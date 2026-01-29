@@ -5,6 +5,8 @@ import { mountAssistant } from '../src/routes/assistant';
 import { requestId } from '../src/middleware/requestId';
 import { jest, describe, it, expect } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Minimal auth stub for tests
 jest.mock('../src/middleware/auth', () => ({
   auth: () => (_req: any, _res: any, next: any) => next(),
@@ -24,7 +26,7 @@ function makeApp() {
   return app;
 }
 
-describe('POST /assistant/stream', () => {
+describeIf('POST /assistant/stream', () => {
   it('streams tokens and completes', async () => {
     const app = makeApp();
     const res = await request(app)

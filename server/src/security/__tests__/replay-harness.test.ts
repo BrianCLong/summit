@@ -5,6 +5,8 @@ import type { Express, NextFunction, Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const run =
   process.env.RUN_REPLAY_HARNESS === 'true' &&
   process.env.NO_NETWORK_LISTEN !== 'true';

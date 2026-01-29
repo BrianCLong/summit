@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { test, expect } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 test('similarEntities by text (integration)', async () => {
   const apiUrl = process.env.API_URL || 'http://localhost:4000';
   const q = `{ similarEntities(text:"banking fraud", topK:5){ id score } }`;

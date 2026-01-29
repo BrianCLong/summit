@@ -3,13 +3,15 @@ import express from 'express';
 import request from 'supertest';
 import { httpMetricsMiddleware } from '../http-metrics-middleware.js';
 import {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
   httpRequestDurationSeconds,
   httpRequestsTotal,
   resetMetrics,
   sloAvailability,
 } from '../metrics.js';
 
-describe('httpMetricsMiddleware', () => {
+describeIf('httpMetricsMiddleware', () => {
   beforeEach(() => {
     resetMetrics();
   });

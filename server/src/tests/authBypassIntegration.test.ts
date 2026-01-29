@@ -4,6 +4,8 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import express, { Response } from 'express';
 import { ensureAuthenticated } from '../middleware/auth';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock dependencies
 jest.mock('../db/postgres.js', () => ({
     getPostgresPool: jest.fn(() => ({
@@ -41,7 +43,7 @@ jest.mock('../services/AuthService.js', () => {
 
 const mockAuthService = (global as any).mockAuthService;
 
-describe('Authentication Bypass Integration', () => {
+describeIf('Authentication Bypass Integration', () => {
     let app: express.Application;
 
     beforeEach(() => {

@@ -1,4 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 process.env.NODE_ENV = 'production';
 process.env.CORS_ORIGIN = 'https://example.com';
 process.env.DATABASE_URL = 'postgres://user:securepass@db.example.com:5432/db';

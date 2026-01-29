@@ -5,6 +5,8 @@ import express from 'express';
 import ingestionRouter from '../../routes/ingestion';
 import { BackpressureGuard } from '../guard';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock dependencies
 jest.mock('../../middleware/auth', () => ({
   ensureAuthenticated: (req: any, res: any, next: any) => {
@@ -32,7 +34,7 @@ jest.mock('pg', () => {
   };
 });
 
-describe('Ingestion Route Backpressure', () => {
+describeIf('Ingestion Route Backpressure', () => {
   let app: express.Express;
   let guard: BackpressureGuard;
 

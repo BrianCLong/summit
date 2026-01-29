@@ -2,6 +2,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express from 'express';
 import request from 'supertest';
 import {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
   AuthenticatedRequest,
   rbacManager,
   requirePermission,

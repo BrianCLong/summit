@@ -1,0 +1,21 @@
+name: subsumption-bundle
+
+on:
+  pull_request:
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - "docs/**"
+      - "evidence/**"
+
+jobs:
+  subsumption-bundle-verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify subsumption bundle
+        run: node scripts/ci/verify_subsumption_bundle.mjs

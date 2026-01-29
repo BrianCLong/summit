@@ -9,6 +9,8 @@ import policyProfilesRouter from '../src/routes/policy-profiles.js';
 import tenantRouter from '../src/routes/tenants.js';
 import type { NextFunction, Request, Response } from 'express';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock dependencies
 jest.mock('../src/services/TenantService.js', () => ({
     tenantService: {

@@ -3,7 +3,9 @@ import assert from 'node:assert';
 import request from 'supertest';
 import express from 'express';
 
-describe('Exports Security', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Exports Security', () => {
   let app: express.Express;
 
   before(async () => {

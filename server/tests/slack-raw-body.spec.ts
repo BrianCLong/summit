@@ -3,7 +3,9 @@ import express from 'express';
 import crypto from 'crypto';
 import slackRouter from '../src/routes/slack';
 
-describe('Slack raw-body route', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Slack raw-body route', () => {
   const app = express();
   app.use('/', slackRouter);
 

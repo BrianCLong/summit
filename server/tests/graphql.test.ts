@@ -4,6 +4,8 @@ import type { Server } from 'http';
 import { createApp } from '../src/app';
 import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const describeIf = process.env.NO_NETWORK_LISTEN === 'true'
   ? describe.skip
   : describe;

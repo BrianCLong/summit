@@ -3,6 +3,8 @@ import request from 'supertest';
 import router, { checkMCPHealth } from '../servers-api.js';
 import { jest, describe, it, expect } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
 const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
 

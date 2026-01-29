@@ -6,6 +6,8 @@ import { PredictiveThreatAnalyticsService } from '../src/services/PredictiveThre
 import { AutomatedIntelligenceReportingService } from '../src/services/AutomatedIntelligenceReportingService.js';
 import threatIntelRouter from '../src/routes/threat-intelligence.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../src/middleware/auth.js', () => ({
   ensureAuthenticated: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));

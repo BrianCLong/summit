@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 /**
  * Integration tests for AI/ML workflows
  */
@@ -93,14 +95,14 @@ function createTestApp() {
   return app;
 }
 
-describe('AI Integration Tests', () => {
+describeIf('AI Integration Tests', () => {
   let app;
 
   beforeEach(() => {
     app = createTestApp();
   });
 
-  describe('AI Webhook Processing', () => {
+  describeIf('AI Webhook Processing', () => {
     it('should process NLP entity extraction webhook', async () => {
       const webhookPayload = {
         job_id: uuidv4(),
@@ -219,7 +221,7 @@ describe('AI Integration Tests', () => {
     });
   });
 
-  describe('GraphQL AI Mutations', () => {
+  describeIf('GraphQL AI Mutations', () => {
     it('should queue entity extraction job', async () => {
       const mutation = `
         mutation ExtractEntities($docs: [JSON!]!) {
@@ -307,7 +309,7 @@ describe('AI Integration Tests', () => {
     });
   });
 
-  describe('GraphQL AI Queries', () => {
+  describeIf('GraphQL AI Queries', () => {
     it('should fetch pending insights', async () => {
       const query = `
         query GetInsights($status: String) {
@@ -342,7 +344,7 @@ describe('AI Integration Tests', () => {
     });
   });
 
-  describe('ML Service Health Checks', () => {
+  describeIf('ML Service Health Checks', () => {
     it('should check ML service health', async () => {
       const response = await request(app).get('/ml/health').expect(200);
 
@@ -351,7 +353,7 @@ describe('AI Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeIf('Error Handling', () => {
     it('should handle malformed webhook payloads', async () => {
       const malformedPayload = {
         invalid: 'payload',
@@ -399,7 +401,7 @@ describe('AI Integration Tests', () => {
     });
   });
 
-  describe('Performance Tests', () => {
+  describeIf('Performance Tests', () => {
     it('should handle multiple concurrent webhook requests', async () => {
       const requests = Array.from({ length: 10 }, (_, i) =>
         request(app).post('/ai/webhook').send({

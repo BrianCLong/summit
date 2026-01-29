@@ -2,6 +2,8 @@ import express, { type Router } from 'express';
 import request from 'supertest';
 import { jest } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 

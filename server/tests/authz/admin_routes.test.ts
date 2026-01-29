@@ -2,6 +2,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import request from 'supertest';
 import { app } from './test-app';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../src/middleware/auth', () => ({
   ensureAuthenticated: (req, res, next) => {
     // Default to a non-admin user
@@ -21,7 +23,7 @@ jest.mock('../../src/temporal/control.js', () => ({
   disableTemporal: jest.fn(),
 }));
 
-describe('AuthZ Regression Tests: Admin Routes', () => {
+describeIf('AuthZ Regression Tests: Admin Routes', () => {
   it('denies non-admin access to /admin/config', async () => {
     const res = await request(app).get('/admin/config');
     expect(res.status).toBe(403);

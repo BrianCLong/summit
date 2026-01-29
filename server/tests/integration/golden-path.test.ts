@@ -3,6 +3,8 @@ import { jest } from '@jest/globals';
 
 
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock the Neo4j driver initialization to prevent connection errors in environment without DB
 jest.mock('../../src/db/neo4j.js', () => ({
   initializeNeo4jDriver: jest.fn(),
@@ -286,7 +288,7 @@ console.log('DB CONFIG LOADED');
 // Skip AI routes to avoid pino CJS/ESM interop issues during tests
 process.env.SKIP_AI_ROUTES = 'true';
 
-describe('Golden Path Integration', () => {
+describeIf('Golden Path Integration', () => {
   let harness: any;
   let server: any;
   let app: any;

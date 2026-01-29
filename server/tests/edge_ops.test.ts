@@ -1,6 +1,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 

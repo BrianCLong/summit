@@ -4,6 +4,8 @@ import request from 'supertest';
 import nock from 'nock';
 import type { PreflightRequest } from '../../../../packages/policy-audit/src/types';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock functions declared before mocks
 const mockGetPostgresPool = jest.fn();
 

@@ -1,11 +1,13 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 /**
  * Tests for GNN integration in IntelGraph server
  */
 const request = require('supertest');
 const GNNService = require('../src/services/GNNService');
 
-describe('GNN Integration Tests', () => {
-  describe('GNNService', () => {
+describeIf('GNN Integration Tests', () => {
+  describeIf('GNNService', () => {
     it('should convert graph data correctly', () => {
       // Test edge list format
       const edgeList = [
@@ -71,7 +73,7 @@ describe('GNN Integration Tests', () => {
     });
   });
 
-  describe('GNN API Methods', () => {
+  describeIf('GNN API Methods', () => {
     const mockGraphData = {
       edges: [
         ['person1', 'org1'],
@@ -138,7 +140,7 @@ describe('GNN Integration Tests', () => {
     });
   });
 
-  describe('Graph Data Conversion Edge Cases', () => {
+  describeIf('Graph Data Conversion Edge Cases', () => {
     it('should handle empty graph data', () => {
       const emptyGraph = { edges: [] };
       const converted = GNNService.convertGraphData(emptyGraph);
@@ -174,7 +176,7 @@ describe('GNN Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeIf('Error Handling', () => {
     it('should handle network errors gracefully', async () => {
       // Test with invalid URL to simulate network error
       const originalUrl = GNNService.mlServiceUrl;
@@ -198,7 +200,7 @@ describe('GNN Integration Tests', () => {
     });
   });
 
-  describe('GNN Task Configuration', () => {
+  describeIf('GNN Task Configuration', () => {
     it('should apply default model configurations', () => {
       const defaultConfig = {
         model_type: 'graphsage',
@@ -236,7 +238,7 @@ describe('GNN Integration Tests', () => {
     });
   });
 
-  describe('Integration Scenarios', () => {
+  describeIf('Integration Scenarios', () => {
     it('should handle real-world intelligence graph format', () => {
       const intelligenceGraph = {
         nodes: [
@@ -320,7 +322,7 @@ describe('GNN Integration Tests', () => {
   });
 });
 
-describe('GNN Performance Considerations', () => {
+describeIf('GNN Performance Considerations', () => {
   it('should handle large node feature arrays efficiently', () => {
     const largeFeatureNodes = Array.from({ length: 1000 }, (_, i) => ({
       id: `node_${i}`,

@@ -3,6 +3,8 @@ import express from 'express';
 import request from 'supertest';
 import { getNlGraphQueryService } from '../index.ts';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 let nlGraphQueryRouter: express.Router;
 
 jest.mock('../index.ts', () => ({

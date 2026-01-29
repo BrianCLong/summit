@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 /**
  * E2E Tests for AI Copilot
  *
@@ -71,7 +73,7 @@ describeIf('AI Copilot E2E', () => {
     await cleanupTestData(investigationId);
   });
 
-  describe('POST /api/ai-copilot/query', () => {
+  describeIf('POST /api/ai-copilot/query', () => {
     it('should execute a GraphRAG query with citations', async () => {
       const response = await request(app)
         .post('/api/ai-copilot/query')
@@ -278,7 +280,7 @@ describeIf('AI Copilot E2E', () => {
     });
   });
 
-  describe('GET /api/ai-copilot/history/:investigationId', () => {
+  describeIf('GET /api/ai-copilot/history/:investigationId', () => {
     it('should return query history', async () => {
       // First execute a query
       await request(app)
@@ -323,7 +325,7 @@ describeIf('AI Copilot E2E', () => {
     });
   });
 
-  describe('GET /api/ai-copilot/run/:runId', () => {
+  describeIf('GET /api/ai-copilot/run/:runId', () => {
     it('should return detailed run information', async () => {
       // Execute a query first
       const queryResponse = await request(app)
@@ -359,7 +361,7 @@ describeIf('AI Copilot E2E', () => {
     });
   });
 
-  describe('POST /api/ai-copilot/replay/:runId', () => {
+  describeIf('POST /api/ai-copilot/replay/:runId', () => {
     it('should replay a query successfully', async () => {
       // Execute original query
       const originalResponse = await request(app)
@@ -414,7 +416,7 @@ describeIf('AI Copilot E2E', () => {
     });
   });
 
-  describe('GET /api/ai-copilot/health', () => {
+  describeIf('GET /api/ai-copilot/health', () => {
     it('should return health status', async () => {
       const response = await request(app)
         .get('/api/ai-copilot/health')
@@ -428,7 +430,7 @@ describeIf('AI Copilot E2E', () => {
     });
   });
 
-  describe('GET /api/ai-copilot/capabilities', () => {
+  describeIf('GET /api/ai-copilot/capabilities', () => {
     it('should return available capabilities', async () => {
       const response = await request(app)
         .get('/api/ai-copilot/capabilities')

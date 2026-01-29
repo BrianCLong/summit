@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import { tenantContextMiddleware } from '../../src/middleware/tenantContext';
 import { JWT_SECRET } from '../../src/lib/auth';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 

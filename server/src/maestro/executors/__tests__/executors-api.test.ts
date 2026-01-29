@@ -3,7 +3,9 @@ import request from 'supertest';
 import router from '../../executors-api';
 import { describe, it, expect } from '@jest/globals';
 
-describe('Executors API', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Executors API', () => {
   const app = express();
   app.use('/api/maestro/v1', router);
 

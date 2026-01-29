@@ -2,6 +2,8 @@ import request from 'supertest';
 import express from 'express';
 import { describe, test, expect, jest, beforeEach } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Use unstable_mockModule for ESM mocking
 jest.unstable_mockModule('../../src/middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, res: any, next: any) => {
@@ -26,7 +28,7 @@ const app = express();
 app.use(express.json());
 app.use(router);
 
-describe('POST /sign-manifest Security', () => {
+describeIf('POST /sign-manifest Security', () => {
     const originalEnv = process.env;
 
     beforeEach(() => {

@@ -2,6 +2,8 @@ import request from 'supertest';
 import { createApp } from '../../src/app.js';
 import { jest, describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock database and external dependencies
 // Mock database and external dependencies
 // Use unstable_mockModule for ESM mocking
@@ -37,7 +39,7 @@ const createTestHarness = async () => {
   return { app, server };
 };
 
-describe('Ticket Linking Integration Flow', () => {
+describeIf('Ticket Linking Integration Flow', () => {
   let server: any;
   let app: any;
   let harness: any; // Added harness declaration
@@ -59,7 +61,7 @@ describe('Ticket Linking Integration Flow', () => {
     }
   });
 
-  describe('GitHub Webhook → Run Completion → TicketDetails Integration', () => {
+  describeIf('GitHub Webhook → Run Completion → TicketDetails Integration', () => {
     it('should link ticket to run via webhook and show in TicketDetails', async () => {
       // Import is now top-level
       // const ticketLinkService = require('../../src/services/ticket-links.js');
@@ -206,7 +208,7 @@ describe('Ticket Linking Integration Flow', () => {
     });
   });
 
-  describe('Jira Webhook → Deployment → TicketDetails Integration', () => {
+  describeIf('Jira Webhook → Deployment → TicketDetails Integration', () => {
     it('should link Jira ticket to deployment and show in UI', async () => {
       // const ticketLinkService = require('../../src/services/ticket-links.js');
 
@@ -268,7 +270,7 @@ describe('Ticket Linking Integration Flow', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeIf('Error Handling', () => {
     it('should handle webhook with invalid payload gracefully', async () => {
       const invalidPayload = {}; // Missing 'action' field to trigger validation error
 
@@ -307,7 +309,7 @@ describe('Ticket Linking Integration Flow', () => {
     });
   });
 
-  describe('Idempotency', () => {
+  describeIf('Idempotency', () => {
     it('should handle duplicate webhook calls without errors', async () => {
       // const ticketLinkService = require('../../src/services/ticket-links.js');
 

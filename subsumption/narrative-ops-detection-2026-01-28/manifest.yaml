@@ -19,7 +19,7 @@ gates:
 evidence:
   ids:
     - EVD-NAROPS-BUNDLE-001
-docs:
+docs_targets:
   - docs/standards/narrative-ops-detection-2026-01-28.md
   - docs/security/data-handling/narrative-ops-detection-2026-01-28.md
   - docs/ops/runbooks/narrative-ops-detection-2026-01-28.md

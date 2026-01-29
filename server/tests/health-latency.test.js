@@ -1,6 +1,8 @@
 const express = require('express');
 const request = require('supertest');
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 function createMonitoringApp() {
   const app = express();
   const monitoringRouter = require('../src/routes/monitoring');
@@ -11,7 +13,7 @@ function createMonitoringApp() {
   return app;
 }
 
-describe('Service health latency budgets', () => {
+describeIf('Service health latency budgets', () => {
   let app;
 
   beforeAll(() => {

@@ -9,7 +9,9 @@ import { expressValidationPipeline } from '../middleware/express-validation-pipe
 import { createRedisRateLimiter } from '../middleware/redisRateLimiter.ts';
 import { sanitizeHtml } from '../utils/htmlSanitizer.ts';
 
-describe('Security middleware integration', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Security middleware integration', () => {
   const allowedOrigins = ['http://allowed.test'];
   const buildApp = () => {
     const app = express();

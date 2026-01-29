@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import {
   Card,
@@ -8,8 +8,10 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/ui/Card';
-import { AlertTriangle, RefreshCw, Home, Loader2, ExternalLink } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, Loader2, ExternalLink, Bot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useResilience } from '@/contexts/ResilienceContext';
+import { logErrorEvidence } from '@/lib/evidenceLogger';
 
 interface ErrorFallbackProps {
   error: Error | null;
@@ -41,26 +43,56 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   const navigate = useNavigate();
   const headingRef = useRef<HTMLHeadingElement>(null);
 
+  // Safely attempt to use resilience context, fallback to default if missing
+  let resilienceContext;
+  try {
+    resilienceContext = useResilience();
+  } catch (e) {
+    // Context missing, use defaults
+    resilienceContext = {
+      policy: { maxRetries: 3, retryBackoffMs: 2000, fallbackStrategy: 'simple', reportErrors: true },
+      agenticRecoveryEnabled: false
+    };
+  }
+  const { agenticRecoveryEnabled, policy } = resilienceContext;
+
+  const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [diagnosis, setDiagnosis] = useState<string | null>(null);
+
   useEffect(() => {
-    // Focus the heading for accessibility when the error boundary mounts
+    // Focus the heading for accessibility
     if (headingRef.current) {
       headingRef.current.focus();
     }
-  }, []);
+
+    // Log evidence if enabled
+    if (error && policy.reportErrors) {
+      logErrorEvidence(error);
+    }
+  }, [error, policy.reportErrors]);
 
   const handleHome = () => {
     navigate('/');
-    // Optional: reset boundary if provided, though navigating might be enough
     if (resetErrorBoundary) {
       resetErrorBoundary();
     }
   };
 
-  const canRetry = showRetry && retryCount < maxRetries;
+  const handleAgentDiagnosis = () => {
+    setIsDiagnosing(true);
+    // Stub for Agentic Recovery
+    setTimeout(() => {
+      setIsDiagnosing(false);
+      setDiagnosis("Copilot Diagnosis: This appears to be a transient network failure. A retry is recommended.");
+    }, 1500);
+  };
+
+  const effectiveMaxRetries = maxRetries || policy.maxRetries;
+  const canRetry = showRetry && retryCount < effectiveMaxRetries;
   const retryButtonText = isRetrying
-    ? `Retrying (${retryCount}/${maxRetries})...`
+    ? `Retrying (${retryCount}/${effectiveMaxRetries})...`
     : canRetry
-    ? `Try Again (${retryCount}/${maxRetries})`
+    ? `Try Again (${retryCount}/${effectiveMaxRetries})`
     : 'Retry limit reached';
 
   return (
@@ -94,6 +126,19 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
               )}
             </div>
           )}
+
+          {diagnosis && (
+            <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-md border border-blue-200 dark:border-blue-800 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-semibold mb-1">
+                <Bot className="h-4 w-4" />
+                <span>Copilot Insight</span>
+              </div>
+              <p className="text-sm text-blue-600 dark:text-blue-200">
+                {diagnosis}
+              </p>
+            </div>
+          )}
+
           {!import.meta.env.DEV && (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
@@ -108,18 +153,30 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
           )}
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
-          <div className="flex gap-3 w-full justify-end">
+          <div className="flex gap-3 w-full justify-end flex-wrap">
+             {agenticRecoveryEnabled && !diagnosis && (
+              <Button
+                variant="secondary"
+                onClick={handleAgentDiagnosis}
+                disabled={isDiagnosing}
+              >
+                {isDiagnosing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                {isDiagnosing ? 'Analyzing...' : 'Ask Copilot'}
+              </Button>
+            )}
+
             {showHomeButton && (
               <Button variant="outline" onClick={handleHome}>
                 <Home className="mr-2 h-4 w-4" />
-                Back to Workspace
+                Workspace
               </Button>
             )}
-            {showRetry && resetErrorBoundary && (
-              <Button
+
+            {(showRetry || (!showRetry && resetErrorBoundary)) && resetErrorBoundary && (
+               <Button
                 onClick={resetErrorBoundary}
                 variant="default"
-                disabled={!canRetry || isRetrying}
+                disabled={!canRetry && showRetry && !isRetrying}
               >
                 {isRetrying ? (
                   <>
@@ -129,15 +186,9 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
                 ) : (
                   <>
                     <RefreshCw className="mr-2 h-4 w-4" />
-                    {retryButtonText}
+                    {showRetry ? retryButtonText : 'Try Again'}
                   </>
                 )}
-              </Button>
-            )}
-            {!showRetry && resetErrorBoundary && (
-              <Button onClick={resetErrorBoundary} variant="default">
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Try Again
               </Button>
             )}
           </div>

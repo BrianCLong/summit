@@ -5,6 +5,8 @@ import Joi from 'joi';
 import { z } from 'zod';
 import { buildRequestValidator, createSqlInjectionGuard } from '../request-schema-validator.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
 const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
 

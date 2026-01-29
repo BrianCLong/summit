@@ -2,7 +2,9 @@ import request from 'supertest';
 import express from 'express';
 import stripeConnectRouter from '../src/routes/stripe-connect';
 
-describe('Stripe Connect raw-body route', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Stripe Connect raw-body route', () => {
   const app = express();
   app.use('/webhooks/stripe-connect', stripeConnectRouter as any);
 

@@ -2,6 +2,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express from 'express';
 import request from 'supertest';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../config.js', () => ({
   cfg: {
     CORS_ORIGIN: 'https://allowed.test',
@@ -14,7 +16,7 @@ jest.mock('../../config.js', () => ({
 
 import { buildContentSecurityPolicy } from '../http-shield.js';
 
-describe('buildContentSecurityPolicy', () => {
+describeIf('buildContentSecurityPolicy', () => {
   it('aligns connect-src with configured CORS origins', async () => {
     const app = express();
     app.use(buildContentSecurityPolicy());

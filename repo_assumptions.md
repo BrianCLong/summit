@@ -1,9 +1,10 @@
-# Repo Assumptions — narrative-ops-detection-2026-01-28
+# Repo Assumptions
 
 ## Verified (conversation-context only)
 - Summit uses deterministic evidence artifacts: report.json / metrics.json / stamp.json separation.
 - Summit has CI scripts under scripts/ci and governance gates used for GA readiness.
 - Branch protection + required checks enforcement is a known active effort.
+- Deterministic verifier for subsumption bundles exists in `scripts/ci/verify_subsumption_bundle.mjs`.
 
 ## Assumed (must validate)
 - Node.js >= 20 and pnpm available for running scripts/ci/*.mjs.
@@ -19,3 +20,4 @@
 - Run required check discovery steps in required_checks.todo.md.
 - Confirm test runner via package.json.
 - Confirm repo conventions for evidence index location and CI workflow naming.
+- Run `node scripts/ci/verify_subsumption_bundle.mjs <item-slug>`.

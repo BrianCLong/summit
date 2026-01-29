@@ -4,14 +4,16 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { Application } from 'express';
 
-describe('Server Hardening & Invariants', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Server Hardening & Invariants', () => {
     let app: Application;
 
     beforeAll(async () => {
         app = await createApp();
     });
 
-    describe('Global Error Handling', () => {
+    describeIf('Global Error Handling', () => {
         it('should return 404 for unknown routes', async () => {
             const res = await request(app).get('/api/unknown-route-123');
             expect(res.status).toBe(404);
@@ -33,7 +35,7 @@ describe('Server Hardening & Invariants', () => {
         });
     });
 
-    describe('GraphQL Error Handling', () => {
+    describeIf('GraphQL Error Handling', () => {
         it('should return 400 for invalid GraphQL syntax', async () => {
             const res = await request(app)
                 .post('/graphql')

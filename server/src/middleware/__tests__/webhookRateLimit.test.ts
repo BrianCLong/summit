@@ -6,6 +6,8 @@ import aiWebhook from '../../routes/aiWebhook.js';
 import { resetRateLimitStore } from '../rateLimit.js';
 import { RateLimitConfig, setRateLimitConfig } from '../../config/rateLimit.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../realtime/pubsub.js', () => ({
   pubsub: { publish: jest.fn() },
 }));

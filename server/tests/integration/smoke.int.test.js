@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Moved from server/tests/smoke.test.js
 const request = require('supertest');
 const express = require('express');
@@ -13,7 +15,7 @@ function makeApp() {
   return app;
 }
 
-describe('server smoke tests', () => {
+describeIf('server smoke tests', () => {
   it('responds to /api/health', async () => {
     const app = makeApp();
     const res = await request(app).get('/api/health').expect(200);

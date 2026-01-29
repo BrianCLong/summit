@@ -4,6 +4,8 @@ import request from 'supertest';
 import fs from 'fs';
 import path from 'path';
 import {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
   createGraphqlPersistedAllowlistMiddleware,
   hashPersistedQuery,
 } from '../src/middleware/graphqlPersistedAllowlist.js';

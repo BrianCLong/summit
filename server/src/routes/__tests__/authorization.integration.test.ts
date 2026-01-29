@@ -3,6 +3,8 @@ import express from 'express';
 import request from 'supertest';
 import authorize from '../../middleware/authorization.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const app = express();
 
 app.use(express.json());
@@ -26,7 +28,7 @@ app.get('/admin/users', authorize('manage_users'), (_req, res) => {
   res.json({ users: [] });
 });
 
-describe('authorization guard integration', () => {
+describeIf('authorization guard integration', () => {
   it('blocks IntelGraph writes when unauthenticated or unauthorized', async () => {
     await request(app).post('/entities').expect(401);
 

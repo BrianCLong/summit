@@ -3,6 +3,8 @@ import express from 'express';
 import request from 'supertest';
 import { correlationIdMiddleware } from '../../middleware/correlation-id.js';
 import {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
   appLogger,
   getRequestContext,
   requestContextMiddleware,

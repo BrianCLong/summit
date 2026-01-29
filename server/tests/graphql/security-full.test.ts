@@ -2,6 +2,8 @@
 import request from 'supertest';
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const unstableMockModule = (jest as any).unstable_mockModule as any;
 unstableMockModule('../../src/utils/htmlSanitizer', () => ({
   sanitizeHtml: (value: string) => value,

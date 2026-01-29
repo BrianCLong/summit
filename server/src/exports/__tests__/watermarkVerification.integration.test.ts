@@ -2,9 +2,11 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express, { Express } from 'express';
 import request from 'supertest';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const originalEnv = process.env;
 
-describe('POST /exports/:id/verify-watermark', () => {
+describeIf('POST /exports/:id/verify-watermark', () => {
   let app: Express;
 
   beforeEach(async () => {

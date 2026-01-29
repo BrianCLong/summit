@@ -42,6 +42,14 @@ artifacts:
     checks:
       - "retrieval_determinism_check"
 
+  policy_cards_v0:
+    path: "artifacts/policy/"
+    required: false
+    description: "Policy Cards v0 enforcement artifacts (report, metrics, stamp)."
+    checks:
+      - "policy-validate"
+      - "policy-drift"
+
 sections:
   - id: "decision_reversibility"
     title: "Decision Reversibility"

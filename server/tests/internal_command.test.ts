@@ -2,6 +2,8 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Use unstable_mockModule for ESM mocking
 jest.unstable_mockModule('../src/middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, res: any, next: any) => {
@@ -11,7 +13,7 @@ jest.unstable_mockModule('../src/middleware/auth.js', () => ({
   ensureRole: () => (req: any, res: any, next: any) => next(),
 }));
 
-describe('Internal Command Dashboard Endpoints', () => {
+describeIf('Internal Command Dashboard Endpoints', () => {
   let app: any;
   let internalCommandRouter: any;
 

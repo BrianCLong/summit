@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Moved from server/tests/entities.audit.test.ts
 import express from 'express';
 import request from 'supertest';
@@ -31,7 +33,7 @@ jest.mock('../src/middleware/auth', () => ({
 }));
 const entitiesRouter = require('../src/routes/entities');
 const { getPostgresPool } = require('../src/config/database');
-describe('Entities route audit logging', () => {
+describeIf('Entities route audit logging', () => {
   it('logs view audit with null details', async () => {
     const app = express();
     app.use(express.json());

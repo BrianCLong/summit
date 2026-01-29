@@ -6,6 +6,8 @@ import { newDb } from 'pg-mem';
 import { opaClient } from '../../services/opa-client.js';
 import entityCommentsRouter from '../entity-comments.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const memDb = newDb({ noAstCoverageCheck: true });
 memDb.public.registerFunction({
   name: 'gen_random_uuid',

@@ -4,6 +4,8 @@ import express, { Response } from 'express';
 import { ensureAuthenticated } from '../middleware/auth';
 import { tenantContextMiddleware } from '../middleware/tenantContext';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock prom-client BEFORE anything else
 jest.mock('prom-client', () => {
     const mockMetric = {
@@ -84,7 +86,7 @@ jest.mock('../services/AuthService.js', () => {
 import AuthService from '../services/AuthService.js';
 const mockAuthService = (global as any).mockAuthService;
 
-describe('Tenant Isolation Integration', () => {
+describeIf('Tenant Isolation Integration', () => {
     let app: express.Application;
 
     beforeEach(() => {

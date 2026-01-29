@@ -3,6 +3,8 @@ import express from 'express';
 import request from 'supertest';
 import commandConsoleRouter from '../internal/command-console';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../services/GAReleaseService', () => ({
   GAReleaseService: jest.fn().mockImplementation(() => ({
     getReleaseInfo: jest

@@ -3,6 +3,8 @@ import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 import { rateLimitMiddleware } from '../../src/middleware/rateLimit';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock getRedisClient to return a fake Redis client
 // This tests Middleware -> RateLimiter -> (Mock)Redis
 const mockRedis = {
@@ -17,7 +19,7 @@ jest.mock('../../src/config/database.js', () => ({
 // We need to unmock RateLimiter if it was automatically mocked by previous tests
 jest.unmock('../../src/services/RateLimiter');
 
-describe('Rate Limit Middleware Integration (with Redis Mock)', () => {
+describeIf('Rate Limit Middleware Integration (with Redis Mock)', () => {
   let app: express.Express;
 
   beforeEach(() => {

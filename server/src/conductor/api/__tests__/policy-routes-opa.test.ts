@@ -2,6 +2,8 @@ import express from 'express';
 import request from 'supertest';
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../governance/opa-integration.js', () => ({
   opaPolicyEngine: {
     evaluatePolicy: jest.fn(),
@@ -59,7 +61,7 @@ function buildApp() {
   return app;
 }
 
-describe('Maestro routing OPA guard', () => {
+describeIf('Maestro routing OPA guard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     evaluatePolicyMock.mockReset();

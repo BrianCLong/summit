@@ -4,6 +4,8 @@ import request from 'supertest';
 import sharingRouter from '../../routes/sharing.js';
 import { resetStore } from '../store.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const buildApp = () => {
   const app = express();
   app.use(express.json());
@@ -11,7 +13,7 @@ const buildApp = () => {
   return app;
 };
 
-describe('sharing flows', () => {
+describeIf('sharing flows', () => {
   const app = buildApp();
 
   beforeEach(() => {

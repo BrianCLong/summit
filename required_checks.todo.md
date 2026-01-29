@@ -1,27 +1,26 @@
 # Required Checks Discovery — TODO
 
-Goal: enumerate exact required check names enforced by branch protection for `main`.
+## Goal
+List the exact required check names enforced by branch protection for the default branch.
 
-## UI Method
-1. Open repo Settings → Branches → Branch protection rules for `main`.
-2. Under “Require status checks to pass”, copy the exact check names.
-3. Paste into: subsumption/narrative-ops-detection-2026-01-28/required_checks.verified.json
+## UI Steps
+1. Repo → Settings → Branches → Branch protection rules.
+2. Open the rule for the default branch.
+3. Under “Require status checks to pass”, copy the check names exactly.
 
-## API Method (GitHub)
-1. Use GitHub CLI:
-   - gh api repos/<OWNER>/<REPO>/branches/main/protection --jq '.required_status_checks'
-2. Or:
-   - gh api repos/<OWNER>/<REPO>/branches/main/protection/required_status_checks
-3. Save raw JSON output as above.
+## API Steps (preferred, reproducible)
+- Use GitHub API:
+  - GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+  - GET /repos/{owner}/{repo}/branches/{branch}/protection
+- Record exact check names into:
+  - `subsumption/ssdf-v1-2/required_checks.verified.json`
 
-## Temporary naming convention (until verified)
-- `subsumption-bundle-verify`
-- `subsumption-policy-fixtures`
-- `subsumption-eval-smoke`
+## Temporary convention (until verified)
+- `subsumption-verify`
+- `ssdf-mapping-verify`
 
 ## Rename plan
-If discovered names differ, update:
-- workflow job `name:`
-- docs references
-- required_checks.verified.json
-Then add a small PR: `chore(ci): align subsumption check names to branch protection`.
+If verified names differ, add a small PR that:
+- updates workflow job name(s)
+- updates manifest gate list
+- updates any branch-protection machine-verifier (if present)

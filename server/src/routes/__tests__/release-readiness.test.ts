@@ -4,6 +4,8 @@ import request from 'supertest';
 import opsRouter from '../ops.js';
 import { releaseReadinessService } from '../../services/releaseReadinessService.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 

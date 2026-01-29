@@ -2,6 +2,8 @@ import express from 'express';
 import request from 'supertest';
 import { jest, describe, it, expect } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../src/config/database', () => {
   const query = jest.fn().mockResolvedValue({});
   return {
@@ -35,7 +37,7 @@ jest.mock('../src/middleware/auth', () => ({
 const entitiesRouter = require('../src/routes/entities');
 const { getPostgresPool } = require('../src/config/database');
 
-describe('Entities route audit logging', () => {
+describeIf('Entities route audit logging', () => {
   it('logs view audit with null details', async () => {
     const app = express();
     app.use(express.json());

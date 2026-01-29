@@ -4,6 +4,8 @@ import fs from 'fs';
 import path from 'path';
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock functions declared before mocks
 const mockCreateJob = jest.fn();
 const mockListJobsForTenant = jest.fn();

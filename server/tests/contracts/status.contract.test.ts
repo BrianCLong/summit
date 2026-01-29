@@ -4,6 +4,8 @@ import request from 'supertest';
 import fc from 'fast-check';
 import { statusRouter } from '../../src/http/status.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const mockGetConductorHealth = jest.fn(async () => ({ status: 'healthy', checks: { queue: 'ok' } }));
 const mockBudgetStatus = jest.fn(async () => ({ status: 'healthy', remaining: 100 }));
 const mockCreateBudgetController = jest.fn(() => ({ getBudgetStatus: mockBudgetStatus }));

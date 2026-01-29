@@ -8,6 +8,8 @@ import opsRouter from '../ops.js';
 import { actionsRouter } from '../actions.js';
 import { policyBundleStore } from '../../policy/bundleStore.js';
 import { ActionPolicyService } from '../../services/ActionPolicyService.js';
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../scripts/maintenance.js', () => ({ runMaintenance: jest.fn() }));
 
 jest.mock('../../audit/emit.js', () => ({

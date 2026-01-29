@@ -2,6 +2,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import express, { Express } from 'express';
 import request from 'supertest';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const run = process.env.NO_NETWORK_LISTEN !== 'true';
 const describeIf = run ? describe : describe.skip;
 

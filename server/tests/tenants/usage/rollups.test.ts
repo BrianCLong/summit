@@ -1,5 +1,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const mockQuery = jest.fn();
 const mockRelease = jest.fn();
 
@@ -93,7 +95,7 @@ app.use((err: any, _req: any, res: any, _next: any) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-describe('GET /api/tenants/:tenantId/usage', () => {
+describeIf('GET /api/tenants/:tenantId/usage', () => {
   beforeEach(() => {
     mockQuery.mockReset();
     mockRelease.mockReset();

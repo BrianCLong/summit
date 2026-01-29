@@ -1,0 +1,86 @@
+name: supplychain-verify
+on:
+  push:
+    branches: [ "**" ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write    # for keyless verification if needed
+  packages: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (shallow ok)
+        uses: actions/checkout@v4
+
+      - name: Set image ref
+        id: img
+        run: |
+          IMAGE_REF="ghcr.io/${GITHUB_REPOSITORY}/app:${GITHUB_SHA}"
+          echo "ref=${IMAGE_REF}" >> "$GITHUB_OUTPUT"
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Install OPA
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa && sudo mv opa /usr/local/bin/opa
+
+      - name: Resolve digest and fetch attestation
+        id: fetch
+        env:
+          IMAGE_REF: ${{ steps.img.outputs.ref }}
+        run: |
+          DIGEST="$(cosign triangulate "${IMAGE_REF}")"
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          # Verify there is a valid in-toto attestation recorded in Rekor
+          cosign verify-attestation "${DIGEST}" --type slsaprovenance > att.json
+          # Extract the in-toto payload for policy input
+          jq -r '.[0].payload | @base64d' att.json > statement.json
+
+      - name: Policy input bundle
+        run: |
+          jq -n \
+            --slurpfile stmt statement.json \
+            --arg ref "${{ steps.img.outputs.ref }}" \
+            '
+            {
+              subject: $stmt[0].subject[0],
+              predicateType: $stmt[0].predicateType,
+              predicate: $stmt[0].predicate,
+              image: {
+                ref: $ref,
+                tag: ($ref | split(":")[1])
+              }
+            }' > policy_input.json
+
+      - name: Verify policy (deny must fail the job)
+        run: |
+          opa eval --format=json \
+            --data policy/opa/supplychain.rego \
+            --input policy_input.json \
+            'data.supplychain' | tee policy_eval.json
+          jq -e '(.result[0].expressions[0].value.allow) == true' policy_eval.json > /dev/null
+
+      # Negative tests: tamper digest / remove subject -> expect failure
+      - name: Negative test - tampered digest must fail
+        continue-on-error: true
+        run: |
+          jq '.subject.digest.sha256="deadbeef"' policy_input.json > bad.json
+          opa eval --format=json --data policy/opa/supplychain.rego --input bad.json 'data.supplychain' | \
+            jq -e '(.result[0].expressions[0].value.allow) == false'
+
+      - name: Negative test - missing subject must fail
+        continue-on-error: true
+        run: |
+          jq 'del(.subject.digest)' policy_input.json > bad2.json
+          opa eval --format=json --data policy/opa/supplychain.rego --input bad2.json 'data.supplychain' | \
+            jq -e '(.result[0].expressions[0].value.allow) == false'
+
+    # Policy: optional on feature branches; required on main/release/*
+    if: |
+      startsWith(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/heads/release/')

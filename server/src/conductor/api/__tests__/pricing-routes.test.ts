@@ -4,6 +4,8 @@ import request from 'supertest';
 import { conductorRoutes } from '../conductor-routes.js';
 import { refreshPricing } from '../../scheduling/pricing-refresh.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../scheduling/pricing-refresh.js', () => ({
   refreshPricing: jest.fn(),
 }));
@@ -15,7 +17,7 @@ const buildApp = () => {
   return app;
 };
 
-describe('POST /api/conductor/pricing/refresh', () => {
+describeIf('POST /api/conductor/pricing/refresh', () => {
   const originalBypass = process.env.AUTH_BYPASS;
 
   afterEach(() => {

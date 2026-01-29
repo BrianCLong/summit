@@ -5,6 +5,8 @@ import path from 'path';
 import recipesRouter from '../src/routes/recipes.js';
 import { jest } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock dependencies
 jest.mock('../src/recipes/loader.js');
 jest.mock('../src/featureFlags/flagsmith.js');

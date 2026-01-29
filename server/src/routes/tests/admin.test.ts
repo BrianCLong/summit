@@ -6,6 +6,8 @@ import { SecretManager } from '../../services/secretManager';
 import { MockServiceRegistry } from '../../services/serviceRegistry';
 import axios from 'axios';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -16,7 +18,7 @@ app.use(adminRouter);
 const secretManager = new SecretManager();
 const serviceRegistry = new MockServiceRegistry();
 
-describe('Admin Routes', () => {
+describeIf('Admin Routes', () => {
   beforeEach(async () => {
     await secretManager.setSecret('TEST_SECRET', 'current', 'secret-value-1');
     await secretManager.setSecret('TEST_SECRET', 'v2', 'secret-value-2');

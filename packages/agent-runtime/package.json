@@ -2,15 +2,17 @@
   "name": "@intelgraph/agent-runtime",
   "version": "0.1.0",
   "description": "Agent Runtime v1 for IntelGraph Platform",
-  "main": "src/interfaces.ts",
-  "types": "src/interfaces.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "npx tsx test/run_tests.ts"
   },
   "dependencies": {
     "zod": "^3.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "tsx": "^4.21.0"
   }
 }

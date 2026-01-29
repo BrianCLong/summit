@@ -1,0 +1,17 @@
+{
+  "claims": [
+    "ITEM:CLAIM-01",
+    "ITEM:METHOD-04",
+    "ITEM:METHOD-05"
+  ],
+  "decisions": [],
+  "errors": [],
+  "evidence_id": "EVD-NARRATIVEOPSDETECTION20260128-GATE-001",
+  "findings": [
+    {
+      "kind": "manifest_sha256",
+      "value": "59c3518888c7f1f815a8c23b39414916aa0b89fe13159e37acf00588e9f55c4f"
+    }
+  ],
+  "item_slug": "narrative-ops-detection-2026-01-28"
+}

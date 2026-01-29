@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 /**
  * Tests for graph operations and real-time features
  */
@@ -155,14 +157,14 @@ function createGraphTestApp() {
   return app;
 }
 
-describe('Graph Operations Tests', () => {
+describeIf('Graph Operations Tests', () => {
   let app;
 
   beforeEach(() => {
     app = createGraphTestApp();
   });
 
-  describe('Graph Export Functionality', () => {
+  describeIf('Graph Export Functionality', () => {
     it('should export graph as JSON', async () => {
       const response = await request(app)
         .get('/api/graph/export/json')
@@ -225,7 +227,7 @@ describe('Graph Operations Tests', () => {
     });
   });
 
-  describe('Graph Manipulation', () => {
+  describeIf('Graph Manipulation', () => {
     it('should add new nodes to graph', async () => {
       const newNode = {
         label: 'Jane Smith',
@@ -290,7 +292,7 @@ describe('Graph Operations Tests', () => {
     });
   });
 
-  describe('Graph Querying and Filtering', () => {
+  describeIf('Graph Querying and Filtering', () => {
     it('should fetch full graph without filters', async () => {
       const response = await request(app).get('/api/graph').expect(200);
 
@@ -337,7 +339,7 @@ describe('Graph Operations Tests', () => {
     });
   });
 
-  describe('Real-time Updates Simulation', () => {
+  describeIf('Real-time Updates Simulation', () => {
     it('should simulate node addition events', async () => {
       const updateData = {
         eventType: 'node:added',
@@ -402,7 +404,7 @@ describe('Graph Operations Tests', () => {
     });
   });
 
-  describe('Graph Analytics', () => {
+  describeIf('Graph Analytics', () => {
     it('should compute basic graph metrics', async () => {
       const response = await request(app)
         .get('/api/graph/analytics')
@@ -433,7 +435,7 @@ describe('Graph Operations Tests', () => {
     });
   });
 
-  describe('Performance and Stress Tests', () => {
+  describeIf('Performance and Stress Tests', () => {
     it('should handle multiple concurrent graph queries', async () => {
       const requests = Array.from({ length: 20 }, () =>
         request(app).get('/api/graph'),
@@ -508,7 +510,7 @@ describe('Graph Operations Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeIf('Error Handling', () => {
     it('should handle malformed node creation requests', async () => {
       const invalidNode = {
         // Missing required fields

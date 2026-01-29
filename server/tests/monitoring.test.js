@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 /**
  * Tests for monitoring and observability features
  */
@@ -15,14 +17,14 @@ function createMonitoringTestApp() {
   return app;
 }
 
-describe('Monitoring Endpoints', () => {
+describeIf('Monitoring Endpoints', () => {
   let app;
 
   beforeEach(() => {
     app = createMonitoringTestApp();
   });
 
-  describe('Prometheus Metrics', () => {
+  describeIf('Prometheus Metrics', () => {
     it('should expose metrics endpoint', async () => {
       const response = await request(app).get('/metrics').expect(200);
 
@@ -55,7 +57,7 @@ describe('Monitoring Endpoints', () => {
     });
   });
 
-  describe('Web Vitals endpoint', () => {
+  describeIf('Web Vitals endpoint', () => {
     it('should accept web vitals and expose them in metrics', async () => {
       await request(app)
         .post('/web-vitals')
@@ -71,7 +73,7 @@ describe('Monitoring Endpoints', () => {
     });
   });
 
-  describe('Health Check Endpoints', () => {
+  describeIf('Health Check Endpoints', () => {
     it('should perform comprehensive health check', async () => {
       const response = await request(app).get('/health').timeout(10000); // Health checks may take time
 
@@ -126,7 +128,7 @@ describe('Monitoring Endpoints', () => {
     });
   });
 
-  describe('Individual Service Health Checks', () => {
+  describeIf('Individual Service Health Checks', () => {
     it('should check database health', async () => {
       const response = await request(app)
         .get('/health/database')
@@ -176,7 +178,7 @@ describe('Monitoring Endpoints', () => {
     });
   });
 
-  describe('Monitoring Middleware', () => {
+  describeIf('Monitoring Middleware', () => {
     it('should track HTTP request metrics', async () => {
       const { httpMetricsMiddleware } = require('../src/monitoring/middleware');
       const testApp = express();
@@ -193,7 +195,7 @@ describe('Monitoring Endpoints', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeIf('Error Handling', () => {
     it('should handle health check timeouts gracefully', async () => {
       const response = await request(app).get('/health').timeout(15000); // Longer timeout to test internal timeout handling
 
@@ -210,7 +212,7 @@ describe('Monitoring Endpoints', () => {
     });
   });
 
-  describe('Performance', () => {
+  describeIf('Performance', () => {
     it('should handle concurrent health check requests', async () => {
       const requests = Array.from({ length: 10 }, () =>
         request(app).get('/health/quick').timeout(5000),
@@ -258,14 +260,14 @@ describe('Monitoring Endpoints', () => {
   });
 });
 
-describe('Health Check Components', () => {
+describeIf('Health Check Components', () => {
   const {
     checkDatabase,
     checkRedis,
     checkSystemResources,
   } = require('../src/monitoring/health');
 
-  describe('Database Health Check', () => {
+  describeIf('Database Health Check', () => {
     it('should check database connectivity', async () => {
       const result = await checkDatabase();
 
@@ -281,7 +283,7 @@ describe('Health Check Components', () => {
     });
   });
 
-  describe('Redis Health Check', () => {
+  describeIf('Redis Health Check', () => {
     it('should check Redis connectivity', async () => {
       const result = await checkRedis();
 
@@ -290,7 +292,7 @@ describe('Health Check Components', () => {
     });
   });
 
-  describe('System Resources Check', () => {
+  describeIf('System Resources Check', () => {
     it('should check system resource utilization', () => {
       const result = checkSystemResources();
 

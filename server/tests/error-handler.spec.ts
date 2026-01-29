@@ -1,7 +1,9 @@
 import request from 'supertest';
 import express from 'express';
 
-describe('Express 5 centralized errors', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Express 5 centralized errors', () => {
   it('catches async throw', async () => {
     const app = express();
     const r = express.Router();

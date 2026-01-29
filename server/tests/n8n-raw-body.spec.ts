@@ -2,7 +2,9 @@ import request from 'supertest';
 import express from 'express';
 import n8nRouter from '../src/routes/n8n';
 
-describe('n8n raw-body route', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('n8n raw-body route', () => {
   const app = express();
   app.use('/', n8nRouter);
 

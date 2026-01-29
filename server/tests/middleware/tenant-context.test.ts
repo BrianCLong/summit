@@ -3,7 +3,9 @@ import express from 'express';
 import request from 'supertest';
 import tenantContextMiddleware from '../../src/middleware/tenantContext.js';
 
-describe('tenantContextMiddleware', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('tenantContextMiddleware', () => {
   const buildApp = () => {
     const app = express();
     app.use(express.json());

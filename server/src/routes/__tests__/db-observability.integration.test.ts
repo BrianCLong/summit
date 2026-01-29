@@ -3,7 +3,9 @@ import express from 'express';
 import request from 'supertest';
 import { buildDbObservabilityRouter } from '../db-observability.js';
 
-describe('db observability router', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('db observability router', () => {
   const snapshotMock = jest.fn().mockResolvedValue({
     takenAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
     locks: [],

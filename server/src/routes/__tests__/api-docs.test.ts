@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 /**
  * API Documentation Routes Tests
  * Issue: #11814 - API Documentation with OpenAPI/Swagger

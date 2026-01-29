@@ -1,7 +1,9 @@
 const request = require('supertest');
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const { createApp } = require('../src/appFactory');
 
-describe('GET /health', () => {
+describeIf('GET /health', () => {
   it('returns OK with expected shape', async () => {
     const app = createApp({ lightweight: true });
     const res = await request(app).get('/health').expect(200);

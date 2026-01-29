@@ -1,0 +1,5 @@
+{
+  "claim_id": "CLM-TEST-002",
+  "text": "The Earth is flat.",
+  "expected_support": "contradicted"
+}

@@ -2,6 +2,8 @@ import request from 'supertest';
 import { createTestUser, createTestCase } from '../setup';
 import { jest, describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 let createServer: ((options?: any) => Promise<any>) | null = null;
 const allowIntegration = process.env.RUN_GRAPHQL_INTEGRATION === 'true';
 try {
@@ -41,7 +43,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     if (app?.close) await app.close();
   });
 
-  describe('Authentication & Authorization', () => {
+  describeIf('Authentication & Authorization', () => {
     it('should reject requests without authentication', async () => {
       const query = `
         query {
@@ -112,7 +114,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Case Management', () => {
+  describeIf('Case Management', () => {
     it('should create a new case', async () => {
       const mutation = `
         mutation CreateCase($input: CreateCaseInput!) {
@@ -242,7 +244,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Entity Management', () => {
+  describeIf('Entity Management', () => {
     it('should create entity with validation', async () => {
       const mutation = `
         mutation CreateEntity($input: CreateEntityInput!) {
@@ -314,7 +316,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Graph Analytics', () => {
+  describeIf('Graph Analytics', () => {
     it('should find shortest path between entities', async () => {
       const query = `
         query FindPath($from: ID!, $to: ID!, $maxHops: Int) {
@@ -389,7 +391,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Real-time Subscriptions', () => {
+  describeIf('Real-time Subscriptions', () => {
     it('should handle case updates subscription', (done) => {
       // Mock WebSocket subscription
       const subscription = `
@@ -410,7 +412,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Search Integration', () => {
+  describeIf('Search Integration', () => {
     it('should perform full-text search', async () => {
       const query = `
         query Search($query: String!, $filters: SearchFilters) {
@@ -459,7 +461,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Audit Trail', () => {
+  describeIf('Audit Trail', () => {
     it('should create audit log for mutations', async () => {
       const mutation = `
         mutation CreateCase($input: CreateCaseInput!) {
@@ -502,7 +504,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeIf('Error Handling', () => {
     it('should handle database connection errors gracefully', async () => {
       // Mock database error
       jest
@@ -546,7 +548,7 @@ describeIntegration('GraphQL API Integration Tests', () => {
     });
   });
 
-  describe('Performance', () => {
+  describeIf('Performance', () => {
     it('should handle concurrent requests efficiently', async () => {
       const query = `
         query {

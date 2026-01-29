@@ -4,7 +4,9 @@ import { getPostgresPool } from '../../db/postgres.js';
 import { evidenceProvenanceService } from '../evidence/provenance-service.js';
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 
-describe('Maestro Integration Tests', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Maestro Integration Tests', () => {
   let testRunId: string;
   let authToken: string;
   let app: any;
@@ -35,7 +37,7 @@ describe('Maestro Integration Tests', () => {
     await pool.end();
   });
 
-  describe('Router Decision Transparency', () => {
+  describeIf('Router Decision Transparency', () => {
     beforeEach(async () => {
       const pool = getPostgresPool();
       // Insert test router decision
@@ -104,7 +106,7 @@ describe('Maestro Integration Tests', () => {
     });
   });
 
-  describe('Evidence Provenance System', () => {
+  describeIf('Evidence Provenance System', () => {
     test('should store and verify evidence', async () => {
       const artifact = {
         runId: testRunId,
@@ -143,7 +145,7 @@ describe('Maestro Integration Tests', () => {
     });
   });
 
-  describe('Approval System', () => {
+  describeIf('Approval System', () => {
     beforeEach(async () => {
       const pool = getPostgresPool();
       // Create approval request
@@ -200,7 +202,7 @@ describe('Maestro Integration Tests', () => {
     });
   });
 
-  describe('MCP Server Management', () => {
+  describeIf('MCP Server Management', () => {
     test('should create MCP server', async () => {
       const serverData = {
         name: 'test-mcp-server',
@@ -229,7 +231,7 @@ describe('Maestro Integration Tests', () => {
     });
   });
 
-  describe('Dashboard API', () => {
+  describeIf('Dashboard API', () => {
     test('should fetch dashboard summary', async () => {
       const response = await request(app)
         .get('/api/maestro/v1/dashboard/summary')
@@ -255,7 +257,7 @@ describe('Maestro Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
+  describeIf('Error Handling', () => {
     test('should handle 404 for non-existent run', async () => {
       const fakeRunId = '00000000-0000-0000-0000-000000000000';
 
@@ -283,7 +285,7 @@ describe('Maestro Integration Tests', () => {
     });
   });
 
-  describe('Performance & Scalability', () => {
+  describeIf('Performance & Scalability', () => {
     test('should handle concurrent router decisions', async () => {
       const promises = Array.from({ length: 10 }, (_, i) =>
         request(app)

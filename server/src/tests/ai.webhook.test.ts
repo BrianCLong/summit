@@ -4,6 +4,8 @@ import { createApp } from '../app'; // assumes your express app export
 import { describe, it, test, expect, beforeAll } from '@jest/globals';
 import type { Express } from 'express';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const SECRET = process.env.ML_WEBHOOK_SECRET || 'test-secret';
 
 function sign(body: any) {

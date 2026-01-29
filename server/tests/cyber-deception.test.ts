@@ -3,6 +3,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import request from 'supertest';
 import { CyberDeceptionService } from '../src/services/CyberDeceptionService.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 

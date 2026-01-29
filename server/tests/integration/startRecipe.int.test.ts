@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { jest, describe, it, test, expect, beforeAll, beforeEach } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock dependencies before importing the app
 jest.mock('../../src/recipes/loader.js');
 jest.mock('../../src/featureFlags/flagsmith.js');
@@ -14,7 +16,7 @@ const mockFlagEnabled = require('../../src/featureFlags/flagsmith.js')
   .isEnabled as jest.MockedFunction<any>;
 const mockCrypto = require('crypto') as jest.Mocked<typeof import('crypto')>;
 
-describe('GraphQL startRecipe Integration Tests', () => {
+describeIf('GraphQL startRecipe Integration Tests', () => {
   let app: any;
 
   beforeAll(async () => {
@@ -35,7 +37,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
       .set('Content-Type', 'application/json');
   };
 
-  describe('startRecipe mutation', () => {
+  describeIf('startRecipe mutation', () => {
     beforeEach(() => {
       // Mock file system calls
       jest.spyOn(fs, 'existsSync').mockReturnValue(true);
@@ -235,7 +237,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
     });
   });
 
-  describe('Budget directive integration', () => {
+  describeIf('Budget directive integration', () => {
     it('should respect @budget directive limits', async () => {
       // This test would require actual budget plugin integration
       // For now, we'll test that the schema includes the directive properly
@@ -264,7 +266,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
     });
   });
 
-  describe('Error handling', () => {
+  describeIf('Error handling', () => {
     it('should handle file system errors gracefully', async () => {
       jest.spyOn(fs, 'existsSync').mockImplementation(() => {
         throw new Error('File system error');
@@ -305,7 +307,7 @@ describe('GraphQL startRecipe Integration Tests', () => {
     });
   });
 
-  describe('Audit trail', () => {
+  describeIf('Audit trail', () => {
     it('should generate proper audit IDs', async () => {
       mockCrypto.randomUUID
         .mockReturnValueOnce('run-uuid-123')

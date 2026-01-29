@@ -2,7 +2,9 @@ import request from 'supertest';
 import express from 'express';
 import githubRouter from '../src/routes/github';
 
-describe('GitHub raw-body route', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('GitHub raw-body route', () => {
   const app = express();
   app.use('/webhooks/github', githubRouter as any);
 

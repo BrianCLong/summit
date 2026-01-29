@@ -2,6 +2,8 @@ import express from 'express';
 import request from 'supertest';
 import { describe, beforeEach, it, expect, jest, afterEach, beforeAll, afterAll } from '@jest/globals';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock functions declared before mocks
 const mockQuery = jest.fn();
 const mockRelease = jest.fn();

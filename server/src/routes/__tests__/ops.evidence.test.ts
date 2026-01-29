@@ -5,6 +5,8 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import request from 'supertest';
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../scripts/maintenance.js', () => ({ runMaintenance: jest.fn() }));
 jest.mock('../../backup/BackupService.js', () => ({
   BackupService: jest.fn().mockImplementation(() => ({

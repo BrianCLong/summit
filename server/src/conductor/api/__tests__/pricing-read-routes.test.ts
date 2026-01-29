@@ -4,6 +4,8 @@ import request from 'supertest';
 import { pricingReadRoutes } from '../pricing-read-routes';
 import { listPools, currentPricing } from '../../scheduling/pools.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../../auth/rbac-middleware', () => ({
   requirePermission: () => (_req: any, _res: any, next: any) => next(),
 }));

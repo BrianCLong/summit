@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 import request from 'supertest';
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // import { createApp } from '../../app.js';
 import { pg } from '../../db/pg.js';
 import { webhookQueue } from '../webhook.queue.js';

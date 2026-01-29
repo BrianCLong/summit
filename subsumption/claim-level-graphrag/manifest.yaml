@@ -1,0 +1,49 @@
+item:
+  slug: claim-level-graphrag
+  title: "Claim-level grounding for GraphRAG"
+  type: "spec/pattern"
+  date: "2026-01-28"
+  links:
+    - "https://arxiv.org/abs/2601.06519"
+    - "https://www.emergentmind.com/topics/claim-level-grounding-approach"
+required_checks:
+  discovery: "assumed"
+  assumed_names:
+    - "subsumption-bundle-verifier"
+prs:
+  - title: "chore(subsumption): add claim-level-graphrag bundle manifest + evidence schemas"
+    lane: "foundation"
+    owner: "A"
+    risk: "green"
+  - title: "ci(subsumption): add subsumption bundle verifier + deny-by-default fixtures"
+    lane: "foundation"
+    owner: "B/D"
+    risk: "green"
+  - title: "test(evals): add evidence-coverage metrics + drift monitor skeleton"
+    lane: "foundation"
+    owner: "C/D"
+    risk: "green"
+  - title: "feat(claims): add claim extractor + mock claim verifier"
+    lane: "innovation"
+    owner: "A"
+    risk: "yellow"
+  - title: "feat(retrieval): add hub-penalty scoring hook"
+    lane: "innovation"
+    owner: "A/C"
+    risk: "yellow"
+evidence_ids:
+  - "EVD-CLGRAG-FOUND-001"
+  - "EVD-CLGRAG-CI-001"
+  - "EVD-CLGRAG-EVAL-001"
+  - "EVD-CLGRAG-FEAT-001"
+  - "EVD-CLGRAG-FEAT-002"
+docs:
+  - "docs/standards/claim-level-graphrag.md"
+  - "docs/security/data-handling/claim-level-graphrag.md"
+  - "docs/ops/runbooks/claim-level-graphrag.md"
+  - "docs/decisions/claim-level-graphrag.md"
+feature_flags:
+  - name: "SUMMIT_CLAIM_LEVEL_GROUNDING"
+    default: 0
+  - name: "SUMMIT_HUB_PENALTY"
+    default: 0

@@ -5,6 +5,8 @@ import type { Pool } from 'pg';
 import { getPostgresPool } from '../../db/postgres.js';
 import { CaseOverviewCacheRepo } from '../../repos/CaseOverviewCacheRepo.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const TENANT_ID = 'tenant-case-overview-route';
 const USER_ID = 'case-overview-route-user';
 const describeIfDb =

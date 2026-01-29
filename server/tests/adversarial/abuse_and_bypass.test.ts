@@ -2,6 +2,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // @ts-ignore
 import { abuseDetectionMiddleware } from '../../src/middleware/abuseDetection';
 

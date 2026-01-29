@@ -6,6 +6,8 @@ import { costAwareScheduler } from '../cost-aware-scheduler';
 import { choosePool } from '../selector.js';
 import { recordPoolSelectionAudit } from '../pool-selection-audit';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 jest.mock('../cost-aware-scheduler', () => ({
   costAwareScheduler: {
     schedule: jest.fn(),
@@ -24,7 +26,7 @@ const mockSchedule = costAwareScheduler.schedule as jest.Mock;
 const mockChoosePool = choosePool as jest.Mock;
 const mockAudit = recordPoolSelectionAudit as jest.Mock;
 
-describe('scheduler-api pool selection', () => {
+describeIf('scheduler-api pool selection', () => {
   const app = express();
   app.use(express.json());
   app.use('/', schedulerRouter);

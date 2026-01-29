@@ -3,6 +3,8 @@ import crypto from 'crypto';
 import express from 'express';
 import request from 'supertest';
 import {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
   canonicalStringify,
   hashCanonical,
   signReceiptPayload,

@@ -1,0 +1,47 @@
+name: KEV Alert
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Daily at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  kev-scan:
+    name: KEV Vulnerability Scan
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Run Vulnerability Scan
+        run: |
+          # Ensure script is executable
+          chmod +x scripts/scan-vulnerabilities.sh
+          # Run scan, ignore exit code 1 (failure on criticals) so we can proceed to KEV check
+          ./scripts/scan-vulnerabilities.sh . ./vulnerability-reports || true
+
+      - name: Run KEV Watch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Ensure script is executable
+          chmod +x scripts/kev_watch.py
+          # Run KEV check
+          ./scripts/kev_watch.py ./vulnerability-reports

@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // @ts-nocheck
 import { jest, describe, beforeAll, afterAll, it, expect, afterEach } from '@jest/globals';
 import request from 'supertest';

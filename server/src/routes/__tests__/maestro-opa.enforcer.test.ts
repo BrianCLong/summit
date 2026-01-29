@@ -4,6 +4,8 @@ import request from 'supertest';
 import { createMaestroOPAEnforcer } from '../maestro_routes';
 import { logger } from '../../utils/logger';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 

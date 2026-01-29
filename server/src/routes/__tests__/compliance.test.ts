@@ -3,6 +3,8 @@ import request from 'supertest';
 import express from 'express';
 import type { NextFunction, Request, Response } from 'express';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // ESM-compatible mocking using unstable_mockModule
 jest.unstable_mockModule('../../middleware/auth', () => ({
   ensureAuthenticated: (req: Request, _res: Response, next: NextFunction) => {
@@ -44,7 +46,7 @@ beforeAll(async () => {
   app = await createApp();
 });
 
-describe('GET /api/compliance/soc2-packet', () => {
+describeIf('GET /api/compliance/soc2-packet', () => {
   const startDate = '2025-01-01T00:00:00.000Z';
   const endDate = '2025-12-31T23:59:59.999Z';
 

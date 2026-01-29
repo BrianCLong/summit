@@ -2,6 +2,8 @@ import { describe, it, expect, jest, beforeEach, afterEach, beforeAll, afterAll 
 import request from 'supertest';
 import express, { Request, Response, NextFunction } from 'express';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock functions declared before mocks
 const mockCreateApiKey = jest.fn();
 const mockListApiKeys = jest.fn();

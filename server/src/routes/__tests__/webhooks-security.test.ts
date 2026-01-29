@@ -2,6 +2,8 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock dependencies
 jest.unstable_mockModule('../../services/ticket-links.js', () => ({
   addTicketRunLink: jest.fn(),
@@ -50,7 +52,7 @@ jest.unstable_mockModule('../../observability/index.js', () => ({
   },
 }));
 
-describe('Webhooks Security', () => {
+describeIf('Webhooks Security', () => {
   let app: express.Express;
   let originalEnv: NodeJS.ProcessEnv;
 

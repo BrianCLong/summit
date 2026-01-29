@@ -3,7 +3,9 @@ import request from 'supertest';
 import router from '../../pipelines-api';
 import { describe, it, expect } from '@jest/globals';
 
-describe('Pipelines API', () => {
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Pipelines API', () => {
   const app = express();
   app.use('/api/maestro/v1', router);
 

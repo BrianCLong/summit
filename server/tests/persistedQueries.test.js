@@ -2,12 +2,14 @@ const express = require('express');
 const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const { createHash } = require('crypto');
 const {
   createPersistedQueriesMiddleware,
 } = require('../src/middleware/persistedQueries.ts');
 
-describe('persisted queries per tenant', () => {
+describeIf('persisted queries per tenant', () => {
   const tmpDir = path.join(__dirname, 'tmp-pq');
   const tenantA = 'tenantA';
   const query = 'query Test { __typename }';

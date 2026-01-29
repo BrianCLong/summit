@@ -3,6 +3,8 @@ import express from 'express';
 import request from 'supertest';
 import { Pool } from 'pg';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const ACTOR_ONE = 'support-comment-author';
 const ACTOR_TWO = 'support-comment-other';
 

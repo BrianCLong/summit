@@ -1,3 +1,5 @@
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 /**
  * Authentication Integration Tests
  *
@@ -74,7 +76,7 @@ describe.skip('Authentication Integration Tests', () => {
     mockConnect.mockResolvedValue(mockClient);
   });
 
-  describe('POST /auth/register', () => {
+  describeIf('POST /auth/register', () => {
     const validRegistration = {
       email: 'newuser@example.com',
       password: 'ValidPassword123!',
@@ -151,7 +153,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /auth/login', () => {
+  describeIf('POST /auth/login', () => {
     it('should login user with valid credentials', async () => {
       const mockUser = {
         id: 'user-123',
@@ -221,7 +223,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /auth/refresh', () => {
+  describeIf('POST /auth/refresh', () => {
     it('should refresh token with valid refresh token', async () => {
       const validRefreshToken = 'valid-refresh-token';
 
@@ -279,7 +281,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /auth/logout', () => {
+  describeIf('POST /auth/logout', () => {
     it('should logout user with valid token', async () => {
       // Generate a valid token
       const token = jwt.sign(
@@ -319,7 +321,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('GET /auth/me', () => {
+  describeIf('GET /auth/me', () => {
     it('should return current user profile', async () => {
       const token = jwt.sign(
         { userId: 'user-123', email: 'test@example.com', role: 'ANALYST' },
@@ -351,7 +353,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('GET /auth/verify-token', () => {
+  describeIf('GET /auth/verify-token', () => {
     it('should verify valid token', async () => {
       const token = jwt.sign(
         { userId: 'user-123', email: 'test@example.com', role: 'ANALYST' },
@@ -388,7 +390,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /auth/password/reset-request', () => {
+  describeIf('POST /auth/password/reset-request', () => {
     it('should initiate password reset for existing user', async () => {
       const mockClient = {
         query: mockQuery,
@@ -440,7 +442,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /auth/password/reset', () => {
+  describeIf('POST /auth/password/reset', () => {
     it('should reset password with valid token', async () => {
       const mockClient = {
         query: mockQuery,
@@ -508,7 +510,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /auth/password/change', () => {
+  describeIf('POST /auth/password/change', () => {
     it('should change password for authenticated user', async () => {
       const token = jwt.sign(
         { userId: 'user-123', email: 'test@example.com', role: 'ANALYST' },
@@ -610,7 +612,7 @@ describe.skip('Authentication Integration Tests', () => {
     });
   });
 
-  describe('Rate Limiting', () => {
+  describeIf('Rate Limiting', () => {
     it('should rate limit login attempts', async () => {
       // This would require multiple requests to trigger rate limiting
       // Implementation depends on the actual rate limiter configuration

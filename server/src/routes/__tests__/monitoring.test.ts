@@ -2,6 +2,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import request from 'supertest';
 import express from 'express';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Mock functions declared before mocks
 const mockInc = jest.fn();
 const mockObserve = jest.fn();
@@ -38,12 +40,12 @@ const app = express();
 app.use(express.json());
 app.use('/', monitoringRouter);
 
-describe('Monitoring Routes', () => {
+describeIf('Monitoring Routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('POST /telemetry/events', () => {
+  describeIf('POST /telemetry/events', () => {
     it('should increment goldenPathStepTotal for golden_path_step event', async () => {
       const payload = {
         event: 'golden_path_step',
@@ -98,7 +100,7 @@ describe('Monitoring Routes', () => {
     });
   });
 
-  describe('POST /telemetry/dora', () => {
+  describeIf('POST /telemetry/dora', () => {
     it('should increment maestroDeploymentsTotal for deployment metric', async () => {
       const payload = {
         metric: 'deployment',

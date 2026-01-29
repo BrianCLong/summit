@@ -5,12 +5,14 @@ import fs from 'fs';
 import request from 'supertest';
 import { createApiDocsRouter } from '../src/routes/api-docs.js';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 // Use process.cwd() since tests run from server directory
 const testDir = path.join(process.cwd(), 'tests');
 
 const fixtureSpecPath = path.join(process.cwd(), '../openapi/spec.yaml');
 
-describe('API documentation routes', () => {
+describeIf('API documentation routes', () => {
   const app = express();
 
   beforeAll(async () => {
@@ -52,7 +54,7 @@ describe('API documentation routes', () => {
   });
 });
 
-describe('API documentation router bootstrap failures', () => {
+describeIf('API documentation router bootstrap failures', () => {
   it('throws a helpful error when the spec is missing', async () => {
     const missingPath = path.join(__dirname, '../openapi/does-not-exist.yaml');
 

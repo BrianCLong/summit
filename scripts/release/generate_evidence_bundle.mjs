@@ -11,7 +11,25 @@ function main() {
 
   if (files.length === 0) {
     console.warn('No files provided to generate evidence bundle. Searching in artifacts/ directory...');
-    // Fallback or just empty
+
+    const supplyChainDir = path.join('artifacts', 'supplychain');
+    if (fs.existsSync(supplyChainDir)) {
+      const walkSync = (dir, filelist = []) => {
+        fs.readdirSync(dir).forEach(file => {
+          const filepath = path.join(dir, file);
+          if (fs.statSync(filepath).isDirectory()) {
+            filelist = walkSync(filepath, filelist);
+          } else {
+            filelist.push(filepath);
+          }
+        });
+        return filelist;
+      };
+
+      const foundFiles = walkSync(supplyChainDir);
+      console.log(`Found ${foundFiles.length} supply chain artifacts.`);
+      files.push(...foundFiles);
+    }
   }
 
   const bundle = files.map(f => {

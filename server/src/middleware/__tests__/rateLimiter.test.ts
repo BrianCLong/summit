@@ -3,6 +3,8 @@ import express from 'express';
 import request from 'supertest';
 import { publicRateLimit, authenticatedRateLimit } from '../rateLimiter';
 
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
 const app = express();
 app.use('/public', publicRateLimit, (req, res) => res.status(200).send('Public OK'));
 
