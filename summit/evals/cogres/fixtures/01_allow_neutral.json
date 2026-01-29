@@ -1,0 +1,5 @@
+{
+  "event": { "action": "summarize" },
+  "signals": {},
+  "expected_allow": true
+}

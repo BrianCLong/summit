@@ -1,0 +1,12 @@
+{
+  "nodes": {
+    "Actor": { "properties": ["id", "type", "trust_score"] },
+    "Narrative": { "properties": ["id", "content_hash", "topic"] },
+    "Channel": { "properties": ["id", "platform", "reach"] }
+  },
+  "edges": {
+    "AMPLIFIES": { "source": "Actor", "target": "Narrative" },
+    "TARGETS": { "source": "Narrative", "target": "Channel" },
+    "LINKS_TO": { "source": "Actor", "target": "Actor" }
+  }
+}

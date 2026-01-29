@@ -13,3 +13,7 @@
 | ci:dependency-delta-verify | verify-dependency-delta |
 | ci:cti-contract-verify | test-cti-contracts |
 | ci:robustness-smoke | smoke-tests |
+| ci:summit-evidence | summit-evidence |
+| ci:summit-cogres-evals | summit-cogres-evals |
+| ci:summit-neverlog | summit-neverlog |
+| ci:summit-supply-chain | summit-supply-chain |

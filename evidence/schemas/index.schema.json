@@ -7,7 +7,7 @@
     "items": {
       "type": "object",
       "patternProperties": {
-        "^EVD-[A-Z0-9-]+$": { "type": "string" }
+        "^EVD-[A-Za-z0-9-]+$": { "type": "string" }
       },
       "additionalProperties": false
     }

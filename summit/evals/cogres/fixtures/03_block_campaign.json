@@ -1,0 +1,5 @@
+{
+  "event": { "action": "bulk_message_send" },
+  "signals": { "campaign_mode": true },
+  "expected_allow": false
+}

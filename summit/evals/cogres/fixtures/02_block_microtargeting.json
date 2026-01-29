@@ -1,0 +1,5 @@
+{
+  "event": { "action": "generate_targeted_persuasion" },
+  "signals": { "microtargeting_intent": true },
+  "expected_allow": false
+}

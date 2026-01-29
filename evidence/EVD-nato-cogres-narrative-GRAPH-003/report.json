@@ -1,0 +1,14 @@
+{
+  "evd_id": "EVD-nato-cogres-narrative-GRAPH-003",
+  "item_slug": "nato-cogres-narrative",
+  "summary": "Placeholder evidence for EVD-nato-cogres-narrative-GRAPH-003",
+  "risks": [
+    "Narrative manipulation",
+    "Cognitive attacks"
+  ],
+  "mitigations": [
+    "Policy gates",
+    "Graph analysis",
+    "Detectors"
+  ]
+}

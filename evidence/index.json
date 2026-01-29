@@ -1,4 +1,11 @@
 {
-  "version": 1,
-  "items": {}
+  "items": {
+    "EVD-nato-cogres-narrative-CAMPAIGN-005": "evidence/EVD-nato-cogres-narrative-CAMPAIGN-005/report.json",
+    "EVD-nato-cogres-narrative-EVAL-004": "evidence/EVD-nato-cogres-narrative-EVAL-004/report.json",
+    "EVD-nato-cogres-narrative-EVIDENCE-001": "evidence/EVD-nato-cogres-narrative-EVIDENCE-001/report.json",
+    "EVD-nato-cogres-narrative-GRAPH-003": "evidence/EVD-nato-cogres-narrative-GRAPH-003/report.json",
+    "EVD-nato-cogres-narrative-MARKERS-006": "evidence/EVD-nato-cogres-narrative-MARKERS-006/report.json",
+    "EVD-nato-cogres-narrative-POLICY-002": "evidence/EVD-nato-cogres-narrative-POLICY-002/report.json"
+  },
+  "version": 1
 }
