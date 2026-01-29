@@ -156,7 +156,7 @@ async function start() {
   });
 }
 
-start().catch((error) => {
+export const startPromise = start().catch((error) => {
   logger.error({ error }, 'Failed to start Tenant API');
   process.exit(1);
 });

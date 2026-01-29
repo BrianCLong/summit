@@ -19,8 +19,12 @@ vi.mock('../src/db/postgres.js', () => ({
 }));
 
 // Import after mocking
-import app from '../src/index.js';
+import app, { startPromise } from '../src/index.js';
 import { pool } from '../src/db/postgres.js';
+
+beforeAll(async () => {
+  await startPromise;
+});
 
 describe('Tenant API', () => {
   describe('Health Endpoints', () => {
