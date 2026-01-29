@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T12:00:00Z",
-  "revision_note": "Added narrative frames contract scaffold, fixtures, and evidence output for Narrative Intelligence lane",
+  "last_updated": "2026-01-29T10:12:00Z",
+  "revision_note": "Initiated GA recapture Phase 0/1 evidence capture and backlog planning",
   "initiatives": [
     {
       "id": "A",
