@@ -2,5 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Report",
   "type": "object",
+  "required": ["tool", "run_id", "evidence_ids", "artifacts"],
+  "properties": {
+    "tool": { "type": "string" },
+    "run_id": { "type": "string" },
+    "evidence_ids": { "type": "array", "items": { "type": "string" } },
+    "artifacts": { "type": "object", "additionalProperties": { "type": "string" } }
+  },
   "additionalProperties": true
 }
