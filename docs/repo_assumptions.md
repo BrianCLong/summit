@@ -1,19 +1,19 @@
-# Repo Assumptions Ledger (Subsumption Engine v4)
+# Repo Assumptions & Reality Check
 
-## Verified (conversation-derived)
-- Deterministic evidence and GA governance gates are priorities.
-- CI scripts exist under scripts/ci and are used to enforce policies.
+## Verified
+*   **Repo Structure**: `summit/` is the core Python package, `tests/` contains tests.
+*   **Package Management**: `requirements.in` lists `fastapi`, `uvicorn`, `httpx`, `pytest`.
+*   **Model Registry**: `summit/registry/model.py` defines schema, `summit/registry/store.py` loads it. No existing data files found in `summit/registry/`.
+*   **LLM Config**: `litellm.config.yaml` exists in root, implying use of `litellm` proxy, but no direct python usage found in `summit/`.
+*   **Sandbox**: `summit/agents/sandbox.py` handles tool execution sandbox.
+*   **Tests**: `tests/test_sandbox.py` exists, confirming `pytest` usage.
 
-## Assumed (validate in repo)
-- Node 20+ / pnpm workspace setup.
-- GitHub Actions workflows run scripts under scripts/ci.
-- evidence/ directory either exists or can be introduced safely.
+## Assumptions
+*   **Provider Location**: Since no explicit "provider" module was found (only scattered adapters in `packages/`), we assume `summit/providers/` is the correct place for new core providers.
+*   **Registry Data**: We assume `summit/registry/data/` is the correct place to store registry JSON files.
+*   **Artifacts**: We assume `artifacts/` directory should be created in the root for outputs.
 
-## Must-not-touch (blast radius)
-- Core runtime packages and public APIs unless required for gating.
-- Existing workflow logic beyond adding a new job hook.
-- Security-sensitive config unless required for verifier integration.
-
-## Validation Plan
-- Identify required checks from branch protection settings (UI/API).
-- Confirm existing evidence conventions and align schemas to avoid drift.
+## Must-not-touch
+*   `.archive/`
+*   `.disabled/`
+*   `.quarantine/`
