@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-TEST-VALID-001",
+  "area": "testing",
+  "summary": "This is a valid test report.",
+  "artifacts": [
+    { "path": "test.log", "description": "Log file" }
+  ]
+}

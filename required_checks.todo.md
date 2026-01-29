@@ -1,15 +1,14 @@
-# Required Checks Discovery (TODO)
+# Required Checks Discovery
 
-1. Open repo settings -> Branch protection -> note required check names.
-2. In CI provider UI, list workflow/job names that gate merges.
-3. Populate `ci/required_checks.json` (to be added in PR1 follow-up if needed).
-4. Rename plan: map placeholder gates to real names once discovered.
+## UI Steps
+1. Go to repository Settings -> Branches.
+2. Check branch protection rules for `main`.
+3. Note the list of "Require status checks to pass before merging".
 
-## Placeholder Mapping
+## API Steps
+1. Use `gh api repos/:owner/:repo/branches/main/protection` to list required checks programmatically.
+2. Cross-reference these names with `ci/gates/` definitions.
 
-| Placeholder | Potential Real Name |
-|---|---|
-| ci:evidence-verify | verify-evidence |
-| ci:dependency-delta-verify | verify-dependency-delta |
-| ci:cti-contract-verify | test-cti-contracts |
-| ci:robustness-smoke | smoke-tests |
+## Plan
+1. Once checks are discovered, rename temporary check names in CI config to match required names.
+2. Ensure no gaps between required checks and actual CI jobs.
