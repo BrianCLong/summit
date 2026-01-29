@@ -1,11 +1,21 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "patternProperties": {
-    "^EVD-[A-Z0-9-]+$": {
-      "type": "array",
-      "items": { "type": "string" }
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "type":"object",
+  "required":["items"],
+  "properties":{
+    "items":{
+      "type":"array",
+      "items":{
+        "type":"object",
+        "required":["evidence_id","path","sha256"],
+        "properties":{
+          "evidence_id":{"type":"string","pattern":"^EVD-OSINTENTERPRISE-[A-Z0-9_]+-[0-9]{3}$"},
+          "path":{"type":"string"},
+          "sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}
+        },
+        "additionalProperties":false
+      }
     }
   },
-  "additionalProperties": false
+  "additionalProperties":false
 }

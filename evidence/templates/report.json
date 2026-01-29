@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-OSINTENTERPRISE-TEMPLATE-000",
+  "item_slug": "template-slug",
+  "summary": "Template summary",
+  "decisions": [],
+  "findings": [],
+  "errors": [],
+  "claims": []
+}
