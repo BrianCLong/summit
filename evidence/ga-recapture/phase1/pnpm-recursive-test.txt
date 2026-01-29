@@ -1,0 +1,317 @@
+Scope: 704 of 705 workspace projects
+apps/a11y-lab test$ echo 'E2E tests require running server - use test:e2e'
+apps/analytics-engine test$ NODE_OPTIONS='--experimental-vm-modules' jest
+apps/command-console test$ vitest run
+apps/a11y-lab test: E2E tests require running server - use test:e2e
+apps/a11y-lab test: Done
+apps/compliance-console test$ vitest run
+apps/compliance-console test:  RUN  v1.6.1 /workspace/summit/apps/compliance-console
+apps/command-console test:  RUN  v2.1.9 /workspace/summit/apps/command-console
+apps/compliance-console test:  ✓ src/approvals/__tests__/abac.test.ts  (6 tests) 17ms
+apps/analytics-engine test: (node:13105) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+apps/analytics-engine test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/analytics-engine test: PASS src/__tests__/materializedViews.integration.test.ts
+apps/analytics-engine test: PASS src/services/__tests__/MaterializedViewScheduler.test.ts
+apps/analytics-engine test:   ● Console
+apps/analytics-engine test:     console.log
+apps/analytics-engine test:       2026-01-29 10:11:09 [[32minfo[39m]: Materialized view refresh completed {"service":"analytics-engine","views":[{"view":"maestro.mv_reporting_entity_activity","status":"ok","durationMs":25,"rows":12}]}
+apps/analytics-engine test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/analytics-engine test: Test Suites: 2 passed, 2 total
+apps/analytics-engine test: Tests:       2 passed, 2 total
+apps/analytics-engine test: Snapshots:   0 total
+apps/analytics-engine test: Time:        5.59 s, estimated 7 s
+apps/analytics-engine test: Ran all test suites.
+apps/analytics-engine test: Done
+apps/field-kit test$ vitest
+apps/compliance-console test:  ✓ src/approvals/__tests__/approvalDetails.test.tsx  (2 tests) 292ms
+apps/command-console test:  ✓ src/App.test.tsx (2 tests) 667ms
+apps/command-console test:    ✓ Command Console dashboard > renders health and tenant panels 609ms
+apps/command-console test:  Test Files  1 passed (1)
+apps/command-console test:       Tests  2 passed (2)
+apps/command-console test:    Start at  10:11:04
+apps/command-console test:    Duration  7.01s (transform 597ms, setup 385ms, collect 1.09s, tests 667ms, environment 2.41s, prepare 408ms)
+apps/command-console test: Done
+apps/graph-analytics test$ NODE_OPTIONS='--experimental-vm-modules' jest
+apps/field-kit test:  RUN  v4.0.16 /workspace/summit/apps/field-kit
+apps/compliance-console test:  ✓ src/approvals/__tests__/auditTimeline.test.tsx  (1 test) 247ms
+apps/compliance-console test:  ✓ src/approvals/__tests__/approvalsPage.test.tsx  (1 test) 132ms
+apps/compliance-console test:  Test Files  4 passed (4)
+apps/compliance-console test:       Tests  10 passed (10)
+apps/compliance-console test:    Start at  10:11:04
+apps/compliance-console test:    Duration  10.31s (transform 867ms, setup 1.40s, collect 3.38s, tests 688ms, environment 6.56s, prepare 2.54s)
+apps/compliance-console test: Done
+apps/labeling-ui test$ vitest --passWithNoTests
+apps/labeling-ui test:  DEV  v1.6.1 /workspace/summit/apps/labeling-ui
+apps/labeling-ui test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+apps/labeling-ui test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+apps/labeling-ui test: watch exclude:  **/node_modules/**, **/dist/**
+apps/labeling-ui test: No test files found, exiting with code 0
+apps/labeling-ui test: Done
+apps/ml-engine test$ jest --passWithNoTests
+apps/field-kit test:  ✓ src/__tests__/sync.test.ts (2 tests) 624ms
+apps/field-kit test:      ✓ processes queue when online  601ms
+apps/field-kit test:  Test Files  1 passed (1)
+apps/field-kit test:       Tests  2 passed (2)
+apps/field-kit test:    Start at  10:11:13
+apps/field-kit test:    Duration  4.25s (transform 358ms, setup 0ms, import 442ms, tests 624ms, environment 2.21s)
+apps/field-kit test: Done
+apps/mobile-interface test$ jest --passWithNoTests
+apps/ml-engine test: No tests found, exiting with code 0
+apps/ml-engine test: Done
+apps/mobile-native test$ jest --passWithNoTests
+apps/graph-analytics test: (node:13324) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+apps/graph-analytics test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/graph-analytics test: PASS src/__tests__/geoPoints.test.ts
+apps/mobile-interface test: No tests found, exiting with code 0
+apps/mobile-interface test: Done
+apps/search-engine test$ NODE_OPTIONS='--experimental-vm-modules' jest
+apps/graph-analytics test: PASS src/__tests__/algorithms.test.ts
+apps/graph-analytics test:   ● Console
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Computing centrality metrics {"service":"graph-analytics","nodes":4,"edges":5}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Centrality metrics computed {"service":"graph-analytics","elapsed":"27ms","topByDegree":["B","C","A"]}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Computing centrality metrics {"service":"graph-analytics","nodes":4,"edges":5}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Centrality metrics computed {"service":"graph-analytics","elapsed":"2ms","topByDegree":["B","C","A"]}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Computing centrality metrics {"service":"graph-analytics","nodes":4,"edges":5}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Centrality metrics computed {"service":"graph-analytics","elapsed":"2ms","topByDegree":["B","C"]}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Computing centrality metrics {"service":"graph-analytics","nodes":4,"edges":5}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Centrality metrics computed {"service":"graph-analytics","elapsed":"2ms","topByDegree":["B","C","A"]}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Running Louvain community detection {"service":"graph-analytics","nodes":10}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Louvain completed {"service":"graph-analytics","iterations":2,"communities":2,"modularity":"0.5533"}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Running label propagation algorithm {"service":"graph-analytics","nodes":10,"maxIterations":100}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Label propagation completed {"service":"graph-analytics","iterations":2,"communities":2}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Running Louvain community detection {"service":"graph-analytics","nodes":10}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Louvain completed {"service":"graph-analytics","iterations":2,"communities":2,"modularity":"0.5533"}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Running pattern miner {"service":"graph-analytics","graph":10}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test:     console.log
+apps/graph-analytics test:       2026-01-29 10:11:20 [[32minfo[39m]: Pattern mining completed, found 13 patterns {"service":"graph-analytics"}
+apps/graph-analytics test:       at Console.log (node_modules/winston/lib/winston/transports/console.js:87:23)
+apps/graph-analytics test: Test Suites: 2 passed, 2 total
+apps/graph-analytics test: Tests:       19 passed, 19 total
+apps/graph-analytics test: Snapshots:   0 total
+apps/graph-analytics test: Time:        6.134 s, estimated 7 s
+apps/graph-analytics test: Ran all test suites.
+apps/mobile-native test: No tests found, exiting with code 0
+apps/graph-analytics test: Done
+apps/server test$ NODE_OPTIONS=--experimental-vm-modules jest --config ./jest.config.cjs --runInBand
+apps/mobile-native test: Done
+apps/slo-exporter test$ echo "No tests specified yet" && exit 0
+apps/slo-exporter test: No tests specified yet
+apps/slo-exporter test: Done
+apps/tri-pane test$ vitest run
+apps/tri-pane test:  RUN  v2.1.9 /workspace/summit/apps/tri-pane
+apps/server test: ts-jest[ts-jest-transformer] (WARN) Define `ts-jest` config under `globals` is deprecated. Please do
+apps/server test: transform: {
+apps/server test:     <transform_regex>: ['ts-jest', { /* ts-jest config goes here in Jest */ }],
+apps/server test: },
+apps/server test: See more at https://kulshekhar.github.io/ts-jest/docs/getting-started/presets#advanced
+apps/search-engine test: (node:13444) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+apps/search-engine test: (Use `node --trace-warnings ...` to show where the warning was created)
+apps/search-engine test: PASS src/__tests__/ElasticsearchService.test.ts
+apps/search-engine test: PASS src/__tests__/QueryBuilderService.test.ts
+apps/search-engine test: Test Suites: 2 passed, 2 total
+apps/search-engine test: Tests:       58 passed, 58 total
+apps/search-engine test: Snapshots:   0 total
+apps/search-engine test: Time:        6.222 s
+apps/search-engine test: Ran all test suites.
+apps/search-engine test: Done
+apps/web test$ vitest
+apps/web test:  RUN  v4.0.16 /workspace/summit/apps/web
+apps/tri-pane test:  ✓ src/components/__tests__/savedViews.test.tsx (2 tests) 1143ms
+apps/tri-pane test:    ✓ Saved views > saves, persists, reloads, and restores a time window 1032ms
+apps/tri-pane test:  Test Files  1 passed (1)
+apps/tri-pane test:       Tests  2 passed (2)
+apps/tri-pane test:    Start at  10:11:22
+apps/tri-pane test:    Duration  7.30s (transform 594ms, setup 432ms, collect 1.46s, tests 1.14s, environment 2.36s, prepare 401ms)
+apps/tri-pane test: Done
+apps/webapp test$ vitest run
+apps/webapp test:  RUN  v4.0.18 /workspace/summit/apps/webapp
+apps/webapp test: stdout | src/App.test.tsx
+apps/webapp test: Setup file is executing (using require)...
+apps/webapp test: TextEncoder in util: true
+apps/webapp test: stdout | src/components/SelectionSummary.test.tsx
+apps/webapp test: Setup file is executing (using require)...
+apps/webapp test: TextEncoder in util: true
+apps/web test:  ✓ src/__tests__/integration/error-boundaries.test.tsx (11 tests | 1 skipped) 2127ms
+apps/web test:        ✓ catches data fetch errors and shows appropriate fallback  359ms
+apps/web test:        ✓ renders admin panel successfully when no errors occur  597ms
+apps/web test:        ✓ provides safe navigation back to workspace  376ms
+apps/web test:  ↓ src/features/triPane/TriPaneShell.test.tsx (16 tests | 16 skipped)
+apps/webapp test: stderr | src/components/SelectionSummary.test.tsx > SelectionSummary > renders with no selection
+apps/webapp test: In HTML, <div> cannot be a descendant of <p>.
+apps/webapp test: This will cause a hydration error.
+apps/webapp test:   <Provider store={{...}}>
+apps/webapp test:     <SelectionSummary>
+apps/webapp test:       <Grid direction="row" spacing={2} alignItems="center" data-testid="selection-..." aria-label="selection ...">
+apps/webapp test:         <MuiStack-root as="div" ownerState={{...}} ref={null} className="MuiStack-root" data-testid="selection-..." ...>
+apps/webapp test:           <Insertion>
+apps/webapp test:           <div className="MuiStack-r..." data-testid="selection-..." aria-label="selection ...">
+apps/webapp test:             <Typography variant="body2">
+apps/webapp test:               <MuiTypography-root as="p" ref={null} className="MuiTypogra..." sx={{...}} ...>
+apps/webapp test:                 <Insertion>
+apps/webapp test: >               <p className="MuiTypography-root MuiTypography-body2 css-7ctihp-MuiTypography-root" style={{}}>
+apps/webapp test:                   <Chip label="None" color="default" size="small" variant="outlined" data-testid="selected-n..." ...>
+apps/webapp test:                     <MuiChip-root as="div" onClick={function onClick} onKeyDown={function onKeyDown} ...>
+apps/webapp test:                       <Insertion>
+apps/webapp test: >                     <div
+apps/webapp test: >                       onClick={function onClick}
+apps/webapp test: >                       onKeyDown={function onKeyDown}
+apps/webapp test: >                       onKeyUp={function onKeyUp}
+apps/webapp test: >                       disabled={undefined}
+apps/webapp test: >                       tabIndex={undefined}
+apps/webapp test: >                       data-testid="selected-node-label"
+apps/webapp test: >                       className="MuiChip-root MuiChip-outlined MuiChip-sizeSmall MuiChip-colorDefault MuiChip-outlin..."
+apps/webapp test: >                       ref={function}
+apps/webapp test: >                     >
+apps/webapp test:             ...
+apps/webapp test: <p> cannot contain a nested <div>.
+apps/webapp test: See this log for the ancestor stack trace.
+apps/webapp test:  ✓ src/components/SelectionSummary.test.tsx (3 tests) 701ms
+apps/webapp test:      ✓ renders with no selection  320ms
+apps/webapp test: stderr | src/App.test.tsx > renders panes
+apps/webapp test: In HTML, <div> cannot be a descendant of <p>.
+apps/webapp test: This will cause a hydration error.
+apps/webapp test:   ...
+apps/webapp test:     <CssBaseline>
+apps/webapp test:     <BrowserRouter>
+apps/webapp test:       <Router basename={undefined} location={{pathname:"/", ...}} navigationType="POP" navigator={{action:"POP", ...}} ...>
+apps/webapp test:         <CommandPalette>
+apps/webapp test:         <Box display="flex" justifyContent="space-between" alignItems="center" p={1}>
+apps/webapp test:           <Styled(div) as="div" ref={null} className="MuiBox-root" theme={{...}} sx={{display:"flex", ...}}>
+apps/webapp test:             <Insertion>
+apps/webapp test:             <div className="MuiBox-roo...">
+apps/webapp test:               <SelectionSummary>
+apps/webapp test:                 <Grid direction="row" spacing={2} alignItems="center" data-testid="selection-..." ...>
+apps/webapp test:                   <MuiStack-root as="div" ownerState={{...}} ref={null} className="MuiStack-root" ...>
+apps/webapp test:                     <Insertion>
+apps/webapp test:                     <div className="MuiStack-r..." data-testid="selection-..." aria-label="selection ...">
+apps/webapp test:                       <Typography variant="body2">
+apps/webapp test:                         <MuiTypography-root as="p" ref={null} className="MuiTypogra..." sx={{...}} ...>
+apps/webapp test:                           <Insertion>
+apps/webapp test: >                         <p className="MuiTypography-root MuiTypography-body2 css-7ctihp-MuiTypography-root" style={{}}>
+apps/webapp test:                             <Chip label="None" color="default" size="small" variant="outlined" ...>
+apps/webapp test:                               <MuiChip-root as="div" onClick={function onClick} onKeyDown={function onKeyDown} ...>
+apps/webapp test:                                 <Insertion>
+apps/webapp test: >                               <div
+apps/webapp test: >                                 onClick={function onClick}
+apps/webapp test: >                                 onKeyDown={function onKeyDown}
+apps/webapp test: >                                 onKeyUp={function onKeyUp}
+apps/webapp test: >                                 disabled={undefined}
+apps/webapp test: >                                 tabIndex={undefined}
+apps/webapp test: >                                 data-testid="selected-node-label"
+apps/webapp test: >                                 className="MuiChip-root MuiChip-outlined MuiChip-sizeSmall MuiChip-colorDefault MuiC..."
+apps/webapp test: >                                 ref={function}
+apps/webapp test: >                               >
+apps/webapp test:                       ...
+apps/webapp test:               ...
+apps/webapp test:         ...
+apps/webapp test: <p> cannot contain a nested <div>.
+apps/webapp test: See this log for the ancestor stack trace.
+apps/webapp test:  ✓ src/App.test.tsx (2 tests) 501ms
+apps/webapp test:    ✓ renders panes  487ms
+apps/webapp test:  Test Files  2 passed (2)
+apps/webapp test:       Tests  5 passed (5)
+apps/webapp test:    Start at  10:11:33
+apps/webapp test:    Duration  11.08s (transform 1.17s, setup 991ms, import 8.54s, tests 1.20s, environment 7.55s)
+apps/webapp test: Done
+apps/workflow-engine test$ jest
+apps/web test: stdout | src/telemetry/__tests__/metrics.test.ts > reportError > sends error data to telemetry endpoint
+apps/web test: 🚨 Error Reported
+apps/web test:   Fingerprint: ad2daa72
+apps/web test:   Category: render
+apps/web test:   Severity: high
+apps/web test:   Context: { componentStack: 'at Component' }
+apps/web test: stderr | src/telemetry/__tests__/metrics.test.ts > reportError > sends error data to telemetry endpoint
+apps/web test:   Error: Test error
+apps/web test:       at /workspace/summit/apps/web/src/telemetry/__tests__/metrics.test.ts:151:19
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:145:11
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:915:26
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1243:20
+apps/web test:       at new Promise (<anonymous>)
+apps/web test:       at runWithTimeout (file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1209:10)
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1653:37
+apps/web test:       at Traces.$ (file:///workspace/summit/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+apps/web test:       at trace (file:///workspace/summit/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)
+apps/web test:       at runTest (file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1653:12)
+apps/web test: stdout | src/telemetry/__tests__/metrics.test.ts > reportError > includes error fingerprint and category
+apps/web test: 🚨 Error Reported
+apps/web test:   Fingerprint: ad2daa72
+apps/web test:   Category: unknown
+apps/web test:   Severity: high
+apps/web test:   Context: undefined
+apps/web test: stdout | src/telemetry/__tests__/metrics.test.ts > reportError > includes additional context
+apps/web test: 🚨 Error Reported
+apps/web test:   Fingerprint: ad2daa72
+apps/web test:   Category: unknown
+apps/web test:   Severity: high
+apps/web test:   Context: undefined
+apps/web test: stderr | src/telemetry/__tests__/metrics.test.ts > reportError > includes error fingerprint and category
+apps/web test:   Error: Test error
+apps/web test:       at /workspace/summit/apps/web/src/telemetry/__tests__/metrics.test.ts:168:19
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:145:11
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:915:26
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1243:20
+apps/web test:       at new Promise (<anonymous>)
+apps/web test:       at runWithTimeout (file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1209:10)
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1653:37
+apps/web test:       at Traces.$ (file:///workspace/summit/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+apps/web test:       at trace (file:///workspace/summit/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)
+apps/web test:       at runTest (file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1653:12)
+apps/web test: stderr | src/telemetry/__tests__/metrics.test.ts > reportError > includes additional context
+apps/web test:   Error: Test error
+apps/web test:       at /workspace/summit/apps/web/src/telemetry/__tests__/metrics.test.ts:179:19
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:145:11
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:915:26
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1243:20
+apps/web test:       at new Promise (<anonymous>)
+apps/web test:       at runWithTimeout (file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1209:10)
+apps/web test:       at file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1653:37
+apps/web test:       at Traces.$ (file:///workspace/summit/node_modules/vitest/dist/chunks/traces.U4xDYhzZ.js:115:27)
+apps/web test:       at trace (file:///workspace/summit/node_modules/vitest/dist/chunks/test.B8ej_ZHS.js:239:21)
+apps/web test:       at runTest (file:///workspace/summit/node_modules/@vitest/runner/dist/index.js:1653:12)
+apps/web test: stdout | src/telemetry/__tests__/metrics.test.ts > reportError > handles fetch failures gracefully
+apps/web test: 🚨 Error Reported
+apps/web test:   Fingerprint: ad2daa72
+apps/web test:   Category: unknown
+apps/web test:   Severity: high
+apps/web test:   Context: undefined
+apps/web test:  ✓ src/telemetry/__tests__/metrics.test.ts (17 tests) 105ms
+apps/workflow-engine test: ● Validation Error:
+apps/workflow-engine test:   Module <rootDir>/tests/utils/jest-setup.cjs in the setupFilesAfterEnv option was not found.
+apps/workflow-engine test:          <rootDir> is: /workspace/summit/apps/workflow-engine
+apps/workflow-engine test:   Configuration Documentation:
+apps/workflow-engine test:   https://jestjs.io/docs/configuration
+apps/workflow-engine test: Failed
+/workspace/summit/apps/workflow-engine:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @intelgraph/workflow-engine@4.2.3 test: `jest`
+Exit status 1
+client test$ node node_modules/jest/bin/jest.js --config jest.config.cjs
