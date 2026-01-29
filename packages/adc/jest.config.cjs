@@ -14,4 +14,5 @@ module.exports = {
         ],
     },
     testMatch: ['**/tests/**/*.spec.ts', '**/tests/**/*.test.ts'],
+    injectGlobals: true,
 };
