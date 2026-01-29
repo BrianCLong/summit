@@ -1,12 +1,11 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Evidence Report",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Report Schema",
   "type": "object",
-  "required": ["evidence_id"],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "summary": { "type": "string" },
-    "artifacts": { "type": "array" }
+    "run_id": { "type": "string" },
+    "status": { "type": "string" },
+    "results": { "type": "object" }
   },
-  "additionalProperties": false
+  "required": ["run_id", "status"]
 }
