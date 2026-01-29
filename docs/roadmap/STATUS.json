@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T00:00:00Z",
-  "revision_note": "Added graph-hybrid subsumption scaffold tracking (manifest, policy, eval, and evidence bundle).",
+  "last_updated": "2026-01-29T18:00:00Z",
+  "revision_note": "Added Palantir feature superset competitive plan for governed differentiation.",
   "initiatives": [
     {
       "id": "A",
@@ -92,13 +92,6 @@
             "Execution budget and observability controls not implemented"
           ],
           "target_completion": "Sprint N+2"
-        },
-        {
-          "id": "C4",
-          "name": "Graph-Hybrid Subsumption Bundle",
-          "status": "in-progress",
-          "owner": "Codex",
-          "evidence": "Subsumption manifest, policy fixtures, eval harness, and deterministic evidence scaffolded under subsumption/graph-hybrid."
         }
       ]
     },
@@ -241,8 +234,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 15,
-    "in_progress": 3,
-    "total": 24,
+    "total": 23,
     "ga_blockers": [
       "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
     ]
