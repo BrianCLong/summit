@@ -1,7 +1,10 @@
-## Required checks discovery (Summit)
-1) GitHub UI: Settings → Branches → Branch protection rules → note required status checks
-2) CLI/API: gh api repos/<org>/<repo>/branches/<branch>/protection
-3) Record names below and replace temporary gate names:
-   - ci/evidence_schema_check -> <REAL_NAME>
-   - ci/governance_explainability_gate -> <REAL_NAME>
-   - ci/dependency_delta_gate -> <REAL_NAME>
+# Required checks discovery (TODO)
+1) Open GitHub repo → Settings → Branches → Branch protection rules.
+2) List required status checks and their exact names.
+3) Replace temporary check names in `.github/workflows/jetrl-ci.yml`.
+
+## Temporary Gate Names (to be replaced or implemented)
+* `ci/evidence_schema_check`
+* `ci/latency_budget_gate`
+* `ci/pipeline_resilience_gate`
+* `ci/dependency_delta_gate`
