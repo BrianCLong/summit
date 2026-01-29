@@ -1,41 +1,14 @@
 {
-  "version": 1,
-  "items": [
-    {
-      "evidence_id": "EVD-vfgnn-SPEC-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-vfgnn-GOV-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-vfgnn-ROB-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-vfgnn-ATT-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-vfgnn-NEG-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+  "version": "1.0",
+  "evidence": {
+    "EVD-260118692-EVID-001": {
+      "area": "subsumption",
+      "item_slug": "lingbot-vla",
+      "files": [
+        "evidence/subsumption/lingbot-vla/report.json",
+        "evidence/subsumption/lingbot-vla/metrics.json",
+        "evidence/subsumption/lingbot-vla/stamp.json"
+      ]
     }
-  ]
+  }
 }
