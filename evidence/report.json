@@ -1,19 +1,13 @@
 {
-  "summary": "Angular Skills Governance and Evaluation Report",
-  "sections": {
-    "policy_check": {
-      "command": "python3 -m skills.cli validate --root third_party/skills/angular-skills",
-      "exit_code": 0,
-      "stdout": "Validated 1 skills. No violations.\n",
-      "stderr": "",
-      "status": "PASS"
-    },
-    "evaluator_check": {
-      "command": "python3 -m eval.angular_modernity.check --fixtures eval/angular_modernity/fixtures",
-      "exit_code": 1,
-      "stdout": "Found 4 violations:\n[AM-002] eval/angular_modernity/fixtures/negative.ts:6 - Avoid *ngIf. Use the new @if control flow block.\n  Context: <div *ngIf=\"isVisible\">\n[AM-003] eval/angular_modernity/fixtures/negative.ts:8 - Avoid *ngFor. Use the new @for control flow block.\n  Context: <li *ngFor=\"let item of items\">{{item}}</li>\n[AM-004] eval/angular_modernity/fixtures/negative.ts:18 - Avoid constructor injection. Use `inject()` for dependency injection.\n  Context: constructor(private service: MyService) {}\n[AM-005] eval/angular_modernity/fixtures/negative.ts:14 - Avoid @Input decorator. Use signal-based `input()` or `input.required()`.\n  Context: @Input() data: string;\n",
-      "stderr": "",
-      "status": "FAIL"
-    }
+  "run_id": "run-001",
+  "item_slug": "pipeline-resilience",
+  "evd_ids": ["EVD-PIPELINE-RESILIENCE-001"],
+  "summary": {
+    "what_ran": "Pipeline Scaffolding Check",
+    "result": "PASS"
+  },
+  "artifacts": {
+    "metrics": "evidence/metrics.json",
+    "stamp": "evidence/stamp.json"
   }
 }
