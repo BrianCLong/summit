@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T00:00:00Z",
-  "revision_note": "Added Guardrailed Prompt → Procedure initiative tracking for agentic workflow governance.",
+  "last_updated": "2026-01-29T20:29:00Z",
+  "revision_note": "Logged competitive intelligence update for graph analytics & enterprise knowledge graph platforms (2026-01-29).",
   "initiatives": [
     {
       "id": "A",
@@ -227,19 +227,6 @@
           "evidence": "Scaffolded worldsim core interface, evidence schemas, and discovery TODOs for PR1."
         }
       ]
-    },
-    {
-      "id": "I",
-      "name": "Guardrailed Prompt → Procedure (P2P)",
-      "epics": [
-        {
-          "id": "I1",
-          "name": "Procedure DSL + Policy Gates",
-          "status": "in-progress",
-          "owner": "Codex",
-          "evidence": "Introduced Procedure schema, deny-by-default policy, deterministic compiler, lint workflow, and drift monitoring scaffold."
-        }
-      ]
     }
   ],
   "summary": {
@@ -247,7 +234,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 15,
-    "total": 24,
+    "total": 23,
     "ga_blockers": [
       "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
     ]
