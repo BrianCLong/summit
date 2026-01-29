@@ -455,3 +455,56 @@ E2E Tests: Require full stack
 3. Deploy to staging environment and run smoke tests
 4. Complete external infrastructure provisioning (DNS, SSL, secrets)
 5. Schedule go-live with stakeholder notification
+
+---
+
+## 8. Post-Deploy Monitoring Gate
+
+We have implemented a standardized Post-Deploy Monitoring Gate to validate production health immediately after rollout. This gate consists of a canary script and an optional Prometheus SLO snapshot.
+
+### Components
+
+1.  **Canary Script (`scripts/go-live/post-deploy-canary.sh`)**:
+    *   Verifies liveness/readiness probes (`/healthz`, `/readyz`).
+    *   Checks application health (`/health`).
+    *   Ensures metrics are exposed (`/metrics`).
+    *   Validates version info (`/status`).
+
+2.  **SLO Snapshot (`scripts/go-live/prom-slo-snapshot.ts`)**:
+    *   Captures current error rates, latency, and pod restarts from Prometheus.
+    *   Generates a JSON snapshot and a Markdown summary.
+
+3.  **Evidence Generator**:
+    *   Aggregates canary and SLO results into a signed evidence bundle (`evidence.json`, `checksums.txt`).
+
+### Running the Gate (GitHub Actions)
+
+Go to **Actions** -> **Post-Deploy Monitoring Gate** and run with:
+*   `base_url`: `https://api.prod.summit.example.com`
+*   `prom_url` (optional): `https://prometheus.ops.summit.example.com`
+*   `require_prom`: `true` (if Prometheus is critical for validation)
+
+### Running Locally (Ops Workstation)
+
+```bash
+# 1. Run Canary
+export BASE_URL="https://api.prod.summit.example.com"
+./scripts/go-live/post-deploy-canary.sh
+
+# 2. Run SLO Snapshot (Optional)
+export PROM_URL="https://prometheus.ops.summit.example.com"
+export PROM_TOKEN="<token>" # if needed
+npx tsx scripts/go-live/prom-slo-snapshot.ts
+
+# 3. Generate Evidence
+pnpm evidence:post-deploy:gen
+
+# 4. Verify Evidence
+pnpm evidence:post-deploy:verify
+```
+
+### Interpretation
+
+*   **Canary Fail**: Immediate Rollback. The service is not responding correctly.
+*   **SLO Snapshot Fail (Error Rate > Threshold)**: Investigate immediately. Consider rollback if sustained.
+*   **Evidence Verification Fail**: The artifact has been tampered with or is incomplete.

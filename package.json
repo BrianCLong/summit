@@ -114,6 +114,8 @@
     "ci:branch-protection:apply": "node scripts/ci/apply_branch_protection_policy.mjs --apply",
     "ci:branch-protection:plan": "node scripts/ci/apply_branch_protection_policy.mjs --dry-run",
     "ci:evidence:index": "node scripts/release/generate_evidence_index.mjs --evidence-dir evidence --provenance evidence/provenance.json --outjson evidence/evidence-index.json --outmd evidence/EVIDENCE_INDEX.md",
+    "evidence:post-deploy:gen": "npx tsx scripts/evidence/generate-post-deploy-evidence.ts",
+    "evidence:post-deploy:verify": "npx tsx scripts/evidence/verify-post-deploy-evidence.ts",
     "ci:evidence-id-consistency": "node scripts/ci/verify_evidence_id_consistency.mjs",
     "validate:gate-installation": "node scripts/ci/verify_gate_installation.mjs",
     "ci:evidence-id:monitoring": "node scripts/ci/integrations/evidence-id-monitoring-hook.mjs",
