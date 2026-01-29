@@ -1,12 +1,16 @@
 import express from "express";
 import request from "supertest";
-import nock from "nock";
 import { stubIdentity } from "../src/authz/identity-middleware";
 import { customerReadGuard } from "../src/authz/customer-read-guard";
+import { evaluateCustomerRead } from "../src/authz/opa-client";
+import { vi, describe, beforeEach, it, expect, type Mock } from "vitest";
+
+// Mock the opa-client module
+vi.mock("../src/authz/opa-client", () => ({
+  evaluateCustomerRead: vi.fn(),
+}));
 
 describe("customerReadGuard", () => {
-  const OPA_PATH = "/v1/data/companyos/authz/customer/decision";
-
   function buildApp() {
     const app = express();
     app.use(stubIdentity);
@@ -21,14 +25,14 @@ describe("customerReadGuard", () => {
   }
 
   beforeEach(() => {
-    nock.cleanAll();
-    process.env.OPA_URL = `http://opa-test.local${OPA_PATH}`;
+    vi.clearAllMocks();
   });
 
   it("allows when OPA returns allow=true", async () => {
-    nock("http://opa-test.local")
-      .post(OPA_PATH)
-      .reply(200, { result: { allow: true, reason: "tenant_role_ok" } });
+    (evaluateCustomerRead as Mock).mockResolvedValue({
+      allow: true,
+      reason: "tenant_role_ok",
+    });
 
     const app = buildApp();
     const res = await request(app)
@@ -41,9 +45,10 @@ describe("customerReadGuard", () => {
   });
 
   it("denies when OPA returns allow=false", async () => {
-    nock("http://opa-test.local")
-      .post(OPA_PATH)
-      .reply(200, { result: { allow: false, reason: "not_in_tenant" } });
+    (evaluateCustomerRead as Mock).mockResolvedValue({
+      allow: false,
+      reason: "not_in_tenant",
+    });
 
     const app = buildApp();
     const res = await request(app)
