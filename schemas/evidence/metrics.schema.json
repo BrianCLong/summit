@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Metrics",
+  "type": "object",
+  "required": ["total_events"],
+  "properties": {
+    "total_events": { "type": "integer" }
+  }
+}

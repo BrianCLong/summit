@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Report",
+  "type": "object",
+  "required": ["evidence_id", "module", "summary"],
+  "properties": {
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9-]+$" },
+    "module": { "type": "string" },
+    "summary": { "type": "object" },
+    "notes": { "type": "string" }
+  }
+}
