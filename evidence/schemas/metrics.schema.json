@@ -2,17 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Metrics",
   "type": "object",
+  "required": ["evidence_id", "metrics"],
   "properties": {
-    "confusion_matrix": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": { "type": "integer" }
-      }
-    },
-    "false_positives": { "type": "integer" },
-    "false_negatives": { "type": "integer" },
-    "accuracy": { "type": "number" }
-  },
-  "additionalProperties": true
+    "evidence_id": { "type": "string" },
+    "metrics": { "type": "object", "additionalProperties": { "type": ["number", "string", "boolean"] } }
+  }
 }
