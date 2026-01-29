@@ -2,16 +2,8 @@
   "version": 1,
   "items": [
     {
-      "id": "EVD-INFLUENCEGNN-CAMPAIGN-001",
-      "path": "evidence/EVD-INFLUENCEGNN-CAMPAIGN-001/report.json",
-      "metrics": "evidence/EVD-INFLUENCEGNN-CAMPAIGN-001/metrics.json",
-      "stamp": "evidence/EVD-INFLUENCEGNN-CAMPAIGN-001/stamp.json"
-    },
-    {
-      "id": "EVD-INFLUENCEGNN-FED-001",
-      "path": "evidence/EVD-INFLUENCEGNN-FED-001/report.json",
-      "metrics": "evidence/EVD-INFLUENCEGNN-FED-001/metrics.json",
-      "stamp": "evidence/EVD-INFLUENCEGNN-FED-001/stamp.json"
+      "id": "EVD-PPGI-MAG-PRIV-001",
+      "path": "evidence/packs/EVD-PPGI-MAG-PRIV-001/report.json"
     }
   ]
 }

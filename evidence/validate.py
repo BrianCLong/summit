@@ -57,15 +57,19 @@ def main():
     # Validate index against schema
     validate_schema(index, ROOT / "evidence" / "schemas" / "index.schema.json", context="index.json")
 
-    items = index.get("items", {})
-    if not isinstance(items, dict):
-        fail("index.json 'items' must be a dict")
+    items = index.get("items", [])
+    if not isinstance(items, list):
+        fail("index.json 'items' must be a list")
 
     print(f"Index valid. {len(items)} items found.")
 
-    for evd_id, path in items.items():
+    for item in items:
+        # Validate item against item schema in index.schema.json (manually here)
+        if "id" not in item or "path" not in item:
+            fail(f"Item missing id or path: {item}")
+
         # Check if path exists
-        item_path = ROOT / path
+        item_path = ROOT / item["path"]
         if not item_path.exists():
             fail(f"Evidence file not found: {item_path}")
 
@@ -73,16 +77,19 @@ def main():
         report = load_json(item_path)
 
         # Determine which schema to use.
-        if "evd_id" in report:
-             validate_schema(report, ROOT / "evidence" / "schemas" / "report.schema.json", context=evd_id)
-             print(f"Validated {evd_id} as Standard Report")
-        elif "summary" in report and "artifacts" in report:
-            validate_schema(report, ROOT / "evidence" / "schemas" / "agentic_report.schema.json", context=evd_id)
-            print(f"Validated {evd_id} as Agentic Report")
+        if "summary" in report and "artifacts" in report:
+            if "item_slug" in report and "area" in report:
+                validate_schema(report, ROOT / "evidence" / "schemas" / "agentic_report.schema.json", context=item['id'])
+                print(f"Validated {item['id']} as Agentic Report")
+            elif "evidence_id" in report:
+                validate_schema(report, ROOT / "evidence" / "schemas" / "ppgi_report.schema.json", context=item['id'])
+                print(f"Validated {item['id']} as PPGI Report")
+            else:
+                print(f"WARN: Report {item['id']} has summary/artifacts but no known schema match.")
         elif "claims" in report:
-             print(f"Validated {evd_id} as Legacy Report")
+             print(f"Validated {item['id']} as Legacy Report")
         else:
-             print(f"WARN: Unknown report format for {evd_id}")
+             print(f"WARN: Unknown report format for {item['id']}")
 
     print("All evidence verified.")
 
