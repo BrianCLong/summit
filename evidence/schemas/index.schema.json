@@ -10,18 +10,36 @@
     "items": {
       "type": "array",
       "items": {
-        "type": "object",
-        "required": ["id", "path"],
-        "properties": {
-          "id": {
-            "type": "string",
-            "pattern": "^EVD-[A-Z0-9_-]+$"
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["id", "path"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^EVD-[A-Z0-9_-]+$"
+              },
+              "path": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           },
-          "path": {
-            "type": "string"
+          {
+            "type": "object",
+            "required": ["evidence_id", "report", "metrics", "stamp"],
+            "properties": {
+              "evidence_id": {
+                "type": "string",
+                "pattern": "^EVD-[A-Z0-9_]+-[A-Z]+-[0-9]{3}$"
+              },
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            },
+            "additionalProperties": false
           }
-        },
-        "additionalProperties": false
+        ]
       }
     }
   },

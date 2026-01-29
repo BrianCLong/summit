@@ -1,24 +1,6 @@
 {
-  "version": "1.0",
+  "version": 1,
   "items": [
-    {
-      "evidence_id": "EVD-SOT-EVAL-001",
-      "area": "eval",
-      "files": {
-        "report": "evidence/EVD-SOT-EVAL-001/report.json",
-        "metrics": "evidence/EVD-SOT-EVAL-001/metrics.json",
-        "stamp": "evidence/EVD-SOT-EVAL-001/stamp.json"
-      }
-    },
-    {
-      "evidence_id": "EVD-SOT-EVID-001",
-      "area": "evidence",
-      "files": {
-        "report": "evidence/EVD-SOT-EVID-001/report.json",
-        "metrics": "evidence/EVD-SOT-EVID-001/metrics.json",
-        "stamp": "evidence/EVD-SOT-EVID-001/stamp.json"
-      }
-    },
     {
       "evidence_id": "EVD-vfgnn-SPEC-001",
       "report": "evidence/report.json",
@@ -48,6 +30,18 @@
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-AIPERS-BASE-001",
+      "report": "evidence/runs/initial/report.json",
+      "metrics": "evidence/runs/initial/metrics.json",
+      "stamp": "evidence/runs/initial/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ARCEE-TRINITY-LICENSE-001",
+      "report": "evidence/arcee-trinity/EVD-ARCEE-TRINITY-LICENSE-001/report.json",
+      "metrics": "evidence/arcee-trinity/EVD-ARCEE-TRINITY-LICENSE-001/metrics.json",
+      "stamp": "evidence/arcee-trinity/EVD-ARCEE-TRINITY-LICENSE-001/stamp.json"
     }
   ]
 }
