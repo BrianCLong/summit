@@ -1,10 +1,5 @@
-# Required checks discovery (temporary)
-
-1. In GitHub UI: Settings → Branches → Branch protection rules → note required status checks.
-2. In GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-3. Add discovered names to `ci/required_checks.json` (to be created) and update CI verifier config.
-
-Temporary gate naming convention until discovered:
-
-- summit-ci/evidence-validate
-- summit-ci/supplychain-delta
+# Required checks discovery (TODO)
+1) Open GitHub repo → Settings → Branches → Branch protection rules.
+2) List required status checks and their exact names.
+3) Replace temporary check names in `.github/workflows/jetrl-ci.yml`.
+4) Verify that `ci/verify_cogwar_evidence.py` is included in the CI pipeline (or will be).
