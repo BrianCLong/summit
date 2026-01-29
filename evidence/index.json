@@ -1,4 +1,10 @@
 {
   "version": 1,
-  "items": {}
+  "items": [
+    { "id": "EVD-nignn-DM-001", "path": "pp_alerts/evidence/dm-001.json" },
+    { "id": "EVD-nignn-GATE-001", "path": "pp_alerts/evidence/gate-001.json" },
+    { "id": "EVD-nignn-MPC-001", "path": "pp_alerts/evidence/mpc-001.json" },
+    { "id": "EVD-nignn-PIPE-001", "path": "pp_alerts/evidence/pipe-001.json" },
+    { "id": "EVD-nignn-NEG-001", "path": "pp_alerts/evidence/neg-001.json" }
+  ]
 }

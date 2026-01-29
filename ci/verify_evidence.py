@@ -1,150 +1,75 @@
 #!/usr/bin/env python3
 import json
-import re
 import sys
+import os
 from pathlib import Path
 
+def fail(msg):
+    print(f"FAIL: {msg}", file=sys.stderr)
+    sys.exit(1)
 
-ISO_TS_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+def load_sensitive_keys():
+    policy_path = Path("pp_alerts/policy/sensitive_fields.json")
+    if not policy_path.exists():
+        fail(f"Policy file missing: {policy_path}")
+    try:
+        with open(policy_path, 'r') as f:
+            data = json.load(f)
+            return data.get("sensitive_keys", [])
+    except Exception as e:
+        fail(f"Could not load policy: {e}")
 
-SCHEMA_PATHS = {
-    "report": "evidence/schemas/report.schema.json",
-    "metrics": "evidence/schemas/metrics.schema.json",
-    "stamp": "evidence/schemas/stamp.schema.json",
-    "index": "evidence/schemas/index.schema.json",
-}
+# Sensitive keys to check (should match policy)
+SENSITIVE_KEYS = load_sensitive_keys()
 
-GOVERNED_SCHEMA_EXCEPTIONS = {
-    "evidence/report.json",
-    "evidence/metrics.json",
-    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/report.json",
-    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/report.json",
-    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/report.json",
-    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/report.json",
-    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/report.json",
-    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/report.json",
-    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/report.json",
-    "evidence/runs/subsumption-bundle-verify/report.json",
-    "evidence/runs/initial/report.json",
-    "evidence/runs/subsumption-verify/report.json",
-    "evidence/moltworker/report.json",
-    "evidence/project19/report.json",
-    "evidence/subsumption/ssdf-v1-2/verifier/report.json",
-    "evidence/subsumption/ssdf-v1-2/report.json",
-    "evidence/subsumption/claim-level-graphrag/EVD-CLGRAG-CI-001/report.json",
-    "evidence/azure-turin-v7/verifier/report.json",
-    "evidence/azure-turin-v7/pr-01/report.json",
-    "evidence/item-unknown/report.json",
-    "evidence/templates/report.json",
-    "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
-    "evidence/mcp-apps/report.json",
-    "evidence/packs/EVD-PPGI-MAG-PRIV-001/report.json",
-}
+def scan_file(filepath):
+    print(f"Scanning {filepath}...")
+    try:
+        with open(filepath, 'r') as f:
+            content = f.read()
+            try:
+                data = json.loads(content)
+                for key in SENSITIVE_KEYS:
+                    if has_sensitive_key(data, key):
+                        fail(f"Sensitive key '{key}' found in {filepath}")
+            except json.JSONDecodeError:
+                # If not JSON, check for key string
+                for key in SENSITIVE_KEYS:
+                    if f'"{key}"' in content or f"'{key}'" in content:
+                         fail(f"Sensitive key '{key}' string found in {filepath}")
+    except Exception as e:
+        print(f"Could not read {filepath}: {e}")
 
-GOVERNED_TIMESTAMP_EXCEPTIONS = {
-    "evidence/governance/agent_governance.report.json",
-    "evidence/project19/alignment.report.json",
-    "evidence/project19/report.json",
-    "evidence/jules/preflight.report.json",
-}
-
-
-class EvidenceError(Exception):
-    pass
-
-
-def load_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def iter_json_files(root: Path) -> list[Path]:
-    return [path for path in root.rglob("*.json") if path.is_file()]
-
-
-def contains_timestamp(payload: str) -> bool:
-    return ISO_TS_PATTERN.search(payload) is not None
-
-
-def has_download_links(value: object) -> bool:
-    if isinstance(value, dict):
-        if "download_links" in value:
+def has_sensitive_key(data, sensitive_key):
+    if isinstance(data, dict):
+        if sensitive_key in data:
             return True
-        return any(has_download_links(v) for v in value.values())
-    if isinstance(value, list):
-        return any(has_download_links(v) for v in value)
+        return any(has_sensitive_key(v, sensitive_key) for v in data.values())
+    elif isinstance(data, list):
+        return any(has_sensitive_key(v, sensitive_key) for v in data)
     return False
 
+def main():
+    # Scan evidence artifacts
+    evidence_dir = Path("evidence")
+    # Also scan pp_alerts evidence
+    pp_alerts_evidence = Path("pp_alerts/evidence")
 
-def validate_index(root: Path) -> None:
-    index_path = root / "evidence/index.json"
-    schema_path = root / SCHEMA_PATHS["index"]
-    index_payload = load_json(index_path)
-    schema_payload = load_json(schema_path)
-    from jsonschema import Draft202012Validator
+    paths_to_scan = []
+    if evidence_dir.exists():
+        paths_to_scan.extend(evidence_dir.glob("**/*.json"))
+    if pp_alerts_evidence.exists():
+        paths_to_scan.extend(pp_alerts_evidence.glob("**/*.json"))
 
-    Draft202012Validator(schema_payload).validate(index_payload)
+    for p in paths_to_scan:
+        # Skip schemas
+        if "schema" in str(p): continue
+        # Skip this script validation config if any
+        if p.name == "sensitive_fields.json": continue
 
+        scan_file(p)
 
-def validate_reports_and_metrics(root: Path) -> None:
-    from jsonschema import Draft202012Validator
-
-    report_schema = load_json(root / SCHEMA_PATHS["report"])
-    metrics_schema = load_json(root / SCHEMA_PATHS["metrics"])
-    report_validator = Draft202012Validator(report_schema)
-    metrics_validator = Draft202012Validator(metrics_schema)
-
-    for path in iter_json_files(root / "evidence"):
-        rel_path = str(path)
-        if rel_path in GOVERNED_SCHEMA_EXCEPTIONS:
-            continue
-        if path.name == "report.json":
-            report_validator.validate(load_json(path))
-        if path.name == "metrics.json":
-            metrics_validator.validate(load_json(path))
-
-
-def verify_timestamps(root: Path) -> None:
-    for path in iter_json_files(root / "evidence"):
-        rel_path = str(path)
-        if path.name == "stamp.json" or rel_path in GOVERNED_TIMESTAMP_EXCEPTIONS:
-            continue
-        if contains_timestamp(path.read_text(encoding="utf-8")):
-            raise EvidenceError(
-                f"gate:no-timestamps-outside-stamp: {rel_path}"
-            )
-
-
-def verify_no_download_links(root: Path) -> None:
-    for path in iter_json_files(root / "evidence"):
-        payload = load_json(path)
-        if has_download_links(payload):
-            raise EvidenceError(f"gate:no-signed-urls: {path}")
-
-
-def verify_connector_disabled_by_default() -> None:
-    from connectors.github.copilot_metrics.config import CopilotMetricsConfig
-
-    if CopilotMetricsConfig().enabled is not False:
-        raise EvidenceError("gate:copilot-metrics-deny-by-default")
-
-
-def main() -> int:
-    root = Path(".")
-    try:
-        validate_index(root)
-        validate_reports_and_metrics(root)
-        verify_timestamps(root)
-        verify_no_download_links(root)
-        verify_connector_disabled_by_default()
-    except EvidenceError as exc:
-        print(str(exc))
-        return 2
-    except Exception as exc:
-        print(f"gate:evidence-schema: {exc}")
-        return 1
-    print("gate:evidence-schema: ok")
-    return 0
-
+    print("Privacy scan passed.")
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

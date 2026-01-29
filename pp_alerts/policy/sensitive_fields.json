@@ -1,0 +1,3 @@
+{
+  "sensitive_keys": ["raw_alert", "src_ip", "dst_ip", "user_id", "payload", "email", "phone"]
+}

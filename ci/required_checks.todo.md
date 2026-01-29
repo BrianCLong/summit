@@ -5,9 +5,26 @@
 3. Paste them into `ci/required_checks.json` (to be added in PR7).
 4. If names differ from our local gates, add a rename map.
 
-Current Assumed Checks:
-- `check:lint`
-- `check:unit`
-- `check:security`
-- `check:evidence-validate`
-- `check:dep-delta`
+## UI steps (GitHub)
+1) Repo → Settings → Branches → Branch protection rule → "Require status checks"
+2) Copy the exact check names into `ci/verifier_spec.md`.
+
+## Discovered Checks (Preliminary)
+- validate-release-policy
+- lint-reason-codes
+- security-scan
+- sbom
+
+## Temporary naming convention
+Until discovered, gates are referenced as:
+- summit/evidence
+- summit/evals_smoke
+- summit/promptpack_schema
+- summit/tool_spec_quality
+
+## Rename plan
+Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
+
+## New Module Checks (pp_alerts)
+- pp_alerts/tests (pending discovery of real name)
+- pp_alerts/privacy-scan (pending discovery of real name)
