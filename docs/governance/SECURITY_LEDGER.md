@@ -11,8 +11,18 @@ This document tracks security threats, mitigations, and their verification statu
 | RET-003 | **Prompt Injection via Sources** | High | Source hashing + Content Sanitization (future). | `sources.json` (hashes) | Planned |
 | RET-004 | **Graph Poisoning** | High | Provenance linking of all nodes to signed `Input` artifacts. | `retrieval.json` (evidence refs) | Planned |
 
+## Threat Model: Policy Cards v0
+
+| ID | Threat | Severity | Mitigation | Verification | Status |
+|---|---|---|---|---|---|
+| POL-001 | **Policy Bypass** | Critical | Runtime Shim (deny-by-default) + Regression Tests. | `metrics.json` (block_rate), `policy_bypass_attempt_test` | Implemented |
+| POL-002 | **Sensitive Data Leakage** | High | Never-Log Rules + Scrubber. | `report.json` (evidence checks) | Planned |
+| POL-003 | **Policy Drift** | Medium | Canonicalization + Drift Monitor. | `drift_report.json` | Implemented |
+
 ## Evidence IDs
 
+- `EVID-POLICY-*-report`
+- `EVID-POLICY-*-runtime`
 - `retrieval_plan_ir`
 - `retrieval_policy_gate`
 - `retrieval_evidence_bundle`
