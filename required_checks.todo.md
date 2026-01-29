@@ -1,11 +1,19 @@
-## Discover required checks (GitHub UI)
-1. Open repo → Settings → Branches → Branch protection rule.
-2. List required status checks (exact names).
+# Required Checks (TODO)
 
-## Discover via API
-1. Use GitHub REST: Get branch protection for default branch.
-2. Record required checks; paste into `tools/ci/required_checks.json`.
+This file lists the required CI checks for the Over-Engineered Retrieval System.
 
-## Temporary gate names (until discovered)
-- ci/privacy-graph-gate
-- ci/deps-delta-gate
+## Temporary Required Checks
+
+*   `ci/lint`
+*   `ci/unit`
+*   `ci/typecheck`
+*   `ci/security`
+*   `ci/evidence-schema-validate`
+*   `ci/dependency-delta`
+
+## Discovery Plan
+
+1.  Check GitHub Settings -> Branches -> Protection rules -> Required status checks.
+2.  Use GitHub API to list checks for default branch.
+3.  Update this file with authoritative names.
+4.  Create a follow-up PR to rename temporary gates.
