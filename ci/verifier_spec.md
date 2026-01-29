@@ -1,22 +1,14 @@
-# CI Verifier Spec — FEWSHOT5X
+# CI Verifier Specification
 
-## Required checks
-- [ ] validate-release-policy
-- [ ] lint-reason-codes
-- [ ] security-scan
-- [ ] sbom
+This file maps logical Summit gates to their execution commands and expected Evidence IDs.
 
-## Summit gates
-1) summit/evidence
-- Command: `python3 -m evidence.validate --latest`
-- Validates schemas + index mapping.
+| Gate Name | Command | Output Evidence ID |
+|-----------|---------|--------------------|
+| `split_brain_eval` | `python tools/ci/run_split_brain_eval.py` | `EVD-LLMTRAININGCHANGE-EVAL-001` |
+| `policy_enablement_gate` | `python tools/ci/run_policy_gates.py` | `EVD-LLMTRAININGCHANGE-POLICY-001` |
+| `objective_conflict_gate` | `pytest tests/test_objective_conflicts.py` | N/A (Unit Test) |
 
-2) summit/agentic_eval_smoke
-- Command: `python3 evals/agentic_coding/harness.py --suite smoke`
-- Produces evidence artifacts.
+## Configuration
 
-## Evidence outputs (per run)
-- evidence/fewshot5x-agentic-coding/EVD-FEWSHOT5X-EVAL-001/report.json
-- evidence/fewshot5x-agentic-coding/EVD-FEWSHOT5X-EVAL-001/metrics.json
-- evidence/fewshot5x-agentic-coding/EVD-FEWSHOT5X-EVAL-001/stamp.json
-- evidence/index.json (updated)
+- **Fail-fast**: Yes
+- **Timeout**: 10m
