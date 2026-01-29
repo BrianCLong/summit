@@ -1,0 +1,5 @@
+{
+  "claim_id": "CLM-TEST-001",
+  "text": "The moon is made of green cheese.",
+  "expected_support": "unsupported"
+}

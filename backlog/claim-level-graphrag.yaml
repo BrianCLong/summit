@@ -1,0 +1,9 @@
+version: 1
+items:
+  - title: "Graph-backed per-claim retrieval adapter (Cypher)"
+    owner: "TBD"
+    estimate: "5d"
+    dependency: "Graph adapter interface merged"
+    reason_deferred: "Lane 2 feature; keep GA blast radius minimal"
+    related_claim_ids: ["ITEM:OPS-05"]
+    required_gates_later: ["hub-penalty-eval", "query-plan-schema"]

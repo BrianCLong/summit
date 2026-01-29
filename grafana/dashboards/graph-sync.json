@@ -1,0 +1,28 @@
+{
+  "title": "Graph Sync Drift & SLA",
+  "uid": "graph-sync-v1",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Lag Rate",
+      "type": "timeseries",
+      "targets": [{ "expr": "graph_sync_lag_rate", "refId": "A" }]
+    },
+    {
+      "id": 2,
+      "title": "Orphans PG",
+      "type": "stat",
+      "targets": [{ "expr": "graph_sync_orphans_pg", "refId": "A" }]
+    },
+    {
+      "id": 3,
+      "title": "Node/Edge Deltas",
+      "type": "timeseries",
+      "targets": [
+        { "expr": "graph_sync_node_delta_count", "legendFormat": "Nodes", "refId": "A" },
+        { "expr": "graph_sync_edge_delta_count", "legendFormat": "Edges", "refId": "B" }
+      ]
+    }
+  ],
+  "schemaVersion": 30
+}
