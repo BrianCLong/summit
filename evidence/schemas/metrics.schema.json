@@ -3,21 +3,16 @@
   "title": "Summit Evidence Metrics",
   "type": "object",
   "properties": {
-    "latency_ms_p95": { "type": "number" },
-    "ead": {
+    "confusion_matrix": {
       "type": "object",
-      "properties": {
-        "precision": { "type": "number" },
-        "recall": { "type": "number" }
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": { "type": "integer" }
       }
     },
-    "bias": {
-      "type": "object",
-      "properties": {
-        "by_language": { "type": "object" },
-        "by_region": { "type": "object" },
-        "by_demographic_proxy": { "type": "object" }
-      }
-    }
-  }
+    "false_positives": { "type": "integer" },
+    "false_negatives": { "type": "integer" },
+    "accuracy": { "type": "number" }
+  },
+  "additionalProperties": true
 }
