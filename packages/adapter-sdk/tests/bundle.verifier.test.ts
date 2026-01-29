@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buildBundle } from '../src/bundle/builder';
+import { buildAdapterBundle } from '../src/bundle/builder';
 import { verifyBundle } from '../src/bundle/verifier';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +23,7 @@ describe('bundle verifier', () => {
   });
 
   it('accepts a signed bundle with manifest and payload', async () => {
-    const bundleDir = await buildBundle({
+    const bundleDir = await buildAdapterBundle({
       manifest: {
         name: 'demo',
         version: '0.0.1',
@@ -43,7 +43,7 @@ describe('bundle verifier', () => {
   });
 
   it('fails unsigned bundle', async () => {
-    const bundleDir = await buildBundle({
+    const bundleDir = await buildAdapterBundle({
       manifest: {
         name: 'demo-unsigned',
         version: '0.0.1',
