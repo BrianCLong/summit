@@ -1,9 +1,14 @@
-# Required checks discovery (TODO)
-1) GitHub UI: Repo → Settings → Branches → Branch protection rule → list required checks.
-2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-3) Record names here; then rename temporary CI jobs to match.
+# Required Checks Discovery (TODO)
 
-Temporary gate names (to be replaced):
-- summit-unit-tests
-- summit-evidence
-- summit-deps-delta
+## UI
+1. Repo → Settings → Branches → Branch protection rules.
+2. Record exact required check names (copy/paste).
+
+## API (GitHub)
+- List branch protection required checks, save names here.
+
+## Temporary checks (until confirmed)
+- ci/unit
+- ci/evidence
+- ci/security
+- ci/deps_delta

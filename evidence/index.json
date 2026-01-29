@@ -1,102 +1,30 @@
 {
   "version": 1,
-  "evidence": {},
-  "items": [
-    {
-      "evidence_id": "EVD-VFGNN-SPEC-001",
+  "items": {
+    "EVD-vfgnn-SPEC-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-VFGNN-GOV-001",
+    "EVD-vfgnn-GOV-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-VFGNN-ROB-001",
+    "EVD-vfgnn-ROB-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-VFGNN-ATT-001",
+    "EVD-vfgnn-ATT-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    {
-      "evidence_id": "EVD-VFGNN-NEG-001",
+    "EVD-vfgnn-NEG-001": {
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-PROJECTGENIE-WORLDSIM-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-PROJECTGENIE-EVALS-002",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-PROJECTGENIE-GOV-003",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-PROJECTGENIE-PROV-004",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-PROJECTGENIE-SEC-005",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-MOLTWORKER-ARCH-001",
-      "report": "evidence/moltworker/report.json",
-      "metrics": "evidence/moltworker/metrics.json",
-      "stamp": "evidence/moltworker/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-MOLTWORKER-POLICY-001",
-      "report": "evidence/moltworker/report.json",
-      "metrics": "evidence/moltworker/metrics.json",
-      "stamp": "evidence/moltworker/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-MOLTWORKER-SANDBOX-001",
-      "report": "evidence/moltworker/report.json",
-      "metrics": "evidence/moltworker/metrics.json",
-      "stamp": "evidence/moltworker/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-MOLTWORKER-MODEL-001",
-      "report": "evidence/moltworker/report.json",
-      "metrics": "evidence/moltworker/metrics.json",
-      "stamp": "evidence/moltworker/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-MOLTWORKER-BROWSER-001",
-      "report": "evidence/moltworker/report.json",
-      "metrics": "evidence/moltworker/metrics.json",
-      "stamp": "evidence/moltworker/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-MOLTWORKER-SUPPLY-001",
-      "report": "evidence/moltworker/report.json",
-      "metrics": "evidence/moltworker/metrics.json",
-      "stamp": "evidence/moltworker/stamp.json"
     }
-  ]
+  }
 }
