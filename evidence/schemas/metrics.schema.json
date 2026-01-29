@@ -1,23 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["latency_ms_p95", "ead", "bias"],
+  "required": ["evidence_id", "metrics"],
   "properties": {
-    "latency_ms_p95": { "type": "number" },
-    "ead": {
-      "type": "object",
-      "properties": {
-        "precision": { "type": "number" },
-        "recall": { "type": "number" }
-      }
-    },
-    "bias": {
-      "type": "object",
-      "properties": {
-        "by_language": { "type": "object" },
-        "by_region": { "type": "object" },
-        "by_demographic_proxy": { "type": "object" }
-      }
-    }
-  }
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
+    "metrics": { "type": "object" }
+  },
+  "additionalProperties": true
 }
