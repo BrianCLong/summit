@@ -1,27 +1,19 @@
 version: 1
 prompts:
-  - id: shai-hulud-supply-chain
+  - id: background-sessions-pr1-evidence-scaffold
     version: v1
-    path: prompts/subsumption/shai-hulud-supply-chain@v1.md
-    sha256: d456a63f7e8531d579ed361ea4e30846516e0382982f19eda91af8c760969ca2
-    description: Scaffold the Shai-Hulud supply-chain subsumption bundle and evidence artifacts.
+    path: prompts/background-sessions/pr1-evidence-scaffold.md
+    sha256: aeec36297d17ca2543569fd819c42aab3efcedac37b7c99df00865639ed97f0b
+    description: Scaffold Background Sessions evidence schemas, fixtures, and checks discovery.
     scope:
       paths:
-        - subsumption/shai-hulud-supply-chain/
-        - evidence/subsumption/shai-hulud-supply-chain/
-        - evidence/schemas/subsumption_*.schema.json
-        - evidence/index.json
-        - docs/standards/shai-hulud-supply-chain.md
-        - docs/security/data-handling/shai-hulud-supply-chain.md
-        - docs/ops/runbooks/shai-hulud-supply-chain.md
-        - docs/decisions/shai-hulud-supply-chain.md
+        - modules/background_sessions/
         - docs/roadmap/STATUS.json
-        - agents/examples/
+        - prompts/background-sessions/pr1-evidence-scaffold.md
         - prompts/registry.yaml
       domains:
         - governance
-        - security
-        - supply-chain
+        - evidence
     verification:
       tiers_required:
         - C

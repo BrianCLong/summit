@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-01T10:00:00Z",
-  "revision_note": "Added OpenCode Zero-to-Titan intake standard with governance mappings and readiness scope",
+  "revision_note": "Initialized Background Sessions evidence scaffolding and required checks discovery plan",
   "initiatives": [
     {
       "id": "A",
