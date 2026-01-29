@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "evidence": [
+    {
+      "evidence_id": "EVD-NAROPS-BUNDLE-001",
+      "item_slug": "narrative-ops-detection-2026-01-28",
+      "paths": [
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-BUNDLE-001/report.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-BUNDLE-001/metrics.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-BUNDLE-001/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-NAROPS-POLICY-001",
+      "item_slug": "narrative-ops-detection-2026-01-28",
+      "paths": [
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-POLICY-001/report.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-POLICY-001/metrics.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-POLICY-001/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-NAROPS-EVAL-001",
+      "item_slug": "narrative-ops-detection-2026-01-28",
+      "paths": [
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-EVAL-001/report.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-EVAL-001/metrics.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-EVAL-001/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-NAROPS-DRIFT-001",
+      "item_slug": "narrative-ops-detection-2026-01-28",
+      "paths": [
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-DRIFT-001/report.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-DRIFT-001/metrics.json",
+        "subsumption/narrative-ops-detection-2026-01-28/runs/ci/EVD-NAROPS-DRIFT-001/stamp.json"
+      ]
+    }
+  ]
+}
