@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Evidence Stamp Schema",
+  "title": "Evidence Stamp",
   "type": "object",
+  "required": ["generated_at", "run_id"],
   "properties": {
-    "timestamp": { "type": "string", "format": "date-time" },
-    "version": { "type": "string" },
-    "hash": { "type": "string" }
+    "generated_at": { "type": "string" },
+    "run_id": { "type": "string" }
   },
-  "required": ["timestamp", "version"]
+  "additionalProperties": false
 }

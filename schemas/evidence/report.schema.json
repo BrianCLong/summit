@@ -1,11 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Evidence Report Schema",
+  "title": "Evidence Report",
   "type": "object",
+  "required": ["evidence_id", "module", "scope", "findings", "safety_note"],
   "properties": {
-    "run_id": { "type": "string" },
-    "status": { "type": "string" },
-    "results": { "type": "object" }
+    "evidence_id": { "type": "string" },
+    "module": { "type": "string" },
+    "scope": { "type": "string" },
+    "findings": { "type": "object" },
+    "safety_note": { "type": "string" }
   },
-  "required": ["run_id", "status"]
+  "additionalProperties": false
 }
