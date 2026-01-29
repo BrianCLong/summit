@@ -4,7 +4,6 @@
   "type": "object",
   "properties": {
     "version": { "type": "string" },
-    "evidence": { "type": "object" },
     "items": {
       "type": "array",
       "items": {

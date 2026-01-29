@@ -11,12 +11,21 @@ def main() -> int:
   if not idx.exists():
     print("missing evidence/index.json")
     return 2
-  data = json.loads(idx.read_text(encoding="utf-8"))
+  try:
+    data = json.loads(idx.read_text(encoding="utf-8"))
+  except json.JSONDecodeError:
+    print("invalid index.json: not valid json")
+    return 2
+
   if "items" not in data:
     print("invalid index.json: missing items")
     return 2
+
   for it in data["items"]:
     for k in ("report","metrics","stamp"):
+      if k not in it:
+         print(f"missing key {k} in item {it}")
+         return 2
       p = Path(it[k])
       if not p.exists():
         print(f"missing {k} file: {p}")
