@@ -2,10 +2,41 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Metrics",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
+  "required": [
+    "evidence_id",
+    "fidelity",
+    "stability",
+    "coverage",
+    "predicate_rates"
+  ],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "metrics": { "type": "object", "additionalProperties": { "type": ["number", "string", "boolean"] } }
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-[A-Z0-9-]+$"
+    },
+    "fidelity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "stability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "coverage": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "predicate_rates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    }
   },
   "additionalProperties": false
 }

@@ -4,16 +4,30 @@
   "type": "object",
   "required": ["version", "items"],
   "properties": {
-    "version": { "type": "string" },
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
     "items": {
-      "type": "object",
-      "additionalProperties": {
+      "type": "array",
+      "items": {
         "type": "object",
-        "required": ["report", "metrics", "stamp"],
+        "required": ["evidence_id", "files", "sha256"],
         "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-[A-Z0-9-]+$"
+          },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "sha256": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "minItems": 1
+          }
         },
         "additionalProperties": false
       }

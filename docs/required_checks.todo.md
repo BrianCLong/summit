@@ -1,17 +1,7 @@
-# Required Checks Discovery (TODO)
-
-## Option A: GitHub UI
-1. Repo → Settings → Branches → Branch protection rule for default branch
-2. Note exact names under “Require status checks to pass”
-3. Paste into `subsumption/_global/required_checks.json`
-
-## Option B: GitHub API
-- Use: GET /repos/{owner}/{repo}/branches/{branch}/protection
-- Record `required_status_checks.contexts`
-
-## Temporary Convention (until verified)
-- `subsumption-bundle-verify`
-- `subsumption-bundle-evals`
-
-## Rename Plan
-- If actual required checks differ: add mapping file + update workflow job name(s) in a follow-up PR.
+## Required checks discovery (Summit)
+1) GitHub UI: Settings → Branches → Branch protection rules → note required status checks
+2) CLI/API: gh api repos/<org>/<repo>/branches/<branch>/protection
+3) Record names below and replace temporary gate names:
+   - ci/evidence_schema_check -> <REAL_NAME>
+   - ci/governance_explainability_gate -> <REAL_NAME>
+   - ci/dependency_delta_gate -> <REAL_NAME>
