@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-28T12:45:00Z",
-  "revision_note": "Embedded ultra-maximal agent prompt into agent-bundle configuration for governed execution",
+  "last_updated": "2026-01-30T12:45:00Z",
+  "revision_note": "Added FastGen evidence scaffolding + accel registry skeleton (PR1-PR2 alignment).",
   "initiatives": [
     {
       "id": "A",

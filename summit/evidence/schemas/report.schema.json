@@ -1,49 +1,28 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Report",
+  "title": "EvidenceReport",
   "type": "object",
-  "required": [
-    "evidence_id",
-    "run_metadata",
-    "dataset_id",
-    "model_id",
-    "method",
-    "top_findings",
-    "summary",
-    "artifacts"
-  ],
+  "required": ["evidence_id", "item", "summary", "artifacts"],
   "properties": {
     "evidence_id": {
-      "type": "string",
-      "pattern": "^EVD-[A-Z0-9-]+$"
+      "type": "string"
     },
-    "run_metadata": {
+    "item": {
       "type": "object",
-      "additionalProperties": true
-    },
-    "dataset_id": {
-      "type": "string"
-    },
-    "model_id": {
-      "type": "string"
-    },
-    "method": {
-      "type": "string",
-      "enum": ["baseline_structural", "counterfactual_externality", "adapter:subgraphx", "adapter:pgexplainer"]
-    },
-    "top_findings": {
-      "type": "array",
-      "items": {
-        "type": "object"
+      "required": ["name", "source"],
+      "properties": {
+        "name": { "type": "string" },
+        "source": { "type": "string" }
       }
     },
-    "summary": {
-      "type": "string"
-    },
+    "summary": { "type": "string" },
     "artifacts": {
-      "type": "array",
-      "items": {
-        "type": "string"
+      "type": "object",
+      "required": ["report_json", "metrics_json", "stamp_json"],
+      "properties": {
+        "report_json": { "type": "string" },
+        "metrics_json": { "type": "string" },
+        "stamp_json": { "type": "string" }
       }
     }
   },
