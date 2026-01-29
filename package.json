@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "5.2.45",
+  "version": "5.2.46",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
