@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "item": { "const": "PLASSFCOG" },
+    "indicators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "aggregation_level": { "enum": ["org", "unit", "region"] },
+          "value": { "type": "number" },
+          "basis": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^EVD-" }
+          }
+        },
+        "required": ["id", "aggregation_level", "value", "basis"],
+        "additionalProperties": false
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "hypothesis": { "type": "string" },
+          "confidence": { "enum": ["low", "med", "high"] },
+          "protective_actions": { "type": "array", "items": { "type": "string" } },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^EVD-" }
+          }
+        },
+        "required": ["id", "hypothesis", "confidence", "protective_actions", "evidence"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["item", "indicators", "warnings"],
+  "additionalProperties": false
+}

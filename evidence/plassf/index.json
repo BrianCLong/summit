@@ -1,0 +1,9 @@
+{
+  "item": "PLASSFCOG",
+  "evidence": {
+    "EVD-PLASSFCOG-MODEL-001": ["packages/integrated-cogdef/models/adversary_integrator.json"],
+    "EVD-PLASSFCOG-IW-001": ["packages/integrated-cogdef/schemas/iw_pack.schema.json"],
+    "EVD-PLASSFCOG-GOV-001": ["packages/integrated-cogdef/src/guardrails.ts"],
+    "EVD-PLASSFCOG-GATES-001": ["evidence/plassf/report.json", "evidence/plassf/metrics.json"]
+  }
+}

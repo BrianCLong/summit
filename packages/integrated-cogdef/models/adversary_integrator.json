@@ -1,0 +1,11 @@
+{
+  "item": "PLASSFCOG",
+  "pattern_id": "INT-FUSE-001",
+  "domains": ["space","cyber","ew","info_psych"],
+  "integration_mechanisms": [
+    "fused_situational_awareness",
+    "synchronized_disruption_risk",
+    "targeting_surface_expansion"
+  ],
+  "defensive_focus": ["dependency_mapping","warning_generation","resilience_controls"]
+}

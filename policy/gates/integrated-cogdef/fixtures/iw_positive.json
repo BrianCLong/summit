@@ -1,0 +1,20 @@
+{
+  "item": "PLASSFCOG",
+  "indicators": [
+    {
+      "id": "IND-001",
+      "aggregation_level": "org",
+      "value": 0.5,
+      "basis": ["EVD-123"]
+    }
+  ],
+  "warnings": [
+    {
+      "id": "WARN-001",
+      "hypothesis": "Test",
+      "confidence": "high",
+      "protective_actions": ["alert"],
+      "evidence": ["EVD-456"]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "item": { "const": "PLASSFCOG" },
+    "pattern_id": { "type": "string" },
+    "domains": { "type": "array", "items": { "type": "string" } },
+    "integration_mechanisms": { "type": "array", "items": { "type": "string" } },
+    "defensive_focus": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["item", "pattern_id", "domains", "integration_mechanisms", "defensive_focus"],
+  "additionalProperties": false
+}

@@ -1,0 +1,12 @@
+{
+  "item": "PLASSFCOG",
+  "indicators": [
+    {
+      "id": "IND-001",
+      "aggregation_level": "individual",
+      "value": 0.5,
+      "basis": ["EVD-123"]
+    }
+  ],
+  "warnings": []
+}

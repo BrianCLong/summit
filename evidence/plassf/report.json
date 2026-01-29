@@ -1,0 +1,10 @@
+{
+  "run_id": "manual-init-001",
+  "item_slug": "PLASSFCOG",
+  "evd_ids": ["EVD-PLASSFCOG-GATES-001"],
+  "summary": {
+    "what_ran": "Manual initialization of PLASSFCOG evidence pack",
+    "result": "success"
+  },
+  "artifacts": []
+}

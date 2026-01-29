@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "item": {
+      "type": "string",
+      "const": "PLASSFCOG"
+    },
+    "allowed_uses": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "prohibited_uses": {
+      "type": "array",
+      "items": { "type": "string" },
+      "contains": { "enum": ["microtargeted_persuasion", "covert_influence_operations"] },
+      "minItems": 2
+    }
+  },
+  "required": ["item", "allowed_uses", "prohibited_uses"],
+  "additionalProperties": false
+}

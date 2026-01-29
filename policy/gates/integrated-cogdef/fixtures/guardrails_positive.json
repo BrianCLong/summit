@@ -1,0 +1,13 @@
+{
+  "item": "PLASSFCOG",
+  "allowed_uses": [
+    "indicators_and_warnings",
+    "resilience_training_tracking"
+  ],
+  "prohibited_uses": [
+    "microtargeted_persuasion",
+    "covert_influence_operations",
+    "behavior_manipulation_tooling",
+    "individual_psychometric_scoring_default"
+  ]
+}
