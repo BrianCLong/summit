@@ -1,8 +1,9 @@
 {
+  "evidence_id": "EVD-LEGACY-REP-001",
+  "item_slug": "legacy",
+  "summary": "Legacy report",
+  "artifacts": [],
   "report_id": "REP-001",
   "status": "draft",
-  "vfgnn_status": "initialized",
-  "evidence_id": "EVD-VFGNN-SPEC-001",
-  "summary": "Secure MCP evidence scaffold initialized.",
-  "artifacts": [{ "path": "evidence/report.json" }]
+  "vfgnn_status": "initialized"
 }

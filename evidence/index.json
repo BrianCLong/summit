@@ -1,35 +1,41 @@
 {
   "version": 1,
-  "items": {
-    "EVD-vfgnn-SPEC-001": {
+  "items": [
+    {
+      "evidence_id": "EVD-vfgnn-SPEC-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-GOV-001": {
+    {
+      "evidence_id": "EVD-vfgnn-GOV-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-ROB-001": {
+    {
+      "evidence_id": "EVD-vfgnn-ROB-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-ATT-001": {
+    {
+      "evidence_id": "EVD-vfgnn-ATT-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-NEG-001": {
+    {
+      "evidence_id": "EVD-vfgnn-NEG-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001": {
-      "report": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
-      "metrics": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/metrics.json",
-      "stamp": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/stamp.json"
+    {
+      "evidence_id": "EVD-AIPERS-BASE-001",
+      "report": "evidence/runs/initial/report.json",
+      "metrics": "evidence/runs/initial/metrics.json",
+      "stamp": "evidence/runs/initial/stamp.json"
     }
-  }
+  ]
 }
