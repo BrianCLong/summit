@@ -19,6 +19,9 @@ Until discovered, gates are referenced as:
 - summit/evals_smoke
 - summit/promptpack_schema
 - summit/tool_spec_quality
+- fedgnn-governance
+- fedgnn-evidence-verify
+- fedgnn-adversarial-fixtures
 
 ## Rename plan
 Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.

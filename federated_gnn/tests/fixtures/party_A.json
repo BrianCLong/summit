@@ -1,0 +1,6 @@
+{
+  "party_id": "party-A",
+  "trust_domain": "example.com",
+  "signing_key_id": "key-123",
+  "feature_namespaces": ["finance"]
+}

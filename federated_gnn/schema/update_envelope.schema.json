@@ -1,0 +1,22 @@
+{
+  "$id": "update_envelope.schema.json",
+  "type": "object",
+  "required": ["party_id", "round_id", "model_hash", "gradient_stats", "signature"],
+  "properties": {
+    "party_id": {"type": "string"},
+    "round_id": {"type": "integer"},
+    "model_hash": {"type": "string"},
+    "gradient_stats": {
+      "type": "object",
+      "properties": {
+        "l2_norm": {"type": "number"},
+        "max_val": {"type": "number"},
+        "min_val": {"type": "number"}
+      },
+      "required": ["l2_norm"]
+    },
+    "signature": {"type": "string"},
+    "payload_path": {"type": "string"}
+  },
+  "additionalProperties": false
+}
