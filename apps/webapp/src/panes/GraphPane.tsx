@@ -3,6 +3,7 @@ import cytoscape from 'cytoscape';
 import { useDispatch } from 'react-redux';
 import { fetchGraph } from '../data/mockGraph';
 import { selectNode } from '../store';
+import { trackGoldenPathStep } from '../telemetry';
 
 export function GraphPane() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,6 +46,7 @@ export function GraphPane() {
         e.preventDefault();
       };
       container.addEventListener('contextmenu', onContextMenu);
+      trackGoldenPathStep('graph_pane_loaded', 'success');
     });
   }, [dispatch]);
 
