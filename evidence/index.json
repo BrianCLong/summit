@@ -25,6 +25,11 @@
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
+    },
+    "EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001": {
+      "report": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
+      "metrics": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/metrics.json",
+      "stamp": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/stamp.json"
     }
   }
 }

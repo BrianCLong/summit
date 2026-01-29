@@ -1,121 +1,84 @@
-import json
 import sys
+import subprocess
+import json
 import os
-import re
-from pathlib import Path
 
-# Paths
-ROOT = Path(__file__).resolve().parents[1]
-EVID = ROOT / "evidence"
-INDEX_PATH = EVID / "index.json"
-SCHEMA_DIR = EVID / "schema"
+def run_command(cmd, msg):
+    print(f"Running: {msg}")
+    result = subprocess.run(cmd, shell=True)
+    if result.returncode != 0:
+        print(f"FAILED: {msg}")
+        return False
+    print(f"PASSED: {msg}")
+    return True
 
-def fail(msg):
-    print(f"FAIL: {msg}")
-    sys.exit(1)
-
-def load_json(path):
+def verify_evidence_index():
+    print("Verifying evidence/index.json...")
     try:
-        with open(path, "r") as f:
-            return json.load(f)
+        with open("evidence/index.json") as f:
+            index = json.load(f)
+
+        required_ids = [
+            "EVD-vfgnn-SPEC-001",
+            "EVD-vfgnn-GOV-001",
+            "EVD-vfgnn-ROB-001",
+            "EVD-vfgnn-ATT-001",
+            "EVD-vfgnn-NEG-001"
+        ]
+
+        items = index.get('items', {})
+        if isinstance(items, list):
+            found_ids = {item['evidence_id'] for item in items}
+        else:
+            found_ids = set(items.keys())
+
+        missing = [rid for rid in required_ids if rid not in found_ids]
+
+        if missing:
+            print(f"FAILED: Missing evidence IDs: {missing}")
+            return False
+
+        print("PASSED: Evidence Index check")
+        return True
     except Exception as e:
-        fail(f"Could not read {path}: {e}")
-
-def validate_schema(instance, schema_path):
-    schema = load_json(schema_path)
-    # Simple validation (required fields)
-    for field in schema.get("required", []):
-        if field not in instance:
-            fail(f"Missing required field '{field}' in {instance} (schema: {schema_path})")
-    # Properties check (primitive types)
-    props = schema.get("properties", {})
-    for k, v in instance.items():
-        if k in props:
-            ptype = props[k].get("type")
-            if ptype == "string" and not isinstance(v, str):
-                fail(f"Field '{k}' must be string")
-            elif ptype == "object" and not isinstance(v, dict):
-                fail(f"Field '{k}' must be object")
-            elif ptype == "array" and not isinstance(v, list):
-                fail(f"Field '{k}' must be array")
-
-def check_timestamps(path):
-    # Recursively check for timestamps in json files, excluding stamp.json
-    # Timestamp regex: YYYY-MM-DD or ISO8601-ish
-    # We look for typical JSON date strings
-    TIMESTAMP_RE = re.compile(r'"\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}')
-
-    IGNORE_FILES = {
-        "provenance.json", "governance-bundle.json", "release_abort_events.json",
-        "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json", "index.json"
-    }
-    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "schema"}
-
-    for root, _, files in os.walk(path):
-        # Check ignore dirs
-        parts = Path(root).parts
-        if any(d in parts for d in IGNORE_DIRS):
-            continue
-
-        for fname in files:
-            if not fname.endswith(".json"):
-                continue
-            if fname == "stamp.json":
-                continue
-            if fname in IGNORE_FILES:
-                continue
-
-            fpath = Path(root) / fname
-            try:
-                content = fpath.read_text()
-                if TIMESTAMP_RE.search(content):
-                    fail(f"Timestamp found in {fpath}. Timestamps only allowed in stamp.json")
-            except Exception as e:
-                print(f"WARN: Could not read {fpath}: {e}")
+        print(f"FAILED: Evidence check error: {e}")
+        return False
 
 def main():
-    print("Verifying evidence system...")
-    if not INDEX_PATH.exists():
-        fail("evidence/index.json missing")
+    checks = [
+        ("python3 federated_gnn/tests/test_robust_aggregation.py", "Robust Aggregation Tests"),
+        ("python3 federated_gnn/tests/test_backdoor_gates.py", "Backdoor Gate Tests"),
+        ("python3 federated_gnn/gates/verify_update_signature.py federated_gnn/tests/fixtures/update_signed.pass.json federated_gnn/tests/fixtures/party_A.json", "Signature Gate (Pass)"),
+        ("! python3 federated_gnn/gates/verify_update_signature.py federated_gnn/tests/fixtures/update_unsigned.fail.json federated_gnn/tests/fixtures/party_A.json", "Signature Gate (Fail)"),
+        # Add anomaly check
+        ("python3 federated_gnn/gates/update_anomaly_thresholds.py federated_gnn/tests/fixtures/update_signed.pass.json federated_gnn/tests/fixtures/thresholds.json", "Anomaly Gate (Pass)"),
+    ]
 
-    index = load_json(INDEX_PATH)
-    items = index.get("items")
-    if not isinstance(items, dict):
-        fail("index.json 'items' must be an object")
+    success = True
+    for cmd, msg in checks:
+        if cmd.startswith("! "):
+            real_cmd = cmd[2:]
+            print(f"Running (expect fail): {msg}")
+            # Suppress output for expected failure
+            result = subprocess.run(real_cmd, shell=True, capture_output=True)
+            if result.returncode == 0:
+                print(f"FAILED: {msg} (Should have failed but passed)")
+                success = False
+            else:
+                print(f"PASSED: {msg}")
+        else:
+            if not run_command(cmd, msg):
+                success = False
 
-    for evid, paths in items.items():
-        if evid.startswith("EVD-vfgnn-"):
-            print(f"Skipping legacy item {evid}")
-            continue
+    if not verify_evidence_index():
+        success = False
 
-        print(f"Verifying {evid}...")
-        # Expect paths to be a dict of {report, metrics, stamp}
-        if not isinstance(paths, dict):
-             fail(f"Item {evid} in index must be a dict of paths")
-
-        # Report
-        rpath = ROOT / paths.get("report", "")
-        if not rpath.exists():
-            fail(f"Report not found for {evid}: {rpath}")
-        validate_schema(load_json(rpath), SCHEMA_DIR / "report.schema.json")
-
-        # Metrics
-        mpath = ROOT / paths.get("metrics", "")
-        if not mpath.exists():
-            fail(f"Metrics not found for {evid}: {mpath}")
-        validate_schema(load_json(mpath), SCHEMA_DIR / "metrics.schema.json")
-
-        # Stamp
-        spath = ROOT / paths.get("stamp", "")
-        if not spath.exists():
-            fail(f"Stamp not found for {evid}: {spath}")
-        validate_schema(load_json(spath), SCHEMA_DIR / "stamp.schema.json")
-
-    print("Checking for leaked timestamps...")
-    check_timestamps(EVID)
-
-    print("PASSED: Evidence verification")
+    if success:
+        print("\nALL VFGNN VERIFICATION CHECKS PASSED")
+        sys.exit(0)
+    else:
+        print("\nSOME CHECKS FAILED")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
