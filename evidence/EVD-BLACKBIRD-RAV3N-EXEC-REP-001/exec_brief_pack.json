@@ -1,0 +1,10 @@
+{
+    "pack_id": "PACK-001",
+    "title": "Test Brief",
+    "timeframe": "2025-Q1",
+    "ranked_items": [],
+    "key_takeaways": ["Deterministic"],
+    "recommended_next_steps": ["monitor"],
+    "confidence_notes": ["High"],
+    "audit": {}
+}
