@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-GRAPH-HYBRID-SEC-001",
+  "metrics": {
+    "deny_fixtures": 3
+  }
+}

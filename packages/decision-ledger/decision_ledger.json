@@ -66,5 +66,22 @@
     },
     "reasoning": "Added WorldSim core interface, evidence schemas, and discovery TODOs with default-off posture for PR1 baseline.",
     "reverted": false
+  },
+  {
+    "id": "graphhybrid-001",
+    "timestamp": "2026-01-30T00:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJncmFwaC1oeWJyaWQgc3Vic3VtcHRpb24gc2NhZmZvbGQgKG1hbmlmZXN0LCBwb2xpY3ksIGV2YWwsIGRvY3MsIGV2aWRlbmNlKSIsImZpbGVzIjpbInN1YnN1bXB0aW9uL2dyYXBoLWh5YnJpZC9tYW5pZmVzdC55YW1sIiwicG9saWN5L2dyYXBocmFnL3BvbGljeS55YW1sIiwic2NyaXB0cy9jaS92ZXJpZnlfc3Vic3VtcHRpb25fYnVuZGxlLm1qcyIsInNjcmlwdHMvZXZhbHMvaHlicmlkX2V2YWwubWpzIiwiZG9jcy9zdGFuZGFyZHMvZ3JhcGgtaHlicmlkLWludGVyb3AubWQiLCJkb2NzL3NlY3VyaXR5L2RhdGEtaGFuZGxpbmcvZ3JhcGgtaHlicmlkLm1kIiwiZG9jcy9vcHMvcnVuYm9va3MvZ3JhcGgtaHlicmlkLm1kIiwiZG9jcy9kZWNpc2lvbnMvZ3JhcGgtaHlicmlkLm1kIiwiZXZpZGVuY2UvaW5kZXguanNvbiJdfQ==",
+    "decision": {
+      "action": "scaffold_graph_hybrid_bundle",
+      "rule": {
+        "condition": "graph-hybrid subsumption scaffold required",
+        "action": "scaffold_graph_hybrid_bundle",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added graph-hybrid subsumption manifest, policy fixtures, eval harness, verifier, docs, and evidence bundles with feature-flagged adapters.",
+    "reverted": false
   }
 ]
