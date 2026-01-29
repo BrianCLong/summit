@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Background Sessions Evidence Stamp",
+  "type": "object",
+  "required": ["generated_at", "generated_by"],
+  "properties": {
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generated_by": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

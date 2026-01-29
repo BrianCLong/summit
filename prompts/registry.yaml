@@ -1,5 +1,28 @@
 version: 1
 prompts:
+  - id: background-sessions-pr1-evidence-scaffold
+    version: v1
+    path: prompts/background-sessions/pr1-evidence-scaffold.md
+    sha256: aeec36297d17ca2543569fd819c42aab3efcedac37b7c99df00865639ed97f0b
+    description: Scaffold Background Sessions evidence schemas, fixtures, and checks discovery.
+    scope:
+      paths:
+        - modules/background_sessions/
+        - docs/roadmap/STATUS.json
+        - prompts/background-sessions/pr1-evidence-scaffold.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: integrations-backlog-sync
     version: v1
     path: prompts/integrations/backlog-sync.md
