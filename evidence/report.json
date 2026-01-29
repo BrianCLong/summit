@@ -1,4 +1,5 @@
 {
   "report_id": "REP-001",
-  "status": "draft"
+  "status": "draft",
+  "vfgnn_status": "initialized"
 }
