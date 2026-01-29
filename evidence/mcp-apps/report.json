@@ -1,0 +1,22 @@
+{
+  "item_slug": "mcp-apps",
+  "evidence_ids": [
+    "EVD-MCPAPPS-SEC-001",
+    "EVD-MCPAPPS-SEC-002",
+    "EVD-MCPAPPS-SEC-003"
+  ],
+  "claims": [],
+  "decisions": [
+    "verify_subsumption_bundle executed"
+  ],
+  "artifacts": [
+    {
+      "path": "subsumption/mcp-apps/manifest.yaml",
+      "sha256": "642ffde6bb1b4fc00c8bf28bb4db327051c4c1d5926928055d65e2335aeac168"
+    },
+    {
+      "path": "subsumption/mcp-apps/policy.yaml",
+      "sha256": "93830d9a5203d6829cc8341164716f0ec785ab707e23f86efec2263baacef2b8"
+    }
+  ]
+}

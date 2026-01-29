@@ -1,0 +1,48 @@
+version: 1
+defaults:
+  # deny-by-default; only allow via explicit capability entries
+  allow: false
+  require_human_approval: true
+  audit:
+    record_request_payload: redacted # store structure + hashes, not raw secrets
+    record_response_payload: redacted
+    tamper_evidence: hash_chain+sig
+    evidence_bundle: true
+
+apps:
+  slack:
+    namespace: "slack:${SESSION_ID}"
+    token_scope: ["chat:write", "channels:read"]   # no files:write, etc.
+    capabilities:
+      draft_message:
+        allow: true
+        require_human_approval: false
+        rate_limit: { max_per_min: 20 }
+      send_message:
+        allow: true
+        require_human_approval: true
+        guardrails:
+          restricted_channels: ["#prod-incidents", "#security"]
+          disallow_patterns: ["(?i)password", "(?i)secret", "(?i)api[_-]?key"]
+  figma:
+    namespace: "figma:${SESSION_ID}"
+    token_scope: ["files:read"]
+    capabilities:
+      open_file_readonly:
+        allow: true
+        require_human_approval: false
+      export_frames_png:
+        allow: true
+        require_human_approval: true
+        guardrails:
+          max_pixels: 20_000_000
+  canva:
+    namespace: "canva:${SESSION_ID}"
+    token_scope: ["export:write", "assets:read"]
+    capabilities:
+      export_design:
+        allow: true
+        require_human_approval: true
+        guardrails:
+          formats_allowed: ["pdf","png"]
+          max_mb: 50
