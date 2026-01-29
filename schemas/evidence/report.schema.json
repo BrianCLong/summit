@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Report",
+  "type": "object",
+  "properties": {
+    "evd_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "artifacts": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["evd_id"]
+}
