@@ -9,3 +9,5 @@
 ## Temporary gate names (until discovered)
 - ci/privacy-graph-gate
 - ci/deps-delta-gate
+- summit-ci/verify-evidence
+- summit-ci/dependency-delta
