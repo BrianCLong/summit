@@ -1,8 +1,22 @@
 {
   "version": 1,
   "items": [
-    { "id": "EVD-copilotcliacp-PROTO-001", "files": ["evidence/acp_report.json"] },
-    { "id": "EVD-copilotcliacp-SEC-001", "files": ["evidence/acp_metrics.json"] },
-    { "id": "EVD-copilotcliacp-E2E-001", "files": ["evidence/acp_stamp.json"] }
+    {
+      "item_slug": "ai-influence-ops",
+      "area": "security",
+      "evidence_ids": [
+        "EVD-ai-influence-ops-EVIDENCE-001",
+        "EVD-ai-influence-ops-POLICY-002",
+        "EVD-ai-influence-ops-EVAL-003",
+        "EVD-ai-influence-ops-MICRO-004",
+        "EVD-ai-influence-ops-CAMPAIGN-005",
+        "EVD-ai-influence-ops-DATA-006"
+      ],
+      "artifacts": {
+        "report": "evidence/ai-influence-ops/report.json",
+        "metrics": "evidence/ai-influence-ops/metrics.json",
+        "stamp": "evidence/ai-influence-ops/stamp.json"
+      }
+    }
   ]
 }
