@@ -12,6 +12,10 @@ Discover the exact CI "Required checks" names enforced on the default branch.
 - lint-reason-codes
 - security-scan
 - sbom
+- summit-influence-evidence
+- summit-influence-evals
+- summit-neverlog
+- summit-supply-chain
 
 ## Temporary naming convention
 Until discovered, gates are referenced as:
@@ -19,6 +23,10 @@ Until discovered, gates are referenced as:
 - summit/evals_smoke
 - summit/promptpack_schema
 - summit/tool_spec_quality
+- summit/influence-evidence
+- summit/influence-evals
+- summit/neverlog
+- summit/supply-chain
 
 ## Rename plan
 Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.

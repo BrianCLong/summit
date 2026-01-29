@@ -1,0 +1,22 @@
+{
+  "item_slug": "ai-influence-ops",
+  "evidence_ids": [
+    "EVD-ai-influence-ops-EVIDENCE-001",
+    "EVD-ai-influence-ops-POLICY-002",
+    "EVD-ai-influence-ops-EVAL-003",
+    "EVD-ai-influence-ops-MICRO-004",
+    "EVD-ai-influence-ops-CAMPAIGN-005",
+    "EVD-ai-influence-ops-DATA-006"
+  ],
+  "claims": [
+    {
+      "claim_id": "CLM-001",
+      "source": "ODNI 2025",
+      "used_for": "threat_model"
+    }
+  ],
+  "decisions": [
+    "deny-by-default"
+  ],
+  "artifacts": []
+}
