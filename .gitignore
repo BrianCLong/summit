@@ -362,3 +362,4 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
+_worktrees/
