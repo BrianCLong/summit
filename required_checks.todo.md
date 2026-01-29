@@ -1,6 +1,11 @@
-# Required checks discovery (TODO)
-1) Open GitHub repo → Settings → Branches → Branch protection rules.
-2) List required status checks and their exact names.
-3) Replace temporary check names in `.github/workflows/jetrl-ci.yml`.
-4) Add `ci:campaign-contract-verify` once implemented and named.
-5) Add `ci:federation-contract-verify` once implemented and named.
+# Required Checks Discovery
+
+## TODO
+* [ ] Check GitHub UI to list branch protection required checks.
+* [ ] Identify if existing gates map to these checks.
+
+## Naming Convention
+* Temporary naming convention: `ci/summit-gate-*`
+
+## Rename Plan
+* Rename plan once confirmed with the team.
