@@ -1,14 +1,11 @@
-## Required checks discovery (TEMP)
+# Required checks discovery (rename plan)
 
-1. In GitHub repo: Settings → Branches → Branch protection rules
-2. Record exact check names required for merge
-3. Replace placeholders in `.github/workflows/ci.yml`
+1. In repo settings → Branch protection → record required status check names.
+2. Or via API: list check runs for a PR and capture the stable names.
+3. Update this file with authoritative names and add a PR to rename temporary gates.
 
-Temporary checks expected:
+## Temporary gate names (until verified)
 
-- ci/evidence-validate
-- summit/unit-tests
-
-Rename plan:
-
-- PRx: update workflow + badges once real required checks are known
+- ci/unit
+- ci/policy-gates
+- ci/evals

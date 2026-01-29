@@ -32,16 +32,10 @@
       "stamp": "evidence/stamp.json"
     },
     {
-      "evidence_id": "EVD-AIPERS-BASE-001",
-      "report": "evidence/runs/initial/report.json",
-      "metrics": "evidence/runs/initial/metrics.json",
-      "stamp": "evidence/runs/initial/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-AUTOMATION-TURN-3-GOV-001",
-      "report": "subsumption/automation-turn-3/evidence/report.json",
-      "metrics": "subsumption/automation-turn-3/evidence/metrics.json",
-      "stamp": "subsumption/automation-turn-3/evidence/stamp.json"
+      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     }
   ]
 }
