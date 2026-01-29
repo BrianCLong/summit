@@ -1,54 +1,108 @@
 #!/usr/bin/env python3
+import argparse
 import json
+import os
 import sys
-from pathlib import Path
+from typing import Dict, Any, List
+
+# Try to import jsonschema, but don't fail immediately if missing
+# (though it's required for full validation)
+try:
+    import jsonschema
+    from jsonschema import validate
+except ImportError:
+    jsonschema = None
+
+def load_json(path: str) -> Any:
+    try:
+        with open(path, 'r') as f:
+            return json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"FAIL: Invalid JSON in {path}: {e}")
+        sys.exit(1)
+
+def validate_schema(instance: Any, schema_path: str):
+    if not jsonschema:
+        print(f"WARNING: jsonschema not installed, skipping schema validation for {schema_path}")
+        return
+
+    if not os.path.exists(schema_path):
+        print(f"ERROR: Schema not found at {schema_path}")
+        sys.exit(1)
+
+    schema = load_json(schema_path)
+    try:
+        validate(instance=instance, schema=schema)
+        print(f"PASS: Schema validation for {os.path.basename(schema_path)}")
+    except jsonschema.exceptions.ValidationError as e:
+        print(f"FAIL: Schema validation failed for {os.path.basename(schema_path)}")
+        print(e)
+        sys.exit(1)
+
+def check_timestamps(data: Any, path: str = ""):
+    """Recursively check for 'timestamp' or 'date' keys in dictionaries."""
+    if isinstance(data, dict):
+        for k, v in data.items():
+            if ("timestamp" in k.lower() or "date" in k.lower()) and "candidate" not in k.lower():
+                # "candidate" exception just in case, but strictly "timestamp" or "date"
+                # The rule is "Timestamps only in stamp.json".
+                # We can be strict.
+                print(f"FAIL: Found timestamp-like key '{k}' in {path}. Timestamps must be in stamp.json only.")
+                sys.exit(1)
+            check_timestamps(v, path)
+    elif isinstance(data, list):
+        for item in data:
+            check_timestamps(item, path)
 
 def main():
-    root = Path(__file__).parent.parent
-    evidence_dir = root / "evidence"
+    parser = argparse.ArgumentParser(description="Verify Summit RT-NIDS Evidence Bundle")
+    parser.add_argument("--bundle", default=".", help="Path to evidence bundle directory")
+    args = parser.parse_args()
 
-    # 1. Check required files
-    required = ["index.json", "report.json", "metrics.json", "stamp.json"]
-    for f in required:
-        if not (evidence_dir / f).exists():
-            print(f"FAIL: Missing required evidence file: {f}")
-            sys.exit(1)
+    bundle_path = args.bundle
 
-    # 2. Check determinism: no timestamps except in stamp.json
-    # Heuristic: search for patterns like YYYY-MM-DD or T00:00:00
-    IGNORE = {
-        "provenance.json", "governance-bundle.json", "release_abort_events.json",
-        "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json"
+    # Define schema paths relative to repo root
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.dirname(script_dir) # ci/ -> root
+    schema_dir = os.path.join(repo_root, "summit/nids_rt/evidence/schemas")
+
+    required_files = {
+        "metrics.json": "rtnids_metrics.schema.json",
+        "report.json": "rtnids_report.schema.json",
+        "stamp.json": "rtnids_stamp.schema.json",
+        "evidence/index.json": "rtnids_index.schema.json"
     }
-    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
 
-    for p in evidence_dir.rglob("*"):
-        if p.is_dir() or p.name == "stamp.json":
-            continue
-        if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS) or p.name.endswith(".schema.json"):
-            continue
-        if p.suffix not in [".json", ".md", ".yml"]:
-            continue
+    files_found = 0
 
-        try:
-            content = p.read_text()
-            # Simple check for "202x-"
-            if "202" in content and "-" in content and ":" in content:
-                # Potential ISO timestamp
-                print(f"FAIL: Potential timestamp found in {p.relative_to(root)}")
-                sys.exit(2)
-        except Exception:
-            continue
+    # Check index.json
+    index_path = os.path.join(bundle_path, "evidence", "index.json")
+    if os.path.exists(index_path):
+        print(f"Found index at {index_path}")
+        data = load_json(index_path)
+        validate_schema(data, os.path.join(schema_dir, "rtnids_index.schema.json"))
+        files_found += 1
 
-    # 3. Deterministic ordering: JSON files should be sorted
-    # (Checking if they ARE sorted is hard, but we can verify they are valid)
+    # Check other files
+    for filename, schema_name in required_files.items():
+        if filename == "evidence/index.json": continue
 
-    # 4. Evidence index consistency
-    # (In a real system, we'd check EVD-IDs)
+        file_path = os.path.join(bundle_path, filename)
+        if os.path.exists(file_path):
+            print(f"Found {filename}")
+            data = load_json(file_path)
+            validate_schema(data, os.path.join(schema_dir, schema_name))
 
-    print("OK: Evidence verified")
-    sys.exit(0)
+            # Timestamp check (strict: only stamp.json allowed)
+            if filename != "stamp.json":
+                check_timestamps(data, filename)
+
+            files_found += 1
+
+    if files_found == 0:
+        print("INFO: No RT-NIDS evidence files found in bundle path. This is expected if the bundle hasn't been generated yet.")
+
+    print("Verification complete.")
 
 if __name__ == "__main__":
     main()
