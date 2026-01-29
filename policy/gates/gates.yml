@@ -1,0 +1,5 @@
+gates:
+  - id: gate:evidence-index
+    cmd: "npx tsx packages/evidence/src/verify.ts evidence"
+  - id: gate:deny-by-default-fixtures
+    cmd: "npx tsx packages/evidence/src/verify.ts policy/gates/fixtures/evidence_index_negative && exit 1 || exit 0"
