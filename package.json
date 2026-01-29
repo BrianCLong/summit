@@ -132,7 +132,7 @@
     "ci:ga:manifest": "node scripts/release/generate_ga_evidence_manifest.mjs --evidence-dir evidence --provenance evidence/provenance.json --out evidence/ga-evidence-manifest.json",
     "ci:ga:dashboard": "node scripts/release/generate_ga_evidence_dashboard.mjs --evidence-dir evidence --out evidence/GA_EVIDENCE_DASHBOARD.md",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "cd server && node scripts/smoke-test.cjs",
     "ga:evidence-pack": "node scripts/release/ga_evidence_pack.mjs",
     "ga:evidence-pack:check": "node scripts/release/ga_evidence_pack.mjs --check-determinism",
     "release:ready": "npm run compliance:antigravity && pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
