@@ -25,8 +25,19 @@ def main() -> int:
         print(f"FAIL missing evidence files: {missing}")
         return 2
     index = load(EVID / "index.json")
-    if not isinstance(index, dict) or "evidence" not in index:
-        print("FAIL index.json must contain top-level 'evidence' object")
+    if not isinstance(index, dict):
+        print("FAIL index.json must be a JSON object")
+        return 3
+
+    if "items" in index:
+        if not isinstance(index["items"], list):
+            print("FAIL index.json 'items' must be an array")
+            return 3
+    elif "evidence" in index:
+        # Legacy support
+        pass
+    else:
+        print("FAIL index.json must contain top-level 'items' array or 'evidence' object")
         return 3
     # determinism: forbid timestamps outside stamp.json (simple heuristic)
     forbidden = []
