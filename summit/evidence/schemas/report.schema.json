@@ -6,7 +6,12 @@
   "properties": {
     "evidence_id": { "type": "string" },
     "summary": { "type": "string" },
-    "artifacts": { "type": "array", "items": { "type": "string" } }
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "run_id": { "type": "string" },
+    "results": {
+      "type": "array",
+      "items": { "type": "object", "additionalProperties": true }
+    }
   },
   "additionalProperties": false
 }

@@ -5,7 +5,9 @@
   "required": ["evidence_id", "generated_at"],
   "properties": {
     "evidence_id": { "type": "string" },
-    "generated_at": { "type": "string", "description": "RFC3339 timestamp (timestamps allowed only in stamp.json)" }
+    "generated_at": { "type": "string", "description": "RFC3339 timestamp (timestamps allowed only in stamp.json)" },
+    "run_id": { "type": "string" },
+    "created_at": { "type": ["string", "null"] }
   },
   "additionalProperties": false
 }
