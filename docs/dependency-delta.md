@@ -1,16 +1,15 @@
-# Dependency Delta (Summit AI Governance)
+# Dependency Delta (Summit Niche Radar)
 
-## PR: AI Governance Foundation
-**Date**: 2026-01-27
-**Owner**: Jules (Release Captain)
+## PR: Evidence Scaffolding and CI Verifier
+**Date**: 2026-01-28
+**Owner**: Jules
 
 ### New Dependencies
-- **Python**: `pathlib`, `json`, `unittest` (standard library)
-- **CI**: `actions/setup-python@v5`
+- **Python**: `jsonschema` (Required for `tools/ci/verify_evidence_bundle.py` to validate JSON schemas).
 
 ### Removed Dependencies
 - None
 
 ### Security/Governance Review
-- Standard library only. No third-party packages introduced in core governance logic.
-- Redaction logic added for audit trails.
+- `jsonschema` is a standard, widely-used library for JSON validation.
+- Used only in CI/Tooling, not in production runtime path.
