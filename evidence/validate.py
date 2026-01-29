@@ -57,19 +57,15 @@ def main():
     # Validate index against schema
     validate_schema(index, ROOT / "evidence" / "schemas" / "index.schema.json", context="index.json")
 
-    items = index.get("items", [])
-    if not isinstance(items, list):
-        fail("index.json 'items' must be a list")
+    items = index.get("items", {})
+    if not isinstance(items, dict):
+        fail("index.json 'items' must be a dict")
 
     print(f"Index valid. {len(items)} items found.")
 
-    for item in items:
-        # Validate item against item schema in index.schema.json (manually here)
-        if "id" not in item or "path" not in item:
-            fail(f"Item missing id or path: {item}")
-
+    for evd_id, path in items.items():
         # Check if path exists
-        item_path = ROOT / item["path"]
+        item_path = ROOT / path
         if not item_path.exists():
             fail(f"Evidence file not found: {item_path}")
 
@@ -77,13 +73,16 @@ def main():
         report = load_json(item_path)
 
         # Determine which schema to use.
-        if "summary" in report and "artifacts" in report:
-            validate_schema(report, ROOT / "evidence" / "schemas" / "agentic_report.schema.json", context=item['id'])
-            print(f"Validated {item['id']} as Agentic Report")
+        if "evd_id" in report:
+             validate_schema(report, ROOT / "evidence" / "schemas" / "report.schema.json", context=evd_id)
+             print(f"Validated {evd_id} as Standard Report")
+        elif "summary" in report and "artifacts" in report:
+            validate_schema(report, ROOT / "evidence" / "schemas" / "agentic_report.schema.json", context=evd_id)
+            print(f"Validated {evd_id} as Agentic Report")
         elif "claims" in report:
-             print(f"Validated {item['id']} as Legacy Report")
+             print(f"Validated {evd_id} as Legacy Report")
         else:
-             print(f"WARN: Unknown report format for {item['id']}")
+             print(f"WARN: Unknown report format for {evd_id}")
 
     print("All evidence verified.")
 
