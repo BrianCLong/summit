@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "latency_ms": { "type": "number" },
+    "recall_at_k": { "type": "number" },
+    "total_tokens": { "type": "integer" }
+  },
+  "required": ["latency_ms"],
+  "additionalProperties": true
+}

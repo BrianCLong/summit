@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "patternProperties": {
+    "^EVD-overengineered-retrieval-[A-Za-z0-9]+-\\d+$": {
+      "type": "object",
+      "properties": {
+        "file": { "type": "string" },
+        "hash": { "type": "string" }
+      },
+      "required": ["file"]
+    }
+  },
+  "additionalProperties": false
+}

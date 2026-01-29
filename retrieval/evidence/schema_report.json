@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "run_id": { "type": "string" },
+    "plan": { "type": "object" },
+    "query_intent": { "type": "string" },
+    "summary": { "type": "string" }
+  },
+  "required": ["run_id", "plan", "query_intent", "summary"],
+  "additionalProperties": false
+}
