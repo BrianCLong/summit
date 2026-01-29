@@ -1,17 +1,24 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["evd_id", "item_slug", "summary", "risks", "mitigations"],
   "properties": {
-    "evd_id": { "type": "string", "pattern": "^EVD-[A-Z0-9-]+$" },
+    "run_id": { "type": "string" },
     "item_slug": { "type": "string" },
-    "summary": { "type": "string" },
-    "risks": { "type": "array", "items": { "type": "string" } },
-    "mitigations": { "type": "array", "items": { "type": "string" } },
+    "evd_ids": { "type": "array", "items": { "type": "string" } },
+    "summary": {
+      "type": "object",
+      "required": ["what_ran", "result"],
+      "properties": {
+        "what_ran": { "type": "string" },
+        "result": { "type": "string" }
+      }
+    },
     "artifacts": {
       "type": "object",
-      "additionalProperties": { "type": "string" }
+      "properties": {
+        "metrics": { "type": "string" },
+        "stamp": { "type": "string" }
+      }
     }
-  },
-  "additionalProperties": false
+  }
 }
