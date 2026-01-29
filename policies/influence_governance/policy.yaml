@@ -1,0 +1,26 @@
+version: "1.0"
+module: influence_governance
+defaults:
+  allow: false
+
+# Prohibited by policy: any request or output that constitutes persuasion,
+# targeting, psychographic segmentation, or operational influence guidance.
+prohibited_intents:
+  - persuasion
+  - microtargeting
+  - psychographic_segmentation
+  - automated_counter_messaging
+  - covert_influence
+  - narrative_shaping_playbook
+
+data_handling:
+  classification: "restricted"
+  retention_days: 30
+  never_log_fields:
+    - individual_id
+    - device_id
+    - raw_handle
+    - psychographic_segment
+    - persona_target
+    - message_variant
+    - call_to_action

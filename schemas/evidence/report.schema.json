@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Report",
+  "type": "object",
+  "required": ["evidence_id", "module", "scope", "findings", "safety_note"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "module": { "type": "string" },
+    "scope": { "type": "string" },
+    "findings": { "type": "object" },
+    "safety_note": { "type": "string" }
+  },
+  "additionalProperties": false
+}
