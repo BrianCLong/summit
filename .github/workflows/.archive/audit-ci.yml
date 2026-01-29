@@ -12,14 +12,14 @@ jobs:
   validate-schema:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Validate JSON Schema
         run: npx ajv-cli validate -s audit/schema/audit_event.schema.json -d audit/examples/valid_event.json || echo "No example yet, skipping"
 
   policy-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install OPA
         run: |
           curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
@@ -30,7 +30,7 @@ jobs:
   unit-test-audit-sdk:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Dependencies
         run: npm install
       - name: Run Tests
