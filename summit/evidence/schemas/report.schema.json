@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Report",
   "type": "object",
-  "required": ["evidence_id", "summary", "artifacts"],
+  "required": ["evd_id", "summary", "inputs", "outputs"],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "summary": { "type": "string" },
-    "artifacts": { "type": "array", "items": { "type": "string" } }
+    "evd_id": {"type": "string"},
+    "summary": {"type": "string"},
+    "inputs": {"type": "object"},
+    "outputs": {"type": "object"}
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }
