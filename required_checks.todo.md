@@ -1,11 +1,18 @@
-# Required Checks Discovery
+# Required Checks Discovery (TODO)
 
-## TODO
-* [ ] Check GitHub UI to list branch protection required checks.
-* [ ] Identify if existing gates map to these checks.
+## Goal
+Identify the repo’s REQUIRED check names and map them to the temporary gates below.
 
-## Naming Convention
-* Temporary naming convention: `ci/summit-gate-*`
+## Temporary gate names used by this PR stack
+- ci/psyche-policy-gate
+- ci/evidence-schema-validate
+- ci/no-pii-in-artifacts
+- ci/dependency-delta
 
-## Rename Plan
-* Rename plan once confirmed with the team.
+## How to discover required checks
+1. Open a recent merged PR in the target repo.
+2. Find the “Checks” section and note checks marked as “Required”.
+3. Alternatively (GitHub): Settings → Branches → Branch protection rules → Required status checks.
+
+## Rename plan
+Once real names are known, add a tiny PR to rename the temporary gate labels in docs and CI config.
