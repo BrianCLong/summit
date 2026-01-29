@@ -1,11 +1,10 @@
-# Standards Mapping: item-unknown
+# item-unknown — Standards & Interop Mapping
 
-## Overview
-Placeholder until ITEM is provided.
+## Import/Export Matrix
+- (TODO) When ITEM provided: formats, protocols, connectors
 
-## Formats
-- Subsumption manifest: subsumption/<item>/manifest.yaml
-- Evidence: report.json, metrics.json, stamp.json + evidence/index.json
+## Non-goals
+- No runtime integrations until ITEM is grounded and licensed
 
-## Compatibility Notes
-- Designed to be additive and tool-agnostic.
+## Compatibility notes
+- Bundle manifests are stable, versioned, and verifier-enforced

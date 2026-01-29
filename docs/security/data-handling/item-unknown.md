@@ -1,12 +1,13 @@
-# Data Handling: item-unknown
+# Data Handling — item-unknown
 
-## Data Classes
-- Public: docs/standards/*
-- Internal: subsumption/* manifests, non-sensitive
-- Confidential/Regulated: not permitted in evidence outputs
-
-## Never-log
-- Secrets, tokens, credentials, raw PII
+## Data classes
+- public / internal / confidential / regulated (definitions TBD)
 
 ## Retention
-- Evidence artifacts are deterministic; retention policy follows Summit GA evidence policy (TBD).
+- Evidence reports/metrics retained per GA policy (TODO link)
+
+## Audit export
+- evidence/index.json + manifest.yaml are the minimum export set
+
+## Never-log fields
+- secrets, tokens, credentials, personal data (deny-by-default)

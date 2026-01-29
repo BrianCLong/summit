@@ -1,13 +1,11 @@
-# Runbook: item-unknown Subsumption Bundle
+# Runbook — Subsumption Bundle Verifier (item-unknown)
 
-## Failure Modes
-1) Verifier fails: missing docs/evidence/index
-2) deps-delta missing after lockfile change
-3) deny-by-default fixtures missing
+## Failure modes
+- Missing manifest
+- Missing evidence files
+- Index not updated
+- Missing deny-by-default fixtures
+- Lockfile changed without deps_delta update
 
-## Triage
-- Run: node scripts/ci/verify_subsumption_bundle.mjs --item item-unknown --local
-
-## Alerts (future)
-- Drift detector failure
-- Verifier runtime regression
+## Alerts (CI)
+- On failure: surface actionable error with file paths
