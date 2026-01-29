@@ -28,6 +28,9 @@ on:
 permissions:
   contents: read
   actions: read
+  security-events: write # Required by _reusable-ga-readiness.yml
+  id-token: write # Required for OIDC/Sigstore signing
+  pull-requests: write # Required by _reusable-ga-readiness.yml
 
 concurrency:
   group: release-ga-${{ github.ref_name || inputs.tag }}
