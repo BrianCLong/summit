@@ -10,3 +10,11 @@ This directory contains the canonical schemas and artifacts for the Summit Evide
 
 ## Usage
 Run `ci/gates/validate_evidence.py` to validate generated evidence against these schemas.
+
+## Runtime Evidence (Jet-RL / Precision Flow)
+For unified precision flow runs, the following artifacts are required:
+- `run_report.json` (validates against `schemas/run_report.schema.json`)
+- `run_metrics.json` (validates against `schemas/run_metrics.schema.json`)
+- `run_index.json` (validates against `schemas/run_index.schema.json`)
+
+No file other than `stamp.json` (or strictly timestamped files) may contain nondeterministic values.
