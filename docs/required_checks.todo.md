@@ -1,7 +1,17 @@
-## Required checks discovery (Summit)
-1) GitHub UI: Settings → Branches → Branch protection rules → note required status checks
-2) CLI/API: gh api repos/<org>/<repo>/branches/<branch>/protection
-3) Record names below and replace temporary gate names:
-   - ci/evidence_schema_check -> <REAL_NAME>
-   - ci/governance_explainability_gate -> <REAL_NAME>
-   - ci/dependency_delta_gate -> <REAL_NAME>
+# Required Checks Discovery (TODO)
+
+1) GitHub UI:
+- Repo → Settings → Branches → Branch protection rules
+- Record "Required status checks" names exactly.
+
+2) Add them to CI mapping:
+- Create/Update `ci/required_checks.json` with exact names.
+
+3) Temporary gates (until discovered):
+- check:ontology_conformance
+- check:policy_deny_by_default
+- check:evidence_bundle_present
+- check:dependency_delta_present
+
+4) Rename plan:
+- Once actual check names are known, add a PR that aliases old → new for 2 releases, then removes old.

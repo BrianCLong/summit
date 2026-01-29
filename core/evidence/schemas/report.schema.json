@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "report.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "evidence_id": { "type": "string", "pattern": "^EVD-PAL-GF-[A-Z]{3,8}-[0-9]{3}$" },
+    "summary": { "type": "string" },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "verdict": { "type": "string", "enum": ["pass", "fail"] }
+  },
+  "required": ["evidence_id", "summary", "verdict"]
+}
