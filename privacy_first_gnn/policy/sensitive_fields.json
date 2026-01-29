@@ -1,0 +1,10 @@
+{
+  "sensitive_fields": [
+    "src_ip",
+    "dst_ip",
+    "user_id",
+    "payload_plaintext",
+    "secret_key",
+    "private_key"
+  ]
+}
