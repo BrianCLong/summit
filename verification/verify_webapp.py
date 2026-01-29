@@ -1,5 +1,6 @@
 from playwright.sync_api import Page, expect, sync_playwright
 
+
 def test_webapp_loads(page: Page):
     # Capture console logs
     page.on("console", lambda msg: print(f"Console: {msg.text}"))
