@@ -28,3 +28,5 @@ openlineage-python
 prov
 lxml
 rdflib
+pillow
+opencv-python-headless
