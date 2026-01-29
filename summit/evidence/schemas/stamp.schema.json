@@ -2,10 +2,29 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Stamp",
   "type": "object",
-  "required": ["evidence_id", "generated_at"],
+  "required": [
+    "evidence_id",
+    "generated_at",
+    "git_sha",
+    "runner"
+  ],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "generated_at": { "type": "string", "description": "RFC3339 timestamp (timestamps allowed only in stamp.json)" }
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-[A-Z0-9-]+$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 timestamp. This is the ONLY file allowed to contain timestamps."
+    },
+    "git_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "runner": {
+      "type": "string"
+    }
   },
   "additionalProperties": false
 }
