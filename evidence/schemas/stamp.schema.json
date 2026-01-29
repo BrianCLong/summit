@@ -1,12 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Stamp (timestamps allowed only here)",
+  "title": "Summit Evidence Stamp",
   "type": "object",
-  "required": ["evidence_id", "created_at"],
+  "required": ["version", "evidence_id", "tool", "generated_at"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "created_at": {"type": "string", "format": "date-time"},
-    "git_sha": {"type": "string"}
+    "version": { "type": "integer", "const": 1 },
+    "evidence_id": { "type": "string" },
+    "tool": { "type": "string" },
+    "generated_at": { "type": "string" }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

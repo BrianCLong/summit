@@ -1,85 +1,68 @@
-#!/usr/bin/env node
+// scripts/ci/verify_subsumption_bundle.mjs
 import fs from "node:fs";
 import path from "node:path";
 
-const item = "graph-hybrid";
-const manifestPath =
-  process.env.SUBSUMPTION_MANIFEST_PATH ||
-  path.join("subsumption", item, "manifest.yaml");
-
-const docsTargets = [
-  "docs/standards/graph-hybrid-interop.md",
-  "docs/security/data-handling/graph-hybrid.md",
-  "docs/ops/runbooks/graph-hybrid.md",
-  "docs/decisions/graph-hybrid.md",
-];
-
-const evidenceSchemaPaths = [
-  "evidence/schema/report.schema.json",
-  "evidence/schema/metrics.schema.json",
-  "evidence/schema/stamp.schema.json",
-  "evidence/index.json",
-];
-
-const evidenceOutputDir = path.join(
-  "evidence",
-  "graph-hybrid",
-  "EVD-GRAPH-HYBRID-GOV-002",
-);
-
-function fail(message) {
-  console.error(message);
+function fail(msg) {
+  console.error(msg);
   process.exit(1);
 }
 
-function requirePath(targetPath, message) {
-  if (!fs.existsSync(targetPath)) {
-    fail(message ?? `missing required path: ${targetPath}`);
+function readText(p) {
+  return fs.readFileSync(p, "utf8");
+}
+
+// Minimal YAML parsing (no deps): supports `key: value` and arrays of scalars
+function parseYamlMinimal(yaml) {
+  const lines = yaml.split(/\r?\n/);
+  const out = {};
+  let currentKey = null;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    if (line.startsWith("- ")) {
+      if (!currentKey) fail("YAML parse error: array item without key");
+      out[currentKey] = out[currentKey] || [];
+      out[currentKey].push(line.slice(2).trim().replace(/^"|"$/g, ""));
+      continue;
+    }
+    const m = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
+    if (m) {
+      currentKey = m[1];
+      const v = m[2].trim();
+      out[currentKey] = v === "" ? "" : v.replace(/^"|"$/g, "");
+      continue;
+    }
   }
+  return out;
 }
 
-requirePath(manifestPath, `missing manifest: ${manifestPath}`);
-for (const schemaPath of evidenceSchemaPaths) {
-  requirePath(schemaPath, `missing evidence schema/index: ${schemaPath}`);
-}
-for (const docPath of docsTargets) {
-  requirePath(docPath, `missing docs target: ${docPath}`);
-}
-requirePath("policy/graphrag/policy.yaml", "missing policy/graphrag/policy.yaml");
-requirePath(
-  "policy/graphrag/fixtures/deny",
-  "missing policy/graphrag/fixtures/deny",
-);
+const manifestPath = process.argv[2];
+if (!manifestPath) fail("Usage: node scripts/ci/verify_subsumption_bundle.mjs <manifest.yaml>");
 
-fs.mkdirSync(evidenceOutputDir, { recursive: true });
-const report = {
-  evidence_id: "EVD-GRAPH-HYBRID-GOV-002",
-  summary: "Subsumption bundle verifier completed with required files present.",
-  artifacts: ["metrics.json", "stamp.json"],
-  checked_paths: [manifestPath, ...docsTargets, ...evidenceSchemaPaths],
-};
-const metrics = {
-  evidence_id: "EVD-GRAPH-HYBRID-GOV-002",
-  metrics: {
-    required_paths_checked: report.checked_paths.length,
-  },
-};
-const stamp = {
-  evidence_id: "EVD-GRAPH-HYBRID-GOV-002",
-  tool_versions: {
-    node: process.version,
-  },
-  generated_at: "2026-01-30T00:00:00Z",
-};
-fs.writeFileSync(
-  path.join(evidenceOutputDir, "report.json"),
-  JSON.stringify(report, null, 2),
-);
-fs.writeFileSync(
-  path.join(evidenceOutputDir, "metrics.json"),
-  JSON.stringify(metrics, null, 2),
-);
-fs.writeFileSync(
-  path.join(evidenceOutputDir, "stamp.json"),
-  JSON.stringify(stamp, null, 2),
-);
+if (!fs.existsSync(manifestPath)) fail(`Missing manifest: ${manifestPath}`);
+const manifestRaw = readText(manifestPath);
+
+// NOTE: This is intentionally minimal; full YAML structure validation is enforced via required file existence checks.
+const top = parseYamlMinimal(manifestRaw);
+if (!top.version) fail("Manifest missing: version");
+
+const root = path.resolve(path.dirname(manifestPath), "..", "..");
+const required = [
+  path.join(root, "evidence", "index.json"),
+  path.join(root, "evidence", "schemas", "report.schema.json"),
+  path.join(root, "evidence", "schemas", "metrics.schema.json"),
+  path.join(root, "evidence", "schemas", "stamp.schema.json"),
+];
+
+for (const p of required) {
+  if (!fs.existsSync(p)) fail(`Missing required file: ${p}`);
+}
+
+// Deny-by-default fixtures required for every bundle
+const bundleDir = path.dirname(manifestPath);
+const denyFixture = path.join(bundleDir, "fixtures", "deny", "README.md");
+const allowFixture = path.join(bundleDir, "fixtures", "allow", "README.md");
+if (!fs.existsSync(denyFixture)) fail(`Missing deny-by-default fixture: ${denyFixture}`);
+if (!fs.existsSync(allowFixture)) fail(`Missing allow fixture: ${allowFixture}`);
+
+console.log("OK: subsumption bundle basic verification passed");

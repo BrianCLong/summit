@@ -1,70 +1,72 @@
 {
   "version": 1,
-  "items": {
-    "EVD-vfgnn-SPEC-001": {
+  "evidence": {},
+  "items": [
+    {
+      "evidence_id": "EVD-VFGNN-SPEC-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-GOV-001": {
+    {
+      "evidence_id": "EVD-VFGNN-GOV-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-ROB-001": {
+    {
+      "evidence_id": "EVD-VFGNN-ROB-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-ATT-001": {
+    {
+      "evidence_id": "EVD-VFGNN-ATT-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-vfgnn-NEG-001": {
+    {
+      "evidence_id": "EVD-VFGNN-NEG-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
     },
-    "EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001": {
-      "report": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
-      "metrics": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/metrics.json",
-      "stamp": "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/stamp.json"
+    {
+      "evidence_id": "EVD-PROJECTGENIE-WORLDSIM-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-GRAPH-HYBRID-GOV-001": {
-      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/report.json",
-      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/metrics.json",
-      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/stamp.json"
+    {
+      "evidence_id": "EVD-PROJECTGENIE-EVALS-002",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-GRAPH-HYBRID-GOV-002": {
-      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/report.json",
-      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/metrics.json",
-      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/stamp.json"
+    {
+      "evidence_id": "EVD-PROJECTGENIE-GOV-003",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-GRAPH-HYBRID-SEC-001": {
-      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/report.json",
-      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/metrics.json",
-      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/stamp.json"
+    {
+      "evidence_id": "EVD-PROJECTGENIE-PROV-004",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-GRAPH-HYBRID-SEC-002": {
-      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/report.json",
-      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/metrics.json",
-      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/stamp.json"
+    {
+      "evidence_id": "EVD-PROJECTGENIE-SEC-005",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-GRAPH-HYBRID-PERF-001": {
-      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/report.json",
-      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/metrics.json",
-      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/stamp.json"
-    },
-    "EVD-GRAPH-HYBRID-ARCH-001": {
-      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/report.json",
-      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/metrics.json",
-      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/stamp.json"
-    },
-    "EVD-GRAPH-HYBRID-PROD-001": {
-      "report": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/report.json",
-      "metrics": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/metrics.json",
-      "stamp": "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/stamp.json"
+    {
+      "evidence_id": "EVD-ITEMUNKNOWN-FND-001",
+      "report": "evidence/item-unknown/report.json",
+      "metrics": "evidence/item-unknown/metrics.json",
+      "stamp": "evidence/item-unknown/stamp.json"
     }
-  }
+  ]
 }

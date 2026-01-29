@@ -1,18 +1,10 @@
 version: 1
 items:
-  - title: "ITEM-specific claim ingestion + grounded claim registry"
-    owner: "Agent A"
-    estimate: "2d"
-    dependency: "ITEM excerpts"
-    reason_deferred: "ITEM not provided"
+  - title: "Populate claim registry from real ITEM excerpts"
+    owner: "TBD"
+    estimate: "2h"
+    dependency: "ITEM provided"
+    reason_deferred: "No ITEM content in current invocation"
     related_claim_ids: []
     required_gates_later:
-      - "subsumption/verify-bundle"
-  - title: "Graph-native provenance nodes/edges for claims"
-    owner: "Agent A"
-    estimate: "3d"
-    dependency: "Data model confirmation"
-    reason_deferred: "Lane 2 innovation"
-    related_claim_ids: []
-    required_gates_later:
-      - "provenance-schema-validate"
+      - "subsumption-bundle-verify"

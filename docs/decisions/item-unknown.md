@@ -1,20 +1,16 @@
-# Decisions: item-unknown
+# Decisions — item-unknown
 
-## Decisions Made
-- Shipped subsumption scaffolding without ITEM specifics to avoid hallucination and IP risk.
-- Enforced evidence determinism separation: report/metrics/stamp.
-- Added deny-by-default fixture requirement (verifier rule planned).
+## Decision
+Ship subsumption bundle framework without ITEM-specific claims.
 
-## Alternatives Rejected
-- Implementing ITEM-specific features without excerpts (rejected: ungrounded).
-- Refactoring existing CI/evidence flows (rejected: blast radius).
+## Alternatives rejected
+- Implement ITEM features without grounding (rejected: hallucination risk)
 
 ## Deferred
-- Claim registry grounded in ITEM snippets.
-- Graph-native provenance edges for claims.
+- All ITEM-specific integrations (waiting on excerpts/license)
 
-## Risk Tradeoffs
-- Temporary assumed CI check name until required checks discovered.
+## Risk tradeoffs
+- Minimal YAML parser (no deps) vs full YAML: chosen to avoid supply chain additions.
 
-## GA Alignment
-- Improves auditability, determinism, and enforceable governance with minimal surface area.
+## GA alignment
+- Improves determinism and machine-verifiability of future subsumptions.
