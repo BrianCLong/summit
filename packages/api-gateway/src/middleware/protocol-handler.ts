@@ -74,7 +74,7 @@ export class ProtocolHandler {
     );
   }
 
-  async handleProtocol(
+  handleProtocol(
     req: IncomingMessage,
     res: ServerResponse,
     protocol: Protocol
@@ -100,24 +100,24 @@ export class ProtocolHandler {
     }
   }
 
-  private async handleHTTP(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private handleHTTP(req: IncomingMessage, res: ServerResponse): Promise<void> {
     // HTTP handling is done by the main gateway
     logger.debug('HTTP request', { method: req.method, url: req.url });
   }
 
-  private async handleWebSocket(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private handleWebSocket(req: IncomingMessage, res: ServerResponse): Promise<void> {
     logger.info('WebSocket upgrade requested', { url: req.url });
     // WebSocket upgrade handling would be implemented here
     // This would typically use the 'ws' library
   }
 
-  private async handleGRPC(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private handleGRPC(req: IncomingMessage, res: ServerResponse): Promise<void> {
     logger.info('gRPC request', { url: req.url });
     // gRPC handling would be implemented here
     // This would typically use @grpc/grpc-js
   }
 
-  private async handleHTTP2(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  private handleHTTP2(req: IncomingMessage, res: ServerResponse): Promise<void> {
     logger.debug('HTTP/2 request', { method: req.method, url: req.url });
     // HTTP/2 specific handling
   }

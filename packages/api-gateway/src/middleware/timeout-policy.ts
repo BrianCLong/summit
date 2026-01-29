@@ -36,7 +36,7 @@ export class TimeoutPolicy {
     return this.config.default;
   }
 
-  async executeWithTimeout<T>(
+  executeWithTimeout<T>(
     operation: () => Promise<T>,
     timeoutMs?: number,
     context?: Record<string, any>

@@ -46,7 +46,7 @@ export function DLPApolloPlugin(
   };
 
   return {
-    async requestDidStart({ request, contextValue }): Promise<GraphQLRequestListener<DLPContext>> {
+    requestDidStart({ request, contextValue }): Promise<GraphQLRequestListener<DLPContext>> {
       const operationName = request.operationName || 'unknown';
 
       // Skip excluded operations

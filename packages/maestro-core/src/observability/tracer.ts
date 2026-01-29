@@ -434,7 +434,7 @@ export class MaestroTracer extends EventEmitter {
       testSpan.end();
       return true;
     } catch (error) {
-      console.error('Tracing health check failed:', error);
+      console.error('Tracing health check failed:', error); // eslint-disable-line no-console
       return false;
     }
   }
