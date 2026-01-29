@@ -2,24 +2,12 @@
   "version": 1,
   "items": [
     {
-      "id": "EVD-angular-skills-REG-001",
-      "path": "skills/index.json"
-    },
-    {
-      "id": "EVD-angular-skills-GOV-001",
-      "path": "evidence/report.json"
-    },
-    {
-      "id": "EVD-angular-skills-EVAL-001",
-      "path": "evidence/metrics.json"
-    },
-    {
-      "id": "EVD-angular-skills-INT-001",
-      "path": "evidence/report.json"
-    },
-    {
-      "id": "EVD-angular-skills-NEG-001",
-      "path": "evidence/report.json"
+      "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+      "paths": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     }
   ]
 }

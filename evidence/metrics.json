@@ -1,7 +1,12 @@
 {
-  "metrics": {
-    "skills_indexed": 1,
-    "policy_violations": 0,
-    "evaluator_violations_detected": 4
+  "latency_ms_p95": 10.0,
+  "ead": {
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "bias": {
+    "by_language": {},
+    "by_region": {},
+    "by_demographic_proxy": {}
   }
 }
