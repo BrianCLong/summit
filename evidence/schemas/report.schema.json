@@ -1,26 +1,17 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Report",
   "type": "object",
-  "required": ["run_id", "item_slug", "evd_ids", "summary", "artifacts"],
+  "required": ["evidence_id", "item_slug", "area", "summary", "artifacts"],
   "properties": {
-    "run_id": { "type": "string" },
-    "item_slug": { "type": "string" },
-    "evd_ids": { "type": "array", "items": { "type": "string" } },
-    "summary": {
-      "type": "object",
-      "required": ["what_ran", "result"],
-      "properties": {
-        "what_ran": { "type": "string" },
-        "result": { "type": "string" }
-      }
-    },
+    "evidence_id": {"type": "string", "pattern": "^EVD-[A-Z0-9-]+-[A-Z]+-[0-9]{3}$"},
+    "item_slug": {"type": "string"},
+    "area": {"type": "string"},
+    "summary": {"type": "string"},
     "artifacts": {
-      "type": "object",
-      "properties": {
-        "metrics": { "type": "string" },
-        "stamp": { "type": "string" }
-      }
+      "type": "array",
+      "items": {"type": "string"}
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }
