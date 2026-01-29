@@ -41,14 +41,14 @@ order:
 
 This section defines the hierarchy and capabilities of agents in the Summit ecosystem.
 
-### Permissions
+**Permissions**
 
 - **Strategic Agents (Jules):** Full repo access, merge authority, policy definition.
 - **System Agents (Maestro):** Runtime execution, kill-switch activation, task dispatch.
 - **Tactical Agents (Codex, Antigravity):** Code modification, test execution, evidence generation.
 - **Governance Agents (Aegis):** Policy evaluation, block/deny authority, audit logging.
 
-### Stop Conditions
+**Stop Conditions**
 
 Agents must terminate or pause execution if:
 
@@ -58,7 +58,7 @@ Agents must terminate or pause execution if:
 - Resource budgets (tokens, compute, spend) are exceeded.
 - A `KILL` signal is received from the orchestrator.
 
-### Escalation
+**Escalation**
 
 - Ambiguities in policy or architectural direction must be escalated to human operators.
 - Critical security vulnerabilities or gate bypasses must be reported to the security DRI immediately.
