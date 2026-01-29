@@ -422,3 +422,14 @@ test-security: ## Run security verifications
 test-compliance: ## Run compliance controls as tests
 	@echo "Running Compliance Tests..."
 	@node --test compliance/soc/*.test.mjs
+
+# Eval Skills
+.PHONY: eval-skill eval-skills-changed eval-skills-all
+eval-skill: ## Run a single eval skill (SKILL=...)
+	@npx tsx evals/runner/run_skill_eval.ts --skill $(SKILL)
+
+eval-skills-changed: ## Run eval skills changed in the current diff
+	@npx tsx evals/runner/run_skills_changed.ts
+
+eval-skills-all: ## Run the full eval skills suite
+	@npx tsx evals/runner/run_skill_suite.ts
