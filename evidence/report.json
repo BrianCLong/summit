@@ -1,10 +1,10 @@
 {
-  "run_id": "run-001",
-  "item_slug": "pipeline-resilience",
-  "evd_ids": ["EVD-PIPELINE-RESILIENCE-001"],
+  "run_id": "RUN-ALPHA-001",
+  "item_slug": "iiot6g-gnn-he",
+  "evd_ids": [],
   "summary": {
-    "what_ran": "Pipeline Scaffolding Check",
-    "result": "PASS"
+    "what_ran": "Initial skeleton setup",
+    "result": "success"
   },
   "artifacts": {
     "metrics": "evidence/metrics.json",

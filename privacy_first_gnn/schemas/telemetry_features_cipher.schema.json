@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TelemetryFeaturesCipher",
+  "description": "Encrypted telemetry features for privacy-preserving GNN inference",
+  "type": "object",
+  "properties": {
+    "payloads": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Base64 encoded ciphertext blob"
+      }
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["SENSITIVE_ENCRYPTED"]
+    },
+    "encoding": {
+      "type": "string",
+      "enum": ["base64", "hex"]
+    }
+  },
+  "required": ["payloads", "classification"]
+}
