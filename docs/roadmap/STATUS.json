@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-28T18:00:00Z",
-  "revision_note": "GA verification map ordering guardrail enforced; branch protection audit tokens required | LingBot-VLA evidence scaffolding recorded; governance docs added.",
+  "last_updated": "2026-01-29T00:00:00Z",
+  "revision_note": "Added OSS LLM exposure evidence scaffolding requirements and schemas",
   "initiatives": [
     {
       "id": "A",

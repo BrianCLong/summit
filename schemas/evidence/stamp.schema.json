@@ -2,10 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SummitEvidenceStamp",
   "type": "object",
-  "required": ["evidence_id", "generated_at"],
+  "required": ["generated_at", "mode"],
   "properties": {
-    "evidence_id": {"type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z]+-[0-9]{3}$"},
-    "generated_at": {"type": "string", "format": "date-time"}
+    "generated_at": { "type": "string" },
+    "mode": { "type": "string" }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
