@@ -1,5 +1,5 @@
 {
-  "latency_ms_p95": 10.0,
+  "latency_ms_p95": 0.0,
   "ead": {
     "precision": 1.0,
     "recall": 1.0

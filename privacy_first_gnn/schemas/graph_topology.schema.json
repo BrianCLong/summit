@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GraphTopology",
+  "description": "Pseudonymous device interaction graph for IIoT",
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^node-[a-f0-9]{16}$" }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "src": { "type": "string" },
+          "dst": { "type": "string" },
+          "bucket": { "type": "integer", "description": "Time bucket ID for temporal patterns" }
+        },
+        "required": ["src", "dst", "bucket"]
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "privacy_level": { "enum": ["minimized", "anonymous"] }
+      }
+    }
+  },
+  "required": ["nodes", "edges"]
+}
