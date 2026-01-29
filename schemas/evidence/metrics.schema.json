@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Metrics Schema",
+  "type": "object",
+  "properties": {
+    "run_id": { "type": "string" },
+    "metrics": { "type": "object" }
+  },
+  "required": ["run_id", "metrics"]
+}
