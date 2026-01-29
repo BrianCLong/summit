@@ -22,3 +22,7 @@ Until discovered, gates are referenced as:
 
 ## Rename plan
 Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
+
+## New Module Checks (pp_alerts)
+- pp_alerts/tests (pending discovery of real name)
+- pp_alerts/privacy-scan (pending discovery of real name)
