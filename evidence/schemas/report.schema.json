@@ -1,26 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["run_id", "item_slug", "evd_ids", "summary", "artifacts"],
   "properties": {
-    "run_id": { "type": "string" },
-    "item_slug": { "type": "string" },
-    "evd_ids": { "type": "array", "items": { "type": "string" } },
-    "summary": {
-      "type": "object",
-      "required": ["what_ran", "result"],
-      "properties": {
-        "what_ran": { "type": "string" },
-        "result": { "type": "string" }
-      }
-    },
-    "artifacts": {
-      "type": "object",
-      "properties": {
-        "metrics": { "type": "string" },
-        "stamp": { "type": "string" }
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "description", "source_refs"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "source_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "solo_scale_features": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }
