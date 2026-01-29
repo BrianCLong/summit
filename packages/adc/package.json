@@ -13,6 +13,7 @@
     "typescript": "^5.9.3",
     "@types/jest": "^30.0.0",
     "jest": "^30.2.0",
-    "@types/node": "20.19.27"
+    "@types/node": "20.19.27",
+    "ts-jest": "^29.1.1"
   }
 }

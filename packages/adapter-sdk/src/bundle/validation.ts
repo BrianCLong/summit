@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Ajv, { ErrorObject } from 'ajv';
 import addFormats from 'ajv-formats';
 import type { AdapterCompatibilityMatrix, AdapterManifest } from './types.js';
@@ -13,16 +12,36 @@ const ajv = new Ajv({
 });
 addFormats(ajv);
 
+// Add JSON Schema draft-2020-12 meta-schema
+ajv.addMetaSchema({
+  $id: 'https://json-schema.org/draft/2020-12/schema',
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  $vocabulary: {
+    'https://json-schema.org/draft/2020-12/vocab/core': true,
+    'https://json-schema.org/draft/2020-12/vocab/applicator': true,
+    'https://json-schema.org/draft/2020-12/vocab/unevaluated': true,
+    'https://json-schema.org/draft/2020-12/vocab/validation': true,
+    'https://json-schema.org/draft/2020-12/vocab/meta-data': true,
+    'https://json-schema.org/draft/2020-12/vocab/format-annotation': true,
+    'https://json-schema.org/draft/2020-12/vocab/content': true,
+  },
+  $dynamicAnchor: 'meta',
+  type: ['object', 'boolean'],
+});
+
 ajv.addSchema(compatibilitySchema);
 ajv.addSchema(configSchema);
 ajv.addSchema(manifestSchema);
 
-const manifestValidator = ajv.getSchema<AdapterManifest>(manifestSchema.$id ?? 'manifest')!;
+const manifestValidator = ajv.getSchema<AdapterManifest>(manifestSchema.$id ?? 'manifest');
 const compatibilityValidator = ajv.getSchema<AdapterCompatibilityMatrix>(
   compatibilitySchema.$id ?? 'compatibility'
-)!;
+);
 
 export function validateManifest(manifest: unknown): asserts manifest is AdapterManifest {
+  if (!manifestValidator) {
+    throw new BundleValidationError('Manifest validator not found');
+  }
   if (!manifestValidator(manifest)) {
     throw new BundleValidationError(formatValidationErrors('manifest', manifestValidator.errors));
   }
@@ -31,6 +50,9 @@ export function validateManifest(manifest: unknown): asserts manifest is Adapter
 export function validateCompatibility(
   compatibility: unknown
 ): asserts compatibility is AdapterCompatibilityMatrix {
+  if (!compatibilityValidator) {
+    throw new BundleValidationError('Compatibility validator not found');
+  }
   if (!compatibilityValidator(compatibility)) {
     throw new BundleValidationError(
       formatValidationErrors('compatibility matrix', compatibilityValidator.errors)
@@ -39,7 +61,8 @@ export function validateCompatibility(
 }
 
 export function validateConfigSchema(schema: unknown): void {
-  const valid = ajv.validateSchema(schema);
+   
+  const valid = ajv.validateSchema(schema as any);
   if (!valid) {
     throw new BundleValidationError(formatValidationErrors('config schema', ajv.errors));
   }
