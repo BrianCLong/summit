@@ -164,6 +164,7 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
         {/* Filters */}
         <div className="flex items-center gap-2 flex-wrap">
           <select
+            aria-label="Filter by band"
             value={bandFilter}
             onChange={(e) => setBandFilter(e.target.value as FrequencyBand | 'ALL')}
             className="px-2 py-1 text-xs bg-slate-700 border border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-cyan-500"
@@ -195,11 +196,10 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
               <button
                 key={field}
                 onClick={() => handleSort(field)}
-                className={`px-2 py-0.5 rounded ${
-                  sortField === field
+                className={`px-2 py-0.5 rounded ${sortField === field
                     ? 'bg-cyan-600 text-white'
                     : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                }`}
+                  }`}
               >
                 {field.charAt(0).toUpperCase() + field.slice(1)}
                 {sortField === field && (
@@ -221,25 +221,22 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
             <div
               key={stream.id}
               onClick={() => onSelectStream?.(stream)}
-              className={`px-4 py-3 border-b border-slate-800/50 cursor-pointer transition-colors ${
-                isSelected
+              className={`px-4 py-3 border-b border-slate-800/50 cursor-pointer transition-colors ${isSelected
                   ? 'bg-cyan-900/30 border-l-2 border-l-cyan-400'
                   : 'hover:bg-slate-800/50 border-l-2 border-l-transparent'
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3">
                 {/* Activity indicator */}
                 <span
-                  className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                    stream.active ? 'bg-green-500 animate-pulse' : 'bg-slate-600'
-                  }`}
+                  className={`w-2 h-2 rounded-full flex-shrink-0 ${stream.active ? 'bg-green-500 animate-pulse' : 'bg-slate-600'
+                    }`}
                 />
 
                 {/* Band badge */}
                 <span
-                  className={`px-1.5 py-0.5 text-xs font-bold text-white rounded ${
-                    BAND_COLORS[stream.band]
-                  }`}
+                  className={`px-1.5 py-0.5 text-xs font-bold text-white rounded ${BAND_COLORS[stream.band]
+                    }`}
                 >
                   {stream.band}
                 </span>
@@ -249,9 +246,8 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate">{stream.name}</span>
                     <span
-                      className={`px-1.5 py-0.5 text-xs rounded ${
-                        CONFIDENCE_STYLES[stream.confidence].bg
-                      } ${CONFIDENCE_STYLES[stream.confidence].text}`}
+                      className={`px-1.5 py-0.5 text-xs rounded ${CONFIDENCE_STYLES[stream.confidence].bg
+                        } ${CONFIDENCE_STYLES[stream.confidence].text}`}
                     >
                       {stream.confidence}
                     </span>
@@ -275,11 +271,10 @@ export const SignalStreamList: React.FC<SignalStreamListProps> = ({
                       onSubscribe?.(stream.id);
                     }
                   }}
-                  className={`p-1.5 rounded transition-colors ${
-                    isSubscribed
+                  className={`p-1.5 rounded transition-colors ${isSubscribed
                       ? 'bg-cyan-600 text-white'
                       : 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white'
-                  }`}
+                    }`}
                   title={isSubscribed ? 'Unsubscribe' : 'Subscribe'}
                 >
                   <svg

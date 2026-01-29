@@ -143,6 +143,7 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
           <label className="block text-xs text-slate-400 mb-2">Select signal stream:</label>
           <div className="flex gap-2">
             <select
+              aria-label="Select signal stream"
               value={selectedStreamId || ''}
               onChange={(e) => setSelectedStreamId(e.target.value || null)}
               className="flex-1 px-3 py-2 text-sm bg-slate-800 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
@@ -236,9 +237,8 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
             {completedTasks.map((task) => (
               <div
                 key={task.id}
-                className={`px-4 py-3 border-b border-slate-800/50 hover:bg-slate-800/30 cursor-pointer ${
-                  task.status === 'FAILED' ? 'opacity-60' : ''
-                }`}
+                className={`px-4 py-3 border-b border-slate-800/50 hover:bg-slate-800/30 cursor-pointer ${task.status === 'FAILED' ? 'opacity-60' : ''
+                  }`}
                 onClick={() => task.result && onViewResult?.(task.result)}
               >
                 <div className="flex items-center justify-between">
@@ -249,9 +249,8 @@ export const AgenticDemodulationPanel: React.FC<AgenticDemodulationPanelProps> =
                     <span className="text-sm font-medium">{task.signalId}</span>
                     {task.result && (
                       <span
-                        className={`px-1.5 py-0.5 text-xs font-bold text-white rounded ${
-                          MODULATION_BADGES[task.result.modulation].color
-                        }`}
+                        className={`px-1.5 py-0.5 text-xs font-bold text-white rounded ${MODULATION_BADGES[task.result.modulation].color
+                          }`}
                       >
                         {MODULATION_BADGES[task.result.modulation].label}
                       </span>
