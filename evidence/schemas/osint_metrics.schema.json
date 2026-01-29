@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "auth_quarantine_rate": { "type": "number" },
+    "corroboration_coverage": { "type": "number" },
+    "task_to_product_latency": { "type": "number" }
+  },
+  "required": ["auth_quarantine_rate"],
+  "additionalProperties": true
+}
