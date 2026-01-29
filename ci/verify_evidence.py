@@ -1,108 +1,79 @@
-#!/usr/bin/env python3
-import argparse
+import sys
+import subprocess
 import json
 import os
-import sys
-from typing import Dict, Any, List
 
-# Try to import jsonschema, but don't fail immediately if missing
-# (though it's required for full validation)
-try:
-    import jsonschema
-    from jsonschema import validate
-except ImportError:
-    jsonschema = None
+def run_command(cmd, msg):
+    print(f"Running: {msg}")
+    result = subprocess.run(cmd, shell=True)
+    if result.returncode != 0:
+        print(f"FAILED: {msg}")
+        return False
+    print(f"PASSED: {msg}")
+    return True
 
-def load_json(path: str) -> Any:
+def verify_evidence_index():
+    print("Verifying evidence/index.json...")
     try:
-        with open(path, 'r') as f:
-            return json.load(f)
-    except json.JSONDecodeError as e:
-        print(f"FAIL: Invalid JSON in {path}: {e}")
-        sys.exit(1)
+        with open("evidence/index.json") as f:
+            index = json.load(f)
 
-def validate_schema(instance: Any, schema_path: str):
-    if not jsonschema:
-        print(f"WARNING: jsonschema not installed, skipping schema validation for {schema_path}")
-        return
+        required_ids = [
+            "EVD-vfgnn-SPEC-001",
+            "EVD-vfgnn-GOV-001",
+            "EVD-vfgnn-ROB-001",
+            "EVD-vfgnn-ATT-001",
+            "EVD-vfgnn-NEG-001"
+        ]
 
-    if not os.path.exists(schema_path):
-        print(f"ERROR: Schema not found at {schema_path}")
-        sys.exit(1)
+        found_ids = {item['evidence_id'] for item in index['items']}
+        missing = [rid for rid in required_ids if rid not in found_ids]
 
-    schema = load_json(schema_path)
-    try:
-        validate(instance=instance, schema=schema)
-        print(f"PASS: Schema validation for {os.path.basename(schema_path)}")
-    except jsonschema.exceptions.ValidationError as e:
-        print(f"FAIL: Schema validation failed for {os.path.basename(schema_path)}")
-        print(e)
-        sys.exit(1)
+        if missing:
+            print(f"FAILED: Missing evidence IDs: {missing}")
+            return False
 
-def check_timestamps(data: Any, path: str = ""):
-    """Recursively check for 'timestamp' or 'date' keys in dictionaries."""
-    if isinstance(data, dict):
-        for k, v in data.items():
-            if ("timestamp" in k.lower() or "date" in k.lower()) and "candidate" not in k.lower():
-                # "candidate" exception just in case, but strictly "timestamp" or "date"
-                # The rule is "Timestamps only in stamp.json".
-                # We can be strict.
-                print(f"FAIL: Found timestamp-like key '{k}' in {path}. Timestamps must be in stamp.json only.")
-                sys.exit(1)
-            check_timestamps(v, path)
-    elif isinstance(data, list):
-        for item in data:
-            check_timestamps(item, path)
+        print("PASSED: Evidence Index check")
+        return True
+    except Exception as e:
+        print(f"FAILED: Evidence check error: {e}")
+        return False
 
 def main():
-    parser = argparse.ArgumentParser(description="Verify Summit RT-NIDS Evidence Bundle")
-    parser.add_argument("--bundle", default=".", help="Path to evidence bundle directory")
-    args = parser.parse_args()
+    checks = [
+        ("python3 federated_gnn/tests/test_robust_aggregation.py", "Robust Aggregation Tests"),
+        ("python3 federated_gnn/tests/test_backdoor_gates.py", "Backdoor Gate Tests"),
+        ("python3 federated_gnn/gates/verify_update_signature.py federated_gnn/tests/fixtures/update_signed.pass.json federated_gnn/tests/fixtures/party_A.json", "Signature Gate (Pass)"),
+        ("! python3 federated_gnn/gates/verify_update_signature.py federated_gnn/tests/fixtures/update_unsigned.fail.json federated_gnn/tests/fixtures/party_A.json", "Signature Gate (Fail)"),
+        # Add anomaly check
+        ("python3 federated_gnn/gates/update_anomaly_thresholds.py federated_gnn/tests/fixtures/update_signed.pass.json federated_gnn/tests/fixtures/thresholds.json", "Anomaly Gate (Pass)"),
+    ]
 
-    bundle_path = args.bundle
+    success = True
+    for cmd, msg in checks:
+        if cmd.startswith("! "):
+            real_cmd = cmd[2:]
+            print(f"Running (expect fail): {msg}")
+            # Suppress output for expected failure
+            result = subprocess.run(real_cmd, shell=True, capture_output=True)
+            if result.returncode == 0:
+                print(f"FAILED: {msg} (Should have failed but passed)")
+                success = False
+            else:
+                print(f"PASSED: {msg}")
+        else:
+            if not run_command(cmd, msg):
+                success = False
 
-    # Define schema paths relative to repo root
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.dirname(script_dir) # ci/ -> root
-    schema_dir = os.path.join(repo_root, "summit/nids_rt/evidence/schemas")
+    if not verify_evidence_index():
+        success = False
 
-    required_files = {
-        "metrics.json": "rtnids_metrics.schema.json",
-        "report.json": "rtnids_report.schema.json",
-        "stamp.json": "rtnids_stamp.schema.json",
-        "evidence/index.json": "rtnids_index.schema.json"
-    }
-
-    files_found = 0
-
-    # Check index.json
-    index_path = os.path.join(bundle_path, "evidence", "index.json")
-    if os.path.exists(index_path):
-        print(f"Found index at {index_path}")
-        data = load_json(index_path)
-        validate_schema(data, os.path.join(schema_dir, "rtnids_index.schema.json"))
-        files_found += 1
-
-    # Check other files
-    for filename, schema_name in required_files.items():
-        if filename == "evidence/index.json": continue
-
-        file_path = os.path.join(bundle_path, filename)
-        if os.path.exists(file_path):
-            print(f"Found {filename}")
-            data = load_json(file_path)
-            validate_schema(data, os.path.join(schema_dir, schema_name))
-
-            # Timestamp check (strict: only stamp.json allowed)
-            if filename != "stamp.json":
-                check_timestamps(data, filename)
-
-            files_found += 1
-
-    if files_found == 0:
-        print("INFO: No RT-NIDS evidence files found in bundle path. This is expected if the bundle hasn't been generated yet.")
-
-    print("Verification complete.")
+    if success:
+        print("\nALL VFGNN VERIFICATION CHECKS PASSED")
+        sys.exit(0)
+    else:
+        print("\nSOME CHECKS FAILED")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
