@@ -10,3 +10,9 @@ export const provenanceLedger = {
   getHistory: jest.fn(),
   createTransaction: jest.fn(),
 };
+
+export class ProvenanceLedgerV2 {
+  static getInstance() {
+    return provenanceLedger;
+  }
+}

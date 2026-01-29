@@ -1,4 +1,8 @@
 {
   "version": "1.0",
-  "evidence": {}
+  "evidence": {
+    "EVD-ISS11675-AUDIT-001": "evidence/EVD-ISS11675-AUDIT-001",
+    "EVD-ISS11675-AUDIT-002": "evidence/EVD-ISS11675-AUDIT-002",
+    "EVD-ISS11675-AUDIT-003": "evidence/EVD-ISS11675-AUDIT-003"
+  }
 }
