@@ -6,7 +6,7 @@ import { LocalStubProvider } from './providers/LocalStubProvider.ts';
 // I will use named import to match my test expectation and best practice.
 import { AuthService } from '../../services/AuthService.ts';
 import logger from '../../utils/logger.ts';
-import { ProvenanceLedgerV2 } from '../../provenance/ledger.ts';
+import { ProvenanceLedgerV2 } from '../../provenance/ledger.js';
 
 export class SSOService {
   private providers: Map<string, SSOProvider> = new Map();
