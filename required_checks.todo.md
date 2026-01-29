@@ -1,16 +1,15 @@
 # Required checks discovery (TODO)
 
-## Deterministic steps
+1. Open GitHub repo → Settings → Branches → Branch protection rules.
+2. List required status checks and their exact names.
+3. Write the canonical list into `ci/required_checks.json`.
+4. Replace temporary check names in workflow configs after the canonical list is known.
 
-1. UI: GitHub repo → Settings → Branches → Branch protection rules → list required checks.
-2. API: `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`.
-3. Record exact names in `ci/required_checks_map.json`.
+## Temporary Check Names
 
-## Temporary gate naming convention
-
-- `ci/evidence-verify`
-- `ci/deps-delta-verify`
-
-## Rename plan
-
-Once actual required checks are known, map old → new in `ci/required_checks_map.json` and update CI.
+- `ci:moral_schema_validate`
+- `ci:moral_unit`
+- `ci:moral_policy_deny_by_default`
+- `ci:supply_chain_delta`
+- `worldsim-foundation-gate`
+- `evidence-schema-gate`
