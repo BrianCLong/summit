@@ -1,0 +1,15 @@
+{
+  "run_id": "run-EVD-ai-espionage-force-multiplier-PERSONA-004",
+  "item_slug": "ai-espionage-force-multiplier",
+  "evd_ids": [
+    "EVD-ai-espionage-force-multiplier-PERSONA-004"
+  ],
+  "summary": {
+    "what_ran": "Placeholder initialization",
+    "result": "Pending implementation"
+  },
+  "artifacts": {
+    "metrics": "metrics.json",
+    "stamp": "stamp.json"
+  }
+}

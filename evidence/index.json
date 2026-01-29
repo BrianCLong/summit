@@ -1,4 +1,47 @@
 {
   "version": 1,
-  "items": []
+  "items": [
+    {
+      "evidence_id": "EVD-ai-espionage-force-multiplier-EVIDENCE-001",
+      "path": "evidence/EVD-ai-espionage-force-multiplier-EVIDENCE-001",
+      "report": "evidence/EVD-ai-espionage-force-multiplier-EVIDENCE-001/report.json",
+      "metrics": "evidence/EVD-ai-espionage-force-multiplier-EVIDENCE-001/metrics.json",
+      "stamp": "evidence/EVD-ai-espionage-force-multiplier-EVIDENCE-001/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ai-espionage-force-multiplier-POLICY-002",
+      "path": "evidence/EVD-ai-espionage-force-multiplier-POLICY-002",
+      "report": "evidence/EVD-ai-espionage-force-multiplier-POLICY-002/report.json",
+      "metrics": "evidence/EVD-ai-espionage-force-multiplier-POLICY-002/metrics.json",
+      "stamp": "evidence/EVD-ai-espionage-force-multiplier-POLICY-002/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ai-espionage-force-multiplier-EVAL-003",
+      "path": "evidence/EVD-ai-espionage-force-multiplier-EVAL-003",
+      "report": "evidence/EVD-ai-espionage-force-multiplier-EVAL-003/report.json",
+      "metrics": "evidence/EVD-ai-espionage-force-multiplier-EVAL-003/metrics.json",
+      "stamp": "evidence/EVD-ai-espionage-force-multiplier-EVAL-003/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ai-espionage-force-multiplier-PERSONA-004",
+      "path": "evidence/EVD-ai-espionage-force-multiplier-PERSONA-004",
+      "report": "evidence/EVD-ai-espionage-force-multiplier-PERSONA-004/report.json",
+      "metrics": "evidence/EVD-ai-espionage-force-multiplier-PERSONA-004/metrics.json",
+      "stamp": "evidence/EVD-ai-espionage-force-multiplier-PERSONA-004/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ai-espionage-force-multiplier-DECEPTION-005",
+      "path": "evidence/EVD-ai-espionage-force-multiplier-DECEPTION-005",
+      "report": "evidence/EVD-ai-espionage-force-multiplier-DECEPTION-005/report.json",
+      "metrics": "evidence/EVD-ai-espionage-force-multiplier-DECEPTION-005/metrics.json",
+      "stamp": "evidence/EVD-ai-espionage-force-multiplier-DECEPTION-005/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ai-espionage-force-multiplier-DATA-006",
+      "path": "evidence/EVD-ai-espionage-force-multiplier-DATA-006",
+      "report": "evidence/EVD-ai-espionage-force-multiplier-DATA-006/report.json",
+      "metrics": "evidence/EVD-ai-espionage-force-multiplier-DATA-006/metrics.json",
+      "stamp": "evidence/EVD-ai-espionage-force-multiplier-DATA-006/stamp.json"
+    }
+  ]
 }
