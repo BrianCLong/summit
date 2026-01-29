@@ -10,9 +10,15 @@ This document tracks security threats, mitigations, and their verification statu
 | RET-002 | **Cross-Tenant Graph Traversal** | Critical | Execution Policy Gate enforces `tenant_id` constraints in Cypher/GSQL. | `plan.json` (constraints) | Planned |
 | RET-003 | **Prompt Injection via Sources** | High | Source hashing + Content Sanitization (future). | `sources.json` (hashes) | Planned |
 | RET-004 | **Graph Poisoning** | High | Provenance linking of all nodes to signed `Input` artifacts. | `retrieval.json` (evidence refs) | Planned |
+| SUP-001 | **AI Hallucinated Dependency** | High | AI Upgrade Grounding Gate verifies existence in registry. | `EVID:SUPPLYCHAIN:ai-upgrade-grounding:v1` | Active |
+| SUP-002 | **Malicious Dependency Injection** | Critical | Dependency Intake Gate checks denylist and suspicious patterns. | `EVID:SUPPLYCHAIN:dependency-intake:v1` | Active |
+| SUP-003 | **Developer Environment Compromise** | High | Dev Threat Audit Gate scans for backdoor patterns. | `EVID:SUPPLYCHAIN:dev-threat-audit:v1` | Active |
 
 ## Evidence IDs
 
+- `EVID:SUPPLYCHAIN:ai-upgrade-grounding:v1`
+- `EVID:SUPPLYCHAIN:dependency-intake:v1`
+- `EVID:SUPPLYCHAIN:dev-threat-audit:v1`
 - `retrieval_plan_ir`
 - `retrieval_policy_gate`
 - `retrieval_evidence_bundle`
