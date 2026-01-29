@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Stamp",
+  "type": "object",
+  "required": ["evidence_id", "generated_at"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "generated_at": { "type": "string", "description": "RFC3339 timestamp (timestamps allowed only in stamp.json)" }
+  },
+  "additionalProperties": false
+}

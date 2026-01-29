@@ -1,13 +1,4 @@
 {
-  "version": 1,
-  "entries": [
-    {
-      "item_slug": "azure-turin-v7",
-      "evidence_path": "evidence/azure-turin-v7"
-    },
-    {
-      "item_slug": "item-unknown",
-      "evidence_path": "evidence/item-unknown"
-    }
-  ]
+  "version": "1.0",
+  "items": {}
 }
