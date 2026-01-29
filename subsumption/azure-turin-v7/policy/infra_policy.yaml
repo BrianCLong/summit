@@ -1,0 +1,9 @@
+# Policy: Infrastructure Selection
+# Scope: Azure Turin v7
+rules:
+  - id: "must-have-evidence"
+    description: "Every deployment choice must link to an evidence artifact."
+    level: "deny"
+  - id: "no-live-pricing"
+    description: "Pricing must be offline/snapshot only."
+    level: "deny"

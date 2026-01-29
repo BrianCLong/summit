@@ -1,4 +1,9 @@
 {
   "version": 1,
-  "items": {}
+  "entries": [
+    {
+        "item_slug": "azure-turin-v7",
+        "evidence_path": "evidence/azure-turin-v7"
+    }
+  ]
 }
