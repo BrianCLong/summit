@@ -1,11 +1,26 @@
-## Discover required checks (GitHub UI)
-1. Open repo → Settings → Branches → Branch protection rule.
-2. List required status checks (exact names).
+# Required checks discovery (TODO)
 
-## Discover via API
-1. Use GitHub REST: Get branch protection for default branch.
-2. Record required checks; paste into `tools/ci/required_checks.json`.
+## Goal
 
-## Temporary gate names (until discovered)
-- ci/privacy-graph-gate
-- ci/deps-delta-gate
+List the exact GitHub required status checks for the default branch.
+
+## UI method
+
+1. Repo → Settings → Branches → Branch protection rules.
+2. Record each required check name exactly.
+
+## API method
+
+Use GitHub API to fetch branch protection and required status checks contexts.
+
+## Temporary gate naming (until discovered)
+
+- ci/agent-verify
+- ci/agent-scope
+- ci/agent-ledger
+- ci/ask-parity
+- ci/dep-delta
+
+## Rename plan
+
+Once names are known, add PR to alias/rename CI jobs to match required checks.
