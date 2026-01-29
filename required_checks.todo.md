@@ -1,18 +1,11 @@
-# Required Checks for ACP Integration
+# Required checks discovery
 
-## GitHub Actions Gates
-* `ci/summit-acp-verify` (Proposed): Runs `scripts/ci/verify_acp_bundle.py`.
-* `ci/policy_deny_default`: Ensures default policy is deny.
+Temporary check names (wire these in GitHub Branch Protection):
+- `verify (summit-evidence)`
 
-## Temporary gate names used by this PR stack
-- ci/evidence-validate
-- ci/unit
-- ci/security-neverlog
+Required status checks:
+1. `ci/summit-evidence`
+2. `ci/summit-influence-policy`
+3. `ci/summit-info-integrity-evals`
 
-## How to discover required checks
-1. Open a recent merged PR in the target repo.
-2. Find the “Checks” section and note checks marked as “Required”.
-3. Alternatively (GitHub): Settings → Branches → Branch protection rules → Required status checks.
-
-## Rename plan
-Once real names are known, add a tiny PR to rename the temporary gate labels in docs and CI config.
+Note: These will be satisfied by the `summit-evidence.yml` workflow jobs.

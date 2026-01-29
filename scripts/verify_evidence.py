@@ -129,8 +129,6 @@ def main() -> int:
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
             continue
-        if p.name.endswith(".schema.json"):
-            continue
         if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
             continue
         try:

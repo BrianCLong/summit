@@ -1,41 +1,13 @@
 {
-  "version": "1.0",
   "items": [
     {
-      "id": "EVD-angular-skills-REG-001",
-      "path": "skills/index.json"
-    },
-    {
-      "id": "EVD-angular-skills-GOV-001",
-      "path": "evidence/report.json"
-    },
-    {
-      "id": "EVD-angular-skills-EVAL-001",
-      "path": "evidence/metrics.json"
-    },
-    {
-      "id": "EVD-angular-skills-INT-001",
-      "path": "evidence/report.json"
-    },
-    {
-      "id": "EVD-angular-skills-NEG-001",
-      "path": "evidence/report.json"
-    },
-    {
-      "id": "EVD-LIMY-AGENTICWEB-SCHEMA-001",
-      "path": "evidence/EVD-LIMY-AGENTICWEB-SCHEMA-001"
-    },
-    {
-      "id": "EVD-LIMY-AGENTICWEB-PRIVACY-002",
-      "path": "evidence/EVD-LIMY-AGENTICWEB-PRIVACY-002"
-    },
-    {
-      "id": "EVD-LIMY-AGENTICWEB-COLLECT-003",
-      "path": "evidence/EVD-LIMY-AGENTICWEB-COLLECT-003"
-    },
-    {
-      "id": "EVD-LIMY-AGENTICWEB-METRICS-004",
-      "path": "evidence/EVD-LIMY-AGENTICWEB-METRICS-004"
+      "evidence_id": "EVD-AI-MISO-PSYOP-2025-EVAL-001",
+      "files": [
+        "evidence/runs/ai-miso-psyop-2025/metrics.json",
+        "evidence/runs/ai-miso-psyop-2025/report.json",
+        "evidence/runs/ai-miso-psyop-2025/stamp.json"
+      ]
     }
-  ]
+  ],
+  "version": "1.0"
 }
