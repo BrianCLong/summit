@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["created_at"],
+  "required": ["evidence_id", "created_utc", "tool"],
   "properties": {
-    "created_at": { "type": "string", "format": "date-time" }
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
+    "created_utc": { "type": "string", "format": "date-time" },
+    "tool": { "type": "string" }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

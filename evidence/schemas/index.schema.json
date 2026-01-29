@@ -1,11 +1,28 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "patternProperties": {
-    "^EVD-[A-Z0-9-]+$": {
+  "required": ["version", "items"],
+  "properties": {
+    "version": { "type": "string" },
+    "items": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "area", "artifacts"],
+        "properties": {
+          "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
+          "area": { "type": "string" },
+          "artifacts": {
+            "type": "object",
+            "required": ["report", "metrics", "stamp"],
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            }
+          }
+        }
+      }
     }
-  },
-  "additionalProperties": false
+  }
 }
