@@ -1,4 +1,14 @@
 {
-  "version": 1,
-  "items": []
+  "version": "1.0",
+  "items": [
+    {
+      "evidence_id": "EVD-DEFONRAMPS-PROGRAMS-001",
+      "area": "PROGRAMS",
+      "artifacts": {
+        "report": "evidence/EVD-DEFONRAMPS-PROGRAMS-001/report.json",
+        "metrics": "evidence/EVD-DEFONRAMPS-PROGRAMS-001/metrics.json",
+        "stamp": "evidence/EVD-DEFONRAMPS-PROGRAMS-001/stamp.json"
+      }
+    }
+  ]
 }

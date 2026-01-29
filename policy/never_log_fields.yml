@@ -1,0 +1,9 @@
+never_log_fields:
+  - "api_key"
+  - "auth_token"
+  - "password"
+  - "secret"
+  - "private_key"
+  - "submission_credential"
+  - "customer_id"
+  - "sam_gov_password"

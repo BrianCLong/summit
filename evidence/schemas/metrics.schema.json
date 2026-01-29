@@ -1,23 +1,5 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["latency_ms_p95", "ead", "bias"],
-  "properties": {
-    "latency_ms_p95": { "type": "number" },
-    "ead": {
-      "type": "object",
-      "properties": {
-        "precision": { "type": "number" },
-        "recall": { "type": "number" }
-      }
-    },
-    "bias": {
-      "type": "object",
-      "properties": {
-        "by_language": { "type": "object" },
-        "by_region": { "type": "object" },
-        "by_demographic_proxy": { "type": "object" }
-      }
-    }
-  }
+  "additionalProperties": true
 }

@@ -22,3 +22,9 @@ Until discovered, gates are referenced as:
 
 ## Rename plan
 Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
+
+## Local Verification (New)
+The following scripts enforce the Defense On-ramps policy:
+- `python ci/check_evidence_index.py`
+- `python ci/check_policy_classification.py`
+- `python ci/check_concept_completeness.py`
