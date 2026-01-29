@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AggregateIndicator",
+  "type": "object",
+  "required": ["time_bucket", "region_bucket", "indicator_type", "value", "confidence", "method", "limits"],
+  "properties": {
+    "time_bucket": { "type": "string" },
+    "region_bucket": { "type": "string" },
+    "indicator_type": {
+      "type": "string",
+      "enum": ["morale_proxy", "cohesion_proxy", "trust_proxy", "decision_friction_proxy", "polarization_proxy"]
+    },
+    "value": { "type": "number" },
+    "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+    "method": { "type": "string", "enum": ["survey_aggregate", "content_aggregate", "admin_aggregate", "synthetic_eval"] },
+    "limits": { "type": "string" }
+  },
+  "additionalProperties": false
+}

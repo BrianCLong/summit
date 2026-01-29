@@ -1,11 +1,6 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Evidence Metrics",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["prohibited_intent_blocks", "prohibited_field_blocks"],
-  "properties": {
-    "prohibited_intent_blocks": { "type": "integer", "minimum": 0 },
-    "prohibited_field_blocks": { "type": "integer", "minimum": 0 }
-  },
-  "additionalProperties": false
+  "description": "Generic metrics schema allowing module-specific metrics.",
+  "additionalProperties": true
 }
