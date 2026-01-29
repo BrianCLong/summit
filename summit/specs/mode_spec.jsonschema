@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Mode",
+  "type": "object",
+  "required": ["name", "tools", "permissions"],
+  "properties": {
+    "name": {"type": "string"},
+    "tools": {"type": "array", "items": {"type": "string"}},
+    "permissions": {"type": "object", "additionalProperties": {"type": "boolean"}}
+  }
+}

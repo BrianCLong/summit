@@ -2,23 +2,19 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Index",
   "type": "object",
+  "required": ["items"],
   "properties": {
-    "version": { "type": "string" },
     "items": {
       "type": "array",
       "items": {
         "type": "object",
+        "required": ["evidence_id", "dir"],
         "properties": {
-          "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
-        },
-        "required": ["evidence_id","report","metrics","stamp"],
-        "additionalProperties": false
+          "evidence_id": { "type": "string" },
+          "dir": { "type": "string" }
+        }
       }
     }
   },
-  "required": ["version","items"],
   "additionalProperties": false
 }

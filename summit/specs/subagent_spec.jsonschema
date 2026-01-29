@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Subagent",
+  "type": "object",
+  "required": ["name", "purpose", "tools"],
+  "properties": {
+    "name": {"type": "string"},
+    "purpose": {"type": "string"},
+    "tools": {"type": "array", "items": {"type": "string"}}
+  }
+}

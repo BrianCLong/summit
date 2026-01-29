@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Skill",
+  "type": "object",
+  "required": ["name", "command", "steps"],
+  "properties": {
+    "name": {"type": "string"},
+    "command": {"type": "string", "pattern": "^/[a-z0-9-]+$"},
+    "steps": {"type": "array", "items": {"type": "object"}}
+  }
+}
