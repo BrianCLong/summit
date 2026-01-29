@@ -19,6 +19,12 @@ This document tracks security threats, mitigations, and their verification statu
 | POL-002 | **Sensitive Data Leakage** | High | Never-Log Rules + Scrubber. | `report.json` (evidence checks) | Planned |
 | POL-003 | **Policy Drift** | Medium | Canonicalization + Drift Monitor. | `drift_report.json` | Implemented |
 
+## Threat Model: Supply Chain
+
+| ID | Threat | Severity | Mitigation | Verification | Status |
+|---|---|---|---|---|---|
+| SC-001 | **PackageGate / Shai-Hulud** | Critical | Enforce pnpm >= 10.26.0 to prevent git-dep RCE. | `package.json` (packageManager field) | Implemented |
+
 ## Evidence IDs
 
 - `EVID-POLICY-*-report`
