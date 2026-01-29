@@ -2,8 +2,24 @@
   "version": 1,
   "items": [
     {
-      "id": "EVD-PPGI-MAG-PRIV-001",
-      "path": "evidence/packs/EVD-PPGI-MAG-PRIV-001/report.json"
+      "id": "EVD-angular-skills-REG-001",
+      "path": "skills/index.json"
+    },
+    {
+      "id": "EVD-angular-skills-GOV-001",
+      "path": "evidence/report.json"
+    },
+    {
+      "id": "EVD-angular-skills-EVAL-001",
+      "path": "evidence/metrics.json"
+    },
+    {
+      "id": "EVD-angular-skills-INT-001",
+      "path": "evidence/report.json"
+    },
+    {
+      "id": "EVD-angular-skills-NEG-001",
+      "path": "evidence/report.json"
     }
   ]
 }

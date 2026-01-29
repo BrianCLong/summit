@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "version": { "type": "integer" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "path": { "type": "string" },
+          "sha256": { "type": "string" },
+          "license": { "type": ["string", "null"] },
+          "compatibility": { "type": ["string", "null"] },
+          "allowed_tools": { "type": ["string", "null"] },
+          "metadata": { "type": "object" }
+        },
+        "required": ["name", "description", "path", "sha256"]
+      }
+    }
+  },
+  "required": ["version", "items"]
+}

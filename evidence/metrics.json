@@ -1,3 +1,7 @@
 {
-  "coverage": 0.0
+  "metrics": {
+    "skills_indexed": 1,
+    "policy_violations": 0,
+    "evaluator_violations_detected": 4
+  }
 }
