@@ -1,0 +1,3 @@
+# Lane 2 flags MUST remain false by default
+ai_assist_mapping: false
+edge_mode: false
