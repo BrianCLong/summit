@@ -1,13 +1,16 @@
 # Required checks discovery (TODO)
 
-1) Identify branch protection required checks (GitHub UI):
-   - Repo → Settings → Branches → Branch protection rules → Required status checks
+## Deterministic steps
 
-2) Map each required check name to the CI job in this repo.
+1. UI: GitHub repo → Settings → Branches → Branch protection rules → list required checks.
+2. API: `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`.
+3. Record exact names in `ci/required_checks_map.json`.
 
-3) Update CI verifier spec:
-   - Replace placeholder check names:
-     - agent_composer_unit
-     - agent_composer_e2e
-     - agent_composer_citation_verifier
-     - agent_composer_policy_suite
+## Temporary gate naming convention
+
+- `ci/evidence-verify`
+- `ci/deps-delta-verify`
+
+## Rename plan
+
+Once actual required checks are known, map old → new in `ci/required_checks_map.json` and update CI.

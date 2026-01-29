@@ -392,6 +392,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: secure-mcp-evidence-scaffold
+    version: v1
+    path: prompts/security/secure-mcp-evidence-scaffold@v1.md
+    sha256: 36696b2c92abadd559bafff4f93a4573b764f4475c56f28ef46e0ad828ad7645
+    description: Secure MCP evidence schema alignment and verification gate scaffold.
+    scope:
+      paths:
+        - evidence/
+        - ci/verify_evidence.sh
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/security/secure-mcp-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - security
+        - governance
+        - ci
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: mvp4-ga-gate-artifacts
     version: v1
     path: prompts/docs/mvp4-ga-gate-artifacts@v1.md
