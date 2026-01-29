@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/Input'
+import { Textarea } from '@/components/ui/Textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Badge } from '@/components/ui/Badge'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
-import { Separator } from '@/components/ui/separator'
+import { Switch } from '@/components/ui/Switch'
+import { Label } from '@/components/ui/Label'
+import { Slider } from '@/components/ui/Slider'
+import { Separator } from '@/components/ui/Separator'
 import {
   AlertCircle,
   Activity,

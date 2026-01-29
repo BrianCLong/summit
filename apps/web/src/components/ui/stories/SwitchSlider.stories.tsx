@@ -3,8 +3,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
 
-import { Label } from '../label'
-import { Slider } from '../slider'
+import { Label } from '../Label'
+import { Slider } from '../Slider'
 import { Switch } from '../switch'
 import { tokenVar } from '@/theme/tokens'
 

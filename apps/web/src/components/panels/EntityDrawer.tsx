@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/Drawer'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '@/components/ui/Textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import {

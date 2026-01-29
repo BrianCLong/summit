@@ -3,9 +3,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
 
-import { Input } from '../input'
-import { Label } from '../label'
-import { Textarea } from '../textarea'
+import { Input } from '../Input'
+import { Label } from '../Label'
+import { Textarea } from '../Textarea'
 import { tokenVar } from '@/theme/tokens'
 
 const meta: Meta<typeof Input> = {

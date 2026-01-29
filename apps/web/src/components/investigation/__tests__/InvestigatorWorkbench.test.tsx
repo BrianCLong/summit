@@ -33,7 +33,7 @@ vi.mock('@/graphs/GraphCanvas', () => {
 })
 
 // Mock UI components
-vi.mock('@/components/ui/slider', () => ({
+vi.mock('@/components/ui/Slider', () => ({
   Slider: ({ onValueChange }: any) => (
     <input
       type="range"

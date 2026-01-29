@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { GrowthPlaybookGenerator } from '@/features/growth/GrowthPlaybookGenerator';
 import { GrowthPlaybookView } from '@/features/growth/GrowthPlaybookView';
 import { CompanyProfile, Playbook } from '@/features/growth/types';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/components/ui/Toast';
 import { PageHeader } from '@/components/ui/PageHeader';
 
 export default function GrowthPlaybookPage(): React.ReactElement {

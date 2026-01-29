@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { GraphCanvas, GraphCanvasRef } from '@/graphs/GraphCanvas'
 import { Button } from '@/components/ui/Button'
-import { Slider } from '@/components/ui/slider'
+import { Slider } from '@/components/ui/Slider'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
 // Mock data for initial state

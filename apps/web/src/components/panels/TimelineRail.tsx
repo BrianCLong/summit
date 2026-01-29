@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Slider } from '@/components/ui/slider'
+import { Slider } from '@/components/ui/Slider'
 import { Skeleton } from '@/components/ui/Skeleton'
 import {
   Tooltip,

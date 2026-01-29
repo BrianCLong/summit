@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { axe, toHaveNoViolations } from 'jest-axe';
 import { Button } from './Button';
-import { Input } from './input';
+import { Input } from './Input';
 
 // Extend expect with jest-axe
 expect.extend(toHaveNoViolations);

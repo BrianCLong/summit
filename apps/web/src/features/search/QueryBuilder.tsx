@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Search, Plus, Trash, Filter, Save, Calendar, User, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/Badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/Popover';

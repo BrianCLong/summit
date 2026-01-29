@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
 } from '@/components/ui/DropdownMenu'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui/Input'
 import { Camera, Save, Trash2, RotateCcw } from 'lucide-react'
 import {
   Dialog,

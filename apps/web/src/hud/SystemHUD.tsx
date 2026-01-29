@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/Popover'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/Dialog'
 import { Badge } from '@/components/ui/Badge'
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@/components/ui/Separator'
 import { TrustHealthDashboard } from '@/components/trust/TrustHealthDashboard'
 
 export function SystemHUD() {

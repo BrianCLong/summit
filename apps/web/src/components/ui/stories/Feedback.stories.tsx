@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import type { Meta, StoryObj } from '@storybook/react'
-import { Alert, AlertDescription, AlertTitle } from '../alert'
+import { Alert, AlertDescription, AlertTitle } from '../Alert'
 import { tokenVar } from '@/theme/tokens'
 
 const meta: Meta<typeof Alert> = {
