@@ -1,5 +1,8 @@
 {
   "report_id": "REP-001",
   "status": "draft",
-  "vfgnn_status": "initialized"
+  "vfgnn_status": "initialized",
+  "evidence_id": "EVD-VFGNN-SPEC-001",
+  "summary": "Secure MCP evidence scaffold initialized.",
+  "artifacts": [{ "path": "evidence/report.json" }]
 }
