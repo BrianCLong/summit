@@ -61,6 +61,42 @@
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-MOLTWORKER-ARCH-001",
+      "report": "evidence/moltworker/report.json",
+      "metrics": "evidence/moltworker/metrics.json",
+      "stamp": "evidence/moltworker/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-MOLTWORKER-POLICY-001",
+      "report": "evidence/moltworker/report.json",
+      "metrics": "evidence/moltworker/metrics.json",
+      "stamp": "evidence/moltworker/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-MOLTWORKER-SANDBOX-001",
+      "report": "evidence/moltworker/report.json",
+      "metrics": "evidence/moltworker/metrics.json",
+      "stamp": "evidence/moltworker/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-MOLTWORKER-MODEL-001",
+      "report": "evidence/moltworker/report.json",
+      "metrics": "evidence/moltworker/metrics.json",
+      "stamp": "evidence/moltworker/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-MOLTWORKER-BROWSER-001",
+      "report": "evidence/moltworker/report.json",
+      "metrics": "evidence/moltworker/metrics.json",
+      "stamp": "evidence/moltworker/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-MOLTWORKER-SUPPLY-001",
+      "report": "evidence/moltworker/report.json",
+      "metrics": "evidence/moltworker/metrics.json",
+      "stamp": "evidence/moltworker/stamp.json"
     }
   ]
 }
