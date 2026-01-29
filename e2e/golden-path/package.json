@@ -7,12 +7,8 @@
     "test:debug": "playwright test --debug"
   },
   "devDependencies": {
-<<<<<<< HEAD
-    "@playwright/test": "^1.57.0"
-=======
     "@playwright/test": "^1.57.0",
     "typescript": "^5.7.3",
     "ts-node": "^10.9.2"
->>>>>>> 50f8d7925a (feat: add golden path E2E test harness for consolidated frontend)
   }
 }

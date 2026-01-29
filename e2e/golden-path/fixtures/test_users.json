@@ -1,16 +1,12 @@
-<<<<<<< HEAD
-{
-  "testUser": {
-    "username": "admin",
-    "password": "password"
-  }
-}
-=======
 [
   {
     "role": "analyst",
     "email": "analyst@intelgraph.tech",
-    "password": "password123"
+    "password": "test-only-password"
+  },
+  {
+    "role": "admin",
+    "email": "admin@intelgraph.tech",
+    "password": "test-only-password"
   }
 ]
->>>>>>> 50f8d7925a (feat: add golden path E2E test harness for consolidated frontend)
