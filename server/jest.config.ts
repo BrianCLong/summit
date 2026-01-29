@@ -103,6 +103,7 @@ const config: Config = {
     '@intelgraph/attack-surface': '<rootDir>/tests/mocks/attack-surface.ts',
     '@packages/cache': '<rootDir>/tests/mocks/cache.ts',
     '.*security/secret-audit-logger(\\.js)?$': '<rootDir>/tests/mocks/secret-audit-logger.ts',
+    '^python-shell$': '<rootDir>/tests/mocks/python-shell.ts',
     '^axios$': '<rootDir>/tests/mocks/axios.ts',
     '^openai$': '<rootDir>/tests/mocks/openai.ts',
     '.*observability/tracing(\\.js)?$': '<rootDir>/tests/mocks/otel-service.ts',
