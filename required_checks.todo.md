@@ -1,10 +1,11 @@
-<!-- required_checks.todo.md -->
-# Required checks discovery (TODO)
+## Required checks discovery (TEMP)
+1) In GitHub repo: Settings → Branches → Branch protection rules
+2) Record exact check names required for merge
+3) Replace placeholders in `.github/workflows/ci.yml`
 
-1) Open your repo → Settings → Branches → Branch protection rules.
-2) List required status checks (names exactly).
-3) Paste them into: ci/required_checks.txt (to be created in PR-followup)
-4) Rename temporary gates:
-- gate:evidence
-- gate:deps
-- gate:runtime-security
+Temporary checks expected:
+- summit/verify-evidence
+- summit/unit-tests
+
+Rename plan:
+- PRx: update workflow + badges once real required checks are known
