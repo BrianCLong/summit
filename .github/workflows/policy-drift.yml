@@ -1,0 +1,37 @@
+name: Policy Drift Monitor
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily
+  workflow_dispatch:
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    if: ${{ vars.POLICY_DRIFT_MONITOR_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Build Policy Cards
+        run: |
+          cd packages/policy-cards
+          npm install
+          npm run build
+
+      - name: Run Drift Check
+        run: npx tsx scripts/monitoring/policy-cards-v0-drift.ts
+
+      - name: Archive Drift Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: policy-drift-report
+          path: artifacts/policy/drift_report.json

@@ -1,18 +1,16 @@
-# Repo Assumptions Ledger (Subsumption Engine v4)
+# Repo Assumptions — MCP Apps Subsumption Bundle
 
-## Verified
-- Summit enforces GA-grade governance and deterministic evidence patterns.
-- CI scripts exist under scripts/ci/* style paths (pattern-level).
+## Verified (from prior project context)
+- Deterministic evidence artifacts are required: report.json, metrics.json, stamp.json separated.
+- CI has existing scripts/ci verifiers and governance enforcement.
 
 ## Assumed (validate)
-- Node.js is available in CI runners.
-- GitHub Actions is the CI system of record.
-- Adding an additive workflow job will not break branch protection.
+- Node.js 20+ available in CI.
+- scripts/ci/*.mjs can run with `node`.
+- CI supports adding a new required check job.
+- Test runner exists (Jest). If not, we will use node-based fixture tests.
 
 ## Must-not-touch (blast radius)
-- No refactors in workspaces/packages/*
-- No modifications to existing release automation unless explicitly needed for gating.
+- No refactors across packages/.
 - No public API changes.
-
-## Required checks
-- Unknown names; discover via GitHub UI/API (see required_checks.todo.md).
+- Only additive changes under subsumption/, scripts/ci/, docs/, evidence/.

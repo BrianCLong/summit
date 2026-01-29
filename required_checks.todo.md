@@ -1,17 +1,26 @@
-# Required Checks Discovery (GitHub Branch Protection)
+# Required Checks Discovery — TODO
 
 ## Goal
-Enumerate exact required status check names enforced on the protected branch (e.g., main).
+List the exact required check names enforced by branch protection for the default branch.
 
 ## UI Steps
-1. Repo → Settings → Branches → Branch protection rules
-2. Open the rule for the protected branch
-3. Under “Require status checks to pass”, copy the exact check names (case-sensitive)
+1. Repo → Settings → Branches → Branch protection rules.
+2. Open the rule for the default branch.
+3. Under “Require status checks to pass”, copy the check names exactly.
 
-## API Steps (GitHub CLI)
-1. gh api repos/<OWNER>/<REPO>/branches/<BRANCH>/protection --jq '.required_status_checks.contexts'
-2. Save output to subsumption/_meta/required_checks.json
+## API Steps (preferred, reproducible)
+- Use GitHub API:
+  - GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+  - GET /repos/{owner}/{repo}/branches/{branch}/protection
+- Record exact check names into:
+  - `subsumption/ssdf-v1-2/required_checks.verified.json`
 
-## Temporary naming convention
-Use job name prefix: `subsumption/verify-bundle`
-Until verified, we treat this as non-required and keep it informational.
+## Temporary convention (until verified)
+- `subsumption-verify`
+- `ssdf-mapping-verify`
+
+## Rename plan
+If verified names differ, add a small PR that:
+- updates workflow job name(s)
+- updates manifest gate list
+- updates any branch-protection machine-verifier (if present)

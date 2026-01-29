@@ -1,0 +1,39 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: graph-sync
+    folder: GraphSync
+    interval: 1m
+    rules:
+      - uid: graph_sync_critical_lag
+        title: Graph Sync Critical Lag
+        condition: C
+        data:
+          - refId: A
+            queryType: range
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: graph_sync_lag_rate > 0.001
+          - refId: C
+            queryType: resample
+            model:
+              expr: $A
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "Graph Sync Lag > 0.1%"
+        labels:
+          severity: critical
+      - uid: graph_sync_orphans
+        title: Graph Sync Orphans Detected
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: graph_sync_orphans_pg > 0
+        for: 1m
+        labels:
+          severity: critical

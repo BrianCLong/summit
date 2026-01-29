@@ -1,0 +1,7 @@
+items:
+  - title: "Real adapter implementation"
+    status: deferred
+    reason: "Requires security audit"
+  - title: "Signature key management"
+    status: deferred
+    reason: "Pending infra"
