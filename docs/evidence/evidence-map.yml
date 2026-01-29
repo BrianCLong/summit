@@ -52,3 +52,14 @@ evidence:
       path: docs/osint/updates/automation-turn-4.md
     criteria:
       - rule: existence
+
+  - id: EVID-OSINT-TURN-005
+    name: OSINT Platform Development Update - Turn 5
+    description: Periodic update on Maltego, i2 Analyst's Notebook, and emerging OSINT platforms (Jan 29, 2026).
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-5.md
+    criteria:
+      - rule: existence
+      - rule: header_validation
+        headers: [ILSA-Level, IBOM-Verified]

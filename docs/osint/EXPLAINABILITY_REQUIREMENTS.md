@@ -1,3 +1,10 @@
+Owner: @intelgraph/osint-team
+Last-Reviewed: 2026-01-29
+Evidence-IDs: none
+Status: active
+ILSA-Level: 3
+IBOM-Verified: true
+
 # Explainability Requirements (The Explainability Gate)
 
 ## Core Directive
