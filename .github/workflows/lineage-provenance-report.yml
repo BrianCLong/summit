@@ -1,0 +1,122 @@
+name: lineage-provenance-report
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # nightly UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: lineage-provenance-report
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm -v
+            pnpm instal
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Generate lineage report
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          # Directory where OpenLineage event JSON files exist.
+          # You can populate this directory in prior steps from Marquez export, logs, etc.
+          LINEAGE_EVENTS_DIR: ${{ vars.LINEAGE_EVENTS_DIR }}
+          LINEAGE_POLICY_PATH: ${{ vars.LINEAGE_POLICY_PATH }}
+        run: |
+          node scripts/lineage/report/generate_lineage_report.mjs
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lineage-provenance-report-${{ github.sha }}
+          path: |
+            artifacts/lineage/${{ github.sha }}/report.md
+            artifacts/lineage/${{ github.sha }}/metrics.json
+            artifacts/lineage/${{ github.sha }}/gaps.json
+          if-no-files-found: error
+          retention-days: 30
+
+      # Optional: open issues for P0/P1 gaps. Controlled by repo variable LINEAGE_OPEN_ISSUES=true
+      - name: Open issues for gaps (optional)
+        if: ${{ vars.LINEAGE_OPEN_ISSUES == 'true' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = `artifacts/lineage/${process.env.GITHUB_SHA}/gaps.json`;
+            if (!fs.existsSync(path)) {
+              core.info(`No gaps.json found at ${path}. Nothing to file.`);
+              return;
+            }
+            const gaps = JSON.parse(fs.readFileSync(path, 'utf8'));
+            if (!Array.isArray(gaps) || gaps.length === 0) {
+              core.info('No gaps to file.');
+              return;
+            }
+
+            function titleForGap(g) {
+              const sev = (g.severity || 'P2').toUpperCase();
+              return `[${sev}] Lineage gap: ${g.kind} ${g.target || ''}`.trim();
+            }
+
+            function bodyForGap(g) {
+              const lines = [];
+              lines.push(`Deterministic lineage gate detected a gap.`);
+              lines.push('');
+              lines.push(`- Severity: ${g.severity || 'P2'}`);
+              lines.push(`- Kind: ${g.kind}`);
+              if (g.target) lines.push(`- Target: ${g.target}`);
+              if (g.details) lines.push(`- Details: ${g.details}`);
+              if (g.recommended_fix) lines.push(`- Recommended fix: ${g.recommended_fix}`);
+              lines.push('');
+              lines.push(`Artifacts: artifacts/lineage/${process.env.GITHUB_SHA}/report.md`);
+              return lines.join('\n');
+            }
+
+            for (const g of gaps) {
+              const sev = (g.severity || 'P2').toUpperCase();
+              if (sev !== 'P0' && sev !== 'P1') continue;
+
+              const title = titleForGap(g);
+              const body = bodyForGap(g);
+
+              // Dedupe by searching for open issues with same title prefix.
+              const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:title "${title.replace(/"/g,'\\"')}"`;
+              const res = await github.rest.search.issuesAndPullRequests({ q, per_page: 5 });
+              if (res.data.items && res.data.items.length > 0) {
+                core.info(`Issue already exists for: ${title}`);
+                continue;
+              }
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['governance', 'lineage', sev.toLowerCase()]
+              });
+              core.info(`Created issue: ${title}`);
+            }
