@@ -1,4 +1,35 @@
 {
   "version": 1,
-  "items": []
+  "items": [
+    {
+      "evidence_id": "EVD-vfgnn-SPEC-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-GOV-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-ROB-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-ATT-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-NEG-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    }
+  ]
 }

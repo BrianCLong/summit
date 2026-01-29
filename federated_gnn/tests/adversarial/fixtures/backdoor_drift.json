@@ -1,0 +1,11 @@
+{
+  "party_id": "party-Bad",
+  "round_id": 1,
+  "model_hash": "badhash",
+  "gradient_stats": {
+    "l2_norm": 50.0,
+    "min_val": -10.0,
+    "max_val": 50.0
+  },
+  "signature": "sig_bad_key"
+}
