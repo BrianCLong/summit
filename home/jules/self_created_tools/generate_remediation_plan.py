@@ -49,7 +49,7 @@ def main():
         return
 
     findings = []
-    with open(CSV_PATH, 'r') as f:
+    with open(CSV_PATH) as f:
         reader = csv.DictReader(f)
         for i, row in enumerate(reader):
             finding_id = f"GD-{str(i+1).zfill(2)}"

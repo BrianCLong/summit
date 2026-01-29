@@ -10,9 +10,9 @@ from intelgraph_py.analytics.explainability_engine import generate_explanation
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.connectors.osint_agent import ThreatActorProfilingAgent
 from intelgraph_py.database import get_db
+from intelgraph_py.lineage.openlineage_producer import OpenLineageProducer
 from intelgraph_py.models import AlertLog, ExplanationTaskResult, Schedule, Subscription
 from intelgraph_py.storage.neo4j_store import Neo4jStore
-from intelgraph_py.lineage.openlineage_producer import OpenLineageProducer
 
 lineage_producer = OpenLineageProducer()
 

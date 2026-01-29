@@ -8,8 +8,6 @@ from pydantic import BaseModel, Field
 
 from maestro.checks import check_release_gate, generate_compliance_report
 from maestro.lineage.openlineage_producer import OpenLineageProducer
-from maestro.provenance.exporter import ProvenanceExporter
-from maestro.prov import serializer
 from maestro.models import (
     Artifact,
     ArtifactKind,
@@ -18,6 +16,8 @@ from maestro.models import (
     Run,
     RunStatus,
 )
+from maestro.prov import serializer
+from maestro.provenance.exporter import ProvenanceExporter
 
 router = APIRouter(prefix="/maestro", tags=["maestro"])
 lineage_producer = OpenLineageProducer()

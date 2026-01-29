@@ -1,7 +1,8 @@
-import unittest
-from airflow.models import DagBag
 import os
 import sys
+import unittest
+
+from airflow.models import DagBag
 
 # Ensure the airflow directory is in the path for imports
 sys.path.append(os.path.join(os.getcwd(), 'airflow'))
