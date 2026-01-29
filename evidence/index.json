@@ -20,6 +20,22 @@
     {
       "id": "EVD-angular-skills-NEG-001",
       "path": "evidence/report.json"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-SCHEMA-001",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-SCHEMA-001"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-PRIVACY-002",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-PRIVACY-002"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-COLLECT-003",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-COLLECT-003"
+    },
+    {
+      "id": "EVD-LIMY-AGENTICWEB-METRICS-004",
+      "path": "evidence/EVD-LIMY-AGENTICWEB-METRICS-004"
     }
   ]
 }

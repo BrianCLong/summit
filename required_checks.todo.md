@@ -4,10 +4,9 @@
 Identify the repo’s REQUIRED check names and map them to the temporary gates below.
 
 ## Temporary gate names used by this PR stack
-- ci/psyche-policy-gate
-- ci/evidence-schema-validate
-- ci/no-pii-in-artifacts
-- ci/dependency-delta
+- ci/evidence-validate
+- ci/unit
+- ci/security-neverlog
 
 ## How to discover required checks
 1. Open a recent merged PR in the target repo.
