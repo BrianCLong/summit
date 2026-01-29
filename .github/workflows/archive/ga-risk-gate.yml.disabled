@@ -55,6 +55,12 @@ jobs:
              exit 1
           fi
 
+      - name: Governance Drift Check
+        run: node scripts/ci/governance_drift_detector.mjs --baseline origin/main
+
+      - name: Evidence Freshness Check
+        run: node scripts/ci/evidence_freshness.mjs
+
       # 2. Secrets Scanning (Trivy)
       - name: Run Trivy vulnerability scanner (Secrets)
         uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
@@ -97,6 +103,7 @@ jobs:
             sbom.cdx.json
             trivy-results.json
             grype-results.json
+            artifacts/*.json
           if-no-files-found: error
 
       - name: Fail on scan errors
