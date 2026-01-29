@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["p50_latency_ms", "p95_latency_ms", "p99_latency_ms", "throughput_rps", "cache_hit_rate", "fallback_rate", "graph_nodes_avg", "graph_edges_avg"],
+  "properties": {
+    "p50_latency_ms": { "type": "number" },
+    "p95_latency_ms": { "type": "number" },
+    "p99_latency_ms": { "type": "number" },
+    "throughput_rps": { "type": "number" },
+    "cache_hit_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "fallback_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "graph_nodes_avg": { "type": "number" },
+    "graph_edges_avg": { "type": "number" }
+  },
+  "additionalProperties": false
+}
