@@ -1,11 +1,18 @@
 {
+  "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+  "summary": "Pipeline Scaffolding Check: PASS",
+  "steps": [
+    {
+      "name": "check",
+      "status": "pass",
+      "details": {
+        "what_ran": "Pipeline Scaffolding Check"
+      }
+    }
+  ],
   "run_id": "run-001",
   "item_slug": "pipeline-resilience",
   "evd_ids": ["EVD-PIPELINE-RESILIENCE-001"],
-  "summary": {
-    "what_ran": "Pipeline Scaffolding Check",
-    "result": "PASS"
-  },
   "artifacts": {
     "metrics": "evidence/metrics.json",
     "stamp": "evidence/stamp.json"

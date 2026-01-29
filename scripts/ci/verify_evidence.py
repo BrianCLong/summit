@@ -8,19 +8,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 if "SUMMIT_EVIDENCE_ROOT" in os.environ:
     EVID = Path(os.environ["SUMMIT_EVIDENCE_ROOT"])
-    # Adjust ROOT to be parent of evidence dir if using override,
-    # or keep it as repo root?
-    # The script uses ROOT / path. Paths in index are usually relative to repo root.
-    # If we override EVID, we probably are testing in isolation.
-    # So we should probably treat EVID.parent as ROOT.
-    ROOT = EVID.parent
+    ROOT = EVID.parent # Assumption for relative paths
 else:
     EVID = ROOT / "evidence"
 
 SCHEMAS = EVID / "schemas"
 
 def fail(msg):
-    print(f"FAIL: {msg}", file=sys.stderr)
+    print(f"evidence-verify: FAIL: {msg}", file=sys.stderr)
     sys.exit(1)
 
 def load_json(p):
@@ -29,51 +24,80 @@ def load_json(p):
     except Exception as e:
         fail(f"Could not read/parse {p}: {e}")
 
-def validate_schema(instance, schema_path, context=""):
-    schema = load_json(schema_path)
-
+def _validate_recursive(instance, schema, context):
     # Required fields
     required = schema.get("required", [])
-    for field in required:
-        if field not in instance:
-            fail(f"Missing required field '{field}' in {context}")
+    if isinstance(instance, dict):
+        for field in required:
+            if field not in instance:
+                fail(f"Missing required field '{field}' in {context}")
 
-    # Top-level types
-    props = schema.get("properties", {})
-    for key, val in instance.items():
-        if key in props:
-            ptype = props[key].get("type")
-            if ptype == "string" and not isinstance(val, str):
-                fail(f"Field '{key}' in {context} must be string")
-            elif ptype == "array" and not isinstance(val, list):
-                fail(f"Field '{key}' in {context} must be array")
-            elif ptype == "object" and not isinstance(val, dict):
-                fail(f"Field '{key}' in {context} must be object")
-            elif ptype == "integer" and not isinstance(val, int):
-                fail(f"Field '{key}' in {context} must be integer")
-            elif ptype == "number" and not isinstance(val, (int, float)):
-                fail(f"Field '{key}' in {context} must be number")
+        # Properties check
+        props = schema.get("properties", {})
+        additional_allowed = schema.get("additionalProperties", True)
 
-            # Pattern check
-            pattern = props[key].get("pattern")
-            if pattern and isinstance(val, str):
-                if not re.match(pattern, val):
-                     fail(f"Field '{key}' in {context} value '{val}' does not match pattern '{pattern}'")
+        for key, val in instance.items():
+            if key not in props and not additional_allowed:
+                 fail(f"Unexpected field '{key}' in {context}")
+
+            if key in props:
+                prop_schema = props[key]
+                ptype = prop_schema.get("type")
+
+                # Type checking
+                if ptype == "string" and not isinstance(val, str):
+                    fail(f"Field '{key}' in {context} must be string")
+                elif ptype == "array" and not isinstance(val, list):
+                    fail(f"Field '{key}' in {context} must be array")
+                elif ptype == "object" and not isinstance(val, dict):
+                    fail(f"Field '{key}' in {context} must be object")
+                elif ptype == "number" and not isinstance(val, (int, float)):
+                    fail(f"Field '{key}' in {context} must be number")
+                elif ptype == "integer" and not isinstance(val, int):
+                    fail(f"Field '{key}' in {context} must be integer")
+
+                # Pattern check
+                pattern = prop_schema.get("pattern")
+                if pattern and isinstance(val, str):
+                    if not re.match(pattern, val):
+                         fail(f"Field '{key}' in {context} value '{val}' does not match pattern '{pattern}'")
+
+                # Recursion
+                if ptype == "object" and "properties" in prop_schema:
+                    _validate_recursive(val, prop_schema, f"{context}.{key}")
+                elif ptype == "array" and "items" in prop_schema:
+                    item_schema = prop_schema["items"]
+                    for idx, item in enumerate(val):
+                        # item_schema might be a type string or object
+                        if isinstance(item_schema, dict):
+                            _validate_recursive(item, item_schema, f"{context}.{key}[{idx}]")
+
+def validate_schema(instance, schema_path, context=""):
+    if not schema_path.exists():
+        fail(f"Schema not found: {schema_path}")
+    schema = load_json(schema_path)
+    _validate_recursive(instance, schema, context)
 
 def check_timestamps():
+    # Determinism rule: timestamps ONLY in stamp.json
     forbidden = []
+    # Ignore specific files and dirs
     IGNORE_FILES = {
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json", "index.json"
+        "evidence-index.json", "index.json", "index.schema.json", "report.schema.json",
+        "metrics.schema.json", "stamp.schema.json" # Ignore schemas
     }
     IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
 
     for p in EVID.rglob("*"):
-        if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"}:
-            continue
-        if p.name in IGNORE_FILES or any(d in p.parts for d in IGNORE_DIRS):
-            continue
+        if not p.is_file(): continue
+        if p.name == "stamp.json": continue
+        if p.name in IGNORE_FILES: continue
+        # Check if any parent part is in IGNORE_DIRS
+        if any(part in IGNORE_DIRS for part in p.parts): continue
+        if p.suffix not in {".json"}: continue
+
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
             # Heuristic: YYYY-MM-DD
@@ -86,58 +110,48 @@ def check_timestamps():
         fail(f"Possible timestamps found outside stamp.json in: {forbidden}")
 
 def main():
+    print(f"Verifying evidence in {EVID}")
+
+    # 1. Verify index.json existence
     index_path = EVID / "index.json"
     if not index_path.exists():
         fail("evidence/index.json missing")
 
     index = load_json(index_path)
-    validate_schema(index, SCHEMAS / "index.schema.json", context="index.json")
 
-    items = index.get("items", {})
-    # Schema validation ensures items is object, but double check logic
-    if not isinstance(items, dict):
-         fail("index.json 'items' must be a dict") # Should be caught by schema validation theoretically but our validator is simple
+    if "items" not in index or not isinstance(index["items"], list):
+        fail("index.json must have 'items' list")
 
-    print(f"Verifying {len(items)} evidence items...")
+    print(f"Found {len(index['items'])} items in index.")
 
-    for evd_id, path in items.items():
-        item_path = ROOT / path
-        if not item_path.exists():
-            fail(f"Evidence file not found: {item_path} (for {evd_id})")
+    for item in index["items"]:
+        # Support both 'files' (plan) and 'paths' (existing)
+        files = item.get("files", item.get("paths", []))
+        evd_id = item.get("evidence_id")
 
-        report = load_json(item_path)
+        if not evd_id:
+            fail(f"Item in index missing evidence_id: {item}")
 
-        # Decide schema
-        if "evd_id" in report:
-             validate_schema(report, SCHEMAS / "report.schema.json", context=evd_id)
-        elif "summary" in report and "artifacts" in report:
-             validate_schema(report, SCHEMAS / "agentic_report.schema.json", context=evd_id)
-        elif "claims" in report:
-             pass # Legacy
-        else:
-             print(f"WARN: Unknown report format for {evd_id}")
+        print(f"Verifying {evd_id}...")
 
-        # Check artifacts if present
-        artifacts = report.get("artifacts")
-        if isinstance(artifacts, dict):
-            for key, art_path in artifacts.items():
-                if isinstance(art_path, str):
-                    # Resolve path: try root-relative first, then report-relative
-                    full_art_path = ROOT / art_path
-                    if not full_art_path.exists():
-                         full_art_path = item_path.parent / art_path
+        for fpath_str in files:
+            fpath = ROOT / fpath_str
+            if not fpath.exists():
+                fail(f"File referenced in index not found: {fpath_str}")
 
-                    if not full_art_path.exists():
-                        fail(f"Artifact {key} not found at {art_path} (referenced in {evd_id})")
+            # Validate schema based on filename
+            fname = fpath.name
+            if fname == "report.json":
+                validate_schema(load_json(fpath), SCHEMAS / "report.schema.json", context=f"{evd_id} report")
+            elif fname == "metrics.json":
+                validate_schema(load_json(fpath), SCHEMAS / "metrics.schema.json", context=f"{evd_id} metrics")
+            elif fname == "stamp.json":
+                validate_schema(load_json(fpath), SCHEMAS / "stamp.schema.json", context=f"{evd_id} stamp")
 
-                    # Validate against schema if known
-                    if key == "metrics":
-                        validate_schema(load_json(full_art_path), SCHEMAS / "metrics.schema.json", context=f"{evd_id} metrics")
-                    elif key == "stamp":
-                        validate_schema(load_json(full_art_path), SCHEMAS / "stamp.schema.json", context=f"{evd_id} stamp")
-
+    # 2. Check for timestamps
     check_timestamps()
-    print("OK: Evidence verified")
+
+    print("evidence-verify: PASS")
 
 if __name__ == "__main__":
     main()

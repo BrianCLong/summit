@@ -2,5 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Stamp",
   "type": "object",
-  "additionalProperties": true
+  "required": ["evidence_id", "generated_at"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "ci_run_id": { "type": "string" }
+  },
+  "additionalProperties": false
 }
