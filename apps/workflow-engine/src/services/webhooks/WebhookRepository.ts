@@ -103,7 +103,7 @@ function mapAttempt(row: any): WebhookDeliveryAttempt {
 }
 
 export class WebhookRepository {
-  constructor(private readonly pool: Pool) {}
+  constructor(private readonly pool: Pool) { }
 
   async ensureSchema(): Promise<void> {
     await this.pool.query(BASE_SCHEMA);
@@ -153,7 +153,7 @@ export class WebhookRepository {
       `SELECT * FROM webhook_subscriptions
        WHERE tenant_id = $1
        AND is_active = TRUE
-       AND event_types @> ARRAY[$2]::text[]`,
+       AND $2 = ANY(event_types)`,
       [tenantId, eventType],
     );
 
@@ -196,10 +196,10 @@ export class WebhookRepository {
     const result = await this.pool.query(
       `SELECT * FROM webhook_deliveries
        WHERE status IN ('pending','failed')
-       AND (next_attempt_at IS NULL OR next_attempt_at <= CURRENT_TIMESTAMP)
-       ORDER BY next_attempt_at NULLS FIRST, created_at
+       AND (next_attempt_at IS NULL OR next_attempt_at <= $2)
+       ORDER BY next_attempt_at, created_at
        LIMIT $1`,
-      [limit],
+      [limit, new Date()],
     );
 
     return result.rows.map(mapDelivery);

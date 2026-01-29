@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
@@ -70,15 +72,15 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
-    '^pg$': '<rootDir>/__mocks__/pg.js',
-    '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
-    '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
-    '^uWebSockets\\.js$': '<rootDir>/__mocks__/uWebSockets.js',
-    '^@server/(.*)$': '<rootDir>/server/src/$1',
-    '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',
-    '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src/index.ts',
+    '^node-fetch$': path.resolve(__dirname, '__mocks__/node-fetch.js'),
+    '^pg$': path.resolve(__dirname, '__mocks__/pg.js'),
+    '^ioredis$': path.resolve(__dirname, '__mocks__/ioredis.js'),
+    '^puppeteer$': path.resolve(__dirname, '__mocks__/puppeteer.js'),
+    '^uWebSockets\\.js$': path.resolve(__dirname, '__mocks__/uWebSockets.js'),
+    '^@server/(.*)$': path.resolve(__dirname, 'server/src/$1'),
+    '^@tests/(.*)$': path.resolve(__dirname, 'tests/$1'),
+    '^@intelgraph/provenance$': path.resolve(__dirname, 'packages/provenance/src/index.ts'),
+    '^@intelgraph/(.*)$': path.resolve(__dirname, 'packages/$1/src/index.ts'),
   },
   transformIgnorePatterns: [
     'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|.*\\.mjs$))',
@@ -90,6 +92,6 @@ module.exports = {
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.cjs'],
+  setupFilesAfterEnv: [path.resolve(__dirname, 'tests/utils/jest-setup.cjs')],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
