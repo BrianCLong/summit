@@ -1,0 +1,13 @@
+{
+  "evidence": [
+    {
+      "id": "EVD-AIINFOPS-TEST-003",
+      "area": "TEST",
+      "files": {
+        "report": "evidence/fixtures/bad/bad_timestamp/EVD-AIINFOPS-TEST-003/report.json",
+        "metrics": "evidence/fixtures/bad/bad_timestamp/EVD-AIINFOPS-TEST-003/metrics.json",
+        "stamp": "evidence/fixtures/bad/bad_timestamp/EVD-AIINFOPS-TEST-003/stamp.json"
+      }
+    }
+  ]
+}

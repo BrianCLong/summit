@@ -1,4 +1,10 @@
-# Required checks discovery (TODO)
-1) Open GitHub repo → Settings → Branches → Branch protection rules.
-2) List required status checks and their exact names.
-3) Replace temporary check names in `.github/workflows/jetrl-ci.yml`.
+# Required Checks Discovery
+
+## CI Checks to Enable
+
+1.  `evidence-verify`: Runs `tools/ci/verify_evidence.py`.
+
+## Temporary Check Naming Conventions
+- `evidence-verify`
+- `io-workflow-e2e` (Planned)
+- `provenance-verify` (Planned)

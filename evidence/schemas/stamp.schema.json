@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["created_at"],
+  "required": ["evidence_id", "generated_at", "generator"],
   "properties": {
-    "created_at": { "type": "string", "format": "date-time" }
+    "evidence_id": { "type": "string", "pattern": "^EVD-AIINFOPS-[A-Z]+-\\d{3}$" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "generator": { "type": "string" }
   },
   "additionalProperties": false
 }

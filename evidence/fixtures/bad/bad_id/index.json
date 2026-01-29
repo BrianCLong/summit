@@ -1,0 +1,13 @@
+{
+  "evidence": [
+    {
+      "id": "EVD-BAD-ID-004",
+      "area": "TEST",
+      "files": {
+        "report": "evidence/fixtures/bad/bad_id/EVD-BAD-ID-004/report.json",
+        "metrics": "evidence/fixtures/bad/bad_id/EVD-BAD-ID-004/metrics.json",
+        "stamp": "evidence/fixtures/bad/bad_id/EVD-BAD-ID-004/stamp.json"
+      }
+    }
+  ]
+}

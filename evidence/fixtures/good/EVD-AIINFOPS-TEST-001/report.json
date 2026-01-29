@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-AIINFOPS-TEST-001",
+  "scope": "test",
+  "summary": "A valid test report.",
+  "results": [{"name": "test_pass", "pass": true}],
+  "artifacts": ["some/artifact.json"]
+}

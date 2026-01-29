@@ -1,0 +1,5 @@
+{
+  "evidence_id": "EVD-AIINFOPS-TEST-001",
+  "counters": {"test_count": 1},
+  "latency_ms": {"test_latency": 10}
+}

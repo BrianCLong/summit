@@ -1,23 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["latency_ms_p95", "ead", "bias"],
+  "required": ["evidence_id"],
   "properties": {
-    "latency_ms_p95": { "type": "number" },
-    "ead": {
+    "evidence_id": { "type": "string", "pattern": "^EVD-AIINFOPS-[A-Z]+-\\d{3}$" },
+    "counters": {
       "type": "object",
-      "properties": {
-        "precision": { "type": "number" },
-        "recall": { "type": "number" }
-      }
+      "additionalProperties": { "type": "number" }
     },
-    "bias": {
+    "latency_ms": {
       "type": "object",
-      "properties": {
-        "by_language": { "type": "object" },
-        "by_region": { "type": "object" },
-        "by_demographic_proxy": { "type": "object" }
-      }
+      "additionalProperties": { "type": "number" }
     }
-  }
+  },
+  "additionalProperties": false
 }
