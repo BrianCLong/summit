@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 
+<<<<<<< HEAD
 test.describe('Policy Redaction Gate', () => {
   // Always enable this test, or ensure it runs when tests are enabled
 
@@ -50,5 +51,54 @@ test.describe('Policy Redaction Gate', () => {
 
     // Cleanup
     fs.rmSync(testDir, { recursive: true, force: true });
+=======
+test.describe.configure({ mode: 'serial' });
+
+test.describe('policy: redaction', () => {
+  const artifactsDir = path.join(__dirname, '../../../artifacts/test-redaction');
+  const scanScript = path.join(__dirname, '../../../scripts/ci/redaction_scan.sh');
+
+  test.beforeAll(() => {
+    if (!fs.existsSync(artifactsDir)) {
+      fs.mkdirSync(artifactsDir, { recursive: true });
+    }
+  });
+
+  test.beforeEach(() => {
+    // Clean directory before each test
+    if (fs.existsSync(artifactsDir)) {
+        fs.rmSync(artifactsDir, { recursive: true, force: true });
+        fs.mkdirSync(artifactsDir, { recursive: true });
+    }
+  });
+
+  test.afterAll(() => {
+    if (fs.existsSync(artifactsDir)) {
+      fs.rmSync(artifactsDir, { recursive: true, force: true });
+    }
+  });
+
+  test('scanner allows clean artifacts', () => {
+    fs.writeFileSync(path.join(artifactsDir, 'clean.txt'), 'This is a clean file.');
+
+    try {
+      execSync(`${scanScript} ${artifactsDir}`, { stdio: 'pipe' });
+    } catch (e: any) {
+      throw new Error(`Scanner failed on clean artifact: ${e.stdout?.toString()}`);
+    }
+  });
+
+  test('scanner detects secrets', () => {
+    fs.writeFileSync(path.join(artifactsDir, 'dirty.txt'), 'Config: SECRET=super_sensitive_value');
+
+    try {
+      execSync(`${scanScript} ${artifactsDir}`, { stdio: 'pipe' });
+      throw new Error('Scanner should have failed but passed.');
+    } catch (e: any) {
+      expect(e.status).toBe(1);
+      const output = e.stdout?.toString() + e.stderr?.toString();
+      expect(output).toContain('Forbidden pattern found');
+    }
+>>>>>>> 50f8d7925a (feat: add golden path E2E test harness for consolidated frontend)
   });
 });
