@@ -112,8 +112,8 @@ export class WebhookDeliveryWorker {
         delivery.id,
         'succeeded',
         delivery.attemptCount + 1,
-        null,
-        null,
+        undefined,
+        undefined,
       );
     } catch (err: any) {
       const attemptNumber = delivery.attemptCount + 1;
@@ -139,7 +139,7 @@ export class WebhookDeliveryWorker {
       );
 
       if (status === 'dead') {
-        this.metrics.recordDeadLetter(error);
+        this.metrics.recordDeadLetter(error ?? 'Unknown error');
         logger.error('webhook.dead_letter', { deliveryId: delivery.id, error });
       } else {
         this.metrics.recordFailure(Date.now() - started);

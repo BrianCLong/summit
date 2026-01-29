@@ -177,7 +177,7 @@ export class InterventionRecommender {
       .map(([domain, stats]) => ({
         domain,
         affectedCount: predictions.filter(
-          (p) => p.domainScores[domain] < 50
+          (p) => (p.domainScores[domain] ?? 100) < 50
         ).length,
         avgScore: Math.round(stats.total / stats.count),
         priority: this.determineDomainPriority(stats.total / stats.count),
@@ -281,7 +281,7 @@ export class InterventionRecommender {
   }
 
   private estimateImpact(prediction: WellbeingPrediction, domain: WellbeingDomain): number {
-    const currentScore = prediction.domainScores[domain];
+    const currentScore = prediction.domainScores[domain] ?? 50;
     const potentialGain = 100 - currentScore;
     // Estimate 30-60% improvement potential based on intervention
     return Math.round(potentialGain * (0.3 + Math.random() * 0.3));

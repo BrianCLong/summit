@@ -11,9 +11,6 @@ import {
   normalizeReasoningBudget,
   type ReasoningBudgetContract,
 } from './budget';
-import { AgentGovernanceService } from './governance-service.ts';
-import logger from '../utils/logger.ts';
-import { metrics } from '../monitoring/metrics.ts';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"

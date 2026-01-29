@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -28,13 +29,13 @@ const argValue = (flag: string) => {
 };
 
 const loadTargets = (input?: string): string[] | undefined => {
-  if (!input) return undefined;
+  if (!input) {return undefined;}
   const resolved = path.resolve(input);
   if (fs.existsSync(resolved)) {
     return fs
       .readFileSync(resolved, 'utf-8')
       .split(/\r?\n/)
-      .map((l) => l.trim())
+      .map((l: string) => l.trim())
       .filter(Boolean);
   }
   return input.split(',').map((t) => t.trim()).filter(Boolean);

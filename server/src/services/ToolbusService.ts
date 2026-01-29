@@ -3,7 +3,7 @@ import {
   ConnectorContext,
   RateLimiter,
   ConnectorResult,
-  ConnectorAction,
+  ToolDefinition,
 } from '@intelgraph/connector-sdk';
 import { logger } from '../utils/logger.js';
 import Ajv from 'ajv';
@@ -110,8 +110,8 @@ export class ToolbusService {
     }
 
     // Validation
-    const actions = connector.getActions ? await connector.getActions() : [];
-    const actionDef = actions.find(a => a.name === actionName);
+    const actions: ToolDefinition[] = connector.getTools ? await connector.getTools() : [];
+    const actionDef = actions.find((a: ToolDefinition) => a.name === actionName);
 
     if (actionDef && actionDef.inputSchema) {
       const validate = ajv.compile(actionDef.inputSchema);

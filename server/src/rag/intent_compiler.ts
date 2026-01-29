@@ -26,7 +26,30 @@ export const IntentSpecSchema = z.object({
   })
 });
 
-export type IntentSpec = z.infer<typeof IntentSpecSchema>;
+export type IntentSpec = {
+  query_id: string;
+  original_query: string;
+  intent_type: "traversal" | "aggregation" | "path_finding" | "neighbor_expansion";
+  target_entities: Array<{
+    id: string;
+    type: string;
+    confidence: number;
+  }>;
+  constraints?: {
+    max_hops?: number;
+    min_confidence?: number;
+    relationship_types?: string[];
+  };
+  evidence_budget: {
+    max_nodes: number;
+    max_edges: number;
+    max_paths: number;
+  };
+  ordering: {
+    by: "centrality" | "recency" | "confidence";
+    direction: "ASC" | "DESC";
+  };
+};
 
 export class EvidenceBudget {
   constructor(private config: { maxNodes: number; maxEdges: number; maxPaths: number }) {}
