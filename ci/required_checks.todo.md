@@ -1,30 +1,13 @@
-# required_checks.todo.md
+# Required Checks Discovery (TODO)
 
-## Goal
-Discover the exact CI "Required checks" names enforced on the default branch.
+1. Open repo settings → Branch protection rules.
+2. Record required status check names for default branch.
+3. Paste them into `ci/required_checks.json` (to be added in PR7).
+4. If names differ from our local gates, add a rename map.
 
-## UI steps (GitHub)
-1) Repo → Settings → Branches → Branch protection rule → "Require status checks"
-2) Copy the exact check names into `ci/verifier_spec.md`.
-
-## Discovered Checks (Preliminary)
-- validate-release-policy
-- lint-reason-codes
-- security-scan
-- sbom
-
-## Temporary naming convention
-Until discovered, gates are referenced as:
-- summit/evidence
-- summit/evals_smoke
-- summit/promptpack_schema
-- summit/tool_spec_quality
-- fedgnn-governance
-- fedgnn-evidence-verify
-- fedgnn-adversarial-fixtures
-- evidence_verify_sot
-- sot_eval_smoke
-- repro_gate
-
-## Rename plan
-Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
+Current Assumed Checks:
+- `check:lint`
+- `check:unit`
+- `check:security`
+- `check:evidence-validate`
+- `check:dep-delta`
