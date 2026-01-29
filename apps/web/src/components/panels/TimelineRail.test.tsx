@@ -5,9 +5,9 @@ import * as React from 'react'
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() { }
+  unobserve() { }
+  disconnect() { }
 } as any
 
 // Mock Tooltip components
@@ -91,7 +91,7 @@ describe('TimelineRail', () => {
       screen.getByRole('button', { name: /Restart playback/i })
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('button', { name: /Start playback/i })
+      screen.getByRole('button', { name: /^Start playback$/i })
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /Playback speed/i })
@@ -100,11 +100,11 @@ describe('TimelineRail', () => {
 
   it('toggles play/pause label', () => {
     render(<TimelineRail {...defaultProps} />)
-    const playButton = screen.getByRole('button', { name: /Start playback/i })
+    const playButton = screen.getByRole('button', { name: /^Start playback$/i })
     fireEvent.click(playButton)
 
     expect(
-      screen.getByRole('button', { name: /Pause playback/i })
+      screen.getByRole('button', { name: /^Pause playback$/i })
     ).toBeInTheDocument()
   })
 

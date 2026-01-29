@@ -388,6 +388,7 @@ export function TimelineRail({
                     variant="ghost"
                     size="sm"
                     className="h-8 px-2 text-xs"
+                    aria-label="Playback speed"
                     onClick={() =>
                       setPlaybackSpeed(s =>
                         s >= 10 ? 1 : s === 1 ? 2 : s === 2 ? 5 : 10
@@ -465,11 +466,10 @@ export function TimelineRail({
                 return (
                   <div
                     key={event.id}
-                    className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors ${
-                      selectedEventId === event.id
+                    className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors ${selectedEventId === event.id
                         ? 'bg-muted ring-2 ring-primary'
                         : ''
-                    } ${isFuture ? 'opacity-40 grayscale' : ''}`}
+                      } ${isFuture ? 'opacity-40 grayscale' : ''}`}
                     onClick={() => onEventSelect?.(event)}
                   >
                     <div
