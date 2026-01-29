@@ -26,6 +26,7 @@ export enum SensitiveDataType {
   CLASSIFIED = 'classified',
   LOCATION = 'location',
   BIOMETRIC = 'biometric',
+  SECURITY = 'security',          // Sandbox boundary risks (SSRF, path traversal, injection)
 }
 
 // Sandbox resource quotas
