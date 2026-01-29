@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { InvestigationPage } from '../pages/InvestigationPage';
 
 test.describe('golden-path: journey', () => {
   // Configurable kill switch for the journey itself
@@ -34,9 +35,22 @@ test.describe('golden-path: journey', () => {
       await dashboardPage.navigateToInvestigations();
     });
 
-    // 4. Verify investigation list loaded
-    await test.step('Verify Investigations Page', async () => {
-      await expect(page.locator('[data-testid="investigations-list"]')).toBeVisible({ timeout: 10000 });
+    // 4. Open Investigation
+    const investigationPage = new InvestigationPage(page);
+    await test.step('Open Golden Path Investigation', async () => {
+        await investigationPage.openInvestigation('Golden Path Investigation');
+        await investigationPage.isLoaded();
+    });
+
+    // 5. Verify Entities
+    await test.step('Verify Entities', async () => {
+        await investigationPage.verifyEntityVisible('John Doe');
+        await investigationPage.verifyEntityVisible('Acme Corp');
+    });
+
+    // 6. Graph View
+    await test.step('Switch to Graph', async () => {
+        await investigationPage.switchToGraphView();
     });
   });
 });

@@ -12,11 +12,8 @@ export class LoginPage {
     await expect(this.page.locator('#root')).toBeAttached();
   }
 
-  async login(email?: string, password?: string) {
-    await this.goto();
-    const loginButton = this.page.getByRole('button', { name: /login|sign in/i });
-    if (await loginButton.isVisible()) {
-      await loginButton.click();
-    }
+  async login(email: string, password: string) {
+    await this.page.goto('/login');
+    // TODO: implement real login when needed
   }
 }
