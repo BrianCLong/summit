@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Language Transfer Matrix",
+  "type": "object",
+  "required": ["matrix_version", "source_languages", "target_languages", "transfer_values", "provenance"],
+  "properties": {
+    "matrix_version": { "type": "string" },
+    "source_languages": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$" }
+    },
+    "target_languages": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$" }
+    },
+    "transfer_values": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": { "type": "number", "minimum": -1, "maximum": 1 }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source", "collected_at"],
+      "properties": {
+        "source": { "type": "string" },
+        "collected_at": { "type": "string", "format": "date-time" },
+        "author": { "type": "string" },
+        "methodology": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

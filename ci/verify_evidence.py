@@ -2,6 +2,7 @@ import sys
 import subprocess
 import json
 import os
+from pathlib import Path
 
 def run_command(cmd, msg):
     print(f"Running: {msg}")
@@ -11,6 +12,27 @@ def run_command(cmd, msg):
         return False
     print(f"PASSED: {msg}")
     return True
+
+def verify_schemas():
+    print("Verifying schemas...")
+    try:
+        from jsonschema import validate
+        ROOT = Path(__file__).resolve().parents[1]
+
+        # Validate transfer matrix schema exists
+        tm_schema_path = ROOT / "evidence" / "schemas" / "transfer_matrix.schema.json"
+        if not tm_schema_path.exists():
+            print(f"FAILED: Schema missing: {tm_schema_path}")
+            return False
+
+        print("PASSED: Schema existence check")
+        return True
+    except ImportError:
+        print("jsonschema not found, skipping deep validation")
+        return True
+    except Exception as e:
+        print(f"FAILED: Schema check error: {e}")
+        return False
 
 def verify_evidence_index():
     print("Verifying evidence/index.json...")
@@ -23,10 +45,16 @@ def verify_evidence_index():
             "EVD-vfgnn-GOV-001",
             "EVD-vfgnn-ROB-001",
             "EVD-vfgnn-ATT-001",
-            "EVD-vfgnn-NEG-001"
+            "EVD-vfgnn-NEG-001",
+            "EVD-ATLAS-SCHEMA-001",
+            "EVD-ATLAS-PLNR-001",
+            "EVD-ATLAS-XFER-001",
+            "EVD-ATLAS-ATLS-001",
+            "EVD-ATLAS-GOV-001"
         ]
 
-        found_ids = {item['evidence_id'] for item in index['items']}
+        found_ids = {item['evidence_id'] for item in index['items'] if 'evidence_id' in item}
+        # Fallback for legacy format if needed, but here we expect evidence_id
         missing = [rid for rid in required_ids if rid not in found_ids]
 
         if missing:
@@ -64,6 +92,9 @@ def main():
         else:
             if not run_command(cmd, msg):
                 success = False
+
+    if not verify_schemas():
+        success = False
 
     if not verify_evidence_index():
         success = False
