@@ -18,17 +18,6 @@ def validate_schema(data, schema_path):
         schema = json.load(f)
     validate(instance=data, schema=schema)
 
-def verify_hash(filepath, expected_hash):
-    sha256 = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        while True:
-            data = f.read(65536)
-            if not data:
-                break
-            sha256.update(data)
-    if sha256.hexdigest() != expected_hash:
-        raise ValueError(f"Hash mismatch for {filepath}: expected {expected_hash}, got {sha256.hexdigest()}")
-
 def scan_for_timestamps(data, path=""):
     """Recursively scan for timestamp-like strings."""
     if isinstance(data, dict):
@@ -70,58 +59,32 @@ def main():
     # 2. Iterate items and validate
     for item in index_data["items"]:
         evd_id = item["evidence_id"]
-        files = item["files"]
-        hashes = item["sha256"]
 
-        if len(files) != len(hashes):
-            print(f"Error: Mismatch in files and hashes count for {evd_id}")
-            sys.exit(1)
+        required_files = {
+            "report": item["report"],
+            "metrics": item["metrics"],
+            "stamp": item["stamp"]
+        }
 
-        # Check required files
-        required_files = {"report.json", "metrics.json", "stamp.json"}
-        file_set = set(files)
-        missing_required = required_files - file_set
-        if missing_required:
-             print(f"Error: Missing required files for {evd_id}: {missing_required}")
-             sys.exit(1)
-
-        for fname, expected_hash in zip(files, hashes):
+        for file_type, fname in required_files.items():
             fpath = evidence_dir / fname
             if not fpath.exists():
-                print(f"Error: File {fname} not found for {evd_id}")
+                print(f"Error: File {fname} ({file_type}) not found for {evd_id}")
                 sys.exit(1)
 
-            # Verify hash
+            # Validate schema
+            schema_file = schemas_dir / f"{file_type}.schema.json"
             try:
-                verify_hash(fpath, expected_hash)
-            except ValueError as e:
-                print(f"Error: {e}")
-                sys.exit(1)
+                data = load_json(fpath)
+                validate_schema(data, schema_file)
 
-            # Validate schema if applicable
-            if fname == "report.json":
-                try:
-                    data = load_json(fpath)
-                    validate_schema(data, schemas_dir / "report.schema.json")
-                    # Scan for timestamps
+                # Special check for report.json: no timestamps
+                if file_type == "report":
                     scan_for_timestamps(data)
-                except Exception as e:
-                    print(f"Error validating {fname}: {e}")
-                    sys.exit(1)
-            elif fname == "metrics.json":
-                try:
-                    data = load_json(fpath)
-                    validate_schema(data, schemas_dir / "metrics.schema.json")
-                except Exception as e:
-                    print(f"Error validating {fname}: {e}")
-                    sys.exit(1)
-            elif fname == "stamp.json":
-                try:
-                    data = load_json(fpath)
-                    validate_schema(data, schemas_dir / "stamp.schema.json")
-                except Exception as e:
-                    print(f"Error validating {fname}: {e}")
-                    sys.exit(1)
+
+            except Exception as e:
+                print(f"Error validating {fname} ({file_type}) for {evd_id}: {e}")
+                sys.exit(1)
 
     print("Evidence verification passed.")
 

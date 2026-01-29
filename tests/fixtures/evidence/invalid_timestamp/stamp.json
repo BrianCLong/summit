@@ -1,6 +1,4 @@
 {
-  "evidence_id": "EVD-XGNN-GOV-003",
-  "generated_at": "2023-10-27T10:00:00Z",
-  "git_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "runner": "test"
+  "evidence_id": "EVD-CLAUDE-SKILLS-002",
+  "created_at": "2026-01-25T12:00:00Z"
 }

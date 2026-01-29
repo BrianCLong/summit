@@ -1,11 +1,9 @@
-## Discover required checks (GitHub UI)
-1. Open repo → Settings → Branches → Branch protection rule.
-2. List required status checks (exact names).
+# Required checks discovery (temporary)
+1) Open repo → Settings → Branches → Branch protection rules.
+2) Record required check names for default branch.
+3) Update `.github/workflows/*` names OR map them in `ci/required_checks.map.json`.
 
-## Discover via API
-1. Use GitHub REST: Get branch protection for default branch.
-2. Record required checks; paste into `tools/ci/required_checks.json`.
-
-## Temporary gate names (until discovered)
-- ci/privacy-graph-gate
-- ci/deps-delta-gate
+Temporary local gate names:
+- skillpacks:validate
+- evidence:schemas
+- supplychain:delta

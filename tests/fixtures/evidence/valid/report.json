@@ -1,10 +1,11 @@
 {
-  "evidence_id": "EVD-XGNN-GOV-001",
-  "run_metadata": { "env": "test" },
-  "dataset_id": "ds_123",
-  "model_id": "model_abc",
-  "method": "baseline_structural",
-  "top_findings": [],
-  "summary": "Test run",
-  "artifacts": ["graph.png"]
+  "evidence_id": "EVD-CLAUDE-SKILLS-001",
+  "skillpack_id": "verify-work",
+  "summary": "Verified all changes in PR1.",
+  "findings": [
+    {
+      "severity": "info",
+      "message": "All checks passed."
+    }
+  ]
 }
