@@ -215,6 +215,7 @@ This document provides a comprehensive inventory of all Summit services and thei
 | innovation-sandbox            | TBD  | TBD              | TBD       | TBD        | TBD           |
 | insight-ai                    | TBD  | TBD              | TBD       | TBD        | TBD           |
 | insights                      | TBD  | TBD              | TBD       | TBD        | TBD           |
+| integration-gateway           | TBD  | TBD              | TBD       | TBD        | TBD           |
 | integrations                  | TBD  | TBD              | TBD       | TBD        | TBD           |
 | intel                         | TBD  | TBD              | TBD       | TBD        | TBD           |
 | intelgraph-server             | TBD  | TBD              | TBD       | TBD        | TBD           |
@@ -401,6 +402,7 @@ This document provides a comprehensive inventory of all Summit services and thei
 | worker-queue                  | TBD  | TBD              | TBD       | TBD        | TBD           |
 | workers                       | TBD  | TBD              | TBD       | TBD        | TBD           |
 | workflow                      | TBD  | TBD              | TBD       | TBD        | TBD           |
+| xai-explain-anomaly           | TBD  | TBD              | TBD       | TBD        | TBD           |
 | zk-deconfliction              | TBD  | TBD              | TBD       | TBD        | TBD           |
 | zk-tx                         | TBD  | TBD              | TBD       | TBD        | TBD           |
 | zk-tx-svc                     | TBD  | TBD              | TBD       | TBD        | TBD           |
