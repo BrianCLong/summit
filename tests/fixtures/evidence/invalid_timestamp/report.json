@@ -1,10 +1,11 @@
 {
-  "evidence_id": "EVD-XGNN-GOV-003",
-  "run_metadata": { "date": "2023-10-27T10:00:00Z" },
-  "dataset_id": "ds",
-  "model_id": "m",
-  "method": "baseline_structural",
-  "top_findings": [],
-  "summary": "s",
-  "artifacts": []
+  "evidence_id": "EVD-CLAUDE-SKILLS-002",
+  "skillpack_id": "verify-work",
+  "summary": "Report with forbidden timestamp.",
+  "findings": [
+    {
+      "severity": "info",
+      "message": "2026-01-25T12:00:00Z"
+    }
+  ]
 }

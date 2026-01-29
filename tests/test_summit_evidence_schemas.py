@@ -50,9 +50,9 @@ def test_verify_evidence_missing_files():
         text=True
     )
     assert result.returncode != 0
-    assert "Missing required files" in result.stdout
+    assert "not found for" in result.stdout
 
-def test_manual_schema_validation_invalid_method():
+def test_manual_schema_validation_invalid_severity():
     """Manually validate the invalid fixture against the schema to ensure schema correctness."""
     with open(SCHEMAS_DIR / "report.schema.json") as f:
         schema = json.load(f)
@@ -60,8 +60,8 @@ def test_manual_schema_validation_invalid_method():
     with open(INVALID_FIXTURES / "report.json") as f:
         data = json.load(f)
 
-    # The invalid fixture has "method": "invalid_method" which is not in the enum
+    # The invalid fixture has "severity": "invalid_severity" which is not in the enum
     with pytest.raises(ValidationError) as excinfo:
         validate(instance=data, schema=schema)
 
-    assert "'invalid_method' is not one of" in str(excinfo.value)
+    assert "'invalid_severity' is not one of" in str(excinfo.value)
