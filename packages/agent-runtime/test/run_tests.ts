@@ -6,7 +6,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const tests = [
     "policy_bypass_attempt_test.ts",
-    "forbidden_tool_test.ts"
+    "forbidden_tool_test.ts",
+    "policy_deny_default_test.ts",
+    "browser_restrictions_test.ts"
 ];
 
 let failure = false;

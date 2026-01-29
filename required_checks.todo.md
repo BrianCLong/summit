@@ -1,15 +1,9 @@
 # Required checks discovery (TODO)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rule → list required checks.
+2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Record names here; then rename temporary CI jobs to match.
 
-1. Open GitHub repo → Settings → Branches → Branch protection rules.
-2. List required status checks and their exact names.
-3. Write the canonical list into `ci/required_checks.json`.
-4. Replace temporary check names in workflow configs after the canonical list is known.
-
-## Temporary Check Names
-
-- `ci:moral_schema_validate`
-- `ci:moral_unit`
-- `ci:moral_policy_deny_by_default`
-- `ci:supply_chain_delta`
-- `worldsim-foundation-gate`
-- `evidence-schema-gate`
+Temporary gate names (to be replaced):
+- summit-unit-tests
+- summit-evidence
+- summit-deps-delta
