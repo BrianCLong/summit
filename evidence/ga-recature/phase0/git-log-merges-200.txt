@@ -1,0 +1,86 @@
+cd6b9bd53 Merge PR #17007: feat: Foundation for 5x agentic coding (Evidence + Evals)
+dbb71f97d Merge PR #17003: feat(subsumption): add aidisinfo25 misinfo defense bundle
+346d8fbbc Merge PR #17001: feat: Implement CycloneDX SBOM attestation with Cosign
+e98bf7caf Merge PR #16982: feat: add narrative-ops-detection subsumption bundle
+415d7607f Merge PR #16975: feat: Claude Code Swarm Orchestration Skill
+121bab117 Merge PR #16998: chore: production-harden Dockerfile and add go-live readiness assessment
+8b308c110 Merge pull request #16986 from BrianCLong/feat/subsumption-item-unknown-11501892874165389869
+0b131c07d Merge remote-tracking branch 'origin/main' into feat/subsumption-item-unknown-11501892874165389869
+3a3a7d856 Merge pull request #16997 from BrianCLong/subsumption/azure-turin-v7-9607953653571586661
+73289628b Merge remote-tracking branch 'origin/main' into subsumption/azure-turin-v7-9607953653571586661
+a962728e3 Merge PR #16993: feat(subsumption): add SSDF v1.2 alignment bundle and verifier
+6d8a0d093 Merge PR #16992: Add MCP Apps Subsumption Bundle
+482d883d2 Merge PR #16983: Foundation: Automation Turn #6 Subsumption Bundle
+f82126382 Merge PR #16974: feat(resilience): implement Project 19 items 2-5 (Resilience Engine)
+5277f07c8 Merge PR #16978: feat: add supply chain guardrails and gates
+7f380bed1 Merge PR #16922: fix(ci): stabilize workflows, add GA gate, and align Jest config
+72ad7c244 Merge PR #16808: ci: establish observable baseline pipeline
+b0d20a68d Merge PR #16774: fix(ci): resurrect CI workflow and establish green baseline
+0e5b60cbf Merge PR #16777: ci: add reusable workflow for monorepo gates + evidence upload
+2f2e4c212 Merge PR #16860: feat(maestro): Add Sandbox Tool MVP
+88e00773c Merge PR #16971: Agentic Plan Gate and Governance
+062066c90 Merge PR #16800: Consolidate CI workflows
+3e6909b83 Merge PR #16789: CI/CD Security & Release Hardening
+110eac3bd Merge PR #16788: OIDC Cloud Auth and Pre-Deploy SLO Gates
+2f3f29d8f Merge PR #16674: Comprehensive Testing Suite & CI/CD Implementation
+68d7b1723 Merge PR #16677: Skip airgap-vuln-manager tests due to ESM mocking issues
+64ff69183 Merge PR #16676: Comprehensive Summit monitoring and observability
+653cd3016 Merge PR #16675: Enhance Data Infrastructure - Redis, Partitioning, Backup
+7f33f447e Merge PR #16690: Lock Ownership and Declare Steady-State GA
+bcd54459c Merge PR #16685: Governance Drift and Evidence Freshness Gate
+2d0d149a5 Merge PR #16683: Establish weekly GA readiness cadence
+a5cae8e65 Merge PR #16773: GA Recovery Sprint - Value Harvest & Canonicalization
+44a2f7d21 Merge PR #16733: Comprehensive Testing Suite & CI/CD Pipeline
+5323e6b11 Merge PR #16720: GA readiness fixes
+fa9db8469 Merge PR #16859: Summit Task Graph with FileSystem Persistence
+f98c797d4 Merge PR #16923: ARK sequence agent spine with sandbox boundary tests
+af03c1272 Merge PR #16966: Update node-gyp dependency and fix tsconfig
+a1ffa2e8c Merge PR #16878: ARK Foundational Layer
+7b1ae7d51 Merge PR #16967: Governed retrieval substrate (IR, Policy, Evidence)
+1f84fd3c0 Merge PR #16906: Self-hosted CI runners and PR preview environments
+e235b7ffb Merge PR #16921: Eval baseline gates and ratchet support
+84b10e0cd Merge PR #16874: Eval-skills framework with three skill suites
+67b676c14 Merge PR #16873: Intent-decomposition package with Bi-Fact evaluation
+913317ab8 Merge PR #16795: GA Infrastructure & CDC Sync Validator
+c37b69bbb Merge PR #16786: Platform-Embedded AI Governance Framework
+3c940edf6 Merge PR #16782: MCP-Native Agent Platform Rollout (Project #19)
+4a3f3caee Merge PR #16760: Automation Turn #7 constraint-driven execution
+cf339a88d Merge PR #16766: Automation Turn #7: Supply Chain Integrity Updates
+ede0dbae0 Merge PR #16735: Maestro reasoning budgets, tool graph, and noise harness
+57f869f38 Merge PR #16737: Project #19 execution package
+84457f7a0 Merge PR #16753: Extract and Instantiate OSINT Methodology Moats
+7bbbfa10a Merge PR #16731: Enhance Summit data storage and caching infrastructure
+d8a2ff68f Merge PR #16736: H1 2026 Roadmap and Agent Governance Artifacts
+d926eff10 Merge PR #16738: Advanced Tool Use prompt framework and docs
+96c50bc49 Merge #16770: OpenLineage and W3C PROV support
+4a82b3a47 Merge PR #16770: OpenLineage and W3C PROV support in Maestro
+53d5ce5f1 Merge #16783: Graph Intent Architecture
+79b202a49 Merge PR #16783: Graph Intent Architecture with Evidence Budgeting
+507bd9e9e Merge #16803: DISARM taxonomy scaffold
+caa2d70d2 Merge PR #16803: DISARM taxonomy scaffold
+8d97c7a96 Merge #16742: Antigravity governance scaffolding
+d07f716ad Merge PR #16742: Antigravity governance scaffolding
+eef8e95b4 Merge #16781: Antigravity Agent Framework
+42dd534aa Merge PR #16781: Integrate Antigravity Agent Framework
+b83637d8a Merge #16771: Lineage resilience and replayability
+1f9029779 Merge PR #16771: Lineage resilience and replayability
+6ed9a48f3 Merge #16772: Software Supply Chain Integrity
+8a4ec918f Merge PR #16772: Software Supply Chain Integrity Enhancements
+71f066aa3 Merge #16796: Salvage GA technical debt
+e84874c25 Merge PR #16796: Salvage GA technical debt - streaming-ingest & bulk tests
+0117f7175 Merge #16811: Intelligence Foundry docs
+ff4e66e08 Merge PR #16811: Intelligence Foundry architecture docs
+7fddc568a Merge #16828: Graph↔Postgres drift gate
+121aa9835 Merge PR #16828: Graph↔Postgres drift gate
+17d8988a6 Merge #16813: SLSA Provenance Verification
+546150876 Merge PR #16813: SLSA Provenance Verification with Graph-Sync-Validator
+a9c29337c Merge #16920: Branch protection audit tokens for drift detection
+e07e0a56e Merge PR #16920: Branch protection audit tokens for drift detection
+8f0d671fe Merge #16954: Update dependencies and add xai-explain-anomaly service
+65f861c89 Merge PR #16954: Update dependencies and add xai-explain-anomaly service
+e6abc73f7 Merge #16719: Fix dependency resolution and cleanup type conflicts
+56ecc1b9c Merge PR #16719: Fix dependency resolution and cleanup type conflicts
+1f0736636 ci: resolve merge conflict in integrity baseline
+0fcf09d3e chore(security): merge PR #16318 hardening fixes
+144b330f9 chore(security): merge PR #16287 Python RCE fixes
+470f06fef Merge pull request #16181 from BrianCLong/chore/release-cleanup
