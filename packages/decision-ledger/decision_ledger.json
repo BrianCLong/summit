@@ -49,5 +49,22 @@
     },
     "reasoning": "Registered MCP Git chain hardening prompt and task spec to satisfy governance invariants.",
     "reverted": false
+  },
+  {
+    "id": "b6c9b5d0b1",
+    "timestamp": "2026-01-29T00:20:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAid29ybGRzaW0gUFIxIHNjYWZmb2xkIChjb3JlIGludGVyZmFjZSwgZXZpZGVuY2Ugc2NoZW1hcywgZGlzY292ZXJ5IFRPRE9zKSIsICJmaWxlcyI6IFsid29ybGRzaW0vY29yZS5weSIsICJ3b3JsZHNpbS9fX2luaXRfXy5weSIsICJzY2hlbWFzL2V2aWRlbmNlX3JlcG9ydC5zY2hlbWEuanNvbiIsICJzY2hlbWFzL2V2aWRlbmNlX21ldHJpY3Muc2NoZW1hLmpzb24iLCAic2NoZW1hcy9ldmlkZW5jZV9zdGFtcC5zY2hlbWEuanNvbiIsICJBUkNISVRFQ1RVUkVfTUFQLnRvZG8ubWQiLCAicmVxdWlyZWRfY2hlY2tzLnRvZG8ubWQiLCAiZXZpZGVuY2UvaW5kZXguanNvbiIsICJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iXX0=",
+    "decision": {
+      "action": "scaffold_worldsim_pr1",
+      "rule": {
+        "condition": "worldsim foundation scaffold required",
+        "action": "scaffold_worldsim_pr1",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added WorldSim core interface, evidence schemas, and discovery TODOs with default-off posture for PR1 baseline.",
+    "reverted": false
   }
 ]
