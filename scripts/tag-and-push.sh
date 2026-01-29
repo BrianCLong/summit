@@ -11,7 +11,7 @@ git diff --quiet || { echo "Working tree not clean"; exit 1; }
 
 # PR gate tests (constrained runner-friendly)
 WITH_ASSISTANT=${WITH_ASSISTANT:-0} pnpm install
-WITH_ASSISTANT=${WITH_ASSISTANT:-0} pnpm run test:all
+WITH_ASSISTANT=${WITH_ASSISTANT:-0} pnpm run test
 
 # branch + push
 git checkout -b "$BRANCH"

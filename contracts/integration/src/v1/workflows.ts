@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Workflow Contract v1
  * Maestro Conductor workflow execution API contracts
@@ -73,7 +74,7 @@ export const StartWorkflowRequestV1 = z.object({
   version: z.literal('v1').describe('API version'),
   workflow: z.string().min(1).describe('Workflow name/identifier'),
   namespace: z.string().default('default').describe('Workflow namespace'),
-  inputs: z.record(z.unknown()).describe('Workflow input parameters'),
+  inputs: z.record(z.string(), z.unknown()).describe('Workflow input parameters'),
   metadata: z
     .object({
       correlationId: z.string().uuid().optional().describe('Correlation ID for tracing'),
@@ -151,7 +152,7 @@ export const GetWorkflowStatusResponseV1 = z.object({
   status: WorkflowStatusV1.describe('Current workflow status'),
   startedAt: z.string().datetime().describe('When the workflow started'),
   completedAt: z.string().datetime().optional().describe('When the workflow completed'),
-  outputs: z.record(z.unknown()).optional().describe('Workflow outputs (if completed)'),
+  outputs: z.record(z.string(), z.unknown()).optional().describe('Workflow outputs (if completed)'),
   error: z.string().optional().describe('Error message if workflow failed'),
   steps: z.array(WorkflowStepV1).optional().describe('Step execution details'),
   metadata: z

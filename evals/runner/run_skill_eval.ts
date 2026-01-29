@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -54,7 +55,7 @@ const runCommand = async (
   const stdout = await fs.open(stdoutPath, 'w');
   const stderr = await fs.open(stderrPath, 'w');
   const start = Date.now();
-  return new Promise((resolve, reject) => {
+  return new Promise<{ exitCode: number | null; durationMs: number }>((resolve, reject) => {
     const child = spawn(bin, args, {
       cwd: repoRoot,
       env,
@@ -78,7 +79,7 @@ const runCommand = async (
   });
 };
 
-const runGitStatus = async (): Promise<string[]> => {
+const runGitStatus = (): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     const child = spawn('git', ['status', '--porcelain=v1'], {
       cwd: repoRoot,
@@ -152,7 +153,7 @@ const runCase = async (
   traceWriter: { write: (event: TraceEvent) => Promise<void> },
   artifactDir: string,
 ): Promise<CaseResult> => {
-  const caseStart = Date.now();
+  // const caseStart = Date.now();
   await ensureDir(artifactDir);
   await traceWriter.write({
     ts: nowIso(),
@@ -233,7 +234,7 @@ const runCase = async (
   };
 };
 
-const loadModule = async <T>(modulePath: string): Promise<T> => {
+const loadModule = <T>(modulePath: string): Promise<T> => {
   const absolute = path.resolve(repoRoot, modulePath);
   return import(pathToFileURL(absolute).href) as Promise<T>;
 };
@@ -244,7 +245,7 @@ const runDeterministicGrader = async (
   skillDir: string,
   prompts: PromptCase[],
 ): Promise<DeterministicResult> => {
-  const module = await loadModule<{ grade: typeof gradeDeterministic }>(
+  const module = await loadModule<{ grade: gradeDeterministic }>(
     config.deterministic_grader,
   );
   const trace = await parseTrace(tracePath);
@@ -263,7 +264,7 @@ const runRubricGrader = async (
   tracePath: string,
   skillDir: string,
 ): Promise<RubricResult> => {
-  const module = await loadModule<{ grade: typeof gradeRubric }>(
+  const module = await loadModule<{ grade: gradeRubric }>(
     config.rubric.grader,
   );
   const trace = await parseTrace(tracePath);

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -8,7 +9,7 @@ import { ScoreSummary } from './types.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-const runGit = async (args: string[]): Promise<string> =>
+const runGit = (args: string[]): Promise<string> =>
   new Promise((resolve, reject) => {
     const child = spawn('git', args, {
       cwd: repoRoot,
@@ -48,8 +49,8 @@ const findChangedSkills = async (): Promise<string[]> => {
   return Array.from(skills);
 };
 
-const runSkill = async (skill: string): Promise<void> => {
-  await new Promise<void>((resolve, reject) => {
+const runSkill = (skill: string): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
     const child = spawn('npx', ['tsx', 'evals/runner/run_skill_eval.ts', '--skill', skill], {
       cwd: repoRoot,
       stdio: 'inherit',
@@ -64,7 +65,7 @@ const runSkill = async (skill: string): Promise<void> => {
   });
 };
 
-const loadLatestSummary = async (skill: string): Promise<ScoreSummary> => {
+const loadLatestSummary = (skill: string): Promise<ScoreSummary> => {
   const summaryPath = path.join(repoRoot, 'evals', 'skills', skill, 'artifacts', 'latest.json');
   return readJson<ScoreSummary>(summaryPath);
 };

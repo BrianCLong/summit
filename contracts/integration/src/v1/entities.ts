@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Entity Schemas v1
  * Defines canonical entity types for the IntelGraph model

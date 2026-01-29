@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -17,7 +18,7 @@ const listSkills = async (): Promise<string[]> => {
     .filter((name) => !name.startsWith('.'));
 };
 
-const runSkill = async (skill: string): Promise<void> =>
+const runSkill = (skill: string): Promise<void> =>
   new Promise((resolve, reject) => {
     const child = spawn('npx', ['tsx', 'evals/runner/run_skill_eval.ts', '--skill', skill], {
       cwd: repoRoot,
@@ -32,7 +33,7 @@ const runSkill = async (skill: string): Promise<void> =>
     });
   });
 
-const loadLatestSummary = async (skill: string): Promise<ScoreSummary> => {
+const loadLatestSummary = (skill: string): Promise<ScoreSummary> => {
   const summaryPath = path.join(repoRoot, 'evals', 'skills', skill, 'artifacts', 'latest.json');
   return readJson<ScoreSummary>(summaryPath);
 };
