@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "entries": {
+    "EVD-SSDF12-BASE-001": {
+      "report": "evidence/subsumption/ssdf-v1-2/report.json",
+      "metrics": "evidence/subsumption/ssdf-v1-2/metrics.json",
+      "stamp": "evidence/subsumption/ssdf-v1-2/stamp.json"
+    },
+    "EVD-SSDF12-GATE-001": {
+      "report": "evidence/subsumption/ssdf-v1-2/verifier/report.json",
+      "metrics": "evidence/subsumption/ssdf-v1-2/verifier/metrics.json",
+      "stamp": "evidence/subsumption/ssdf-v1-2/verifier/stamp.json"
+    },
+    "EVD-SSDF12-GATE-002": {
+      "report": "evidence/subsumption/ssdf-v1-2/verifier/report.json",
+      "metrics": "evidence/subsumption/ssdf-v1-2/verifier/metrics.json",
+      "stamp": "evidence/subsumption/ssdf-v1-2/verifier/stamp.json"
+    },
+    "EVD-SSDF12-GATE-003": {
+      "report": "evidence/subsumption/ssdf-v1-2/verifier/report.json",
+      "metrics": "evidence/subsumption/ssdf-v1-2/verifier/metrics.json",
+      "stamp": "evidence/subsumption/ssdf-v1-2/verifier/stamp.json"
+    }
+  }
+}

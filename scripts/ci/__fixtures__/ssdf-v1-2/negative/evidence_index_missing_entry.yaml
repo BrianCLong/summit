@@ -1,0 +1,7 @@
+item:
+  slug: negative-missing-evidence
+  title: Negative Missing Evidence
+  type: spec
+evidence:
+  required_ids:
+    - "EVD-NON-EXISTENT-001"
