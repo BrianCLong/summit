@@ -17,5 +17,6 @@ Once the required checks are known, we will rename the temporary gate jobs to ma
 ## Todo
 - [ ] List current required checks in GitHub UI/API.
 - [ ] Rename temporary gate names to match repo policy.
-- [ ] Ensure `gate_evidence_validate` is enabled.
+- [x] Ensure `gate_evidence_validate` is enabled.
 - [ ] Ensure `gate_dependency_delta` is enabled.
+- [x] Add CI for TTT Evidence (ci:evidence)

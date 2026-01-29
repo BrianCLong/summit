@@ -1,0 +1,4 @@
+{
+  "path": "/etc/shadow",
+  "description": "This path should be blocked by policy"
+}
