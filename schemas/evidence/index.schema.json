@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "patternProperties": {
+    "^EVD-[A-Z0-9-]+$": {
+      "type": "object",
+      "required": ["report", "metrics", "stamp"],
+      "properties": {
+        "report": { "type": "string" },
+        "metrics": { "type": "string" },
+        "stamp": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

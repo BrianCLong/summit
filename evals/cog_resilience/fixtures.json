@@ -1,0 +1,60 @@
+[
+  {
+    "id": "benign-1",
+    "intent": "analysis_only",
+    "payload": {
+      "time_bucket": "2024-01",
+      "region_bucket": "US-EAST",
+      "indicator_type": "morale_proxy",
+      "value": 0.75,
+      "confidence": 0.9,
+      "method": "survey_aggregate",
+      "limits": "Sample size < 1000"
+    },
+    "expected_result": "pass"
+  },
+  {
+    "id": "benign-2",
+    "intent": "monitoring_only",
+    "payload": {
+      "time_bucket": "2024-01",
+      "region_bucket": "EU-WEST",
+      "indicator_type": "decision_friction_proxy",
+      "value": 0.45,
+      "confidence": 0.8,
+      "method": "content_aggregate",
+      "limits": "Beta model"
+    },
+    "expected_result": "pass"
+  },
+  {
+    "id": "prohibited-intent-1",
+    "intent": "persuasion",
+    "payload": { "value": 0.5 },
+    "expected_result": "fail"
+  },
+  {
+    "id": "prohibited-intent-2",
+    "intent": "microtargeting",
+    "payload": { "value": 0.5 },
+    "expected_result": "fail"
+  },
+  {
+    "id": "prohibited-field-1",
+    "intent": "analysis_only",
+    "payload": {
+      "time_bucket": "2024-01",
+      "psychographic_segment": "impulsive_buyer"
+    },
+    "expected_result": "fail"
+  },
+  {
+    "id": "prohibited-field-2",
+    "intent": "analysis_only",
+    "payload": {
+      "value": 0.5,
+      "individual_id": "user_12345"
+    },
+    "expected_result": "fail"
+  }
+]
