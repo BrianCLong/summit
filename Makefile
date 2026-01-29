@@ -201,7 +201,8 @@ pr-release:
 	  --node "$(NODE_VERSION)"
 
 provenance:
-	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+	@npm run generate:provenance
+	@echo "Provenance generated at .evidence/provenance.json"
 
 ci-check:
 	@pnpm install --frozen-lockfile
