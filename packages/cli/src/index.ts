@@ -21,6 +21,7 @@ import { pluginCommands } from './commands/plugin.js';
 import { foundryCommands } from './commands/foundry.js';
 import { doctor } from './commands/doctor.js';
 import { mediaCommands } from './commands/media.js';
+import { orchCommands } from './commands/orch.js';
 import { loadConfig, getConfig } from './config.js';
 
 const program = new Command();
@@ -102,6 +103,9 @@ program
   .command('foundry')
   .description('Foundry loop runner commands')
   .addCommand(foundryCommands.loop);
+
+// Orchestration commands
+program.addCommand(orchCommands.root);
 
 // Media provenance commands
 program.addCommand(mediaCommands);
