@@ -35,14 +35,18 @@ def validate_evidence_files():
         # Collect all referenced files to validate
         files_to_validate = []
         for item in index_data.get("items", []):
-            if "report" in item: files_to_validate.append((item["report"], report_schema))
-            if "metrics" in item: files_to_validate.append((item["metrics"], metrics_schema))
-            if "stamp" in item: files_to_validate.append((item["stamp"], stamp_schema))
+            if "report" in item:
+                files_to_validate.append((item["report"], report_schema))
+            if "metrics" in item:
+                files_to_validate.append((item["metrics"], metrics_schema))
+            if "stamp" in item:
+                files_to_validate.append((item["stamp"], stamp_schema))
 
         # Validate unique files
         validated = set()
         for filepath, schema in files_to_validate:
-            if filepath in validated: continue
+            if filepath in validated:
+                continue
             if not os.path.exists(filepath):
                 print(f"WARNING: File {filepath} referenced in index but does not exist.")
                 continue

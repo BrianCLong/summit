@@ -64,9 +64,11 @@ def main():
 
     for p in paths_to_scan:
         # Skip schemas
-        if "schema" in str(p): continue
+        if "schema" in str(p):
+            continue
         # Skip this script validation config if any
-        if p.name == "sensitive_fields.json": continue
+        if p.name == "sensitive_fields.json":
+            continue
 
         scan_file(p)
 

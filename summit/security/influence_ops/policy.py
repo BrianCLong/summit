@@ -26,9 +26,12 @@ class InfluenceOpsGate:
 
     if sensitive and (microtargeting or profiling or campaign_mode):
       reasons = []
-      if microtargeting: reasons.append("microtargeting_intent")
-      if profiling: reasons.append("profiling_intent")
-      if campaign_mode: reasons.append("campaign_mode")
+      if microtargeting:
+          reasons.append("microtargeting_intent")
+      if profiling:
+          reasons.append("profiling_intent")
+      if campaign_mode:
+          reasons.append("campaign_mode")
       return GateDecision(False, reasons, float(signals.get("risk_score", 0.9)))
 
     return GateDecision(True, [], float(signals.get("risk_score", 0.0)))

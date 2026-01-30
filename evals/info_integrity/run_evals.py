@@ -20,7 +20,8 @@ def run_eval_on_file(filepath: Path):
 
     with open(filepath) as f:
         for line in f:
-            if not line.strip(): continue
+            if not line.strip():
+                continue
             total += 1
             data = json.loads(line)
             intent = data.get("intent")

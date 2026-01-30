@@ -8,11 +8,13 @@ def test_circuit_breaker_opens_after_threshold():
   cb = CircuitBreaker(BreakerConfig(window_size=10, error_rate_to_open=0.5, open_seconds=60))
 
   # Fill window with success
-  for _ in range(5): cb.record(True)
+  for _ in range(5):
+      cb.record(True)
   assert cb.state == State.CLOSED
 
   # Add failures
-  for _ in range(5): cb.record(False)
+  for _ in range(5):
+      cb.record(False)
   # Now we have 5 success, 5 failures. 5/10 = 0.5. Should open.
   assert cb.state == State.OPEN
   assert cb.allow() is False
