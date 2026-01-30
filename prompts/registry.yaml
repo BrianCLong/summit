@@ -131,6 +131,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: lingbot-world-scaffold
+    version: v1
+    path: prompts/worldmodels/lingbot-world-scaffold.md
+    sha256: 538d8c7606c352ec21ec672ec86e504fdcc38e7d8c1546b6c8eda0a873111aa5
+    description: Scaffold clean-room world model interfaces and docs for LingBot-World alignment.
+    scope:
+      paths:
+        - docs/items/2601-20540-lingbot-world/
+        - docs/worldmodels/
+        - summit/worldmodels/
+        - NOTICE.third_party.md
+        - docs/roadmap/STATUS.json
+        - prompts/worldmodels/lingbot-world-scaffold.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - worldmodels
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: antigravity-moat-augmentation
     version: v1
     path: prompts/governance/antigravity-moat-augmentation@v1.md
