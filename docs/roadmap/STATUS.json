@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T12:00:00Z",
-  "revision_note": "Added subagent authoring documentation and baseline built-in agent definitions.",
+  "last_updated": "2026-01-30T00:00:00Z",
+  "revision_note": "Added Arcee Trinity evidence validation scaffolding (schemas, validator, CI hook).",
   "initiatives": [
     {
       "id": "A",
