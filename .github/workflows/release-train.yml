@@ -53,20 +53,20 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
 
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          version: "10.0.0"
+          version: "9.12.0"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build Packages
         id: build
-        run: npm run build
+        run: pnpm run build
 
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
@@ -88,7 +88,7 @@ jobs:
 
   sbom:
     name: Generate SBOM
-    needs: build
+    needs: build_and_sign
     runs-on: ubuntu-latest
     if: success()
 
@@ -119,8 +119,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "9.12.0"
 
       - name: Generate Evidence Bundle (Provenance)
         run: |
@@ -142,7 +147,7 @@ jobs:
 
   finalize:
     name: Finalize Release (Dry Run)
-    needs: [build, sbom, provenance]
+    needs: [build_and_sign, sbom]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -150,8 +155,9 @@ jobs:
         run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
 
   post_deploy_verification:
-    needs: progressive_rollout
+    needs: finalize
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
       - name: Post-deploy probes (latency/error rates/log SLOs)

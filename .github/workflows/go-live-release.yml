@@ -7,16 +7,16 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (leave empty for auto from package.json)'
+        description: "Release version (leave empty for auto from package.json)"
         required: false
         type: string
       draft:
-        description: 'Create as draft release'
+        description: "Create as draft release"
         required: false
         type: boolean
         default: true
       smoke_url:
-        description: 'URL for smoke test (optional)'
+        description: "URL for smoke test (optional)"
         required: false
         type: string
 
@@ -48,12 +48,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 10
+          version: 9.12.0
 
       - name: Get pnpm store directory
         shell: bash
@@ -73,9 +73,9 @@ jobs:
       - name: Generate Evidence Bundle
         id: generate
         env:
-          GA_VERIFY_MODE: 'true'
+          GA_VERIFY_MODE: "true"
           SMOKE_URL: ${{ inputs.smoke_url }}
-          CI: 'true'
+          CI: "true"
         run: |
           pnpm evidence:go-live:gen || true
           SHA=$(git rev-parse HEAD)
@@ -101,7 +101,7 @@ jobs:
 
       - name: Sign Evidence Bundle
         env:
-          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_EXPERIMENTAL: "1"
         run: |
           SHA=$(git rev-parse HEAD)
           pnpm release:go-live:sign "artifacts/evidence/go-live/${SHA}" || echo "Signing failed (non-fatal for dry-run)"
