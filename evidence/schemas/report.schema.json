@@ -2,12 +2,42 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "report_id": { "type": "string" },
-    "evidence_id": { "type": "string" },
-    "item": { "type": "string" },
-    "status": { "type": "string" },
-    "vfgnn_status": { "type": "string" },
-    "artifacts": { "type": "array" }
-  },
-  "additionalProperties": true
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9_]+-[A-Z0-9_]+-[0-9]{3}$" },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "classification": {
+      "type": "string",
+      "enum": ["public", "internal", "restricted"],
+      "default": "internal"
+    },
+    "item_slug": { "type": "string" },
+    "area": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "kind"],
+        "properties": {
+          "ref": { "type": "string" },
+          "kind": { "type": "string", "enum": ["video", "repo", "doc", "blog", "news", "other"] }
+        }
+      }
+    },
+    "created": {
+      "type": "string",
+      "description": "Logical date only; timestamps must be in stamp.json."
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "content_type"],
+        "properties": {
+          "path": { "type": "string" },
+          "content_type": { "type": "string" },
+          "sha256": { "type": "string" }
+        }
+      }
+    }
+  }
 }

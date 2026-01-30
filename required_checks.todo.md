@@ -1,15 +1,10 @@
-## Required checks discovery (RDP)
+# Required checks discovery (temporary)
 
-1. Open the repository settings → Branch protection rules.
-2. Record the exact required check names (case-sensitive).
-3. Use the GitHub API branch protection endpoint to confirm the same list.
-4. Add them to `.github/required_checks.yml` (to be created in PR7).
-5. Rename temporary gates accordingly.
+1. In GitHub UI: Settings → Branches → Branch protection rules → note required status checks.
+2. In GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3. Add discovered names to `ci/required_checks.json` (to be created) and update CI verifier config.
 
-Temporary checks expected:
+Temporary gate naming convention until discovered:
 
-- ci/unit
-- ci/lint
-- ci/evidence
-- ci/deps-delta
-- ci/policy
+- summit-ci/evidence-validate
+- summit-ci/supplychain-delta

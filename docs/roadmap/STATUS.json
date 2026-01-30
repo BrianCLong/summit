@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T00:00:00Z",
-  "revision_note": "Required checks discovery steps updated; dependency delta marker recorded for ralphex subsumption kickoff.",
+  "last_updated": "2026-01-29T12:00:00Z",
+  "revision_note": "Add Postiz evidence scaffolding, item registry, and policy gate specs",
   "initiatives": [
     {
       "id": "A",
