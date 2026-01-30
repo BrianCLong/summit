@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-28T19:00:00Z",
-  "revision_note": "IOHunter evidence schemas/fixtures wired into verifier; required checks discovery refreshed.",
+  "last_updated": "2026-01-30T01:06:40Z",
+  "revision_note": "Cross-platform graph model + co-share builder scaffolding added for Summit graph substrate; unit tests added for similarity builder.",
   "initiatives": [
     {
       "id": "A",

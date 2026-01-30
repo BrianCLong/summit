@@ -234,6 +234,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cross-platform-graph-scaffold
+    version: v1
+    path: prompts/summit/cross-platform-graph-scaffold@v1.md
+    sha256: 370887e5e8117fca7efade5cc69fee38a3a11329d7d2e6c9b59befa059a5d618
+    description: Implement deterministic cross-platform graph primitives and co-share builder scaffolding.
+    scope:
+      paths:
+        - summit/graph/
+        - docs/cross_platform_graph.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/summit/
+        - prompts/registry.yaml
+      domains:
+        - graph
+        - analytics
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
