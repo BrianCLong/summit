@@ -1,6 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Report Schema",
   "type": "object",
+  "description": "Schema for the main evidence report.",
   "required": ["run_id", "item_slug", "evd_ids", "summary", "artifacts"],
   "properties": {
     "run_id": { "type": "string" },
