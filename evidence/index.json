@@ -1,4 +1,10 @@
 {
   "version": "1.0",
-  "items": {}
+  "items": {
+    "EVD-2601-20245-SKILL-001": ["evidence/skill_report.json", "evidence/skill_metrics.json", "evidence/skill_stamp.json"],
+    "EVD-2601-20245-SKILL-002": ["evidence/skill_report.json", "evidence/skill_metrics.json", "evidence/skill_stamp.json"],
+    "EVD-2601-20245-SKILL-003": ["evidence/skill_report.json", "evidence/skill_metrics.json", "evidence/skill_stamp.json"],
+    "EVD-2601-20245-SKILL-004": ["evidence/skill_report.json", "evidence/skill_metrics.json", "evidence/skill_stamp.json"],
+    "EVD-2601-20245-SKILL-005": ["evidence/skill_report.json", "evidence/skill_metrics.json", "evidence/skill_stamp.json"]
+  }
 }
