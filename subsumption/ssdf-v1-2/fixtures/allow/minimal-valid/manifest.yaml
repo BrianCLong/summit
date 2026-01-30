@@ -1,0 +1,7 @@
+item:
+  slug: ssdf-v1-2
+bundle:
+  pr_cap: 7
+checks:
+  jobs:
+    - "subsumption/verify-bundle"

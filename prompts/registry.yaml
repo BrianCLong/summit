@@ -287,6 +287,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ssdf-v1.2-subsump-bundle
+    version: v1
+    path: prompts/compliance/ssdf-v1-2-subsump@v1.md
+    sha256: ff1f25223d1985ecb43e418f1c30b54bfb7dd3cd98751a61b1dffca164e987ac
+    description: Scaffold SSDF v1.2 subsumption bundle, evidence entries, fixtures, and backlog updates.
+    scope:
+      paths:
+        - subsumption/ssdf-v1-2/
+        - evidence/
+        - backlog/ssdf-v1-2.yaml
+        - docs/roadmap/STATUS.json
+        - prompts/compliance/ssdf-v1-2-subsump@v1.md
+        - prompts/registry.yaml
+      domains:
+        - compliance
+        - governance
+        - evidence
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: pr-lifecycle-report
     version: v1
     path: prompts/governance/pr-lifecycle-report.md
