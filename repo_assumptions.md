@@ -2,12 +2,13 @@
 
 ## Verified
 
-- This subsumption bundle is generated without live repo inspection in this session.
+- Repository contents inspected locally; subsumption bundles and verifier script exist.
+- CI uses GitHub Actions workflows under `.github/workflows/`.
+- Evidence schemas and index live under `evidence/`.
 
 ## Assumed (validate ASAP)
 
-- Node.js toolchain exists (pnpm/npm), scripts under `scripts/**`.
-- CI runs GitHub Actions; required checks exist but names are unknown.
+- Required status check names remain to be confirmed against branch protection.
 - Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
 
 ## Must-not-touch (until validated)
@@ -18,6 +19,5 @@
 
 ## Validation plan
 
-- Run `git ls-files` and confirm presence of `scripts/ci/**`, `docs/**`, `evidence/**`.
 - Enumerate required checks via GitHub branch protection UI/API.
 - Confirm test runner (jest/vitest) and lint tooling.
