@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PROV-JSON",
+  "description": "W3C PROV-JSON Schema for Summit Provenance",
+  "type": "object",
+  "properties": {
+    "prefix": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "entity": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+            "type": "object",
+            "additionalProperties": true
+        }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+            "type": "object",
+            "properties": {
+                "prov:startTime": { "type": "string", "format": "date-time" },
+                "prov:endTime": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": true
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+            "type": "object",
+            "additionalProperties": true
+        }
+      }
+    },
+    "wasGeneratedBy": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+            "type": "object",
+            "required": ["prov:entity", "prov:activity"],
+            "properties": {
+                "prov:entity": { "type": "string" },
+                "prov:activity": { "type": "string" },
+                "prov:time": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": true
+        }
+      }
+    },
+    "used": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+            "type": "object",
+            "required": ["prov:activity", "prov:entity"],
+            "properties": {
+                "prov:activity": { "type": "string" },
+                "prov:entity": { "type": "string" },
+                "prov:time": { "type": "string", "format": "date-time" }
+            },
+            "additionalProperties": true
+        }
+      }
+    },
+    "wasAssociatedWith": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+            "type": "object",
+            "required": ["prov:activity", "prov:agent"],
+            "properties": {
+                "prov:activity": { "type": "string" },
+                "prov:agent": { "type": "string" },
+                "prov:plan": { "type": "string" }
+            },
+            "additionalProperties": true
+        }
+      }
+    },
+    "wasAttributedTo": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+            "type": "object",
+            "required": ["prov:entity", "prov:agent"],
+            "properties": {
+                "prov:entity": { "type": "string" },
+                "prov:agent": { "type": "string" }
+            },
+            "additionalProperties": true
+        }
+      }
+    },
+    "wasDerivedFrom": {
+        "type": "object",
+        "patternProperties": {
+            "^.*$": {
+                "type": "object",
+                "required": ["prov:generatedEntity", "prov:usedEntity"],
+                "properties": {
+                    "prov:generatedEntity": { "type": "string" },
+                    "prov:usedEntity": { "type": "string" },
+                    "prov:activity": { "type": "string" },
+                    "prov:generation": { "type": "string" },
+                    "prov:usage": { "type": "string" }
+                },
+                "additionalProperties": true
+            }
+        }
+    }
+  },
+  "additionalProperties": false
+}

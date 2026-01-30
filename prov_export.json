@@ -1,0 +1,69 @@
+{
+  "prefix": {
+    "prov": "http://www.w3.org/ns/prov#",
+    "summit": "https://intelgraph.com/provenance/",
+    "ex": "http://example.org/"
+  },
+  "entity": {
+    "ex:dataset1": {
+      "prov:type": "Dataset",
+      "ex:path": "s3://bucket/data1.csv"
+    },
+    "ex:dataset2": {
+      "prov:type": "Dataset",
+      "ex:path": "s3://bucket/data2.csv"
+    },
+    "ex:model_v1": {
+      "prov:type": "Model",
+      "ex:accuracy": 0.95
+    }
+  },
+  "activity": {
+    "ex:run_123": {
+      "ex:algorithm": "XGBoost",
+      "prov:startTime": "2023-10-27T10:00:00.000Z",
+      "prov:endTime": "2023-10-27T10:30:00.000Z"
+    }
+  },
+  "agent": {
+    "ex:Alice": {
+      "prov:type": "Person",
+      "ex:role": "DataScientist"
+    }
+  },
+  "wasGeneratedBy": {
+    "_:gen_ex_model_v1_ex_run_123": {
+      "prov:entity": "ex:model_v1",
+      "prov:activity": "ex:run_123",
+      "prov:time": "2023-10-27T10:30:00.000Z"
+    }
+  },
+  "used": {
+    "_:used_ex_run_123_ex_dataset1": {
+      "prov:activity": "ex:run_123",
+      "prov:entity": "ex:dataset1"
+    },
+    "_:used_ex_run_123_ex_dataset2": {
+      "prov:activity": "ex:run_123",
+      "prov:entity": "ex:dataset2"
+    }
+  },
+  "wasAssociatedWith": {
+    "_:assoc_ex_run_123_ex_Alice": {
+      "prov:activity": "ex:run_123",
+      "prov:agent": "ex:Alice"
+    }
+  },
+  "wasAttributedTo": {
+    "_:attr_ex_model_v1_ex_Alice": {
+      "prov:entity": "ex:model_v1",
+      "prov:agent": "ex:Alice"
+    }
+  },
+  "wasDerivedFrom": {
+    "_:derived_ex_model_v1_ex_dataset1": {
+      "prov:generatedEntity": "ex:model_v1",
+      "prov:usedEntity": "ex:dataset1"
+    }
+  }
+}
