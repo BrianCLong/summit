@@ -1,0 +1,8 @@
+- id: S1
+  url: https://www.maltego.com/blog/how-maltego-helps-soc-teams-reduce-alert-fatigue-accelerate-resolution-time/
+  title: How Maltego Helps SOC Teams Reduce Alert Fatigue
+  date: 2026-01-29
+- id: S2
+  url: docs/osint/updates/automation-turn-5.md
+  title: Summit OSINT Platform Update Turn 5
+  date: 2026-01-29

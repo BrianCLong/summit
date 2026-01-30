@@ -1,0 +1,6 @@
+# Mapping: Extraction -> Summit Module
+ci.target.area.001:
+  module: packages/agent-spine
+  change_type: additive
+  risk: low
+  pr: PR1

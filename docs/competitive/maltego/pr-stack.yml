@@ -1,0 +1,9 @@
+PR0:
+  scope: Maltego competitive dossier initialization
+  risk: none
+PR1:
+  scope: Hardening governance gates (ci.maltego.ops.001)
+  risk: low
+PR2:
+  scope: MCP connector ergonomic improvements (ci.maltego.ecosystem.001)
+  risk: low

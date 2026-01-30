@@ -1,0 +1,10 @@
+ci.maltego.ops.001:
+  module: docs/governance
+  change_type: refinement
+  risk: low
+  pr: PR1
+ci.maltego.ecosystem.001:
+  module: packages/mcp-apps
+  change_type: additive
+  risk: low
+  pr: PR2

@@ -1,0 +1,16 @@
+# PR Stack Plan
+PR0:
+  scope: Dossier initialization
+  risk: None
+PR1:
+  scope: Adopt low-risk patterns
+  risk: Low
+PR2:
+  scope: Integrate core patterns
+  risk: Medium
+PR3:
+  scope: Transcend with benchmarks
+  risk: High
+PR4:
+  scope: Moat and Gate
+  risk: Low

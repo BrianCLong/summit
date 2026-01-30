@@ -1,0 +1,5 @@
+# Sources for TARGET
+- id: S1
+  url: https://example.com/source1
+  title: Source Title
+  date: 2026-01-29
