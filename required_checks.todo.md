@@ -1,12 +1,39 @@
 # Required checks discovery (temporary)
 
-1. In GitHub UI: Settings -> Branches -> Branch protection rule -> note required checks.
-2. OR via API: GET /repos/{owner}/{repo}/branches/{branch}/protection
-3. Copy names into ci/required_checks.json
+## Inspection Steps
+1. Inspect branch protection rules for `main` in the repository settings.
+2. Identify the exact names of required status checks (e.g., "ci/test", "ci/lint").
+
+## Mapping Instructions
+1. Open `ci/required_checks.json`.
+2. Add the discovered check names as keys.
+   Example:
+   ```json
+   {
+     "ci/test": true,
+     "ci/lint": true
+   }
+   ```
+3. Ensure the CI workflows trigger these checks.
+
+## Mapping Instructions
+1. Open `ci/required_checks.json`.
+2. Add the discovered check names as keys.
+   Example:
+   ```json
+   {
+     "ci/test": true,
+     "ci/lint": true
+   }
+   ```
+3. Ensure the CI workflows trigger these checks.
 
 Temporary convention until discovered:
 
-- "unit"
-- "lint"
-- "typecheck"
-- "security-scan"
+- `ci/summit-evidence`
+- `ci/summit-cog-policy`
+- `ci/summit-cog-evals`
+- `ci/supply-chain-delta`
+
+## Rename Plan
+Once the actual required check names are confirmed from branch protection settings, update `ci/required_checks.json` and ensure CI workflows match.

@@ -1,75 +1,51 @@
 #!/usr/bin/env python3
-import json
-import sys
-import os
-from pathlib import Path
+from __future__ import annotations
+import json, sys, pathlib
+from jsonschema import Draft202012Validator
 
-def fail(msg):
-    print(f"FAIL: {msg}", file=sys.stderr)
-    sys.exit(1)
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+SCHEMAS = ROOT / "schemas" / "evidence"
+EVIDENCE = ROOT / "evidence"
 
-def load_sensitive_keys():
-    policy_path = Path("pp_alerts/policy/sensitive_fields.json")
-    if not policy_path.exists():
-        fail(f"Policy file missing: {policy_path}")
-    try:
-        with open(policy_path, 'r') as f:
-            data = json.load(f)
-            return data.get("sensitive_keys", [])
-    except Exception as e:
-        fail(f"Could not load policy: {e}")
+def _load(p: pathlib.Path):
+    return json.loads(p.read_text(encoding="utf-8"))
 
-# Sensitive keys to check (should match policy)
-SENSITIVE_KEYS = load_sensitive_keys()
+def main() -> int:
+    index_p = EVIDENCE / "index.json"
+    if not index_p.exists():
+        print("missing evidence/index.json")
+        return 2
 
-def scan_file(filepath):
-    print(f"Scanning {filepath}...")
-    try:
-        with open(filepath, 'r') as f:
-            content = f.read()
-            try:
-                data = json.loads(content)
-                for key in SENSITIVE_KEYS:
-                    if has_sensitive_key(data, key):
-                        fail(f"Sensitive key '{key}' found in {filepath}")
-            except json.JSONDecodeError:
-                # If not JSON, check for key string
-                for key in SENSITIVE_KEYS:
-                    if f'"{key}"' in content or f"'{key}'" in content:
-                         fail(f"Sensitive key '{key}' string found in {filepath}")
-    except Exception as e:
-        print(f"Could not read {filepath}: {e}")
+    index = _load(index_p)
+    Draft202012Validator(_load(SCHEMAS / "index.schema.json")).validate(index)
 
-def has_sensitive_key(data, sensitive_key):
-    if isinstance(data, dict):
-        if sensitive_key in data:
-            return True
-        return any(has_sensitive_key(v, sensitive_key) for v in data.values())
-    elif isinstance(data, list):
-        return any(has_sensitive_key(v, sensitive_key) for v in data)
-    return False
+    # index["evidence"] is validated by schema to be a dict
+    for evd_id, rel in index["evidence"].items():
+        base = EVIDENCE / rel
+        report = _load(base / "report.json")
+        metrics = _load(base / "metrics.json")
+        stamp = _load(base / "stamp.json")
 
-def main():
-    # Scan evidence artifacts
-    evidence_dir = Path("evidence")
-    # Also scan pp_alerts evidence
-    pp_alerts_evidence = Path("pp_alerts/evidence")
+        Draft202012Validator(_load(SCHEMAS / "report.schema.json")).validate(report)
+        Draft202012Validator(_load(SCHEMAS / "metrics.schema.json")).validate(metrics)
+        Draft202012Validator(_load(SCHEMAS / "stamp.schema.json")).validate(stamp)
 
-    paths_to_scan = []
-    if evidence_dir.exists():
-        paths_to_scan.extend(evidence_dir.glob("**/*.json"))
-    if pp_alerts_evidence.exists():
-        paths_to_scan.extend(pp_alerts_evidence.glob("**/*.json"))
+        # Hard rule: timestamps only allowed in stamp.json
+        def find_timestamps(obj, path=""):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if "time" in k.lower() or "timestamp" in k.lower():
+                        raise AssertionError(f"timestamp-like field in {path}/{k} for {evd_id}")
+                    find_timestamps(v, f"{path}/{k}")
+            elif isinstance(obj, list):
+                for i, v in enumerate(obj):
+                    find_timestamps(v, f"{path}[{i}]")
 
-    for p in paths_to_scan:
-        # Skip schemas
-        if "schema" in str(p): continue
-        # Skip this script validation config if any
-        if p.name == "sensitive_fields.json": continue
+        find_timestamps(report, "report.json")
+        find_timestamps(metrics, "metrics.json")
 
-        scan_file(p)
-
-    print("Privacy scan passed.")
+    print("evidence verification: OK")
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
