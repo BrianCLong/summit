@@ -2,12 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Stamp",
   "type": "object",
-  "required": ["version", "evidence_id", "tool", "generated_at"],
+  "required": ["evidence_id", "generated_at_utc"],
   "properties": {
-    "version": { "type": "integer", "const": 1 },
     "evidence_id": { "type": "string" },
-    "tool": { "type": "string" },
-    "generated_at": { "type": "string" }
-  },
-  "additionalProperties": true
+    "generated_at_utc": { "type": "string", "format": "date-time" },
+    "runner": { "type": "string" },
+    "git_commit": { "type": "string" }
+  }
 }

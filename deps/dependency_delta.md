@@ -1,16 +1,9 @@
-# Dependency Delta
+# Dependency delta (template)
 
-**PR Number:** N/A
-**Date:** 2026-01-29
-
-## Changes
-
-- No dependency changes.
-
-## Rationale
-
-- Evidence schemas and bundle writer added without new dependencies.
-
-## Risk Assessment
-
-- None; no dependency surface changes.
+- PR: <fill>
+- Why needed:
+- Added:
+- Updated:
+- Removed:
+- Risk notes:
+- Rollback:
