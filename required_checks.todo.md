@@ -16,6 +16,18 @@
    ```
 3. Ensure the CI workflows trigger these checks.
 
+## Mapping Instructions
+1. Open `ci/required_checks.json`.
+2. Add the discovered check names as keys.
+   Example:
+   ```json
+   {
+     "ci/test": true,
+     "ci/lint": true
+   }
+   ```
+3. Ensure the CI workflows trigger these checks.
+
 Temporary convention until discovered:
 
 - `ci/summit-evidence`
