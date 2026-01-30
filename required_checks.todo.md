@@ -1,9 +1,15 @@
-# Required checks discovery
+## Required checks discovery (RDP)
 
-1. Open repo settings → Branch protection → record required status check names.
-2. Or via API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks.
-3. Replace placeholder names in CI + docs:
-   - ci/evidence_schema
-   - ci/dependency_delta
-   - ci/unit_tests
-4. Add a PR to rename gates to the canonical check names.
+1. In GitHub repo: Settings → Branches → Branch protection rules
+2. Record exact check names required for merge
+3. Replace placeholders in `.github/workflows/ci.yml`
+
+Temporary checks expected:
+
+- ci/summit-security-foundation
+- ci/summit-security-gates
+- ci/summit-security-deps
+
+Rename plan:
+- Update workflow + badges once real required checks are known.
+- Support legacy check names for one release cycle.
