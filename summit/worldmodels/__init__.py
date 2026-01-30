@@ -1,17 +1,22 @@
-from summit.worldmodels.flags import (
-    WORLD_MODEL_BACKEND_FLAG,
-    WORLD_MODEL_ENABLE_FLAG,
-    is_worldmodel_enabled,
-    selected_backend,
+from __future__ import annotations
+
+from summit.worldmodels.flags import selected_backend, worldmodel_enabled
+from summit.worldmodels.interfaces import (
+    Action,
+    ActionBatch,
+    BackendFactory,
+    CapabilityDescriptor,
+    StepResult,
+    WorldModelBackend,
 )
-from summit.worldmodels.interfaces import Action, StepResult, WorldModelBackend
 
 __all__ = [
     "Action",
+    "ActionBatch",
+    "BackendFactory",
+    "CapabilityDescriptor",
     "StepResult",
     "WorldModelBackend",
-    "WORLD_MODEL_BACKEND_FLAG",
-    "WORLD_MODEL_ENABLE_FLAG",
-    "is_worldmodel_enabled",
     "selected_backend",
+    "worldmodel_enabled",
 ]
