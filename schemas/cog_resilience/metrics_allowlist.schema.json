@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cognitive Resilience Metrics Allowlist",
+  "type": "object",
+  "properties": {
+    "policy_blocks_total": { "type": "number" },
+    "prohibited_field_blocks_total": { "type": "number" },
+    "schema_validation_pass_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "indicator_coverage": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "additionalProperties": false
+}
