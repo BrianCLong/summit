@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-02T12:30:00Z",
-  "revision_note": "Aligned Keel evidence templates and index entries for architecture, stability, depth scaling, and benchmark bundles.",
+  "last_updated": "2026-02-02T09:00:00Z",
+  "revision_note": "Added Summit evidence schema scaffolding and required checks discovery updates",
   "initiatives": [
     {
       "id": "A",

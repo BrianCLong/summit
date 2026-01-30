@@ -8,8 +8,9 @@ This project incorporates concepts and patterns inspired by the following open-s
 - **License**: MIT
 - **Notice**: Concepts inspired by everything-claude-code. Clean-room implementation.
 
-## lingbot-world
+## SCOUT (Language-based Trial and Error Falls Behind in the Era of Experience)
 
-- **Source**: https://github.com/Robbyant/lingbot-world/
-- **License**: Apache-2.0
-- **Notice**: Concepts inspired by the LingBot-World paper and repository. Clean-room implementation.
+- **Source**: https://huggingface.co/papers/2601.21754
+- **Repo**: https://github.com/Harry-mic/SCOUT
+- **License**: MIT
+- **Notice**: Concepts inspired by SCOUT. Clean-room implementation.
