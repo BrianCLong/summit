@@ -8,18 +8,95 @@ Rules:
  - deny-by-default: missing required files fails
 """
 from __future__ import annotations
-import json, sys
+
+import json
+import re
+import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EVID = ROOT / "evidence"
+IOHUNTER_FIXTURES = EVID / "fixtures" / "iohunter"
 
 REQUIRED = ["index.json", "report.json", "metrics.json", "stamp.json"]
 
 def load(p: Path) -> object:
     return json.loads(p.read_text(encoding="utf-8"))
 
+EVIDENCE_ID_RE = re.compile(r"^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$")
+SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
+
+def _require(cond: bool, msg: str) -> None:
+    if not cond:
+        raise ValueError(msg)
+
+def _require_str(value: object, msg: str) -> str:
+    _require(isinstance(value, str), msg)
+    return value
+
+def _require_number(value: object, msg: str) -> None:
+    _require(isinstance(value, (int, float)), msg)
+
+def validate_report(payload: dict) -> None:
+    evidence_id = _require_str(payload.get("evidence_id"), "report.evidence_id missing")
+    _require(EVIDENCE_ID_RE.match(evidence_id) is not None, "report.evidence_id invalid")
+    _require_str(payload.get("item_slug"), "report.item_slug missing")
+    _require_str(payload.get("summary"), "report.summary missing")
+    artifacts = payload.get("artifacts")
+    _require(isinstance(artifacts, list), "report.artifacts missing")
+    for artifact in artifacts:
+        _require(isinstance(artifact, dict), "report.artifacts item must be object")
+        path = _require_str(artifact.get("path"), "report.artifact.path missing")
+        sha = _require_str(artifact.get("sha256"), "report.artifact.sha256 missing")
+        _require(len(path) > 0, "report.artifact.path empty")
+        _require(SHA256_RE.match(sha) is not None, "report.artifact.sha256 invalid")
+
+def validate_metrics(payload: dict) -> None:
+    _require_str(payload.get("evidence_id"), "metrics.evidence_id missing")
+    metrics = payload.get("metrics")
+    _require(isinstance(metrics, dict), "metrics.metrics missing")
+    for value in metrics.values():
+        _require_number(value, "metrics.metrics values must be numbers")
+
+def validate_stamp(payload: dict) -> None:
+    _require_str(payload.get("evidence_id"), "stamp.evidence_id missing")
+    created = _require_str(payload.get("created_utc"), "stamp.created_utc missing")
+    _require_str(payload.get("git_commit"), "stamp.git_commit missing")
+    datetime.fromisoformat(created.replace("Z", "+00:00"))
+
+def validate_index(payload: dict) -> None:
+    _require_str(payload.get("item_slug"), "index.item_slug missing")
+    entries = payload.get("entries")
+    _require(isinstance(entries, list), "index.entries missing")
+    for entry in entries:
+        _require(isinstance(entry, dict), "index.entry must be object")
+        _require_str(entry.get("evidence_id"), "index.entry.evidence_id missing")
+        _require_str(entry.get("report"), "index.entry.report missing")
+        _require_str(entry.get("metrics"), "index.entry.metrics missing")
+        _require_str(entry.get("stamp"), "index.entry.stamp missing")
+
+def validate_fixture(instance_path: Path, validator) -> None:
+    instance = load(instance_path)
+    _require(isinstance(instance, dict), f"{instance_path} must be an object")
+    validator(instance)
+
 def main() -> int:
+    valid = IOHUNTER_FIXTURES / "valid"
+    invalid = IOHUNTER_FIXTURES / "invalid"
+
+    validate_fixture(valid / "report.json", validate_report)
+    validate_fixture(valid / "metrics.json", validate_metrics)
+    validate_fixture(valid / "stamp.json", validate_stamp)
+    validate_fixture(valid / "index.json", validate_index)
+
+    try:
+        validate_fixture(invalid / "report.missing_field.json", validate_report)
+        print("ERROR: invalid fixture unexpectedly validated", file=sys.stderr)
+        return 2
+    except ValueError:
+        pass
+
     missing = [f for f in REQUIRED if not (EVID / f).exists()]
     if missing:
         print(f"FAIL missing evidence files: {missing}")

@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-IOHUNTER-SCHEMA-001",
+  "metrics": {
+    "macro_f1": 0.42,
+    "samples": 10
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T00:00:00Z",
-  "revision_note": "Telemetry privacy gate scaffold, evidence entry, and deny-by-default allowlist recorded.",
+  "last_updated": "2026-01-28T19:00:00Z",
+  "revision_note": "IOHunter evidence schemas/fixtures wired into verifier; required checks discovery refreshed.",
   "initiatives": [
     {
       "id": "A",
