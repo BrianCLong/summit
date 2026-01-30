@@ -1,6 +1,8 @@
 import pytest
+
 from privacy_first_gnn.he.api import HEInterface
 from privacy_first_gnn.he.mock_backend import MockHEBackend
+
 
 def test_he_contract_flow():
     backend = MockHEBackend()

@@ -1,7 +1,8 @@
 # ci/dependency_delta_guard.py
 import argparse
-import sys
 import pathlib
+import sys
+
 
 def load_allowlist(path):
     if not path or not pathlib.Path(path).exists():

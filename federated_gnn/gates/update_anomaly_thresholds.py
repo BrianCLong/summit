@@ -1,17 +1,18 @@
-import sys
 import json
 import os
+import sys
+
 
 def check_anomaly(update_path: str, thresholds_path: str) -> bool:
     try:
-        with open(update_path, 'r') as f:
+        with open(update_path) as f:
             envelope = json.load(f)
 
         # Check if envelope has gradient_stats
         stats = envelope.get("gradient_stats", {})
         l2_norm = stats.get("l2_norm", 0.0)
 
-        with open(thresholds_path, 'r') as f:
+        with open(thresholds_path) as f:
             thresholds = json.load(f)
 
         max_norm = thresholds.get("max_l2_norm", 10.0)

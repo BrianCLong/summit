@@ -1,6 +1,8 @@
 import pytest
-from summit.privacy_graph.types import GraphEvent
+
 from summit.privacy_graph.graph_builder import build_graph
+from summit.privacy_graph.types import GraphEvent
+
 
 def test_filters_unsafe_features():
     events = [

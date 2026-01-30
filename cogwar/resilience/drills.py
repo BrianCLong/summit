@@ -1,7 +1,9 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
-from .metrics import create_metric, calculate_readiness_score
+
+from .metrics import calculate_readiness_score, create_metric
+
 
 def load_scenario(scenario_id: str, fixtures_dir: Path) -> dict:
     path = fixtures_dir / "scenarios.json"
@@ -27,7 +29,7 @@ def run_drill(scenario_id: str, fixtures_dir: Path) -> dict:
     result = {
         "scenario_id": scenario_id,
         "success": is_defensive, # Fail if trying to run offensive drill
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     }
 
     return result

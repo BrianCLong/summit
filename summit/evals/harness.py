@@ -1,6 +1,7 @@
 import json
-from pathlib import Path
 import os
+from pathlib import Path
+
 
 def load_fixture(path: str):
     return json.loads(Path(path).read_text(encoding="utf-8"))

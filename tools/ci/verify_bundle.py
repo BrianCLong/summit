@@ -1,14 +1,15 @@
-import sys
-import os
 import json
+import os
 import subprocess
+import sys
+
 import jsonschema
 
 # Add root to sys.path to allow importing summit_sim
 sys.path.append(os.getcwd())
 
 def load_json(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         return json.load(f)
 
 def run_command(cmd, msg):

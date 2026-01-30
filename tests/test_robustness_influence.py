@@ -1,8 +1,15 @@
-import os
 import json
+import os
 import tempfile
+
 import pytest
-from summit.eval.robustness_influence import perturb_edge_injection, perturb_sybil_attack, run_robustness_suite
+
+from summit.eval.robustness_influence import (
+    perturb_edge_injection,
+    perturb_sybil_attack,
+    run_robustness_suite,
+)
+
 
 def test_edge_injection():
     graph = {"nodes": ["A", "B"], "edges": [{"source": "A", "target": "B"}]}

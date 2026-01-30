@@ -1,5 +1,7 @@
 import json
+
 from ..gates.no_plaintext_sensitive import verify_no_plaintext_sensitive
+
 
 def ingest_telemetry(topology, encrypted_features, policy):
     """

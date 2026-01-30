@@ -1,6 +1,8 @@
-import prov.model
 import datetime
-from typing import Dict, Any
+from typing import Any, Dict
+
+import prov.model
+
 
 class ProvenanceExporter:
     def __init__(self, namespace_uri="http://summit.example.org/"):
@@ -8,10 +10,10 @@ class ProvenanceExporter:
         self.doc.set_default_namespace(namespace_uri)
         self.doc.add_namespace("prov", "http://www.w3.org/ns/prov#")
 
-    def add_entity(self, entity_id: str, label: str, attributes: Dict[str, Any] = None):
+    def add_entity(self, entity_id: str, label: str, attributes: dict[str, Any] = None):
         self.doc.entity(entity_id, {prov.model.PROV_LABEL: label, **(attributes or {})})
 
-    def add_activity(self, activity_id: str, start_time: datetime.datetime = None, end_time: datetime.datetime = None, attributes: Dict[str, Any] = None):
+    def add_activity(self, activity_id: str, start_time: datetime.datetime = None, end_time: datetime.datetime = None, attributes: dict[str, Any] = None):
         self.doc.activity(activity_id, startTime=start_time, endTime=end_time, other_attributes=attributes)
 
     def add_agent(self, agent_id: str, label: str = None):

@@ -1,7 +1,8 @@
-from typing import List, Dict, Any
 import uuid
+from typing import Any, Dict, List
 
-def extract_indicators(observations: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
+def extract_indicators(observations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Extracts indicators from a list of observations.
     Currently uses simple rule-based stubs.

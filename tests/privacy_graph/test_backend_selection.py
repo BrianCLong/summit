@@ -1,7 +1,9 @@
 import pytest
-from summit.privacy_graph.config import PrivacyGraphConfig
+
 from summit.privacy_graph.analytics import run_analytics
+from summit.privacy_graph.config import PrivacyGraphConfig
 from summit.privacy_graph.types import GraphEvent
+
 
 def test_runs_plaintext_backend():
     cfg = PrivacyGraphConfig(

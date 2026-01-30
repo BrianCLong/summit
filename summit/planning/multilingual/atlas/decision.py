@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+
 
 @dataclass(frozen=True)
 class CrossoverDecision:
@@ -12,7 +14,7 @@ def get_pretrain_vs_finetune_decision(
     model_size_params: int,
     target_language: str,
     token_budget: int,
-    overrides: Optional[Dict[str, int]] = None
+    overrides: Optional[dict[str, int]] = None
 ) -> CrossoverDecision:
     """
     Heuristic for pretrain vs finetune decision.

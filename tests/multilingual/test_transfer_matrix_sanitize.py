@@ -1,7 +1,10 @@
-import pytest
-from summit.planning.multilingual.transfer_matrix import LanguageTransferMatrix
 import json
 from pathlib import Path
+
+import pytest
+
+from summit.planning.multilingual.transfer_matrix import LanguageTransferMatrix
+
 
 def test_transfer_matrix_valid():
     matrix = LanguageTransferMatrix(

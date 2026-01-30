@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import json
-import sys
 import os
+import sys
 from pathlib import Path
+
 
 def fail(msg):
     print(f"FAIL: {msg}", file=sys.stderr)
@@ -13,7 +14,7 @@ def load_sensitive_keys():
     if not policy_path.exists():
         fail(f"Policy file missing: {policy_path}")
     try:
-        with open(policy_path, 'r') as f:
+        with open(policy_path) as f:
             data = json.load(f)
             return data.get("sensitive_keys", [])
     except Exception as e:
@@ -25,7 +26,7 @@ SENSITIVE_KEYS = load_sensitive_keys()
 def scan_file(filepath):
     print(f"Scanning {filepath}...")
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             content = f.read()
             try:
                 data = json.loads(content)

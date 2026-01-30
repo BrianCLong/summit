@@ -1,5 +1,6 @@
-from summit.active_measures.graphs.model import Graph, add_edge
 from summit.active_measures.graphs.baselines import out_weight
+from summit.active_measures.graphs.model import Graph, add_edge
+
 
 def test_graph_construction():
     g = Graph()

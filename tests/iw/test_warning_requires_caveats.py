@@ -1,5 +1,7 @@
 import pytest
+
 from cogwar.iw.warning import generate_warning
+
 
 def test_warning_has_caveats():
     indicators = [{

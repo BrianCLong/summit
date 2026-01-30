@@ -1,10 +1,10 @@
 """
 CI Gate: verifies DEPENDENCY_DELTA.md exists and is updated when dependencies change.
 """
-import sys
-import subprocess
-from pathlib import Path
 import os
+import subprocess
+import sys
+from pathlib import Path
 
 DEP_FILES = {"package.json", "package-lock.json", "requirements.txt", "pyproject.toml", "pnpm-lock.yaml"}
 

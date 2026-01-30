@@ -1,5 +1,7 @@
 import os
+
 from .coord_anom import Finding
+
 
 def is_enabled():
     return os.getenv("INTEGRITY_HARASS_DETECTOR_ENABLED", "false").lower() == "true"

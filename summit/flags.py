@@ -1,5 +1,6 @@
 import os
 
+
 def is_feature_enabled(name: str, default: bool = False) -> bool:
     val = os.environ.get(name)
     if val is None:

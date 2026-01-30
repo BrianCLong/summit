@@ -1,5 +1,6 @@
 from summit.workflows.ir import WorkflowIR
 
+
 def to_mermaid(ir: WorkflowIR) -> str:
     lines = ["flowchart TD"]
     for s in ir.steps:

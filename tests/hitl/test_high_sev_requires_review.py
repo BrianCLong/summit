@@ -1,6 +1,8 @@
 import pytest
-from cogwar.hitl.thresholds import requires_review
+
 from cogwar.hitl.review import submit_for_review
+from cogwar.hitl.thresholds import requires_review
+
 
 def test_high_sev_requires_review():
     warning = {

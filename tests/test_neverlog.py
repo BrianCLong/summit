@@ -1,5 +1,6 @@
 from agentic_web_visibility.policy.neverlog import audit_event
 
+
 def test_audit_safe():
     event = {"id": "1", "data": {"foo": "bar"}}
     assert audit_event(event) is True

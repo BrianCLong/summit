@@ -1,5 +1,7 @@
 import pytest
+
 from summit.orchestration.policy.trace_redaction import TraceRedactor
+
 
 def test_redact_email():
     redactor = TraceRedactor()

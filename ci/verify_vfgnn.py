@@ -1,7 +1,8 @@
-import sys
-import subprocess
 import json
 import os
+import subprocess
+import sys
+
 
 def run_command(cmd, msg):
     print(f"Running: {msg}")

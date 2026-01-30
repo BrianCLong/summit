@@ -35,4 +35,4 @@ class FieldPolicy:
     never_log: bool = False
 
 
-TelemetryEvent = Dict[str, Any]
+TelemetryEvent = dict[str, Any]

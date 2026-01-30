@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Protocol, Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Protocol, Tuple
+
 
 @dataclass(frozen=True)
 class LatentBatch:

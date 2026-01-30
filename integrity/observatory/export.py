@@ -1,12 +1,14 @@
-import os
 import json
-from typing import Dict, Any, List
+import os
+from typing import Any, Dict, List
+
 from ..detectors.coord_anom import Finding
+
 
 def is_enabled():
     return os.getenv("INTEGRITY_OBSERVATORY_EXPORT_ENABLED", "false").lower() == "true"
 
-def package_export(findings: List[Finding], aggregates: Dict[str, Any]) -> Dict[str, Any]:
+def package_export(findings: list[Finding], aggregates: dict[str, Any]) -> dict[str, Any]:
     """
     Produces a standardized export bundle for the AI Influence Observatory.
     Flagged OFF by default.

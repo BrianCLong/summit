@@ -1,6 +1,8 @@
 import pytest
-from summit.builder.spec import BuilderSpec
+
 from summit.builder.elicitation import ElicitationEngine
+from summit.builder.spec import BuilderSpec
+
 
 def test_elicitation_questions():
     engine = ElicitationEngine()

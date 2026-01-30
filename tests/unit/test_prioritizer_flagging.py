@@ -1,7 +1,9 @@
 import os
+
 from services.pipeline.config_flags import is_gnn_prioritizer_enabled
 from services.pipeline.prioritizer import get_prioritizer
 from services.pipeline.prioritizer.gnn_stub import GNNPrioritizerStub
+
 
 def test_feature_flag_off_by_default(monkeypatch):
     # Ensure env var is not set

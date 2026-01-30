@@ -1,11 +1,12 @@
-import yaml
-import pytest
 import os
+
+import pytest
+import yaml
 
 POLICY_DIR = "policies/cog_resilience"
 
 def load_policy():
-    with open(os.path.join(POLICY_DIR, "policy.yaml"), "r") as f:
+    with open(os.path.join(POLICY_DIR, "policy.yaml")) as f:
         return yaml.safe_load(f)
 
 def test_policy_structure():

@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
-def thin_signature(tool_name: str, json_schema: Dict[str, Any]) -> str:
+
+def thin_signature(tool_name: str, json_schema: dict[str, Any]) -> str:
     """
     Produce a stable, minimal signature string:
       tool(param1: string, param2?: number) -> any

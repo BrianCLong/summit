@@ -1,5 +1,6 @@
 import os
 
+
 class SimConfig:
     @staticmethod
     def use_llm_agents() -> bool:

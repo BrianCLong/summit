@@ -1,8 +1,8 @@
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 NEVER_LOG_FIELDS = ["password", "token", "secret", "authorization", "cookie", "raw_prompt"]
 
-def audit_event(event: Dict[str, Any]) -> bool:
+def audit_event(event: dict[str, Any]) -> bool:
     """
     Returns True if the event is safe to log, False if it contains forbidden fields.
     """

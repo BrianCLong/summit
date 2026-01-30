@@ -1,6 +1,8 @@
 import json
 import os
+
 import pytest
+
 from psychographics.mft.scorer import MFTScorer
 
 FIXTURES_DIR = "psychographics/mft/fixtures"

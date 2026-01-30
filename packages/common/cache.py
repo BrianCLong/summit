@@ -1,6 +1,7 @@
 import time
 from dataclasses import dataclass
-from typing import Optional, Dict, Tuple
+from typing import Dict, Optional, Tuple
+
 
 @dataclass(frozen=True)
 class CacheKey:
@@ -13,7 +14,7 @@ class CacheKey:
 class L1MemoryCache:
   def __init__(self, max_items: int = 1024):
     self.max_items = max_items
-    self._store: Dict[str, Tuple[float, object]] = {}
+    self._store: dict[str, tuple[float, object]] = {}
 
   def get(self, k: str) -> Optional[object]:
     v = self._store.get(k)

@@ -1,10 +1,13 @@
 from __future__ import annotations
-from typing import List, Dict, Any
+
+from typing import Any, Dict, List
+
 from .config import PrivacyGraphConfig
+from .graph_builder import build_graph
+from .he_adapter import CipherTensor, HESimulatedBackend, PlaintextBackend, SecureBackend
 from .policy import PrivacyGraphPolicy
 from .types import GraphEvent
-from .graph_builder import build_graph
-from .he_adapter import SecureBackend, PlaintextBackend, HESimulatedBackend, CipherTensor
+
 
 def get_backend(cfg: PrivacyGraphConfig) -> SecureBackend:
     if cfg.backend == "plaintext":
@@ -15,7 +18,7 @@ def get_backend(cfg: PrivacyGraphConfig) -> SecureBackend:
         # Should satisfy policy validation, but just in case
         raise ValueError(f"Unknown backend: {cfg.backend}")
 
-def run_analytics(events: List[GraphEvent], cfg: PrivacyGraphConfig) -> Dict[str, Any]:
+def run_analytics(events: list[GraphEvent], cfg: PrivacyGraphConfig) -> dict[str, Any]:
     # 1. Validate Config
     PrivacyGraphPolicy.validate(cfg)
 

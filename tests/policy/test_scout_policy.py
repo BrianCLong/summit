@@ -1,6 +1,8 @@
 import pytest
+
+from summit.policy.scouts import check_allowlist, check_budget
 from summit.scouts.base import Config, Result
-from summit.policy.scouts import check_budget, check_allowlist
+
 
 def test_budget_exceeded():
     cfg = Config(max_cost_ms=100)

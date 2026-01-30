@@ -1,6 +1,8 @@
 import pytest
+
 from summit.influence.campaigns.model import CampaignSubgraph
 from summit.influence.campaigns.validators import validate_campaign
+
 
 def test_campaign_validation_valid():
     data = {

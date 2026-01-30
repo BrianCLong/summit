@@ -3,8 +3,10 @@
 CI verifier for Summit evidence artifacts.
 TODO: wire into actual CI job name once required checks are discovered.
 """
-import json, sys
+import json
+import sys
 from pathlib import Path
+
 
 def main() -> int:
   idx = Path("evidence/index.json")

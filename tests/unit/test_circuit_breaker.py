@@ -1,5 +1,7 @@
-from packages.common.circuit_breaker import CircuitBreaker, BreakerConfig, State
 import time
+
+from packages.common.circuit_breaker import BreakerConfig, CircuitBreaker, State
+
 
 def test_circuit_breaker_opens_after_threshold():
   # window=10, 50% error rate -> 5 failures needed if window is full

@@ -4,10 +4,10 @@ Deny-by-default: fails if any required artifact missing or invalid.
 """
 from __future__ import annotations
 
-import json
 import argparse
-from pathlib import Path
+import json
 import sys
+from pathlib import Path
 
 REQUIRED = ["report.json", "metrics.json", "stamp.json", "index.json"]
 

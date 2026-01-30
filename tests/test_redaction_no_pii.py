@@ -1,6 +1,7 @@
 import pytest
 from modules.reports.redaction import redact
 
+
 def test_redact_sensitive_keys():
     data = {"safe": "value", "emails": ["a@b.com"], "nested": {"raw_text": "secret"}}
     redacted = redact(data)

@@ -1,8 +1,8 @@
 import json
-import sys
-import pathlib
 import os
+import pathlib
 import subprocess
+import sys
 
 # GATE-DEPS-DELTA: Enforce dependency allowlist and lockfile integrity
 

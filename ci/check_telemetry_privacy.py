@@ -40,7 +40,7 @@ def fail(message: str) -> None:
     sys.exit(1)
 
 
-def load_json(path: pathlib.Path) -> Dict[str, object]:
+def load_json(path: pathlib.Path) -> dict[str, object]:
     try:
         return json.loads(path.read_text())
     except FileNotFoundError:
@@ -50,7 +50,7 @@ def load_json(path: pathlib.Path) -> Dict[str, object]:
     raise RuntimeError("unreachable")
 
 
-def validate_allowlist(allowlist: Dict[str, Dict[str, object]]) -> None:
+def validate_allowlist(allowlist: dict[str, dict[str, object]]) -> None:
     for field, policy in allowlist.items():
         if not isinstance(policy, dict):
             fail(f"allowlist entry for {field} must be an object")
@@ -71,10 +71,10 @@ def validate_allowlist(allowlist: Dict[str, Dict[str, object]]) -> None:
 
 
 def validate_event_schema(
-    allowlist: Dict[str, Dict[str, object]],
-    event_schema: Dict[str, object],
+    allowlist: dict[str, dict[str, object]],
+    event_schema: dict[str, object],
 ) -> None:
-    missing_fields: List[str] = [
+    missing_fields: list[str] = [
         key for key in event_schema.keys() if key not in allowlist
     ]
     if missing_fields:

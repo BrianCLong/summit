@@ -1,9 +1,10 @@
-import os
 import json
-import pytest
-import subprocess
+import os
 import shutil
+import subprocess
 from pathlib import Path
+
+import pytest
 
 TOOLS_DIR = os.path.join(os.path.dirname(__file__), '../tools')
 EVIDENCE_VALIDATE_SCRIPT = os.path.join(TOOLS_DIR, 'evidence_validate.py')

@@ -1,5 +1,7 @@
 import pytest
+
 from modules.feed.narrative_feed import FeedItem, build_feed
+
 
 def test_feed_ordering_is_deterministic():
     item1 = FeedItem("N1", 80, 0.9, [], "Line1", {})

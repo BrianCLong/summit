@@ -1,5 +1,7 @@
 import argparse
+
 from .config import SkillForgeConfig
+
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="summit skillforge")

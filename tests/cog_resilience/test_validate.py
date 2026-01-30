@@ -1,5 +1,11 @@
 import pytest
-from modules.cog_resilience.validate import validate_intent, validate_no_prohibited_fields, validate_compliance
+
+from modules.cog_resilience.validate import (
+    validate_compliance,
+    validate_intent,
+    validate_no_prohibited_fields,
+)
+
 
 def test_validate_intent_allowed():
     # 'analysis_only' is in allowed_intents

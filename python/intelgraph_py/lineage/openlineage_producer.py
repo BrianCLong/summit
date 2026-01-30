@@ -1,10 +1,12 @@
+import datetime
 import os
 import uuid
+from typing import Any, Dict, List, Optional
+
 import yaml
-import datetime
-from typing import List, Optional, Dict, Any
 from openlineage.client import OpenLineageClient
-from openlineage.client.event_v2 import RunEvent, Job, Run, Dataset, RunState
+from openlineage.client.event_v2 import Dataset, Job, Run, RunEvent, RunState
+
 
 class OpenLineageProducer:
     def __init__(self, namespace: str = "summit_intelgraph"):
@@ -13,7 +15,7 @@ class OpenLineageProducer:
 
         if os.path.exists(config_path):
             try:
-                with open(config_path, 'r') as f:
+                with open(config_path) as f:
                     config = yaml.safe_load(f)
                     if config:
                         if "url" in config and "OPENLINEAGE_URL" not in os.environ:
@@ -31,8 +33,8 @@ class OpenLineageProducer:
                           event_type: RunState,
                           job_name: str,
                           run_id: str,
-                          inputs: Optional[List[Dict[str, Any]]] = None,
-                          outputs: Optional[List[Dict[str, Any]]] = None) -> RunEvent:
+                          inputs: Optional[list[dict[str, Any]]] = None,
+                          outputs: Optional[list[dict[str, Any]]] = None) -> RunEvent:
 
         input_datasets = []
         if inputs:
@@ -46,7 +48,7 @@ class OpenLineageProducer:
 
         return RunEvent(
             eventType=event_type,
-            eventTime=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            eventTime=datetime.datetime.now(datetime.UTC).isoformat(),
             run=Run(runId=run_id, facets={}),
             job=Job(namespace=self.namespace, name=job_name, facets={}),
             inputs=input_datasets,
@@ -54,7 +56,7 @@ class OpenLineageProducer:
             producer="https://github.com/BrianCLong/summit/python/intelgraph_py/lineage"
         )
 
-    def emit_start(self, job_name: str, run_id: str, inputs: Optional[List[Dict[str, Any]]] = None):
+    def emit_start(self, job_name: str, run_id: str, inputs: Optional[list[dict[str, Any]]] = None):
         """Emits a START event."""
         try:
             event = self._create_run_event(RunState.START, job_name, run_id, inputs=inputs)
@@ -63,7 +65,7 @@ class OpenLineageProducer:
             # Fail silently or log, don't crash the app
             print(f"Error emitting OpenLineage START event: {e}")
 
-    def emit_complete(self, job_name: str, run_id: str, outputs: Optional[List[Dict[str, Any]]] = None):
+    def emit_complete(self, job_name: str, run_id: str, outputs: Optional[list[dict[str, Any]]] = None):
         """Emits a COMPLETE event."""
         try:
             event = self._create_run_event(RunState.COMPLETE, job_name, run_id, outputs=outputs)

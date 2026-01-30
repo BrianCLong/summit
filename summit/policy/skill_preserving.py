@@ -1,6 +1,7 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
-def build_response_plan(user_request: str, context: Dict[str, Any]) -> Dict[str, Any]:
+
+def build_response_plan(user_request: str, context: dict[str, Any]) -> dict[str, Any]:
     """
     Skill-Preserving Mode (SPM):
     - Ask for user's plan/intent

@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/schemas/go-live-evidence.json",
+  "title": "Go-Live Evidence Bundle",
+  "description": "Schema for validating go-live evidence bundles",
+  "type": "object",
+  "required": ["version", "generatedAt", "git", "checks", "summary"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the evidence schema"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evidence generation"
+    },
+    "git": {
+      "type": "object",
+      "required": ["sha", "branch", "dirty"],
+      "properties": {
+        "sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$",
+          "description": "Full git commit SHA"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Git branch name"
+        },
+        "dirty": {
+          "type": "boolean",
+          "description": "Whether the working tree has uncommitted changes"
+        }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "properties": {
+        "node": { "type": "string" },
+        "pnpm": { "type": "string" }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "required": ["lint", "build", "test", "smoke"],
+      "properties": {
+        "lint": { "$ref": "#/definitions/checkResult" },
+        "build": { "$ref": "#/definitions/checkResult" },
+        "test": { "$ref": "#/definitions/checkResult" },
+        "smoke": { "$ref": "#/definitions/checkResult" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["passed", "totalChecks", "passedChecks", "failedChecks"],
+      "properties": {
+        "passed": { "type": "boolean" },
+        "totalChecks": { "type": "integer", "minimum": 0 },
+        "passedChecks": { "type": "integer", "minimum": 0 },
+        "failedChecks": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "definitions": {
+    "checkResult": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "skipped"]
+        },
+        "durationMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "output": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

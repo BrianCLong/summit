@@ -1,9 +1,12 @@
 import os
 import shutil
 import tempfile
-import pytest
-from summit.psyche.evidence.writer import EvidenceWriter
+
 import jsonschema
+import pytest
+
+from summit.psyche.evidence.writer import EvidenceWriter
+
 
 def test_evidence_writer_creates_valid_bundle():
     with tempfile.TemporaryDirectory() as tmpdir:

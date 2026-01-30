@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Protocol, Dict, Any
+from typing import Any, Dict, Protocol
+
 
 class Tool(Protocol):
     name: str
-    def __call__(self, inp: Dict[str, Any]) -> Dict[str, Any]: ...
+    def __call__(self, inp: dict[str, Any]) -> dict[str, Any]: ...
 
 @dataclass(frozen=True)
 class ToolSandboxConfig:

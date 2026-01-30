@@ -1,10 +1,12 @@
 import json
 import os
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from .discover import find_skills
 from .model import Skill
 
-def build_index(root_dir: str) -> Dict[str, Any]:
+
+def build_index(root_dir: str) -> dict[str, Any]:
     """
     Builds a deterministic index of all skills found in root_dir.
     """

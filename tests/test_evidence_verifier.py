@@ -1,15 +1,16 @@
+import json
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-import json
-import sys
 
 # Add scripts to path so we can import verify_evidence if needed,
 # but we'll mostly run it as a subprocess or import main.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from scripts import verify_evidence
+
 
 class TestEvidenceVerifier(unittest.TestCase):
     def setUp(self):

@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
+
 from .schema import MediaEvidenceV1
+
 
 class Emu3BackendAdapter(ABC):
     @abstractmethod

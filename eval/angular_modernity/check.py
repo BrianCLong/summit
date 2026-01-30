@@ -1,12 +1,14 @@
 import os
 import re
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from .rules import RULES
 
-def check_file(filepath: str) -> List[Dict[str, Any]]:
+
+def check_file(filepath: str) -> list[dict[str, Any]]:
     violations = []
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
             lines = content.splitlines()
 

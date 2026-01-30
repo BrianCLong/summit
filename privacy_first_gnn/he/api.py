@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class HEBackend(ABC):
     @abstractmethod
     def encrypt(self, plain_value, public_params):

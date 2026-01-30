@@ -1,5 +1,6 @@
-import yaml
 from pathlib import Path
+
+import yaml
 
 # Load prohibited items from policy.yaml
 ROOT = Path(__file__).resolve().parents[2]
@@ -7,7 +8,7 @@ POLICY_PATH = ROOT / "policies" / "influence_governance" / "policy.yaml"
 
 def load_policy_config():
     try:
-        with open(POLICY_PATH, "r") as f:
+        with open(POLICY_PATH) as f:
             policy = yaml.safe_load(f)
             return (
                 set(policy.get("prohibited_intents", [])),

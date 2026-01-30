@@ -1,7 +1,8 @@
-from typing import List, Dict, Any
 import uuid
+from typing import Any, Dict, List
 
-def generate_warning(indicators: List[Dict[str, Any]]) -> Dict[str, Any]:
+
+def generate_warning(indicators: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Generates a warning from a list of indicators.
     Enforces caveats and evidence references.

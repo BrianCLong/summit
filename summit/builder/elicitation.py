@@ -1,12 +1,14 @@
 from typing import List, Optional
+
 from .spec import BuilderSpec
+
 
 class ElicitationEngine:
     def __init__(self):
         # In a real app, this would interface with an LLM
         pass
 
-    def get_clarifying_questions(self, spec: BuilderSpec) -> List[str]:
+    def get_clarifying_questions(self, spec: BuilderSpec) -> list[str]:
         questions = []
         if not spec.document_types:
             questions.append("What types of documents are you processing?")

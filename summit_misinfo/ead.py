@@ -1,18 +1,19 @@
 from __future__ import annotations
+
+import os
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from typing import Deque, Dict, Optional
-import os
 
-from .signals import StreamEvent
 from .scoring import Score
+from .signals import StreamEvent
 
 EVD = "EVD-AIDISINFO25-EAD-001"
 
 @dataclass
 class EADState:
     window_ms: int = 5 * 60 * 1000
-    per_content: Dict[str, Deque[int]] = None
+    per_content: dict[str, deque[int]] = None
     def __post_init__(self):
         if self.per_content is None:
             self.per_content = defaultdict(deque)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import re
+import datetime
 import json
 import os
-import datetime
+import re
 
 LEDGER_PATH = "docs/security/SECURITY-ISSUE-LEDGER.md"
 OUTPUT_PATH = "compliance-snapshot.json"
@@ -11,12 +11,12 @@ def parse_ledger(path):
     if not os.path.exists(path):
         return {"error": "Ledger not found"}
 
-    with open(path, 'r') as f:
+    with open(path) as f:
         content = f.read()
 
     snapshot = {
         "source": path,
-        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
         "summary": {},
         "status": "UNKNOWN"
     }

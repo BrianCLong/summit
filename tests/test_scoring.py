@@ -1,7 +1,9 @@
-from summit_misinfo.scoring import Registry, Score
-from summit_misinfo.signals import StreamEvent
 import os
 from unittest import mock
+
+from summit_misinfo.scoring import Registry, Score
+from summit_misinfo.signals import StreamEvent
+
 
 def test_registry_score():
     r = Registry()

@@ -1,5 +1,7 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
+
 from .thresholds import requires_review
+
 
 def submit_for_review(warning: dict, reviewer_role: str = "analyst") -> dict:
     """
@@ -22,5 +24,5 @@ def record_decision(warning_id: str, decision: str, rationale: str) -> dict:
         "warning_id": warning_id,
         "decision": decision,
         "rationale": rationale,
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     }

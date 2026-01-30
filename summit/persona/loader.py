@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from summit import flags
 
 DEFAULT_SOUL = Path(__file__).parent / "defaults" / "Soul.md"

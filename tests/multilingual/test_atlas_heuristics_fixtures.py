@@ -1,8 +1,14 @@
 import pytest
-from summit.planning.multilingual.atlas.heuristics import scale_for_language_count, ATLAS_K_DOUBLE_MODEL_MULT, ATLAS_K_DOUBLE_DATA_MULT
+
+import summit.flags
+from summit.planning.multilingual.atlas.heuristics import (
+    ATLAS_K_DOUBLE_DATA_MULT,
+    ATLAS_K_DOUBLE_MODEL_MULT,
+    scale_for_language_count,
+)
 from summit.planning.multilingual.atlas.planner import AtlasPlanner
 from summit.planning.multilingual.planner import PlanRequest
-import summit.flags
+
 
 def test_atlas_heuristics_doubling():
     scaling = scale_for_language_count(1, 2)

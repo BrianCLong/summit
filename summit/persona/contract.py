@@ -1,13 +1,14 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
 
+
 @dataclass(frozen=True)
 class PersonaContract:
   persona_id: str
   version: str
-  allowed_style_axes: Dict[str, List[str]] = field(default_factory=dict)
-  forbidden_axes: List[str] = field(default_factory=list)
-  disclosures: List[str] = field(default_factory=list)
+  allowed_style_axes: dict[str, list[str]] = field(default_factory=dict)
+  forbidden_axes: list[str] = field(default_factory=list)
+  disclosures: list[str] = field(default_factory=list)
 
   def validate(self) -> None:
     if not self.persona_id or not self.version:

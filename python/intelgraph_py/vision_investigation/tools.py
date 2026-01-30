@@ -1,9 +1,11 @@
-import os
-import math
-import cv2
 import hashlib
+import math
+import os
+
+import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
+
 
 def _generate_output_path(original_path: str, suffix: str, params: dict = None) -> str:
     directory, filename = os.path.split(original_path)
@@ -71,7 +73,7 @@ def annotate_image(image_path: str, text: str, coords: tuple[int, int], color: s
             try:
                 # Try to load a standard font if available, or default
                 font = ImageFont.load_default()
-            except IOError:
+            except OSError:
                 font = ImageFont.load_default()
 
             draw.text(coords, text, fill=color, font=font)

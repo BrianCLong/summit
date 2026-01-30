@@ -1,6 +1,8 @@
-import sys
 import argparse
+import sys
+
 from .runner import run
+
 
 def main():
     parser = argparse.ArgumentParser(description="Solid Gate - Engineering Quality Guardrail")

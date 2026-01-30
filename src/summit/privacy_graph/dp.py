@@ -1,15 +1,17 @@
 from __future__ import annotations
-import random
-from typing import List, Tuple, Dict
 
-def cap_degree(edges: List[Tuple[str, str]], max_degree: int, seed: int = 0) -> List[Tuple[str, str]]:
+import random
+from typing import Dict, List, Tuple
+
+
+def cap_degree(edges: list[tuple[str, str]], max_degree: int, seed: int = 0) -> list[tuple[str, str]]:
     # Although seed is provided, this implementation is currently deterministic based on input order.
     # We use random just to initialize if we needed to shuffle, but we don't shuffle to preserve stability.
     # If shuffling is needed for privacy (sampling), it should use the seed.
     # For now, strict first-k approach.
 
-    out: List[Tuple[str, str]] = []
-    deg: Dict[str, int] = {}
+    out: list[tuple[str, str]] = []
+    deg: dict[str, int] = {}
 
     for (u, v) in edges:
         if deg.get(u, 0) >= max_degree:

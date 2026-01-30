@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+import os
 import subprocess
 import sys
-import os
 
 LOCKFILES = {"package-lock.json", "poetry.lock", "requirements.txt", "pnpm-lock.yaml", "yarn.lock"}
 DELTA_DOC = "docs/deps/dependency_delta.md"

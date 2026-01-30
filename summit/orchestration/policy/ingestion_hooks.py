@@ -1,6 +1,8 @@
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
 from summit.orchestration.policy.trace_redaction import TraceRedactor
+
 
 class MessyLogsIngestor:
     """Ingests and redacts conversational artifacts."""
@@ -8,7 +10,7 @@ class MessyLogsIngestor:
     def __init__(self, redactor: TraceRedactor = None):
         self.redactor = redactor or TraceRedactor()
 
-    def ingest(self, raw_data: Dict[str, Any]) -> Dict[str, Any]:
+    def ingest(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         """Redacts and classifies raw transcript data."""
         # 1. Redact transcript
         redacted_transcript = []

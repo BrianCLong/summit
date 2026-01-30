@@ -1,11 +1,12 @@
+import json
 import os
 import shutil
-import tempfile
-import unittest
 import subprocess
 import sys
+import tempfile
+import unittest
 from pathlib import Path
-import json
+
 
 class TestVerifyEvidence(unittest.TestCase):
     def setUp(self):

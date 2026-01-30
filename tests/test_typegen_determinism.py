@@ -1,5 +1,7 @@
 import json
+
 from codemode.typegen import thin_signature
+
 
 def test_determinism_sorted_keys():
     schema = {

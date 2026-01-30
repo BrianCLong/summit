@@ -1,11 +1,13 @@
 import argparse
 import json
-import sys
 import os
+import sys
+
 import jsonschema
 
+
 def load_json(path):
-    with open(path, 'r') as f:
+    with open(path) as f:
         return json.load(f)
 
 def validate_artifact(artifact_path, schema_path):

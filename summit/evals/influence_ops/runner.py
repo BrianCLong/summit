@@ -1,6 +1,7 @@
-from typing import Dict, Any, List, Callable
+from typing import Any, Callable, Dict, List
 
-def run_suite(*, cases: List[Dict[str, Any]], gate_check: Callable[..., Any]) -> Dict[str, Any]:
+
+def run_suite(*, cases: list[dict[str, Any]], gate_check: Callable[..., Any]) -> dict[str, Any]:
   out = {"total": len(cases), "blocked": 0, "allowed": 0, "by_tag": {}, "failures": []}
   for c in cases:
     tag = c.get("tag", "untagged")
@@ -30,6 +31,7 @@ def run_suite(*, cases: List[Dict[str, Any]], gate_check: Callable[..., Any]) ->
 if __name__ == "__main__":
     import json
     import sys
+
     from summit.evals.influence_ops.fixtures import CASES
     from summit.security.influence_ops.policy import InfluenceOpsGate
 

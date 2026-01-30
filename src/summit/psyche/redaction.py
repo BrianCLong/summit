@@ -1,6 +1,7 @@
-from typing import Tuple, Dict, Any, List
+from typing import Any, Dict, List, Tuple
 
-def scrub_pii(text: str) -> Tuple[str, Dict[str, Any]]:
+
+def scrub_pii(text: str) -> tuple[str, dict[str, Any]]:
     """
     Scrub PII from text.
     Returns:
@@ -16,7 +17,7 @@ def scrub_pii(text: str) -> Tuple[str, Dict[str, Any]]:
     }
     return text, redaction_report
 
-def assert_no_pii_in_evidence(evidence_data: Dict[str, Any]) -> None:
+def assert_no_pii_in_evidence(evidence_data: dict[str, Any]) -> None:
     """
     Recursively check evidence data for PII keys or patterns.
     Raises ValueError if PII is suspected.

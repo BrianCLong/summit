@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Literal, Optional, Dict, Any, List
+from typing import Any, Dict, List, Literal, Optional
 
 PrecisionMode = Literal["bf16", "fp8_unified", "mixed_legacy"]
 FP8Format = Literal["E4M3", "E5M2"]
@@ -10,7 +11,7 @@ class FP8Config:
     fmt: FP8Format = "E4M3"
     amax_history: int = 16
     scale_method: str = "dynamic"  # TODO: define allowed values
-    allow_calibration_ops: List[str] = field(default_factory=list)  # deny-by-default
+    allow_calibration_ops: list[str] = field(default_factory=list)  # deny-by-default
 
 @dataclass(frozen=True)
 class EnforcementConfig:
@@ -23,7 +24,7 @@ class PrecisionFlowPolicy:
     fp8: FP8Config = field(default_factory=FP8Config)
     enforcement: EnforcementConfig = field(default_factory=EnforcementConfig)
 
-def policy_from_dict(d: Dict[str, Any]) -> PrecisionFlowPolicy:
+def policy_from_dict(d: dict[str, Any]) -> PrecisionFlowPolicy:
     # Minimal parser; keep blast radius small.
     mode = d.get("mode", "bf16")
     fp8d = d.get("fp8", {}) or {}

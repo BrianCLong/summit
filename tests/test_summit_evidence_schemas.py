@@ -1,8 +1,9 @@
-import subprocess
-import pytest
 import json
+import subprocess
 from pathlib import Path
-from jsonschema import validate, ValidationError
+
+import pytest
+from jsonschema import ValidationError, validate
 
 # Path to the verifier script
 VERIFIER_SCRIPT = Path("ci/verify_evidence.py")

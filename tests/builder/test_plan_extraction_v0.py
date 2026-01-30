@@ -1,8 +1,11 @@
-import pytest
 import os
 from unittest.mock import patch
-from summit.builder.spec import BuilderSpec
+
+import pytest
+
 from summit.builder.plan import plan_from_spec
+from summit.builder.spec import BuilderSpec
+
 
 @patch.dict(os.environ, {"SUMMIT_BUILDER_ENABLED": "1"})
 def test_plan_from_spec_extraction():

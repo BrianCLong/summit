@@ -1,5 +1,6 @@
 from summit.runtime.budget import Budget
 
+
 def test_budget_starts_ok():
     b = Budget(max_tokens=100, max_usd=1.0)
     assert b.check()

@@ -1,5 +1,6 @@
 import os
 
+
 def is_gnn_prioritizer_enabled() -> bool:
     return os.getenv("FEATURE_PRIORITIZER_GNN", "false").lower() == "true"
 

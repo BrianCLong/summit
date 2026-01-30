@@ -1,6 +1,8 @@
 import os
+from typing import Any, Dict, List, Optional
+
 import httpx
-from typing import List, Dict, Any, Optional
+
 
 class TogetherProvider:
     """
@@ -23,11 +25,11 @@ class TogetherProvider:
 
     async def chat_completion(
         self,
-        messages: List[Dict[str, Any]],
-        tools: Optional[List[Dict[str, Any]]] = None,
+        messages: list[dict[str, Any]],
+        tools: Optional[list[dict[str, Any]]] = None,
         model: str = "moonshotai/Kimi-K2.5",
         temperature: float = 0.7
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
 
         if not self.api_key:
              raise ValueError("TOGETHER_API_KEY is not set")

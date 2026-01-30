@@ -1,10 +1,10 @@
-import sys
-import json
 import argparse
+import json
+import sys
 from pathlib import Path
 
 try:
-    from jsonschema import validate, RefResolver
+    from jsonschema import RefResolver, validate
 except ImportError:
     print("jsonschema not found.")
     sys.exit(1)

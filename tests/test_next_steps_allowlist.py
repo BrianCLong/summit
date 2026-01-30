@@ -1,5 +1,7 @@
 import pytest
-from modules.decision.next_steps import recommend_next_steps, ALLOWED_NEXT_STEPS
+
+from modules.decision.next_steps import ALLOWED_NEXT_STEPS, recommend_next_steps
+
 
 def test_only_allowed_steps_returned():
     drivers = ["toxicity", "automation", "unknown_bad_thing"]

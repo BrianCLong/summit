@@ -1,6 +1,9 @@
 import os
-from summit.workflows.ir import WorkflowIR, Step
+
+from summit.workflows.ir import Step, WorkflowIR
+
 from .spec import BuilderSpec
+
 
 def plan_from_spec(spec: BuilderSpec) -> WorkflowIR:
     # Feature flag check

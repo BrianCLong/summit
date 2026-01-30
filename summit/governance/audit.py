@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 import json
 import os
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
+
 
 @dataclass(frozen=True)
 class AuditEvent:
@@ -11,12 +13,12 @@ class AuditEvent:
     actor: str
     action: str
     decision: str  # "allow" | "deny" | "needs_approval"
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     evidence_id: Optional[str] = None
 
 NEVER_LOG = ["password", "secret", "token", "api_key", "pii", "phi"]
 
-def redact(data: Dict[str, Any]) -> Dict[str, Any]:
+def redact(data: dict[str, Any]) -> dict[str, Any]:
     """Simple recursive redaction for sensitive fields."""
     redacted = {}
     for k, v in data.items():

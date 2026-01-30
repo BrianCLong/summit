@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Simple regex-based patterns for sensitive data (expand as needed)
 PATTERNS = {
@@ -19,7 +19,7 @@ def sanitize_value(value: Any) -> Any:
         return [sanitize_value(v) for v in value]
     return value
 
-def sanitize_event(event_dict: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_event(event_dict: dict[str, Any]) -> dict[str, Any]:
     """
     Sanitizes a dictionary representing an event.
     Ensures keys are safe and values are redacted.

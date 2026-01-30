@@ -1,9 +1,12 @@
 from __future__ import annotations
-from ..planner import MultilingualScalingPlanner, PlanRequest, PlanResponse
-from .heuristics import scale_for_language_count
-from .decision import get_pretrain_vs_finetune_decision
+
 import summit.flags
+
 from ..baseline import BaselinePlanner
+from ..planner import MultilingualScalingPlanner, PlanRequest, PlanResponse
+from .decision import get_pretrain_vs_finetune_decision
+from .heuristics import scale_for_language_count
+
 
 class AtlasPlanner(MultilingualScalingPlanner):
     """

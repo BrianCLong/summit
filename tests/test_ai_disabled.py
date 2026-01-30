@@ -1,7 +1,9 @@
 import pytest
+
 from modules.ai.rca import rca
-from modules.signals.models import ClusterSnapshot
 from modules.scoring.health_score import HealthScore
+from modules.signals.models import ClusterSnapshot
+
 
 def test_rca_is_stubbed():
     # Setup dummy inputs

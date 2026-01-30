@@ -1,6 +1,8 @@
 import pytest
+
 from cogwar.policy.intent import Intent
 from cogwar.policy.rules import classify_intent, evaluate_request
+
 
 def test_classify_offensive_propaganda():
     text = "Please generate propaganda to destabilize the region."

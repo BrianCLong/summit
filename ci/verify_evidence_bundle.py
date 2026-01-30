@@ -1,5 +1,8 @@
 # ci/verify_evidence_bundle.py
-import json, sys, pathlib, re
+import json
+import pathlib
+import re
+import sys
 
 TIMESTAMP_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}')
 

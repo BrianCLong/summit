@@ -4,11 +4,11 @@ from dataclasses import dataclass
 from typing import Dict, Iterable, List
 
 # Baseline MFT-5 used by MAG evaluations (Care/Fairness/Loyalty/Authority/Sanctity).
-MFT5: List[str] = ["care", "fairness", "loyalty", "authority", "sanctity"]
+MFT5: list[str] = ["care", "fairness", "loyalty", "authority", "sanctity"]
 
 UNKNOWN_KEY = "unknown"
 
-def normalize(vec: Dict[str, float], *, allow_unknown: bool = True) -> Dict[str, float]:
+def normalize(vec: dict[str, float], *, allow_unknown: bool = True) -> dict[str, float]:
     """
     Deterministically normalize a moral vector.
     - Missing foundations default to 0.

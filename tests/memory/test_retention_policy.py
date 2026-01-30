@@ -1,6 +1,8 @@
-import time
 import os
+import time
+
 from summit.memory.retention import RetentionPolicy
+
 
 def test_retention_archives_old_file(tmp_path):
     f = tmp_path / "ledger.jsonl"

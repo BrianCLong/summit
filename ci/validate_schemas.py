@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
-import json
 import argparse
-import sys
-import re
+import json
 import os
+import re
+import sys
 from pathlib import Path
-from jsonschema import validate, ValidationError
+
+from jsonschema import ValidationError, validate
 
 # Regex to detect ISO 8601 timestamps
 TIMESTAMP_REGEX = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}')
 
 def load_json(path):
-    with open(path, 'r') as f:
+    with open(path) as f:
         return json.load(f)
 
 def validate_schema(data, schema_path):
     try:
-        with open(schema_path, 'r') as f:
+        with open(schema_path) as f:
             schema = json.load(f)
         validate(instance=data, schema=schema)
         return True, None
@@ -67,7 +68,7 @@ def main():
 
     # 2. Walk evidence directory and validate known patterns
     # IGNORE LEGACY DIRS for now to allow new strict schemas
-    IGNORED_DIRS = {"subsumption", "azure-turin-v7", "project19", "context", "ecosystem", "fixtures", "governance", "jules", "mcp", "mcp-apps", "runs", "runtime", "schemas", "subsumption"}
+    IGNORED_DIRS = {"subsumption", "azure-turin-v7", "project19", "context", "ecosystem", "fixtures", "governance", "jules", "mcp", "mcp-apps", "runs", "runtime", "schemas"}
 
     for fpath in root_dir.rglob("*.json"):
         # Skip schemas themselves and ignored dirs

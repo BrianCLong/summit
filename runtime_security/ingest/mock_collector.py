@@ -1,6 +1,8 @@
 from __future__ import annotations
-from .schemas import RuntimeSignal
+
 from .redaction import redact
+from .schemas import RuntimeSignal
+
 
 def collect() -> list[RuntimeSignal]:
     raw = [

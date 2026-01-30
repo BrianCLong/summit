@@ -15,7 +15,7 @@ class Action:
     dz: float = 0.0
     yaw: float = 0.0
     pitch: float = 0.0
-    discrete: Tuple[str, ...] = ()
+    discrete: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -28,8 +28,8 @@ class CapabilityDescriptor:
 
 @dataclass(frozen=True)
 class StepResult:
-    frames: Tuple[Frame, ...]
-    meta: Dict[str, Any]
+    frames: tuple[Frame, ...]
+    meta: dict[str, Any]
 
 
 class WorldModelBackend(Protocol):
@@ -49,7 +49,7 @@ class WorldModelBackend(Protocol):
 
 
 class BackendFactory(Protocol):
-    def __call__(self, config: Optional[Dict[str, Any]] = None) -> WorldModelBackend:
+    def __call__(self, config: Optional[dict[str, Any]] = None) -> WorldModelBackend:
         ...
 
 

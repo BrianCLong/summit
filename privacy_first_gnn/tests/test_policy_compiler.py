@@ -1,5 +1,6 @@
 from privacy_first_gnn.policy.compiler import PrivacyPolicyCompiler, apply_policy
 
+
 def test_policy_compiler():
     classifications = {
         "src_ip": "SENSITIVE",

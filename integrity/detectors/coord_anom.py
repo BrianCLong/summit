@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -7,7 +8,7 @@ class Finding:
     score: float
     reason: str
 
-def detect(signal_bundle: Dict[str, Any]) -> list[Finding]:
+def detect(signal_bundle: dict[str, Any]) -> list[Finding]:
     """
     Placeholder: coordination anomaly on timing burstiness.
     Deny-by-default: produce no findings unless threshold exceeded.

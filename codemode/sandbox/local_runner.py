@@ -1,5 +1,6 @@
-from codemode.sandbox.base import SandboxRunner
 from codemode.policy import SandboxPolicy
+from codemode.sandbox.base import SandboxRunner
+
 
 class LocalSandboxRunner(SandboxRunner):
     def run_code(self, code: str) -> str:

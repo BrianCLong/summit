@@ -1,7 +1,10 @@
-import pytest
 import os
-from cogwar.innovation.sync_inference import infer_sync_events
+
+import pytest
+
 from cogwar.innovation.narrative_clustering import cluster_narratives
+from cogwar.innovation.sync_inference import infer_sync_events
+
 
 def test_sync_inference_disabled_by_default():
     # Ensure env var is not set or false (save/restore)

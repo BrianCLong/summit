@@ -2,12 +2,14 @@ import argparse
 import json
 import os
 import sys
+from typing import Any, Dict, List
+
 import jsonschema
-from typing import Dict, Any, List
+
 
 def load_json(path: str) -> Any:
     try:
-        with open(path, 'r') as f:
+        with open(path) as f:
             return json.load(f)
     except FileNotFoundError:
         print(f"Error: File not found: {path}")
@@ -16,7 +18,7 @@ def load_json(path: str) -> Any:
         print(f"Error: Invalid JSON in {path}: {e}")
         return None
 
-def validate_schema(data: Any, schema: Dict[str, Any], context: str) -> bool:
+def validate_schema(data: Any, schema: dict[str, Any], context: str) -> bool:
     try:
         jsonschema.validate(instance=data, schema=schema)
         return True

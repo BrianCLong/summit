@@ -2,16 +2,17 @@
 CI Gate: Enforce OSINT policy.
 Wraps summit.policy.osint_policy.
 """
-import sys
-import json
 import argparse
+import json
+import sys
+
 # Ensure we can import from summit (assuming root is PYTHONPATH)
 try:
-    from summit.policy.osint_policy import evaluate, OsintPolicyInput
+    from summit.policy.osint_policy import OsintPolicyInput, evaluate
 except ImportError:
     # If summit package is not in path, try relative import or adjust path
     sys.path.append(".")
-    from summit.policy.osint_policy import evaluate, OsintPolicyInput
+    from summit.policy.osint_policy import OsintPolicyInput, evaluate
 
 def main():
     parser = argparse.ArgumentParser()
@@ -19,7 +20,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        with open(args.input, "r") as f:
+        with open(args.input) as f:
             data = json.load(f)
     except Exception as e:
         print(f"failed_to_load_input error={e}")

@@ -1,6 +1,8 @@
 import pytest
-from summit_sim.tools.registry import ToolRegistry
+
 from summit_sim.tools.interfaces import EchoTool
+from summit_sim.tools.registry import ToolRegistry
+
 
 def test_deny_by_default():
     registry = ToolRegistry()

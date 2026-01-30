@@ -1,17 +1,18 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Any
+from typing import Any, List
+
 
 @dataclass
 class Result:
-    artifacts: List[str] = field(default_factory=list)
+    artifacts: list[str] = field(default_factory=list)
     cost_ms: int = 0
 
 @dataclass
 class Config:
     max_cost_ms: int = 1000
     max_output_bytes: int = 1024 * 1024
-    allowlisted_tools: List[str] = field(default_factory=list)
+    allowlisted_tools: list[str] = field(default_factory=list)
 
 class Scout(ABC):
     @abstractmethod

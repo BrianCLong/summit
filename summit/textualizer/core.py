@@ -1,6 +1,7 @@
 from typing import List
 
-def to_context_pack(traj_paths: List[str]) -> bytes:
+
+def to_context_pack(traj_paths: list[str]) -> bytes:
     """
     Deterministically converts trajectories into context packs.
     """

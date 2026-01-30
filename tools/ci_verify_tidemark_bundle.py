@@ -32,11 +32,11 @@ TIMESTAMP_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 FORBIDDEN_KEYS = {"user_id", "handle", "email", "username"}
 
 
-def _load_json(path: Path) -> Dict[str, Any]:
+def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def _collect_keys(payload: Any, keys: List[str]) -> None:
+def _collect_keys(payload: Any, keys: list[str]) -> None:
     if isinstance(payload, dict):
         for key, value in payload.items():
             keys.append(key)
@@ -60,7 +60,7 @@ def _find_timestamps(payload: Any) -> bool:
     return False
 
 
-def _validate_schema(instance: Dict[str, Any], schema_path: Path, errors: List[str]) -> None:
+def _validate_schema(instance: dict[str, Any], schema_path: Path, errors: list[str]) -> None:
     if jsonschema is None:
         errors.append("jsonschema dependency missing; cannot validate schemas")
         return
@@ -71,7 +71,7 @@ def _validate_schema(instance: Dict[str, Any], schema_path: Path, errors: List[s
         errors.append(f"Schema validation failed for {schema_path}: {exc.message}")
 
 
-def _check_feature_flags(errors: List[str]) -> None:
+def _check_feature_flags(errors: list[str]) -> None:
     config_path = ROOT / "src" / "temporal_graph" / "config.py"
     if not config_path.exists():
         errors.append("Missing src/temporal_graph/config.py for feature flag defaults")
@@ -104,7 +104,7 @@ def _check_feature_flags(errors: List[str]) -> None:
 
 
 def main() -> int:
-    errors: List[str] = []
+    errors: list[str] = []
 
     for rel_path in BUNDLE_FILES:
         path = ROOT / rel_path
@@ -145,7 +145,7 @@ def main() -> int:
         if not _find_timestamps(payload):
             errors.append("stamp.json must include RFC3339 timestamp")
 
-    forbidden_hits: List[str] = []
+    forbidden_hits: list[str] = []
     for rel_path in [
         "evidence/tidemark-temporal-communities/report.json",
         "evidence/tidemark-temporal-communities/metrics.json",
@@ -155,7 +155,7 @@ def main() -> int:
         if not path.exists():
             continue
         payload = _load_json(path)
-        keys: List[str] = []
+        keys: list[str] = []
         _collect_keys(payload, keys)
         hits = FORBIDDEN_KEYS.intersection({key.lower() for key in keys})
         if hits:

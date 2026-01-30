@@ -1,21 +1,22 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
 import hashlib
 import json
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class DecisionRecord:
     decision_id: str
     context: str
     outcome: str
-    top_factors: List[str]
-    policy_checks: List[str]
+    top_factors: list[str]
+    policy_checks: list[str]
     model_version: Optional[str] = None
     human_readable_summary: str = ""
     timestamp: Optional[str] = None # Optional, only populated if needed for non-deterministic debugging
 
     @staticmethod
-    def create(context: str, outcome: str, factors: List[str], policies: List[str], model: str = "baseline") -> 'DecisionRecord':
+    def create(context: str, outcome: str, factors: list[str], policies: list[str], model: str = "baseline") -> 'DecisionRecord':
         # Deterministic ID based on content
         content = f"{context}:{outcome}:{model}:{sorted(factors)}"
         did = hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
@@ -29,7 +30,7 @@ class DecisionRecord:
             human_readable_summary=f"Decided {outcome} based on {', '.join(factors)}"
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "decision_id": self.decision_id,
             "context": self.context,

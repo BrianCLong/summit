@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict, Any, Iterable
+from typing import Any, Dict, Iterable
+
 
 @dataclass(frozen=True)
 class Event:
@@ -10,7 +11,7 @@ class Event:
     target_id: str | None
     community_id: str | None
 
-def extract(events: Iterable[Event]) -> Dict[str, Any]:
+def extract(events: Iterable[Event]) -> dict[str, Any]:
     """
     Returns derived aggregates for downstream detectors.
     Keep deterministic: no timestamps, no randomness.

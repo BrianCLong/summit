@@ -1,15 +1,15 @@
 import argparse
+import datetime
 import json
 import sys
 import uuid
-import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_DIR = ROOT / "evidence"
 
 def load_jsonl(p):
-    with open(p, "r") as f:
+    with open(p) as f:
         return [json.loads(line) for line in f if line.strip()]
 
 def main():
@@ -44,7 +44,7 @@ def main():
         "item_slug": item_slug,
         "area": "agentic_coding",
         "summary": f"Executed suite {args.suite} with {len(results)} tasks.",
-        "artifacts": [f"evals/agentic_coding/fixtures/tasks.jsonl"]
+        "artifacts": ["evals/agentic_coding/fixtures/tasks.jsonl"]
     }
 
     metrics = {

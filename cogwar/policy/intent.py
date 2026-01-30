@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+
 class Intent(Enum):
     DEFENSIVE_IW = auto()      # I&W generation, fusion, reporting
     RESILIENCE_DRILL = auto()  # Running drills, checking metrics

@@ -1,7 +1,10 @@
 import json
-import pytest
 from pathlib import Path
-from connectors.spiderfoot import load_export, normalize, write_normalized, OsintEvent
+
+import pytest
+
+from connectors.spiderfoot import OsintEvent, load_export, normalize, write_normalized
+
 
 def test_import_minimal():
     export_path = Path("tests/fixtures/spiderfoot/minimal_export.json")

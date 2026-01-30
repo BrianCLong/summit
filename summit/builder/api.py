@@ -1,10 +1,12 @@
 import os
 from typing import Optional
-from summit.builder.spec import BuilderSpec
-from summit.builder.plan import plan_from_spec
+
 from summit.builder.codegen import generate_project_files
-from summit.integrations.git.local_export import LocalExportGit
+from summit.builder.plan import plan_from_spec
+from summit.builder.spec import BuilderSpec
 from summit.deploy.local import LocalDeployAdapter
+from summit.integrations.git.local_export import LocalExportGit
+
 
 class BuilderAPI:
     def __init__(self):

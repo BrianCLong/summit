@@ -1,5 +1,6 @@
 from integrity.detectors.coord_anom import detect
 
+
 def test_coord_negative_fixture():
     sig = {"bursts_per_minute": {0: 3, 1: 2}}
     assert detect(sig) == []

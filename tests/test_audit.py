@@ -1,10 +1,12 @@
-import unittest
-import os
 import json
+import os
 import shutil
 import tempfile
+import unittest
 from pathlib import Path
+
 from summit.governance.audit import AuditEvent, emit, redact
+
 
 class TestAudit(unittest.TestCase):
     def test_redact(self):
@@ -34,7 +36,7 @@ class TestAudit(unittest.TestCase):
             )
             emit(event, sink=sink)
 
-            with open(sink, "r") as f:
+            with open(sink) as f:
                 line = f.readline()
                 data = json.loads(line)
                 self.assertEqual(data["event_type"], "test")
