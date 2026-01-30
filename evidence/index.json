@@ -8,10 +8,40 @@
       "stamp": "evidence/subsumption/lingbot-vla/stamp.json"
     },
     {
-      "evidence_id": "EVD-TELETOK-2025-EVIDENCE-001",
-      "report": "evidence/TELETOK-2025/report.json",
-      "metrics": "evidence/TELETOK-2025/metrics.json",
-      "stamp": "evidence/TELETOK-2025/stamp.json"
+      "evidence_id": "EVD-vfgnn-GOV-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-ROB-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-ATT-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-NEG-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-TIDEMARK-TGRAPH-001",
+      "report": "evidence/tidemark-temporal-communities/report.json",
+      "metrics": "evidence/tidemark-temporal-communities/metrics.json",
+      "stamp": "evidence/tidemark-temporal-communities/stamp.json"
     }
   ]
 }

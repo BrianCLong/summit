@@ -1,28 +1,24 @@
-# Required Checks Discovery (TODO)
+# Required Checks Discovery (Temporary)
 
 ## Goal
 
-Identify exact branch protection required-check names for `main`.
+Capture the authoritative required checks for trajectory workstreams and map them to temporary
+placeholders until the real CI names are confirmed.
 
-## Steps (UI)
+## Discovery Steps
 
-1. Repo → Settings → Branches → Branch protection rules → `main`.
-2. Copy the **exact** check names listed under “Require status checks to pass”.
+1. Open the repository settings → Branch protection rules.
+2. Enumerate required checks for the default branch.
+3. Cross-check with `docs/CI_STANDARDS.md` and `pr-quality-gate.yml` for pipeline names.
+4. Record the authoritative names below and update the temporary gate labels.
 
-## Steps (API)
+## Temporary Gate Labels
 
-1. Use GitHub REST:
-   - GET /repos/{owner}/{repo}/branches/main/protection
-2. Extract required_status_checks.contexts
+- `ci/trajectory-schema`
+- `ci/trajectory-evidence`
+- `ci/trajectory-determinism`
 
-## Temporary Gate Naming Convention
+## Notes
 
-- subsumption-bundle-verify (temporary)
-- expectation-baseline-evals (temporary)
-
-## Rename Plan
-
-If actual required check names differ, add a PR that:
-
-- updates workflow job names to match exact contexts
-- updates docs + manifest required checks list
+- Replace temporary labels once the official names are confirmed.
+- Keep the required checks list in sync with the CI workflow definitions.
