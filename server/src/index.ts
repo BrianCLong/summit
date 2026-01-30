@@ -29,6 +29,7 @@ import { bootstrapSecrets } from './bootstrap-secrets.ts';
 import { logger } from './config/logger.ts';
 import { createApp } from './app.ts';
 import './monitoring/metrics.ts'; // Initialize Prometheus metrics collection
+import { partitionMaintenanceService } from './services/PartitionMaintenanceService.ts';
 
 const startServer = async () => {
   // Initialize OpenTelemetry tracing early in the startup sequence
@@ -176,6 +177,9 @@ const startServer = async () => {
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
+    // Start Partition Maintenance Service
+    partitionMaintenanceService.start();
+
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
 
@@ -205,6 +209,8 @@ const startServer = async () => {
     // Stop Policy Watcher
     const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.ts');
     PolicyWatcher.getInstance().stop();
+
+    partitionMaintenanceService.stop();
 
     wss.close();
     io.close(); // Close Socket.IO server

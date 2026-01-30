@@ -101,6 +101,22 @@ services:
       - default
       - observability
 
+  backup-service:
+    build: ./server/infrastructure/backup-scripts
+    volumes:
+      - ./backups:/backups
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - default
+      - observability
+
 volumes:
   neo4j_data: {}
   pg_data: {}
