@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-14T21:05:00Z",
+  "revision_note": "Reinforced Summit Skills governance and OPA vetting checks",
   "initiatives": [
     {
       "id": "A",
