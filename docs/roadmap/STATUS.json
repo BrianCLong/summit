@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T03:57:10Z",
-  "revision_note": "Added world-model backend interface scaffolding and default-off kill-switch documentation.",
+  "last_updated": "2026-01-30T03:47:56Z",
+  "revision_note": "Dynamic Intent discovery scaffolding and prompt registry entry recorded.",
   "initiatives": [
     {
       "id": "A",
