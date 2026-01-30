@@ -1,6 +1,5 @@
-// Moved from server/tests/smoke.test.js
-const request = require('supertest');
-const express = require('express');
+import request from 'supertest';
+import express from 'express';
 
 function makeApp() {
   const app = express();

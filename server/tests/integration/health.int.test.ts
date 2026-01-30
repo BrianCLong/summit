@@ -1,6 +1,5 @@
-// Moved from server/tests/health.test.js
-const request = require('supertest');
-const { createApp } = require('../src/appFactory');
+import request from 'supertest';
+import { createApp } from '../../src/appFactory';
 
 describe('GET /health', () => {
   it('returns OK with expected shape', async () => {
