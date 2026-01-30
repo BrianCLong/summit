@@ -1,5 +1,34 @@
 version: 1
 prompts:
+  - id: keel-evidence-templates
+    version: v1
+    path: prompts/evidence/keel-evidence-templates@v1.md
+    sha256: e5a30955d6df4cfea44900137428a5dc84f25c8a9b22b3abdfc67b18a7ceca1d
+    description: Align Keel evidence templates and index entries for ARCH/STAB/DSCL/BENCH bundles.
+    scope:
+      paths:
+        - evidence/index.json
+        - summit/evidence/templates/keel-arch/
+        - summit/evidence/templates/keel-stab/
+        - summit/evidence/templates/keel-dscl/
+        - summit/evidence/templates/keel-bench/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/evidence/keel-evidence-templates@v1.md
+        - prompts/registry.yaml
+        - agents/examples/KEEL_EVIDENCE_TEMPLATES_20260130.json
+      domains:
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md
