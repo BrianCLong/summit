@@ -1,3 +1,49 @@
+# v5.4.0-batch3 Release Notes
+
+**Release Date:** 2026-01-29
+**Release Type:** Batch 3 Feature Release
+**Release Captain:** Antigravity
+
+---
+
+## Highlights
+
+This release consolidates "Day 2" advanced capabilities into the Summit Platform, including Audit Logging, Agent Skills Architecture, and Cognitive Resilience. It also includes the previously integrated Batch 1 (Unblockers) and Batch 2 (Evidence/OSINT) foundation layers.
+
+---
+
+## Integrated Features (Batch 3)
+
+### Compliance & Safety
+
+- **Audit Logging**: Comprehensive logging service for all sensitive Investigation and Evidence actions.
+- **Cognitive Resilience**: New MOE module (`CognitiveShaping`) to mitigate analyst potential bias and cognitive load.
+
+### AI & Agents
+
+- **Agent Skills Registry**: Python-based registry for dynamic skill registration, enabling easier extension of agent capabilities.
+
+### Foundations (Batch 1 & 2 Included)
+
+- **Evidence Framework**: Migrated to V1 Array schema for Evidence Bundles.
+- **OSINT Module**: Core OSINT ingestion capabilities (News API, Twitter/X scraper stubs).
+- **Environment**: Unified `.env.example` and health check endpoints.
+
+---
+
+## Upgrade Notes
+
+1.  **Database Migration**: Run `pnpm db:migrate` to apply the new Audit Log schemas.
+2.  **Evidence Format**: Legacy `dictionary`-based evidence indexes are deprecated. The system defaults to the `array`-based V1 format. The `EvidenceWriter` class handles this transparently.
+
+---
+
+## SHA Reference
+
+- Tag: `v5.4.0-batch3`
+
+---
+
 # v4.1.0 GA Release Notes
 
 **Release Date**: 2026-01-05

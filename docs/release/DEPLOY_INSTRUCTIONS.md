@@ -1,6 +1,6 @@
-# Deployment Instructions: v5.3.1-batch2
+# Deployment Instructions: v5.4.0-batch3
 
-**Release Tag:** `v5.3.1-batch2`
+**Release Tag:** `v5.4.0-batch3`
 **Date:** 2026-01-29
 
 ## 1. Push Code & Tags
@@ -10,14 +10,14 @@
 git push origin main
 
 # Push release tag
-git push origin v5.3.1-batch2
+git push origin v5.4.0-batch3
 ```
 
 ## 2. Deploy to Staging
 
 ```bash
 # Trigger Staging Deployment (if manual)
-gh workflow run deploy-staging.yml --ref v5.3.1-batch2
+gh workflow run deploy-staging.yml --ref v5.4.0-batch3
 ```
 
 ## 3. Verify Staging
@@ -31,7 +31,7 @@ gh workflow run deploy-staging.yml --ref v5.3.1-batch2
 
 ```bash
 # Trigger Production Deployment
-gh workflow run deploy-prod.yml --ref v5.3.1-batch2
+gh workflow run deploy-prod.yml --ref v5.4.0-batch3
 ```
 
 ## 5. Post-Deploy Verification
