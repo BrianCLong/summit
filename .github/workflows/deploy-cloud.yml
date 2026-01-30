@@ -1,0 +1,127 @@
+name: Deploy Cloud
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'infra/**'
+      - 'deployment/**'
+      - 'environments/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - stage
+          - prod
+
+jobs:
+  build:
+    # Only run build on push to main (dev). For promotions (workflow_dispatch), we use the existing image from main.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Prov Ledger
+        uses: docker/build-push-action@v5
+        with:
+          context: services/prov-ledger
+          push: true
+          tags: ghcr.io/${{ github.repository }}/prov-ledger:${{ github.sha }}
+
+      - name: Build and Push Policy LAC
+        uses: docker/build-push-action@v5
+        with:
+          context: gateway/policy-lac
+          push: true
+          tags: ghcr.io/${{ github.repository }}/policy-lac:${{ github.sha }}
+
+  deploy:
+    # Always run deploy. If triggered by push, it waits for build. If dispatch, it proceeds (build skipped).
+    if: always() && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: environments/${{ inputs.environment || 'dev' }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ inputs.environment || 'dev' }}/terraform.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}"
+
+      - name: Terraform Apply
+        # Run apply on push (dev) or dispatch (all envs)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        working-directory: environments/${{ inputs.environment || 'dev' }}
+        run: terraform apply -auto-approve -var-file=terraform.tfvars
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # Pass required variables as env vars since tfvars doesn't have them
+          TF_VAR_environment: ${{ inputs.environment || 'dev' }}
+
+      - name: Update Kubeconfig
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: |
+          aws eks update-kubeconfig --name summit-${{ inputs.environment || 'dev' }}-cluster --region ${{ secrets.AWS_REGION }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Sync Secrets
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: |
+          kubectl create secret generic summit-secrets \
+            --from-literal=NEO4J_AUTH=${{ secrets.NEO4J_AUTH }} \
+            --from-literal=POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to K8s
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+        run: |
+          # Substitute environment variables in manifests
+          export IMAGE_TAG=${{ github.sha }}
+          # Using sed to replace image names with GHCR path
+          sed -i 's|summit/prov-ledger|ghcr.io/${{ github.repository }}/prov-ledger|g' deployment/k8s/*.yaml
+          sed -i 's|summit/policy-lac|ghcr.io/${{ github.repository }}/policy-lac|g' deployment/k8s/*.yaml
+
+          for file in deployment/k8s/*.yaml; do
+            envsubst < "$file" | kubectl apply -f -
+          done
+
+      - name: Generate Deploy Stamp
+        if: success()
+        run: |
+          npx tsx scripts/ops/generate-deploy-stamp.ts \
+            --env=${{ inputs.environment || 'dev' }} \
+            --sha=${{ github.sha }} \
+            --out=artifacts/deploy/${{ inputs.environment || 'dev' }}/${{ github.sha }}/stamp.json
+
+      - name: Upload Stamp
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-stamp-${{ inputs.environment || 'dev' }}
+          path: artifacts/deploy/${{ inputs.environment || 'dev' }}/${{ github.sha }}/stamp.json

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-public
+spec:
+  selector:
+    tier: backend # Matches the apps
+  ports:
+    - name: prov-ledger
+      protocol: TCP
+      port: 4010
+      targetPort: 4010
+    - name: policy-lac
+      protocol: TCP
+      port: 4000
+      targetPort: 4000
+  type: LoadBalancer
