@@ -1,3 +1,4 @@
 # Dependency Delta
 
-No dependencies were added or updated for the Dynamic Intent scaffolding changes.
+- Status: No dependency changes in this update.
+- Lockfiles: Unchanged.

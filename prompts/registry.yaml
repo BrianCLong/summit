@@ -821,3 +821,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: dynamic-intent-required-checks-module-map
+    version: v1
+    path: prompts/dynamic-intent/required-checks-module-map@v1.md
+    sha256: 1ebdb7be99bf75da2ae461d2a4e3c0c0511177ed854aebf72872cc02fb74b137
+    description: Document Dynamic Intent required checks discovery and module map placeholders.
+    scope:
+      paths:
+        - required_checks.todo.md
+        - docs/dynamic_intent/
+        - docs/deps_delta.md
+        - docs/roadmap/STATUS.json
+        - prompts/dynamic-intent/required-checks-module-map@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - planning
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
