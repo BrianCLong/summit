@@ -6,3 +6,4 @@ export * from './state/index.js';
 export * from './governance/index.js';
 export * from './scoring/index.js';
 export * from './context/index.js';
+export * from './evidence/index.js';
