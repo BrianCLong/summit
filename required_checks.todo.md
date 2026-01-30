@@ -1,12 +1,13 @@
-# Required checks discovery (rename plan)
+# Required Checks Discovery (TODO)
 
-1. In repo settings → Branch protection → record required status check names.
-2. Or via API: list check runs for a PR and capture the stable names.
-3. Update this file with authoritative names and add a PR to rename temporary gates.
+1. Open the repository settings → Branch protection rules.
+2. Record the exact required check names (case-sensitive).
+3. Add them to `.github/required_checks.yml` (to be created in PR7).
+4. Rename temporary gates accordingly.
 
-## Temporary gate names (until verified)
+Temporary convention (until discovered):
 
 - ci/unit
-- ci/policy-gates
-- ci/evals
-- telemetry_privacy_gate
+- ci/lint
+- ci/evidence
+- ci/deps-delta

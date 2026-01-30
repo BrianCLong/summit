@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit.evidence.stamp.iohunter",
+  "type": "object",
+  "required": ["evidence_id", "created_utc", "git_commit"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "created_utc": { "type": "string", "format": "date-time" },
+    "git_commit": { "type": "string" }
+  },
+  "additionalProperties": false
+}
