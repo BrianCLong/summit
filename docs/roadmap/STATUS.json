@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-02T09:00:00Z",
-  "revision_note": "Added Summit evidence schema scaffolding and required checks discovery updates",
+  "last_updated": "2026-01-31T00:00:00Z",
+  "revision_note": "Added Innovator-VL evidence + harness scaffold (Lane 1) with deterministic outputs and required-check discovery checklist.",
   "initiatives": [
     {
       "id": "A",

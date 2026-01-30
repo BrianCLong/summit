@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "stamp.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "generated_at_utc": { "type": "string", "format": "date-time" },
+    "git_commit": { "type": "string" },
+    "runner": { "type": "string" }
+  },
+  "required": ["generated_at_utc", "git_commit", "runner"]
+}
