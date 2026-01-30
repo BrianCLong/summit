@@ -1,0 +1,8 @@
+{
+  "version": "5.3.1",
+  "tag": "v5.3.1-batch2",
+  "date": "2026-01-29",
+  "batch_1_prs": ["#16831", "#16945", "#16893", "fix/rego-v1"],
+  "batch_2_prs": ["#17036", "#17039", "#17066"],
+  "status": "ready-for-deploy"
+}
