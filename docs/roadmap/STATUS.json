@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T00:00:00Z",
-  "revision_note": "Added release-train hardening workflow and release gate scripts",
+  "last_updated": "2026-01-29T12:00:00Z",
+  "revision_note": "Added branch protection as code governance bundle scaffolding",
   "initiatives": [
     {
       "id": "A",

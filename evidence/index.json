@@ -92,6 +92,42 @@
         "evidence/runs/verify-subsumption-bundle/metrics.json",
         "evidence/runs/verify-subsumption-bundle/stamp.json"
       ]
+    },
+    "EVD-BPAC-GOV-001": {
+      "area": "governance",
+      "item_slug": "branch-protection-as-code",
+      "files": [
+        "evidence/bpac/EVD-BPAC-GOV-001/report.json",
+        "evidence/bpac/EVD-BPAC-GOV-001/metrics.json",
+        "evidence/bpac/EVD-BPAC-GOV-001/stamp.json"
+      ]
+    },
+    "EVD-BPAC-GOV-003": {
+      "area": "governance",
+      "item_slug": "branch-protection-as-code",
+      "files": [
+        "evidence/bpac/EVD-BPAC-GOV-003/report.json",
+        "evidence/bpac/EVD-BPAC-GOV-003/metrics.json",
+        "evidence/bpac/EVD-BPAC-GOV-003/stamp.json"
+      ]
+    },
+    "EVD-BPAC-GOV-006": {
+      "area": "governance",
+      "item_slug": "branch-protection-as-code",
+      "files": [
+        "evidence/bpac/EVD-BPAC-GOV-006/report.json",
+        "evidence/bpac/EVD-BPAC-GOV-006/metrics.json",
+        "evidence/bpac/EVD-BPAC-GOV-006/stamp.json"
+      ]
+    },
+    "EVD-BPAC-GOV-007": {
+      "area": "governance",
+      "item_slug": "branch-protection-as-code",
+      "files": [
+        "evidence/bpac/EVD-BPAC-GOV-007/report.json",
+        "evidence/bpac/EVD-BPAC-GOV-007/metrics.json",
+        "evidence/bpac/EVD-BPAC-GOV-007/stamp.json"
+      ]
     }
   ]
 }

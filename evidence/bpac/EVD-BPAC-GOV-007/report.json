@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-BPAC-GOV-007",
+  "summary": "BPAC governance documentation recorded.",
+  "claims": ["SUMMIT_ORIGINAL"],
+  "decisions": ["allow"],
+  "details": {
+    "decisions_doc": "docs/decisions/branch-protection-as-code.md",
+    "data_handling_doc": "docs/security/data-handling/branch-protection-as-code.md",
+    "backlog_entry": "backlog/branch-protection-as-code.yaml"
+  }
+}
