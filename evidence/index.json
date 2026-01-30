@@ -1,10 +1,22 @@
 {
   "version": 1,
   "items": [
-    { "id": "EVD-nignn-DM-001", "path": "pp_alerts/evidence/dm-001.json" },
-    { "id": "EVD-nignn-GATE-001", "path": "pp_alerts/evidence/gate-001.json" },
-    { "id": "EVD-nignn-MPC-001", "path": "pp_alerts/evidence/mpc-001.json" },
-    { "id": "EVD-nignn-PIPE-001", "path": "pp_alerts/evidence/pipe-001.json" },
-    { "id": "EVD-nignn-NEG-001", "path": "pp_alerts/evidence/neg-001.json" }
+    {
+      "item_slug": "ai-influence-ops",
+      "area": "security",
+      "evidence_ids": [
+        "EVD-ai-influence-ops-EVIDENCE-001",
+        "EVD-ai-influence-ops-POLICY-002",
+        "EVD-ai-influence-ops-EVAL-003",
+        "EVD-ai-influence-ops-MICRO-004",
+        "EVD-ai-influence-ops-CAMPAIGN-005",
+        "EVD-ai-influence-ops-DATA-006"
+      ],
+      "artifacts": {
+        "report": "evidence/ai-influence-ops/report.json",
+        "metrics": "evidence/ai-influence-ops/metrics.json",
+        "stamp": "evidence/ai-influence-ops/stamp.json"
+      }
+    }
   ]
 }

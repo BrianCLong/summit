@@ -1,13 +1,9 @@
-# Required checks discovery (Lane 1)
+# Required Checks for ACP Integration
 
-1. **Discover Checks**:
-   - Open GitHub repo → Settings → Branches → Required status checks.
-   - Use `gh api` to list checks if accessible.
+## GitHub Actions Gates
+* `ci/summit-acp-verify` (Proposed): Runs `scripts/ci/verify_acp_bundle.py`.
+* `ci/policy_deny_default`: Ensures default policy is deny.
 
-2. **Temporary Local Names**:
-   - `summit-evidence`: Runs `ci/check_evidence.sh`.
-   - `summit-tests`: Runs unit tests.
-   - `summit-lint`: Runs linters.
-
-3. **Rename Plan**:
-   - Once real check names are discovered, map them in `.github/workflows`.
+## Manual Verification
+* [ ] Verify `evidence/index.json` contains valid ACP evidence IDs.
+* [ ] Verify `evidence/stamp.json` is the only file with timestamps.
