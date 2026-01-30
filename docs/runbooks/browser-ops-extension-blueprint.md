@@ -10,6 +10,13 @@ This blueprint is explicitly aligned with the Summit Readiness Assertion to pree
 scrutiny and ensure deterministic policy enforcement across Browser Ops artifacts. See
 `docs/SUMMIT_READINESS_ASSERTION.md` for the authoritative readiness contract.
 
+## Governance Posture (Governed Exceptions)
+
+Any deviation from policy gates, action budgets, or evidence capture must be recorded as a
+**Governed Exception**. Governed Exceptions are temporary, named, and policy-scoped with an
+explicit expiration. No action executes outside policy-as-code, and all exceptions must link to
+an approved decision log entry.
+
 ## 1) Summit-Native Architecture Pattern (Two-Agent Loop)
 
 **PlannerAgent** and **NavigatorAgent** execute an explicit loop with policy-gated actions. The
@@ -31,6 +38,7 @@ flowchart TD
 - JSON output from both agents is **schema-validated**.
 - Every action is **OPA-reviewed** before execution.
 - Every observation and action is **hash-anchored** for replay.
+- All compliance decisions are **logged** with a decision record ID.
 
 ## 2) TypeScript Contract (BrowserState, Observation, Actions)
 
@@ -59,6 +67,7 @@ export interface BrowserState {
     classification: "public" | "restricted" | "sensitive";
     allowVisionEscalation: boolean;
     maxStepBudget: number;
+    decisionLogId: string; // links actions to compliance decision log
   };
 }
 
@@ -176,6 +185,7 @@ allow {
   not denied
   within_step_budget
   action_allowed
+  log_decision
 }
 
 denied {
@@ -191,6 +201,16 @@ within_step_budget {
 action_allowed {
   input.action.type in {"navigate", "click", "type", "select", "scroll", "wait", "extract"}
   not blocked_domain
+}
+
+log_decision {
+  input.state.policyContext.decisionLogId != ""
+}
+
+governed_exception {
+  input.policy.governed_exception.id != ""
+  input.policy.governed_exception.expires_at != ""
+  input.policy.governed_exception.reason != ""
 }
 
 blocked_domain {
@@ -210,12 +230,20 @@ is_sensitive_selector {
 
 ```json
 {
-  "state": { "activeUrl": "https://example.com", "policyContext": { "maxStepBudget": 25 } },
+  "state": {
+    "activeUrl": "https://example.com",
+    "policyContext": { "maxStepBudget": 25, "decisionLogId": "dec-2026-01-23-001" }
+  },
   "action": { "type": "click", "selector": "#submit", "redact": true },
   "step_index": 3,
   "policy": {
     "blocked_domains": ["payments.example"],
-    "sensitive_selectors": ["input[type=password]", "input[name=ssn]"]
+    "sensitive_selectors": ["input[type=password]", "input[name=ssn]"],
+    "governed_exception": {
+      "id": "ge-2026-01-23-ops-001",
+      "expires_at": "2026-02-15T00:00:00Z",
+      "reason": "Emergency remediation workflow"
+    }
   }
 }
 ```
@@ -232,7 +260,24 @@ Every action must produce a deterministic evidence bundle for replay.
 **Non-negotiable:** The evidence bundle must validate against Summit provenance schema and be
 linked to a session `sessionId` for audit replay.
 
-## 5) Extension Package Layout (MVP)
+## 5) Decision Logging (Policy-as-Code)
+
+Every action evaluation must emit a decision record that is referenced by
+`policyContext.decisionLogId`. Decision records include:
+
+- action ID and hash
+- policy bundle version
+- allow/deny result and rationale
+- governed exception references (if any)
+
+## 6) Privacy-First On-Device Mode
+
+- **Runtime**: WebLLM + WebGPU for on-device inference after model download.
+- **Browser requirement**: Chrome 124+ for WebGPU in extension service workers.
+- **Model registry**: Enumerate default + alternate local models with explicit hashes and cache
+  size budgets.
+
+## 7) Extension Package Layout (MVP)
 
 ```text
 extensions/browser-ops/
@@ -255,14 +300,14 @@ extensions/browser-ops/
 └── manifest.json
 ```
 
-## 6) Summit Upgrade Hooks (Moat)
+## 8) Summit Upgrade Hooks (Moat)
 
 - **Policy-gated actions** with allow/deny and step budgets.
 - **Provenance ledger** for deterministic evidence bundles.
 - **Vision-lite** hooks (DOM + accessibility tree + text regions) and optional escalation.
 - **Driver router**: Extension vs. Playwright vs. Sandbox — a single contract.
 
-## 7) Implementation Checklist
+## 9) Implementation Checklist
 
 1. Implement the TypeScript contract in `packages/browser-ops-contract/`.
 2. Stand up the extension scaffold under `extensions/browser-ops/`.
@@ -271,4 +316,4 @@ extensions/browser-ops/
 5. Validate with deterministic task harness and golden-path smoke checks.
 
 **Completion Definition:** Browser Ops MVP delivers policy-gated actions, provenance capture, and
-replayable evidence bundles with a validated JSON contract.
+replayable evidence bundles with a validated JSON contract and decision log linkage.

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T00:00:00Z",
-  "revision_note": "Added OSS LLM exposure evidence scaffolding requirements and schemas",
+  "last_updated": "2026-01-29T10:36:28Z",
+  "revision_note": "Require decision logging and governed exception fields in Browser Ops runbook",
   "initiatives": [
     {
       "id": "A",
