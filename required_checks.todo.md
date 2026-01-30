@@ -9,3 +9,4 @@
 - ci/unit
 - ci/policy-gates
 - ci/evals
+- ci/summit-bundle-verify
