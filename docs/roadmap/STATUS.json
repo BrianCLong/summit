@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-30T02:08:04Z",
+  "revision_note": "Hardened Copilot CLI wrapper overrides for lane flags and transcript output",
   "initiatives": [
     {
       "id": "A",
