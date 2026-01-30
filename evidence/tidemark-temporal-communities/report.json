@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-TIDEMARK-TGRAPH-001",
+  "item_slug": "tidemark-temporal-communities",
+  "summary": "Scaffolded evidence bundle for temporal community tracking (schemas, required checks, fixtures).",
+  "artifacts": [
+    "schemas/trajectory/community_trajectory.schema.json",
+    "schemas/trajectory/community_partition.schema.json",
+    "schemas/trajectory/community_transition.schema.json",
+    "docs/required_checks.todo.md",
+    "fixtures/temporal_graph/tiny_cascade.json"
+  ]
+}

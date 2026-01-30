@@ -687,3 +687,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: tidemark-evidence-scaffold
+    version: v1
+    path: prompts/temporal/tidemark-evidence-scaffold@v1.md
+    sha256: 3040c42ef8bfabcf9abbc1d95707d73ff85b6c35faa6ff65326d78cee052f58c
+    description: Scaffold tidemark temporal community evidence bundle and verification gate.
+    scope:
+      paths:
+        - evidence/
+        - schemas/trajectory/
+        - fixtures/temporal_graph/
+        - docs/required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - docs/dependency_delta.md
+        - tools/ci_verify_tidemark_bundle.py
+        - src/temporal_graph/config.py
+        - prompts/temporal/tidemark-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
