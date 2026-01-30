@@ -1,0 +1,71 @@
+item:
+  slug: shai-hulud-supply-chain
+  title: "Supply-chain attacks: Shai-Hulud (npm) + PyPI spellchecker RAT"
+  type: "incident-analysis"
+  dates:
+    npm_worm: "2025-09-23..2025-11-30"
+    pypi_rat: "2026-01-21"
+  sources:
+    - name: "Microsoft guidance on Shai-Hulud 2.0"
+      ref: "https://www.microsoft.com/en-us/security/blog/2025/12/09/shai-hulud-2-0-guidance-for-detecting-investigating-and-defending-against-the-supply-chain-attack/"
+      claims: ["ITEM:CLAIM-01"]
+    - name: "CISA alert on npm supply-chain compromise"
+      ref: "https://www.cisa.gov/news-events/alerts/2025/09/23/widespread-supply-chain-compromise-impacting-npm-ecosystem"
+      claims: ["ITEM:CLAIM-03"]
+    - name: "Aikido report on spellchecker RAT typosquats"
+      ref: "https://www.aikido.dev/blog/malicious-pypi-packages-spellcheckpy-and-spellcheckerpy-deliver-python-rat"
+      claims: ["ITEM:CLAIM-04"]
+
+required_checks:
+  discovery: assumed
+  verified: []
+
+constraints:
+  pr_cap: 7
+  max_yellow: 2
+  max_red: 0
+  two_lane:
+    foundation_required: true
+    innovation_flagged: true
+
+feature_flags:
+  - name: "SUBSUMPTION_HEURISTICS_ASSET_PAYLOAD"
+    default: "off"
+
+prs:
+  - title: "chore(subsumption): add shai-hulud supply-chain bundle scaffold"
+    lane: "foundation"
+    owner: "A"
+    risk: "green"
+    evidence_ids: ["EVD-SUPPLYCHAIN-GOV-001"]
+
+  - title: "feat(ci): add subsumption bundle verifier + fixtures"
+    lane: "foundation"
+    owner: "C"
+    risk: "green"
+    evidence_ids: ["EVD-SUPPLYCHAIN-GOV-002", "EVD-SUPPLYCHAIN-MET-001"]
+
+  - title: "feat(policy): add deny-by-default npm lifecycle gate"
+    lane: "foundation"
+    owner: "B"
+    risk: "green"
+    evidence_ids: ["EVD-SUPPLYCHAIN-SEC-001"]
+
+  - title: "feat(heuristics): add asset payload heuristics (flagged off)"
+    lane: "innovation"
+    owner: "C"
+    risk: "yellow"
+    evidence_ids: ["EVD-SUPPLYCHAIN-SEC-002"]
+
+docs_targets:
+  - "docs/standards/shai-hulud-supply-chain.md"
+  - "docs/security/data-handling/shai-hulud-supply-chain.md"
+  - "docs/ops/runbooks/shai-hulud-supply-chain.md"
+  - "docs/decisions/shai-hulud-supply-chain.md"
+
+evidence_ids:
+  - "EVD-SUPPLYCHAIN-GOV-001"
+  - "EVD-SUPPLYCHAIN-GOV-002"
+  - "EVD-SUPPLYCHAIN-MET-001"
+  - "EVD-SUPPLYCHAIN-SEC-001"
+  - "EVD-SUPPLYCHAIN-SEC-002"
