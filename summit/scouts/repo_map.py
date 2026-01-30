@@ -7,6 +7,6 @@ class RepoMapScout(Scout):
     def name(self) -> str:
         return "repo_map"
 
-    def run(self, ctx: Any, cfg: Config) -> Result:
+    def _run(self, ctx: Any, cfg: Config) -> Result:
         # TODO: implement deterministic tree walk + hash list
         return Result()
