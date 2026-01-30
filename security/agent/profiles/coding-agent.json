@@ -1,0 +1,23 @@
+{
+  "profile": "default-coding-agent",
+  "version": 1,
+  "permissions": {
+    "repo": {
+      "read": ["*"],
+      "write": ["src/**", "tests/**", "docs/**"]
+    },
+    "workflows": {
+      "write": false
+    },
+    "releases": {
+      "create": false
+    },
+    "network": {
+      "outbound": ["github.com", "pypi.org", "npmjs.com"]
+    }
+  },
+  "constraints": {
+    "max_files_modified": 50,
+    "disallowed_patterns": ["*.env", "**/secrets/**"]
+  }
+}
