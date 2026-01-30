@@ -3,39 +3,57 @@
   "items": [
     {
       "evidence_id": "EVD-vfgnn-SPEC-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "report": "evidence/legacy/report.json",
+      "metrics": "evidence/legacy/metrics.json",
+      "stamp": "evidence/legacy/stamp.json"
     },
     {
       "evidence_id": "EVD-vfgnn-GOV-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "report": "evidence/legacy/report.json",
+      "metrics": "evidence/legacy/metrics.json",
+      "stamp": "evidence/legacy/stamp.json"
     },
     {
       "evidence_id": "EVD-vfgnn-ROB-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "report": "evidence/legacy/report.json",
+      "metrics": "evidence/legacy/metrics.json",
+      "stamp": "evidence/legacy/stamp.json"
     },
     {
       "evidence_id": "EVD-vfgnn-ATT-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "report": "evidence/legacy/report.json",
+      "metrics": "evidence/legacy/metrics.json",
+      "stamp": "evidence/legacy/stamp.json"
     },
     {
       "evidence_id": "EVD-vfgnn-NEG-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "report": "evidence/legacy/report.json",
+      "metrics": "evidence/legacy/metrics.json",
+      "stamp": "evidence/legacy/stamp.json"
     },
     {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ISS11675-AUDIT-001",
+      "report": "evidence/EVD-ISS11675-AUDIT-001/report.json",
+      "metrics": "evidence/EVD-ISS11675-AUDIT-001/metrics.json",
+      "stamp": "evidence/EVD-ISS11675-AUDIT-001/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ISS11675-AUDIT-002",
+      "report": "evidence/EVD-ISS11675-AUDIT-002/report.json",
+      "metrics": "evidence/EVD-ISS11675-AUDIT-002/metrics.json",
+      "stamp": "evidence/EVD-ISS11675-AUDIT-002/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ISS11675-AUDIT-003",
+      "report": "evidence/EVD-ISS11675-AUDIT-003/report.json",
+      "metrics": "evidence/EVD-ISS11675-AUDIT-003/metrics.json",
+      "stamp": "evidence/EVD-ISS11675-AUDIT-003/stamp.json"
     }
   ]
 }

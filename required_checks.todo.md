@@ -9,3 +9,14 @@
 - ci/unit
 - ci/policy-gates
 - ci/evals
+- gate.auditlog.evidence
+- auditlog.schema
+- auditlog.persistence
+- auditlog.reporting
+
+## GitHub API Steps
+
+```bash
+# List required status checks
+gh api repos/:owner/:repo/branches/main/protection/required_status_checks
+```
