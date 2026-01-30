@@ -1,0 +1,26 @@
+{
+  "bundle_id": "pp-socialreasoning-fixture-pass-001",
+  "evidence": [
+    {
+      "description": "Schema presence",
+      "evidence_id": "EVD-PP-SOCIALREASONING-SCHEMA-001",
+      "path": "evidence/report.json",
+      "schema_path": "evidence.report.schema.json"
+    },
+    {
+      "description": "Metrics bundle",
+      "evidence_id": "EVD-PP-SOCIALREASONING-EVAL-001",
+      "path": "evidence/metrics.json",
+      "schema_path": "evidence.metrics.schema.json"
+    },
+    {
+      "description": "Stamp",
+      "evidence_id": "EVD-PP-SOCIALREASONING-EVAL-002",
+      "path": "evidence/stamp.json",
+      "schema_path": "evidence.stamp.schema.json"
+    }
+  ],
+  "item": {
+    "arxiv_id": "2601.20757"
+  }
+}
