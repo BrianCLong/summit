@@ -8,10 +8,8 @@ This project incorporates concepts and patterns inspired by the following open-s
 - **License**: MIT
 - **Notice**: Concepts inspired by everything-claude-code. Clean-room implementation.
 
-## SCOUT: Language-based Trial and Error Falls Behind in the Era of Experience
+## lingbot-world
 
-This project includes concepts and clean-room re-derived interfaces from the SCOUT project.
-
-- **Paper:** "Language-based Trial and Error Falls Behind in the Era of Experience" (arXiv:2601.21754) [Hugging Face Paper Page](https://huggingface.co/papers/2601.21754)
-- **Repository:** [Harry-mic/SCOUT](https://github.com/Harry-mic/SCOUT)
-- **License:** MIT
+- **Source**: https://github.com/Robbyant/lingbot-world/
+- **License**: Apache-2.0
+- **Notice**: Concepts inspired by the LingBot-World paper and repository. Clean-room implementation.

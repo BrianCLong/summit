@@ -100,5 +100,22 @@
     },
     "reasoning": "Created Debezium OpenLineage subsumption manifest, fixtures, evidence, prompt registry entry, and roadmap update with rollback path documented.",
     "reverted": false
+  },
+  {
+    "id": "keel-evidence-templates-001",
+    "timestamp": "2026-01-30T03:55:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAiYWxpZ24gS2VlbCBldmlkZW5jZSB0ZW1wbGF0ZXMgYW5kIGluZGV4IGVudHJpZXMiLCAiZmlsZXMiOiBbImV2aWRlbmNlL2luZGV4Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWFyY2gvcmVwb3J0Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWFyY2gvbWV0cmljcy5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1hcmNoL3N0YW1wLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLXN0YWIvcmVwb3J0Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLXN0YWIvbWV0cmljcy5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1zdGFiL3N0YW1wLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWRzY2wvcmVwb3J0Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWRzY2wvbWV0cmljcy5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1kc2NsL3N0YW1wLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWJlbmNoL3JlcG9ydC5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1iZW5jaC9tZXRyaWNzLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWJlbmNoL3N0YW1wLmpzb24iLCAiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIiwgInBhY2thZ2VzL2RlY2lzaW9uLWxlZGdlci9kZWNpc2lvbl9sZWRnZXIuanNvbiIsICJwcm9tcHRzL2V2aWRlbmNlL2tlZWwtZXZpZGVuY2UtdGVtcGxhdGVzQHYxLm1kIiwgInByb21wdHMvcmVnaXN0cnkueWFtbCIsICJhZ2VudHMvZXhhbXBsZXMvS0VFTF9FVklERU5DRV9URU1QTEFURVNfMjAyNjAxMzAuanNvbiJdfQ==",
+    "decision": {
+      "action": "align_keel_evidence_templates",
+      "rule": {
+        "condition": "keel evidence bundles require explicit template mapping",
+        "action": "align_keel_evidence_templates",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Mapped Keel evidence IDs to dedicated template artifacts for architecture, stability, depth scaling, and benchmark bundles.",
+    "reverted": false
   }
 ]
