@@ -3,108 +3,60 @@
   "item": "ECC",
   "items": [
     {
-      "evidence_id": "EVD-260118692-EVID-001",
-      "report": "evidence/subsumption/lingbot-vla/report.json",
-      "metrics": "evidence/subsumption/lingbot-vla/metrics.json",
-      "stamp": "evidence/subsumption/lingbot-vla/stamp.json"
+      "evidence_id": "EVD-vfgnn-SPEC-001",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-GOV-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-ROB-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-ATT-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-NEG-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-TIDEMARK-TGRAPH-001",
-      "report": "evidence/tidemark-temporal-communities/report.json",
-      "metrics": "evidence/tidemark-temporal-communities/metrics.json",
-      "stamp": "evidence/tidemark-temporal-communities/stamp.json"
-    }
-  ],
-  "evidence": [
-    {
-      "evidence_id": "EVD-PROJECTGENIE-EVALS-002",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-SCHEMA-001",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-PROJECTGENIE-GOV-003",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-PLNR-001",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-PROJECTGENIE-PROV-004",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-XFER-001",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-PROJECTGENIE-SEC-005",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-ATLS-001",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-ITEMUNKNOWN-FND-001",
-      "report": "evidence/item-unknown/report.json",
-      "metrics": "evidence/item-unknown/metrics.json",
-      "stamp": "evidence/item-unknown/stamp.json"
+      "evidence_id": "EVD-ATLAS-ATLS-002",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-CONNECTOR-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-GOV-001",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-SCHEMA-002",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-CI-003",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-INGEST-004",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-RESIDENCY-005",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-SUPPLYCHAIN-GOV-001",
+      "files": [
+        "evidence/subsumption/shai-hulud-supply-chain/report.json",
+        "evidence/subsumption/shai-hulud-supply-chain/metrics.json",
+        "evidence/subsumption/shai-hulud-supply-chain/stamp.json"
+      ]
     }
   ]
 }
