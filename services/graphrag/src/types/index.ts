@@ -276,6 +276,10 @@ export interface GraphRAGConfig {
     enabled: boolean;
     serviceName: string;
   };
+  pruning?: {
+    endpoint?: string;
+    timeoutMs?: number;
+  };
 }
 
 export const DEFAULT_CONFIG: Partial<GraphRAGConfig> = {

@@ -33,6 +33,11 @@ export type { CitationLink, CitationValidation, ProvenanceRecord } from './citat
 export { ContextFusion } from './fusion/ContextFusion.js';
 export type { FusionConfig, ConflictInfo } from './fusion/ContextFusion.js';
 
+// Context pruning
+export { ContextPrunerClient, applyPolicy } from './context/ContextPrunerClient.js';
+export { packContext } from './context/ContextPacker.js';
+export type { HighlightRequest, HighlightResponse, PruningPolicy } from './context/types.js';
+
 // Analysis
 export { CounterfactualEngine } from './analysis/CounterfactualEngine.js';
 export type { Counterfactual, SensitivityAnalysis } from './analysis/CounterfactualEngine.js';

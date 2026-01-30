@@ -24,6 +24,9 @@ import { CitationManager } from './citation/CitationManager.js';
 import { ContextFusion } from './fusion/ContextFusion.js';
 import { CounterfactualEngine, Counterfactual, SensitivityAnalysis } from './analysis/CounterfactualEngine.js';
 import { LLMIntegration, LLMConfig } from './llm/LLMIntegration.js';
+import { ContextPrunerClient, applyPolicy } from './context/ContextPrunerClient.js';
+import { packContext } from './context/ContextPacker.js';
+import type { HighlightResponse, PruningPolicy } from './context/types.js';
 
 const tracer = trace.getTracer('graphrag-orchestrator');
 
@@ -34,12 +37,16 @@ export interface QueryOptions {
   policyContext?: PolicyContext;
   maxTokens?: number;
   temperature?: number;
+  pruningPolicy?: PruningPolicy;
+  enablePruning?: boolean;
+  subquestions?: string[];
 }
 
 export interface GraphRAGResponse {
   answer: RAGAnswer;
   retrievalResult: RetrievalResult;
   fusedContext: FusedContext;
+  pruningResult?: HighlightResponse | null;
   counterfactuals?: Counterfactual[];
   sensitivityAnalysis?: SensitivityAnalysis;
   metadata: {
@@ -61,6 +68,7 @@ export class GraphRAGOrchestrator {
   private contextFusion: ContextFusion;
   private counterfactualEngine: CounterfactualEngine;
   private llm: LLMIntegration;
+  private pruner: ContextPrunerClient | null;
   private config: GraphRAGConfig;
 
   constructor(config: GraphRAGConfig) {
@@ -114,6 +122,9 @@ export class GraphRAGOrchestrator {
       maxTokens: config.generation.maxTokens * 2,
     });
     this.counterfactualEngine = new CounterfactualEngine(this.driver, this.llm);
+    this.pruner = config.pruning?.endpoint
+      ? new ContextPrunerClient(config.pruning.endpoint, config.pruning.timeoutMs)
+      : null;
   }
 
   /**
@@ -155,13 +166,25 @@ export class GraphRAGOrchestrator {
 
         // Phase 3: Context fusion
         const fusionStart = Date.now();
-        const fusedContext = await this.performFusion(evidenceChunks, options);
+        const pruningResult = await this.performPruning(
+          query,
+          evidenceChunks,
+          options,
+        );
+
+        const packed = packContext(
+          evidenceChunks,
+          pruningResult,
+          options.pruningPolicy?.maxContextTokens,
+        );
+
+        const fusedContext = await this.performFusion(packed.chunks, options);
         timings.fusion = Date.now() - fusionStart;
         span.setAttribute('fusion.timeMs', timings.fusion);
 
         // Phase 4: Answer generation
         const generationStart = Date.now();
-        const answer = await this.generateAnswer(query, evidenceChunks, options);
+        const answer = await this.generateAnswer(query, packed.chunks, options);
         timings.generation = Date.now() - generationStart;
         span.setAttribute('generation.timeMs', timings.generation);
 
@@ -193,6 +216,7 @@ export class GraphRAGOrchestrator {
           answer,
           retrievalResult,
           fusedContext,
+          pruningResult,
           counterfactuals,
           sensitivityAnalysis,
           metadata: {
@@ -279,6 +303,44 @@ export class GraphRAGOrchestrator {
       temperature: options.temperature,
       includeReasoning: true,
     });
+  }
+
+  private async performPruning(
+    query: RetrievalQuery,
+    evidenceChunks: EvidenceChunk[],
+    options: QueryOptions,
+  ): Promise<HighlightResponse | null> {
+    if (!this.pruner || !options.enablePruning) {
+      return null;
+    }
+    try {
+      const documents = evidenceChunks.map((chunk) => ({
+        doc_id: chunk.id,
+        text: chunk.content,
+        metadata: { tenantId: chunk.tenantId },
+      }));
+      const request = applyPolicy(
+        {
+          query: query.query,
+          documents,
+          language: undefined,
+          budget: options.pruningPolicy?.maxContextTokens,
+          granularity: 'sentence',
+          return_metrics: true,
+          subquestions: options.subquestions,
+          keep_at_least_sources: options.pruningPolicy?.minEvidenceSources,
+        },
+        options.pruningPolicy,
+      );
+      return this.pruner.highlight(request);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      tracer.startActiveSpan('context_pruner_fallback', (span) => {
+        span.setAttribute('error.message', message);
+        span.end();
+      });
+      return null;
+    }
   }
 
   /**
