@@ -16,5 +16,6 @@ patches:
     target:
       kind: Deployment
 
-commonLabels:
-  environment: prod
+labels:
+  - pairs:
+      environment: prod

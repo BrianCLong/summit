@@ -13,5 +13,6 @@ patches:
     target:
       kind: Deployment
 
-commonLabels:
-  environment: dev
+labels:
+  - pairs:
+      environment: dev
