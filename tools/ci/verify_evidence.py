@@ -5,7 +5,10 @@ Validates evidence/index.json and referenced per-EVD files:
   - report.json, metrics.json, stamp.json
 Timestamps ONLY allowed in stamp.json.
 """
-import json, sys, re, argparse
+import argparse
+import json
+import re
+import sys
 from pathlib import Path
 
 # Try importing jsonschema if available, otherwise fallback to basic checks
@@ -18,6 +21,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_DIR = ROOT / "evidence"
 SCHEMAS_DIR = EVIDENCE_DIR / "schemas"
+EVIDENCE_ID_PATTERN = re.compile(r"^EVD-[A-Z0-9_-]+-[A-Z]+-[0-9]{3}$")
 
 def die(msg: str) -> None:
     print(f"[verify_evidence] FAIL: {msg}", file=sys.stderr)
@@ -75,37 +79,46 @@ def main() -> None:
         die(f"evidence/index.json is not valid JSON: {e}")
 
     # Validate index schema
-    if "evidence" not in data or not isinstance(data["evidence"], list):
-        die("index.json must contain list: evidence")
+    if "items" not in data or not isinstance(data["items"], list):
+        die("index.json must contain list: items")
 
     validate_schema(data, "index.schema.json")
 
-    for evd in data["evidence"]:
-        for k in ("id", "files"):
-            if k not in evd:
-                die(f"{evd!r} missing {k}")
+    for item in data["items"]:
+        if "evidence_id" in item:
+            evidence_id = item["evidence_id"]
+            if not EVIDENCE_ID_PATTERN.match(evidence_id):
+                die(f"Invalid Evidence ID format: {evidence_id}")
 
-        # Enforce EVD pattern
-        if not re.match(r"^EVD-AIINFOPS-[A-Z]+-\d{3}$", evd["id"]):
-            die(f"Invalid Evidence ID format: {evd['id']}")
+            for req in ("report", "metrics", "stamp"):
+                if req not in item:
+                    die(f"{evidence_id} missing {req} file mapping")
 
-        files = evd["files"]
-        for req in ("report", "metrics", "stamp"):
-            if req not in files:
-                die(f"{evd['id']} missing {req} file mapping")
+                p = (ROOT / item[req]).resolve()
+                if not p.exists():
+                    die(f"{evidence_id} missing file on disk: {p}")
 
-            p = (ROOT / files[req]).resolve()
+                try:
+                    content = json.loads(p.read_text(encoding="utf-8"))
+                except json.JSONDecodeError as e:
+                    die(f"File {item[req]} is not valid JSON: {e}")
+
+                check_timestamps(content, item[req])
+                validate_schema(content, f"{req}.schema.json")
+        elif "id" in item and "path" in item:
+            evidence_id = item["id"]
+            p = (ROOT / item["path"]).resolve()
             if not p.exists():
-                die(f"{evd['id']} missing file on disk: {p}")
+                die(f"{evidence_id} missing file on disk: {p}")
 
             try:
                 content = json.loads(p.read_text(encoding="utf-8"))
             except json.JSONDecodeError as e:
-                die(f"File {files[req]} is not valid JSON: {e}")
+                die(f"File {item['path']} is not valid JSON: {e}")
 
-            # specific checks
-            check_timestamps(content, files[req])
-            validate_schema(content, f"{req}.schema.json")
+            check_timestamps(content, item["path"])
+        else:
+            die(f"Unknown evidence index entry: {item!r}")
 
     print("[verify_evidence] OK")
 
