@@ -1,25 +1,21 @@
-# World Models Overview
+# Summit World Models Overview
 
-This document defines a backend-agnostic interface for interactive world simulators and the associated feature flags.
+This document defines the initial contract for world-model backends and the
+kill-switch defaults. World-models are **deny-by-default** and remain disabled
+until explicitly enabled through environment flags.
 
-## Scope
+## Interface
 
-- Provide a clean-room, Summit-native contract for world model backends.
-- Keep functionality disabled by default until explicit enablement.
+Implementations must conform to `summit.worldmodels.WorldModelBackend`, exposing
+`reset`, `step`, and `stream` while providing a `CapabilityDescriptor` for
+runtime gating.
 
-## Feature flags (kill switches)
+## Flags (kill-switch defaults)
 
-- `SUMMIT_WORLDMODEL_ENABLE` (default: `0`): gate all world-model functionality.
-- `SUMMIT_WORLDMODEL_BACKEND` (default: `none`): selected backend identifier.
+- `SUMMIT_WORLDMODEL_ENABLE=0` (default): master enable switch.
+- `SUMMIT_WORLDMODEL_BACKEND=none` (default): backend selector.
 
-## Interface summary
+## Operating posture
 
-World model backends implement `WorldModelBackend` with a minimal `reset` / `step` / optional `stream` protocol.
-
-- `reset(initial_state=None)` resets backend state.
-- `step(action, prompt="")` returns a `StepResult` containing frames and metadata.
-- `stream(actions, prompt="")` yields `StepResult` items for iterable actions.
-
-## Evidence IDs
-
-- `EVD-2601-20540-INTF-001`: WorldModel backend interface contract.
+- No backend is loaded unless the enable flag is explicitly set.
+- Feature work remains gated behind the environment switch.
