@@ -1,5 +1,5 @@
 
-import { Patent, ResearchPaper } from '../types.ts';
+import { Patent, ResearchPaper } from '../types.js';
 
 export interface IngestionConnector {
   fetchPatents(query: string): Promise<any[]>;

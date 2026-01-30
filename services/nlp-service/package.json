@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/nlp-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "REST API service for NLP and text analytics",
   "type": "module",
   "main": "./dist/server.js",

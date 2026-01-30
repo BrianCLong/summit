@@ -345,15 +345,6 @@ export class MockTriPaneDataProvider implements TriPaneDataProvider {
 export const mockDataProvider = new MockTriPaneDataProvider()
 
 /**
- * Pre-generated static mock data for tests
- */
-const staticEntities = generateMockEntities(20)
-export const mockEntities = staticEntities
-export const mockRelationships = generateMockRelationships(staticEntities, 30)
-export const mockTimelineEvents = generateMockTimelineEvents(staticEntities, 50)
-export const mockGeospatialEvents = generateMockGeospatialEvents(25)
-
-/**
  * Hook for using mock data in components
  */
 export async function useMockTriPaneData() {

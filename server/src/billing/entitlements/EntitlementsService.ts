@@ -1,8 +1,8 @@
-import { getPostgresPool } from '../../config/database.ts';
-import logger from '../../utils/logger.ts';
-import { Entitlement, EntitlementCheckResult } from './types.ts';
+import { getPostgresPool } from '../../config/database.js';
+import logger from '../../utils/logger.js';
+import { Entitlement, EntitlementCheckResult } from './types.js';
 import { randomUUID } from 'crypto';
-import { provenanceLedger } from '../../provenance/ledger.ts';
+import { provenanceLedger } from '../../provenance/ledger.js';
 
 export interface EntitlementsInterface {
   canUse(feature: string, tenantId: string): Promise<boolean>;

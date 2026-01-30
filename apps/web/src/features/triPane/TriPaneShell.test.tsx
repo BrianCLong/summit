@@ -19,10 +19,7 @@ import {
   generateMockGeospatialEvents,
 } from './mockData'
 
-// TODO: These tests need significant infrastructure work to properly mock all required contexts
-// (AuthProvider, SnapshotProvider) and match the actual component UI.
-// Skipping for GA hardening - to be addressed in follow-up PR.
-describe.skip('TriPaneShell', () => {
+describe('TriPaneShell', () => {
   // Mock data
   const mockEntities = generateMockEntities(10)
   const mockRelationships = generateMockRelationships(mockEntities, 15)

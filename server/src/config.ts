@@ -28,12 +28,6 @@ export const EnvSchema = z
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
     DOCLING_SVC_URL: z.string().url().default('http://localhost:5001'),
     DOCLING_SVC_TIMEOUT_MS: z.coerce.number().default(30000),
-    // GraphQL Cost Analysis & Rate Limiting
-    ENFORCE_GRAPHQL_COST_LIMITS: z.coerce.boolean().default(true),
-    GRAPHQL_COST_CONFIG_PATH: z.string().optional(),
-    COST_EXEMPT_TENANTS: z.string().optional().default(''),
-    GA_CLOUD: z.coerce.boolean().default(false),
-    AWS_REGION: z.string().optional(),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -68,11 +62,6 @@ const ENV_VAR_HELP: Record<string, string> = {
   JWT_SECRET: 'JWT signing secret (min 32 characters, use strong random value)',
   JWT_REFRESH_SECRET: 'JWT refresh token secret (min 32 characters, different from JWT_SECRET)',
   CORS_ORIGIN: 'Allowed CORS origins (comma-separated, e.g., http://localhost:3000)',
-  ENFORCE_GRAPHQL_COST_LIMITS: 'Enable/disable GraphQL cost limit enforcement (default: true)',
-  GRAPHQL_COST_CONFIG_PATH: 'Path to GraphQL cost configuration JSON file (optional)',
-  COST_EXEMPT_TENANTS: 'Comma-separated list of tenant IDs exempt from cost limits',
-  GA_CLOUD: 'Enable strict GA cloud readiness checks (default: false)',
-  AWS_REGION: 'AWS Region (required if GA_CLOUD is true)',
 };
 
 export const cfg = (() => {
@@ -160,32 +149,7 @@ export const cfg = (() => {
         fail(key, 'contains localhost/devpassword; set a production secret');
       }
     });
-  }
-
-  if (env.GA_CLOUD) {
-    console.log('🔒 GA Cloud Guard Active: Enforcing strict production constraints');
-
-    if (env.NODE_ENV !== 'production') {
-      console.error('\n❌ GA Cloud Error: NODE_ENV must be "production" when GA_CLOUD is enabled.\n');
-      process.exit(1);
-    }
-
-    if (!env.AWS_REGION) {
-      console.error('\n❌ GA Cloud Error: AWS_REGION is required when GA_CLOUD is enabled.\n');
-      process.exit(1);
-    }
-
-    // Ensure strictly no localhost in critical URLs for GA
-    const criticalUrls = [env.DATABASE_URL, env.NEO4J_URI];
-    criticalUrls.forEach(url => {
-        if (url && (url.includes('localhost') || url.includes('127.0.0.1'))) {
-             console.error(`\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`);
-             process.exit(1);
-        }
-    });
-  }
-
-  if (env.NODE_ENV !== 'production' && !env.GA_CLOUD) {
+  } else {
     console.log(`[STARTUP] Environment validated (${present} keys)`);
   }
   return env;

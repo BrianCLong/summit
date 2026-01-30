@@ -145,17 +145,11 @@ export class QueryBuilderService {
       'person',
       'people',
       'organization',
-      'organizations',
       'company',
-      'companies',
       'location',
-      'locations',
       'event',
-      'events',
       'document',
-      'documents',
       'threat',
-      'threats',
     ]);
     const dateTerms = new Set([
       'today',
@@ -178,16 +172,6 @@ export class QueryBuilderService {
       'connected',
     ]);
 
-    const singularize = (word: string): string => {
-      // Handle known irregular plurals that should stay as-is
-      const irregulars = new Set(['people']);
-      if (irregulars.has(word)) return word;
-      if (word.endsWith('ies') && word.length > 3)
-        return word.slice(0, -3) + 'y';
-      if (word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
-      return word;
-    };
-
     tokens.forEach((token) => {
       if (
         stopWords.has(token) &&
@@ -199,8 +183,7 @@ export class QueryBuilderService {
       }
 
       if (entityTypeTerms.has(token)) {
-        // Normalize to singular form when adding entity types
-        processed.entityTypes.push(singularize(token));
+        processed.entityTypes.push(token);
       } else if (dateTerms.has(token)) {
         processed.dateExpressions.push(token);
       } else if (operatorTerms.has(token)) {
@@ -467,20 +450,10 @@ export class QueryBuilderService {
 
     words.forEach((word) => {
       expandedWords.push(word);
-      const lowerWord = word.toLowerCase();
 
-      // Forward lookup: word is a base term with synonyms
-      const synonyms = this.synonyms.get(lowerWord);
+      const synonyms = this.synonyms.get(word.toLowerCase());
       if (synonyms) {
         expandedWords.push(...synonyms);
-      }
-
-      // Reverse lookup: word is a synonym of another base term
-      for (const [baseTerm, synonymList] of this.synonyms.entries()) {
-        if (synonymList.includes(lowerWord)) {
-          expandedWords.push(baseTerm);
-          expandedWords.push(...synonymList.filter((s) => s !== lowerWord));
-        }
       }
     });
 

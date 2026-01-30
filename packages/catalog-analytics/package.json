@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/catalog-analytics",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Analytics and reporting for data catalog usage, adoption, and ROI",
   "license": "MIT",
   "type": "module",

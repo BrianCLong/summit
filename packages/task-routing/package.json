@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/task-routing",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Intelligent task routing and assignment system",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "uuid": "^13.0.0",
-    "lodash": "^4.17.23"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/node": "20.19.27",

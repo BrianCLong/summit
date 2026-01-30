@@ -1,6 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { vi, describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ErrorBoundary } from '../ErrorBoundary';
 import '@testing-library/jest-dom';
 
@@ -16,7 +15,7 @@ describe('ErrorBoundary', () => {
   // Mock console.error to avoid noise in test output
   const originalError = console.error;
   beforeAll(() => {
-    console.error = vi.fn();
+    console.error = jest.fn();
   });
 
   afterAll(() => {
@@ -25,7 +24,7 @@ describe('ErrorBoundary', () => {
 
   it('renders children when no error occurs', () => {
     render(
-      <ErrorBoundary>
+      <ErrorBoundary componentName="TestComp">
         <div>Content</div>
       </ErrorBoundary>
     );
@@ -34,21 +33,32 @@ describe('ErrorBoundary', () => {
 
   it('renders fallback UI when an error occurs', () => {
     render(
-      <ErrorBoundary>
+      <ErrorBoundary componentName="TestComp">
         <Bomb shouldThrow={true} />
       </ErrorBoundary>
     );
     expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
-    expect(screen.getByText(/Reload Page/i)).toBeInTheDocument();
-    expect(screen.getByText(/Go Home/i)).toBeInTheDocument();
+    expect(screen.getByText(/TestComp/i)).toBeInTheDocument();
+    expect(screen.getByText('Test Explosion')).toBeInTheDocument();
   });
 
-  it('renders custom fallback when provided', () => {
-    render(
-      <ErrorBoundary fallback={<div>Custom Error UI</div>}>
+  it('provides a retry button that resets the state', () => {
+    const { rerender } = render(
+      <ErrorBoundary componentName="TestComp">
         <Bomb shouldThrow={true} />
       </ErrorBoundary>
     );
-    expect(screen.getByText('Custom Error UI')).toBeInTheDocument();
+
+    expect(screen.getByText('Try Again')).toBeInTheDocument();
+
+    // Rerender with safe prop so retry works
+    rerender(
+      <ErrorBoundary componentName="TestComp">
+        <Bomb shouldThrow={false} />
+      </ErrorBoundary>
+    );
+
+    fireEvent.click(screen.getByText('Try Again'));
+    expect(screen.getByText('Safe Component')).toBeInTheDocument();
   });
 });

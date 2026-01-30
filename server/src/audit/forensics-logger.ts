@@ -14,7 +14,7 @@
 import Redis from 'ioredis';
 import crypto from 'crypto';
 import { EventEmitter } from 'events';
-import logger from '../config/logger.ts';
+import logger from '../config/logger.js';
 
 // ============================================================================
 // Types and Interfaces

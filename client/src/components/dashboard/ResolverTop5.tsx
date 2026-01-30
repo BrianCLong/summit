@@ -2,7 +2,6 @@ import React from 'react';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Link from '@mui/material/Link';
-import { getJaegerUrl } from '../../config/urls';
 
 export default function ResolverTop5() {
   const { data } = useSafeQuery<
@@ -27,8 +26,7 @@ export default function ResolverTop5() {
       flex: 1,
       renderCell: (p: { value?: string; row: any }) => {
         const op = `${p.row.parent}.${p.row.field}`;
-        const base =
-          (window as any).__JAEGER_BASE || getJaegerUrl() || '';
+        const base = (window as any).__JAEGER_BASE || 'http://localhost:16686';
         const service = (window as any).__JAEGER_SERVICE || 'intelgraph-dev';
         const lookback = (window as any).__JAEGER_LOOKBACK || '1h';
         const href = `${base}/search?service=${service}&operation=${op}&lookback=${lookback}`;

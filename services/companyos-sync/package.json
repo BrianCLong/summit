@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/companyos-sync",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Bi-directional user and role synchronization between CompanyOS and Summit RBAC",
   "type": "module",
   "main": "dist/index.js",

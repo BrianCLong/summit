@@ -3,7 +3,6 @@ import { MaestroTask } from './model';
 import { MaestroEngine } from './engine';
 import { MaestroAgentService } from './agent_service';
 import { logger } from '../utils/logger';
-import { DiffusionCoderAdapter } from './adapters/diffusion_coder';
 
 // Mock Interfaces for Integrations
 interface LLMService {
@@ -18,8 +17,7 @@ export class MaestroHandlers {
     private engine: MaestroEngine,
     private agentService: MaestroAgentService,
     private llm: LLMService,
-    private graph: GraphService,
-    private diffusionCoder: DiffusionCoderAdapter
+    private graph: GraphService
   ) {}
 
   registerAll() {
@@ -28,7 +26,6 @@ export class MaestroHandlers {
     this.engine.registerTaskHandler('graph_job', this.handleGraphJob.bind(this));
     this.engine.registerTaskHandler('agent_call', this.handleAgentCall.bind(this));
     this.engine.registerTaskHandler('custom', this.handleCustom.bind(this));
-    this.engine.registerTaskHandler('diffusion_edit', this.handleDiffusionEdit.bind(this));
   }
 
   private async handleLLMCall(task: MaestroTask): Promise<any> {
@@ -102,25 +99,5 @@ export class MaestroHandlers {
   private async handleCustom(task: MaestroTask): Promise<any> {
     logger.info(`[Maestro] Executing Custom task ${task.id}`);
     return { result: 'custom execution done', payload: task.payload };
-  }
-
-  private async handleDiffusionEdit(task: MaestroTask): Promise<any> {
-    logger.info(`[Maestro] Executing Diffusion Edit for task ${task.id}`);
-    const { prompt, steps, block_length, remasking, threshold } = task.payload as {
-      prompt: string;
-      steps?: number;
-      block_length?: number;
-      remasking?: 'low_confidence' | 'none';
-      threshold?: number;
-    };
-
-    const result = await this.diffusionCoder.executeDiffusion(
-      task.runId,
-      task.id,
-      { prompt, steps, block_length, remasking, threshold },
-      task.tenantId
-    );
-
-    return result;
   }
 }

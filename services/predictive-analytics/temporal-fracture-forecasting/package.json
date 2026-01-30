@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/temporal-fracture-forecasting",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Temporal Fracture Forecasting - Predicts system instability and phase transitions",
   "type": "module",
   "main": "dist/index.js",

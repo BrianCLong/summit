@@ -1,9 +1,4 @@
 import '@testing-library/jest-dom';
-
-console.log('Setup file is executing (using require)...');
-
-const util = require('util');
-console.log('TextEncoder in util:', !!util.TextEncoder);
-
-globalThis.TextEncoder = util.TextEncoder;
-globalThis.TextDecoder = util.TextDecoder;
+import { TextEncoder, TextDecoder } from 'util';
+(globalThis as any).TextEncoder = TextEncoder;
+(globalThis as any).TextDecoder = TextDecoder as any;

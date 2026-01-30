@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/replayctl",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "CLI tool for managing ingest replay operations",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/scoring-engine",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Pluggable scoring engine for evaluating agent outputs",
   "type": "module",
   "main": "./dist/engine.js",

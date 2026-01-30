@@ -13,22 +13,6 @@ export const typeDefs = gql`
     updatedAt: DateTime!
   }
 
-  type Health {
-    ok: Boolean!
-    timestamp: DateTime!
-  }
-
-  type PingResponse {
-    ok: Boolean!
-    timestamp: DateTime!
-    message: String
-  }
-
-  input PingInput {
-    message: String!
-    timestamp: DateTime
-  }
-
   type Relationship {
     id: ID!
     source: Entity!
@@ -143,7 +127,7 @@ export const typeDefs = gql`
     forecast(id: ID!): Forecast
 
     # Health Check
-    health: Health!
+    health: String!
   }
 
   # Mutation Root
@@ -157,9 +141,6 @@ export const typeDefs = gql`
 
     # Prediction Mutations
     createForecast(input: CreateForecastInput!): Forecast!
-
-    # System Mutations
-    ping(input: PingInput!): PingResponse!
   }
 
   # Input Types

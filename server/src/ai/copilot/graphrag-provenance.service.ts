@@ -24,7 +24,7 @@ import {
   GraphRAGRequestSchema,
   CitationSchema,
   SourceTypeSchema,
-} from './types.ts';
+} from './types.js';
 
 const logger = (pino as any)({ name: 'graphrag-provenance' });
 

@@ -26,9 +26,6 @@ const requiredFeatures = {
   },
   'Ingestion Security Hardening': {
     keyword: 'ingestion'
-  },
-  'Media Authenticity & Provenance': {
-    keyword: 'Media Authenticity'
   }
 };
 

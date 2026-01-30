@@ -4,7 +4,7 @@ import { promisify } from 'util';
 import path from 'path';
 import pino from 'pino';
 import sharp from 'sharp';
-import { ExtractionEngineConfig } from '../types.ts';
+import { ExtractionEngineConfig } from '../types.js';
 
 const logger = (pino as any)({ name: 'OCREngine' });
 

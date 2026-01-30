@@ -1,4 +1,4 @@
-import type { ModelAdapter } from './model-adapter.ts';
+import type { ModelAdapter } from './model-adapter.js';
 import { randomUUID as uuidv4 } from 'crypto';
 // @ts-ignore
 import { default as pino } from 'pino';
@@ -173,13 +173,9 @@ export class NlToCypherService {
         };
       }
 
-      // P2-2: Sandbox execution with safety checks
-      // NOTE: Using safe simulation. For production, integrate real Neo4j sandbox with:
-      // - Isolated read-only database
-      // - Query timeout enforcement
-      // - Resource limits (memory, CPU)
-      // - Network isolation
-      const mockRows = this.executeSandboxed(safeCypher);
+      // TODO: Integrate with actual Neo4j sandbox connection
+      // For now, simulate execution
+      const mockRows = this.simulateExecution(safeCypher);
 
       const executionTime = Date.now() - startTime;
 
@@ -241,19 +237,7 @@ export class NlToCypherService {
     }
 
     // Fallback to model adapter
-    const systemInstruction = `You are a Neo4j Expert and Intelligence Analysis Copilot.
-Your goal is to translate natural language questions into efficient, read-only Cypher queries.
-
-## NEO4J PERFORMANCE GUIDANCE
-- Use batch patterns where applicable, but for read queries focus on index usage.
-- Avoid variable-length paths with unbounded depth (e.g. [*]). Always specify a max depth (e.g. [*..3]).
-- Always include a LIMIT clause (default 100) to prevent blowing up result sizes.
-- Treat the Neo4j graph as the source of truth for entity identity and relationships.
-
-## RESPONSE FORMAT
-Return ONLY the Cypher query. No markdown formatting, no explanations.`;
-
-    return this.adapter.generate(`${systemInstruction}\n\nUser Query: ${prompt}`);
+    return this.adapter.generate(prompt);
   }
 
   private validateCypher(cypher: string): CypherValidationResult {
@@ -410,24 +394,7 @@ Return ONLY the Cypher query. No markdown formatting, no explanations.`;
     return safeCypher;
   }
 
-  /**
-   * Execute Cypher in sandboxed environment (P2-2 implementation)
-   *
-   * Safety features:
-   * - Read-only queries enforced
-   * - Result size limits (max 100 rows)
-   * - Mock data for security (no real DB access)
-   *
-   * TODO: Replace with real Neo4j sandbox:
-   * - Isolated read-only database instance
-   * - Query timeout enforcement (5s max)
-   * - Memory/CPU resource limits
-   * - Network isolation
-   */
-  private executeSandboxed(cypher: string): any[] {
-    // Safety: Validate query is read-only (already done in validation)
-    console.debug('[NL-to-Cypher Sandbox P2-2] Executing query:', cypher);
-
+  private simulateExecution(cypher: string): any[] {
     // Mock execution for demo purposes
     const mockData = [
       { id: '1', name: 'Node 1', type: 'Person' },
@@ -440,7 +407,6 @@ Return ONLY the Cypher query. No markdown formatting, no explanations.`;
       return [{ count: mockData.length }];
     }
 
-    // Safety: Enforce max result size
     return mockData.slice(0, Math.min(3, 100));
   }
 

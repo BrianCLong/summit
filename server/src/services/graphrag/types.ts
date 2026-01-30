@@ -168,12 +168,6 @@ export interface CaseGraphRepository {
     caseId: string,
     params?: CaseGraphRepositoryParams,
   ): Promise<Omit<GraphContext, 'evidenceSnippets'>>;
-
-  getSubgraphByCypher(
-    caseId: string,
-    cypher: string,
-    params?: Record<string, any>,
-  ): Promise<Omit<GraphContext, 'evidenceSnippets'>>;
 }
 
 export interface EvidenceSearchParams {
@@ -232,24 +226,6 @@ export interface GraphRagLlmAdapter {
   generateAnswer(input: {
     context: LlmContextPayload;
   }): Promise<LlmGeneratedAnswer>;
-}
-
-export interface CypherLlmInterface {
-  generateCypher(prompt: string): Promise<{ cypher: string; explanation: string }>;
-}
-
-export interface CypherGenerationResult {
-  cypher: string;
-  params?: Record<string, any>;
-  mode: 'template' | 'llm';
-  templateId?: string;
-  confidence: number;
-}
-
-export interface SchemaContext {
-  nodeTypes: string[];
-  edgeTypes: string[];
-  schemaSummary: string;
 }
 
 // =============================================================================

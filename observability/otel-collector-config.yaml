@@ -3,43 +3,25 @@ receivers:
     protocols:
       http:
         endpoint: '0.0.0.0:4318' # OTLP/HTTP endpoint
-      grpc:
-        endpoint: '0.0.0.0:4317' # OTLP/gRPC endpoint
-
-processors:
-  batch:
-    timeout: 1s
-    send_batch_size: 1024
 
 exporters:
   logging:
     verbosity: detailed # For debugging
-
   otlp:
-    endpoint: 'tempo:4317' # Tempo endpoint for traces
-    tls:
-      insecure: true
-
-  prometheus:
-    endpoint: "0.0.0.0:8889"
-    namespace: "summit"
-    resource_to_telemetry_conversion:
-      enabled: true
-
-  loki:
-    endpoint: "http://loki:3100/loki/api/v1/push"
+    endpoint: 'tempo:4317' # Example Tempo endpoint for traces
+  otlp/metrics:
+    endpoint: 'prometheus:4317' # Example Prometheus endpoint for metrics
+  otlp/logs:
+    endpoint: 'loki:4317' # Example Loki endpoint for logs
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
       exporters: [logging, otlp]
     metrics:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [logging, prometheus]
+      exporters: [logging, otlp/metrics]
     logs:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [logging, loki]
+      exporters: [logging, otlp/logs]

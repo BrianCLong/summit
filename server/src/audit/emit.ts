@@ -1,5 +1,5 @@
-import { advancedAuditSystem } from './index.ts';
-import type { AuditEventV1 } from './audit-v1.ts';
+import { advancedAuditSystem } from './index.js';
+import type { AuditEventV1 } from './audit-v1.js';
 
 export interface EmitAuditOptions {
   level?: 'debug' | 'info' | 'warn' | 'error' | 'critical';

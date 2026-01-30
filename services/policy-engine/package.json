@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/policy-engine",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "License/Authority Engine with data license registry, warrant/authority binding, and policy evaluation",
   "main": "dist/index.js",
   "scripts": {

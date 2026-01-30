@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-ingest",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "start:dev": "tsx src/s3csv-worker.ts",

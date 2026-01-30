@@ -4,7 +4,7 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-// require('jest-extended'); // Handled by jest.config.ts via jest-extended/all
+require('jest-extended');
 
 require('dotenv').config({ path: './.env.test' });
 
@@ -679,7 +679,7 @@ jest.mock('prom-client', () => {
   }
   class MockRegistry {
     constructor() {
-      this._metrics = {};
+      this.metrics = {};
     }
     registerMetric() { }
     getSingleMetric() { return null; }

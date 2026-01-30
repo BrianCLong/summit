@@ -12,14 +12,18 @@
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { validateAndSanitizeDropInput, type DropInput } from '../validation.js';
-import * as securityLoggerModule from '../../observability/securityLogger.js';
+import { securityLogger } from '../../observability/securityLogger.js';
 
-// Spy on security logger
-const logEventSpy = jest.spyOn(securityLoggerModule.securityLogger, 'logEvent');
+// Mock security logger
+jest.mock('../../observability/securityLogger.js', () => ({
+  securityLogger: {
+    logEvent: jest.fn(),
+  },
+}));
 
 describe('validateAndSanitizeDropInput', () => {
   beforeEach(() => {
-    logEventSpy.mockClear();
+    jest.clearAllMocks();
   });
 
   describe('Basic Input Validation', () => {
@@ -126,14 +130,14 @@ describe('validateAndSanitizeDropInput', () => {
       expect(result.payload.toString()).toBe('hello');
     });
 
-    it('should handle empty base64 string as valid', () => {
+    it('should handle empty base64 string', () => {
       const input: DropInput = {
         payload: '',
       };
 
-      // Empty string is valid base64 (decodes to empty buffer)
-      const result = validateAndSanitizeDropInput(input);
-      expect(result.payload.byteLength).toBe(0);
+      expect(() => validateAndSanitizeDropInput(input)).toThrow(
+        'Payload must be base64 encoded',
+      );
     });
 
     it('should handle whitespace-only payload', () => {
@@ -204,7 +208,7 @@ describe('validateAndSanitizeDropInput', () => {
         // Expected
       }
 
-      expect(logEventSpy).toHaveBeenCalledWith(
+      expect(securityLogger.logEvent).toHaveBeenCalledWith(
         'drop_validation_failed',
         expect.objectContaining({
           level: 'warn',
@@ -245,15 +249,15 @@ describe('validateAndSanitizeDropInput', () => {
       );
     });
 
-    it('should handle empty string metadata as undefined', () => {
+    it('should handle empty string metadata', () => {
       const input: DropInput = {
         payload: Buffer.from('test').toString('base64'),
         metadata: '',
       };
 
-      // Empty string is falsy so it's treated as undefined (not parsed)
-      const result = validateAndSanitizeDropInput(input);
-      expect(result.metadata).toBeUndefined();
+      expect(() => validateAndSanitizeDropInput(input)).toThrow(
+        'Metadata must be valid JSON',
+      );
     });
 
     it('should sanitize low ASCII characters from metadata', () => {
@@ -339,7 +343,7 @@ describe('validateAndSanitizeDropInput', () => {
         // Expected
       }
 
-      expect(logEventSpy).toHaveBeenCalledWith(
+      expect(securityLogger.logEvent).toHaveBeenCalledWith(
         'drop_validation_failed',
         expect.objectContaining({
           level: 'warn',
@@ -355,7 +359,7 @@ describe('validateAndSanitizeDropInput', () => {
         // Expected
       }
 
-      expect(logEventSpy).toHaveBeenCalledWith(
+      expect(securityLogger.logEvent).toHaveBeenCalledWith(
         'drop_validation_failed',
         expect.objectContaining({
           level: 'warn',
@@ -374,7 +378,7 @@ describe('validateAndSanitizeDropInput', () => {
         // Expected
       }
 
-      expect(logEventSpy).toHaveBeenCalledWith(
+      expect(securityLogger.logEvent).toHaveBeenCalledWith(
         'drop_validation_failed',
         expect.objectContaining({
           level: 'warn',
@@ -389,7 +393,7 @@ describe('validateAndSanitizeDropInput', () => {
         metadata: JSON.stringify({ key: 'value' }),
       });
 
-      expect(logEventSpy).not.toHaveBeenCalled();
+      expect(securityLogger.logEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -531,9 +535,7 @@ describe('validateAndSanitizeDropInput', () => {
         payload: Buffer.from('').toString('base64'),
       };
 
-      // Zero-length payload is valid (no minimum size requirement)
-      const result = validateAndSanitizeDropInput(input);
-      expect(result.payload.byteLength).toBe(0);
+      expect(() => validateAndSanitizeDropInput(input)).toThrow();
     });
   });
 

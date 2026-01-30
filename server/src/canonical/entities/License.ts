@@ -5,7 +5,7 @@
  * Represents a license or permit with bitemporal tracking
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface LicenseIssuer {
   /** Issuing authority name */

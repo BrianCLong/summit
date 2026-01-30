@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/maestro",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Maestro CLI for workflow orchestration",
   "main": "dist/index.js",
   "bin": {

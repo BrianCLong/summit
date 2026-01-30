@@ -4,7 +4,7 @@ nameOverride: ""
 
 image:
   repository: neo4j
-  tag: "2025.01-enterprise"
+  tag: "5.22.0-enterprise"
   pullPolicy: IfNotPresent
 
 auth:
@@ -32,14 +32,14 @@ service:
   http:
     port: 7474
   discovery:
-    port: 6000
+    port: 5000
 
 config:
   dbms.default_listen_address: "0.0.0.0"
   dbms.default_advertised_address: "$(POD_IP)"
   dbms.routing.enabled: "true"
-  dbms.cluster.endpoints: "$(POD_IP):6000"
-  dbms.kubernetes.discovery.service_port_name: "discovery"
+  causal_clustering.discovery_type: "K8S"
+  causal_clustering.k8s.service_port_name: "discovery"
   causal_clustering.load_balancing_config: "server_policies: { default: { read: any, write: any }}"
   dbms.memory.heap.initial_size: "4G"
   dbms.memory.heap.max_size: "4G"

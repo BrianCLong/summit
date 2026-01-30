@@ -18,7 +18,7 @@ import {
   type Provenance,
   type RedactionStatus,
   type CopilotAnswer,
-} from './types.ts';
+} from './types.js';
 
 const logger = (pino as any)({ name: 'redaction-service' });
 

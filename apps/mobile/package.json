@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mobile",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "React Native OSINT mobile app for Summit IntelGraph with offline-first architecture and real-time GraphQL subscriptions",
   "private": true,
   "main": "index.js",

@@ -5,7 +5,7 @@
  * Represents physical or digital assets (vehicles, real estate, cryptocurrency, etc.)
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface AssetIdentifiers {
   /** Serial numbers */

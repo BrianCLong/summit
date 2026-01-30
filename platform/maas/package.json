@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/maas",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {

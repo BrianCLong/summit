@@ -1,4 +1,3 @@
-id: core_evals
 tasks:
   - id: copilot_summary
     dataset: GOLDEN/datasets/copilot_summary.jsonl

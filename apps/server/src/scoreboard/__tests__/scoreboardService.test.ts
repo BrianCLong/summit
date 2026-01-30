@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
 import { scoreboardService } from '../scoreboardService.js';
 import { DomainMetricsInput } from '../types.js';
 

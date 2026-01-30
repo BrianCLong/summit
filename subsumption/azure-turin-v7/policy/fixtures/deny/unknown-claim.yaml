@@ -1,4 +1,0 @@
-item:
-  slug: azure-turin-v7
-claims:
-  - id: "ITEM:UNKNOWN-999" # Should fail verification

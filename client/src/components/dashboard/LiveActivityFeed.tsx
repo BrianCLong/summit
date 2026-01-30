@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -21,7 +21,8 @@ import {
   Search as SearchIcon,
   Security as SecurityIcon,
 } from '@mui/icons-material';
-import { gql, useQuery } from '@apollo/client';
+// TODO: Re-enable GraphQL subscription when schema is available
+// import { useActivityFeedSubscription } from '../../generated/graphql';
 
 interface ActivityEvent {
   id: string;
@@ -32,38 +33,8 @@ interface ActivityEvent {
     id: string;
     name: string;
   };
-  metadata?: unknown;
+  metadata?: any;
 }
-
-interface ActivityFeedRow {
-  id: string;
-  actionType: string;
-  resourceType?: string | null;
-  resourceId?: string | null;
-  actorId?: string | null;
-  timestamp: string;
-  payload?: unknown;
-  metadata?: unknown;
-}
-
-interface ActivityFeedResponse {
-  activities: ActivityFeedRow[];
-}
-
-const ACTIVITY_FEED_QUERY = gql`
-  query ActivityFeed($limit: Int, $offset: Int) {
-    activities(limit: $limit, offset: $offset) {
-      id
-      actionType
-      resourceType
-      resourceId
-      actorId
-      timestamp
-      payload
-      metadata
-    }
-  }
-`;
 
 const getActivityIcon = (type: string) => {
   switch (type) {
@@ -96,74 +67,72 @@ const getActivityColor = (type: string) => {
   }
 };
 
-const mapActivity = (row: ActivityFeedRow): ActivityEvent => {
-  const payload =
-    row.payload && typeof row.payload === 'object'
-      ? (row.payload as Record<string, unknown>)
-      : undefined;
-  const metadata =
-    row.metadata && typeof row.metadata === 'object'
-      ? (row.metadata as Record<string, unknown>)
-      : undefined;
-
-  const message =
-    (payload?.message as string) ||
-    (metadata?.message as string) ||
-    `${row.actionType}${row.resourceType ? `: ${row.resourceType}` : ''}`;
-
-  const actorName =
-    (payload?.actorName as string) ||
-    (metadata?.actorName as string) ||
-    row.actorId ||
-    'Unknown';
-
-  return {
-    id: row.id,
-    type: row.actionType,
-    message,
-    timestamp: row.timestamp,
-    actor: {
-      id: row.actorId || 'unknown',
-      name: actorName,
-    },
-    metadata: row.metadata,
-  };
-};
-
 export default function LiveActivityFeed() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activities, setActivities] = useState<ActivityEvent[]>([]);
+
+  // Mock activities for development
+  const mockActivities: ActivityEvent[] = [
+    {
+      id: '1',
+      type: 'INVESTIGATION_CREATED',
+      message: 'New investigation started: Financial Network Analysis',
+      timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 mins ago
+      actor: { id: '1', name: 'John Smith' },
+    },
+    {
+      id: '2',
+      type: 'ENTITY_ADDED',
+      message: 'Entity added to investigation: ABC Corporation',
+      timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 mins ago
+      actor: { id: '2', name: 'Sarah Johnson' },
+    },
+    {
+      id: '3',
+      type: 'THREAT_DETECTED',
+      message: 'Potential threat identified in communication patterns',
+      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 mins ago
+      actor: { id: '3', name: 'AI System' },
+    },
+    {
+      id: '4',
+      type: 'USER_LOGIN',
+      message: 'User logged in from new location',
+      timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
+      actor: { id: '4', name: 'Mike Davis' },
+    },
+  ];
+
+  const [activities, setActivities] = useState<ActivityEvent[]>(mockActivities);
   const [newActivityCount, setNewActivityCount] = useState(0);
 
-  const { data, loading, error } = useQuery<ActivityFeedResponse>(
-    ACTIVITY_FEED_QUERY,
-    {
-      variables: { limit: 20, offset: 0 },
-      pollInterval: 15000,
-      fetchPolicy: 'cache-and-network',
-      notifyOnNetworkStatusChange: true,
-    },
-  );
+  // TODO: Re-enable GraphQL subscription when schema is available
+  // const { data, loading, error } = useActivityFeedSubscription({
+  //   onComplete: () => console.log('Activity subscription completed'),
+  //   onError: (err) => console.warn('Activity subscription error:', err)
+  // });
 
-  useEffect(() => {
-    if (!data?.activities) return;
-    const next = data.activities.map(mapActivity);
+  // Mock data for development
+  const data = null;
+  const loading = false;
+  const error = null;
 
-    setActivities((prev) => {
-      if (!prev.length) return next;
-      const prevIds = new Set(prev.map((activity) => activity.id));
-      const incoming = next.filter((activity) => !prevIds.has(activity.id));
-      if (!isExpanded && incoming.length > 0) {
-        setNewActivityCount((count) => count + incoming.length);
-      }
-      return next;
-    });
-  }, [data, isExpanded]);
+  // TODO: Re-enable when GraphQL subscription is available
+  // useEffect(() => {
+  //   if (data?.activityFeed) {
+  //     const newActivity = data.activityFeed as ActivityEvent;
+  //     setActivities(prev => [newActivity, ...prev.slice(0, 19)]); // Keep last 20
+  //
+  //     // Increment notification count if not expanded
+  //     if (!isExpanded) {
+  //       setNewActivityCount(prev => prev + 1);
+  //     }
+  //   }
+  // }, [data, isExpanded]);
 
   const handleToggleExpand = () => {
     setIsExpanded(!isExpanded);
     if (!isExpanded) {
-      setNewActivityCount(0);
+      setNewActivityCount(0); // Clear notification when expanding
     }
   };
 
@@ -253,9 +222,7 @@ export default function LiveActivityFeed() {
                           {activity.message}
                         </Typography>
                         <Chip
-                          label={activity.type
-                            .toLowerCase()
-                            .replace('_', ' ')}
+                          label={activity.type.toLowerCase().replace('_', ' ')}
                           size="small"
                           color={getActivityColor(activity.type)}
                           variant="outlined"
@@ -263,9 +230,21 @@ export default function LiveActivityFeed() {
                       </Box>
                     }
                     secondary={
-                      <Typography variant="caption" color="text.secondary">
-                        {activity.actor.name} • {formatTimestamp(activity.timestamp)}
-                      </Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          mt: 0.5,
+                        }}
+                      >
+                        <Typography variant="caption" color="text.secondary">
+                          {activity.actor.name}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          • {formatTimestamp(activity.timestamp)}
+                        </Typography>
+                      </Box>
                     }
                   />
                 </ListItem>

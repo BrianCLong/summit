@@ -1,4 +1,3 @@
-import { describe, it, expect, jest } from '@jest/globals';
 import { MaterializedViewScheduler } from '../MaterializedViewScheduler';
 import type { Pool } from 'pg';
 

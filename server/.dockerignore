@@ -131,6 +131,3 @@ secret/
 # Monitoring
 grafana/
 prometheus/
-
-!intelgraph-feature-flags-4.2.3.tgz
-!intelgraph-telemetry-config-4.2.3.tgz

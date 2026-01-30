@@ -190,7 +190,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "websocket_connections_active",
+          "expr": "active_connections",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"

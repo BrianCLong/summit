@@ -12,10 +12,6 @@ VERSION=${2:-$(git describe --tags --always)}
 OUTPUT_DIR=${3:-"./sboms"}
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-# SBOM Standards (Modern defaults)
-CYCLONEDX_VERSION=${CYCLONEDX_VERSION:-"1.7"}
-SPDX_VERSION=${SPDX_VERSION:-"3.0.1"}
-
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
 
@@ -35,13 +31,10 @@ if [ -f "Dockerfile" ] || [ -f "Dockerfile.*" ]; then
         
         echo "  - Processing $service_name from $dockerfile..."
         
-        # Generate CycloneDX format (Targeting $CYCLONEDX_VERSION)
-        # Note: syft uses -o cyclonedx-json. Explicit versioning might require additional flags or tool-specific config.
-        syft packages dir:. -o "cyclonedx-json@$CYCLONEDX_VERSION" --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json" 2>/dev/null || \
+        # Generate CycloneDX format
         syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"
         
-        # Generate SPDX format (Targeting $SPDX_VERSION)
-        syft packages dir:. -o "spdx-json@$SPDX_VERSION" --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json" 2>/dev/null || \
+        # Generate SPDX format
         syft packages dir:. -o spdx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json"
         
         # Generate syft table format for human consumption

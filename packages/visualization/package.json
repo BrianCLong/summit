@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/visualization",
-  "version": "4.2.3",
+  "version": "4.1.4",
   "description": "Core visualization library for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,7 +16,7 @@
     "react-dom": "^18.3.1",
     "d3": "^7.9.0",
     "@types/d3": "^7.4.3",
-    "lodash": "^4.17.23",
+    "lodash": "^4.17.21",
     "@types/lodash": "^4.17.7"
   },
   "peerDependencies": {

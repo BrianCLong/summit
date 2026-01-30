@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/analytics-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Analytics service for advanced analytics and reporting",
   "main": "dist/index.js",
   "scripts": {

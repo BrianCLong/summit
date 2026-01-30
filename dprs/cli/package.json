@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dprs-cli",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "CLI for the Differential Privacy Release Scheduler",
   "private": true,
   "type": "module",

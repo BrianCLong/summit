@@ -328,7 +328,7 @@ Evidence is automatically collected by the daily workflow:
 
 ```bash
 # Manual collection
-./scripts/release/generate_evidence_bundle.sh --type rc
+./scripts/release/collect_evidence.sh --type rc
 ```
 
 ---

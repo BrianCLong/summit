@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { AdvancedAuditSystem } from '../advanced-audit-system.ts';
+import { AdvancedAuditSystem } from '../advanced-audit-system.js';
 
-jest.mock('../../config/database.ts', () => ({
+jest.mock('../../config/database.js', () => ({
   getPostgresPool: jest.fn(() => null),
   getRedisClient: jest.fn(() => null),
 }));

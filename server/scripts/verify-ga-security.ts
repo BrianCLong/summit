@@ -245,16 +245,14 @@ class SecurityVerifier {
       return;
     }
 
-    // Check for imports (support both .ts and .js extensions)
+    // Check for imports
     const importsPublicRateLimit =
       appFile.includes('publicRateLimit') &&
-      (appFile.includes("from './middleware/rateLimiter.js'") ||
-       appFile.includes("from './middleware/rateLimiter.ts'"));
+      appFile.includes("from './middleware/rateLimiter.js'");
 
     const importsAuthRateLimit =
       appFile.includes('authenticatedRateLimit') &&
-      (appFile.includes("from './middleware/rateLimiter.js'") ||
-       appFile.includes("from './middleware/rateLimiter.ts'"));
+      appFile.includes("from './middleware/rateLimiter.js'");
 
     // Check for usage
     const usesPublicRateLimit =

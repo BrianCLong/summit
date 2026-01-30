@@ -1,2 +1,2 @@
-export { default } from './store/index';
-export * from './store/index';
+export { store as default } from './store/index.js';
+export * from './store/index.js';

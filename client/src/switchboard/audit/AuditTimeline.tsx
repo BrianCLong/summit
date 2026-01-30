@@ -12,7 +12,6 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { getApiBaseUrl } from '../../config/urls';
 
 type Outcome = 'success' | 'failure' | 'partial' | 'pending';
 
@@ -38,7 +37,9 @@ export interface AuditTimelineProps {
   className?: string;
 }
 
-const defaultApiBase = getApiBaseUrl();
+const defaultApiBase =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
 
 const getFallbackText = (value?: string) => value?.trim() || undefined;
 

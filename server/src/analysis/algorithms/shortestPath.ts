@@ -1,4 +1,4 @@
-import { Graph, NodeId, GraphEdge } from '../graphTypes.ts';
+import { Graph, NodeId, GraphEdge } from '../graphTypes.js';
 
 export interface PathResult {
   path: NodeId[] | null;

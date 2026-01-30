@@ -11,14 +11,14 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import {
   CopilotGovernanceService,
   createCopilotGovernanceService,
-} from '../governance.service.ts';
-import { CopilotAnswerSchema } from '../types.ts';
+} from '../governance.service.js';
+import { CopilotAnswerSchema } from '../types.js';
 import type {
   CopilotAnswer,
   CopilotRefusal,
   GovernanceVerdict,
   GuardrailCheck,
-} from '../types.ts';
+} from '../types.js';
 
 describe('Copilot Governance Bypass Prevention', () => {
   let governanceService: CopilotGovernanceService;

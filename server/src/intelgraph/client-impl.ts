@@ -13,24 +13,10 @@ export class IntelGraphClientImpl implements IntelGraphClient {
     return getNeo4jDriver();
   }
 
-  private serializeRunProps(run: Partial<Run>) {
-    const { reasoningBudget, reasoningBudgetEvidence, ...props } = run;
-    return {
-      ...props,
-      ...(reasoningBudget
-        ? { reasoningBudget: JSON.stringify(reasoningBudget) }
-        : {}),
-      ...(reasoningBudgetEvidence
-        ? { reasoningBudgetEvidence: JSON.stringify(reasoningBudgetEvidence) }
-        : {}),
-    };
-  }
-
   async createRun(run: Run): Promise<void> {
     const session = this.driver.session();
     try {
-      const { user, ...rest } = run;
-      const props = this.serializeRunProps(rest);
+      const { user, ...props } = run;
       await session.run(
         `
         MERGE (r:MaestroRun {id: $props.id})
@@ -51,8 +37,7 @@ export class IntelGraphClientImpl implements IntelGraphClient {
     const session = this.driver.session();
     try {
       // Exclude nested objects from patch if any (like user)
-      const { user, ...rest } = patch;
-      const props = this.serializeRunProps(rest);
+      const { user, ...props } = patch;
       await session.run(
         `
         MATCH (r:MaestroRun {id: $runId})

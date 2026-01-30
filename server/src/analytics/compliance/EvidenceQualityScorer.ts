@@ -15,13 +15,13 @@ import {
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
-} from '../../types/data-envelope.ts';
+} from '../../types/data-envelope.js';
 import type {
   DataEnvelope,
   GovernanceVerdict,
-} from '../../types/data-envelope.ts';
-import logger from '../../utils/logger.ts';
-import type { ComplianceFramework } from './CompliancePredictionEngine.ts';
+} from '../../types/data-envelope.js';
+import logger from '../../utils/logger.js';
+import type { ComplianceFramework } from './CompliancePredictionEngine.js';
 
 // ============================================================================
 // Types

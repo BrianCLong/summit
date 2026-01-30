@@ -1,22 +1,18 @@
-const path = require('path');
-const baseConfig = require('../../jest.config.cjs');
-
 module.exports = {
-  ...baseConfig,
-  rootDir: path.resolve(__dirname, '../..'),
-  roots: ['<rootDir>/apps/analytics-engine/src'],
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
+  roots: ['<rootDir>/src'],
+  extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.[cm]?[tj]sx?$': [
+    '^.+\\.ts$': [
       'ts-jest',
       {
         useESM: true,
-        tsconfig: path.resolve(__dirname, '../../tsconfig.test.json'),
+        tsconfig: '<rootDir>/tsconfig.json',
       },
     ],
   },
   moduleNameMapper: {
-    ...baseConfig.moduleNameMapper,
-    '^pg$': '<rootDir>/__mocks__/pg.js',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
 };

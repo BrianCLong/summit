@@ -1,0 +1,26 @@
+{
+  "platform_version": "v0.3.3-mc",
+  "evidence_model": {
+    "config": "evidence/v0.3.3/config/config-snapshot.json + config-signature.txt",
+    "observability": "evidence/v0.3.3/observability/dashboard-mc-platform.json",
+    "budgets": "evidence/v0.3.3/budgets/*.json (per-tenant)",
+    "rag": "evidence/v0.3.3/rag/grounding-attest.json + trajectory-results.json",
+    "autonomy": "evidence/v0.3.3/autonomy/TENANT_003/*.json"
+  },
+  "ci_gates": [
+    "quality: lint, type, unit/integration, promtool rules, trajectory golden-set, grounding verifier",
+    "policy: OPA simulation must allow; residency & purpose OK; persisted-only index verified",
+    "config_attestation: pre-deploy snapshot; fail on drift",
+    "canary: Kayenta-style p95 gate (≤+5%); error rate gate; Slack PROMOTE/HOLD",
+    "evidence: bundle signed; includes config snapshot, dashboards, alerts, budgets, RAG attestations"
+  ],
+  "epics": [
+    "E1: Tenant Drilldowns & Budgets",
+    "E2: Config Integrity Attestations",
+    "E3: Egress Gateway Mode (LLM)",
+    "E4: Agentic RAG + Grounding Attestations",
+    "E5: Autonomy Tier-3 Expansion (TENANT_003)"
+  ],
+  "status": "planning",
+  "target_duration": "6 weeks"
+}

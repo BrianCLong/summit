@@ -12,7 +12,7 @@ import * as yaml from 'yaml';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Pool } from 'pg';
-import { getPostgresPool } from '../../config/database.ts';
+import { getPostgresPool } from '../../config/database.js';
 
 // ============================================================================
 // Types

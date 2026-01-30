@@ -25,7 +25,6 @@ module.exports = {
     '/archive/',
     '/salvage/',
     '/pull/',
-    '/.cache/',
   ],
   watchPathIgnorePatterns: [
     '/node_modules/',
@@ -88,8 +87,6 @@ module.exports = {
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
   testTimeout: 30000,
-  maxWorkers: '50%',
-  reporters: ['default', ['jest-junit', { outputDirectory: 'reports/junit' }]],
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },

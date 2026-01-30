@@ -1,0 +1,116 @@
+{
+  "runs": {
+    "f358f1ea-c049-49b1-be49-4b36059bfb46": {
+      "id": "f358f1ea-c049-49b1-be49-4b36059bfb46",
+      "type": "plan",
+      "status": "queued",
+      "createdAt": "2025-11-20T07:08:29.042Z",
+      "input": {
+        "kind": "plan",
+        "repo": "test-repo",
+        "issue": "issue-123",
+        "budgetUSD": 10,
+        "context": {},
+        "metadata": {
+          "actor": "test-user",
+          "timestamp": "2025-11-20T07:08:29.037Z",
+          "sprint_version": "v1"
+        }
+      },
+      "metadata": {
+        "actor": "test-user",
+        "timestamp": "2025-11-20T07:08:29.037Z",
+        "sprint_version": "v1"
+      },
+      "artifacts": [],
+      "evidenceIds": [],
+      "childRunIds": []
+    },
+    "f503302e-d6a6-4612-8cf3-fa8218f9eb05": {
+      "id": "f503302e-d6a6-4612-8cf3-fa8218f9eb05",
+      "type": "scaffold",
+      "status": "queued",
+      "idempotencyKey": "cdb2b4df-73b2-4066-a0cb-eff95e26eb62",
+      "createdAt": "2025-11-20T07:08:29.049Z",
+      "input": {
+        "kind": "scaffold",
+        "repo": "test-repo",
+        "issue": "issue-124",
+        "budgetUSD": 10,
+        "context": {},
+        "idempotencyKey": "cdb2b4df-73b2-4066-a0cb-eff95e26eb62",
+        "metadata": {
+          "actor": "test-user",
+          "timestamp": "2025-11-20T07:08:29.049Z",
+          "sprint_version": "v1"
+        }
+      },
+      "metadata": {
+        "actor": "test-user",
+        "timestamp": "2025-11-20T07:08:29.049Z",
+        "sprint_version": "v1"
+      },
+      "artifacts": [],
+      "evidenceIds": [],
+      "childRunIds": []
+    },
+    "f632ef4d-ad71-48d3-9557-17dc82dd549f": {
+      "id": "f632ef4d-ad71-48d3-9557-17dc82dd549f",
+      "type": "scaffold",
+      "status": "queued",
+      "idempotencyKey": "key-1",
+      "createdAt": "2025-11-20T07:08:29.053Z",
+      "input": {},
+      "metadata": {
+        "actor": "test"
+      },
+      "artifacts": [],
+      "evidenceIds": [],
+      "childRunIds": []
+    },
+    "c6cec3b3-bffd-4da8-a0ef-4aa9bfe04a41": {
+      "id": "c6cec3b3-bffd-4da8-a0ef-4aa9bfe04a41",
+      "type": "test",
+      "status": "succeeded",
+      "createdAt": "2025-11-20T07:08:29.056Z",
+      "input": {
+        "foo": "bar"
+      },
+      "metadata": {
+        "actor": "tester"
+      },
+      "artifacts": [],
+      "evidenceIds": [],
+      "childRunIds": [],
+      "startedAt": "2025-11-20T07:08:29.057Z",
+      "completedAt": "2025-11-20T07:08:29.058Z",
+      "output": {
+        "result": "success"
+      }
+    },
+    "0af462e8-3049-43f3-9be3-2e3f2dbc8ce7": {
+      "id": "0af462e8-3049-43f3-9be3-2e3f2dbc8ce7",
+      "type": "docs",
+      "status": "queued",
+      "createdAt": "2025-11-20T07:08:29.061Z",
+      "input": {},
+      "metadata": {
+        "actor": "doc-bot"
+      },
+      "artifacts": [
+        {
+          "id": "art-1",
+          "name": "README.md",
+          "type": "file",
+          "location": "/tmp/README.md"
+        }
+      ],
+      "evidenceIds": [],
+      "childRunIds": []
+    }
+  },
+  "idempotency": {
+    "cdb2b4df-73b2-4066-a0cb-eff95e26eb62": "f503302e-d6a6-4612-8cf3-fa8218f9eb05",
+    "key-1": "f632ef4d-ad71-48d3-9557-17dc82dd549f"
+  }
+}

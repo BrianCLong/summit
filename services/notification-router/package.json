@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/notification-router",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Real-time notification routing and delivery service for audit events",
   "type": "module",
   "main": "dist/index.js",

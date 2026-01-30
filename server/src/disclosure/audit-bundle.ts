@@ -27,7 +27,7 @@ interface BundleResult {
   bundlePath: string;
   sha256: string;
   checksums: Record<string, string>;
-  claimSet: Record<string, unknown>;
+  claimSet: any;
   merkleRoot: string;
   format: BundleFormat;
 }
@@ -39,7 +39,7 @@ async function hashFile(filePath: string): Promise<string> {
   const { createReadStream } = await import('fs');
   return new Promise<string>((resolve, reject) => {
     const stream = createReadStream(filePath);
-    stream.on('data', (chunk: Buffer | string) => hash.update(chunk));
+    stream.on('data', (chunk: any) => hash.update(chunk));
     stream.on('end', () => resolve(hash.digest('hex')));
     stream.on('error', reject);
   });
@@ -127,23 +127,17 @@ export async function buildAuditBundle({
     [tenantId, window.start, window.end, limit],
   );
 
-interface SbomRow {
-  run_id: string;
-  created_at: Date | string;
-  sbom: unknown;
-}
-
   const policy = { rules: ['pii', 'sensitive', 'financial'] as const };
 
   const auditEvents = await Promise.all(
-    auditQuery.rows.map((row: unknown) =>
+    auditQuery.rows.map((row: any) =>
       redaction.redactObject(row, policy as any, tenantId, {
         purpose: 'audit_bundle',
       }),
     ),
   );
   const policyDecisions = await Promise.all(
-    policyQuery.rows.map((row: unknown) =>
+    policyQuery.rows.map((row: any) =>
       redaction.redactObject(row, policy as any, tenantId, {
         purpose: 'audit_bundle',
       }),
@@ -171,7 +165,7 @@ interface SbomRow {
   artifacts.push({ name: 'policy-decisions.json', path: policyPath });
 
   const sbomPath = path.join(workdir, 'sbom-reports.json');
-  const sbomReports = sbomQuery.rows.map((row: SbomRow) => ({
+  const sbomReports = sbomQuery.rows.map((row: any) => ({
     runId: row.run_id,
     createdAt:
       row.created_at instanceof Date

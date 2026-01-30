@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { AnomalyDetector } from './AnomalyDetector.ts';
-import { TimeSeriesPoint } from './types.ts';
+import { AnomalyDetector } from './AnomalyDetector.js';
+import { TimeSeriesPoint } from './types.js';
 
 // In-memory store for demo. In production, read from DB/TimeSeries store.
 const metricHistory: Record<string, TimeSeriesPoint[]> = {};
@@ -9,7 +9,7 @@ export const runAnomalyDetection = (req: Request, res: Response) => {
     const { metric, value, detector = 'zscore' } = req.body;
 
     if (!metric || value === undefined) {
-        return res.status(400).tson({ error: 'metric and value required' });
+        return res.status(400).json({ error: 'metric and value required' });
     }
 
     const history = metricHistory[metric] || [];
@@ -29,7 +29,7 @@ export const runAnomalyDetection = (req: Request, res: Response) => {
     if (history.length > 100) history.shift(); // Keep window small for demo
     metricHistory[metric] = history;
 
-    res.tson({
+    res.json({
         metric,
         value,
         anomaly: anomaly || 'none'
@@ -39,5 +39,5 @@ export const runAnomalyDetection = (req: Request, res: Response) => {
 export const getAnomalies = (req: Request, res: Response) => {
     // Return all detected anomalies?
     // For MVP just return 'ok' as we don't persist anomalies in a list here, just real-time detection
-    res.tson({ status: 'ok', msg: 'Check /run output for specific checks' });
+    res.json({ status: 'ok', msg: 'Check /run output for specific checks' });
 };

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cloud-platform-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Cloud platform service for multi-cloud management",
   "main": "dist/index.js",
   "type": "module",

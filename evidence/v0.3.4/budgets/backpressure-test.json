@@ -1,0 +1,27 @@
+{
+  "config": {
+    "enabled": true,
+    "persisted_only_mode": true,
+    "max_queue_size": 1000,
+    "throttle_factor": 0.5
+  },
+  "queue_status": {
+    "current_depth": 5,
+    "max_depth": 1000,
+    "utilization_percent": 0.5
+  },
+  "throttling_status": {
+    "active_throttles": 0,
+    "total_throttled_tenants": 0
+  },
+  "persisted_queries": {
+    "registered_count": 2,
+    "hit_rate_estimate": 85.0
+  },
+  "performance_metrics": {
+    "total_requests": 5,
+    "throttled_requests": 0,
+    "blocked_requests": 0,
+    "queue_overflows": 0
+  }
+}

@@ -1,4 +1,4 @@
-import { logger as defaultLogger } from '../../config/logger.js';
+import { logger as defaultLogger } from '../../../logger.js';
 
 export type GateStatus = 'pass' | 'fail';
 

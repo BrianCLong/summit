@@ -35,7 +35,6 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import type { ChipProps } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
@@ -62,7 +61,10 @@ export default function RoleList() {
     permissionCategories,
     loading,
     error,
+    selectedRole,
     refreshRoles,
+    loadRole,
+    clearSelection,
     createRole,
     updateRole,
     deleteRole,
@@ -149,7 +151,7 @@ export default function RoleList() {
     });
   };
 
-  const getScopeColor = (scope: Role['scope']): ChipProps['color'] => {
+  const getScopeColor = (scope: string) => {
     switch (scope) {
       case 'full':
         return 'error';
@@ -312,7 +314,7 @@ export default function RoleList() {
                       <Chip
                         label={role.scope}
                         size="small"
-                        color={getScopeColor(role.scope)}
+                        color={getScopeColor(role.scope) as any}
                       />
                     </TableCell>
                     <TableCell>

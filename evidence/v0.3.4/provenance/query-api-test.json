@@ -1,0 +1,35 @@
+{
+  "test_metadata": {
+    "timestamp": "2025-09-26T15:37:41.434644+00:00",
+    "platform_version": "v0.3.4-mc",
+    "test_type": "provenance_query_api"
+  },
+  "performance_results": {
+    "average_query_time_ms": 0.1283884048461914,
+    "maximum_query_time_ms": 0.4420280456542969,
+    "target_success_rate_percent": 100.0,
+    "performance_target_met": true
+  },
+  "api_metrics": {
+    "cache_stats": {
+      "entries": 4,
+      "hit_rate_estimate": 75.0,
+      "ttl_seconds": 300
+    },
+    "database_stats": {
+      "total_traces": 5,
+      "total_events": 35,
+      "avg_query_time_ms": 45.8
+    },
+    "performance_targets": {
+      "query_time_target_ms": 200,
+      "success_rate": 99.2
+    }
+  },
+  "sample_traces": 1,
+  "functionality_tests": {
+    "trace_query": true,
+    "trace_explanation": true,
+    "performance_benchmark": true
+  }
+}

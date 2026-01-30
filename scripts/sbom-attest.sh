@@ -73,11 +73,8 @@ build_and_attest() {
         echo "🔐 Signing container image..."
         cosign sign --yes --key env://COSIGN_PRIVATE_KEY "$IMAGE_REF"
 
-        if [ -f "sbom-$NAME.cdx.json" ]; then
-            echo "📋 Attesting SBOM (CycloneDX)..."
-            cosign attest --yes --key env://COSIGN_PRIVATE_KEY --predicate sbom-$NAME.cdx.json --type cyclonedx "$IMAGE_REF"
-        elif [ -f "sbom-$NAME.spdx.json" ]; then
-            echo "📋 Attesting SBOM (SPDX)..."
+        if [ -f "sbom-$NAME.spdx.json" ]; then
+            echo "📋 Attesting SBOM..."
             cosign attest --yes --key env://COSIGN_PRIVATE_KEY --predicate sbom-$NAME.spdx.json --type spdx "$IMAGE_REF"
         fi
         echo "✅ Signed and Attested $NAME"

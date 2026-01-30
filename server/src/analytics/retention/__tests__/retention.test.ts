@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
-import { RetentionService } from '../RetentionService.ts';
+import { RetentionService } from '../RetentionService.js';
 
 const TEST_LOG_DIR = path.join(__dirname, 'test_logs_retention_' + Date.now());
 
@@ -27,12 +27,12 @@ describe('RetentionService', () => {
         const date = new Date();
         date.setDate(date.getDate() - 10);
         const dateStr = date.toISOString().split('T')[0];
-        const oldFile = `telemetry-${dateStr}.tsonl`;
+        const oldFile = `telemetry-${dateStr}.jsonl`;
         fs.writeFileSync(path.join(TEST_LOG_DIR, oldFile), 'data');
 
         // Create a file from today
         const todayStr = new Date().toISOString().split('T')[0];
-        const newFile = `telemetry-${todayStr}.tsonl`;
+        const newFile = `telemetry-${todayStr}.jsonl`;
         fs.writeFileSync(path.join(TEST_LOG_DIR, newFile), 'data');
 
         // Keep 5 days

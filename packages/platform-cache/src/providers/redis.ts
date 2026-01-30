@@ -1,4 +1,4 @@
-import Redis, { Cluster } from 'ioredis';
+import Redis from 'ioredis';
 import type { CacheProvider } from '../types.js';
 
 /**
@@ -23,10 +23,6 @@ export interface RedisProviderOptions {
   connectTimeout?: number;
   /** Enable offline queue */
   enableOfflineQueue?: boolean;
-  /** Use Redis Cluster */
-  useCluster?: boolean;
-  /** TLS options (pass empty object to enable TLS) */
-  tls?: Record<string, any>;
 }
 
 /**
@@ -34,43 +30,29 @@ export interface RedisProviderOptions {
  */
 export class RedisProvider implements CacheProvider {
   readonly name = 'redis';
-  private client: Redis | Cluster;
+  private client: Redis;
   private keyPrefix: string;
 
   constructor(options: RedisProviderOptions = {}) {
     this.keyPrefix = options.keyPrefix ?? '';
 
-    const commonOptions: any = {
-      maxRetriesPerRequest: options.maxRetriesPerRequest ?? 3,
-      connectTimeout: options.connectTimeout ?? 10000,
-      enableOfflineQueue: options.enableOfflineQueue ?? true,
-      lazyConnect: true,
-      password: options.password,
-    };
-
-    if (options.tls) {
-      commonOptions.tls = options.tls;
-    }
-
-    if (options.useCluster) {
-      // For cluster mode, we can pass the URL or host/port as a startup node
-      const startupNode = options.url || {
-        host: options.host ?? 'localhost',
-        port: options.port ?? 6379,
-      };
-
-      this.client = new Redis.Cluster([startupNode], {
-        redisOptions: commonOptions,
-        dnsLookup: (address, callback) => callback(null, address), // Often needed for AWS ElastiCache
+    if (options.url) {
+      this.client = new Redis(options.url, {
+        maxRetriesPerRequest: options.maxRetriesPerRequest ?? 3,
+        connectTimeout: options.connectTimeout ?? 10000,
+        enableOfflineQueue: options.enableOfflineQueue ?? true,
+        lazyConnect: true,
       });
-    } else if (options.url) {
-      this.client = new Redis(options.url, commonOptions);
     } else {
       this.client = new Redis({
         host: options.host ?? 'localhost',
         port: options.port ?? 6379,
+        password: options.password,
         db: options.db ?? 0,
-        ...commonOptions,
+        maxRetriesPerRequest: options.maxRetriesPerRequest ?? 3,
+        connectTimeout: options.connectTimeout ?? 10000,
+        enableOfflineQueue: options.enableOfflineQueue ?? true,
+        lazyConnect: true,
       });
     }
 
@@ -196,7 +178,7 @@ export class RedisProvider implements CacheProvider {
   /**
    * Get underlying Redis client
    */
-  getClient(): Redis | Cluster {
+  getClient(): Redis {
     return this.client;
   }
 

@@ -5,10 +5,12 @@
     "rootDir": "./src",
     "declaration": true,
     "declarationMap": true,
-    "composite": true,
-    "types": []
+    "composite": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"],
-  "references": [{ "path": "../sandbox-tenant-profile" }, { "path": "../datalab-service" }]
+  "references": [
+    { "path": "../sandbox-tenant-profile" },
+    { "path": "../datalab-service" }
+  ]
 }

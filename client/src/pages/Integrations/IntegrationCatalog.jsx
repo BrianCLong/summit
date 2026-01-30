@@ -30,6 +30,7 @@ import {
   DialogActions,
   Alert,
   LinearProgress,
+  Tooltip,
   Paper,
   Table,
   TableBody,
@@ -37,6 +38,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  IconButton,
   Switch,
   Divider,
   Badge,
@@ -49,10 +51,13 @@ import {
   Add,
   CheckCircle,
   Error,
+  Warning,
   Link,
   LinkOff,
+  Settings,
   PlayArrow,
   Refresh,
+  Security,
   Approval,
   History,
 } from '@mui/icons-material';
@@ -361,8 +366,8 @@ function IntegrationCard({ integration, manifest, onConnect, onDisconnect, onExe
 
 // Approval Queue Component
 function ApprovalQueue() {
-  const { approvals, loading, error, processing, approve, reject } = useIntegrationApprovals();
-  const comment = '';
+  const { approvals, loading, error, processing, approve, reject, refresh } = useIntegrationApprovals();
+  const [comment, setComment] = useState('');
 
   if (loading) return <LinearProgress />;
 
@@ -508,6 +513,7 @@ export default function IntegrationCatalog() {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [setupManifest, setSetupManifest] = useState(null);
+  const [executeIntegration, setExecuteIntegration] = useState(null);
 
   // Create manifest lookup
   const manifestMap = useMemo(() => {

@@ -1,24 +1,6 @@
 ## Summary
 <!-- What does this PR do? Link to Jira ticket or issue. -->
 
-## Assumption Ledger
-<!-- State your assumptions, ambiguities, tradeoffs, and stop conditions. -->
-- **Assumptions**:
-- **Ambiguities**:
-- **Tradeoffs**:
-- **Stop Condition**:
-
-## Diff Budget
-<!-- Declare your expected diff and reconcile actual changes. -->
-- **Expected Files**:
-- **Expected LOC Delta**:
-- **Surgical Rule**: [ ] No unrelated refactors/formatting.
-
-## Success Criteria
-<!-- List verifiable success criteria. -->
-- [ ]
-- [ ]
-
 ## Type of Change
 - [ ] Bug Fix
 - [ ] New Feature
@@ -33,12 +15,6 @@
 - [ ] **Determinism**: No leaked singletons or open handles.
 - [ ] **Evidence**: Added at least one test case or verification step.
 
-## Evidence Summary
-<!-- Generate Summit-style evidence for merge readiness. -->
-- **Tests/Logs**:
-- **Screenshots**:
-- **Policy/Security Notes**:
-
 ## Verification Plan
 <!-- How did you verify this change? -->
 - [ ] Automated Test (Unit/Integration)
@@ -48,11 +24,3 @@
 ```bash
 # Paste verification output here
 ```
-
-<!-- AGENT-METADATA:START -->
-{
-  "promptId": "",
-  "taskId": "",
-  "tags": []
-}
-<!-- AGENT-METADATA:END -->

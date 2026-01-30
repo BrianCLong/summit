@@ -18,11 +18,7 @@
         "contradicts",
         "owns",
         "governedBy",
-        "licensedBy",
-        "targets",
-        "erodes",
-        "reinforces",
-        "supports"
+        "licensedBy"
       ]
     },
     "sourceId": { "$ref": "../base.schema.json#/$defs/Identifier" },

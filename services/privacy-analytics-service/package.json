@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/privacy-analytics-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Privacy-preserving analytics service with differential privacy, k-anonymity, and aggregation controls for IntelGraph",
   "type": "module",
   "main": "dist/server.js",

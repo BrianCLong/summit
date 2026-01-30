@@ -50,11 +50,7 @@ import {
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
-  maestroMttrHours,
-  // Standard metrics
-  httpRequestsTotal as stdHttpRequestsTotal,
-  httpRequestDuration as stdHttpRequestDuration,
-  websocketConnections
+  maestroMttrHours
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -101,10 +97,7 @@ export {
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
-  maestroMttrHours,
-  stdHttpRequestsTotal,
-  stdHttpRequestDuration,
-  websocketConnections
+  maestroMttrHours
 };
 
 export const metrics = {
@@ -149,8 +142,5 @@ export const metrics = {
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
-  maestroMttrHours,
-  stdHttpRequestsTotal,
-  stdHttpRequestDuration,
-  websocketConnections
+  maestroMttrHours
 };

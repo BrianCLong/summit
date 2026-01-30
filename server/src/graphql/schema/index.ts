@@ -13,7 +13,6 @@ import provenanceTypeDefs from '../schema.provenance.js';
 import { sprint28TypeDefs } from './sprint28.js';
 import { ingestionTypeDefs } from './ingestion.js';
 import { erTypeDefs } from '../schema.er.js';
-import { foundryTypeDefs } from '../schema.foundry.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -36,10 +35,6 @@ const cogSecTypeDefs = fs.readFileSync(cogSecSchemaPath, 'utf8');
 // Load Deduplication schema
 const dedupSchemaPath = path.join(__dirname, '../schemas/deduplication.graphql');
 const dedupTypeDefs = fs.readFileSync(dedupSchemaPath, 'utf8');
-
-// Load Voice schema
-const voiceSchemaPath = path.join(__dirname, '../schemas/voice.graphql');
-const voiceTypeDefs = fs.readFileSync(voiceSchemaPath, 'utf8');
 
 const base = gql`
   scalar JSON
@@ -74,12 +69,10 @@ export const typeDefs = [
   sprint28TypeDefs,
   ingestionTypeDefs,
   erTypeDefs,
-  foundryTypeDefs,
   ewTypeDefs,
   collabTypeDefs,
   cogSecTypeDefs,
   dedupTypeDefs,
-  voiceTypeDefs,
 ];
 
 export default typeDefs;

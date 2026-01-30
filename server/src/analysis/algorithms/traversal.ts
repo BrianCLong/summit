@@ -1,4 +1,4 @@
-import { Graph, GraphNode, NodeId, GraphEdge } from '../graphTypes.ts';
+import { Graph, GraphNode, NodeId, GraphEdge } from '../graphTypes.js';
 
 type AdjacencyList = Map<NodeId, NodeId[]>;
 

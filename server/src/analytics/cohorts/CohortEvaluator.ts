@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Cohort, CohortEvaluationResult, CohortMember } from './types.ts';
-import { TelemetryEvent } from '../telemetry/types.ts';
+import { Cohort, CohortEvaluationResult, CohortMember } from './types.js';
+import { TelemetryEvent } from '../telemetry/types.js';
 
 // Helper to read logs - reusing the structure from TelemetryService
 // In production, this would query a DB or OLAP store (ClickHouse, Snowflake, etc.)
@@ -40,7 +40,7 @@ export class CohortEvaluator {
             return [];
         }
 
-        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.tsonl'));
+        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.jsonl'));
         // In real impl, filter files by date window (cohort.windowDays)
 
         const aggregates = new Map<string, number>(); // key: tenantHash:userHash, val: metric

@@ -46,8 +46,6 @@ export function executeQuery() {
     headers: {
       'Content-Type': 'application/json',
       'X-Test-Scenario': 'query-slo',
-      'x-authority-id': 'k6-test-authority',
-      'x-reason-for-access': 'slo-validation',
     },
   });
   check(response, {
@@ -62,8 +60,6 @@ export function executeMutation() {
     headers: {
       'Content-Type': 'application/json',
       'X-Test-Scenario': 'mutation-slo',
-      'x-authority-id': 'k6-test-authority',
-      'x-reason-for-access': 'slo-validation',
     },
   });
   check(response, {

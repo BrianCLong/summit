@@ -9,8 +9,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "types": []
+    "declaration": true
   },
   "include": ["index.ts"],
   "exclude": ["node_modules", "dist"]

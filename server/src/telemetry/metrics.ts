@@ -1,47 +1,60 @@
 /**
- * Metrics Collection for IntelGraph Maestro
- * Wraps monitoring/metrics.js to provide backward compatibility and a clean interface.
+ * No-op Metrics Collection for IntelGraph Maestro (OTel disabled)
+ * Preserves API compatibility without external dependencies.
  */
 import logger from '../utils/logger.js';
-import {
-  maestroOrchestrationRequests,
-  maestroOrchestrationDuration,
-  maestroOrchestrationErrors,
-  maestroActiveConnections,
-  maestroActiveSessions,
-  maestroAiModelRequests,
-  maestroAiModelDuration,
-  maestroAiModelErrors,
-  maestroAiModelCosts,
-  maestroThompsonSamplingRewards,
-  maestroGraphOperations,
-  maestroGraphQueryDuration,
-  maestroGraphConnections,
-  maestroGraphEntities,
-  maestroGraphRelations,
-  maestroPremiumRoutingDecisions,
-  maestroPremiumBudgetUtilization,
-  maestroPremiumCostSavings,
-  maestroSecurityEvents,
-  maestroComplianceGateDecisions,
-  maestroAuthenticationAttempts,
-  maestroAuthorizationDecisions,
-  maestroInvestigationsCreated,
-  maestroDataSourcesActive,
-  maestroWebScrapingRequests,
-  maestroSynthesisOperations,
-  memoryUsage
-} from '../monitoring/metrics.js';
 
 /**
  * IntelGraph Metrics Manager
  */
 export class IntelGraphMetrics {
   private static instance: IntelGraphMetrics;
+  private meter: any;
+
+  // Core Application Metrics
+  private orchestrationRequests: any;
+  private orchestrationDuration: any;
+  private orchestrationErrors: any;
+  private activeConnections: any;
+  private activeSessions: any;
+
+  // AI Model Metrics
+  private aiModelRequests: any;
+  private aiModelDuration: any;
+  private aiModelErrors: any;
+  private aiModelCosts: any;
+  private thompsonSamplingRewards: any;
+
+  // Graph Database Metrics
+  private graphOperations: any;
+  private graphQueryDuration: any;
+  private graphConnections: any;
+  private graphEntities: any;
+  private graphRelations: any;
+
+  // Premium Routing Metrics
+  private premiumRoutingDecisions: any;
+  private premiumBudgetUtilization: any;
+  private premiumCostSavings: any;
+
+  // Security Metrics
+  private securityEvents: any;
+  private complianceGateDecisions: any;
+  private authenticationAttempts: any;
+  private authorizationDecisions: any;
+
+  // Business Metrics
+  private investigationsCreated: any;
+  private dataSourcesActive: any;
+  private webScrapingRequests: any;
+  private synthesisOperations: any;
+
+  // System Metrics
+  private memoryUsage: any;
+  private cpuUsage: any;
 
   private constructor() {
-    // Metrics initialization handled in monitoring/metrics.ts
-    logger.info('IntelGraphMetrics initialized (backed by prom-client).');
+    this.setupMetrics();
   }
 
   public static getInstance(): IntelGraphMetrics {
@@ -51,21 +64,268 @@ export class IntelGraphMetrics {
     return IntelGraphMetrics.instance;
   }
 
+  private setupMetrics(): void {
+    // No-op meter factory
+    const noopInstrument = {
+      add: (_v: number, _attrs?: any) => {},
+      record: (_v: number, _attrs?: any) => {},
+      set: (_v: number, _attrs?: any) => {},
+    };
+    const noopObservable = { addCallback: (_cb: any) => {} };
+    this.meter = {
+      createCounter: (_: string, __?: any) => ({ ...noopInstrument }),
+      createHistogram: (_: string, __?: any) => ({ ...noopInstrument }),
+      createGauge: (_: string, __?: any) => ({ ...noopInstrument }),
+      createUpDownCounter: (_: string, __?: any) => ({ ...noopInstrument }),
+      createObservableGauge: (_: string, __?: any) => ({ ...noopObservable }),
+    };
+
+    this.initializeMetrics();
+    this.setupSystemMetrics();
+    logger.info('Metrics disabled (no-op).');
+  }
+
+  private initializeMetrics(): void {
+    // Orchestration Metrics
+    this.orchestrationRequests = this.meter.createCounter(
+      'maestro_orchestration_requests_total',
+      {
+        description: 'Total number of orchestration requests',
+      },
+    );
+
+    this.orchestrationDuration = this.meter.createHistogram(
+      'maestro_orchestration_duration_seconds',
+      {
+        description: 'Duration of orchestration requests',
+        boundaries: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120],
+      },
+    );
+
+    this.orchestrationErrors = this.meter.createCounter(
+      'maestro_orchestration_errors_total',
+      {
+        description: 'Total number of orchestration errors',
+      },
+    );
+
+    this.activeConnections = this.meter.createUpDownCounter(
+      'maestro_active_connections',
+      {
+        description: 'Number of active connections',
+      },
+    );
+
+    this.activeSessions = this.meter.createUpDownCounter(
+      'maestro_active_sessions_total',
+      {
+        description: 'Number of active user sessions',
+      },
+    );
+
+    // AI Model Metrics
+    this.aiModelRequests = this.meter.createCounter(
+      'maestro_ai_model_requests_total',
+      {
+        description: 'Total AI model requests by model type',
+      },
+    );
+
+    this.aiModelDuration = this.meter.createHistogram(
+      'maestro_ai_model_response_time_seconds',
+      {
+        description: 'AI model response time',
+        boundaries: [0.1, 0.5, 1, 2, 5, 10, 20, 30],
+      },
+    );
+
+    this.aiModelErrors = this.meter.createCounter(
+      'maestro_ai_model_errors_total',
+      {
+        description: 'Total AI model errors',
+      },
+    );
+
+    this.aiModelCosts = this.meter.createHistogram(
+      'maestro_ai_model_cost_usd',
+      {
+        description: 'Cost per AI model request in USD',
+        boundaries: [0.001, 0.01, 0.1, 1, 5, 10, 50],
+      },
+    );
+
+    this.thompsonSamplingRewards = this.meter.createGauge(
+      'maestro_thompson_sampling_reward_rate',
+      {
+        description: 'Thompson sampling reward rate by model',
+      },
+    );
+
+    // Graph Database Metrics
+    this.graphOperations = this.meter.createCounter(
+      'maestro_graph_operations_total',
+      {
+        description: 'Total graph database operations',
+      },
+    );
+
+    this.graphQueryDuration = this.meter.createHistogram(
+      'maestro_graph_query_duration_seconds',
+      {
+        description: 'Graph query execution time',
+        boundaries: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],
+      },
+    );
+
+    this.graphConnections = this.meter.createUpDownCounter(
+      'maestro_graph_connections_active',
+      {
+        description: 'Active Neo4j connections',
+      },
+    );
+
+    this.graphEntities = this.meter.createUpDownCounter(
+      'maestro_graph_entities_total',
+      {
+        description: 'Total entities in graph database',
+      },
+    );
+
+    this.graphRelations = this.meter.createUpDownCounter(
+      'maestro_graph_relations_total',
+      {
+        description: 'Total relations in graph database',
+      },
+    );
+
+    // Premium Routing Metrics
+    this.premiumRoutingDecisions = this.meter.createCounter(
+      'maestro_premium_routing_decisions_total',
+      {
+        description: 'Premium routing decisions',
+      },
+    );
+
+    this.premiumBudgetUtilization = this.meter.createGauge(
+      'maestro_premium_budget_utilization_percent',
+      {
+        description: 'Premium model budget utilization percentage',
+      },
+    );
+
+    this.premiumCostSavings = this.meter.createCounter(
+      'maestro_premium_cost_savings_usd',
+      {
+        description: 'Cost savings from premium routing',
+      },
+    );
+
+    // Security Metrics
+    this.securityEvents = this.meter.createCounter(
+      'maestro_security_events_total',
+      {
+        description: 'Security events by type',
+      },
+    );
+
+    this.complianceGateDecisions = this.meter.createCounter(
+      'maestro_compliance_gate_decisions_total',
+      {
+        description: 'Compliance gate decisions',
+      },
+    );
+
+    this.authenticationAttempts = this.meter.createCounter(
+      'maestro_authentication_attempts_total',
+      {
+        description: 'Authentication attempts',
+      },
+    );
+
+    this.authorizationDecisions = this.meter.createCounter(
+      'maestro_authorization_decisions_total',
+      {
+        description: 'Authorization decisions',
+      },
+    );
+
+    // Business Metrics
+    this.investigationsCreated = this.meter.createCounter(
+      'maestro_investigations_created_total',
+      {
+        description: 'Total investigations created',
+      },
+    );
+
+    this.dataSourcesActive = this.meter.createUpDownCounter(
+      'maestro_data_sources_active_total',
+      {
+        description: 'Number of active data sources',
+      },
+    );
+
+    this.webScrapingRequests = this.meter.createCounter(
+      'maestro_web_scraping_requests_total',
+      {
+        description: 'Web scraping requests',
+      },
+    );
+
+    this.synthesisOperations = this.meter.createCounter(
+      'maestro_synthesis_operations_total',
+      {
+        description: 'Data synthesis operations',
+      },
+    );
+  }
+
+  private setupSystemMetrics(): void {
+    // Memory usage
+    this.memoryUsage = this.meter.createObservableGauge(
+      'maestro_memory_usage_bytes',
+      {
+        description: 'Memory usage in bytes',
+      },
+    );
+
+    // no-op
+
+    // CPU usage
+    this.cpuUsage = this.meter.createObservableGauge(
+      'maestro_cpu_usage_percent',
+      {
+        description: 'CPU usage percentage',
+      },
+    );
+
+    // no-op
+
+    // Event loop lag
+    const eventLoopLag = this.meter.createObservableGauge(
+      'maestro_event_loop_lag_seconds',
+      {
+        description: 'Event loop lag in seconds',
+      },
+    );
+
+    // no-op
+  }
+
   // Public API Methods
   public recordOrchestrationRequest(
     method: string,
     endpoint: string,
     status: string,
   ): void {
-    maestroOrchestrationRequests.inc({ method, endpoint, status });
+    this.orchestrationRequests.add(1, { method, endpoint, status });
   }
 
   public recordOrchestrationDuration(duration: number, endpoint: string): void {
-    maestroOrchestrationDuration.observe({ endpoint }, duration);
+    this.orchestrationDuration.record(duration, { endpoint });
   }
 
   public recordOrchestrationError(error: string, endpoint: string): void {
-    maestroOrchestrationErrors.inc({ error_type: error, endpoint });
+    this.orchestrationErrors.add(1, { error_type: error, endpoint });
   }
 
   public recordAIModelRequest(
@@ -74,9 +334,9 @@ export class IntelGraphMetrics {
     status: string,
     cost: number = 0,
   ): void {
-    maestroAiModelRequests.inc({ model, operation, status });
+    this.aiModelRequests.add(1, { model, operation, status });
     if (cost > 0) {
-      maestroAiModelCosts.observe({ model, operation }, cost);
+      this.aiModelCosts.record(cost, { model, operation });
     }
   }
 
@@ -85,11 +345,11 @@ export class IntelGraphMetrics {
     model: string,
     operation: string,
   ): void {
-    maestroAiModelDuration.observe({ model, operation }, duration);
+    this.aiModelDuration.record(duration, { model, operation });
   }
 
   public updateThompsonSamplingReward(model: string, rewardRate: number): void {
-    maestroThompsonSamplingRewards.set({ model }, rewardRate);
+    this.thompsonSamplingRewards.set(rewardRate, { model });
   }
 
   public recordGraphOperation(
@@ -97,12 +357,12 @@ export class IntelGraphMetrics {
     status: string,
     duration: number,
   ): void {
-    maestroGraphOperations.inc({ operation, status });
-    maestroGraphQueryDuration.observe({ operation }, duration);
+    this.graphOperations.add(1, { operation, status });
+    this.graphQueryDuration.record(duration, { operation });
   }
 
   public updateGraphEntityCount(count: number, entityType?: string): void {
-    maestroGraphEntities.set({ entity_type: entityType || 'all' }, count);
+    this.graphEntities.add(count, { entity_type: entityType || 'all' });
   }
 
   public recordPremiumRoutingDecision(
@@ -110,14 +370,14 @@ export class IntelGraphMetrics {
     modelTier: string,
     cost: number,
   ): void {
-    maestroPremiumRoutingDecisions.inc({ decision, model_tier: modelTier });
+    this.premiumRoutingDecisions.add(1, { decision, model_tier: modelTier });
     if (decision === 'downgrade') {
-      maestroPremiumCostSavings.inc({ model_tier: modelTier }, cost);
+      this.premiumCostSavings.add(cost, { model_tier: modelTier });
     }
   }
 
   public updatePremiumBudgetUtilization(percentage: number): void {
-    maestroPremiumBudgetUtilization.set(percentage);
+    this.premiumBudgetUtilization.set(percentage);
   }
 
   public recordSecurityEvent(
@@ -125,7 +385,7 @@ export class IntelGraphMetrics {
     severity: string,
     userId?: string,
   ): void {
-    maestroSecurityEvents.inc({
+    this.securityEvents.add(1, {
       event_type: eventType,
       severity,
       user_id: userId || 'anonymous',
@@ -137,7 +397,7 @@ export class IntelGraphMetrics {
     policy: string,
     reason?: string,
   ): void {
-    maestroComplianceGateDecisions.inc({
+    this.complianceGateDecisions.add(1, {
       decision,
       policy,
       reason: reason || 'none',
@@ -149,7 +409,7 @@ export class IntelGraphMetrics {
     status: string,
     userId?: string,
   ): void {
-    maestroAuthenticationAttempts.inc({
+    this.authenticationAttempts.add(1, {
       auth_method: method,
       status,
       user_id: userId || 'anonymous',
@@ -157,18 +417,18 @@ export class IntelGraphMetrics {
   }
 
   public recordInvestigationCreated(type: string, userId: string): void {
-    maestroInvestigationsCreated.inc({
+    this.investigationsCreated.add(1, {
       investigation_type: type,
       user_id: userId,
     });
   }
 
   public updateActiveDataSources(count: number, sourceType?: string): void {
-    maestroDataSourcesActive.set({ source_type: sourceType || 'all' }, count);
+    this.dataSourcesActive.add(count, { source_type: sourceType || 'all' });
   }
 
   public recordWebScrapingRequest(status: string, domain?: string): void {
-    maestroWebScrapingRequests.inc({
+    this.webScrapingRequests.add(1, {
       status,
       domain: domain || 'unknown',
     });
@@ -178,22 +438,14 @@ export class IntelGraphMetrics {
     delta: number,
     connectionType: string = 'http',
   ): void {
-    if (delta > 0) {
-        maestroActiveConnections.inc({ type: connectionType }, delta);
-    } else {
-        maestroActiveConnections.dec({ type: connectionType }, Math.abs(delta));
-    }
+    this.activeConnections.add(delta, { type: connectionType });
   }
 
   public updateActiveSessions(
     delta: number,
     sessionType: string = 'user',
   ): void {
-    if (delta > 0) {
-        maestroActiveSessions.inc({ type: sessionType }, delta);
-    } else {
-        maestroActiveSessions.dec({ type: sessionType }, Math.abs(delta));
-    }
+    this.activeSessions.add(delta, { type: sessionType });
   }
 
   public async shutdown(): Promise<void> {

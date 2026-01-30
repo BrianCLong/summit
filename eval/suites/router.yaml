@@ -1,4 +1,3 @@
-id: router
 tasks:
   - id: qa_short
     dataset: s3://maestro-eval/qa_short.jsonl

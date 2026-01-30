@@ -1,5 +1,5 @@
 
-import type { ProvenanceEntry } from '../provenance/ledger.ts';
+import type { ProvenanceEntry } from '../provenance/ledger.js';
 
 export interface UnifiedAuditEvent {
   actor: {

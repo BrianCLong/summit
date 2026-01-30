@@ -252,7 +252,6 @@ export function EntityDrawer({
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Edit entity"
                     onClick={() => onAction?.('edit', selectedEntity)}
                   >
                     <Edit3 className="h-4 w-4" />
@@ -266,7 +265,6 @@ export function EntityDrawer({
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Delete entity"
                     onClick={() => onAction?.('delete', selectedEntity)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -280,7 +278,6 @@ export function EntityDrawer({
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Export entity"
                     onClick={() => onAction?.('export', selectedEntity)}
                   >
                     <ExternalLink className="h-4 w-4" />
@@ -492,10 +489,9 @@ export function EntityDrawer({
                     <Button
                       size="sm"
                       onClick={handleAddComment}
-                      loading={commentSubmitting}
-                      disabled={!commentDraft.trim()}
+                      disabled={commentSubmitting || !commentDraft.trim()}
                     >
-                      Post comment
+                      {commentSubmitting ? 'Posting…' : 'Post comment'}
                     </Button>
                   </div>
                   {commentError && (

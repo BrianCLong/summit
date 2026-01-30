@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/incident-api",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

@@ -1,13 +1,22 @@
 import { Box, Dialog } from '@mui/material';
+import { useEffect, useState } from 'react';
 
-interface CommandPaletteProps {
-  open: boolean;
-  onClose: () => void;
-}
+export function CommandPalette() {
+  const [open, setOpen] = useState(false);
 
-export function CommandPalette({ open, onClose }: CommandPaletteProps) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setOpen((o) => !o);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={() => setOpen(false)}>
       <Box sx={{ p: 3 }}>Command palette</Box>
     </Dialog>
   );

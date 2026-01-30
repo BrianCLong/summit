@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ExportService } from './ExportService.ts';
+import { ExportService } from './ExportService.js';
 
 const service = new ExportService({ kAnonymityThreshold: 5 });
 
@@ -13,7 +13,7 @@ export const exportData = (req: Request, res: Response) => {
     const { data, format = 'csv' } = req.body;
 
     if (!Array.isArray(data)) {
-        return res.status(400).tson({ error: 'Data must be an array of objects' });
+        return res.status(400).json({ error: 'Data must be an array of objects' });
     }
 
     if (format === 'csv') {
@@ -37,8 +37,8 @@ export const exportData = (req: Request, res: Response) => {
              return true;
         });
 
-        return res.tson(safeData);
+        return res.json(safeData);
     }
 
-    res.status(400).tson({ error: 'Unsupported format' });
+    res.status(400).json({ error: 'Unsupported format' });
 };

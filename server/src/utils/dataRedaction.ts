@@ -1,7 +1,6 @@
 import { User } from '../types/context'; // Assuming User type is defined here
 // @ts-ignore
 import { default as pino } from 'pino';
-import { createHash } from 'crypto';
 
 // @ts-ignore
 const logger = (pino as any)();
@@ -19,14 +18,6 @@ const PII_DEFINITIONS = {
   DATE_OF_BIRTH: ['dob', 'properties.dob'],
   // Add more as needed
 };
-
-// Pre-compute path to PII type mapping for O(1) lookup
-const PATH_TO_PII_TYPE: Record<string, keyof typeof PII_DEFINITIONS> = {};
-(Object.keys(PII_DEFINITIONS) as Array<keyof typeof PII_DEFINITIONS>).forEach((type) => {
-  PII_DEFINITIONS[type].forEach((path) => {
-    PATH_TO_PII_TYPE[path] = type;
-  });
-});
 
 // Define redaction strategies
 enum RedactionStrategy {
@@ -75,53 +66,48 @@ export function redactData(data: any, user: User, sensitivity?: string): any {
   const policy = REDACTION_POLICIES_BY_ROLE[userRole.toUpperCase()] || {};
 
   // Deep clone data to avoid modifying original object
-  // Using structuredClone is faster than JSON.parse(JSON.stringify) and supports more types
-  let redactedData: any;
-  try {
-    redactedData = structuredClone(data);
-  } catch (e) {
-    // Fallback if data is not clonable (e.g. contains functions), though unusual for data objects
-    redactedData = JSON.parse(JSON.stringify(data));
-  }
+  const redactedData = JSON.parse(JSON.stringify(data));
 
   let piiRedactedCount = 0;
-  // const piiFieldsRedacted: string[] = []; // optimize: commented out unused array
+  const piiFieldsRedacted: string[] = [];
 
-  const applyRedaction = (obj: any, prefix: string) => {
+  const applyRedaction = (obj: any, path: string[]) => {
     if (typeof obj !== 'object' || obj === null) return;
 
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        // Optimize path construction: use string concatenation instead of array spread
-        const fullPath = prefix ? `${prefix}.${key}` : key;
+      if (obj.hasOwnProperty(key)) {
+        const currentPath = [...path, key];
+        const fullPath = currentPath.join('.');
 
-        // O(1) lookup instead of nested loops
-        const piiType = PATH_TO_PII_TYPE[fullPath];
-        if (piiType) {
-            const strategy = policy[piiType];
+        for (const piiType in PII_DEFINITIONS) {
+          const piiPaths =
+            PII_DEFINITIONS[piiType as keyof typeof PII_DEFINITIONS];
+          if (piiPaths.includes(fullPath)) {
+            const strategy = policy[piiType as keyof typeof policy];
             if (strategy) {
-                obj[key] = applyStrategy(
-                  obj[key],
-                  piiType,
-                  strategy,
-                );
-                piiRedactedCount++;
-                // piiFieldsRedacted.push(fullPath);
-                logger.debug(
-                  `Redacted PII field: ${fullPath} with strategy: ${strategy}`,
-                );
+              obj[key] = applyStrategy(
+                obj[key],
+                piiType as keyof typeof PII_DEFINITIONS,
+                strategy,
+              );
+              piiRedactedCount++;
+              piiFieldsRedacted.push(fullPath);
+              logger.debug(
+                `Redacted PII field: ${fullPath} with strategy: ${strategy}`,
+              );
             }
+          }
         }
 
         // Recursively apply redaction to nested objects/arrays
         if (typeof obj[key] === 'object') {
-          applyRedaction(obj[key], fullPath);
+          applyRedaction(obj[key], currentPath);
         }
       }
     }
   };
 
-  applyRedaction(redactedData, '');
+  applyRedaction(redactedData, []);
 
   logger.info(
     `Data redaction complete for user ${user.id} (role: ${userRole}). Redacted ${piiRedactedCount} PII fields.`,
@@ -182,5 +168,6 @@ function maskPartial(
 function hashValue(value: string): string {
   // In a real application, use a strong, secure hashing algorithm
   // For demonstration, a simple SHA-256 like hash
-  return createHash('sha256').update(value).digest('hex');
+  const crypto = require('crypto');
+  return crypto.createHash('sha256').update(value).digest('hex');
 }

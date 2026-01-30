@@ -103,7 +103,7 @@ function CytoscapeGraph() {
   }, [lodMode]);
 
   // WebSocket connection for real-time updates
-  const socket = useSocket('/');
+  const socket = useSocket('ws://localhost:4000');
 
   // AI operations hook
   const aiOps = useAIOperations();

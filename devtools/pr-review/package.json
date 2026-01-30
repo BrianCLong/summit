@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/pr-review",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "PR Review Assistant with zero-secret guarantee",
   "main": "dist/main.js",
   "scripts": {

@@ -13,11 +13,10 @@ import {
   ApolloProvider,
   HttpLink,
 } from '@apollo/client';
-import { getGraphqlHttpUrl } from './config/urls';
 
 // Initialize Apollo Client
 const httpLink = new HttpLink({
-  uri: getGraphqlHttpUrl(),
+  uri: 'http://localhost:4000/graphql', // Assuming your GraphQL server runs on port 4000
 });
 
 const client = new ApolloClient({

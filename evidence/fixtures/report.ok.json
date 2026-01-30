@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-TEST-OK-001",
-  "item_slug": "test-item",
-  "claims": ["Claim 1", "Claim 2"],
-  "decisions": [{"decision": "allow"}],
-  "findings": [{"risk": 0}]
-}

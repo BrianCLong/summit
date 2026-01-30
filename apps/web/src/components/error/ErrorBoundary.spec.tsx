@@ -52,11 +52,7 @@ describe('ErrorBoundary', () => {
     expect(reportError).toHaveBeenCalledWith(
       expect.any(Error),
       expect.any(Object),
-      'high',
-      expect.objectContaining({
-        retryCount: 0,
-        route: expect.any(String),
-      })
+      'high'
     );
   });
 

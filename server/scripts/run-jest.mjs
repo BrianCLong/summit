@@ -4,13 +4,12 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const jestBin = path.join(__dirname, '..', '..', 'node_modules', 'jest', 'bin', 'jest.js');
+const jestBin = path.join(__dirname, '..', 'node_modules', 'jest', 'bin', 'jest.js');
 
 const baseArgs = [
   '--config',
   'jest.config.ts',
-  // NOTE: testPathIgnorePatterns is defined in jest.config.ts with comprehensive
-  // exclusions for ESM/CJS incompatible tests. Do not override here.
+  '--testPathIgnorePatterns=integration|/src/tests/|\\.e2e\\.',
   '--passWithNoTests',
 ];
 

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
-import { getSocketBaseUrl } from '../config/urls';
 
 export const useSocket = (namespace = '/', options = {}) => {
   const [socket, setSocket] = useState(null);
@@ -16,12 +15,7 @@ export const useSocket = (namespace = '/', options = {}) => {
     }
 
     // Create new socket connection
-    const baseUrl = getSocketBaseUrl();
-    if (!baseUrl) {
-      setError('Socket base URL not configured');
-      return undefined;
-    }
-    const newSocket = io(`${baseUrl}${namespace}`, {
+    const newSocket = io(`http://localhost:4000${namespace}`, {
       autoConnect: true,
       reconnection: true,
       reconnectionDelay: 1000,

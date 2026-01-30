@@ -70,7 +70,7 @@ afterEach(() => {
 })
 
 describe('CommandCenterDashboard', () => {
-  it.skip('renders ER ops panel with charts', async () => {
+  it('renders ER ops panel with charts', async () => {
     render(<CommandCenterDashboard />)
 
     await waitFor(() => {

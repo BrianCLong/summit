@@ -1,5 +1,5 @@
 
-import { Employee, EmployeeRole, EmployeeScope, AgentStatus, AgentTask, AgentCapability } from './types.ts';
+import { Employee, EmployeeRole, EmployeeScope, AgentStatus, AgentTask, AgentCapability } from './types.js';
 
 export abstract class AgentEmployee implements Employee {
   id: string;

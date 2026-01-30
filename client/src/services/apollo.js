@@ -8,10 +8,9 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { setContext } from '@apollo/client/link/context';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
-import { getGraphqlHttpUrl, getGraphqlWsUrl } from '../config/urls';
 
 const httpLink = createHttpLink({
-  uri: getGraphqlHttpUrl(),
+  uri: import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -39,12 +38,14 @@ const authLink = setContext((_, { headers }) => {
 let link = authLink.concat(httpLink);
 
 try {
+  const wsUrl = (
+    import.meta.env.VITE_API_URL || 'http://localhost:4000/graphql'
+  )
+    .replace('http://', 'ws://')
+    .replace('https://', 'wss://');
+
   const token =
     typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '';
-  const wsUrl = getGraphqlWsUrl();
-  if (!wsUrl.startsWith('ws')) {
-    throw new Error('WebSocket URL not configured');
-  }
   const wsLink = new GraphQLWsLink(
     createClient({
       url: wsUrl,

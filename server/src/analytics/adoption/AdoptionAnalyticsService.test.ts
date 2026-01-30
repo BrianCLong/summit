@@ -5,11 +5,11 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { AdoptionAnalyticsService } from './AdoptionAnalyticsService.ts';
-import type { AdoptionEventRaw, ConsentRecord } from './types.ts';
+import { AdoptionAnalyticsService } from './AdoptionAnalyticsService.js';
+import type { AdoptionEventRaw, ConsentRecord } from './types.js';
 
 // Mock the database pool
-jest.mock('../../config/database.ts', () => ({
+jest.mock('../../config/database.js', () => ({
   getPostgresPool: jest.fn(() => null),
 }));
 

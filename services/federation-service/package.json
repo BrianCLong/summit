@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/federation-service",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Cross-organization intelligence exchange and federation service with policy-bound sharing",
   "type": "module",
   "main": "dist/index.js",

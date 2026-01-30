@@ -8,22 +8,11 @@
  * Enables GDPR/CCPA compliance (deletion queries), explainability,
  * and hallucination detection.
  *
- * ⚠️ IMPLEMENTATION STATUS: BASIC VERSION (P1-1 from audit report)
- * - ✅ In-memory attribution storage
- * - ✅ Simple token-level tracking (word-based approximation)
- * - ✅ Deletion query support (GDPR/CCPA)
- * - ⚠️ MISSING: Real-time streaming attribution marker detection
- * - ⚠️ MISSING: LLM attention weight integration
- * - ⚠️ MISSING: PostgreSQL persistence
- * - ⚠️ MISSING: Tokenizer integration (using naive word splitting)
- *
  * Patent Defensive Publication: 2026-01-01
  * Related: ADR-0025
  *
  * @module conductor/attribution/tag-builder
  */
-
-import crypto from 'crypto';
 
 /**
  * Source context with sensitivity labels
@@ -119,17 +108,11 @@ export interface DeletionQueryResult {
  * Token Attribution Graph Builder
  */
 export class TokenAttributionGraphBuilder {
-  // In-memory store for attribution graphs (TODO: replace with PostgreSQL)
-  private attributionGraphs: Map<string, AttributionGraph> = new Map();
-
   constructor(
-    // NOTE: Using simplified implementation without external dependencies
     // TODO: Inject LLM client with streaming API access
     // TODO: Inject PostgreSQL client for attribution_graphs table
     // TODO: Inject tokenizer (e.g., tiktoken for GPT models)
-  ) {
-    console.warn('[AI Attribution] Using simplified in-memory implementation. For production, integrate PostgreSQL persistence.');
-  }
+  ) {}
 
   /**
    * Build attribution graph during LLM generation.
@@ -163,31 +146,31 @@ export class TokenAttributionGraphBuilder {
     for await (const chunk of generationStream) {
       outputText += chunk;
 
-      // Simplified: Detect attribution markers in stream
-      const markerRegex = /<\|attr:([^|]+)\|>/g;
-      let match;
+      // TODO: Detect attribution markers in stream
+      // const markerRegex = /<\|attr:([^|]+)\|>/g;
+      // let match;
+      //
+      // while ((match = markerRegex.exec(chunk)) !== null) {
+      //   const newSourceId = match[1];
+      //
+      //   // Close previous attribution range
+      //   if (currentSourceId) {
+      //     nodes.push({
+      //       sourceId: currentSourceId,
+      //       tokenSpan: [rangeStart, currentTokenIndex],
+      //       confidence: 0.85, // TODO: Compute from attention weights
+      //       transformation: 'paraphrase' // TODO: Infer from similarity
+      //     });
+      //   }
+      //
+      //   // Start new attribution range
+      //   currentSourceId = newSourceId;
+      //   rangeStart = currentTokenIndex;
+      // }
 
-      while ((match = markerRegex.exec(chunk)) !== null) {
-        const newSourceId = match[1];
-
-        // Close previous attribution range
-        if (currentSourceId) {
-          nodes.push({
-            sourceId: currentSourceId,
-            tokenSpan: [rangeStart, currentTokenIndex],
-            confidence: 0.75, // Simplified: fixed confidence (no attention weights)
-            transformation: 'paraphrase', // Simplified: assume paraphrase
-          });
-        }
-
-        // Start new attribution range
-        currentSourceId = newSourceId;
-        rangeStart = currentTokenIndex;
-      }
-
-      // Simplified token counting: approximate by words (TODO: use tiktoken)
-      const wordCount = chunk.split(/\s+/).filter(w => w.length > 0).length;
-      currentTokenIndex += wordCount;
+      // TODO: Count tokens in chunk
+      // const tokens = this.tokenizer.encode(chunk);
+      // currentTokenIndex += tokens.length;
     }
 
     // Close final attribution range
@@ -195,21 +178,8 @@ export class TokenAttributionGraphBuilder {
       nodes.push({
         sourceId: currentSourceId,
         tokenSpan: [rangeStart, currentTokenIndex],
-        confidence: 0.75,
+        confidence: 0.85,
         transformation: 'paraphrase',
-      });
-    }
-
-    // If no explicit attributions found, attribute entire output to all sources with low confidence
-    if (nodes.length === 0 && contextSources.length > 0) {
-      console.warn(`[AI Attribution] No attribution markers found for output ${outputId}. Attributing to all sources with low confidence.`);
-      contextSources.forEach((source) => {
-        nodes.push({
-          sourceId: source.sourceId,
-          tokenSpan: [0, currentTokenIndex],
-          confidence: 0.3, // Low confidence for implicit attribution
-          transformation: 'synthesize',
-        });
       });
     }
 
@@ -222,9 +192,8 @@ export class TokenAttributionGraphBuilder {
       createdAt: new Date(),
     };
 
-    // Store in memory (TODO: persist to PostgreSQL)
-    this.attributionGraphs.set(outputId, graph);
-    console.info(`[AI Attribution] Stored attribution graph for output ${outputId} with ${nodes.length} attribution nodes.`);
+    // TODO: Store in database
+    // await this.storeGraph(graph);
 
     return graph;
   }
@@ -244,26 +213,26 @@ export class TokenAttributionGraphBuilder {
    * @returns Deletion query result with affected outputs
    */
   async queryBySource(sourceId: string): Promise<DeletionQueryResult> {
-    // Query in-memory store (TODO: replace with PostgreSQL query)
+    // TODO: Query database
+    // const results = await this.db.query(`
+    //   SELECT output_id, token_start, token_end, output_text
+    //   FROM attribution_graphs
+    //   WHERE source_id = $1
+    // `, [sourceId]);
+
     const affectedOutputs: DeletionQueryResult['affectedOutputs'] = [];
 
-    for (const [outputId, graph] of this.attributionGraphs.entries()) {
-      // Find all nodes that reference this source
-      const relevantNodes = graph.nodes.filter(node => node.sourceId === sourceId);
-
-      if (relevantNodes.length > 0) {
-        const tokenRanges = relevantNodes.map(node => node.tokenSpan);
-        const redactedText = this.redactTokenRanges(graph.outputText, tokenRanges);
-
-        affectedOutputs.push({
-          outputId,
-          tokenRanges,
-          redactedText,
-        });
-      }
-    }
-
-    console.info(`[AI Attribution] Found ${affectedOutputs.length} outputs containing data from source ${sourceId}`);
+    // TODO: For each output, generate redacted version
+    // for (const row of results.rows) {
+    //   const tokenRanges: Array<[number, number]> = [[row.token_start, row.token_end]];
+    //   const redactedText = this.redactTokenRanges(row.output_text, tokenRanges);
+    //
+    //   affectedOutputs.push({
+    //     outputId: row.output_id,
+    //     tokenRanges,
+    //     redactedText
+    //   });
+    // }
 
     return {
       affectedOutputs,
@@ -282,15 +251,15 @@ export class TokenAttributionGraphBuilder {
    * @returns Attribution graph showing source breakdown
    */
   async queryByOutput(outputId: string): Promise<AttributionGraph | null> {
-    // Query in-memory store (TODO: replace with PostgreSQL query)
-    const graph = this.attributionGraphs.get(outputId);
+    // TODO: Query database
+    // const graph = await this.db.query(`
+    //   SELECT * FROM attribution_graphs WHERE output_id = $1
+    // `, [outputId]);
 
-    if (!graph) {
-      console.warn(`[AI Attribution] No attribution graph found for output ${outputId}`);
-      return null;
-    }
+    // if (!graph.rows.length) return null;
 
-    return graph;
+    // TODO: Reconstruct graph from database rows
+    return null; // TODO: Implement
   }
 
   /**
@@ -309,52 +278,11 @@ export class TokenAttributionGraphBuilder {
     const graph = await this.queryByOutput(outputId);
     if (!graph) return [];
 
-    // Find gaps in attribution coverage (potential hallucinations)
-    const coveredRanges = graph.nodes.map(n => n.tokenSpan);
-    const gaps = this.findGapsInRanges(coveredRanges, graph.tokenCount);
+    // TODO: Find gaps in attribution coverage
+    // const coveredRanges = graph.nodes.map(n => n.tokenSpan);
+    // const gaps = this.findGapsInRanges(coveredRanges, graph.tokenCount);
 
-    if (gaps.length > 0) {
-      console.warn(`[AI Attribution] Found ${gaps.length} ungrounded token ranges in output ${outputId} (potential hallucinations)`);
-    }
-
-    return gaps;
-  }
-
-  /**
-   * Helper: Find gaps in coverage ranges
-   */
-  private findGapsInRanges(ranges: Array<[number, number]>, totalLength: number): Array<[number, number]> {
-    if (ranges.length === 0) {
-      return totalLength > 0 ? [[0, totalLength]] : [];
-    }
-
-    // Sort ranges by start position
-    const sorted = [...ranges].sort((a, b) => a[0] - b[0]);
-
-    const gaps: Array<[number, number]> = [];
-
-    // Check gap before first range
-    if (sorted[0][0] > 0) {
-      gaps.push([0, sorted[0][0]]);
-    }
-
-    // Check gaps between ranges
-    for (let i = 0; i < sorted.length - 1; i++) {
-      const currentEnd = sorted[i][1];
-      const nextStart = sorted[i + 1][0];
-
-      if (nextStart > currentEnd) {
-        gaps.push([currentEnd, nextStart]);
-      }
-    }
-
-    // Check gap after last range
-    const lastEnd = sorted[sorted.length - 1][1];
-    if (lastEnd < totalLength) {
-      gaps.push([lastEnd, totalLength]);
-    }
-
-    return gaps;
+    return []; // TODO: Implement
   }
 
   /**
@@ -406,23 +334,18 @@ export class TokenAttributionGraphBuilder {
    * @returns Text with redacted ranges replaced with "[REDACTED]"
    */
   private redactTokenRanges(text: string, tokenRanges: Array<[number, number]>): string {
-    // Simplified: Use word-level redaction (TODO: replace with proper tokenizer)
-    const words = text.split(/\s+/);
+    // TODO: Tokenize, replace ranges, detokenize
+    // const tokens = this.tokenizer.encode(text);
+    //
+    // for (const [start, end] of tokenRanges) {
+    //   for (let i = start; i < end; i++) {
+    //     tokens[i] = this.tokenizer.encode('[REDACTED]')[0];
+    //   }
+    // }
+    //
+    // return this.tokenizer.decode(tokens);
 
-    // Create a set of word indices to redact
-    const redactIndices = new Set<number>();
-    for (const [start, end] of tokenRanges) {
-      for (let i = start; i < Math.min(end, words.length); i++) {
-        redactIndices.add(i);
-      }
-    }
-
-    // Redact marked words
-    const redactedWords = words.map((word, idx) =>
-      redactIndices.has(idx) ? '[REDACTED]' : word
-    );
-
-    return redactedWords.join(' ');
+    return text; // TODO: Implement
   }
 }
 

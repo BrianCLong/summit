@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/collective-intelligence-weaving",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Collective Intelligence Future Weaving - merges distributed intelligence signals into unified predictive futures",
   "type": "module",
   "main": "dist/index.js",

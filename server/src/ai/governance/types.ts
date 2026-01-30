@@ -8,7 +8,7 @@
  * @version 4.0.0-alpha
  */
 
-import { GovernanceVerdict, PolicyAction } from '../../governance/types.ts';
+import { GovernanceVerdict, PolicyAction } from '../../governance/types.js';
 
 // Local ProvenanceMetadata definition (aligned with provenance-beta types)
 export interface ProvenanceMetadata {

@@ -1,9 +1,11 @@
 {
   "files": [],
   "references": [
+    // Core applications
     { "path": "./client" },
     { "path": "./server" },
 
+    // Apps workspace
     { "path": "./apps/analytics-engine" },
     { "path": "./apps/graph-analytics" },
     { "path": "./apps/intelgraph-api" },
@@ -15,6 +17,7 @@
     { "path": "./apps/web" },
     { "path": "./apps/webapp" },
 
+    // Packages workspace
     { "path": "./packages/common-types" },
     { "path": "./packages/competitive-execution" },
     { "path": "./packages/govbrief" },
@@ -28,12 +31,14 @@
     { "path": "./packages/sdk-ts" },
     { "path": "./packages/types" },
 
+    // MLOps packages
     { "path": "./packages/mlops-platform" },
     { "path": "./packages/model-serving" },
     { "path": "./packages/model-monitoring" },
     { "path": "./packages/model-explainability" },
     { "path": "./packages/training-orchestration" },
 
+    // Services workspace
     { "path": "./services/agent-runtime" },
     { "path": "./services/api-gateway" },
     { "path": "./services/authz-gateway" },
@@ -48,6 +53,7 @@
     { "path": "./services/spar" },
     { "path": "./services/trr" },
 
+    // MLOps services
     { "path": "./services/mlops-service" },
     { "path": "./services/model-registry-service" }
   ]

@@ -5,7 +5,7 @@
  * Represents a device or hardware with bitemporal tracking
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface DeviceIdentifiers {
   /** Serial number */

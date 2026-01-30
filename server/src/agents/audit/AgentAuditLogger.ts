@@ -13,7 +13,7 @@
 import { randomUUID } from 'crypto';
 import { createHash, createHmac } from 'crypto';
 import { Pool } from 'pg';
-import { getPostgresPool } from '../../config/database.ts';
+import { getPostgresPool } from '../../config/database.js';
 
 // ============================================================================
 // Types

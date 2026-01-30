@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mobile-interface",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Mobile-responsive Investigation Interface for IntelGraph",
   "private": true,
   "scripts": {
@@ -9,13 +9,13 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "test:watch": "jest --watch",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "next": "^16.1.5",
+    "next": "^16.0.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.0",
     "react-query": "^3.39.3",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sandbox-gateway",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "GraphQL gateway for sandbox tenant and data lab services",
   "type": "module",
   "main": "dist/index.js",
@@ -51,10 +51,7 @@
     "tsx": "^4.7.0",
     "vitest": "^1.0.0"
   },
-  "files": [
-    "dist",
-    "src"
-  ],
+  "files": ["dist", "src"],
   "author": "IntelGraph Team",
   "license": "MIT"
 }

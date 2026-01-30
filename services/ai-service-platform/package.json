@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ai-service-platform",
-  "version": "4.2.3",
+  "version": "2.0.0",
   "description": "Instant AI-Powered Service Launch Platform - Deploy AI services in hours, not months",
   "type": "module",
   "main": "dist/index.js",

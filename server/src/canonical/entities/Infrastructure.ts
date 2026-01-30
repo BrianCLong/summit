@@ -3,7 +3,7 @@
  * Canonical Entities: Infrastructure & Devices
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface Device extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Device';

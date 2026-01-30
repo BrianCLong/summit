@@ -1,14 +1,14 @@
 
-import { RedisService } from '../cache/redis.ts';
-import logger from '../config/logger.ts';
-import { getNeo4jDriver } from '../db/neo4j.ts';
+import { RedisService } from '../cache/redis.js';
+import logger from '../config/logger.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import { createWriteStream } from 'fs';
 import zlib from 'zlib';
-import { PrometheusMetrics } from '../utils/metrics.ts';
+import { PrometheusMetrics } from '../utils/metrics.js';
 
 const execAsync = promisify(exec);
 
@@ -114,22 +114,10 @@ export class BackupService {
 
       const cmd = `PGPASSWORD='${pgPassword}' pg_dump -h ${pgHost} -U ${pgUser} ${pgDb}`;
 
-      let attempt = 0;
-      const maxRetries = 3;
-      while (attempt < maxRetries) {
-          try {
-              if (options.compress) {
-                await execAsync(`${cmd} | gzip > "${finalPath}"`);
-              } else {
-                await execAsync(`${cmd} > "${finalPath}"`);
-              }
-              break;
-          } catch (e) {
-              attempt++;
-              if (attempt >= maxRetries) throw e;
-              logger.warn({ error: e }, `Postgres backup attempt ${attempt} failed, retrying in 2s...`);
-              await new Promise(r => setTimeout(r, 2000));
-          }
+      if (options.compress) {
+        await execAsync(`${cmd} | gzip > "${finalPath}"`);
+      } else {
+        await execAsync(`${cmd} > "${finalPath}"`);
       }
 
       const stats = await fs.stat(finalPath);
@@ -161,7 +149,7 @@ export class BackupService {
     try {
       const dir = await this.ensureBackupDir('neo4j');
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `neo4j-export-${timestamp}.tsonl`;
+      const filename = `neo4j-export-${timestamp}.jsonl`;
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
@@ -188,18 +176,10 @@ export class BackupService {
               writeTarget.write(line);
           }
 
-          const relResult = await session.run('MATCH (a)-[r]->(b) RETURN r, a.id as startId, b.id as endId');
+          const relResult = await session.run('MATCH ()-[r]->() RETURN r');
           for (const record of relResult.records) {
               const rel = record.get('r');
-              const startId = record.get('startId');
-              const endId = record.get('endId');
-              const line = JSON.stringify({
-                  type: 'rel',
-                  typeName: rel.type,
-                  props: rel.properties,
-                  startId,
-                  endId
-              }) + '\n';
+              const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
               writeTarget.write(line);
           }
 
@@ -246,16 +226,7 @@ export class BackupService {
        const isCluster = (client as any).constructor.name === 'Cluster';
 
        if (isCluster) {
-          // @ts-ignore
-          const nodes = client.nodes ? client.nodes('master') : [];
-          if (nodes.length > 0) {
-              logger.info(`Triggering BGSAVE on ${nodes.length} master nodes...`);
-              await Promise.all(nodes.map((node: any) => node.bgsave().catch((e: any) =>
-                  logger.warn(`Failed to trigger BGSAVE on node ${node.options.host}: ${e.message}`)
-              )));
-          } else {
-              logger.warn('No master nodes found in cluster for backup.');
-          }
+          throw new Error('Redis Cluster backup not supported in this version. Use manual persistence management or snapshots.');
        } else {
            // @ts-ignore
            await client.bgsave();

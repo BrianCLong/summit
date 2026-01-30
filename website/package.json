@@ -1,7 +1,7 @@
 {
   "name": "@topicality/website",
   "private": true,
-  "version": "4.2.3",
+  "version": "0.1.0",
   "packageManager": "pnpm@9.12.3",
   "scripts": {
     "dev": "next dev",

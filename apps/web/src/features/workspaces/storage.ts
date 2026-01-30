@@ -32,15 +32,13 @@ const getDefaultWorkspaceState = (
 }
 
 const ensurePanelCoverage = (
-  panels: WorkspacePreset['panels'],
-  presetId: WorkspacePresetId = 'investigate'
+  panels: WorkspacePreset['panels']
 ): WorkspacePreset['panels'] => {
-  const defaultPanels = defaultWorkspacePresets[presetId].panels;
-  const merged = { ...panels };
-  (Object.keys(defaultPanels) as WorkspacePanelKey[]).forEach(
+  const merged = { ...panels }
+  (Object.keys(defaultWorkspacePresets.investigate.panels) as WorkspacePanelKey[]).forEach(
     panelKey => {
       merged[panelKey] = {
-        ...defaultPanels[panelKey],
+        ...defaultWorkspacePresets.investigate.panels[panelKey],
         ...(panels[panelKey] || {}),
       }
     }
@@ -67,7 +65,7 @@ const migrateFromV1 = (
     workspaces[id as WorkspacePresetId] = {
       ...workspaces[id as WorkspacePresetId],
       panels: layout?.panels
-        ? ensurePanelCoverage(layout.panels as WorkspacePreset['panels'], id as WorkspacePresetId)
+        ? ensurePanelCoverage(layout.panels as WorkspacePreset['panels'])
         : workspaces[id as WorkspacePresetId].panels,
       defaultRoute:
         layout?.defaultRoute ||
@@ -104,7 +102,7 @@ export const migrateWorkspaceState = (
       acc[presetId] = {
         ...defaultWorkspacePresets[presetId],
         ...preset,
-        panels: ensurePanelCoverage(preset.panels, presetId),
+        panels: ensurePanelCoverage(preset.panels),
         lastUpdated: preset.lastUpdated || Date.now(),
         lastRoute:
           preset.lastRoute ||

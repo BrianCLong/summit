@@ -1,0 +1,18 @@
+{
+  "sample_id": "sample_1_mc-v035-demo-202509",
+  "kid": "mc-v035-demo-202509",
+  "mock_token": "eyJ0eXAiOiAiSldUIiwgImFsZyI6ICJIUzI1NiIsICJraWQiOiAibWMtdjAzNS1kZW1vLTIwMjUwOSJ9.eyJyZXF1ZXN0SWQiOiAicmVxXzE3NTg5NTA5NTIyNTJfMCIsICJ0ZW5hbnRJZCI6ICJURU5BTlRfMDAxIiwgInRpbWVzdGFtcCI6ICIyMDI1LTA5LTI2VDIzOjI5OjEyLjI1MjA2MloiLCAiaW5wdXRIYXNoIjogIjA3ZWQzOTNhMTdmM2ViMzQiLCAib3V0cHV0SGFzaCI6ICJmODBkMzA3YThmZmY5YzJkIiwgIm1vZGVsIjogImNsYXVkZS0zLjUtc29ubmV0IiwgImNvc3QiOiAwLjAyMzQsICJwcm92RGFnSWQiOiAiZGFnX3NhbXBsZV8wX21jLXYwMzUtZGVtby0yMDI1MDkifQ.56fcc16b63c24007aa3e198687ac9f7e",
+  "payload_claims": {
+    "requestId": "req_1758950952252_0",
+    "tenantId": "TENANT_001",
+    "timestamp": "2025-09-26T23:29:12.252062Z",
+    "inputHash": "07ed393a17f3eb34",
+    "outputHash": "f80d307a8fff9c2d",
+    "model": "claude-3.5-sonnet",
+    "cost": 0.0234,
+    "provDagId": "dag_sample_0_mc-v035-demo-202509"
+  },
+  "verification_endpoint": "/api/v2/attest/verify/mc-v035-demo-202509",
+  "created": "2025-09-26T23:29:12.252092Z",
+  "note": "Demo token - implement proper JWS signing in production"
+}

@@ -31,15 +31,12 @@ import Assessment from '@mui/icons-material/Assessment';
 import OpenInNew from '@mui/icons-material/OpenInNew';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setTenant, setStatus } from '../store/slices/ui';
-import { getGrafanaUrl, getJaegerUrl } from '../config/urls';
 
 export default function AppHeader() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { tenant, status } = useAppSelector((s: any) => s.ui);
-  const grafanaUrl = getGrafanaUrl();
-  const jaegerUrl = getJaegerUrl();
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
     null,
   );
@@ -172,12 +169,13 @@ export default function AppHeader() {
           {/* External Tools */}
           <Tooltip title="Grafana Dashboard">
             <IconButton
-              component="a"
-              href={grafanaUrl || '#'}
+              href={
+                import.meta.env.VITE_GRAFANA_URL ||
+                'http://localhost:3000/grafana'
+              }
               target="_blank"
               rel="noreferrer"
               sx={{ color: 'text.primary' }}
-              disabled={!grafanaUrl}
             >
               <Assessment />
             </IconButton>
@@ -185,12 +183,10 @@ export default function AppHeader() {
 
           <Tooltip title="Jaeger Tracing">
             <IconButton
-              component="a"
-              href={jaegerUrl || '#'}
+              href={import.meta.env.VITE_JAEGER_URL || 'http://localhost:16686'}
               target="_blank"
               rel="noreferrer"
               sx={{ color: 'text.primary' }}
-              disabled={!jaegerUrl}
             >
               <OpenInNew />
             </IconButton>

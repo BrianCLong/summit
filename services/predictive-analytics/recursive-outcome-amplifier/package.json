@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/recursive-outcome-amplifier",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Recursive Outcome Amplifier™ - Predicts cascading consequences through multi-order propagation",
   "type": "module",
   "main": "./dist/index.js",

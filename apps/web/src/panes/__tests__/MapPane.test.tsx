@@ -95,9 +95,7 @@ const renderPane = async () => {
   return render(<MapPane />);
 };
 
-// TODO: Tests have expectation mismatches with current component behavior
-// Need to investigate if clustering algorithm changed or test expectations need updating
-describe.skip('MapPane clustering controls', () => {
+describe('MapPane clustering controls', () => {
   beforeEach(() => {
     vi.resetModules();
     zoomHandlers.length = 0;

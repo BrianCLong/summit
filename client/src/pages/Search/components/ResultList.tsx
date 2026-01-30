@@ -61,9 +61,6 @@ interface SearchResult {
 interface ResultListProps {
   results: SearchResult[];
   loading?: boolean;
-  onResultSelect?: (result: SearchResult) => void;
-  onTagSelect?: (tag: string) => void;
-  getResultHref?: (result: SearchResult) => string | null;
 }
 
 const getEntityIcon = (type: SearchResult['type']) => {
@@ -113,9 +110,6 @@ const getScoreColor = (score: number): ChipProps['color'] => {
 export default function ResultList({
   results,
   loading = false,
-  onResultSelect,
-  onTagSelect,
-  getResultHref,
 }: ResultListProps) {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState('relevance');
@@ -168,19 +162,6 @@ export default function ResultList({
       newBookmarked.add(resultId);
     }
     setBookmarked(newBookmarked);
-  };
-
-  const handleSelectResult = (result: SearchResult) => {
-    if (onResultSelect) onResultSelect(result);
-  };
-
-  const openInNewTab = (result: SearchResult) => {
-    const href = getResultHref ? getResultHref(result) : null;
-    if (href) {
-      window.open(href, '_blank', 'noopener,noreferrer');
-      return;
-    }
-    handleSelectResult(result);
   };
 
   if (loading) {
@@ -278,7 +259,9 @@ export default function ResultList({
                             cursor: 'pointer',
                             '&:hover': { color: 'primary.main' },
                           }}
-                          onClick={() => handleSelectResult(result)}
+                          onClick={() => {
+                            /* TODO: Navigate to detail page */
+                          }}
                         >
                           {result.title}
                         </Typography>
@@ -335,7 +318,9 @@ export default function ResultList({
                             size="small"
                             variant="outlined"
                             sx={{ fontSize: '0.7rem', height: 24 }}
-                            onClick={() => onTagSelect?.(tag)}
+                            onClick={() => {
+                              /* TODO: Filter by tag */
+                            }}
                           />
                         ))}
                         {result.tags.length > 4 && (
@@ -371,10 +356,7 @@ export default function ResultList({
                       </Tooltip>
 
                       <Tooltip title="View details">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleSelectResult(result)}
-                        >
+                        <IconButton size="small">
                           <Visibility />
                         </IconButton>
                       </Tooltip>
@@ -486,12 +468,7 @@ export default function ResultList({
                   sx: { width: 200 },
                 }}
               >
-                <MenuItem
-                  onClick={() => {
-                    openInNewTab(result);
-                    handleMenuClose(result.id);
-                  }}
-                >
+                <MenuItem onClick={() => handleMenuClose(result.id)}>
                   <ListItemIcon>
                     <OpenInNew />
                   </ListItemIcon>

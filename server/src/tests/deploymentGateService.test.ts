@@ -13,7 +13,7 @@ let DeploymentGateService: typeof DeploymentGateServiceType;
 
 describe('DeploymentGateService', () => {
   beforeAll(async () => {
-    jest.unstable_mockModule('../../config/logger', () => ({
+    jest.unstable_mockModule('../../../logger', () => ({
       logger: {
         info: jest.fn(),
         warn: jest.fn(),

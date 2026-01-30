@@ -1,1 +1,1 @@
-export { NlqModal } from './NlqModal.tsx';
+export { NlqModal } from './NlqModal.js';

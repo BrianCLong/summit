@@ -139,8 +139,9 @@ ci_pipeline() {
 
 artifacts_bundle() {
   echo "==> Generating SBOM + provenance"
-  npm run generate:sbom
-  npm run generate:provenance
+  pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+  node .ci/gen-provenance.js > provenance.json
+  node .ci/verify-provenance.js provenance.json
 }
 
 open_release_pr() {
