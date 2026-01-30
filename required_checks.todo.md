@@ -9,4 +9,4 @@
 - ci/unit
 - ci/policy-gates
 - ci/evals
-- subsumption-bundle-verify
+- telemetry_privacy_gate
