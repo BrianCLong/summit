@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T01:06:40Z",
-  "revision_note": "Cross-platform graph model + co-share builder scaffolding added for Summit graph substrate; unit tests added for similarity builder.",
+  "last_updated": "2026-01-30T00:00:00Z",
+  "revision_note": "TELETOK-2025 evidence index alignment + CI gate scaffolding recorded; branch protection audit tokens remain required.",
   "initiatives": [
     {
       "id": "A",

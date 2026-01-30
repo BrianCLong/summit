@@ -1,79 +1,17 @@
 {
-  "evidence_version": "1.0",
+  "version": 1,
   "items": [
     {
-      "evidence_id": "EVD-vfgnn-SPEC-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "evidence_id": "EVD-260118692-EVID-001",
+      "report": "evidence/subsumption/lingbot-vla/report.json",
+      "metrics": "evidence/subsumption/lingbot-vla/metrics.json",
+      "stamp": "evidence/subsumption/lingbot-vla/stamp.json"
     },
     {
-      "evidence_id": "EVD-vfgnn-GOV-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-vfgnn-ROB-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-vfgnn-ATT-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-vfgnn-NEG-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-ATLAS-SCHEMA-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-ATLAS-PLNR-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-ATLAS-XFER-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-ATLAS-ATLS-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-ATLAS-ATLS-002",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-ATLAS-GOV-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
-    },
-    {
-      "evidence_id": "EVD-SSDF12-BNDL-001",
-      "files": [
-        "evidence/ssdf-v1-2/pr-01/report.json",
-        "evidence/ssdf-v1-2/pr-01/metrics.json",
-        "evidence/ssdf-v1-2/pr-01/stamp.json"
-      ]
-    },
-    "EVD-EXPB-CORE-001": {
-      "area": "subsumption",
-      "item_slug": "expectation-baselines",
-      "files": [
-        "evidence/runs/expectation-baselines/report.json",
-        "evidence/runs/expectation-baselines/metrics.json",
-        "evidence/runs/expectation-baselines/stamp.json"
-      ]
-    },
-    "EVD-PRIVTEL-SCHEMA-001": {
-      "area": "telemetry-privacy",
-      "item_slug": "privtel",
-      "files": [
-        "evidence/privtel/report.json",
-        "evidence/privtel/metrics.json",
-        "evidence/privtel/stamp.json"
-      ]
+      "evidence_id": "EVD-TELETOK-2025-EVIDENCE-001",
+      "report": "evidence/TELETOK-2025/report.json",
+      "metrics": "evidence/TELETOK-2025/metrics.json",
+      "stamp": "evidence/TELETOK-2025/stamp.json"
     }
   ]
 }
