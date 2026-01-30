@@ -19,6 +19,7 @@ npm run summitctl -- <command> [args]
 ```
 
 Or make it globally available (optional):
+
 ```bash
 cd tools/summitctl
 npm link
@@ -29,6 +30,7 @@ npm link
 These commands enforce standard workflows across the repository.
 
 ### `summitctl init`
+
 **Scaffold Development Environment**
 
 Runs the standard bootstrapping process (`make bootstrap`), installs dependencies, and optionally starts services.
@@ -42,6 +44,7 @@ summitctl init --full
 ```
 
 ### `summitctl check`
+
 **Validate Code Quality**
 
 Runs linting, type checking, and security scans without executing the full test suite. Useful for pre-commit checks.
@@ -55,18 +58,31 @@ summitctl check --no-security
 ```
 
 ### `summitctl test`
+
 **Run Tests**
 
 Executes various tiers of tests.
 
-```bash
+````bash
 # Run all tests (unit, integration, smoke)
 summitctl test
 
 # Run specific tier
 summitctl test --unit
 summitctl test --smoke
-```
+
+### `summitctl cap`
+
+Capability Fabric commands for discovery and governance.
+
+```bash
+summitctl cap scan
+summitctl cap validate
+summitctl cap report --strict
+summitctl cap register --openapi api/openapi.yaml --capability-id inventory.manage
+````
+
+````
 
 ### `summitctl release-dry-run`
 **Simulate Release**
@@ -75,7 +91,7 @@ Simulates the release process locally to catch issues before CI.
 
 ```bash
 summitctl release-dry-run
-```
+````
 
 ## Task Management
 
