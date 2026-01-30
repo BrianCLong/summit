@@ -192,46 +192,25 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: competitive-osint-platform-developments-turn-3
+  - id: agent-registry-v0
     version: v1
-    path: prompts/competitive/osint-platform-developments-turn-3.md
-    sha256: 0c35018c60506de46d105a5a21896c259766956c4ccf5887f57d7ee5092bbb48
-    description: Capture automation turn 3 OSINT platform developments and update roadmap status.
+    path: prompts/agents/agent-registry-v0.md
+    sha256: 87bba436d33f7b69ea50e655f0b2f4c008a8edb9d6f213d1e7853cceaf4a8ff7
+    description: Implement the Agent Registry v0 scaffolding with schema, loader, CLI, tests, and documentation.
     scope:
       paths:
-        - competitive/
+        - packages/agent-registry/
+        - packages/cli/
+        - docs/agents/
         - docs/roadmap/STATUS.json
         - agents/examples/
-        - prompts/competitive/
+        - prompts/agents/agent-registry-v0.md
         - prompts/registry.yaml
       domains:
+        - governance
+        - tooling
+        - agents
         - documentation
-        - competitive-intel
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: universal-supremacy-prompt
-    version: v1
-    path: prompts/competitive/universal-supremacy-prompt@v1.md
-    sha256: eb9a6f548bef01188302983aff947c6701f6c72538b400ca0dd5b8d6dfb77603
-    description: Drop-in prompt to structure competitive subsumption, moat, gating, and irreversibility analysis.
-    scope:
-      paths:
-        - prompts/competitive/
-        - docs/roadmap/STATUS.json
-        - prompts/registry.yaml
-        - agents/examples/
-      domains:
-        - competitive-intel
-        - governance
-        - product-strategy
     verification:
       tiers_required:
         - C

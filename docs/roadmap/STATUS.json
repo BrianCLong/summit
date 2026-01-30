@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T12:00:00Z",
-  "revision_note": "Add shai-hulud supply-chain subsumption bundle scaffold and evidence registration",
+  "last_updated": "2026-01-30T00:00:00Z",
+  "revision_note": "Added Copilot metrics evidence gates, connector skeleton, and attribution docs.",
   "initiatives": [
     {
       "id": "A",
