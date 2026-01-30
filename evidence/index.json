@@ -26,65 +26,47 @@
       "metrics": "evidence/legacy/EVD-VFGNN-NEG-001/metrics.json",
       "stamp": "evidence/legacy/EVD-VFGNN-NEG-001/stamp.json"
     },
-    "EVD-PROJECTGENIE-WORLDSIM-001": {
-      "report": "evidence/legacy/EVD-PROJECTGENIE-WORLDSIM-001/report.json",
-      "metrics": "evidence/legacy/EVD-PROJECTGENIE-WORLDSIM-001/metrics.json",
-      "stamp": "evidence/legacy/EVD-PROJECTGENIE-WORLDSIM-001/stamp.json"
+    {
+      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-PROJECTGENIE-EVALS-002": {
-      "report": "evidence/legacy/EVD-PROJECTGENIE-EVALS-002/report.json",
-      "metrics": "evidence/legacy/EVD-PROJECTGENIE-EVALS-002/metrics.json",
-      "stamp": "evidence/legacy/EVD-PROJECTGENIE-EVALS-002/stamp.json"
+    {
+      "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-PROJECTGENIE-GOV-003": {
-      "report": "evidence/legacy/EVD-PROJECTGENIE-GOV-003/report.json",
-      "metrics": "evidence/legacy/EVD-PROJECTGENIE-GOV-003/metrics.json",
-      "stamp": "evidence/legacy/EVD-PROJECTGENIE-GOV-003/stamp.json"
+    {
+      "evidence_id": "EVD-PSYCH_ABM_LLM-RAG-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-PROJECTGENIE-PROV-004": {
-      "report": "evidence/legacy/EVD-PROJECTGENIE-PROV-004/report.json",
-      "metrics": "evidence/legacy/EVD-PROJECTGENIE-PROV-004/metrics.json",
-      "stamp": "evidence/legacy/EVD-PROJECTGENIE-PROV-004/stamp.json"
+    {
+      "evidence_id": "EVD-PSYCH_ABM_LLM-MFT-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-PROJECTGENIE-SEC-005": {
-      "report": "evidence/legacy/EVD-PROJECTGENIE-SEC-005/report.json",
-      "metrics": "evidence/legacy/EVD-PROJECTGENIE-SEC-005/metrics.json",
-      "stamp": "evidence/legacy/EVD-PROJECTGENIE-SEC-005/stamp.json"
+    {
+      "evidence_id": "EVD-PSYCH_ABM_LLM-ABM-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-ITEMUNKNOWN-FND-001": {
-      "report": "evidence/legacy/EVD-ITEMUNKNOWN-FND-001/report.json",
-      "metrics": "evidence/legacy/EVD-ITEMUNKNOWN-FND-001/metrics.json",
-      "stamp": "evidence/legacy/EVD-ITEMUNKNOWN-FND-001/stamp.json"
+    {
+      "evidence_id": "EVD-PSYCH_ABM_LLM-SEC-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     },
-    "EVD-AISWARMS_SOCIAL-SCHEMA-001": {
-      "report": "evidence/AISWARMS_SOCIAL/SCHEMA-001/report.json",
-      "metrics": "evidence/AISWARMS_SOCIAL/SCHEMA-001/metrics.json",
-      "stamp": "evidence/AISWARMS_SOCIAL/SCHEMA-001/stamp.json"
-    },
-    "EVD-AISWARMS_SOCIAL-SIGNALS-001": {
-      "report": "evidence/AISWARMS_SOCIAL/SIGNALS-001/report.json",
-      "metrics": "evidence/AISWARMS_SOCIAL/SIGNALS-001/metrics.json",
-      "stamp": "evidence/AISWARMS_SOCIAL/SIGNALS-001/stamp.json"
-    },
-    "EVD-AISWARMS_SOCIAL-DETECT-001": {
-      "report": "evidence/AISWARMS_SOCIAL/DETECT-001/report.json",
-      "metrics": "evidence/AISWARMS_SOCIAL/DETECT-001/metrics.json",
-      "stamp": "evidence/AISWARMS_SOCIAL/DETECT-001/stamp.json"
-    },
-    "EVD-AISWARMS_SOCIAL-HARASS-001": {
-      "report": "evidence/AISWARMS_SOCIAL/HARASS-001/report.json",
-      "metrics": "evidence/AISWARMS_SOCIAL/HARASS-001/metrics.json",
-      "stamp": "evidence/AISWARMS_SOCIAL/HARASS-001/stamp.json"
-    },
-    "EVD-AISWARMS_SOCIAL-OBS-001": {
-      "report": "evidence/AISWARMS_SOCIAL/OBS-001/report.json",
-      "metrics": "evidence/AISWARMS_SOCIAL/OBS-001/metrics.json",
-      "stamp": "evidence/AISWARMS_SOCIAL/OBS-001/stamp.json"
-    },
-    "EVD-AISWARMS_SOCIAL-SIM-001": {
-      "report": "evidence/AISWARMS_SOCIAL/SIM-001/report.json",
-      "metrics": "evidence/AISWARMS_SOCIAL/SIM-001/metrics.json",
-      "stamp": "evidence/AISWARMS_SOCIAL/SIM-001/stamp.json"
+    {
+      "evidence_id": "EVD-PSYCH_ABM_LLM-CI-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     }
   }
 }

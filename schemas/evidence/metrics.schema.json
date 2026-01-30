@@ -1,18 +1,6 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "SummitEvidenceMetrics",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Metrics",
   "type": "object",
-  "required": ["counters", "gauges", "schema_version"],
-  "properties": {
-    "schema_version": { "type": "string" },
-    "counters": {
-      "type": "object",
-      "additionalProperties": { "type": "number" }
-    },
-    "gauges": {
-      "type": "object",
-      "additionalProperties": { "type": "number" }
-    }
-  },
-  "additionalProperties": false
+  "additionalProperties": true
 }

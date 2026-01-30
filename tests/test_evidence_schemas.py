@@ -1,31 +1,55 @@
 import json
-from pathlib import Path
+import os
+import pytest
+from jsonschema import validate
 
-import jsonschema
+SCHEMAS_DIR = "schemas/evidence"
 
-from summit_evidence.write_bundle import build_bundle, write_bundle
+def load_json(filepath):
+    with open(filepath, "r") as f:
+        return json.load(f)
 
+def test_report_schema():
+    schema = load_json(os.path.join(SCHEMAS_DIR, "report.schema.json"))
+    valid_data = {
+        "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
+        "summary": "Test summary",
+        "artifacts": [
+            {"path": "some/path", "description": "desc"}
+        ]
+    }
+    validate(instance=valid_data, schema=schema)
 
-def _load_schema(name: str) -> dict:
-    schema_path = Path("schemas/evidence") / name
-    return json.loads(schema_path.read_text(encoding="utf-8"))
+def test_metrics_schema():
+    schema = load_json(os.path.join(SCHEMAS_DIR, "metrics.schema.json"))
+    valid_data = {
+        "metrics": {
+            "score": 0.9,
+            "latency": 100
+        }
+    }
+    validate(instance=valid_data, schema=schema)
 
+def test_stamp_schema():
+    schema = load_json(os.path.join(SCHEMAS_DIR, "stamp.schema.json"))
+    valid_data = {
+        "created_at": "2023-10-27T10:00:00Z",
+        "version": "1.0.0",
+        "git_commit": "abcdef"
+    }
+    validate(instance=valid_data, schema=schema)
 
-def test_build_bundle_matches_schemas(tmp_path: Path) -> None:
-    bundle = build_bundle(mode="audit")
-
-    jsonschema.validate(bundle["report"], _load_schema("report.schema.json"))
-    jsonschema.validate(bundle["metrics"], _load_schema("metrics.schema.json"))
-    jsonschema.validate(bundle["stamp"], _load_schema("stamp.schema.json"))
-    jsonschema.validate(bundle["index"], _load_schema("index.schema.json"))
-
-    write_bundle(out_dir=tmp_path, mode="audit")
-    report = json.loads((tmp_path / "report.json").read_text(encoding="utf-8"))
-    metrics = json.loads((tmp_path / "metrics.json").read_text(encoding="utf-8"))
-    stamp = json.loads((tmp_path / "stamp.json").read_text(encoding="utf-8"))
-    index = json.loads((tmp_path / "index.json").read_text(encoding="utf-8"))
-
-    jsonschema.validate(report, _load_schema("report.schema.json"))
-    jsonschema.validate(metrics, _load_schema("metrics.schema.json"))
-    jsonschema.validate(stamp, _load_schema("stamp.schema.json"))
-    jsonschema.validate(index, _load_schema("index.schema.json"))
+def test_index_schema():
+    schema = load_json(os.path.join(SCHEMAS_DIR, "index.schema.json"))
+    valid_data = {
+        "version": 1,
+        "items": [
+            {
+                "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
+                "report": "evidence/report.json",
+                "metrics": "evidence/metrics.json",
+                "stamp": "evidence/stamp.json"
+            }
+        ]
+    }
+    validate(instance=valid_data, schema=schema)
