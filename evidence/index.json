@@ -75,12 +75,52 @@
       ]
     },
     {
-      "evidence_id": "EVD-POSTIZ-GATE-004",
-      "files": [
-        "evidence/EVD-POSTIZ-GATE-004/report.json",
-        "evidence/EVD-POSTIZ-GATE-004/metrics.json",
-        "evidence/EVD-POSTIZ-GATE-004/stamp.json"
-      ]
+      "evidence_id": "EVD-PROJECTGENIE-SEC-005",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ITEMUNKNOWN-FND-001",
+      "report": "evidence/item-unknown/report.json",
+      "metrics": "evidence/item-unknown/metrics.json",
+      "stamp": "evidence/item-unknown/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-CONNECTOR-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-SCHEMA-002",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-CI-003",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-INGEST-004",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-RESIDENCY-005",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
+      "report": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/report.json",
+      "metrics": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/metrics.json",
+      "stamp": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/stamp.json"
     }
   ]
 }
