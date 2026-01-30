@@ -244,24 +244,24 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: cross-platform-graph-scaffold
+  - id: debezium-openlineage-subsumption
     version: v1
-    path: prompts/summit/cross-platform-graph-scaffold@v1.md
-    sha256: 370887e5e8117fca7efade5cc69fee38a3a11329d7d2e6c9b59befa059a5d618
-    description: Implement deterministic cross-platform graph primitives and co-share builder scaffolding.
+    path: prompts/subsumption/debezium-openlineage@v1.md
+    sha256: 06b14984ffbb6e08019d9efcd31353218466aeb9e9b1702d8c1496934858ff6c
+    description: Scaffold deterministic subsumption artifacts for Debezium OpenLineage integration.
     scope:
       paths:
-        - summit/graph/
-        - docs/cross_platform_graph.md
+        - subsumption/debezium-openlineage/
+        - docs/standards/debezium-openlineage.md
+        - packages/decision-ledger/decision_ledger.json
         - docs/roadmap/STATUS.json
+        - evidence/index.json
+        - prompts/subsumption/
         - agents/examples/
-        - prompts/summit/
-        - prompts/registry.yaml
       domains:
-        - graph
-        - analytics
         - governance
-        - documentation
+        - subsumption
+        - data-lineage
     verification:
       tiers_required:
         - C
