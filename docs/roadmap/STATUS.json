@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T00:00:00Z",
-  "revision_note": "Added Innovator-VL evidence + harness scaffold (Lane 1) with deterministic outputs and required-check discovery checklist.",
+  "last_updated": "2026-02-02T12:30:00Z",
+  "revision_note": "Aligned Keel evidence templates and index entries for architecture, stability, depth scaling, and benchmark bundles.",
   "initiatives": [
     {
       "id": "A",
