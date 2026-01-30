@@ -57,110 +57,14 @@
         "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
     },
-    "EVD-ITEMUNKNOWN-FND-001": {
+    "EVD-EXPB-CORE-001": {
       "area": "subsumption",
-      "item_slug": "item-unknown",
+      "item_slug": "expectation-baselines",
       "files": [
-        "evidence/item-unknown/report.json",
-        "evidence/item-unknown/metrics.json",
-        "evidence/item-unknown/stamp.json"
+        "evidence/runs/expectation-baselines/report.json",
+        "evidence/runs/expectation-baselines/metrics.json",
+        "evidence/runs/expectation-baselines/stamp.json"
       ]
-    },
-    "EVD-SUBSUMPTION-FRAMEWORK-GOV-001": {
-      "area": "subsumption",
-      "item_slug": "subsumption-bundle-framework",
-      "files": [
-        "evidence/runs/verify-subsumption-bundle/report.json",
-        "evidence/runs/verify-subsumption-bundle/metrics.json",
-        "evidence/runs/verify-subsumption-bundle/stamp.json"
-      ]
-    },
-    "EVD-SUBSUMPTION-FRAMEWORK-SEC-001": {
-      "area": "subsumption",
-      "item_slug": "subsumption-bundle-framework",
-      "files": [
-        "evidence/runs/verify-subsumption-bundle/report.json",
-        "evidence/runs/verify-subsumption-bundle/metrics.json",
-        "evidence/runs/verify-subsumption-bundle/stamp.json"
-      ]
-    },
-    "EVD-SUBSUMPTION-FRAMEWORK-GTM-001": {
-      "area": "subsumption",
-      "item_slug": "subsumption-bundle-framework",
-      "files": [
-        "evidence/runs/verify-subsumption-bundle/report.json",
-        "evidence/runs/verify-subsumption-bundle/metrics.json",
-        "evidence/runs/verify-subsumption-bundle/stamp.json"
-      ]
-    },
-    "EVD-BPAC-GOV-001": {
-      "area": "governance",
-      "item_slug": "branch-protection-as-code",
-      "files": [
-        "evidence/bpac/EVD-BPAC-GOV-001/report.json",
-        "evidence/bpac/EVD-BPAC-GOV-001/metrics.json",
-        "evidence/bpac/EVD-BPAC-GOV-001/stamp.json"
-      ]
-    },
-    "EVD-BPAC-GOV-003": {
-      "area": "governance",
-      "item_slug": "branch-protection-as-code",
-      "files": [
-        "evidence/bpac/EVD-BPAC-GOV-003/report.json",
-        "evidence/bpac/EVD-BPAC-GOV-003/metrics.json",
-        "evidence/bpac/EVD-BPAC-GOV-003/stamp.json"
-      ]
-    },
-    "EVD-BPAC-GOV-006": {
-      "area": "governance",
-      "item_slug": "branch-protection-as-code",
-      "files": [
-        "evidence/bpac/EVD-BPAC-GOV-006/report.json",
-        "evidence/bpac/EVD-BPAC-GOV-006/metrics.json",
-        "evidence/bpac/EVD-BPAC-GOV-006/stamp.json"
-      ]
-    },
-    "EVD-BPAC-GOV-007": {
-      "area": "governance",
-      "item_slug": "branch-protection-as-code",
-      "files": [
-        "evidence/bpac/EVD-BPAC-GOV-007/report.json",
-        "evidence/bpac/EVD-BPAC-GOV-007/metrics.json",
-        "evidence/bpac/EVD-BPAC-GOV-007/stamp.json"
-      ]
-    },
-    "EVD-ITEMUNKNOWN-CI-001": {
-      "area": "subsumption",
-      "item_slug": "item-UNKNOWN",
-      "files": [
-        "evidence/runs/verify_subsumption_bundle/report.json",
-        "evidence/runs/verify_subsumption_bundle/metrics.json",
-        "evidence/runs/verify_subsumption_bundle/stamp.json"
-      ]
-    },
-    "EVD-AUTOMATION-TURN-3-GOV-001": {
-      "area": "subsumption",
-      "item_slug": "automation-turn-3",
-      "files": [
-        "subsumption/automation-turn-3/evidence/report.json",
-        "subsumption/automation-turn-3/evidence/metrics.json",
-        "subsumption/automation-turn-3/evidence/stamp.json"
-      ]
-    },
-    "EVD-BUNDLE-GOV-001": {
-      "area": "governance",
-      "item_slug": "example",
-      "files": ["subsumption/example/evidence/report.json"]
-    },
-    "EVD-BUNDLE-GOV-003": {
-      "area": "metrics",
-      "item_slug": "example",
-      "files": ["subsumption/example/evidence/metrics.json"]
-    },
-    "EVD-BUNDLE-GOV-004": {
-      "area": "stamp",
-      "item_slug": "example",
-      "files": ["subsumption/example/evidence/stamp.json"]
     }
   ]
 }
