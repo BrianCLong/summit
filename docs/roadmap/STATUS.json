@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T12:00:00Z",
-  "revision_note": "Add shai-hulud supply-chain subsumption bundle scaffold and evidence registration",
+  "last_updated": "2026-01-17T22:29:59Z",
+  "revision_note": "Added agent registry v0 scaffolding with CLI validation and docs",
   "initiatives": [
     {
       "id": "A",
