@@ -71,15 +71,3 @@ jobs:
         with:
           attestation-path: ./provenance/multiple.intoto.jsonl
           github-context: ${{ toJSON(github) }}
-
-      - name: Standardize Provenance Artifact
-        run: |
-          mkdir -p artifacts/provenance/${{ github.sha }}
-          cp ./provenance/multiple.intoto.jsonl artifacts/provenance/${{ github.sha }}/attestation.json
-
-      - name: Upload Standardized Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-gate-artifacts-provenance
-          path: artifacts/
-          retention-days: 90

@@ -18,32 +18,13 @@ jobs:
           fail-build: true
           severity-cutoff: high
           only-fixed: false
-          output-format: json
-
-      - name: Standardize Artifacts
-        run: |
-          mkdir -p artifacts/security-gate/${{ github.sha }}
-          mkdir -p artifacts/sbom/${{ github.sha }}
-
-          # Move/Rename for standardization
-          cp sbom.json artifacts/sbom/${{ github.sha }}/sbom.json
-
-          # Convert/Move scan results to deps.report.json
-          # Note: anchore scan output might be sarif by default or json depending on config.
-          # If result is sarif, we keep it as source, but maybe create a simplified report?
-          # For now, we assume the output of scan-action with output-format json gives us what we want
-          # or we use the sarif.
-
-          # If we used sarif above:
-          if [ -f results.sarif ]; then
-             cp results.sarif artifacts/security-gate/${{ github.sha }}/deps.report.json
-          fi
-
-      - name: Upload SBOM Artifacts
+      - name: Upload SBOM artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-gate-artifacts
-          path: artifacts/
+          name: sbom-scan-results
+          path: |
+            sbom.json
+            results.sarif
           retention-days: 90
 # Linked: https://linear.app/summi7/issue/SUM-10197
