@@ -18,7 +18,7 @@
 
 version: "2.0.0"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-01-13"
+last_updated: "2026-01-30"
 owner: "Platform Engineering"
 
 # Branch Protection Policy
