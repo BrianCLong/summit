@@ -1,0 +1,26 @@
+# People Thrive Redaction Rules
+# Mandatory redaction of PII from all incident records.
+
+version: 1.0
+enforcement_level: strict
+
+never_log_fields:
+  - name
+  - email
+  - reporter_name
+  - reporter_email
+  - subject_name
+  - witness_names
+  - free_text_description
+  - private_messages_content
+  - attachments_raw
+
+allowed_metrics_fields:
+  - incident_id (uuid)
+  - category (e.g., bias, microaggression, toxic_behavior)
+  - severity (low, medium, high)
+  - resolution_state (resolved, dismissed)
+  - timestamp_month (rounded to first of month)
+
+verification:
+  check_script: "ci/verifiers/people_thrive/verify_no_pii.py"

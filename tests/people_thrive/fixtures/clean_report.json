@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-PEOPLETHRIVE-SCHEMA-001",
+  "item_slug": "PEOPLETHRIVE",
+  "claims": ["No PII here"],
+  "findings": [
+    {
+      "severity": "low",
+      "category": "communication",
+      "status": "resolved"
+    }
+  ]
+}

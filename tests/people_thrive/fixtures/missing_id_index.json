@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-SCHEMA-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    }
+  ]
+}

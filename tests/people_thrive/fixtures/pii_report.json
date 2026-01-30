@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-PEOPLETHRIVE-SCHEMA-001",
+  "item_slug": "PEOPLETHRIVE",
+  "claims": ["PII Leakage Test"],
+  "findings": [
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "issue": "Toxic behavior"
+    }
+  ]
+}

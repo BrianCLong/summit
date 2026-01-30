@@ -1,0 +1,20 @@
+# People Thrive Incident Intake Channels
+# Default: all external integrations disabled.
+
+channels:
+  slack:
+    enabled: false
+    channel_name: "#thrive-incidents-triage"
+    webhook_url: "SECRET_REDACTED"
+
+  email:
+    enabled: false
+    address: "thrive-support@example.com"
+
+  internal_portal:
+    enabled: true
+    path: "/governance/people-thrive/report"
+
+settings:
+  allow_anonymous_reports: true
+  auto_redaction_enabled: true

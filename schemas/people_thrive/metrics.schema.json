@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "People Thrive Evidence Metrics",
+  "type": "object",
+  "required": ["evidence_id", "metrics"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "learning_objectives_count": { "type": "number" },
+        "resilience_objectives_count": { "type": "number" },
+        "incident_count_total": { "type": "number" },
+        "incident_resolution_rate": { "type": "number" },
+        "support_network_touchpoints": { "type": "number" }
+      },
+      "additionalProperties": { "type": "number" }
+    }
+  },
+  "additionalProperties": false
+}

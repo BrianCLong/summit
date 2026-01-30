@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-SCHEMA-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-POLICY-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-TESTS-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-METRICS-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-RUNBOOK-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    }
+  ]
+}

@@ -1,9 +1,23 @@
 # Required checks discovery
 
-1. Open repo settings → Branch protection → record required status check names.
-2. Or via API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks.
-3. Replace placeholder names in CI + docs:
-   - ci/evidence_schema
-   - ci/dependency_delta
-   - ci/unit_tests
-4. Add a PR to rename gates to the canonical check names.
+## Discover required checks (GitHub UI)
+
+1. Repo → Settings → Branches → Branch protection rules → (protected branch).
+2. In "Require status checks", copy exact check names (case-sensitive).
+3. Paste into `subsumption/graph-hybrid/manifest.yaml` under `required_checks.verified`.
+
+## Discover required checks (GitHub API)
+
+- Use: `gh api repos/<OWNER>/<REPO>/branches/<BRANCH>/protection/required_status_checks`
+- Copy `contexts[]` into manifest.
+
+## Temporary convention (until verified)
+
+- Use `subsumption-bundle-verify` as the proposed check name.
+- Rename plan: if mismatch found, update workflow job name + manifest + docs in a single PR.
+
+## People Thrive Checks (Proposed)
+
+- `people_thrive_evidence_present`
+- `people_thrive_pii_guard`
+- `people_thrive_policy_valid`

@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-PEOPLETHRIVE-METRICS-001",
+  "metrics": {
+    "learning_objectives_count": 150,
+    "resilience_objectives_count": 45,
+    "incident_count_total": 3,
+    "incident_resolution_rate": 1.0,
+    "support_network_touchpoints": 12
+  }
+}

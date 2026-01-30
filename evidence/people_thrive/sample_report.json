@@ -1,0 +1,19 @@
+{
+  "evidence_id": "EVD-PEOPLETHRIVE-METRICS-001",
+  "item_slug": "PEOPLETHRIVE",
+  "claims": ["Culture metrics for Q1 2026 collected and aggregated."],
+  "decisions": [
+    {
+      "id": "DEC-PT-001",
+      "rationale": "Increased focus on resilience training due to high project pressure.",
+      "outcome": "Scheduled 3 additional workshops."
+    }
+  ],
+  "findings": [
+    {
+      "metric": "learning_objectives_count",
+      "value": 150,
+      "status": "above_target"
+    }
+  ]
+}

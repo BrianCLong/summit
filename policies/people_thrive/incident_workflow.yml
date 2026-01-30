@@ -1,0 +1,38 @@
+# People Thrive Incident Workflow
+# States and transitions for culture-related incidents.
+
+version: 1.0
+states:
+  - id: reported
+    description: "Initial report received."
+    allowed_transitions: [triaged, dismissed]
+
+  - id: triaged
+    description: "Severity assessed and owners assigned."
+    allowed_transitions: [investigating, coaching, escalated]
+
+  - id: investigating
+    description: "Fact-finding and interviews in progress."
+    allowed_transitions: [coaching, escalated, resolved]
+
+  - id: coaching
+    description: "Growth-oriented feedback and learning loop active."
+    allowed_transitions: [resolved]
+
+  - id: escalated
+    description: "Severe case moved to specialized handling (HR/Legal)."
+    allowed_transitions: [resolved]
+
+  - id: resolved
+    description: "Action taken and documented (anonymized)."
+    allowed_transitions: []
+
+  - id: dismissed
+    description: "Report found to be out of scope or invalid."
+    allowed_transitions: []
+
+required_states: [reported, triaged, resolved]
+
+governance:
+  redaction_required: true
+  audit_logging: true

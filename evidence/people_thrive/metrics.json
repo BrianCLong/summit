@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-PEOPLETHRIVE-SCHEMA-001",
+  "metrics": {
+    "learning_objectives_count": 0,
+    "resilience_objectives_count": 0,
+    "incident_count_total": 0,
+    "incident_resolution_rate": 0,
+    "support_network_touchpoints": 0
+  }
+}

@@ -1,0 +1,26 @@
+# Behavior Standards Policy
+# Based on InfoQ ITEM: "address toxic behaviour, bias, and microaggressions early and consistently."
+
+version: 1.0
+metadata:
+  name: behavior_standards
+  slug: PEOPLETHRIVE-POLICY-001
+
+standards:
+  toxic_behavior:
+    definition: "Actions that erode trust, safety, or collaboration."
+    response_expectation: "Immediate triage; growth-oriented coaching for minor cases; escalation for severe cases."
+    consistency_rule: "Apply same criteria regardless of role or seniority."
+
+  bias_and_microaggressions:
+    definition: "Subtle or overt actions that marginalized individuals or groups."
+    response_expectation: "Active addressing; documented course correction; educational follow-up."
+    proactive_measures: ["Bias awareness check-ins", "Inclusive language review"]
+
+  fairness_and_consistency:
+    rule: "All incidents must follow the standard incident workflow."
+    evidence_requirement: "Incident resolution must be recorded in metrics (anonymized)."
+
+accountability:
+  manager_role: "Responsible for modeling behavior and immediate triage."
+  steward_role: "Responsible for oversight and ensuring consistency across teams."

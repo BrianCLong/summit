@@ -38,10 +38,70 @@
       "stamp": "evidence/stamp.json"
     },
     {
-      "evidence_id": "EVD-TIDEMARK-TGRAPH-001",
-      "report": "evidence/tidemark-temporal-communities/report.json",
-      "metrics": "evidence/tidemark-temporal-communities/metrics.json",
-      "stamp": "evidence/tidemark-temporal-communities/stamp.json"
+      "evidence_id": "EVD-PROJECTGENIE-WORLDSIM-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PROJECTGENIE-EVALS-002",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PROJECTGENIE-GOV-003",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PROJECTGENIE-PROV-004",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PROJECTGENIE-SEC-005",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ITEMUNKNOWN-FND-001",
+      "report": "evidence/item-unknown/report.json",
+      "metrics": "evidence/item-unknown/metrics.json",
+      "stamp": "evidence/item-unknown/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-SCHEMA-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-POLICY-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-TESTS-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-METRICS-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PEOPLETHRIVE-RUNBOOK-001",
+      "report": "evidence/people_thrive/report.json",
+      "metrics": "evidence/people_thrive/metrics.json",
+      "stamp": "evidence/people_thrive/stamp.json"
     }
   ]
 }
