@@ -26,6 +26,61 @@
 2. Check recent deploys and feature flag changes affecting Copilot.
 3. Inspect upstream dependency health (LLM provider, vector store).
 4. Review logs for spikes in timeouts or 5xx responses.
+5. Confirm all model calls are routed through the Summit gateway and tool registry.
+6. Confirm trace records include task graph, agent messages, tool calls, policies, and evaluation signals.
+
+## Gateway & Trace Governance Checks
+
+### Gateway Enforcement
+
+**Goal**: Ensure the Copilot service uses the Summit API gateway for auth, rate limiting,
+provider routing, cost tracking, and unified logging.
+
+**Verify**:
+
+1. Confirm gateway routing in service logs for Copilot requests (gateway request IDs must be present).
+2. Validate policy enforcement outcomes via policy engine logs (OPA decision IDs must be present).
+3. Verify cost meters are emitting usage events for each model request.
+
+**Evidence**:
+
+- Capture a sample gateway request ID and its corresponding model call log entry.
+- Record the policy decision ID and the applied policy version for the sample request.
+
+### Trace Completeness
+
+**Goal**: Ensure traces are governance-ready for evaluation pipelines.
+
+**Required Trace Fields**:
+
+- Task graph lineage and execution order.
+- Agent messages and decision checkpoints.
+- Tool calls with inputs, outputs, and error states.
+- Policy IDs, versions, and outcomes.
+- Evaluation signals (quality scores, human feedback flags, imputed intention order through the 23rd order).
+
+**Verify**:
+
+1. Pull a recent trace and confirm all required fields are present.
+2. Validate that tool call logs link back to the gateway request ID.
+3. Confirm evaluation signals are emitted for downstream assessment.
+
+### Governed Exceptions
+
+**Goal**: Convert any legacy bypass or partial trace into a governed exception with explicit
+accountability.
+
+**Trigger**:
+
+- Missing gateway request IDs.
+- Missing policy decision IDs.
+- Missing any required trace fields.
+
+**Action**:
+
+1. Open a governed exception record in the incident tracker referencing the affected run IDs.
+2. Record the compensating controls and remediation deadline.
+3. Escalate to governance if the exception impacts regulated workflows.
 
 ## Common Issues
 
