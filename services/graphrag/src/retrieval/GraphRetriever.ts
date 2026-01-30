@@ -6,6 +6,7 @@
 import { Driver, Session } from 'neo4j-driver';
 import { v4 as uuidv4 } from 'uuid';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { LLMIntegration } from '../llm/LLMIntegration.js';
 import {
   RetrievalQuery,
   RetrievalResult,
@@ -22,6 +23,7 @@ export interface GraphRetrieverConfig {
   minRelevance: number;
   useBetweenness: boolean;
   usePageRank: boolean;
+  indexName: string;
 }
 
 interface SubgraphNode {
@@ -46,6 +48,7 @@ export class GraphRetriever {
 
   constructor(
     private driver: Driver,
+    private embedder: LLMIntegration,
     config: Partial<GraphRetrieverConfig> = {},
   ) {
     this.config = {
@@ -54,6 +57,7 @@ export class GraphRetriever {
       minRelevance: config.minRelevance ?? 0.3,
       useBetweenness: config.useBetweenness ?? true,
       usePageRank: config.usePageRank ?? true,
+      indexName: config.indexName ?? 'entity_embeddings',
     };
   }
 
@@ -143,34 +147,66 @@ export class GraphRetriever {
     session: Session,
     query: RetrievalQuery,
   ): Promise<string[]> {
-    // TODO: Migrate to Cypher 25 Native Vector search for Neo4j 2025.01+
-    // Use the native `vector.similarity.cosine` function if embeddings are stored as VECTOR type.
-    // Example:
-    // MATCH (n:Entity)
-    // WHERE n.embedding IS NOT NULL
-    // WITH n, vector.similarity.cosine(n.embedding, $queryVector) as score
-    // WHERE score >= $minScore
-    // RETURN n.id as id, score
-    // ORDER BY score DESC LIMIT $limit
+    const seedIds = new Set<string>();
+    const limit = Math.min(query.maxNodes / 10, 100);
 
-    // Use full-text search to find matching entities
-    const result = await session.run(
-      `
-      CALL db.index.fulltext.queryNodes('entitySearch', $query)
-      YIELD node, score
-      WHERE score >= $minScore
-      RETURN node.id as id, score
-      ORDER BY score DESC
-      LIMIT $limit
-      `,
-      {
-        query: query.query,
-        minScore: query.minRelevance,
-        limit: Math.min(query.maxNodes / 10, 100),
-      },
-    );
+    // Hybrid Search: Combine Vector Search + Full-Text Search in parallel
 
-    return result.records.map((r) => r.get('id'));
+    const vectorSearch = async (): Promise<string[]> => {
+      try {
+        const { embedding } = await this.embedder.embed(query.query);
+
+        const result = await session.run(
+          `
+          CALL db.index.vector.queryNodes($indexName, $limit, $embedding)
+          YIELD node, score
+          WHERE score >= $minScore
+          RETURN node.id as id, score
+          `,
+          {
+            indexName: this.config.indexName,
+            limit,
+            embedding,
+            minScore: query.minRelevance,
+          },
+        );
+        return result.records.map((r) => r.get('id')).filter((id) => !!id);
+      } catch (error) {
+        console.warn('Vector search failed (index may be missing), falling back to FTS only', error);
+        return [];
+      }
+    };
+
+    const ftsSearch = async (): Promise<string[]> => {
+      try {
+        const result = await session.run(
+          `
+          CALL db.index.fulltext.queryNodes('entitySearch', $query)
+          YIELD node, score
+          WHERE score >= $minScore
+          RETURN node.id as id, score
+          ORDER BY score DESC
+          LIMIT $limit
+          `,
+          {
+            query: query.query,
+            minScore: query.minRelevance,
+            limit,
+          },
+        );
+        return result.records.map((r) => r.get('id')).filter((id) => !!id);
+      } catch (error) {
+        console.warn('Full-text search failed', error);
+        return [];
+      }
+    };
+
+    const [vectorIds, ftsIds] = await Promise.all([vectorSearch(), ftsSearch()]);
+
+    vectorIds.forEach((id) => seedIds.add(id));
+    ftsIds.forEach((id) => seedIds.add(id));
+
+    return Array.from(seedIds);
   }
 
   /**

@@ -87,7 +87,7 @@ export class GraphRAGOrchestrator {
     this.llm = new LLMIntegration(llmConfig);
 
     // Initialize retrievers
-    this.graphRetriever = new GraphRetriever(this.driver, {
+    this.graphRetriever = new GraphRetriever(this.driver, this.llm, {
       maxHops: config.retrieval.maxHops,
       maxNodes: config.retrieval.maxNodes,
       minRelevance: config.retrieval.minRelevance,
