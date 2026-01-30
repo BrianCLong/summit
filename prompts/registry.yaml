@@ -474,6 +474,29 @@ prompts:
         - governance
         - program-management
         - compliance
+  - id: gitattributes-lfs-exception
+    version: v1
+    path: prompts/governance/gitattributes-lfs-exception@v1.md
+    sha256: c6824f0d4a05ded519f881194b2297485d9d2eccdbaa29834fe4e24acf8ec56c
+    description: Governed workflow for adding minimal .gitattributes LFS exceptions.
+    scope:
+      paths:
+        - .gitattributes
+        - docs/roadmap/STATUS.json
+        - prompts/governance/gitattributes-lfs-exception@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - repo-maintenance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit
   - id: narrative-analysis-update-20260124
     version: v1
     path: prompts/research/narrative-analysis-update-20260124.md
