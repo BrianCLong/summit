@@ -2,25 +2,27 @@
 
 ## Goal
 
-Identify exact required-check names enforced by branch protection for `main` (and any release branches).
+Identify exact branch protection required-check names for `main`.
 
-## UI steps (fast)
+## Steps (UI)
 
-1. Repo → Settings → Branches → Branch protection rules.
-2. Record:
-   - Branch pattern
-   - "Require status checks" list (exact names)
-   - "Require workflows to pass" if present
+1. Repo → Settings → Branches → Branch protection rules → `main`.
+2. Copy the **exact** check names listed under “Require status checks to pass”.
 
-## API steps (authoritative)
+## Steps (API)
 
-- Use GitHub REST:
-  - Get branch protection for `main`
-  - Extract required status checks contexts
-- Save results into `docs/required_checks.verified.json` (stable ordering).
+1. Use GitHub REST:
+   - GET /repos/{owner}/{repo}/branches/main/protection
+2. Extract required_status_checks.contexts
 
-## Temporary convention (until verified)
+## Temporary Gate Naming Convention
 
-- Name new gate: `verify_subsumption_bundle`
-- Rename plan:
-  - If repo expects prefix like `ci / ...`, add follow-up PR to align names.
+- subsumption-bundle-verify (temporary)
+- expectation-baseline-evals (temporary)
+
+## Rename Plan
+
+If actual required check names differ, add a PR that:
+
+- updates workflow job names to match exact contexts
+- updates docs + manifest required checks list
