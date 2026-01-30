@@ -1,0 +1,1 @@
+make ga-verify || true
