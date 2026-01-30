@@ -85,20 +85,20 @@
     "reverted": false
   },
   {
-    "id": "itemunknown-001",
-    "timestamp": "2026-01-29T19:10:00Z",
+    "id": "debezium-openlineage-001",
+    "timestamp": "2026-01-30T01:35:06Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiJzdWJzdW1wdGlvbiBpdGVtLVVOS05PV04gc2NhZmZvbGQgKG1hbmlmZXN0LCB2ZXJpZmllciwgZml4dHVyZXMsIHdvcmtmbG93LCBkb2NzLCBldmlkZW5jZSwgbW9uaXRvcmluZykiLCJmaWxlcyI6WyJzdWJzdW1wdGlvbi9pdGVtLVVOS05PV04vbWFuaWZlc3QueWFtbCIsInNjcmlwdHMvY2kvdmVyaWZ5X3N1YnN1bXB0aW9uX2J1bmRsZS5tanMiLCJzY3JpcHRzL2NpL19fZml4dHVyZXNfXy9zdWJzdW1wdGlvbi9pdGVtLVVOS05PV04iLCJzY3JpcHRzL2NpL3J1bl9zdWJzdW1wdGlvbl92ZXJpZnkuc2giLCJkb2NzL3JlcG9fYXNzdW1wdGlvbnMubWQiLCJkb2NzL3JlcXVpcmVkX2NoZWNrcy50b2RvLm1kIiwiZG9jcy9zdGFuZGFyZHMvaXRlbS1VTktOT1dOLm1kIiwiZG9jcy9zZWN1cml0eS9kYXRhLWhhbmRsaW5nL2l0ZW0tVU5LTk9XTi5tZCIsImRvY3Mvb3BzL3J1bmJvb2tzL2l0ZW0tVU5LTk9XTi5tZCIsImRvY3MvZGVjaXNpb25zL2l0ZW0tVU5LTk9XTi5tZCIsImRvY3MvYXNzdW1wdGlvbnMvaXRlbS1VTktOT1dOLm1kIiwiYmFja2xvZy9pdGVtLVVOS05PV04ueWFtbCIsImRlcHNfZGVsdGEvaXRlbS1VTktOT1dOLm1kIiwiZXZpZGVuY2UvaW5kZXguanNvbiIsIi5naXRodWIvd29ya2Zsb3dzL3N1YnN1bXB0aW9uLWJ1bmRsZS55bWwiLCJzY3JpcHRzL21vbml0b3JpbmcvaXRlbS1VTktOT1dOLWRyaWZ0Lm1qcyIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiJdfQ==",
+    "inputHash": "eyJjaGFuZ2UiOiJkZWJleml1bS1vcGVubGluZWFnZSBzdWJzdW1wdGlvbiBzY2FmZm9sZCIsImZpbGVzIjpbInN1YnN1bXB0aW9uL2RlYmV6aXVtLW9wZW5saW5lYWdlL21hbmlmZXN0LnlhbWwiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9saWNlbnNlX2dhdGUubWQiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9maXh0dXJlcy9hbGxvdy9SRUFETUUubWQiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9maXh0dXJlcy9kZW55L1JFQURNRS5tZCIsInN1YnN1bXB0aW9uL2RlYmV6aXVtLW9wZW5saW5lYWdlL2V2aWRlbmNlL3JlcG9ydC5qc29uIiwic3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2UvZXZpZGVuY2UvbWV0cmljcy5qc29uIiwic3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2UvZXZpZGVuY2Uvc3RhbXAuanNvbiIsImRvY3Mvc3RhbmRhcmRzL2RlYmV6aXVtLW9wZW5saW5lYWdlLm1kIiwiZXZpZGVuY2UvaW5kZXguanNvbiIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsInByb21wdHMvc3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2VAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvZGViZXppdW0tb3BlbmxpbmVhZ2UtdGFzay5qc29uIl19",
     "decision": {
-      "action": "scaffold_item_unknown_bundle",
+      "action": "scaffold_debezium_openlineage_bundle",
       "rule": {
-        "condition": "subsumption bundle scaffold required",
-        "action": "scaffold_item_unknown_bundle",
+        "condition": "subsumption scaffold required",
+        "action": "scaffold_debezium_openlineage_bundle",
         "max_cost": 0
       }
     },
-    "reasoning": "Added item-UNKNOWN subsumption scaffold, deterministic verifier, fixtures, and workflow to enforce evidence and docs gates with rollback-ready posture.",
+    "reasoning": "Created Debezium OpenLineage subsumption manifest, fixtures, evidence, prompt registry entry, and roadmap update with rollback path documented.",
     "reverted": false
   }
 ]

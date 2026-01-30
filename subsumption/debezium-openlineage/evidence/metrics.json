@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-DEBEZIUM-OPENLINEAGE-FND-001",
+  "metrics": {
+    "bundle_files": 5,
+    "docs_files": 1,
+    "fixture_sets": 2
+  }
+}
