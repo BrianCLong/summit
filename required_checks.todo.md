@@ -1,11 +1,11 @@
-# Required Checks for ACP Integration
+# Required checks discovery
 
-## GitHub Actions Gates
-* `ci/summit-acp-verify` (Proposed): Runs `scripts/ci/verify_acp_bundle.py`.
-* `ci/policy_deny_default`: Ensures default policy is deny.
+Temporary check names (wire these in GitHub Branch Protection):
+- `verify (summit-evidence)`
 
-## Temporary gate names (until discovered)
-- ci/privacy-graph-gate
-- ci/deps-delta-gate
-- summit-ci/verify-evidence
-- summit-ci/dependency-delta
+Required status checks:
+1. `ci/summit-evidence`
+2. `ci/summit-influence-policy`
+3. `ci/summit-info-integrity-evals`
+
+Note: These will be satisfied by the `summit-evidence.yml` workflow jobs.

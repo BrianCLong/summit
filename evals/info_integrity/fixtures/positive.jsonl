@@ -1,0 +1,2 @@
+{"intent": "analysis_only", "payload": {"region_bucket": "US-EAST", "time_bucket": "2025-W01", "topic": "disinfo_trends", "sentiment_bucket": "neg", "volume_estimate": 1250}}
+{"intent": "analysis_only", "payload": {"region_bucket": "GLOBAL", "time_bucket": "2025-Q1", "topic": "narrative_drift", "sentiment_bucket": "pos", "volume_estimate": 500}}

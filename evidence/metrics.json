@@ -1,0 +1,15 @@
+{
+  "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+  "metrics": {
+    "latency_ms_p95": 10.0,
+    "ead": {
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "bias": {
+      "by_language": {},
+      "by_region": {},
+      "by_demographic_proxy": {}
+    }
+  }
+}

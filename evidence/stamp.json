@@ -1,4 +1,5 @@
 {
-  "generated_at": "2026-01-27T12:00:00Z",
-  "source_rev": "HEAD"
+  "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+  "generated_at": "2023-10-27T10:00:00Z",
+  "ci_run_id": "run-001"
 }
