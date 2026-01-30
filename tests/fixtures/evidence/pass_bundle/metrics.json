@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-SCOUT-CI-005",
+  "metrics": {
+    "duration": 1.5,
+    "status": "pass"
+  }
+}
