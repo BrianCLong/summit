@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-14T00:00:00Z",
-  "revision_note": "Added subsumption bundle framework scaffolding and verifier gate docs",
+  "last_updated": "2026-02-01T00:00:00Z",
+  "revision_note": "Added release-train hardening workflow and release gate scripts",
   "initiatives": [
     {
       "id": "A",

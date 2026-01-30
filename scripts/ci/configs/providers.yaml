@@ -1,0 +1,7 @@
+providers:
+  - name: auth
+    status_url: https://status.authcorp.com/summary.json
+    pause_on: [partial_outage, major_outage]
+  - name: payments
+    status_url: https://status.payments.example.com/api/v2/summary.json
+    pause_on: [degraded_performance, major_outage]
