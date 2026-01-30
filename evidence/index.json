@@ -1,20 +1,23 @@
 {
-  "version": "1.0",
-  "items": {
-    "EVD-PIPELINE-RESILIENCE-001": {
+  "evidence_version": "1.0",
+  "items": [
+    {
+      "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    "EVD-SKETCHDYNAMICS-PIPELINE-001": {
+    {
+      "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    "EVD-SKETCHDYNAMICS-CLARIFY-001": {
+    {
+      "evidence_id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
-      "artifacts": ["fixtures/ambiguities/critical.json"]
+      "files": ["fixtures/ambiguities/critical.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-ATT-001",
@@ -108,5 +111,5 @@
         "evidence/privtel/stamp.json"
       ]
     }
-  }
+  ]
 }
