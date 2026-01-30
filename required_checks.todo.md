@@ -10,6 +10,12 @@ Temporary checks expected:
 - ci/summit-security-gates
 - ci/summit-security-deps
 
-Rename plan:
-- Update workflow + badges once real required checks are known.
-- Support legacy check names for one release cycle.
+- Use: `gh api repos/<OWNER>/<REPO>/branches/<BRANCH>/protection/required_status_checks`
+- Copy `contexts[]` into manifest.
+
+## Temporary convention (until verified)
+
+- Use `subsumption-bundle-verify` as the proposed check name for existing gates.
+- New temporary gates: `gate:evidence-schema`, `gate:no-timestamps-outside-stamp`,
+  `gate:copilot-metrics-deny-by-default`, `gate:no-signed-urls`.
+- Rename plan: if mismatch found, update workflow job name + manifest + docs in a single PR.

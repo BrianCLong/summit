@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T01:06:38Z",
-  "revision_note": "Scaffolded tidemark temporal community evidence bundle and verification gate.",
+  "last_updated": "2026-01-30T00:00:00Z",
+  "revision_note": "Added Copilot metrics evidence gates, connector skeleton, and attribution docs.",
   "initiatives": [
     {
       "id": "A",

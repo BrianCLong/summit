@@ -1,10 +1,10 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Metrics",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "metrics": { "type": "object", "additionalProperties": { "type": ["number", "string", "boolean"] } }
-  }
+    "coverage": { "type": "number" },
+    "update_anomaly_score_p95": { "type": "number" },
+    "quarantine_count": { "type": "integer" }
+  },
+  "additionalProperties": true
 }
