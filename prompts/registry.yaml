@@ -29,6 +29,52 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cistp-master
+    version: v1
+    path: prompts/competitive/cistp/CISTP_MASTER_v1.md
+    sha256: 656769b807a00592ecc950502e205cac395de9421d2cc42f1655dafbc3aea2e9
+    description: Competitive Intelligence Subsumption & Transcendence Protocol (CISTP) Master Prompt.
+    scope:
+      paths:
+        - prompts/competitive/cistp/
+        - docs/competitive/
+        - competitive/
+        - docs/governance/COMPETITIVE_INTEL_POLICY.md
+      domains:
+        - competitive-intel
+        - product-strategy
+        - governance
+    verification:
+      tiers_required:
+        - B
+    allowed_operations:
+      - create
+      - edit
+  - id: cistp-arch
+    version: v1
+    path: prompts/competitive/cistp/CISTP_ARCH_v1.md
+    sha256: dbcaf47c3c037347d7937e5f8860572d7ed999ce6d5041d15e8f4d742b569588
+    description: CISTP ARCH Sub-Agent for architecture and performance extraction.
+  - id: cistp-agents-rag
+    version: v1
+    path: prompts/competitive/cistp/CISTP_AGENTS_RAG_v1.md
+    sha256: 0f4fc127e7d88c3e9c5bd0af2f8ce2a22233a74e58f6eaa282410beac49d1832
+    description: CISTP AGENTS/RAG Sub-Agent for orchestration and retrieval analysis.
+  - id: cistp-graph-data
+    version: v1
+    path: prompts/competitive/cistp/CISTP_GRAPH_DATA_v1.md
+    sha256: f6fd618e8cf149d4f0f45e985091ff96e02f740839ef6f98249fb80697f56e5d
+    description: CISTP GRAPH/DATA Sub-Agent for knowledge graph and data engineering analysis.
+  - id: cistp-product-ux
+    version: v1
+    path: prompts/competitive/cistp/CISTP_PRODUCT_UX_v1.md
+    sha256: d313c89ef6b61a06e6b4f8efa5793e5e144007e7a33e13dc49cf955bcd6a17b5
+    description: CISTP PRODUCT/UX Sub-Agent for workflows and experience analysis.
+  - id: cistp-ops-gov
+    version: v1
+    path: prompts/competitive/cistp/CISTP_OPS_GOV_v1.md
+    sha256: 18de46b8492fe987eb763beee7bb663b1f0e378bd5b30596f5bfb8e94ae7135b
+    description: CISTP OPS/GOV Sub-Agent for operations, security, and governance analysis.
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

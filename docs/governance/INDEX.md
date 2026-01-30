@@ -36,11 +36,16 @@ This index is the authoritative navigation layer for governance artifacts.
 - [Security Audit Gate](GATES/security-audit-gate.md)
   - Command: `pnpm ci:security-audit-gate`
   - Evidence: none (logs only)
+- [Competitive Intelligence Gate](GATES/competitive-intel-gate.md)
+  - Job: `Competitive Intel Gate`
+  - Command: `python3 security/gates/gate_competitive_intel.py`
+  - Evidence: none (logs only)
 - [Unified Governance Gate](UNIFIED_GATE.md) (planned)
 
 ## Policies & Exceptions
 
 - [Governance Policies](POLICIES.md)
+- [Competitive Intelligence Subsumption Policy](COMPETITIVE_INTEL_POLICY.md)
 - [Exceptions Register](EXCEPTIONS.md)
 
 ## Evidence & Audit

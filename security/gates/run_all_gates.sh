@@ -16,6 +16,7 @@ echo "--- Running RDP Security Gates ---"
 ./security/gates/gate_secret_leaks.sh || FAILED=1
 ./security/gates/gate_fork_actions_safety.sh || FAILED=1
 python3 security/gates/gate_dependency_allowlist.py || FAILED=1
+python3 security/gates/gate_competitive_intel.py || FAILED=1
 
 # Innovation Lane (Alert-only or Gated)
 ./security/agent/alap_enforcement.sh || true
