@@ -11,6 +11,7 @@ from pathlib import Path
 
 TOOLS_CI_DIR = Path(__file__).resolve().parents[3] / "tools/ci"
 SCRIPT_PATH = TOOLS_CI_DIR / "evidence_validate_bundle.py"
+FIXTURES_DIR = Path(__file__).resolve().parents[1] / "fixtures"
 
 class TestEvidenceValidateBundle(unittest.TestCase):
     def setUp(self):
@@ -71,6 +72,24 @@ class TestEvidenceValidateBundle(unittest.TestCase):
         )
         self.assertEqual(result.returncode, 0, f"Script failed: {result.stderr}")
         self.assertIn("PASS: Bundle is valid.", result.stdout)
+
+    def test_fixture_bundle_passes(self):
+        fixture_dir = FIXTURES_DIR / "pass_bundle"
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT_PATH), str(fixture_dir)],
+            capture_output=True, text=True
+        )
+        self.assertEqual(result.returncode, 0, f"Fixture failed: {result.stderr}")
+        self.assertIn("PASS: Bundle is valid.", result.stdout)
+
+    def test_fixture_bundle_fails(self):
+        fixture_dir = FIXTURES_DIR / "fail_bundle"
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT_PATH), str(fixture_dir)],
+            capture_output=True, text=True
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Timestamp key 'created_at' found", result.stderr)
 
     def test_invalid_keys_order(self):
         # Write file with unsorted keys manually

@@ -1,0 +1,26 @@
+{
+  "bundle_id": "fixture-bundle-pass",
+  "evidence": [
+    {
+      "description": "Evaluation report",
+      "evidence_id": "EVD-PP-SOCIALREASONING-EVAL-001",
+      "path": "evidence/report.json",
+      "schema_path": "evidence.report.schema.json"
+    },
+    {
+      "description": "Evaluation metrics",
+      "evidence_id": "EVD-PP-SOCIALREASONING-RATIONALE-001",
+      "path": "evidence/metrics.json",
+      "schema_path": "evidence.metrics.schema.json"
+    },
+    {
+      "description": "Evidence stamp",
+      "evidence_id": "EVD-PP-SOCIALREASONING-SCHEMA-001",
+      "path": "evidence/stamp.json",
+      "schema_path": "evidence.stamp.schema.json"
+    }
+  ],
+  "item": {
+    "arxiv_id": "2601.20757"
+  }
+}
