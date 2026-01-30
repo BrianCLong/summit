@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '0 2 * * *' # Nightly at 2 AM UTC
+    - cron: '0 2 * * *' # Nightly at 2 AM
   workflow_dispatch:
 
 jobs:
@@ -20,24 +20,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'pnpm'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
         run: pnpm install
@@ -48,13 +36,15 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Run Golden Path E2E
-        run: ./scripts/ci/run_golden_path_e2e.sh
         env:
-          GOLDEN_PATH_E2E_ENABLED: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '1' || '0' }}
-          GOLDEN_PATH_JOURNEY: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'basic' }}
-          BASE_URL: http://localhost:3000
+          GOLDEN_PATH_E2E_ENABLED: ${{ github.event_name == 'schedule' && '1' || '0' }}
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+             export GOLDEN_PATH_E2E_ENABLED=1
+          fi
+          ./scripts/ci/run_golden_path_e2e.sh
 
-      - name: Upload Playwright Report
+      - name: Upload Playwright Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -66,6 +56,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: golden-path-evidence
-          path: artifacts/evidence/goldenpath-frontend/
+          name: summit-evidence
+          path: artifacts/evidence/
           retention-days: 7
