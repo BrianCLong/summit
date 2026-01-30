@@ -1,0 +1,14 @@
+name: governance-daily
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/ci/verify_branch_protection.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
