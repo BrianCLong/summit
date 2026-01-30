@@ -15,3 +15,10 @@ This document tracks and justifies changes to the project's dependency surface.
 - **Justification**: Evidence bundle, schemas, and CI verification script do not introduce new dependencies.
 - **Risk Assessment**: None. Dependency surface unchanged.
 - **Owner**: Codex (Engineer)
+
+## [2026-02-01] Typhoon-S Master Plan Implementation
+
+- **Added**: None.
+- **Justification**: Clean-room implementation of Typhoon-S post-training recipes and evidence/governance structures.
+- **Risk Assessment**: None. No new external dependencies introduced.
+- **Owner**: Jules (Release Captain)
