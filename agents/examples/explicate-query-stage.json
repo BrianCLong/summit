@@ -1,0 +1,42 @@
+{
+  "task_id": "EXPLICATE_QUERY_STAGE",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "maestro-explicate-query-stage",
+    "version": "v1",
+    "sha256": "d8ea6af1bb43efa40f2092d24d9c784dd16f5c1d2073c43af7daf016d609c5db",
+    "path": "prompts/maestro/explicate-query-stage@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/maestro-core/",
+      "packages/maestro-cli/",
+      "packages/agent-lab/",
+      "docs/",
+      "prompts/maestro/explicate-query-stage@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["maestro", "multimodal", "retrieval", "governance", "tools"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["unit-test-log", "golden-fixtures"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Explicitation artifact includes explicit_query, intent, domain_guess, entities, visual_evidence, assumptions, unknown_slots, retrieval_plan, answer_style, and confidence.",
+    "Retrieval gate blocks missing explicitation without governance waiver.",
+    "Tool endpoint explicate_query returns explicitation artifact JSON.",
+    "Golden fixtures cover screenshots, photos, diagrams, and maps."
+  ],
+  "stop_conditions": [
+    "CI indicates prompt hash mismatch or metadata scope violation.",
+    "Explicitation output invents sensitive personal data."
+  ]
+}
