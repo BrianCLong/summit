@@ -1,20 +1,16 @@
 # Required Checks Discovery
 
-To ensure the "Persona Prompting" feature is properly governed, the following CI checks must be enabled and mapped to the repository settings.
+## TODO
+1.  Push branch and open PR.
+2.  Observe running checks in GitHub UI.
+3.  Identify the exact job names for:
+    - Evidence validation
+    - Policy fixture tests
+    - Telemetry tests
+    - Eval harness execution
+4.  Update `.github/workflows/summit_skill_gates.yml` to match if needed (e.g. if we rename jobs).
+5.  Add these checks to Branch Protection Rules.
 
-## 1. List Existing Checks
-Use the GitHub CLI or API to list status checks for recent commits to identify the exact names reported by the CI runners.
-
-```bash
-# Example
-gh api repos/:owner/:repo/commits/main/status-check-contexts
-```
-
-The following checks are expected to be required for `atp_latent` integration:
-- `ci:unit`
-- `ci:schema`
-- `ci:lint`
-- `ci:deps-delta`
-
-## Rename Plan
-Once the actual required check names are confirmed from branch protection settings, rename these temporary checks in the CI workflows to match.
+## Current Placeholder Names
+- `summit-skill-gates / evidence-schemas`
+- `summit-skill-gates / policy-fixtures`
