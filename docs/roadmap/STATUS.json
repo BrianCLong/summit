@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T03:47:56Z",
-  "revision_note": "Dynamic Intent discovery scaffolding and prompt registry entry recorded.",
+  "last_updated": "2026-02-01T00:00:00Z",
+  "revision_note": "Expanded required checks discovery guidance and temporary verifier naming.",
   "initiatives": [
     {
       "id": "A",
