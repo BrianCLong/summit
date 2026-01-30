@@ -1,18 +1,15 @@
 version: 1
 item:
   slug: automation-turn-3
-  title: "Automation Turn #3 — Daily Cyber Threat Intelligence Briefing"
+  title: "Automation Turn #3 — AI Platform & Agentic Updates Summary"
   links:
-    - "https://cyberpress.org/fake-sites-distribute-spyware/?utm_source=chatgpt.com"
-    - "https://www.infosecurity-magazine.com/news/454000-malicious-open-source/?utm_source=chatgpt.com"
-    - "https://www.pcgamer.com/software/security/google-says-a-winrar-exploit-for-windows-is-in-widespread-use-by-government-backed-threat-actors-linked-to-russia-and-china/?utm_source=chatgpt.com"
-    - "https://www.techradar.com/pro/security/nike-investigating-mega-security-breach-as-hackers-claim-to-have-stolen-1-4tb-of-data?utm_source=chatgpt.com"
-    - "https://industrialcyber.co/reports/hacktivists-and-cybercriminals-expand-attacks-on-ics-ot-and-ai-systems-across-critical-infrastructure/?utm_source=chatgpt.com"
-    - "https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/?utm_source=chatgpt.com"
-    - "https://www.cyfirma.com/news/weekly-intelligence-report-30-january-2026/?utm_source=chatgpt.com"
-  type: "cti-briefing"
+    - "https://github.blog/news-insights/company-news/build-an-agent-into-any-app-with-the-github-copilot-sdk/?utm_source=chatgpt.com"
+    - "https://www.axios.com/2026/01/28/ai-anthropic-claude-servicenow-agents?utm_source=chatgpt.com"
+    - "https://www.theverge.com/news/867673/claude-mcp-app-interactive-slack-figma-canva?utm_source=chatgpt.com"
+    - "https://www.barrons.com/articles/agentic-ai-cybersecurity-stocks-crowdstrike-ed44bfbf?utm_source=chatgpt.com"
+  type: "ai-platform-updates"
   date: "2026-01-29"
-  intriguing_claim: "Fake OSS installer sites and malicious OSS packages are industrialized, pressuring cloud and supply-chain defenses."
+  intriguing_claim: "Copilot SDK embedding, Claude enterprise integration, MCP app workflows, and agent security risks converge into a governed automation imperative."
 required_checks:
   status: "assumed"
   assumed:
@@ -31,8 +28,6 @@ evals:
     type: "fixture"
 evidence_ids:
   - "EVD-AUTOMATION-TURN-3-GOV-001"
-  - "EVD-AUTOMATION-TURN-3-SEC-001"
-  - "EVD-AUTOMATION-TURN-3-OPS-001"
 docs:
   - "docs/standards/automation-turn-3.md"
   - "docs/security/data-handling/automation-turn-3.md"

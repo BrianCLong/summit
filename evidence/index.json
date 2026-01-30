@@ -137,6 +137,30 @@
         "evidence/runs/verify_subsumption_bundle/metrics.json",
         "evidence/runs/verify_subsumption_bundle/stamp.json"
       ]
+    },
+    "EVD-AUTOMATION-TURN-3-GOV-001": {
+      "area": "subsumption",
+      "item_slug": "automation-turn-3",
+      "files": [
+        "subsumption/automation-turn-3/evidence/report.json",
+        "subsumption/automation-turn-3/evidence/metrics.json",
+        "subsumption/automation-turn-3/evidence/stamp.json"
+      ]
+    },
+    "EVD-BUNDLE-GOV-001": {
+      "area": "governance",
+      "item_slug": "example",
+      "files": ["subsumption/example/evidence/report.json"]
+    },
+    "EVD-BUNDLE-GOV-003": {
+      "area": "metrics",
+      "item_slug": "example",
+      "files": ["subsumption/example/evidence/metrics.json"]
+    },
+    "EVD-BUNDLE-GOV-004": {
+      "area": "stamp",
+      "item_slug": "example",
+      "files": ["subsumption/example/evidence/stamp.json"]
     }
   ]
 }
