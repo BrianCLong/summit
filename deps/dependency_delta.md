@@ -2,12 +2,12 @@
 
 ## Summary
 
-- Added:
-- Removed:
-- Updated:
+- Added: None.
+- Removed: None.
+- Updated: None.
 
 ## Notes
 
-- Rationale:
-- Risk:
-- Rollback:
+- Rationale: Evidence schema scaffolding only.
+- Risk: None.
+- Rollback: Revert commit.
