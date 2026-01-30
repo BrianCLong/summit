@@ -1,72 +1,101 @@
 {
-  "version": 1,
-  "evidence": {
-    "EVD-VFGNN-SPEC-001": {
-      "report": "evidence/legacy/EVD-VFGNN-SPEC-001/report.json",
-      "metrics": "evidence/legacy/EVD-VFGNN-SPEC-001/metrics.json",
-      "stamp": "evidence/legacy/EVD-VFGNN-SPEC-001/stamp.json"
+  "evidence_version": "1.0",
+  "items": [
+    {
+      "evidence_id": "EVD-vfgnn-SPEC-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
-    "EVD-VFGNN-GOV-001": {
-      "report": "evidence/legacy/EVD-VFGNN-GOV-001/report.json",
-      "metrics": "evidence/legacy/EVD-VFGNN-GOV-001/metrics.json",
-      "stamp": "evidence/legacy/EVD-VFGNN-GOV-001/stamp.json"
+    {
+      "evidence_id": "EVD-vfgnn-GOV-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
-    "EVD-VFGNN-ROB-001": {
-      "report": "evidence/legacy/EVD-VFGNN-ROB-001/report.json",
-      "metrics": "evidence/legacy/EVD-VFGNN-ROB-001/metrics.json",
-      "stamp": "evidence/legacy/EVD-VFGNN-ROB-001/stamp.json"
+    {
+      "evidence_id": "EVD-vfgnn-ROB-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
-    "EVD-VFGNN-ATT-001": {
-      "report": "evidence/legacy/EVD-VFGNN-ATT-001/report.json",
-      "metrics": "evidence/legacy/EVD-VFGNN-ATT-001/metrics.json",
-      "stamp": "evidence/legacy/EVD-VFGNN-ATT-001/stamp.json"
+    {
+      "evidence_id": "EVD-vfgnn-ATT-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
-    "EVD-VFGNN-NEG-001": {
-      "report": "evidence/legacy/EVD-VFGNN-NEG-001/report.json",
-      "metrics": "evidence/legacy/EVD-VFGNN-NEG-001/metrics.json",
-      "stamp": "evidence/legacy/EVD-VFGNN-NEG-001/stamp.json"
+    {
+      "evidence_id": "EVD-vfgnn-NEG-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     {
-      "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-SCHEMA-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     {
-      "evidence_id": "EVD-PSYCH_ABM_LLM-RAG-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-PLNR-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     {
-      "evidence_id": "EVD-PSYCH_ABM_LLM-MFT-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-XFER-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     {
-      "evidence_id": "EVD-PSYCH_ABM_LLM-ABM-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-ATLS-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     {
-      "evidence_id": "EVD-PSYCH_ABM_LLM-SEC-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-ATLS-002",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     {
-      "evidence_id": "EVD-PSYCH_ABM_LLM-CI-001",
-      "report": "evidence/report.json",
-      "metrics": "evidence/metrics.json",
-      "stamp": "evidence/stamp.json"
+      "evidence_id": "EVD-ATLAS-GOV-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     }
   }
 }
