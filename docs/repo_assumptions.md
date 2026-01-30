@@ -1,20 +1,21 @@
-# Repo Assumptions (ASSUMPTION-LEDGER)
+# Repo Assumptions (Subsumption Bundle Scaffold)
 
 ## Verified
 
-- None (no repo access in this session).
+- Repo state: Intentionally constrained to local verification; external branch protection state is deferred pending governance access.
 
-## Assumed
+## Assumed (must validate)
 
-- GitHub Actions is used for CI.
-- Node.js is available in CI to run `scripts/ci/*.mjs`.
-- Conventional commits are acceptable for PR titles.
+- CI uses GitHub Actions.
+- Node runtime is available for CI scripts.
+- Evidence artifacts are acceptable as JSON outputs under `evidence/`.
 
 ## Must-not-touch
 
-- Existing packages/workspaces (no refactors).
-- Existing workflows except adding one new job (no edits to existing jobs unless required).
+- Existing workflows (modify only by adding new workflow or a single job if conventions require).
+- Public API surfaces and packages unless explicitly required by a gate.
 
-## Required Checks
+## Validation plan
 
-- Unknown. Use `docs/required_checks.todo.md` to discover exact names before making them required.
+- Discover required checks (see `docs/required_checks.todo.md`).
+- Confirm Node version and package manager conventions.

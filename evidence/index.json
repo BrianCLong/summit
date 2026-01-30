@@ -128,6 +128,15 @@
         "evidence/bpac/EVD-BPAC-GOV-007/metrics.json",
         "evidence/bpac/EVD-BPAC-GOV-007/stamp.json"
       ]
+    },
+    "EVD-ITEMUNKNOWN-CI-001": {
+      "area": "subsumption",
+      "item_slug": "item-UNKNOWN",
+      "files": [
+        "evidence/runs/verify_subsumption_bundle/report.json",
+        "evidence/runs/verify_subsumption_bundle/metrics.json",
+        "evidence/runs/verify_subsumption_bundle/stamp.json"
+      ]
     }
   ]
 }
