@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-RTSTREAM-GRAPHRAG-INGEST-001",
+  "metrics": {
+    "tests_passed": 1,
+    "coverage": 100
+  }
+}

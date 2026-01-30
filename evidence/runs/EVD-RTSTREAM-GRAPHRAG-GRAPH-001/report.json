@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-RTSTREAM-GRAPHRAG-GRAPH-001",
+  "summary": "Automated run of RTStream GraphRAG tests",
+  "artifacts": [
+    "metrics.json",
+    "stamp.json"
+  ]
+}
