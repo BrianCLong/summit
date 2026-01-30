@@ -539,6 +539,43 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: subsumption-bundle-framework
+    version: v1
+    path: prompts/governance/subsumption-bundle-framework@v1.md
+    sha256: f09271d11c1411c92d68fd6bcb8aa9d647b5739ce15c27b60fb634f85519dbee
+    description: Scaffold subsumption bundle templates, verifier gates, and governance docs for deterministic intake.
+    scope:
+      paths:
+        - subsumption/
+        - scripts/ci/
+        - docs/standards/
+        - docs/security/data-handling/
+        - docs/ops/runbooks/
+        - docs/decisions/
+        - docs/repo_assumptions.md
+        - docs/required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - evidence/index.json
+        - deps_delta/
+        - backlog/
+        - .github/workflows/subsumption-bundle.yml
+        - prompts/governance/subsumption-bundle-framework@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - ci
+        - evidence
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: daily-disinfo-research-summary
     version: v1
     path: prompts/research/daily-disinfo-research-summary@v1.md

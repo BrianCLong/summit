@@ -56,6 +56,42 @@
         "evidence/ssdf-v1-2/pr-01/metrics.json",
         "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
+    },
+    "EVD-ITEMUNKNOWN-FND-001": {
+      "area": "subsumption",
+      "item_slug": "item-unknown",
+      "files": [
+        "evidence/item-unknown/report.json",
+        "evidence/item-unknown/metrics.json",
+        "evidence/item-unknown/stamp.json"
+      ]
+    },
+    "EVD-SUBSUMPTION-FRAMEWORK-GOV-001": {
+      "area": "subsumption",
+      "item_slug": "subsumption-bundle-framework",
+      "files": [
+        "evidence/runs/verify-subsumption-bundle/report.json",
+        "evidence/runs/verify-subsumption-bundle/metrics.json",
+        "evidence/runs/verify-subsumption-bundle/stamp.json"
+      ]
+    },
+    "EVD-SUBSUMPTION-FRAMEWORK-SEC-001": {
+      "area": "subsumption",
+      "item_slug": "subsumption-bundle-framework",
+      "files": [
+        "evidence/runs/verify-subsumption-bundle/report.json",
+        "evidence/runs/verify-subsumption-bundle/metrics.json",
+        "evidence/runs/verify-subsumption-bundle/stamp.json"
+      ]
+    },
+    "EVD-SUBSUMPTION-FRAMEWORK-GTM-001": {
+      "area": "subsumption",
+      "item_slug": "subsumption-bundle-framework",
+      "files": [
+        "evidence/runs/verify-subsumption-bundle/report.json",
+        "evidence/runs/verify-subsumption-bundle/metrics.json",
+        "evidence/runs/verify-subsumption-bundle/stamp.json"
+      ]
     }
   ]
 }

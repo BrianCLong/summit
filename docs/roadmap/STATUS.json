@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T12:00:00Z",
-  "revision_note": "Add SSDF v1.2 subsumption bundle scaffold and evidence entry",
+  "last_updated": "2026-02-14T00:00:00Z",
+  "revision_note": "Added subsumption bundle framework scaffolding and verifier gate docs",
   "initiatives": [
     {
       "id": "A",
