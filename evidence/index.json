@@ -1,9 +1,4 @@
 {
   "version": 1,
-  "items": [
-    { "id": "EVD-PCTX_CODEMODE-ARCH-001", "path": "docs/architecture/codemode.md" },
-    { "id": "EVD-PCTX_CODEMODE-SEC-002", "path": "tests/security/README.md" },
-    { "id": "EVD-PCTX_CODEMODE-EVAL-003", "path": "evals/codemode_bench/metrics.json" },
-    { "id": "EVD-PCTX_CODEMODE-CI-004", "path": "ci/required_checks.todo.md" }
-  ]
+  "items": {}
 }

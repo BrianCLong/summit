@@ -1,5 +1,13 @@
-# Required checks discovery (TODO)
-1) Open GitHub repo → Settings → Branches → Branch protection rules.
-2) List required status checks and their exact names.
-3) Replace temporary check names in `.github/workflows/jetrl-ci.yml`.
-4) Verify that `ci/verify_cogwar_evidence.py` is included in the CI pipeline (or will be).
+# Required checks discovery (Lane 1)
+
+1. **Discover Checks**:
+   - Open GitHub repo → Settings → Branches → Required status checks.
+   - Use `gh api` to list checks if accessible.
+
+2. **Temporary Local Names**:
+   - `summit-evidence`: Runs `ci/check_evidence.sh`.
+   - `summit-tests`: Runs unit tests.
+   - `summit-lint`: Runs linters.
+
+3. **Rename Plan**:
+   - Once real check names are discovered, map them in `.github/workflows`.
