@@ -57,6 +57,8 @@
     "security:evidence-pack": "npx tsx scripts/security/evidence-pack.ts --mode=live",
     "security:evidence-pack:offline": "npx tsx scripts/security/evidence-pack.ts --mode=offline --fixturesDir=scripts/security/fixtures",
     "security:drift-check": "npx tsx scripts/security/drift-check.ts",
+    "test:security": "pnpm --filter intelgraph-server run test src/security/__tests__",
+    "provenance:gate": "bash scripts/ci/enforce-provenance.sh",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "test:quarantine": "echo 'Quarantine test placeholder - no flaky tests currently'",
