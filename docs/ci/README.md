@@ -231,3 +231,4 @@ gh run cancel <run-id>  # Cancel stale run
 - [BRANCH_PROTECTION_RECONCILIATION.md](./BRANCH_PROTECTION_RECONCILIATION.md) - Protection alignment
 - [CANARY_ROLLOUT.md](./CANARY_ROLLOUT.md) - Canary promotion process
 - [ACTIONS_PINNING.md](./ACTIONS_PINNING.md) - SHA pinning policy
+- [daily/2026-01-29-ci-cd-daily.md](./daily/2026-01-29-ci-cd-daily.md) - CI/CD daily report
