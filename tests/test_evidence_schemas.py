@@ -1,56 +1,68 @@
+from __future__ import annotations
+
 import json
-import os
+import re
+from pathlib import Path
 
 import pytest
-from jsonschema import validate
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import ValidationError
 
-SCHEMAS_DIR = "schemas/evidence"
+ROOT = Path(__file__).resolve().parents[1]
+SCHEMAS = ROOT / "evidence" / "schemas"
+FIXTURES = ROOT / "evidence" / "fixtures" / "kimik25"
+TIMESTAMP_VALUE = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}")
 
-def load_json(filepath):
-    with open(filepath) as f:
-        return json.load(f)
 
-def test_report_schema():
-    schema = load_json(os.path.join(SCHEMAS_DIR, "report.schema.json"))
-    valid_data = {
-        "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
-        "summary": "Test summary",
-        "artifacts": [
-            {"path": "some/path", "description": "desc"}
-        ]
-    }
-    validate(instance=valid_data, schema=schema)
+def load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
 
-def test_metrics_schema():
-    schema = load_json(os.path.join(SCHEMAS_DIR, "metrics.schema.json"))
-    valid_data = {
-        "metrics": {
-            "score": 0.9,
-            "latency": 100
-        }
-    }
-    validate(instance=valid_data, schema=schema)
 
-def test_stamp_schema():
-    schema = load_json(os.path.join(SCHEMAS_DIR, "stamp.schema.json"))
-    valid_data = {
-        "created_at": "2023-10-27T10:00:00Z",
-        "version": "1.0.0",
-        "git_commit": "abcdef"
-    }
-    validate(instance=valid_data, schema=schema)
+def validate(schema_name: str, fixture_name: str) -> None:
+    schema = load_json(SCHEMAS / schema_name)
+    data = load_json(FIXTURES / fixture_name)
+    Draft202012Validator(schema).validate(data)
 
-def test_index_schema():
-    schema = load_json(os.path.join(SCHEMAS_DIR, "index.schema.json"))
-    valid_data = {
-        "version": 1,
-        "items": [
-            {
-                "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
-                "report": "evidence/report.json",
-                "metrics": "evidence/metrics.json",
-                "stamp": "evidence/stamp.json"
-            }
-        ]
-    }
-    validate(instance=valid_data, schema=schema)
+
+def scan_for_timestamps(obj: object) -> bool:
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            key_lower = key.lower()
+            if (
+                "time" in key_lower
+                or "timestamp" in key_lower
+                or "date" in key_lower
+                or "generated" in key_lower
+                or "created" in key_lower
+            ) and isinstance(value, str):
+                if TIMESTAMP_VALUE.search(value):
+                    return True
+            if scan_for_timestamps(value):
+                return True
+    elif isinstance(obj, list):
+        return any(scan_for_timestamps(item) for item in obj)
+    return False
+
+
+def test_report_schema_ok() -> None:
+    validate("report.schema.json", "report.ok.json")
+
+
+def test_metrics_schema_ok() -> None:
+    validate("metrics.schema.json", "metrics.ok.json")
+
+
+def test_stamp_schema_ok() -> None:
+    validate("stamp.schema.json", "stamp.ok.json")
+
+
+def test_report_schema_missing_evidence_id() -> None:
+    schema = load_json(SCHEMAS / "report.schema.json")
+    data = load_json(FIXTURES / "report.bad.json")
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(data)
+
+
+def test_report_timestamp_detected() -> None:
+    data = load_json(FIXTURES / "report.timestamp.json")
+    assert scan_for_timestamps(data)

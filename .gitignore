@@ -363,3 +363,7 @@ evidence-staging/
 *.txt
 tmp-test/
 _worktrees/
+
+# Evidence outputs (governed artifacts)
+!evidence/out/
+!evidence/out/**
