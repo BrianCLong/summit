@@ -24,6 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20' # Ensure this matches project's engine requirement
 
       - name: Set up Python

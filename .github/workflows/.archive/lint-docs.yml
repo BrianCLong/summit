@@ -13,6 +13,7 @@ jobs:
       - name: Use Node 18
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
       - name: Install markdownlint-cli
         run: npm i -g markdownlint-cli@0.39.0

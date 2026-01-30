@@ -23,6 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Enable Corepack

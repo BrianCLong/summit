@@ -15,6 +15,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '18'
 
       # Ideally this would spin up the environment or target a staging environment

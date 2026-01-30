@@ -1,0 +1,269 @@
+name: CI Legacy (Non-Blocking)
+
+# This workflow contains NON-BLOCKING checks:
+# - Quarantined flaky tests
+# - Legacy test suites (Jest/ts-jest with ESM issues)
+# - Experimental features
+# - Deprecated checks being migrated
+#
+# None of these jobs block PR merges. They provide informational feedback only.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quarantine-tests:
+    name: Quarantine Tests (Flaky)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # NON-BLOCKING
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run quarantined tests
+        run: |
+          if npm run test:quarantine 2>/dev/null; then
+            echo "✅ Quarantined tests passed"
+          else
+            echo "⚠️ Quarantined tests failed (expected, non-blocking)"
+          fi
+
+      - name: Upload quarantine results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: quarantine-test-results
+          path: |
+            test-results/quarantine/
+          retention-days: 7
+
+  jest-legacy-suite:
+    name: Jest/ts-jest Suite (ESM Issues)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # NON-BLOCKING (ESM loader issues)
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Jest test suite
+        run: |
+          echo "=== Running legacy Jest suite ==="
+          echo "Note: This suite has known ESM/node-fetch issues"
+          npm test || echo "⚠️ Jest suite failed (known issues, non-blocking)"
+
+      - name: Upload Jest results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: jest-test-results
+          path: |
+            coverage/
+            test-results/
+          retention-days: 7
+
+  experimental-checks:
+    name: Experimental Checks
+    runs-on: ubuntu-latest
+    continue-on-error: true  # NON-BLOCKING
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: AI Copilot Canary
+        run: |
+          if make test:ai-canary 2>/dev/null; then
+            echo "✅ AI Copilot canary passed"
+          else
+            echo "⚠️ AI Copilot canary skipped or failed (experimental)"
+          fi
+
+      - name: Graph Guardrail Fuzz
+        run: |
+          if make test:graph-fuzz 2>/dev/null; then
+            echo "✅ Graph guardrail fuzz passed"
+          else
+            echo "⚠️ Graph guardrail fuzz skipped or failed (experimental)"
+          fi
+
+      - name: Performance benchmarks
+        run: |
+          if [ -f "scripts/run-benchmarks.ts" ]; then
+            npx tsx scripts/run-benchmarks.ts || echo "⚠️ Benchmarks failed (non-blocking)"
+          else
+            echo "Benchmarks skipped (not yet implemented)"
+          fi
+
+  deprecated-checks:
+    name: Deprecated Checks (Migration in Progress)
+    runs-on: ubuntu-latest
+    continue-on-error: true  # NON-BLOCKING
+    steps:
+      - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Schema diff (migrating to ci-verify)
+        run: |
+          echo "=== Schema Diff (Deprecated) ==="
+          echo "This check is being migrated to ci-verify.yml"
+          if npm run graphql:schema:check 2>/dev/null; then
+            echo "✅ Schema diff passed"
+          else
+            echo "⚠️ Schema diff failed or skipped (non-blocking)"
+          fi
+
+      - name: Old governance checks (migrating to ci-verify)
+        run: |
+          echo "=== Old Governance Checks (Deprecated) ==="
+          echo "These checks are being consolidated into ci-verify.yml"
+          if npm run check:governance:legacy 2>/dev/null; then
+            echo "✅ Legacy governance checks passed"
+          else
+            echo "⚠️ Legacy governance checks skipped (non-blocking)"
+          fi
+
+  performance-regression:
+    name: Performance Regression Tests
+    runs-on: ubuntu-latest
+    continue-on-error: true  # NON-BLOCKING
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run performance tests
+        run: |
+          if [ -f "test/performance/run-perf-tests.ts" ]; then
+            npx tsx test/performance/run-perf-tests.ts || echo "⚠️ Performance tests failed (non-blocking)"
+          else
+            echo "Performance tests skipped (not yet implemented)"
+          fi
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: performance-results
+          path: |
+            test-results/performance/
+          retention-days: 30
+
+  accessibility-audit:
+    name: Web Accessibility Audit
+    runs-on: ubuntu-latest
+    continue-on-error: true  # NON-BLOCKING
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run accessibility checks
+        run: |
+          if npm run test:accessibility 2>/dev/null; then
+            echo "✅ Accessibility checks passed"
+          else
+            echo "⚠️ Accessibility checks skipped or failed (non-blocking)"
+          fi
+
+      - name: Upload a11y results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: accessibility-results
+          path: |
+            test-results/accessibility/
+          retention-days: 30
+
+  ci-legacy-summary:
+    name: CI Legacy Summary (Informational)
+    runs-on: ubuntu-latest
+    needs:
+      - quarantine-tests
+      - jest-legacy-suite
+      - experimental-checks
+      - deprecated-checks
+      - performance-regression
+      - accessibility-audit
+    if: always()
+    steps:
+      - name: Report results (non-blocking)
+        run: |
+          echo "=== CI Legacy Summary (INFORMATIONAL) ==="
+          echo ""
+          echo "Quarantine Tests: ${{ needs.quarantine-tests.result }}"
+          echo "Jest Legacy Suite: ${{ needs.jest-legacy-suite.result }}"
+          echo "Experimental Checks: ${{ needs.experimental-checks.result }}"
+          echo "Deprecated Checks: ${{ needs.deprecated-checks.result }}"
+          echo "Performance Regression: ${{ needs.performance-regression.result }}"
+          echo "Accessibility Audit: ${{ needs.accessibility-audit.result }}"
+          echo ""
+          echo "ℹ️ CI LEGACY: INFORMATIONAL ONLY"
+          echo "These checks do NOT block PR merges."
+          echo "Failures indicate areas for future improvement."
+
+      - name: Post summary
+        run: |
+          echo "## ℹ️ CI Legacy: Informational Only" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following checks are **non-blocking** and do not affect PR mergeability:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Quarantine Tests | ${{ needs.quarantine-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Jest Legacy Suite | ${{ needs.jest-legacy-suite.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Experimental Checks | ${{ needs.experimental-checks.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deprecated Checks | ${{ needs.deprecated-checks.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance Regression | ${{ needs.performance-regression.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Accessibility Audit | ${{ needs.accessibility-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note**: These are informational and tracked for future stabilization." >> $GITHUB_STEP_SUMMARY
+          echo "See \`docs/ga/CI_CONSOLIDATION_PLAN.md\` for migration status." >> $GITHUB_STEP_SUMMARY
