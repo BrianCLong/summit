@@ -7,18 +7,15 @@ on:
       - "scripts/ci/**"
       - "docs/**"
       - "evidence/**"
-      - "deps_delta/**"
-      - "backlog/**"
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
-  verify-subsumption-bundle:
-    runs-on: ubuntu-24.04
+  verify_subsumption_bundle:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Verify template bundle
-        run: node scripts/ci/verify_subsumption_bundle.mjs --manifest subsumption/_template/manifest.yaml
+      - name: Verify subsumption bundle
+        run: node scripts/ci/verify_subsumption_bundle.mjs --bundle subsumption/item-UNKNOWN

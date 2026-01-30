@@ -1,167 +1,280 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import yaml from 'js-yaml';
 
-function fail(msg, code = 2) {
-  console.error(msg);
-  process.exit(code);
+const args = process.argv.slice(2);
+const bundleArgIndex = args.indexOf('--bundle');
+const fixtureArgIndex = args.indexOf('--fixture');
+const bundlePath = bundleArgIndex >= 0 ? args[bundleArgIndex + 1] : 'subsumption/item-UNKNOWN';
+const fixtureRoot = fixtureArgIndex >= 0 ? args[fixtureArgIndex + 1] : null;
+
+const repoRoot = process.cwd();
+const docTargets = [
+  'docs/repo_assumptions.md',
+  'docs/required_checks.todo.md',
+  'docs/standards/item-UNKNOWN.md',
+  'docs/security/data-handling/item-UNKNOWN.md',
+  'docs/ops/runbooks/item-UNKNOWN.md',
+  'docs/decisions/item-UNKNOWN.md',
+  'docs/assumptions/item-UNKNOWN.md',
+];
+const schemaPaths = [
+  'evidence/schemas/report.schema.json',
+  'evidence/schemas/metrics.schema.json',
+  'evidence/schemas/stamp.schema.json',
+];
+
+function fail(message) {
+  console.error(message);
+  process.exit(1);
 }
 
-function sortKeysDeep(value) {
-  if (Array.isArray(value)) {
-    return value.map(sortKeysDeep);
+function exists(targetPath) {
+  try {
+    fs.accessSync(targetPath);
+    return true;
+  } catch {
+    return false;
   }
-  if (value && typeof value === 'object') {
-    const out = {};
-    for (const key of Object.keys(value).sort()) {
-      out[key] = sortKeysDeep(value[key]);
+}
+
+function readJson(filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(raw);
+}
+
+function hasTimestampValue(value) {
+  if (typeof value === 'string') {
+    return /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value);
+  }
+  return false;
+}
+
+function scanForTimestamps(node, trail = []) {
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i += 1) {
+      const result = scanForTimestamps(node[i], trail.concat(String(i)));
+      if (result) {
+        return result;
+      }
     }
-    return out;
+    return null;
   }
-  return value;
-}
 
-function stableJson(value) {
-  return `${JSON.stringify(sortKeysDeep(value), null, 2)}\n`;
-}
-
-function readText(p) {
-  return fs.readFileSync(p, 'utf8');
-}
-
-function fileExists(filePath) {
-  return fs.existsSync(filePath);
-}
-
-function ensureString(value, label, errors) {
-  if (typeof value !== 'string' || value.trim().length === 0) {
-    errors.push(`Missing or invalid ${label}.`);
-  }
-}
-
-function ensureArray(value, label, errors) {
-  if (!Array.isArray(value) || value.length === 0) {
-    errors.push(`Missing or invalid ${label}.`);
-  }
-}
-
-const manifestPath = process.argv[2];
-if (!manifestPath) {
-  fail('Usage: node scripts/ci/verify_subsumption_bundle.mjs <manifest.yaml>');
-}
-
-if (!fs.existsSync(manifestPath)) {
-  fail(`Missing manifest: ${manifestPath}`);
-}
-
-const manifestRaw = readText(manifestPath);
-let manifest;
-try {
-  manifest = yaml.load(manifestRaw);
-} catch (error) {
-  fail(`Invalid YAML in ${manifestPath}: ${error.message}`);
-}
-
-const errors = [];
-ensureString(manifest?.version?.toString?.(), 'manifest version', errors);
-ensureString(manifest?.item?.slug, 'item.slug', errors);
-ensureString(manifest?.item?.title, 'item.title', errors);
-ensureString(manifest?.item?.type, 'item.type', errors);
-ensureString(manifest?.claims?.registry, 'claims.registry', errors);
-ensureArray(manifest?.docs, 'docs', errors);
-ensureArray(manifest?.evidence_ids, 'evidence_ids', errors);
-
-const root = path.resolve(path.dirname(manifestPath), '..', '..');
-const claimsRegistry = manifest?.claims?.registry
-  ? path.join(root, manifest.claims.registry)
-  : null;
-if (claimsRegistry && !fileExists(claimsRegistry)) {
-  errors.push(`Missing claims registry: ${claimsRegistry}`);
-}
-
-const docs = Array.isArray(manifest?.docs) ? manifest.docs : [];
-for (const docPath of docs) {
-  const resolved = path.join(root, docPath);
-  if (!fileExists(resolved)) {
-    errors.push(`Missing doc: ${resolved}`);
-  }
-}
-
-const bundleDir = path.dirname(manifestPath);
-const denyFixture = path.join(bundleDir, 'fixtures', 'deny', 'README.md');
-const allowFixture = path.join(bundleDir, 'fixtures', 'allow', 'README.md');
-if (!fileExists(denyFixture)) {
-  errors.push(`Missing deny-by-default fixture: ${denyFixture}`);
-}
-if (!fileExists(allowFixture)) {
-  errors.push(`Missing allow fixture: ${allowFixture}`);
-}
-
-const slug = manifest?.item?.slug;
-const evidenceIndexPath = path.join(root, 'evidence', 'index.json');
-let evidenceIndex = null;
-if (slug === 'branch-protection-as-code') {
-  if (fileExists(evidenceIndexPath)) {
-    evidenceIndex = JSON.parse(readText(evidenceIndexPath));
-  } else {
-    errors.push(`Missing evidence index: ${evidenceIndexPath}`);
-  }
-}
-
-if (slug === 'branch-protection-as-code' && evidenceIndex?.evidence) {
-  for (const evidenceId of manifest.evidence_ids) {
-    const entry = evidenceIndex.evidence[evidenceId];
-    if (!entry) {
-      errors.push(`Evidence ID missing in index: ${evidenceId}`);
-      continue;
-    }
-    for (const filePath of entry.files || []) {
-      const resolved = path.join(root, filePath);
-      if (!fileExists(resolved)) {
-        errors.push(`Evidence file missing: ${resolved}`);
+  if (node && typeof node === 'object') {
+    for (const [key, value] of Object.entries(node)) {
+      const lowerKey = key.toLowerCase();
+      if (['created_at', 'generated_at', 'timestamp', 'createdat', 'generatedat'].includes(lowerKey)) {
+        return trail.concat(key).join('.');
+      }
+      if (hasTimestampValue(value)) {
+        return trail.concat(key).join('.');
+      }
+      const nested = scanForTimestamps(value, trail.concat(key));
+      if (nested) {
+        return nested;
       }
     }
   }
+
+  return null;
 }
 
-if (slug === 'branch-protection-as-code') {
-  const evidenceDir = path.join(root, 'evidence', 'bpac', 'EVD-BPAC-GOV-003');
-  const report = {
-    evidence_id: 'EVD-BPAC-GOV-003',
-    summary: errors.length > 0 ? 'Subsumption bundle verification failed.' : 'Subsumption bundle verified.',
-    claims: ['SUMMIT_ORIGINAL'],
-    decisions: [errors.length > 0 ? 'deny-by-default' : 'allow'],
-    details: {
-      manifest_path: manifestPath,
-      docs_count: docs.length,
-      evidence_ids_count: Array.isArray(manifest?.evidence_ids) ? manifest.evidence_ids.length : 0,
-      errors
+function checkBundle(bundleDir, { docRoot, enforceSchemas, enforceEvidenceIndex, enforceFixtures }) {
+  const errors = [];
+  const checks = [];
+
+  const manifestPath = path.join(bundleDir, 'manifest.yaml');
+  if (!exists(manifestPath)) {
+    errors.push(`Missing manifest.yaml at ${manifestPath}`);
+  } else {
+    checks.push(manifestPath);
+  }
+
+  for (const docPath of docTargets) {
+    const target = path.join(docRoot, docPath);
+    if (!exists(target)) {
+      errors.push(`Missing docs target: ${docPath}`);
+    } else {
+      checks.push(target);
     }
-  };
-  const metrics = {
-    evidence_id: 'EVD-BPAC-GOV-003',
-    metrics: {
-      docs_count: docs.length,
-      evidence_ids_count: Array.isArray(manifest?.evidence_ids) ? manifest.evidence_ids.length : 0,
-      error_count: errors.length
+  }
+
+  if (enforceSchemas) {
+    for (const schemaPath of schemaPaths) {
+      const target = path.join(repoRoot, schemaPath);
+      if (!exists(target)) {
+        errors.push(`Missing schema: ${schemaPath}`);
+      } else {
+        checks.push(target);
+      }
     }
-  };
-  const stamp = {
-    evidence_id: 'EVD-BPAC-GOV-003',
-    tool: 'verify_subsumption_bundle',
-    version: '1.0.0',
-    timestamp: new Date().toISOString()
-  };
+  }
 
-  fs.mkdirSync(evidenceDir, { recursive: true });
-  fs.writeFileSync(path.join(evidenceDir, 'report.json'), stableJson(report));
-  fs.writeFileSync(path.join(evidenceDir, 'metrics.json'), stableJson(metrics));
-  fs.writeFileSync(path.join(evidenceDir, 'stamp.json'), stableJson(stamp));
+  if (enforceEvidenceIndex) {
+    const indexPath = path.join(repoRoot, 'evidence/index.json');
+    if (!exists(indexPath)) {
+      errors.push('Missing evidence/index.json');
+    } else {
+      checks.push(indexPath);
+    }
+  }
+
+  if (enforceFixtures) {
+    const fixturePath = path.join(repoRoot, 'scripts/ci/__fixtures__/subsumption/item-UNKNOWN');
+    if (!exists(fixturePath)) {
+      errors.push(`Missing fixtures directory: ${fixturePath}`);
+    } else {
+      checks.push(fixturePath);
+    }
+  }
+
+  const reportPath = path.join(bundleDir, 'report.json');
+  const metricsPath = path.join(bundleDir, 'metrics.json');
+  if (exists(reportPath)) {
+    const reportData = readJson(reportPath);
+    const timestampTrail = scanForTimestamps(reportData);
+    if (timestampTrail) {
+      errors.push(`Report contains timestamp-like value at ${timestampTrail}`);
+    }
+  }
+  if (exists(metricsPath)) {
+    const metricsData = readJson(metricsPath);
+    const timestampTrail = scanForTimestamps(metricsData);
+    if (timestampTrail) {
+      errors.push(`Metrics contains timestamp-like value at ${timestampTrail}`);
+    }
+  }
+
+  return { errors, checks };
 }
 
-if (errors.length > 0) {
-  fail(errors.join('\n'));
+function listFixtureDirs(rootDir) {
+  if (!exists(rootDir)) {
+    return { positive: [], negative: [] };
+  }
+  const positiveDir = path.join(rootDir, 'positive');
+  const negativeDir = path.join(rootDir, 'negative');
+  const listChildren = (dirPath) =>
+    exists(dirPath)
+      ? fs
+          .readdirSync(dirPath)
+          .map((entry) => path.join(dirPath, entry))
+          .filter((entry) => fs.statSync(entry).isDirectory())
+      : [];
+  return {
+    positive: listChildren(positiveDir),
+    negative: listChildren(negativeDir),
+  };
 }
 
-console.log('OK: subsumption bundle verification passed.');
+const metrics = {
+  files_checked: 0,
+  fixtures_checked: 0,
+  fixtures_passed: 0,
+  fixtures_failed: 0,
+  violations: 0,
+};
+
+if (fixtureRoot) {
+  const fixtureDirs = listFixtureDirs(fixtureRoot);
+  const allFixtures = [...fixtureDirs.positive, ...fixtureDirs.negative];
+  if (allFixtures.length === 0) {
+    fail(`No fixtures found in ${fixtureRoot}`);
+  }
+
+  for (const fixtureDir of fixtureDirs.positive) {
+    const result = checkBundle(fixtureDir, {
+      docRoot: fixtureDir,
+      enforceSchemas: false,
+      enforceEvidenceIndex: true,
+      enforceFixtures: false,
+    });
+    metrics.fixtures_checked += 1;
+    metrics.files_checked += result.checks.length;
+    if (result.errors.length === 0) {
+      metrics.fixtures_passed += 1;
+    } else {
+      metrics.fixtures_failed += 1;
+      metrics.violations += result.errors.length;
+      fail(`Positive fixture failed (${fixtureDir}):\n- ${result.errors.join('\n- ')}`);
+    }
+  }
+
+  for (const fixtureDir of fixtureDirs.negative) {
+    const result = checkBundle(fixtureDir, {
+      docRoot: fixtureDir,
+      enforceSchemas: false,
+      enforceEvidenceIndex: true,
+      enforceFixtures: false,
+    });
+    metrics.fixtures_checked += 1;
+    metrics.files_checked += result.checks.length;
+    if (result.errors.length === 0) {
+      metrics.fixtures_failed += 1;
+      fail(`Negative fixture unexpectedly passed (${fixtureDir}).`);
+    } else {
+      metrics.fixtures_passed += 1;
+      metrics.violations += result.errors.length;
+    }
+  }
+} else {
+  const result = checkBundle(path.resolve(bundlePath), {
+    docRoot: repoRoot,
+    enforceSchemas: true,
+    enforceEvidenceIndex: true,
+    enforceFixtures: true,
+  });
+  metrics.files_checked += result.checks.length;
+  metrics.violations += result.errors.length;
+  if (result.errors.length > 0) {
+    fail(`verify_subsumption_bundle failed:\n- ${result.errors.join('\n- ')}`);
+  }
+}
+
+const outDir = path.join(repoRoot, 'evidence/runs/verify_subsumption_bundle');
+fs.mkdirSync(outDir, { recursive: true });
+
+fs.writeFileSync(
+  path.join(outDir, 'report.json'),
+  JSON.stringify(
+    {
+      version: 1,
+      evidence_id: 'EVD-ITEMUNKNOWN-CI-001',
+      item_slug: 'item-UNKNOWN',
+      claims: [],
+      decisions: ['Generated by verify_subsumption_bundle'],
+    },
+    null,
+    2,
+  ),
+);
+
+fs.writeFileSync(
+  path.join(outDir, 'metrics.json'),
+  JSON.stringify(
+    {
+      version: 1,
+      evidence_id: 'EVD-ITEMUNKNOWN-CI-001',
+      counters: metrics,
+    },
+    null,
+    2,
+  ),
+);
+
+fs.writeFileSync(
+  path.join(outDir, 'stamp.json'),
+  JSON.stringify(
+    {
+      version: 1,
+      evidence_id: 'EVD-ITEMUNKNOWN-CI-001',
+      tool: 'verify_subsumption_bundle@0.1.0',
+      generated_at: new Date().toISOString(),
+    },
+    null,
+    2,
+  ),
+);
+
+console.log('OK: verify_subsumption_bundle');

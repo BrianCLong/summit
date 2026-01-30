@@ -1,0 +1,6 @@
+version: 1
+item:
+  slug: item-UNKNOWN
+  title: "Fixture"
+claims:
+  registry: "subsumption/item-UNKNOWN/claims.md"

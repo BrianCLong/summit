@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T16:00:00Z",
-  "revision_note": "CI/CD daily report (2026-01-29) published for upstream/fork visibility alignment.",
+  "last_updated": "2026-01-29T19:00:00Z",
+  "revision_note": "Subsumption bundle scaffold for item-UNKNOWN recorded with verifier, fixtures, workflow, and evidence index updates; required-check discovery and assumptions tracked.",
   "initiatives": [
     {
       "id": "A",
