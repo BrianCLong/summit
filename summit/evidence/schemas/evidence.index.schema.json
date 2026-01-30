@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Index",
+  "type": "object",
+  "required": ["bundle_id", "item", "evidence"],
+  "properties": {
+    "bundle_id": {"type": "string"},
+    "item": {"type": "object", "required": ["arxiv_id"], "properties": {"arxiv_id": {"const": "2601.20757"}}},
+    "evidence": {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "required": ["evidence_id", "path", "description"],
+            "properties": {
+                "evidence_id": {"type": "string", "pattern": "^EVD-PP-SOCIALREASONING-[A-Z]+-\\d{3}$"},
+                "path": {"type": "string"},
+                "schema_path": {"type": "string"},
+                "description": {"type": "string"}
+            }
+        }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,16 +1,24 @@
-# Required Checks Todo
+# Required Checks Discovery
 
-## Inspection Steps
-1. Inspect branch protection rules for `main`.
-2. Identify required status checks.
+To ensure the "Persona Prompting" feature is properly governed, the following CI checks must be enabled and mapped to the repository settings.
 
-## Temporary Check Names
-The following checks are expected to be required for `cog_resilience` integration:
+## 1. List Existing Checks
+Use the GitHub CLI or API to list status checks for recent commits to identify the exact names reported by the CI runners.
 
-- `ci/summit-evidence`
-- `ci/summit-cog-policy`
-- `ci/summit-cog-evals`
-- `ci/supply-chain-delta`
+```bash
+# Example
+gh api repos/:owner/:repo/commits/main/status-check-contexts
+```
 
-## Rename Plan
-Once the actual required check names are confirmed from branch protection settings, rename these temporary checks in the CI workflows to match.
+## 2. Temporary Check Names
+Until the exact names are confirmed, we assume:
+
+*   `ci/persona-evals`: Runs the `summit/evals/social_reasoning/runner.py` with seed data.
+*   `ci/evidence-validate`: Runs `tools/ci/evidence_validate_bundle.py` on the output of the eval.
+
+## 3. Rename Plan
+Once the real check names are known (e.g., `test-persona-eval`, `validate-bundle-artifacts`), update the Branch Protection Rules to require them.
+
+## 4. Required Gates
+*   `persona_prompting_gate`: Must pass for any PR enabling `PERSONA_PROMPTING` feature flag.
+*   `persona_rationale_regression`: Must pass if rationale metrics degrade.
