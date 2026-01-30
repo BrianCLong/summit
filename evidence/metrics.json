@@ -1,15 +1,9 @@
 {
-  "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+  "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
   "metrics": {
-    "latency_ms_p95": 10.0,
-    "ead": {
-      "precision": 1.0,
-      "recall": 1.0
-    },
-    "bias": {
-      "by_language": {},
-      "by_region": {},
-      "by_demographic_proxy": {}
-    }
+    "clarification_turns_count": 0,
+    "critical_ambiguities_unresolved_count": 0,
+    "locality_pass_rate": 1.0,
+    "determinism_hash_match": 1.0
   }
 }

@@ -1,24 +1,27 @@
-# Required Checks Discovery (TODO)
-1) GitHub UI: Settings → Branches → Branch protection → Required status checks.
-2) Record exact check names here (copy/paste).
-3) Map them to Summit CI gate names and rename temporary checks.
+# Required Checks Discovery (Dynamic Intent)
 
-To ensure the "Persona Prompting" feature is properly governed, the following CI checks must be enabled and mapped to the repository settings.
+This checklist governs the Dynamic Intent scaffolding and associated evidence gates.
 
 ## 1. List Existing Checks
 
-Use the GitHub CLI or API to list status checks for recent commits to identify the exact names reported by the CI runners.
+Use the GitHub UI and API to list required checks for the default branch:
+
+1. **GitHub UI** → Repository → Settings → Branches → Branch protection rules → Required status checks.
+2. **GitHub API**:
 
 ```bash
-# Example
 gh api repos/:owner/:repo/commits/main/status-check-contexts
 ```
 
-Temporary check names to align with this initiative (replace once branch protection names are confirmed):
+## Temporary Required Check Names
 
-- `ci/persona-evals`
-- `ci/evidence-validate`
+- `ci/schema-validate`
+- `ci/determinism`
+- `ci/deny-by-default`
+- `ci/deps-delta`
+- `ci/locality-gate`
 
 ## Rename Plan
 
-Once the actual required check names are confirmed from branch protection settings, rename these temporary checks in the CI workflows to match.
+Once branch protection check names are confirmed, rename the temporary checks to match and update
+`docs/dynamic_intent/summit_module_map.md` with the canonical mapping.

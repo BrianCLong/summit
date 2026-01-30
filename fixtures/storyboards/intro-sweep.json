@@ -1,0 +1,37 @@
+{
+  "storyboard_id": "storyboard-intro-sweep",
+  "version": "0.1",
+  "frames": [
+    {
+      "frame_index": 0,
+      "frame_hash": "frame-0",
+      "notes": "Line sweeps left to right",
+      "strokes": [
+        {
+          "stroke_id": "stroke-0",
+          "label": "baseline",
+          "points": [
+            { "x": 0, "y": 0 },
+            { "x": 1, "y": 0 }
+          ]
+        }
+      ]
+    },
+    {
+      "frame_index": 1,
+      "frame_hash": "frame-1",
+      "notes": "Arrow grows upward",
+      "strokes": [
+        {
+          "stroke_id": "stroke-1",
+          "label": "arrow",
+          "points": [
+            { "x": 1, "y": 0 },
+            { "x": 1, "y": 1 }
+          ]
+        }
+      ]
+    }
+  ],
+  "imports": []
+}
