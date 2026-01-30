@@ -1,14 +1,12 @@
-# Required Checks Discovery (TODO)
+# Required checks discovery (temporary)
 
-## UI
-1. Repo Settings -> Branches -> Branch protection rules.
-2. Note required status checks for default branch.
+1. In GitHub UI: Settings -> Branches -> Branch protection rule -> note required checks.
+2. OR via API: GET /repos/{owner}/{repo}/branches/{branch}/protection
+3. Copy names into ci/required_checks.json
 
-## API (GitHub)
-Use: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+Temporary convention until discovered:
 
-## Temporary CI gate names (will rename)
-- ci/unit
-- ci/evidence
-- ci/governance
-- ci/eval
+- "unit"
+- "lint"
+- "typecheck"
+- "security-scan"

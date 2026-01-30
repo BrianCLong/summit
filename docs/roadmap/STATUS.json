@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T12:00:00Z",
-  "revision_note": "Keel Lane-1 scaffolding added (config validation, stability tests, evidence templates, and docs).",
+  "last_updated": "2026-02-02T12:00:00Z",
+  "revision_note": "Added baseline evidence schemas for SE-DiCoW bundle scaffolding and updated required checks discovery notes.",
   "initiatives": [
     {
       "id": "A",
