@@ -169,7 +169,7 @@
     "release:impact": "npx tsx scripts/release/analyze-impact.ts",
     "release:scheduler": "npx tsx scripts/release/release-scheduler.ts",
     "test:go-live-pipeline": "node --test scripts/evidence/tests/go-live-pipeline.integration.test.mjs",
-    "release:ready": "npm run compliance:antigravity && pnpm ga:verify && GA_VERIFY_MODE=true pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "release:ready": "pnpm run test:security && pnpm run provenance:gate && pnpm ga:verify",
     "prepare": "husky",
     "postinstall": "rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot 2>/dev/null || true"
   },
@@ -322,9 +322,6 @@
     "client",
     "server"
   ],
-  "scripts": {
-    "test:security": "pnpm --filter intelgraph-server run test src/security/__tests__"
-  },
   "pnpm": {
     "auditConfig": {
       "ignoreCves": [

@@ -1,6 +1,14 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
+// Vite env vars - babel transforms import.meta.env to process.env
+process.env.VITE_GRAFANA_URL = process.env.VITE_GRAFANA_URL || 'http://localhost:3000';
+process.env.VITE_GRAFANA_MAESTRO_DASH_UID = process.env.VITE_GRAFANA_MAESTRO_DASH_UID || 'test-dashboard';
+process.env.VITE_API_URL = process.env.VITE_API_URL || 'http://localhost:8080';
+process.env.MODE = 'test';
+process.env.DEV = 'false';
+process.env.PROD = 'false';
+
 // Manual fetch mock since whatwg-fetch might be missing
 global.fetch = jest.fn(() =>
     Promise.resolve({

@@ -2,11 +2,24 @@
 const config = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+  globals: {
+    'import.meta': {
+      env: {
+        VITE_GRAFANA_URL: 'http://localhost:3000',
+        VITE_GRAFANA_MAESTRO_DASH_UID: 'test-dashboard',
+        VITE_API_URL: 'http://localhost:8080',
+        MODE: 'test',
+        DEV: false,
+        PROD: false,
+      },
+    },
+  },
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
     '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
     '^ansi-regex$': '<rootDir>/__mocks__/ansi-regex.js',
+    '^@mui/material/Unstable_Grid2$': '<rootDir>/__mocks__/MuiGrid2.js',
     '^react$': '<rootDir>/../node_modules/react',
     '^react/(.*)$': '<rootDir>/../node_modules/react/$1',
     '^react/jsx-runtime$': '<rootDir>/../node_modules/react/jsx-runtime',
@@ -18,12 +31,7 @@ const config = {
     '^@emotion/styled$': '<rootDir>/../node_modules/@emotion/styled',
   },
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react-jsx'
-      }
-    }],
-    '^.+\\.(js|jsx)$': 'babel-jest', // Assuming you might have some JS/JSX files
+    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
   },
   testMatch: [
     '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',
