@@ -1,62 +1,47 @@
-import json
-import os
-import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
 
-def write_json(path: Path, data: Dict[str, Any]) -> None:
+import json
+from pathlib import Path
+from typing import Any, Mapping
+
+
+def canonical_json_dumps(payload: Mapping[str, Any]) -> str:
+    return json.dumps(
+        payload,
+        sort_keys=True,
+        indent=2,
+        ensure_ascii=False,
+    ) + "\n"
+
+
+def write_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        # Canonical JSON: sorted keys, indent 2
-        json.dump(data, f, indent=2, sort_keys=True)
-        f.write("\n")
+    path.write_text(canonical_json_dumps(payload), encoding="utf-8")
+
 
 def write_evidence_bundle(
     output_dir: Path,
-    evidence_id: str,
-    summary: str,
-    artifacts: List[str],
-    metrics: Dict[str, Any],
-    git_commit: str,
-) -> None:
-    """
-    Writes a full evidence bundle (report, metrics, stamp, index entry).
-    """
+    *,
+    report: Mapping[str, Any],
+    metrics: Mapping[str, Any],
+    stamp: Mapping[str, Any],
+    index: Mapping[str, Any],
+) -> dict[str, Path]:
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. report.json
-    report_data = {
-        "evidence_id": evidence_id,
-        "summary": summary,
-        "artifacts": artifacts
-    }
-    write_json(output_dir / "report.json", report_data)
+    report_path = output_dir / "report.json"
+    metrics_path = output_dir / "metrics.json"
+    stamp_path = output_dir / "stamp.json"
+    index_path = output_dir / "evidence" / "index.json"
 
-    # 2. metrics.json
-    metrics_data = {
-        "evidence_id": evidence_id,
-        "metrics": metrics
-    }
-    write_json(output_dir / "metrics.json", metrics_data)
+    write_json(report_path, report)
+    write_json(metrics_path, metrics)
+    write_json(stamp_path, stamp)
+    write_json(index_path, index)
 
-    # 3. stamp.json
-    # Timestamp only here.
-    now_utc = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
-    stamp_data = {
-        "created_at": now_utc,
-        "git_commit": git_commit
+    return {
+        "report": report_path,
+        "metrics": metrics_path,
+        "stamp": stamp_path,
+        "index": index_path,
     }
-    write_json(output_dir / "stamp.json", stamp_data)
-
-    # 4. evidence/index.json
-    # Creates a mini index for this bundle.
-    index_data = {
-        "items": [
-            {
-                "evidence_id": evidence_id,
-                "report": "report.json",
-                "metrics": "metrics.json",
-                "stamp": "stamp.json"
-            }
-        ]
-    }
-    write_json(output_dir / "evidence" / "index.json", index_data)
