@@ -1,0 +1,39 @@
+{
+  "task_id": "SWITCHBOARD_CAPSULES_V2",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "switchboard-capsules-replay",
+    "version": "v1",
+    "sha256": "06ca76c9f5e1ce8cf40de3f669f49ae2cad9fe8dbcb41ee61af1ac77e55e0098",
+    "path": "prompts/switchboard/capsules-replay-v2.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "cli/",
+      "docs/",
+      ".summit/",
+      "agents/examples/",
+      "prompts/switchboard/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["switchboard", "governance", "provenance", "tooling"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["cli test output", "capsule replay report"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Capsule runs are policy-gated with ledgered exec/write entries",
+    "Replay reproduces diffs and command outputs",
+    "Evidence bundle includes manifest, ledger, diffs, and outputs"
+  ],
+  "stop_conditions": [
+    "Policy denial without waiver for required action",
+    "Ledger hash chain verification failure"
+  ]
+}
