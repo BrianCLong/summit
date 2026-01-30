@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T19:00:00Z",
-  "revision_note": "Added Automation Turn #3 subsumption bundle artifacts (manifest, evidence triad, docs, fixtures).",
+  "last_updated": "2026-01-29T00:00:00Z",
+  "revision_note": "Added inhouse data agent evidence schemas and required checks discovery scaffold",
   "initiatives": [
     {
       "id": "A",
@@ -92,13 +92,6 @@
             "Execution budget and observability controls not implemented"
           ],
           "target_completion": "Sprint N+2"
-        },
-        {
-          "id": "C4",
-          "name": "Subsumption Bundle Intake (Automation Turn #3)",
-          "status": "in-progress",
-          "owner": "Codex",
-          "evidence": "Added automation-turn-3 manifest, evidence triad, docs, fixtures, and evidence index entry."
         }
       ]
     },
@@ -221,19 +214,6 @@
           "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
         }
       ]
-    },
-    {
-      "id": "H",
-      "name": "World Simulation (WorldSim)",
-      "epics": [
-        {
-          "id": "H1",
-          "name": "WorldSim Foundation Scaffold",
-          "status": "in-progress",
-          "owner": "Codex",
-          "evidence": "Scaffolded worldsim core interface, evidence schemas, and discovery TODOs for PR1."
-        }
-      ]
     }
   ],
   "summary": {
@@ -241,7 +221,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 15,
-    "total": 24,
+    "total": 22,
     "ga_blockers": [
       "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
     ]
