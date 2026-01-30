@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T12:30:00Z",
-  "revision_note": "Added Dynamic Intent evidence scaffolding, schemas, fixtures, and required check mapping",
+  "last_updated": "2026-02-02T00:00:00Z",
+  "revision_note": "Evidence schemas aligned with index format; evidence verifier now validates schemas and timestamp placement with required-checks mapping scaffold.",
   "initiatives": [
     {
       "id": "A",

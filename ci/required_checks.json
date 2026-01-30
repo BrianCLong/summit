@@ -1,1 +1,6 @@
-{}
+{
+  "required_checks": [],
+  "renames": {},
+  "last_updated": "2026-01-30",
+  "notes": "Populate with exact required status check names from branch protection rules."
+}
