@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Warning",
+  "type": "object",
+  "required": ["warning_id", "summary", "confidence", "hitl_required"],
+  "properties": {
+    "warning_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "indicators": {
+      "type": "array",
+      "items": { "$ref": "indicator.schema.json" }
+    },
+    "assessed_hypotheses": {
+      "type": "array",
+      "items": { "$ref": "campaign_hypothesis.schema.json" }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "recommended_defensive_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "hitl_required": { "type": "boolean" },
+    "caveats": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
