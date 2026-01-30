@@ -14,9 +14,9 @@
     "items": {
       "type": "array",
       "items": {
-        "type": "object",
         "oneOf": [
           {
+            "type": "object",
             "required": ["id", "path"],
             "properties": {
               "id": {
@@ -30,42 +30,36 @@
             "additionalProperties": false
           },
           {
+            "type": "object",
             "required": ["evidence_id", "report", "metrics", "stamp"],
             "properties": {
               "evidence_id": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^EVD-[A-Z0-9_-]+$"
               },
-              "report": {
-                "type": "string"
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["evidence_id", "area", "files"],
+            "properties": {
+              "evidence_id": {
+                "type": "string",
+                "pattern": "^EVD-[A-Z0-9_-]+$"
               },
-              "metrics": {
-                "type": "string"
-              },
-              "stamp": {
-                "type": "string"
+              "area": { "type": "string" },
+              "files": {
+                "type": "array",
+                "items": { "type": "string" }
               }
             },
             "additionalProperties": false
           }
         ]
-      }
-    },
-    "evidence": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "files"],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "files": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
       }
     }
   },

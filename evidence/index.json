@@ -47,11 +47,64 @@
   ],
   "evidence": [
     {
-      "id": "EVD-ECC-IMPORT-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json"
-      ]
+      "evidence_id": "EVD-PROJECTGENIE-EVALS-002",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PROJECTGENIE-GOV-003",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PROJECTGENIE-PROV-004",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-PROJECTGENIE-SEC-005",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ITEMUNKNOWN-FND-001",
+      "report": "evidence/item-unknown/report.json",
+      "metrics": "evidence/item-unknown/metrics.json",
+      "stamp": "evidence/item-unknown/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-CONNECTOR-001",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-SCHEMA-002",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-CI-003",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-INGEST-004",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-GHCOPILOTMETRICSRESIDENCY-RESIDENCY-005",
+      "report": "evidence/report.json",
+      "metrics": "evidence/metrics.json",
+      "stamp": "evidence/stamp.json"
     }
   ]
 }
