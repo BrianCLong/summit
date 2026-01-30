@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SummitEvidenceIndex",
+  "type": "object",
+  "required": ["bundle_id", "artifacts"],
+  "properties": {
+    "bundle_id": { "type": "string" },
+    "artifacts": {
+      "type": "object",
+      "required": ["report", "metrics", "stamp"],
+      "properties": {
+        "report": { "type": "string" },
+        "metrics": { "type": "string" },
+        "stamp": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

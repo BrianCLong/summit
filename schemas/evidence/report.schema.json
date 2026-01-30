@@ -2,12 +2,40 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SummitEvidenceReport",
   "type": "object",
-  "required": ["evidence_id", "item_slug", "summary", "artifacts"],
+  "required": ["item", "run", "findings"],
   "properties": {
-    "evidence_id": {"type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z]+-[0-9]{3}$"},
-    "item_slug": {"type": "string"},
-    "summary": {"type": "string"},
-    "artifacts": {"type": "array", "items": {"type": "string"}}
+    "item": {
+      "type": "object",
+      "required": ["slug", "source", "date"],
+      "properties": {
+        "slug": { "type": "string" },
+        "source": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "run": {
+      "type": "object",
+      "required": ["mode", "environment"],
+      "properties": {
+        "mode": { "type": "string" },
+        "environment": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "severity", "summary"],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "severity": { "type": "string" },
+          "summary": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }
