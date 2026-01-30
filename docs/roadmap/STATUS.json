@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T19:00:58Z",
-  "revision_note": "Added governed prompt for .gitattributes LFS exceptions and recorded verification PNG exemption.",
+  "last_updated": "2026-01-30T22:27:39Z",
+  "revision_note": "Added governed prompt for nl-graph-query test tson fallback and refreshed LFS exception governance record.",
   "initiatives": [
     {
       "id": "A",

@@ -497,6 +497,33 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: nl-graph-query-test-tson-fix
+    version: v1
+    path: prompts/governance/nl-graph-query-test-tson-fix@v1.md
+    sha256: 7cb8d104379ca5cf0df7830a33ff19a7a4932224f4d429f83256a19d32ab1004
+    description: Test-only fallback from express.tson() to express.json() in nl-graph-query routes.
+    scope:
+      paths:
+        - .gitattributes
+        - docs/roadmap/STATUS.json
+        - prompts/governance/gitattributes-lfs-exception@v1.md
+        - prompts/governance/nl-graph-query-test-tson-fix@v1.md
+        - prompts/registry.yaml
+        - server/src/ai/nl-graph-query/__tests__/nl-graph-query.routes.test.ts
+      domains:
+        - governance
+        - documentation
+        - repo-maintenance
+        - testing
+        - server
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit
   - id: narrative-analysis-update-20260124
     version: v1
     path: prompts/research/narrative-analysis-update-20260124.md
