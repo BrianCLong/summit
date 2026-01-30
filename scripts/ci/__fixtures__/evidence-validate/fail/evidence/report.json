@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-01-30T00:00:00Z",
+  "evidence_id": "EVD-PP-SOCIALREASONING-SCHEMA-002",
+  "item": {
+    "arxiv_id": "2601.20757"
+  },
+  "summary": {
+    "status": "fail"
+  }
+}
