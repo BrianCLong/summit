@@ -91,12 +91,17 @@ def check_timestamps():
     IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
 
     for p in EVID.rglob("*"):
-        if not p.is_file(): continue
-        if p.name == "stamp.json": continue
-        if p.name in IGNORE_FILES: continue
+        if not p.is_file():
+            continue
+        if p.name == "stamp.json":
+            continue
+        if p.name in IGNORE_FILES:
+            continue
         # Check if any parent part is in IGNORE_DIRS
-        if any(part in IGNORE_DIRS for part in p.parts): continue
-        if p.suffix not in {".json"}: continue
+        if any(part in IGNORE_DIRS for part in p.parts):
+            continue
+        if p.suffix not in {".json"}:
+            continue
 
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")

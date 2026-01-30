@@ -8,7 +8,8 @@ from jsonschema import Draft202012Validator
 
 def load(p):
   try:
-    with open(p,encoding="utf-8") as f: return json.load(f)
+    with open(p, encoding="utf-8") as f:
+        return json.load(f)
   except Exception as e:
     print(f"[EVIDENCE] Error loading {p}: {e}")
     sys.exit(1)
@@ -27,7 +28,8 @@ def validate(instance, schema_path, name="Artifact"):
   v = Draft202012Validator(schema)
   errs = sorted(v.iter_errors(instance), key=lambda e: e.path)
   if errs:
-    for e in errs: print(f"[EVIDENCE] {name} Error {list(e.path)}: {e.message}")
+    for e in errs:
+        print(f"[EVIDENCE] {name} Error {list(e.path)}: {e.message}")
     return False
   print(f"[EVIDENCE] OK: {name}")
   return True
