@@ -1,0 +1,14 @@
+{
+  "evidence_id": "EVD-SOT-EVAL-001",
+  "mode": "smoke",
+  "results": [
+    {
+      "case": "arithmetic-001",
+      "status": "pass"
+    },
+    {
+      "case": "plan-001",
+      "status": "pass"
+    }
+  ]
+}

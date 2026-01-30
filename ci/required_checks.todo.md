@@ -22,6 +22,9 @@ Until discovered, gates are referenced as:
 - fedgnn-governance
 - fedgnn-evidence-verify
 - fedgnn-adversarial-fixtures
+- evidence_verify_sot
+- sot_eval_smoke
+- repro_gate
 
 ## Rename plan
 Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
