@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Code Mode Audit Log",
+  "type": "object",
+  "required": ["timestamp", "event_type", "tool_name", "status"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "event_type": { "type": "string", "enum": ["tool_call", "tool_result", "error"] },
+    "tool_name": { "type": "string" },
+    "input_hash": { "type": "string" },
+    "duration_ms": { "type": "number" },
+    "status": { "type": "string", "enum": ["success", "failure", "denied"] },
+    "redacted_fields": { "type": "array", "items": { "type": "string" } }
+  }
+}
