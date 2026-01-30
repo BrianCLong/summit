@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T10:00:00Z",
-  "revision_note": "Initialized Background Sessions evidence scaffolding and required checks discovery plan",
+  "last_updated": "2026-02-02T09:00:00Z",
+  "revision_note": "Added Summit evidence schema scaffolding and required checks discovery updates",
   "initiatives": [
     {
       "id": "A",
