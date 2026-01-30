@@ -2,26 +2,28 @@
 
 ## Goal
 
-Discover the exact required check names enforced by branch protection for the default branch.
+Produce the exact list of required check contexts for branch protection.
 
 ## Option A — GitHub UI
 
-1. Repo → Settings → Branches → Branch protection rules.
-2. Open rule for default branch.
-3. Copy the list under “Require status checks to pass”.
-4. Paste into `docs/required_checks.verified.md` (new file) as a bullet list.
+1. Repo → Settings → Branches → Branch protection rules → main.
+2. Copy the "Require status checks to pass before merging" list exactly.
 
-## Option B — GitHub API
+## Option B — GitHub REST API
 
-Use REST:
+1. Fetch protection:
+   - `GET /repos/{owner}/{repo}/branches/main/protection`
+2. Record:
+   - `required_status_checks.contexts` (array of strings)
+   - `required_status_checks.strict` (boolean)
 
-- `GET /repos/{owner}/{repo}/branches/{branch}/protection`
-  Then extract:
-- `required_status_checks.contexts`
-- `required_status_checks.checks[].context` (if present)
+## Option C — GitHub CLI
 
-## Temporary Convention (until verified)
+1. `gh api /repos/{owner}/{repo}/branches/main/protection --jq '.required_status_checks.contexts'`
 
-- New gate job name: `verify-subsumption-bundle`
-  Rename plan:
-- If actual naming conventions differ, create PR to rename the job to match existing required-check patterns.
+## Output
+
+Update these files with the discovered contexts:
+
+- `.github/governance/branch_protection_rules.json`
+- `subsumption/branch-protection-as-code/manifest.yaml`
