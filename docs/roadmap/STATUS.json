@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T10:00:00Z",
-  "revision_note": "Initialized Background Sessions evidence scaffolding and required checks discovery plan",
+  "last_updated": "2026-01-30T12:00:00Z",
+  "revision_note": "Keel Lane-1 scaffolding added (config validation, stability tests, evidence templates, and docs).",
   "initiatives": [
     {
       "id": "A",
