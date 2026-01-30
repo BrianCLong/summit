@@ -65,6 +65,15 @@
         "evidence/runs/expectation-baselines/metrics.json",
         "evidence/runs/expectation-baselines/stamp.json"
       ]
+    },
+    "EVD-PRIVTEL-SCHEMA-001": {
+      "area": "telemetry-privacy",
+      "item_slug": "privtel",
+      "files": [
+        "evidence/privtel/report.json",
+        "evidence/privtel/metrics.json",
+        "evidence/privtel/stamp.json"
+      ]
     }
   ]
 }

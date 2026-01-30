@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T01:13:19Z",
-  "revision_note": "Expectation baselines subsumption bundle manifest + evidence schemas added; deterministic evidence index entry and governance docs seeded.",
+  "last_updated": "2026-01-29T00:00:00Z",
+  "revision_note": "Telemetry privacy gate scaffold, evidence entry, and deny-by-default allowlist recorded.",
   "initiatives": [
     {
       "id": "A",
