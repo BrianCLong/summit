@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T00:00:00Z",
-  "revision_note": "Added Copilot metrics evidence gates, connector skeleton, and attribution docs.",
+  "last_updated": "2026-01-29T12:00:00Z",
+  "revision_note": "Added narrative frames contract scaffold, fixtures, and evidence output for Narrative Intelligence lane",
   "initiatives": [
     {
       "id": "A",

@@ -416,6 +416,26 @@ prompts:
       domains:
         - documentation
         - research
+  - id: narrative-analysis-update-20260129
+    version: v1
+    path: prompts/research/narrative-analysis-update-20260129.md
+    sha256: 517e5b854f95ce39902e954672bdcfc23ba4adc21597221189c60d42af57d553
+    description: Narrative intelligence frames contract scaffold for 2026-01-29.
+    scope:
+      paths:
+        - narratives/
+        - eval/narratives/
+        - security/gates/
+        - evidence/
+        - docs/roadmap/STATUS.json
+        - prompts/research/
+        - agents/examples/
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - research
+        - governance
+        - security
   - id: siteimprove-agentic-content-intel
     version: v1
     path: prompts/competitive/siteimprove-agentic-content-intelligence.md

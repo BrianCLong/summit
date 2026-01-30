@@ -119,6 +119,12 @@
       "report": "evidence/report.json",
       "metrics": "evidence/metrics.json",
       "stamp": "evidence/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
+      "report": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/report.json",
+      "metrics": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/metrics.json",
+      "stamp": "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/stamp.json"
     }
   ]
 }
