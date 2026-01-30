@@ -5,15 +5,20 @@ on:
     paths:
       - "subsumption/**"
       - "scripts/ci/**"
-      - "policy/**"
       - "docs/**"
       - "evidence/**"
+      - "deps_delta/**"
+      - "backlog/**"
   workflow_dispatch:
 
 jobs:
-  subsumption-bundle-verify:
-    runs-on: ubuntu-latest
+  verify-subsumption-bundle:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Verify subsumption bundle
-        run: node scripts/ci/verify_subsumption_bundle.mjs
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify template bundle
+        run: node scripts/ci/verify_subsumption_bundle.mjs --manifest subsumption/_template/manifest.yaml
