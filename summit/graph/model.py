@@ -13,7 +13,7 @@ class Node:
     id: str
     type: NodeType
     platform: Optional[Platform]
-    attrs: Dict[str, Any]
+    attrs: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -23,4 +23,4 @@ class Edge:
     type: EdgeType
     ts: int
     weight: float = 1.0
-    attrs: Optional[Dict[str, Any]] = None
+    attrs: Optional[dict[str, Any]] = None

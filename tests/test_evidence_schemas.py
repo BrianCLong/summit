@@ -1,12 +1,13 @@
 import json
 import os
+
 import pytest
 from jsonschema import validate
 
 SCHEMAS_DIR = "schemas/evidence"
 
 def load_json(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         return json.load(f)
 
 def test_report_schema():

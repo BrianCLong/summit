@@ -1,6 +1,8 @@
 import pytest
-from summit.workflows.ir import WorkflowIR, Step
+
 from summit.builder.graph import to_mermaid
+from summit.workflows.ir import Step, WorkflowIR
+
 
 def test_to_mermaid_output():
     ir = WorkflowIR(

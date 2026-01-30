@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
+
 class Tool(ABC):
     @property
     @abstractmethod
@@ -8,7 +9,7 @@ class Tool(ABC):
         pass
 
     @abstractmethod
-    def execute(self, params: Dict[str, Any]) -> Any:
+    def execute(self, params: dict[str, Any]) -> Any:
         pass
 
 class ToolRegistryInterface(ABC):
@@ -17,5 +18,5 @@ class ToolRegistryInterface(ABC):
         pass
 
     @abstractmethod
-    def list_tools(self) -> List[str]:
+    def list_tools(self) -> list[str]:
         pass

@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 NEVER_LOG_FIELDS = [
     "raw_profile",
@@ -11,7 +11,7 @@ NEVER_LOG_FIELDS = [
 ]
 
 class InfluencePrivacyGuard:
-    def validate_log_entry(self, entry: Any) -> List[str]:
+    def validate_log_entry(self, entry: Any) -> list[str]:
         violations = []
         if isinstance(entry, dict):
             for k, v in entry.items():
@@ -23,7 +23,7 @@ class InfluencePrivacyGuard:
                 violations.extend(self.validate_log_entry(item))
         return violations
 
-    def audit(self, logs: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def audit(self, logs: list[dict[str, Any]]) -> dict[str, Any]:
         total_violations = 0
         violated_fields = set()
         for log in logs:
@@ -38,9 +38,9 @@ class InfluencePrivacyGuard:
         }
 
 if __name__ == "__main__":
+    import argparse
     import json
     import sys
-    import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--audit", action="store_true", help="Run audit")

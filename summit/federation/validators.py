@@ -1,7 +1,9 @@
 from typing import Any, Dict
+
 from .protocol import PrivacyMechanism
 
-def validate_update(data: Dict[str, Any]) -> None:
+
+def validate_update(data: dict[str, Any]) -> None:
     # Check for raw gradients/payloads (fail safe) - Check this FIRST
     if "weights" in data or "gradients" in data or "payload" in data:
          raise ValueError("Raw payload fields are not allowed in the update contract")

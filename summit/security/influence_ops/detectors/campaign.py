@@ -1,8 +1,9 @@
-from typing import Dict, Any
 import re
+from typing import Any, Dict
+
 
 class CampaignDetector:
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         text_lower = text.lower()
         campaign_keywords = ["variants", "versions", "a/b test", "optimize for", "audiences"]
 

@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
+
 from .envelope import SummitEnvelope
+
 
 class ProtocolAdapter(ABC):
   """Maps between SummitEnvelope and an external protocol representation."""

@@ -1,5 +1,7 @@
-from packages.common.cache import L1MemoryCache, MultiLayerCache, CacheKey
 import time
+
+from packages.common.cache import CacheKey, L1MemoryCache, MultiLayerCache
+
 
 def test_cache_namespace_versioning():
   c = MultiLayerCache(L1MemoryCache())

@@ -1,6 +1,9 @@
 import json
+
 import pytest
-from summit.policy.osint_policy import evaluate, OsintPolicyInput
+
+from summit.policy.osint_policy import OsintPolicyInput, evaluate
+
 
 def test_allow_valid():
     inp = OsintPolicyInput(

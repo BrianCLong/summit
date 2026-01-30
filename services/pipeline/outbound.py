@@ -1,4 +1,4 @@
-from packages.common.circuit_breaker import CircuitBreaker, BreakerConfig
+from packages.common.circuit_breaker import BreakerConfig, CircuitBreaker
 
 # Example singleton instance
 # In real usage, this might be injected or configured per-service

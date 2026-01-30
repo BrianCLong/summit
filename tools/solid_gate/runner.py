@@ -1,10 +1,10 @@
-import os
-import json
 import hashlib
-from typing import List, Dict
-from . import git
-from . import rules
-from .schema import Report, Metrics, Stamp
+import json
+import os
+from typing import Dict, List
+
+from . import git, rules
+from .schema import Metrics, Report, Stamp
 
 ARTIFACTS_DIR = "artifacts/solid-gate"
 

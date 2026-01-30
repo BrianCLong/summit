@@ -1,6 +1,7 @@
-import sys
 import json
+import sys
 import time
+
 
 def main():
     while True:

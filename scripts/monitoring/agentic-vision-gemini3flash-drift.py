@@ -1,19 +1,20 @@
-import sys
+import logging
 import os
 import shutil
+import sys
 import tempfile
-import logging
+
 from PIL import Image
 
 # Ensure python modules can be imported
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../python"))
 
 try:
-    from intelgraph_py.vision_investigation.loop import VisionInvestigationLoop, LLMProvider
+    from intelgraph_py.vision_investigation.loop import LLMProvider, VisionInvestigationLoop
 except ImportError:
     # Fallback if running from repo root
     sys.path.append("python")
-    from intelgraph_py.vision_investigation.loop import VisionInvestigationLoop, LLMProvider
+    from intelgraph_py.vision_investigation.loop import LLMProvider, VisionInvestigationLoop
 
 logging.basicConfig(level=logging.INFO)
 

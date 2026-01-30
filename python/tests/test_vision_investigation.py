@@ -1,11 +1,13 @@
 import os
 import shutil
 import tempfile
+
 import pytest
-from PIL import Image
-from intelgraph_py.vision_investigation.tools import crop_image, rotate_image, measure_distance
-from intelgraph_py.vision_investigation.sandbox import SafeExecutor
 from intelgraph_py.vision_investigation.loop import VisionInvestigationLoop
+from intelgraph_py.vision_investigation.sandbox import SafeExecutor
+from intelgraph_py.vision_investigation.tools import crop_image, measure_distance, rotate_image
+from PIL import Image
+
 
 class MockLLM:
     def __init__(self, responses):

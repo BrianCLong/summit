@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class MoralPolicy:
     # deny-by-default: must be explicitly enabled by operator

@@ -1,13 +1,14 @@
-import sys
-import os
 import asyncio
 import json
+import os
+import sys
 import time
 
 # Ensure we can import from summit
 sys.path.append(os.getcwd())
 
 from summit.providers.moonshot import MoonshotProvider
+
 
 async def run_drift_check():
     api_key = os.environ.get("MOONSHOT_API_KEY")
@@ -77,7 +78,7 @@ async def run_drift_check():
     with open("artifacts/kimi-k2-5/drift/metrics.json", "w") as f:
         json.dump(metrics, f, indent=2)
 
-    print(f"Drift check complete.")
+    print("Drift check complete.")
 
 if __name__ == "__main__":
     asyncio.run(run_drift_check())

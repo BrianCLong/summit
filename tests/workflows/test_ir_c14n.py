@@ -1,7 +1,10 @@
-import pytest
 import json
-from summit.workflows.ir import WorkflowIR, Step
+
+import pytest
+
 from summit.workflows.c14n import canonicalize
+from summit.workflows.ir import Step, WorkflowIR
+
 
 def test_canonicalize_stability():
     ir1 = WorkflowIR(

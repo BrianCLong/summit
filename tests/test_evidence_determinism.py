@@ -1,6 +1,9 @@
 import json
+
 import pytest
+
 from connectors.spiderfoot import OsintEvent, write_normalized
+
 
 def test_determinism(tmp_path):
     events = [

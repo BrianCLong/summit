@@ -1,18 +1,19 @@
-import os
 import hashlib
+import os
 from datetime import datetime
 from typing import Optional
 
 # Conditional import to allow loading the module even if torch/transformers are missing
 try:
     import torch
-    from transformers import AutoModel, AutoTokenizer, AutoImageProcessor
+    from transformers import AutoImageProcessor, AutoModel, AutoTokenizer
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
 
 from ..adapter import Emu3BackendAdapter
 from ..schema import MediaEvidenceV1, ProvenanceV1
+
 
 def hf_enabled() -> bool:
     return os.getenv("SUMMIT_EMU3_ALLOW_MODEL_DOWNLOAD") == "1"

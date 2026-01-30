@@ -1,13 +1,15 @@
 from typing import Any, Dict
-from codemode.policy import SandboxPolicy
+
 from codemode.audit import AuditLogger
+from codemode.policy import SandboxPolicy
+
 
 class CodeModeProxy:
     def __init__(self, policy: SandboxPolicy, audit_logger: AuditLogger):
         self.policy = policy
         self.audit = audit_logger
 
-    def dispatch(self, tool_name: str, args: Dict[str, Any]) -> Any:
+    def dispatch(self, tool_name: str, args: dict[str, Any]) -> Any:
         # 1. Audit Request
         self.audit.log_event("tool_call", tool_name, args)
 

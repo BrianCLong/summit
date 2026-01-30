@@ -1,4 +1,5 @@
-from codemode.audit import redact, AuditLogger
+from codemode.audit import AuditLogger, redact
+
 
 def test_redaction_simple():
     data = {"token": "secret123", "public": "visible"}

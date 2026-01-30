@@ -1,7 +1,10 @@
-import pytest
-from unittest import mock
-from summit.persona.loader import load_persona
 from pathlib import Path
+from unittest import mock
+
+import pytest
+
+from summit.persona.loader import load_persona
+
 
 def test_persona_disabled_by_default():
     with mock.patch("summit.flags.FEATURE_SOUL_MD", False):

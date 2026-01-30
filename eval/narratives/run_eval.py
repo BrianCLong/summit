@@ -1,7 +1,7 @@
 import json
 import pathlib
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any, Dict, List, Tuple
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -15,11 +15,11 @@ EVIDENCE_DIR = pathlib.Path("evidence") / EVIDENCE_ID
 FIXTURES_DIR = pathlib.Path("eval/narratives/fixtures")
 
 
-def load_cases(path: pathlib.Path) -> List[Dict[str, Any]]:
+def load_cases(path: pathlib.Path) -> list[dict[str, Any]]:
     return json.loads(path.read_text(encoding="utf-8")).get("cases", [])
 
 
-def run_cases(cases: List[Dict[str, Any]]) -> Tuple[int, int]:
+def run_cases(cases: list[dict[str, Any]]) -> tuple[int, int]:
     passed = 0
     failed = 0
     for case in cases:
@@ -35,7 +35,7 @@ def run_cases(cases: List[Dict[str, Any]]) -> Tuple[int, int]:
     return passed, failed
 
 
-def write_json(path: pathlib.Path, payload: Dict[str, Any]) -> None:
+def write_json(path: pathlib.Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
@@ -69,7 +69,7 @@ def main() -> None:
         "failed": total_failed,
     }
     stamp = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
     }
 
     write_json(EVIDENCE_DIR / "report.json", report)

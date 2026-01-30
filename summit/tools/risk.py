@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+
 class ToolRisk(Enum):
     LOW = auto()
     MEDIUM = auto()

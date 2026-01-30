@@ -1,5 +1,7 @@
 import pytest
+
 from summit.persona.contract import PersonaContract
+
 
 def test_contract_requires_forbidden_axes():
   c = PersonaContract(persona_id="default", version="1.0.0")

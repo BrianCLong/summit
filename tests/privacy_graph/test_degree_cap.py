@@ -1,5 +1,7 @@
 import pytest
+
 from summit.privacy_graph.dp import cap_degree, gaussian_noise
+
 
 def test_cap_degree_limits_neighbors():
     edges = [("a", "b"), ("a", "c"), ("a", "d"), ("a", "e")]

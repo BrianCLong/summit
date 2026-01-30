@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 
+
 def main():
     parser = argparse.ArgumentParser(description="Emit evidence artifact")
     parser.add_argument("--id", required=True, help="Evidence ID")

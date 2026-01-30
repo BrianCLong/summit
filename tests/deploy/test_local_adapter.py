@@ -1,9 +1,12 @@
-import pytest
 import os
 from unittest.mock import patch
-from summit.deploy.local import LocalDeployAdapter
+
+import pytest
+
 from summit.builder.api import BuilderAPI
 from summit.builder.spec import BuilderSpec
+from summit.deploy.local import LocalDeployAdapter
+
 
 def test_local_deploy_adapter():
     adapter = LocalDeployAdapter()

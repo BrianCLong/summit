@@ -1,4 +1,5 @@
-from typing import TypedDict, Literal
+from typing import Literal, TypedDict
+
 
 class AggregateIndicator(TypedDict):
     time_bucket: str

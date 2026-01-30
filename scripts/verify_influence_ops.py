@@ -1,18 +1,19 @@
-import sys
 import json
 import os
+import sys
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 # Add repo root to path
 sys.path.insert(0, os.getcwd())
 
-from summit.security.influence_ops.policy import InfluenceOpsGate
-from summit.security.influence_ops.detectors.microtargeting import MicrotargetingDetector
-from summit.security.influence_ops.detectors.campaign import CampaignDetector
-from summit.security.influence_ops.privacy import InfluencePrivacyGuard
-from summit.evals.influence_ops.runner import run_suite
 from summit.evals.influence_ops.fixtures import CASES
+from summit.evals.influence_ops.runner import run_suite
+from summit.security.influence_ops.detectors.campaign import CampaignDetector
+from summit.security.influence_ops.detectors.microtargeting import MicrotargetingDetector
+from summit.security.influence_ops.policy import InfluenceOpsGate
+from summit.security.influence_ops.privacy import InfluencePrivacyGuard
+
 
 def main():
     print("Initializing Influence Ops Verification...")

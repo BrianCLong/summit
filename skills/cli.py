@@ -1,10 +1,12 @@
 import argparse
 import json
-import sys
 import os
-from .index import build_index
-from .policy import validate_skill, PolicyViolation
+import sys
+
 from .discover import find_skills
+from .index import build_index
+from .policy import PolicyViolation, validate_skill
+
 
 def main():
     parser = argparse.ArgumentParser(description="Summit Skills CLI")

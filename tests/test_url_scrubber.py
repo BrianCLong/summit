@@ -1,5 +1,6 @@
 from agentic_web_visibility.policy.url_scrubber import scrub_query
 
+
 def test_scrub_clean():
     assert scrub_query("foo=bar") == "foo=bar"
     assert scrub_query("q=search") == "q=search"

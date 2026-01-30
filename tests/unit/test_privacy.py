@@ -1,4 +1,5 @@
-from packages.common.privacy import redact_dict, PrivacyGuard
+from packages.common.privacy import PrivacyGuard, redact_dict
+
 
 def test_never_log_fields_are_redacted():
   sensitive = {

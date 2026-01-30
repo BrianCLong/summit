@@ -1,6 +1,8 @@
 import json
+
 from .adapter import ProtocolAdapter
 from .envelope import SummitEnvelope, ToolCall
+
 
 class LoopbackAdapter(ProtocolAdapter):
   def encode(self, env: SummitEnvelope) -> bytes:

@@ -1,6 +1,7 @@
 import pytest
-from summit_emu3.schema import MediaEvidenceV1, ProvenanceV1
 from summit_emu3.backends.dummy import DummyBackend
+from summit_emu3.schema import MediaEvidenceV1, ProvenanceV1
+
 
 def test_media_evidence_validation():
     # Test valid evidence

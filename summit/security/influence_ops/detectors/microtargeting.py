@@ -1,7 +1,8 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class MicrotargetingDetector:
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         text_lower = text.lower()
         micro_keywords = ["traits", "psychographic", "demographic", "personality", "persuade them to"]
         profiling_keywords = ["segment", "cluster", "fingerprint", "profile", "fears"]

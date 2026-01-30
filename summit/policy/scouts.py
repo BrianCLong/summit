@@ -1,5 +1,7 @@
 from typing import List, Optional
+
 from summit.scouts.base import Config, Result
+
 
 def check_budget(result: Result, cfg: Config) -> bool:
     if result.cost_ms > cfg.max_cost_ms:

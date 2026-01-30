@@ -1,6 +1,8 @@
 import os
-from typing import Iterable, Any
+from typing import Any, Iterable
+
 from ..signals.base import Event
+
 
 def is_enabled():
     return os.getenv("INTEGRITY_SIM_HARNESS_ENABLED", "false").lower() == "true"

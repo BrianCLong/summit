@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List, Any
+from typing import Any, List
+
 
 class Memory(ABC):
     @abstractmethod
@@ -7,12 +8,12 @@ class Memory(ABC):
         pass
 
     @abstractmethod
-    def retrieve(self, query: Any) -> List[Any]:
+    def retrieve(self, query: Any) -> list[Any]:
         pass
 
 class NoOpMemory(Memory):
     def store(self, item: Any) -> None:
         pass
 
-    def retrieve(self, query: Any) -> List[Any]:
+    def retrieve(self, query: Any) -> list[Any]:
         return []

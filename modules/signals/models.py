@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, Optional, Dict, Any, List
+from typing import Any, Dict, List, Literal, Optional
 
 HealthState = Literal["HEALTHY", "DEGRADED", "CRITICAL", "UNKNOWN"]
 
@@ -11,7 +11,7 @@ class EventSignal:
     reason: str            # e.g., CrashLoopBackOff / FailedScheduling
     message: str           # untrusted text; do not feed to LLM unfiltered
     ts_unix: int
-    labels: Dict[str, str]
+    labels: dict[str, str]
 
 @dataclass(frozen=True)
 class ClusterSnapshot:
@@ -20,5 +20,5 @@ class ClusterSnapshot:
     mem_util_pct: Optional[float]
     ready_nodes: Optional[int]
     total_nodes: Optional[int]
-    workloads: Dict[str, Any]
-    events: List[EventSignal]
+    workloads: dict[str, Any]
+    events: list[EventSignal]

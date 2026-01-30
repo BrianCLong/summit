@@ -1,5 +1,7 @@
 import pytest
+
 from summit.planning.multilingual.atlas.decision import get_pretrain_vs_finetune_decision
+
 
 def test_crossover_finetune():
     # 100B tokens for 2B model is below 200B threshold

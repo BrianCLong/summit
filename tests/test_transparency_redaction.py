@@ -1,5 +1,7 @@
 import json
+
 from summit_misinfo.governance.transparency import generate_report
+
 
 def test_transparency_generation():
     json_str = generate_report(

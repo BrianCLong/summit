@@ -1,14 +1,15 @@
-from dataclasses import dataclass
-from typing import Dict, Any, Optional
 import time
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
 
 @dataclass
 class TelemetryEvent:
     event_type: str
     timestamp: float
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
 
-    def __init__(self, event_type: str, payload: Dict[str, Any]):
+    def __init__(self, event_type: str, payload: dict[str, Any]):
         self.event_type = event_type
         self.timestamp = time.time()
         self.payload = payload
@@ -25,7 +26,7 @@ ALLOWED_INTERACTION_FIELDS = {
 }
 
 class InteractionEvent(TelemetryEvent):
-    def __init__(self, mode: str, model: str, spm: bool, extra_metrics: Optional[Dict[str, Any]] = None):
+    def __init__(self, mode: str, model: str, spm: bool, extra_metrics: Optional[dict[str, Any]] = None):
         payload = {
             "interaction_mode": mode,
             "model_name": model,

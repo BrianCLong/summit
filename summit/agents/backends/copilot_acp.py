@@ -1,5 +1,6 @@
 from summit.config.flags import SUMMIT_ACP_ENABLE
 
+
 class CopilotAcpBackend:
     name = "copilot_acp"
     def __init__(self, permission_broker):

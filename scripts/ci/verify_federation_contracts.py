@@ -1,5 +1,6 @@
-import sys
 import subprocess
+import sys
+
 
 def main():
     print("Verifying federation contracts via pytest...")

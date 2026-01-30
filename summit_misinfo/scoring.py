@@ -1,14 +1,17 @@
 from __future__ import annotations
+
+import os
 from dataclasses import dataclass
 from typing import Callable, List
-import os
+
 from .signals import StreamEvent
+
 
 @dataclass(frozen=True)
 class Score:
     risk_score: float
-    reasons: List[str]
-    evd_ids: List[str]
+    reasons: list[str]
+    evd_ids: list[str]
 
 Detector = Callable[[StreamEvent], Score]
 

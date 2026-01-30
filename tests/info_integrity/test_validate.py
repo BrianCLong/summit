@@ -1,5 +1,10 @@
 import pytest
-from modules.info_integrity.validate import validate_request_intent, validate_payload_no_prohibited_fields
+
+from modules.info_integrity.validate import (
+    validate_payload_no_prohibited_fields,
+    validate_request_intent,
+)
+
 
 def test_validate_request_intent():
     # Positive

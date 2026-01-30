@@ -1,5 +1,6 @@
 import os
 from typing import Any
+
 from summit.moral.propagate import propagate_priors
 
 MORAL_LAYER_ENABLED = os.environ.get("MORAL_LAYER_ENABLED", "false").lower() == "true"

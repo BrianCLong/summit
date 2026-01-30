@@ -1,12 +1,14 @@
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 from summit.chat_gateway.interface import ChatConnector
 
+
 class MockConnector(ChatConnector):
-    def __init__(self, incoming: List[Dict[str, Any]] = None):
+    def __init__(self, incoming: list[dict[str, Any]] = None):
         self.incoming = incoming or []
         self.outgoing = []
 
-    def receive(self) -> Optional[Dict[str, Any]]:
+    def receive(self) -> Optional[dict[str, Any]]:
         if not self.incoming:
             return None
         msg = self.incoming.pop(0)

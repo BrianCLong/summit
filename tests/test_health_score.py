@@ -1,6 +1,8 @@
 import pytest
-from modules.signals.models import ClusterSnapshot, EventSignal
+
 from modules.scoring.health_score import compute_health
+from modules.signals.models import ClusterSnapshot, EventSignal
+
 
 def test_perfect_health():
     snapshot = ClusterSnapshot(

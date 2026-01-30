@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class SkillMetrics:
     debug_success_rate: float = 0.0

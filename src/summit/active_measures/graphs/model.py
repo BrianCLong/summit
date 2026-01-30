@@ -1,14 +1,15 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Dict, Tuple, Set
+from typing import Dict, Set, Tuple
 
 NodeId = str
-EdgeKey = Tuple[NodeId, NodeId, str]  # (src, dst, interaction_type)
+EdgeKey = tuple[NodeId, NodeId, str]  # (src, dst, interaction_type)
 
 @dataclass
 class Graph:
-    nodes: Set[NodeId] = field(default_factory=set)
-    edges: Dict[EdgeKey, float] = field(default_factory=dict)  # weight
+    nodes: set[NodeId] = field(default_factory=set)
+    edges: dict[EdgeKey, float] = field(default_factory=dict)  # weight
 
 def add_edge(g: Graph, src: NodeId, dst: NodeId, kind: str, w: float) -> None:
     g.nodes.add(src)

@@ -1,6 +1,8 @@
 import pytest
-from codemode.policy import SandboxPolicy, DEFAULT_POLICY
+
+from codemode.policy import DEFAULT_POLICY, SandboxPolicy
 from codemode.sandbox.local_runner import LocalSandboxRunner
+
 
 def test_network_deny_default():
     policy = DEFAULT_POLICY

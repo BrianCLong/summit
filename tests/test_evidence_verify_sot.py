@@ -1,8 +1,10 @@
 import json
 import pathlib
-import pytest
 import subprocess
 import sys
+
+import pytest
+
 
 @pytest.fixture
 def temp_evidence_root(tmp_path):

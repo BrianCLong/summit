@@ -1,5 +1,6 @@
 from .intent import Intent
 
+
 class PolicyDecision:
     def __init__(self, allowed: bool, reason: str):
         self.allowed = allowed

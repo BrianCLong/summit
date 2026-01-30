@@ -1,5 +1,7 @@
 import json
+
 from .ir import WorkflowIR
+
 
 def canonicalize(ir: WorkflowIR) -> str:
     obj = {

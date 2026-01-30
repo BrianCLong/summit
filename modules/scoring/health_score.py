@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+
 from modules.signals.models import ClusterSnapshot, HealthState
+
 
 @dataclass(frozen=True)
 class HealthScore:

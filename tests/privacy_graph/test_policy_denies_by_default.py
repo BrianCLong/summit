@@ -1,6 +1,8 @@
 import pytest
+
 from summit.privacy_graph.config import PrivacyGraphConfig
 from summit.privacy_graph.policy import PrivacyGraphPolicy, PrivacyGraphPolicyError
+
 
 def test_denies_by_default():
     cfg = PrivacyGraphConfig()

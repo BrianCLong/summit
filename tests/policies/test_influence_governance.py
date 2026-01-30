@@ -1,15 +1,16 @@
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
 
 POLICY_DIR = Path(__file__).resolve().parents[2] / "policies" / "influence_governance"
 
 def load_policy():
-    with open(POLICY_DIR / "policy.yaml", "r") as f:
+    with open(POLICY_DIR / "policy.yaml") as f:
         return yaml.safe_load(f)
 
 def load_list(filename):
-    with open(POLICY_DIR / filename, "r") as f:
+    with open(POLICY_DIR / filename) as f:
         return [line.strip() for line in f if line.strip()]
 
 def test_policy_load():

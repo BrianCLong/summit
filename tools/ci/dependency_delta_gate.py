@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 def main() -> int:
     # Minimal enforcement: if dependency manifest changed, require a deps delta doc
     manifests = ["pyproject.toml", "requirements.txt", "package-lock.json", "pnpm-lock.yaml"]

@@ -1,10 +1,10 @@
 import json
 import os
 import shutil
-import tempfile
-import unittest
 import subprocess
 import sys
+import tempfile
+import unittest
 from pathlib import Path
 
 # We test the script tools/ci/evidence_validate_bundle.py by invoking it as a subprocess

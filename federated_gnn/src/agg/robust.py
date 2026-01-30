@@ -1,5 +1,6 @@
 import statistics
 
+
 def robust_aggregate(updates: list[float], method: str = "median", trim_ratio: float = 0.1) -> float:
     """
     Aggregates a list of scalar updates using robust methods.

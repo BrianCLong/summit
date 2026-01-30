@@ -1,6 +1,8 @@
 import pytest
-from summit.moral.propagate import propagate_priors
+
 from summit.moral.foundations import UNKNOWN_KEY
+from summit.moral.propagate import propagate_priors
+
 
 def test_propagate_logic_basic():
     # Graph: A -> B

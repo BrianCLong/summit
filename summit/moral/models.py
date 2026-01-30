@@ -9,7 +9,7 @@ SubjectType = Literal["actor", "segment", "concept"]
 class MoralProfile:
     subject_id: str
     subject_type: SubjectType
-    vector: Dict[str, float]          # normalized moral foundations distribution
+    vector: dict[str, float]          # normalized moral foundations distribution
     confidence: float                 # 0..1
-    provenance: Dict[str, str]        # e.g., {"method":"MAG_DIFFUSE", "lexicon":"MFD2.0"}
+    provenance: dict[str, str]        # e.g., {"method":"MAG_DIFFUSE", "lexicon":"MFD2.0"}
     purpose_tag: str                  # required (policy gate)

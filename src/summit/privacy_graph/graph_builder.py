@@ -1,13 +1,15 @@
 from __future__ import annotations
-from typing import List, Set, Tuple, Dict
+
+from typing import Dict, List, Set, Tuple
+
 from .types import GraphEvent, GraphFrame
 
 ALLOWED_FEATURE_KEYS = {"bytes", "packets", "duration_ms", "count"}
 
-def build_graph(events: List[GraphEvent]) -> GraphFrame:
-    nodes: Set[str] = set()
-    edges: List[Tuple[str, str]] = []
-    edge_features: List[Dict[str, float]] = []
+def build_graph(events: list[GraphEvent]) -> GraphFrame:
+    nodes: set[str] = set()
+    edges: list[tuple[str, str]] = []
+    edge_features: list[dict[str, float]] = []
 
     for e in events:
         nodes.add(e.src)

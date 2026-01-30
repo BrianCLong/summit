@@ -1,9 +1,12 @@
-import yaml
 import hashlib
-from typing import Tuple, Optional
+from typing import Optional, Tuple
+
+import yaml
+
 from .model import Skill, SkillFrontmatter
 
-def parse_frontmatter(content: str) -> Tuple[Optional[dict], str]:
+
+def parse_frontmatter(content: str) -> tuple[Optional[dict], str]:
     """
     Parses YAML frontmatter from a string.
     Returns (frontmatter_dict, body).
@@ -20,7 +23,7 @@ def parse_frontmatter(content: str) -> Tuple[Optional[dict], str]:
     return None, content
 
 def load_skill(filepath: str) -> Skill:
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, encoding='utf-8') as f:
         content = f.read()
 
     # Calculate hash of full content

@@ -1,7 +1,9 @@
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from summit_sim.agents.agent_spec import AgentSpec
-from summit_sim.agents.policy import Policy
 from summit_sim.agents.memory import Memory
+from summit_sim.agents.policy import Policy
+
 
 class StateMachineRunner:
     def __init__(self, agent_spec: AgentSpec, policy: Policy, memory: Memory):
@@ -11,7 +13,7 @@ class StateMachineRunner:
         self.state = "INITIAL"
         self.steps = 0
 
-    def step(self, context: Dict[str, Any]) -> Any:
+    def step(self, context: dict[str, Any]) -> Any:
         self.steps += 1
         # Simple transition logic for now
         decision = self.policy.decide(context)

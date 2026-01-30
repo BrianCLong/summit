@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from codemode.policy import SandboxPolicy
 from typing import Any
+
+from codemode.policy import SandboxPolicy
+
 
 class SandboxRunner(ABC):
     def __init__(self, policy: SandboxPolicy):

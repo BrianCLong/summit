@@ -1,4 +1,5 @@
-from typing import Literal, List, Dict, Any, Optional
+from typing import Any, Dict, List, Literal, Optional
+
 from pydantic import BaseModel, Field
 
 Mode = Literal["caption", "vqa", "video-consistency"]
@@ -14,8 +15,8 @@ class MediaEvidenceV1(BaseModel):
     evidence_id: str = Field(..., pattern=r"^EVID:emu3-ntp:[a-f0-9]{12}:(caption|vqa|video-consistency):v1$")
     mode: Mode
     caption: Optional[str] = None
-    tags: List[str] = Field(default_factory=list)
-    qa: List[Dict[str, str]] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    qa: list[dict[str, str]] = Field(default_factory=list)
     consistency_score: Optional[float] = None
     provenance: ProvenanceV1
 

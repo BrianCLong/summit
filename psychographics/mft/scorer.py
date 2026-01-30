@@ -1,8 +1,10 @@
 from typing import Any, Dict
+
 from psychographics.mft.schema import MFTScore
 
+
 class MFTScorer:
-    def score(self, text: str, context: Dict[str, Any] = None) -> MFTScore:
+    def score(self, text: str, context: dict[str, Any] = None) -> MFTScore:
         # Deterministic stub for now.
         # Check context for prompt sensitivity hooks?
 

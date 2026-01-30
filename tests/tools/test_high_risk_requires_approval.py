@@ -1,7 +1,9 @@
 import pytest
+
 from summit.policy.engine import PolicyEngine
 from summit.policy.rules.tool_risk import HighRiskToolRule
 from summit.protocols.envelope import SummitEnvelope, ToolCall
+
 
 def test_high_risk_tool_blocked_without_approval():
     env = SummitEnvelope(

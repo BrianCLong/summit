@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+import glob
+import json
 import os
 import sys
-import json
+
 import requests
-import glob
 
 # CISA KEV Catalog URL
 KEV_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
@@ -35,7 +36,7 @@ def load_vuln_report(report_path):
         print(f"Using latest vulnerability report: {report_path}")
 
     try:
-        with open(report_path, 'r') as f:
+        with open(report_path) as f:
             return json.load(f)
     except Exception as e:
         print(f"Error loading vulnerability report {report_path}: {e}")
@@ -147,7 +148,7 @@ def main():
     else:
         report_path = sys.argv[1]
 
-    print(f"Starting KEV Watch...")
+    print("Starting KEV Watch...")
 
     kev_data = fetch_kev_catalog()
     vuln_data = load_vuln_report(report_path)

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 
 @dataclass(frozen=True)
 class OPDConfig:
@@ -16,7 +17,7 @@ class OPDTrainer:
     def __init__(self, cfg: OPDConfig):
         self.cfg = cfg
 
-    def train_step(self) -> Dict[str, Any]:
+    def train_step(self) -> dict[str, Any]:
         # TODO: implement teacher-in-loop forward (optionally model swap/offload),
         # compute KL divergence between teacher/student token distributions.
         return {"status": "stub", "mode": self.cfg.mode}

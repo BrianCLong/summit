@@ -1,5 +1,7 @@
 import pytest
+
 from modules.llm.contracts import SafeLLMSummary
+
 
 def test_summary_constraints():
     # Simulation of a check that would run on LLM output

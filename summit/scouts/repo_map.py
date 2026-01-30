@@ -1,5 +1,7 @@
 from typing import Any
-from .base import Scout, Config, Result
+
+from .base import Config, Result, Scout
+
 
 class RepoMapScout(Scout):
     def name(self) -> str:

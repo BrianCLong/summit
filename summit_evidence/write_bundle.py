@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Dict, List
 
@@ -17,7 +17,7 @@ class EvidenceFinding:
     summary: str
 
 
-def build_bundle(mode: str, findings: List[EvidenceFinding] | None = None) -> Dict[str, Dict]:
+def build_bundle(mode: str, findings: list[EvidenceFinding] | None = None) -> dict[str, dict]:
     """Build evidence bundle payloads as Python dictionaries."""
     findings = findings or []
     report = {
@@ -49,7 +49,7 @@ def build_bundle(mode: str, findings: List[EvidenceFinding] | None = None) -> Di
     }
 
     stamp = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "mode": mode,
     }
 
@@ -70,11 +70,11 @@ def build_bundle(mode: str, findings: List[EvidenceFinding] | None = None) -> Di
     }
 
 
-def _write_json(path: Path, payload: Dict) -> None:
+def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def write_bundle(out_dir: Path, mode: str) -> Dict[str, Dict]:
+def write_bundle(out_dir: Path, mode: str) -> dict[str, dict]:
     """Write evidence bundle JSON files to the output directory."""
     out_dir.mkdir(parents=True, exist_ok=True)
     bundle = build_bundle(mode=mode)

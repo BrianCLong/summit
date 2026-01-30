@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from modules.signals.models import ClusterSnapshot
+
 from modules.scoring.health_score import HealthScore
+from modules.signals.models import ClusterSnapshot
+
 
 @dataclass(frozen=True)
 class RCAResult:

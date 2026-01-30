@@ -1,7 +1,10 @@
 import json
-import pytest
 import os
-from summit.moral.mag_infer import diffuse_moral_relevance, MagConfig
+
+import pytest
+
+from summit.moral.mag_infer import MagConfig, diffuse_moral_relevance
+
 
 def test_determinism():
     fixture_path = os.path.join(os.path.dirname(__file__), "../fixtures/mini_assoc_graph.json")

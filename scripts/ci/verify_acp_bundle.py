@@ -1,9 +1,9 @@
-import sys
+import importlib.util
 import json
 import os
 import re
+import sys
 from pathlib import Path
-import importlib.util
 
 # Try to import jsonschema
 try:

@@ -1,11 +1,12 @@
-import sys
 import asyncio
 import json
 import subprocess
+import sys
 from typing import AsyncGenerator, List, Optional
 
+
 class StdioNdjsonTransport:
-    def __init__(self, argv: List[str]):
+    def __init__(self, argv: list[str]):
         self._argv = argv
         self._proc: Optional[asyncio.subprocess.Process] = None
 

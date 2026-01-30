@@ -1,5 +1,6 @@
-import sys
 import subprocess
+import sys
+
 
 def main():
     print("Verifying campaign contracts via pytest...")

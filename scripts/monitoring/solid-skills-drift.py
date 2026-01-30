@@ -1,8 +1,9 @@
-import subprocess
+import argparse
 import json
 import os
-import argparse
+import subprocess
 from datetime import datetime
+
 
 def get_sha_week_ago():
     try:

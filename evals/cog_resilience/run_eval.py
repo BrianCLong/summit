@@ -1,9 +1,9 @@
+import datetime
 import json
 import os
-import uuid
-import datetime
 import sys
-from typing import Dict, Any
+import uuid
+from typing import Any, Dict
 
 # Ensure we can import modules
 sys.path.append(os.getcwd())
@@ -16,7 +16,7 @@ EVIDENCE_INDEX_PATH = os.path.join(EVIDENCE_DIR, "index.json")
 EVD_ID = "EVD-PLA-COG-SHAPING-MOE-EVAL-001"
 
 def run_evals():
-    with open(FIXTURES_PATH, "r") as f:
+    with open(FIXTURES_PATH) as f:
         fixtures = json.load(f)
 
     results = []
@@ -100,7 +100,7 @@ def write_evidence(results, metrics):
 
     # Stamp
     stamp = {
-        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        "created_at": datetime.datetime.now(datetime.UTC).isoformat()
     }
     with open(os.path.join(run_dir, "stamp.json"), "w") as f:
         json.dump(stamp, f, indent=2, sort_keys=True)
@@ -109,7 +109,7 @@ def write_evidence(results, metrics):
     index = {}
     if os.path.exists(EVIDENCE_INDEX_PATH):
         try:
-            with open(EVIDENCE_INDEX_PATH, "r") as f:
+            with open(EVIDENCE_INDEX_PATH) as f:
                 index = json.load(f)
         except json.JSONDecodeError:
             pass # Start fresh if corrupt

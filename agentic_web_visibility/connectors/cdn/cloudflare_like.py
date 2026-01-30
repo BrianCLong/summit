@@ -1,5 +1,6 @@
 from .base import CDNConnector
 
+
 class CloudflareLikeConnector(CDNConnector):
     """
     Stub for Cloudflare-like CDN connector.

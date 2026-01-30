@@ -1,6 +1,7 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
-def score_response(prompt: str, response: str) -> Dict[str, Any]:
+
+def score_response(prompt: str, response: str) -> dict[str, Any]:
     """
     Scores a response based on disempowerment patterns.
     Returns a dictionary with scores.

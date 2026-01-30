@@ -1,5 +1,6 @@
 from summit.active_measures.policy import check_investigative_support_only, check_never_log_fields
 
+
 def test_deny_forbidden_actions():
     d = check_investigative_support_only(["takedown"])
     assert not d.allowed

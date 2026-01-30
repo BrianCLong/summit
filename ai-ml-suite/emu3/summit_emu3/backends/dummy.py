@@ -5,6 +5,7 @@ from typing import Optional
 from ..adapter import Emu3BackendAdapter
 from ..schema import MediaEvidenceV1, ProvenanceV1
 
+
 class DummyBackend(Emu3BackendAdapter):
     def generate_evidence(
         self,

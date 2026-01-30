@@ -1,5 +1,7 @@
 import pytest
+
 from summit.policy.permission_broker import PermissionBroker
+
 
 def test_headless_deny_all():
     broker = PermissionBroker(mode="headless")

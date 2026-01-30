@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Literal, Dict, List, Any
+from typing import Any, Dict, List, Literal
 
 StepKind = Literal["classify", "route", "extract", "validate", "transform"]
 
@@ -7,10 +7,10 @@ StepKind = Literal["classify", "route", "extract", "validate", "transform"]
 class Step:
     id: str
     kind: StepKind
-    config: Dict[str, Any] = field(default_factory=dict)
+    config: dict[str, Any] = field(default_factory=dict)
 
 @dataclass(frozen=True)
 class WorkflowIR:
-    steps: List[Step]
-    edges: List[tuple[str, str]]  # (from, to)
-    meta: Dict[str, Any] = field(default_factory=dict)
+    steps: list[Step]
+    edges: list[tuple[str, str]]  # (from, to)
+    meta: dict[str, Any] = field(default_factory=dict)

@@ -1,6 +1,7 @@
 from typing import Any, Dict
 
-def validate_campaign(data: Dict[str, Any]) -> None:
+
+def validate_campaign(data: dict[str, Any]) -> None:
     required_fields = {
         "campaign_id", "time_window", "root_entities",
         "subgraph_ref", "features", "governance"

@@ -1,6 +1,8 @@
 import pytest
-from modules.signals.models import EventSignal
+
 from modules.events.classifier import classify_event
+from modules.signals.models import EventSignal
+
 
 def test_classify_known_event():
     event = EventSignal(

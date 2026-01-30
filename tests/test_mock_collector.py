@@ -1,5 +1,7 @@
 import os
+
 import pytest
+
 from agentic_web_visibility.collectors.mock import MockCollector
 from agentic_web_visibility.policy.schema_validate import validate_event
 

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, Optional, Dict, Any, List
+from typing import Any, Dict, List, Literal, Optional
 
 AllowedPurpose = Literal["situational_awareness", "research_eval", "redteam_defense"]
 
@@ -14,7 +14,7 @@ class PolicyContext:
 class PolicyDenied(Exception):
     pass
 
-def enforce_policy(ctx: PolicyContext, flags: Dict[str, Any]) -> None:
+def enforce_policy(ctx: PolicyContext, flags: dict[str, Any]) -> None:
     """
     Deny-by-default psychographic policy gate.
     flags MUST include:

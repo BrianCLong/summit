@@ -1,13 +1,14 @@
 from dataclasses import dataclass, field
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 
 @dataclass(frozen=True)
 class PolicyDecision:
     policy_id: str
     mode: str  # "baseline" | "skill_preserving"
-    reasons: List[str] = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)
 
-def route(context: Dict[str, Any]) -> PolicyDecision:
+def route(context: dict[str, Any]) -> PolicyDecision:
     """
     Deny-by-default: only enable skill_preserving when explicitly requested
     or when context indicates 'learning/new domain' AND org allows it.

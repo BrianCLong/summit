@@ -1,6 +1,7 @@
+import datetime
 import json
 from pathlib import Path
-import datetime
+
 
 def main() -> None:
     # TODO: dataset adapter for MMSD2.0 once data path is known.

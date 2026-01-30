@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 import argparse
-import subprocess
-import sys
 import json
 import os
+import subprocess
+import sys
 from pathlib import Path
+
 
 def enrich_media(input_path: str, backend: str = "dummy", output_dir: str = "."):
     """

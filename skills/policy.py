@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from .model import Skill
 
 # Deny-by-default: allowlist is empty by default

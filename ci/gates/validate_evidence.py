@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-import json, sys, os
+import json
+import os
+import sys
+
 from jsonschema import Draft202012Validator
+
 
 def load(p):
   try:
-    with open(p,"r",encoding="utf-8") as f: return json.load(f)
+    with open(p,encoding="utf-8") as f: return json.load(f)
   except Exception as e:
     print(f"[EVIDENCE] Error loading {p}: {e}")
     sys.exit(1)
@@ -50,7 +54,7 @@ def check_no_timestamps(data, filename):
     errors = walk(data, "")
     if errors:
         print(f"[EVIDENCE] FAILED: {filename} contains forbidden timestamp fields: {errors}")
-        print(f"[EVIDENCE] Timestamps must be confined to stamp.json.")
+        print("[EVIDENCE] Timestamps must be confined to stamp.json.")
         return False
     return True
 

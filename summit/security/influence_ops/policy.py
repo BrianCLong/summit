@@ -1,20 +1,21 @@
 from dataclasses import dataclass
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 
 @dataclass(frozen=True)
 class GateDecision:
   allow: bool
-  reasons: List[str]
+  reasons: list[str]
   risk_score: float
 
 class InfluenceOpsGate:
   """
   Deny-by-default for high-risk influence behaviors (precision influence, profiling, campaign-mode).
   """
-  def __init__(self, *, config: Dict[str, Any]):
+  def __init__(self, *, config: dict[str, Any]):
     self.config = config
 
-  def check(self, *, event: Dict[str, Any], signals: Dict[str, Any]) -> GateDecision:
+  def check(self, *, event: dict[str, Any], signals: dict[str, Any]) -> GateDecision:
     action = event.get("action", "")
     sensitive = action in self.config.get("sensitive_actions", ["generate_persuasion","bulk_message_send","ad_copy_variants"])
 

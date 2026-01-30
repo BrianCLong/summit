@@ -1,4 +1,5 @@
-from summit.atp_latent.coherence_reward import coherence_reward, CoherenceRewardConfig
+from summit.atp_latent.coherence_reward import CoherenceRewardConfig, coherence_reward
+
 
 def test_disabled_returns_zero():
   assert coherence_reward(["a","a"], CoherenceRewardConfig(enabled=False)) == 0.0

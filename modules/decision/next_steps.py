@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 ALLOWED_NEXT_STEPS = {
   "monitor",
@@ -11,9 +11,9 @@ ALLOWED_NEXT_STEPS = {
   "engage_legal_review"
 }
 
-def recommend_next_steps(drivers: List[str], context: Dict) -> List[str]:
+def recommend_next_steps(drivers: list[str], context: dict) -> list[str]:
     # Deterministic mapping; no LLM.
-    steps: List[str] = ["monitor"]
+    steps: list[str] = ["monitor"]
     if any("automation" in d or "coordination" in d for d in drivers):
         steps.append("escalate_to_security")
     if any("toxicity" in d or "hate" in d for d in drivers):

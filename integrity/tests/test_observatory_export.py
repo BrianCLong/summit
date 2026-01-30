@@ -1,7 +1,9 @@
 import os
 from unittest import mock
-from integrity.observatory.export import package_export
+
 from integrity.detectors.coord_anom import Finding
+from integrity.observatory.export import package_export
+
 
 def test_package_export_disabled_by_default():
     findings = [Finding(detector="coord_anom", score=1.0, reason="test")]

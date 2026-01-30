@@ -1,5 +1,6 @@
 from summit.precision.policy import policy_from_dict
 
+
 def test_no_interstep_calibration_by_default():
     p = policy_from_dict({})
     assert p.fp8.allow_calibration_ops == []

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class DiscrepancyFeatures:
     semantic_discrepancy: float

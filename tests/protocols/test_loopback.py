@@ -1,6 +1,7 @@
 from summit.protocols.envelope import SummitEnvelope, ToolCall
 from summit.protocols.loopback import LoopbackAdapter
 
+
 def test_loopback_roundtrip():
     adapter = LoopbackAdapter()
     env = SummitEnvelope(

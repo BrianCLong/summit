@@ -1,5 +1,6 @@
 from .api import HEBackend
 
+
 class MockHEBackend(HEBackend):
     def encrypt(self, plain_value, public_params):
         if public_params != "MOCK_PUBLIC_PARAMS":

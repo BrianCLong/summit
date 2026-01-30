@@ -1,8 +1,12 @@
 import json
 import sys
 from pathlib import Path
-from modules.info_integrity.validate import validate_request_intent, validate_payload_no_prohibited_fields
+
 from modules.info_integrity.reporting import write_compliance_evidence
+from modules.info_integrity.validate import (
+    validate_payload_no_prohibited_fields,
+    validate_request_intent,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES_DIR = ROOT / "evals" / "info_integrity" / "fixtures"
@@ -14,7 +18,7 @@ def run_eval_on_file(filepath: Path):
     passed = 0
     total = 0
 
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         for line in f:
             if not line.strip(): continue
             total += 1

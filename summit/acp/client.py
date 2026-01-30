@@ -1,12 +1,14 @@
 import asyncio
 import uuid
-from typing import Dict, Any, Optional, Callable
+from typing import Any, Callable, Dict, Optional
+
 from .transport_stdio import StdioNdjsonTransport
+
 
 class AcpClient:
     def __init__(self, transport: StdioNdjsonTransport):
         self._transport = transport
-        self._pending_requests: Dict[str, asyncio.Future] = {}
+        self._pending_requests: dict[str, asyncio.Future] = {}
         self._notification_handler: Optional[Callable[[dict], Any]] = None
         self._listen_task: Optional[asyncio.Task] = None
 
