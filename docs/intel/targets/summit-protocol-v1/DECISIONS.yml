@@ -1,0 +1,7 @@
+findings:
+  - id: "finding-001"
+    decision: "Adopt"
+    reason: "Standardizes competitive analysis integration."
+    summit_module_path: "summit/protocols/subsumption"
+    owner_agent: "Jules"
+    adr_id: "ADR-001"

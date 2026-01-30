@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Intel Finding",
+  "type": "object",
+  "required": ["id", "category", "claim", "confidence", "rationale", "summit_mapping", "adoption_risk", "evidence", "counter_evidence"],
+  "properties": {
+    "id": { "type": "string" },
+    "category": { "enum": ["arch", "impl", "agents", "KG", "UX", "ops", "security", "biz"] },
+    "claim": { "type": "string" },
+    "confidence": { "enum": ["low", "med", "high"] },
+    "rationale": { "type": "string" },
+    "summit_mapping": { "type": "array", "items": { "type": "string" } },
+    "adoption_risk": { "enum": ["low", "med", "high"] },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url", "snippet"],
+        "properties": {
+          "url": { "type": "string" },
+          "snippet": { "type": "string", "maxLength": 500 }
+        }
+      }
+    },
+    "counter_evidence": { "type": "string" }
+  }
+}

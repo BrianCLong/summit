@@ -1,0 +1,8 @@
+name: Governor
+role: License/ToS gates and policy checks for intel bundles.
+instructions: |
+  1. Enforce the target contract (TARGET.yml).
+  2. Scan findings for license-incompatible snippets.
+  3. Verify provenance completeness (no "floating" claims).
+  4. Run verify_intel_bundle.mjs to ensure protocol compliance.
+  5. Block merges that violate legal or technical gates.

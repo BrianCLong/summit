@@ -1,0 +1,7 @@
+findings:
+  - id: "<FINDING_ID>"
+    decision: "<Adopt | Adapt | Reject>"
+    reason: "<Value, risk, overlap, complexity, time-to-ship>"
+    summit_module_path: "<PATH>"
+    owner_agent: "<AGENT_NAME>"
+    adr_id: "<ADR_ID | null>"

@@ -1,0 +1,1 @@
+{"id": "finding-<hash>", "category": "arch", "claim": "Finding summary.", "confidence": "high", "rationale": "Why we think so.", "summit_mapping": ["core"], "adoption_risk": "low", "evidence": [{"url": "http://example.com", "snippet": "..."}], "counter_evidence": "..."}

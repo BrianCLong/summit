@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Intel Decisions",
+  "type": "object",
+  "required": ["findings"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "decision", "reason", "summit_module_path", "owner_agent"],
+        "properties": {
+          "id": { "type": "string" },
+          "decision": { "enum": ["Adopt", "Adapt", "Reject"] },
+          "reason": { "type": "string" },
+          "summit_module_path": { "type": "string" },
+          "owner_agent": { "type": "string" },
+          "adr_id": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

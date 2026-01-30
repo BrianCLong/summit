@@ -1,0 +1,17 @@
+target_name: "<NAME>"
+target_type: "<repo | docs site | product | SaaS | paper | blog series>"
+target_urls:
+  - "<URL>"
+license_posture: "<OSS license | ToS constraints | unknown>"
+collection_boundary:
+  no_auth: true
+  no_scraping_behind_paywalls: true
+  no_private_apis: true
+  no_leaked_keys: true
+  no_reverse_engineering_binaries: true
+compliance_gates:
+  publicly_accessible_only: true
+  license_tos_compatible_extraction: true
+  no_direct_code_copying: true
+  transformative_reimplementation: true
+  evidence_recorded: true

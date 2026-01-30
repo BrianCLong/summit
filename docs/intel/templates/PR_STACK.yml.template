@@ -1,0 +1,21 @@
+pr_stack:
+  PR-0:
+    title: "Evidence bundle"
+    description: "Adds target folder, findings, decisions"
+    gated: true
+  PR-1:
+    title: "Interfaces + flags"
+    description: "Adds types/contracts, feature flags, internal APIs"
+    gated: true
+  PR-2:
+    title: "MVP slice"
+    description: "Smallest vertical capability"
+    gated: true
+  PR-3:
+    title: "Evals + benchmarks"
+    description: "Eval harness updates, baseline measurements"
+    gated: true
+  PR-4:
+    title: "Moat/gates"
+    description: "Controls, policy checks, provenance, SBOM hooks"
+    gated: true

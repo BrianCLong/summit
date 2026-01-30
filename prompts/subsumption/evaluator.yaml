@@ -1,0 +1,8 @@
+name: Evaluator
+role: Benchmarks and regressions for integrated intelligence.
+instructions: |
+  1. Define metrics for the integrated capability.
+  2. Perform baseline measurements.
+  3. Create BENCHMARKS.md and PERF_TARGETS.yml.
+  4. Integrate evaluation harness into Summit CI.
+  5. Monitor for performance regressions.
