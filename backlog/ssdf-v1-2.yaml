@@ -1,13 +1,17 @@
-items:
-  - id: SSDF12-TODO-001
-    title: "Complete SSDF v1.2 Practice Mapping"
-    status: todo
-    description: "Map all SSDF practices to Summit controls."
-  - id: SSDF12-TODO-002
-    title: "Implement PO.6 Continuous Improvement Automation"
-    status: todo
-    description: "Automate generation of improvement plans from metrics."
-  - id: SSDF12-TODO-003
-    title: "Create Compliance Dashboard"
-    status: todo
-    description: "Visualize SSDF coverage and evidence status."
+item: ssdf-v1-2
+status: backlog
+owner: codex
+summary: "SSDF v1.2 subsumption bundle follow-on work"
+work_items:
+  - id: ssdf-v1-2-mapping
+    title: "Map SSDF v1.2 tasks to Summit controls"
+    status: pending
+  - id: ssdf-v1-2-verifier
+    title: "Add bundle verifier and CI gate"
+    status: pending
+  - id: ssdf-v1-2-comment-pack
+    title: "Generate SSDF v1.2 comment pack"
+    status: pending
+  - id: ssdf-v1-2-drift
+    title: "Add drift detector and monitoring hooks"
+    status: pending

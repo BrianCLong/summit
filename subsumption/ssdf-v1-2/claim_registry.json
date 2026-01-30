@@ -1,1 +1,19 @@
-[]
+{
+  "claims": [
+    {
+      "id": "ITEM:CLAIM-01",
+      "statement": "SSDF v1.2 IPD published on 2025-12-17.",
+      "source": "https://csrc.nist.gov/pubs/sp/800/218/r1/ipd"
+    },
+    {
+      "id": "ITEM:CLAIM-02",
+      "statement": "SSDF v1.2 public comment period ends 2026-01-30.",
+      "source": "https://csrc.nist.gov/pubs/sp/800/218/r1/ipd"
+    },
+    {
+      "id": "ITEM:CLAIM-03",
+      "statement": "Comment submission email is ssdf@nist.gov.",
+      "source": "https://csrc.nist.gov/pubs/sp/800/218/r1/ipd"
+    }
+  ]
+}

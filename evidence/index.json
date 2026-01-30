@@ -3,99 +3,59 @@
   "items": [
     {
       "evidence_id": "EVD-vfgnn-SPEC-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-GOV-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-ROB-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-ATT-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-vfgnn-NEG-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-ATLAS-SCHEMA-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-ATLAS-PLNR-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-ATLAS-XFER-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-ATLAS-ATLS-001",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-ATLAS-ATLS-002",
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
       "evidence_id": "EVD-ATLAS-GOV-001",
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    {
+      "evidence_id": "EVD-SSDF12-BNDL-001",
       "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
+        "evidence/ssdf-v1-2/pr-01/report.json",
+        "evidence/ssdf-v1-2/pr-01/metrics.json",
+        "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
     }
-  }
+  ]
 }

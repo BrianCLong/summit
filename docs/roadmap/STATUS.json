@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T10:36:28Z",
-  "revision_note": "Require decision logging and governed exception fields in Browser Ops runbook",
+  "last_updated": "2026-01-29T12:00:00Z",
+  "revision_note": "Add SSDF v1.2 subsumption bundle scaffold and evidence entry",
   "initiatives": [
     {
       "id": "A",
@@ -39,10 +39,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -51,9 +48,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -62,9 +57,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
