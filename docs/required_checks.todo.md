@@ -1,16 +1,22 @@
-# Required Checks Discovery
+# Required Checks Discovery (TODO)
 
-## UI Steps
-1. Go to GitHub branch protection.
-2. Check required checks list.
+1) GitHub UI: Settings → Branches → Branch protection rules → note required status checks.
+2) GitHub API:
+   - GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Record check names in `ci/required_checks.json` (to be added in PR1.5 if needed).
 
-## API Steps
-`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+Temporary gate names (inferred from .github/workflows/ci-pr.yml):
+- Lint
+- Typecheck
+- Unit Tests
+- Build
+- Config Guard
+- Integration Tests
+- Deterministic Build
+- Golden Path Smoke Test
+- E2E Tests (Playwright)
+- Governance
+- SOC Controls
 
-## Current Checks (Temporary Convention)
-- `gate/evidence-validate`
-- `gate/osint-policy`
-- `gate/depdelta`
-
-## Plan
-PR to map temp checks to official check names once discovered.
+Rename plan:
+- Add mapping file + deprecate old names for 2 releases.
