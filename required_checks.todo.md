@@ -13,6 +13,10 @@
 - auditlog.schema
 - auditlog.persistence
 - auditlog.reporting
+- ci/summit-evidence
+- ci/summit-cog-policy
+- ci/summit-cog-evals
+- ci/supply-chain-delta
 
 ## GitHub API Steps
 
