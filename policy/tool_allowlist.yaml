@@ -1,0 +1,13 @@
+version: 1
+allowed_tools:
+  - web_search
+  - retrieve_docs
+  - calculator
+
+allowed_domains:
+  - wikipedia.org
+  - arxiv.org
+  - airtable.com
+  - producthunt.com
+  - venturebeat.com
+  - techcrunch.com
