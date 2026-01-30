@@ -1,0 +1,48 @@
+{
+  "task_id": "LAZY_MCP_SKILLPACKS_2026_01_14",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "lazy-mcp-skillpacks",
+    "version": "v1",
+    "sha256": "a5127a0addcbc97f6f863d5a02ee286c0267f44abe5e39f24934f9e7d717eee8",
+    "path": "prompts/skillpacks/lazy-mcp-skillpacks@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/agent-skillpacks/",
+      ".summit/skillpacks/",
+      "docs/skillpacks-lazy-mcp.md",
+      "docs/roadmap/STATUS.json",
+      "artifacts/tool-loading-report.json",
+      "artifacts/tool-loading-report.md",
+      "agents/examples/",
+      "prompts/skillpacks/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["agent-tooling", "governance", "mcp", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/tool-loading-report.json",
+      "artifacts/tool-loading-report.md",
+      "packages/agent-skillpacks/__tests__/__snapshots__/evidence-writer.test.ts.snap"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Skillpacks lazily inject distilled MCP schemas only when invoked.",
+    "Adaptive sharding routes tool subsets based on governance and task context.",
+    "Governance policy denies unknown tools in CI without a waiver.",
+    "Evidence artifacts are emitted and stable."
+  ],
+  "stop_conditions": [
+    "Policy gating cannot be enforced deterministically.",
+    "Evidence artifacts fail to emit.",
+    "Scope drift outside declared paths."
+  ]
+}
