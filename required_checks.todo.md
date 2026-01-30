@@ -6,10 +6,12 @@
 
 Temporary checks expected:
 
-- ci/summit-security-foundation
-- ci/summit-security-gates
-- ci/summit-security-deps
-
-Rename plan:
-- Update workflow + badges once real required checks are known.
-- Support legacy check names for one release cycle.
+3) Update CI verifier spec:
+   - Replace placeholder check names:
+     - agent_composer_unit
+     - agent_composer_e2e
+     - agent_composer_citation_verifier
+     - agent_composer_policy_suite
+     - ci/summit-evidence
+     - ci/summit-policy
+     - ci/summit-schema
