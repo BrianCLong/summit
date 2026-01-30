@@ -1,11 +1,12 @@
-# Summit Evidence System
+# Summit Evidence Bundles
 
-This folder defines the deterministic evidence contract used by CI and runtime exporters.
+Deterministic evidence artifacts for CI + audit.
 
-Required per Evidence ID directory:
-- report.json
-- metrics.json
-- stamp.json (timestamps allowed only here)
+Bundle layout (per run):
+  summit/evidence/runs/<run_name>/
+    report.json
+    metrics.json
+    stamp.json   # timestamps allowed ONLY here
+    index.json   # maps Evidence IDs -> files
 
-Global:
-- /evidence/index.json maps Evidence IDs to file paths.
+See schemas in summit/evidence/schemas/.
