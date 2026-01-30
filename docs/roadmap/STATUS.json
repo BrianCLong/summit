@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-17T22:29:59Z",
-  "revision_note": "Added agent registry v0 scaffolding with CLI validation and docs",
+  "last_updated": "2026-01-29T12:00:00Z",
+  "revision_note": "Add Postiz evidence scaffolding, item registry, and policy gate specs",
   "initiatives": [
     {
       "id": "A",

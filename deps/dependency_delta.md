@@ -1,14 +1,13 @@
-# Dependency Delta (Supply Chain Governance)
+# Dependency Delta
 
-All changes to project dependencies (npm, PyPI, etc.) must be documented here for security review.
+## Summary
 
-## Change Log
+- Added:
+- Removed:
+- Updated:
 
-### [YYYY-MM-DD] - Description of Change
-- **Type**: ADD / UPDATE / REMOVE
-- **Package**: `package-name`
-- **Reason**: Bug fix / New feature / Security patch
-- **Reviewer Acknowledgement**: [ ]
+## Notes
 
----
-*Note: This file is enforced by the `GATE-DEPS-DELTA` security gate.*
+- Rationale:
+- Risk:
+- Rollback:

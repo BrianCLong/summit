@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-POSTIZ-PROD-003",
+  "metrics": [
+    { "name": "product_patterns_count", "value": 3, "unit": "count", "provenance": "estimated" },
+    { "name": "compliance_patterns_count", "value": 3, "unit": "count", "provenance": "estimated" },
+    { "name": "growth_patterns_count", "value": 2, "unit": "count", "provenance": "estimated" }
+  ]
+}

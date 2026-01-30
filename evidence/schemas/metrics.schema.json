@@ -2,9 +2,28 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "coverage": { "type": "number" },
-    "update_anomaly_score_p95": { "type": "number" },
-    "quarantine_count": { "type": "integer" }
-  },
-  "additionalProperties": true
+    "evidence_id": { "type": "string" },
+    "metrics": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": { "type": ["number", "string", "boolean"] }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "value", "unit", "provenance"],
+            "properties": {
+              "name": { "type": "string" },
+              "value": {},
+              "unit": { "type": "string" },
+              "provenance": { "type": "string", "enum": ["verified", "claimed", "estimated"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      ]
+    }
+  }
 }

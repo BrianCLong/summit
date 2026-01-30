@@ -51,11 +51,35 @@
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     {
-      "evidence_id": "EVD-DEBEZIUM-OPENLINEAGE-FND-001",
+      "evidence_id": "EVD-POSTIZ-GROWTH-001",
       "files": [
-        "subsumption/debezium-openlineage/evidence/report.json",
-        "subsumption/debezium-openlineage/evidence/metrics.json",
-        "subsumption/debezium-openlineage/evidence/stamp.json"
+        "evidence/EVD-POSTIZ-GROWTH-001/report.json",
+        "evidence/EVD-POSTIZ-GROWTH-001/metrics.json",
+        "evidence/EVD-POSTIZ-GROWTH-001/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-POSTIZ-COMPLY-002",
+      "files": [
+        "evidence/EVD-POSTIZ-COMPLY-002/report.json",
+        "evidence/EVD-POSTIZ-COMPLY-002/metrics.json",
+        "evidence/EVD-POSTIZ-COMPLY-002/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-POSTIZ-PROD-003",
+      "files": [
+        "evidence/EVD-POSTIZ-PROD-003/report.json",
+        "evidence/EVD-POSTIZ-PROD-003/metrics.json",
+        "evidence/EVD-POSTIZ-PROD-003/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-POSTIZ-GATE-004",
+      "files": [
+        "evidence/EVD-POSTIZ-GATE-004/report.json",
+        "evidence/EVD-POSTIZ-GATE-004/metrics.json",
+        "evidence/EVD-POSTIZ-GATE-004/stamp.json"
       ]
     }
   ]
