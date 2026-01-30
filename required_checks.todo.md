@@ -1,11 +1,4 @@
-# Required checks discovery
-
-Temporary check names (wire these in GitHub Branch Protection):
-- `verify (summit-evidence)`
-
-Required status checks:
-1. `ci/summit-evidence`
-2. `ci/summit-influence-policy`
-3. `ci/summit-info-integrity-evals`
-
-Note: These will be satisfied by the `summit-evidence.yml` workflow jobs.
+# Required checks discovery (rename plan)
+1) GitHub UI: Repo → Settings → Branches → Branch protection → “Require status checks”.
+2) Copy exact check names here.
+3) Rename temporary gate names in `.github/workflows/*` to match.
