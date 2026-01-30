@@ -4,8 +4,7 @@
   "type": "object",
   "required": ["evidence_id", "metrics"],
   "properties": {
-    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9-]+$" },
-    "metrics": { "type": "object" }
-  },
-  "additionalProperties": false
+    "evidence_id": {"type": "string"},
+    "metrics": {"type": "object", "additionalProperties": true}
+  }
 }

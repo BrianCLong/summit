@@ -9,3 +9,6 @@ def is_feature_enabled(name: str, default: bool = False) -> bool:
 FEATURE_SOUL_MD = is_feature_enabled("FEATURE_SOUL_MD", default=False)
 FEATURE_CHAT_GATEWAY = is_feature_enabled("FEATURE_CHAT_GATEWAY", default=False)
 ATLAS_PLANNER_ENABLED = is_feature_enabled("ATLAS_PLANNER_ENABLED", default=False)
+
+SUMMIT_MM_ANCHOR_PROVIDER = os.environ.get("SUMMIT_MM_ANCHOR_PROVIDER", "mock")
+SUMMIT_MM_GDCNET = is_feature_enabled("SUMMIT_MM_GDCNET", default=False)
