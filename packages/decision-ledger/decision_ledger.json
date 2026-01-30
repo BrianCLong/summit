@@ -102,20 +102,20 @@
     "reverted": false
   },
   {
-    "id": "keel-evidence-templates-001",
-    "timestamp": "2026-01-30T03:55:00Z",
+    "id": "e6b2b7f4a1",
+    "timestamp": "2026-01-30T03:52:13.212168Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiAiYWxpZ24gS2VlbCBldmlkZW5jZSB0ZW1wbGF0ZXMgYW5kIGluZGV4IGVudHJpZXMiLCAiZmlsZXMiOiBbImV2aWRlbmNlL2luZGV4Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWFyY2gvcmVwb3J0Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWFyY2gvbWV0cmljcy5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1hcmNoL3N0YW1wLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLXN0YWIvcmVwb3J0Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLXN0YWIvbWV0cmljcy5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1zdGFiL3N0YW1wLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWRzY2wvcmVwb3J0Lmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWRzY2wvbWV0cmljcy5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1kc2NsL3N0YW1wLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWJlbmNoL3JlcG9ydC5qc29uIiwgInN1bW1pdC9ldmlkZW5jZS90ZW1wbGF0ZXMva2VlbC1iZW5jaC9tZXRyaWNzLmpzb24iLCAic3VtbWl0L2V2aWRlbmNlL3RlbXBsYXRlcy9rZWVsLWJlbmNoL3N0YW1wLmpzb24iLCAiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIiwgInBhY2thZ2VzL2RlY2lzaW9uLWxlZGdlci9kZWNpc2lvbl9sZWRnZXIuanNvbiIsICJwcm9tcHRzL2V2aWRlbmNlL2tlZWwtZXZpZGVuY2UtdGVtcGxhdGVzQHYxLm1kIiwgInByb21wdHMvcmVnaXN0cnkueWFtbCIsICJhZ2VudHMvZXhhbXBsZXMvS0VFTF9FVklERU5DRV9URU1QTEFURVNfMjAyNjAxMzAuanNvbiJdfQ==",
+    "inputHash": "eyJjaGFuZ2UiOiAiQWxpZ25lZCBldmlkZW5jZSBzY2hlbWFzIGFuZCB2ZXJpZmljYXRpb24sIGFkZGVkIHJlcXVpcmVkIGNoZWNrcyBzY2FmZm9sZC4iLCAiZmlsZXMiOiBbImNpL3ZlcmlmeV9ldmlkZW5jZS5weSIsICJzY2hlbWFzL2V2aWRlbmNlL2luZGV4LnNjaGVtYS5qc29uIiwgInNjaGVtYXMvZXZpZGVuY2UvcmVwb3J0LnNjaGVtYS5qc29uIiwgInNjaGVtYXMvZXZpZGVuY2UvbWV0cmljcy5zY2hlbWEuanNvbiIsICJzY2hlbWFzL2V2aWRlbmNlL3N0YW1wLnNjaGVtYS5qc29uIiwgImV2aWRlbmNlL1JFQURNRS5tZCIsICJjaS9yZXF1aXJlZF9jaGVja3MuanNvbiIsICJjaS9yZXF1aXJlZF9jaGVja3MudG9kby5tZCIsICJyZXF1aXJlZF9jaGVja3MudG9kby5tZCIsICJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iXX0=",
     "decision": {
-      "action": "align_keel_evidence_templates",
+      "action": "evidence_schema_alignment",
       "rule": {
-        "condition": "keel evidence bundles require explicit template mapping",
-        "action": "align_keel_evidence_templates",
+        "condition": "evidence validation required for rollout precision work",
+        "action": "evidence_schema_alignment",
         "max_cost": 0
       }
     },
-    "reasoning": "Mapped Keel evidence IDs to dedicated template artifacts for architecture, stability, depth scaling, and benchmark bundles.",
+    "reasoning": "Aligned evidence schemas with index format, added schema/timestamp validation, and scaffolded required-check mapping. Rollback: revert commit 40708209.",
     "reverted": false
   }
 ]

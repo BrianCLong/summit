@@ -1,27 +1,18 @@
 # Required Checks Discovery (Dynamic Intent)
 
-This checklist governs the Dynamic Intent scaffolding and associated evidence gates.
+## UI
 
-## 1. List Existing Checks
+1. Repo Settings -> Branches -> Branch protection rules.
+2. Note required status checks for default branch.
+3. Record exact check names in `ci/required_checks.json`.
 
-Use the GitHub UI and API to list required checks for the default branch:
+## API (GitHub)
 
-1. **GitHub UI** → Repository → Settings → Branches → Branch protection rules → Required status checks.
-2. **GitHub API**:
+Use: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 
-```bash
-gh api repos/:owner/:repo/commits/main/status-check-contexts
-```
+## Temporary CI gate names (will rename)
 
-## Temporary Required Check Names
-
-- `ci/schema-validate`
-- `ci/determinism`
-- `ci/deny-by-default`
-- `ci/deps-delta`
-- `ci/locality-gate`
-
-## Rename Plan
-
-Once branch protection check names are confirmed, rename the temporary checks to match and update
-`docs/dynamic_intent/summit_module_map.md` with the canonical mapping.
+- ci/unit
+- ci/evidence
+- ci/governance
+- ci/eval
