@@ -295,6 +295,7 @@
     "commander": "^14.0.2",
     "cross-env": "^10.0.0",
     "cross-spawn": "^7.0.6",
+    "path-key": "^4.0.0",
     "dotenv": "^17.2.1",
     "hono": "4.11.4",
     "ioredis": "^5.8.2",
@@ -319,6 +320,9 @@
     "client",
     "server"
   ],
+  "scripts": {
+    "test:security": "pnpm --filter intelgraph-server run test src/security/__tests__"
+  },
   "pnpm": {
     "auditConfig": {
       "ignoreCves": [
