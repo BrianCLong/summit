@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["version", "items"],
   "properties": {
-    "version": { "const": 1 },
+    "version": { "type": "integer" },
     "items": {
       "type": "array",
       "items": {
@@ -13,7 +13,8 @@
         "properties": {
           "id": { "type": "string", "pattern": "^EVD-[A-Z0-9_-]+$" },
           "path": { "type": "string" }
-        }
+        },
+        "additionalProperties": false
       }
     }
   }
