@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Provenance Metadata Schema v1
  * Tracks data lineage, source attribution, and confidence scores

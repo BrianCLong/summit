@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Integration Contracts v1
  * Unified contracts for Summit critical path (IG-101, MC-205, CO-58, SB-33)

@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Query Contract v1
  * IntelGraph query API contracts

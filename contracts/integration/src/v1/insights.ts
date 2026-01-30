@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Insights API Contract v1
  * CompanyOS product-facing API contracts for insights generation

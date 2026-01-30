@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Workflow Contract v1
  * Maestro Conductor workflow execution API contracts

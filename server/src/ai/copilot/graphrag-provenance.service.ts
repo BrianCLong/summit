@@ -895,7 +895,7 @@ Respond with JSON only:`;
     entities: GraphEntity[],
     relationships: GraphRelationship[],
   ): string {
-    const crypto = require('crypto');
+    import crypto from 'crypto';
     const content = JSON.stringify({
       entities: entities.map((e) => e.id).sort(),
       relationships: relationships.map((r: any) => r.id).sort(),

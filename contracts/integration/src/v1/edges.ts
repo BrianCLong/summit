@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Edge Schemas v1
  * Defines canonical relationship types for the IntelGraph model

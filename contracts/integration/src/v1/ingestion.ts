@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /**
  * Ingestion Contract v1
  * Switchboard → IntelGraph data ingestion API contracts

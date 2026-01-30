@@ -362,7 +362,7 @@ export class AuditChainVerifier {
 
   private storeRecord(record: AuditRecord, chainLink: ChainLink): void {
     // Ensure directory exists
-    const fs = require('fs');
+    import fs from 'fs';
     if (!fs.existsSync(this.chainPath)) {
       fs.mkdirSync(this.chainPath, { recursive: true });
     }
