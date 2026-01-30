@@ -52,7 +52,7 @@ import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import RouteAnnouncer from './components/a11y/RouteAnnouncer';
-import { useFeatureFlag } from './hooks/useFeatureFlag';
+import { useFeatureFlag, FeatureFlagProvider } from './hooks/useFeatureFlag';
 import { getGraphqlHttpUrl } from './config/urls';
 
 // Lazy load heavy components for better initial load performance
@@ -883,12 +883,14 @@ function App() {
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <DemoIndicator />
-          <ThemedAppShell>
-            <Router>
-              <MainLayout />
-            </Router>
-          </ThemedAppShell>
+          <FeatureFlagProvider>
+            <DemoIndicator />
+            <ThemedAppShell>
+              <Router>
+                <MainLayout />
+              </Router>
+            </ThemedAppShell>
+          </FeatureFlagProvider>
         </AuthProvider>
       </ApolloProvider>
     </Provider>
