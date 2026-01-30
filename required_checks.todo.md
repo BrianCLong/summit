@@ -1,38 +1,26 @@
-# Required Checks Discovery (Dynamic Intent)
+# Required checks discovery (TODO)
 
-## Summit Readiness Anchor
+## Goal
+List the repository's *required* CI checks for the default branch, then map them to verifier names
+in `ci/verifiers/`.
 
-Reference: docs/SUMMIT_READINESS_ASSERTION.md (use this as the governing readiness baseline).
+## GitHub UI steps
+1. Repo → Settings → Branches → Branch protection rules.
+2. Open the rule for the default branch.
+3. Under “Require status checks to pass”, copy the exact check names.
 
-## UI (GitHub)
+## GitHub API steps (alternative)
+Use the Branch Protection API to fetch required status checks for the branch:
+`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
 
-1. Repo Settings → Branches → Branch protection rules.
-2. Select the default branch rule.
-3. Record the exact required status checks (names are authoritative).
-4. Capture any required pull request review settings tied to checks.
-5. Export the list into this file and replace the temporary names below.
+## Temporary convention
+Until discovered, we use temporary verifier names:
+- `ci:unit`
+- `ci:schema`
+- `ci:lint`
+- `ci:deps-delta`
 
-## API (GitHub REST)
-
-- Endpoint: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-- Additional: GET /repos/{owner}/{repo}/branches/{branch}/protection
-- Persist the `contexts` array verbatim in this file.
-
-## API (GitHub GraphQL)
-
-- Query `branchProtectionRules` and record `requiredStatusCheckContexts`.
-- Store the results in `required_checks.todo.md` and reconcile with REST output.
-
-## Temporary CI gate names (rename after discovery)
-
-- ci/schema-validate
-- ci/determinism
-- ci/deny-by-default
-- ci/deps-delta
-- ci/locality-gate
-
-## Rename plan (authoritative naming)
-
-1. Replace temporary names with the exact required contexts from GitHub.
-2. Add a mapping table `{temporary → required}` for traceability.
-3. Update any CI configuration to use the authoritative names.
+## Rename plan
+Once real check names are known:
+1. Update CI config to emit the official check names.
+2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.
