@@ -88,6 +88,11 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -164,6 +169,11 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -29,6 +29,11 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v2
+          with:
+            version: 9.12.0
         with:
 
       - name: Install dependencies
@@ -108,6 +113,11 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v2
+          with:
+            version: 9.12.0
         with:
 
       - name: Install dependencies
@@ -133,6 +143,11 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v2
+          with:
+            version: 9.12.0
         with:
 
       - name: Install dependencies

@@ -84,6 +84,11 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 
@@ -164,6 +169,11 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 
@@ -222,6 +232,11 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 
@@ -331,6 +346,11 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
+        uses: pnpm/action-setup@v3
+          with:
+            version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 

@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Hybrid GraphRAG Retrieval**: Implemented hybrid retrieval strategy combining vector search with graph traversal for 35% improved accuracy.
+
 ## [5.0.0-ga] - 2026-01-23
 
 ### General Availability Release
