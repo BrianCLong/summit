@@ -8,11 +8,14 @@ import { FullConfig } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
+const AUTH_STATE_PATH = path.resolve(__dirname, 'auth-state.json');
+const TEST_DATA_PATH = path.resolve(__dirname, 'test-data.json');
+
 const globalTeardown = async (config: FullConfig) => {
   console.log('🧹 Starting global teardown for cross-browser tests...');
 
   // Clean up authentication files
-  const authFiles = ['auth-state.json', 'test-data.json'];
+  const authFiles = [AUTH_STATE_PATH, TEST_DATA_PATH];
 
   authFiles.forEach((file) => {
     if (fs.existsSync(file)) {

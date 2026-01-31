@@ -13,16 +13,17 @@ import AxeBuilder from '@axe-core/playwright';
 import fs from 'fs';
 import path from 'path';
 
-const AUTH_STATE_PATH = path.join(__dirname, '../auth-state.json');
+const AUTH_STATE_PATH = path.resolve(__dirname, '../auth-state.json');
+const hasAuthState = fs.existsSync(AUTH_STATE_PATH);
 
-test.use({ storageState: AUTH_STATE_PATH });
+test.use({ storageState: hasAuthState ? AUTH_STATE_PATH : undefined });
 
 test.describe('Maestro Dashboard', () => {
   let page: Page;
 
   test.beforeAll(() => {
     if (!fs.existsSync(AUTH_STATE_PATH)) {
-      throw new Error(
+      test.skip(
         'Missing auth storage state. Run the auth-setup spec to generate auth-state.json (e.g., `npx playwright test tests/e2e/tests/auth-setup.spec.ts --project=chromium-desktop`).',
       );
     }

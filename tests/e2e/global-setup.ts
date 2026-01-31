@@ -9,6 +9,8 @@ import { chromium, FullConfig } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
 
+const AUTH_STATE_PATH = path.resolve(__dirname, 'auth-state.json');
+
 const globalSetup = async (config: FullConfig) => {
   console.log('🚀 Starting global setup for cross-browser tests...');
 
@@ -73,7 +75,7 @@ async function setupAuthentication() {
       await page.waitForURL('**/dashboard', { timeout: 30000 });
 
       // Save authentication state
-      await context.storageState({ path: 'auth-state.json' });
+      await context.storageState({ path: AUTH_STATE_PATH });
 
       console.log('✅ Authentication state saved');
     } else {
@@ -161,10 +163,10 @@ async function seedTestDataViaAPI(testData: any) {
     const context = await browser.newContext();
 
     // Load auth state if available
-    if (fs.existsSync('auth-state.json')) {
+    if (fs.existsSync(AUTH_STATE_PATH)) {
       await context.addInitScript(() => {
         const authState = JSON.parse(
-          fs.readFileSync('auth-state.json', 'utf8'),
+          fs.readFileSync(AUTH_STATE_PATH, 'utf8'),
         );
         if (authState.localStorage) {
           for (const [key, value] of Object.entries(authState.localStorage)) {

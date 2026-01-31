@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
-const AUTH_STATE_PATH = path.join(__dirname, '../auth-state.json');
+const AUTH_STATE_PATH = path.resolve(__dirname, '../auth-state.json');
 
 // Run serially so we only persist a single canonical auth state.
 test.describe.configure({ mode: 'serial' });
