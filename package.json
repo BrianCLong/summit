@@ -316,7 +316,7 @@
       "preact": ">=10.25.4",
       "@types/react": "18.3.11",
       "@types/react-dom": "18.3.0",
-      "apollo-server-express": ">=3.13.1",
+    "apollo-server-express": ">=3.13.0",
       "redis": ">=5.9.0"
     }
   }
