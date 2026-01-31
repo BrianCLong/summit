@@ -1,4 +1,4 @@
-import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@maestro/core';
+import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@intelgraph/maestro-core';
 import {
     FSRepoAdapter,
     RCRSession,
