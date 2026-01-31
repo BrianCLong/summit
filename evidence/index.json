@@ -5,6 +5,11 @@
       "report": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/report.json",
       "stamp": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/stamp.json"
     },
+    "EVD-mcp-a2a-mental-model-interop-001": {
+      "report": "evidence/EVD-mcp-a2a-mental-model-interop-001/report.json",
+      "metrics": "evidence/EVD-mcp-a2a-mental-model-interop-001/metrics.json",
+      "stamp": "evidence/EVD-mcp-a2a-mental-model-interop-001/stamp.json"
+    },
     "EVD-SDSBC-FOUNDATION-001": {
       "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
       "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
