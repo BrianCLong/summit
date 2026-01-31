@@ -1,0 +1,43 @@
+{
+  "task_id": "QWEN3_ASR_SCAFFOLD_20260131",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "qwen3-asr-scaffold",
+    "version": "v1",
+    "sha256": "58d8b8c189745d63cdf6bf12cfaef24fd77f5671b6c3e62b346bd66566d2f265",
+    "path": "prompts/asr/qwen3-asr-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "asr/",
+      "docs/asr/",
+      "tests/",
+      "required_checks.todo.md",
+      "NOTICE.third_party.md",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json",
+      "prompts/asr/qwen3-asr-scaffold@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["asr", "governance", "documentation", "security", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["pytest -q"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "ASR scaffold is deny-by-default with redaction tests passing",
+    "Evidence runner emits deterministic artifacts",
+    "Roadmap status and decision ledger updated"
+  ],
+  "stop_conditions": [
+    "Required checks mapping cannot be confirmed",
+    "Any dependency addition is required"
+  ]
+}
