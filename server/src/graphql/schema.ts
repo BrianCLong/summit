@@ -241,6 +241,8 @@ export const typeDefs = `
     auditTrace(investigationId: ID!, filter: JSON): [JSON!]!
     exportProvenance(tenantId: String!, format: String): ProvenanceExport!
     riskSignals(limit: Int = 50, offset: Int = 0): [RiskSignal!]!
+    trustScore(subjectId: ID!): JSON
+    trustScoresPage(tenantId: String!, limit: Int, offset: Int): JSON
     evidenceBundles(limit: Int = 20): [EvidenceBundle!]!
     warRooms(status: String): [WarRoom!]!
     activeCampaigns(limit: Int): [CogSecCampaign!]!
