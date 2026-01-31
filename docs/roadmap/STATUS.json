@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-18T00:00:00Z",
-  "revision_note": "Added APPLEQAI evidence bundle, biometric gate scaffolding, and input routing interfaces.",
+  "revision_note": "Added required checks verifier scaffold and evidence schema alignment for Codespaces residency PR1.",
   "initiatives": [
     {
       "id": "A",

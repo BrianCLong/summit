@@ -1,5 +1,6 @@
 {
   "version": 1,
+  "items": [],
   "evidence": {
     "EVD-APPLEQAI-PRIV-002": {
       "report": "evidence/EVD-APPLEQAI-PRIV-002/report.json",

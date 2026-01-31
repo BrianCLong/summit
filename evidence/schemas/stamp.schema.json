@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit.evidence.stamp",
+  "title": "Summit Evidence Stamp (non-deterministic)",
   "type": "object",
-  "required": ["evidence_id", "timestamp", "commit"],
+  "required": ["evidence_id", "generated_at"],
   "properties": {
-    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
-    "timestamp": { "type": "string", "format": "date-time" },
-    "commit": { "type": "string" },
-    "input_hash_tree": { "type": "object", "additionalProperties": { "type": "string" } },
-    "tool_versions": { "type": "object", "additionalProperties": { "type": "string" } }
-  },
-  "additionalProperties": false
+    "evidence_id": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "tool_versions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  }
 }
