@@ -1,0 +1,16 @@
+services:
+  vllm-deepseek-ocr:
+    image: vllm/vllm-openai:v0.11.1
+    command:
+      - "--model"
+      - "deepseek-ai/DeepSeek-OCR"
+      - "--trust-remote-code"
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
