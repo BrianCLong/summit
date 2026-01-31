@@ -70,26 +70,40 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
+      - name: Generate GitHub App Token
+        id: app-token
+        if: secrets.BRANCH_PROTECTION_APP_ID != '' && secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY != ''
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
+          private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
+
       - name: Validate branch protection token
         env:
-          BRANCH_PROTECTION_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          LEGACY_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
-          if [[ "${{ github.event.inputs.mode }}" == "apply" ]]; then
-            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
-              echo "::error::BRANCH_PROTECTION_ADMIN_TOKEN is required for apply mode."
-              exit 1
-            fi
-          else
-            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
-              echo "::error::BRANCH_PROTECTION_READ_TOKEN is required for plan mode."
-              exit 1
-            fi
+          if [[ -n "$APP_TOKEN" ]]; then
+            echo "Using GitHub App Token"
+            exit 0
           fi
+
+          if [[ -n "$LEGACY_TOKEN" ]]; then
+            echo "Using Legacy Token"
+            exit 0
+          fi
+
+          if [[ "${{ github.event.inputs.mode }}" == "apply" ]]; then
+            echo "::error::BRANCH_PROTECTION_ADMIN_TOKEN or GitHub App (with admin:write) is required for apply mode."
+          else
+            echo "::error::BRANCH_PROTECTION_READ_TOKEN or GitHub App is required for plan mode."
+          fi
+          exit 1
 
       - name: Run Reconciler
         id: reconcile
         env:
-          GH_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || (github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN) }}
         run: |
           mkdir -p "${{ env.OUT_DIR }}"
 

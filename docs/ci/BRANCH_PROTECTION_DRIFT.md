@@ -193,8 +193,31 @@ Reading branch protection requires one of:
 
 - Admin access to the repository
 - `read:org` scope (for organization repos)
+- **GitHub App** with `Administration: Read-only` permission
 
 If permissions are insufficient, the script reports the limitation and creates an issue explaining the access requirement.
+
+### GitHub App Configuration (Recommended)
+
+To avoid managing personal access tokens and ensure consistent permissions, a GitHub App is the preferred authentication method.
+
+**1. Create a GitHub App** with the following permissions:
+
+- **Administration**: Read-only (Required for Drift Detection & Plan mode)
+  - _Note: `Administration: Read & write` is required for Reconcile Apply mode_
+- **Contents**: Read-only
+- **Issues**: Read & write
+- **Metadata**: Read-only
+
+**2. Install the App** on the repository.
+
+**3. Configure Secrets**:
+Add the following repository secrets:
+
+- `BRANCH_PROTECTION_APP_ID`: The App ID
+- `BRANCH_PROTECTION_APP_PRIVATE_KEY`: The private key (PEM format)
+
+The workflows will automatically prefer the App token if these secrets are present.
 
 ---
 
