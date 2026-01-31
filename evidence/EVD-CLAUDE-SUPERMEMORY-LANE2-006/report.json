@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-CLAUDE-SUPERMEMORY-LANE2-006",
+  "item_slug": "claude-supermemory",
+  "summary": "Scaffolding for EVD-CLAUDE-SUPERMEMORY-LANE2-006",
+  "artifacts": {
+    "metrics": "evidence/EVD-CLAUDE-SUPERMEMORY-LANE2-006/metrics.json",
+    "stamp": "evidence/EVD-CLAUDE-SUPERMEMORY-LANE2-006/stamp.json"
+  }
+}

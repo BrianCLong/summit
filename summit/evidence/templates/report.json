@@ -3,5 +3,6 @@
   "item_slug": "260119895-keel",
   "claims": ["Keel block implements LN_out(alpha * x + F(LN_in(x))) with explicit alpha."],
   "decisions": [],
-  "findings": []
+  "findings": [],
+  "summary": "Template report summary"
 }
