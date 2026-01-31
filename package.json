@@ -50,6 +50,8 @@
     "optimize:check": "npx tsx scripts/optimization/check_optimization_metrics.ts",
     "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
+    "agent-trace:validate": "pnpm --filter @intelgraph/agent-trace validate",
+    "agent-trace:summarize": "pnpm --filter @intelgraph/agent-trace run summarize",
     "lint": "eslint . && (ruff check . || true)",
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
     "lint:strict": "eslint . && (ruff check . || true)",
