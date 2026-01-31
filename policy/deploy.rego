@@ -1,6 +1,7 @@
 package summit.deploy
 
 import data.summit.shared
+import future.keywords
 
 default allow := false
 
@@ -8,6 +9,7 @@ allow if {
   input.env == "prod"
   required_approvals_met
   sbom_signed
+  evidence_verified
   not has_security_failures
 }
 
@@ -17,6 +19,11 @@ required_approvals_met if {
 
 sbom_signed if {
   input.artifact.sbom.signed == true
+}
+
+evidence_verified if {
+  input.evidence.bundle_id
+  input.evidence.status == "verified"
 }
 
 has_security_failures if {
@@ -33,6 +40,12 @@ strict_deny contains msg if {
   input.env == "prod"
   not sbom_signed
   msg := "SBOM is missing or unsigned"
+}
+
+strict_deny contains msg if {
+  input.env == "prod"
+  not evidence_verified
+  msg := "compliance evidence missing or unverified"
 }
 
 strict_deny contains msg if {
