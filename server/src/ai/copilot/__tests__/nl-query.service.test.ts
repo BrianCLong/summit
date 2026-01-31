@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { NLQueryService, createNLQueryService } from '../nl-query.service.ts';
-import type { NLQueryRequest } from '../types.ts';
+import { NLQueryService, createNLQueryService } from '../nl-query.service.js';
+import type { NLQueryRequest } from '../types.js';
 
 describe('NLQueryService', () => {
   let service: NLQueryService;

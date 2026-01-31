@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { experimentService } from './ExperimentService.ts';
-import { Experiment } from './types.ts';
+import { experimentService } from './ExperimentService.js';
+import { Experiment } from './types.js';
 
 export const createExperiment = (req: Request, res: Response) => {
     try {

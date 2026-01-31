@@ -2,10 +2,10 @@
  * Core detector interfaces
  */
 
-import { ThreatEvent, AnomalyScore, BehaviorProfile, NetworkEvent } from '../types/events';
-import { ThreatIndicator } from '../types/threats';
-import { Alert } from '../types/alerts';
-import { PredictionRequest, PredictionResult } from '../types/ml';
+import { ThreatEvent, AnomalyScore, BehaviorProfile, NetworkEvent } from '../types/events.js';
+import { ThreatIndicator } from '../types/threats.js';
+import { Alert } from '../types/alerts.js';
+import { PredictionRequest, PredictionResult } from '../types/ml.js';
 
 export interface IThreatDetector {
   /**

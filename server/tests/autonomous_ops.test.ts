@@ -1,8 +1,8 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { AutomationExecutor } from '../src/autonomous/AutomationExecutor';
-import { GuardrailService } from '../src/autonomous/GuardrailService';
-import { ApprovalService } from '../src/autonomous/ApprovalService';
-import { PolicyDecision, PolicyEngine } from '../src/autonomous/policy-engine';
+import { AutomationExecutor } from '../src/autonomous/AutomationExecutor.js';
+import { GuardrailService } from '../src/autonomous/GuardrailService.js';
+import { ApprovalService } from '../src/autonomous/ApprovalService.js';
+import { PolicyDecision, PolicyEngine } from '../src/autonomous/policy-engine.js';
 import { Logger } from 'pino';
 import { Pool } from 'pg';
 

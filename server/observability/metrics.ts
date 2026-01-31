@@ -6,7 +6,7 @@ import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { metrics } from '@opentelemetry/api';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 // Initialize OpenTelemetry SDK
 const sdk = new NodeSDK({

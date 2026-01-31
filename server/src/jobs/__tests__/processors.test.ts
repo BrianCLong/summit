@@ -1,9 +1,9 @@
 import { describe, it, expect, jest } from '@jest/globals';
-import { ingestionProcessor } from '../processors/ingestion.processor';
-import { reportProcessor } from '../processors/report.processor';
-import { analyticsProcessor } from '../processors/analytics.processor';
-import { notificationProcessor } from '../processors/notification.processor';
-import { webhookProcessor } from '../processors/webhook.processor';
+import { ingestionProcessor } from '../processors/ingestion.processor.js';
+import { reportProcessor } from '../processors/report.processor.js';
+import { analyticsProcessor } from '../processors/analytics.processor.js';
+import { notificationProcessor } from '../processors/notification.processor.js';
+import { webhookProcessor } from '../processors/webhook.processor.js';
 
 describe('Job Processors', () => {
     describe('ingestionProcessor', () => {

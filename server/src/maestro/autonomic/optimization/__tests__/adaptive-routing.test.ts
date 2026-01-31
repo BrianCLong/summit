@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { AdaptiveRoutingService } from '../adaptive-routing';
+import { AdaptiveRoutingService } from '../adaptive-routing.js';
 
 describe('AdaptiveRoutingService', () => {
   let service: AdaptiveRoutingService;

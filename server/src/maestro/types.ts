@@ -1,163 +1,87 @@
-import type {
-  ReasoningBudgetContract,
-  ReasoningBudgetEvidence,
-} from './budget';
+// Maestro Orchestrator Types
 
-export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval';
-
-export interface UserRef {
-  id: string;
-}
-
-export interface AgentRef {
+export interface MaestroLoop {
   id: string;
   name: string;
-  kind: 'llm' | 'tool' | 'workflow' | 'graph-engine';
-  modelId?: string;        // e.g. "openai:gpt-4.1"
-  toolName?: string;       // e.g. "bash-shell"
+  type: string;
+  status: 'active' | 'paused' | 'inactive';
+  lastDecision?: string;
+  lastRun?: string;
+  config: Record<string, any>;
 }
 
-export interface Run {
+export interface MaestroAgent {
   id: string;
-  user: UserRef;
-  createdAt: string;
-  requestText: string;
-  tenantId?: string;
-  reasoningBudget?: ReasoningBudgetContract;
-  reasoningBudgetEvidence?: ReasoningBudgetEvidence;
-}
-
-export interface Task {
-  id: string;
-  runId: string;
-  parentTaskId?: string;
-  status: TaskStatus;
-  agent: AgentRef;
-  kind: 'plan' | 'action' | 'subworkflow' | 'graph.analysis';
-  description: string;
-  input: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  errorMessage?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Artifact {
-  id: string;
-  runId: string;
-  taskId: string;
-  kind: 'text' | 'json' | 'file' | 'graph';
-  label: string;
-  data: unknown; // or a typed union if you want stricter types
-  createdAt: string;
-}
-
-export interface CostSample {
-  id: string;
-  runId: string;
-  taskId: string;
+  name: string;
+  role: string;
   model: string;
-  vendor: 'openai' | 'anthropic' | 'google' | 'local';
-  inputTokens: number;
-  outputTokens: number;
-  currency: 'USD';
-  cost: number;
-  createdAt: string;
-  feature?: string;
-  tenantId?: string;
-  environment?: string;
+  status: 'active' | 'inactive' | 'error';
+  routingWeight: number;
+  metrics: Record<string, number>;
 }
 
-export interface RunCostSummary {
-  runId: string;
-  totalCostUSD: number;
-  totalInputTokens: number;
-  totalOutputTokens: number;
-  byModel: Record<string, {
-    costUSD: number;
-    inputTokens: number;
-    outputTokens: number;
-  }>;
+export interface MaestroExperiment {
+  id: string;
+  name: string;
+  hypothesis: string;
+  status: 'running' | 'completed' | 'failed' | 'paused';
+  variants: string[];
+  metrics: Record<string, any>;
+  startDate: string;
+  endDate: string;
 }
 
-// Coordination Types for Subagent Collaboration (Added in Phase 3)
+export interface MaestroPlaybook {
+  id: string;
+  name: string;
+  description: string;
+  triggers: string[];
+  actions: string[];
+  isEnabled: boolean;
+}
+
+export interface MaestroAuditEvent {
+  id: string;
+  timestamp: string;
+  actor: string;
+  action: string;
+  resource: string;
+  details: string;
+  status: string;
+}
+
 export interface CoordinationTask {
   id: string;
   title: string;
   description: string;
-  assignedAgentIds: string[];
-  dependencies?: string[];
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  deadline?: Date;
-  payload: Record<string, any>;
-  status: 'pending' | 'delegated' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
+  status: 'pending' | 'in-progress' | 'completed' | 'failed';
+  ownerId: string;
+  participants: string[];
+  priority: number;
   result?: any;
   error?: string;
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
 }
 
 export interface CoordinationChannel {
   id: string;
+  topic: string;
   participants: string[];
-  topic: string;  // What they're coordinating about (e.g., "threat-analysis", "entity-resolution")
-  messages: CoordinationMessage[];
-  createdAt: Date;
-  updatedAt?: Date;
-  isActive: boolean;
-}
-
-export interface CoordinationMessage {
-  id: string;
-  senderId: string;
-  recipientId?: string;  // If null, broadcast to channel
-  timestamp: Date;
-  type: 'TASK_ASSIGNMENT' | 'TASK_RESULT' | 'REQUEST_HELP' | 'REQUEST_REVIEW' | 'CONSENSUS_PROPOSAL' | 'CONSENSUS_VOTE' | 'STATUS_UPDATE' | 'COORDINATION_MESSAGE';
-  content: string;
-  attachments?: any[];
-  correlationId?: string;  // For linking related messages
-  metadata?: Record<string, any>;
+  status: 'active' | 'inactive' | 'archived';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ConsensusProposal<T = any> {
   id: string;
-  coordinatorId: string;
   topic: string;
   proposal: T;
-  voters: string[];  // Agent IDs that should vote
-  votingDeadline: Date;
-  votes: Map<string, { vote: 'approve' | 'reject' | 'abstain'; timestamp: Date; rationale?: string }>;
-  status: 'draft' | 'in_voting' | 'passed' | 'rejected' | 'cancelled';
-  createdAt: Date;
-  updatedAt?: Date;
-  closedAt?: Date;
-}
-
-export interface AgentCoordinationMetrics {
-  coordinationMessagesSent: number;
-  coordinationMessagesReceived: number;
-  collaborativeTasksCompleted: number;
-  consensusDecisionsMade: number;
-  resourceSharingEvents: number;
-  conflictResolutionEvents: number;
-  averageCollaborationTimeMs: number;
-  updatedAt?: Date;
-}
-
-export interface PlaybookSignature {
-  algorithm: 'ed25519';
-  signature: string;
-  publicKey: string;
-  signedAt: string;
-}
-
-export interface Playbook {
-  id: string;
-  name: string;
-  description?: string;
-  triggers: string[];
-  actions: string[];
-  isEnabled: boolean;
-  version?: string;
-  signature?: PlaybookSignature;
+  coordinatorId: string;
+  voters: string[];
+  votes: Record<string, { decision: 'approve' | 'reject' | 'abstain'; reason?: string; weight?: number; timestamp: string }>;
+  status: 'voting' | 'approved' | 'rejected' | 'expired';
+  deadline: string;
+  createdAt: string;
 }

@@ -14,7 +14,7 @@
  */
 
 import { EventEmitter } from 'events';
-import logger from '../../utils/logger.ts';
+import logger from '../../utils/logger.js';
 import {
   TrustScoreRequest,
   TrustScoreResponse,
@@ -39,7 +39,7 @@ import {
   SubjectType,
   getTrustScoreBand,
   calculateStandardDeviation,
-} from './types.ts';
+} from './types.js';
 
 // ============================================================================
 // Configuration

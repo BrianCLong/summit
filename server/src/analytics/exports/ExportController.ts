@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ExportService } from './ExportService.ts';
+import { ExportService } from './ExportService.js';
 
 const service = new ExportService({ kAnonymityThreshold: 5 });
 

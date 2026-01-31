@@ -1,4 +1,4 @@
-import { compare } from './util/diff';
+import { compare } from './util/diff.js';
 export async function shadowQuery(q) {
   const cur = await searchActive(q);
   const cand = await searchCandidate(q);

@@ -6,7 +6,7 @@ import {
   SocialMediaProfile,
   CorporateRecord,
   PublicRecord,
-} from './types';
+} from './types.js';
 
 /**
  * ClaimExtractor - Automation Turn #5 Implementation

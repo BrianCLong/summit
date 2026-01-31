@@ -5,7 +5,7 @@
 import pino from 'pino';
 import type { Logger } from './Logger.js';
 
-const pinoLogger = (pino as any)({
+const pinoLogger = pino({
   level: process.env.LOG_LEVEL || 'info',
   transport:
     process.env.NODE_ENV === 'development'

@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { pg } from '../db/pg';
+import { pg } from '../db/pg.js';
 
 export interface Incident {
   id: string;

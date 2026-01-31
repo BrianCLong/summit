@@ -2,7 +2,7 @@ import express from 'express';
 import { IngestionService } from '../lib/data-platform/ingest/service.js';
 import { RetrievalService } from '../lib/data-platform/retrieval/service.js';
 import { RagService } from '../lib/data-platform/rag/service.js';
-import { pg } from '../db/pg';
+import { pg } from '../db/pg.js';
 
 const router = express.Router();
 const ingestionService = new IngestionService();

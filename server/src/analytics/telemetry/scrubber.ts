@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { ALLOWLIST } from './allowlist.ts';
+import { ALLOWLIST } from './allowlist.js';
 
 // Patterns that look like PII or Secrets
 const PII_PATTERNS = [

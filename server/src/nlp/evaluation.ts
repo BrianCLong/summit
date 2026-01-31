@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { TextIngestionPipeline, loadDomainTestSet, RawDocument } from './pipeline';
+import { TextIngestionPipeline, loadDomainTestSet, RawDocument } from './pipeline.js';
 
 export interface EvaluationMetrics {
   precision: number;

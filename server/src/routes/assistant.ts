@@ -1,22 +1,22 @@
 // @ts-nocheck
 import type { Express, Response } from 'express';
 import type { AuthenticatedRequest } from './types.js';
-import { MockLLM } from '../services/llm';
-import { auth } from '../middleware/auth';
-import { rateLimit } from '../middleware/rateLimit';
-import { logAssistantEvent } from '../db/audit';
-import { enqueueEnrichment } from '../workers/enrichment'; // New import
-import { enqueue } from '../services/coalescer'; // Import enqueue for coalescing
-// import { httpLatency, httpErrors, tokensOut } from '../telemetry/metrics'; // New import
+import { MockLLM } from '../services/llm.js';
+import { auth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
+import { logAssistantEvent } from '../db/audit.js';
+import { enqueueEnrichment } from '../workers/enrichment.js'; // New import
+import { enqueue } from '../services/coalescer.js'; // Import enqueue for coalescing
+// import { httpLatency, httpErrors, tokensOut } from '../telemetry/metrics.js'; // New import
 import { randomUUID } from 'node:crypto'; // New import
-import { isSuspicious } from '../services/guard'; // New import
-import { getCached, setCached } from '../cache/answers'; // New import
+import { isSuspicious } from '../services/guard.js'; // New import
+import { getCached, setCached } from '../cache/answers.js'; // New import
 import {
   fetchGraphContext,
   fetchTextPassages,
   buildRagPrompt,
-} from '../services/rag'; // New import
-// import { runCypher } from '../graph/neo4j'; // New import
+} from '../services/rag.js'; // New import
+// import { runCypher } from '../graph/neo4j.js'; // New import
 
 // Mock metrics for now to fix TS errors
 const httpLatency = { startTimer: () => () => {} };

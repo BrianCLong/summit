@@ -20,7 +20,7 @@ jest.unstable_mockModule('../../services/FinOpsRollupService.js', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const finopsRouter = (await import('../finops')).default;
+const finopsRouter = (await import('../finops.js')).default;
 const { finOpsRollupService } = await import('../../services/FinOpsRollupService.js');
 
 const describeIf =

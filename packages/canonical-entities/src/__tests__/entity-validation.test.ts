@@ -10,7 +10,7 @@ import {
   EventEntity,
   validateEntity,
   createEntity,
-} from '../types';
+} from '../types.js';
 
 describe('Canonical Entity Validation', () => {
   describe('PersonEntity', () => {

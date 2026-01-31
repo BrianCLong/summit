@@ -1,14 +1,14 @@
 
 import * as v8 from 'v8';
 import * as fs from 'fs';
-import { telemetry } from './comprehensive-telemetry.ts';
+import { telemetry } from './comprehensive-telemetry.js';
 import { Request } from 'express';
 import * as path from 'path';
 import * as os from 'os';
 import { performance } from 'perf_hooks';
 
-import { telemetryConfig } from '../../config/telemetry.ts';
-import { cfg } from '../../config.ts';
+import { telemetryConfig } from '../../config/telemetry.js';
+import { cfg } from '../../config.js';
 
 class DiagnosticSnapshotter {
   private snapshotInProgress = false;

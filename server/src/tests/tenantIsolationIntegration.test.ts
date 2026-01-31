@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import express, { Response } from 'express';
-import { ensureAuthenticated } from '../middleware/auth';
-import { tenantContextMiddleware } from '../middleware/tenantContext';
+import { ensureAuthenticated } from '../middleware/auth.js';
+import { tenantContextMiddleware } from '../middleware/tenantContext.js';
 
 // Mock prom-client BEFORE anything else
 jest.mock('prom-client', () => {

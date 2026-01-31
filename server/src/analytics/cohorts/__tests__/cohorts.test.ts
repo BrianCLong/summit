@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
-import { CohortEvaluator } from '../CohortEvaluator.ts';
-import { Cohort } from '../types.ts';
+import { CohortEvaluator } from '../CohortEvaluator.js';
+import { Cohort } from '../types.js';
 
 const TEST_LOG_DIR = path.join(__dirname, 'test_logs_cohorts_' + Date.now());
 

@@ -2,10 +2,10 @@
   "name": "intelgraph-server",
   "version": "4.2.3",
   "description": "IntelGraph Platform Backend API",
-  "main": "dist/src/index.js",
+  "main": "dist/server/src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node dist/src/index.js",
+    "start": "node dist/server/src/index.js",
     "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
     "build": "node build.mjs",
     "typecheck": "tsc --noEmit",

@@ -98,7 +98,7 @@ export class SecretDriftDetector {
           lines.forEach((line: any, idx: any) => {
             if (line.includes(value)) {
               // Check if it's the config file itself or the .env loading part
-              if (filePath.endsWith('config.ts') || filePath.endsWith('.env')) return;
+              if (filePath.endsWith('config.js') || filePath.endsWith('.env')) return;
 
               leaks.push({ secret: key, file: filePath, line: idx + 1 });
             }
@@ -113,7 +113,7 @@ export class SecretDriftDetector {
         const fp = path.join(dir, f);
         if (this.fs.statSync(fp).isDirectory()) {
           walkDir(fp);
-        } else if (f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json')) {
+        } else if (f.endsWith('.js') || f.endsWith('.js') || f.endsWith('.json')) {
           scanFile(fp);
         }
       });

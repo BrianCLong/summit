@@ -16,7 +16,7 @@ import type {
   JWTSecurityManager as JWTSecurityManagerClass,
   createJWTSecurityManager as createJWTSecurityManagerFn,
 } from '../jwt-security.js';
-import { createClient, mockRedisClient } from '../../../tests/mocks/redis';
+import { createClient, mockRedisClient } from '../../../tests/mocks/redis.js';
 
 const staticKeyPair = {
   publicKey: '-----BEGIN PUBLIC KEY-----\nMOCK\n-----END PUBLIC KEY-----',

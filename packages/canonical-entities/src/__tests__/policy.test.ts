@@ -12,7 +12,7 @@ import {
   createAdminUserContext,
   UserContext,
   PolicyLabels,
-} from '../policy';
+} from '../policy.js';
 
 describe('Policy Engine', () => {
   describe('hasSufficientClearance', () => {

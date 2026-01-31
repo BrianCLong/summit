@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { pricingReadRoutes } from '../pricing-read-routes';
+import { pricingReadRoutes } from '../pricing-read-routes.js';
 import { listPools, currentPricing } from '../../scheduling/pools.js';
 
 jest.mock('../../auth/rbac-middleware', () => ({

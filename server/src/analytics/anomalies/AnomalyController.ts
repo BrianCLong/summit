@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { AnomalyDetector } from './AnomalyDetector.ts';
-import { TimeSeriesPoint } from './types.ts';
+import { AnomalyDetector } from './AnomalyDetector.js';
+import { TimeSeriesPoint } from './types.js';
 
 // In-memory store for demo. In production, read from DB/TimeSeries store.
 const metricHistory: Record<string, TimeSeriesPoint[]> = {};

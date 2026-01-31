@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { DomainName, RecordTimelineEntry } from './types';
+import { DomainName, RecordTimelineEntry } from './types.js';
 import { Request, Response, NextFunction } from 'express';
 
 export const correctnessCorrelationIdHeader = 'x-correctness-correlation-id';

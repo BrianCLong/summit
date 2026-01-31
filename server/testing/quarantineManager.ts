@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { logger } from '../utils/logger';
-import { FlakeAnalysis } from './flakeRadar';
+import { logger } from '../utils/logger.js';
+import { FlakeAnalysis } from './flakeRadar.js';
 
 export interface QuarantineEntry {
   testKey: string;

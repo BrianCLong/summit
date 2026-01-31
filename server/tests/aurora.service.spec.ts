@@ -1,5 +1,5 @@
 // server/tests/aurora.service.spec.ts
-import { AuroraService } from '../src/aurora/AuroraService';
+import { AuroraService } from '../src/aurora/AuroraService.js';
 import { CortexOverlay } from '../src/aurora/aurora.types';
 
 describe('AuroraService', () => {

@@ -1,4 +1,4 @@
-import { capitalize, reverse } from './stringUtils';
+import { capitalize, reverse } from './stringUtils.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('String Utils', () => {

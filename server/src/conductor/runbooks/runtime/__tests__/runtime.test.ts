@@ -25,8 +25,8 @@ import {
   RapidAttributionRunbook,
   validateRapidAttributionInput,
   rapidAttributionExampleInput,
-} from '../index';
-import { LegalBasis, DataLicense } from '../../dags/types';
+} from '../index.js';
+import { LegalBasis, DataLicense } from '../../dags/types.js';
 
 // ============================================================================
 // Test Helpers

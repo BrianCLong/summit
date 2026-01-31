@@ -13,7 +13,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import logger from '../config/logger.ts';
+import logger from '../config/logger.js';
 
 // ============================================================================
 // Types and Interfaces
