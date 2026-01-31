@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T08:05:00Z",
-  "revision_note": "Pinned log-symbols chalk resolution to unblock Cypress postinstall.",
+  "last_updated": "2026-02-15T00:00:00Z",
+  "revision_note": "Switched branch protection drift workflow to GitHub App token authentication; documented investigation/export RBAC verification updates tied to Task Brief #6.",
   "initiatives": [
     {
       "id": "A",
