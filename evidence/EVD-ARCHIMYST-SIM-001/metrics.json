@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-ARCHIMYST-SIM-001",
+  "metrics": {
+    "p95_ms": 10.15,
+    "p99_ms": 16.240000000000002,
+    "error_rate": 0.0,
+    "cost_usd_per_day": 1.0,
+    "saturation": 0.02
+  }
+}

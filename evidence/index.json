@@ -25,7 +25,7 @@
       "metrics": "evidence/EVD-SDSBC-CODEGEN-001/metrics.json",
       "stamp": "evidence/EVD-SDSBC-CODEGEN-001/stamp.json"
     },
-    "EVD-HONO-ERRBOUNDARY-XSS-SUPPLYCHAIN-001": {
+"EVD-HONO-ERRBOUNDARY-XSS-SUPPLYCHAIN-001": {
       "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
       "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
       "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
@@ -39,6 +39,11 @@
       "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
       "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
       "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-ARCHIMYST-SIM-001": {
+      "report": "evidence/EVD-ARCHIMYST-SIM-001/report.json",
+      "metrics": "evidence/EVD-ARCHIMYST-SIM-001/metrics.json",
+      "stamp": "evidence/EVD-ARCHIMYST-SIM-001/stamp.json"
     }
   },
   "version": 1
