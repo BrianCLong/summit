@@ -34,6 +34,7 @@ export interface RunContext {
     triggered_by: string;
     environment: string;
     parameters: Record<string, any>;
+    idempotency_key?: string;
     budget?: {
         max_cost_usd?: number;
         max_duration_ms?: number;
@@ -50,6 +51,9 @@ export interface StepExecution {
     error?: string;
     cost_usd?: number;
     metadata: Record<string, any>;
+    idempotency_key?: string;
+    last_heartbeat?: Date;
+    worker_id?: string;
 }
 export interface StepPlugin {
     name: string;
@@ -89,6 +93,7 @@ export interface StateStore {
     createStepExecution(execution: StepExecution): Promise<void>;
     updateStepExecution(execution: StepExecution): Promise<void>;
     getStepExecution(runId: string, stepId: string): Promise<StepExecution | null>;
+    getActiveExecutions(): Promise<StepExecution[]>;
 }
 export interface ArtifactStore {
     store(runId: string, stepId: string, name: string, data: Buffer): Promise<string>;

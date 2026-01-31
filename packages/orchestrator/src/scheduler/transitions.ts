@@ -1,13 +1,16 @@
-import { TaskGraph } from './graph.js';
+import { OrchestratorStore } from '../store.js';
 import { OrchestratorEvent } from '../types.js';
 import { OrchestratorPolicy } from '@summit/policy';
 
 export class Scheduler {
   private policy = new OrchestratorPolicy();
 
-  constructor(public graph: TaskGraph) {}
+  constructor(public store: OrchestratorStore, public runId: string) { }
 
-  applyEvent(event: OrchestratorEvent) {
+  async applyEvent(event: OrchestratorEvent) {
+    // Audit log persistence
+    await this.store.saveEvent(event);
+
     // Policy check logic
     let action = '';
     // Simple mapping for MWS
@@ -15,26 +18,31 @@ export class Scheduler {
     else if (event.type === 'TASK_COMPLETED') action = 'complete_task';
 
     if (action) {
-        if (!this.policy.checkPermission(action, {})) {
-            // In a real system we might flag this event as a violation
-            console.warn(`Event ${event.type} potentially violated policy (simulation)`);
-        }
+      if (!this.policy.checkPermission(action, {})) {
+        // In a real system we might flag this event as a violation
+        console.warn(`Event ${event.type} potentially violated policy (simulation)`);
+      }
     }
 
     switch (event.type) {
       case 'TASK_CREATED':
-        this.graph.addTask(event.payload as any);
+        await this.store.upsertTask({ ...event.payload as any, runId: this.runId });
         break;
       case 'TASK_STARTED':
         {
-            const p = event.payload as any;
-            this.graph.startTask(p.taskId, p.agentId, p.timestamp);
+          const p = event.payload as any;
+          await this.store.updateTaskStatus(p.taskId, 'in_progress', {
+            owner: p.agentId,
+            startedAt: p.timestamp
+          });
         }
         break;
       case 'TASK_COMPLETED':
         {
-            const p = event.payload as any;
-            this.graph.completeTask(p.taskId, p.timestamp);
+          const p = event.payload as any;
+          await this.store.updateTaskStatus(p.taskId, 'completed', {
+            completedAt: p.timestamp
+          });
         }
         break;
     }

@@ -41,6 +41,7 @@ export interface RunContext {
   triggered_by: string;
   environment: string;
   parameters: Record<string, any>;
+  idempotency_key?: string;
   budget?: {
     max_cost_usd?: number;
     max_duration_ms?: number;
@@ -58,6 +59,9 @@ export interface StepExecution {
   error?: string;
   cost_usd?: number;
   metadata: Record<string, any>;
+  idempotency_key?: string;
+  last_heartbeat?: Date;
+  worker_id?: string;
 }
 
 export interface StepPlugin {
@@ -209,10 +213,39 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
+  async recover(): Promise<void> {
+    const activeExecutions = await this.stateStore.getActiveExecutions();
+    const runIds = [...new Set(activeExecutions.map((e) => e.run_id))];
+
+    for (const runId of runIds) {
+      const runDetails = await this.stateStore.getRunDetails(runId);
+      if (!runDetails || !runDetails.workflow_definition) continue;
+
+      const context: RunContext = {
+        run_id: runDetails.run_id,
+        workflow: runDetails.workflow_definition,
+        tenant_id: runDetails.tenant_id,
+        triggered_by: runDetails.triggered_by,
+        environment: runDetails.environment,
+        parameters: runDetails.parameters,
+        budget: runDetails.budget,
+      };
+
+      this.activeRuns.set(runId, context);
+      setImmediate(() => this.executeWorkflow(context));
+    }
+  }
+
   private async executeStepWithRetry(
     context: RunContext,
     step: WorkflowStep,
   ): Promise<void> {
+    // Check if already succeeded (for recovery/resume)
+    const existing = await this.stateStore.getStepExecution(context.run_id, step.id);
+    if (existing?.status === 'succeeded') {
+      return;
+    }
+
     const plugin = this.plugins.get(step.plugin);
     if (!plugin) {
       throw new Error(`Plugin not found: ${step.plugin}`);
@@ -441,6 +474,7 @@ export interface StateStore {
     runId: string,
     stepId: string,
   ): Promise<StepExecution | null>;
+  getActiveExecutions(): Promise<StepExecution[]>;
 }
 
 export interface ArtifactStore {

@@ -5,3 +5,4 @@ export * from './types.js';
 export * from './eventlog/append.js';
 export * from './eventlog/replay.js';
 export * from './eventlog/verify.js';
+export * from './store.js';
