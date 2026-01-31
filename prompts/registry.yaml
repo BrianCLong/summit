@@ -668,6 +668,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: exclude-worktrees-cjs-guard
+    version: v1
+    path: prompts/governance/exclude-worktrees-cjs-guard@v1.md
+    sha256: 8ca6d3a5c78628348dfd03ed2d13e95ababe45aede34d199bde69e31140baca3
+    description: Exclude _worktrees from CJS ESM syntax guard to prevent false positives.
+    scope:
+      paths:
+        - scripts/check-cjs-commonjs.cjs
+        - docs/roadmap/STATUS.json
+        - prompts/governance/exclude-worktrees-cjs-guard@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - ci
+        - tooling
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit
   - id: genui-plan-scaffold
     version: v1
     path: prompts/genui/genui-plan-scaffold@v1.md
