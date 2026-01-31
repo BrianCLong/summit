@@ -5,7 +5,7 @@ import { GraphQLError } from 'graphql';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
-import { VoiceGateway } from './gateways/VoiceGateway.ts';
+import { VoiceGateway } from './gateways/VoiceGateway.js';
 import pino from 'pino';
 import { getContext } from './lib/auth.ts';
 import path from 'path';
@@ -62,7 +62,9 @@ const startServer = async () => {
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
 
-  await initializeNeo4jDriver();
+  if (!process.env.DISABLE_NEO4J) {
+    await initializeNeo4jDriver();
+  }
 
   // Subscriptions with Persisted Query validation
 
@@ -154,9 +156,11 @@ const startServer = async () => {
     logger.info(`Server listening on port ${port}`);
 
     // Initialize and start Data Retention Service
-    const neo4jDriver = getNeo4jDriver();
-    const dataRetentionService = new DataRetentionService(neo4jDriver);
-    dataRetentionService.startCleanupJob(); // Start the cleanup job
+    if (!process.env.DISABLE_NEO4J) {
+      const neo4jDriver = getNeo4jDriver();
+      const dataRetentionService = new DataRetentionService(neo4jDriver);
+      dataRetentionService.startCleanupJob(); // Start the cleanup job
+    }
 
     // Start OSINT Workers
     startOSINTWorkers();
@@ -175,13 +179,17 @@ const startServer = async () => {
     gaCoreMetrics.start();
 
     // Check Neo4j Indexes
-    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+    if (!process.env.DISABLE_NEO4J) {
+      checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+    }
 
     // Start Partition Maintenance Service
     partitionMaintenanceService.start();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
-    await startKafkaConsumer();
+    if (typeof startKafkaConsumer === 'function') {
+      await startKafkaConsumer();
+    }
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
@@ -222,11 +230,14 @@ const startServer = async () => {
     // Shutdown OpenTelemetry
     await getTracer().shutdown();
 
-    await Promise.allSettled([
-      closeNeo4jDriver(),
+    const shutdownPromises = [
       closePostgresPool(),
       closeRedisClient(),
-    ]);
+    ];
+    if (!process.env.DISABLE_NEO4J) {
+      shutdownPromises.push(closeNeo4jDriver());
+    }
+    await Promise.allSettled(shutdownPromises);
     httpServer.close((err: any) => {
       if (err) {
         logger.error(
