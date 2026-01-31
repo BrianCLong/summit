@@ -1,5 +1,5 @@
 {
-  "name": "@summi7/graph-sync-validator",
+  "name": "@summit/graph-sync-validator",
   "version": "0.1.0",
   "description": "Graph↔PG sync validator",
   "main": "src/compare/compare.mjs",
