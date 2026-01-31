@@ -1,0 +1,144 @@
+{
+  "evidence_id": "EVID-cti-20260131-8b1b8659",
+  "item_slug": "cti-subsumption-20260131",
+  "claims": [
+    "Destructive operations are being publicly attributed at state level",
+    "Berserk Bear/Dragonfly attributed to FSB",
+    "AI-assisted malware is being reported in developer-targeting campaigns",
+    "Attribution claimed to KONNI",
+    "Credential abuse is a dominant pattern in defensive telemetry",
+    "OSS ecosystem threats are emphasized",
+    "Attribution automation research trend: Multi-agent RAG",
+    "Typosquatting is a recognized supply-chain technique"
+  ],
+  "decisions": [],
+  "findings": [
+    {
+      "item": {
+        "source_url": "https://www.reuters.com/technology/polish-officials-blame-russian-domestic-spy-agency-dec-29-cyberattacks-2026-01-30/",
+        "title": "Polish officials blame Russian domestic spy agency for Dec 29 cyberattacks",
+        "retrieved_at": "2026-01-31_20-29-10_UTC",
+        "content_hash": "776b8f69b486ef00f8263cf7b7a982f797333c34ed856dead6b766f690f5b7bc",
+        "extract_hash": "9e86682f744e544d28730e5e7f4c44c11ea19c54a00a9a7d00fc338223074ccb",
+        "claims": [
+          "Destructive operations are being publicly attributed at state level",
+          "Berserk Bear/Dragonfly attributed to FSB"
+        ],
+        "citation_offsets": []
+      },
+      "mapping": {
+        "source_url": "https://www.reuters.com/technology/polish-officials-blame-russian-domestic-spy-agency-dec-29-cyberattacks-2026-01-30/",
+        "mappings": [
+          {
+            "technique": "Data Destruction (T1485)",
+            "control": "Immutable Backups",
+            "trigger": "Destructive intent detected"
+          },
+          {
+            "technique": "Data Destruction (T1485)",
+            "control": "Wiper Heuristics (EDR)",
+            "trigger": "Destructive intent detected"
+          }
+        ]
+      }
+    },
+    {
+      "item": {
+        "source_url": "https://www.techradar.com/pro/security/more-ai-malware-has-been-found-this-time-targeting-crypto-developers",
+        "title": "More AI malware has been found - and this time, crypto developers are under attack",
+        "retrieved_at": "2026-01-31_20-29-10_UTC",
+        "content_hash": "4f7c613599c6addff88fb595140ace60295bca06a09058864c00e813372760d5",
+        "extract_hash": "c369adcacba5bcd7ecb575c6f1bae943de39f9f474f73abc4596e32c7223777e",
+        "claims": [
+          "AI-assisted malware is being reported in developer-targeting campaigns",
+          "Attribution claimed to KONNI"
+        ],
+        "citation_offsets": []
+      },
+      "mapping": {
+        "source_url": "https://www.techradar.com/pro/security/more-ai-malware-has-been-found-this-time-targeting-crypto-developers",
+        "mappings": [
+          {
+            "technique": "User Execution (T1204)",
+            "control": "Repo Hardening (Branch Protection)",
+            "trigger": "Developer targeting detected"
+          },
+          {
+            "technique": "Command and Scripting Interpreter (T1059)",
+            "control": "Behavioral Analysis (PowerShell)",
+            "trigger": "PowerShell backdoor detected"
+          }
+        ]
+      }
+    },
+    {
+      "item": {
+        "source_url": "https://criticalstart.com/h1-2025-cti-report",
+        "title": "Critical Start H1 2025 CTI report",
+        "retrieved_at": "2026-01-31_20-29-10_UTC",
+        "content_hash": "50908ce2e7d928c88c50809468cd5b0192f9267de16ecd791f228354953b3843",
+        "extract_hash": "27043163ef7df6f3e640aa8f3f68e9d4a156a02ac71960af04cfbdca3dd6c868",
+        "claims": [
+          "Credential abuse is a dominant pattern in defensive telemetry",
+          "OSS ecosystem threats are emphasized"
+        ],
+        "citation_offsets": []
+      },
+      "mapping": {
+        "source_url": "https://criticalstart.com/h1-2025-cti-report",
+        "mappings": [
+          {
+            "technique": "Valid Accounts (T1078)",
+            "control": "Impossible Travel Detection",
+            "trigger": "Credential abuse pattern detected"
+          },
+          {
+            "technique": "Brute Force (T1110)",
+            "control": "Identity Anomaly Detection",
+            "trigger": "Password spraying detected"
+          }
+        ]
+      }
+    },
+    {
+      "item": {
+        "source_url": "https://arxiv.org/abs/2506.10175",
+        "title": "AURA: A Multi-Agent Intelligence Framework for Knowledge-Enhanced Cyber Threat Attribution",
+        "retrieved_at": "2026-01-31_20-29-10_UTC",
+        "content_hash": "1d36a2e16cba4f7102cd25d3ac788a4bf9c23595dc9de26e5e4ab43450718499",
+        "extract_hash": "197cbfeb298c23b5c156151753c7ea118f14950d3ff76b27ba149c1c7b734218",
+        "claims": [
+          "Attribution automation research trend: Multi-agent RAG"
+        ],
+        "citation_offsets": []
+      },
+      "mapping": {
+        "source_url": "https://arxiv.org/abs/2506.10175",
+        "mappings": []
+      }
+    },
+    {
+      "item": {
+        "source_url": "https://www.darkreading.com/vulnerabilities-threats/beware-the-package-typosquatting-supply-chain-attack",
+        "title": "Beware the Package Typosquatting Supply Chain Attack",
+        "retrieved_at": "2026-01-31_20-29-10_UTC",
+        "content_hash": "6695e2e253d44f0e7511db2fd5d0664ec92081043c4a0569372856de11ad0103",
+        "extract_hash": "2f3b90963a21abbab3f9b7c856e23c7bae7295d61f5ecafd7dd4711e23daeed8",
+        "claims": [
+          "Typosquatting is a recognized supply-chain technique"
+        ],
+        "citation_offsets": []
+      },
+      "mapping": {
+        "source_url": "https://www.darkreading.com/vulnerabilities-threats/beware-the-package-typosquatting-supply-chain-attack",
+        "mappings": [
+          {
+            "technique": "Supply Chain Compromise (T1195)",
+            "control": "Registry Allowlisting",
+            "trigger": "Typosquatting detected"
+          }
+        ]
+      }
+    }
+  ]
+}
