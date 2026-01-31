@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-MOLTBOOKREVOLT-EVIDENCE-001",
+  "summary": "Scaffolded evidence pack for controlled multi-agent exchange (CMAE).",
+  "verified_sources": [
+    "The Verge reporting on Moltbook/OpenClaw",
+    "Secondary summary of Amir Husain critique (no direct Forbes text)"
+  ],
+  "assumptions": [
+    "Summit requires governed multi-agent exchange capabilities"
+  ],
+  "controls": [],
+  "tests": []
+}

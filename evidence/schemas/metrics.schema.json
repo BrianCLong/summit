@@ -1,10 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Metrics",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
+  "required": ["evidence_id", "rooms_created_total", "blocked_messages_total", "policy_violations_by_rule", "audit_exports_generated_total"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "metrics": {"type": "object", "additionalProperties": true}
-  }
+    "evidence_id": { "type": "string" },
+    "rooms_created_total": { "type": "integer" },
+    "blocked_messages_total": { "type": "integer" },
+    "policy_violations_by_rule": { "type": "object" },
+    "audit_exports_generated_total": { "type": "integer" }
+  },
+  "additionalProperties": false
 }
