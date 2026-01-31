@@ -876,3 +876,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: predictd-build-context
+    version: v1
+    path: prompts/operations/predictd-build-context@v1.md
+    sha256: 56cee7d6520c8e89718b7965242f0dd26475a099c5515e4dc189221276e4141a
+    description: Reduce predictd Docker build context to prevent BuildKit grpc failures.
+    scope:
+      paths:
+        - services/predictd/Dockerfile
+        - docs/roadmap/STATUS.json
+        - prompts/operations/predictd-build-context@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - ci
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit
