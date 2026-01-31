@@ -1,0 +1,10 @@
+version: v1
+source_ledger:
+  - source_id: SRC-0001
+    name: "<source name>"
+    url: "<public url>"
+    license: "<license identifier>"
+    license_obligations: "<attribution/notice requirements>"
+    captured_at: "<YYYY-MM-DD>"
+    version_ref: "<tag|commit|release>"
+    notes: "<notes>"
