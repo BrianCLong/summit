@@ -1,13 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit.evidence.metrics",
+  "title": "summit evidence metrics",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
+  "required": ["true_positive_rate", "false_positive_rate", "rule_runtime_ms_p95", "coverage"],
   "properties": {
-    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
-    "metrics": {
+    "true_positive_rate": {"type": "number"},
+    "false_positive_rate": {"type": "number"},
+    "rule_runtime_ms_p95": {"type": "number"},
+    "coverage": {
       "type": "object",
-      "additionalProperties": { "type": "number" }
+      "required": ["sources"],
+      "properties": {
+        "sources": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
