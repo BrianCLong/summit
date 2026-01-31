@@ -1,7 +1,7 @@
-import { Entity, Edge, Document, Chunk, ConnectorContext } from '../data-model/types';
+import { Entity, Edge, Document, Chunk, ConnectorContext } from '../data-model/types.js';
 import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
-import { getNeo4jDriver } from '../config/database';
+import { getNeo4jDriver } from '../config/database.js';
 
 type PoolLike = {
   connect: () => Promise<{

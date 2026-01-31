@@ -1,18 +1,10 @@
-# Standards & Interop Mapping: item-UNKNOWN
+# item-unknown — Standards & Interop Mapping
 
 ## Import/Export Matrix
-
-- Deferred pending ITEM excerpts.
+- (TODO) When ITEM provided: formats, protocols, connectors
 
 ## Non-goals
-
-- No ITEM-specific adapters until claims and licenses are verified.
+- No runtime integrations until ITEM is grounded and licensed
 
 ## Compatibility notes
-
-- This bundle defines stable evidence formats and a manifest contract usable across items.
-
-## Claim-safe statements
-
-- The current bundle is a governance scaffold only; no ITEM-specific capabilities are implemented.
-- Evidence artifacts are deterministic placeholders pending ITEM excerpts.
+- Bundle manifests are stable, versioned, and verifier-enforced

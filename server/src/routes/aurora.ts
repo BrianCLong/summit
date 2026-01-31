@@ -1,6 +1,6 @@
 // server/src/routes/aurora.ts
 import { Router } from 'express';
-import { auroraService } from '../aurora/AuroraService';
+import { auroraService } from '../aurora/AuroraService.js';
 
 const router = Router();
 

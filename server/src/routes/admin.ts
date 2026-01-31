@@ -459,8 +459,8 @@ router.post('/admin/opa/sync-n8n-flows', async (_req, res) => {
   }
 });
 
-import { SecretManager } from '../services/secretManager';
-import { MockServiceRegistry } from '../services/serviceRegistry';
+import { SecretManager } from '../services/secretManager.js';
+import { MockServiceRegistry } from '../services/serviceRegistry.js';
 
 const secretManager = new SecretManager();
 const serviceRegistry = new MockServiceRegistry();

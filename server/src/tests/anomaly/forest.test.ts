@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { score } from '../../anomaly/forest';
-import type { Neo4jGraph } from '../../anomaly/forest';
+import { score } from '../../anomaly/forest.js';
+import type { Neo4jGraph } from '../../anomaly/forest.js';
 
 describe('isolation forest graph scoring', () => {
   it('detects high-degree nodes as anomalies', () => {

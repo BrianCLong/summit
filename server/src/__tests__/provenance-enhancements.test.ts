@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { ProvenanceLedgerBetaService } from '../services/provenance-ledger-beta.ts';
+import { ProvenanceLedgerBetaService } from '../services/provenance-ledger-beta.js';
 import crypto from 'crypto';
 import type {
   License,
@@ -12,7 +12,7 @@ import type {
   Evidence,
   Claim,
   ClaimEvidenceLink,
-} from '../types/provenance-beta.ts';
+} from '../types/provenance-beta.js';
 
 const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
 const describeIf = runAcceptance ? describe : describe.skip;

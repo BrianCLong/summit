@@ -3,9 +3,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import express from 'express';
 import request from 'supertest';
-import { CaseBundleService } from '../src/cases/bundles/CaseBundleService';
-import { FixtureCaseBundleStore } from '../src/cases/bundles/FixtureCaseBundleStore';
-import caseBundleRouter from '../src/routes/case-bundles';
+import { CaseBundleService } from '../src/cases/bundles/CaseBundleService.js';
+import { FixtureCaseBundleStore } from '../src/cases/bundles/FixtureCaseBundleStore.js';
+import caseBundleRouter from '../src/routes/case-bundles.js';
 
 describe('CASE_BUNDLE_V1 export/import workflow', () => {
   const createdPaths: string[] = [];

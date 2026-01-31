@@ -3,7 +3,7 @@ import {
   requestFactory,
   responseFactory,
   nextFactory,
-} from '../../../../tests/factories/requestFactory';
+} from '../../../../tests/factories/requestFactory.js';
 
 // Mock functions declared before mocks
 const mockEvaluatePolicy = jest.fn();
@@ -33,8 +33,8 @@ jest.unstable_mockModule('../../utils/logger', () => {
 });
 
 // Dynamic imports AFTER mocks are set up
-const { maestroAuthzMiddleware } = await import('../maestro-authz');
-const { opaPolicyEngine } = await import('../../conductor/governance/opa-integration');
+const { maestroAuthzMiddleware } = await import('../maestro-authz.js');
+const { opaPolicyEngine } = await import('../../conductor/governance/opa-integration.js');
 
 describe('maestroAuthzMiddleware', () => {
   const createRequest = () => {

@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
-import { PostgresProvider } from '../PostgresProvider';
-import { getPostgresPool } from '../../db/postgres';
+import { PostgresProvider } from '../PostgresProvider.js';
+import { getPostgresPool } from '../../db/postgres.js';
 
 // Mock getPostgresPool
 jest.mock('../../db/postgres', () => ({

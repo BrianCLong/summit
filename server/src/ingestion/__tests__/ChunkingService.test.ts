@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { ChunkingService } from '../ChunkingService';
-import { Document } from '../../data-model/types';
+import { ChunkingService } from '../ChunkingService.js';
+import { Document } from '../../data-model/types.js';
 
 describe('ChunkingService', () => {
   let chunkingService: ChunkingService;

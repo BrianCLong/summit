@@ -11,8 +11,8 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { ExplainabilityExplorerService } from '../explainability/ExplainabilityExplorerService';
-import { ListRunsFilter } from '../explainability/types';
+import { ExplainabilityExplorerService } from '../explainability/ExplainabilityExplorerService.js';
+import { ListRunsFilter } from '../explainability/types.js';
 
 const router = Router();
 const service = ExplainabilityExplorerService.getInstance();

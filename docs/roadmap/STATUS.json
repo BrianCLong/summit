@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T00:00:00Z",
-  "revision_note": "Expanded required checks discovery guidance and temporary verifier naming.",
+  "last_updated": "2026-01-31T12:52:23Z",
+  "revision_note": "Added CTA leaders evidence ingest bundle and verification stub.",
   "initiatives": [
     {
       "id": "A",
@@ -39,7 +39,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "blockers": [
+            "Need connector registry",
+            "Missing connector lifecycle management"
+          ],
           "target_completion": "Sprint N+2"
         },
         {
@@ -48,7 +51,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         },
         {
@@ -57,7 +62,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         }
       ]

@@ -91,7 +91,7 @@ describe('BackupService', () => {
   let BackupService: any;
 
   beforeAll(async () => {
-    const module = await import('../BackupService');
+    const module = await import('../BackupService.js');
     BackupService = module.BackupService;
   });
 

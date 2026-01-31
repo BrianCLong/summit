@@ -6,6 +6,6 @@
  * @module agents/negotiation
  */
 
-export { NegotiationRuntime, getNegotiationRuntime } from './NegotiationRuntime.ts';
-export type { NegotiationRuntimeConfig } from './NegotiationRuntime.ts';
-export * from './types.ts';
+export { NegotiationRuntime, getNegotiationRuntime } from './NegotiationRuntime.js';
+export type { NegotiationRuntimeConfig } from './NegotiationRuntime.js';
+export * from './types.js';

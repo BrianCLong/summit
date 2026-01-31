@@ -2,7 +2,7 @@
  * Event correlation utilities
  */
 
-import { ThreatEvent } from '../types/events';
+import { ThreatEvent } from '../types/events.js';
 import { createHash } from 'crypto';
 
 /**

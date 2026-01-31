@@ -2,11 +2,11 @@
  * REST API Middleware Collection
  */
 
-export * from './context';
-export * from './error-handler';
-export * from './pagination';
-export * from './response';
-export * from './validation';
-export * from './versioning';
-export * from './idempotency';
-export * from './metrics';
+export * from './context.js';
+export * from './error-handler.js';
+export * from './pagination.js';
+export * from './response.js';
+export * from './validation.js';
+export * from './versioning.js';
+export * from './idempotency.js';
+export * from './metrics.js';

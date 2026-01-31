@@ -3,7 +3,7 @@ import {
   pickCheapestEligible,
   type PoolCost,
   type PoolInfo,
-} from '../pools';
+} from '../pools.js';
 
 describe('pickCheapestEligible', () => {
   const pools: PoolInfo[] = [

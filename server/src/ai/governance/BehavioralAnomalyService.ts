@@ -16,8 +16,8 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
-import { GovernanceVerdict } from '../../governance/types.ts';
-import logger from '../../utils/logger.ts';
+import { GovernanceVerdict } from '../../governance/types.js';
+import logger from '../../utils/logger.js';
 import {
   BehavioralAnomaly,
   AnomalyType,
@@ -35,8 +35,8 @@ import {
   AIGovernanceConfig,
   ProvenanceMetadata,
   ChainOfCustodyEntry,
-} from './types.ts';
-import { GovernanceLLMClient, getGovernanceLLMClient } from './llm/index.ts';
+} from './types.js';
+import { GovernanceLLMClient, getGovernanceLLMClient } from './llm/index.js';
 
 // =============================================================================
 // Anomaly Detection Thresholds

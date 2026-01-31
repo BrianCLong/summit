@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { FeatureFlags } from '../config/featureFlags';
-import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService';
+import { FeatureFlags } from '../config/featureFlags.js';
+import { MVP1RBACService, Permission, ResourceType } from './MVP1RBACService.js';
 // @ts-ignore
 import { default as pino } from 'pino';
 

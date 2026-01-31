@@ -1,5 +1,5 @@
 
-import { getNeo4jDriver } from '../../config/database.ts';
+import { getNeo4jDriver } from '../../config/database.js';
 
 export class CompetitiveIntelligenceService {
   private static instance: CompetitiveIntelligenceService;

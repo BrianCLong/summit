@@ -10,10 +10,10 @@ import {
   AnomalyResult,
   Entity,
   Edge,
-} from '../graph/types';
-import { getDriver, runCypher } from '../graph/neo4j';
-import logger from '../utils/logger';
-import { cacheService } from './CacheService';
+} from '../graph/types.js';
+import { getDriver, runCypher } from '../graph/neo4j.js';
+import logger from '../utils/logger.js';
+import { cacheService } from './CacheService.js';
 
 export class Neo4jGraphAnalyticsService implements GraphAnalyticsService {
   private static instance: Neo4jGraphAnalyticsService;

@@ -16,12 +16,12 @@ import {
   PolicyAction,
   RiskLevel,
   GovernanceResult,
-} from '../types/data-envelope';
+} from '../types/data-envelope.js';
 import { randomUUID, createHash } from 'crypto';
-import { wrapResolversWithPolicy } from './policyWrapper';
+import { wrapResolversWithPolicy } from './policyWrapper.js';
 // Stubbed imports for missing services
-// import { getProvenance } from '../../prov-ledger-service/src/ledger';
-// import { checkLicensesWithContext } from '../../prov-ledger-service/src/ledger';
+// import { getProvenance } from '../../prov-ledger-service/src/ledger.js';
+// import { checkLicensesWithContext } from '../../prov-ledger-service/src/ledger.js';
 
 /**
  * Resolver for generateHypothesesWithEnvelope

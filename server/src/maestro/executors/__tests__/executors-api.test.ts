@@ -1,6 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import router from '../../executors-api';
+import router from '../../executors-api.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('Executors API', () => {

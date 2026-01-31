@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-SDSBC-FOUNDATION-001",
+  "item_slug": "sdsbc-evidence-scaffold",
+  "summary": {
+    "what_ran": "evidence scaffold validation",
+    "result": "pass"
+  },
+  "artifacts": {
+    "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
+    "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
+  }
+}

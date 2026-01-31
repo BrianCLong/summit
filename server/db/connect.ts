@@ -1,4 +1,4 @@
-import { buildRdsAuthToken } from './iam';
+import { buildRdsAuthToken } from './iam.js';
 export async function getConn() {
   if (process.env.DB_AUTH_MODE === 'iam') {
     const token = await buildRdsAuthToken(
