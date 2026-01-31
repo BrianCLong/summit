@@ -1,16 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
-    "evidence_id": { "type": "string" },
-    "benchmark_id": { "type": "string" },
-    "run_id": { "type": "string" },
-    "generated_at": { "type": "string", "format": "date-time" }
+    "started_at": {"type": "string"},
+    "finished_at": {"type": "string"},
+    "runner": {"type": "string"}
   },
-  "required": ["generated_at"],
-  "anyOf": [
-    { "required": ["evidence_id"] },
-    { "required": ["benchmark_id", "run_id"] }
-  ],
-  "additionalProperties": true
+  "required": ["started_at", "finished_at"]
 }

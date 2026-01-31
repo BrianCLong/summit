@@ -17,6 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set Start Time
+        run: echo "START_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+
       - name: Install vCluster CLI
         run: |
           curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64"
@@ -47,5 +50,27 @@ jobs:
         if: always()
         run: |
           mkdir -p evidence/EVD-VIND-LCY-002
-          echo '{"evidence_id": "EVD-VIND-LCY-002", "status": "${{ job.status }}"}' > evidence/EVD-VIND-LCY-002/report.json
-          echo '{"started_at": "${{ github.event.repository.pushed_at }}", "finished_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)", "runner": "github-actions"}' > evidence/EVD-VIND-LCY-002/stamp.json
+          echo '{"evidence_id": "EVD-VIND-LCY-002", "summary": "Pause/resume lifecycle result", "status": "${{ job.status }}"}' > evidence/EVD-VIND-LCY-002/report.json
+          echo "{\"started_at\": \"$START_TIME\", \"finished_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"runner\": \"github-actions\"}" > evidence/EVD-VIND-LCY-002/stamp.json
+
+      - name: Update Evidence Index
+        if: always()
+        run: |
+          python3 -c "
+          import json, os
+          path = 'evidence/index.json'
+          if os.path.exists(path):
+              with open(path, 'r') as f:
+                  data = json.load(f)
+          else:
+              data = {'version': 1, 'items': []}
+
+          data['items'] = [i for i in data['items'] if i['evidence_id'] != 'EVD-VIND-LCY-002']
+          data['items'].append({
+              'evidence_id': 'EVD-VIND-LCY-002',
+              'report': 'evidence/EVD-VIND-LCY-002/report.json',
+              'stamp': 'evidence/EVD-VIND-LCY-002/stamp.json'
+          })
+          with open(path, 'w') as f:
+              json.dump(data, f, indent=2)
+          "
