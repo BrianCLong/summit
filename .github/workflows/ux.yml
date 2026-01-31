@@ -1,0 +1,40 @@
+name: UX Governance
+
+on:
+  pull_request:
+    paths:
+      - 'client/**'
+      - 'summit/ux/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+      - 'summit/ux/**'
+
+jobs:
+  ux-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate UX Report
+        run: |
+          # Placeholder for UX report generation
+          echo "{}" > ux-governance-report.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ux-governance-report
+          path: ux-governance-report.json
