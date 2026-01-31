@@ -122,7 +122,9 @@ def main() -> int:
     IGNORE = {
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json"
+        "evidence-index.json",
+        "acp_stamp.json", "skill_metrics.json", "skill_stamp.json", "skill_report.json",
+        "exec_brief_pack.json"
     }
     IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
 
