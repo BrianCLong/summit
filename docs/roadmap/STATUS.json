@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-17T00:00:00Z",
-  "revision_note": "Added Hono supply-chain gate evidence bundle scaffolding and docs template.",
+  "last_updated": "2026-01-31T00:26:15Z",
+  "revision_note": "Hardened SE-DiCoW schema test to validate schemas when jsonschema is available.",
   "initiatives": [
     {
       "id": "A",

@@ -2,12 +2,12 @@
 
 ## Summary
 
-- Added: None.
-- Removed: None.
-- Updated: None.
+- Added: none
+- Removed: none
+- Updated: none
 
 ## Notes
 
-- Rationale: Evidence schema scaffolding only.
-- Risk: None.
-- Rollback: Revert commit.
+- Rationale: Evidence schema test hardening and governance metadata updates only.
+- Risk: None (no dependency changes).
+- Rollback: Revert this change.
