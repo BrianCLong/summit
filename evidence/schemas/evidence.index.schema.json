@@ -1,38 +1,23 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.local/schemas/evidence.index.schema.json",
+  "type": "object",
+  "required": ["item_slug", "generated_by", "evidence"],
   "properties": {
-    "evidence_version": {
-      "type": "string"
-    },
-    "items": {
-      "items": {
-        "additionalProperties": false,
+    "item_slug": { "type": "string", "minLength": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["files"],
         "properties": {
-          "evidence_id": {
-            "pattern": "^EVD-[a-zA-Z0-9-]+$",
-            "type": "string"
-          },
-          "files": {
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1,
-            "type": "array"
-          }
+          "summary": { "type": "string" },
+          "files": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1 }
         },
-        "required": [
-          "evidence_id",
-          "files"
-        ],
-        "type": "object"
-      },
-      "type": "array"
+        "additionalProperties": false
+      }
     }
   },
-  "required": [
-    "evidence_version",
-    "items"
-  ],
-  "type": "object"
+  "additionalProperties": false
 }

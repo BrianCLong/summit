@@ -69,6 +69,10 @@ always_required:
     workflow: "smoke-gate.yml"
     rationale: "Full-stack smoke test verifying health endpoints with real services - ensures deployability"
 
+  - name: "CI Security"
+    workflow: "ci-security.yml"
+    rationale: "Mandatory security gates for all commits (Comet P0 Cluster B)"
+
 # Conditional Required Checks
 # ---------------------------
 # These checks are required ONLY when specific paths are changed.

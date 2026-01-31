@@ -117,5 +117,22 @@
     },
     "reasoning": "Aligned evidence schemas with index format, added schema/timestamp validation, and scaffolded required-check mapping. Rollback: revert commit 40708209.",
     "reverted": false
+  },
+  {
+    "id": "cta-leaders-ingest-20260131",
+    "timestamp": "2026-01-31T12:52:23Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJjdGEgbGVhZGVycyBldmlkZW5jZSBpbmdlc3Qgc2NhZmZvbGQiLCJmaWxlcyI6WyJldmlkZW5jZS9FVkQtQ1RBLUxFQURFUlMtMjAyNi0wMS1JTkdFU1QtMDAxL3JlcG9ydC5qc29uIiwiZXZpZGVuY2UvRVZELUNUQS1MRUFERVJTLTIwMjYtMDEtSU5HRVNULTAwMS9tZXRyaWNzLmpzb24iLCJldmlkZW5jZS9FVkQtQ1RBLUxFQURFUlMtMjAyNi0wMS1JTkdFU1QtMDAxL3N0YW1wLmpzb24iLCJldmlkZW5jZS9FVkQtQ1RBLUxFQURFUlMtMjAyNi0wMS1JTkdFU1QtMDAxL3NvdXJjZXMuanNvbiIsInN1bW1pdC9maXh0dXJlcy9jdGFfbGVhZGVyc18yMDI2XzAxL2JyZWFraW5nZGVmZW5zZV9leGNlcnB0Lm1kIiwic3VtbWl0L2ZpeHR1cmVzL2N0YV9sZWFkZXJzXzIwMjZfMDEvY3RvX21pbF9leGNlcnB0Lm1kIiwiZXZpZGVuY2UvaW5kZXguanNvbiIsImNpL3ZlcmlmeV9ldmlkZW5jZS5weSIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsImRlcHMuZGVsdGEubWQiLCJwcm9tcHRzL2V2aWRlbmNlL2N0YS1sZWFkZXJzLWluZ2VzdC1zY2FmZm9sZEB2MS5tZCIsInByb21wdHMvcmVnaXN0cnkueWFtbCIsImFnZW50cy9leGFtcGxlcy9DVEFfTEVBREVSU19JTkdFU1RfMjAyNjAxMzEuanNvbiJdfQ==",
+    "decision": {
+      "action": "scaffold_cta_evidence_ingest",
+      "rule": {
+        "condition": "public CTA roster evidence requires deterministic ingest scaffolding",
+        "action": "scaffold_cta_evidence_ingest",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Captured CTA leader roster evidence with hashed excerpts, index registration, and verification stub plus governance metadata.",
+    "reverted": false
   }
 ]
