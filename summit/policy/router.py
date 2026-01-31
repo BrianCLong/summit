@@ -23,7 +23,22 @@ def route(context: dict[str, Any]) -> PolicyDecision:
             reasons=["flag_off"]
         )
 
-    # TODO: add org policy allowlist + user opt-in checks
+    org_policy = context.get("org_policy", {})
+    if not org_policy.get("allow_skill_preserving", False):
+        return PolicyDecision(
+            policy_id="POL-BASELINE",
+            mode="baseline",
+            reasons=["org_policy_deny"]
+        )
+
+    user_settings = context.get("user_settings", {})
+    if not user_settings.get("opt_in_skill_preserving", False):
+        return PolicyDecision(
+            policy_id="POL-BASELINE",
+            mode="baseline",
+            reasons=["user_opt_out"]
+        )
+
     return PolicyDecision(
         policy_id="POL-SKILL-PRESERVE",
         mode="skill_preserving",
