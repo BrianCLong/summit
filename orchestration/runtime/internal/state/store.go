@@ -253,6 +253,26 @@ func (s *Store) Fail(ctx context.Context, runID, message string) error {
 	return err
 }
 
+// Kill terminates a run immediately with a reason (Emergency Kill Switch).
+func (s *Store) Kill(ctx context.Context, runID, reason string) error {
+	s.mu.Lock()
+	status, ok := s.runs[runID]
+	if !ok {
+		status = &model.Status{RunID: runID}
+		s.runs[runID] = status
+	}
+	status.State = "Killed"
+	status.Current = reason
+	status.Updated = time.Now().UTC()
+	s.mu.Unlock()
+
+	if s.db == nil {
+		return nil
+	}
+	_, err := s.db.ExecContext(ctx, `update chronos_runs set state = 'Killed', current = $2, updated_at = now() where run_id = $1`, runID, reason)
+	return err
+}
+
 // Status fetches the current status for a run.
 func (s *Store) Status(ctx context.Context, runID string) (*model.Status, error) {
 	s.mu.RLock()
