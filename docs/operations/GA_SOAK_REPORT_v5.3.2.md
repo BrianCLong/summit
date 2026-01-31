@@ -5,7 +5,7 @@
 - **Modes:** Standalone stability soak + `SMOKE_MODE=full`
 - **Result:** Mixed
   - **Standalone stability soak:** PASS (binary + health checks)
-  - **SMOKE_MODE=full:** FAIL (dependency missing: `axios`)
+  - **SMOKE_MODE=full:** BLOCKED/FAIL (install blocker then missing dependency)
 
 ## Simulation Metadata (Standalone)
 - **Cycles:** 5
@@ -35,9 +35,9 @@
 | **GraphQL Access** | ❌ FAILED | HTTP `403 Forbidden`. **Expected behavior** given the harness did not inject a valid prod-signed JWT. |
 | **Dependencies** | ⚠️ MIXED | Postgres healthy. Neo4j/Frontend unreachable due to harness network isolation. |
 
-## SMOKE_MODE=full Run (Failed)
+## SMOKE_MODE=full Run (Blocked/Failed)
 ### Prerequisites Checklist
-- [ ] `pnpm install` completed in repo root
+- [ ] `pnpm install` completed in repo root (FAILED: Cypress postinstall)
 - [ ] API server running on `API_URL` (default `http://localhost:4000`)
 - [ ] PostgreSQL reachable
 - [ ] Neo4j reachable
@@ -46,7 +46,13 @@
 ### Soak Cycles
 | Cycle | Timestamp (UTC) | Mode | Result | Notes |
 |------:|-----------------|------|--------|-------|
+| 0 | 2026-01-31T07:54:23Z | full | BLOCKED | `pnpm install` failed during Cypress postinstall (`chalk.blue is not a function`) |
 | 1 | 2026-01-31T07:22:38Z | full | FAIL | `MODULE_NOT_FOUND: axios` while executing `server/scripts/smoke-test.cjs` |
+
+### Failure Details (Install Blocker)
+- **Error:** `TypeError: chalk.blue is not a function`
+- **Location:** `/private/tmp/soak-pr/node_modules/log-symbols/index.js:6` via Cypress postinstall
+- **Action:** Investigate Cypress/chalk dependency mismatch or rerun install with compatible toolchain.
 
 ### Failure Details (Cycle 1)
 - **Error:** `Cannot find module 'axios'`
@@ -68,7 +74,7 @@ The **Server Binary is Stable (Lane A Passed)**.
 **Recommendation**: The `Smoke Gate` in CI is ready to merge for Lane A. Lane B (Functional) validation should be added as a follow-up with a dedicated integration harness.
 
 ## Next Steps
-1. Install dependencies: `pnpm install`.
+1. Resolve Cypress postinstall failure (chalk API mismatch).
 2. Re-run soak loop:
    ```bash
    for i in {1..5}; do SMOKE_MODE=full pnpm run test:smoke || break; done
