@@ -32,7 +32,7 @@ export class TelemetryService {
 
   private rotateLog() {
     const date = new Date().toISOString().split('T')[0];
-    const filename = `telemetry-${date}.tsonl`;
+    const filename = `telemetry-${date}.jsonl`;
     const filepath = path.join(this.config.logDir, filename);
 
     if (this.currentLogFile !== filepath) {

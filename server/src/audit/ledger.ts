@@ -40,7 +40,7 @@ export interface AuditLedgerPayload {
 const defaultLedgerFilePath = (): string => {
   const auditDir =
     process.env.AUDIT_LOG_DIR ?? path.join(process.cwd(), 'logs', 'audit');
-  return path.join(auditDir, 'audit-ledger.tsonl');
+  return path.join(auditDir, 'audit-ledger.jsonl');
 };
 
 export const getLedgerFilePath = (): string =>

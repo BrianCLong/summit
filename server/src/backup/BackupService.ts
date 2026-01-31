@@ -161,7 +161,7 @@ export class BackupService {
     try {
       const dir = await this.ensureBackupDir('neo4j');
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `neo4j-export-${timestamp}.tsonl`;
+      const filename = `neo4j-export-${timestamp}.jsonl`;
       const filepath = path.join(dir, filename);
       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
