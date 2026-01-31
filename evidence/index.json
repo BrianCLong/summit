@@ -5,6 +5,11 @@
       "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
       "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
       "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
+    },
+    "EVD-SDSBC-CODEGEN-001": {
+      "report": "evidence/EVD-SDSBC-CODEGEN-001/report.json",
+      "metrics": "evidence/EVD-SDSBC-CODEGEN-001/metrics.json",
+      "stamp": "evidence/EVD-SDSBC-CODEGEN-001/stamp.json"
     }
   }
 }
