@@ -235,6 +235,8 @@ export const typeDefs = `
     users(limit: Int = 25, offset: Int = 0): [User!]!
     investigation(id: ID!): Investigation
     investigations(limit: Int = 25, offset: Int = 0): [Investigation!]!
+    semanticSearch(query: String!, filters: JSON, limit: Int = 10, offset: Int = 0): [Entity!]!
+    auditTrace(investigationId: ID!, filter: JSON): [JSON!]!
     exportProvenance(tenantId: String!, format: String): ProvenanceExport!
     riskSignals(limit: Int = 50, offset: Int = 0): [RiskSignal!]!
     evidenceBundles(limit: Int = 20): [EvidenceBundle!]!
@@ -247,6 +249,7 @@ export const typeDefs = `
     getStrategicResponsePlaybooks(scenarioId: ID!): JSON
     getCrisisScenario(id: ID!): JSON
     getAllCrisisScenarios: [JSON]
+    health: JSON
   }
 
   type Mutation {
