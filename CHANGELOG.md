@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Competitive Intelligence Subsumption & Transcendence Protocol (CISTP v1) master and sub-agent prompts.
+- Competitive Intelligence Subsumption Policy (`docs/governance/COMPETITIVE_INTEL_POLICY.md`).
+- Automated CI security gate for competitive intelligence evidence verification.
+
 ## [5.0.0-ga] - 2026-01-23
 
 ### General Availability Release

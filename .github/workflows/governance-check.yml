@@ -20,6 +20,9 @@ jobs:
         with:
           script: |
             const labels = context.payload.pull_request.labels.map(l => l.name);
+            const body = context.payload.pull_request.body || "";
+            const bodyMatch = body.match(/classification:\\s*(patch|minor|major)/i);
+            if (bodyMatch) labels.push(bodyMatch[1].toLowerCase());
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
             if (!valid) {
               core.setFailed("PR must have a classification label: patch, minor, or major.");
