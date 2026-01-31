@@ -23,7 +23,7 @@ def route(context: dict[str, Any]) -> PolicyDecision:
             reasons=["flag_off"]
         )
 
-    org_policy = context.get("org_policy", {})
+    org_policy = context.get("org_policy") or {}
     if not org_policy.get("allow_skill_preserving", False):
         return PolicyDecision(
             policy_id="POL-BASELINE",
@@ -31,7 +31,7 @@ def route(context: dict[str, Any]) -> PolicyDecision:
             reasons=["org_policy_deny"]
         )
 
-    user_settings = context.get("user_settings", {})
+    user_settings = context.get("user_settings") or {}
     if not user_settings.get("opt_in_skill_preserving", False):
         return PolicyDecision(
             policy_id="POL-BASELINE",
