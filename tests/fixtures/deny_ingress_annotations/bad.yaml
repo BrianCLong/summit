@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: annotation-bypass
+  annotations:
+    nginx.ingress.kubernetes.io/server-snippet: |
+      more_set_headers "X-Bypass: true";
+spec:
+  rules:
+    - host: bypass.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bypass-service
+                port:
+                  number: 80
