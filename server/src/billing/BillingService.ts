@@ -71,7 +71,7 @@ export class BillingService {
       await this.adapter.exportUsage(report);
 
       return report;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error({ err: error, tenantId }, 'Failed to generate billing report');
       throw error;
     }

@@ -11,7 +11,7 @@ type BillingJobDependencies = {
 };
 
 type PostgresClient = {
-  query: (text: string, params?: unknown[]) => Promise<{ rows: any[] }>;
+  query: (text: string, params?: unknown[]) => Promise<{ rows: unknown[] }>;
   release: () => void;
 };
 
@@ -89,11 +89,11 @@ export class BillingJobService {
             continue;
           }
           await this.billing.generateAndExportReport(tenantId);
-        } catch (err: any) {
+        } catch (err: unknown) {
           this.logger.error({ err, tenantId }, 'Failed to process billing for tenant');
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.logger.error({ err }, 'Failed to list tenants for billing close');
     } finally {
       if (lockAcquired && client) {
@@ -129,7 +129,7 @@ export class BillingJobService {
         BillingJobService.BILLING_CLOSE_LOCK_KEY,
       ]);
       this.logger.info('Billing close lock released');
-    } catch (err: any) {
+    } catch (err: unknown) {
       this.logger.error({ err }, 'Failed to release billing close advisory lock');
     }
   }
