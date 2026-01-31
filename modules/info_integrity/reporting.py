@@ -1,5 +1,5 @@
 import json
-from datetime import timezone
+from datetime import timezone, datetime
 from pathlib import Path
 from typing import Any, Dict
 
@@ -18,9 +18,9 @@ def write_compliance_evidence(run_dir: Path, evidence_id: str, findings: dict[st
         "prohibited_intent_blocks": int(findings.get("prohibited_intent_blocks", 0)),
         "prohibited_field_blocks": int(findings.get("prohibited_field_blocks", 0)),
     }
-    from datetime import datetime, timezone
+
     stamp = {
-        "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+        "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "run_id": run_dir.name
     }
 
@@ -39,23 +39,24 @@ def write_compliance_evidence(run_dir: Path, evidence_id: str, findings: dict[st
         try:
             index_data = json.loads(index_path.read_text())
             # Check if evidence_id already exists
-            items = index_data.get("items", [])
-            existing = next((item for item in items if item["evidence_id"] == evidence_id), None)
+            evidence_map = index_data.get("evidence", {})
 
-            new_files = [
-                str(report_path.relative_to(root_dir)),
-                str(metrics_path.relative_to(root_dir)),
-                str(stamp_path.relative_to(root_dir))
-            ]
+            existing = evidence_map.get(evidence_id, {})
 
-            if existing:
-                existing["files"] = sorted(list(set(existing["files"] + new_files)))
-            else:
-                items.append({
-                    "evidence_id": evidence_id,
-                    "files": sorted(new_files)
-                })
-            index_data["items"] = items
+            # Prepare new file paths relative to root
+            new_files_map = {
+                "report": str(report_path.relative_to(root_dir)),
+                "metrics": str(metrics_path.relative_to(root_dir)),
+                "stamp": str(stamp_path.relative_to(root_dir))
+            }
+
+            # Update existing entry with new paths (merging)
+            existing.update(new_files_map)
+
+            # Write back to map
+            evidence_map[evidence_id] = existing
+            index_data["evidence"] = evidence_map
+
             index_path.write_text(json.dumps(index_data, indent=2, sort_keys=True) + "\n")
         except Exception as e:
             print(f"Warning: could not update evidence/index.json: {e}")
