@@ -1,0 +1,9 @@
+{
+  "item_slug": "deepseek-ocr-eval",
+  "metrics": {
+    "backend_selected": "auto",
+    "exact_match_rate_small": 1.0,
+    "model_id": "deepseek-ai/DeepSeek-OCR-2"
+  },
+  "run_id": "eval-run-001"
+}
