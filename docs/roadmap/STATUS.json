@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T13:05:00Z",
-  "revision_note": "Added MCP/A2A mental model evidence scaffolding and interop documentation.",
+  "last_updated": "2026-01-31T14:00:00Z",
+  "revision_note": "Aligned Express 4.x consumers to 4.21.2 for patched CVE coverage.",
   "initiatives": [
     {
       "id": "A",
