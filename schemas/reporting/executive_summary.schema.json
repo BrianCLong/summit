@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Executive Summary",
+  "description": "A schema for a high-level executive summary of the assurance graph.",
+  "type": "object",
+  "properties": {
+    "total_repos": {
+      "type": "integer"
+    },
+    "total_releases": {
+      "type": "integer"
+    },
+    "total_artifacts": {
+      "type": "integer"
+    },
+    "total_controls": {
+      "type": "integer"
+    },
+    "total_exceptions": {
+      "type": "integer"
+    },
+    "total_incidents": {
+      "type": "integer"
+    },
+    "total_slos": {
+      "type": "integer"
+    },
+    "total_customers": {
+      "type": "integer"
+    },
+    "total_deployments": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "total_repos",
+    "total_releases",
+    "total_artifacts",
+    "total_controls",
+    "total_exceptions",
+    "total_incidents",
+    "total_slos",
+    "total_customers",
+    "total_deployments"
+  ]
+}

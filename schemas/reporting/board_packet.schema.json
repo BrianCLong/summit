@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Board Packet",
+  "description": "A schema for a comprehensive board packet.",
+  "type": "object",
+  "properties": {
+    "executive_summary": {
+      "$ref": "executive_summary.schema.json"
+    },
+    "drift_anomalies": {
+      "$ref": "../../schemas/assurance/drift_anomaly_report.schema.json"
+    },
+    "assurance_graph": {
+      "$ref": "../../schemas/assurance/assurance_graph.schema.json"
+    }
+  },
+  "required": ["executive_summary", "drift_anomalies", "assurance_graph"]
+}

@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Federated Evidence Bundle",
+  "description": "A schema for a federated evidence bundle, containing verifiable artifacts from a software build and release process.",
+  "type": "object",
+  "properties": {
+    "source_repo": {
+      "description": "The repository from which the bundle was generated.",
+      "type": "string",
+      "format": "uri"
+    },
+    "source_sha": {
+      "description": "The git commit SHA of the source code.",
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "tag": {
+      "description": "The git tag associated with the release.",
+      "type": "string"
+    },
+    "build_timestamp": {
+      "description": "The ISO 8601 timestamp of when the bundle was created.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "bundle_manifest": {
+      "description": "A deterministic manifest of all files included in the bundle.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "checksum": {
+            "type": "string"
+          }
+        },
+        "required": ["path", "checksum"]
+      }
+    },
+    "checksums": {
+      "description": "Checksums of the bundle itself.",
+      "type": "object",
+      "properties": {
+        "sha256": {
+          "type": "string"
+        }
+      },
+      "required": ["sha256"]
+    },
+    "signature_metadata": {
+      "description": "Metadata about the signature of the bundle.",
+      "type": "object",
+      "properties": {
+        "signer": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        }
+      },
+      "required": ["signer", "signature"]
+    },
+    "artifact_index": {
+      "description": "An index of artifacts, categorized by class.",
+      "type": "object",
+      "properties": {
+        "security": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/artifact" }
+        },
+        "ops": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/artifact" }
+        },
+        "compliance": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/artifact" }
+        },
+        "gtm": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/artifact" }
+        },
+        "cs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/artifact" }
+        }
+      }
+    }
+  },
+  "required": [
+    "source_repo",
+    "source_sha",
+    "tag",
+    "build_timestamp",
+    "bundle_manifest",
+    "checksums",
+    "artifact_index"
+  ],
+  "definitions": {
+    "artifact": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "checksum": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "required": ["name", "path", "checksum"]
+    }
+  }
+}

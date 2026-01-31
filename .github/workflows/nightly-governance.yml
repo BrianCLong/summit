@@ -1,0 +1,39 @@
+name: Nightly Governance
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Run every night at midnight
+  workflow_dispatch:
+
+jobs:
+  nightly-governance:
+    name: Nightly Governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Ingest latest bundles
+        run: ts-node scripts/federation/ingest_bundle.ts --all
+      - name: Detect policy drift
+        run: ts-node scripts/federation/detect_policy_drift.ts
+      - name: Build assurance graph
+        run: ts-node scripts/assurance/build_assurance_graph.ts
+      - name: Generate executive summary
+        run: ts-node scripts/reporting/generate_executive_summary.ts
+      - name: Detect drift anomalies
+        run: ts-node scripts/assurance/detect_drift_anomalies.ts
+      - name: Generate board packet
+        run: ts-node scripts/reporting/generate_board_packet.ts
+      - uses: actions/upload-artifact@b7c566a772e6b6bf58ed0dc250532a479d7789f # v6
+        with:
+          retention-days: 14
+          name: governance-reports-${{ github.run_id }}
+          path: |
+            artifacts/assurance-graph/
+            artifacts/reporting/
+            artifacts/assurance/drift-anomalies/
+            artifacts/federation/policy-drift/

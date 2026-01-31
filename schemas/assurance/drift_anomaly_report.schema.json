@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Drift Anomaly Report",
+  "description": "A schema for a drift anomaly report.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "drift": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": ["repo", "reason", "drift"]
+  }
+}
