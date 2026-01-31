@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T10:25:00Z",
-  "revision_note": "Restore er-service requirements.txt to unblock Docker dev stack builds.",
+  "last_updated": "2026-02-15T00:00:00Z",
+  "revision_note": "Include ga-graphai workspace packages in gateway Docker build context to fix pnpm file deps.; Documented investigation/export RBAC verification updates tied to Task Brief #6.",
   "initiatives": [
     {
       "id": "A",

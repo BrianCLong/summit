@@ -847,16 +847,16 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: er-service-requirements
+  - id: gateway-ga-graphai-context
     version: v1
-    path: prompts/operations/er-service-requirements@v1.md
-    sha256: 256c993088b3345423ea5fdb998436d1c986d114aa791aacc7b4f57b179ef4ce
-    description: Restore er-service requirements.txt for Docker builds.
+    path: prompts/operations/gateway-ga-graphai-context@v1.md
+    sha256: 609e5116967e4a2809fdd68ac9793c2f9f021af699df8c80ea26c88f4696d273
+    description: Ensure gateway Docker build includes ga-graphai workspace packages for pnpm file dependencies.
     scope:
       paths:
-        - services/er-service/requirements.txt
+        - apps/gateway/Dockerfile
         - docs/roadmap/STATUS.json
-        - prompts/operations/er-service-requirements@v1.md
+        - prompts/operations/gateway-ga-graphai-context@v1.md
         - prompts/registry.yaml
       domains:
         - operations
