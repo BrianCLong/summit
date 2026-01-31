@@ -301,6 +301,16 @@ ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
 
+# --- Governance & Evidence ---
+
+.PHONY: evidence-bundle
+evidence-bundle: ## Generate a standard evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [RISK=low] [CHECKS="make test"])
+	@python3 scripts/maintainers/gen-evidence-bundle.py \
+		$(if $(BASE),--base $(BASE),) \
+		$(if $(RISK),--risk $(RISK),) \
+		$(if $(CHECKS),--checks "$(CHECKS)",) \
+		$(if $(PROMPTS),--prompts "$(PROMPTS)",)
+
 # --- Demo Environment ---
 
 demo: ## Launch one-command demo environment
