@@ -1,0 +1,71 @@
+{
+  "date": "2026-01-14",
+  "head_sha": "ac4912fe173558516bc8819790cd51ceff14e253",
+  "setup_status": {
+    "status": "Yellow",
+    "details": "Bootstrap script takes >5 minutes; flaky smoke tests on local."
+  },
+  "friction_items": [
+    {
+      "item": "scripts/bootstrap.sh slowness",
+      "impact": "High",
+      "frequency": "Every setup"
+    },
+    {
+      "item": "verify:ga-security.ts runtime",
+      "impact": "Medium",
+      "frequency": "Pre-commit/CI"
+    },
+    {
+      "item": "test:smoke flakiness",
+      "impact": "High",
+      "frequency": "Daily"
+    }
+  ],
+  "objectives": [
+    {
+      "title": "Reduce 'fresh clone to tests passing' time",
+      "acceptance_criteria": "Bootstrap completes in < 2 minutes with caching."
+    },
+    {
+      "title": "Speed up local security verification",
+      "acceptance_criteria": "Create verify:ga-security:lite for pre-commit (<30s)."
+    },
+    {
+      "title": "Stabilize smoke tests",
+      "acceptance_criteria": "test:smoke passes 50/50 times locally."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "DX-20260114-01",
+      "priority": "P1",
+      "owner": "Codex",
+      "description": "Optimize bootstrap.sh with caching strategies."
+    },
+    {
+      "id": "DX-20260114-02",
+      "priority": "P2",
+      "owner": "Codex",
+      "description": "Implement verify:ga-security:lite mode."
+    },
+    {
+      "id": "DX-20260114-03",
+      "priority": "P0",
+      "owner": "Codex",
+      "description": "Debug and fix race conditions in test:smoke."
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Prioritize bootstrap speed over full clean builds for local dev.",
+      "rationale": "Developer velocity is impacted by slow setup times."
+    }
+  ],
+  "cross_system_actions": [
+    "GitHub Projects: Create DX cards for friction items.",
+    "Linear: Create tasks for P0/P1 tooling changes.",
+    "Jira: Log task for smoke test stability.",
+    "Notion: Update Onboarding guide with new bootstrap expectations."
+  ]
+}
