@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+OPENAPI_FILE="services/ssel/api/openapi.yaml"
+
+if [ ! -f "$OPENAPI_FILE" ]; then
+  echo "Error: $OPENAPI_FILE not found."
+  exit 1
+fi
+
+echo "Found $OPENAPI_FILE"
+
+# Basic version check
+if ! grep -q "openapi: 3.0.3" "$OPENAPI_FILE"; then
+  echo "Error: $OPENAPI_FILE does not start with openapi: 3.0.3"
+  exit 1
+fi
+
+echo "OpenAPI spec seems valid (basic check)."
+exit 0
