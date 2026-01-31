@@ -50,11 +50,25 @@ For ready-to-use templates that keep issues and PRs crisp, copy the relevant pla
   - **E2E**: `pnpm e2e` (Playwright)
   - **Smoke**: `make smoke` (Core integration loop)
 
-### 3. Submission
+### 3. Workflow Linting
+
+If you modify GitHub Actions workflows in `.github/workflows/`, run `actionlint` locally before pushing:
+
+```bash
+# Using Docker (recommended)
+docker run --rm -v "$(pwd):/repo" rhysd/actionlint:latest -color
+
+# Using Go install
+go install github.com/rhysd/actionlint/cmd/actionlint@latest && actionlint
+```
+
+CI will run actionlint on all workflow changes and **block merges on failures**.
+
+### 4. Submission
 
 - Open a Pull Request against `main`.
 - Fill out the PR template completely.
-- Ensure all CI checks pass (Lint, Unit, Golden Path).
+- Ensure all CI checks pass (Lint, Unit, Golden Path, Actionlint).
 
 ## 🤖 Guidelines for External Contributors (Bots & Co-authors)
 
