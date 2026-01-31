@@ -1,0 +1,3 @@
+{"id": "task1", "prompt": "Solve 2+2", "target": "4"}
+{"id": "task2", "prompt": "Capital of France?", "target": "Paris"}
+{"id": "task3", "prompt": "Is Python interpreted?", "target": "Yes"}

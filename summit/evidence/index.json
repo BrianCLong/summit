@@ -11,6 +11,12 @@
       "report": "examples/run_bundle/report.json",
       "metrics": "examples/run_bundle/metrics.json",
       "stamp": "examples/run_bundle/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-SPATIALGENEVAL-BENCH-001",
+      "report": "benchmarks/spatialgeneval/manifest.json",
+      "metrics": "benchmarks/spatialgeneval/manifest.json",
+      "stamp": "benchmarks/spatialgeneval/manifest.json"
     }
   ]
 }

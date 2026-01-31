@@ -1,0 +1,6 @@
+{
+  "baseline_metrics": {
+    "correctness_proxy": 0.85,
+    "token_proxy": 300
+  }
+}
