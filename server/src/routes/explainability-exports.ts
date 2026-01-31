@@ -5,9 +5,9 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { ExplainabilityExplorerService } from '../explainability/ExplainabilityExplorerService.js';
-import { SIEMExportService, SIEMConfig } from '../integrations/SIEMExportService.js';
-import { ExplainableRun } from '../explainability/types.js';
+import { ExplainabilityExplorerService } from '../explainability/ExplainabilityExplorerService';
+import { SIEMExportService, SIEMConfig } from '../integrations/SIEMExportService';
+import { ExplainableRun } from '../explainability/types';
 
 const router = Router();
 const explorerService = ExplainabilityExplorerService.getInstance();

@@ -1,91 +1,99 @@
+
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { SecretDriftDetector } from '../secret-drift.js';
+import { SecretDriftDetector } from '../secret-drift';
+import fs from 'fs';
 import path from 'path';
+
+// Mock fs and process.env
+jest.mock('fs');
+// Mock EnvSchema from config
+jest.mock('../../config', () => ({
+  EnvSchema: {
+    shape: {
+      NODE_ENV: {},
+      PORT: {},
+      DATABASE_URL: {},
+      SECRET_KEY: {}, // Sensitive
+    }
+  },
+  cfg: {}
+}));
 
 describe('SecretDriftDetector', () => {
   const mockEnvPath = '/test/.env';
   let detector: SecretDriftDetector;
-  
-  const mockFs = {
-    existsSync: jest.fn<any>(),
-    readFileSync: jest.fn<any>(),
-    readdirSync: jest.fn<any>(),
-    statSync: jest.fn<any>(),
-    writeFileSync: jest.fn<any>(),
-  };
-  
-  const mockEnv: NodeJS.ProcessEnv = {};
+  const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockEnv.SECRET_KEY = 'super_secret_value_123';
-    detector = new SecretDriftDetector(mockEnvPath, { 
-      fs: mockFs as any, 
-      env: mockEnv 
-    });
-    mockFs.existsSync.mockReturnValue(true);
+    jest.resetModules();
+    process.env = { ...originalEnv };
+    detector = new SecretDriftDetector(mockEnvPath);
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+  });
+
+  afterAll(() => {
+    process.env = originalEnv;
   });
 
   describe('detectUnusedSecrets', () => {
     it('should detect keys in .env that are not in EnvSchema', () => {
-      mockFs.readFileSync.mockReturnValue(
+      (fs.readFileSync as jest.Mock).mockReturnValue(
         'NODE_ENV=test\nUNUSED_KEY=value\n# Comment\nSECRET_KEY=abc'
       );
 
       const unused = detector.detectUnusedSecrets();
-      // EnvSchema is still the real one, but we know it has NODE_ENV
       expect(unused).toContain('UNUSED_KEY');
       expect(unused).not.toContain('NODE_ENV');
+      expect(unused).not.toContain('SECRET_KEY');
     });
   });
 
   describe('detectLeakedSecrets', () => {
     it('should detect sensitive values in source files', () => {
-      const leakedValue = 'super_secret_value_longer_than_8_chars';
-      mockEnv.JWT_SECRET = leakedValue;
+      process.env.SECRET_KEY = 'super_secret_value_123';
 
       // Mock readdirSync and statSync for traversal
-      mockFs.readdirSync.mockImplementation((dir: string) => {
-        if (dir === path.resolve(process.cwd(), 'src')) return ['leaky.js'];
+      (fs.readdirSync as jest.Mock).mockImplementation((dir) => {
+        if (dir === path.resolve(process.cwd(), 'src')) return ['leaky.ts'];
         return [];
       });
-      mockFs.statSync.mockReturnValue({ isDirectory: () => false });
-      mockFs.readFileSync.mockReturnValue(`const key = "${leakedValue}";`);
+      (fs.statSync as jest.Mock).mockReturnValue({ isDirectory: () => false });
+      (fs.readFileSync as jest.Mock).mockReturnValue('const key = "super_secret_value_123";');
 
       const leaks = detector.detectLeakedSecrets();
       expect(leaks).toHaveLength(1);
-      expect(leaks[0].secret).toBe('JWT_SECRET');
-      expect(leaks[0].file).toContain('leaky.js');
+      expect(leaks[0].secret).toBe('SECRET_KEY');
+      expect(leaks[0].file).toContain('leaky.ts');
     });
   });
 
   describe('detectExpiredSecrets', () => {
     it('should detect insecure defaults', () => {
-      mockEnv.JWT_SECRET = 'changeme_but_longer_to_pass_zod_if_needed';
-      mockEnv.JWT_REFRESH_SECRET = 'changeme_but_longer_to_pass_zod_if_needed';
-      
+      process.env.SECRET_KEY = 'changeme';
       const expired = detector.detectExpiredSecrets();
-      expect(expired.some(e => e.includes('insecure default detected'))).toBe(true);
+      expect(expired).toHaveLength(1);
+      expect(expired[0]).toContain('insecure default detected');
     });
 
     it('should detect expired secrets via _EXPIRY var', () => {
-      mockEnv.JWT_SECRET = 'valid_secret_value_longer_than_32_chars';
-      mockEnv.JWT_SECRET_EXPIRY = '2000-01-01T00:00:00Z'; // Past date
+      process.env.SECRET_KEY = 'valid';
+      process.env.SECRET_KEY_EXPIRY = '2000-01-01T00:00:00Z'; // Past date
 
       const expired = detector.detectExpiredSecrets();
-      expect(expired.some(e => e.includes('expired on'))).toBe(true);
+      expect(expired).toHaveLength(1);
+      expect(expired[0]).toContain('expired on');
     });
   });
 
   describe('enforceRemoval', () => {
     it('should remove specified keys from .env file', () => {
-      mockFs.readFileSync.mockReturnValue(
+      (fs.readFileSync as jest.Mock).mockReturnValue(
         'KEEP=val\nREMOVE=val\n'
       );
 
       detector.enforceRemoval(['REMOVE']);
 
-      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+      expect(fs.writeFileSync).toHaveBeenCalledWith(
         mockEnvPath,
         'KEEP=val\n'
       );

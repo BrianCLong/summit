@@ -4,7 +4,7 @@ import {
   Q3CClient,
   createQ3CAnnotationMiddleware,
   createQ3CBudgetGuard,
-} from '../q3cCostGuard.js';
+} from '../q3cCostGuard';
 
 describe('q3c middleware', () => {
   const makeResponse = (payload: unknown, status = 200) => ({

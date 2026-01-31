@@ -15,7 +15,7 @@ jest.mock('../../config/logger', () => ({
   },
 }));
 
-import { tenantRouter } from '../tenantRouter.js';
+import { tenantRouter } from '../tenantRouter';
 
 class MockPool {
   public queries: any[] = [];

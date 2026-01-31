@@ -8,9 +8,9 @@
 
 import { Request, Response, NextFunction } from 'express';
 import Redis from 'ioredis';
-import { PrometheusMetrics } from '../utils/metrics.js';
-import logger from '../utils/logger.js';
-import { tracer, Span } from '../utils/tracing.js';
+import { PrometheusMetrics } from '../utils/metrics';
+import logger from '../utils/logger';
+import { tracer, Span } from '../utils/tracing';
 
 // Configuration interface
 interface AbuseGuardConfig {

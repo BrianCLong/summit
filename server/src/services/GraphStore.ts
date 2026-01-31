@@ -1,5 +1,5 @@
 import { Driver, Node, Relationship as Neo4jRelationship } from 'neo4j-driver';
-import { getNeo4jDriver } from '../db/neo4j.js';
+import { getNeo4jDriver } from '../db/neo4j';
 import { provLedgerClient } from '../lib/prov-ledger.js';
 import logger from '../utils/logger.js';
 import { SearchIndexService } from '../search-index/SearchIndexService.js';

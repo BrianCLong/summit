@@ -50,7 +50,7 @@ export type AlertRule = z.infer<typeof AlertRuleSchema>;
  *
  * @example
  * ```typescript
- * import { alertingService, AlertRuleSchema } from './AlertingService.js';
+ * import { alertingService, AlertRuleSchema } from './AlertingService';
  *
  * // Add a new rule
  * const newRule = AlertRuleSchema.parse({

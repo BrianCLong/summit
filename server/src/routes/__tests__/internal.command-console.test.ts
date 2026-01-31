@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import commandConsoleRouter from '../internal/command-console.js';
+import commandConsoleRouter from '../internal/command-console';
 
 jest.mock('../../services/GAReleaseService', () => ({
   GAReleaseService: jest.fn().mockImplementation(() => ({

@@ -11,9 +11,9 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { NLToCypherService } from '../NLToCypherService.js';
-import LLMService from '../LLMService.js';
-import { LLMGuardrailsService } from '../../security/llm-guardrails.js';
+import { NLToCypherService } from '../NLToCypherService';
+import LLMService from '../LLMService';
+import { LLMGuardrailsService } from '../../security/llm-guardrails';
 
 // Mock dependencies
 const mockNeo4jDriver: any = {

@@ -11,7 +11,7 @@
  */
 
 import { jest } from '@jest/globals';
-import { EntityRepo, type Entity, type EntityInput } from '../EntityRepo.js';
+import { EntityRepo, type Entity, type EntityInput } from '../EntityRepo';
 import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
 

@@ -1,4 +1,4 @@
-import { trainATL, inferTariff } from '../src.js';
+import { trainATL, inferTariff } from '../src';
 import { randomUUID } from 'crypto';
 
 describe('ATL', () => {

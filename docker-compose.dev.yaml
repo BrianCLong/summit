@@ -10,13 +10,7 @@ services:
       COPILOT_NLQ: "true"
       UI_TRIPANE: "true"
       POLICY_COMPILER_URL: "http://policy-compiler:8080"
-      OPA_DECISION_URL: "http://opa:8181/v1/data/policy/authz/abac/decision"
-      TYPESENSE_HOST: "typesense"
-      TYPESENSE_PORT: "8108"
-      TYPESENSE_API_KEY: "xyz"
-    depends_on:
-      - policy-compiler
-      - typesense
+    depends_on: [ policy-compiler ]
 
   ui:
     build: ./apps/ui
@@ -54,26 +48,3 @@ services:
       - "4001:4001"
     environment:
       - PREDICTD_PORT=4001
-
-  typesense:
-    image: typesense/typesense:0.25.2
-    ports:
-      - "8108:8108"
-    environment:
-      - TYPESENSE_DATA_DIR=/data
-      - TYPESENSE_API_KEY=xyz
-      - TYPESENSE_ENABLE_CORS=true
-    volumes:
-      - ./tmp/typesense-data:/data
-
-  opa:
-    image: openpolicyagent/opa:0.61.0
-    ports:
-      - "8181:8181"
-    command:
-      - "run"
-      - "--server"
-      - "--addr=0.0.0.0:8181"
-      - "/policies"
-    volumes:
-      - ./services/opa/policies:/policies

@@ -28,8 +28,7 @@ func main() {
 	}()
 
 	dsn := os.Getenv("PG_DSN")
-	redisAddr := os.Getenv("REDIS_ADDR")
-	store, err := state.OpenPostgres(ctx, dsn, redisAddr)
+	store, err := state.OpenPostgres(ctx, dsn)
 	if err != nil {
 		log.Fatalf("connect postgres: %v", err)
 	}

@@ -25,13 +25,7 @@ RUN npm install -g nodemon
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 # Copy package files and install as root
-COPY package*.json intelgraph-feature-flags-4.2.3.tgz intelgraph-telemetry-config-4.2.3.tgz maestro-core-4.2.3.tgz ./
-
-# Replace workspace dependencies with local tarballs to avoid "Unsupported URL Type workspace:" error
-RUN sed -i 's|"@intelgraph/feature-flags": "workspace:\*"|"@intelgraph/feature-flags": "file:./intelgraph-feature-flags-4.2.3.tgz"|g' package.json && \
-    sed -i 's|"@intelgraph/telemetry-config": "workspace:\*"|"@intelgraph/telemetry-config": "file:./intelgraph-telemetry-config-4.2.3.tgz"|g' package.json && \
-    sed -i 's|"@maestro/core": "workspace:\*"|"@maestro/core": "file:./maestro-core-4.2.3.tgz"|g' package.json
-
+COPY package*.json intelgraph-feature-flags-4.2.3.tgz intelgraph-telemetry-config-4.2.3.tgz ./
 RUN npm install --legacy-peer-deps
 
 # Copy source code and set permissions

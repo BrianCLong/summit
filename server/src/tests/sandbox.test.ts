@@ -1,4 +1,4 @@
-import { executeSandbox } from '../nl2cypher/sandbox.js';
+import { executeSandbox } from '../nl2cypher/sandbox';
 import { execSync } from 'node:child_process';
 import { describe, it, expect } from '@jest/globals';
 

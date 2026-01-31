@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { choosePool } from '../selector.js';
+import { choosePool } from '../selector';
 
 jest.mock('../pools', () => ({
   listPools: jest.fn(),

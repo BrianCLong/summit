@@ -7,7 +7,7 @@ import type {
   ConfigDrift,
   SmokeTestResult,
   ApiChange,
-} from '../conductor/deployment/deploymentGateService.js';
+} from '../conductor/deployment/deploymentGateService';
 
 let DeploymentGateService: typeof DeploymentGateServiceType;
 

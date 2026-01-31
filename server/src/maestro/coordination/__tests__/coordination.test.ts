@@ -1,8 +1,8 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { coordinationService } from '../service.js';
-import { budgetManager } from '../budget-manager.js';
-import { CoordinationSchema, SharedBudget } from '../types.js';
+import { coordinationService } from '../service';
+import { budgetManager } from '../budget-manager';
+import { CoordinationSchema, SharedBudget } from '../types';
 
 // Mock dependencies
 jest.mock('../../MaestroService', () => ({

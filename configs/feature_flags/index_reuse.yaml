@@ -1,5 +1,0 @@
-flags:
-  FF_SECURE_INDEX_REUSE: false
-  FF_PROOF_FILTER_ENFORCE: true
-  FF_STORE_OPAQUE_PATHS: true
-  FF_EMBED_CACHE: false

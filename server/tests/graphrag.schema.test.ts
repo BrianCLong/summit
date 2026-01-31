@@ -1,4 +1,4 @@
-import { GraphRAGService } from '../src/services/GraphRAGService.js';
+import { GraphRAGService } from '../src/services/GraphRAGService';
 import { jest, test, expect } from '@jest/globals';
 
 test('graphRagAnswer validates JSON schema', async () => {

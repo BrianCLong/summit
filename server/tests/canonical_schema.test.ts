@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { isValidAt, wasKnownAt, BitemporalFields } from '../src/canonical/types.js';
+import { isValidAt, wasKnownAt, BitemporalFields } from '../src/canonical/types';
 
 describe('Canonical Data Model', () => {
   describe('Temporal Logic', () => {

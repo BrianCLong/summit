@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { ResidencyGuard, ResidencyViolationError } from '../residency-guard.js';
-import { getPostgresPool } from '../../db/postgres.js';
+import { ResidencyGuard, ResidencyViolationError } from '../residency-guard';
+import { getPostgresPool } from '../../db/postgres';
 
 jest.mock('../../db/postgres', () => ({
   getPostgresPool: jest.fn(),

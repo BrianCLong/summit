@@ -129,14 +129,14 @@ export class SemanticContextValidator {
       this.logger.warn(
         '[SECURITY] SemanticContextValidator is DISABLED. Stub implementations return 0.0 (no actual validation). ' +
         'Set SEMANTIC_VALIDATION_ENABLED=true only after implementing real validation methods. ' +
-        'See: server/src/conductor/validation/semantic-validator.js'
+        'See: server/src/conductor/validation/semantic-validator.ts'
       );
     } else {
       this.logger.error(
         '[SECURITY CRITICAL] SemanticContextValidator is ENABLED but uses STUB implementations! ' +
         'All validation methods return 0.0 (bypasses security checks). ' +
         'This is NOT SAFE for production. Disable immediately or implement real validation. ' +
-        'See: server/src/conductor/validation/semantic-validator.js'
+        'See: server/src/conductor/validation/semantic-validator.ts'
       );
     }
   }

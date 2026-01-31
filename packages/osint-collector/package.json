@@ -20,7 +20,7 @@
     "axios": "^1.11.0",
     "cheerio": "^1.0.0",
     "puppeteer": "^23.0.0",
-    "playwright": "^1.58.1",
+    "playwright": "^1.56.0",
     "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0",
     "whois": "^2.13.10",

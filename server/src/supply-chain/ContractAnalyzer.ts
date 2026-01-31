@@ -1,4 +1,4 @@
-import { ContractAnalysis } from './types.js';
+import { ContractAnalysis } from './types';
 import { randomUUID } from 'crypto';
 
 export class ContractAnalyzer {

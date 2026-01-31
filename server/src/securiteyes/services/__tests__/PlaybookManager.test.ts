@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { PlaybookManager } from '../PlaybookManager.js';
-import { SecuriteyesService } from '../SecuriteyesService.js';
+import { PlaybookManager } from '../PlaybookManager';
+import { SecuriteyesService } from '../SecuriteyesService';
 
 const mockSecuriteyesService = {
   createNode: jest.fn().mockResolvedValue({ id: 'mitigation-1' })

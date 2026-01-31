@@ -1,5 +1,0 @@
-name = "ubuntu-minimal"
-display_name = "Ubuntu Minimal"
-qemu_profile = "virt-vga"
-default_args = ["-m", "2048", "-cpu", "host"]
-provenance = "builtin"

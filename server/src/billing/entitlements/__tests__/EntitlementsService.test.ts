@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { EntitlementsService } from '../EntitlementsService.js';
+import { EntitlementsService } from '../EntitlementsService';
 
 describe('EntitlementsService', () => {
   let service: EntitlementsService;

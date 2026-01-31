@@ -1,4 +1,4 @@
-import { FeatureStore } from '../risk/FeatureStore.js';
+import { FeatureStore } from '../risk/FeatureStore';
 import { describe, it, expect } from '@jest/globals';
 
 describe('FeatureStore', () => {

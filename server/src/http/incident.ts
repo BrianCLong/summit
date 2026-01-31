@@ -2,9 +2,9 @@
 // Provides REST endpoints for incident management and coordination
 
 import express from 'express';
-import { incidentResponseEngine } from '../conductor/incident/response-engine.js';
-import { runbookExecutor } from '../conductor/incident/runbook-executor.js';
-import { warRoomCoordinator } from '../conductor/incident/war-room.js';
+import { incidentResponseEngine } from '../conductor/incident/response-engine';
+import { runbookExecutor } from '../conductor/incident/runbook-executor';
+import { warRoomCoordinator } from '../conductor/incident/war-room';
 
 export const incidentRouter = express.Router();
 

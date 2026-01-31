@@ -29,35 +29,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: cta-leaders-ingest-scaffold
-    version: v1
-    path: prompts/evidence/cta-leaders-ingest-scaffold@v1.md
-    sha256: 4d3953f51bb92d0568295bf8fdbde77e615d283c247a331c27da643cee031aa6
-    description: Scaffold CTA leaders evidence ingest bundle and verification stub.
-    scope:
-      paths:
-        - evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/
-        - evidence/index.json
-        - ci/verify_evidence.py
-        - summit/fixtures/cta_leaders_2026_01/
-        - docs/roadmap/STATUS.json
-        - deps.delta.md
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/evidence/cta-leaders-ingest-scaffold@v1.md
-        - prompts/registry.yaml
-        - agents/examples/CTA_LEADERS_INGEST_20260131.json
-      domains:
-        - evidence
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

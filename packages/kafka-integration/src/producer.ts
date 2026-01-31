@@ -8,8 +8,8 @@ import {
   EOSProducerConfig,
   StreamMessage,
   SerializationFormat,
-} from './types.js';
-import { SchemaRegistryClient } from './schema-registry.js';
+} from './types';
+import { SchemaRegistryClient } from './schema-registry';
 
 const logger = pino({ name: 'kafka-producer' });
 const tracer = trace.getTracer('kafka-producer');

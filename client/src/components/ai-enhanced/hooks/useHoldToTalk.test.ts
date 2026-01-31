@@ -1,11 +1,8 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { useHoldToTalk } from './useHoldToTalk';
 import $ from 'jquery';
 
-// Skip: Test fundamentally broken - manually assigning ref doesn't trigger useEffect
-// The hook's effect depends on [onStart, onEnd], not the ref, so setting ref.current
-// after renderHook doesn't re-run the effect. Would need wrapper component to test properly.
-describe.skip('useHoldToTalk', () => {
+describe('useHoldToTalk', () => {
   let onStartMock: jest.Mock;
   let onEndMock: jest.Mock;
   let buttonElement: HTMLButtonElement;

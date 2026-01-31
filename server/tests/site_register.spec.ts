@@ -1,4 +1,4 @@
-import { registerSite, verifySignature } from '../src/sites/register.js';
+import { registerSite, verifySignature } from '../src/sites/register';
 
 test('registers site and rejects bad signatures', async () => {
   const s = await registerSite({

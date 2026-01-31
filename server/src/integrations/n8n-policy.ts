@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import baseLogger from '../config/logger.js';
+import baseLogger from '../config/logger';
 import axios from 'axios';
 
 const logger = baseLogger.child({ name: 'n8n-policy' });

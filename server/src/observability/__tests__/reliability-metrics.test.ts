@@ -1,10 +1,10 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { registry } from '../../metrics.js';
+import { registry } from '../../metrics';
 import {
   incrementTenantBudgetHit,
   recordEndpointResult,
   resetReliabilityMetrics,
-} from '../reliability-metrics.js';
+} from '../reliability-metrics';
 
 const RELIABILITY_METRIC_NAMES = [
   'reliability_request_duration_seconds',
@@ -34,7 +34,7 @@ describe('reliability metrics registration', () => {
     }
     expect(reliabilityMetrics.length).toBe(RELIABILITY_METRIC_NAMES.length);
 
-    await import('../reliability-metrics.js');
+    await import('../reliability-metrics');
     const after = await registry.getMetricsAsJSON();
     const reliabilityAfter = after.filter((metric: { name?: string }) =>
       RELIABILITY_METRIC_NAMES.includes(metric.name ?? ''),

@@ -1,6 +1,6 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { ProvenanceLedgerV2, provenanceLedger } from '../ledger.js';
-import { pool } from '../../db/pg.js';
+import { ProvenanceLedgerV2, provenanceLedger } from '../ledger';
+import { pool } from '../../db/pg';
 
 // Mock DB connection
 jest.mock('../../db/pg', () => ({
@@ -11,7 +11,7 @@ jest.mock('../../db/pg', () => ({
 }));
 
 // Mock telemetry to avoid import side effects that crash tests
-jest.mock('../../lib/telemetry/comprehensive-telemetry.js', () => ({
+jest.mock('../../lib/telemetry/comprehensive-telemetry.ts', () => ({
   telemetry: {
     recordLatency: jest.fn(),
     incrementCounter: jest.fn(),

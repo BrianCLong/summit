@@ -14,9 +14,9 @@ import {
   ConsumerGroupConfig,
   StreamMessage,
   ProcessingResult,
-} from './types.js';
-import { SchemaRegistryClient } from './schema-registry.js';
-import { DeadLetterQueue } from './dlq.js';
+} from './types';
+import { SchemaRegistryClient } from './schema-registry';
+import { DeadLetterQueue } from './dlq';
 
 const logger = pino({ name: 'kafka-consumer' });
 const tracer = trace.getTracer('kafka-consumer');

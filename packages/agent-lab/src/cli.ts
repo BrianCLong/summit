@@ -3,11 +3,11 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import { ContentBoundary } from './contentBoundary.js';
-import { judgeRun } from './judge.js';
-import { createDefaultBus, runWorkflow } from './toolBus.js';
-import { builtInTools } from './tools.js';
-import { loadWorkflowSpec } from './workflowSpec.js';
+import { ContentBoundary } from './contentBoundary';
+import { judgeRun } from './judge';
+import { createDefaultBus, runWorkflow } from './toolBus';
+import { builtInTools } from './tools';
+import { loadWorkflowSpec } from './workflowSpec';
 
 const usage = () => {
   console.log(`Agent Lab CLI

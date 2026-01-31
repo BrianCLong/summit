@@ -1,4 +1,4 @@
-import { TrustTier } from '../marketplace/types.js';
+import { TrustTier } from '../marketplace/types';
 
 export type CapabilityType =
   | 'network.outbound'

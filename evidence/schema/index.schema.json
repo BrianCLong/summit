@@ -1,24 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
+  "required": ["version", "items"],
   "properties": {
-    "version": {"type": "string"},
+    "version": { "type": "string" },
     "items": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
+        "required": ["report", "metrics", "stamp"],
         "properties": {
-          "title": {"type": "string"},
-          "category": {"type": "string"},
-          "artifacts": {"type": "array", "items": {"type": "string"}},
-          "report": {"type": "string"},
-          "metrics": {"type": "string"},
-          "stamp": {"type": "string"},
-          "files": {"type": "array", "items": {"type": "string"}},
-          "evidence_id": {"type": "string"}
-        }
+          "report": { "type": "string" },
+          "metrics": { "type": "string" },
+          "stamp": { "type": "string" }
+        },
+        "additionalProperties": true
       }
     }
   },
-  "required": ["items"]
+  "additionalProperties": true
 }

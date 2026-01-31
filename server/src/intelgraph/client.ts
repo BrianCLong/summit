@@ -1,4 +1,4 @@
-import { Run, Task, Artifact, CostSample, RunCostSummary } from '../maestro/types.js';
+import { Run, Task, Artifact, CostSample, RunCostSummary } from '../maestro/types';
 
 export interface IntelGraphClient {
   createRun(run: Run): Promise<void>;

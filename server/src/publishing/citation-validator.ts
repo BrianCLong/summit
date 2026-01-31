@@ -10,7 +10,7 @@ import type {
   LicenseInfo,
   PublishValidationResult,
   ProofCarryingManifest,
-} from './proof-carrying-types.js';
+} from './proof-carrying-types';
 
 export interface CitationRegistry {
   id: string;

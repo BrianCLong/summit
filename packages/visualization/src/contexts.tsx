@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { VisualizationTheme, DataPoint } from './types.js';
+import { VisualizationTheme, DataPoint } from './types';
 
 // Visualization Theme Context
 interface VisualizationThemeContextValue {

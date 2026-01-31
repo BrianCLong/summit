@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
-import { app } from './test-app.js';
+import { app } from './test-app';
 
 jest.mock('../../src/middleware/auth', () => ({
   ensureAuthenticated: (req, res, next) => {

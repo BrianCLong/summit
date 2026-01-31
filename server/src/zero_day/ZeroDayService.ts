@@ -1,7 +1,7 @@
 // server/src/zero_day/ZeroDayService.ts
 
 import { randomUUID } from 'crypto';
-import { ThreatDesignation, AuthorityDelegation, KillChainLog, AutonomousAction } from './zero_day.types.js';
+import { ThreatDesignation, AuthorityDelegation, KillChainLog, AutonomousAction } from './zero_day.types';
 
 /**
  * Service for managing the (simulated) Autonomous Cyber-Physical Kill Chain.

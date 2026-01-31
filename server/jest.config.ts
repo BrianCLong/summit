@@ -108,6 +108,7 @@ const config: Config = {
     'src/retrieval/__tests__/',
     'src/routes/__tests__/',
     'src/securiteyes/',
+    'src/security/__tests__/',
     'src/security/tenant-simulation/__tests__/',
     'src/services/__tests__/',
     'src/summitsight/__tests__/',

@@ -1,6 +1,6 @@
-import { EntityResolver } from '../engine/EntityResolver.js';
-import { NaiveBayesModel } from '../models/NaiveBayesModel.js';
-import { IntelGraphService } from '../../services/IntelGraphService.js';
+import { EntityResolver } from '../engine/EntityResolver';
+import { NaiveBayesModel } from '../models/NaiveBayesModel';
+import { IntelGraphService } from '../../services/IntelGraphService';
 import { jest } from '@jest/globals';
 
 // Mock dependencies

@@ -1,5 +1,5 @@
-import { BaseEnvironment } from '../env.js';
-import { Observation, Action, StepResult } from '../types.js';
+import { BaseEnvironment } from '../env';
+import { Observation, Action, StepResult } from '../types';
 
 export class BrowserOpsEnvironment extends BaseEnvironment {
   public name = 'BrowserOps';

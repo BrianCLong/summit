@@ -1,4 +1,4 @@
-import { requireReason } from '../src/middleware/rfa.js';
+import { requireReason } from '../src/middleware/rfa';
 
 describe('reason-for-access middleware', () => {
   it('blocks restricted without reason', () => {

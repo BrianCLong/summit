@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
-import { HybridEntityRecognizer } from '../pii/recognizer.js';
-import { redactionService } from '../redaction/redact.js';
-import { logger as appLogger } from '../config/logger.js';
+import { HybridEntityRecognizer } from '../pii/recognizer';
+import { redactionService } from '../redaction/redact';
+import { logger as appLogger } from '../config/logger';
 
 type PiiFinding = {
   path: string;

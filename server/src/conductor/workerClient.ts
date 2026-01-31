@@ -29,8 +29,8 @@ export async function executeOnWorker(
   inflight++;
   try {
     // Lazy import generated client at runtime (placeholder path)
-    const { StepRunnerClient } = await import('./gen/runner_grpc_pb.js');
-    const { StepRequest } = await import('./gen/runner_pb.js');
+    const { StepRunnerClient } = await import('./gen/runner_grpc_pb');
+    const { StepRequest } = await import('./gen/runner_pb');
     const client = new (StepRunnerClient as any)(
       t.addr,
       grpc.credentials.createInsecure(),

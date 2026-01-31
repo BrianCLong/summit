@@ -1,5 +1,5 @@
 // server/tests/zero_day.service.spec.ts
-import { ZeroDayService } from '../src/zero_day/ZeroDayService.js';
+import { ZeroDayService } from '../src/zero_day/ZeroDayService';
 
 jest.useFakeTimers();
 

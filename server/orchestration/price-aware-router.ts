@@ -1,5 +1,5 @@
 // server/orchestration/price-aware-router.ts
-import { fetchPriceSignals } from './price-signal-ingestor.js';
+import { fetchPriceSignals } from './price-signal-ingestor';
 
 // Mock resource types
 type Resource = { id: string; type: 'compute' | 'llm'; costPerUnit: number };

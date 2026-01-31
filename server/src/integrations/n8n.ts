@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import axios from 'axios';
-import baseLogger from '../config/logger.js';
+import baseLogger from '../config/logger';
 import { ProvenanceLedgerService } from '../services/provenance-ledger.js';
 
 const logger = baseLogger.child({ name: 'integrations:n8n' });

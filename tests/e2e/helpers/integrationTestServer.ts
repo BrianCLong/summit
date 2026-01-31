@@ -62,42 +62,6 @@ interface LoginBody {
   password: string;
 }
 
-type TestRole = 'viewer' | 'investigator' | 'admin';
-
-const ROLE_PERMISSIONS: Record<TestRole, string[]> = {
-  viewer: ['investigations:read'],
-  investigator: ['investigations:read', 'investigations:write'],
-  admin: ['*'],
-};
-
-const resolveRole = (req: Request): TestRole => {
-  const header = req.headers['x-test-role'];
-  if (typeof header === 'string') {
-    const normalized = header.toLowerCase();
-    if (normalized === 'viewer' || normalized === 'investigator' || normalized === 'admin') {
-      return normalized as TestRole;
-    }
-  }
-  return 'admin';
-};
-
-const requirePermission = (permission: string) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const user = (req as any).user as { id: string; role: TestRole; permissions: string[] } | undefined;
-    if (!user) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-    if (!user.permissions.includes('*') && !user.permissions.includes(permission)) {
-      return res.status(403).json({
-        message: 'Forbidden',
-        required: permission,
-        role: user.role,
-      });
-    }
-    return next();
-  };
-};
-
 export function createIntegrationTestServer() {
   const app = express();
   app.use(express.json());
@@ -125,13 +89,6 @@ export function createIntegrationTestServer() {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
-
-    const role = resolveRole(req);
-    (req as any).user = {
-      id: 'test-user',
-      role,
-      permissions: ROLE_PERMISSIONS[role],
-    };
 
     return next();
   };
@@ -365,12 +322,12 @@ export function createIntegrationTestServer() {
     res.json({ circuits: { neo4j: 'closed', postgres: 'closed' } });
   });
 
-  app.post('/api/investigations', requirePermission('investigations:write'), (req, res) => {
+  app.post('/api/investigations', (req, res) => {
     const workspaceId = randomUUID();
     res.status(201).json({ id: workspaceId, name: req.body.name, description: req.body.description });
   });
 
-  app.post('/api/investigations/:workspaceId/analyze', requirePermission('investigations:write'), (req, res) => {
+  app.post('/api/investigations/:workspaceId/analyze', (req, res) => {
     const analysisId = randomUUID();
     state.analyses.set(analysisId, {
       id: analysisId,
@@ -382,7 +339,7 @@ export function createIntegrationTestServer() {
     res.status(202).json({ analysisId, status: 'running', request: req.body });
   });
 
-  app.get('/api/investigations/:workspaceId/analyses/:analysisId', requirePermission('investigations:read'), (req, res) => {
+  app.get('/api/investigations/:workspaceId/analyses/:analysisId', (req, res) => {
     const analysis = state.analyses.get(req.params.analysisId);
     if (!analysis) {
       return res.status(404).json({ message: 'Analysis not found' });
@@ -396,7 +353,7 @@ export function createIntegrationTestServer() {
     res.json({ id: analysis.id, status: analysis.status, workspaceId: analysis.workspaceId });
   });
 
-  app.get('/api/investigations/:workspaceId/results', requirePermission('investigations:read'), (req, res) => {
+  app.get('/api/investigations/:workspaceId/results', (req, res) => {
     const analysis = Array.from(state.analyses.values()).find(
       (item) => item.workspaceId === req.params.workspaceId,
     );

@@ -15,9 +15,9 @@ jest.unstable_mockModule('../../provenance/ledger', () => ({
   },
 }));
 
-const { EntityResolver } = await import('../engine/EntityResolver.js');
-const { IntelGraphService } = await import('../../services/IntelGraphService.js');
-const { provenanceLedger } = await import('../../provenance/ledger.js');
+const { EntityResolver } = await import('../engine/EntityResolver');
+const { IntelGraphService } = await import('../../services/IntelGraphService');
+const { provenanceLedger } = await import('../../provenance/ledger');
 
 describe('EntityResolver', () => {
   let resolver: EntityResolver;

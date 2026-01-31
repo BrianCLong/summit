@@ -13,16 +13,16 @@ import {
   mcpRegistry,
   executeToolAnywhere,
   initializeMCPClient,
-} from './mcp/client.js';
-import { orchestrator, MCPOrchestrator, WorkflowRecipes } from './mcp/orchestrator.js';
+} from './mcp/client';
+import { orchestrator, MCPOrchestrator, WorkflowRecipes } from './mcp/orchestrator';
 import { randomUUID as uuid } from 'crypto';
 import {
   BudgetAdmissionController,
   createBudgetController,
-} from './admission/budget-control.js';
+} from './admission/budget-control';
 import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
-import { ConductorCache } from './cache.js';
+import { ConductorCache } from './cache';
 import { createHash } from 'crypto';
 import { registerBuiltins, runPlugin } from '../plugins/index.js';
 import { checkResidency } from '../policy/opaClient.js';
@@ -30,7 +30,7 @@ import { checkQuota, accrueUsage } from './quotas.js';
 import {
   MissionControlConflictResolver,
   MissionControlResolution,
-} from './mission-control/conflict-resolution.js';
+} from './mission-control/conflict-resolution';
 import { PolicyEngine } from '../services/PolicyEngine.js'; // Integration of Policy Engine
 
 export interface ConductorConfig {

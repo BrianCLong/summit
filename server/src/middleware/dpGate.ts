@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
-import { PrivacyBudgetLedger, LaplaceMechanism } from '../services/dp-runtime/mechanisms.js';
-import { AppError } from '../lib/errors.js';
+import { PrivacyBudgetLedger, LaplaceMechanism } from '../services/dp-runtime/mechanisms';
+import { AppError } from '../lib/errors';
 import crypto from 'crypto';
 import { Redis } from 'ioredis';
 

@@ -1,4 +1,4 @@
-import { enforceABAC } from '../plugins/opaEnforcer.js';
+import { enforceABAC } from '../plugins/opaEnforcer';
 export async function guardRead(
   ctx: any,
   resource: { tenant: string; labels?: string[]; retention?: string },

@@ -1,4 +1,4 @@
-import { Vendor, SBOM, ContractAnalysis, SupplyChainRiskScore } from './types.js';
+import { Vendor, SBOM, ContractAnalysis, SupplyChainRiskScore } from './types';
 
 export class SupplyChainRiskEngine {
 

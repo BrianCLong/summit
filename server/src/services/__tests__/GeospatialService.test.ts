@@ -1,5 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { GeospatialService, setPostgresPoolForTesting } from '../GeospatialService.js';
+import { GeospatialService, setPostgresPoolForTesting } from '../GeospatialService';
 
 const mPool = {
   query: jest.fn(),

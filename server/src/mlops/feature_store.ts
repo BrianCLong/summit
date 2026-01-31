@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
-import { FeatureSet, FeatureDefinition } from './types.js';
-import { logger } from '../config/logger.js';
+import { FeatureSet, FeatureDefinition } from './types';
+import { logger } from '../config/logger';
 
 /**
  * Feature Store Service.

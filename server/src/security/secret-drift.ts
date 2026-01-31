@@ -13,14 +13,10 @@ export interface SecretDriftReport {
 
 export class SecretDriftDetector {
   private envFilePath: string;
-  private fs: any;
-  private env: NodeJS.ProcessEnv;
 
-  constructor(envFilePath?: string, dependencies?: { fs?: any; env?: NodeJS.ProcessEnv }) {
+  constructor(envFilePath?: string) {
     // Default to .env in the current working directory (usually server root or repo root)
     this.envFilePath = envFilePath || path.resolve(process.cwd(), '.env');
-    this.fs = dependencies?.fs || fs;
-    this.env = dependencies?.env || process.env;
   }
 
   /**
@@ -33,12 +29,12 @@ export class SecretDriftDetector {
     const schemaKeys = Object.keys(EnvSchema.shape);
 
     // 2. Get keys from .env file
-    if (!this.fs.existsSync(this.envFilePath)) {
+    if (!fs.existsSync(this.envFilePath)) {
       console.warn(`[SecretDrift] No .env file found at ${this.envFilePath}`);
       return [];
     }
 
-    const envContent = this.fs.readFileSync(this.envFilePath, 'utf-8');
+    const envContent = fs.readFileSync(this.envFilePath, 'utf-8');
     const envKeys = envContent
       .split('\n')
       .map((line: any) => line.trim())
@@ -76,7 +72,7 @@ export class SecretDriftDetector {
     // Ideally we scan the whole 'src' directory.
     const srcDir = path.resolve(process.cwd(), 'src');
 
-    if (!this.fs.existsSync(srcDir)) {
+    if (!fs.existsSync(srcDir)) {
       console.warn(`[SecretDrift] src directory not found at ${srcDir}`);
       return [];
     }
@@ -87,10 +83,10 @@ export class SecretDriftDetector {
       // Let's scan everything for now, maybe exclude node_modules or dist.
       if (filePath.includes('node_modules') || filePath.includes('.git')) return;
 
-      const content = this.fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, 'utf-8');
 
       sensitiveKeys.forEach(key => {
-        const value = this.env[key];
+        const value = process.env[key];
         // Only check for secrets that are long enough to be unique/meaningful
         if (value && value.length > 8 && content.includes(value)) {
           // Find line number
@@ -98,7 +94,7 @@ export class SecretDriftDetector {
           lines.forEach((line: any, idx: any) => {
             if (line.includes(value)) {
               // Check if it's the config file itself or the .env loading part
-              if (filePath.endsWith('config.js') || filePath.endsWith('.env')) return;
+              if (filePath.endsWith('config.ts') || filePath.endsWith('.env')) return;
 
               leaks.push({ secret: key, file: filePath, line: idx + 1 });
             }
@@ -108,12 +104,12 @@ export class SecretDriftDetector {
     };
 
     const walkDir = (dir: string) => {
-      const files = this.fs.readdirSync(dir);
+      const files = fs.readdirSync(dir);
       files.forEach((f: any) => {
         const fp = path.join(dir, f);
-        if (this.fs.statSync(fp).isDirectory()) {
+        if (fs.statSync(fp).isDirectory()) {
           walkDir(fp);
-        } else if (f.endsWith('.js') || f.endsWith('.js') || f.endsWith('.json')) {
+        } else if (f.endsWith('.ts') || f.endsWith('.js') || f.endsWith('.json')) {
           scanFile(fp);
         }
       });
@@ -128,14 +124,14 @@ export class SecretDriftDetector {
    */
   public detectExpiredSecrets(): string[] {
     const expired: string[] = [];
-    const env = this.env;
+    const env = process.env;
 
     Object.keys(EnvSchema.shape).forEach(key => {
       const val = env[key];
       if (!val) return;
 
       // 1. Insecure defaults
-      if (typeof val === 'string' && (val.includes('changeme') || val.includes('devpassword') || val === 'secret')) {
+      if (val.includes('changeme') || val.includes('devpassword') || val === 'secret') {
         expired.push(`${key} (insecure default detected)`);
       }
 
@@ -156,9 +152,9 @@ export class SecretDriftDetector {
    * Enforces removal of unused keys from the .env file.
    */
   public enforceRemoval(keysToRemove: string[]): void {
-    if (!this.fs.existsSync(this.envFilePath)) return;
+    if (!fs.existsSync(this.envFilePath)) return;
 
-    let content = this.fs.readFileSync(this.envFilePath, 'utf-8');
+    let content = fs.readFileSync(this.envFilePath, 'utf-8');
     const lines = content.split('\n');
     const newLines = lines.filter((line: any) => {
       const key = line.split('=')[0].trim();
@@ -169,7 +165,7 @@ export class SecretDriftDetector {
       return true;
     });
 
-    this.fs.writeFileSync(this.envFilePath, newLines.join('\n'));
+    fs.writeFileSync(this.envFilePath, newLines.join('\n'));
   }
 
   public async runAudit(autoFix: boolean = false): Promise<SecretDriftReport> {

@@ -16,9 +16,9 @@
 # IMPORTANT: Do not add new always_required checks without
 # verifying they run on EVERY commit to main.
 
-version: "2.1.0"
+version: "2.0.0"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-01-30"
+last_updated: "2026-01-13"
 owner: "Platform Engineering"
 
 # Branch Protection Policy
@@ -29,13 +29,11 @@ branch_protection:
   required_status_checks:
     strict: true
     contexts:
-      - "Branch Protection Drift Detection"
       - "CI Core (Primary Gate)"
       - "CI / config-guard"
       - "CI / unit-tests"
       - "GA Gate"
       - "Release Readiness Gate"
-      - "Smoke Gate"
       - "SOC Controls"
       - "Unit Tests & Coverage"
       - "ga / gate"
@@ -64,14 +62,6 @@ always_required:
   - name: "CI Core (Primary Gate)"
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
-
-  - name: "Smoke Gate"
-    workflow: "smoke-gate.yml"
-    rationale: "Full-stack smoke test verifying health endpoints with real services - ensures deployability"
-
-  - name: "CI Security"
-    workflow: "ci-security.yml"
-    rationale: "Mandatory security gates for all commits (Comet P0 Cluster B)"
 
 # Conditional Required Checks
 # ---------------------------

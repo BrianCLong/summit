@@ -1,4 +1,4 @@
-import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy.js';
+import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy';
 import { ForbiddenError } from 'apollo-server-express';
 import { describe, it, test, expect } from '@jest/globals';
 

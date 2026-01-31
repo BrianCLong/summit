@@ -1,4 +1,4 @@
-import { GossipAuditor } from '../transparency/GossipAuditor.js';
+import { GossipAuditor } from '../transparency/GossipAuditor';
 import { describe, it, expect } from '@jest/globals';
 
 describe('GossipAuditor', () => {

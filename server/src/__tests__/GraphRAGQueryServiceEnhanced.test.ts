@@ -7,13 +7,13 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
 import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
-import { GraphRAGQueryServiceEnhanced, type GraphRAGQueryRequestEnhanced } from '../services/GraphRAGQueryServiceEnhanced.js';
-import { GraphRAGService } from '../services/GraphRAGService.js';
-import { QueryPreviewService } from '../services/QueryPreviewService.js';
-import { GlassBoxRunService } from '../services/GlassBoxRunService.js';
-import { RedactionService } from '../redaction/redact.js';
-import { ProvLedgerClient } from '../prov-ledger-client/client.js';
-import { LLMGuardrailsService } from '../security/llm-guardrails.js';
+import { GraphRAGQueryServiceEnhanced, type GraphRAGQueryRequestEnhanced } from '../services/GraphRAGQueryServiceEnhanced';
+import { GraphRAGService } from '../services/GraphRAGService';
+import { QueryPreviewService } from '../services/QueryPreviewService';
+import { GlassBoxRunService } from '../services/GlassBoxRunService';
+import { RedactionService } from '../redaction/redact';
+import { ProvLedgerClient } from '../prov-ledger-client/client';
+import { LLMGuardrailsService } from '../security/llm-guardrails';
 
 describe('GraphRAGQueryServiceEnhanced', () => {
   let service: GraphRAGQueryServiceEnhanced;

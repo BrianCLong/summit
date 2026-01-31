@@ -1,4 +1,4 @@
-import { AdapterLifecycleIntent, AdapterLifecycleStage } from './lifecycle.js';
+import { AdapterLifecycleIntent, AdapterLifecycleStage } from './lifecycle';
 
 export interface PolicyPreflightInput {
   intent: AdapterLifecycleIntent;

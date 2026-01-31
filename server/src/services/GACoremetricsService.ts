@@ -10,11 +10,11 @@ import {
   Counter,
   collectDefaultMetrics,
 } from 'prom-client';
-import { getPostgresPool } from '../config/database.js';
-import { getNeo4jDriver } from '../config/database.js';
-import logger from '../config/logger.js';
+import { getPostgresPool } from '../config/database';
+import { getNeo4jDriver } from '../config/database';
+import logger from '../config/logger';
 // @ts-ignore - HybridEntityResolutionService class doesn't exist (exports resolveEntities function instead)
-// import { HybridEntityResolutionService } from './HybridEntityResolutionService.js';
+// import { HybridEntityResolutionService } from './HybridEntityResolutionService';
 
 const log = logger.child({ name: 'GACoreMetrics' });
 

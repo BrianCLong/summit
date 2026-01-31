@@ -1,4 +1,4 @@
-import { RunSummary } from './evidence.js';
+import { RunSummary } from './evidence';
 
 export interface JudgeScores {
   complianceScore: number;

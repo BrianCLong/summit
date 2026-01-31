@@ -6,8 +6,8 @@
  */
 
 import pino from 'pino';
-import { getPostgresPool } from '../db/postgres.js';
-import { resourceTagging, TagCategory } from './ResourceTaggingService.js';
+import { getPostgresPool } from '../db/postgres';
+import { resourceTagging, TagCategory } from './ResourceTaggingService';
 
 const logger = (pino as any)({ name: 'cost-anomaly-detection' });
 

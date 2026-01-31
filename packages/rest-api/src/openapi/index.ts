@@ -2,4 +2,4 @@
  * OpenAPI Module Exports
  */
 
-export * from './generator.js';
+export * from './generator';

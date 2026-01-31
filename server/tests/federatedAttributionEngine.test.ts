@@ -4,7 +4,7 @@ import {
   AttributionResult,
   ConversionEvent,
   FederatedAttributionEngine,
-} from '../src/services/attribution/FederatedAttributionEngine.js';
+} from '../src/services/attribution/FederatedAttributionEngine';
 
 describe('FederatedAttributionEngine', () => {
   const baseTime = Date.now();

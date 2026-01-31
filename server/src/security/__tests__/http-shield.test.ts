@@ -17,7 +17,7 @@ import { buildContentSecurityPolicy } from '../http-shield.js';
 describe('buildContentSecurityPolicy', () => {
   it('aligns connect-src with configured CORS origins', async () => {
     const app = express();
-    app.use(buildContentSecurityPolicy('https://allowed.test'));
+    app.use(buildContentSecurityPolicy());
     app.get('/csp', (_req, res) => res.send('ok'));
 
     const response = await request(app).get('/csp');

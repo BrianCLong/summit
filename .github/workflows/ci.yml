@@ -11,10 +11,6 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# Global environment for all jobs - prevents V8 heap exhaustion
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
-
 jobs:
   config-guard:
     name: Build & Test (Untrusted)

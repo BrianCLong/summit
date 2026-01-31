@@ -1,4 +1,4 @@
-import { getNeo4jDriver } from '../db/neo4j.js';
+import { getNeo4jDriver } from '../db/neo4j.ts';
 import {
   Graph,
   GraphNode,
@@ -8,13 +8,13 @@ import {
   ShortestPathParams,
   KHopParams,
   DegreeCentralityParams
-} from './graphTypes.js';
-import { shortestPath } from './algorithms/shortestPath.js';
-import { kHopNeighborhood } from './algorithms/traversal.js';
-import { degreeCentrality } from './algorithms/centrality.js';
-import { connectedComponents } from './algorithms/community.js';
+} from './graphTypes.ts';
+import { shortestPath } from './algorithms/shortestPath.ts';
+import { kHopNeighborhood } from './algorithms/traversal.ts';
+import { degreeCentrality } from './algorithms/centrality.ts';
+import { connectedComponents } from './algorithms/community.ts';
 import { v4 as uuidv4 } from 'uuid';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger.ts';
 
 export class GraphAnalysisService {
   private static instance: GraphAnalysisService;

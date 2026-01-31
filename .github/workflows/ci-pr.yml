@@ -19,10 +19,6 @@ permissions:
   checks: write
   id-token: write # if you use OIDC in any job
 
-# Global environment for all jobs - prevents V8 heap exhaustion
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
-
 jobs:
   build-test:
     name: ${{ matrix.name }}

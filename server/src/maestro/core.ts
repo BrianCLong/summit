@@ -1,19 +1,19 @@
-import { IntelGraphClient } from '../intelgraph/client.js';
-import { Task, Run, Artifact, TaskStatus } from './types.js';
-import { CostMeter } from './cost_meter.js';
-import { OpenAILLM } from './adapters/llm_openai.js';
-import { ResidencyGuard } from '../data-residency/residency-guard.js';
-import { AgentGovernanceService } from './governance-service.js';
-import logger from '../utils/logger.js';
-import { metrics } from '../monitoring/metrics.js';
+import { IntelGraphClient } from '../intelgraph/client';
+import { Task, Run, Artifact, TaskStatus } from './types';
+import { CostMeter } from './cost_meter';
+import { OpenAILLM } from './adapters/llm_openai';
+import { ResidencyGuard } from '../data-residency/residency-guard';
+import { AgentGovernanceService } from './governance-service.ts';
+import logger from '../utils/logger.ts';
+import { metrics } from '../monitoring/metrics.ts';
 import {
   buildBudgetEvidence,
   normalizeReasoningBudget,
   type ReasoningBudgetContract,
-} from './budget.js';
-import { AgentGovernanceService } from './governance-service.js';
-import logger from '../utils/logger.js';
-import { metrics } from '../monitoring/metrics.js';
+} from './budget';
+import { AgentGovernanceService } from './governance-service.ts';
+import logger from '../utils/logger.ts';
+import { metrics } from '../monitoring/metrics.ts';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"

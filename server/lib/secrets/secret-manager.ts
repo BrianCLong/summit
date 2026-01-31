@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SecretAuditLogger } from '../security/secret-audit-logger.js';
+import { SecretAuditLogger } from '../security/secret-audit-logger';
 
 export type SecretProviderName = 'vault' | 'awsSecretsManager' | 'environment' | 'file';
 

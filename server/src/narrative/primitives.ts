@@ -1,5 +1,5 @@
 
-import { NarrativeEvent } from './types.js';
+import { NarrativeEvent } from './types';
 
 /**
  * NARRATIVE_OPS PRIMITIVES

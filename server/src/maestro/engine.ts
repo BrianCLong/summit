@@ -2,12 +2,12 @@
 import {
   MaestroTemplate, MaestroRun, MaestroTask,
   RunId, TaskId, TemplateId, TenantId
-} from './model.js';
-import { MaestroDSL } from './dsl.js';
+} from './model';
+import { MaestroDSL } from './dsl';
 import { Pool } from 'pg';
 import { Queue, Worker, QueueEvents } from 'bullmq';
-import { logger } from '../utils/logger.js';
-import { coordinationService } from './coordination/service.js';
+import { logger } from '../utils/logger';
+import { coordinationService } from './coordination/service';
 import * as crypto from 'node:crypto';
 import {
   TransitionReceiptInput,
@@ -100,22 +100,7 @@ export class MaestroEngine {
       [templateId, tenantId]
     );
     if (res.rows.length === 0) throw new Error(`Template not found: ${templateId}`);
-    
-    const row = res.rows[0];
-    const template: MaestroTemplate = {
-      id: row.id,
-      tenantId: row.tenant_id,
-      name: row.name,
-      version: row.version,
-      description: row.description,
-      kind: row.kind,
-      inputSchema: row.input_schema,
-      outputSchema: row.output_schema,
-      spec: row.spec,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      metadata: row.metadata
-    };
+    const template: MaestroTemplate = res.rows[0]; // TODO: Map snake_case to camelCase
 
     // 2. Validate Input (stub)
     // TODO: Validate input against template.inputSchema

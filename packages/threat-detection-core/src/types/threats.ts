@@ -2,7 +2,7 @@
  * Threat model types
  */
 
-import { ThreatCategory, ThreatSeverity } from './events.js';
+import { ThreatCategory, ThreatSeverity } from './events';
 
 export interface ThreatIndicator {
   type: 'ip' | 'domain' | 'url' | 'hash' | 'email' | 'file' | 'cve' | 'signature';

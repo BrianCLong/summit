@@ -1,10 +1,10 @@
 import path from 'path';
 
-import { ContentBoundary } from './contentBoundary.js';
-import { EvidenceStore, RunSummary } from './evidence.js';
-import { BasicPolicyEngine, PolicyConfig, PolicyDecision, PolicyEngine } from './policy.js';
-import { ToolDefinition } from './tools.js';
-import { WorkflowSpec } from './workflowSpec.js';
+import { ContentBoundary } from './contentBoundary';
+import { EvidenceStore, RunSummary } from './evidence';
+import { BasicPolicyEngine, PolicyConfig, PolicyDecision, PolicyEngine } from './policy';
+import { ToolDefinition } from './tools';
+import { WorkflowSpec } from './workflowSpec';
 
 export interface ToolBusOptions {
   baseArtifactsDir: string;

@@ -12,7 +12,7 @@ import type {
   APIConfig,
   RateLimitOptions,
   CacheOptions,
-} from './types.js';
+} from './types';
 
 export class APIRouter {
   private router: Router;

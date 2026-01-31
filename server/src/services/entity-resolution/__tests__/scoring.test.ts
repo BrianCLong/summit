@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { ScoringEngine } from '../scoring.js';
-import { EntityInput } from '../models.js';
+import { ScoringEngine } from '../scoring';
+import { EntityInput } from '../models';
 
 describe('ScoringEngine', () => {
   let engine: ScoringEngine;

@@ -1,6 +1,6 @@
-import { getPostgresPool } from '../db/postgres.js';
-import { getNeo4jDriver } from '../db/neo4j.js';
-import { FeatureFlags } from '../config/featureFlags.js';
+import { getPostgresPool } from '../db/postgres';
+import { getNeo4jDriver } from '../db/neo4j';
+import { FeatureFlags } from '../config/featureFlags';
 // @ts-ignore
 import { default as pino } from 'pino';
 

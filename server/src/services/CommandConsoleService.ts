@@ -173,7 +173,7 @@ export class CommandConsoleService {
         'src',
         'routes',
         'internal',
-        'command-console.js',
+        'command-console.ts',
       ),
       path.join(
         process.cwd(),

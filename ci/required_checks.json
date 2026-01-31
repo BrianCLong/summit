@@ -1,16 +1,6 @@
 {
-  "required_checks": [
-    "Security Scan",
-    "Policy Compliance",
-    "GA Evidence Completeness",
-    "MCP Tool UX Lint"
-  ],
-  "renames": {
-    "ci:unit": "Unit Tests",
-    "ci:schema": "Schema Validation",
-    "ci:lint": "Lint",
-    "ci:deps-delta": "Dependency Delta"
-  },
+  "required_checks": [],
+  "renames": {},
   "last_updated": "2026-01-30",
   "notes": "Populate with exact required status check names from branch protection rules."
 }

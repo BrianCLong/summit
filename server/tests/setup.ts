@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { seedTestTenants, teardownTestTenants } from './helpers/testTenants.js';
+import { seedTestTenants, teardownTestTenants } from './helpers/testTenants';
 
 const resolvedMock = (value: unknown) => jest.fn(async () => value);
 

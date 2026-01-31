@@ -1,6 +1,6 @@
 
-import { BaseConnector } from './base.js';
-import { ConnectorConfig } from './types.js';
+import { BaseConnector } from './base';
+import { ConnectorConfig } from './types';
 
 export class ConnectorRegistry {
   private static instance: ConnectorRegistry;
