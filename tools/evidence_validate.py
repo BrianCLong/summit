@@ -71,59 +71,41 @@ def main():
 
     success = True
 
-    # Validate Items
-    for item in index_data.get("items", []):
-        evidence_id = item.get("id")
-        path = item.get("path")
+    evidence_entries = index_data.get("evidence", {})
+    if not isinstance(evidence_entries, dict) or not evidence_entries:
+        print("Error: Evidence index must contain evidence entries.")
+        sys.exit(1)
 
-        # If path is relative, make it absolute relative to repo root (or args.evidence parent)
-        # Assuming args.evidence points to 'evidence/' dir.
-        # But index.json paths seem to be relative to repo root e.g. "evidence/report.json"
-
-        # If path is a directory, look for standard artifacts
-        # If path is a file, strictly it doesn't match the new standard but let's see.
-
-        full_path = path
-        if not os.path.exists(full_path):
-            print(f"Warning: Path not found for evidence {evidence_id}: {full_path}")
-            # Non-fatal for now unless strict
+    for evidence_id, entry in evidence_entries.items():
+        if not isinstance(entry, dict):
+            print(f"Error: Evidence entry {evidence_id} must be an object.")
+            success = False
             continue
 
-        artifacts_to_check = []
-        if os.path.isdir(full_path):
-            artifacts_to_check = [
-                ("report.json", report_schema, False),
-                ("metrics.json", metrics_schema, False),
-                ("stamp.json", stamp_schema, True)
-            ]
-            base_dir = full_path
-        else:
-            # It's a file. check what it is based on name?
-            # Existing entries point to 'evidence/report.json'.
-            # We can skip validation for legacy or try to guess.
-            # For this plan, we care about the new IDs which are directories.
-            if "LIMY-AGENTICWEB" in evidence_id:
-                 print(f"Error: Agentic Web evidence {evidence_id} points to a file, expected directory.")
-                 success = False
-            continue
+        for key in ("report", "metrics", "stamp"):
+            if key not in entry:
+                print(f"Error: Evidence entry {evidence_id} missing {key}.")
+                success = False
+                continue
 
-        for filename, schema, allow_timestamps in artifacts_to_check:
-            filepath = os.path.join(base_dir, filename)
+        artifacts_to_check = [
+            (entry["report"], report_schema, False),
+            (entry["metrics"], metrics_schema, False),
+            (entry["stamp"], stamp_schema, True),
+        ]
+
+        for filepath, schema, allow_timestamps in artifacts_to_check:
             if not os.path.exists(filepath):
-                 print(f"Missing artifact {filename} in {base_dir}")
-                 # For now, require all? The plan says "Required artifacts per run".
-                 # If we are validating *existence*, yes.
-                 # But if we are just validating what exists, maybe optional.
-                 # Plan implies mandatory.
-                 success = False
-                 continue
+                print(f"Missing artifact for {evidence_id}: {filepath}")
+                success = False
+                continue
 
             data = load_json(filepath)
             if data is None:
                 success = False
                 continue
 
-            if not validate_schema(data, schema, f"{evidence_id}/{filename}"):
+            if not validate_schema(data, schema, f"{evidence_id}/{os.path.basename(filepath)}"):
                 success = False
 
             if not check_timestamps(data, filepath, allow_timestamps):

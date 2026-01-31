@@ -1,5 +1,7 @@
 {
   "evidence_id": "EVD-TEST-001",
+  "run_id": "fixture-001",
+  "evd_ids": ["EVD-TEST-001"],
   "item_slug": "fixture",
   "summary": {
     "what_ran": "fixture",

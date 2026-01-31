@@ -1,10 +1,50 @@
 {
-  "version": 1,
   "evidence": {
+    "EVD-CTA-LEADERS-2026-01-INGEST-001": {
+      "metrics": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/metrics.json",
+      "report": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/report.json",
+      "stamp": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/stamp.json"
+    },
+    "EVD-mcp-a2a-mental-model-interop-001": {
+      "report": "evidence/EVD-mcp-a2a-mental-model-interop-001/report.json",
+      "metrics": "evidence/EVD-mcp-a2a-mental-model-interop-001/metrics.json",
+      "stamp": "evidence/EVD-mcp-a2a-mental-model-interop-001/stamp.json"
+    },
     "EVD-SDSBC-FOUNDATION-001": {
-      "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
       "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
+      "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
       "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
+    },
+    "EVD-CURSOR-SECURE-INDEXING-PERF-001": {
+      "report": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/report.json",
+      "metrics": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/metrics.json",
+      "stamp": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/stamp.json"
+    },
+    "EVD-SDSBC-CODEGEN-001": {
+      "report": "evidence/EVD-SDSBC-CODEGEN-001/report.json",
+      "metrics": "evidence/EVD-SDSBC-CODEGEN-001/metrics.json",
+      "stamp": "evidence/EVD-SDSBC-CODEGEN-001/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-SUPPLYCHAIN-001": {
+      "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-CI-002": {
+      "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-DOCS-003": {
+      "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-ARCHIMYST-SIM-001": {
+      "report": "evidence/EVD-ARCHIMYST-SIM-001/report.json",
+      "metrics": "evidence/EVD-ARCHIMYST-SIM-001/metrics.json",
+      "stamp": "evidence/EVD-ARCHIMYST-SIM-001/stamp.json"
     }
-  }
+  },
+  "version": 1
 }

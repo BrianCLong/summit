@@ -1,5 +1,7 @@
 {
   "evidence_id": "EVD-SDSBC-FOUNDATION-001",
+  "run_id": "sdsbc-foundation-2026-02-16",
+  "evd_ids": ["EVD-SDSBC-FOUNDATION-001"],
   "item_slug": "sdsbc-evidence-scaffold",
   "summary": {
     "what_ran": "evidence scaffold validation",

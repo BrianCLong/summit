@@ -22,3 +22,6 @@ jobs:
           python-version: "3.11"
       - name: Validate evidence bundle
         run: python tools/evidence_validate.py --schemas evidence/schemas --index evidence/index.json
+      - name: Validate evidence bundle (advisory)
+        run: python tools/validate_evidence.py
+        continue-on-error: true
