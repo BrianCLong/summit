@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T02:06:05Z",
-  "revision_note": "Expanded Model Mesh policy pack with 23rd-order governed intent ladder",
+  "last_updated": "2026-01-31T12:52:23Z",
+  "revision_note": "Added CTA leaders evidence ingest bundle and verification stub.",
   "initiatives": [
     {
       "id": "A",
@@ -39,7 +39,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "blockers": [
+            "Need connector registry",
+            "Missing connector lifecycle management"
+          ],
           "target_completion": "Sprint N+2"
         },
         {
@@ -48,7 +51,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         },
         {
@@ -57,7 +62,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -136,14 +143,94 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Counter-Campaign Optimization",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Counter-Play Search",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Defined Neo4j schema, GraphQL API, copilot flow, and success metrics in docs/runbooks/counter-campaign-optimization-epics.md",
+          "target_completion": "Sprint N+3"
+        },
+        {
+          "id": "F2",
+          "name": "Robustness Stress-Testing",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Defined adaptation scenarios, robustness ranking workflow, and metrics in docs/runbooks/counter-campaign-optimization-epics.md",
+          "target_completion": "Sprint N+3"
+        },
+        {
+          "id": "F3",
+          "name": "A/B Simulation Experiments",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Defined simulation experiment schema, GraphQL API, and copilot flow in docs/runbooks/counter-campaign-optimization-epics.md",
+          "target_completion": "Sprint N+4"
+        }
+      ]
+    },
+    {
+      "id": "G",
+      "name": "Governed Geo-Intelligence",
+      "epics": [
+        {
+          "id": "G1",
+          "name": "GeoCanvas v1",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G2",
+          "name": "Dossier Composer",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G3",
+          "name": "Confidence Engine",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G4",
+          "name": "Provenance Ledger Enhancements",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G5",
+          "name": "Policy Gates",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        },
+        {
+          "id": "G6",
+          "name": "Oversight Analytics",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 5,
     "partial": 1,
     "incomplete": 0,
-    "not_started": 6,
-    "total": 12,
-    "ga_blockers": []
+    "not_started": 15,
+    "total": 22,
+    "ga_blockers": [
+      "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
+    ]
   }
 }

@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 7 — Board Engagement on Strategy (make them useful, not ornamental)
 
 1.  **Pre-wire major decisions with 1:1s to avoid meeting ambushes.**

@@ -54,11 +54,10 @@ const mockSnapshot: CommandConsoleSnapshot = {
 
 describe('Command Console dashboard', () => {
   const originalFetch = global.fetch;
-  const originalEnv = { ...(import.meta as any).env };
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    (import.meta as any).env = { ...originalEnv, VITE_COMMAND_CONSOLE_ENABLED: 'true' };
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.stubEnv('VITE_COMMAND_CONSOLE_ENABLED', 'true');
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => mockSnapshot,
@@ -67,8 +66,8 @@ describe('Command Console dashboard', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
     global.fetch = originalFetch;
-    (import.meta as any).env = originalEnv;
   });
 
   it('renders health and tenant panels', async () => {
@@ -78,17 +77,19 @@ describe('Command Console dashboard', () => {
       expect(screen.getByText(/Summit Command Console/i)).toBeInTheDocument();
     });
 
-    expect(screen.getByText(/GA Gate/i)).toBeInTheDocument();
+    // Use exact match for "GA Gate" to avoid matching "GA Gate Failures"
+    expect(screen.getByText('GA Gate')).toBeInTheDocument();
     expect(screen.getByText(/Tenant & Blast Radius/i)).toBeInTheDocument();
-    expect(screen.getByText(/acme/)).toBeInTheDocument();
+    // Multiple elements contain "acme" so check at least one exists
+    expect(screen.getAllByText(/acme/).length).toBeGreaterThan(0);
     expect(screen.getByText(/LLM Tokens/)).toBeInTheDocument();
   });
 
   it('shows a helpful message when disabled', async () => {
-    (import.meta as any).env = { VITE_COMMAND_CONSOLE_ENABLED: 'false' };
+    vi.stubEnv('VITE_COMMAND_CONSOLE_ENABLED', 'false');
     render(<App />);
     await waitFor(() => {
-      expect(screen.getByText(/Access blocked/)).toBeInTheDocument();
+      expect(screen.getByText(/Access blocked/i)).toBeInTheDocument();
     });
   });
 });

@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Evidence ID Consistency Report (Deterministic)",
+  "description": "Deterministic report on Evidence ID compliance in governance documents - no runtime timestamps",
+  "required": ["version", "generator", "status", "sha", "policy_hash", "source", "config", "totals", "results"],
+  "properties": {
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "generator": {"type": "string", "const": "evidence-id-consistency-verifier"},
+    "status": {"type": "string", "enum": ["pass", "fail"]},
+    "sha": {"type": "string"},
+    "policy_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "source": {"type": "string", "const": "evidence-id-policy"},
+    "config": {
+      "type": "object",
+      "properties": {
+        "governance_dir": {"type": "string"},
+        "evidence_map_path": {"type": "string"},
+        "output_dir": {"type": "string"},
+        "repo_relative": {"type": "string", "description": "Relative path from repo root"}
+      },
+      "additionalProperties": false
+    },
+    "totals": {
+      "type": "object",
+      "required": ["documents_checked", "evidence_ids_found", "violations", "errors", "warnings", "infos"],
+      "properties": {
+        "documents_checked": {"type": "integer", "minimum": 0},
+        "evidence_ids_found": {"type": "integer", "minimum": 0},
+        "evidence_ids_referenced": {"type": "integer", "minimum": 0},
+        "evidence_ids_registered": {"type": "integer", "minimum": 0},
+        "evidence_ids_orphaned": {"type": "integer", "minimum": 0},
+        "violations": {"type": "integer", "minimum": 0},
+        "errors": {"type": "integer", "minimum": 0},
+        "warnings": {"type": "integer", "minimum": 0},
+        "infos": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "violations", "evidence_ids"],
+        "properties": {
+          "path": {"type": "string", "description": "Relative path from repo root"},
+          "violations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type", "message", "severity"],
+              "properties": {
+                "type": {"type": "string"},
+                "message": {"type": "string"},
+                "severity": {"type": "string", "enum": ["error", "warning", "info"]},
+                "evidence_id": {"type": "string"},
+                "details": {"type": "object"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "evidence_ids": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "summary": {"type": "string"},
+        "orphaned_ids": {"type": "array", "items": {"type": "string"}},
+        "recommendations": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "not": {
+    "anyOf": [
+      {"required": ["timestamp"]},
+      {"required": ["generated_at"]},
+      {"required": ["created_at"]},
+      {"required": ["last_update"]},
+      {"required": ["execution_time"]}
+    ]
+  }
+}

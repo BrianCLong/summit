@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-AZURETURINV7-MET-001",
+  "metrics": {
+    "error_count": 0,
+    "verifier_runtime_ms": 6
+  }
+}

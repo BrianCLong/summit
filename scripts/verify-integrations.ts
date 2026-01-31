@@ -1,6 +1,8 @@
 // Usage:
 //   npx ts-node scripts/verify-integrations.ts github
 //   npx ts-node scripts/verify-integrations.ts jira
+//   npx ts-node scripts/verify-integrations.ts linear
+//   npx ts-node scripts/verify-integrations.ts notion
 //   npx ts-node scripts/verify-integrations.ts maestro
 
 import 'dotenv/config';
@@ -17,6 +19,10 @@ const GH_WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET || '';
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL || '';
 const JIRA_EMAIL = process.env.JIRA_EMAIL || '';
 const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN || '';
+const LINEAR_API_TOKEN = process.env.LINEAR_API_TOKEN || '';
+const NOTION_API_KEY = process.env.NOTION_API_KEY || '';
+const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID || '';
+const NOTION_VERSION = process.env.NOTION_VERSION || '2022-06-28';
 
 const MAESTRO_BASE =
   process.env.MAESTRO_BASE_URL || 'https://maestro.dev.topicality.co';
@@ -121,6 +127,56 @@ async function verifyMaestro() {
   return true;
 }
 
+async function verifyLinear() {
+  console.log('→ Verifying Linear API token…');
+  assert(LINEAR_API_TOKEN, 'Missing LINEAR_API_TOKEN');
+  const response = await fetch('https://api.linear.app/graphql', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${LINEAR_API_TOKEN}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      query: 'query { viewer { id name email } }',
+    }),
+  });
+  assert(response.ok, `Linear GraphQL failed: ${response.status}`);
+  const data = await response.json();
+  console.log(
+    `✔ Linear OK — viewer: ${data?.data?.viewer?.name || 'unknown'}`,
+  );
+  return true;
+}
+
+async function verifyNotion() {
+  console.log('→ Verifying Notion API token + database schema…');
+  assert(NOTION_API_KEY && NOTION_DATABASE_ID, 'Missing Notion envs');
+  const response = await fetch(
+    `https://api.notion.com/v1/databases/${NOTION_DATABASE_ID}`,
+    {
+      headers: {
+        Authorization: `Bearer ${NOTION_API_KEY}`,
+        'Notion-Version': NOTION_VERSION,
+      },
+    },
+  );
+  assert(response.ok, `Notion database read failed: ${response.status}`);
+  const data = (await response.json()) as {
+    properties?: Record<string, unknown>;
+    title?: { plain_text?: string }[];
+  };
+  const properties = data.properties ?? {};
+  const required = ['Name', 'Status', 'Priority Level', 'Text'];
+  const missing = required.filter((name) => !properties[name]);
+  assert(
+    missing.length === 0,
+    `Notion database missing properties: ${missing.join(', ')}`,
+  );
+  const title = data.title?.[0]?.plain_text ?? 'untitled';
+  console.log(`✔ Notion OK — database: ${title}`);
+  return true;
+}
+
 const task = process.argv[2];
 (async () => {
   try {
@@ -129,6 +185,8 @@ const task = process.argv[2];
       await verifyWebhookSignatureSample();
     }
     if (!task || task === 'jira') await verifyJira();
+    if (!task || task === 'linear') await verifyLinear();
+    if (!task || task === 'notion') await verifyNotion();
     if (!task || task === 'maestro') await verifyMaestro();
     console.log('✅ All selected checks passed.');
   } catch (e: any) {

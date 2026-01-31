@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OSINT Claim Graph",
+  "type": "object",
+  "properties": {
+    "claimId": { "type": "string" },
+    "statement": { "type": "string" },
+    "evidencePointers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidenceId": { "type": "string" },
+          "sourceUri": { "type": "string" }
+        },
+        "required": ["evidenceId"]
+      }
+    },
+    "confidenceHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "opposingClaimId": { "type": "string" },
+          "conflictType": { "type": "string", "enum": ["DIRECT_NEGATION", "MUTUALLY_EXCLUSIVE", "TEMPORAL_CONFLICT"] },
+          "detectedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  },
+  "required": ["claimId", "statement", "evidencePointers", "contradictions"]
+}

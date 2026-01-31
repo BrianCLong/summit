@@ -1,0 +1,20 @@
+870135919 chore(release): bump version to 5.2.77
+a6e60cc99 Privacy-Preserving Graph Analytics Foundation (#17026)
+fb8d521fe feat: Subsume Resilient Intelligence Pipeline (Circuit Breaker, Cache, Privacy, Explainability) (#17025)
+43d003e4e chore(release): bump version to 5.2.76
+22c03e8e0 Add Angular Skills Governance and Subsumption Bundle (#17023)
+21ae3adae feat: add golden path E2E test harness (#17022)
+d677a644d feat: Add Psychographic Signals module foundation (#17021)
+5f7528611 PR1 Foundation: Evidence Schemas and Discovery (#17020)
+a5ee9fe64 chore(release): bump version to 5.2.75
+73e255a22 feat: GNN influence campaigns and federation contracts (#17019)
+f9ed2f7b9 feat: Implement Moltbot capabilities with security gates (#17018)
+c1a96678f feat: Post-Deploy Monitoring Gate (#17015)
+558f935bb feat: add golden path e2e test suite (#17014)
+2ef4a67ac feat: Evidence scaffolding and schema updates (PR1) (#17013)
+0e7e9943a Implement CogSec Foundation (Schema, Model, Dual-Use Guard) (#17047)
+aff29c0da chore(release): bump version to 5.2.74
+d976db872 feat: Add evidence schemas and verifier for Graph Explainability (#17027)
+615b72d50 feat: Initialize Foundry Package and Core Data Models (#17017)
+6de9b2f1d feat: evidence system scaffolding and CI gates (#17016)
+702466994 chore(release): bump version to 5.2.73

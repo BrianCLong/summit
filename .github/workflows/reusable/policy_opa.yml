@@ -1,13 +1,3 @@
-name: Reusable policy_opa
-on:
-  workflow_call:
-
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Placeholder for policy_opa
-        run: echo "Running policy_opa workflow placeholder"
 name: policy_opa
 
 on:
@@ -25,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4 # v4
 
       - name: Set up OPA
         uses: open-policy-agent/setup-opa@9c3361f8beace1df5a8e053b85fed850d191ebc3 # v1

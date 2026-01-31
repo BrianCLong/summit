@@ -97,6 +97,8 @@ class SecureFusionService {
       // Note: Actual Vector Search syntax depends on Neo4j version and index config.
       // We assume an index 'entity_embeddings' exists.
 
+      // TODO: Migrate to Cypher 25 for Neo4j 2025.01+
+      // db.index.vector.queryNodes is deprecated. Use native VECTOR type and vector search.
       const query = `
         CALL db.index.vector.queryNodes('entity_embeddings', 1, $vector)
         YIELD node, score
@@ -161,6 +163,8 @@ class SecureFusionService {
 
   async createEntity(session: any, item: any, enrichment: any, vector: number[]) {
     const id = item.id || `entity-${crypto.randomUUID()}`;
+    // TODO: Migrate to Cypher 25 for Neo4j 2025.01+
+    // Wrap vector in `vector($vector, dimension, FLOAT32)` to store as native VECTOR type.
     const createQuery = `
       CREATE (n:Entity {
         id: $id,

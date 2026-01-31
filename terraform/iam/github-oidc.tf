@@ -24,8 +24,7 @@ resource "aws_iam_role" "gha_deploy" {
       Condition = {
         StringLike = {
           "token.actions.githubusercontent.com:sub" = [
-            "repo:ORG/REPO:ref:refs/heads/main",
-            "repo:ORG/REPO:pull_request"
+            "repo:ORG/REPO:ref:refs/heads/main"
           ]
         },
         StringEquals = {

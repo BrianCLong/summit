@@ -64,15 +64,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 8
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -90,7 +88,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          chmod +x scripts/release/collect_evidence.sh
+          chmod +x scripts/release/generate_evidence_bundle.sh
 
           CATEGORY="${{ inputs.category || 'all' }}"
           ARGS="--category $CATEGORY"
@@ -100,7 +98,7 @@ jobs:
           fi
 
           # Run collection
-          ./scripts/release/collect_evidence.sh $ARGS 2>&1 | tee collection.log
+          ./scripts/release/generate_evidence_bundle.sh $ARGS 2>&1 | tee collection.log
 
           # Parse summary file for outputs
           SUMMARY_FILE=$(ls artifacts/evidence/evidence-summary-*.md 2>/dev/null | tail -1)

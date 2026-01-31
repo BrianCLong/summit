@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 4 — Enterprise-Grade Admin & Controls v2 (standardization engine)
 
 1. Expand RBAC to role templates and least-privilege defaults.

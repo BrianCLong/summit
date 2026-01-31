@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
-import { QueueWorker } from '../queue-worker';
-import { costAwareScheduler } from '../cost-aware-scheduler';
-import { prometheusConductorMetrics } from '../../observability/prometheus';
+import { QueueWorker } from '../queue-worker.js';
+import { costAwareScheduler } from '../cost-aware-scheduler.js';
+import { prometheusConductorMetrics } from '../../observability/prometheus.js';
 
 jest.mock('../cost-aware-scheduler', () => ({
   costAwareScheduler: {

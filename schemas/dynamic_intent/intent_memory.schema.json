@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IntentMemory",
+  "type": "object",
+  "required": ["memory_id", "entries"],
+  "properties": {
+    "memory_id": { "type": "string" },
+    "storyboard_id": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ambiguity_id", "answer"],
+        "properties": {
+          "ambiguity_id": { "type": "string" },
+          "answer": { "type": "string" },
+          "source_turn_id": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

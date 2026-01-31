@@ -1,0 +1,26 @@
+{
+  "id": "urn:summit:taxonomy:v1",
+  "version": "1.0.0",
+  "description": "Authoritative AI Governance Taxonomy for Summit Platform.",
+  "lifecycle_stages": [
+    "DESIGN",
+    "DATA_INGESTION",
+    "MODEL_TRAINING",
+    "EVALUATION",
+    "DEPLOYMENT",
+    "MONITORING",
+    "RETIREMENT"
+  ],
+  "risk_classes": [
+    "UNACCEPTABLE",
+    "HIGH",
+    "LIMITED",
+    "MINIMAL"
+  ],
+  "control_types": [
+    "PREVENTIVE",
+    "DETECTIVE",
+    "CORRECTIVE",
+    "DIRECTIVE"
+  ]
+}

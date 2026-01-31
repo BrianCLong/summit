@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { typesenseClient } from '../lib/typesense';
+import { logger } from '../logger';
 
 const router = Router();
 
@@ -41,7 +42,7 @@ router.post('/v1/search', async (req: Request, res: Response) => {
         const result = await typesenseClient.collections(collectionAlias).documents().search(searchParams);
         res.json(result);
     } catch (err: any) {
-        console.error(err);
+        logger.error('Search failed', err, { tenantId: getTenantId(req) });
         res.status(500).json({ error: err.message });
     }
 });
@@ -74,6 +75,7 @@ router.post('/v1/search/suggest', async (req: Request, res: Response) => {
          const result = await typesenseClient.collections(collectionAlias).documents().search(searchParams);
          res.json(result);
      } catch (err: any) {
+        logger.error('Suggest failed', err, { tenantId: getTenantId(req) });
         res.status(500).json({ error: err.message });
     }
 });

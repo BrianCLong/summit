@@ -28,7 +28,7 @@ module "db" {
   port     = 5432
 
   vpc_security_group_ids = var.security_group_ids
-  subnet_ids              = var.subnet_ids
+  subnet_ids             = var.subnet_ids
 
   backup_window           = "03:00-06:00"
   backup_retention_period = 7

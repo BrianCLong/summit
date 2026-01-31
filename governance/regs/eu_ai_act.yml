@@ -1,0 +1,14 @@
+regime: EU_AI_ACT
+timeline:
+  entered_into_force: "2024-08-01"
+  prohibited_practices_apply: "2025-02-02"
+  gpai_obligations_apply: "2025-08-02"
+  full_applicability: "2026-08-02"
+  embedded_high_risk_transition_end: "2027-08-02"
+controls:
+  - id: EU-CTRL-AUDIT-LOGS
+    maps_to: ["auditability", "accountability"]
+    summit_default: "append_only_audit_jsonl"
+  - id: EU-CTRL-HUMAN-OVERSIGHT
+    maps_to: ["human_oversight"]
+    summit_default: "approval_required_for_side_effects"

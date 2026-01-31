@@ -1,0 +1,6 @@
+apiVersion: v2
+name: universal-app
+description: A universal Helm chart for Summit microservices
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

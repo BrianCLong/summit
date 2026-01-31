@@ -1,0 +1,46 @@
+graph TD
+    subgraph "External World"
+        OSINT_Sources[Social, Dark Web, Media, Financial]
+    end
+
+    subgraph "Summit Intelligence Graph Foundry"
+        subgraph "Collection Layer"
+            Collectors[OSINT Collector Agents]
+            Tools[Governed Tools / MCP]
+        end
+
+        subgraph "Governance Layer"
+            OPA[OPA Policy Gateway]
+            Ledger[Provenance Ledger]
+        end
+
+        subgraph "Storage & Analysis Layer"
+            IntelGraph[(IntelGraph - Neo4j)]
+            GraphRAG[GraphRAG Engine]
+        end
+
+        subgraph "Reasoning Layer"
+            Maestro[Maestro V2 Orchestrator]
+            Agents[Enrichment, Reasoning, Risk Agents]
+        end
+
+        subgraph "Output Layer"
+            EvidenceBundle[Evidence Bundle / Attestation]
+            Insights[Intelligence Reports / Actions]
+        end
+    end
+
+    OSINT_Sources -->|Raw Data| Collectors
+    Collectors -->|Tool Call| OPA
+    OPA -->|Allow/Deny| Tools
+    Tools -->|Enriched Data| Ledger
+    Ledger -->|Evidence-ID| IntelGraph
+    IntelGraph -->|Subgraphs| GraphRAG
+    GraphRAG -->|Context| Agents
+    Agents -->|Hypotheses| Maestro
+    Maestro -->|Finalize| EvidenceBundle
+    EvidenceBundle --> Insights
+
+    style OPA fill:#f9f,stroke:#333,stroke-width:4px
+    style Ledger fill:#bbf,stroke:#333,stroke-width:4px
+    style IntelGraph fill:#bfb,stroke:#333,stroke-width:4px

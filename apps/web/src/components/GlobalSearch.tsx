@@ -4,6 +4,7 @@ import { Search, FileText, User, AlertTriangle, Zap } from 'lucide-react'
 import { useSearch } from '@/contexts/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useDemoMode } from '@/components/common/DemoIndicator'
 
 interface SearchResult {
@@ -191,7 +192,7 @@ export function GlobalSearch() {
 
           <Command.List className="max-h-96 overflow-y-auto p-2">
             {!isDemoMode && (
-              <div className="py-3 text-center text-xs text-muted-foreground">
+              <div className="m-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400">
                 Live search is unavailable until a backend connection is configured.
               </div>
             )}
@@ -202,8 +203,13 @@ export function GlobalSearch() {
             )}
 
             {!loading && query && results.length === 0 && (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                No results found for "{query}"
+              <div className="py-2 px-2">
+                <EmptyState
+                  icon="search"
+                  title="No results found"
+                  description={`We couldn't find anything matching "${query}"`}
+                  className="py-6"
+                />
               </div>
             )}
 

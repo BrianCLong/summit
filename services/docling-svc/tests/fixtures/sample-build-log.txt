@@ -1,3 +1,0 @@
-[2024-09-01T12:00:00Z] ERROR build step "lint" failed: Missing semicolon on line 42
-[2024-09-01T12:00:01Z] WARN retest command will rerun jest suite
-[2024-09-01T12:00:03Z] INFO uploading coverage report to s3://bucket

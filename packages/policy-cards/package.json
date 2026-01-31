@@ -1,0 +1,18 @@
+{
+  "name": "@summit/policy-cards",
+  "version": "0.0.1",
+  "description": "Policy Cards v0: Schema, canonicalization, and validation.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "npx tsx test/schema.test.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "@types/node": "^18.0.0"
+  }
+}

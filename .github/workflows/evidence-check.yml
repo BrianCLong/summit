@@ -1,0 +1,50 @@
+name: Evidence Bundle Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for agentic-change label
+        id: check-label
+        run: |
+          if [[ "${{ contains(github.event.pull_request.labels.*.name, 'agentic-change') }}" == "true" ]]; then
+            echo "required=true" >> $GITHUB_OUTPUT
+          else
+            echo "required=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        if: steps.check-label.outputs.required == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Evidence Bundle
+        if: steps.check-label.outputs.required == 'true'
+        run: |
+          # Fetch the base branch to ensure diff works
+          git fetch origin ${{ github.base_ref }}
+
+          # Get list of changed files in this PR
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          if echo "$CHANGED_FILES" | grep -q "^evidence/"; then
+            echo "✅ Evidence Bundle found."
+            exit 0
+          else
+            echo "❌ Missing Evidence Bundle!"
+            echo "PRs labeled 'agentic-change' must include an Evidence Bundle in the 'evidence/' directory."
+            echo "See docs/evidence-bundle-spec.md for details."
+            exit 1
+          fi

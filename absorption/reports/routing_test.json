@@ -1,6 +1,0 @@
-{
-  "decision": "allowed",
-  "model": "local/llama",
-  "loa": 1,
-  "env": "dev"
-}

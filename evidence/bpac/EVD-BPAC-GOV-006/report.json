@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-BPAC-GOV-006",
+  "summary": "Local verification and runbook scaffolding recorded.",
+  "claims": ["SUMMIT_ORIGINAL"],
+  "decisions": ["allow"],
+  "details": {
+    "local_verify_script": "scripts/ci/local_verify_bpac.sh",
+    "runbook": "docs/ops/runbooks/branch-protection-as-code.md"
+  }
+}

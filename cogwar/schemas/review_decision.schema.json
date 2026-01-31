@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReviewDecision",
+  "type": "object",
+  "required": ["warning_id", "reviewer_role", "decision"],
+  "properties": {
+    "warning_id": { "type": "string" },
+    "reviewer_role": { "type": "string" },
+    "decision": {
+      "type": "string",
+      "enum": ["approve", "revise", "reject"]
+    },
+    "rationale_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

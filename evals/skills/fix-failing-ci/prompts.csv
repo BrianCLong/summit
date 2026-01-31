@@ -1,0 +1,11 @@
+id,prompt,expected_trigger,tags
+ci-01,"Fix the failing CI pipeline for unit tests",true,explicit|ci
+ci-02,"Diagnose flaky test failures in the build",true,explicit
+ci-03,"Repair lint failures in CI for the server package",true,explicit
+ci-04,"Investigate why the pipeline is red and propose a fix",true,explicit
+ci-05,"Stabilize the flaky integration test suite",true,explicit
+ci-06,"Do not fix CI just summarize deployment status",false,negative
+ci-07,"Skip tests and focus on roadmap writing",false,negative
+ci-08,"Avoid touching CI focus on documentation",false,negative
+ci-09,"No CI fix needed create a release note",false,negative
+ci-10,"Provide guidance only without changing tests",false,negative

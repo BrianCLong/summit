@@ -7,9 +7,9 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { PrometheusMetrics } from '../utils/metrics';
-import logger from '../utils/logger';
-import { tracer, Span } from '../utils/tracing';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import logger from '../utils/logger.js';
+import { tracer, Span } from '../utils/tracing.js';
 
 // Configuration for graph abuse detection
 interface GraphAbuseGuardConfig {

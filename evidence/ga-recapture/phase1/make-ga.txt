@@ -1,0 +1,105 @@
+Starting GA Gate...
+▶ Running check: Lint and Test...
+make[1]: Entering directory '/workspace/summit'
+pnpm -w exec eslint . || true
+.venv/bin/ruff check .
+.venv/bin/mypy src
+
+/workspace/summit/contracts/integration/src/v1/edges.ts
+   23:13  warning  'RelationshipTypeV1' is already defined    no-redeclare
+   49:13  warning  'AssociatedWithEdgeV1' is already defined  no-redeclare
+   70:13  warning  'WorksForEdgeV1' is already defined        no-redeclare
+   89:13  warning  'OwnsEdgeV1' is already defined            no-redeclare
+  100:13  warning  'EdgeV1' is already defined                no-redeclare
+
+/workspace/summit/contracts/integration/src/v1/entities.ts
+  28:13  warning  'PersonEntityV1' is already defined        no-redeclare
+  50:13  warning  'OrganizationEntityV1' is already defined  no-redeclare
+  60:13  warning  'EntityV1' is already defined              no-redeclare
+
+/workspace/summit/contracts/integration/src/v1/ingestion.ts
+   25:13  warning  'IngestRequestV1' is already defined                 no-redeclare
+   42:13  warning  'IngestPersonRequestV1' is already defined           no-redeclare
+   58:13  warning  'IngestOrganizationRequestV1' is already defined     no-redeclare
+   78:13  warning  'IngestErrorV1' is already defined                   no-redeclare
+  103:13  warning  'IngestResponseV1' is already defined                no-redeclare
+  127:13  warning  'IngestPersonResponseV1' is already defined          no-redeclare
+  137:13  warning  'BatchIngestionStatusRequestV1' is already defined   no-redeclare
+  158:13  warning  'BatchIngestionStatusResponseV1' is already defined  no-redeclare
+
+/workspace/summit/contracts/integration/src/v1/insights.ts
+   21:13  warning  'InsightTypeV1' is already defined                         no-redeclare
+   28:13  warning  'InsightStatusV1' is already defined                       no-redeclare
+   55:13  warning  'CreatePersonNetworkInsightRequestV1' is already defined   no-redeclare
+   96:13  warning  'PersonNetworkInsightDataV1' is already defined            no-redeclare
+  116:13  warning  'CreatePersonNetworkInsightResponseV1' is already defined  no-redeclare
+  126:13  warning  'GetInsightRequestV1' is already defined                   no-redeclare
+  146:13  warning  'GetInsightResponseV1' is already defined                  no-redeclare
+  167:13  warning  'GetPersonNetworkInsightResponseV1' is already defined     no-redeclare
+  191:13  warning  'ListInsightsRequestV1' is already defined                 no-redeclare
+  204:13  warning  'InsightSummaryV1' is already defined                      no-redeclare
+  220:13  warning  'ListInsightsResponseV1' is already defined                no-redeclare
+  230:13  warning  'DeleteInsightRequestV1' is already defined                no-redeclare
+  242:13  warning  'DeleteInsightResponseV1' is already defined               no-redeclare
+
+/workspace/summit/contracts/integration/src/v1/provenance.ts
+  25:13  warning  'SourceTypeV1' is already defined      no-redeclare
+  38:13  warning  'SourceMetadataV1' is already defined  no-redeclare
+  55:13  warning  'ProvenanceV1' is already defined      no-redeclare
+  73:13  warning  'EntityMetadataV1' is already defined  no-redeclare
+  89:13  warning  'EdgeMetadataV1' is already defined    no-redeclare
+
+/workspace/summit/contracts/integration/src/v1/queries.ts
+   19:13  warning  'GetPersonRequestV1' is already defined          no-redeclare
+   30:13  warning  'GetPersonResponseV1' is already defined         no-redeclare
+   40:13  warning  'PersonAssociationV1' is already defined         no-redeclare
+   63:13  warning  'GetPersonNetworkRequestV1' is already defined   no-redeclare
+   80:13  warning  'GetPersonNetworkResponseV1' is already defined  no-redeclare
+   92:13  warning  'GetEntityRequestV1' is already defined          no-redeclare
+  103:13  warning  'GetEntityResponseV1' is already defined         no-redeclare
+  123:13  warning  'SearchEntitiesRequestV1' is already defined     no-redeclare
+  139:13  warning  'SearchEntitiesResponseV1' is already defined    no-redeclare
+  152:13  warning  'GetEntityContextRequestV1' is already defined   no-redeclare
+  169:13  warning  'GetEntityContextResponseV1' is already defined  no-redeclare
+
+/workspace/summit/contracts/integration/src/v1/workflows.ts
+   15:13  warning  'WorkflowStatusV1' is already defined                          no-redeclare
+   42:13  warning  'PersonNetworkWorkflowInputV1' is already defined              no-redeclare
+   67:13  warning  'PersonNetworkWorkflowOutputV1' is already defined             no-redeclare
+   86:13  warning  'StartWorkflowRequestV1' is already defined                    no-redeclare
+  105:13  warning  'StartPersonNetworkWorkflowRequestV1' is already defined       no-redeclare
+  117:13  warning  'StartWorkflowResponseV1' is already defined                   no-redeclare
+  127:13  warning  'GetWorkflowStatusRequestV1' is already defined                no-redeclare
+  141:13  warning  'WorkflowStepV1' is already defined                            no-redeclare
+  166:13  warning  'GetWorkflowStatusResponseV1' is already defined               no-redeclare
+  184:13  warning  'GetPersonNetworkWorkflowStatusResponseV1' is already defined  no-redeclare
+  195:13  warning  'CancelWorkflowRequestV1' is already defined                   no-redeclare
+  207:13  warning  'CancelWorkflowResponseV1' is already defined                  no-redeclare
+
+/workspace/summit/evals/runner/filesystem.ts
+  31:31  warning  Async arrow function has no 'await' expression  require-await
+
+/workspace/summit/evals/runner/run_skill_eval.ts
+   81:50  warning  Async arrow function has no 'await' expression                                        require-await
+  155:9   warning  'caseStart' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  236:62  warning  Async arrow function has no 'await' expression                                        require-await
+  254:6   warning  'gradeDeterministic' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  273:6   warning  'gradeRubric' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  358:3   warning  Unexpected console statement                                                          no-console
+  362:3   warning  Unexpected console statement                                                          no-console
+
+/workspace/summit/evals/runner/run_skill_suite.ts
+  20:55  warning  Async arrow function has no 'await' expression  require-await
+  35:72  warning  Async arrow function has no 'await' expression  require-await
+  57:3   warning  Unexpected console statement                    no-console
+
+/workspace/summit/evals/runner/run_skills_changed.ts
+  11:56  warning  Async arrow function has no 'await' expression  require-await
+  67:72  warning  Async arrow function has no 'await' expression  require-await
+  75:5   warning  Unexpected console statement                    no-console
+  93:3   warning  Unexpected console statement                    no-console
+
+✖ 72 problems (0 errors, 72 warnings)
+
+make[1]: Leaving directory '/workspace/summit'
+  ❌ Lint and Test failed

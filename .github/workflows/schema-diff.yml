@@ -45,12 +45,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0 # Full history for accurate diffs
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "npm"
@@ -231,7 +231,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Download diff report
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
@@ -240,6 +240,8 @@ jobs:
           path: ./diff-reports
 
       - name: Record in audit log
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           mkdir -p audit/ga-evidence/api-contracts/audit-log
 
@@ -248,7 +250,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "event": "schema_diff_check",
             "pr_number": "${{ github.event.pull_request.number }}",
-            "pr_title": "${{ github.event.pull_request.title }}",
+            "pr_title": "${PR_TITLE}",
             "author": "${{ github.event.pull_request.user.login }}",
             "workflow_run": "${{ github.run_id }}",
             "result": "${{ needs.schema-diff.result }}",

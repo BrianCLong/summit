@@ -1,0 +1,66 @@
+name: Backup and Disaster Recovery
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2am UTC
+  workflow_dispatch:
+    inputs:
+      backup_set:
+        description: 'Backup Set'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - minimal
+          - disaster_recovery
+          - config_only
+
+jobs:
+  backup:
+    name: Execute Backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write # For AWS OIDC authentication
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client redis-tools
+          # Neo4j tools might be needed or handled via docker in the script
+          # The script uses 'docker exec' if local tools fail, but in CI we might not have the containers running unless we spin them up.
+          # If this runs against a remote DB, we just need clients.
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        if: ${{ vars.AWS_ENABLED == 'true' }}
+        with:
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+
+      - name: Run Backup Script
+        env:
+          BACKUP_SET: ${{ inputs.backup_set || 'full' }}
+          S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+          ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          # Ensure script knows it's running in CI if needed, though script doesn't seem to check CI env var.
+        run: |
+          chmod +x scripts/backup-enhanced.sh
+          ./scripts/backup-enhanced.sh --set=$BACKUP_SET
+
+      - name: Upload Backup Artifact
+        if: ${{ vars.AWS_ENABLED != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-backup-${{ inputs.backup_set || 'full' }}-${{ github.run_id }}
+          path: backups/
+          retention-days: 14

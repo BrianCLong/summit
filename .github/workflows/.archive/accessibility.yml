@@ -148,6 +148,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install Pa11y
@@ -187,6 +188,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install color contrast checker

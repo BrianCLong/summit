@@ -7,13 +7,13 @@ import type {
   ConfigDrift,
   SmokeTestResult,
   ApiChange,
-} from '../conductor/deployment/deploymentGateService';
+} from '../conductor/deployment/deploymentGateService.js';
 
 let DeploymentGateService: typeof DeploymentGateServiceType;
 
 describe('DeploymentGateService', () => {
   beforeAll(async () => {
-    jest.unstable_mockModule('../../../logger', () => ({
+    jest.unstable_mockModule('../../config/logger', () => ({
       logger: {
         info: jest.fn(),
         warn: jest.fn(),

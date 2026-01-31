@@ -72,9 +72,9 @@ module "eks" {
   # Node groups
   eks_managed_node_groups = {
     general = {
-      name            = "${var.cluster_name}-general"
-      instance_types  = var.node_instance_types
-      capacity_type   = "ON_DEMAND"
+      name           = "${var.cluster_name}-general"
+      instance_types = var.node_instance_types
+      capacity_type  = "ON_DEMAND"
 
       min_size     = var.node_min_count
       max_size     = var.node_max_count
@@ -82,7 +82,7 @@ module "eks" {
 
       # Node labels
       labels = {
-        role = "general"
+        role        = "general"
         environment = var.environment
       }
 
@@ -97,7 +97,7 @@ module "eks" {
             volume_size           = 100
             volume_type           = "gp3"
             encrypted             = true
-            kms_key_id           = var.kms_key_arn
+            kms_key_id            = var.kms_key_arn
             delete_on_termination = true
           }
         }
@@ -255,8 +255,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   # Enable Azure AD integration
   azure_active_directory_role_based_access_control {
-    managed                = true
-    azure_rbac_enabled     = true
+    managed            = true
+    azure_rbac_enabled = true
   }
 
   # Encryption

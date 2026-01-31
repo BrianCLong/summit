@@ -63,17 +63,33 @@ jobs:
           echo "::warning::Apply mode confirmed - will attempt to modify branch protection"
 
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4 # v4
 
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
+      - name: Validate branch protection token
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: |
+          if [[ "${{ github.event.inputs.mode }}" == "apply" ]]; then
+            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+              echo "::error::BRANCH_PROTECTION_ADMIN_TOKEN is required for apply mode."
+              exit 1
+            fi
+          else
+            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+              echo "::error::BRANCH_PROTECTION_READ_TOKEN is required for plan mode."
+              exit 1
+            fi
+          fi
+
       - name: Run Reconciler
         id: reconcile
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
           mkdir -p "${{ env.OUT_DIR }}"
 
@@ -111,7 +127,7 @@ jobs:
           fi
 
       - name: Upload Reconciliation Plan
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: branch-protection-reconcile-plan
           path: |
@@ -133,7 +149,7 @@ jobs:
 
       - name: Create Issue for Plan
         if: steps.reconcile.outputs.needs_reconciliation == 'true' && github.event.inputs.mode == 'plan'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');

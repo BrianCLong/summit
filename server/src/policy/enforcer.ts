@@ -1,12 +1,12 @@
 // @ts-nocheck
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
-import { redis } from '../subscriptions/pubsub';
+import { redis } from '../subscriptions/pubsub.js';
 import {
   SecurityEvent,
   ZeroTrustAuditLogger,
   createZeroTrustAuditLogger,
-} from '../../security/zero-trust/siem/audit-logger';
+} from '../../security/zero-trust/siem/audit-logger.js';
 
 const tracer = trace.getTracer('policy-enforcer', '24.2.0');
 

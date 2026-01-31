@@ -3,8 +3,8 @@
 
 import { jest, describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 import WebSocket from 'ws';
-import { MCPClient, MCPServerRegistry } from '../mcp/client';
-import { MCPServerConfig } from '../types';
+import { MCPClient, MCPServerRegistry } from '../mcp/client.js';
+import { MCPServerConfig } from '../types.js';
 
 // Mock WebSocket with an explicit factory so default import wiring works in ESM/CJS
 jest.mock('ws', () => {

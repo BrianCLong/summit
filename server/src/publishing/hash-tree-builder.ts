@@ -9,7 +9,7 @@
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import type { HashTree, MerkleNode } from './proof-carrying-types';
+import type { HashTree, MerkleNode } from './proof-carrying-types.js';
 
 export interface FileHashInfo {
   path: string;

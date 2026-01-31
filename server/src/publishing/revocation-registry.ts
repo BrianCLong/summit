@@ -14,7 +14,7 @@ import type {
   RevocationRecord,
   EvidenceWallet,
   ProofCarryingManifest,
-} from './proof-carrying-types';
+} from './proof-carrying-types.js';
 
 export interface RevocationRegistryConfig {
   privateKey: string; // For signing revocations

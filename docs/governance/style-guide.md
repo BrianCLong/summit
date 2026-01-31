@@ -1,4 +1,10 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ---
+
 title: Documentation Style Guide
 summary: Comprehensive style guide for consistent, high-quality documentation across the IntelGraph ecosystem
 version: 2.0.0
@@ -6,6 +12,7 @@ lastUpdated: 2025-09-09
 owner: docs
 status: approved
 reviewers: [docs-team, editorial-board]
+
 ---
 
 # IntelGraph Documentation Style Guide

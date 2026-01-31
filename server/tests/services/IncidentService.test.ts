@@ -1,8 +1,11 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { IncidentService } from '../../src/services/IncidentService';
-import { pg } from '../../src/db/pg';
 
-jest.mock('../../src/db/pg');
+const pgMock = { oneOrNone: jest.fn() };
+await jest.unstable_mockModule('../../src/db/pg', () => ({
+  pg: pgMock,
+}));
+
+const { IncidentService } = await import('../../src/services/IncidentService');
 
 describe('IncidentService', () => {
     beforeEach(() => {
@@ -10,7 +13,7 @@ describe('IncidentService', () => {
     });
 
     it('should create incident', async () => {
-        (pg.oneOrNone as any).mockResolvedValue({
+        pgMock.oneOrNone.mockResolvedValue({
             id: 'incident-1',
             title: 'Test Incident'
         });
@@ -22,7 +25,7 @@ describe('IncidentService', () => {
         });
 
         expect(incident.id).toBe('incident-1');
-        expect(pg.oneOrNone).toHaveBeenCalledWith(
+        expect(pgMock.oneOrNone).toHaveBeenCalledWith(
             expect.stringContaining('INSERT INTO incidents'),
             expect.anything(),
             expect.anything()

@@ -10,7 +10,7 @@ jobs:
     name: Assurance Snapshot
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - name: Verify agent file checksums
         run: |
           AGENTS_MD_SHA256=$(grep '^AGENTS_MD_SHA256=' .github/governance_hashes | cut -d'=' -f2)

@@ -1,0 +1,14 @@
+{
+  "name": "golden-path-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:debug": "playwright test --debug"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "typescript": "^5.7.3",
+    "ts-node": "^10.9.2"
+  }
+}

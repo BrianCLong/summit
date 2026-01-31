@@ -56,9 +56,9 @@ export class DomainIntelCollector extends CollectorBase {
    */
   private async getWhoisData(domain: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      whoisLookup(domain, (err: Error | null, data: string) => {
+      whoisLookup(domain, (err: Error | null, data: string | unknown[]) => {
         if (err) reject(err);
-        else resolve(data);
+        else resolve(data as string);
       });
     });
   }

@@ -11,7 +11,9 @@ import { HybridSemanticRetriever } from '../HybridSemanticRetriever.js';
 import {
   SemanticRAGRequest,
   SemanticRAGResponse,
+  SemanticRAGRequestSchema,
   TraversalStrategy,
+  TraversalConfigSchema,
   STIXObject,
 } from '../types.js';
 
@@ -628,7 +630,7 @@ describe('Type Validation', () => {
 
     expect(() => {
       // @ts-ignore - Testing schema validation
-      const parsed = require('../types.js').SemanticRAGRequestSchema.parse(validRequest);
+      const parsed = SemanticRAGRequestSchema.parse(validRequest);
       expect(parsed).toBeDefined();
     }).not.toThrow();
   });
@@ -640,7 +642,7 @@ describe('Type Validation', () => {
     };
 
     expect(() => {
-      require('../types.js').SemanticRAGRequestSchema.parse(invalidRequest);
+      SemanticRAGRequestSchema.parse(invalidRequest);
     }).toThrow();
   });
 
@@ -653,7 +655,7 @@ describe('Type Validation', () => {
     };
 
     expect(() => {
-      const parsed = require('../types.js').TraversalConfigSchema.parse(validConfig);
+      const parsed = TraversalConfigSchema.parse(validConfig);
       expect(parsed).toBeDefined();
     }).not.toThrow();
   });

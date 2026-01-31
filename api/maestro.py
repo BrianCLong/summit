@@ -3,10 +3,11 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from maestro.checks import check_release_gate, generate_compliance_report
+from maestro.lineage.openlineage_producer import OpenLineageProducer
 from maestro.models import (
     Artifact,
     ArtifactKind,
@@ -15,8 +16,11 @@ from maestro.models import (
     Run,
     RunStatus,
 )
+from maestro.prov import serializer
+from maestro.provenance.exporter import ProvenanceExporter
 
 router = APIRouter(prefix="/maestro", tags=["maestro"])
+lineage_producer = OpenLineageProducer()
 
 
 # Request/Response schemas
@@ -83,7 +87,16 @@ def create_run(request: CreateRunRequest, req: Request):
         metadata=request.metadata,
     )
 
-    return store.create_run(run)
+    created_run = store.create_run(run)
+
+    # Emit OpenLineage START event
+    lineage_producer.emit_start(
+        run_id=created_run.id,
+        job_name=created_run.name,
+        args=created_run.metadata,
+    )
+
+    return created_run
 
 
 @router.get("/runs", response_model=list[Run])
@@ -125,6 +138,12 @@ def update_run(run_id: str, request: UpdateRunRequest, req: Request):
     run = store.update_run(run_id, updates)
     if not run:
         raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+
+    # Emit OpenLineage events based on status change
+    if request.status == RunStatus.SUCCEEDED:
+        lineage_producer.emit_complete(run_id=run.id, job_name=run.name)
+    elif request.status == RunStatus.FAILED:
+        lineage_producer.emit_fail(run_id=run.id, job_name=run.name)
 
     return run
 
@@ -260,3 +279,33 @@ def check_run_release_gate(run_id: str, req: Request):
         "message": result.message,
         "details": result.details,
     }
+
+
+@router.get("/runs/{run_id}/provenance")
+def get_run_provenance(run_id: str, req: Request, format: str = "json"):
+    """Get W3C PROV export for a run."""
+    store = req.app.state.maestro_store
+    run = store.get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+
+    artifacts = store.list_artifacts(run_id=run_id)
+
+    exporter = ProvenanceExporter()
+    doc = exporter.export_run(run, artifacts)
+    if not doc:
+        raise HTTPException(status_code=500, detail="Failed to generate provenance document")
+
+    if format == "json":
+        content = serializer.serialize_to_json(doc)
+        media_type = "application/json"
+    elif format == "xml":
+        content = serializer.serialize_to_xml(doc)
+        media_type = "application/xml"
+    elif format == "rdf":
+        content = serializer.serialize_to_rdf(doc)
+        media_type = "text/turtle"
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
+
+    return Response(content=content, media_type=media_type)

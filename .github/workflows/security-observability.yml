@@ -1,0 +1,66 @@
+name: Security Observability
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Every Monday at 8am UTC
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: read
+  # dependabot-alerts: read # GitHub Actions doesn't support this permission key in some versions, but 'contents: read' usually suffices or it needs a PAT.
+  # Actually, dependabot alerts require 'security-events' or specific permission?
+  # Standard GITHUB_TOKEN permissions usually include 'dependabot-alerts: read' if contents is read?
+  # Docs say "dependabot-alerts: read".
+  # If the key is invalid in YAML validation, we might need to remove it, but let's try.
+  # "metrics" is not a permission.
+
+jobs:
+  observability:
+    name: Collect and Trend Security Metrics
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve Previous Run
+        id: previous_run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Find the last successful run of this workflow on main
+          RUN_ID=$(gh run list --workflow security-observability.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty')
+          echo "Last successful run ID: $RUN_ID"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Download Previous Metrics
+        if: steps.previous_run.outputs.run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: security-metrics
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ steps.previous_run.outputs.run_id }}
+          path: previous-metrics
+        continue-on-error: true # It's okay if this is the first run or artifact expired
+
+      - name: Collect Metrics
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ALERT_THRESHOLD_CRITICAL: 0
+        run: |
+          # Grant execute permission just in case
+          node scripts/ci/collect_security_metrics.mjs
+
+      - name: Upload Metrics Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-metrics
+          path: artifacts/security-metrics.json
+          retention-days: 90

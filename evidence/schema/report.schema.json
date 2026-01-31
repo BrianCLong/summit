@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "status": {"type": "string", "enum": ["pass", "fail", "error"]},
+    "details": {"type": "string"},
+    "findings": {"type": "array", "items": {"type": "object"}}
+  },
+  "required": ["evidence_id", "status"]
+}

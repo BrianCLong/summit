@@ -14,7 +14,7 @@
 
 import request from 'supertest';
 import { randomUUID } from 'crypto';
-import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { describe, it, test, expect, beforeAll, afterAll, jest } from '@jest/globals';
 
 const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
 const describeIf = runAcceptance ? describe : describe.skip;

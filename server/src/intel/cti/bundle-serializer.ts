@@ -22,12 +22,12 @@ import type {
 } from './types.js';
 import {
   INTELGRAPH_EXTENSION_DEFINITION,
-  getTlpMarking,
 } from './types.js';
 import {
   mapEntityToStix,
   createRelationship,
   createProducerIdentity,
+  getTlpMarking,
   getTlpMarkingRef,
   type EntityMappingResult,
   type RelationshipInput,

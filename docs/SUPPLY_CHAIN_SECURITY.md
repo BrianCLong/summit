@@ -21,7 +21,7 @@ cosign verify-attestation --type slsaprovenance <IMAGE_URI>
 
 We generate SBOMs for every release to track dependencies and vulnerabilities.
 
-*   **Format**: We produce CycloneDX (`sbom.cdx.json`) format. (SPDX generation is currently limited by environment constraints but can be enabled if tooling allows).
+*   **Format**: We produce CycloneDX v1.7 (`sbom.cdx.json`) format. This includes Cryptographic Bill of Materials (CBOM) for post-quantum readiness and detailed Intellectual Property (IP) metadata.
 *   **Tooling**: We use `cdxgen` to analyze the project structure and dependencies.
 *   **Automation**: SBOMs are automatically generated during the CI/CD pipeline.
 

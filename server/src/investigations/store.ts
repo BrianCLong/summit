@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Case, CaseStatus, EntityRef, Note, Workspace } from './types';
+import { Case, CaseStatus, EntityRef, Note, Workspace } from './types.js';
 
 type IdGenerator = () => string;
 type Clock = () => Date;

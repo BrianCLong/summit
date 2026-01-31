@@ -61,8 +61,8 @@ jest.unstable_mockModule('../../services/RateLimiter', () => ({
 
 // Dynamic imports AFTER mocks are set up
 const { Queue, Worker } = await import('bullmq');
-const aiRouter = (await import('../ai')).default;
-const { rateLimiter } = await import('../../services/RateLimiter');
+const aiRouter = (await import('../ai.js')).default;
+const { rateLimiter } = await import('../../services/RateLimiter.js');
 
 const getRouteHandlers = (path: string) => {
   const layer = (aiRouter as any).stack.find(

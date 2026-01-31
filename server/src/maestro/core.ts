@@ -1,12 +1,28 @@
-import { IntelGraphClient } from '../intelgraph/client';
-import { Task, Run, Artifact, TaskStatus } from './types';
-import { CostMeter } from './cost_meter';
-import { OpenAILLM } from './adapters/llm_openai';
-import { ResidencyGuard } from '../data-residency/residency-guard';
+import { IntelGraphClient } from '../intelgraph/client.js';
+import { Task, Run, Artifact, TaskStatus } from './types.js';
+import { CostMeter } from './cost_meter.js';
+import { OpenAILLM } from './adapters/llm_openai.js';
+import { ResidencyGuard } from '../data-residency/residency-guard.js';
+import { AgentGovernanceService } from './governance-service.js';
+import logger from '../utils/logger.js';
+import { metrics } from '../monitoring/metrics.js';
+import {
+  buildBudgetEvidence,
+  normalizeReasoningBudget,
+  type ReasoningBudgetContract,
+} from './budget.js';
+import { AgentGovernanceService } from './governance-service.js';
+import logger from '../utils/logger.js';
+import { metrics } from '../monitoring/metrics.js';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
   defaultActionAgent: string;
+}
+
+export interface MaestroRunOptions {
+  tenantId?: string;
+  reasoningBudget?: Partial<ReasoningBudgetContract>;
 }
 
 export class Maestro {
@@ -17,14 +33,22 @@ export class Maestro {
     private config: MaestroConfig,
   ) {}
 
-  async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
+  async createRun(
+    userId: string,
+    requestText: string,
+    options?: MaestroRunOptions,
+  ): Promise<Run> {
+    const reasoningBudget = normalizeReasoningBudget(
+      options?.reasoningBudget,
+    );
     const run: Run = {
       id: crypto.randomUUID(),
       user: { id: userId },
       createdAt: new Date().toISOString(),
       requestText,
       // Pass tenant context if available (will need DB schema update for full persistence)
-      ...(options?.tenantId ? { tenantId: options.tenantId } : {})
+      ...(options?.tenantId ? { tenantId: options.tenantId } : {}),
+      reasoningBudget,
     } as Run;
     await this.ig.createRun(run);
     return run;
@@ -78,6 +102,7 @@ export class Maestro {
 
   async executeTask(task: Task): Promise<{ task: Task; artifact: Artifact | null }> {
     const now = new Date().toISOString();
+    const timer = metrics.maestroJobExecutionDurationSeconds.startTimer({ job_type: task.kind, status: 'success' });
     await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
     try {
@@ -94,9 +119,108 @@ export class Maestro {
           await guard.validateAgentExecution(tenantId);
       }
 
+      // === GOVERNANCE CHECK (Story 1.1) ===
+      // Check agent governance policies before execution
+      const governanceService = AgentGovernanceService.getInstance();
+      const maestroAgent = {
+        id: task.agent.id,
+        name: task.agent.name,
+        tenantId: tenantId || 'system',
+        capabilities: [], // Could be extracted from agent metadata
+        metadata: {
+          modelId: task.agent.modelId,
+          kind: task.agent.kind
+        },
+        status: 'idle' as const,
+        health: {
+          cpuUsage: 0,
+          memoryUsage: 0,
+          lastHeartbeat: new Date(),
+          activeTasks: 1,
+          errorRate: 0
+        },
+        templateId: task.agent.kind,
+        config: {}
+      };
+
+      const governanceDecision = await governanceService.evaluateAction(
+        maestroAgent,
+        task.kind, // action type: 'plan', 'action', 'subworkflow', 'graph.analysis'
+        {
+          taskId: task.id,
+          runId: task.runId,
+          description: task.description,
+          input: task.input,
+          tenantId
+        },
+        {
+          source: 'maestro_core_executeTask',
+          timestamp: now
+        }
+      );
+
+      // If governance check fails, fail the task
+      if (!governanceDecision.allowed) {
+        const errorMessage = `Governance policy violation: ${governanceDecision.reason}. ` +
+          `Risk score: ${governanceDecision.riskScore.toFixed(2)}. ` +
+          `Violations: ${governanceDecision.violations?.map(v => v.violationType).join(', ') || 'none'}`;
+
+        logger.error({
+          taskId: task.id,
+          runId: task.runId,
+          agentId: task.agent.id,
+          decision: governanceDecision
+        }, 'Task blocked by governance policy');
+
+        await this.ig.updateTask(task.id, {
+          status: 'failed',
+          errorMessage,
+          updatedAt: now
+        });
+
+        throw new Error(errorMessage);
+      }
+
+      // If requires approval, set task to pending_approval state (Story 1.3)
+      if (governanceDecision.requiredApprovals && governanceDecision.requiredApprovals > 0) {
+        logger.warn({
+          taskId: task.id,
+          runId: task.runId,
+          agentId: task.agent.id,
+          requiredApprovals: governanceDecision.requiredApprovals,
+          riskScore: governanceDecision.riskScore
+        }, 'Task requires human approval');
+
+        await this.ig.updateTask(task.id, {
+          status: 'pending_approval',
+          errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s). Risk score: ${governanceDecision.riskScore.toFixed(2)}`,
+          updatedAt: now
+        });
+
+        // Return task in pending_approval state - execution halts here
+        return {
+          task: {
+            ...task,
+            status: 'pending_approval' as TaskStatus,
+            errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s)`,
+            updatedAt: now
+          },
+          artifact: null
+        };
+      }
+
+      logger.info({
+        taskId: task.id,
+        runId: task.runId,
+        agentId: task.agent.id,
+        riskScore: governanceDecision.riskScore
+      }, 'Task passed governance checks, proceeding with execution');
+      // === END GOVERNANCE CHECK ===
+
       let result: string = '';
 
       if (task.agent.kind === 'llm') {
+        metrics.maestroAiModelRequests.inc({ model: task.agent.modelId, operation: 'executeTask', status: 'attempt' });
         let attempts = 0;
         const maxRetries = 3;
         let lastError: any;
@@ -179,6 +303,7 @@ export class Maestro {
       await this.ig.createArtifact(artifact);
       await this.ig.updateTask(task.id, updatedTask);
 
+      timer(); // End timer success
       return {
         task: { ...task, ...updatedTask } as Task,
         artifact,
@@ -191,33 +316,65 @@ export class Maestro {
       };
       await this.ig.updateTask(task.id, updatedTask);
 
+      metrics.maestroAiModelErrors.inc({ model: task.agent.modelId || 'unknown' });
+      timer({ status: 'failed' }); // End timer failed
       return { task: { ...task, ...updatedTask } as Task, artifact: null };
     }
   }
 
-  async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
-    const run = await this.createRun(userId, requestText, options);
-    const tasks = await this.planRequest(run);
+  async runPipeline(
+    userId: string,
+    requestText: string,
+    options?: MaestroRunOptions,
+  ) {
+    const end = metrics.maestroOrchestrationDuration.startTimer({ endpoint: 'runPipeline' });
+    metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'started' });
+    metrics.maestroActiveSessions.inc({ type: 'pipeline' });
+    const startTime = Date.now();
 
-    const executable = tasks.filter(t => t.status === 'queued');
+    try {
+      const run = await this.createRun(userId, requestText, options);
+      const tasks = await this.planRequest(run);
 
-    const results = [];
-    for (const task of executable) {
-      const res = await this.executeTask(task);
-      results.push(res);
+      const executable = tasks.filter(t => t.status === 'queued');
+
+      const results = [];
+      for (const task of executable) {
+        const res = await this.executeTask(task);
+        results.push(res);
+      }
+
+      const costSummary = await this.costMeter.summarize(run.id);
+
+      const budgetEvidence = buildBudgetEvidence(run.reasoningBudget!, {
+        success: results.every((result) => result.task.status === 'succeeded'),
+        latencyMs: Date.now() - startTime,
+        totalCostUSD: costSummary.totalCostUSD,
+        totalInputTokens: costSummary.totalInputTokens,
+        totalOutputTokens: costSummary.totalOutputTokens,
+      });
+      await this.ig.updateRun(run.id, {
+        reasoningBudgetEvidence: budgetEvidence,
+      });
+
+      end();
+      metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'success' });
+      return {
+        run,
+        tasks: tasks.map(t => ({
+          id: t.id,
+          status: t.status,
+          description: t.description,
+        })),
+        results,
+        costSummary,
+      };
+    } catch (error) {
+      metrics.maestroOrchestrationErrors.inc({ error_type: 'pipeline_error', endpoint: 'runPipeline' });
+      metrics.maestroOrchestrationRequests.inc({ method: 'runPipeline', endpoint: 'runPipeline', status: 'error' });
+      throw error;
+    } finally {
+      metrics.maestroActiveSessions.dec({ type: 'pipeline' });
     }
-
-    const costSummary = await this.costMeter.summarize(run.id);
-
-    return {
-      run,
-      tasks: tasks.map(t => ({
-        id: t.id,
-        status: t.status,
-        description: t.description,
-      })),
-      results,
-      costSummary,
-    };
   }
 }

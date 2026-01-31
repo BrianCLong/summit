@@ -1,0 +1,36 @@
+version: 1
+item:
+  slug: automation-turn-3
+  title: "Automation Turn #3 — AI Platform & Agentic Updates Summary"
+  links:
+    - "https://github.blog/news-insights/company-news/build-an-agent-into-any-app-with-the-github-copilot-sdk/?utm_source=chatgpt.com"
+    - "https://www.axios.com/2026/01/28/ai-anthropic-claude-servicenow-agents?utm_source=chatgpt.com"
+    - "https://www.theverge.com/news/867673/claude-mcp-app-interactive-slack-figma-canva?utm_source=chatgpt.com"
+    - "https://www.barrons.com/articles/agentic-ai-cybersecurity-stocks-crowdstrike-ed44bfbf?utm_source=chatgpt.com"
+  type: "ai-platform-updates"
+  date: "2026-01-29"
+  intriguing_claim: "Copilot SDK embedding, Claude enterprise integration, MCP app workflows, and agent security risks converge into a governed automation imperative."
+required_checks:
+  status: "assumed"
+  assumed:
+    - "subsumption-bundle-verify"
+pr_stack:
+  - title: "chore(subsumption): add automation-turn-3 bundle artifacts"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+claim_registry: []
+gates:
+  - name: "subsumption-bundle-verify"
+    path: "scripts/ci/verify_subsumption_bundle.mjs"
+evals:
+  - name: "evidence-determinism-regression"
+    type: "fixture"
+evidence_ids:
+  - "EVD-AUTOMATION-TURN-3-GOV-001"
+docs:
+  - "docs/standards/automation-turn-3.md"
+  - "docs/security/data-handling/automation-turn-3.md"
+  - "docs/ops/runbooks/automation-turn-3.md"
+  - "docs/decisions/automation-turn-3.md"
+feature_flags: []

@@ -1,0 +1,75 @@
+
+type IdentityCluster {
+  id: ID!
+  name: String!
+  values: [String!]!
+  size: Float!
+}
+
+type NarrativeMarket {
+  id: ID!
+  topic: String!
+  narrativeIds: [ID!]!
+  audienceSegments: [IdentityCluster!]!
+}
+
+type NarrativeAlignment {
+  narrativeId: ID!
+  clusterId: ID!
+  score: Float!
+}
+
+type MarketSnapshot {
+  timestamp: Float!
+  marketId: ID!
+  narrativeShares: JSON! # Map<String, Float>
+  clusterSaturation: JSON! # Map<String, Float>
+}
+
+scalar JSON
+
+extend type Query {
+  getMarketState(id: ID!): MarketSnapshot
+  listMarkets: [NarrativeMarket!]!
+}
+
+extend type Mutation {
+  simulateMarket(id: ID!, steps: Int!): MarketSnapshot!
+  createMarket(topic: String!, narratives: [ID!]!, clusters: [ID!]!): NarrativeMarket!
+  updateAlignment(narrativeId: ID!, clusterId: ID!, score: Float!): NarrativeAlignment!
+}
+
+# --- Frame-First Extensions (2026-01-27 Strategy) ---
+
+enum ActorRole {
+  INITIATOR
+  VALIDATOR
+  AMPLIFIER
+  HYBRID
+}
+
+type NarrativeFrame {
+  id: ID!
+  invariantCore: String!
+  embedding: [Float!]
+  keywords: [String!]!
+  stabilityScore: Float! # 0-1 measure of frame persistence
+  lifespanDays: Float!
+}
+
+type FrameAlignment {
+  narrativeId: ID!
+  frameId: ID!
+  score: Float!
+}
+
+type BaselineDrift {
+  metric: String!
+  driftScore: Float! # Rate of change in baseline discourse
+  timeWindowDays: Int!
+}
+
+extend type NarrativeMarket {
+  frames: [NarrativeFrame!]
+  driftMetrics: [BaselineDrift!]
+}

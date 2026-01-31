@@ -9,8 +9,8 @@ import {
   getModelFamily,
   validateTokenBudget,
   ModelFamily,
-} from '../lib/tokcount';
-import logger from '../utils/logger';
+} from '../lib/tokcount.js';
+import logger from '../utils/logger.js';
 
 interface LLMRequest extends Request {
   body: {

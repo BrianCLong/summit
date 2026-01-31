@@ -74,5 +74,27 @@
     "evidence": ["docs/security/security-architecture-and-policies.md"],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "Generative UI Plan Contract",
+    "tier": "C",
+    "artifact": "docs/ga/genui/UI_CONTRACT.md",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/ga/genui/UI_CONTRACT.md",
+      "docs/ga/genui/TOOL_MANUAL.md",
+      "docs/ga/genui/ANTI_FOOTGUNS.md"
+    ],
+    "keywords": ["Structured Plan", "Tool", "Footguns"],
+    "notes": "Ensures the GenUI contract, tool schema, and anti-footgun guardrails remain anchored."
+  },
+  {
+    "feature": "GA Gate Artifact Closure",
+    "tier": "C",
+    "artifact": "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
+    "ciStatus": "wired",
+    "evidence": ["docs/ga/MVP4_GA_GATE_ARTIFACTS.md", "GA_READINESS_REPORT.md"],
+    "keywords": ["Gate Artifacts", "Go/No-Go"],
+    "notes": "Tracks explicit GA gate artifacts (Terraform, DR restore, canary, migration sequencing) and ties them to evidence paths."
   }
 ]

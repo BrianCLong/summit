@@ -1,0 +1,39 @@
+name: Emu3 Adapter CI
+
+on:
+  push:
+    paths:
+      - 'ai-ml-suite/emu3/**'
+      - '.github/workflows/emu3-ci.yml'
+  pull_request:
+    paths:
+      - 'ai-ml-suite/emu3/**'
+      - '.github/workflows/emu3-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai-ml-suite/emu3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -e .[dev]
+          pip install pytest ruff
+
+      - name: Lint with Ruff
+        run: ruff check .
+
+      - name: Run Tests
+        run: pytest
+        env:
+          SUMMIT_EMU3_ALLOW_MODEL_DOWNLOAD: "0"

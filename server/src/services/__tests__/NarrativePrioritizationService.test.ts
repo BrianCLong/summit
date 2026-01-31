@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { NarrativePrioritizationService } from '../NarrativePrioritizationService';
+import { NarrativePrioritizationService } from '../NarrativePrioritizationService.js';
 
 // Mock dependencies
 const mockRun = jest.fn() as jest.Mock;

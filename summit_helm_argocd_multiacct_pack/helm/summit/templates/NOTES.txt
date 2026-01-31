@@ -1,5 +1,0 @@
-To install:
-  helm upgrade -i summit ./helm/summit -n summit --create-namespace -f ./helm/summit/values-dev.yaml
-
-To set image digest:
-  helm upgrade summit ./helm/summit -n summit --set image.repository=<repo> --set image.tag=<sha>

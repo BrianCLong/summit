@@ -2,7 +2,7 @@
  * TAXII 2.1 Service E2E Tests
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { TaxiiService } from '../taxii-service.js';
 import { createBundle } from '../bundle-serializer.js';
 import { createProducerIdentity, getTlpMarking } from '../entity-mapper.js';

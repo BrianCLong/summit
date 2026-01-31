@@ -5,7 +5,9 @@
       "@apps/*": ["apps/*/src"],
       "@packages/*": ["packages/*/src"],
       "@services/*": ["services/*/src"],
-      "@contracts/*": ["contracts/*/src"]
+      "@contracts/*": ["contracts/*/src"],
+      "@summit/agent-gym": ["packages/agent-gym/src/index.ts"],
+      "@summit/agent-gym-metrics": ["packages/agent-gym-metrics/src/index.ts"]
     }
   }
 }

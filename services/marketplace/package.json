@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/marketplace",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Data Trading and Reuse Marketplace Service",
   "type": "module",
   "main": "dist/index.js",
@@ -38,7 +38,7 @@
     "@types/pg": "^8.10.9",
     "@types/uuid": "^9.0.7",
     "@vitest/coverage-v8": "^1.0.4",
-    "eslint": "^8.56.0",
+    "eslint": "^9.39.2",
     "tsx": "^4.6.2",
     "typescript": "^5.3.3",
     "vitest": "^1.0.4"

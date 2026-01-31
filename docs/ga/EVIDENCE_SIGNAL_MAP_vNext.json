@@ -1,0 +1,39 @@
+{
+  "signals": [
+    {
+      "id": "SIG-RUNTIME-001",
+      "claim": "Agent Runtimes > Workflow Engines",
+      "evidence_type": "ARCHITECTURE_DOC",
+      "owner": "Jules",
+      "verification_method": "docs/architecture/agent-runtime-semantics.md"
+    },
+    {
+      "id": "SIG-EVAL-001",
+      "claim": "Trajectory-Centric Evaluation",
+      "evidence_type": "METRIC_REPORT",
+      "owner": "Jules",
+      "verification_method": "docs/observability/agent-health-score.md"
+    },
+    {
+      "id": "SIG-COST-001",
+      "claim": "Pre-Execution Cost Modeling",
+      "evidence_type": "BENCHMARK_RESULT",
+      "owner": "Jules",
+      "verification_method": "docs/finops/cost-performance-frontier.json"
+    },
+    {
+      "id": "SIG-GOV-001",
+      "claim": "Charter-Based Governance",
+      "evidence_type": "POLICY_AS_CODE",
+      "owner": "Jules",
+      "verification_method": "packages/governance/runtime-gates"
+    },
+    {
+      "id": "SIG-HITL-001",
+      "claim": "Async HITL",
+      "evidence_type": "ARCHITECTURE_DOC",
+      "owner": "Jules",
+      "verification_method": "docs/governance/async-hitl.md"
+    }
+  ]
+}

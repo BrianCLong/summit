@@ -1,0 +1,47 @@
+{
+  "evidence_id": "EVD-AUTOMATION-TURN-3-GOV-001",
+  "item_slug": "automation-turn-3",
+  "claims": ["CLAIM-01", "CLAIM-02", "CLAIM-03", "CLAIM-04"],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "decision": "MODE_B_LINK_ONLY",
+      "rationale": "Proceed with governed bundle artifacts using link-only intake for agentic platform updates."
+    },
+    {
+      "id": "DEC-002",
+      "decision": "EVIDENCE_DETERMINISTIC",
+      "rationale": "Keep report and metrics stable; timestamps reserved for stamp.json."
+    }
+  ],
+  "findings": [
+    {
+      "id": "FND-01",
+      "summary": "GitHub Copilot SDK exposes an agentic execution loop that can be embedded into applications for native agent workflows.",
+      "sources": [
+        "https://github.blog/news-insights/company-news/build-an-agent-into-any-app-with-the-github-copilot-sdk/?utm_source=chatgpt.com"
+      ]
+    },
+    {
+      "id": "FND-02",
+      "summary": "Claude models are integrated into ServiceNow agent tooling, signaling enterprise-grade, no-code workflow automation.",
+      "sources": [
+        "https://www.axios.com/2026/01/28/ai-anthropic-claude-servicenow-agents?utm_source=chatgpt.com"
+      ]
+    },
+    {
+      "id": "FND-03",
+      "summary": "MCP extensions expand into interactive app workflows (Slack, Figma, Canva), turning chat into an action control plane.",
+      "sources": [
+        "https://www.theverge.com/news/867673/claude-mcp-app-interactive-slack-figma-canva?utm_source=chatgpt.com"
+      ]
+    },
+    {
+      "id": "FND-04",
+      "summary": "Agentic autonomy raises prompt-injection and tool-abuse risks, requiring hardened security controls and auditability.",
+      "sources": [
+        "https://www.barrons.com/articles/agentic-ai-cybersecurity-stocks-crowdstrike-ed44bfbf?utm_source=chatgpt.com"
+      ]
+    }
+  ]
+}

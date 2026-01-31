@@ -2,12 +2,17 @@ import asyncio
 import glob
 import json
 import os
+import sys
 import time
 from datetime import datetime
 from statistics import mean
 
 import httpx
 import yaml
+
+sys.path.append(os.path.dirname(__file__))
+
+from baselines import evaluate_thresholds, load_baselines, resolve_suite_id
 
 
 # Scoring functions
@@ -83,7 +88,7 @@ async def eval_task(client, route, item, model_name, mock=False):
     return dt, out, cost
 
 
-def compare_with_baseline(current_results, evidence_dir):
+def compare_with_baseline(current_results, evidence_dir, regression_delta):
     # Find latest result file
     files = glob.glob(os.path.join(evidence_dir, "eval_report-*.json"))
 
@@ -124,8 +129,7 @@ def compare_with_baseline(current_results, evidence_dir):
             }
             comparison.append(comp_item)
 
-            # Define regression threshold, e.g., -0.1
-            if diff < -0.1:
+            if diff < regression_delta:
                 regressions.append(comp_item)
 
     return comparison, regressions
@@ -217,7 +221,18 @@ async def main(base: str, token: str, suite_path: str, mock: bool):
         print(f"Generated report: {report_path}")
 
         # Comparison
-        comparison_result, regressions = compare_with_baseline(results, evidence_dir)
+        baselines = load_baselines()
+        suite_id = resolve_suite_id(suite, suite_path)
+        regression_delta = (
+            baselines.get("suites", {})
+            .get(suite_id, {})
+            .get("gates", {})
+            .get("regression_delta", -0.1)
+        )
+
+        comparison_result, regressions = compare_with_baseline(
+            results, evidence_dir, regression_delta
+        )
         if comparison_result:
             print("\n--- Regression Report ---")
             if regressions:
@@ -235,6 +250,27 @@ async def main(base: str, token: str, suite_path: str, mock: bool):
                 json.dump(
                     {"comparison": comparison_result, "regressions": regressions}, f, indent=2
                 )
+
+        baseline_failures = evaluate_thresholds(results, baselines, suite_id)
+        if baseline_failures:
+            print("\n--- Baseline Gate Report ---")
+            print(f"FAIL: {len(baseline_failures)} baseline gates failed!")
+            for failure in baseline_failures:
+                print(
+                    "  "
+                    f"{failure['task']} ({failure['model']}): "
+                    f"{failure['metric']} {failure['actual']} "
+                    f"{failure['operator']} {failure['threshold']}"
+                )
+
+            gates_path = report_path.replace(".json", "_gates.json")
+            with open(gates_path, "w") as f:
+                json.dump(
+                    {"suite": suite_id, "failures": baseline_failures}, f, indent=2
+                )
+
+        if regressions or baseline_failures:
+            sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "started_at": {"type": "string"},
+    "finished_at": {"type": "string"},
+    "runner": {"type": "string"}
+  },
+  "required": ["started_at", "finished_at"]
+}

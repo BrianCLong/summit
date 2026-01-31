@@ -12,7 +12,7 @@ import {
   EgressProfile,
   ExecutorConfig,
   RetryPolicy,
-} from './types';
+} from './types.js';
 
 const logger = pino({ name: 'adapter-executor' });
 

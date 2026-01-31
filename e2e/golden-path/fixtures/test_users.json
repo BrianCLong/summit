@@ -1,0 +1,12 @@
+[
+  {
+    "role": "analyst",
+    "email": "analyst@intelgraph.tech",
+    "password": "test-only-password"
+  },
+  {
+    "role": "admin",
+    "email": "admin@intelgraph.tech",
+    "password": "test-only-password"
+  }
+]

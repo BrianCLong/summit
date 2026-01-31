@@ -21,6 +21,10 @@ on:
         required: false
         type: string
         default: "us-east-1"
+      role-to-assume:
+        description: "IAM Role to assume (OIDC)"
+        required: false
+        type: string
       has_aws:
         description: "Whether AWS credentials are available"
         required: false
@@ -51,13 +55,24 @@ jobs:
     name: AWS ${{ inputs.operation }}
     runs-on: ubuntu-latest
     if: ${{ inputs.has_aws }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
-      - name: Configure AWS credentials
-        if: ${{ env.AWS_ACCESS_KEY_ID != '' }}
-        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
+      - name: Configure AWS credentials (OIDC)
+        if: ${{ inputs.role-to-assume != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.role-to-assume }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          mask-aws-account-id: true
+
+      - name: Configure AWS credentials (Keys)
+        if: ${{ inputs.role-to-assume == '' && env.AWS_ACCESS_KEY_ID != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
@@ -65,7 +80,7 @@ jobs:
           mask-aws-account-id: true
 
       - name: S3 Upload
-        if: ${{ inputs.operation == 'upload' && env.AWS_ACCESS_KEY_ID != '' }}
+        if: ${{ inputs.operation == 'upload' && (env.AWS_ACCESS_KEY_ID != '' || inputs.role-to-assume != '') }}
         run: |
           if [ -n "${{ inputs.s3_path }}" ] && [ -n "${{ env.S3_BUCKET }}" ]; then
             aws s3 cp "${{ inputs.source_path }}" "s3://${{ env.S3_BUCKET }}/${{ inputs.s3_path }}" --recursive
@@ -76,7 +91,7 @@ jobs:
           fi
 
       - name: S3 Sync
-        if: ${{ inputs.operation == 'sync' && env.AWS_ACCESS_KEY_ID != '' }}
+        if: ${{ inputs.operation == 'sync' && (env.AWS_ACCESS_KEY_ID != '' || inputs.role-to-assume != '') }}
         run: |
           if [ -n "${{ inputs.s3_path }}" ] && [ -n "${{ env.S3_BUCKET }}" ]; then
             aws s3 sync "${{ inputs.source_path }}" "s3://${{ env.S3_BUCKET }}/${{ inputs.s3_path }}" --delete
@@ -87,6 +102,6 @@ jobs:
           fi
 
       - name: Skip AWS operations
-        if: ${{ env.AWS_ACCESS_KEY_ID == '' }}
+        if: ${{ env.AWS_ACCESS_KEY_ID == '' && inputs.role-to-assume == '' }}
         run: |
           echo "⏭️ AWS credentials not available, skipping ${{ inputs.operation }}"

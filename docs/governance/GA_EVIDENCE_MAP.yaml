@@ -1,0 +1,62 @@
+# GA Evidence Map
+# This file serves as the machine-verifiable registry for GA readiness artifacts.
+# Supersedes previous JSON versions.
+
+version: "1.0.0"
+artifacts:
+  provenance:
+    path: ".evidence/provenance.json"
+    required: true
+    description: "SLSA provenance for all build artifacts."
+
+  sbom:
+    path: ".evidence/sbom.json"
+    required: true
+    description: "Software Bill of Materials in SPDX/CycloneDX format."
+
+  decision_ledger:
+    path: "packages/decision-ledger/decision_ledger.json"
+    required: true
+    description: "Audit log of all autonomous decisions and rollbacks."
+    checks:
+      - "verify_decision_replay"
+
+  policy_versioning:
+    path: "packages/decision-policy/"
+    required: true
+    description: "Versioned decision policies."
+    checks:
+      - "policy_schema_validation"
+
+  agent_negotiation:
+    path: "packages/agent-negotiation/"
+    required: true
+    description: "Agent negotiation definitions and logs."
+    checks:
+      - "verify_agent_negotiation"
+
+  retrieval_plan:
+    path: "packages/retrieval-engine/artifacts/evidence/retrieval/"
+    required: false
+    description: "Deterministic retrieval plans and evidence bundles."
+    checks:
+      - "retrieval_determinism_check"
+
+  policy_cards_v0:
+    path: "artifacts/policy/"
+    required: false
+    description: "Policy Cards v0 enforcement artifacts (report, metrics, stamp)."
+    checks:
+      - "policy-validate"
+      - "policy-drift"
+
+sections:
+  - id: "decision_reversibility"
+    title: "Decision Reversibility"
+    description: "All autonomous decisions must be reversible."
+    evidence: ["decision_ledger"]
+
+  - id: "agent_governance"
+    title: "Agent Governance"
+    description: "Agents must operate under versioned policies and negotiate conflicts."
+    evidence: ["policy_versioning", "agent_negotiation"]

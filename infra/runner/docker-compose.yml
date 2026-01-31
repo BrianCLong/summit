@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  runner:
+    image: myoung34/github-runner:latest
+    environment:
+      REPO_URL: https://github.com/BrianCLong/summit
+      RUNNER_TOKEN: ${RUNNER_TOKEN}
+      RUNNER_NAME: ${RUNNER_NAME:-github-runner}
+      RUNNER_LABELS: "self-hosted,linux,preview"
+      # Optional: Pass AWS credentials if not running on an instance with an IAM role
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-2}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./runner:/home/runner
+    restart: unless-stopped

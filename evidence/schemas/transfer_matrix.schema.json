@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "matrix_version": {
+      "type": "string"
+    },
+    "provenance": {
+      "additionalProperties": true,
+      "properties": {
+        "collected_at": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "type": "object"
+    },
+    "source_languages": {
+      "items": {
+        "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "target_languages": {
+      "items": {
+        "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "transfer_values": {
+      "items": {
+        "items": {
+          "maximum": 1.0,
+          "minimum": -1.0,
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "matrix_version",
+    "source_languages",
+    "target_languages",
+    "transfer_values",
+    "provenance"
+  ],
+  "type": "object"
+}

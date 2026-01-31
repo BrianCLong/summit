@@ -1,0 +1,8 @@
+[
+  {
+    "id": "read-001",
+    "description": "Explain what this function does",
+    "code": "def f(x): return x * x",
+    "expected_answer": "It squares the input"
+  }
+]

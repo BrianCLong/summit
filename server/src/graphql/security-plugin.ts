@@ -6,8 +6,8 @@ import {
   checkPersistedQuery,
   checkIntrospectionAllowed,
   getAllowlistStats,
-} from './persisted';
-import { prometheusConductorMetrics } from '../conductor/observability/prometheus';
+} from './persisted.js';
+import { prometheusConductorMetrics } from '../conductor/observability/prometheus.js';
 
 export interface SecurityPluginConfig {
   enablePersistedQueries: boolean;

@@ -1,0 +1,21 @@
+name: subsumption-bundle
+
+on:
+  pull_request:
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - "docs/**"
+      - "evidence/**"
+  workflow_dispatch: {}
+
+jobs:
+  verify_subsumption_bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify subsumption bundle
+        run: node scripts/ci/verify_subsumption_bundle.mjs --bundle subsumption/item-UNKNOWN

@@ -5,12 +5,11 @@ import { GraphQLError } from 'graphql';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
+import { VoiceGateway } from './gateways/VoiceGateway.js';
 import pino from 'pino';
 import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
-// import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
-import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
@@ -18,7 +17,7 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
-import { initTelemetry } from '@intelgraph/telemetry-config';
+import { initializeTracing, getTracer } from './observability/tracer.js';
 import { streamingRateLimiter } from './routes/streaming.js';
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 import { ingestionService } from './services/IngestionService.js';
@@ -28,10 +27,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { bootstrapSecrets } from './bootstrap-secrets.js';
 import { logger } from './config/logger.js';
+import { createApp } from './app.js';
 import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
+import { partitionMaintenanceService } from './services/PartitionMaintenanceService.js';
 
 const startServer = async () => {
-  const sdk = initTelemetry('intelgraph-server');
+  // Initialize OpenTelemetry tracing early in the startup sequence
+  const tracer = initializeTracing();
+  await tracer.initialize();
 
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
@@ -59,7 +62,13 @@ const startServer = async () => {
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
 
-  await initializeNeo4jDriver();
+  if (process.env.REQUIRE_REAL_DBS !== 'false') {
+    if (!process.env.DISABLE_NEO4J) {
+      await initializeNeo4jDriver();
+    }
+  } else {
+    logger.info('REQUIRE_REAL_DBS=false, skipping Neo4j driver initialization');
+  }
 
   // Subscriptions with Persisted Query validation
 
@@ -68,8 +77,11 @@ const startServer = async () => {
     path: '/graphql',
   });
 
-  // const wsPersistedQueries = new WSPersistedQueriesMiddleware();
-  // const wsMiddleware = wsPersistedQueries.createMiddleware();
+  const voiceWss = new WebSocketServer({
+    server: httpServer as import('http').Server,
+    path: '/speak',
+  });
+  new VoiceGateway(voiceWss);
 
   useServer(
     {
@@ -148,9 +160,11 @@ const startServer = async () => {
     logger.info(`Server listening on port ${port}`);
 
     // Initialize and start Data Retention Service
-    const neo4jDriver = getNeo4jDriver();
-    const dataRetentionService = new DataRetentionService(neo4jDriver);
-    dataRetentionService.startCleanupJob(); // Start the cleanup job
+    if (!process.env.DISABLE_NEO4J) {
+      const neo4jDriver = getNeo4jDriver();
+      const dataRetentionService = new DataRetentionService(neo4jDriver);
+      dataRetentionService.startCleanupJob(); // Start the cleanup job
+    }
 
     // Start OSINT Workers
     startOSINTWorkers();
@@ -169,10 +183,17 @@ const startServer = async () => {
     gaCoreMetrics.start();
 
     // Check Neo4j Indexes
-    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+    if (!process.env.DISABLE_NEO4J) {
+      checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+    }
+
+    // Start Partition Maintenance Service
+    partitionMaintenanceService.start();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
-    await startKafkaConsumer();
+    if (typeof startKafkaConsumer === 'function') {
+      await startKafkaConsumer();
+    }
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
@@ -201,17 +222,26 @@ const startServer = async () => {
     const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
     PolicyWatcher.getInstance().stop();
 
+    partitionMaintenanceService.stop();
+
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
     if (stopKafkaConsumer) {
       await stopKafkaConsumer();
     } // WAR-GAMED SIMULATION - Stop Kafka Consumer
-    await Promise.allSettled([
-      closeNeo4jDriver(),
+
+    // Shutdown OpenTelemetry
+    await getTracer().shutdown();
+
+    const shutdownPromises = [
       closePostgresPool(),
       closeRedisClient(),
-    ]);
+    ];
+    if (!process.env.DISABLE_NEO4J) {
+      shutdownPromises.push(closeNeo4jDriver());
+    }
+    await Promise.allSettled(shutdownPromises);
     httpServer.close((err: any) => {
       if (err) {
         logger.error(

@@ -17,7 +17,6 @@ resource "aws_iam_role" "github_deployer" {
         StringLike = {
           "token.actions.githubusercontent.com:sub" = [
             "repo:BrianCLong/summit:ref:refs/heads/main",
-            "repo:BrianCLong/summit:pull_request",
             "repo:BrianCLong/summit:ref:refs/heads/feature/dev-aws-green"
           ]
         }

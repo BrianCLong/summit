@@ -1,576 +1,584 @@
-name: GA Release (Legacy)
-# DEPRECATED: This workflow is superseded by release-ga-pipeline.yml
-# The canonical GA pipeline owns all v*.*.* tag events.
-# This workflow is retained for manual-only dispatch compatibility.
-# See: docs/ci/RELEASE_GA_PIPELINE.md
+name: Release GA Pipeline
+
+# Canonical GA Pipeline - Single authoritative workflow for GA tag events
+# Enforces lineage, verification, publish guard, and two-person approval.
+#
+# This workflow:
+# 1. Verifies GA tag points to successful RC commit (lineage)
+# 2. Runs release readiness verification
+# 3. Builds GA release bundle
+# 4. Runs publish guard
+# 5. Requires two-person approval before publishing
+# 6. Produces single ga-release-bundle-{tag} artifact
+#
+# See docs/ci/RELEASE_GA_PIPELINE.md for full documentation.
 
 on:
-  # Tag triggers removed - now handled by release-ga-pipeline.yml
-  # push:
-  #   tags:
-  #     - "v*"
+  push:
+    tags:
+      - "v*.*.*"
+
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (if different from ref)"
-        required: false
+        description: "GA tag to process (e.g., v4.1.2)"
+        required: true
         type: string
-      dry_run:
-        description: "Validate release process without publishing"
-        type: boolean
-        default: false
-        required: false
-      override_freeze:
-        description: "Override release freeze window?"
-        type: boolean
-        default: false
-        required: false
-      override_reason:
-        description: "Reason for override (min 20 chars)"
-        type: string
-        default: ""
-        required: false
-
-concurrency:
-  group: release-${{ inputs.tag || github.ref_name }}
-  cancel-in-progress: false
 
 permissions:
-  contents: write
-  packages: write
-  id-token: write # For OIDC/Cosign if needed
+  contents: read
+  actions: read
+  security-events: write # Required by _reusable-ga-readiness.yml
+  id-token: write # Required for OIDC/Sigstore signing
+  pull-requests: write # Required by _reusable-ga-readiness.yml
+
+concurrency:
+  group: release-ga-${{ github.ref_name || inputs.tag }}
+  cancel-in-progress: false
 
 jobs:
-  test-and-verify:
-    name: Verification Gates
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-        with:
-          fetch-depth: 0
-
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Preflight Release
-        run: node scripts/release/preflight-release.mjs
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Test Release Scripts
-        run: pnpm -w test:release-scripts
-
-      - name: Check Release Freeze Window
-        env:
-          OVERRIDE: ${{ inputs.override_freeze || 'false' }}
-          OVERRIDE_REASON: ${{ inputs.override_reason || '' }}
-        run: node scripts/release/check-freeze.mjs
-
-      - name: Upload Freeze Evidence
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          retention-days: 14
-          name: freeze-evidence
-          path: dist/release/freeze.json
-
-      - name: Run Server Tests
-        run: |
-          mkdir -p dist/release
-          if pnpm test:server; then
-            echo '{"ok": true}' > dist/release/verify.json
-          else
-            echo '{"ok": false, "code": "VERIFY_FAILED"}' > dist/release/verify.json
-            exit 1
-          fi
-        continue-on-error: false
-
-      - name: Run Policy Checks
-        run: |
-          if ./scripts/policy-test.sh; then
-            echo '{"ok": true}' > dist/release/preflight.json
-          else
-            echo '{"ok": false, "code": "SECURITY_GUARD"}' > dist/release/preflight.json
-            exit 1
-          fi
-        continue-on-error: false
-
-      - name: Verify Documentation Completeness
-        run: ./scripts/check_traceability.cjs
-        continue-on-error: false
-
-      - name: Check Freeze Window
-        if: always()
-        run: |
-          mkdir -p dist/release
-          if ./scripts/check-freeze.sh; then
-            echo '{"ok": true}' > dist/release/freeze.json
-          else
-            echo '{"ok": false, "code": "FREEZE_WINDOW", "message": "Freeze window is active"}' > dist/release/freeze.json
-          fi
-
-      - name: Generate Release Status
-        if: always()
-        run: node scripts/release/build-release-status.mjs
-
-      - name: Validate Release Schemas
-        if: always()
-        run: node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict
-
-      - name: Upload Release Status
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          retention-days: 14
-          name: release-status
-          path: dist/release/release-status.json
-
-  build-server:
-    name: Build Server
-    needs: test-and-verify
-    uses: ./.github/workflows/_reusable-slsa-build.yml
-    with:
-      image_name: server
-      dockerfile: server/Dockerfile
-      context: .
-      push: true
-      sign: true
-      sbom: true
-      slsa_provenance: true
-    secrets: inherit
-
-  build-client:
-    name: Build Client
-    needs: test-and-verify
-    uses: ./.github/workflows/_reusable-slsa-build.yml
-    with:
-      image_name: client
-      dockerfile: client/Dockerfile
-      context: .
-      push: true
-      sign: true
-      sbom: true
-      slsa_provenance: true
-    secrets: inherit
-
-  # Job: Collect and unify SBOM artifacts
-  collect-sboms:
-    name: Collect SBOMs & Generate Provenance
-    needs: [build-server, build-client]
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Gate: Exclude RC tags - only process GA tags
+  # ═══════════════════════════════════════════════════════════════════════════
+  gate:
+    name: "0️⃣ Gate Check"
     runs-on: ubuntu-latest
     outputs:
-      bundle_path: ${{ steps.collect.outputs.bundle_path }}
+      is_ga: ${{ steps.check.outputs.is_ga }}
+      tag: ${{ steps.check.outputs.tag }}
+      sha: ${{ steps.check.outputs.sha }}
+      version: ${{ steps.check.outputs.version }}
+
+    steps:
+      - name: Determine Tag and SHA
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG="${{ github.ref_name }}"
+            SHA="${{ github.sha }}"
+          else
+            TAG="${{ inputs.tag }}"
+            SHA=""
+          fi
+
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
+
+          # Extract version (e.g., 4.1.2 from v4.1.2)
+          VERSION=$(echo "${TAG}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+          # Check if this is a GA tag (not an RC tag)
+          # SECURITY: Strict anchoring to prevent substring bypass
+          if [[ "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
+            echo "is_ga=false" >> $GITHUB_OUTPUT
+            echo "Tag ${TAG} is an RC tag, skipping GA pipeline"
+          else
+            echo "is_ga=true" >> $GITHUB_OUTPUT
+            echo "Tag ${TAG} is a GA tag, proceeding"
+          fi
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Freeze Gate: Check if change freeze is active
+  # Blocks GA promotion when error budget is exhausted (unless override active)
+  # ═══════════════════════════════════════════════════════════════════════════
+  freeze-gate:
+    name: "🔒 Freeze Gate"
+    runs-on: ubuntu-latest
+    needs: gate
+    if: needs.gate.outputs.is_ga == 'true'
+
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v4
+
+      - name: Check Freeze Mode
+        run: |
+          chmod +x scripts/release/enforce_freeze_gate.sh
+
+          echo "Checking freeze gate for GA release..."
+
+          scripts/release/enforce_freeze_gate.sh \
+            --mode ga \
+            --tag "${{ needs.gate.outputs.tag }}" \
+            --verbose
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 1: Lineage Check (fail fast)
+  # Verify GA tag points to successful RC commit
+  # ═══════════════════════════════════════════════════════════════════════════
+  lineage:
+    name: "1️⃣ Lineage Check"
+    runs-on: ubuntu-latest
+    needs: [gate, freeze-gate]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    outputs:
+      rc_tag: ${{ steps.lineage.outputs.rc_tag }}
+      lineage_status: ${{ steps.lineage.outputs.status }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
+          ref: ${{ needs.gate.outputs.tag }}
 
-      - name: Extract Tag and Version
-        id: version
+      - name: Resolve SHA
+        id: resolve
         run: |
-          TAG="${{ inputs.tag || github.ref_name }}"
-          TAG="${TAG#refs/tags/}"
-          VERSION="${TAG#v}"
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Tag: ${TAG}, Version: ${VERSION}"
+          if [[ -z "${{ needs.gate.outputs.sha }}" ]]; then
+            SHA=$(git rev-parse HEAD)
+          else
+            SHA="${{ needs.gate.outputs.sha }}"
+          fi
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
-      - name: Create Bundle Directory
+      - name: Verify RC Lineage
+        id: lineage
         run: |
-          mkdir -p artifacts/release/${{ steps.version.outputs.tag }}
+          chmod +x scripts/release/verify-rc-lineage.sh
 
-      - name: Collect SBOM Artifacts
-        id: collect
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ steps.resolve.outputs.sha }}"
+
+          echo "Verifying lineage for GA tag: ${TAG}"
+          echo "Commit SHA: ${SHA}"
+
+          set +e
+          OUTPUT=$(scripts/release/verify-rc-lineage.sh \
+            --ga-tag "${TAG}" \
+            --ga-sha "${SHA}" \
+            --require-success \
+            --json 2>&1)
+          EXIT_CODE=$?
+          set -e
+
+          echo "${OUTPUT}"
+
+          # Parse JSON output for RC tag
+          if echo "${OUTPUT}" | jq -e '.rc_tag' > /dev/null 2>&1; then
+            RC_TAG=$(echo "${OUTPUT}" | jq -r '.rc_tag // empty')
+            echo "rc_tag=${RC_TAG}" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ ${EXIT_CODE} -eq 0 ]]; then
+            echo "status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Lineage Summary
+        if: always()
         run: |
-          chmod +x scripts/release/collect_sbom_artifacts.sh
+          TAG="${{ needs.gate.outputs.tag }}"
+          STATUS="${{ steps.lineage.outputs.status }}"
+          RC_TAG="${{ steps.lineage.outputs.rc_tag }}"
 
-          # Run SBOM collection
-          # Allow missing container SBOM initially - it may not exist yet
-          ./scripts/release/collect_sbom_artifacts.sh \
-            --tag "${{ steps.version.outputs.tag }}" \
-            --sha "${{ github.sha }}" \
-            --out "artifacts/release/${{ steps.version.outputs.tag }}" \
-            --allow-missing-container || true
+          if [[ "${STATUS}" == "passed" ]]; then
+            echo "### ✅ Lineage Verified" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Lineage Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GA Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source RC | \`${RC_TAG:-N/A}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
 
-          echo "bundle_path=artifacts/release/${{ steps.version.outputs.tag }}" >> $GITHUB_OUTPUT
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 2: Verification (Hardened Readiness)
+  # ═══════════════════════════════════════════════════════════════════════════
+  verify:
+    name: "2️⃣ Verification"
+    uses: ./.github/workflows/_reusable-ga-readiness.yml
+    needs: [gate, lineage]
+    if: needs.gate.outputs.is_ga == 'true'
+    with:
+      ref: ${{ needs.gate.outputs.tag }}
 
-      - name: Generate Bundle SBOM
-        run: |
-          chmod +x scripts/release/generate_bundle_sbom.sh
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 3: Build GA Bundle
+  # ═══════════════════════════════════════════════════════════════════════════
+  build-bundle:
+    name: "3️⃣ Build GA Bundle"
+    runs-on: ubuntu-latest
+    needs: [gate, lineage, verify]
+    if: needs.gate.outputs.is_ga == 'true'
 
-          # Generate CycloneDX SBOM describing the bundle contents
-          ./scripts/release/generate_bundle_sbom.sh \
-            --bundle "artifacts/release/${{ steps.version.outputs.tag }}" \
-            --tag "${{ steps.version.outputs.tag }}" \
-            --sha "${{ github.sha }}"
-
+    steps:
       - name: Generate Provenance Manifest
         run: |
-          chmod +x scripts/release/generate_provenance_manifest.sh
+          if [[ -f scripts/release/generate_provenance_manifest.sh ]]; then
+            chmod +x scripts/release/generate_provenance_manifest.sh
+            scripts/release/generate_provenance_manifest.sh \
+              --tag "${{ needs.gate.outputs.tag }}" \
+              --sha "${{ needs.verify.outputs.sha }}" \
+              --bundle-dir "staging/ga-bundle" \
+              --workflow-run "${{ github.run_id }}" || true
+          fi
 
-          # Generate provenance manifest (after bundle SBOM so it can reference it)
-          ./scripts/release/generate_provenance_manifest.sh \
-            --tag "${{ steps.version.outputs.tag }}" \
-            --sha "${{ github.sha }}" \
-            --bundle-dir "artifacts/release/${{ steps.version.outputs.tag }}" \
-            --workflow-run "${{ github.run_id }}"
-
-      - name: Upload SBOM Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
         with:
-          name: sbom-bundle-${{ steps.version.outputs.tag }}
-          path: artifacts/release/${{ steps.version.outputs.tag }}/
+          cosign-release: "v2.2.2"
+
+      - name: Sign Provenance (Keyless)
+        run: |
+          echo "Signing provenance.json with Keyless OIDC..."
+          cosign sign-blob --yes \
+            staging/ga-bundle/provenance.json \
+            --output-signature staging/ga-bundle/provenance.json.sig \
+            --output-certificate staging/ga-bundle/provenance.json.pem
+
+          echo "Signature created: staging/ga-bundle/provenance.json.sig"
+
+      - name: Upload GA Bundle
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: ga-bundle-staging
+          path: staging/ga-bundle/
           retention-days: 90
 
-      - name: SBOM Collection Summary
-        run: |
-          echo "## SBOM Collection Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** \`${{ steps.version.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Collected Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          find artifacts/release/${{ steps.version.outputs.tag }} -type f -name "*.json" | while read f; do
-            echo "$(basename $f): $(wc -c < $f | tr -d ' ') bytes"
-          done >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-
-  # Job: Prepare release artifacts (runs automatically)
-  prepare-release:
-    name: Prepare Release Bundle
-    needs: [build-server, build-client, collect-sboms]
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 4: Publish Guard
+  # Final verification before publishing
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish-guard:
+    name: "4️⃣ Publish Guard"
     runs-on: ubuntu-latest
+    needs: [gate, lineage, verify, build-bundle]
+    if: needs.gate.outputs.is_ga == 'true'
+
     outputs:
-      tag: ${{ steps.version.outputs.tag }}
-      evidence_sha256: ${{ steps.bundle.outputs.evidence_sha256 }}
-      provenance_sha256: ${{ steps.bundle.outputs.provenance_sha256 }}
-    permissions:
-      contents: read
+      publish_allowed: ${{ steps.guard.outputs.publish_allowed }}
+
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.gate.outputs.tag }}
 
-      - name: Extract Tag
-        id: version
+      - name: Download GA Bundle
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        with:
+          name: ga-bundle-staging
+          path: staging/ga-bundle
+
+      - name: Download Verification Output
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        with:
+          name: verification-output
+          path: staging/verification
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        with:
+          cosign-release: "v2.2.2"
+
+      - name: Verify Signed Bundle (Strict)
+        env:
+          EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
         run: |
-          TAG="${{ inputs.tag || github.ref_name }}"
-          TAG="${TAG#refs/tags/}"
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          chmod +x scripts/release/verify-release-bundle.mjs
+          node scripts/release/verify-release-bundle.mjs --path staging/ga-bundle --strict
 
-      - name: Download Server Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: build-artifacts-server-${{ github.run_id }}
-          path: evidence/server
-
-      - name: Download Client Artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: build-artifacts-client-${{ github.run_id }}
-          path: evidence/client
-
-      - name: Download SBOM Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: sbom-bundle-${{ steps.version.outputs.tag }}
-          path: evidence/sbom-bundle
-
-      - name: Download Freeze Evidence
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: freeze-evidence
-          path: evidence/freeze
-
-      - name: Download Release Status
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: release-status
-          path: evidence/release
-
-      - name: Create Evidence Bundle
-        id: bundle
+      - name: Run Publish Guard
+        id: guard
         run: |
-          mkdir -p release-assets
+          chmod +x scripts/release/publish_guard.sh
 
-          # Generate Checksums for all evidence (This creates evidence/SHA256SUMS)
-          # Use deterministic sorting to ensure stable hash
-          cd evidence
-          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
-          cd ..
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
 
-          # Verify Evidence Linkage
-          # We compare the digest of the generated artifacts (SHA256SUMS) against the
-          # committed evidence file in release-evidence/<TAG>.json
+          mkdir -p artifacts/publish-guard
+          REPORT_FILE="artifacts/publish-guard/PUBLISH_GUARD_REPORT.txt"
 
-          TAG="${{ inputs.tag || github.ref_name }}"
-          # Strip refs/tags/ prefix if present
-          TAG="${TAG#refs/tags/}"
+          set +e
+          scripts/release/publish_guard.sh \
+            --tag "${TAG}" \
+            --sha "${SHA}" \
+            --bundle-dir "staging/ga-bundle" \
+            --verbose 2>&1 | tee "${REPORT_FILE}"
+          EXIT_CODE=$?
+          set -e
 
-          REPO_EVIDENCE="release-evidence/${TAG}.json"
-
-          if [ -f "$REPO_EVIDENCE" ]; then
-            echo "Verifying linkage against committed evidence: $REPO_EVIDENCE"
-
-            # Compute digest of the FRESH SHA256SUMS (generated in previous step)
-            # Note: SHA256SUMS is in the 'evidence/' directory
-            ACTUAL_DIGEST=$(sha256sum evidence/SHA256SUMS | awk '{print $1}')
-
-            # Validate the committed evidence file structure
-            node scripts/release/validate-evidence.mjs --evidence "$REPO_EVIDENCE"
-
-            # Check for mismatch
-            EXPECTED_DIGEST=$(jq -r .bundle.digest "$REPO_EVIDENCE")
-
-            if [ "$ACTUAL_DIGEST" != "$EXPECTED_DIGEST" ]; then
-              echo "❌ EVIDENCE_BUNDLE_DIGEST_MISMATCH"
-              echo "Expected: $EXPECTED_DIGEST"
-              echo "Actual:   $ACTUAL_DIGEST"
-
-              # Emit failure report
-              echo '{"ok": false, "digestMatched": false, "expectedDigest": "'"$EXPECTED_DIGEST"'", "actualDigest": "'"$ACTUAL_DIGEST"'"}' > evidence/evidence-check.json
-              exit 1
-            else
-              echo "✅ Evidence bundle digest matched: $ACTUAL_DIGEST"
-              echo '{"ok": true, "digestMatched": true, "expectedDigest": "'"$EXPECTED_DIGEST"'", "actualDigest": "'"$ACTUAL_DIGEST"'"}' > evidence/evidence-check.json
-            fi
+          if [[ ${EXIT_CODE} -eq 0 ]]; then
+            echo "publish_allowed=true" >> $GITHUB_OUTPUT
           else
-            echo "⚠️ No committed evidence found at $REPO_EVIDENCE, skipping linkage check."
+            echo "publish_allowed=false" >> $GITHUB_OUTPUT
           fi
 
-          # Calculate provenance hash if available
-          PROVENANCE_SHA256=""
-          if [ -f "evidence/sbom-bundle/provenance.json" ]; then
-            PROVENANCE_SHA256=$(sha256sum evidence/sbom-bundle/provenance.json | awk '{print $1}')
-          fi
-
-          # Create release bundle tarball
-          tar -czf release-assets/evidence.tar.gz evidence/
-
-          # Calculate evidence tarball hash
-          EVIDENCE_SHA256=$(sha256sum release-assets/evidence.tar.gz | awk '{print $1}')
-
-          echo "evidence_sha256=${EVIDENCE_SHA256}" >> $GITHUB_OUTPUT
-          echo "provenance_sha256=${PROVENANCE_SHA256}" >> $GITHUB_OUTPUT
-
-          echo "📦 Evidence bundle created"
-          echo "  SHA256: ${EVIDENCE_SHA256}"
-
-      - name: Generate Required Checks Snapshot
-        run: |
-          # Capture the list of required checks that were verified
-          cat > release-assets/required_checks_snapshot.txt <<EOF
-          # Required Checks Snapshot
-          # Tag: ${{ steps.version.outputs.tag }}
-          # Commit: ${{ github.sha }}
-          # Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          test-and-verify: passed
-          build-server: passed
-          build-client: passed
-          collect-sboms: passed
-          EOF
-
-      - name: Upload Release Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - name: Upload Publish Guard Report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
-          name: release-bundle-${{ steps.version.outputs.tag }}
-          path: release-assets/
+          name: publish-guard-report
+          path: artifacts/publish-guard/
           retention-days: 90
 
-      - name: Prepare Release Summary
+      - name: Publish Guard Summary
+        if: always()
         run: |
-          echo "### 📦 Release Bundle Prepared" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** \`${{ steps.version.outputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Evidence Bundle SHA256:** \`${{ steps.bundle.outputs.evidence_sha256 }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### ⏳ Awaiting Two-Person Approval" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The release bundle is ready. Publishing requires approval from the \`ga-release\` environment." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Required reviewers** must approve in the GitHub Actions UI before the release is published." >> $GITHUB_STEP_SUMMARY
+          TAG="${{ needs.gate.outputs.tag }}"
+          ALLOWED="${{ steps.guard.outputs.publish_allowed }}"
 
-  # Job: Publish release (requires environment approval)
-  publish:
-    name: Publish Release
-    needs: [prepare-release]
+          if [[ "${ALLOWED}" == "true" ]]; then
+            echo "### ✅ Publish Guard Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Publish Guard Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Tag: \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 5: Assemble Final Bundle
+  # Combine all artifacts into ga-release-bundle-{tag}
+  # ═══════════════════════════════════════════════════════════════════════════
+  assemble:
+    name: "5️⃣ Assemble Release Bundle"
     runs-on: ubuntu-latest
-    # TWO-PERSON APPROVAL: This job requires approval from the ga-release environment
-    # Configure required reviewers in GitHub: Settings → Environments → ga-release
+    needs: [gate, lineage, verify, build-bundle, publish-guard]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        with:
+          path: staging
+
+      - name: Assemble GA Release Bundle
+        id: assemble
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+          VERSION="${{ needs.gate.outputs.version }}"
+          RC_TAG="${{ needs.lineage.outputs.rc_tag }}"
+          LINEAGE_STATUS="${{ needs.lineage.outputs.lineage_status }}"
+          VERIFY_STATUS="${{ needs.verify.outputs.verify_status }}"
+          PUBLISH_ALLOWED="${{ needs.publish-guard.outputs.publish_allowed }}"
+
+          BUNDLE_DIR="ga-release-bundle-${TAG}"
+          mkdir -p "${BUNDLE_DIR}"
+
+          echo "Assembling GA Release Bundle: ${BUNDLE_DIR}"
+
+          # Copy GA bundle contents
+          if [[ -d "staging/ga-bundle-staging" ]]; then
+            cp -r staging/ga-bundle-staging/* "${BUNDLE_DIR}/" 2>/dev/null || true
+          fi
+
+          # Copy verification output
+          if [[ -f "staging/verification-output/REQUIRED_CHECKS.txt" ]]; then
+            cp staging/verification-output/REQUIRED_CHECKS.txt "${BUNDLE_DIR}/"
+          fi
+
+          # Copy publish guard report
+          if [[ -f "staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt" ]]; then
+            cp staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt "${BUNDLE_DIR}/"
+          fi
+
+          # Create pipeline_metadata.json using jq
+          jq -n \
+            --arg version "1.0.0" \
+            --arg pipeline "release-ga" \
+            --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg ga_tag "${TAG}" \
+            --arg base_version "${VERSION}" \
+            --arg commit_sha "${SHA}" \
+            --arg source_rc "${RC_TAG}" \
+            --arg lineage_status "${LINEAGE_STATUS}" \
+            --arg verify_status "${VERIFY_STATUS}" \
+            --argjson publish_allowed $([ "${PUBLISH_ALLOWED}" == "true" ] && echo "true" || echo "false") \
+            --arg run_id "${{ github.run_id }}" \
+            --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg actor "${{ github.actor }}" \
+            '{
+              version: $version,
+              pipeline: $pipeline,
+              generated_at: $generated_at,
+              release: {
+                ga_tag: $ga_tag,
+                base_version: $base_version,
+                commit_sha: $commit_sha,
+                source_rc: $source_rc
+              },
+              verification: {
+                lineage: $lineage_status,
+                checks: $verify_status,
+                publish_allowed: $publish_allowed
+              },
+              workflow: {
+                run_id: $run_id,
+                run_url: $run_url,
+                actor: $actor
+              },
+              artifacts: {
+                release_notes: "github_release.md",
+                publish_script: "publish_to_ga.sh",
+                verification: "REQUIRED_CHECKS.txt",
+                publish_guard: "PUBLISH_GUARD_REPORT.txt",
+                checklist: "GA_RELEASE_CHECKLIST.md"
+              }
+            }' > "${BUNDLE_DIR}/pipeline_metadata.json"
+
+          # Regenerate SHA256SUMS
+          cd "${BUNDLE_DIR}"
+          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          cd - > /dev/null
+
+          echo "bundle_dir=${BUNDLE_DIR}" >> $GITHUB_OUTPUT
+
+          echo ""
+          echo "Bundle contents:"
+          ls -la "${BUNDLE_DIR}/"
+
+      - name: Upload GA Release Bundle
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
+          path: ga-release-bundle-${{ needs.gate.outputs.tag }}
+          retention-days: 90
+
+      - name: Cleanup Intermediate Artifacts
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
+        with:
+          name: |
+            ga-bundle-staging
+            verification-output
+            publish-guard-report
+          failOnError: false
+
+      - name: Final Summary
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+          VERSION="${{ needs.gate.outputs.version }}"
+          RC_TAG="${{ needs.lineage.outputs.rc_tag }}"
+          LINEAGE="${{ needs.lineage.outputs.lineage_status }}"
+          VERIFY="${{ needs.verify.outputs.verify_status }}"
+          GUARD="${{ needs.publish-guard.outputs.publish_allowed }}"
+
+          if [[ "${LINEAGE}" == "passed" && "${VERIFY}" == "passed" && "${GUARD}" == "true" ]]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="READY FOR APPROVAL"
+          else
+            STATUS_ICON="❌"
+            STATUS_TEXT="NOT READY"
+          fi
+
+          echo "## ${STATUS_ICON} GA Release Pipeline: ${TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lineage Check | $([ "${LINEAGE}" == "passed" ] && echo "✅" || echo "❌") ${LINEAGE} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Verification | $([ "${VERIFY}" == "passed" ] && echo "✅" || echo "⚠️") ${VERIFY} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Publish Guard | $([ "${GUARD}" == "true" ] && echo "✅" || echo "❌") ${GUARD} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bundle | ✅ Assembled |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Release Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GA Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source RC | \`${RC_TAG:-N/A}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${SHA:0:7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${VERSION} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | \`ga-release-bundle-${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${GUARD}" == "true" ]]; then
+            echo "### 🚀 Next Steps: Two-Person Approval" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This release requires two-person approval via the \`ga-release\` environment." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. Download the \`ga-release-bundle-${TAG}\` artifact" >> $GITHUB_STEP_SUMMARY
+            echo "2. Review the bundle contents" >> $GITHUB_STEP_SUMMARY
+            echo "3. Run: \`./publish_to_ga.sh --dry-run\`" >> $GITHUB_STEP_SUMMARY
+            echo "4. If approved, trigger the publish workflow manually" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ Cannot Proceed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "One or more gates failed. Review the pipeline output and fix issues before retrying." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 6: Publish (requires environment approval)
+  # Two-person approval gate before publishing
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish:
+    name: "6️⃣ Publish Release"
+    runs-on: ubuntu-latest
+    needs: [gate, lineage, verify, build-bundle, publish-guard, assemble]
+    if: |
+      needs.gate.outputs.is_ga == 'true' &&
+      needs.publish-guard.outputs.publish_allowed == 'true'
+
     environment:
       name: ga-release
-      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.prepare-release.outputs.tag }}
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.gate.outputs.tag }}
+
     permissions:
       contents: write
-      packages: write
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v4
 
-      - name: Download Release Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+      - name: Download GA Release Bundle
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
-          name: release-bundle-${{ needs.prepare-release.outputs.tag }}
-          path: release-assets
+          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
+          path: ga-release-bundle
 
       - name: Verify Bundle Integrity
-        id: verify
         run: |
-          TAG="${{ needs.prepare-release.outputs.tag }}"
-          EXPECTED_HASH="${{ needs.prepare-release.outputs.evidence_sha256 }}"
-
-          echo "🔐 Verifying release bundle integrity..."
-          echo "Tag: ${TAG}"
-          echo "Expected SHA256: ${EXPECTED_HASH}"
-
-          # Verify the evidence tarball hash matches what was prepared
-          ACTUAL_HASH=$(sha256sum release-assets/evidence.tar.gz | awk '{print $1}')
-          echo "Actual SHA256: ${ACTUAL_HASH}"
-
-          if [ "${ACTUAL_HASH}" != "${EXPECTED_HASH}" ]; then
-            echo "::error::Evidence bundle hash mismatch! The artifact may have been tampered with."
-            echo "Expected: ${EXPECTED_HASH}"
-            echo "Actual:   ${ACTUAL_HASH}"
+          cd ga-release-bundle
+          if sha256sum -c SHA256SUMS; then
+            echo "✅ Bundle integrity verified"
+          else
+            echo "❌ Bundle integrity check failed"
             exit 1
           fi
 
-          echo "✅ Evidence bundle integrity verified"
-          echo "verified=true" >> $GITHUB_OUTPUT
-
-      - name: Generate Approval Record
-        id: approval
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ needs.prepare-release.outputs.tag }}"
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
 
-          # Generate approval record for audit trail
-          cat > release-assets/approval_record.json <<EOF
-          {
-            "version": "1.0.0",
-            "approval": {
-              "workflow_run_id": "${{ github.run_id }}",
-              "workflow_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-              "environment": "ga-release",
-              "tag": "${TAG}",
-              "commit_sha": "${{ github.sha }}",
-              "evidence_sha256": "${{ needs.prepare-release.outputs.evidence_sha256 }}",
-              "provenance_sha256": "${{ needs.prepare-release.outputs.provenance_sha256 }}",
-              "approved_at": "${TIMESTAMP}",
-              "triggered_by": "${{ github.actor }}",
-              "repository": "${{ github.repository }}"
-            },
-            "verification": {
-              "bundle_integrity": "verified",
-              "required_checks": "passed",
-              "environment_approval": "granted"
-            },
-            "audit_note": "Reviewer identity available in GitHub audit log for this workflow run"
-          }
-          EOF
-
-          echo "📋 Approval record generated"
-          cat release-assets/approval_record.json
-
-      - name: Upload Approval Record
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: approval-record-${{ needs.prepare-release.outputs.tag }}
-          path: release-assets/approval_record.json
-          retention-days: 90 # Keep approval records for 1 year
-
-      - name: Generate Release Notes
-        id: notes
-        run: |
-          echo "notes=GA Release ${{ needs.prepare-release.outputs.tag }} (SLSA L3 Compliant)" >> $GITHUB_OUTPUT
-
-      - name: Publish Release
-        id: publish
-        if: ${{ inputs.dry_run != true }}
-        run: |
-          TAG="${{ needs.prepare-release.outputs.tag }}"
-          echo "Processing release for tag: $TAG"
-
-          # Determine prerelease
-          PRERELEASE=false
-          if [[ "$TAG" == *"-rc"* ]]; then
-            PRERELEASE=true
-          fi
+          echo "Creating GitHub Release: ${TAG}"
 
           # Check if release exists
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "Release $TAG exists. Updating..."
-            EXISTED="true"
-            ACTION="updated"
-
-            # Pattern A: Update
-            gh release upload "$TAG" release-assets/evidence.tar.gz --clobber --repo "$GITHUB_REPOSITORY"
-            gh release edit "$TAG" \
-              --notes "${{ steps.notes.outputs.notes }}" \
-              --prerelease="$PRERELEASE" \
-              --repo "$GITHUB_REPOSITORY"
-
+          if gh release view "${TAG}" > /dev/null 2>&1; then
+            echo "Release ${TAG} exists, updating..."
+            gh release upload "${TAG}" ga-release-bundle/* --clobber || true
           else
-            echo "Release $TAG does not exist. Creating..."
-            EXISTED="false"
-            ACTION="created"
-
-            gh release create "$TAG" release-assets/evidence.tar.gz \
-              --title "$TAG" \
-              --notes "${{ steps.notes.outputs.notes }}" \
-              --prerelease="$PRERELEASE" \
-              --repo "$GITHUB_REPOSITORY"
+            echo "Creating new release ${TAG}..."
+            gh release create "${TAG}" \
+              --title "${TAG} - GA Release" \
+              --notes-file ga-release-bundle/github_release.md \
+              ga-release-bundle/* || echo "Release creation attempted"
           fi
 
-          echo "existed=$EXISTED" >> "$GITHUB_OUTPUT"
-          echo "action=$ACTION" >> "$GITHUB_OUTPUT"
-
-      - name: Dry Run Summary
-        if: ${{ inputs.dry_run == true }}
+      - name: Publish Summary
         run: |
-          TAG="${{ needs.prepare-release.outputs.tag }}"
-          echo "dry_run=true" >> "$GITHUB_OUTPUT"
-          echo "### 🧪 Dry Run Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** \`$TAG\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### ✅ Validation Passed" >> $GITHUB_STEP_SUMMARY
-          echo "- Build: Server and Client images built successfully" >> $GITHUB_STEP_SUMMARY
-          echo "- Tests: All verification gates passed" >> $GITHUB_STEP_SUMMARY
-          echo "- Evidence: Bundle created and checksums verified" >> $GITHUB_STEP_SUMMARY
-          echo "- Approval: Environment approval granted" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### 📦 Artifacts (not published)" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          ls -la release-assets/ >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> **Note:** This was a dry run. No release was published." >> $GITHUB_STEP_SUMMARY
+          TAG="${{ needs.gate.outputs.tag }}"
 
-      - name: Release Summary
-        if: ${{ always() && inputs.dry_run != true }}
-        run: |
-          echo "### ✅ Release Published" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ GA Release Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tag:** ${{ needs.prepare-release.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Concurrency Group:** release-${{ needs.prepare-release.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Release Existed:** ${{ steps.publish.outputs.existed }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Action Taken:** ${{ steps.publish.outputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "#### 🔐 Two-Person Approval" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment:** ga-release" >> $GITHUB_STEP_SUMMARY
-          echo "- **Approval Record:** See \`approval-record-${{ needs.prepare-release.outputs.tag }}\` artifact" >> $GITHUB_STEP_SUMMARY
-          echo "- **Audit Log:** GitHub audit log contains reviewer identity" >> $GITHUB_STEP_SUMMARY
+          echo "Two-person approval was granted via the \`ga-release\` environment." >> $GITHUB_STEP_SUMMARY

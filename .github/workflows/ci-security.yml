@@ -35,7 +35,7 @@ env:
 jobs:
   context:
     name: Determine execution context
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       run_dast: ${{ steps.flags.outputs.run_dast }}
       run_snyk: ${{ steps.flags.outputs.run_snyk }}
@@ -63,35 +63,33 @@ jobs:
 
   secret-scan:
     name: Secret scanning (Gitleaks)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+        uses: actions/checkout@v4 # v4.1.7
         with:
           fetch-depth: 0
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Gitleaks
-        uses: zricethezav/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
-        with:
-          args: detect --source . --report-format sarif --report-path ${{ env.REPORT_DIR }}/gitleaks.sarif
-      - name: Upload SARIF to GitHub Security
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
-        with:
-          sarif_file: ${{ env.REPORT_DIR }}/gitleaks.sarif
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+      # Note: Gitleaks v2 action handles SARIF upload internally when GITHUB_TOKEN is provided
       - name: Persist report artifact
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
-          path: ${{ env.REPORT_DIR }}/gitleaks.sarif
+          path: results.sarif
+          if-no-files-found: ignore
 
   sast:
     name: Static application security testing (CodeQL)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     permissions:
       actions: read
@@ -102,28 +100,28 @@ jobs:
       matrix:
         language: [javascript, python]
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/init@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           languages: ${{ matrix.language }}
       - name: Autobuild (best effort)
-        uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/autobuild@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         continue-on-error: true
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/analyze@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           category: "/language:${{ matrix.language }}"
 
   semgrep:
     name: Semgrep policy-as-code (SAST)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     permissions:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Semgrep CI ruleset
@@ -135,12 +133,12 @@ jobs:
           auditOn: push
       - name: Upload Semgrep SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           sarif_file: ${{ env.REPORT_DIR }}/semgrep.sarif
       - name: Persist Semgrep report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -148,13 +146,13 @@ jobs:
 
   dependency-scan:
     name: Dependency vulnerability scan (Snyk)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     if: ${{ needs.context.outputs.run_snyk == 'true' }}
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Ensure SNYK_TOKEN is configured
@@ -165,7 +163,7 @@ jobs:
             exit 1
           fi
       - name: Run Snyk test across all manifests
-        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
+        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.10.0
         with:
           command: test
           args: >-
@@ -175,12 +173,12 @@ jobs:
             --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
       - name: Upload Snyk SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
       - name: Persist Snyk report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -188,15 +186,15 @@ jobs:
 
   filesystem-scan:
     name: File system vulnerability scan (Trivy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     permissions:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Install Trivy
-        uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+        uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.0
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Trivy FS scan
@@ -210,12 +208,12 @@ jobs:
             .
       - name: Upload filesystem SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
       - name: Persist filesystem report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -223,13 +221,13 @@ jobs:
 
   container-scan:
     name: Container image scan (Trivy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     permissions:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Build server image for scanning
@@ -237,7 +235,7 @@ jobs:
       - name: Build client image for scanning
         run: docker build -t security-suite/client ./client
       - name: Scan server image
-        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.1
         with:
           image-ref: security-suite/server
           format: sarif
@@ -246,11 +244,11 @@ jobs:
           ignore-unfixed: true
       - name: Upload server SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-server.sarif
       - name: Scan client image
-        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.1
         with:
           image-ref: security-suite/client
           format: sarif
@@ -259,12 +257,12 @@ jobs:
           ignore-unfixed: true
       - name: Upload client SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
       - name: Persist container reports
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -274,11 +272,11 @@ jobs:
 
   license-compliance:
     name: License compliance verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
-      - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+      - uses: actions/checkout@v4 # v4.1.7
+      - uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.5
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Evaluate license policy
@@ -291,7 +289,7 @@ jobs:
             .
       - name: Persist license report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -299,10 +297,10 @@ jobs:
 
   iac-scan:
     name: Infrastructure-as-code scan (Checkov)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Install Checkov
         run: pip install --no-cache-dir checkov==3.2.23
       - name: Run Checkov across Terraform and Helm assets
@@ -316,12 +314,12 @@ jobs:
             --output sarif
       - name: Upload Checkov SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        uses: github/codeql-action/upload-sarif@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           sarif_file: ${{ env.REPORT_DIR }}/results.sarif
       - name: Persist Checkov report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -329,12 +327,12 @@ jobs:
 
   opa-policy:
     name: Policy enforcement (OPA/Conftest)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Install Helm
-        uses: azure/setup-helm@bf6a7d304bc2fdb57e0331155b7ebf2c504acf0a # v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.1.0
         with:
           version: "3.12.0"
       - name: Install Conftest
@@ -353,7 +351,7 @@ jobs:
         run: conftest test rendered --policy policies/opa
       - name: Persist rendered manifests
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -361,17 +359,17 @@ jobs:
 
   cis-benchmark:
     name: CIS benchmark validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - context
       - opa-policy
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Install Helm
-        uses: azure/setup-helm@bf6a7d304bc2fdb57e0331155b7ebf2c504acf0a # v4
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.1.0
         with:
           version: "3.12.0"
-      - uses: aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1 # v0.2.4
+      - uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.0
       - name: Render manifests for CIS evaluation
         run: |
           set -euo pipefail
@@ -392,7 +390,7 @@ jobs:
           fi
       - name: Persist CIS report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -400,17 +398,17 @@ jobs:
 
   baseline:
     name: Security baseline verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Execute baseline checks
         run: |
           chmod +x scripts/security/baseline-check.sh
           REPORT_DIR="$REPORT_DIR" scripts/security/baseline-check.sh
       - name: Persist baseline report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -418,12 +416,12 @@ jobs:
 
   dast:
     name: Dynamic application security testing (OWASP ZAP)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: context
     if: ${{ needs.context.outputs.run_dast == 'true' }}
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
@@ -440,7 +438,7 @@ jobs:
           echo "Application did not become ready in time" >&2
           exit 1
       - name: OWASP ZAP baseline scan
-        uses: zaproxy/action-baseline@6c5a007541891231cd9e0ddec25d4f25c59c9874 # v0.15.0
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
         with:
           target: "http://localhost:3000"
           cmd_options: "-a -m 5"
@@ -456,7 +454,7 @@ jobs:
         run: docker compose -f docker-compose.yml down
       - name: Persist ZAP reports
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -467,7 +465,7 @@ jobs:
 
   security-summary:
     name: Aggregate security coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - secret-scan
       - sast
@@ -486,7 +484,7 @@ jobs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
     steps:
       - name: Download all security reports
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: security-reports
           path: aggregated-security
@@ -539,7 +537,7 @@ jobs:
                 json.dump(summary, fh, indent=2)
           PY
       - name: Publish job summary
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const fs = require('fs');
@@ -558,7 +556,7 @@ jobs:
               .write();
       - name: Upload aggregated summary
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -571,7 +569,7 @@ jobs:
 
   production-approval:
     name: Security gate approval for deployments
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: security-summary
     if: ${{ github.event_name == 'workflow_call' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     environment:

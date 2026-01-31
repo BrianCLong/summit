@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit MCP Resource Schema",
+  "description": "Schema for Summit's Model Context Protocol (MCP) Resource Definition",
+  "type": "object",
+  "properties": {
+    "resource_id": {
+      "type": "string",
+      "description": "Unique identifier for the resource (e.g., summit.logs.error_stream)"
+    },
+    "uri": {
+      "type": "string",
+      "description": "The URI to access the resource"
+    },
+    "mimeType": {
+      "type": "string",
+      "description": "The MIME type of the resource content"
+    },
+    "access": {
+      "type": "string",
+      "enum": [
+        "read-only",
+        "read-write"
+      ],
+      "default": "read-only",
+      "description": "Access level for the resource"
+    }
+  },
+  "required": [
+    "resource_id",
+    "uri",
+    "mimeType"
+  ]
+}

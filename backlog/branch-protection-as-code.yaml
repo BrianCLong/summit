@@ -1,0 +1,11 @@
+item: branch-protection-as-code
+deferred:
+  - title: Org-wide enforcement across all repos
+    owner: governance
+    estimate: 5d
+    dependency: admin token + org policy alignment
+    reason: out of MWS
+    claim_ids:
+      - SUMMIT_ORIGINAL
+    required_gates:
+      - ci: branch-protection-drift

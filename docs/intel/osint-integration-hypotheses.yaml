@@ -1,0 +1,49 @@
+# Summit OSINT Integration Hypotheses
+# Date: 2026-01-25
+# Purpose: Define strategic integration patterns for third-party OSINT capabilities within Summit architecture.
+
+integrations:
+  - id: "osint-connector-ingestion"
+    name: "Governed OSINT Ingestion Pipeline"
+    type: "Connector (Ingress)"
+    description: "Standardized ingestion of external OSINT feeds (e.g., Social Links, ShadowDragon) into IntelGraph via governed pipelines."
+    value_proposition: "Allows analysts to leverage specialized external collection tools while maintaining Summit's 'System of Record' integrity."
+    required_interfaces:
+      - "OSINTPipeline (server/src/osint/OSINTPipeline.ts)"
+      - "ProvenanceLedger (server/src/provenance/ledger.ts)"
+      - "EntityResolutionService (server/src/intelgraph/EntityResolutionService.ts)"
+    governance_implications:
+      - "All ingested entities must be stamped with source provenance."
+      - "Ingestion triggers automatic entity resolution and policy checks (OPA)."
+      - "Risk of 'inference creep' if external data quality is low."
+    ga_readiness_risk: "Medium (Requires strict schema validation for diverse external sources)."
+
+  - id: "graph-enrichment-overlay"
+    name: "On-Demand Graph Enrichment"
+    type: "Enrichment (Overlay)"
+    description: "Contextual enrichment of selected graph nodes (e.g., IP, Email, Domain) using external API lookups triggered by analyst action."
+    value_proposition: "Reduces 'swivel-chair' analysis by bringing external context directly to the node in IntelGraph."
+    required_interfaces:
+      - "OSINTEnrichmentService (server/src/osint/OSINTEnrichmentService.ts)"
+      - "GraphResolver (GraphQL)"
+      - "CostEstimator (server/src/autonomous/CostEstimator.ts)"
+    governance_implications:
+      - "Enrichment actions must be logged in the Provenance Ledger."
+      - "Cost controls (tokens/API credits) must be enforced via CostEstimator."
+      - "Data minimization: Only fetch relevant fields."
+    ga_readiness_risk: "Low (Existing pattern, needs specific connector implementations)."
+
+  - id: "evidence-export-pack"
+    name: "Immutable Evidence Export"
+    type: "Export (Egress)"
+    description: "Exporting a subgraph or investigation timeline as a cryptographically verifiable 'Evidence Pack' for external consumption (Court, LEA, Compliance)."
+    value_proposition: "Extends Summit's 'Truth Moat' outside the platform, allowing third parties to verify the integrity of the investigation."
+    required_interfaces:
+      - "ProvenanceLedger (server/src/provenance/ledger.ts)"
+      - "CaseExportService (Future)"
+      - "DigitalSignatureService"
+    governance_implications:
+      - "Exports must be signed and time-stamped."
+      - "Chain of custody must be preserved in the export format (e.g., verifiable PDF or JSON-LD)."
+      - "Redaction policies must be applied before export."
+    ga_readiness_risk: "High (Requires robust export format and verification tooling)."

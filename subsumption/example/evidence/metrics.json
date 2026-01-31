@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-BUNDLE-GOV-003",
+  "metrics": {
+    "claims_count": 1,
+    "findings_count": 1,
+    "docs_targets_count": 4
+  }
+}

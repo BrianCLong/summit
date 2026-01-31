@@ -25,6 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
@@ -61,6 +62,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
@@ -157,7 +159,7 @@ jobs:
 
       # Build Server
       - name: Build and push Server
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: ./server
           file: ./server/Dockerfile.dev
@@ -169,7 +171,7 @@ jobs:
 
       # Build Client
       - name: Build and push Client
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: ./client
           file: ./client/Dockerfile.dev
@@ -189,6 +191,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - uses: pnpm/action-setup@v4

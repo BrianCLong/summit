@@ -1,14 +1,13 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { nl2cypher } from '../nl2cypher/index';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { nl2cypher } from '../nl2cypher/index.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('nl2cypher corpus', () => {
   it('produces expected cypher and AST for corpus', () => {
-    const corpusPath = join(
-      __dirname,
-      '../../../contracts/nl2cypher/prompts.tsv',
-    );
+    const currentDir = dirname(fileURLToPath(import.meta.url));
+    const corpusPath = join(currentDir, '../../../contracts/nl2cypher/prompts.tsv');
     const lines = readFileSync(corpusPath, 'utf-8').trim().split('\n');
     let success = 0;
     for (const line of lines) {

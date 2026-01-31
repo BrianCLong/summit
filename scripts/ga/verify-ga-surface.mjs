@@ -13,7 +13,9 @@ const requiredFeatures = [
   'Observability Taxonomy',
   'Data Classification & Governance',
   'Policy Preflight & Receipts',
-  'Ingestion Security Hardening'
+  'Ingestion Security Hardening',
+  'Generative UI Plan Contract',
+  'GA Gate Artifact Closure'
 ];
 
 const allowedTiers = new Set(['A', 'B', 'C']);
@@ -42,6 +44,26 @@ async function ensureFileContains(relativePath, keyword) {
 async function validateVerificationMap() {
   const map = await readJson('docs/ga/verification-map.json');
   const featureNames = map.map((entry) => entry.feature);
+  const sortedFeatureNames = [...featureNames].sort((a, b) => {
+    const left = a.toLowerCase();
+    const right = b.toLowerCase();
+    if (left < right) {
+      return -1;
+    }
+    if (left > right) {
+      return 1;
+    }
+    return 0;
+  });
+
+  const isSorted = featureNames.every(
+    (feature, index) => feature === sortedFeatureNames[index]
+  );
+  if (!isSorted) {
+    errors.push(
+      'verification-map.json entries must be sorted by feature name (case-insensitive).'
+    );
+  }
 
   for (const feature of requiredFeatures) {
     if (!featureNames.includes(feature)) {

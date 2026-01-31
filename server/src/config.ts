@@ -28,6 +28,19 @@ export const EnvSchema = z
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
     DOCLING_SVC_URL: z.string().url().default('http://localhost:5001'),
     DOCLING_SVC_TIMEOUT_MS: z.coerce.number().default(30000),
+    // GraphQL Cost Analysis & Rate Limiting
+    ENFORCE_GRAPHQL_COST_LIMITS: z.coerce.boolean().default(true),
+    GRAPHQL_COST_CONFIG_PATH: z.string().optional(),
+    COST_EXEMPT_TENANTS: z.string().optional().default(''),
+    GA_CLOUD: z.coerce.boolean().default(false),
+    AWS_REGION: z.string().optional(),
+    AI_ENABLED: z.coerce.boolean().default(false),
+    KAFKA_ENABLED: z.coerce.boolean().default(false),
+    OPENAI_API_KEY: z.string().optional(),
+    ANTHROPIC_API_KEY: z.string().optional(),
+    SKIP_AI_ROUTES: z.coerce.boolean().default(false),
+    SKIP_WEBHOOKS: z.coerce.boolean().default(false),
+    SKIP_GRAPHQL: z.coerce.boolean().default(false),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -62,12 +75,32 @@ const ENV_VAR_HELP: Record<string, string> = {
   JWT_SECRET: 'JWT signing secret (min 32 characters, use strong random value)',
   JWT_REFRESH_SECRET: 'JWT refresh token secret (min 32 characters, different from JWT_SECRET)',
   CORS_ORIGIN: 'Allowed CORS origins (comma-separated, e.g., http://localhost:3000)',
+  ENFORCE_GRAPHQL_COST_LIMITS: 'Enable/disable GraphQL cost limit enforcement (default: true)',
+  GRAPHQL_COST_CONFIG_PATH: 'Path to GraphQL cost configuration JSON file (optional)',
+  COST_EXEMPT_TENANTS: 'Comma-separated list of tenant IDs exempt from cost limits',
+  GA_CLOUD: 'Enable strict GA cloud readiness checks (default: false)',
+  AWS_REGION: 'AWS Region (required if GA_CLOUD is true)',
+  AI_ENABLED: 'Enable AI-augmented features (default: false)',
+  OPENAI_API_KEY: 'OpenAI API Key (required if AI_ENABLED=true)',
+  ANTHROPIC_API_KEY: 'Anthropic API Key (required if AI_ENABLED=true)',
 };
 
-export const cfg = (() => {
+const initializeConfig = () => {
   const isTest = process.env.NODE_ENV === 'test';
   const schema = isTest ? TestEnv : Env;
-  const parsed = schema.safeParse(process.env);
+  
+  // Cross-field validation for AI
+  const rawData = { ...process.env };
+  const parsed = schema.safeParse(rawData);
+  
+  if (parsed.success) {
+    const data = parsed.data;
+    if (data.AI_ENABLED && !data.OPENAI_API_KEY && !data.ANTHROPIC_API_KEY) {
+      console.error('\n❌ AI Configuration Error: AI_ENABLED=true requires either OPENAI_API_KEY or ANTHROPIC_API_KEY.\n');
+      process.exit(1);
+    }
+  }
+
   if (!parsed.success) {
     console.error('\n❌ Environment Validation Failed\n');
     console.error('Missing or invalid environment variables:\n');
@@ -149,11 +182,58 @@ export const cfg = (() => {
         fail(key, 'contains localhost/devpassword; set a production secret');
       }
     });
-  } else {
+  }
+
+  if (env.GA_CLOUD) {
+    console.log('🔒 GA Cloud Guard Active: Enforcing strict production constraints');
+
+    if (env.NODE_ENV !== 'production') {
+      console.error('\n❌ GA Cloud Error: NODE_ENV must be "production" when GA_CLOUD is enabled.\n');
+      process.exit(1);
+    }
+
+    if (!env.AWS_REGION) {
+      console.error('\n❌ GA Cloud Error: AWS_REGION is required when GA_CLOUD is enabled.\n');
+      process.exit(1);
+    }
+
+    // Ensure strictly no localhost in critical URLs for GA
+    const criticalUrls = [env.DATABASE_URL, env.NEO4J_URI];
+    criticalUrls.forEach(url => {
+        if (url && (url.includes('localhost') || url.includes('127.0.0.1'))) {
+             console.error(`\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`);
+             process.exit(1);
+        }
+    });
+  }
+
+  if (env.NODE_ENV !== 'production' && !env.GA_CLOUD) {
     console.log(`[STARTUP] Environment validated (${present} keys)`);
   }
   return env;
-})();
+};
+
+let _cfg: any = null;
+export const cfg = new Proxy({} as any, {
+  get: (_target, prop) => {
+    if (!_cfg) {
+      _cfg = initializeConfig();
+    }
+    return _cfg[prop];
+  },
+  ownKeys: (_target) => {
+    if (!_cfg) {
+      _cfg = initializeConfig();
+    }
+    return Reflect.ownKeys(_cfg);
+  },
+  getOwnPropertyDescriptor: (_target, prop) => {
+    if (!_cfg) {
+      _cfg = initializeConfig();
+    }
+    return Reflect.getOwnPropertyDescriptor(_cfg, prop);
+  }
+});
 
 // Derived URLs for convenience
 export const dbUrls = {

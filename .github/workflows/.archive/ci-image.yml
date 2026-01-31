@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+        uses: actions/checkout@v4
 
       - name: Check for changes
         id: changes
@@ -51,7 +51,7 @@ jobs:
 
       - name: Build and push server image
         if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
-        uses: docker/build-push-action@v6 # No specific SHA found
+        uses: docker/build-push-action@v4 # No specific SHA found
         with:
           context: ./server
           file: ./server/Dockerfile.prod # Assuming a production Dockerfile exists
@@ -60,7 +60,7 @@ jobs:
 
       - name: Build and push client image
         if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
-        uses: docker/build-push-action@v6 # No specific SHA found
+        uses: docker/build-push-action@v4 # No specific SHA found
         with:
           context: ./client
           file: ./client/Dockerfile.prod # Assuming a production Dockerfile exists

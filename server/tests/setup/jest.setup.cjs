@@ -4,7 +4,7 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+// require('jest-extended'); // Handled by jest.config.ts via jest-extended/all
 
 require('dotenv').config({ path: './.env.test' });
 
@@ -238,6 +238,22 @@ jest.mock('ioredis', () => {
 });
 
 // Mock config/logger removed to use moduleNameMapper and tests/mocks/logger.ts
+// Mock OCREngine to avoid pino import issues and external dependencies
+jest.mock('../../src/ai/engines/OCREngine.js', () => ({
+  __esModule: true,
+  OCREngine: jest.fn().mockImplementation(() => ({
+    initialize: jest.fn().mockResolvedValue(undefined),
+    shutdown: jest.fn().mockResolvedValue(undefined),
+    isReady: jest.fn().mockReturnValue(true),
+    extractText: jest.fn().mockResolvedValue([]),
+  })),
+  default: jest.fn().mockImplementation(() => ({
+    initialize: jest.fn().mockResolvedValue(undefined),
+    shutdown: jest.fn().mockResolvedValue(undefined),
+    isReady: jest.fn().mockReturnValue(true),
+    extractText: jest.fn().mockResolvedValue([]),
+  })),
+}));
 
 // Mock middleware/audit-logger
 jest.mock('../../src/middleware/audit-logger', () => ({
@@ -663,7 +679,7 @@ jest.mock('prom-client', () => {
   }
   class MockRegistry {
     constructor() {
-      this.metrics = {};
+      this._metrics = {};
     }
     registerMetric() { }
     getSingleMetric() { return null; }

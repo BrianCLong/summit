@@ -1,0 +1,17 @@
+# Canonical Control Catalog
+# This file defines the compliance controls for the ecosystem.
+
+version: 1
+
+controls:
+  - id: ac-1
+    name: "Access Control"
+    description: "Ensure that access to systems is limited to authorized users."
+
+  - id: sc-1
+    name: "System and Communications Protection"
+    description: "Ensure that systems and communications are protected from unauthorized access."
+
+  - id: si-1
+    name: "System and Information Integrity"
+    description: "Ensure that systems and information are protected from unauthorized modification."

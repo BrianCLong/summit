@@ -1,0 +1,13 @@
+{
+  "name": "@intelgraph/decision-policy",
+  "version": "0.1.0",
+  "description": "Versioned decision policies for autonomous agents.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+      "ajv": "^8.12.0"
+  }
+}

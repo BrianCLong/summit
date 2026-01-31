@@ -4,7 +4,7 @@ import Redis from 'ioredis';
 import pino from 'pino';
 
 type AdvancedAuditSystem =
-  import('../../audit/advanced-audit-system.ts').AdvancedAuditSystem;
+  import('../../audit/advanced-audit-system.js').AdvancedAuditSystem;
 
 // Mock dependencies
 const mockQuery = jest.fn() as jest.MockedFunction<
@@ -25,8 +25,8 @@ describe('AdvancedAuditSystem', () => {
   const signingKey = 'test-signing-key';
   const encryptionKey = 'test-encryption-key';
   const { AdvancedAuditSystem } = jest.requireActual(
-    '../../audit/advanced-audit-system.ts',
-  ) as typeof import('../../audit/advanced-audit-system.ts');
+    '../../audit/advanced-audit-system.js',
+  ) as typeof import('../../audit/advanced-audit-system.js');
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -1,0 +1,22 @@
+{
+  "title": "Systemic Risk Overview - Executive",
+  "refreshInterval": "1h",
+  "widgets": [
+    {
+      "type": "gauge",
+      "title": "Current SRI Score",
+      "metric": "sri_score",
+      "thresholds": {
+        "green": [0, 30],
+        "yellow": [30, 70],
+        "red": [70, 100]
+      }
+    },
+    {
+      "type": "graph",
+      "title": "Risk Propagation Map",
+      "query": "MATCH (e:RiskEvent)-[:IMPACTS]->(i:Institution) RETURN e, i",
+      "visualization": "force-directed"
+    }
+  ]
+}

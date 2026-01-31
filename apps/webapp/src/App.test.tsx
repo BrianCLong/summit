@@ -2,13 +2,17 @@ import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { App } from './App';
 import { store, selectNode } from './store';
+import { vi } from 'vitest';
 
-jest.mock('cytoscape', () => () => ({
-  on: () => {},
-  container: () => document.createElement('div'),
+vi.mock('cytoscape', () => ({
+  default: () => ({
+    on: () => {},
+    container: () => document.createElement('div'),
+    remove: () => {},
+  }),
 }));
 
-jest.mock('vis-timeline/standalone', () => ({
+vi.mock('vis-timeline/standalone', () => ({
   DataSet: class {
     add() {}
   },
@@ -18,31 +22,31 @@ jest.mock('vis-timeline/standalone', () => ({
       return { start: new Date(), end: new Date() };
     }
     setSelection() {}
+    destroy() {}
     dom = { center: document.createElement('div') };
   },
 }));
 
-jest.mock('mapbox-gl', () => ({
-  Map: class {
-    flyTo() {}
+vi.mock('mapbox-gl', () => ({
+  default: {
+    Map: class {
+      flyTo() {}
+      remove() {}
+    },
+    Marker: class {
+      setLngLat() {
+        return this;
+      }
+      addTo() {
+        return this;
+      }
+    },
+    accessToken: '',
   },
-  Marker: class {
-    setLngLat() {
-      return this;
-    }
-    addTo() {
-      return this;
-    }
-  },
-  accessToken: '',
 }));
 
 test('renders panes', () => {
-  render(
-    <Provider store={store}>
-      <App />
-    </Provider>,
-  );
+  render(<App />);
   expect(screen.getByLabelText('toggle theme')).toBeInTheDocument();
 });
 

@@ -1,0 +1,8 @@
+[
+  {
+    "id": "debug-001",
+    "description": "Fix the off-by-one error in this loop",
+    "code": "for i in range(len(arr) + 1): ...",
+    "expected_behavior": "Should iterate exactly len(arr) times"
+  }
+]

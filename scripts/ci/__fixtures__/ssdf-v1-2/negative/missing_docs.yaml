@@ -1,0 +1,8 @@
+version: 1
+item:
+  slug: ssdf-v1-2-missing-docs
+  title: "Negative Test: Missing Docs"
+  type: "spec"
+docs:
+  required:
+    - "docs/non_existent_file.md"

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Index",
+  "type": "object",
+  "patternProperties": {
+    "^EVD-[A-Z0-9-]+$": {
+      "type": "string",
+      "description": "Path to the evidence file"
+    }
+  },
+  "additionalProperties": false
+}

@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4 # v4
 
       - name: Determine Report Month
         id: month
@@ -63,7 +63,7 @@ jobs:
 
       - name: Download Site Artifact
         id: download
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
           name: release-ops-site
           path: ${{ env.SITE_DIR }}
@@ -259,7 +259,7 @@ jobs:
       - name: Create Issue
         if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
         id: create
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');
@@ -278,7 +278,7 @@ jobs:
 
       - name: Update Issue
         if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');

@@ -1,0 +1,21 @@
+name: summit-skill-gates
+on: [pull_request]
+jobs:
+  evidence-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate evidence schemas exist
+        run: |
+          test -f evidence/schemas/report.schema.json
+          test -f evidence/schemas/metrics.schema.json
+          test -f evidence/schemas/skill_stamp.schema.json
+  policy-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deny-by-default check (flag off)
+        run: |
+          python3 -c "from summit.policy.router import route; \
+          d=route({'feature_flags': {'SKILL_PRESERVING_MODE': False}}); \
+          assert d.mode=='baseline'"

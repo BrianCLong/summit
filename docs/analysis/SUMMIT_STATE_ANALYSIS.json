@@ -1,0 +1,393 @@
+{
+  "summary": "Summit is a mature, enterprise-grade intelligence platform repository implementing a sophisticated monorepo architecture with 448+ packages, 200+ services, and 28+ applications. The repository demonstrates exceptional CI/CD maturity with 147 active GitHub Actions workflows, comprehensive security scanning (CodeQL, gitleaks, SBOM), and policy-as-code governance (OPA). Documentation is extensive (4,178 markdown files, 35MB) but may benefit from improved discoverability. Developer experience tooling is robust with deterministic bootstrap, DevContainers, and multi-agent provisioning. Key gaps exist in marketing evidence automation, test coverage visibility in CI, and documentation freshness validation. The platform is well-positioned for GA with strong foundations in reproducibility, security, and compliance evidence collection.",
+
+  "critical_issues": [
+    {
+      "id": "CI-001",
+      "severity": "HIGH",
+      "category": "CI/CD",
+      "title": "Test Coverage Not Enforced in Main CI Pipeline",
+      "description": "While coverage thresholds are configured (80% in jest.config.cjs), the main ci.yml workflow does not explicitly gate on coverage metrics. Coverage collection happens but enforcement is not visible in PR gates.",
+      "impact": "Code with insufficient test coverage may be merged, increasing technical debt and regression risk.",
+      "recommendation": "Add explicit coverage gate step to ci.yml using coverage:gate script with failure on threshold violations."
+    },
+    {
+      "id": "DOC-001",
+      "severity": "HIGH",
+      "category": "Documentation",
+      "title": "Documentation Freshness and Link Validation Missing",
+      "description": "With 4,178 markdown files across 519 directories, no automated validation exists for stale content, broken internal links, or outdated API references.",
+      "impact": "Developer confusion, wasted time following outdated procedures, potential security risks from obsolete guidance.",
+      "recommendation": "Implement docs-linkcheck and freshness-audit workflows with automated PR annotations."
+    },
+    {
+      "id": "GOV-001",
+      "severity": "HIGH",
+      "category": "Governance",
+      "title": "Marketing Claims Not Automatically Validated Against Evidence",
+      "description": "Marketing and pitch materials exist (Summit-IntelGraph_Pioneers_Deck.pptx, OnePager.pdf) but no automated pipeline validates claims against CI evidence bundles.",
+      "impact": "Risk of marketing claims diverging from actual platform capabilities, compliance and trust issues.",
+      "recommendation": "Implement claim-evidence-matrix workflow that cross-references docs/marketing claims with CI test results and capability attestations."
+    },
+    {
+      "id": "DX-001",
+      "severity": "MEDIUM",
+      "category": "Developer Experience",
+      "title": "Inconsistent Version Pinning Across Tool Chains",
+      "description": ".nvmrc specifies Node v20.19.0 but .tool-versions specifies nodejs 20.11.0. Multiple Python pyproject.toml files lack version pins for critical dependencies.",
+      "impact": "Environment drift between developers, CI, and production causing hard-to-reproduce bugs.",
+      "recommendation": "Consolidate version specifications and add version-drift-check workflow to CI."
+    },
+    {
+      "id": "CI-002",
+      "severity": "MEDIUM",
+      "category": "CI/CD",
+      "title": "200+ Archived Workflows Create Maintenance Burden",
+      "description": ".github/workflows/.archive/ contains 200+ legacy workflows that may cause confusion and slow repository operations.",
+      "impact": "Slower git operations, potential for accidental resurrection of deprecated workflows, cognitive overhead.",
+      "recommendation": "Migrate archived workflows to separate branch or git-lfs, document migration timeline, implement archive cleanup policy."
+    },
+    {
+      "id": "SEC-001",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "SBOM Generation Not Integrated Into Release Artifacts",
+      "description": "sbom-scan.yml exists but SBOM attestation is not automatically attached to release artifacts or container images.",
+      "impact": "Supply chain compliance gaps, difficulty responding to vulnerability inquiries from customers.",
+      "recommendation": "Integrate SBOM generation into release-ga.yml with automatic artifact attachment and signing."
+    },
+    {
+      "id": "DX-002",
+      "severity": "MEDIUM",
+      "category": "Developer Experience",
+      "title": "No Centralized Error/Troubleshooting Guide",
+      "description": "Despite extensive runbooks (40+), no centralized FAQ or troubleshooting decision tree exists for common development issues.",
+      "impact": "Developers waste time debugging common issues that could be quickly resolved with documented solutions.",
+      "recommendation": "Create docs/troubleshooting/FAQ.md with searchable error codes and resolution paths."
+    },
+    {
+      "id": "CI-003",
+      "severity": "MEDIUM",
+      "category": "CI/CD",
+      "title": "Performance Regression Testing Not in Main CI Path",
+      "description": "Performance testing workflows exist (perf.yml, ci-perf) but are not triggered on PR merges to main.",
+      "impact": "Performance regressions may ship undetected, causing customer-facing latency issues.",
+      "recommendation": "Add lightweight performance smoke test to ci.yml or implement scheduled nightly performance suite with regression alerts."
+    },
+    {
+      "id": "GOV-002",
+      "severity": "LOW",
+      "category": "Governance",
+      "title": "ADR Index Not Automatically Updated",
+      "description": "docs/ADR/ADR_INDEX.md exists but new ADRs must be manually added to the index.",
+      "impact": "ADR discoverability issues, potential for duplicate or conflicting architectural decisions.",
+      "recommendation": "Implement adr-index-sync workflow that auto-generates index from ADR file metadata."
+    },
+    {
+      "id": "DOC-002",
+      "severity": "LOW",
+      "category": "Documentation",
+      "title": "docs-site Underutilized Relative to /docs Volume",
+      "description": "Docusaurus-based docs-site exists but only 20KB vs 35MB in /docs, suggesting public documentation site is not fully populated.",
+      "impact": "External stakeholders may not have access to comprehensive documentation, reducing adoption.",
+      "recommendation": "Implement docs-sync workflow to selectively publish public-safe documentation to docs-site."
+    }
+  ],
+
+  "gap_matrix": {
+    "repository_structure": {
+      "current_state": "MATURE",
+      "maturity_score": 8.5,
+      "strengths": [
+        "Well-organized monorepo with clear package/service/app separation",
+        "Comprehensive config file organization at root level",
+        "Clear archive/disabled directory conventions",
+        "Infrastructure-as-Code throughout (Terraform, Helm, K8s)",
+        "Multi-language support (TypeScript, Python, Rust, Go)"
+      ],
+      "gaps": [
+        {
+          "gap": "No CODEOWNERS validation in CI",
+          "target": "Automated CODEOWNERS coverage check ensuring all paths have owners",
+          "effort": "LOW"
+        },
+        {
+          "gap": "Inconsistent README presence across 448+ packages",
+          "target": "100% README coverage with template validation",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "No automated dependency graph visualization",
+          "target": "Auto-generated package dependency diagrams in docs",
+          "effort": "LOW"
+        }
+      ]
+    },
+    "developer_experience": {
+      "current_state": "STRONG",
+      "maturity_score": 8.0,
+      "strengths": [
+        "Deterministic bootstrap with version validation",
+        "Complete DevContainer setup with full service stack",
+        "Makefile automation for common operations",
+        "Multi-agent provisioning (Claude, Codex, Jules)",
+        "Pre-commit hooks with gitleaks and lint-staged"
+      ],
+      "gaps": [
+        {
+          "gap": "No onboarding time tracking or validation",
+          "target": "< 30 minute onboarding with automated validation checkpoint",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "Missing local development health dashboard",
+          "target": "make dev-status showing service health, versions, and quick diagnostics",
+          "effort": "LOW"
+        },
+        {
+          "gap": "No automated environment drift detection",
+          "target": "CI check comparing local vs CI environment configs",
+          "effort": "LOW"
+        },
+        {
+          "gap": "Python dependency reproducibility gaps",
+          "target": "Poetry or pip-tools with lockfiles across all Python projects",
+          "effort": "MEDIUM"
+        }
+      ]
+    },
+    "cicd_processes": {
+      "current_state": "EXCELLENT",
+      "maturity_score": 9.0,
+      "strengths": [
+        "147 active workflows with modular reusable architecture",
+        "Comprehensive security scanning (CodeQL, gitleaks, trivy, semgrep)",
+        "SLSA provenance and supply chain attestation",
+        "Multi-stage release process (RC, GA, hotfix)",
+        "Evidence collection and governance workflows"
+      ],
+      "gaps": [
+        {
+          "gap": "Coverage enforcement not in main CI gate",
+          "target": "PR blocking on coverage threshold violations",
+          "effort": "LOW"
+        },
+        {
+          "gap": "No performance regression gate",
+          "target": "Automated performance baseline comparison on PRs",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "SBOM not attached to release artifacts",
+          "target": "Signed SBOM in CycloneDX and SPDX formats with every release",
+          "effort": "LOW"
+        },
+        {
+          "gap": "No deployment verification tests",
+          "target": "Post-deploy smoke tests in staging/production pipelines",
+          "effort": "MEDIUM"
+        }
+      ]
+    },
+    "governance_compliance": {
+      "current_state": "STRONG",
+      "maturity_score": 8.0,
+      "strengths": [
+        "Policy-as-Code with OPA/Rego policies",
+        "Comprehensive governance documentation (50+ files)",
+        "Legal/DPA documentation for major AI providers",
+        "SOC controls verification in CI",
+        "Evidence bundle generation workflows"
+      ],
+      "gaps": [
+        {
+          "gap": "Marketing claims not validated against evidence",
+          "target": "Automated claim-evidence cross-reference in CI",
+          "effort": "HIGH"
+        },
+        {
+          "gap": "Compliance attestation not in release checklist",
+          "target": "Mandatory compliance sign-off gate in release-ga.yml",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "No policy drift alerting",
+          "target": "Real-time alerts when deployed config diverges from policy",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "ADR index not auto-maintained",
+          "target": "CI-generated ADR index with decision timeline visualization",
+          "effort": "LOW"
+        }
+      ]
+    },
+    "documentation": {
+      "current_state": "EXTENSIVE",
+      "maturity_score": 7.5,
+      "strengths": [
+        "4,178 markdown files with comprehensive coverage",
+        "18+ Architecture Decision Records",
+        "40+ operational runbooks",
+        "Doctrine/philosophy documentation",
+        "Multi-format support (MD, PDF, PPTX)"
+      ],
+      "gaps": [
+        {
+          "gap": "No link validation or freshness checking",
+          "target": "Weekly docs-health report with stale content alerts",
+          "effort": "LOW"
+        },
+        {
+          "gap": "Documentation site underutilized",
+          "target": "Automated sync of public docs to docs-site",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "No centralized troubleshooting guide",
+          "target": "Searchable FAQ with error code index",
+          "effort": "LOW"
+        },
+        {
+          "gap": "Missing video/interactive tutorials",
+          "target": "Onboarding video walkthrough linked from README",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "Training materials limited (3 files)",
+          "target": "Structured learning paths for different roles",
+          "effort": "HIGH"
+        }
+      ]
+    }
+  },
+
+  "action_plan": [
+    {
+      "priority": 1,
+      "task": "Add coverage gate to main CI workflow",
+      "effort": "LOW",
+      "owner": "Platform Team",
+      "success_criteria": "PRs failing coverage threshold are blocked from merge",
+      "estimated_files": ["ci.yml"],
+      "dependencies": []
+    },
+    {
+      "priority": 2,
+      "task": "Implement documentation link validation workflow",
+      "effort": "LOW",
+      "owner": "DevEx Team",
+      "success_criteria": "Weekly report of broken links with < 24h SLA for critical docs",
+      "estimated_files": ["docs-health.yml", "scripts/docs-linkcheck.sh"],
+      "dependencies": []
+    },
+    {
+      "priority": 3,
+      "task": "Attach signed SBOM to release artifacts",
+      "effort": "LOW",
+      "owner": "Security Team",
+      "success_criteria": "Every GA release includes CycloneDX SBOM signed with Cosign",
+      "estimated_files": ["release-ga.yml", ".ci/sbom/cyclonedx.sh"],
+      "dependencies": []
+    },
+    {
+      "priority": 4,
+      "task": "Create centralized troubleshooting FAQ",
+      "effort": "LOW",
+      "owner": "DevEx Team",
+      "success_criteria": "FAQ covers top 20 error codes with resolution steps",
+      "estimated_files": ["docs/troubleshooting/FAQ.md", "docs/troubleshooting/ERROR_CODES.md"],
+      "dependencies": []
+    },
+    {
+      "priority": 5,
+      "task": "Consolidate Node.js version specifications",
+      "effort": "LOW",
+      "owner": "Platform Team",
+      "success_criteria": "Single source of truth for Node version with drift detection in CI",
+      "estimated_files": [".nvmrc", ".node-version", ".tool-versions", "scripts/version-check.sh"],
+      "dependencies": []
+    },
+    {
+      "priority": 6,
+      "task": "Implement marketing claim evidence validation",
+      "effort": "HIGH",
+      "owner": "Product/Compliance Team",
+      "success_criteria": "All marketing claims in pitch deck traceable to CI evidence",
+      "estimated_files": ["claim-evidence-matrix.yml", "docs/marketing/CLAIMS_REGISTRY.md"],
+      "dependencies": ["SBOM integration", "Evidence bundle workflow"]
+    },
+    {
+      "priority": 7,
+      "task": "Add performance regression gate to CI",
+      "effort": "MEDIUM",
+      "owner": "Platform Team",
+      "success_criteria": "PRs with >10% latency regression flagged for review",
+      "estimated_files": ["ci.yml", "perf-baseline.yml", "scripts/perf-compare.sh"],
+      "dependencies": ["Coverage gate implementation"]
+    },
+    {
+      "priority": 8,
+      "task": "Implement docs-site auto-sync from /docs",
+      "effort": "MEDIUM",
+      "owner": "DevEx Team",
+      "success_criteria": "Public documentation updated within 1 hour of /docs changes",
+      "estimated_files": ["docs-sync.yml", "docs-site/sync-config.json"],
+      "dependencies": ["Documentation link validation"]
+    },
+    {
+      "priority": 9,
+      "task": "Archive legacy workflows to separate storage",
+      "effort": "MEDIUM",
+      "owner": "Platform Team",
+      "success_criteria": "< 50 files in .archive/, remainder in git-lfs or separate branch",
+      "estimated_files": [".github/workflows/.archive/*", "docs/workflows/ARCHIVE_MIGRATION.md"],
+      "dependencies": []
+    },
+    {
+      "priority": 10,
+      "task": "Create structured onboarding learning paths",
+      "effort": "HIGH",
+      "owner": "DevEx Team",
+      "success_criteria": "Role-specific paths (backend, frontend, DevOps) with validation checkpoints",
+      "estimated_files": ["docs/training/LEARNING_PATHS.md", "docs/training/BACKEND_PATH.md"],
+      "dependencies": ["Troubleshooting FAQ", "Documentation sync"]
+    }
+  ],
+
+  "sample_artifacts": {
+    "ci_coverage_gate": {
+      "description": "Add to ci.yml to enforce coverage thresholds",
+      "yaml": "  coverage-gate:\n    runs-on: ubuntu-latest\n    needs: [test]\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/download-artifact@v4\n        with:\n          name: coverage-report\n          path: coverage/\n      - name: Check coverage thresholds\n        run: |\n          pnpm coverage:verify --branches 80 --functions 80 --lines 80 --statements 80\n      - name: Upload coverage to Codecov\n        uses: codecov/codecov-action@v4\n        with:\n          files: coverage/lcov.info\n          fail_ci_if_error: true"
+    },
+    "docs_linkcheck_workflow": {
+      "description": "Weekly documentation health check workflow",
+      "yaml": "name: Documentation Health Check\non:\n  schedule:\n    - cron: '0 6 * * 1'  # Weekly Monday 6 AM\n  workflow_dispatch:\n\njobs:\n  linkcheck:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: Check markdown links\n        uses: gaurav-nelson/github-action-markdown-link-check@v1\n        with:\n          folder-path: 'docs/'\n          config-file: '.markdown-link-check.json'\n      - name: Check for stale docs\n        run: |\n          find docs -name '*.md' -mtime +180 -type f > stale-docs.txt\n          if [ -s stale-docs.txt ]; then\n            echo '::warning::Found documentation not updated in 180+ days'\n            cat stale-docs.txt\n          fi\n      - name: Upload stale docs report\n        uses: actions/upload-artifact@v4\n        with:\n          name: docs-health-report\n          path: stale-docs.txt"
+    },
+    "sbom_release_integration": {
+      "description": "SBOM generation and signing for release-ga.yml",
+      "yaml": "  sbom-generate:\n    runs-on: ubuntu-latest\n    needs: [build]\n    steps:\n      - uses: actions/checkout@v4\n      - name: Generate CycloneDX SBOM\n        run: |\n          pnpm dlx @cyclonedx/cyclonedx-npm --output-file sbom.cyclonedx.json\n      - name: Generate SPDX SBOM\n        run: |\n          pnpm dlx @cyclonedx/cyclonedx-npm --output-format spdx --output-file sbom.spdx.json\n      - name: Sign SBOM with Cosign\n        uses: sigstore/cosign-installer@v3\n      - run: |\n          cosign sign-blob --yes sbom.cyclonedx.json --output-signature sbom.cyclonedx.sig\n      - name: Attach SBOM to release\n        uses: softprops/action-gh-release@v1\n        with:\n          files: |\n            sbom.cyclonedx.json\n            sbom.cyclonedx.sig\n            sbom.spdx.json"
+    },
+    "dev_health_script": {
+      "description": "Local development health dashboard script",
+      "bash": "#!/bin/bash\n# scripts/dev-health.sh - Development environment health check\nset -e\n\necho '=== Summit Dev Environment Health ==='\necho ''\n\n# Version checks\necho '📦 Versions:'\necho \"  Node.js: $(node -v) (expected: v20.19.0)\"\necho \"  pnpm: $(pnpm -v) (expected: 10.0.0)\"\necho \"  Docker: $(docker --version | cut -d' ' -f3)\"\necho ''\n\n# Service health\necho '🏥 Service Health:'\nservices=(\"postgres:5434\" \"redis:6379\" \"neo4j:7474\")\nfor svc in \"${services[@]}\"; do\n  name=${svc%%:*}\n  port=${svc##*:}\n  if nc -z localhost $port 2>/dev/null; then\n    echo \"  ✅ $name (port $port)\"\n  else\n    echo \"  ❌ $name (port $port) - NOT RUNNING\"\n  fi\ndone\necho ''\n\n# Git status\necho '📝 Git Status:'\necho \"  Branch: $(git branch --show-current)\"\necho \"  Uncommitted: $(git status --porcelain | wc -l) files\"\necho ''\n\necho '✨ Health check complete'"
+    },
+    "claim_evidence_matrix_template": {
+      "description": "Template for marketing claim evidence tracking",
+      "markdown": "# Marketing Claim Evidence Matrix\n\n| Claim ID | Marketing Statement | Evidence Type | CI Workflow | Last Verified | Status |\n|----------|---------------------|---------------|-------------|---------------|--------|\n| CLM-001 | \"99.9% uptime SLA\" | SLO Dashboard | error-budget-alerts.yml | 2026-01-27 | ✅ Verified |\n| CLM-002 | \"SOC 2 Compliant\" | Audit Report | compliance.yml | 2026-01-15 | ✅ Verified |\n| CLM-003 | \"< 100ms P99 latency\" | Perf Tests | perf.yml | 2026-01-20 | ⚠️ Needs Update |\n| CLM-004 | \"SBOM for supply chain\" | SBOM Artifact | sbom-scan.yml | Pending | ❌ Not Automated |\n\n## Evidence Collection Process\n1. Claims registered in this matrix\n2. CI workflow generates evidence artifact\n3. Weekly claim-evidence-sync workflow validates\n4. Violations create GitHub issues for review"
+    }
+  },
+
+  "metadata": {
+    "analysis_date": "2026-01-27",
+    "repository_version": "5.0.38",
+    "branch_analyzed": "claude/summit-analysis-prompt-e2cb2",
+    "total_packages": 448,
+    "total_services": 200,
+    "total_applications": 28,
+    "total_workflows": 147,
+    "total_documentation_files": 4178,
+    "documentation_size_mb": 35,
+    "languages": ["TypeScript", "Python", "Rust", "Go"]
+  }
+}

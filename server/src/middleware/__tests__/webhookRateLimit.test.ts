@@ -10,10 +10,6 @@ jest.mock('../../realtime/pubsub.js', () => ({
   pubsub: { publish: jest.fn() },
 }));
 
-jest.mock('../../logger.js', () => ({
-  logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
-}));
-
 const SECRET = 'test-secret';
 
 function buildApp() {

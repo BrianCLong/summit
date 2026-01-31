@@ -4,13 +4,14 @@
 
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { pool } from '../db/pg';
-import { neo } from '../db/neo4j';
-import { redis } from '../subscriptions/pubsub';
+import { pool } from '../db/pg.js';
+import { neo } from '../db/neo4j.js';
+import { redis } from '../subscriptions/pubsub.js';
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
+import vm from 'vm';
 
 const tracer = trace.getTracer('migration-framework', '24.3.0');
 
@@ -509,7 +510,7 @@ export class MigrationFramework extends EventEmitter {
     dryRun: boolean,
   ): Promise<void> {
     // Sandbox JavaScript execution
-    const context = {
+    const sandboxContext = {
       console,
       execution,
       dryRun,
@@ -522,13 +523,15 @@ export class MigrationFramework extends EventEmitter {
         console.log(`[${execution.migrationId}:${step.id}] ${message}`),
     };
 
+    const context = vm.createContext(sandboxContext);
+
     if (dryRun) {
       // For dry run, validate syntax
-      new Function('context', step.content);
+      new vm.Script(step.content);
     } else {
       try {
-        const fn = new Function('context', step.content);
-        await fn(context);
+        const script = new vm.Script(step.content);
+        script.runInContext(context);
       } catch (error: any) {
         throw new Error(`JavaScript step failed: ${(error as Error).message}`);
       }

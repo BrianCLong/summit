@@ -29,7 +29,7 @@ jest.mock('ioredis', () => {
 describe('MLOps Platform', () => {
   describe('ModelRegistry', () => {
     it('should register a model', async () => {
-      const { ModelRegistry } = await import('../src/mlops/registry');
+      const { ModelRegistry } = await import('../src/mlops/registry.js');
       const registry = ModelRegistry.getInstance();
       const id = await registry.registerModel('tenant-1', {
         name: 'test-model',
@@ -44,7 +44,7 @@ describe('MLOps Platform', () => {
 
   describe('FeatureStore', () => {
     it('should ingest and retrieve features', async () => {
-      const { FeatureStoreService } = await import('../src/mlops/feature_store');
+      const { FeatureStoreService } = await import('../src/mlops/feature_store.js');
       const store = FeatureStoreService.getInstance();
       // Since Redis mock returns null, it falls back to memory if connection fails or if we manually mock logic
       // But our implementation tries Redis first.
@@ -63,7 +63,7 @@ describe('MLOps Platform', () => {
 
   describe('ModelServing', () => {
     it('should serve predictions', async () => {
-      const { ModelServingService } = await import('../src/mlops/serving');
+      const { ModelServingService } = await import('../src/mlops/serving.js');
       const serving = ModelServingService.getInstance();
       const result = await serving.predict('tenant-1', {
         modelName: 'sentiment-v1',
@@ -77,7 +77,7 @@ describe('MLOps Platform', () => {
 
   describe('Governance', () => {
     it('should pass checks', async () => {
-      const { ModelGovernanceService } = await import('../src/mlops/governance');
+      const { ModelGovernanceService } = await import('../src/mlops/governance.js');
       const gov = ModelGovernanceService.getInstance();
       const result = await gov.checkFairness('m1', 'd1', ['gender']);
       expect(result.passed).toBe(true);

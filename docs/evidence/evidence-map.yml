@@ -1,0 +1,65 @@
+version: 1.0
+evidence:
+  - id: EVID-NARR-001
+    name: Narrative Snapshot Integrity
+    description: Verification that narrative snapshots are generated and hashed correctly.
+    source:
+      type: file
+      path: artifacts/narrative/snapshots/*.json
+    criteria:
+      - rule: schema_validation
+        schema: schemas/narrative-snapshot.schema.json
+      - rule: integrity_check
+        algorithm: sha256
+
+  - id: EVID-NARR-002
+    name: Model Governance Compliance
+    description: Audit logs proving narrative models passed ethical checks.
+    source:
+      type: database
+      query: "SELECT * FROM model_governance_log WHERE status = 'PASSED'"
+    criteria:
+      - rule: existence
+      - rule: recency
+        threshold: 7d
+
+  - id: EVID-IO-001
+    name: Influence Operation Detection Rate
+    description: Metrics showing detection efficacy against the Golden Dataset.
+    source:
+      type: metric
+      name: io_detection_f1_score
+    criteria:
+      - rule: threshold
+        min: 0.85
+
+  - id: EVID-OSINT-TURN-003
+    name: OSINT Platform Development Update - Turn 3
+    description: Periodic update on Maltego, i2 Analyst's Notebook, and emerging OSINT platforms.
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-3.md
+    criteria:
+      - rule: existence
+      - rule: header_validation
+        headers: [ILSA-Level, IBOM-Verified]
+
+  - id: EVID-OSINT-TURN-004
+    name: Regulatory Intelligence Update (Turn 4)
+    description: AI governance, FedRAMP, CMMC, and GDPR enforcement updates (Jan 2026).
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-4.md
+    criteria:
+      - rule: existence
+
+  - id: EVID-OSINT-TURN-005
+    name: OSINT Platform Development Update - Turn 5
+    description: Periodic update on Maltego, i2 Analyst's Notebook, and emerging OSINT platforms (Jan 29, 2026).
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-5.md
+    criteria:
+      - rule: existence
+      - rule: header_validation
+        headers: [ILSA-Level, IBOM-Verified]

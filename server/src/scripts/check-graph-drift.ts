@@ -1,7 +1,7 @@
-import { GraphConsistencyReporter } from '../services/drivers/GraphConsistencyReporter';
-import { closePostgresPool } from '../db/postgres';
-import { closeNeo4jDriver } from '../db/neo4j';
-import logger from '../config/logger';
+import { GraphConsistencyReporter } from '../services/drivers/GraphConsistencyReporter.js';
+import { closePostgresPool } from '../db/postgres.js';
+import { closeNeo4jDriver } from '../db/neo4j.js';
+import logger from '../config/logger.js';
 
 const run = async () => {
   const reporter = new GraphConsistencyReporter();

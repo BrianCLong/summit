@@ -16,13 +16,14 @@ describe('slow query logging', () => {
       error: jest.fn(),
       child: jest.fn(),
     };
-    jest.spyOn(baseLogger, 'child').mockReturnValue(mockLogger);
+    baseLogger.child.mockReturnValue(mockLogger);
     // @ts-ignore - dynamic import for test harness
     ({ __private } = (await import('../../src/db/postgres')) as any);
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    baseLogger.child.mockReturnValue(mockLogger);
   });
 
   it('emits a structured log for slow queries', () => {
@@ -30,14 +31,13 @@ describe('slow query logging', () => {
       ['traceId', 'trace-123'],
       ['tenantId', 'tenant-abc'],
     ]);
-    correlationStorage.run(store, () => {
-      __private.recordSlowQuery(
-        'stmt_test',
-        312,
-        'write',
-        'SELECT * FROM users',
-      );
-    });
+    correlationStorage.getStore.mockReturnValue(store);
+    __private.recordSlowQuery(
+      'stmt_test',
+      312,
+      'write',
+      'SELECT * FROM users',
+    );
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({

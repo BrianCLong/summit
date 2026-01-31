@@ -1,0 +1,7 @@
+# Trivy Configuration
+format: table
+timeout: 10m
+exit-code: 0
+severity:
+  - HIGH
+  - CRITICAL

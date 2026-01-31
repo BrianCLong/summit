@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/maestro-sdk",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "type": "module",
   "engines": {
     "node": ">=18.18"
@@ -29,7 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^8.41.0",
     "@typescript-eslint/parser": "^8.41.0",
     "dtslint": "^4.2.1",
-    "eslint": "^9.34.0",
+    "eslint": "^9.39.2",
     "jest": "^30.1.2",
     "orval": "^7.11.2",
     "prettier": "^3.6.2",

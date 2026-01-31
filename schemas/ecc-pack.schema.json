@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/ecc-pack.schema.json",
+  "title": "ECC Pack Schema",
+  "type": "object",
+  "properties": {
+    "agents": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "skills": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "hooksJson": {
+      "type": "object"
+    },
+    "mcpServersJson": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "agents",
+    "skills",
+    "commands",
+    "rules"
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CommunityTrajectory",
+  "type": "object",
+  "required": ["trajectory_id", "cascade_id", "snapshots", "communities", "transitions"],
+  "properties": {
+    "trajectory_id": { "type": "string" },
+    "cascade_id": { "type": "string" },
+    "snapshots": { "type": "array", "items": { "type": "string" } },
+    "communities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["community_uid", "snapshot_id", "size", "boundary_node_count"],
+        "properties": {
+          "community_uid": { "type": "string" },
+          "snapshot_id": { "type": "string" },
+          "size": { "type": "integer", "minimum": 0 },
+          "boundary_node_count": { "type": "integer", "minimum": 0 },
+          "metrics": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from_snapshot_id",
+          "to_snapshot_id",
+          "from_community_uid",
+          "to_community_uid",
+          "weight",
+          "kind"
+        ],
+        "properties": {
+          "from_snapshot_id": { "type": "string" },
+          "to_snapshot_id": { "type": "string" },
+          "from_community_uid": { "type": "string" },
+          "to_community_uid": { "type": "string" },
+          "weight": { "type": "number", "minimum": 0 },
+          "kind": {
+            "type": "string",
+            "enum": ["continue", "split", "merge", "birth", "death", "unknown"]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

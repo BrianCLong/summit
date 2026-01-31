@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 8 — “Full Council” Big Bets Program (3 bets, not 30 wishes)
 
 1. Select 3 cross-council big bets for the next half (with explicit kill criteria).

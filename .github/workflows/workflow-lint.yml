@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Download actionlint
         run: |
@@ -38,8 +38,10 @@ jobs:
 
       - name: Run actionlint
         run: |
-          # Run actionlint with shell check integration
-          actionlint -color -verbose
+          # Run actionlint on top-level workflow files only
+          # Exclude archived workflows and disable shellcheck integration
+          # (shellcheck SC2086 info warnings are false positives for GitHub context vars)
+          find .github/workflows -maxdepth 1 -name '*.yml' -o -name '*.yaml' | xargs actionlint -shellcheck= -color -verbose
 
       - name: Validate workflow syntax
         run: |

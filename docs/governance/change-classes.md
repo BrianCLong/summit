@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Change Classes
 
 To ensure sustained velocity without governance erosion, all changes in the Summit repository are classified into three strict categories. This classification determines the required CI checks, review depth, and velocity lane.
@@ -8,6 +13,7 @@ To ensure sustained velocity without governance erosion, all changes in the Summ
 No behavior change. No API change. Safe to merge with minimal friction.
 
 **Examples:**
+
 - Documentation updates (`docs/`)
 - Refactoring internal logic (no signature changes)
 - Fixing typos
@@ -15,6 +21,7 @@ No behavior change. No API change. Safe to merge with minimal friction.
 - Chore updates (dependencies, CI config)
 
 **Requirements:**
+
 - **Lane:** Fast Lane
 - **CI:** Standard lint/test suite.
 - **Review:** 1 approval (can be from code owner).
@@ -26,12 +33,14 @@ No behavior change. No API change. Safe to merge with minimal friction.
 Backward-compatible behavior or API changes. New features that do not break existing consumers.
 
 **Examples:**
+
 - Adding a new API endpoint
 - Adding a new optional field to a schema
 - Implementing a new feature flagged feature
 - UI enhancements
 
 **Requirements:**
+
 - **Lane:** Standard Lane
 - **CI:** Full integration suite + Regression tests.
 - **Review:** 1 approval from Code Owner + 1 approval from Domain DRI.
@@ -43,12 +52,14 @@ Backward-compatible behavior or API changes. New features that do not break exis
 Incompatible changes. Any change that requires consumers to update their code or behavior.
 
 **Examples:**
+
 - Removing or renaming an API endpoint
 - Changing a mandatory field in a schema
 - Altering core governance policies
 - Major dependency upgrades that break APIs
 
 **Requirements:**
+
 - **Lane:** Guarded Lane
 - **CI:** Full suite + Smoke tests + Migration tests.
 - **Review:** 2 approvals (Code Owner + Governance Lead).

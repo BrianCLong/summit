@@ -41,7 +41,9 @@ dependencies = [
   "transformers>=4.30.0",
   "torch>=2.0.0",
   "sentencepiece",
-  "protobuf"
+  "protobuf",
+  "pillow",
+  "opencv-python-headless"
 ]
 
 [project.optional-dependencies]

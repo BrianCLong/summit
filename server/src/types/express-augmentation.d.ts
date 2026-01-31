@@ -1,5 +1,5 @@
-import { DataEnvelope } from './data-envelope';
-// import { ProvenanceChain } from './provenance-beta';
+import { DataEnvelope } from './data-envelope.js';
+// import { ProvenanceChain } from './provenance-beta.js';
 
 declare global {
     namespace Express {

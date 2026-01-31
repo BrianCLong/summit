@@ -1,0 +1,10 @@
+version: 1
+item:
+  slug: minimal-ok
+  title: Minimal OK
+  type: spec
+docs:
+  required:
+    - "subsumption/ssdf-v1-2/README.md"
+evidence:
+  required_ids: []

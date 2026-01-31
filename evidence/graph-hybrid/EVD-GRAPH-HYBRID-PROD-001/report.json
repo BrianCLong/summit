@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-GRAPH-HYBRID-PROD-001",
+  "summary": "Graph-hybrid product docs and backlog entries created.",
+  "artifacts": [
+    "docs/standards/graph-hybrid-interop.md",
+    "docs/security/data-handling/graph-hybrid.md",
+    "docs/ops/runbooks/graph-hybrid.md",
+    "docs/decisions/graph-hybrid.md",
+    "backlog/graph-hybrid.yaml"
+  ]
+}

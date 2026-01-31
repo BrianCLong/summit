@@ -9,7 +9,11 @@
  * - Common assertions
  */
 
+import { jest } from '@jest/globals';
 import { Request, Response } from 'express';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 /**
  * User Fixtures

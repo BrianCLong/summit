@@ -1,0 +1,6 @@
+{
+  "connector": "example",
+  "auth": { "mode": "oauth" },
+  "data_handling": { "never_log_fields": ["access_token"], "retention_days": 30 },
+  "allowed_behaviors": { "publish": true, "read_analytics": true, "scrape": false }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Post-Deploy Evidence Schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "commit_sha": {
+      "type": "string"
+    },
+    "canary": {
+      "type": "object",
+      "required": ["overall_status", "checks"],
+      "properties": {
+        "overall_status": {
+           "type": "string",
+           "enum": ["pass", "fail"]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["endpoint", "status", "code"],
+            "properties": {
+              "endpoint": { "type": "string" },
+              "status": { "type": "string", "enum": ["pass", "fail"] },
+              "code": { "type": "integer" },
+              "latency_ms": { "type": "integer" },
+              "error": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "slo_snapshot": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+             "properties": {
+               "name": { "type": "string" },
+               "value": { "type": ["string", "number"] },
+               "status": { "type": "string" }
+             }
+          }
+        }
+      }
+    }
+  },
+  "required": ["version", "timestamp", "commit_sha", "canary"]
+}

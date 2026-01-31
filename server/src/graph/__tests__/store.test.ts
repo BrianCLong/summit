@@ -1,12 +1,12 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { GraphStore } from '../store';
-import { runCypher } from '../neo4j';
 
-// Mock neo4j
-jest.mock('../neo4j', () => ({
+await jest.unstable_mockModule('../neo4j', () => ({
   runCypher: jest.fn(),
-  getDriver: jest.fn()
+  getDriver: jest.fn(),
 }));
+
+const { GraphStore } = await import('../store.js');
+const { runCypher } = await import('../neo4j.js');
 
 describe('GraphStore', () => {
   let store: GraphStore;

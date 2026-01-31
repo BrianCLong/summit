@@ -111,7 +111,7 @@ export class PartitionManager {
    * Maintenance job to ensure upcoming partitions exist and detach/archive old ones.
    * Can be scheduled via pg-boss or node-cron.
    */
-  async maintainPartitions(tables: string[] = ['audit_logs', 'metrics']): Promise<void> {
+  async maintainPartitions(tables: string[] = ['audit_logs', 'metrics', 'provenance_ledger_v2']): Promise<void> {
     const now = new Date();
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const monthAfterNext = new Date(now.getFullYear(), now.getMonth() + 2, 1);

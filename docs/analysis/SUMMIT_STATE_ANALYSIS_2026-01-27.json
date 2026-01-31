@@ -1,0 +1,387 @@
+{
+  "summary": "Summit is a mature, enterprise-grade intelligence platform at v5.0.38 with 157 GitHub Actions workflows, 700+ documentation files, and comprehensive governance infrastructure. The repository demonstrates strong CI/CD maturity (deterministic builds, SBOM generation, SLSA provenance, SOC control verification) and robust developer tooling (Makefile orchestration, dev containers, pre-commit hooks). However, critical gaps exist in: (1) marketing claim evidence automation (claims documented but not programmatically linked to CI evidence), (2) reproducible developer environment specification (no pinned Ubuntu/Dev Station manifest), (3) staging environment validation automation (GA Readiness Report shows HOLD status with manual verification steps), and (4) incomplete evidence bundle hydration (manifest uses template placeholders). The platform is structurally sound for GA but requires targeted automation to close evidence-claim loops and ensure reproducibility.",
+
+  "critical_issues": [
+    {
+      "id": "CRIT-01",
+      "severity": "HIGH",
+      "category": "Evidence-Claim Gap",
+      "title": "Marketing claims lack automated evidence capture linkage",
+      "description": "NARRATIVE_ARCHITECTURE.md defines mechanical evidence columns (ProvenanceLedger, TenantSafePostgres, BudgetTracker) but no CI workflow validates these claims are tested or attestable. Marketing pillars (Truth, Safety, Control) have no corresponding CI jobs that generate evidence artifacts linked to claims.",
+      "impact": "Compliance risk: claims cannot be defended with automated evidence during audits. Investor due diligence may flag unsubstantiated claims.",
+      "remediation": "Create claim-evidence-matrix.yaml mapping each marketing claim to specific test files and CI artifacts. Add ci-claim-verification.yml workflow."
+    },
+    {
+      "id": "CRIT-02",
+      "severity": "HIGH",
+      "category": "Reproducibility",
+      "title": "Summit Dev Station environment not specified or pinned",
+      "description": "No dev-station manifest, Ubuntu version pinning, or reproducible environment specification exists. .devcontainer exists but lacks version-locked base image and deterministic package installation. Bootstrap relies on system Python and assumes pnpm availability.",
+      "impact": "Developer onboarding inconsistency. 'Works on my machine' failures. Cannot reproduce CI environment locally with confidence.",
+      "remediation": "Create Developer/dev-station/manifest.yaml with pinned Ubuntu version, package versions, and toolchain versions. Add make dev-station-verify target."
+    },
+    {
+      "id": "CRIT-03",
+      "severity": "HIGH",
+      "category": "GA Readiness",
+      "title": "GA Readiness Report shows HOLD status with manual blockers",
+      "description": "GA_READINESS_REPORT.md explicitly states 'NOT READY' with three manual verification steps: Terraform staging apply, DR backup/restore test, and canary run verification. These are not automated.",
+      "impact": "GA release blocked on manual operator actions. No automated gate prevents premature release if manual steps are skipped.",
+      "remediation": "Implement staging-validation.yml workflow that gates release-train.yml. Add make ga-staging-verify target with exit codes."
+    },
+    {
+      "id": "CRIT-04",
+      "severity": "MEDIUM",
+      "category": "Evidence Integrity",
+      "title": "EVIDENCE_BUNDLE.manifest.json contains unhydrated template placeholders",
+      "description": "Release metadata uses Go template syntax ({{ .Release.GitCommit }}) that suggests runtime hydration but no CI step performs this hydration. Evidence bundle may ship with placeholder values.",
+      "impact": "Compliance evidence packages may have incomplete metadata. Audit trail gaps.",
+      "remediation": "Add envsubst or gomplate step in ga-evidence target to hydrate release metadata before artifact upload."
+    },
+    {
+      "id": "CRIT-05",
+      "severity": "MEDIUM",
+      "category": "CI/CD Coverage",
+      "title": "Integration tests have retry logic masking flakiness",
+      "description": "ci-core.yml lines 126-137 implement retry logic with 'echo retry > .retry' pattern. While pragmatic, this masks test flakiness rather than quarantining flaky tests properly.",
+      "impact": "CI stability metrics are inflated. Flaky tests consume CI resources and delay feedback.",
+      "remediation": "Use test-quarantine.json integration with Jest --testPathIgnorePatterns for known flaky tests. Add flaky-test-detector.yml workflow."
+    },
+    {
+      "id": "CRIT-06",
+      "severity": "MEDIUM",
+      "category": "Security",
+      "title": "SBOM workflow uses older action versions (v4 vs v6 elsewhere)",
+      "description": "sbom-scan.yml uses actions/checkout@v4 and actions/upload-artifact@v4 while ci-core.yml uses pinned SHA versions of v6. Inconsistent action versioning.",
+      "impact": "Security inconsistency. Supply chain risk from unpinned actions.",
+      "remediation": "Standardize all workflows to use SHA-pinned v6 actions per ci-core.yml pattern."
+    },
+    {
+      "id": "CRIT-07",
+      "severity": "MEDIUM",
+      "category": "Documentation",
+      "title": "Control matrix is minimal (3 controls)",
+      "description": "compliance/control-matrix.yml only maps SOC2-CC6.1, SOC2-CC6.7, and NIST-SA-11. A GA-ready platform should map 30+ controls across SOC2, ISO 27001, and applicable regulations.",
+      "impact": "Incomplete compliance coverage. Audit findings likely for unmapped controls.",
+      "remediation": "Expand control-matrix.yml to cover full SOC2 Type II control set. Add regulatory-lenses integration."
+    },
+    {
+      "id": "CRIT-08",
+      "severity": "LOW",
+      "category": "Developer Experience",
+      "title": "Makefile has typo in format target (VVENV_BIN vs VENV_BIN)",
+      "description": "Line 95 of Makefile uses $(VVENV_BIN) which is undefined. Likely typo for $(VENV_BIN).",
+      "impact": "make format fails for Python formatting. Developer friction.",
+      "remediation": "Fix typo: VVENV_BIN -> VENV_BIN"
+    },
+    {
+      "id": "CRIT-09",
+      "severity": "LOW",
+      "category": "CI/CD",
+      "title": "Golden Path smoke test has non-blocking failure modes",
+      "description": "ci-core.yml golden-path job uses '|| echo' pattern for bootstrap, up, and smoke steps, making failures non-blocking within the step while the job itself is required.",
+      "impact": "Misleading CI status. Golden path can 'pass' while key steps actually failed.",
+      "remediation": "Remove '|| echo' guards or restructure as separate jobs with proper needs dependencies."
+    },
+    {
+      "id": "CRIT-10",
+      "severity": "LOW",
+      "category": "Governance",
+      "title": "157 workflows may cause GitHub Actions resource contention",
+      "description": "Extremely large workflow count (157 in .github/workflows/) may cause: concurrent job limits hit, workflow dispatch confusion, maintenance burden.",
+      "impact": "CI slowdowns during high-activity periods. Governance drift as workflows are rarely audited.",
+      "remediation": "Audit workflows for consolidation. Use reusable workflows (_reusable-*.yml pattern) more aggressively. Archive inactive workflows."
+    }
+  ],
+
+  "gap_matrix": {
+    "repository_structure": {
+      "current_state": "Well-organized monorepo with 88 src modules, 70+ packages, 20+ apps. Clear separation of concerns. Archive pattern for deprecated code.",
+      "target_state": "Golden-path directory structure with enforced conventions, auto-generated from template.",
+      "gaps": [
+        {
+          "gap": "No ARCHITECTURE.md at root level documenting directory structure intent",
+          "severity": "LOW",
+          "effort": "LOW"
+        },
+        {
+          "gap": "Multiple test directories (__tests__, test_data, testdata, fixtures, specs) without clear convention doc",
+          "severity": "LOW",
+          "effort": "LOW"
+        },
+        {
+          "gap": "No directory linting enforcement (e.g., ls-lint or similar)",
+          "severity": "LOW",
+          "effort": "MEDIUM"
+        }
+      ]
+    },
+    "developer_experience": {
+      "current_state": "Comprehensive Makefile (425+ lines), devcontainer, pre-commit hooks, bootstrap scripts. Version pinning via .nvmrc/.node-version.",
+      "target_state": "One-command reproducible dev environment with version-locked system dependencies, automated health checks, and self-healing bootstrap.",
+      "gaps": [
+        {
+          "gap": "No Ubuntu/OS version pinning in devcontainer or bootstrap",
+          "severity": "HIGH",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "Makefile format target has typo (VVENV_BIN)",
+          "severity": "LOW",
+          "effort": "LOW"
+        },
+        {
+          "gap": "No make doctor command for self-diagnosis (CLI_DOCTOR.md exists but not integrated)",
+          "severity": "MEDIUM",
+          "effort": "LOW"
+        },
+        {
+          "gap": "smoke target sleeps 45s unconditionally; no health-check polling",
+          "severity": "LOW",
+          "effort": "LOW"
+        },
+        {
+          "gap": "No dependency version diff report on pnpm install",
+          "severity": "LOW",
+          "effort": "MEDIUM"
+        }
+      ]
+    },
+    "cicd_processes": {
+      "current_state": "157 workflows covering lint, typecheck, unit/integration/e2e tests, deterministic builds, SBOM, SLSA provenance, SOC control verification, branch protection drift detection.",
+      "target_state": "Minimal required workflow set with maximum reusable workflow usage, consistent action versioning, evidence artifact linkage, and claim verification.",
+      "gaps": [
+        {
+          "gap": "No claim-evidence verification workflow linking marketing claims to test evidence",
+          "severity": "HIGH",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "Inconsistent action versioning (v4 vs SHA-pinned v6)",
+          "severity": "MEDIUM",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "No staging environment validation gate before release",
+          "severity": "HIGH",
+          "effort": "HIGH"
+        },
+        {
+          "gap": "Integration test retry pattern masks flakiness instead of quarantining",
+          "severity": "MEDIUM",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "Golden path smoke test has non-blocking failure modes",
+          "severity": "LOW",
+          "effort": "LOW"
+        },
+        {
+          "gap": "No workflow consolidation strategy; 157 workflows is unsustainable",
+          "severity": "MEDIUM",
+          "effort": "HIGH"
+        },
+        {
+          "gap": "No CI cost/time dashboard or budget alerting",
+          "severity": "LOW",
+          "effort": "MEDIUM"
+        }
+      ]
+    },
+    "governance_claims_evidence": {
+      "current_state": "Governance directory with policies, decisions, release checklist. EVIDENCE_BUNDLE.manifest.json defines CI quality gates. Marketing NARRATIVE_ARCHITECTURE.md maps claims to code components.",
+      "target_state": "Closed-loop evidence system where every marketing claim has CI-generated attestation, every release includes hydrated evidence bundle, and compliance controls are automatically verified.",
+      "gaps": [
+        {
+          "gap": "Marketing claims (ProvenanceLedger, TenantSafePostgres, BudgetTracker) not tested by named CI jobs",
+          "severity": "HIGH",
+          "effort": "HIGH"
+        },
+        {
+          "gap": "EVIDENCE_BUNDLE.manifest.json uses unhydrated template placeholders",
+          "severity": "MEDIUM",
+          "effort": "LOW"
+        },
+        {
+          "gap": "Control matrix only covers 3 controls; SOC2 requires 60+",
+          "severity": "HIGH",
+          "effort": "HIGH"
+        },
+        {
+          "gap": "No automated DPIA completion check before releases with PII scope",
+          "severity": "MEDIUM",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "GA Readiness Report has manual verification steps not automated",
+          "severity": "HIGH",
+          "effort": "HIGH"
+        },
+        {
+          "gap": "No evidence retention/archival policy enforcement in CI",
+          "severity": "LOW",
+          "effort": "MEDIUM"
+        }
+      ]
+    },
+    "documentation_collateral": {
+      "current_state": "700+ markdown files across architecture, API, marketing, onboarding, governance. ADR pattern established. Runbooks exist.",
+      "target_state": "Docs-as-code with automated freshness checks, diagram generation, investor-ready artifact pipeline, and living document verification.",
+      "gaps": [
+        {
+          "gap": "No root ARCHITECTURE.md summarizing system design",
+          "severity": "MEDIUM",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "No automated diagram generation from code (e.g., C4 model)",
+          "severity": "LOW",
+          "effort": "HIGH"
+        },
+        {
+          "gap": "Marketing collateral pipeline not automated (pitch decks, one-pagers)",
+          "severity": "LOW",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "No docs freshness enforcement (stale doc detection)",
+          "severity": "MEDIUM",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "Investor readiness artifacts scattered; no consolidated package",
+          "severity": "MEDIUM",
+          "effort": "MEDIUM"
+        },
+        {
+          "gap": "API documentation completeness not gated in CI",
+          "severity": "LOW",
+          "effort": "MEDIUM"
+        }
+      ]
+    }
+  },
+
+  "action_plan": [
+    {
+      "priority": 1,
+      "task": "Fix Makefile VVENV_BIN typo",
+      "category": "Developer Experience",
+      "effort": "LOW",
+      "owner": "Platform Team",
+      "success_criteria": "make format executes Python formatting without error",
+      "dependencies": []
+    },
+    {
+      "priority": 2,
+      "task": "Hydrate EVIDENCE_BUNDLE.manifest.json in CI",
+      "category": "Governance",
+      "effort": "LOW",
+      "owner": "Platform Team",
+      "success_criteria": "GA evidence bundle contains actual git commit SHA and build timestamp, not template placeholders",
+      "dependencies": []
+    },
+    {
+      "priority": 3,
+      "task": "Standardize GitHub Actions to SHA-pinned v6",
+      "category": "CI/CD",
+      "effort": "MEDIUM",
+      "owner": "Platform Team",
+      "success_criteria": "All workflows use SHA-pinned actions matching ci-core.yml pattern. Dependabot configured for action updates.",
+      "dependencies": []
+    },
+    {
+      "priority": 4,
+      "task": "Create claim-evidence-matrix.yaml linking marketing claims to tests",
+      "category": "Governance",
+      "effort": "MEDIUM",
+      "owner": "Product + Engineering",
+      "success_criteria": "Every claim in NARRATIVE_ARCHITECTURE.md has corresponding test file paths and CI job names in matrix",
+      "dependencies": []
+    },
+    {
+      "priority": 5,
+      "task": "Implement ci-claim-verification.yml workflow",
+      "category": "CI/CD",
+      "effort": "MEDIUM",
+      "owner": "Platform Team",
+      "success_criteria": "PR cannot merge if claim-evidence-matrix references non-existent tests or failing jobs",
+      "dependencies": ["Create claim-evidence-matrix.yaml"]
+    },
+    {
+      "priority": 6,
+      "task": "Create Dev Station manifest with pinned versions",
+      "category": "Developer Experience",
+      "effort": "MEDIUM",
+      "owner": "Platform Team",
+      "success_criteria": "Developer/dev-station/manifest.yaml specifies Ubuntu version, Node version, pnpm version, Python version, Docker version. make dev-station-verify validates local environment.",
+      "dependencies": []
+    },
+    {
+      "priority": 7,
+      "task": "Expand control-matrix.yml to SOC2 Type II coverage",
+      "category": "Governance",
+      "effort": "HIGH",
+      "owner": "Security + Compliance Team",
+      "success_criteria": "Control matrix covers 60+ SOC2 controls with evidence script mappings. CI validates evidence scripts exist.",
+      "dependencies": []
+    },
+    {
+      "priority": 8,
+      "task": "Automate GA Readiness staging validation",
+      "category": "CI/CD",
+      "effort": "HIGH",
+      "owner": "Platform Team",
+      "success_criteria": "staging-validation.yml workflow runs Terraform plan/apply to staging, executes DR restore test, runs canary. Release-train blocked until staging-validation passes.",
+      "dependencies": []
+    },
+    {
+      "priority": 9,
+      "task": "Implement flaky test quarantine integration",
+      "category": "CI/CD",
+      "effort": "MEDIUM",
+      "owner": "QA Team",
+      "success_criteria": "test-quarantine.json automatically updated when tests fail >3 times in 7 days. Quarantined tests skipped with tracking issue created.",
+      "dependencies": []
+    },
+    {
+      "priority": 10,
+      "task": "Consolidate workflows to <50 using reusable patterns",
+      "category": "CI/CD",
+      "effort": "HIGH",
+      "owner": "Platform Team",
+      "success_criteria": "Active workflow count reduced from 157 to <50. All common patterns use _reusable-*.yml. Archived workflows moved to .archive/workflows/",
+      "dependencies": []
+    },
+    {
+      "priority": 11,
+      "task": "Create root ARCHITECTURE.md",
+      "category": "Documentation",
+      "effort": "MEDIUM",
+      "owner": "Architecture Lead",
+      "success_criteria": "ARCHITECTURE.md at repo root with C4 context/container diagrams, directory structure explanation, and links to detailed ADRs",
+      "dependencies": []
+    },
+    {
+      "priority": 12,
+      "task": "Implement docs freshness enforcement",
+      "category": "Documentation",
+      "effort": "MEDIUM",
+      "owner": "Platform Team",
+      "success_criteria": "CI job detects docs not updated in 180 days, creates tracking issues. Critical docs (ARCHITECTURE.md, API_DOCUMENTATION.md) require annual review.",
+      "dependencies": []
+    }
+  ],
+
+  "sample_artifacts": {
+    "claim_evidence_matrix_yaml": "# claim-evidence-matrix.yaml\n# Maps marketing claims to automated evidence\n\nclaims:\n  - id: CLAIM-TRUTH-01\n    pillar: Truth\n    statement: \"The system does not hallucinate or lie about data origin.\"\n    source: docs/marketing/NARRATIVE_ARCHITECTURE.md\n    mechanical_evidence:\n      - component: ProvenanceLedger\n        tests:\n          - server/src/provenance/__tests__/ledger.test.ts\n          - server/src/provenance/__tests__/lineage.test.ts\n        ci_jobs:\n          - ci-core / unit-tests\n          - ci-core / integration-tests\n      - component: ArtifactSigning\n        tests:\n          - server/src/security/__tests__/signing.test.ts\n        ci_jobs:\n          - supply-chain-attest / attest\n\n  - id: CLAIM-SAFETY-01\n    pillar: Safety\n    statement: \"The system protects itself and its users from harm.\"\n    source: docs/marketing/NARRATIVE_ARCHITECTURE.md\n    mechanical_evidence:\n      - component: TenantSafePostgres\n        tests:\n          - server/src/db/__tests__/tenant-isolation.test.ts\n        ci_jobs:\n          - ci-core / integration-tests\n          - soc-control-verification\n      - component: OPA Gates\n        tests:\n          - policies/**/*.rego\n        ci_jobs:\n          - ci-core / soc-control-verification\n\n  - id: CLAIM-CONTROL-01\n    pillar: Control\n    statement: \"The operator is always in command of cost and risk.\"\n    source: docs/marketing/NARRATIVE_ARCHITECTURE.md\n    mechanical_evidence:\n      - component: BudgetTracker\n        tests:\n          - server/src/orchestration/__tests__/budget.test.ts\n        ci_jobs:\n          - ci-core / unit-tests\n      - component: QuotaManager\n        tests:\n          - server/src/orchestration/__tests__/quota.test.ts\n        ci_jobs:\n          - ci-core / unit-tests\n",
+
+    "ci_claim_verification_yml": "name: Claim-Evidence Verification\n\non:\n  pull_request:\n    paths:\n      - 'docs/marketing/**'\n      - 'claim-evidence-matrix.yaml'\n  push:\n    branches: [main]\n\njobs:\n  verify-claims:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Validate claim-evidence-matrix structure\n        run: |\n          python3 -c \"\nimport yaml\nimport sys\nfrom pathlib import Path\n\nwith open('claim-evidence-matrix.yaml') as f:\n    matrix = yaml.safe_load(f)\n\nerrors = []\nfor claim in matrix.get('claims', []):\n    for evidence in claim.get('mechanical_evidence', []):\n        for test in evidence.get('tests', []):\n            if not any(Path('.').glob(test)):\n                errors.append(f\\\"Claim {claim['id']}: Test file not found: {test}\\\")\n\nif errors:\n    print('\\n'.join(errors))\n    sys.exit(1)\nprint('All claim evidence files exist.')\n\"\n\n      - name: Verify CI jobs exist\n        run: |\n          # Extract unique CI job references and verify they exist in workflows\n          yq '.claims[].mechanical_evidence[].ci_jobs[]' claim-evidence-matrix.yaml | sort -u | while read job; do\n            workflow=$(echo \"$job\" | cut -d'/' -f1)\n            if ! ls .github/workflows/ | grep -q \"$workflow\"; then\n              echo \"ERROR: Workflow not found for job reference: $job\"\n              exit 1\n            fi\n          done\n          echo \"All CI job references valid.\"\n",
+
+    "dev_station_manifest_yaml": "# Developer/dev-station/manifest.yaml\n# Summit Dev Station Reproducibility Manifest\n# Version: 1.0.0\n\nbase_environment:\n  os: ubuntu\n  version: \"22.04\"  # LTS pinned\n  architecture: amd64\n\nruntime_versions:\n  node:\n    version: \"20.11.0\"  # Matches .nvmrc\n    source: nvm\n  pnpm:\n    version: \"10.0.0\"  # Matches package.json packageManager\n  python:\n    version: \"3.11.7\"\n    source: pyenv\n  docker:\n    version: \"24.0.0\"\n    compose_version: \"2.24.0\"\n\nsystem_packages:\n  - curl\n  - git\n  - jq\n  - yq\n  - age  # for sops\n  - sops\n  - cosign\n  - opa\n\nverification_script: |\n  #!/bin/bash\n  set -e\n  echo \"Verifying Dev Station environment...\"\n  \n  # Node\n  node_version=$(node -v | tr -d 'v')\n  [[ \"$node_version\" == \"20.11.0\" ]] || echo \"WARN: Node version mismatch: $node_version\"\n  \n  # pnpm\n  pnpm_version=$(pnpm -v)\n  [[ \"$pnpm_version\" == \"10.0.0\" ]] || echo \"WARN: pnpm version mismatch: $pnpm_version\"\n  \n  # Docker\n  docker --version | grep -q \"24.\" || echo \"WARN: Docker version mismatch\"\n  \n  echo \"Dev Station verification complete.\"\n",
+
+    "evidence_hydration_script": "#!/bin/bash\n# scripts/evidence/hydrate-manifest.sh\n# Hydrates EVIDENCE_BUNDLE.manifest.json with actual release metadata\n\nset -euo pipefail\n\nMANIFEST=\"EVIDENCE_BUNDLE.manifest.json\"\nOUTPUT=\"dist/evidence/$(git rev-parse HEAD)/manifest.json\"\n\nmkdir -p \"$(dirname \"$OUTPUT\")\"\n\n# Hydrate template variables\nGIT_COMMIT=$(git rev-parse HEAD)\nBUILD_TIMESTAMP=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\nPIPELINE=\"${GITHUB_WORKFLOW:-local}\"\nAPPROVER=\"${GITHUB_ACTOR:-$(whoami)}\"\n\ncat \"$MANIFEST\" | \\\n  sed \"s/{{ .Release.GitCommit }}/$GIT_COMMIT/g\" | \\\n  sed \"s/{{ .Release.Pipeline }}/$PIPELINE/g\" | \\\n  sed \"s/{{ .Release.BuildTime }}/$BUILD_TIMESTAMP/g\" | \\\n  sed \"s/{{ .Release.Approver }}/$APPROVER/g\" \\\n  > \"$OUTPUT\"\n\necho \"Hydrated manifest written to $OUTPUT\"\necho \"  Git Commit: $GIT_COMMIT\"\necho \"  Build Time: $BUILD_TIMESTAMP\"\necho \"  Pipeline: $PIPELINE\"\necho \"  Approver: $APPROVER\"\n",
+
+    "makefile_fix_diff": "--- a/Makefile\n+++ b/Makefile\n@@ -92,7 +92,7 @@ lint:   ## Lint js/ts + python\n \n format: ## Format code\n \tpnpm -w exec prettier -w . || true\n-\t$(VVENV_BIN)/ruff format .\n+\t$(VENV_BIN)/ruff format .\n \n build:  ## Build all images\n \tdocker compose -f $(COMPOSE_DEV_FILE) build\n"
+  }
+}

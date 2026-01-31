@@ -2,7 +2,7 @@
 import request from 'supertest';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import express, { Response } from 'express';
-import { ensureAuthenticated } from '../middleware/auth';
+import { ensureAuthenticated } from '../middleware/auth.js';
 
 // Mock dependencies
 jest.mock('../db/postgres.js', () => ({

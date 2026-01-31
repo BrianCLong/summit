@@ -1,0 +1,19 @@
+name: Jet-RL CI
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install pytest jsonschema
+      - run: pytest tests/test_precision_flow_policy.py tests/test_detectors_deny_by_default.py
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install jsonschema
+      - run: python tools/validate_evidence_schemas.py

@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-PCTX_CODEMODE-EVAL-003",
+  "metrics": {
+    "schema_tokens_estimate": 150,
+    "messages_tokens_estimate": 500,
+    "wall_ms": 1200,
+    "success": 1.0
+  }
+}

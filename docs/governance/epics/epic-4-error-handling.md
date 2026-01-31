@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 4 — Error Handling & Recoverability (no stuck states, no mystery failures)
 
 1.  Define error taxonomy and codes (client-safe, actionable, searchable).

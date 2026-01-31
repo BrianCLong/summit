@@ -18,7 +18,12 @@ jest.mock('../../src/services/EmbeddingService.js', () => {
 });
 
 jest.mock('../../src/monitoring/opentelemetry.js', () => ({
+  __esModule: true,
   otelService: {
+    wrapNeo4jOperation: jest.fn(),
+    addSpanAttributes: jest.fn(),
+  },
+  default: {
     wrapNeo4jOperation: jest.fn(),
     addSpanAttributes: jest.fn(),
   },
@@ -57,10 +62,10 @@ describe('SimilarityService Batch Optimization', () => {
     // Setup mocks
     // 1. getEntitiesEmbeddings (Batch fetch)
     mockClient.query.mockResolvedValueOnce({
-        rows: [
-            { entity_id: 'id1', embedding: '[0.1,0.2]' },
-            { entity_id: 'id2', embedding: '[0.3,0.4]' }
-        ]
+      rows: [
+        { entity_id: 'id1', embedding: '[0.1,0.2]' },
+        { entity_id: 'id2', embedding: '[0.3,0.4]' }
+      ]
     });
     // 2. performVectorSearch for id1
     mockClient.query.mockResolvedValueOnce({ rows: [] });

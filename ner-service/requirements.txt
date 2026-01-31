@@ -1,5 +1,0 @@
-fastapi==0.128.0
-uvicorn==0.40.0
-spacy==3.8.11
-# Download a spaCy model, e.g., en_core_web_sm
-# python -m spacy download en_core_web_sm

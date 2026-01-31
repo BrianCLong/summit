@@ -1,0 +1,54 @@
+name: Solid Gate (Engineering Quality)
+
+on:
+  pull_request:
+    # Run on all PRs to main
+    branches: [main]
+    paths:
+      - "src/**"
+      - "packages/**"
+      - "apps/**"
+      - "server/**"
+      - "tools/solid_gate/**"
+
+permissions:
+  contents: read
+
+jobs:
+  solid-gate:
+    name: Solid Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for diffs
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Solid Gate
+        id: gate
+        run: |
+          # Default base is origin/main, but in PR we want the PR base
+          BASE="origin/${{ github.base_ref }}"
+          echo "Running against base: $BASE"
+          python -m tools.solid_gate --diff-base "$BASE"
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: solid-gate-evidence
+          path: artifacts/solid-gate/
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f artifacts/solid-gate/report.json ]; then
+            echo "## Solid Gate Findings" >> $GITHUB_STEP_SUMMARY
+            # Simple parsing for summary (jq is available on ubuntu-latest)
+            jq -r '.findings[] | "- [" + (.severity | ascii_upcase) + "] " + .rule_id + ": " + .message + " (" + (.path // "global") + ")"' artifacts/solid-gate/report.json >> $GITHUB_STEP_SUMMARY
+          fi

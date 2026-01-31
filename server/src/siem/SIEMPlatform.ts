@@ -122,13 +122,14 @@ export class SIEMPlatform {
 
   private matchesConditions(event: SIEMEvent, conditions: RuleCondition[]): boolean {
     return conditions.every(condition => {
-      const val = (event as any)[condition.field]; // Simple field access
+      const eventRecord = event as Record<string, unknown>;
+      const val = eventRecord[condition.field]; // Simple field access
       if (val === undefined) return false;
 
       switch (condition.operator) {
         case 'equals': return val === condition.value;
-        case 'contains': return String(val).includes(condition.value);
-        case 'regex': return new RegExp(condition.value).test(String(val));
+        case 'contains': return String(val).includes(String(condition.value));
+        case 'regex': return new RegExp(String(condition.value)).test(String(val));
         default: return false;
       }
     });
@@ -164,12 +165,12 @@ export class SIEMPlatform {
   }
 
   // Public Query Methods
-  public getEvents(filter: any) {
+  public getEvents(_filter?: Record<string, unknown>) {
     // Basic filter impl
     return this.events.slice().reverse();
   }
 
-  public getAlerts(filter: any) {
+  public getAlerts(_filter?: Record<string, unknown>) {
     return this.alerts.slice().reverse();
   }
 

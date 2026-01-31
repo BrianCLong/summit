@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { RedisService as RedisCache } from '../cache/redis';
+import { RedisService as RedisCache } from '../cache/redis.js';
 
 interface DashboardWidget {
   id: string;

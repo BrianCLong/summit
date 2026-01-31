@@ -1,10 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { verifyWeights } from '../risk/WeightsVerifier';
+import { fileURLToPath } from 'url';
+import { verifyWeights } from '../risk/WeightsVerifier.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('WeightsVerifier', () => {
   it('verifies checksum', () => {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const models = path.join(__dirname, '..', '..', 'models');
     const weightsPath = path.join(models, 'weights.json');
     const checksums = JSON.parse(
