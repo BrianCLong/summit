@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import Set, Dict, Any
 
-def compute_metrics(submitted: Set[str], ground_truth: Set[str]) -> Dict[str, float]:
+from typing import Any, Dict, Set
+
+
+def compute_metrics(submitted: set[str], ground_truth: set[str]) -> dict[str, float]:
     """
     Computes Precision, Recall, and F1 score for set-based answers.
     """
@@ -30,7 +32,7 @@ def compute_metrics(submitted: Set[str], ground_truth: Set[str]) -> Dict[str, fl
         "f1": f1
     }
 
-def classify_bucket(submitted: Set[str], ground_truth: Set[str]) -> str:
+def classify_bucket(submitted: set[str], ground_truth: set[str]) -> str:
     """
     Classifies the result into categorical buckets as per the DeepSearchQA paper.
     """

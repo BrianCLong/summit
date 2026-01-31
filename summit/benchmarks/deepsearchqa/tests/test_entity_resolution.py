@@ -1,4 +1,5 @@
-from summit.benchmarks.deepsearchqa.entity_resolution import canonicalize, EntityResolver
+from summit.benchmarks.deepsearchqa.entity_resolution import EntityResolver, canonicalize
+
 
 def test_canonicalize_heuristics():
     assert canonicalize("United States") == "united states"

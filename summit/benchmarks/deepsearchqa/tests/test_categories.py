@@ -1,5 +1,6 @@
 from summit.benchmarks.deepsearchqa.scoring import classify_bucket
 
+
 def test_fully_correct():
     assert classify_bucket({"a", "b"}, {"a", "b"}) == "Fully Correct"
 

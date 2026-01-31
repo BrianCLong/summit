@@ -1,5 +1,6 @@
 import os
 
+
 def check_dependency_delta(changed_files):
     """
     CI gate: Reject if dependency files changed but dependency-delta.md was not updated.

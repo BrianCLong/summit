@@ -1,5 +1,7 @@
 import pytest
+
 from summit.benchmarks.deepsearchqa.judge import get_judge
+
 
 def test_exact_match_judge_determinism():
     judge = get_judge("off")

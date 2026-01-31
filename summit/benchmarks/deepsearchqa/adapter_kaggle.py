@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 from .schema import DeepSearchQAItem
 
-def load_dataset(path: str | Path) -> List[DeepSearchQAItem]:
+
+def load_dataset(path: str | Path) -> list[DeepSearchQAItem]:
     """
     Loads the DeepSearchQA dataset from a local JSON file.
     Does NOT vendor the dataset; expects a user-provided path.
@@ -15,13 +16,13 @@ def load_dataset(path: str | Path) -> List[DeepSearchQAItem]:
     if not path.exists():
         raise FileNotFoundError(f"Dataset file not found at: {path}")
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
 
     if not isinstance(data, list):
         raise ValueError("Dataset must be a JSON list of items.")
 
-    validated_items: List[DeepSearchQAItem] = []
+    validated_items: list[DeepSearchQAItem] = []
     for i, item in enumerate(data):
         try:
             validate_item(item)

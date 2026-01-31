@@ -1,13 +1,16 @@
 from typing import Dict, Type
+
 from summit.flags import is_feature_enabled
+
 from .drivers.vind.driver import VindDriver
 from .drivers.vind.vcluster_cli import VClusterCLI
 
+
 class DriverRegistry:
-    _drivers: Dict[str, Type] = {}
+    _drivers: dict[str, type] = {}
 
     @classmethod
-    def register(cls, name: str, driver_cls: Type):
+    def register(cls, name: str, driver_cls: type):
         cls._drivers[name] = driver_cls
 
     @classmethod
