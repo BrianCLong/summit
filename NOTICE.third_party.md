@@ -1,22 +1,13 @@
 # Third-Party Notices
 
-This project incorporates concepts and patterns inspired by the following open-source projects:
+This project uses the following third-party components:
 
-## everything-claude-code
-
-- **Source**: https://github.com/affaan-m/everything-claude-code
-- **License**: MIT
-- **Notice**: Concepts inspired by everything-claude-code. Clean-room implementation.
-
-## SCOUT (Language-based Trial and Error Falls Behind in the Era of Experience)
-
-- **Source**: https://huggingface.co/papers/2601.21754
-- **Repo**: https://github.com/Harry-mic/SCOUT
-- **License**: MIT
-- **Notice**: Concepts inspired by SCOUT. Clean-room implementation.
-
-## Qwen/Qwen3-ASR-0.6B
-
-- **Source**: https://huggingface.co/Qwen/Qwen3-ASR-0.6B
+## Qwen3-TTS
+- **Source**: https://github.com/QwenLM/Qwen3-TTS
 - **License**: Apache-2.0
-- **Notice**: Clean-room adapter scaffold references public model documentation.
+- **Attribution**: Qwen3-TTS is developed by the Qwen team.
+
+## ComfyUI-QwenTTS (Harvested Behaviors)
+- **Source**: https://github.com/1038lab/ComfyUI-QwenTTS
+- **License**: GPL-3.0
+- **Note**: Operational patterns and feature sets (device fallback, attention backends) were harvested for clean-room implementation in Summit. No code was copied or imported.
