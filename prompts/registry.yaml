@@ -29,6 +29,41 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: hono-supplychain-remediation-gate
+    version: v1
+    path: prompts/tasks/hono-supplychain-remediation@v1.md
+    sha256: db8053492c129315a364c34d46dc0e92dfb08f9ae7107b2340163a14989365a6
+    description: Add a deny-by-default Hono lockfile gate, evidence bundle scaffolding, and walkthrough updates.
+    scope:
+      paths:
+        - tools/security/verify_hono_lockfile.mjs
+        - tools/security/verify_hono_lockfile.test.mjs
+        - tools/security/fixtures/
+        - tools/security/emit_hono_evidence_stamp.mjs
+        - .github/workflows/security-supplychain.yml
+        - evidence/out/HONO-ERRBOUNDARY-XSS/
+        - evidence/index.json
+        - walkthrough.md
+        - required_checks.todo.md
+        - docs/templates/atomic-pr-brief-template.md
+        - docs/roadmap/STATUS.json
+        - prompts/tasks/hono-supplychain-remediation@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - security
+        - evidence
+        - governance
+        - docs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

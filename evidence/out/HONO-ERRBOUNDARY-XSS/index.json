@@ -1,0 +1,18 @@
+{
+  "item_slug": "HONO-ERRBOUNDARY-XSS",
+  "generated_by": "ci:security-supplychain",
+  "evidence": {
+    "EVD-HONO-ERRBOUNDARY-XSS-SUPPLYCHAIN-001": {
+      "summary": "Lockfile gate confirms no hono@<4.11.7 resolved after pnpm install.",
+      "files": ["report.json", "metrics.json", "stamp.json"]
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-CI-002": {
+      "summary": "CI job hono-version-gate executed successfully on this commit.",
+      "files": ["report.json", "metrics.json", "stamp.json"]
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-DOCS-003": {
+      "summary": "walkthrough.md updated with remediation and verification steps.",
+      "files": ["report.json"]
+    }
+  }
+}
