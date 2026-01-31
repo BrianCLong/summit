@@ -104,6 +104,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: first-mover-advantage-spec
+    version: v1
+    path: prompts/docs/first-mover-spec@v1.md
+    sha256: cf0ae741011566db8bfbf7b28c18935880ea0592e5caff43c3d7b71c220a523b
+    description: Produce a first-mover advantage spec and 4-6 week demo plan for governed agentic operations.
+    scope:
+      paths:
+        - docs/strategy/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/docs/first-mover-spec@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - roadmap
+        - strategy
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
