@@ -525,6 +525,24 @@ prompts:
         - competitive-intel
         - product-strategy
         - governance
+  - id: competitive-intel-protocol
+    version: v1
+    path: prompts/competitive/competitive-intel-protocol@v1.md
+    sha256: 6d995044b35fbc480e6745a5c0be11dbfacf41a6531720ee071ba382e4308829
+    description: Summit competitive intelligence protocol documentation and targets scaffold.
+    scope:
+      paths:
+        - docs/ci/COMPETITIVE_INTELLIGENCE_PROTOCOL.md
+        - docs/ci/targets/README.md
+        - docs/ci/README.md
+        - docs/roadmap/STATUS.json
+        - prompts/competitive/competitive-intel-protocol@v1.md
+        - prompts/registry.yaml
+      domains:
+        - competitive-intel
+        - documentation
+        - governance
+        - ci
   - id: sar-agentic-app-runtime
     version: v1
     path: prompts/architecture/sar-agentic-app-runtime@v1.md
