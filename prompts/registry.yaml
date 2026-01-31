@@ -1,5 +1,36 @@
 version: 1
 prompts:
+  - id: shai-hulud-supply-chain
+    version: v1
+    path: prompts/subsumption/shai-hulud-supply-chain@v1.md
+    sha256: d456a63f7e8531d579ed361ea4e30846516e0382982f19eda91af8c760969ca2
+    description: Scaffold the Shai-Hulud supply-chain subsumption bundle and evidence artifacts.
+    scope:
+      paths:
+        - subsumption/shai-hulud-supply-chain/
+        - evidence/subsumption/shai-hulud-supply-chain/
+        - evidence/schemas/subsumption_*.schema.json
+        - evidence/index.json
+        - docs/standards/shai-hulud-supply-chain.md
+        - docs/security/data-handling/shai-hulud-supply-chain.md
+        - docs/ops/runbooks/shai-hulud-supply-chain.md
+        - docs/decisions/shai-hulud-supply-chain.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - security
+        - supply-chain
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: integrations-backlog-sync
     version: v1
     path: prompts/integrations/backlog-sync.md

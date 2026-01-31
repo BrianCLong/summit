@@ -96,6 +96,14 @@
         "evidence/metrics.json",
         "evidence/stamp.json"
       ]
+    },
+    {
+      "evidence_id": "EVD-SUPPLYCHAIN-GOV-001",
+      "files": [
+        "evidence/subsumption/shai-hulud-supply-chain/report.json",
+        "evidence/subsumption/shai-hulud-supply-chain/metrics.json",
+        "evidence/subsumption/shai-hulud-supply-chain/stamp.json"
+      ]
     }
-  }
+  ]
 }
