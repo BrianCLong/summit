@@ -124,7 +124,7 @@ export class FunnelService {
         const map = new Map<string, TelemetryEvent[]>();
         if (!fs.existsSync(this.logDir)) return map;
 
-        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.tsonl'));
+        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.jsonl'));
         for (const file of files) {
             const content = fs.readFileSync(path.join(this.logDir, file), 'utf-8');
             const lines = content.split('\n');

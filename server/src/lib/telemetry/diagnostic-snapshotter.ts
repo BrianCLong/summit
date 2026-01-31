@@ -78,7 +78,7 @@ class DiagnosticSnapshotter {
   }
 
   private captureConfigState() {
-    const configPath = path.join(os.tmpdir(), `config-state-${Date.now()}.tson`);
+    const configPath = path.join(os.tmpdir(), `config-state-${Date.now()}.json`);
     fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
     console.log(`Configuration state captured at: ${configPath}`);
   }
@@ -96,7 +96,7 @@ class DiagnosticSnapshotter {
   }
 
   private captureActiveRequests() {
-    const activeRequestsPath = path.join(os.tmpdir(), `active-requests-${Date.now()}.tson`);
+    const activeRequestsPath = path.join(os.tmpdir(), `active-requests-${Date.now()}.json`);
     const activeRequests = {
       count: this.activeRequests.size,
       requests: Array.from(this.activeRequests).map((req: any) => ({
