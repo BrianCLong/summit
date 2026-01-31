@@ -12,9 +12,6 @@ overrides:
   debug: '>=4.3.5'
   eslint>chalk: ^4.1.2
   chalk: '>=5.3.0'
-  cypress>log-symbols: 4.1.0
-  cypress>chalk: 4.1.2
-  log-symbols>chalk: 4.1.2
   color: '>=4.2.3'
   ansi-regex: ^5.0.1
   ws: '>=8.18.4'
@@ -33,7 +30,6 @@ overrides:
   express: '>=4.21.0'
   axios: '>=1.13.2'
   glob: '>=11.1.0'
-  cacache>glob: 7.2.3
   tar-fs: '>=3.0.6'
   '@babel/runtime': '>=7.26.0'
   esbuild: '>=0.25.0'
@@ -5077,8 +5073,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  packages/co: {}
-
   packages/cogsec-model:
     devDependencies:
       typescript:
@@ -7874,8 +7868,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  packages/ig: {}
-
   packages/image-forensics:
     dependencies:
       '@intelgraph/computer-vision':
@@ -8846,8 +8838,6 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)
-
-  packages/mc: {}
 
   packages/mcp: {}
 
@@ -11434,8 +11424,6 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
-  packages/sb: {}
-
   packages/sdk:
     devDependencies:
       '@types/node':
@@ -12150,21 +12138,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-
-  packages/summit-platform:
-    dependencies:
-      '@summit/flows-co':
-        specifier: workspace:*
-        version: link:../co
-      '@summit/flows-ig':
-        specifier: workspace:*
-        version: link:../ig
-      '@summit/flows-mc':
-        specifier: workspace:*
-        version: link:../mc
-      '@summit/flows-sb':
-        specifier: workspace:*
-        version: link:../sb
 
   packages/supplier-risk:
     dependencies:
@@ -42482,9 +42455,6 @@ packages:
   fs-monkey@1.1.0:
     resolution: {integrity: sha512-QMUezzXWII9EV5aTFXW1UBVUO77wYPpjqIF8/AviUCThNeSYZykpoTixUeaNNBwmCev0AMDWMAni+f8Hxb1IFw==}
 
-  fs.realpath@1.0.0:
-    resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
-
   fsevents@2.3.2:
     resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -42716,10 +42686,6 @@ packages:
   glob@13.0.0:
     resolution: {integrity: sha512-tvZgpqk6fz4BaNZ66ZsRaZnbHvP/jG3uKJvAZOwEVUL4RTA5nJeeLYfyN9/VA8NX/V3IBG+hkeuGpKjvELkVhA==}
     engines: {node: 20 || >=22}
-
-  glob@7.2.3:
-    resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
 
   global-agent@3.0.0:
     resolution: {integrity: sha512-PT6XReJ+D07JvGoxQMkT6qji/jVNfX/h364XHZOWeRzy64sSFr+xJ5OX7LI3b4MPQzdL4H8Y8M0xzPpsVMwA8Q==}
@@ -43512,10 +43478,6 @@ packages:
 
   inflected@2.1.0:
     resolution: {integrity: sha512-hAEKNxvHf2Iq3H60oMBHkB4wl5jn3TPF3+fXek/sRwAB5gP9xWs4r7aweSF95f99HFoz69pnZTcu8f0SIHV18w==}
-
-  inflight@1.0.6:
-    resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
-    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -47483,10 +47445,6 @@ packages:
   path-exists@5.0.0:
     resolution: {integrity: sha512-RjhtfwJOxzcFmNOi6ltcbcu4Iu+FL3zEj83dk4kAS+fVpTxXLO1b38RvJgT/0QwvV/L3aY9TAnyv0EOqW4GoMQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  path-is-absolute@1.0.1:
-    resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
-    engines: {node: '>=0.10.0'}
 
   path-is-inside@1.0.2:
     resolution: {integrity: sha512-DUWJr3+ULp4zXmol/SZkFf3JGsS9/SIv+Y3Rt93/UjPpDpklB5f1er4O3POIbUuUJ3FXgqte2Q7SrU6zAqwk8w==}
@@ -78618,7 +78576,7 @@ snapshots:
       '@npmcli/move-file': 2.0.1
       chownr: 2.0.0
       fs-minipass: 2.1.0
-      glob: 7.2.3
+      glob: 13.0.0
       infer-owner: 1.0.4
       lru-cache: 7.18.3
       minipass: 3.3.6
@@ -78639,7 +78597,7 @@ snapshots:
     dependencies:
       '@npmcli/fs': 3.1.1
       fs-minipass: 3.0.3
-      glob: 7.2.3
+      glob: 13.0.0
       lru-cache: 10.4.3
       minipass: 7.1.2
       minipass-collect: 2.0.1
@@ -79947,7 +79905,7 @@ snapshots:
       bluebird: 3.7.2
       buffer: 5.7.1
       cachedir: 2.4.0
-      chalk: 4.1.2
+      chalk: 5.6.2
       check-more-types: 2.24.0
       ci-info: 4.3.1
       cli-cursor: 3.1.0
@@ -83189,8 +83147,6 @@ snapshots:
 
   fs-monkey@1.1.0: {}
 
-  fs.realpath@1.0.0: {}
-
   fsevents@2.3.2:
     optional: true
 
@@ -83453,15 +83409,6 @@ snapshots:
       minimatch: 10.1.1
       minipass: 7.1.2
       path-scurry: 2.0.1
-
-  glob@7.2.3:
-    dependencies:
-      fs.realpath: 1.0.0
-      inflight: 1.0.6
-      inherits: 2.0.4
-      minimatch: 3.1.2
-      once: 1.4.0
-      path-is-absolute: 1.0.1
 
   global-agent@3.0.0:
     dependencies:
@@ -84381,11 +84328,6 @@ snapshots:
   infer-owner@1.0.4: {}
 
   inflected@2.1.0: {}
-
-  inflight@1.0.6:
-    dependencies:
-      once: 1.4.0
-      wrappy: 1.0.2
 
   inherits@2.0.4: {}
 
@@ -87955,17 +87897,17 @@ snapshots:
 
   log-symbols@4.1.0:
     dependencies:
-      chalk: 4.1.2
+      chalk: 5.6.2
       is-unicode-supported: 0.1.0
 
   log-symbols@5.1.0:
     dependencies:
-      chalk: 4.1.2
+      chalk: 5.6.2
       is-unicode-supported: 1.3.0
 
   log-symbols@6.0.0:
     dependencies:
-      chalk: 4.1.2
+      chalk: 5.6.2
       is-unicode-supported: 1.3.0
 
   log-symbols@7.0.1:
@@ -90629,8 +90571,6 @@ snapshots:
   path-exists@4.0.0: {}
 
   path-exists@5.0.0: {}
-
-  path-is-absolute@1.0.1: {}
 
   path-is-inside@1.0.2: {}
 

@@ -5,7 +5,7 @@ export interface BundleCase {
   description?: string;
   compartment?: string;
   policyLabels?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface BundleEvidence {
@@ -30,7 +30,7 @@ export interface BundleGraphNode {
   caseId?: string;
   type: string;
   label: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 export interface BundleGraphEdge {
@@ -38,7 +38,7 @@ export interface BundleGraphEdge {
   from: string;
   to: string;
   label: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 export interface BundleGraphSubset {

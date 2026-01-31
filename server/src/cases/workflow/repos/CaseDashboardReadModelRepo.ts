@@ -47,7 +47,7 @@ export class CaseDashboardReadModelRepo {
     const { rows } = (await this.pg.query(query, params)) as { rows: MetricsRow[] };
 
     const mapped = new Map<string, CaseDashboardMetrics>();
-    rows.forEach((row: any) => {
+    rows.forEach((row: MetricsRow) => {
       mapped.set(row.case_id, this.mapRow(row));
     });
 

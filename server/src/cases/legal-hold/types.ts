@@ -51,7 +51,7 @@ export interface LegalHoldInitiationInput {
   custodians: LegalHoldCustodian[];
   scope: PreservationDataScope;
   notificationTemplateId?: string;
-  additionalMetadata?: Record<string, any>;
+  additionalMetadata?: Record<string, unknown>;
   lifecyclePolicyOverrides?: LifecyclePolicyLink[];
   eDiscovery?: {
     enabled: boolean;
@@ -68,7 +68,7 @@ export interface PreservationHoldInput {
   custodians: LegalHoldCustodian[];
   scope: PreservationDataScope;
   issuedBy: LegalHoldInitiationInput['issuedBy'];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PreservationHoldResult {
@@ -144,7 +144,7 @@ export interface LegalHoldRecord {
     matterId?: string;
     exportFormats?: string[];
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface LegalHoldNotificationRecord {
@@ -163,7 +163,7 @@ export interface AuditTrailEntry {
   actorId: string;
   actorRole?: string;
   action: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -219,9 +219,9 @@ export interface LegalHoldNotificationDispatcher {
     templateId?: string;
     recipients: LegalHoldCustodian[];
     channel?: string;
-    data: Record<string, any>;
+    data: Record<string, unknown>;
     priority?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }): Promise<{ id: string; status: 'queued' | 'sent' | 'failed' }>;
 }
 
@@ -230,7 +230,7 @@ export interface ChainOfCustodyAdapter {
     caseId: string;
     actorId: string;
     action: string;
-    payload?: Record<string, any>;
+    payload?: Record<string, unknown>;
   }): Promise<string | null>;
   verify(caseId: string): Promise<boolean>;
   getSigningKeys?():

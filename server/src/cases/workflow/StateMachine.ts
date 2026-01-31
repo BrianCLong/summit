@@ -22,7 +22,7 @@ export interface TransitionContext {
   userRoles: string[]; // Role IDs the user has in this case
   reason: string;
   legalBasis?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class WorkflowStateMachine {
@@ -138,7 +138,7 @@ export class WorkflowStateMachine {
    */
   private async evaluateRoleGuard(
     context: TransitionContext,
-    config: Record<string, any>,
+    config: Record<string, unknown>,
   ): Promise<{ allowed: boolean; errors: string[] }> {
     const requiredRoleIds = config.requiredRoleIds || [];
 
@@ -172,7 +172,7 @@ export class WorkflowStateMachine {
    */
   private async evaluateAuthorityGuard(
     context: TransitionContext,
-    config: Record<string, any>,
+    config: Record<string, unknown>,
   ): Promise<{ allowed: boolean; errors: string[] }> {
     const requiresWarrant = config.requiresWarrant || false;
     const requiresAuthority = config.requiresAuthority || false;
@@ -198,7 +198,7 @@ export class WorkflowStateMachine {
    */
   private async evaluateDataGuard(
     context: TransitionContext,
-    config: Record<string, any>,
+    config: Record<string, unknown>,
   ): Promise<{ allowed: boolean; errors: string[] }> {
     const conditions = config.conditions || [];
     const errors: string[] = [];
@@ -236,7 +236,7 @@ export class WorkflowStateMachine {
    */
   private async evaluateApprovalGuard(
     context: TransitionContext,
-    config: Record<string, any>,
+    config: Record<string, unknown>,
   ): Promise<{ allowed: boolean; errors: string[] }> {
     const approvalType = config.approvalType;
 

@@ -8,7 +8,6 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "pnpm run build",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

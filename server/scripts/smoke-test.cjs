@@ -6,7 +6,8 @@
  */
 const axios = require('axios');
 
-const BASE_URL = process.env.API_URL || 'http://localhost:4000';
+const PORT = process.env.PORT || '4000';
+const BASE_URL = process.env.API_URL || `http://localhost:${PORT}`;
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TEST_TIMEOUT_MS || '10000', 10);
 const VERBOSE = process.env.SMOKE_TEST_VERBOSE === 'true';
 

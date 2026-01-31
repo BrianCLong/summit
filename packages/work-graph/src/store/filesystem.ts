@@ -1,15 +1,15 @@
 /**
  * Summit Work Graph - FileSystem Graph Store
  *
- * "Artifact-first" persistence for Summit Tickets.
- * Stores Tickets as folders with `ticket.json` (eventually yaml) and evidence.
+ * "Artifact-first" persistence for Summit Tasks.
+ * Stores Tasks as folders with `task.json` (eventually yaml) and evidence.
  */
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import type { GraphStore } from './neo4j.js';
-import type { WorkGraphNode } from '../schema/nodes.js';
-import type { WorkGraphEdge } from '../schema/edges.js';
+import type { WorkGraphNode, NodeType } from '../schema/nodes.js';
+import type { WorkGraphEdge, EdgeType } from '../schema/edges.js';
 
 function validateId(id: string) {
   if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
@@ -34,7 +34,7 @@ export class FileSystemGraphStore implements GraphStore {
 
   async init() {
     await fs.mkdir(this.rootDir, { recursive: true });
-    await fs.mkdir(path.join(this.rootDir, 'tickets'), { recursive: true });
+    await fs.mkdir(path.join(this.rootDir, 'tasks'), { recursive: true });
     await fs.mkdir(path.join(this.rootDir, 'artifacts'), { recursive: true });
     await fs.mkdir(path.join(this.rootDir, 'nodes'), { recursive: true });
     await fs.mkdir(path.join(this.rootDir, 'edges'), { recursive: true });
@@ -48,18 +48,18 @@ export class FileSystemGraphStore implements GraphStore {
     await this.init(); // Ensure dirs exist
     validateId(node.id);
 
-    if (node.type === 'ticket') {
-      const ticketDir = path.join(this.rootDir, 'tickets', node.id);
-      await fs.mkdir(ticketDir, { recursive: true });
+    if (node.type === 'task') {
+      const taskDir = path.join(this.rootDir, 'tasks', node.id);
+      await fs.mkdir(taskDir, { recursive: true });
       await fs.writeFile(
-        path.join(ticketDir, 'ticket.json'),
+        path.join(taskDir, 'task.json'),
         JSON.stringify(node, null, 2)
       );
-      await fs.mkdir(path.join(ticketDir, 'evidence'), { recursive: true });
+      await fs.mkdir(path.join(taskDir, 'evidence'), { recursive: true });
       // Initialize logs
-      await fs.writeFile(path.join(ticketDir, 'provenance.jsonl'), '');
-      await fs.writeFile(path.join(ticketDir, 'decision_log.md'), '# Decision Log\n\n');
-    } else if (node.type === 'evidence_bundle') {
+      await fs.writeFile(path.join(taskDir, 'provenance.jsonl'), '');
+      await fs.writeFile(path.join(taskDir, 'decision_log.md'), '# Decision Log\n\n');
+    } else if (node.type === 'artifact') {
       await fs.writeFile(
         path.join(this.rootDir, 'artifacts', `${node.id}.json`),
         JSON.stringify(node, null, 2)
@@ -75,15 +75,15 @@ export class FileSystemGraphStore implements GraphStore {
 
   async getNode<T extends WorkGraphNode>(id: string): Promise<T | null> {
     validateId(id);
-    // Try ticket
+    // Try task
     try {
-      const content = await fs.readFile(path.join(this.rootDir, 'tickets', id, 'ticket.json'), 'utf-8');
+      const content = await fs.readFile(path.join(this.rootDir, 'tasks', id, 'task.json'), 'utf-8');
       return JSON.parse(content, jsonReviver) as T;
     } catch (e) {
       // Ignore
     }
 
-    // Try evidence bundle
+    // Try artifact
     try {
       const content = await fs.readFile(path.join(this.rootDir, 'artifacts', `${id}.json`), 'utf-8');
       return JSON.parse(content, jsonReviver) as T;
@@ -124,12 +124,12 @@ export class FileSystemGraphStore implements GraphStore {
     await readDir(path.join(this.rootDir, 'nodes'));
     await readDir(path.join(this.rootDir, 'artifacts'));
 
-    // Read tickets
+    // Read tasks
     try {
-      const ticketDirs = await fs.readdir(path.join(this.rootDir, 'tickets'));
-      for (const ticketId of ticketDirs) {
+      const taskDirs = await fs.readdir(path.join(this.rootDir, 'tasks'));
+      for (const taskId of taskDirs) {
         try {
-          const content = await fs.readFile(path.join(this.rootDir, 'tickets', ticketId, 'ticket.json'), 'utf-8');
+          const content = await fs.readFile(path.join(this.rootDir, 'tasks', taskId, 'task.json'), 'utf-8');
           nodes.push(JSON.parse(content, jsonReviver) as T);
         } catch (e) {
           // ignore
@@ -164,9 +164,9 @@ export class FileSystemGraphStore implements GraphStore {
     const node = await this.getNode(id);
     if (!node) return false;
 
-    if (node.type === 'ticket') {
-      await fs.rm(path.join(this.rootDir, 'tickets', id), { recursive: true, force: true });
-    } else if (node.type === 'evidence_bundle') {
+    if (node.type === 'task') {
+      await fs.rm(path.join(this.rootDir, 'tasks', id), { recursive: true, force: true });
+    } else if (node.type === 'artifact') {
       await fs.rm(path.join(this.rootDir, 'artifacts', `${id}.json`));
     } else {
       await fs.rm(path.join(this.rootDir, 'nodes', `${id}.json`));

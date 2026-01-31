@@ -162,7 +162,7 @@ describe('Cache', () => {
   });
 
   describe('stats', () => {
-    it.skip('should track hits and misses', async () => {
+    it('should track hits and misses', async () => {
       await cache.set('key', 'value');
 
       await cache.get('key'); // hit

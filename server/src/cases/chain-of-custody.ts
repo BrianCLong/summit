@@ -29,7 +29,7 @@ export interface LegacyCustodyEvent {
   actorId: string;
   action: string;
   at?: Date;
-  payload?: Record<string, any>;
+  payload?: Record<string, unknown>;
 }
 
 export interface EvidenceItem {
@@ -94,12 +94,23 @@ export class ChainOfCustodyService {
   }
 
   async getChain(evidenceId: string): Promise<CustodyEvent[]> {
+    type CustodyRow = {
+      id: string;
+      case_id: string;
+      evidence_id: string;
+      action: CustodyEvent['action'];
+      actor_id: string;
+      timestamp: Date;
+      location: string | null;
+      notes: string | null;
+      verification_hash: string | null;
+    };
     const result = await this.pg.query(
       `SELECT * FROM maestro.chain_of_custody_events WHERE evidence_id = $1 ORDER BY timestamp ASC`,
       [evidenceId]
     );
 
-    return result.rows.map((row: any) => ({
+    return result.rows.map((row: CustodyRow) => ({
       id: row.id,
       caseId: row.case_id,
       evidenceId: row.evidence_id,
@@ -116,6 +127,10 @@ export class ChainOfCustodyService {
    * List all evidence IDs associated with a case
    */
   async listEvidence(caseId: string): Promise<EvidenceItem[]> {
+    type EvidenceRow = {
+      evidence_id: string;
+      last_update: Date;
+    };
     const result = await this.pg.query(
       `SELECT DISTINCT evidence_id, MAX(timestamp) as last_update
        FROM maestro.chain_of_custody_events
@@ -124,7 +139,7 @@ export class ChainOfCustodyService {
       [caseId]
     );
 
-    return result.rows.map((row: any) => ({
+    return result.rows.map((row: EvidenceRow) => ({
       id: row.evidence_id,
       lastUpdate: row.last_update,
     }));
@@ -143,7 +158,17 @@ export class ChainOfCustodyService {
  * @deprecated Use ChainOfCustodyService.recordEvent
  */
 export async function writeCoC(
-  db: any,
+  db: {
+    custodyEvent: {
+      create: (input: {
+        data: LegacyCustodyEvent & {
+          prevHash: string;
+          eventHash: string;
+          signature: string;
+        };
+      }) => Promise<unknown>;
+    };
+  },
   event: LegacyCustodyEvent,
   prevHash: string,
   privateKey: KeyObject,
@@ -168,8 +193,12 @@ export async function writeCoC(
  * @deprecated Use ChainOfCustodyService.verifyIntegrity
  */
 export function verifyChain(events: any[], publicKey: KeyObject): boolean {
+  type LegacyChainEvent = LegacyCustodyEvent & {
+    eventHash: string;
+    signature: string;
+  };
   let prevHash = 'GENESIS';
-  for (const e of events) {
+  for (const e of events as LegacyChainEvent[]) {
     const { caseId, attachmentId, actorId, action, at, payload } = e;
     const payloadStr = JSON.stringify({
       caseId,

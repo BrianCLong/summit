@@ -142,7 +142,7 @@ export class ParticipantRepo {
       [caseId, userId],
     );
 
-    return rows.map((r: any) => r.role_id);
+    return rows.map((r: { role_id: string }) => r.role_id);
   }
 
   /**
@@ -160,7 +160,7 @@ export class ParticipantRepo {
       WHERE cp.user_id = $1
       AND cp.is_active = true
     `;
-    const params: any[] = [userId];
+    const params: unknown[] = [userId];
     let paramIndex = 2;
 
     if (tenantId) {
@@ -174,7 +174,7 @@ export class ParticipantRepo {
     }
 
     const { rows } = await this.pg.query(query, params);
-    return rows.map((r: any) => r.case_id);
+    return rows.map((r: { case_id: string }) => r.case_id);
   }
 
   // ==================== ROLES ====================
@@ -256,7 +256,7 @@ export class ParticipantRepo {
     );
 
     const roleMap: Record<string, string> = {};
-    rows.forEach((r: any) => {
+    rows.forEach((r: { name: string; id: string }) => {
       roleMap[r.name] = r.id;
     });
 
@@ -277,7 +277,7 @@ export class ParticipantRepo {
     }
 
     const updateFields: string[] = [];
-    const params: any[] = [id];
+    const params: unknown[] = [id];
     let paramIndex = 2;
 
     if (updates.name !== undefined) {
@@ -339,7 +339,18 @@ export class ParticipantRepo {
 
   // ==================== MAPPERS ====================
 
-  private mapParticipantRow(row: any): CaseParticipant {
+  private mapParticipantRow(row: {
+    id: string;
+    case_id: string;
+    user_id: string;
+    role_id: string;
+    assigned_at: Date;
+    assigned_by: string | null;
+    removed_at: Date | null;
+    removed_by: string | null;
+    is_active: boolean;
+    metadata?: Record<string, unknown> | null;
+  }): CaseParticipant {
     return {
       id: row.id,
       caseId: row.case_id,
@@ -354,7 +365,15 @@ export class ParticipantRepo {
     };
   }
 
-  private mapRoleRow(row: any): CaseRole {
+  private mapRoleRow(row: {
+    id: string;
+    name: string;
+    description: string | null;
+    permissions?: string[] | null;
+    is_system_role: boolean;
+    created_at: Date;
+    updated_at: Date;
+  }): CaseRole {
     return {
       id: row.id,
       name: row.name,

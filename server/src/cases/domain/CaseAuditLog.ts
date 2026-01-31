@@ -126,7 +126,7 @@ export class CaseAuditLogRepository implements ICaseAuditLogRepository {
       for (const row of result.rows) {
         this.lastHashCache.set(row.case_id, row.hash);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Table might not exist yet - that's okay
       if ((error as NodeJS.ErrnoException).code !== '42P01') {
         throw error;

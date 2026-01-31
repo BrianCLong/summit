@@ -101,7 +101,7 @@ export class SLATracker {
       FROM maestro.case_slas
       WHERE case_id = $1
     `;
-    const params: any[] = [caseId];
+    const params: unknown[] = [caseId];
 
     if (status) {
       query += ` AND status = $2`;
@@ -178,7 +178,14 @@ export class SLATracker {
         id, case_id, sla_type, target_hours, due_at, breached_at`,
     );
 
-    const events: SLABreachEvent[] = rows.map((row: any) => {
+    const events: SLABreachEvent[] = rows.map((row: {
+      id: string;
+      case_id: string;
+      sla_type: SLAType;
+      target_hours: number;
+      due_at: Date;
+      breached_at: Date;
+    }) => {
       const breachDurationHours =
         (new Date().getTime() - new Date(row.due_at).getTime()) / (1000 * 60 * 60);
 
@@ -222,7 +229,13 @@ export class SLATracker {
         id, case_id, sla_type, target_hours, due_at, at_risk_threshold_hours`,
     );
 
-    const events: SLAAtRiskEvent[] = rows.map((row: any) => {
+    const events: SLAAtRiskEvent[] = rows.map((row: {
+      id: string;
+      case_id: string;
+      sla_type: SLAType;
+      target_hours: number;
+      due_at: Date;
+    }) => {
       const hoursRemaining =
         (new Date(row.due_at).getTime() - new Date().getTime()) / (1000 * 60 * 60);
 
@@ -289,7 +302,7 @@ export class SLATracker {
       JOIN maestro.cases c ON c.id = s.case_id
       WHERE s.status = 'breached'
     `;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (tenantId) {
       query += ` AND c.tenant_id = $1`;
@@ -319,7 +332,7 @@ export class SLATracker {
       JOIN maestro.cases c ON c.id = s.case_id
       WHERE s.status = 'at_risk'
     `;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (tenantId) {
       query += ` AND c.tenant_id = $1`;
@@ -351,7 +364,22 @@ export class SLATracker {
   /**
    * Map database row to domain object
    */
-  private mapRow(row: any): CaseSLA {
+  private mapRow(row: {
+    id: string;
+    case_id: string;
+    sla_type: SLAType;
+    target_entity_id: string | null;
+    target_hours: number;
+    due_at: Date;
+    status: SLAStatus;
+    breached_at: Date | null;
+    completed_at: Date | null;
+    at_risk_threshold_hours: number | null;
+    escalation_sent: boolean;
+    metadata?: Record<string, unknown> | null;
+    created_at: Date;
+    updated_at: Date;
+  }): CaseSLA {
     return {
       id: row.id,
       caseId: row.case_id,

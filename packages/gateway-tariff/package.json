@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest --passWithNoTests"
+    "test": "jest"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

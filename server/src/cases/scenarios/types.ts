@@ -29,7 +29,7 @@ export interface ScenarioModification {
   id: string;
   type: ModificationType;
   targetId?: string; // ID of entity/rel/event being modified/removed (if applicable)
-  data?: any; // New data for adds/updates
+  data?: unknown; // New data for adds/updates
   appliedAt: string;
   appliedBy: string;
 }
@@ -37,9 +37,9 @@ export interface ScenarioModification {
 export interface ScenarioResult {
   scenarioId: string;
   finalState: {
-    entities: any[];
-    relationships: any[];
-    timeline: any[];
+    entities: unknown[];
+    relationships: unknown[];
+    timeline: unknown[];
   };
   metrics: {
     entityCount: number;

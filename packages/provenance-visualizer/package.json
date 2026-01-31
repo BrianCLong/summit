@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc && vite build",
     "dev": "vite",
-    "test": "vitest run",
+    "test": "vitest",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit"
   },

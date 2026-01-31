@@ -75,7 +75,7 @@ export interface CaseParticipant {
   removedAt?: Date;
   removedBy?: string;
   isActive: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   // Joined fields (not in DB)
   role?: CaseRole;
 }
@@ -85,7 +85,7 @@ export interface CaseParticipantInput {
   userId: string;
   roleId: string;
   assignedBy?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== STAGE ====================
@@ -101,7 +101,7 @@ export interface CaseStage {
   requiredRoleId?: string;
   slaHours?: number;
   allowedTransitions: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: Date;
 }
 
@@ -115,7 +115,7 @@ export interface CaseStageInput {
   requiredRoleId?: string;
   slaHours?: number;
   allowedTransitions?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== STATE HISTORY ====================
@@ -131,7 +131,7 @@ export interface CaseStateHistory {
   transitionedAt: Date;
   reason: string;
   legalBasis?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface CaseStateHistoryInput {
@@ -143,7 +143,7 @@ export interface CaseStateHistoryInput {
   transitionedBy: string;
   reason: string;
   legalBasis?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== TASK ====================
@@ -164,14 +164,14 @@ export interface CaseTask {
   completedBy?: string;
   requiredRoleId?: string;
   dependsOnTaskIds: string[];
-  resultData: Record<string, any>;
-  metadata: Record<string, any>;
+  resultData: Record<string, unknown>;
+  metadata: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
   // Joined fields (not in DB)
   requiredRole?: CaseRole;
-  case?: any; // Avoid circular dependency, use minimal Case type if needed
+  case?: Record<string, unknown>; // Avoid circular dependency, use minimal Case type if needed
 }
 
 export interface CaseTaskInput {
@@ -185,7 +185,7 @@ export interface CaseTaskInput {
   dueDate?: Date;
   requiredRoleId?: string;
   dependsOnTaskIds?: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdBy: string;
 }
 
@@ -199,8 +199,8 @@ export interface CaseTaskUpdateInput {
   assignedBy?: string;
   dueDate?: Date;
   dependsOnTaskIds?: string[];
-  resultData?: Record<string, any>;
-  metadata?: Record<string, any>;
+  resultData?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== SLA ====================
@@ -217,7 +217,7 @@ export interface CaseSLA {
   completedAt?: Date;
   atRiskThresholdHours: number;
   escalationSent: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -228,7 +228,7 @@ export interface CaseSLAInput {
   targetEntityId?: string;
   targetHours: number;
   atRiskThresholdHours?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== APPROVAL ====================
@@ -246,7 +246,7 @@ export interface CaseApproval {
   completedAt?: Date;
   reason: string;
   decisionReason?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   // Joined fields (not in DB)
   votes?: CaseApprovalVote[];
   requiredRole?: CaseRole;
@@ -260,7 +260,7 @@ export interface CaseApprovalInput {
   requiredRoleId?: string;
   requestedBy: string;
   reason: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface CaseApprovalVote {
@@ -270,7 +270,7 @@ export interface CaseApprovalVote {
   decision: ApprovalDecision;
   reason?: string;
   votedAt: Date;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface CaseApprovalVoteInput {
@@ -278,7 +278,7 @@ export interface CaseApprovalVoteInput {
   approverUserId: string;
   decision: ApprovalDecision;
   reason?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== GRAPH REFERENCE ====================
@@ -295,7 +295,7 @@ export interface CaseGraphReference {
   removedAt?: Date;
   removedBy?: string;
   isActive: boolean;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export interface CaseGraphReferenceInput {
@@ -305,14 +305,14 @@ export interface CaseGraphReferenceInput {
   entityLabel?: string;
   relationshipType?: string;
   addedBy: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== WORKFLOW TRANSITION ====================
 
 export interface WorkflowTransitionGuard {
   type: 'role' | 'authority' | 'data' | 'approval';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface WorkflowTransition {
@@ -327,7 +327,7 @@ export interface WorkflowTransitionRequest {
   userId: string;
   reason: string;
   legalBasis?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface WorkflowTransitionResult {
@@ -349,7 +349,7 @@ export interface CaseWithWorkflow {
   status: CaseStatus;
   compartment?: string;
   policyLabels: string[];
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
   createdBy: string;
@@ -444,8 +444,8 @@ export interface CaseEvent {
   tenantId: string;
   userId?: string;
   timestamp: Date;
-  data: Record<string, any>;
-  metadata?: Record<string, any>;
+  data: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }
 
 // ==================== SUMMARY & STATS ====================

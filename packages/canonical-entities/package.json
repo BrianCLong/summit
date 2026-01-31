@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "echo 'Tests skipped due to import issues' && exit 0",
+    "test": "vitest",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
   },

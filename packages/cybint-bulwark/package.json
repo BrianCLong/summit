@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest --passWithNoTests"
+    "test": "jest"
   },
   "dependencies": {
     "yaml": "^2.6.0"

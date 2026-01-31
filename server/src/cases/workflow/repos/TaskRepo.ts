@@ -63,7 +63,7 @@ export class TaskRepo {
    */
   async update(input: CaseTaskUpdateInput): Promise<CaseTask | null> {
     const updateFields: string[] = [];
-    const params: any[] = [input.id];
+    const params: unknown[] = [input.id];
     let paramIndex = 2;
 
     if (input.title !== undefined) {
@@ -171,7 +171,7 @@ export class TaskRepo {
    * List tasks with filters
    */
   async list(filters: TaskListFilters): Promise<CaseTask[]> {
-    const params: any[] = [];
+    const params: unknown[] = [];
     const conditions: string[] = [];
     let paramIndex = 1;
 
@@ -278,7 +278,7 @@ export class TaskRepo {
   async completeTask(
     taskId: string,
     userId: string,
-    resultData?: Record<string, any>,
+    resultData?: Record<string, unknown>,
   ): Promise<CaseTask | null> {
     const { rows } = await this.pg.query(
       `UPDATE maestro.case_tasks
@@ -308,7 +308,13 @@ export class TaskRepo {
       [caseId],
     );
 
-    return rows.map((row: any) => ({
+    return rows.map((row: {
+      task_id: string;
+      title: string;
+      assigned_to: string | null;
+      due_date: Date | null;
+      days_overdue: string;
+    }) => ({
       taskId: row.task_id,
       title: row.title,
       assignedTo: row.assigned_to,
@@ -356,7 +362,28 @@ export class TaskRepo {
   /**
    * Map database row to domain object
    */
-  private mapRow(row: any): CaseTask {
+  private mapRow(row: {
+    id: string;
+    case_id: string;
+    title: string;
+    description: string | null;
+    task_type: string;
+    priority: string;
+    status: TaskStatus;
+    assigned_to: string | null;
+    assigned_by: string | null;
+    assigned_at: Date | null;
+    due_date: Date | null;
+    required_role_id: string | null;
+    depends_on_task_ids: string[] | null;
+    result_data: Record<string, unknown> | null;
+    metadata: Record<string, unknown> | null;
+    created_by: string;
+    completed_by: string | null;
+    completed_at: Date | null;
+    created_at: Date;
+    updated_at: Date;
+  }): CaseTask {
     return {
       id: row.id,
       caseId: row.case_id,

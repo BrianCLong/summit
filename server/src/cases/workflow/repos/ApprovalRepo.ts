@@ -82,7 +82,7 @@ export class ApprovalRepo {
    * List approvals with filters
    */
   async list(filters: ApprovalListFilters): Promise<CaseApproval[]> {
-    const params: any[] = [];
+    const params: unknown[] = [];
     const conditions: string[] = [];
     let paramIndex = 1;
 
@@ -153,7 +153,16 @@ export class ApprovalRepo {
       [userId],
     );
 
-    return rows.map((row: any) => ({
+    return rows.map((row: {
+      approval_id: string;
+      case_id: string;
+      case_title: string;
+      approval_type: string;
+      reason: string | null;
+      requested_at: Date;
+      required_approvers: number;
+      current_approvals: number;
+    }) => ({
       approvalId: row.approval_id,
       caseId: row.case_id,
       caseTitle: row.case_title,
@@ -315,7 +324,21 @@ export class ApprovalRepo {
 
   // ==================== MAPPERS ====================
 
-  private mapApprovalRow(row: any): CaseApproval {
+  private mapApprovalRow(row: {
+    id: string;
+    case_id: string;
+    approval_type: string;
+    status: ApprovalStatus;
+    requested_by: string;
+    requested_at: Date;
+    completed_at: Date | null;
+    decision_reason: string | null;
+    approvers: string[] | null;
+    required_approvers: number;
+    metadata?: Record<string, unknown> | null;
+    created_at: Date;
+    updated_at: Date;
+  }): CaseApproval {
     return {
       id: row.id,
       caseId: row.case_id,
@@ -333,7 +356,15 @@ export class ApprovalRepo {
     };
   }
 
-  private mapVoteRow(row: any): CaseApprovalVote {
+  private mapVoteRow(row: {
+    id: string;
+    approval_id: string;
+    user_id: string;
+    vote: ApprovalVote;
+    reason: string | null;
+    voted_at: Date;
+    created_at: Date;
+  }): CaseApprovalVote {
     return {
       id: row.id,
       approvalId: row.approval_id,
