@@ -1,10 +1,10 @@
-# Post-Hardening Adversarial Verification (v5.3.1)
+# Post-Hardening Adversarial Verification (v5.3.2)
 
 ## Overview
-This report documents the results of the adversarial "break-it" campaign conducted against the Summit Platform after the v5.3.1 hardening sprint. The goal was to verify the resilience of new security gates and identify any remaining low-hanging fruit.
+This report documents the results of the adversarial "break-it" campaign conducted against the Summit Platform after the v5.3.2 hardening sprint. The goal was to verify the resilience of new security gates and identify any remaining low-hanging fruit.
 
 ## Verification Environment
-- **Release Version**: v5.3.1-HARDENING
+- **Release Version**: v5.3.2-HARDENING
 - **Commit**: `4b5d6bc17ac73c9711683b32852411b3f70941a0`
 - **Timestamp**: 2026-01-30
 - **Tools**: Jest, OPA, custom red-team scripts.
@@ -46,4 +46,4 @@ The gate was tested against missing policy files and environment variable inject
 - **Indirect Injection**: Instructions hidden deep inside RAG context documents require careful chunk-level scanning.
 
 ## Conclusion
-The v5.3.1 hardening measures are verified and resilient against common adversarial techniques. The platform is ready for GA promotion.
+The v5.3.2 hardening measures are verified and resilient against common adversarial techniques. The platform is ready for GA promotion.

@@ -14,10 +14,10 @@ import type { WorkGraphEdge, EdgeType } from '../schema/edges.js';
 // ============================================
 
 export interface GraphStore {
-  getNode<T>(id: string): Promise<T | null>;
-  getNodes<T>(filter?: Partial<T>): Promise<T[]>;
-  createNode<T>(node: T): Promise<T>;
-  updateNode<T>(id: string, updates: Partial<T>): Promise<T | null>;
+  getNode<T extends WorkGraphNode>(id: string): Promise<T | null>;
+  getNodes<T extends WorkGraphNode>(filter?: Partial<T>): Promise<T[]>;
+  createNode<T extends WorkGraphNode>(node: T): Promise<T>;
+  updateNode<T extends WorkGraphNode>(id: string, updates: Partial<T>): Promise<T | null>;
   deleteNode(id: string): Promise<boolean>;
   createEdge(edge: WorkGraphEdge): Promise<WorkGraphEdge>;
   getEdges(filter?: { sourceId?: string; targetId?: string; type?: string }): Promise<WorkGraphEdge[]>;

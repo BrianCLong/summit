@@ -4,7 +4,7 @@ This document defines the mandatory criteria for promoting a Release Candidate (
 
 ## 1. Security & Compliance
 - [ ] **Critical Vulnerabilities**: Zero known High/Critical vulnerabilities in production dependencies (verified by `pnpm audit` and Trivy).
-- [ ] **Hardening Claims**: All claims in the hardening sprint (v5.3.1) are verified and signed.
+- [ ] **Hardening Claims**: All claims in the hardening sprint (v5.3.2) are verified and signed.
 - [ ] **Provenance**: All release artifacts have valid SLSA-compliant provenance (verified by OPA gate).
 - [ ] **Secrets**: No secrets leaked in codebase (verified by `gitleaks`).
 - [ ] **Guardrails**: Prompt injection guardrails verified in `BaseAgentArchetype`.
@@ -19,7 +19,7 @@ This document defines the mandatory criteria for promoting a Release Candidate (
 ## 3. Operational Readiness
 - [ ] **Runbooks**: Operational runbooks for deployment, rotation, and incident response are complete.
 - [ ] **Observability**: SLOs defined and alerting hooks wired for critical path failures.
-- [ ] **Documentation**: `SECURITY.md` and `v5.3.1_RELEASE_NOTES.md` updated.
+- [ ] **Documentation**: `SECURITY.md` and `v5.3.2_RELEASE_NOTES.md` updated.
 
 ## 4. Evidence Bundle
 - [ ] **Bundle Generation**: `pnpm ga:evidence` runs successfully.

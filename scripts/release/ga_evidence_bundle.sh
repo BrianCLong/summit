@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-VERSION="5.3.1"
+VERSION="5.3.2"
 SHA=$(git rev-parse HEAD)
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUNDLE_DIR="dist/evidence/ga-v${VERSION}"

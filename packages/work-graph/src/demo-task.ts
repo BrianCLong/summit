@@ -1,22 +1,22 @@
 
 import { FileSystemGraphStore } from './store/filesystem.js';
-import { Task, Artifact } from './schema/nodes.js';
+import { Ticket, EvidenceBundle } from './schema/nodes.js';
 import * as path from 'path';
 
 async function main() {
   const root = path.join(process.cwd(), '.summit/demo-task-graph');
-  console.log('🚀 Summit Task Graph Demo');
+  console.log('🚀 Summit Ticket Graph Demo');
   console.log('Storing graph in:', root);
 
   const store = new FileSystemGraphStore(root);
   await store.init();
 
-  // 1. Create a Task
-  const taskId = 'task-demo-1';
-  console.log(`\n1. Creating Task: ${taskId}`);
-  const task: Task = {
-    id: taskId,
-    type: 'task',
+  // 1. Create a Ticket
+  const ticketId = 'ticket-demo-1';
+  console.log(`\n1. Creating Ticket: ${ticketId}`);
+  const ticket: Ticket = {
+    id: ticketId,
+    type: 'ticket',
     title: 'Implement FileSystem Storage',
     description: 'Implement a filesystem-based storage for the Work Graph.',
     createdAt: new Date(),
@@ -24,60 +24,60 @@ async function main() {
     createdBy: 'jules',
     status: 'in_progress',
     priority: 'P0',
-    tags: ['core', 'storage'],
-    gates: [
-        { type: 'tests_pass', status: 'pending' },
-        { type: 'lint_clean', status: 'passed' }
-    ]
+    ticketType: 'feature',
+    labels: ['core', 'storage'],
+    agentEligible: true,
+    complexity: 'simple'
   };
-  await store.createNode(task);
-  console.log('   ✓ Task created.');
+  await store.createNode(ticket);
+  console.log('   ✓ Ticket created.');
 
-  // 2. Add an Artifact
-  const artId = 'artifact-demo-1';
-  console.log(`\n2. Adding Artifact: ${artId}`);
-  const artifact: Artifact = {
-    id: artId,
-    type: 'artifact',
-    path: 'src/store/filesystem.ts',
-    summary: 'Implementation of GraphStore interface using fs/promises.',
+  // 2. Add an Evidence Bundle
+  const bundleId = 'evidence-demo-1';
+  console.log(`\n2. Adding Evidence Bundle: ${bundleId}`);
+  const evidenceBundle: EvidenceBundle = {
+    id: bundleId,
+    type: 'evidence_bundle',
+    rubricScore: 92,
+    checks: [
+      { category: 'correctness', status: 'pass', details: 'Build passes with filesystem store enabled.' },
+      { category: 'provenance', status: 'pass', details: 'Decision log initialized in ticket folder.' }
+    ],
     createdAt: new Date(),
     updatedAt: new Date(),
     createdBy: 'jules'
   };
-  await store.createNode(artifact);
-  console.log('   ✓ Artifact created.');
+  await store.createNode(evidenceBundle);
+  console.log('   ✓ Evidence bundle created.');
 
-  // 3. Link Task -> Artifact
-  console.log('\n3. Linking Task -> Artifact (produced)');
+  // 3. Link Ticket -> Evidence Bundle
+  console.log('\n3. Linking Ticket -> Evidence Bundle (produced)');
   await store.createEdge({
     id: 'edge-demo-1',
     type: 'produced',
-    sourceId: taskId,
-    targetId: artId,
+    sourceId: ticketId,
+    targetId: bundleId,
     createdAt: new Date(),
-    createdBy: 'system'
+    createdBy: 'system',
+    weight: 1
   });
   console.log('   ✓ Edge created.');
 
-  // 4. Update Task Status
-  console.log('\n4. Updating Task Status -> done');
-  await store.updateNode(taskId, {
+  // 4. Update Ticket Status
+  console.log('\n4. Updating Ticket Status -> done');
+  await store.updateNode(ticketId, {
     status: 'done',
-    gates: [
-        { type: 'tests_pass', status: 'passed' },
-        { type: 'lint_clean', status: 'passed' }
-    ]
+    completedAt: new Date()
   });
-  console.log('   ✓ Task updated.');
+  console.log('   ✓ Ticket updated.');
 
   // 5. Verification
   console.log('\n5. Verifying Date Hydration');
-  const loadedTask = await store.getNode<Task>(taskId);
-  if (loadedTask && loadedTask.createdAt instanceof Date) {
-      console.log('   ✓ loadedTask.createdAt is a Date object');
+  const loadedTicket = await store.getNode<Ticket>(ticketId);
+  if (loadedTicket && loadedTicket.createdAt instanceof Date) {
+      console.log('   ✓ loadedTicket.createdAt is a Date object');
   } else {
-      console.error('   ❌ loadedTask.createdAt is NOT a Date object:', loadedTask?.createdAt);
+      console.error('   ❌ loadedTicket.createdAt is NOT a Date object:', loadedTicket?.createdAt);
       process.exit(1);
   }
 
