@@ -104,6 +104,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ai-operating-model-gaps
+    version: v1
+    path: prompts/strategy/ai-operating-model-gaps@v1.md
+    sha256: 4f9a62fd0631f458f92adf3afc36efd0b3a4a1b28aaef94b32b344b76b8398b9
+    description: Document AI-native operating model gaps and map them to Summit governance responses.
+    scope:
+      paths:
+        - docs/strategy/AI_OPERATING_MODEL_GAPS.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/strategy/ai-operating-model-gaps@v1.md
+        - prompts/registry.yaml
+      domains:
+        - strategy
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
