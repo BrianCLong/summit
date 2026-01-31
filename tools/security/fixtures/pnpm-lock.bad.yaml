@@ -1,0 +1,8 @@
+# Bad lockfile
+importers:
+  .:
+    dependencies:
+      hono: 4.11.6
+packages:
+  /hono@4.11.6:
+    resolution: {integrity: sha512-xxx}

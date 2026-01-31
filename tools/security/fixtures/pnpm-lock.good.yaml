@@ -1,0 +1,8 @@
+# Good lockfile
+importers:
+  .:
+    dependencies:
+      hono: 4.11.7
+packages:
+  /hono@4.11.7:
+    resolution: {integrity: sha512-xxx}
