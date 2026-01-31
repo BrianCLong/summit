@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T03:24:07Z",
-  "revision_note": "T1 env health: aligned work-graph demo/store/edge rules with ticket + evidence_bundle types and restored prepare builds.",
+  "last_updated": "2026-02-01T00:00:00Z",
+  "revision_note": "Expanded required checks discovery guidance and temporary verifier naming.",
   "initiatives": [
     {
       "id": "A",
