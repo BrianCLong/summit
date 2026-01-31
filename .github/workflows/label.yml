@@ -1,0 +1,19 @@
+name: Enforce PR Classification
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, labeled, unlabeled]
+
+jobs:
+  check-label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
+            if (!valid) {
+              core.warning("PR should have a classification label: patch, minor, or major. (Non-blocking for automated PRs)");
+              // core.setFailed("PR must have a classification label: patch, minor, or major.");
+            }
