@@ -130,6 +130,7 @@ try {
     const sumsContent = readFileSync(sumsPath, 'utf-8');
     const canonicalHashes = new Map(); // filename -> hash
 
+    const invalidLines = [];
     sumsContent.split('\n').forEach(line => {
         const trimmed = line.trim();
         if (!trimmed) return;
@@ -141,10 +142,16 @@ try {
             // Handle ./ prefix if present
             if (filename.startsWith('./')) filename = filename.substring(2);
             canonicalHashes.set(filename, match[1]);
+        } else {
+            invalidLines.push(trimmed);
         }
     });
 
     RESULTS.fileCounts.sumsCount = canonicalHashes.size;
+    if (invalidLines.length > 0) {
+        const sample = invalidLines.slice(0, 3).join(' | ');
+        addError('SHA256SUMS_INVALID_FORMAT', `Invalid SHA256SUMS line(s): ${sample}`);
+    }
     addCheck(`Loaded SHA256SUMS with ${canonicalHashes.size} entries`);
 
     // 2. Directory vs SHA256SUMS
