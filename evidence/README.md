@@ -27,9 +27,13 @@ Validate these files against `schemas/evidence/*.schema.json`.
    Example:
    ```json
    {
-     "version": "1.0",
+     "version": 1,
      "evidence": {
-       "EVD-NEW-001": "path/to/evidence/folder"
+       "EVD-NEW-001": {
+         "report": "evidence/EVD-NEW-001/report.json",
+         "metrics": "evidence/EVD-NEW-001/metrics.json",
+         "stamp": "evidence/EVD-NEW-001/stamp.json"
+       }
      }
    }
    ```
