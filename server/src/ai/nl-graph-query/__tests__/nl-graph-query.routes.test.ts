@@ -14,7 +14,7 @@ const describeIf = run ? describe : describe.skip;
 
 describeIf('nl-graph-query routes', () => {
   const app = express();
-  app.use(express.tson());
+  app.use(express.json());
   beforeAll(async () => {
     nlGraphQueryRouter = (await import('@/routes/nl-graph-query')).default;
     app.use('/', nlGraphQueryRouter);

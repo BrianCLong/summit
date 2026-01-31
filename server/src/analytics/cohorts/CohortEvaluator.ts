@@ -40,7 +40,7 @@ export class CohortEvaluator {
             return [];
         }
 
-        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.tsonl'));
+        const files = fs.readdirSync(this.logDir).filter((f: string) => f.endsWith('.jsonl'));
         // In real impl, filter files by date window (cohort.windowDays)
 
         const aggregates = new Map<string, number>(); // key: tenantHash:userHash, val: metric

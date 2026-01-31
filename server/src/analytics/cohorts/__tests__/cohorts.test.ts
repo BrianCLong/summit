@@ -32,7 +32,7 @@ describe('CohortEvaluator', () => {
             { eventType: 'search', tenantIdHash: 't1', scopeHash: 'u1', ts: new Date().toISOString() },
         ];
 
-        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry-test.tsonl'), events.map(e => JSON.stringify(e)).join('\n'));
+        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry-test.jsonl'), events.map(e => JSON.stringify(e)).join('\n'));
 
         const cohort: Cohort = {
             id: 'heavy-users',

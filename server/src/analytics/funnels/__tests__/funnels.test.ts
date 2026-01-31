@@ -38,7 +38,7 @@ describe('FunnelService', () => {
             { eventType: 'click', scopeHash: 'u3', ts: '2023-01-01T12:05:00Z', props: { id: 'btn' } },
         ];
 
-        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry.tsonl'), events.map(e => JSON.stringify(e)).join('\n'));
+        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry.jsonl'), events.map(e => JSON.stringify(e)).join('\n'));
 
         const funnel: Funnel = {
             id: 'checkout',

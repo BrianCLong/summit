@@ -10,7 +10,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 describe('AuditLedger', () => {
   it('records and verifies a hash chain', async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-ledger-'));
-    const ledgerFilePath = path.join(tmpDir, 'ledger.tsonl');
+    const ledgerFilePath = path.join(tmpDir, 'ledger.jsonl');
     const bus = new LogEventBus(10);
     const ledger = new AuditLedger({ ledgerFilePath, bus });
 
@@ -55,7 +55,7 @@ describe('AuditLedger', () => {
 
   it('detects tampered entries', async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-ledger-tamper-'));
-    const ledgerFilePath = path.join(tmpDir, 'ledger.tsonl');
+    const ledgerFilePath = path.join(tmpDir, 'ledger.jsonl');
     const bus = new LogEventBus(10);
     const ledger = new AuditLedger({ ledgerFilePath, bus });
 
