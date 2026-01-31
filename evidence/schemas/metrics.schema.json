@@ -2,9 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Metrics",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
+  "required": ["evidence_id"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "metrics": {"type": "object", "additionalProperties": true}
-  }
+    "evidence_id": { "type": "string" },
+    "counters": { "type": "object" },
+    "timings_ms": { "type": "object" }
+  },
+  "additionalProperties": true
 }
