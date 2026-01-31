@@ -1,0 +1,10 @@
+{
+  "item_slug": "GOV-EVIDENCE",
+  "generated_by": "ci:evidence-fixture",
+  "evidence": {
+    "EVD-GOV-EVIDENCE-FIXTURE-001": {
+      "summary": "Valid fixture bundle.",
+      "files": ["report.json", "metrics.json", "stamp.json"]
+    }
+  }
+}
