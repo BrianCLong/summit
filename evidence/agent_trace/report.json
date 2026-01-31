@@ -1,0 +1,22 @@
+{
+  "evidence_id": "EVD-AGENTTRACE-REPORT",
+  "summary": "Agent Trace validation and policy report",
+  "artifacts": [
+    ".summit/agent-trace/records/test-rev/550e8400-e29b-41d4-a716-446655440000.json"
+  ],
+  "items": [
+    {
+      "evidence_id": "EVD-AGENTTRACE-RECORD-550e8400-e29b-41d4-a716-446655440000",
+      "summary": "Trace record for 550e8400-e29b-41d4-a716-446655440000",
+      "artifacts": [
+        ".summit/agent-trace/records/test-rev/550e8400-e29b-41d4-a716-446655440000.json"
+      ],
+      "results": [
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "valid": true
+        }
+      ]
+    }
+  ]
+}
