@@ -1,0 +1,13 @@
+[
+  {
+    "actor": {"user_id": "user_003"},
+    "action": "oauth_app_consent",
+    "target": {"app": "workspace"},
+    "auth": {"oauth_client_id": "good_app", "oauth_scopes": ["https://www.googleapis.com/auth/userinfo.email"]}
+  },
+  {
+    "actor": {"user_id": "user_003"},
+    "action": "google_takeout_started",
+    "target": {"app": "workspace"}
+  }
+]

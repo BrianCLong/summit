@@ -1,0 +1,16 @@
+id: SHINY-002
+title: Salesforce Bulk Export Burst
+description: Detects anomalous Salesforce bulk API exports or Report downloads shortly after a new login session.
+severity: high
+required_sources:
+  - salesforce
+query: |
+  sequence by user_id
+    [action == "login"]
+    [action == "salesforce_report_export" or action == "bulk_api_download"] count > 5
+  within 1h
+explain_fields:
+  - user_id
+  - geo.ip
+  - target.resource_id
+  - action

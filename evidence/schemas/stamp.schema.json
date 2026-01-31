@@ -1,12 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit.evidence.stamp",
+  "title": "summit evidence stamp",
   "type": "object",
-  "required": ["evidence_id", "timestamp", "commit"],
+  "required": ["generated_at"],
   "properties": {
-    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
-    "timestamp": { "type": "string", "format": "date-time" },
-    "commit": { "type": "string" }
+    "generated_at": {"type": "string", "format": "date-time"}
   },
   "additionalProperties": false
 }
