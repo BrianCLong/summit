@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "agents": [
+    {
+      "id": "example",
+      "name": "Example Agent",
+      "version": "0.0.1",
+      "description": "fixture",
+      "license": "Apache-2.0",
+      "distribution": {
+        "npx": { "package": "@example/agent@0.0.1", "args": ["--acp"], "env": {} }
+      }
+    }
+  ],
+  "extensions": []
+}
