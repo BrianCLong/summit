@@ -19,6 +19,7 @@ Until discovered, we use temporary verifier names:
 - `ci:schema`
 - `ci:lint`
 - `ci:deps-delta`
+- `ci:deepsearchqa-fixtures`
 
 ## Rename plan
 Once real check names are known:
