@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-14T18:46:29Z",
-  "revision_note": "Added dedicated SOC control unit test job to CI workflow",
+  "last_updated": "2026-01-31T00:09:49Z",
+  "revision_note": "Expanded narrative tracking spec with architecture diagram, operational guardrails, and risk mitigations",
   "initiatives": [
     {
       "id": "A",
