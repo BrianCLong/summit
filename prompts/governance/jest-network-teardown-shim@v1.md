@@ -8,6 +8,8 @@ preserving the existing governed test and LFS exception updates in this PR.
 ## Scope
 - .gitattributes
 - server/tests/setup/jest.setup.cjs
+- server/src/hunting/ThreatHuntingOrchestrator.ts
+- server/src/hunting/__tests__/ThreatHuntingOrchestrator.test.ts
 - docs/roadmap/STATUS.json
 - prompts/registry.yaml
 - prompts/governance/gitattributes-lfs-exception@v1.md

@@ -527,7 +527,7 @@ prompts:
   - id: jest-network-teardown-shim
     version: v1
     path: prompts/governance/jest-network-teardown-shim@v1.md
-    sha256: 224f878edb508025b88e1d19b9a16d1e4619b0b6aee8d656ffa62ac0c6a44cb4
+    sha256: 89af92540729636856abc73ff2cde1b2b68e328e7de033fdd7a5e222e6836059
     description: Add an opt-in Jest setup shim to close network servers when NO_NETWORK_LISTEN is set.
     scope:
       paths:
@@ -538,6 +538,8 @@ prompts:
         - prompts/governance/jest-network-teardown-shim@v1.md
         - prompts/registry.yaml
         - server/tests/setup/jest.setup.cjs
+        - server/src/hunting/ThreatHuntingOrchestrator.ts
+        - server/src/hunting/__tests__/ThreatHuntingOrchestrator.test.ts
         - server/src/ai/nl-graph-query/__tests__/nl-graph-query.routes.test.ts
       domains:
         - governance

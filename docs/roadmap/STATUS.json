@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T23:05:10Z",
-  "revision_note": "Expanded Jest opt-in teardown to track timers in NO_NETWORK_LISTEN mode.",
+  "last_updated": "2026-01-30T23:25:10Z",
+  "revision_note": "Added ThreatHuntingOrchestrator listener cleanup to address MaxListeners warnings.",
   "initiatives": [
     {
       "id": "A",
