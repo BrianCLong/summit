@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Implemented `to_context_pack` in `summit/textualizer` with stable ordering and redaction support.
+
+### Fixed
+- Fixed CI/CD pipeline failures (Python compatibility, pnpm version mismatch, workflow ordering).
+
 ## [5.0.0-ga] - 2026-01-23
 
 ### General Availability Release
