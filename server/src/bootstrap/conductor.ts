@@ -74,7 +74,7 @@ export async function wireConductor(options: {
       options.app.use(
         '/graphql',
         cors(),
-        express.tson(),
+        express.json(),
         // expressMiddleware(apollo, {
         //   context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
         // }),
@@ -96,10 +96,10 @@ export async function wireConductor(options: {
                 ? 200
                 : 503;
 
-          res.status(statusCode).tson(health);
+          res.status(statusCode).json(health);
         } catch (error: any) {
           conductorLogger.error('Health check failed:', error);
-          res.status(503).tson({
+          res.status(503).json({
             status: 'fail',
             message: error instanceof Error ? error.message : 'Unknown error',
           });

@@ -268,7 +268,9 @@ function getNeo4jDriver(): Neo4jDriver {
 }
 
 function getPostgresPool(): ManagedPostgresPool {
-  if (!postgresPool) throw new Error('PostgreSQL pool not initialized');
+  if (!postgresPool) {
+    postgresPool = getManagedPostgresPool();
+  }
   return postgresPool;
 }
 
