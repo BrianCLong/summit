@@ -8,6 +8,16 @@
 
 require('dotenv').config({ path: './.env.test' });
 
+process.env.TZ = process.env.TZ || 'UTC';
+process.env.LANG = process.env.LANG || 'en_US.UTF-8';
+process.env.LC_ALL = process.env.LC_ALL || 'en_US.UTF-8';
+
+if (!global.__TEST_SEED_LOGGED__) {
+  const testSeed = process.env.TEST_SEED || process.env.SEED;
+  console.info(`Running tests with seed: ${testSeed || 'random'}`);
+  global.__TEST_SEED_LOGGED__ = true;
+}
+
 // Global test timeout
 jest.setTimeout(30000);
 

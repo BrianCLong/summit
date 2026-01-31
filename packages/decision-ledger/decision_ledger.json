@@ -119,20 +119,20 @@
     "reverted": false
   },
   {
-    "id": "soc-controls-001",
-    "timestamp": "2026-02-01T01:20:00Z",
+    "id": "test-env-parity-20260203",
+    "timestamp": "2026-02-03T00:00:00Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiJpbnRlZ3JhdGUgU09DIGNvbnRyb2xzIHdvcmtmbG93IGFuZCByZXF1aXJlZCBjaGVja3MiLCJmaWxlcyI6WyIuZ2l0aHViL3dvcmtmbG93cy9zb2MtY29udHJvbHMueW1sIiwiZG9jcy9jaS9SRVFVSVJFRF9DSEVDS1NfUE9MSUNZLnltbCIsImRvY3MvY2kvUkVRVUlSRURfQ0hFQ0tTX1BPTElDWS5qc29uIiwiZG9jcy9jaS9SRVFVSVJFRF9DSEVDS1MubWQiLCJkb2NzL2NpL1JFQURNRS5tZCIsImRvY3MvY2kvU09DX0NPTVBMSUFOQ0UubWQiLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iXX0=",
+    "inputHash": "eyJjaGFuZ2UiOiJ0ZXN0IGVudiBwYXJpdHkgKyBzZWVkIGxvZ2dpbmcgKyBkZXRlcm1pbmlzdGljIGlkcyArIHRpbWluZyB3YWl0IHVwZGF0ZSIsImZpbGVzIjpbIi5lbnYudGVzdCIsImplc3Quc2V0dXAuanMiLCJzZXJ2ZXIvdGVzdHMvc2V0dXAvamVzdC5zZXR1cC5janMiLCJzZXJ2ZXIvdGVzdHMvc2V0dXAvZ2xvYmFsU2V0dXAuY2pzIiwic2VydmVyL3NyYy9vYnNlcnZhYmlsaXR5L19fdGVzdHNfXy9vcGVyYXRpb25hbC1pbnRlbGxpZ2VuY2UudGVzdC50cyIsInNlcnZlci90ZXN0cy9jb25maWcudGVzdC50cyIsInNlcnZlci90ZXN0cy90ZXN0LWVudmlyb25tZW50LnRlc3QudHMiLCJURVNUSU5HLm1kIiwiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIl19",
     "decision": {
-      "action": "integrate_soc_controls_ci",
+      "action": "standardize_test_env_parity",
       "rule": {
-        "condition": "SOC control verification must be enforced in CI required checks",
-        "action": "integrate_soc_controls_ci",
+        "condition": "seeded test flakiness requires parity and deterministic ids",
+        "action": "standardize_test_env_parity",
         "max_cost": 0
       }
     },
-    "reasoning": "Added dedicated SOC controls workflow, updated required checks policy/docs, and documented execution path. Rollback: revert commit and rerun branch protection reconciliation.",
+    "reasoning": "Standardized .env.test defaults, logged active test seed, replaced timing delay with event-driven scheduling, and removed nondeterministic IDs in observability tests. Rollback: git revert HEAD.",
     "reverted": false
   }
 ]
