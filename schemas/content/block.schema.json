@@ -1,70 +1,51 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://summit.local/schemas/content/block.schema.json",
-  "title": "Content Block",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/schemas/content/block.schema.json",
+  "title": "Summit Content Block",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "id",
-    "kind",
-    "body",
-    "language",
-    "audience",
-    "policy_tags",
-    "work_items",
-    "created_at",
-    "updated_at"
-  ],
   "properties": {
-    "id": {
-      "$ref": "content-common.schema.json#/$defs/id"
-    },
+    "id": { "type": "string" },
     "kind": {
       "type": "string",
       "enum": ["narrative", "procedure", "context", "risk", "metric"]
     },
-    "body": {
-      "$ref": "content-common.schema.json#/$defs/nonEmptyString"
-    },
-    "language": {
-      "$ref": "content-common.schema.json#/$defs/nonEmptyString"
-    },
+    "body": { "type": "string" },
+    "language": { "type": "string" },
     "audience": {
       "type": "array",
-      "items": {
-        "$ref": "content-common.schema.json#/$defs/nonEmptyString"
-      },
-      "minItems": 1,
-      "uniqueItems": true
+      "items": { "type": "string" }
     },
     "related_entities": {
       "type": "array",
-      "items": {
-        "$ref": "content-common.schema.json#/$defs/nonEmptyString"
-      },
-      "uniqueItems": true
+      "items": { "type": "string" }
     },
     "policy_tags": {
       "type": "array",
-      "items": {
-        "$ref": "content-common.schema.json#/$defs/policyTag"
-      },
-      "uniqueItems": true
+      "items": { "type": "string" }
     },
-    "security_level": {
-      "$ref": "content-common.schema.json#/$defs/securityLevel"
+    "claim_ids": {
+      "type": "array",
+      "items": { "type": "string" }
     },
     "work_items": {
       "type": "array",
-      "items": {
-        "$ref": "content-common.schema.json#/$defs/workItemRef"
-      }
-    },
-    "created_at": {
-      "$ref": "content-common.schema.json#/$defs/isoDateTime"
-    },
-    "updated_at": {
-      "$ref": "content-common.schema.json#/$defs/isoDateTime"
+      "items": { "$ref": "#/definitions/workItemRef" }
+    }
+  },
+  "required": ["id", "kind", "body", "language"],
+  "definitions": {
+    "workItemRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["issue", "pr", "workflow"] },
+        "repo": { "type": "string" },
+        "number": { "type": "integer", "minimum": 1 },
+        "state": { "type": "string" },
+        "url": { "type": "string" }
+      },
+      "required": ["kind", "repo", "number", "state"]
     }
   }
 }

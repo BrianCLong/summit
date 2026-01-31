@@ -1,29 +1,51 @@
 version: 1
 prompts:
-  - id: atp-latent-pr1-evidence-scaffold
+  - id: structured-content-primitives
     version: v1
-    path: prompts/atp-latent/pr1-evidence-scaffold.md
-    sha256: d0680f8d5c5569ed88518c6b011df50496f39986b5009968b47dfd8b06bec148
-    description: Scaffold ATP-Latent evidence schemas, interfaces, and coherence reward placeholder.
+    path: prompts/content/structured-content-primitives@v1.md
+    sha256: 258e133b40b69ec695a0a9bd1992da5eca9aa092af5471789c43563f512b706e
+    description: Define unified Brief/Claim/Block content primitives with evidence and governance alignment.
     scope:
       paths:
-        - required_checks.todo.md
-        - evidence/
-        - ci/verifiers/
-        - summit/atp_latent/
-        - tests/test_coherence_reward.py
-        - docs/atp_latent/
+        - docs/content/
+        - schemas/content/
         - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/atp-latent/pr1-evidence-scaffold.md
+        - prompts/content/structured-content-primitives@v1.md
         - prompts/registry.yaml
+        - agents/examples/STRUCTURED_CONTENT_PRIMITIVES_20260131.json
+      domains:
+        - content
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: keel-evidence-templates
+    version: v1
+    path: prompts/evidence/keel-evidence-templates@v1.md
+    sha256: e5a30955d6df4cfea44900137428a5dc84f25c8a9b22b3abdfc67b18a7ceca1d
+    description: Align Keel evidence templates and index entries for ARCH/STAB/DSCL/BENCH bundles.
+    scope:
+      paths:
+        - evidence/index.json
+        - summit/evidence/templates/keel-arch/
+        - summit/evidence/templates/keel-stab/
+        - summit/evidence/templates/keel-dscl/
+        - summit/evidence/templates/keel-bench/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/evidence/keel-evidence-templates@v1.md
+        - prompts/registry.yaml
+        - agents/examples/KEEL_EVIDENCE_TEMPLATES_20260130.json
       domains:
         - evidence
         - governance
-        - documentation
-        - ci
-        - testing
-        - ml
     verification:
       tiers_required:
         - C
@@ -164,6 +186,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: lingbot-world-scaffold
+    version: v1
+    path: prompts/worldmodels/lingbot-world-scaffold.md
+    sha256: 538d8c7606c352ec21ec672ec86e504fdcc38e7d8c1546b6c8eda0a873111aa5
+    description: Scaffold clean-room world model interfaces and docs for LingBot-World alignment.
+    scope:
+      paths:
+        - docs/items/2601-20540-lingbot-world/
+        - docs/worldmodels/
+        - summit/worldmodels/
+        - NOTICE.third_party.md
+        - docs/roadmap/STATUS.json
+        - prompts/worldmodels/lingbot-world-scaffold.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - worldmodels
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: antigravity-moat-augmentation
     version: v1
     path: prompts/governance/antigravity-moat-augmentation@v1.md
@@ -217,30 +266,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: linear-sync-invariants
-    version: v1
-    path: prompts/docs/linear-sync-invariants@v1.md
-    sha256: dc23012c21002d124ec7635423e9e869f334074e08755671fd61547f74376a25
-    description: Document Linear ↔ GitHub sync invariants for governance tickets.
-    scope:
-      paths:
-        - docs/ci/
-        - docs/roadmap/STATUS.json
-        - prompts/docs/linear-sync-invariants@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - integrations
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: agent-registry-v0
     version: v1
     path: prompts/agents/agent-registry-v0.md
@@ -259,6 +284,31 @@ prompts:
         - governance
         - tooling
         - agents
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: worldmodel-backend-scaffold
+    version: v1
+    path: prompts/worldmodels/worldmodel-backend-scaffold.md
+    sha256: df003b371b45c4d2b4301e341cc892b55db2bfc0ebcdf85c8b9937c7d3512616
+    description: Scaffold world-model backend interfaces and default-off flags.
+    scope:
+      paths:
+        - summit/worldmodels/
+        - docs/worldmodels/
+        - docs/roadmap/STATUS.json
+        - prompts/worldmodels/worldmodel-backend-scaffold.md
+        - prompts/registry.yaml
+      domains:
+        - worldmodels
+        - governance
         - documentation
     verification:
       tiers_required:
@@ -797,24 +847,23 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: skill-preserving-pr1-evidence-scaffold
+  - id: dynamic-intent-required-checks-module-map
     version: v1
-    path: prompts/summit/skill-preserving-pr1-evidence-scaffold.md
-    sha256: d7adff792ea31f6b9a8c9a6360ef082a5323be96525b759d8ca4556c7349520a
-    description: Scaffold skill-preserving evidence bundles, index entries, feature flags, and CI placeholder gates.
+    path: prompts/dynamic-intent/required-checks-module-map@v1.md
+    sha256: 1ebdb7be99bf75da2ae461d2a4e3c0c0511177ed854aebf72872cc02fb74b137
+    description: Document Dynamic Intent required checks discovery and module map placeholders.
     scope:
       paths:
-        - evidence/
-        - .github/workflows/summit_skill_gates.yml
-        - feature_flags.json
+        - required_checks.todo.md
+        - docs/dynamic_intent/
+        - docs/deps_delta.md
         - docs/roadmap/STATUS.json
-        - prompts/summit/skill-preserving-pr1-evidence-scaffold.md
+        - prompts/dynamic-intent/required-checks-module-map@v1.md
         - prompts/registry.yaml
       domains:
-        - evidence
-        - governance
-        - ci
         - documentation
+        - governance
+        - planning
     verification:
       tiers_required:
         - C
