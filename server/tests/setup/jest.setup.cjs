@@ -737,6 +737,51 @@ const cleanupRegistry = {
   }
 };
 
+const registerNetworkTeardown = () => {
+  const net = require('net');
+  const http = require('http');
+  const https = require('https');
+  const trackedServers = new Set();
+
+  const wrapListen = (proto) => {
+    if (!proto || proto.__jestListenWrapped) return;
+    const originalListen = proto.listen;
+    proto.listen = function (...args) {
+      trackedServers.add(this);
+      return originalListen.apply(this, args);
+    };
+    proto.__jestListenWrapped = true;
+  };
+
+  wrapListen(net.Server && net.Server.prototype);
+  wrapListen(http.Server && http.Server.prototype);
+  wrapListen(https.Server && https.Server.prototype);
+
+  const closeTrackedServers = async () => {
+    const closePromises = [];
+    for (const server of trackedServers) {
+      closePromises.push(new Promise((resolve) => {
+        if (server && typeof server.close === 'function') {
+          server.close(() => resolve());
+          setTimeout(resolve, 1000);
+        } else {
+          resolve();
+        }
+      }));
+    }
+    await Promise.all(closePromises);
+    trackedServers.clear();
+  };
+
+  afterAll(async () => {
+    await closeTrackedServers();
+  });
+};
+
+if (process.env.NO_NETWORK_LISTEN === 'true') {
+  registerNetworkTeardown();
+}
+
 // Export cleanup utilities for tests
 global.testCleanup = {
   // Register a resource for cleanup at end of test

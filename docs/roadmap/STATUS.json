@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T22:27:39Z",
-  "revision_note": "Added governed prompt for nl-graph-query test tson fallback and refreshed LFS exception governance record.",
+  "last_updated": "2026-01-30T22:45:30Z",
+  "revision_note": "Added optional network teardown shim for Jest when NO_NETWORK_LISTEN is set.",
   "initiatives": [
     {
       "id": "A",

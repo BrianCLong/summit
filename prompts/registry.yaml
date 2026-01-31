@@ -524,6 +524,34 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: jest-network-teardown-shim
+    version: v1
+    path: prompts/governance/jest-network-teardown-shim@v1.md
+    sha256: f14c51a005e787de639989c52f2171951a308a0e6b7558a57c83ad4c067b9125
+    description: Add an opt-in Jest setup shim to close network servers when NO_NETWORK_LISTEN is set.
+    scope:
+      paths:
+        - .gitattributes
+        - docs/roadmap/STATUS.json
+        - prompts/governance/gitattributes-lfs-exception@v1.md
+        - prompts/governance/nl-graph-query-test-tson-fix@v1.md
+        - prompts/governance/jest-network-teardown-shim@v1.md
+        - prompts/registry.yaml
+        - server/tests/setup/jest.setup.cjs
+        - server/src/ai/nl-graph-query/__tests__/nl-graph-query.routes.test.ts
+      domains:
+        - governance
+        - documentation
+        - testing
+        - server
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit
   - id: narrative-analysis-update-20260124
     version: v1
     path: prompts/research/narrative-analysis-update-20260124.md
