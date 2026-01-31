@@ -11,13 +11,13 @@ import { spawn } from 'child_process';
 import WebSocket from 'ws';
 import ora from 'ora';
 
-import { MaestroEngine } from '@maestro/core/engine';
-import { PostgresStateStore } from '@maestro/core/stores/postgres-state-store';
-import { S3ArtifactStore } from '@maestro/core/stores/s3-artifact-store';
-import { OPAPolicyEngine } from '@maestro/core/policy/opa-policy-engine';
-import { LiteLLMPlugin } from '@maestro/core/plugins/litellm-plugin';
-import { OllamaPlugin } from '@maestro/core/plugins/ollama-plugin';
-import { WebScraperPlugin } from '@maestro/core/plugins/web-scraper-plugin';
+import { MaestroEngine } from '@intelgraph/maestro-core/engine';
+import { PostgresStateStore } from '@intelgraph/maestro-core/stores/postgres-state-store';
+import { S3ArtifactStore } from '@intelgraph/maestro-core/stores/s3-artifact-store';
+import { OPAPolicyEngine } from '@intelgraph/maestro-core/policy/opa-policy-engine';
+import { LiteLLMPlugin } from '@intelgraph/maestro-core/plugins/litellm-plugin';
+import { OllamaPlugin } from '@intelgraph/maestro-core/plugins/ollama-plugin';
+import { WebScraperPlugin } from '@intelgraph/maestro-core/plugins/web-scraper-plugin';
 
 export interface RunOptions {
   file: string;

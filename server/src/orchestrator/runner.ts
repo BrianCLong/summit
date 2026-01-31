@@ -17,18 +17,12 @@ export async function startOrchestratorWorkers() {
         const store = new PostgresStore(pool.pool);
         partitionManager = new PartitionManager(pool.pool);
 
-<<<<<<< HEAD
-=======
         // 1. Ensure Partitions exist
->>>>>>> 296f3b09105 (feat: add orchestrator store, supply chain workflow, and decks cli)
         await partitionManager.ensurePartitions();
 
         const workerId = `worker-${os.hostname()}-${process.pid}`;
 
-<<<<<<< HEAD
-=======
         // 2. Start Maestro Worker
->>>>>>> 296f3b09105 (feat: add orchestrator store, supply chain workflow, and decks cli)
         maestroWorker = new MaestroWorker(store, {
             workerId,
             concurrency: 5,
@@ -40,10 +34,7 @@ export async function startOrchestratorWorkers() {
 
         maestroWorker.start().catch(err => logger.error({ err }, 'Maestro worker crash'));
 
-<<<<<<< HEAD
-=======
         // 3. Start Retention Worker
->>>>>>> 296f3b09105 (feat: add orchestrator store, supply chain workflow, and decks cli)
         retentionWorker = new OrchestratorRetentionWorker(store);
         retentionWorker.start().catch(err => logger.error({ err }, 'Retention worker crash'));
 

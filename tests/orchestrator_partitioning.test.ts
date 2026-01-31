@@ -3,10 +3,7 @@ import { PostgresStore } from '../server/src/orchestrator/PostgresStore.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getPostgresPool } from '../server/src/db/postgres.js';
 import { PartitionManager } from '../server/src/orchestrator/PartitionManager.js';
-<<<<<<< HEAD
 import { describe, it, expect, beforeAll } from 'vitest';
-=======
->>>>>>> 296f3b09105 (feat: add orchestrator store, supply chain workflow, and decks cli)
 
 describe('Orchestrator Partitioning Phase B (Dual-Write)', () => {
     let pool: Pool;
@@ -27,21 +24,14 @@ describe('Orchestrator Partitioning Phase B (Dual-Write)', () => {
         const runId = uuidv4();
         const taskId = uuidv4();
 
-<<<<<<< HEAD
-        // Create run and task in legacy tables
-=======
         // Create run and task in legacy tables (they aren't partitioned yet in this phase)
->>>>>>> 296f3b09105 (feat: add orchestrator store, supply chain workflow, and decks cli)
         await pool.query('INSERT INTO orchestrator_runs (id, tenant_id, status) VALUES ($1, $2, $3)', [runId, tenantId, 'running']);
         await pool.query('INSERT INTO orchestrator_tasks (id, run_id, tenant_id, name, kind, status) VALUES ($1, $2, $3, $4, $5, $6)',
             [taskId, runId, tenantId, 'test task', 'ping', 'running']);
 
         // Complete task (triggers dual-write)
-<<<<<<< HEAD
-        // We pass workerId 'test-worker' and version 1. In our restored store, 
+        // We pass workerId 'test-worker' and version 1. In our restored store,
         // completeTask expects taskId, workerId, version, result.
-=======
->>>>>>> 296f3b09105 (feat: add orchestrator store, supply chain workflow, and decks cli)
         await store.completeTask(taskId, 'test-worker', 1, { success: true });
 
         // Verify legacy table

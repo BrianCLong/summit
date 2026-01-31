@@ -1,4 +1,4 @@
-import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@maestro/core';
+import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@intelgraph/maestro-core';
 import { v4 as uuidv4 } from 'uuid';
 
 interface VoiceGenerationConfig {
