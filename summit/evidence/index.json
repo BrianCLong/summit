@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "evidence_id": "EVD-ATP-LATENT-EVIDENCE-001",
+      "report": "examples/schema_bundle/report.json",
+      "metrics": "examples/schema_bundle/metrics.json",
+      "stamp": "examples/schema_bundle/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-ATP-LATENT-EVIDENCE-002",
+      "report": "examples/run_bundle/report.json",
+      "metrics": "examples/run_bundle/metrics.json",
+      "stamp": "examples/run_bundle/stamp.json"
+    }
+  ]
+}

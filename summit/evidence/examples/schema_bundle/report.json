@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-ATP-LATENT-EVIDENCE-001",
+  "summary": "Bundle containing evidence schemas",
+  "environment": {},
+  "backend": "schema_repo",
+  "item": { "type": "schema" },
+  "artifacts": [
+    "../../schemas/report.schema.json",
+    "../../schemas/metrics.schema.json",
+    "../../schemas/stamp.schema.json",
+    "../../schemas/index.schema.json"
+  ]
+}

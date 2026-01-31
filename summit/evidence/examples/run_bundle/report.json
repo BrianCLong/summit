@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-ATP-LATENT-EVIDENCE-002",
+  "summary": "Example run bundle for ATP Latent evidence",
+  "environment": { "os": "linux", "python": "3.10" },
+  "backend": "latent_planner_v1",
+  "item": { "type": "example" },
+  "artifacts": ["metrics.json", "stamp.json"]
+}
