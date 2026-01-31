@@ -1,0 +1,5 @@
+{
+  "allow_outbound": true,
+  "allowed_connectors": ["slack"],
+  "allowed_actions": ["send_message"]
+}
