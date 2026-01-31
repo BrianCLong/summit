@@ -7,7 +7,7 @@ import argparse
 import json
 import os
 import subprocess
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -97,7 +97,7 @@ def parse_date(date_str: str | None) -> datetime | None:
 
 
 def count_expiring(exceptions: list[dict], within_days: int) -> int:
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     horizon = now + timedelta(days=within_days)
     count = 0
     for item in exceptions:
@@ -432,7 +432,7 @@ def build_report(
             "repo": repo,
             "branch": env.get("GITHUB_REF_NAME", "unknown"),
             "sha": meta.get("sha") or env.get("GITHUB_SHA") or "unknown",
-            "generated_at": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "ci_run_url": run_url,
             "bundle_id": evidence_dir.name,
         },

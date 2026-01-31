@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -61,7 +61,7 @@ def init_evidence_bundle(root: Path, *, run_id: str) -> EvidencePaths:
     # Requires: evidence_id, generated_at
     # Optional: run_id, created_at
     # Use timezone-aware UTC
-    now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     write_json(p.stamp, {
         "evidence_id": f"EVD-AGENT-{run_id}",
         "generated_at": now,
