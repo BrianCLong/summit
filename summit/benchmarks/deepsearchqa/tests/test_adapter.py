@@ -1,7 +1,10 @@
-import pytest
 import json
 from pathlib import Path
+
+import pytest
+
 from summit.benchmarks.deepsearchqa.adapter_kaggle import load_dataset, validate_item
+
 
 def test_validate_item_valid():
     item = {

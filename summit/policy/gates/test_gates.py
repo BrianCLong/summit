@@ -1,6 +1,7 @@
 from summit.policy.gates.gate_dependency_delta import check_dependency_delta
 from summit.policy.gates.gate_no_secret_logs import check_no_secrets_in_logs
 
+
 def test_gate_dependency_delta():
     # Pass: no dep files changed
     passed, msg = check_dependency_delta(["README.md"])

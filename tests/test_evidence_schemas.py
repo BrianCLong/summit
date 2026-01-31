@@ -1,14 +1,15 @@
 import json
 import os
-import pytest
+
 import jsonschema
+import pytest
 
 EVIDENCE_DIR = os.path.join(os.path.dirname(__file__), "../summit/evidence")
 SCHEMAS_DIR = os.path.join(EVIDENCE_DIR, "schemas")
 EXAMPLES_DIR = os.path.join(EVIDENCE_DIR, "examples")
 
 def load_json(path):
-    with open(path, "r") as f:
+    with open(path) as f:
         return json.load(f)
 
 def test_report_schema():

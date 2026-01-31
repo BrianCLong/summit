@@ -1,7 +1,10 @@
-import pytest
 from unittest.mock import MagicMock
-from summit.cluster.drivers.vind.driver import VindDriver, VindClusterSpec
+
+import pytest
+
+from summit.cluster.drivers.vind.driver import VindClusterSpec, VindDriver
 from summit.cluster.drivers.vind.vcluster_cli import VClusterCLI
+
 
 def test_vind_driver_create():
     cli = MagicMock(spec=VClusterCLI)

@@ -1,5 +1,7 @@
 import pytest
+
 from summit.benchmarks.deepsearchqa.scoring import compute_metrics
+
 
 def test_exact_match():
     m = compute_metrics({"a", "b"}, {"a", "b"})
