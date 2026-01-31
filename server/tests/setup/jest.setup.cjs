@@ -763,6 +763,124 @@ const cleanupRegistry = {
   }
 };
 
+const registerNetworkTeardown = () => {
+  const net = require('net');
+  const http = require('http');
+  const https = require('https');
+  const trackedServers = new Set();
+
+  const wrapListen = (proto) => {
+    if (!proto || proto.__jestListenWrapped) return;
+    const originalListen = proto.listen;
+    proto.listen = function (...args) {
+      trackedServers.add(this);
+      return originalListen.apply(this, args);
+    };
+    proto.__jestListenWrapped = true;
+  };
+
+  wrapListen(net.Server && net.Server.prototype);
+  wrapListen(http.Server && http.Server.prototype);
+  wrapListen(https.Server && https.Server.prototype);
+
+  const closeTrackedServers = async () => {
+    const closePromises = [];
+    for (const server of trackedServers) {
+      closePromises.push(new Promise((resolve) => {
+        if (server && typeof server.close === 'function') {
+          server.close(() => resolve());
+          setTimeout(resolve, 1000);
+        } else {
+          resolve();
+        }
+      }));
+    }
+    await Promise.all(closePromises);
+    trackedServers.clear();
+  };
+
+  afterAll(async () => {
+    await closeTrackedServers();
+  });
+};
+
+if (process.env.NO_NETWORK_LISTEN === 'true') {
+  registerNetworkTeardown();
+}
+
+const registerTimerTeardown = () => {
+  if (global.__jestTimerWrapped) return;
+  global.__jestTimerWrapped = true;
+
+  const trackedTimeouts = new Set();
+  const trackedIntervals = new Set();
+  const trackedImmediates = new Set();
+
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+  const originalSetInterval = global.setInterval;
+  const originalClearInterval = global.clearInterval;
+  const originalSetImmediate = global.setImmediate;
+  const originalClearImmediate = global.clearImmediate;
+
+  global.setTimeout = (fn, delay, ...args) => {
+    const id = originalSetTimeout(fn, delay, ...args);
+    trackedTimeouts.add(id);
+    return id;
+  };
+  global.clearTimeout = (id) => {
+    trackedTimeouts.delete(id);
+    return originalClearTimeout(id);
+  };
+
+  global.setInterval = (fn, delay, ...args) => {
+    const id = originalSetInterval(fn, delay, ...args);
+    trackedIntervals.add(id);
+    return id;
+  };
+  global.clearInterval = (id) => {
+    trackedIntervals.delete(id);
+    return originalClearInterval(id);
+  };
+
+  global.setImmediate = (fn, ...args) => {
+    const id = originalSetImmediate(fn, ...args);
+    trackedImmediates.add(id);
+    return id;
+  };
+  global.clearImmediate = (id) => {
+    trackedImmediates.delete(id);
+    return originalClearImmediate(id);
+  };
+
+  afterAll(() => {
+    for (const id of trackedTimeouts) {
+      originalClearTimeout(id);
+    }
+    for (const id of trackedIntervals) {
+      originalClearInterval(id);
+    }
+    for (const id of trackedImmediates) {
+      originalClearImmediate(id);
+    }
+
+    trackedTimeouts.clear();
+    trackedIntervals.clear();
+    trackedImmediates.clear();
+
+    global.setTimeout = originalSetTimeout;
+    global.clearTimeout = originalClearTimeout;
+    global.setInterval = originalSetInterval;
+    global.clearInterval = originalClearInterval;
+    global.setImmediate = originalSetImmediate;
+    global.clearImmediate = originalClearImmediate;
+  });
+};
+
+if (process.env.NO_NETWORK_LISTEN === 'true') {
+  registerTimerTeardown();
+}
+
 // Export cleanup utilities for tests
 global.testCleanup = {
   // Register a resource for cleanup at end of test

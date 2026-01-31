@@ -29,32 +29,70 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: hono-supplychain-remediation-gate
+  - id: jest-network-teardown-shim
     version: v1
-    path: prompts/tasks/hono-supplychain-remediation@v1.md
-    sha256: db8053492c129315a364c34d46dc0e92dfb08f9ae7107b2340163a14989365a6
-    description: Add a deny-by-default Hono lockfile gate, evidence bundle scaffolding, and walkthrough updates.
+    path: prompts/governance/jest-network-teardown-shim@v1.md
+    sha256: 72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b
+    description: Opt-in Jest network and timer teardown shim for NO_NETWORK_LISTEN=true.
     scope:
       paths:
-        - tools/security/verify_hono_lockfile.mjs
-        - tools/security/verify_hono_lockfile.test.mjs
-        - tools/security/fixtures/
-        - tools/security/emit_hono_evidence_stamp.mjs
-        - .github/workflows/security-supplychain.yml
-        - evidence/out/HONO-ERRBOUNDARY-XSS/
-        - evidence/index.json
-        - walkthrough.md
-        - required_checks.todo.md
-        - docs/templates/atomic-pr-brief-template.md
+        - .gitattributes
+        - PR_DESCRIPTION.md
+        - server/tests/setup/jest.setup.cjs
         - docs/roadmap/STATUS.json
-        - prompts/tasks/hono-supplychain-remediation@v1.md
         - prompts/registry.yaml
-        - agents/examples/
+        - prompts/governance/gitattributes-lfs-exception@v1.md
+        - prompts/governance/nl-graph-query-test-tson-fix@v1.md
+        - prompts/governance/jest-network-teardown-shim@v1.md
       domains:
-        - security
-        - evidence
         - governance
-        - docs
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: gitattributes-lfs-exception
+    version: v1
+    path: prompts/governance/gitattributes-lfs-exception@v1.md
+    sha256: c6824f0d4a05ded519f881194b2297485d9d2eccdbaa29834fe4e24acf8ec56c
+    description: Governed workflow for .gitattributes LFS exceptions.
+    scope:
+      paths:
+        - .gitattributes
+        - docs/roadmap/STATUS.json
+        - prompts/registry.yaml
+        - prompts/governance/gitattributes-lfs-exception@v1.md
+      domains:
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: nl-graph-query-test-tson-fix
+    version: v1
+    path: prompts/governance/nl-graph-query-test-tson-fix@v1.md
+    sha256: 80d63d580e2f6d0233ca4683a5cc783c495a1476b1ecb371f57995529a55d5b2
+    description: Fix nl-graph-query tests to use express.json() when tson is unavailable.
+    scope:
+      paths:
+        - .gitattributes
+        - docs/roadmap/STATUS.json
+        - prompts/registry.yaml
+        - prompts/governance/gitattributes-lfs-exception@v1.md
+        - prompts/governance/nl-graph-query-test-tson-fix@v1.md
+      domains:
+        - governance
+        - testing
     verification:
       tiers_required:
         - C
@@ -156,32 +194,6 @@ prompts:
         - integrations
         - governance
         - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: branch-protection-app-auth
-    version: v1
-    path: prompts/ci/branch-protection-app-auth@v1.md
-    sha256: 62bed8d0e2ec19d778fee25e40b34e015e0e43e0066736d6a43910fb498afc08
-    description: Enable GitHub App authentication for branch protection drift workflows.
-    scope:
-      paths:
-        - .github/workflows/branch-protection-drift.yml
-        - .github/workflows/branch-protection-reconcile.yml
-        - docs/ci/BRANCH_PROTECTION_DRIFT.md
-        - docs/roadmap/STATUS.json
-        - prompts/ci/branch-protection-app-auth@v1.md
-        - prompts/registry.yaml
-        - agents/examples/BRANCH_PROTECTION_APP_AUTH_TASK.json
-      domains:
-        - ci
-        - governance
     verification:
       tiers_required:
         - C
@@ -899,39 +911,6 @@ prompts:
         - documentation
         - governance
         - planning
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: summit-silent-intent-scaffold
-    version: v1
-    path: prompts/summit/silent-intent-scaffold.md
-    sha256: fc78cff5add0b918d3f63995be8b6cb669844ee3f11d595d30c3f1e873b1fad0
-    description: Scaffold silent-intent evidence, biometric gates, input routing, and deps delta checks.
-    scope:
-      paths:
-        - ci/deps_delta_allowlist.json
-        - ci/deps_delta_check.py
-        - docs/roadmap/STATUS.json
-        - evidence/EVD-APPLEQAI-PRIV-002/
-        - evidence/index.json
-        - prompts/registry.yaml
-        - prompts/summit/silent-intent-scaffold.md
-        - summit/input/
-        - summit/policy/
-        - tests/input/
-        - tests/policy/
-      domains:
-        - evidence
-        - governance
-        - policy
-        - input
-        - ci
     verification:
       tiers_required:
         - C
