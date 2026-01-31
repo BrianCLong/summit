@@ -107,8 +107,8 @@ def main() -> int:
         return 3
 
     if "items" in index:
-        if not isinstance(index["items"], list):
-            print("FAIL index.json 'items' must be an array")
+        if not isinstance(index["items"], (list, dict)):
+            print("FAIL index.json 'items' must be an array or object")
             return 3
     elif "evidence" in index:
         # Legacy support
