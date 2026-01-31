@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-30T22:45:30Z",
-  "revision_note": "Added optional network teardown shim for Jest when NO_NETWORK_LISTEN is set.",
+  "last_updated": "2026-01-30T23:05:10Z",
+  "revision_note": "Expanded Jest opt-in teardown to track timers in NO_NETWORK_LISTEN mode.",
   "initiatives": [
     {
       "id": "A",

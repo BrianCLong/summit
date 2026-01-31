@@ -1,9 +1,9 @@
 # Prompt: Jest Network Teardown Shim
 
 ## Intent
-Add an opt-in Jest setup shim that tracks and closes network servers when
-NO_NETWORK_LISTEN=true to reduce open handle hangs, while preserving the
-existing governed test and LFS exception updates in this PR.
+Add an opt-in Jest setup shim that tracks and closes network servers and
+timers when NO_NETWORK_LISTEN=true to reduce open handle hangs, while
+preserving the existing governed test and LFS exception updates in this PR.
 
 ## Scope
 - .gitattributes
