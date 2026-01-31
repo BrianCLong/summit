@@ -29,6 +29,7 @@ branch_protection:
   required_status_checks:
     strict: true
     contexts:
+      - "Branch Protection Drift Detection"
       - "CI Core (Primary Gate)"
       - "CI / config-guard"
       - "CI / unit-tests"
