@@ -368,7 +368,7 @@
       "@modelcontextprotocol/sdk": "1.25.2",
       "hono": "4.11.7",
       "@hono/node-server": "1.19.9",
-      "@hono/node-server>hono": "4.11.4",
+      "@hono/node-server>hono": "4.11.7",
       "@remix-run/router": ">=1.21.0",
       "react-router": ">=6.28.0",
       "preact": ">=10.28.2",
