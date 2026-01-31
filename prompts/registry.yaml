@@ -527,8 +527,8 @@ prompts:
   - id: jest-network-teardown-shim
     version: v1
     path: prompts/governance/jest-network-teardown-shim@v1.md
-    sha256: 89af92540729636856abc73ff2cde1b2b68e328e7de033fdd7a5e222e6836059
-    description: Add an opt-in Jest setup shim to close network servers when NO_NETWORK_LISTEN is set.
+    sha256: 35e66f96f9b1063ef7a6a3ee43fe856e66c61762c69b35dcb3d6014db42179d4
+    description: Add an opt-in Jest setup shim for network/timer teardown and allow listener disposal to prevent MaxListeners warnings.
     scope:
       paths:
         - .gitattributes

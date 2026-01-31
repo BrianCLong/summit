@@ -19,7 +19,7 @@ preserving the existing governed test and LFS exception updates in this PR.
 
 ## Constraints
 - Keep behavior unchanged unless NO_NETWORK_LISTEN=true.
-- Do not modify production runtime code.
+- Allow production runtime changes only when needed to safely dispose shared listeners.
 - Prefer minimal, reversible edits.
 
 ## Verification

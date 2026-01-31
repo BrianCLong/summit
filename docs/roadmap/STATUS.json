@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-01-31T00:00:00Z",
+  "last_updated": "2026-02-15T00:00:00Z",
   "revision_note": "Documented investigation/export RBAC verification updates tied to Task Brief #6; added ThreatHuntingOrchestrator listener cleanup to address MaxListeners warnings.",
   "initiatives": [
     {
