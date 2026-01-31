@@ -66,6 +66,18 @@ jobs:
           --health-timeout 5s
           --health-retries 10
 
+      neo4j:
+        image: neo4j:2025.01
+        env:
+          NEO4J_AUTH: neo4j/password
+        ports:
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p password 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -130,11 +142,11 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: intelgraph
           REDIS_URL: redis://localhost:6379
-          # Neo4j not included in this minimal smoke (use standalone mode for DB-less)
-          NEO4J_URI: ""
-          # Disable features requiring external services
-          DISABLE_NEO4J: "true"
-          SKIP_DB_CHECKS: "true"
+          # Neo4j enabled for Lane B (Functional Soak)
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: password
+          JWT_SECRET: super-secret-smoke-test
 
       - name: Wait for server health
         run: |
@@ -176,6 +188,7 @@ jobs:
           SMOKE_MODE: full
           SMOKE_TEST_VERBOSE: "true"
           SMOKE_TEST_TIMEOUT_MS: "30000"
+          JWT_SECRET: super-secret-smoke-test
 
       - name: Capture server logs
         if: always()
