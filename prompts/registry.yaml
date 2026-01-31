@@ -525,6 +525,24 @@ prompts:
         - competitive-intel
         - product-strategy
         - governance
+  - id: competitive-subsumption-protocol-v4-1
+    version: v1
+    path: prompts/competitive/competitive-subsumption-protocol-v4.1.md
+    sha256: a86aa6168b2b2af54a996d0bb7c00a0cdbe8b56bb2af629b84685640ca314e5e
+    description: Summit competitive subsumption protocol (evidence-first, deterministic, patch-first).
+    scope:
+      paths:
+        - docs/ci/competitive-intel/
+        - docs/ci/targets/
+        - docs/ci/evidence/
+        - docs/roadmap/STATUS.json
+        - prompts/competitive/competitive-subsumption-protocol-v4.1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - competitive-intel
+        - governance
+        - documentation
   - id: sar-agentic-app-runtime
     version: v1
     path: prompts/architecture/sar-agentic-app-runtime@v1.md
