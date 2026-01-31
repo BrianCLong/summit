@@ -29,35 +29,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: cta-leaders-ingest-scaffold
-    version: v1
-    path: prompts/evidence/cta-leaders-ingest-scaffold@v1.md
-    sha256: 4d3953f51bb92d0568295bf8fdbde77e615d283c247a331c27da643cee031aa6
-    description: Scaffold CTA leaders evidence ingest bundle and verification stub.
-    scope:
-      paths:
-        - evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/
-        - evidence/index.json
-        - ci/verify_evidence.py
-        - summit/fixtures/cta_leaders_2026_01/
-        - docs/roadmap/STATUS.json
-        - deps.delta.md
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/evidence/cta-leaders-ingest-scaffold@v1.md
-        - prompts/registry.yaml
-        - agents/examples/CTA_LEADERS_INGEST_20260131.json
-      domains:
-        - evidence
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md
@@ -876,21 +847,29 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: predictd-build-context
+  - id: qwen3-asr-scaffold
     version: v1
-    path: prompts/operations/predictd-build-context@v1.md
-    sha256: 56cee7d6520c8e89718b7965242f0dd26475a099c5515e4dc189221276e4141a
-    description: Reduce predictd Docker build context to prevent BuildKit grpc failures.
+    path: prompts/asr/qwen3-asr-scaffold@v1.md
+    sha256: 58d8b8c189745d63cdf6bf12cfaef24fd77f5671b6c3e62b346bd66566d2f265
+    description: Scaffold deny-by-default Qwen3-ASR integration with guardrails and evidence runner.
     scope:
       paths:
-        - services/predictd/Dockerfile
+        - asr/
+        - docs/asr/
+        - tests/
+        - required_checks.todo.md
+        - NOTICE.third_party.md
         - docs/roadmap/STATUS.json
-        - prompts/operations/predictd-build-context@v1.md
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/asr/qwen3-asr-scaffold@v1.md
         - prompts/registry.yaml
+        - agents/examples/
       domains:
-        - operations
-        - ci
+        - asr
         - governance
+        - documentation
+        - security
+        - testing
     verification:
       tiers_required:
         - C
@@ -898,4 +877,5 @@ prompts:
         permitted: 0
         retirement_target: 0
     allowed_operations:
+      - create
       - edit
