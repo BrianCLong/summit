@@ -1,0 +1,13 @@
+{
+  "item_slug": "claude-code-decks",
+  "evidence": [
+    {
+      "id": "EVD-CLAUDE-CODE-DECKS-FOUND-001",
+      "files": [
+        "evidence/decks/foundation/report.json",
+        "evidence/decks/foundation/metrics.json",
+        "evidence/decks/foundation/stamp.json"
+      ]
+    }
+  ]
+}
