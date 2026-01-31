@@ -1,6 +1,6 @@
 import { CronJob } from 'cron';
-import { getPostgresPool } from '../db/postgres.ts';
-import { logger as baseLogger } from '../config/logger.ts';
+import { getPostgresPool } from '../db/postgres.js';
+import { logger as baseLogger } from '../config/logger.js';
 
 const logger = baseLogger.child({ service: 'PartitionMaintenanceService' });
 

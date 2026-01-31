@@ -11,9 +11,9 @@
  * - Fraud detection patterns
  */
 
-export * from './pattern-matcher';
-export * from './temporal-patterns';
-export * from './state-machine';
-export * from './rule-engine';
-export * from './correlation';
-export * from './types';
+export * from './pattern-matcher.js';
+export * from './temporal-patterns.js';
+export * from './state-machine.js';
+export * from './rule-engine.js';
+export * from './correlation.js';
+export * from './types.js';

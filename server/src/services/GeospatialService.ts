@@ -1,4 +1,4 @@
-import { getPostgresPool as _getPostgresPool } from '../config/database';
+import { getPostgresPool as _getPostgresPool } from '../config/database.js';
 import pg from 'pg';
 import { Pool } from 'pg';
 

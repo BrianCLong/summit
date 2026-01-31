@@ -1,7 +1,7 @@
 // server/src/scripts/generate-disclosure-pack.ts
 import fs from 'fs/promises';
 import path from 'path';
-import { DecisionAnalysisPipeline, DecisionAnalysisInput, DecisionAnalysisResult } from '../maestro/pipelines/decision-analysis-pipeline';
+import { DecisionAnalysisPipeline, DecisionAnalysisInput, DecisionAnalysisResult } from '../maestro/pipelines/decision-analysis-pipeline.js';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);

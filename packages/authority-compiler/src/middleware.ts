@@ -5,8 +5,8 @@
  */
 
 import type { Request, Response, NextFunction } from 'express';
-import { PolicyEvaluator, EvaluationContext } from './evaluator';
-import { Operation, ClassificationLevel } from './schema/policy.schema';
+import { PolicyEvaluator, EvaluationContext } from './evaluator.js';
+import { Operation, ClassificationLevel } from './schema/policy.schema.js';
 
 export interface AuthorityMiddlewareOptions {
   /** Policy evaluator instance */

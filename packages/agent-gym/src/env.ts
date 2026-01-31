@@ -1,4 +1,4 @@
-import { GymEnvironment, Observation, Action, StepResult } from './types';
+import { GymEnvironment, Observation, Action, StepResult } from './types.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export abstract class BaseEnvironment implements GymEnvironment {

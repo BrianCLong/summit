@@ -1,6 +1,6 @@
 import { Queue, Worker, Job } from 'bullmq';
-import { PipelineOrchestrator } from './PipelineOrchestrator';
-import { PipelineConfig } from '../data-model/types';
+import { PipelineOrchestrator } from './PipelineOrchestrator.js';
+import { PipelineConfig } from '../data-model/types.js';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'IngestionQueue' });

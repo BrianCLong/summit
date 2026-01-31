@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { SimpleGraphEngine } from '../SimpleGraph';
-import { GraphSnapshot } from '../../contracts/predictive/types';
+import { SimpleGraphEngine } from '../SimpleGraph.js';
+import { GraphSnapshot } from '../../contracts/predictive/types.js';
 
 describe('SimpleGraphEngine', () => {
     const mockSnapshot: GraphSnapshot = {

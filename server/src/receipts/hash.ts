@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { canonicalize } from './canonicalize';
+import { canonicalize } from './canonicalize.js';
 
 export const RECEIPT_HASH_ENABLED = false;
 

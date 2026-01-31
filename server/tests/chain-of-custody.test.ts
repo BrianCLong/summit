@@ -1,5 +1,5 @@
 import { generateKeyPairSync, KeyObject, verify } from 'crypto';
-import { writeCoC, verifyChain } from '../src/cases/chain-of-custody';
+import { writeCoC, verifyChain } from '../src/cases/chain-of-custody.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('chain of custody', () => {

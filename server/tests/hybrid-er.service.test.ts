@@ -1,4 +1,4 @@
-import { resolveEntities } from '../src/services/HybridEntityResolutionService';
+import { resolveEntities } from '../src/services/HybridEntityResolutionService.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('HybridEntityResolutionService', () => {

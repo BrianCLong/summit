@@ -1,5 +1,5 @@
-import { getNeo4jDriver } from '../db/neo4j';
-import { logger } from '../config/logger';
+import { getNeo4jDriver } from '../db/neo4j.js';
+import { logger } from '../config/logger.js';
 
 export interface ExplanationResult {
     nodeId: string;

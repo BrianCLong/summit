@@ -4,7 +4,7 @@
  * Collects API metrics and analytics
  */
 
-import type { Request, Response, NextFunction, RequestMetrics } from '../types';
+import type { Request, Response, NextFunction, RequestMetrics } from '../types.js';
 
 export interface MetricsCollector {
   record(metrics: RequestMetrics): void | Promise<void>;

@@ -12,9 +12,9 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import {
   GuardrailsService,
   createGuardrailsService,
-} from '../guardrails.service.ts';
-import { RedactionService, createRedactionService } from '../redaction.service.ts';
-import type { CopilotAnswer, Citation, Provenance } from '../types.ts';
+} from '../guardrails.service.js';
+import { RedactionService, createRedactionService } from '../redaction.service.js';
+import type { CopilotAnswer, Citation, Provenance } from '../types.js';
 
 describe('GuardrailsService', () => {
   let guardrailsService: GuardrailsService;

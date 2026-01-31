@@ -1,8 +1,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { QueryIntentPolicyMapper } from '../../services/qic-pm/query-intent-policy-mapper';
-import { createRsrAdapter } from '../../services/qic-pm/adapters/rsr-adapter';
-import { createPpcAdapter } from '../../services/qic-pm/adapters/ppc-adapter';
-import type { QueryIntent, PolicyAction } from '../../services/qic-pm/types';
+import { QueryIntentPolicyMapper } from '../../services/qic-pm/query-intent-policy-mapper.js';
+import { createRsrAdapter } from '../../services/qic-pm/adapters/rsr-adapter.js';
+import { createPpcAdapter } from '../../services/qic-pm/adapters/ppc-adapter.js';
+import type { QueryIntent, PolicyAction } from '../../services/qic-pm/types.js';
 import fixtures from '../fixtures/qicPmFixtures.json';
 
 interface FixtureRow {

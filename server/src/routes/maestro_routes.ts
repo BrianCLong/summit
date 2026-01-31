@@ -2,14 +2,14 @@ import { randomUUID } from 'crypto';
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { Maestro } from '../maestro/core.js';
 import { MaestroQueries } from '../maestro/queries.js';
-import { opaClient } from '../services/opa-client';
-import { getCorrelationContext } from '../middleware/correlation-id';
-import { logger } from '../utils/logger';
+import { opaClient } from '../services/opa-client.js';
+import { getCorrelationContext } from '../middleware/correlation-id.js';
+import { logger } from '../utils/logger.js';
 import { policyActionGate } from '../middleware/policy-action-gate.js';
 import {
   normalizeReasoningBudget,
   summarizeBudgetForPolicy,
-} from '../maestro/budget';
+} from '../maestro/budget.js';
 
 type OpaEvaluator = {
   evaluateQuery: (policyPath: string, input: any) => Promise<any>;

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DeepSearchQAEvidenceStamp",
+  "type": "object",
+  "required": ["created_at", "git_commit"],
+  "properties": {
+    "created_at": { "type": "string", "format": "date-time" },
+    "git_commit": { "type": "string" }
+  },
+  "additionalProperties": false
+}

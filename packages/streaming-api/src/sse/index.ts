@@ -2,4 +2,4 @@
  * SSE Module Exports
  */
 
-export * from './server';
+export * from './server.js';

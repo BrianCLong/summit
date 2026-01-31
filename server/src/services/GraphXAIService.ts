@@ -1,5 +1,5 @@
-import { AdjacencyList, explainDegreeCentrality, explainCommunity } from '../graph/xai';
-import { getNeo4jDriver } from '../config/database';
+import { AdjacencyList, explainDegreeCentrality, explainCommunity } from '../graph/xai.js';
+import { getNeo4jDriver } from '../config/database.js';
 
 /**
  * Service to generate explanations for graph analytics results.

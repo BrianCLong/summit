@@ -1,4 +1,4 @@
-import { median } from '../anomaly';
+import { median } from '../anomaly.js';
 
 export interface GraphNode {
   id: string;

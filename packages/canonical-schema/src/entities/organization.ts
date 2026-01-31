@@ -3,7 +3,7 @@
  * Canonical organization entity type with business identity attributes
  */
 
-import { CanonicalEntityBase, CanonicalEntityType } from '../core/base';
+import { CanonicalEntityBase, CanonicalEntityType } from '../core/base.js';
 
 export interface OrganizationName {
   value: string;

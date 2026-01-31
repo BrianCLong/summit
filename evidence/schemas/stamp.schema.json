@@ -9,4 +9,20 @@
   },
   "required": [],
   "additionalProperties": true
+  "$id": "https://summit.local/schemas/stamp.schema.json",
+  "type": "object",
+  "required": ["generated_at", "git"],
+  "properties": {
+    "generated_at": { "type": "string", "format": "date-time" },
+    "git": {
+      "type": "object",
+      "required": ["sha"],
+      "properties": {
+        "sha": { "type": "string", "minLength": 7 },
+        "ref": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
 }

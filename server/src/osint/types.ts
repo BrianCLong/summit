@@ -1,5 +1,5 @@
 
-import { Entity, EntityKind } from '../data-model/types';
+import { Entity, EntityKind } from '../data-model/types.js';
 
 export interface SocialMediaProfile {
   platform: 'twitter' | 'linkedin' | 'facebook' | 'github' | 'instagram';

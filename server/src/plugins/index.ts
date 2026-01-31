@@ -1,8 +1,8 @@
-import { Plugin, PluginContext } from './sdk';
-import { MarketplaceService } from '../marketplace/service';
-import { PluginRuntime } from './runtime';
-import { PluginStatus } from './types';
-import { TrustTier } from '../marketplace/types';
+import { Plugin, PluginContext } from './sdk.js';
+import { MarketplaceService } from '../marketplace/service.js';
+import { PluginRuntime } from './runtime.js';
+import { PluginStatus } from './types.js';
+import { TrustTier } from '../marketplace/types.js';
 
 // Legacy registry for built-ins
 const legacyRegistry = new Map<string, Plugin<any, any>>();

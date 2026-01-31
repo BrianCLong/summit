@@ -39,9 +39,9 @@ import compression from 'compression';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 
-import type { APIConfig } from './types';
-import { APIRouter } from './router';
-import { OpenAPIGenerator } from './openapi/generator';
+import type { APIConfig } from './types.js';
+import { APIRouter } from './router.js';
+import { OpenAPIGenerator } from './openapi/generator.js';
 import {
   contextMiddleware,
   errorHandler,
@@ -52,12 +52,12 @@ import {
   idempotencyMiddleware,
   metricsMiddleware,
   VersionRegistry,
-} from './middleware';
+} from './middleware.js';
 
-export * from './types';
-export * from './router';
-export * from './middleware';
-export * from './openapi';
+export * from './types.js';
+export * from './router.js';
+export * from './middleware.js';
+export * from './openapi.js';
 
 export interface APIFramework {
   app: Express;

@@ -1,4 +1,4 @@
-import { verifyStripeSig, handleWebhook } from '../payments/StripeWebhook';
+import { verifyStripeSig, handleWebhook } from '../payments/StripeWebhook.js';
 import fs from 'fs';
 import path from 'path';
 import { describe, it, expect } from '@jest/globals';

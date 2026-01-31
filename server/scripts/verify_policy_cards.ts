@@ -1,5 +1,5 @@
 
-import { PolicyEngine } from '../src/autonomous/policy-engine';
+import { PolicyEngine } from '../src/autonomous/policy-engine.js';
 import path from 'path';
 
 const mockDb = { query: async () => ({ rows: [] }) };

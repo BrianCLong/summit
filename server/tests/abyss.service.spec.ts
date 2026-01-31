@@ -1,5 +1,5 @@
 // server/tests/abyss.service.spec.ts
-import { AbyssService } from '../src/abyss/AbyssService';
+import { AbyssService } from '../src/abyss/AbyssService.js';
 
 describe('AbyssService', () => {
   let abyssService: AbyssService;

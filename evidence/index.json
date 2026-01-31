@@ -1,4 +1,22 @@
 {
   "evidence_version": 1.0,
   "items": []
+  "evidence": {
+    "EVD-CTA-LEADERS-2026-01-INGEST-001": {
+      "metrics": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/metrics.json",
+      "report": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/report.json",
+      "stamp": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/stamp.json"
+    },
+    "EVD-SDSBC-FOUNDATION-001": {
+      "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
+      "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
+      "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
+    },
+    "EVD-SDSBC-CODEGEN-001": {
+      "report": "evidence/EVD-SDSBC-CODEGEN-001/report.json",
+      "metrics": "evidence/EVD-SDSBC-CODEGEN-001/metrics.json",
+      "stamp": "evidence/EVD-SDSBC-CODEGEN-001/stamp.json"
+    }
+  },
+  "version": 1
 }

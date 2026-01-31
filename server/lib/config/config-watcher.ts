@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
-import { SchemaValidator } from './schema-validator';
+import { SchemaValidator } from './schema-validator.js';
 
 export class ConfigWatcher {
   private filePath: string;

@@ -33,11 +33,11 @@ jest.mock('ioredis', () => ({
   },
 }));
 
-let LaplaceMechanism: typeof import('../src/services/dp-runtime/mechanisms').LaplaceMechanism;
-let PrivacyBudgetLedger: typeof import('../src/services/dp-runtime/mechanisms').PrivacyBudgetLedger;
+let LaplaceMechanism: typeof import('../src/services/dp-runtime/mechanisms.js').LaplaceMechanism;
+let PrivacyBudgetLedger: typeof import('../src/services/dp-runtime/mechanisms.js').PrivacyBudgetLedger;
 
 beforeAll(async () => {
-  const mod = await import('../src/services/dp-runtime/mechanisms');
+  const mod = await import('../src/services/dp-runtime/mechanisms.js');
   LaplaceMechanism = mod.LaplaceMechanism;
   PrivacyBudgetLedger = mod.PrivacyBudgetLedger;
 });

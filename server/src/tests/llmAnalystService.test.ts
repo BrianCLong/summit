@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import LLMAnalystService from '../services/LLMAnalystService';
+import LLMAnalystService from '../services/LLMAnalystService.js';
 
 class MockLLMService {
   async complete() {

@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { XmlExporter } from '../exporters/xml-exporter';
+import { XmlExporter } from '../exporters/xml-exporter.js';
 
 describe('XmlExporter', () => {
   let exporter: XmlExporter;

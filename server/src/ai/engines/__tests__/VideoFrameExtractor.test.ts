@@ -24,7 +24,7 @@ jest.unstable_mockModule('fs/promises', () => ({
 }));
 
 describe('VideoFrameExtractor', () => {
-  let VideoFrameExtractor: typeof import('../VideoFrameExtractor').VideoFrameExtractor;
+  let VideoFrameExtractor: typeof import('../VideoFrameExtractor.js').VideoFrameExtractor;
   let extractor: InstanceType<typeof VideoFrameExtractor>;
   let ffmpeg: typeof ffmpegMock;
   let fs: typeof fsMock;
@@ -34,7 +34,7 @@ describe('VideoFrameExtractor', () => {
   const mockVideoPath = '/path/to/test-video.mp4';
 
   beforeAll(async () => {
-    ({ VideoFrameExtractor } = await import('../VideoFrameExtractor'));
+    ({ VideoFrameExtractor } = await import('../VideoFrameExtractor.js'));
     ffmpeg = (await import('fluent-ffmpeg')).default as typeof ffmpegMock;
     fs = (await import('fs/promises')).default as typeof fsMock;
   });

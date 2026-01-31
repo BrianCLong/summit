@@ -30,7 +30,7 @@ jest.unstable_mockModule('ioredis', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { AdvancedRateLimiter, RateLimitTier } = await import('../TieredRateLimitMiddleware');
+const { AdvancedRateLimiter, RateLimitTier } = await import('../TieredRateLimitMiddleware.js');
 
 describe('AdvancedRateLimiter', () => {
   let limiter: InstanceType<typeof AdvancedRateLimiter>;

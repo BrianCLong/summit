@@ -1,4 +1,4 @@
-import { GraphSnapshot, Node, Edge, GraphMetrics } from '../contracts/predictive/types';
+import { GraphSnapshot, Node, Edge, GraphMetrics } from '../contracts/predictive/types.js';
 
 export class SimpleGraphEngine {
   private adjacencyList: Map<string, string[]>;

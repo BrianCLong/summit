@@ -4,7 +4,7 @@ import {
   ActionPolicyService,
   calculateRequestHash,
 } from '../services/ActionPolicyService.js';
-import type { PreflightRequest } from '../../../packages/policy-audit/src/types';
+import type { PreflightRequest } from '../../../packages/policy-audit/src/types.js';
 
 const router = express.Router();
 const actionPolicyService = new ActionPolicyService();

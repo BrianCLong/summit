@@ -20,6 +20,10 @@ Until discovered, we use temporary verifier names:
 - `ci:lint`
 - `ci:deps-delta`
 - `ci/evidence-schema`
+- `ci:deepsearchqa-fixtures`
+- `ci:codegen-drift`
+- `ci:determinism-smoke`
+- `ci:supply-chain-delta`
 
 ## Rename plan
 Once real check names are known:

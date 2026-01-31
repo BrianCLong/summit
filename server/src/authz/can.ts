@@ -1,4 +1,4 @@
-import { Permission, Role, ROLE_PERMISSIONS } from './permissions';
+import { Permission, Role, ROLE_PERMISSIONS } from './permissions.js';
 
 export interface AuthorizationContext {
   role: Role;

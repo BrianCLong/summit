@@ -1,5 +1,5 @@
-import { VoiceProvider, VoiceSpec, SpeechJob, StreamCallbacks, VoiceProvenance } from '../types.ts';
-import { VoiceProvenanceLedger } from '../VoiceProvenanceLedger.ts';
+import { VoiceProvider, VoiceSpec, SpeechJob, StreamCallbacks, VoiceProvenance } from '../types.js';
+import { VoiceProvenanceLedger } from '../VoiceProvenanceLedger.js';
 
 export class Qwen3TTSProvider implements VoiceProvider {
   id = 'qwen3-tts';

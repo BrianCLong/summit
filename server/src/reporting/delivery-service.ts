@@ -1,8 +1,8 @@
 // @ts-nocheck
 import axios from 'axios';
 import nodemailer, { Transporter } from 'nodemailer';
-import { DeliveryAttempt, DeliveryInstruction, DeliveryResult, ReportArtifact } from './types';
-import { validateDeliveryInstruction } from './validation';
+import { DeliveryAttempt, DeliveryInstruction, DeliveryResult, ReportArtifact } from './types.js';
+import { validateDeliveryInstruction } from './validation.js';
 
 function buildTransporter(): Transporter {
   if (process.env.SMTP_URL) {
