@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit evidence stamp",
   "type": "object",
-  "additionalProperties": false,
+  "required": ["created_at", "tool_versions"],
   "properties": {
-    "started_at": {"type": "string"},
-    "finished_at": {"type": "string"},
-    "runner": {"type": "string"}
+    "created_at": { "type": "string" },
+    "tool_versions": { "type": "object", "additionalProperties": { "type": "string" } }
   },
-  "required": ["started_at", "finished_at"]
+  "additionalProperties": false
 }
