@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T00:00:00Z",
-  "revision_note": "Consolidated prompt metadata for Jest network teardown shim, governed tests, and LFS exceptions.",
+  "last_updated": "2026-01-29T18:00:00Z",
+  "revision_note": "Expanded narrative frames fixtures with confidence validation and richer evidence reporting",
   "initiatives": [
     {
       "id": "A",
