@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T12:58:00Z",
-  "revision_note": "Reduce predictd Docker build context to avoid BuildKit grpc crash in dev-up.",
+  "last_updated": "2026-01-31T13:05:00Z",
+  "revision_note": "Added MCP/A2A mental model evidence scaffolding and interop documentation.",
   "initiatives": [
     {
       "id": "A",

@@ -1,0 +1,19 @@
+{
+  "evidence_id": "EVD-mcp-a2a-mental-model-interop-001",
+  "item_slug": "mcp-a2a-mental-model",
+  "claims": [
+    "Documented the MCP/A2A layered interop model and Summit control/data plane mapping.",
+    "Established initial evidence scaffolding for the MCP/A2A mental model workstream."
+  ],
+  "decisions": [
+    {
+      "decision": "Adopt a layered interop model with A2A control-plane routing and MCP data-plane tool execution.",
+      "rationale": "Keeps supervisor context compact while preserving governed tool execution in specialist agents."
+    }
+  ],
+  "findings": [
+    {
+      "finding": "Evidence artifacts for interop PR1 are staged in a deterministic layout."
+    }
+  ]
+}
