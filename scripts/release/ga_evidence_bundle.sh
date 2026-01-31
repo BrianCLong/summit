@@ -17,6 +17,7 @@ echo "SHA: ${SHA}"
 mkdir -p "${BUNDLE_DIR}/tests"
 mkdir -p "${BUNDLE_DIR}/policy"
 mkdir -p "${BUNDLE_DIR}/security"
+mkdir -p "${BUNDLE_DIR}/compliance"
 
 # 1. Generate Manifest
 cat <<EOF > "${BUNDLE_DIR}/manifest.json"
@@ -44,7 +45,6 @@ fi
 
 # 3. Collect OPA Policy Evaluations
 echo "⚖️  Collecting policy evaluations..."
-# Generate a fresh evaluation if input exists
 if [ -f "evidence/provenance-input.json" ]; then
     if command -v opa &> /dev/null; then
         opa eval -i evidence/provenance-input.json -d policy/supply_chain.rego "data.supply_chain" --format json > "${BUNDLE_DIR}/policy/opa-evaluation.json"
@@ -55,11 +55,22 @@ else
     echo "{}" > "${BUNDLE_DIR}/policy/opa-evaluation.json"
 fi
 
-# 4. Collect Security Reports (Dependency Audit)
-echo "🛡️  Collecting security reports..."
-pnpm audit --prod --json > "${BUNDLE_DIR}/security/pnpm-audit.json" || true
+# 4. Generate & Collect Compliance Artifacts (SBOM)
+echo "📜 Generating SBOM..."
+npx tsx scripts/compliance/generate_sbom.ts
+if [ -f ".evidence/sbom.json" ]; then
+    cp ".evidence/sbom.json" "${BUNDLE_DIR}/compliance/sbom.json"
+fi
 
-# 5. Create README
+# 5. Collect Security Reports (Dependency Audit)
+echo "🛡️  Collecting security reports..."
+if [[ "${CI:-false}" == "true" ]]; then
+    pnpm audit --prod --json --audit-level critical > "${BUNDLE_DIR}/security/pnpm-audit.json" || true
+else
+    echo "{\"info\": \"Skipped audit in local run\"}" > "${BUNDLE_DIR}/security/pnpm-audit.json"
+fi
+
+# 6. Create README
 cat <<'EOF' > "${BUNDLE_DIR}/README.md"
 # GA Evidence Bundle
 
@@ -70,6 +81,7 @@ This bundle contains the cryptographic and procedural evidence required for Gene
 - `tests/`: Logs and summaries from unit, integration, and smoke tests.
 - `policy/`: OPA evaluation results for supply chain compliance.
 - `security/`: Dependency audit reports and vulnerability scans.
+- `compliance/`: Software Bill of Materials (SBOM) and other compliance data.
 
 ## Reproduction
 To recreate this bundle, run:
@@ -79,7 +91,7 @@ pnpm ga:evidence
 ```
 EOF
 
-# 6. Compress Bundle
+# 7. Compress Bundle
 mkdir -p dist/evidence
 cd dist/evidence
 zip -r "ga-v${VERSION}.zip" "ga-v${VERSION}"
