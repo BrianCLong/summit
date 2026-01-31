@@ -1,19 +1,22 @@
 # GA Soak Report - v5.3.2
 
-## Overview
-This report summarizes the performance and stability of the Summit Platform v5.3.2 GA release under a 5-cycle "soak" simulation.
+## Summary
+- **Date (UTC):** 2026-01-31
+- **Modes:** Standalone stability soak + `SMOKE_MODE=full`
+- **Result:** Mixed
+  - **Standalone stability soak:** PASS (binary + health checks)
+  - **SMOKE_MODE=full:** FAIL (dependency missing: `axios`)
 
-## Simulation Metadata
-- **Date**: 2026-01-31
-- **Cycles**: 5
-- **Mode**: Standalone (Server binary + Dockerized DBs)
-- **Target**: `localhost:4001` (Direct Server)
+## Simulation Metadata (Standalone)
+- **Cycles:** 5
+- **Mode:** Standalone (Server binary + Dockerized DBs)
+- **Target:** `localhost:4001` (Direct Server)
 
-## Environment Constraints
-- **Run Mode**: Standalone server binary running on host port `4001`.
-- **Dependencies**: Dockerized PostgreSQL and Redis. Neo4j and Frontend were not accessible to the test runner.
-- **Auth Config**: Default production settings (requiring valid JWTs), while the harness used a dev/test token or no token.
-- **Networking**: Host-to-Container isolation prevented the test runner from reaching Neo4j/Frontend ports mapped inside Docker.
+## Environment Constraints (Standalone)
+- **Run Mode:** Standalone server binary running on host port `4001`.
+- **Dependencies:** Dockerized PostgreSQL and Redis. Neo4j and Frontend were not accessible to the test runner.
+- **Auth Config:** Default production settings (requiring valid JWTs), while the harness used a dev/test token or no token.
+- **Networking:** Host-to-Container isolation prevented the test runner from reaching Neo4j/Frontend ports mapped inside Docker.
 
 ## Results: Lane A — Stability Soak (Validated)
 *Purpose: Detect corruption, crash loops, deadlocks, startup regressions.*
@@ -32,15 +35,42 @@ This report summarizes the performance and stability of the Summit Platform v5.3
 | **GraphQL Access** | ❌ FAILED | HTTP `403 Forbidden`. **Expected behavior** given the harness did not inject a valid prod-signed JWT. |
 | **Dependencies** | ⚠️ MIXED | Postgres healthy. Neo4j/Frontend unreachable due to harness network isolation. |
 
+## SMOKE_MODE=full Run (Failed)
+### Prerequisites Checklist
+- [ ] `pnpm install` completed in repo root
+- [ ] API server running on `API_URL` (default `http://localhost:4000`)
+- [ ] PostgreSQL reachable
+- [ ] Neo4j reachable
+- [ ] Redis reachable
+
+### Soak Cycles
+| Cycle | Timestamp (UTC) | Mode | Result | Notes |
+|------:|-----------------|------|--------|-------|
+| 1 | 2026-01-31T07:22:38Z | full | FAIL | `MODULE_NOT_FOUND: axios` while executing `server/scripts/smoke-test.cjs` |
+
+### Failure Details (Cycle 1)
+- **Error:** `Cannot find module 'axios'`
+- **Location:** `/private/tmp/soak-pr/server/scripts/smoke-test.cjs`
+- **Exit:** `ELIFECYCLE` (exit code 1)
+- **Action:** Run `pnpm install` in repo root and re-run soak loop.
+
 ## Root Cause Analysis (Functional Failures)
 The functional failures observed in Lane B are **harness-level artifacts**, not code regressions:
-1.  **403 Forbidden**: The server correctly enforced authentication. The soak harness needs a mechanism to generate valid JWTs or a bypass flag (`SOAK_MODE`) to validate GraphQL logic.
-2.  **Network Isolation**: The test runner (on host) could not verify connectivity to dependencies running inside Docker containers that didn't expose ports or resolve via DNS as expected by the config.
+1. **403 Forbidden**: The server correctly enforced authentication. The soak harness needs a mechanism to generate valid JWTs or a bypass flag (`SOAK_MODE`) to validate GraphQL logic.
+2. **Network Isolation**: The test runner (on host) could not verify connectivity to dependencies running inside Docker containers that didn't expose ports or resolve via DNS as expected by the config.
 
 ## Conclusion
 The **Server Binary is Stable (Lane A Passed)**.
-*   ✅ **Binary/runtime stability validated** (boot, sustained uptime across cycles).
-*   ✅ **Health endpoint validated** (consistent 200s, low latency).
-*   ❌ **E2E functionality not validated in this run** due to explicit local auth and container networking constraints.
+* ✅ **Binary/runtime stability validated** (boot, sustained uptime across cycles).
+* ✅ **Health endpoint validated** (consistent 200s, low latency).
+* ❌ **E2E functionality not validated in this run** due to explicit local auth and container networking constraints.
 
-**Recommendation**: The `Smoke Gate` in CI is ready to merge. It correctly enforces Lane A (Stability) which is the prerequisite for deployment. Lane B (Functional) validation should be added as a follow-up with a dedicated integration harness.
+**Recommendation**: The `Smoke Gate` in CI is ready to merge for Lane A. Lane B (Functional) validation should be added as a follow-up with a dedicated integration harness.
+
+## Next Steps
+1. Install dependencies: `pnpm install`.
+2. Re-run soak loop:
+   ```bash
+   for i in {1..5}; do SMOKE_MODE=full pnpm run test:smoke || break; done
+   ```
+3. Update this report with pass/fail per cycle.

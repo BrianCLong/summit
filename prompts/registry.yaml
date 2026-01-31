@@ -847,3 +847,26 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: soak-report-update
+    version: v1
+    path: prompts/operations/soak-report-update@v1.md
+    sha256: f7c5b0368891de6839fd0c27a1a0ebfecaeccfd3742683bf5278e79ebb6bb63e
+    description: Update GA soak report with latest run results and prerequisites.
+    scope:
+      paths:
+        - docs/operations/GA_SOAK_REPORT_v5.3.2.md
+        - docs/roadmap/STATUS.json
+        - prompts/operations/soak-report-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
