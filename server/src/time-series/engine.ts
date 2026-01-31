@@ -106,7 +106,7 @@ export class TimeSeriesEngine {
   }
 
   private runForecast(series: TimeSeriesRow[], config: ForecastConfig) {
-    const values = series.map((row: any) => row.values[config.field]).filter((value): value is number => typeof value === 'number');
+    const values = series.map((row) => row.values[config.field]).filter((value): value is number => typeof value === 'number');
     if (!values.length) return [];
     if (config.model === 'prophet') {
       return prophetForecast(series, config.field, config.horizon);
