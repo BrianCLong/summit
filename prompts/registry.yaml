@@ -215,6 +215,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: competitive-intel-subsumption-engine
+    version: v4_1
+    path: prompts/competitive/competitive-intel-subsumption-engine@v4_1.md
+    sha256: de224f8469be63d9d0846618acb4f266a346513584a92039c98423d290ac9c74
+    description: Switchboard-standard competitive intelligence subsumption protocol (clean-room, evidence-first).
+    scope:
+      paths:
+        - docs/competitive/
+        - docs/roadmap/STATUS.json
+        - prompts/competitive/competitive-intel-subsumption-engine@v4_1.md
+        - prompts/registry.yaml
+      domains:
+        - competitive-intel
+        - documentation
+        - governance
+        - switchboard
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
