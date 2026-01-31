@@ -217,7 +217,7 @@
     "body-parser": "^2.2.1",
     "commander": "^12.1.0",
     "concurrently": "^9.2.0",
-    "eslint": "^9.26.0",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jest": "^29.6.0",
     "eslint-plugin-react": "^7.37.5",
