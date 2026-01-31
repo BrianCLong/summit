@@ -1,29 +1,13 @@
 {
   "version": 1,
-  "items": [],
-  "evidence": {
-    "EVD-APPLEQAI-PRIV-002": {
-      "report": "evidence/EVD-APPLEQAI-PRIV-002/report.json",
-      "metrics": "evidence/EVD-APPLEQAI-PRIV-002/metrics.json",
-      "stamp": "evidence/EVD-APPLEQAI-PRIV-002/stamp.json"
+  "items": [
+    {
+      "id": "EVD-SDSBC-FOUNDATION-001",
+      "path": "evidence/EVD-SDSBC-FOUNDATION-001/report.json"
     },
-    "EVD-SDSBC-FOUNDATION-001": {
-      "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
-      "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
-      "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
-    },
-    "EVD-HONO-ERRBOUNDARY-XSS-SUPPLYCHAIN-001": {
-      "report": "evidence/out/HONO-ERRBOUNDARY-XSS/report.json",
-      "metrics": "evidence/out/HONO-ERRBOUNDARY-XSS/metrics.json",
-      "stamp": "evidence/out/HONO-ERRBOUNDARY-XSS/stamp.json"
-    },
-    "EVD-HONO-ERRBOUNDARY-XSS-CI-002": {
-      "report": "evidence/out/HONO-ERRBOUNDARY-XSS/report.json",
-      "metrics": "evidence/out/HONO-ERRBOUNDARY-XSS/metrics.json",
-      "stamp": "evidence/out/HONO-ERRBOUNDARY-XSS/stamp.json"
-    },
-    "EVD-HONO-ERRBOUNDARY-XSS-DOCS-003": {
-      "report": "evidence/out/HONO-ERRBOUNDARY-XSS/report.json"
+    {
+      "id": "EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001",
+      "path": "evidence/EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001/report.json"
     }
-  }
+  ]
 }

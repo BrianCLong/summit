@@ -12,8 +12,5 @@ FEATURE_CHAT_GATEWAY = is_feature_enabled("FEATURE_CHAT_GATEWAY", default=False)
 ATLAS_PLANNER_ENABLED = is_feature_enabled("ATLAS_PLANNER_ENABLED", default=False)
 SUMMIT_SCOUTS_ENABLED = is_feature_enabled("SUMMIT_SCOUTS_ENABLED", default=False)
 SUMMIT_VIND_ENABLED = is_feature_enabled("SUMMIT_VIND_ENABLED", default=False)
-
-# Qwen3-TTS Feature Flags
-FEATURE_QWEN3_TTS = is_feature_enabled("FEATURE_QWEN3_TTS", default=False)
-FEATURE_QWEN3_TTS_VOICE_CLONE = is_feature_enabled("FEATURE_QWEN3_TTS_VOICE_CLONE", default=False)
-FEATURE_QWEN3_TTS_AUTO_DOWNLOAD = is_feature_enabled("FEATURE_QWEN3_TTS_AUTO_DOWNLOAD", default=False)
+ENABLE_OCR2_VLLM_EXPERIMENTAL = is_feature_enabled("ENABLE_OCR2_VLLM_EXPERIMENTAL", default=False)
+ENABLE_MS_SWIFT_INTEGRATION = is_feature_enabled("ENABLE_MS_SWIFT_INTEGRATION", default=False)
