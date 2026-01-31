@@ -1,0 +1,23 @@
+apiVersion: maestro/v1
+kind: Workflow
+metadata:
+  name: demo-seed
+  version: 0.3.0
+  owner: platform@summit
+spec:
+  parameters:
+    - name: dataset
+      type: string
+      required: true
+  tasks:
+    - id: fetch
+      uses: connectors/s3.get@0.1.0
+      with: { bucket: demo-datasets, key: ${params.dataset} }
+    - id: validate
+      uses: tasks/schema.validate@0.1.0
+      needs: [fetch]
+      with: { schema: { "$schema": "http://json-schema.org/draft-07/schema#", "type": "object" } }
+    - id: ingest
+      uses: connectors/sig.ingest@0.1.0
+      needs: [validate]
+      with: { items: [ { id: "seed-1", payload: { source: "demo" } } ] }
