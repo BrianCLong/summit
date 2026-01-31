@@ -16,9 +16,14 @@ def test_evidence_schemas():
 
     # Load schemas
     schemas_dir = os.path.join(BASE_DIR, 'schemas')
+    index_schema = load_json(os.path.join(schemas_dir, 'index.schema.json'))
     report_schema = load_json(os.path.join(schemas_dir, 'report.schema.json'))
     metrics_schema = load_json(os.path.join(schemas_dir, 'metrics.schema.json'))
     stamp_schema = load_json(os.path.join(schemas_dir, 'stamp.schema.json'))
+
+    # Validate index itself
+    print("Validating index.json")
+    jsonschema.validate(instance=index, schema=index_schema)
 
     for item in index['items']:
         evidence_id = item['evidence_id']

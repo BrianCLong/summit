@@ -1,0 +1,11 @@
+# Temporary Internal Gates (to be mapped to real CI checks)
+
+[gates]
+"gate:evidence-schema-validate" = "active"
+"gate:eval-harness-smoke" = "active"
+"gate:redaction-neverlog" = "active"
+"gate:determinism-fixtures" = "active"
+"gate:featureflag-off-default" = "active"
+
+# Mapping to Real Checks (TODO: fill this in)
+# "gate:evidence-schema-validate" -> "ci/circleci: schema-check"
