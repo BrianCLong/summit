@@ -115,6 +115,9 @@ const config = {
     '<rootDir>/src/auth/withAuthorization.test.tsx',
     '<rootDir>/src/services/socket.test.js',
     '<rootDir>/src/design-system/__tests__/designSystem.test.tsx',
+    '<rootDir>/src/components/explorer/__tests__/useGraphData.test.ts',
+    '<rootDir>/src/pages/Security/__tests__/SecurityPIIScanner.test.jsx',
+    '<rootDir>/src/components/ai-enhanced/__tests__/assistant.chunking.test.tsx',
   ],
 };
 
