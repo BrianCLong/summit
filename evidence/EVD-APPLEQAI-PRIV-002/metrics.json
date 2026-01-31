@@ -1,6 +1,7 @@
 {
   "evidence_id": "EVD-APPLEQAI-PRIV-002",
   "metrics": {
-    "test_passed": 1
+    "blocked_classes": 3,
+    "allowed_classes": 1
   }
 }

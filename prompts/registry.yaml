@@ -847,22 +847,30 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: smoke-diagnostics-preflight
+  - id: summit-silent-intent-scaffold
     version: v1
-    path: prompts/operations/smoke-diagnostics-preflight@v1.md
-    sha256: b50caafd389d2b5cb86273d9bdedf5e9803a754e534ca0f0747dfd3bdfaf0d8c
-    description: Improve smoke-test diagnostics with preflight and standalone/full modes.
+    path: prompts/summit/silent-intent-scaffold.md
+    sha256: fc78cff5add0b918d3f63995be8b6cb669844ee3f11d595d30c3f1e873b1fad0
+    description: Scaffold silent-intent evidence, biometric gates, input routing, and deps delta checks.
     scope:
       paths:
-        - server/scripts/smoke-test.cjs
-        - docs/operations/runbooks/STARTUP_AND_CONFIG.md
+        - ci/deps_delta_allowlist.json
+        - ci/deps_delta_check.py
         - docs/roadmap/STATUS.json
-        - prompts/operations/smoke-diagnostics-preflight@v1.md
+        - evidence/EVD-APPLEQAI-PRIV-002/
+        - evidence/index.json
         - prompts/registry.yaml
+        - prompts/summit/silent-intent-scaffold.md
+        - summit/input/
+        - summit/policy/
+        - tests/input/
+        - tests/policy/
       domains:
-        - operations
-        - ci
+        - evidence
         - governance
+        - policy
+        - input
+        - ci
     verification:
       tiers_required:
         - C
@@ -870,4 +878,5 @@ prompts:
         permitted: 0
         retirement_target: 0
     allowed_operations:
+      - create
       - edit

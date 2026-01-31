@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T05:55:00Z",
-  "revision_note": "Smoke harness now emits actionable diagnostics with preflight and mode guidance.",
+  "last_updated": "2026-02-18T00:00:00Z",
+  "revision_note": "Added APPLEQAI evidence bundle, biometric gate scaffolding, and input routing interfaces.",
   "initiatives": [
     {
       "id": "A",
