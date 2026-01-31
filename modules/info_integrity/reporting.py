@@ -1,5 +1,5 @@
 import json
-from datetime import UTC
+from datetime import timezone
 from pathlib import Path
 from typing import Any, Dict
 
