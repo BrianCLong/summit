@@ -612,36 +612,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: maestro-mcp-flowpacks
-    version: v1
-    path: prompts/maestro/maestro-mcp-flowpacks@v1.md
-    sha256: df7211b61b63302c2ac4db63276b1d03bfd0e40e55cc324d6f4f817dbe5e4f63
-    description: Scaffold Maestro MCP flow packs and Docker targets for Summit component bundles.
-    scope:
-      paths:
-        - packages/ig/
-        - packages/mc/
-        - packages/sb/
-        - packages/co/
-        - packages/summit-platform/
-        - docker/maestro-mcp/
-        - docs/roadmap/STATUS.json
-        - prompts/maestro/maestro-mcp-flowpacks@v1.md
-        - prompts/registry.yaml
-      domains:
-        - maestro
-        - tooling
-        - governance
-        - docker
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: mvp4-ga-gate-artifacts
     version: v1
     path: prompts/docs/mvp4-ga-gate-artifacts@v1.md
@@ -667,29 +637,6 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - create
-      - edit
-  - id: exclude-worktrees-cjs-guard
-    version: v1
-    path: prompts/governance/exclude-worktrees-cjs-guard@v1.md
-    sha256: 8ca6d3a5c78628348dfd03ed2d13e95ababe45aede34d199bde69e31140baca3
-    description: Exclude _worktrees from CJS ESM syntax guard to prevent false positives.
-    scope:
-      paths:
-        - scripts/check-cjs-commonjs.cjs
-        - docs/roadmap/STATUS.json
-        - prompts/governance/exclude-worktrees-cjs-guard@v1.md
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - ci
-        - tooling
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
       - edit
   - id: genui-plan-scaffold
     version: v1
@@ -900,17 +847,17 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: cypress-install-unblock
+  - id: smoke-diagnostics-preflight
     version: v1
-    path: prompts/operations/cypress-install-unblock@v1.md
-    sha256: 8b3970e9e0c3791885dc979c0f6d5d701012d60eb1054087e8c7c26dc629e283
-    description: Unblock Cypress postinstall by pinning chalk resolution for log-symbols.
+    path: prompts/operations/smoke-diagnostics-preflight@v1.md
+    sha256: b50caafd389d2b5cb86273d9bdedf5e9803a754e534ca0f0747dfd3bdfaf0d8c
+    description: Improve smoke-test diagnostics with preflight and standalone/full modes.
     scope:
       paths:
-        - package.json
-        - pnpm-lock.yaml
+        - server/scripts/smoke-test.cjs
+        - docs/operations/runbooks/STARTUP_AND_CONFIG.md
         - docs/roadmap/STATUS.json
-        - prompts/operations/cypress-install-unblock@v1.md
+        - prompts/operations/smoke-diagnostics-preflight@v1.md
         - prompts/registry.yaml
       domains:
         - operations
