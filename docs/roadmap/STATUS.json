@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
-  "revision_note": "Standardized CI test environment defaults and server test isolation guardrails.",
+  "last_updated": "2026-02-01T18:30:00Z",
+  "revision_note": "Documented GitHub App authentication for branch protection drift workflows and updated workflow auth sources.",
   "initiatives": [
     {
       "id": "A",

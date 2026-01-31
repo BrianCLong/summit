@@ -2,7 +2,7 @@
 
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
-**Last Updated:** 2026-01-23
+**Last Updated:** 2026-02-01
 
 ---
 
@@ -179,7 +179,16 @@ When drift is resolved, existing drift issues are automatically closed with a re
 
 ## Required Permissions
 
-### GitHub Token
+### GitHub App Authentication (Required)
+
+Branch protection APIs require elevated read permissions that the default `GITHUB_TOKEN` does not provide. Configure a GitHub App and store its credentials as repository secrets:
+
+- **BRANCH_PROTECTION_APP_ID** (GitHub App ID)
+- **BRANCH_PROTECTION_APP_PRIVATE_KEY** (PEM private key)
+
+The workflow generates an installation token via `actions/create-github-app-token@v1`. If token generation fails, the workflow falls back to `GITHUB_TOKEN` and records a warning in the workflow summary.
+
+### GitHub Token (Workflow Runtime)
 
 The workflow needs:
 
@@ -191,33 +200,15 @@ The workflow needs:
 
 Reading branch protection requires one of:
 
+- GitHub App with **Administration: Read-only** (recommended)
 - Admin access to the repository
 - `read:org` scope (for organization repos)
-- **GitHub App** with `Administration: Read-only` permission
 
 If permissions are insufficient, the script reports the limitation and creates an issue explaining the access requirement.
 
-### GitHub App Configuration (Recommended)
+### Governance Reference
 
-To avoid managing personal access tokens and ensure consistent permissions, a GitHub App is the preferred authentication method.
-
-**1. Create a GitHub App** with the following permissions:
-
-- **Administration**: Read-only (Required for Drift Detection & Plan mode)
-  - _Note: `Administration: Read & write` is required for Reconcile Apply mode_
-- **Contents**: Read-only
-- **Issues**: Read & write
-- **Metadata**: Read-only
-
-**2. Install the App** on the repository.
-
-**3. Configure Secrets**:
-Add the following repository secrets:
-
-- `BRANCH_PROTECTION_APP_ID`: The App ID
-- `BRANCH_PROTECTION_APP_PRIVATE_KEY`: The private key (PEM format)
-
-The workflows will automatically prefer the App token if these secrets are present.
+- [Summit Readiness Assertion](../SUMMIT_READINESS_ASSERTION.md)
 
 ---
 
@@ -357,10 +348,10 @@ The GitHub token lacks access to read branch protection.
 
 ## Change History
 
-| Version | Date       | Changes                                   |
-| ------- | ---------- | ----------------------------------------- |
+| Version | Date       | Changes                                                                                                                                                                                                             |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1.1.0   | 2026-01-23 | Fix extraction to use `branch_protection.required_status_checks.contexts` instead of `always_required`; migrate from file-based state to issue-based state discovery; resolve "Could not push state update" warning |
-| 1.0.0   | 2026-01-08 | Initial branch protection drift detection |
+| 1.0.0   | 2026-01-08 | Initial branch protection drift detection                                                                                                                                                                           |
 
 ---
 
