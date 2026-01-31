@@ -1,26 +1,23 @@
-# Required checks discovery (TODO)
+# Required checks discovery (temporary)
 
 ## Goal
-List the repository's *required* CI checks for the default branch, then map them to verifier names
-in `ci/verifiers/`.
+Identify the exact GitHub required check names for default branch protection, then rename placeholder gates.
 
-## GitHub UI steps
+## UI steps
 1. Repo → Settings → Branches → Branch protection rules.
-2. Open the rule for the default branch.
-3. Under “Require status checks to pass”, copy the exact check names.
+2. Find rule for default branch.
+3. Copy the list under “Require status checks to pass…”
 
-## GitHub API steps (alternative)
-Use the Branch Protection API to fetch required status checks for the branch:
-`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+## API steps (optional)
+Use GitHub REST API:
+- GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 
-## Temporary convention
-Until discovered, we use temporary verifier names:
-- `ci:unit`
-- `ci:schema`
-- `ci:lint`
-- `ci:deps-delta`
+## Temporary gate naming
+- ci/evidence-verify
+- ci/deps-delta-verify
 
 ## Rename plan
-Once real check names are known:
-1. Update CI config to emit the official check names.
-2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.
+Once names are known, create PR to:
+1) update workflow names
+2) update docs
+3) add compatibility aliases for 1 release cycle

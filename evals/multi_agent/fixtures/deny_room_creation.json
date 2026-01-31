@@ -1,0 +1,6 @@
+{
+  "name": "deny_room_creation_without_allowlist",
+  "config": { "SUMMIT_CMAE_ENABLED": true },
+  "room_id": "unlisted-room",
+  "expect": "deny"
+}

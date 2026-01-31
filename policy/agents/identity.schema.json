@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["agent_id", "owner", "scopes"],
+  "properties": {
+    "agent_id": { "type": "string" },
+    "owner": { "type": "string" },
+    "scopes": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
