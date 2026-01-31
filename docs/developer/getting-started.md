@@ -16,6 +16,7 @@ Welcome to IntelGraph development! This guide will help you set up your developm
 - **Docker**: Docker Desktop or Docker Engine 20.10+
 - **Node.js**: v18.x or v20.x (use `nvm` for version management)
 - **Python**: 3.11+ for AI/ML components
+- **Git**: 2.47.1+ (bundle URIs disabled to mitigate CVE-2025-48384-48386)
 
 #### Required Tools
 
@@ -40,6 +41,28 @@ pyenv global 3.11.7
 
 # Install additional tools
 brew install git kubectl helm terraform jq yq
+```
+
+#### Git Version Requirement
+
+This repository requires Git 2.47.1+ and a disabled bundle URI setting:
+
+```bash
+# macOS (Homebrew)
+brew upgrade git
+
+# Ubuntu
+sudo add-apt-repository ppa:git-core/ppa -y
+sudo apt-get update
+sudo apt-get install git -y
+
+# Windows
+# Download from https://git-scm.com/
+
+# Verification
+git --version
+git config --global transfer.bundleURI false
+git config --global --get transfer.bundleURI
 ```
 
 #### IDE Setup (VS Code Recommended)
