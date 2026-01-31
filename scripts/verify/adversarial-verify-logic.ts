@@ -133,6 +133,17 @@ export async function runAdversarialSuite() {
     console.log('✅ Passed provenance gate fail-closed test.');
   }
 
+  // 5. REGRESSION SUITE ENFORCEMENT
+  console.log('\n[5/5] Running permanent regression pack...');
+  try {
+    // We already ran individual logic above, but this confirms the jest suite
+    // which may include more complex cross-os or file-based regressions.
+    execSync("cross-env NODE_OPTIONS='--experimental-vm-modules' npx jest tests/security/regressions", { stdio: 'inherit' });
+    console.log('✅ Passed permanent regression pack.');
+  } catch (e) {
+    summary.failures.push('Permanent Regression Pack Failed');
+  }
+
   console.log('\n' + '='.repeat(50));
   console.log('🏁 ADVERSARIAL VERIFICATION SUMMARY');
   console.log('='.repeat(50));
