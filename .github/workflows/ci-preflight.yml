@@ -5,6 +5,10 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+  concurrency:
+    group: ci-preflight-${{ github.ref }}
+      cancel-in-progress: false
+
 jobs:
   validate-compose:
     runs-on: ubuntu-latest
