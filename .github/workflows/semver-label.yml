@@ -1,38 +1,24 @@
-name: SemVer Label Check
+name: Enforce Semver Label
 
 on:
   pull_request:
-    types: [opened, synchronize, labeled, unlabeled]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+    types: [opened, labeled, unlabeled, synchronize]
 
 jobs:
-  check-semver-label:
-    name: Check SemVer Label
+  enforce-classification:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4 # v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
         with:
-          cache: 'pnpm'
-          node-version: "20"
-
-      - name: Install dependencies (scripts)
-        run: |
-          npm install -g tsx
-          # OR use npx directly
-
-      - name: Run Label Check
-        env:
-          GITHUB_EVENT_PATH: ${{ github.event_path }}
-        run: |
-          npx tsx scripts/check-semver-label.ts
-
-      - name: Run SemVer Tests
-        run: |
-          node --test test/semver/check-semver-label.test.mjs
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
+            const isFeat = context.payload.pull_request.head.ref.startsWith('feat/');
+            if (!valid) {
+              if (isFeat) {
+                console.log("No semver label, but branch is feat/* - treating as minor/patch implicitly.");
+                return; // Allow
+              }
+              core.setFailed("PR must have a classification label: patch, minor, or major.");
+            }

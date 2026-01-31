@@ -5,67 +5,30 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  schedule:
-    - cron: '0 2 * * *' # Nightly at 2 AM UTC
-  workflow_dispatch:
 
 jobs:
   golden-path-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+          node-version: 20
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Install Playwright Browsers
-        run: |
-          cd e2e/golden-path
-          npx playwright install --with-deps chromium
-
-      - name: Run Golden Path E2E
-        run: ./scripts/ci/run_golden_path_e2e.sh
-        env:
-          GOLDEN_PATH_E2E_ENABLED: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '1' || '0' }}
-          GOLDEN_PATH_JOURNEY: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'basic' }}
-          BASE_URL: http://localhost:3000
-
-      - name: Upload Playwright Report
+          version: 9.12.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright
+        run: pnpm exec playwright install --with-deps
+      - name: Run E2E Tests
+        run: pnpm test:e2e
+      - name: Upload Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: artifacts/e2e/playwright-report/
-          retention-days: 7
-
-      - name: Upload Evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: golden-path-evidence
-          path: artifacts/evidence/goldenpath-frontend/
+          path: playwright-report/
           retention-days: 7
