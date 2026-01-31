@@ -80,7 +80,7 @@
     "ts-jest": "^29.1.1",
     "typescript": "^5.9.3",
     "tsx": "^4.7.0",
-    "eslint": "^9.39.1",
+    "eslint": "^9.26.0",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
     "typedoc": "^0.27.6",
