@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T12:00:00Z",
-  "revision_note": "Added skill-preserving evidence scaffolding, index alignment, and CI gate placeholders for deny-by-default policy fixtures",
+  "last_updated": "2026-02-01T14:10:00Z",
+  "revision_note": "Aligned evidence schemas and validator with index item format",
   "initiatives": [
     {
       "id": "A",
