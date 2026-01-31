@@ -56,6 +56,14 @@ export function getRedisClient(): Redis | Cluster {
           enableOfflineQueue: true,
         });
       } else {
+        // If REQUIRE_REAL_DBS is false, or REDIS_HOST is 'redis' (docker default) 
+        // but we are local, allow mock fallback
+        if (process.env.REQUIRE_REAL_DBS === 'false') {
+           logger.info('REQUIRE_REAL_DBS=false, using mock Redis');
+           redisClient = createMockRedisClient() as any;
+           return redisClient;
+        }
+
         redisClient = new Redis({
           host: REDIS_HOST,
           port: REDIS_PORT,

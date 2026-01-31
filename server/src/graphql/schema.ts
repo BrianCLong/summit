@@ -1903,6 +1903,7 @@ input CampaignFilter {
 
     # Evidence & Provenance Queries
     evidenceBundles(filter: EvidenceFilterInput, limit: Int = 20): [EvidenceBundle!]!
+    exportProvenance(tenantId: String!, format: String): ProvenanceExport!
 
     # Electronic Warfare Queries
     ewBattleSpace: BattleSpaceView!
@@ -2176,5 +2177,12 @@ input CampaignFilter {
     repo: String
     runs: [Run!]
     deployments: [Deployment!]
+  }
+
+  type ProvenanceExport {
+    format: String!
+    content: JSON!
+    exportedAt: DateTime!
+    tenantId: String!
   }
 `;
