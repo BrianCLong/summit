@@ -1,12 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["evidence_id", "item", "config", "summary"],
+  "required": ["evidence_id", "status", "summary"],
   "properties": {
     "evidence_id": { "type": "string" },
+    "status": { "type": "string", "enum": ["pass", "fail", "warn"] },
+    "summary": { "type": "string" },
+    "details": { "type": "object" },
     "item": { "type": "object" },
-    "config": { "type": "object" },
-    "summary": { "type": "string" }
+    "config": { "type": "object" }
   },
   "additionalProperties": true
 }
