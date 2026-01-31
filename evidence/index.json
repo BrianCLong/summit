@@ -1,13 +1,91 @@
 {
-  "version": 1,
+  "version": 1.0,
   "items": [
     {
-      "id": "EVD-SDSBC-FOUNDATION-001",
-      "path": "evidence/EVD-SDSBC-FOUNDATION-001/report.json"
+      "id": "EVD-PIPELINE-RESILIENCE-001",
+      "path": "evidence/report.json",
+      "title": "Pipeline Scaffolding Check",
+      "category": "pipeline"
     },
     {
-      "id": "EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001",
-      "path": "evidence/EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001/report.json"
+      "id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
+      "path": "evidence/report.json",
+      "title": "SketchDynamics End-to-End Run",
+      "category": "dynamic-intent"
+    },
+    {
+      "id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
+      "path": "fixtures/ambiguities/critical.json",
+      "title": "SketchDynamics Clarification Trigger",
+      "category": "dynamic-intent"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-ATT-001",
+      "report": "evidence/legacy/EVD-VFGNN-ATT-001/report.json"
+    },
+    {
+      "evidence_id": "EVD-vfgnn-NEG-001",
+      "report": "evidence/legacy/EVD-VFGNN-NEG-001/report.json"
+    },
+    {
+      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-ATLAS-SCHEMA-001",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-ATLAS-PLNR-001",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-ATLAS-XFER-001",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-ATLAS-ATLS-001",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-ATLAS-ATLS-002",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-ATLAS-GOV-001",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-ARCH-001",
+      "report": "evidence/templates/report.json"
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-STAB-002",
+      "report": "evidence/templates/report.json"
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-DSCL-003",
+      "report": "evidence/templates/report.json"
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-BENCH-004",
+      "report": "evidence/templates/report.json"
+    },
+    {
+      "evidence_id": "EVD-SSDF12-BNDL-001",
+      "report": "evidence/ssdf-v1-2/pr-01/report.json"
+    },
+    {
+      "evidence_id": "EVD-EXPB-CORE-001",
+      "report": "evidence/report.json"
+    },
+    {
+      "evidence_id": "EVD-PRIVTEL-SCHEMA-001",
+      "report": "evidence/privtel/report.json"
+    },
+    {
+      "evidence_id": "EVD-SIP2601-HARV-001",
+      "report": "evidence/SIP2601/initial/report.json"
     }
   ]
 }
