@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-APPLEQAI-PRIV-002",
+  "summary": "Biometric gate deny-by-default verification and negative fixtures.",
+  "inputs": [
+    "summit/policy/biometric_policy.yaml"
+  ],
+  "outputs": [
+    "tests/policy/test_biometric_gate.py"
+  ]
+}
