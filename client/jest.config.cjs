@@ -72,6 +72,28 @@ const config = {
       },
     ],
   ],
+  /**
+   * TEMPORARILY SKIPPED TEST SUITES
+   * ================================
+   * These suites are skipped due to fundamental issues that need systematic fixes.
+   * Removal of entries from this list is an explicit goal.
+   *
+   * Categories:
+   * - Category A (Vitest→Jest): Tests using vitest imports/APIs in Jest environment
+   *   Examples: DemoWalkthrough.test.jsx, assistant.chunking.fuzz.test.tsx
+   *
+   * - Category B (Import paths): Broken module paths in tests or source
+   *   Examples: MaestroApp.test.tsx (AuthContext), GraphCanvas.test.tsx (graphql.js)
+   *
+   * - Category C (Assertions): Outdated RTL assertions or MUI structure changes
+   *   Examples: AdminDashboard.test.tsx, VulnerabilityDashboard.test.tsx
+   *
+   * - Category D (Timeouts/Flaky): Async issues, unresolved promises, slow tests
+   *   Examples: ThreatIntelligenceHub.test.tsx, EnhancedAIAssistant.test.tsx
+   *
+   * TODO: Create tracking issue "Unskip broken client Jest suites" with checklist
+   * Target: Remove 5-10 ignored suites per PR, starting with Vitest→Jest conversions
+   */
   testPathIgnorePatterns: [
     '<rootDir>/src/tests/',
     '<rootDir>/src/__tests__/ServiceHealthCard.test.jsx',
