@@ -1,4 +1,4 @@
-name: Enforce Policy
+name: CI
 
 on:
   pull_request:
@@ -26,10 +26,5 @@ jobs:
 
       - name: Run policy check
         run: |
-          # If we had a specific policy check command, we'd run it here.
-          # For now, we'll just check if pnpm is available as a sanity check
-          # and maybe run a lint or test command if applicable to "policy".
-          # Assuming 'pnpm run policy-check' or similar if it existed.
-          # For this context, ensuring pnpm is installed fixes the immediate error.
-          # The logs showed it failed to find pnpm.
+          # Placeholder for policy check
           pnpm --version
