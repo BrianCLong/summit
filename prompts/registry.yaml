@@ -217,6 +217,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: linear-sync-invariants
+    version: v1
+    path: prompts/docs/linear-sync-invariants@v1.md
+    sha256: dc23012c21002d124ec7635423e9e869f334074e08755671fd61547f74376a25
+    description: Document Linear ↔ GitHub sync invariants for governance tickets.
+    scope:
+      paths:
+        - docs/ci/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/linear-sync-invariants@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - integrations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-registry-v0
     version: v1
     path: prompts/agents/agent-registry-v0.md
