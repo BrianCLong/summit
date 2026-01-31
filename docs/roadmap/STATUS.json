@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T00:00:00Z",
-  "revision_note": "Added ThreatTrace subsumption plan and governance-ready roadmap entry.",
+  "last_updated": "2026-01-31T10:25:00Z",
+  "revision_note": "Restore er-service requirements.txt to unblock Docker dev stack builds.",
   "initiatives": [
     {
       "id": "A",
@@ -221,27 +221,14 @@
           "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
         }
       ]
-    },
-    {
-      "id": "H",
-      "name": "ThreatTrace Subsumption",
-      "epics": [
-        {
-          "id": "H1",
-          "name": "ThreatTrace ingestion + evaluation spec",
-          "status": "not-started",
-          "owner": "Jules",
-          "evidence": "docs/architecture/threattrace_subsumption_plan.md establishes architecture, gates, and evidence requirements."
-        }
-      ]
     }
   ],
   "summary": {
     "rc_ready": 5,
     "partial": 1,
     "incomplete": 0,
-    "not_started": 16,
-    "total": 23,
+    "not_started": 15,
+    "total": 22,
     "ga_blockers": [
       "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
     ]
