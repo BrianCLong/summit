@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T00:00:00Z",
-  "revision_note": "Scaffolded Maestro MCP flow packs and Docker targets for ig/mc/sb/co + summit-platform.",
+  "last_updated": "2026-01-31T03:24:07Z",
+  "revision_note": "T1 env health: aligned work-graph demo/store/edge rules with ticket + evidence_bundle types and restored prepare builds.",
   "initiatives": [
     {
       "id": "A",

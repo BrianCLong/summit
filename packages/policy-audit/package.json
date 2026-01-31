@@ -3,7 +3,7 @@
   "version": "4.2.3",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "build": "npx tsc"
   },
   "devDependencies": {

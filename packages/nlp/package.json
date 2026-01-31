@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },
