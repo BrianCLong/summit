@@ -5,6 +5,7 @@
   "required": ["evidence_id", "metrics"],
   "properties": {
     "evidence_id": {"type": "string"},
-    "metrics": {"type": "object", "additionalProperties": true}
-  }
+    "metrics": {"type": "object"}
+  },
+  "additionalProperties": true
 }
