@@ -11,6 +11,7 @@
     "verify:verbose": "tsx scripts/verify.ts --verbose",
     "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
+    "ga:evidence": "bash scripts/release/ga_evidence_bundle.sh",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
