@@ -58,7 +58,12 @@
       "report": "evidence/EVD-APPLEQAI-EVAL-003/report.json",
       "metrics": "evidence/EVD-APPLEQAI-EVAL-003/metrics.json",
       "stamp": "evidence/EVD-APPLEQAI-EVAL-003/stamp.json"
-    }
+    },
+"EVD-WECHAT2NBLM-INGEST-001": {},
+    "EVD-WECHAT2NBLM-NORM-002": {},
+    "EVD-WECHAT2NBLM-CONN-003": {},
+    "EVD-WECHAT2NBLM-PIPE-004": {},
+    "EVD-WECHAT2NBLM-POL-005": {}
   },
   "items": [
     { "id": "EVD-CTA-LEADERS-2026-01-INGEST-001", "path": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/report.json" },
