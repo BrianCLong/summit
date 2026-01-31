@@ -1,0 +1,12 @@
+{
+  "id": "invalid-unknown-type",
+  "version": 1,
+  "assumptions": {},
+  "components": [
+    {
+      "name": "weird-comp",
+      "type": "quantum-processor"
+    }
+  ],
+  "connections": []
+}

@@ -1,4 +1,7 @@
-# Dependency Delta
+# Dependency Delta Gate
+Add an entry here whenever repository lockfiles are modified.
 
-- Status: No dependency changes in this update.
-- Lockfiles: Unchanged.
+## 2026-01-31
+- Action: Add
+- Package: jsonschema
+- Reason: Architecture specification validation for `archsim` module.
