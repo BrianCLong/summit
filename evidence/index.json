@@ -5,6 +5,11 @@
       "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
       "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
       "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
+    },
+    "EVD-CURSOR-SECURE-INDEXING-PERF-001": {
+      "report": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/report.json",
+      "metrics": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/metrics.json",
+      "stamp": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/stamp.json"
     }
   }
 }
