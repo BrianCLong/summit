@@ -2,12 +2,12 @@
 import {
   MaestroTemplate, MaestroRun, MaestroTask,
   RunId, TaskId, TemplateId, TenantId
-} from './model';
-import { MaestroDSL } from './dsl';
+} from './model.js';
+import { MaestroDSL } from './dsl.js';
 import { Pool } from 'pg';
 import { Queue, Worker, QueueEvents } from 'bullmq';
-import { logger } from '../utils/logger';
-import { coordinationService } from './coordination/service';
+import { logger } from '../utils/logger.js';
+import { coordinationService } from './coordination/service.js';
 import * as crypto from 'node:crypto';
 import {
   TransitionReceiptInput,

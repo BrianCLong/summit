@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { authorize } from '../authorization';
+import { authorize } from '../authorization.js';
 
 const requestFactory = (overrides: Record<string, unknown> = {}) => ({
   user: undefined,

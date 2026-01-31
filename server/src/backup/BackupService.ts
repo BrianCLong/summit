@@ -1,14 +1,14 @@
 
-import { RedisService } from '../cache/redis.ts';
-import logger from '../config/logger.ts';
-import { getNeo4jDriver } from '../db/neo4j.ts';
+import { RedisService } from '../cache/redis.js';
+import logger from '../config/logger.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import { createWriteStream } from 'fs';
 import zlib from 'zlib';
-import { PrometheusMetrics } from '../utils/metrics.ts';
+import { PrometheusMetrics } from '../utils/metrics.js';
 
 const execAsync = promisify(exec);
 

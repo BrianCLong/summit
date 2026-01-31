@@ -1,4 +1,4 @@
-import { denyWhenHold } from '../src/cases/legal-hold-guard';
+import { denyWhenHold } from '../src/cases/legal-hold-guard.js';
 import { jest, describe, it, expect } from '@jest/globals';
 
 describe('legal hold guard', () => {

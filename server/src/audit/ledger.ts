@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import pino, { type Logger } from 'pino';
-import { logEventBus, type LogEvent, type LogEventBus } from '../logging/logEventBus.ts';
+import { logEventBus, type LogEvent, type LogEventBus } from '../logging/logEventBus.js';
 
 export interface AuditLedgerEntry {
   eventId: string;

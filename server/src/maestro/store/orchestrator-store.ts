@@ -1,43 +1,16 @@
 import { Pool, QueryResult } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../config/logger.js';
-import { MaestroDB, MaestroAgent, CoordinationTask, CoordinationChannel, ConsensusProposal } from '../types.js';
-
-interface CoordinationTask {
-  id: string;
-  title: string;
-  description: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'failed';
-  ownerId: string;
-  participants: string[];
-  priority: number;
-  result?: any;
-  error?: string;
-  createdAt: string;
-  updatedAt: string;
-  completedAt?: string;
-}
-
-interface CoordinationChannel {
-  id: string;
-  topic: string;
-  participants: string[];
-  status: 'active' | 'inactive' | 'archived';
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ConsensusProposal<T = any> {
-  id: string;
-  topic: string;
-  proposal: T;
-  coordinatorId: string;
-  voters: string[];
-  votes: Record<string, { decision: 'approve' | 'reject' | 'abstain'; reason?: string; weight?: number; timestamp: string }>;
-  status: 'voting' | 'approved' | 'rejected' | 'expired';
-  deadline: string;
-  createdAt: string;
-}
+import { 
+  MaestroLoop,
+  MaestroAgent,
+  MaestroExperiment,
+  MaestroPlaybook,
+  CoordinationTask,
+  CoordinationChannel,
+  ConsensusProposal,
+  AuditEvent
+} from '../types.js';
 
 export class OrchestratorPostgresStore {
   private pool: Pool;
@@ -158,14 +131,14 @@ export class OrchestratorPostgresStore {
       CREATE INDEX IF NOT EXISTS idx_maestro_experiments_status ON maestro_experiments(status);
       CREATE INDEX IF NOT EXISTS idx_maestro_audit_log_created_at ON maestro_audit_log(created_at);
       CREATE INDEX IF NOT EXISTS idx_maestro_coordination_tasks_status ON maestro_coordination_tasks(status);
-      CREATE INDEX IF NOT EXISTS idx_maestro_coordination_channels_status ON maestro_coordination_channels(status);
+      CREATE INDEX IF NOT EXISTS idx_maestro_coordination_channels_topic ON maestro_coordination_channels(topic);
       CREATE INDEX IF NOT EXISTS idx_maestro_consensus_proposals_status ON maestro_consensus_proposals(status);
     `;
 
     try {
       await this.pool.query(createTablesQuery);
       logger.info('OrchestratorPostgresStore initialized successfully');
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Failed to initialize OrchestratorPostgresStore:', error);
       throw error;
     }
@@ -332,7 +305,8 @@ export class OrchestratorPostgresStore {
 
   async createExperiment(experiment: MaestroExperiment, actor: string): Promise<MaestroExperiment> {
     const result = await this.pool.query(
-      `INSERT INTO maestro_experiments (id, name, hypothesis, status, variants, metrics, start_date) 
+      `INSERT INTO maestro_experiments 
+       (id, name, hypothesis, status, variants, metrics, start_date) 
        VALUES ($1, $2, $3, $4, $5, $6, $7) 
        RETURNING id, name, hypothesis, status, variants, metrics, start_date, created_at`,
       [
@@ -418,7 +392,7 @@ export class OrchestratorPostgresStore {
 
   async getCoordinationTaskById(id: string): Promise<CoordinationTask | null> {
     const result = await this.pool.query(
-      'SELECT id, title, description, status, owner_id, participants, priority, created_at, updated_at, result, error, completed_at FROM maestro_coordination_tasks WHERE id = $1',
+      'SELECT id, title, description, status, owner_id, participants, priority, created_at, updated_at FROM maestro_coordination_tasks WHERE id = $1',
       [id]
     );
 
@@ -433,11 +407,8 @@ export class OrchestratorPostgresStore {
       ownerId: row.owner_id,
       participants: row.participants || [],
       priority: row.priority || 0,
-      result: row.result,
-      error: row.error,
       createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
-      completedAt: row.completed_at ? new Date(row.completed_at).toISOString() : undefined,
     };
   }
 
@@ -530,7 +501,7 @@ export class OrchestratorPostgresStore {
     return {
       id: row.id,
       topic: row.topic,
-      proposal: JSON.parse(row.proposal_data),
+      proposal: JSON.parse(row.proposal_data) as T,
       coordinatorId: row.coordinator_id,
       voters: row.voters || [],
       votes: row.votes || {},
@@ -552,7 +523,7 @@ export class OrchestratorPostgresStore {
     return {
       id: row.id,
       topic: row.topic,
-      proposal: JSON.parse(row.proposal_data),
+      proposal: JSON.parse(row.proposal_data) as T,
       coordinatorId: row.coordinator_id,
       voters: row.voters || [],
       votes: row.votes || {},
@@ -605,7 +576,7 @@ export class OrchestratorPostgresStore {
   }
 
   // Audit log methods
-  async getAuditLog(limit: number = 100): Promise<MaestroAuditEvent[]> {
+  async getAuditLog(limit: number = 100): Promise<AuditEvent[]> {
     const result = await this.pool.query(
       `SELECT id, actor, action, resource, details, status, created_at 
        FROM maestro_audit_log 

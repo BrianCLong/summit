@@ -3,8 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { setTimeout as wait } from 'timers/promises';
 
-import { ContentBoundary } from './contentBoundary';
-import { PolicyDecision } from './policy';
+import { ContentBoundary } from './contentBoundary.js';
+import { PolicyDecision } from './policy.js';
 
 export interface ToolContext {
   labMode: boolean;

@@ -1,4 +1,4 @@
-import { putEncryptedArtifact } from '../src/conductor/crypto/envelope';
+import { putEncryptedArtifact } from '../src/conductor/crypto/envelope.js';
 
 test('stores encrypted artifact with AAD (mocked vault likely fails)', async () => {
   // This test exercises function shape; in CI, VAULT env may be absent.

@@ -1,4 +1,4 @@
-import { Graph, NodeId, GraphNode } from '../graphTypes.ts';
+import { Graph, NodeId, GraphNode } from '../graphTypes.js';
 
 export interface ConnectedComponentsResult {
   components: GraphNode[][]; // List of components, each component is a list of nodes

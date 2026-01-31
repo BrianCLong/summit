@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { Action, Principal, ResourceRef } from '../types/identity.js';
 import { evaluate } from '../services/AccessControl.js';
-import { mutationRoleMatrix } from './authzGuard';
+import { mutationRoleMatrix } from './authzGuard.js';
 
 function buildPrincipal(context: any): Principal {
   const user = context?.user || {};

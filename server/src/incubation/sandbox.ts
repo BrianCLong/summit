@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { IncubationCapability, IncubationResult, SandboxContext } from './types.ts';
-import { SimpleBudgetManager } from './budget.ts';
-import { SafeToolRegistry } from './registry.ts';
+import { IncubationCapability, IncubationResult, SandboxContext } from './types.js';
+import { SimpleBudgetManager } from './budget.js';
+import { SafeToolRegistry } from './registry.js';
 
 export class IncubationSandbox {
   private registry: SafeToolRegistry;

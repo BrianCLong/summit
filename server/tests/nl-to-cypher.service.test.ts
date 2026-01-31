@@ -1,5 +1,5 @@
 import { NlToCypherService } from '../src/ai/nl-to-cypher/nl-to-cypher.service';
-import type { ModelAdapter } from '../src/ai/nl-to-cypher/model-adapter';
+import type { ModelAdapter } from '../src/ai/nl-to-cypher/model-adapter.js';
 import { describe, it, expect } from '@jest/globals';
 
 class MockAdapter implements ModelAdapter {

@@ -18,7 +18,7 @@ async function flush() {
   if (cites.length) await writeCites(cites);
 }
 
-import { runCypher } from '../graph/neo4j'; // Import runCypher
+import { runCypher } from '../graph/neo4j.js'; // Import runCypher
 
 // Placeholder functions for now
 async function writeAudits(audits: any[]) {

@@ -1,11 +1,11 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { getNlGraphQueryService } from '../index.ts';
+import { getNlGraphQueryService } from '../index.js';
 
 let nlGraphQueryRouter: express.Router;
 
-jest.mock('../index.ts', () => ({
+jest.mock('../index.js', () => ({
   getNlGraphQueryService: jest.fn(),
 }));
 

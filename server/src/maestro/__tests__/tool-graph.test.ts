@@ -1,7 +1,7 @@
 import {
   synthesizeTaskGraph,
   type ToolDependencyGraph,
-} from '../tool-graph';
+} from '../tool-graph.js';
 
 describe('Tool graph synthesis', () => {
   it('produces an executable connected subgraph', () => {

@@ -1,7 +1,7 @@
 
 import express, { Response, NextFunction } from 'express';
-import { graphStreamer } from '../lib/streaming/GraphStreamer';
-import { getRedisClient } from '../db/redis';
+import { graphStreamer } from '../lib/streaming/GraphStreamer.js';
+import { getRedisClient } from '../db/redis.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();

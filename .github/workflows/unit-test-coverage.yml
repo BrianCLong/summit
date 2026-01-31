@@ -29,6 +29,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# Global environment for all jobs - prevents V8 heap exhaustion
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
 jobs:
   test:
     runs-on: ubuntu-latest

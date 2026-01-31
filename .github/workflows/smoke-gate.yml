@@ -129,7 +129,7 @@ jobs:
         working-directory: server
         run: |
           echo "Starting server in background..."
-          nohup node dist/src/index.js > server.log 2>&1 &
+          nohup node dist/server/src/index.js > server.log 2>&1 &
           echo $! > server.pid
           echo "Server PID: $(cat server.pid)"
         env:
@@ -147,6 +147,7 @@ jobs:
           NEO4J_USER: neo4j
           NEO4J_PASSWORD: password
           JWT_SECRET: super-secret-smoke-test
+          REQUIRE_REAL_DBS: "true"
 
       - name: Wait for server health
         run: |

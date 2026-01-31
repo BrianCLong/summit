@@ -1,5 +1,5 @@
-import { AuditEvent, AuditLevel, ComplianceFramework } from './advanced-audit-system.ts';
-import { advancedAuditSystem } from './index.ts';
+import { AuditEvent, AuditLevel, ComplianceFramework } from './advanced-audit-system.js';
+import { advancedAuditSystem } from './index.js';
 
 /**
  * Unified Audit Sink Interface

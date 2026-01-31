@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { TelemetryEvent, TelemetryConfig } from './types.ts';
-import { TelemetryScrubber } from './scrubber.ts';
+import { TelemetryEvent, TelemetryConfig } from './types.js';
+import { TelemetryScrubber } from './scrubber.js';
 import crypto from 'crypto';
 
 export class TelemetryService {

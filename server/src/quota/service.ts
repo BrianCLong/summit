@@ -4,8 +4,8 @@ import {
   getTenantQuota,
   isQuotaEnforcementEnabled,
   resetTenantQuotaCache,
-} from './config';
-import { QuotaStore } from './store';
+} from './config.js';
+import { QuotaStore } from './store.js';
 
 export type QuotaReason =
   | 'storage_exceeded'

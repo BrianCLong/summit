@@ -1,8 +1,8 @@
-import { ScenarioDefinition, SimulationResult, SimulationState, DomainModel, ScenarioParameters } from './types';
-import { CostModel } from './models/CostModel';
-import { ReliabilityModel } from './models/ReliabilityModel';
-import { AutonomyModel } from './models/AutonomyModel';
-import { RegulatoryModel } from './models/RegulatoryModel';
+import { ScenarioDefinition, SimulationResult, SimulationState, DomainModel, ScenarioParameters } from './types.js';
+import { CostModel } from './models/CostModel.js';
+import { ReliabilityModel } from './models/ReliabilityModel.js';
+import { AutonomyModel } from './models/AutonomyModel.js';
+import { RegulatoryModel } from './models/RegulatoryModel.js';
 
 export class ScenarioEngine {
   private models: DomainModel[] = [];

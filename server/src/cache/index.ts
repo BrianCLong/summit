@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createClient } from 'redis';
-import { safeJsonParse, safeJsonStringify } from '../utils/safe-json.ts';
+import { safeJsonParse, safeJsonStringify } from '../utils/safe-json.js';
 
 // Lazy init
 let redisClient: ReturnType<typeof createClient> | null = null;

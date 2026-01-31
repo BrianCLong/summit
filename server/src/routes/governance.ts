@@ -1,8 +1,8 @@
 
 import express, { Response } from 'express';
-import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryService';
-import { WorkflowService } from '../governance/ontology/WorkflowService';
-import { ensureAuthenticated } from '../middleware/auth';
+import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryService.js';
+import { WorkflowService } from '../governance/ontology/WorkflowService.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();

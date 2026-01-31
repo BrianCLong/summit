@@ -1,4 +1,4 @@
-import { SIEMEvent } from './types';
+import { SIEMEvent } from './types.js';
 
 export interface SIEMSinkConfig {
   type: 'splunk' | 'elastic' | 'stub';

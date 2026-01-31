@@ -1,6 +1,6 @@
-import { getNeo4jDriver } from '../config/database';
-import logger from '../utils/logger';
-import { IntelCorroborationService } from './IntelCorroborationService';
+import { getNeo4jDriver } from '../config/database.js';
+import logger from '../utils/logger.js';
+import { IntelCorroborationService } from './IntelCorroborationService.js';
 
 interface VeracityScore {
   score: number; // 0-100

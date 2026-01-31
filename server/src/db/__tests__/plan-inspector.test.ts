@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { assertIndexUsage, collectSeqScans } from '../plan-inspector';
+import { assertIndexUsage, collectSeqScans } from '../plan-inspector.js';
 
 describe('plan-inspector', () => {
   it('detects sequential scans', () => {

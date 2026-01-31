@@ -1,4 +1,4 @@
-import { EventEnvelope, EventHandlingResult, EventSchema, EventSchemaField } from './types';
+import { EventEnvelope, EventHandlingResult, EventSchema, EventSchemaField } from './types.js';
 
 const isCompatible = (prev: EventSchemaField[], next: EventSchemaField[]) => {
   const prevRequired = prev.filter((f) => f.required).map((f) => f.name);

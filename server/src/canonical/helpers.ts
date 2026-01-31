@@ -6,7 +6,7 @@
  */
 
 import { Pool } from 'pg';
-import { BaseCanonicalEntity, TemporalQuery, BitemporalFields } from './types.ts';
+import { BaseCanonicalEntity, TemporalQuery, BitemporalFields } from './types.js';
 
 /**
  * Get a snapshot of entities as they were at a specific point in time

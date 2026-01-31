@@ -8,7 +8,7 @@ import { graphragTypes } from './types/graphragTypes.js';
 import { coreTypeDefs } from './schema.core.js';
 import { activityTypeDefs } from './schema/activity.js';
 import { documentTypeDefs } from './schema.document.js';
-import { threatActorTypeDefs } from './schema.threat-actor';
+import { threatActorTypeDefs } from './schema.threat-actor.js';
 
 // Load v0.4.0 Transcendent Intelligence schema
 const v040Schema = gql(

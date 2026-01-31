@@ -1,5 +1,5 @@
 import MiniSearch from 'minisearch';
-import { SearchableItem, SearchQuery, SearchResult } from './types';
+import { SearchableItem, SearchQuery, SearchResult } from './types.js';
 import fs from 'fs';
 import path from 'path';
 import logger from '../utils/logger.js';

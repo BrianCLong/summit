@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { ActionPolicyService } from '../ActionPolicyService.js';
-import type { PreflightRequest } from '../../../../packages/policy-audit/src/types';
+import type { PreflightRequest } from '../../../../packages/policy-audit/src/types.js';
 
 const baseRequest: PreflightRequest = {
   action: 'DELETE_ACCOUNT',

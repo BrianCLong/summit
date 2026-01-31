@@ -10,8 +10,8 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
-import { getPostgresPool } from '../../config/database.ts';
-import logger from '../../utils/logger.ts';
+import { getPostgresPool } from '../../config/database.js';
+import logger from '../../utils/logger.js';
 import {
   AdoptionEventRaw,
   AdoptionEvent,
@@ -29,16 +29,16 @@ import {
   PrivacyConfig,
   ConsentRecord,
   FeatureUsageStats,
-} from './types.ts';
+} from './types.js';
 import {
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
-} from '../../types/data-envelope.ts';
+} from '../../types/data-envelope.js';
 import type {
   DataEnvelope,
   GovernanceVerdict,
-} from '../../types/data-envelope.ts';
+} from '../../types/data-envelope.js';
 
 /**
  * Default privacy configuration

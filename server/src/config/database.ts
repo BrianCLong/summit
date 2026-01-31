@@ -10,7 +10,7 @@ import {
   getPostgresPool as getManagedPostgresPool,
   closePostgresPool as closeManagedPostgresPool,
   ManagedPostgresPool,
-} from '../db/postgres';
+} from '../db/postgres.js';
 import {
   getNeo4jDriver as getSharedNeo4jDriver,
   initializeNeo4jDriver,
