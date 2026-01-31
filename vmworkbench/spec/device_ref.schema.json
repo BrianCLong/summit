@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Device Reference",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string", "enum": ["usb", "pci"] },
+    "vendor_id": { "type": "string" },
+    "product_id": { "type": "string" },
+    "bus": { "type": "string" },
+    "addr": { "type": "string" },
+    "safety_class": { "type": "string", "enum": ["generic", "critical-host-input", "unknown"] }
+  },
+  "required": ["id", "kind"]
+}
