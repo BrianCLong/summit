@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import type { Entity, Edge } from '../../graph/types';
+import type { Entity, Edge } from '../../graph/types.js';
 
 // Mock functions declared before mocks
 const mockRunCypher = jest.fn();
@@ -12,8 +12,8 @@ jest.unstable_mockModule('../../graph/neo4j', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { Neo4jGraphService } = await import('../GraphService');
-const { runCypher } = await import('../../graph/neo4j');
+const { Neo4jGraphService } = await import('../GraphService.js');
+const { runCypher } = await import('../../graph/neo4j.js');
 
 describe('Neo4jGraphService', () => {
   const service = Neo4jGraphService.getInstance();

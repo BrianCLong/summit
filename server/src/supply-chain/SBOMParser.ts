@@ -1,4 +1,4 @@
-import { Component, SBOM } from './types';
+import { Component, SBOM } from './types.js';
 import { randomUUID } from 'crypto';
 
 export class SBOMParser {

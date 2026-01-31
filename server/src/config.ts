@@ -34,6 +34,13 @@ export const EnvSchema = z
     COST_EXEMPT_TENANTS: z.string().optional().default(''),
     GA_CLOUD: z.coerce.boolean().default(false),
     AWS_REGION: z.string().optional(),
+    AI_ENABLED: z.coerce.boolean().default(false),
+    KAFKA_ENABLED: z.coerce.boolean().default(false),
+    OPENAI_API_KEY: z.string().optional(),
+    ANTHROPIC_API_KEY: z.string().optional(),
+    SKIP_AI_ROUTES: z.coerce.boolean().default(false),
+    SKIP_WEBHOOKS: z.coerce.boolean().default(false),
+    SKIP_GRAPHQL: z.coerce.boolean().default(false),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -73,12 +80,27 @@ const ENV_VAR_HELP: Record<string, string> = {
   COST_EXEMPT_TENANTS: 'Comma-separated list of tenant IDs exempt from cost limits',
   GA_CLOUD: 'Enable strict GA cloud readiness checks (default: false)',
   AWS_REGION: 'AWS Region (required if GA_CLOUD is true)',
+  AI_ENABLED: 'Enable AI-augmented features (default: false)',
+  OPENAI_API_KEY: 'OpenAI API Key (required if AI_ENABLED=true)',
+  ANTHROPIC_API_KEY: 'Anthropic API Key (required if AI_ENABLED=true)',
 };
 
-export const cfg = (() => {
+const initializeConfig = () => {
   const isTest = process.env.NODE_ENV === 'test';
   const schema = isTest ? TestEnv : Env;
-  const parsed = schema.safeParse(process.env);
+  
+  // Cross-field validation for AI
+  const rawData = { ...process.env };
+  const parsed = schema.safeParse(rawData);
+  
+  if (parsed.success) {
+    const data = parsed.data;
+    if (data.AI_ENABLED && !data.OPENAI_API_KEY && !data.ANTHROPIC_API_KEY) {
+      console.error('\n❌ AI Configuration Error: AI_ENABLED=true requires either OPENAI_API_KEY or ANTHROPIC_API_KEY.\n');
+      process.exit(1);
+    }
+  }
+
   if (!parsed.success) {
     console.error('\n❌ Environment Validation Failed\n');
     console.error('Missing or invalid environment variables:\n');
@@ -189,7 +211,29 @@ export const cfg = (() => {
     console.log(`[STARTUP] Environment validated (${present} keys)`);
   }
   return env;
-})();
+};
+
+let _cfg: any = null;
+export const cfg = new Proxy({} as any, {
+  get: (_target, prop) => {
+    if (!_cfg) {
+      _cfg = initializeConfig();
+    }
+    return _cfg[prop];
+  },
+  ownKeys: (_target) => {
+    if (!_cfg) {
+      _cfg = initializeConfig();
+    }
+    return Reflect.ownKeys(_cfg);
+  },
+  getOwnPropertyDescriptor: (_target, prop) => {
+    if (!_cfg) {
+      _cfg = initializeConfig();
+    }
+    return Reflect.getOwnPropertyDescriptor(_cfg, prop);
+  }
+});
 
 // Derived URLs for convenience
 export const dbUrls = {

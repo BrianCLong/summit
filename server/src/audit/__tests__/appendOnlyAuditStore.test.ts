@@ -2,9 +2,9 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { AppendOnlyAuditStore } from '../appendOnlyAuditStore.ts';
+import { AppendOnlyAuditStore } from '../appendOnlyAuditStore.js';
 
-const tmpFile = () => path.join(os.tmpdir(), `audit-store-${Date.now()}-${Math.random()}.tsonl`);
+const tmpFile = () => path.join(os.tmpdir(), `audit-store-${Date.now()}-${Math.random()}.jsonl`);
 
 describe('AppendOnlyAuditStore', () => {
   it('appends events and maintains hash chain integrity', async () => {

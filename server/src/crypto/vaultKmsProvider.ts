@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { KeyProvider } from './keyProvider';
+import { KeyProvider } from './keyProvider.js';
 
 export class VaultKmsProvider implements KeyProvider {
   constructor(

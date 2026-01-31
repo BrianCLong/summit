@@ -1,5 +1,5 @@
 import { createSign, createPublicKey } from 'crypto';
-import { cfg } from '../config';
+import { cfg } from '../config.js';
 
 /**
  * @class SigningService

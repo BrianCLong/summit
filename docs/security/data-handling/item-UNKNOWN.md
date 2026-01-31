@@ -1,19 +1,10 @@
-# Data Handling: item-UNKNOWN (Framework)
+# item-unknown — Standards & Interop Mapping
 
-## Data classes
+## Import/Export Matrix
+- (TODO) When ITEM provided: formats, protocols, connectors
 
-- Public: docs templates, schema files.
-- Internal: CI evidence outputs (non-secret).
-- Confidential/Regulated: Not permitted in evidence outputs.
+## Non-goals
+- No runtime integrations until ITEM is grounded and licensed
 
-## Retention
-
-- CI evidence runs: retain per CI policy; avoid secrets.
-
-## Audit export
-
-- `evidence/index.json` + referenced files.
-
-## Never-log fields
-
-- Tokens, credentials, API keys, customer data, user identifiers.
+## Compatibility notes
+- Bundle manifests are stable, versioned, and verifier-enforced

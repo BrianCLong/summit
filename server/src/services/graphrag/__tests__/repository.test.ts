@@ -1,7 +1,7 @@
 
 import { describe, expect, it, beforeEach, jest } from '@jest/globals';
-import { Neo4jCaseGraphRepository } from '../repositories/CaseGraphRepository';
-import { runCypher } from '../../../graph/neo4j';
+import { Neo4jCaseGraphRepository } from '../repositories/CaseGraphRepository.js';
+import { runCypher } from '../../../graph/neo4j.js';
 
 // Mock runCypher
 jest.mock('../../../graph/neo4j', () => ({

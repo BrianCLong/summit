@@ -1,14 +1,14 @@
 // @ts-nocheck
-import { neo } from '../db/neo4j';
-import { pg } from '../db/pg';
-import { getUser } from '../auth/context';
-import { opa } from '../policy/opa';
-import { policyEnforcer, Purpose, Action } from '../policy/enforcer';
-import { redactionService } from '../redaction/redact';
-import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
-import { makePubSub } from '../subscriptions/pubsub';
+import { neo } from '../db/neo4j.js';
+import { pg } from '../db/pg.js';
+import { getUser } from '../auth/context.js';
+import { opa } from '../policy/opa.js';
+import { policyEnforcer, Purpose, Action } from '../policy/enforcer.js';
+import { redactionService } from '../redaction/redact.js';
+import { gqlDuration, subscriptionFanoutLatency } from '../metrics.js';
+import { makePubSub } from '../subscriptions/pubsub.js';
 import Redis from 'ioredis';
-import { CausalGraphService } from '../services/CausalGraphService';
+import { CausalGraphService } from '../services/CausalGraphService.js';
 import type { GraphQLContext } from './apollo-v5-server.js';
 import { createRequire } from 'node:module';
 

@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { PRRiskClassifierService } from '../PRRiskClassifierService';
+import { PRRiskClassifierService } from '../PRRiskClassifierService.js';
 
 describe('PRRiskClassifierService', () => {
   let service: PRRiskClassifierService;
@@ -17,7 +17,7 @@ describe('PRRiskClassifierService', () => {
   });
 
   it('should classify security changes as HIGH risk', () => {
-    const files = ['server/src/middleware/auth.ts', 'package.json'];
+    const files = ['server/src/middleware/auth.js', 'package.json'];
     const result = service.classify(files);
     expect(result.riskLevel).toBe('HIGH');
     expect(result.categories).toContain('SECURITY');
@@ -31,21 +31,21 @@ describe('PRRiskClassifierService', () => {
   });
 
   it('should classify UX changes as LOW risk', () => {
-    const files = ['apps/web/src/components/Button.tsx', 'apps/web/src/styles.css'];
+    const files = ['apps/web/src/components/Button.js', 'apps/web/src/styles.css'];
     const result = service.classify(files);
     expect(result.riskLevel).toBe('LOW');
     expect(result.categories).toContain('UX');
   });
 
   it('should classify backend logic changes as MEDIUM risk', () => {
-    const files = ['server/src/services/UserService.ts'];
+    const files = ['server/src/services/UserService.js'];
     const result = service.classify(files);
     expect(result.riskLevel).toBe('MEDIUM');
     expect(result.categories).toContain('LOGIC');
   });
 
   it('should handle mixed changes (Schema + UX) as HIGH risk', () => {
-    const files = ['server/src/db/schema.sql', 'apps/web/src/components/Button.tsx'];
+    const files = ['server/src/db/schema.sql', 'apps/web/src/components/Button.js'];
     const result = service.classify(files);
     expect(result.riskLevel).toBe('HIGH');
     expect(result.categories).toContain('SCHEMA');

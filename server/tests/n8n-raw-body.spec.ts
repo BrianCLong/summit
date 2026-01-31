@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import n8nRouter from '../src/routes/n8n';
+import n8nRouter from '../src/routes/n8n.js';
 
 describe('n8n raw-body route', () => {
   const app = express();

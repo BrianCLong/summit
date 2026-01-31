@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { GrowthPlaybookService } from '../GrowthPlaybookService';
+import { GrowthPlaybookService } from '../GrowthPlaybookService.js';
 
 // Mock LLMService
 jest.mock('../LLMService.js', () => {

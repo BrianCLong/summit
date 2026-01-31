@@ -1,7 +1,7 @@
 
 import { Router } from 'express';
-import { SummitLlmOrchestrator } from '../llm/orchestrator';
-import { promptService } from '../llm/prompts/registry';
+import { SummitLlmOrchestrator } from '../llm/orchestrator.js';
+import { promptService } from '../llm/prompts/registry.js';
 
 const router = Router();
 const orchestrator = new SummitLlmOrchestrator();

@@ -1,5 +1,5 @@
 import MiniSearch from 'minisearch';
-import { SearchableItem, SearchQuery, SearchResult } from './types';
+import { SearchableItem, SearchQuery, SearchResult } from './types.js';
 import fs from 'fs';
 import path from 'path';
 import logger from '../utils/logger.js';
@@ -8,7 +8,7 @@ const INDEX_FILE_PATH = path.join(process.cwd(), 'storage', 'search_index.json')
 
 export class SearchIndexService {
   private static instance: SearchIndexService;
-  private miniSearch: any; // Temporary workaround for miniSearch type issue
+  private miniSearch: MiniSearch<SearchableItem>;
   private isDirty: boolean = false;
   private saveInterval: NodeJS.Timeout | null = null;
 
@@ -21,9 +21,10 @@ export class SearchIndexService {
         fuzzy: 0.2,
         prefix: true
       },
-      extractField: (document: any, fieldName: string) => {
+      extractField: (document: SearchableItem, fieldName: string) => {
         // Access nested fields if necessary
-        return document[fieldName];
+        const record = document as Record<string, unknown>;
+        return record[fieldName];
       }
     });
 
@@ -45,21 +46,24 @@ export class SearchIndexService {
   }
 
   // Hook for Entity Upsert
-  public async onEntityUpsert(entity: any) {
+  public async onEntityUpsert(entity: Record<string, unknown>) {
     if (process.env.SEARCH_ENABLED !== 'true') return;
 
     // Map entity to SearchableItem
     // Attempt to extract caseId from properties if available
-    const caseId = entity.caseId || entity.context?.caseId || entity.properties?.caseId || 'global';
+    const record = entity as Record<string, unknown>;
+    const context = record.context as Record<string, unknown> | undefined;
+    const properties = record.properties as Record<string, unknown> | undefined;
+    const caseId = (record.caseId || context?.caseId || properties?.caseId || 'global') as string;
 
     const item: SearchableItem = {
-      id: entity.id,
+      id: record.id as string,
       type: 'Entity',
       caseId: caseId,
-      content: `${entity.type} ${entity.value} ${entity.label || ''} ${entity.name || ''}`,
-      tags: entity.tags || [],
+      content: `${record.type ?? ''} ${record.value ?? ''} ${record.label ?? ''} ${record.name ?? ''}`.trim(),
+      tags: (record.tags as string[] | undefined) ?? [],
       source: 'graph-store',
-      createdAt: entity.createdAt || new Date().toISOString(),
+      createdAt: (record.createdAt as string | undefined) ?? new Date().toISOString(),
       originalObject: entity
     };
 
@@ -67,19 +71,21 @@ export class SearchIndexService {
   }
 
   // Hook for Claim Upsert
-  public async onClaimUpsert(claim: any) {
+  public async onClaimUpsert(claim: Record<string, unknown>) {
     if (process.env.SEARCH_ENABLED !== 'true') return;
 
-    const caseId = claim.context?.caseId || 'global';
+    const record = claim as Record<string, unknown>;
+    const context = record.context as Record<string, unknown> | undefined;
+    const caseId = (context?.caseId ?? 'global') as string;
 
     const item: SearchableItem = {
-      id: claim.id,
+      id: record.id as string,
       type: 'Claim',
       caseId: caseId,
-      content: `${claim.claimType} ${claim.statement} ${JSON.stringify(claim.subjects)}`,
-      tags: claim.tags || [],
+      content: `${record.claimType ?? ''} ${record.statement ?? ''} ${JSON.stringify(record.subjects ?? [])}`.trim(),
+      tags: (record.tags as string[] | undefined) ?? [],
       source: 'provenance-ledger',
-      createdAt: claim.createdAt || new Date().toISOString(),
+      createdAt: (record.createdAt as string | undefined) ?? new Date().toISOString(),
       originalObject: claim
     };
 
@@ -100,8 +106,8 @@ export class SearchIndexService {
       throw new Error("caseId is required");
     }
 
-    const opts: any = {
-      filter: (result: any) => {
+    const opts = {
+      filter: (result: SearchableItem) => {
         // Filter by caseId
         if (result.caseId !== query.caseId) return false;
 
@@ -126,14 +132,14 @@ export class SearchIndexService {
       queries: [query.q],
     };
 
-    const results = this.miniSearch.search(query.q, opts);
+    const results = this.miniSearch.search(query.q, opts) as Array<SearchableItem & { score: number; match: Record<string, string[]> }>;
 
     // Pagination (manual slicing since minisearch returns all sorted by score)
     const limit = query.limit || 20;
     const offset = query.cursor || 0;
     const pagedResults = results.slice(offset, offset + limit);
 
-    return pagedResults.map((r: any) => {
+    return pagedResults.map((r) => {
       // Generate snippet (simple substring for now, MiniSearch doesn't do full snippets out of box easily without raw access)
       // We stored content.
       const content = r.content || '';
@@ -147,7 +153,7 @@ export class SearchIndexService {
         score: r.score,
         snippet: snippet,
         matchedFields: Object.keys(r.match),
-        item: r as any // The full stored item
+        item: r as SearchableItem // The full stored item
       };
     });
   }
@@ -197,7 +203,7 @@ export class SearchIndexService {
       } finally {
         await session.close();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error('Reindexing failed to fetch data from DB', err);
     }
 
@@ -214,7 +220,7 @@ export class SearchIndexService {
       }
       await fs.promises.writeFile(INDEX_FILE_PATH, json);
       this.isDirty = false;
-    } catch (e: any) {
+    } catch (e: unknown) {
       logger.error('Failed to save search index', e);
     }
   }
@@ -231,13 +237,14 @@ export class SearchIndexService {
             fuzzy: 0.2,
             prefix: true
           },
-          extractField: (document: any, fieldName: string) => {
-            return document[fieldName];
+          extractField: (document: SearchableItem, fieldName: string) => {
+            const record = document as Record<string, unknown>;
+            return record[fieldName];
           }
         });
         logger.info('Search index loaded from disk.');
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       logger.error('Failed to load search index', e);
     }
   }

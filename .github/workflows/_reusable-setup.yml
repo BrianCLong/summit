@@ -49,6 +49,10 @@ on:
 permissions:
   contents: read
 
+# Global environment - prevents V8 heap exhaustion
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
 jobs:
   setup:
     name: Setup Environment

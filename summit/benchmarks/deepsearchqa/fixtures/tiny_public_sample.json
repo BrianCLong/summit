@@ -1,0 +1,22 @@
+[
+  {
+    "id": "test-1",
+    "prompt": "List all countries in the G7.",
+    "answer_type": "set",
+    "ground_truth": ["Canada", "France", "Germany", "Italy", "Japan", "United Kingdom", "United States"],
+    "metadata": {
+      "domain": "politics",
+      "time_anchored": true
+    }
+  },
+  {
+    "id": "test-2",
+    "prompt": "Who is the current Prime Minister of the UK?",
+    "answer_type": "single",
+    "ground_truth": ["Keir Starmer"],
+    "metadata": {
+      "domain": "politics",
+      "time_anchored": true
+    }
+  }
+]

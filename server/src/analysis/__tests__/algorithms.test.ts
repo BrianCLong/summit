@@ -1,9 +1,9 @@
 import { describe, it, expect } from '@jest/globals';
-import { shortestPath } from '../algorithms/shortestPath.ts';
-import { degreeCentrality } from '../algorithms/centrality.ts';
-import { connectedComponents } from '../algorithms/community.ts';
-import { kHopNeighborhood } from '../algorithms/traversal.ts';
-import { Graph } from '../graphTypes.ts';
+import { shortestPath } from '../algorithms/shortestPath.js';
+import { degreeCentrality } from '../algorithms/centrality.js';
+import { connectedComponents } from '../algorithms/community.js';
+import { kHopNeighborhood } from '../algorithms/traversal.js';
+import { Graph } from '../graphTypes.js';
 
 const testGraph: Graph = {
   nodes: [

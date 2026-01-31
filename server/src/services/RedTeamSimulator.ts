@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { SimulationEngineService, SimulationConfig } from './SimulationEngineService';
+import { SimulationEngineService, SimulationConfig } from './SimulationEngineService.js';
 import { eventBus } from '../lib/events/event-bus.js';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 export interface CampaignOptions {
   name?: string;

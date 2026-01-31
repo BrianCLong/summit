@@ -2,15 +2,15 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { AuditLedger, hashPayload, safePayloadFromEvent, verifyAuditLedgerChain } from '../ledger.ts';
-import { LogEventBus } from '../../logging/logEventBus.ts';
+import { AuditLedger, hashPayload, safePayloadFromEvent, verifyAuditLedgerChain } from '../ledger.js';
+import { LogEventBus } from '../../logging/logEventBus.js';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('AuditLedger', () => {
   it('records and verifies a hash chain', async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-ledger-'));
-    const ledgerFilePath = path.join(tmpDir, 'ledger.tsonl');
+    const ledgerFilePath = path.join(tmpDir, 'ledger.jsonl');
     const bus = new LogEventBus(10);
     const ledger = new AuditLedger({ ledgerFilePath, bus });
 
@@ -55,7 +55,7 @@ describe('AuditLedger', () => {
 
   it('detects tampered entries', async () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-ledger-tamper-'));
-    const ledgerFilePath = path.join(tmpDir, 'ledger.tsonl');
+    const ledgerFilePath = path.join(tmpDir, 'ledger.jsonl');
     const bus = new LogEventBus(10);
     const ledger = new AuditLedger({ ledgerFilePath, bus });
 

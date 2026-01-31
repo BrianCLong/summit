@@ -9,7 +9,7 @@
 
 import { Queue, Worker, QueueOptions, WorkerOptions } from 'bullmq';
 import IORedis from 'ioredis';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 // Redis connection configuration
 const REDIS_HOST = process.env.REDIS_HOST || 'localhost';

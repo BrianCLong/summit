@@ -1,5 +1,5 @@
-import { RetrievalService } from './RetrievalService';
-import { Entity, Chunk } from '../data-model/types';
+import { RetrievalService } from './RetrievalService.js';
+import { Entity, Chunk } from '../data-model/types.js';
 
 export class RagContextBuilder {
 

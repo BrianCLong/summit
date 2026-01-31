@@ -10,7 +10,7 @@
  * @module canonical-entities/policy
  */
 
-import { Sensitivity, PolicyLabels } from './types';
+import { Sensitivity, PolicyLabels } from './types.js';
 
 // -----------------------------------------------------------------------------
 // User Context

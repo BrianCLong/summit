@@ -7,7 +7,7 @@
  * @module agents/negotiation/types
  */
 
-import { GovernanceVerdict } from '../../governance/types.ts';
+import { GovernanceVerdict } from '../../governance/types.js';
 
 // ============================================================================
 // Roles & Outcomes

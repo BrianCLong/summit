@@ -53,12 +53,39 @@ async function startServer() {
     }),
   );
 
-  // Health check
+  // Health check - main endpoint
   app.get('/health', (req, res) => {
     res.json({
-      status: 'healthy',
+      status: 'ok',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
+      uptime: process.uptime(),
+      environment: NODE_ENV,
+    });
+  });
+
+  // K8s liveness probe
+  app.get('/health/live', (req, res) => {
+    res.json({ status: 'alive' });
+  });
+
+  // K8s readiness probe
+  app.get('/health/ready', (req, res) => {
+    res.json({ status: 'ready' });
+  });
+
+  // Standard K8s health endpoints
+  app.get('/healthz', (req, res) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    });
+  });
+
+  app.get('/readyz', (req, res) => {
+    res.json({
+      status: 'ready',
+      timestamp: new Date().toISOString(),
     });
   });
 

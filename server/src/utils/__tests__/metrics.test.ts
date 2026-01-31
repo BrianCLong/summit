@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { PrometheusMetrics } from '../metrics';
+import { PrometheusMetrics } from '../metrics.js';
 
 describe('PrometheusMetrics', () => {
   let metrics: PrometheusMetrics;

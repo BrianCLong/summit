@@ -6,7 +6,7 @@ export function aggregateRows(rows: TimeSeriesRow[], windowMs: number, reducer: 
   if (!rows.length || windowMs <= 0) return [];
   const buckets = new Map<number, Record<string, number[]>>();
 
-  rows.forEach((row: any) => {
+  rows.forEach((row) => {
     const bucketKey = Math.floor(row.timestamp.getTime() / windowMs) * windowMs;
     const bucket = buckets.get(bucketKey) ?? {};
     Object.entries(row.values).forEach(([field, value]) => {

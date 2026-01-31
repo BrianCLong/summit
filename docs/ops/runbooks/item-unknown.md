@@ -1,11 +1,17 @@
-# Runbook — Subsumption Bundle Verifier (item-unknown)
+# Runbook: Subsumption Bundle (item-UNKNOWN)
 
 ## Failure modes
-- Missing manifest
-- Missing evidence files
-- Index not updated
-- Missing deny-by-default fixtures
-- Lockfile changed without deps_delta update
 
-## Alerts (CI)
-- On failure: surface actionable error with file paths
+- Verifier fails: missing manifest/docs/evidence entries/fixtures.
+- Evidence determinism violation.
+
+## Triage
+
+1. Open verifier report.json.
+2. Fix missing file or index entry.
+3. Re-run local verify script.
+
+## Alert spec
+
+- Signal: CI job `verify_subsumption_bundle` failing on main.
+- Action: block merge; require bundle repair PR.

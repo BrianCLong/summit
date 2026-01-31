@@ -12,8 +12,8 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { AnomalyDetector } from '../AnomalyDetector.ts';
-import type { TimeSeriesPoint } from '../types.ts';
+import { AnomalyDetector } from '../AnomalyDetector.js';
+import type { TimeSeriesPoint } from '../types.js';
 
 describe('AnomalyDetector', () => {
   const createHistoricalData = (values: number[]): TimeSeriesPoint[] => {

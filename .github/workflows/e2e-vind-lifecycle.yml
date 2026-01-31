@@ -1,0 +1,51 @@
+name: E2E Vind Lifecycle Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  lifecycle-test:
+    name: pause->resume
+    runs-on: ubuntu-latest
+    if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_LIFECYCLE == '1'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install vCluster CLI
+        run: |
+          curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64"
+          chmod +x vcluster
+          sudo mv vcluster /usr/local/bin/
+
+      - name: Set Docker driver
+        run: vcluster use driver docker
+
+      - name: Create cluster
+        run: vcluster create summit-lifecycle --connect=false
+
+      - name: Pause cluster
+        run: vcluster pause summit-lifecycle
+
+      - name: Resume cluster
+        run: vcluster resume summit-lifecycle
+
+      - name: Verify cluster
+        run: |
+          vcluster connect summit-lifecycle -- kubectl get nodes
+
+      - name: Delete cluster
+        if: always()
+        run: vcluster delete summit-lifecycle
+
+      - name: Emit Evidence
+        if: always()
+        run: |
+          mkdir -p evidence/EVD-VIND-LCY-002
+          echo '{"evidence_id": "EVD-VIND-LCY-002", "status": "${{ job.status }}"}' > evidence/EVD-VIND-LCY-002/report.json
+          echo '{"started_at": "${{ github.event.repository.pushed_at }}", "finished_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)", "runner": "github-actions"}' > evidence/EVD-VIND-LCY-002/stamp.json

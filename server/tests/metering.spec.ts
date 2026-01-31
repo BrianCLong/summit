@@ -1,4 +1,4 @@
-import { recordMeters } from '../src/conductor/metering';
+import { recordMeters } from '../src/conductor/metering.js';
 
 test('records meters (schema must exist)', async () => {
   await expect(

@@ -1,6 +1,14 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 
+// Vite env vars - babel transforms import.meta.env to process.env
+process.env.VITE_GRAFANA_URL = process.env.VITE_GRAFANA_URL || 'http://localhost:3000';
+process.env.VITE_GRAFANA_MAESTRO_DASH_UID = process.env.VITE_GRAFANA_MAESTRO_DASH_UID || 'test-dashboard';
+process.env.VITE_API_URL = process.env.VITE_API_URL || 'http://localhost:8080';
+process.env.MODE = 'test';
+process.env.DEV = 'false';
+process.env.PROD = 'false';
+
 // Manual fetch mock since whatwg-fetch might be missing
 global.fetch = jest.fn(() =>
     Promise.resolve({
@@ -157,6 +165,7 @@ jest.mock('./auth/withAuthorization', () => ({
 // --- Router Mocks ---
 // Mock react-router-dom to prevent nesting errors and provide defaults
 jest.mock('react-router-dom', () => {
+    const React = require('react');
     const originalModule = jest.requireActual('react-router-dom');
     return {
         ...originalModule,
@@ -168,6 +177,48 @@ jest.mock('react-router-dom', () => {
             state: null,
         })),
         useParams: jest.fn(() => ({})),
+        Link: ({ children, to, ...props }) => React.createElement('a', { href: to, ...props }, children),
+        NavLink: ({ children, to, ...props }) => React.createElement('a', { href: to, ...props }, children),
+    };
+});
+
+// Mock react-router for Link component
+jest.mock('react-router', () => {
+    const React = require('react');
+    const originalModule = jest.requireActual('react-router');
+    return {
+        ...originalModule,
+        Link: ({ children, to, ...props }) => React.createElement('a', { href: to, ...props }, children),
+        NavLink: ({ children, to, ...props }) => React.createElement('a', { href: to, ...props }, children),
+    };
+});
+
+// --- Apollo Client Mocks ---
+jest.mock('@apollo/client', () => {
+    const React = require('react');
+    const actualApollo = jest.requireActual('@apollo/client');
+    return {
+        ...actualApollo,
+        useQuery: jest.fn(() => ({
+            data: undefined,
+            loading: false,
+            error: undefined,
+            refetch: jest.fn(),
+        })),
+        useMutation: jest.fn(() => [
+            jest.fn(),
+            { data: undefined, loading: false, error: undefined },
+        ]),
+        useSubscription: jest.fn(() => ({
+            data: undefined,
+            loading: false,
+            error: undefined,
+        })),
+        useLazyQuery: jest.fn(() => [
+            jest.fn(),
+            { data: undefined, loading: false, error: undefined },
+        ]),
+        ApolloProvider: ({ children }) => React.createElement(React.Fragment, null, children),
     };
 });
 

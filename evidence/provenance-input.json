@@ -1,0 +1,66 @@
+{
+  "sboms_signed": true,
+  "provenance_signed": true,
+  "type": "container_image",
+  "artifact": {
+    "name": "summit-platform",
+    "sbom_spdx": true,
+    "sbom_cyclonedx": true,
+    "provenance_attestation": true
+  },
+  "slsa_provenance": {
+    "predicate": {
+      "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+      "builder": {
+        "id": "https://github.com/actions/runner"
+      },
+      "metadata": {
+        "buildInvocationId": "https://github.com/summit/run/123"
+      }
+    }
+  },
+  "sbom": {
+    "spdxVersion": "SPDX-2.3",
+    "packages": [
+      {"name": "pkg1", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg2", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg3", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg4", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg5", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg6", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg7", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg8", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg9", "downloadLocation": "NOASSERTION"},
+      {"name": "pkg10", "downloadLocation": "NOASSERTION"}
+    ]
+  },
+  "signature": {
+    "format": "cosign",
+    "certificate": {
+      "oidc_issuer": "https://token.actions.githubusercontent.com"
+    }
+  },
+  "transparency_log": {
+    "uuid": "abc-123"
+  },
+  "vulnerability_scan": {
+    "vulnerabilities": []
+  },
+  "artifacts": [
+    {
+      "name": "artifact1",
+      "sha256": "hash1",
+      "sbom_spdx": true,
+      "sbom_cyclonedx": true,
+      "provenance_attestation": true,
+      "signature_verification_passed": true
+    }
+  ],
+  "evidence_bundle": {
+    "slsa_provenance": true,
+    "sbom": true,
+    "vulnerability_scan": true,
+    "signature": true,
+    "transparency_log": true
+  }
+}

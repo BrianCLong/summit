@@ -1,4 +1,4 @@
-import { estimateCost } from '../nl2cypher/costEstimator';
+import { estimateCost } from '../nl2cypher/costEstimator.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('cost estimator', () => {

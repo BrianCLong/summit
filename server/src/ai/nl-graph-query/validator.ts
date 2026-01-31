@@ -2,7 +2,7 @@
  * Validator - Validates Cypher queries for syntax and security issues
  */
 
-import type { ValidationResult } from './types.ts';
+import type { ValidationResult } from './types.js';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'cypher-validator' });

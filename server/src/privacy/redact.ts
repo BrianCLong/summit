@@ -1,4 +1,4 @@
-import { schemaTags } from './tags';
+import { schemaTags } from './tags.js';
 export function redact(obj: any) {
   if (obj && typeof obj === 'object') {
     for (const k of Object.keys(obj)) {

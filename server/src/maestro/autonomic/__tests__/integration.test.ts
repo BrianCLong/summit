@@ -1,8 +1,8 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { AutonomicLayer } from '../index';
-import { SignalType } from '../signals/types';
-import { SLOAlertLevel } from '../policy/types';
+import { AutonomicLayer } from '../index.js';
+import { SignalType } from '../signals/types.js';
+import { SLOAlertLevel } from '../policy/types.js';
 
 describe('AutonomicLayer Integration', () => {
   let layer: AutonomicLayer;

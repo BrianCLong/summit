@@ -3,7 +3,7 @@
  * Canonical Entities: Financial
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface Account extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Account';

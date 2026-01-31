@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
-import { SpecValidator } from './mapping/validator';
-import { MappingEngine } from './mapping/engine';
+import { SpecValidator } from './mapping/validator.js';
+import { MappingEngine } from './mapping/engine.js';
 
 const program = new Command();
 

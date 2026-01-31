@@ -1,4 +1,4 @@
-import { Principal, RoleKey } from './types.ts';
+import { Principal, RoleKey } from './types.js';
 
 export type Permission =
   | 'runs.read' | 'runs.write'
