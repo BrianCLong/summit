@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T12:52:23Z",
-  "revision_note": "Added CTA leaders evidence ingest bundle and verification stub.",
+  "last_updated": "2026-01-31T12:58:00Z",
+  "revision_note": "Reduce predictd Docker build context to avoid BuildKit grpc crash in dev-up.",
   "initiatives": [
     {
       "id": "A",
