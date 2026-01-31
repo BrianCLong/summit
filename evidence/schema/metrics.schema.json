@@ -1,11 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit evidence metrics",
   "type": "object",
-  "required": ["counters", "timings_ms"],
   "properties": {
-    "counters": { "type": "object", "additionalProperties": { "type": "number" } },
-    "timings_ms": { "type": "object", "additionalProperties": { "type": "number" } }
+    "evidence_id": { "type": "string" },
+    "benchmark_id": { "type": "string" },
+    "run_id": { "type": "string" },
+    "metrics": { "type": "object" }
   },
-  "additionalProperties": false
+  "anyOf": [
+    { "required": ["evidence_id", "metrics"] },
+    { "required": ["benchmark_id", "run_id", "metrics"] }
+  ],
+  "additionalProperties": true
 }

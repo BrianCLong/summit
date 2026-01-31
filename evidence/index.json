@@ -76,4 +76,107 @@
     { "id": "EVD-APPLEQAI-EVAL-003", "path": "evidence/EVD-APPLEQAI-EVAL-003/report.json" }
   ],
   "version": 1
+},
+"EVD-vfgnn-ATT-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-vfgnn-NEG-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-ATLAS-SCHEMA-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-ATLAS-PLNR-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-ATLAS-XFER-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-ATLAS-ATLS-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-ATLAS-ATLS-002": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-ATLAS-GOV-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-260119895-keel-ARCH-001": {
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    "EVD-260119895-keel-STAB-002": {
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    "EVD-260119895-keel-DSCL-003": {
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    "EVD-260119895-keel-BENCH-004": {
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    "EVD-SSDF12-BNDL-001": {
+      "files": [
+        "evidence/ssdf-v1-2/pr-01/report.json",
+        "evidence/ssdf-v1-2/pr-01/metrics.json",
+        "evidence/ssdf-v1-2/pr-01/stamp.json"
+      ]
+    },
+    "EVD-EXPB-CORE-001": {
+      "files": [
+        "evidence/runs/expectation-baselines/report.json",
+        "evidence/runs/expectation-baselines/metrics.json",
+        "evidence/runs/expectation-baselines/stamp.json"
+      ]
+    },
+    "EVD-PRIVTEL-SCHEMA-001": {
+      "files": [
+        "evidence/privtel/report.json",
+        "evidence/privtel/metrics.json",
+        "evidence/privtel/stamp.json"
+      ]
+    },
+    "EVD-SPATIALGENEVAL-BENCH-001": {
+      "title": "SpatialGenEval benchmark registration + manifest",
+      "category": "benchmark",
+      "files": ["benchmarks/spatialgeneval/manifest.json"]
+    },
+    "EVD-SPATIALGENEVAL-DATA-001": {
+      "title": "SpatialGenEval dataset provenance + hash list",
+      "category": "data",
+      "files": ["benchmarks/spatialgeneval/io.py"]
+    },
+    "EVD-SPATIALGENEVAL-EVAL-001": {
+      "title": "SpatialGenEval run report + metrics",
+      "category": "eval",
+      "files": ["evidence/spatialgeneval/report.json", "evidence/spatialgeneval/metrics.json", "evidence/spatialgeneval/stamp.json"]
+    },
+    "EVD-SPATIALGENEVAL-SEC-001": {
+      "title": "SpatialGenEval policy + deny tests",
+      "category": "security",
+      "files": ["tests/test_spatialgeneval_scoring.py"]
+    },
+    "EVD-SPATIALGENEVAL-OPS-001": {
+      "title": "SpatialGenEval CI check discovery + runbook",
+      "category": "ops",
+      "files": ["benchmarks/spatialgeneval/README.md", "required_checks.todo.md"]
+    }
+  }
 }
