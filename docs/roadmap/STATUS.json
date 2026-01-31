@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T14:10:00Z",
-  "revision_note": "Aligned evidence schemas and validator with index item format",
+  "last_updated": "2026-02-14T00:00:00Z",
+  "revision_note": "Added governed content primitive schemas and governance drift brief example.",
   "initiatives": [
     {
       "id": "A",

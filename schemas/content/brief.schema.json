@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/content/brief.schema.json",
+  "title": "Brief",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "type",
+    "status",
+    "owner",
+    "audience",
+    "security_level",
+    "policy_tags",
+    "created_at",
+    "updated_at",
+    "sources",
+    "claims",
+    "actions",
+    "blocks",
+    "layout",
+    "work_items"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "content-common.schema.json#/$defs/id"
+    },
+    "title": {
+      "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["RFC", "runbook", "threat-brief", "deck"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "in-review", "approved", "published", "deprecated", "archived"]
+    },
+    "owner": {
+      "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+    },
+    "audience": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "security_level": {
+      "$ref": "content-common.schema.json#/$defs/securityLevel"
+    },
+    "policy_tags": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/policyTag"
+      },
+      "uniqueItems": true
+    },
+    "created_at": {
+      "$ref": "content-common.schema.json#/$defs/isoDateTime"
+    },
+    "updated_at": {
+      "$ref": "content-common.schema.json#/$defs/isoDateTime"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/sourceRef"
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "$ref": "claim.schema.json"
+      }
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/workItemRef"
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "$ref": "block.schema.json"
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recipe", "block_order"],
+      "properties": {
+        "recipe": {
+          "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+        },
+        "variant": {
+          "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+        },
+        "block_order": {
+          "type": "array",
+          "items": {
+            "$ref": "content-common.schema.json#/$defs/id"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "work_items": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/workItemRef"
+      }
+    }
+  }
+}
