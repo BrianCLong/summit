@@ -19,10 +19,26 @@
       "report": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/report.json",
       "metrics": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/metrics.json",
       "stamp": "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/stamp.json"
+    },
     "EVD-SDSBC-CODEGEN-001": {
       "report": "evidence/EVD-SDSBC-CODEGEN-001/report.json",
       "metrics": "evidence/EVD-SDSBC-CODEGEN-001/metrics.json",
       "stamp": "evidence/EVD-SDSBC-CODEGEN-001/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-SUPPLYCHAIN-001": {
+      "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-CI-002": {
+      "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-DOCS-003": {
+      "report": "evidence/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/HONO-ERRBOUNDARY-XSS/stamp.json"
     }
   },
   "version": 1
