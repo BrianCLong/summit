@@ -48,6 +48,7 @@ export class AuditSink implements IAuditSink {
     return this.recordEvent({
       eventType: 'security_alert',
       level: 'critical',
+      action: 'security_alert_triggered',
       message,
       details,
       complianceRelevant: true,
@@ -62,6 +63,7 @@ export class AuditSink implements IAuditSink {
     return this.recordEvent({
       eventType: 'user_action',
       level: 'info',
+      action: 'compliance_event_recorded',
       message,
       details,
       complianceRelevant: true,
