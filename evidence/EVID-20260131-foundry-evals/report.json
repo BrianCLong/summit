@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    "metrics.json",
+    "stamp.json"
+  ],
+  "evidence_id": "EVD-AGENT-foundry-evals-a1b2c3d",
+  "results": [
+    {
+      "status": "pass",
+      "test": "catalog_discovery"
+    },
+    {
+      "status": "pass",
+      "test": "model_invocation"
+    }
+  ],
+  "run_id": "foundry-evals-a1b2c3d",
+  "summary": "Foundry Integration Evaluation"
+}
