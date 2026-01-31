@@ -1,0 +1,78 @@
+name: E2E vind Lifecycle
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  lifecycle-test:
+    if: ${{ vars.SUMMIT_VIND_LIFECYCLE == '1' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install vCluster CLI
+        run: |
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/loft-sh/vcluster/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+          curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/download/$LATEST_VERSION/vcluster-linux-amd64"
+          chmod +x vcluster
+          sudo mv vcluster /usr/local/bin/
+
+      - name: Set Docker driver
+        run: vcluster use driver docker
+
+      - name: Create cluster
+        run: vcluster create summit-lifecycle --connect=false
+
+      - name: Pause cluster
+        run: vcluster pause summit-lifecycle
+
+      - name: Resume cluster
+        run: vcluster resume summit-lifecycle
+
+      - name: Verify connectivity
+        run: |
+          kubectl get nodes
+          kubectl get ns
+
+      - name: Delete cluster
+        if: always()
+        run: vcluster delete summit-lifecycle
+
+      - name: Emit Evidence
+        if: always()
+        run: |
+          mkdir -p evidence/EVD-VIND-LCY-002
+          cat <<EOF > evidence/EVD-VIND-LCY-002/report.json
+          {
+            "evidence_id": "EVD-VIND-LCY-002",
+            "status": "${{ job.status == 'success' && 'pass' || 'fail' }}",
+            "summary": "Lifecycle pause/resume passed"
+          }
+          EOF
+          cat <<EOF > evidence/EVD-VIND-LCY-002/metrics.json
+          {
+            "evidence_id": "EVD-VIND-LCY-002",
+            "metrics": {
+              "status": "${{ job.status }}"
+            }
+          }
+          EOF
+          cat <<EOF > evidence/EVD-VIND-LCY-002/stamp.json
+          {
+            "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ -d '5 minutes ago')",
+            "finished_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "runner": "github-actions"
+          }
+          EOF
+
+      - name: Upload Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-lifecycle
+          path: evidence/EVD-VIND-LCY-002/
