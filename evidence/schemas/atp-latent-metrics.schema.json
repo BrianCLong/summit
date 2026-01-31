@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ATP-Latent Evidence Metrics",
+  "type": "object",
+  "required": ["metrics"],
+  "properties": {
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "accuracy": { "type": "number" },
+        "token_usage": { "type": "number" },
+        "coherence_score": { "type": "number" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
