@@ -5,7 +5,7 @@
 - **Modes:** Standalone stability soak + `SMOKE_MODE=full`
 - **Result:** Mixed
   - **Standalone stability soak:** PASS (binary + health checks)
-  - **SMOKE_MODE=full:** BLOCKED/FAIL (install blocker, missing dependency, server not running, dev stack build blocker)
+  - **SMOKE_MODE=full:** BLOCKED/FAIL (install blocker, missing dependency, server not running, dev stack build blocker: er-service requirements, predictd BuildKit grpc crash; Docker daemon not running on fallback)
 
 ## Simulation Metadata (Standalone)
 - **Cycles:** 5
@@ -51,6 +51,8 @@
 | 1 | 2026-01-31T07:22:38Z | full | FAIL | `MODULE_NOT_FOUND: axios` while executing `server/scripts/smoke-test.cjs` |
 | 2 | 2026-01-31T09:21:09Z | full | FAIL | Smoke run from `/tmp/cypress-fix` (PR #17451). All endpoints returned `Error` (server not running). |
 | 3 | 2026-01-31T10:18:51Z | full | BLOCKED | Dev stack build failed in `services/er-service` (`requirements.txt` missing). |
+| 4 | 2026-01-31T11:25:36Z | full | BLOCKED | Dev stack build failed in `services/predictd` (Docker build: frontend grpc server closed unexpectedly). |
+| 5 | 2026-01-31T16:19:18Z | full | BLOCKED | Dev stack build failed in `services/predictd` (frontend grpc server closed unexpectedly). Fallback `DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 make dev-up` failed: Docker daemon not running. |
 
 ### Failure Details (Install Blocker)
 - **Error:** `TypeError: chalk.blue is not a function`
@@ -71,6 +73,10 @@
 - **Error:** Dev stack build failed for `services/er-service` — Dockerfile expects `requirements.txt` but file is missing in repo.
 - **Action:** Fix `services/er-service/Dockerfile` or add required file, then re-run `make dev-up`.
 
+### Failure Details (Cycles 4–5)
+- **Error:** Dev stack build failed for `services/predictd` — Docker build error: `frontend grpc server closed unexpectedly`. Fallback `DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 make dev-up` reported Docker daemon not running.
+- **Action:** Ensure Docker Desktop is running; retry `make dev-up`. If BuildKit continues to crash, consider disabling BuildKit for compose or pruning builder cache.
+
 ## Root Cause Analysis (Functional Failures)
 The functional failures observed in Lane B are **harness-level artifacts**, not code regressions:
 1. **403 Forbidden**: The server correctly enforced authentication. The soak harness needs a mechanism to generate valid JWTs or a bypass flag (`SOAK_MODE`) to validate GraphQL logic.
@@ -83,6 +89,9 @@ The **Server Binary is Stable (Lane A Passed)**.
 * ❌ **E2E functionality not validated in this run** due to explicit local auth and container networking constraints.
 
 **Recommendation**: The `Smoke Gate` in CI is ready to merge for Lane A. Lane B (Functional) validation should be added as a follow-up with a dedicated integration harness.
+
+## What Changed Since Last Run
+- Predictd build context reduction landed in main; dev stack build still fails with BuildKit grpc crash. Docker daemon was not running for BuildKit-disabled fallback.
 
 ## Next Steps
 1. Resolve Cypress postinstall failure (chalk API mismatch).
