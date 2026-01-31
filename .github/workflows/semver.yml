@@ -1,17 +1,16 @@
-name: Release Reliability
+name: SemVer Check
 
 on:
-  workflow_run:
-    workflows: ["Release"]
-    types:
-      - completed
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  verify-release:
+  check:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v3
         with:
@@ -22,6 +21,7 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
-      - name: Verify Release
+      - name: Check SemVer
         run: |
-          echo "Verifying release integrity..."
+          # Placeholder for actual SemVer check
+          echo "Checking SemVer compliance..."

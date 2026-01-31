@@ -1,15 +1,13 @@
-name: Release Reliability
+name: Release
 
 on:
-  workflow_run:
-    workflows: ["Release"]
-    types:
-      - completed
+  push:
+    tags:
+      - 'v*'
 
 jobs:
-  verify-release:
+  release:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +20,10 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
-      - name: Verify Release
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish
         run: |
-          echo "Verifying release integrity..."
+          echo "Publishing release..."
+          # pnpm publish
