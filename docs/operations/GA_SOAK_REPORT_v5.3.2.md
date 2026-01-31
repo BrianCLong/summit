@@ -5,7 +5,7 @@
 - **Modes:** Standalone stability soak + `SMOKE_MODE=full`
 - **Result:** Mixed
   - **Standalone stability soak:** PASS (binary + health checks)
-  - **SMOKE_MODE=full:** BLOCKED/FAIL (install blocker then missing dependency)
+  - **SMOKE_MODE=full:** BLOCKED/FAIL (install blocker, missing dependency, server not running)
 
 ## Simulation Metadata (Standalone)
 - **Cycles:** 5
@@ -35,9 +35,10 @@
 | **GraphQL Access** | ❌ FAILED | HTTP `403 Forbidden`. **Expected behavior** given the harness did not inject a valid prod-signed JWT. |
 | **Dependencies** | ⚠️ MIXED | Postgres healthy. Neo4j/Frontend unreachable due to harness network isolation. |
 
-## SMOKE_MODE=full Run (Blocked/Failed)
+## SMOKE_MODE=full Runs (Blocked/Failed)
 ### Prerequisites Checklist
 - [ ] `pnpm install` completed in repo root (FAILED: Cypress postinstall)
+- [x] `pnpm install` completed in worktree with Cypress override (PR #17451)
 - [ ] API server running on `API_URL` (default `http://localhost:4000`)
 - [ ] PostgreSQL reachable
 - [ ] Neo4j reachable
@@ -48,6 +49,7 @@
 |------:|-----------------|------|--------|-------|
 | 0 | 2026-01-31T07:54:23Z | full | BLOCKED | `pnpm install` failed during Cypress postinstall (`chalk.blue is not a function`) |
 | 1 | 2026-01-31T07:22:38Z | full | FAIL | `MODULE_NOT_FOUND: axios` while executing `server/scripts/smoke-test.cjs` |
+| 2 | 2026-01-31T09:21:09Z | full | FAIL | Smoke run from `/tmp/cypress-fix` (PR #17451). All endpoints returned `Error` (server not running). |
 
 ### Failure Details (Install Blocker)
 - **Error:** `TypeError: chalk.blue is not a function`
@@ -59,6 +61,10 @@
 - **Location:** `/private/tmp/soak-pr/server/scripts/smoke-test.cjs`
 - **Exit:** `ELIFECYCLE` (exit code 1)
 - **Action:** Run `pnpm install` in repo root and re-run soak loop.
+
+### Failure Details (Cycle 2)
+- **Error:** Smoke checks failed for `/health`, `/health/live`, `/health/ready`, `/healthz`, `/readyz`, `/metrics`, `/api-docs/` with `Error` responses.
+- **Action:** Start the API server on `http://localhost:4000` and re-run smoke loop.
 
 ## Root Cause Analysis (Functional Failures)
 The functional failures observed in Lane B are **harness-level artifacts**, not code regressions:
@@ -74,7 +80,7 @@ The **Server Binary is Stable (Lane A Passed)**.
 **Recommendation**: The `Smoke Gate` in CI is ready to merge for Lane A. Lane B (Functional) validation should be added as a follow-up with a dedicated integration harness.
 
 ## Next Steps
-1. Resolve Cypress postinstall failure (chalk API mismatch).
+1. Start API server and required dependencies (Postgres, Neo4j, Redis).
 2. Re-run soak loop:
    ```bash
    for i in {1..5}; do SMOKE_MODE=full pnpm run test:smoke || break; done
