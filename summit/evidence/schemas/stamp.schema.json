@@ -6,7 +6,9 @@
   "properties": {
     "created_at": { "type": "string", "format": "date-time" },
     "git_commit": { "type": "string" },
-    "run_id": { "type": "string" }
+    "run_id": { "type": "string" },
+    "input_hash_tree": { "type": "object", "additionalProperties": { "type": "string" } },
+    "tool_versions": { "type": "object", "additionalProperties": { "type": "string" } }
   },
   "additionalProperties": false
 }

@@ -1,0 +1,71 @@
+name: GraphCI Determinism
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ci/graphci/**'
+  pull_request:
+    paths:
+      - 'ci/graphci/**'
+
+jobs:
+  determinism-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          # Install dependencies from requirements.in if possible, else minimal
+          if [ -f requirements.in ]; then
+            pip install -r requirements.in
+          else
+            pip install jsonschema beautifulsoup4 deepdiff
+          fi
+          pip install pytest
+
+      - name: Run Tests
+        run: pytest tests/graphci/test_evidence_layout.py
+
+      - name: Determinism Verification
+        run: |
+          python3 -c "
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          def run_ci(out_dir):
+              subprocess.check_call([
+                  sys.executable, 'ci/graphci/run.py',
+                  '--evidence-id', 'EVD-CI-DET-001',
+                  '--output-dir', out_dir,
+                  '--mode', 'full'
+              ])
+
+          run_ci('out1')
+          run_ci('out2')
+
+          def load_stamp(path):
+              with open(path) as f:
+                  return json.load(f)
+
+          s1 = load_stamp('out1/EVD-CI-DET-001/stamp.json')
+          s2 = load_stamp('out2/EVD-CI-DET-001/stamp.json')
+
+          # Check stable fields
+          fields = ['evidence_id', 'input_hash_tree', 'tool_versions']
+          for field in fields:
+              if s1.get(field) != s2.get(field):
+                  print(f'Mismatch in {field}: {s1.get(field)} vs {s2.get(field)}')
+                  sys.exit(1)
+
+          print('Determinism check passed')
+          "
