@@ -50,3 +50,34 @@ def test_vcluster_cli_run_redacts_stdout(monkeypatch):
 
     assert "secret-kubeconfig-path" not in output
     assert "[REDACTED]" in output
+
+def test_vind_driver_hybrid_deny(monkeypatch):
+    monkeypatch.setattr("summit.cluster.drivers.vind.driver.SUMMIT_VIND_HYBRID_ENABLED", False)
+    cli = MagicMock(spec=VClusterCLI)
+    driver = VindDriver(cli)
+
+    with pytest.raises(NotImplementedError, match="Hybrid nodes feature is disabled"):
+        driver.hybrid_join("test", "1.2.3.4")
+
+def test_vind_driver_snapshots_deny(monkeypatch):
+    monkeypatch.setattr("summit.cluster.drivers.vind.driver.SUMMIT_VIND_SNAPSHOTS_ENABLED", False)
+    cli = MagicMock(spec=VClusterCLI)
+    driver = VindDriver(cli)
+
+    with pytest.raises(NotImplementedError, match="Snapshots feature is disabled"):
+        driver.snapshot_create("test", "snap1")
+
+    with pytest.raises(NotImplementedError, match="Snapshots feature is disabled"):
+        driver.snapshot_restore("test", "snap1")
+
+def test_vind_driver_innovation_allow(monkeypatch):
+    monkeypatch.setattr("summit.cluster.drivers.vind.driver.SUMMIT_VIND_HYBRID_ENABLED", True)
+    monkeypatch.setattr("summit.cluster.drivers.vind.driver.SUMMIT_VIND_SNAPSHOTS_ENABLED", True)
+    cli = MagicMock(spec=VClusterCLI)
+    driver = VindDriver(cli)
+
+    driver.hybrid_join("test", "1.2.3.4")
+    driver.snapshot_create("test", "snap1")
+    driver.snapshot_restore("test", "snap1")
+
+    assert cli.run.call_count == 3

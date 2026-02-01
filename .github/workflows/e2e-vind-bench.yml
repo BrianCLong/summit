@@ -1,0 +1,116 @@
+name: E2E Vind Benchmark Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  bench-test:
+    name: LB probe + cache benchmark
+    runs-on: ubuntu-latest
+    if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_BENCH == '1'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set Start Time
+        run: echo "START_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+
+      - name: Install vCluster CLI
+        run: |
+          curl -L -o vcluster "https://github.com/loft-sh/vcluster/releases/latest/download/vcluster-linux-amd64"
+          chmod +x vcluster
+          sudo mv vcluster /usr/local/bin/
+
+      - name: Set Docker driver
+        run: vcluster use driver docker
+
+      - name: Create cluster
+        run: vcluster create summit-bench --connect=false
+
+      - name: Run LB probe
+        run: |
+          vcluster connect summit-bench -- kubectl create deployment echo --image=hashicorp/http-echo
+          vcluster connect summit-bench -- kubectl expose deployment echo --type=LoadBalancer --port=80 --target-port=5678
+
+          # Wait for LB
+          for i in {1..30}; do
+            LB_IP=$(vcluster connect summit-bench -- kubectl get svc echo -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            if [ -n "$LB_IP" ]; then
+              echo "LB IP found: $LB_IP"
+              curl -s --connect-timeout 5 http://$LB_IP | grep "hello" && break
+            fi
+            echo "Waiting for LB IP..."
+            sleep 10
+          done
+
+      - name: Run Cache Benchmark
+        run: |
+          # Cold pull
+          START=$(date +%s%N)
+          vcluster connect summit-bench -- docker pull nginx:latest
+          END=$(date +%s%N)
+          COLD_S=$(echo "scale=3; ($END - $START) / 1000000000" | bc)
+          echo "COLD_PULL_S=$COLD_S" >> $GITHUB_ENV
+
+          # Warm pull
+          START=$(date +%s%N)
+          vcluster connect summit-bench -- docker pull nginx:latest
+          END=$(date +%s%N)
+          WARM_S=$(echo "scale=3; ($END - $START) / 1000000000" | bc)
+          echo "WARM_PULL_S=$WARM_S" >> $GITHUB_ENV
+
+      - name: Delete cluster
+        if: always()
+        run: vcluster delete summit-bench
+
+      - name: Emit Evidence LB
+        if: always()
+        run: |
+          mkdir -p evidence/EVD-VIND-LB-003
+          echo "{\"evidence_id\": \"EVD-VIND-LB-003\", \"summary\": \"LoadBalancer OOB probe result\", \"status\": \"${{ job.status }}\"}" > evidence/EVD-VIND-LB-003/report.json
+          echo "{\"started_at\": \"$START_TIME\", \"finished_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"runner\": \"github-actions\"}" > evidence/EVD-VIND-LB-003/stamp.json
+
+      - name: Emit Evidence Cache
+        if: always()
+        run: |
+          mkdir -p evidence/EVD-VIND-CCH-004
+          echo "{\"evidence_id\": \"EVD-VIND-CCH-004\", \"summary\": \"Pull-through cache benchmark\", \"status\": \"${{ job.status }}\"}" > evidence/EVD-VIND-CCH-004/report.json
+          echo "{\"evidence_id\": \"EVD-VIND-CCH-004\", \"metrics\": {\"cold_pull_s\": ${{ env.COLD_PULL_S || 0 }}, \"warm_pull_s\": ${{ env.WARM_PULL_S || 0 }}}}" > evidence/EVD-VIND-CCH-004/metrics.json
+          echo "{\"started_at\": \"$START_TIME\", \"finished_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\", \"runner\": \"github-actions\"}" > evidence/EVD-VIND-CCH-004/stamp.json
+
+      - name: Update Evidence Index
+        if: always()
+        run: |
+          # Simple python script to append to the index.json
+          python3 -c "
+          import json, os
+          path = 'evidence/index.json'
+          if os.path.exists(path):
+              with open(path, 'r') as f:
+                  data = json.load(f)
+          else:
+              data = {'version': 1, 'items': []}
+
+          # Remove existing entries for these IDs to avoid duplicates
+          new_ids = ['EVD-VIND-LB-003', 'EVD-VIND-CCH-004']
+          data['items'] = [i for i in data['items'] if i['evidence_id'] not in new_ids]
+
+          data['items'].append({
+              'evidence_id': 'EVD-VIND-LB-003',
+              'report': 'evidence/EVD-VIND-LB-003/report.json',
+              'stamp': 'evidence/EVD-VIND-LB-003/stamp.json'
+          })
+          data['items'].append({
+              'evidence_id': 'EVD-VIND-CCH-004',
+              'report': 'evidence/EVD-VIND-CCH-004/report.json',
+              'metrics': 'evidence/EVD-VIND-CCH-004/metrics.json',
+              'stamp': 'evidence/EVD-VIND-CCH-004/stamp.json'
+          })
+          with open(path, 'w') as f:
+              json.dump(data, f, indent=2)
+          "

@@ -47,3 +47,9 @@ Once real check names are known:
 - schema-validate
 - archsim-foundation
 - evidence-gate
+
+## Vind (vCluster in Docker) checks
+- summit/vind/smoke
+- summit/vind/lifecycle
+- summit/vind/bench
+- summit/vind/security
