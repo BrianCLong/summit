@@ -1,0 +1,34 @@
+{
+  "schema": [
+    "evidence/report.json",
+    "evidence/metrics.json",
+    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-001/report.json",
+    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-ARCH-001/report.json",
+    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-002/report.json",
+    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PROD-001/report.json",
+    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-SEC-002/report.json",
+    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-GOV-001/report.json",
+    "evidence/graph-hybrid/EVD-GRAPH-HYBRID-PERF-001/report.json",
+    "evidence/runs/subsumption-bundle-verify/report.json",
+    "evidence/runs/initial/report.json",
+    "evidence/runs/subsumption-verify/report.json",
+    "evidence/moltworker/report.json",
+    "evidence/project19/report.json",
+    "evidence/subsumption/ssdf-v1-2/verifier/report.json",
+    "evidence/subsumption/ssdf-v1-2/report.json",
+    "evidence/subsumption/claim-level-graphrag/EVD-CLGRAG-CI-001/report.json",
+    "evidence/azure-turin-v7/verifier/report.json",
+    "evidence/azure-turin-v7/pr-01/report.json",
+    "evidence/item-unknown/report.json",
+    "evidence/templates/report.json",
+    "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
+    "evidence/mcp-apps/report.json",
+    "evidence/packs/EVD-PPGI-MAG-PRIV-001/report.json"
+  ],
+  "timestamps": [
+    "evidence/governance/agent_governance.report.json",
+    "evidence/project19/alignment.report.json",
+    "evidence/project19/report.json",
+    "evidence/jules/preflight.report.json"
+  ]
+}

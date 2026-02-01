@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-29T18:00:00Z",
-  "revision_note": "Expanded narrative frames fixtures with confidence validation and richer evidence reporting",
+  "last_updated": "2026-01-30T01:00:00Z",
+  "revision_note": "Documented governed evidence exceptions and wired verifier to load them.",
   "initiatives": [
     {
       "id": "A",
@@ -214,6 +214,19 @@
           "evidence": "Roadmap defined in docs/runbooks/elite-governed-ux-analytics-roadmap.md"
         }
       ]
+    },
+    {
+      "id": "H",
+      "name": "World Simulation (WorldSim)",
+      "epics": [
+        {
+          "id": "H1",
+          "name": "WorldSim Foundation Scaffold",
+          "status": "in-progress",
+          "owner": "Codex",
+          "evidence": "Scaffolded worldsim core interface, evidence schemas, and discovery TODOs for PR1."
+        }
+      ]
     }
   ],
   "summary": {
@@ -221,7 +234,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 15,
-    "total": 22,
+    "total": 23,
     "ga_blockers": [
       "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
     ]
