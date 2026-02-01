@@ -1,0 +1,68 @@
+{
+  "task_id": "REPLIT_AGENT_SUBSUMPTION_20260201",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "replit-agent-foundation",
+    "version": "v1",
+    "sha256": "ad5255fd012d94c9b6b32856eab094ed2e93f364b32edf7c015c70fc2ed9ee6b",
+    "path": "prompts/subsumption/replit-agent-foundation@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "summit/integrations/registry.py",
+      "summit/integrations/__init__.py",
+      "summit/scaffold/",
+      "summit/repair/",
+      "summit/automations/",
+      "tests/test_policy_deny_by_default.py",
+      "tests/test_integration_registry.py",
+      "tests/test_autonomy_budget.py",
+      "tests/test_flagged_modules.py",
+      "evidence/EVD-REPLITAGENT-FOUND-001/",
+      "evidence/EVD-REPLITAGENT-POLICY-001/",
+      "evidence/EVD-REPLITAGENT-INTEG-001/",
+      "evidence/EVD-REPLITAGENT-AUTO-001/",
+      "evidence/EVD-REPLITAGENT-SCAFF-001/",
+      "evidence/EVD-REPLITAGENT-REPAIR-001/",
+      "evidence/EVD-REPLITAGENT-AUTOM-001/",
+      "evidence/index.json",
+      "docs/subsumption/replit_agent.md",
+      "docs/policy.md",
+      "docs/roadmap/STATUS.json",
+      "ci/evidence_validate.py",
+      "required_checks.todo.md",
+      "packages/decision-ledger/decision_ledger.json",
+      "prompts/subsumption/replit-agent-foundation@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/REPLIT_AGENT_SUBSUMPTION_20260201.json"
+    ],
+    "domains": [
+      "governance",
+      "evidence",
+      "policy",
+      "integrations",
+      "automation",
+      "documentation",
+      "testing",
+      "ci"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["evidence/index.json", "decision_ledger"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Replit Agent subsumption evidence bundles are registered.",
+    "Deny-by-default and feature flag behaviors are tested.",
+    "Decision ledger updated with rollback guidance."
+  ],
+  "stop_conditions": [
+    "Evidence index fails to parse.",
+    "Prompt hash mismatch in registry."
+  ]
+}

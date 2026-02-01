@@ -56,3 +56,11 @@ Once real check names are known:
 - summit/vind/lifecycle
 - summit/vind/bench
 - summit/vind/security
+
+## Replit Agent Subsumption (temporary names)
+- ci_unit
+- ci_lint
+- ci_policy
+- ci_evidence_validate
+- ci_supplychain_delta
+- ci_determinism

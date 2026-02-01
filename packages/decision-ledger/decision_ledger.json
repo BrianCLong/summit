@@ -134,5 +134,22 @@
     },
     "reasoning": "Enabled GitHub App installation tokens for branch protection drift workflows with fallback auth, plus documentation and governance updates. Rollback: revert commit once merged.",
     "reverted": false
+  },
+  {
+    "id": "replit-agent-subsump-001",
+    "timestamp": "2026-02-01T20:08:34Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAiUmVwbGl0IEFnZW50IHN1YnN1bXB0aW9uIHNjYWZmb2xkaW5nIHdpdGggZXZpZGVuY2UgYnVuZGxlcywgcG9saWN5IHRlc3RzLCBhbmQgZ2F0ZWQgbW9kdWxlcy4iLCAiZmlsZXMiOiBbImRvY3Mvc3Vic3VtcHRpb24vcmVwbGl0X2FnZW50Lm1kIiwgImRvY3MvcG9saWN5Lm1kIiwgImV2aWRlbmNlL2luZGV4Lmpzb24iLCAic3VtbWl0L2ludGVncmF0aW9ucy9yZWdpc3RyeS5weSIsICJzdW1taXQvc2NhZmZvbGQvZ2VuZXJhdGUucHkiLCAic3VtbWl0L3JlcGFpci9oYXJuZXNzLnB5IiwgInN1bW1pdC9hdXRvbWF0aW9ucy9ydW5uZXIucHkiLCAidGVzdHMvdGVzdF9wb2xpY3lfZGVueV9ieV9kZWZhdWx0LnB5Il19",
+    "decision": {
+      "action": "add_subsumption_scaffolding",
+      "rule": {
+        "condition": "public capability subsumption requires gated scaffolding and evidence",
+        "action": "add_subsumption_scaffolding",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added gated scaffolding and evidence artifacts for Replit Agent subsumption. Rollback: revert commit; leave flags disabled.",
+    "reverted": false
   }
 ]

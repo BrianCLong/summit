@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T00:55:00Z",
-  "revision_note": "Added structured content schemas, documentation, and prompt/task metadata for Brief/Claim/Block primitives.",
+  "last_updated": "2026-02-01T20:08:21Z",
+  "revision_note": "Added Replit Agent subsumption scaffolding, evidence bundles, and gated runtime modules.",
   "initiatives": [
     {
       "id": "A",
@@ -39,7 +39,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "blockers": [
+            "Need connector registry",
+            "Missing connector lifecycle management"
+          ],
           "target_completion": "Sprint N+2"
         },
         {
@@ -48,7 +51,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         },
         {
@@ -57,7 +62,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         }
       ]

@@ -4,53 +4,99 @@
     "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
-      "artifacts": ["fixtures/ambiguities/critical.json"]
+      "artifacts": [
+        "fixtures/ambiguities/critical.json"
+      ]
     },
     "EVD-vfgnn-ATT-001": {
       "evidence_id": "EVD-vfgnn-ATT-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-vfgnn-NEG-001": {
       "evidence_id": "EVD-vfgnn-NEG-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-SCHEMA-001": {
       "evidence_id": "EVD-ATLAS-SCHEMA-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-PLNR-001": {
       "evidence_id": "EVD-ATLAS-PLNR-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-XFER-001": {
       "evidence_id": "EVD-ATLAS-XFER-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-ATLS-001": {
       "evidence_id": "EVD-ATLAS-ATLS-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-ATLS-002": {
       "evidence_id": "EVD-ATLAS-ATLS-002",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-GOV-001": {
       "evidence_id": "EVD-ATLAS-GOV-001",
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-260119895-keel-ARCH-001": {
       "evidence_id": "EVD-260119895-keel-ARCH-001",
@@ -110,8 +156,68 @@
     },
     "EVD-youtu-vl-4b-instruct-LIC-001": {
       "path": "evidence/EVD-youtu-vl-4b-instruct-LIC-001",
-      "files": ["report.json", "metrics.json", "stamp.json"],
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ],
       "area": "license"
+    },
+    "EVD-REPLITAGENT-FOUND-001": {
+      "evidence_id": "EVD-REPLITAGENT-FOUND-001",
+      "files": [
+        "evidence/EVD-REPLITAGENT-FOUND-001/report.json",
+        "evidence/EVD-REPLITAGENT-FOUND-001/metrics.json",
+        "evidence/EVD-REPLITAGENT-FOUND-001/stamp.json"
+      ]
+    },
+    "EVD-REPLITAGENT-POLICY-001": {
+      "evidence_id": "EVD-REPLITAGENT-POLICY-001",
+      "files": [
+        "evidence/EVD-REPLITAGENT-POLICY-001/report.json",
+        "evidence/EVD-REPLITAGENT-POLICY-001/metrics.json",
+        "evidence/EVD-REPLITAGENT-POLICY-001/stamp.json"
+      ]
+    },
+    "EVD-REPLITAGENT-INTEG-001": {
+      "evidence_id": "EVD-REPLITAGENT-INTEG-001",
+      "files": [
+        "evidence/EVD-REPLITAGENT-INTEG-001/report.json",
+        "evidence/EVD-REPLITAGENT-INTEG-001/metrics.json",
+        "evidence/EVD-REPLITAGENT-INTEG-001/stamp.json"
+      ]
+    },
+    "EVD-REPLITAGENT-AUTO-001": {
+      "evidence_id": "EVD-REPLITAGENT-AUTO-001",
+      "files": [
+        "evidence/EVD-REPLITAGENT-AUTO-001/report.json",
+        "evidence/EVD-REPLITAGENT-AUTO-001/metrics.json",
+        "evidence/EVD-REPLITAGENT-AUTO-001/stamp.json"
+      ]
+    },
+    "EVD-REPLITAGENT-SCAFF-001": {
+      "evidence_id": "EVD-REPLITAGENT-SCAFF-001",
+      "files": [
+        "evidence/EVD-REPLITAGENT-SCAFF-001/report.json",
+        "evidence/EVD-REPLITAGENT-SCAFF-001/metrics.json",
+        "evidence/EVD-REPLITAGENT-SCAFF-001/stamp.json"
+      ]
+    },
+    "EVD-REPLITAGENT-REPAIR-001": {
+      "evidence_id": "EVD-REPLITAGENT-REPAIR-001",
+      "files": [
+        "evidence/EVD-REPLITAGENT-REPAIR-001/report.json",
+        "evidence/EVD-REPLITAGENT-REPAIR-001/metrics.json",
+        "evidence/EVD-REPLITAGENT-REPAIR-001/stamp.json"
+      ]
+    },
+    "EVD-REPLITAGENT-AUTOM-001": {
+      "evidence_id": "EVD-REPLITAGENT-AUTOM-001",
+      "files": [
+        "evidence/EVD-REPLITAGENT-AUTOM-001/report.json",
+        "evidence/EVD-REPLITAGENT-AUTOM-001/metrics.json",
+        "evidence/EVD-REPLITAGENT-AUTOM-001/stamp.json"
+      ]
     }
   }
 }
