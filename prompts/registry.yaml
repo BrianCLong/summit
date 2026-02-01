@@ -847,16 +847,17 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: gateway-ga-graphai-context
+  - id: cypress-install-unblock
     version: v1
-    path: prompts/operations/gateway-ga-graphai-context@v1.md
-    sha256: 609e5116967e4a2809fdd68ac9793c2f9f021af699df8c80ea26c88f4696d273
-    description: Ensure gateway Docker build includes ga-graphai workspace packages for pnpm file dependencies.
+    path: prompts/operations/cypress-install-unblock@v1.md
+    sha256: 8b3970e9e0c3791885dc979c0f6d5d701012d60eb1054087e8c7c26dc629e283
+    description: Unblock Cypress postinstall by pinning chalk resolution for log-symbols.
     scope:
       paths:
-        - apps/gateway/Dockerfile
+        - package.json
+        - pnpm-lock.yaml
         - docs/roadmap/STATUS.json
-        - prompts/operations/gateway-ga-graphai-context@v1.md
+        - prompts/operations/cypress-install-unblock@v1.md
         - prompts/registry.yaml
       domains:
         - operations
