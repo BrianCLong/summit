@@ -748,6 +748,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: maestro-mcp-flowpacks
+    version: v1
+    path: prompts/maestro/maestro-mcp-flowpacks@v1.md
+    sha256: df7211b61b63302c2ac4db63276b1d03bfd0e40e55cc324d6f4f817dbe5e4f63
+    description: Scaffold Maestro MCP flow packs and Docker targets for Summit component bundles.
+    scope:
+      paths:
+        - packages/ig/
+        - packages/mc/
+        - packages/sb/
+        - packages/co/
+        - packages/summit-platform/
+        - docker/maestro-mcp/
+        - docs/roadmap/STATUS.json
+        - prompts/maestro/maestro-mcp-flowpacks@v1.md
+        - prompts/registry.yaml
+      domains:
+        - maestro
+        - tooling
+        - governance
+        - docker
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: mvp4-ga-gate-artifacts
     version: v1
     path: prompts/docs/mvp4-ga-gate-artifacts@v1.md
