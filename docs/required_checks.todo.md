@@ -15,6 +15,15 @@
 - `gate/osint-policy`
 - `gate/depdelta`
 
+## Swarm Checks (Temporary)
+
+- `gate/swarm-schema-validate`
+- `gate/swarm-evidence-complete`
+- `gate/swarm-state-integrity`
+- `gate/swarm-policy-deny-default`
+- `gate/swarm-budget-guard`
+- `gate/swarm-replay-determinism`
+
 ## Plan
 
 1. Record official check names in `ci/required_checks.json` once discovered.

@@ -100,6 +100,18 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-CLAUDE-SWARM-ARCH-001": {
+      "files": ["evidence/swarm/arch/report.json", "evidence/swarm/arch/metrics.json", "evidence/swarm/arch/stamp.json"]
+    },
+    "EVD-CLAUDE-SWARM-POLICY-001": {
+      "files": ["evidence/swarm/policy/report.json", "evidence/swarm/policy/metrics.json", "evidence/swarm/policy/stamp.json"]
+    },
+    "EVD-CLAUDE-SWARM-RACE-001": {
+      "files": ["evidence/swarm/race/report.json", "evidence/swarm/race/metrics.json", "evidence/swarm/race/stamp.json"]
+    },
+    "EVD-CLAUDE-SWARM-REPLAY-001": {
+      "files": ["evidence/swarm/replay/report.json", "evidence/swarm/replay/metrics.json", "evidence/swarm/replay/stamp.json"]
     }
   }
 }
