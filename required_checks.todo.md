@@ -17,6 +17,7 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+- `trustable_ai_verifier` - Validates Trustable AI evidence artifacts.
 
 ## Rename Plan
 

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Report",
+  "type": "object",
+  "required": ["evidence_id", "summary", "artifacts", "notes"],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "summary": {"type": "string"},
+    "artifacts": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "notes": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

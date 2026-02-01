@@ -100,6 +100,41 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-TRUSTABLEAI-EVIDENCE-001": {
+      "files": [
+        "evidence/EVD-TRUSTABLEAI-EVIDENCE-001/report.json",
+        "evidence/EVD-TRUSTABLEAI-EVIDENCE-001/metrics.json",
+        "evidence/EVD-TRUSTABLEAI-EVIDENCE-001/stamp.json"
+      ]
+    },
+    "EVD-TRUSTABLEAI-ROUTER-001": {
+      "files": [
+        "evidence/EVD-TRUSTABLEAI-ROUTER-001/report.json",
+        "evidence/EVD-TRUSTABLEAI-ROUTER-001/metrics.json",
+        "evidence/EVD-TRUSTABLEAI-ROUTER-001/stamp.json"
+      ]
+    },
+    "EVD-TRUSTABLEAI-DVR-001": {
+      "files": [
+        "evidence/EVD-TRUSTABLEAI-DVR-001/report.json",
+        "evidence/EVD-TRUSTABLEAI-DVR-001/metrics.json",
+        "evidence/EVD-TRUSTABLEAI-DVR-001/stamp.json"
+      ]
+    },
+    "EVD-TRUSTABLEAI-PERSONA-001": {
+      "files": [
+        "evidence/EVD-TRUSTABLEAI-PERSONA-001/report.json",
+        "evidence/EVD-TRUSTABLEAI-PERSONA-001/metrics.json",
+        "evidence/EVD-TRUSTABLEAI-PERSONA-001/stamp.json"
+      ]
+    },
+    "EVD-TRUSTABLEAI-AUDIT-001": {
+      "files": [
+        "evidence/EVD-TRUSTABLEAI-AUDIT-001/report.json",
+        "evidence/EVD-TRUSTABLEAI-AUDIT-001/metrics.json",
+        "evidence/EVD-TRUSTABLEAI-AUDIT-001/stamp.json"
+      ]
     }
   }
 }

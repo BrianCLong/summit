@@ -1,0 +1,7 @@
+{
+  "version": "1.0",
+  "personas": [
+    {"id": "crew_chief", "name": "Crew Chief", "style": "concise, actionable", "max_msgs_per_min": 6},
+    {"id": "telemetry_engineer", "name": "Telemetry Engineer", "style": "data-first", "max_msgs_per_min": 4}
+  ]
+}

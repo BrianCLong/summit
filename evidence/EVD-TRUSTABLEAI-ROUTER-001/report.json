@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-TRUSTABLEAI-ROUTER-001",
+  "summary": "Router policy schema and stub implementation.",
+  "artifacts": [],
+  "notes": ["Initial setup."]
+}

@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-TRUSTABLEAI-AUDIT-001",
+  "summary": "Audit logger and data handling docs.",
+  "artifacts": [],
+  "notes": ["Initial setup."]
+}
