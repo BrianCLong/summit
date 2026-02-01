@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T00:26:15Z",
-  "revision_note": "Hardened SE-DiCoW schema test to validate schemas when jsonschema is available.",
+  "last_updated": "2026-02-02T10:30:00Z",
+  "revision_note": "Added evidence validation helpers to remove external schema dependency",
   "initiatives": [
     {
       "id": "A",
