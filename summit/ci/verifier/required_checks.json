@@ -1,0 +1,8 @@
+{
+  "required": [
+    "summit-gate/data-residency",
+    "summit-gate/codespaces-ownership",
+    "summit-evidence/validate",
+    "summit-verifier/required-checks"
+  ]
+}
