@@ -1,53 +1,15 @@
 {
   "version": 1,
-  "items": [
-    {
-      "evidence_id": "EVD-SDSBC-FOUNDATION-001",
+  "evidence": {
+    "EVD-APPLEQAI-PRIV-002": {
+      "report": "evidence/EVD-APPLEQAI-PRIV-002/report.json",
+      "metrics": "evidence/EVD-APPLEQAI-PRIV-002/metrics.json",
+      "stamp": "evidence/EVD-APPLEQAI-PRIV-002/stamp.json"
+    },
+    "EVD-SDSBC-FOUNDATION-001": {
       "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
       "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
       "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-CURSOR-INDEXING-MERKLE-001",
-      "report": "evidence/EVD-CURSOR-INDEXING-MERKLE-001/report.json",
-      "metrics": "evidence/EVD-CURSOR-INDEXING-MERKLE-001/metrics.json",
-      "stamp": "evidence/EVD-CURSOR-INDEXING-MERKLE-001/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-CURSOR-INDEXING-DIFF-001",
-      "report": "evidence/EVD-CURSOR-INDEXING-DIFF-001/report.json",
-      "metrics": "evidence/EVD-CURSOR-INDEXING-DIFF-001/metrics.json",
-      "stamp": "evidence/EVD-CURSOR-INDEXING-DIFF-001/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-CURSOR-INDEXING-CHUNK-001",
-      "report": "evidence/EVD-CURSOR-INDEXING-CHUNK-001/report.json",
-      "metrics": "evidence/EVD-CURSOR-INDEXING-CHUNK-001/metrics.json",
-      "stamp": "evidence/EVD-CURSOR-INDEXING-CHUNK-001/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-CURSOR-INDEXING-CACHE-001",
-      "report": "evidence/EVD-CURSOR-INDEXING-CACHE-001/report.json",
-      "metrics": "evidence/EVD-CURSOR-INDEXING-CACHE-001/metrics.json",
-      "stamp": "evidence/EVD-CURSOR-INDEXING-CACHE-001/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-CURSOR-INDEXING-SIMHASH-001",
-      "report": "evidence/EVD-CURSOR-INDEXING-SIMHASH-001/report.json",
-      "metrics": "evidence/EVD-CURSOR-INDEXING-SIMHASH-001/metrics.json",
-      "stamp": "evidence/EVD-CURSOR-INDEXING-SIMHASH-001/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-CURSOR-INDEXING-PROOF-001",
-      "report": "evidence/EVD-CURSOR-INDEXING-PROOF-001/report.json",
-      "metrics": "evidence/EVD-CURSOR-INDEXING-PROOF-001/metrics.json",
-      "stamp": "evidence/EVD-CURSOR-INDEXING-PROOF-001/stamp.json"
-    },
-    {
-      "evidence_id": "EVD-CURSOR-INDEXING-HYBRID-001",
-      "report": "evidence/EVD-CURSOR-INDEXING-HYBRID-001/report.json",
-      "metrics": "evidence/EVD-CURSOR-INDEXING-HYBRID-001/metrics.json",
-      "stamp": "evidence/EVD-CURSOR-INDEXING-HYBRID-001/stamp.json"
     }
-  ]
+  }
 }
