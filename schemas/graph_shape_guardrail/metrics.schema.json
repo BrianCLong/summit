@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Graph Shape Guardrail Metrics",
+  "type": "object",
+  "required": [
+    "tenant_id",
+    "label",
+    "window_start",
+    "window_end",
+    "sample_n",
+    "mean_deg",
+    "skew_deg",
+    "top1p_mass"
+  ],
+  "properties": {
+    "tenant_id": { "type": "string" },
+    "label": { "type": "string" },
+    "window_start": { "type": "string" },
+    "window_end": { "type": "string" },
+    "sample_n": { "type": "integer" },
+    "mean_deg": { "type": "number" },
+    "skew_deg": { "type": "number" },
+    "top1p_mass": { "type": "number" },
+    "evidence_id": { "type": "string" }
+  }
+}

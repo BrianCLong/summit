@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Graph Shape Guardrail Stamp",
+  "type": "object",
+  "required": [
+    "tool_version",
+    "config_hash",
+    "deterministic_seed_version"
+  ],
+  "properties": {
+    "tool_version": { "type": "string" },
+    "config_hash": { "type": "string" },
+    "query_fingerprints": { "type": "object" },
+    "deterministic_seed_version": { "type": "string" },
+    "runtime_metadata": { "type": "object" }
+  }
+}
