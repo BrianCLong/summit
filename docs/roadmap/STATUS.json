@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-15T00:00:00Z",
-  "revision_note": "Added SOC controls CI gate workflow and documentation; documented investigation/export RBAC verification updates tied to Task Brief #6.",
+  "revision_note": "Standardized test environment parity, added seed logging, and documented reproducible test guidance; documented investigation/export RBAC verification updates tied to Task Brief #6.",
   "initiatives": [
     {
       "id": "A",
