@@ -773,3 +773,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: skill-preserving-pr1-evidence-scaffold
+    version: v1
+    path: prompts/summit/skill-preserving-pr1-evidence-scaffold.md
+    sha256: d7adff792ea31f6b9a8c9a6360ef082a5323be96525b759d8ca4556c7349520a
+    description: Scaffold skill-preserving evidence bundles, index entries, feature flags, and CI placeholder gates.
+    scope:
+      paths:
+        - evidence/
+        - .github/workflows/summit_skill_gates.yml
+        - feature_flags.json
+        - docs/roadmap/STATUS.json
+        - prompts/summit/skill-preserving-pr1-evidence-scaffold.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

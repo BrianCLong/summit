@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-02T12:00:00Z",
-  "revision_note": "Asserted ATP-Latent evidence scaffold plan, schemas, and governance hooks",
+  "last_updated": "2026-02-01T12:00:00Z",
+  "revision_note": "Added skill-preserving evidence scaffolding, index alignment, and CI gate placeholders for deny-by-default policy fixtures",
   "initiatives": [
     {
       "id": "A",
