@@ -1,98 +1,29 @@
 version: 1
 prompts:
-  - id: keel-evidence-templates
+  - id: atp-latent-pr1-evidence-scaffold
     version: v1
-    path: prompts/evidence/keel-evidence-templates@v1.md
-    sha256: e5a30955d6df4cfea44900137428a5dc84f25c8a9b22b3abdfc67b18a7ceca1d
-    description: Align Keel evidence templates and index entries for ARCH/STAB/DSCL/BENCH bundles.
+    path: prompts/atp-latent/pr1-evidence-scaffold.md
+    sha256: d0680f8d5c5569ed88518c6b011df50496f39986b5009968b47dfd8b06bec148
+    description: Scaffold ATP-Latent evidence schemas, interfaces, and coherence reward placeholder.
     scope:
       paths:
-        - evidence/index.json
-        - summit/evidence/templates/keel-arch/
-        - summit/evidence/templates/keel-stab/
-        - summit/evidence/templates/keel-dscl/
-        - summit/evidence/templates/keel-bench/
+        - required_checks.todo.md
+        - evidence/
+        - ci/verifiers/
+        - summit/atp_latent/
+        - tests/test_coherence_reward.py
+        - docs/atp_latent/
         - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/evidence/keel-evidence-templates@v1.md
+        - agents/examples/
+        - prompts/atp-latent/pr1-evidence-scaffold.md
         - prompts/registry.yaml
-        - agents/examples/KEEL_EVIDENCE_TEMPLATES_20260130.json
       domains:
         - evidence
         - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: jest-network-teardown-shim
-    version: v1
-    path: prompts/governance/jest-network-teardown-shim@v1.md
-    sha256: 72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b
-    description: Opt-in Jest network and timer teardown shim for NO_NETWORK_LISTEN=true.
-    scope:
-      paths:
-        - .gitattributes
-        - PR_DESCRIPTION.md
-        - server/tests/setup/jest.setup.cjs
-        - docs/roadmap/STATUS.json
-        - prompts/registry.yaml
-        - prompts/governance/gitattributes-lfs-exception@v1.md
-        - prompts/governance/nl-graph-query-test-tson-fix@v1.md
-        - prompts/governance/jest-network-teardown-shim@v1.md
-      domains:
-        - governance
+        - documentation
+        - ci
         - testing
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: gitattributes-lfs-exception
-    version: v1
-    path: prompts/governance/gitattributes-lfs-exception@v1.md
-    sha256: c6824f0d4a05ded519f881194b2297485d9d2eccdbaa29834fe4e24acf8ec56c
-    description: Governed workflow for .gitattributes LFS exceptions.
-    scope:
-      paths:
-        - .gitattributes
-        - docs/roadmap/STATUS.json
-        - prompts/registry.yaml
-        - prompts/governance/gitattributes-lfs-exception@v1.md
-      domains:
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: nl-graph-query-test-tson-fix
-    version: v1
-    path: prompts/governance/nl-graph-query-test-tson-fix@v1.md
-    sha256: 80d63d580e2f6d0233ca4683a5cc783c495a1476b1ecb371f57995529a55d5b2
-    description: Fix nl-graph-query tests to use express.json() when tson is unavailable.
-    scope:
-      paths:
-        - .gitattributes
-        - docs/roadmap/STATUS.json
-        - prompts/registry.yaml
-        - prompts/governance/gitattributes-lfs-exception@v1.md
-        - prompts/governance/nl-graph-query-test-tson-fix@v1.md
-      domains:
-        - governance
-        - testing
+        - ml
     verification:
       tiers_required:
         - C
@@ -233,33 +164,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: lingbot-world-scaffold
-    version: v1
-    path: prompts/worldmodels/lingbot-world-scaffold.md
-    sha256: 538d8c7606c352ec21ec672ec86e504fdcc38e7d8c1546b6c8eda0a873111aa5
-    description: Scaffold clean-room world model interfaces and docs for LingBot-World alignment.
-    scope:
-      paths:
-        - docs/items/2601-20540-lingbot-world/
-        - docs/worldmodels/
-        - summit/worldmodels/
-        - NOTICE.third_party.md
-        - docs/roadmap/STATUS.json
-        - prompts/worldmodels/lingbot-world-scaffold.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - worldmodels
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: antigravity-moat-augmentation
     version: v1
     path: prompts/governance/antigravity-moat-augmentation@v1.md
@@ -331,31 +235,6 @@ prompts:
         - governance
         - tooling
         - agents
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: worldmodel-backend-scaffold
-    version: v1
-    path: prompts/worldmodels/worldmodel-backend-scaffold.md
-    sha256: df003b371b45c4d2b4301e341cc892b55db2bfc0ebcdf85c8b9937c7d3512616
-    description: Scaffold world-model backend interfaces and default-off flags.
-    scope:
-      paths:
-        - summit/worldmodels/
-        - docs/worldmodels/
-        - docs/roadmap/STATUS.json
-        - prompts/worldmodels/worldmodel-backend-scaffold.md
-        - prompts/registry.yaml
-      domains:
-        - worldmodels
-        - governance
         - documentation
     verification:
       tiers_required:
@@ -885,32 +764,6 @@ prompts:
         - governance
         - ci
         - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: dynamic-intent-required-checks-module-map
-    version: v1
-    path: prompts/dynamic-intent/required-checks-module-map@v1.md
-    sha256: 1ebdb7be99bf75da2ae461d2a4e3c0c0511177ed854aebf72872cc02fb74b137
-    description: Document Dynamic Intent required checks discovery and module map placeholders.
-    scope:
-      paths:
-        - required_checks.todo.md
-        - docs/dynamic_intent/
-        - docs/deps_delta.md
-        - docs/roadmap/STATUS.json
-        - prompts/dynamic-intent/required-checks-module-map@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - planning
     verification:
       tiers_required:
         - C
