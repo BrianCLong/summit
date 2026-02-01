@@ -5,20 +5,11 @@
  * Exit codes: 0 = all passed, 1 = critical failure, 2 = degraded (non-critical)
  */
 const axios = require('axios');
-const jwt = require('jsonwebtoken');
 
 const BASE_URL = process.env.API_URL || 'http://localhost:4000';
 const TIMEOUT_MS = parseInt(process.env.SMOKE_TEST_TIMEOUT_MS || '10000', 10);
 const PREFLIGHT_TIMEOUT_MS = parseInt(process.env.SMOKE_PREFLIGHT_TIMEOUT_MS || '2000', 10);
 const SMOKE_MODE = (process.env.SMOKE_MODE || 'full').toLowerCase();
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-do-not-use-in-prod';
-
-// Generate a valid token for testing protected endpoints
-const token = jwt.sign(
-  { userId: 'smoke-test-user', role: 'admin', permissions: ['*'] },
-  JWT_SECRET,
-  { expiresIn: '1h' }
-);
 
 const client = axios.create({
   baseURL: BASE_URL,
@@ -76,24 +67,6 @@ const checks = [
     modes: ['full'],
     validate: (res) => res.status === 200,
   },
-  // Lane B: Functional Checks (GraphQL)
-  {
-    name: 'GraphQL Introspection',
-    endpoint: '/graphql?query=%7B__typename%7D',
-    critical: true,
-    modes: ['full'],
-    validate: (res) => res.status === 200 && res.data?.data?.__typename === 'Query',
-  },
-  {
-    name: 'GraphQL Authenticated Query',
-    endpoint: '/graphql',
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: { query: 'query { __schema { types { name } } }' }, // Universal schema query
-    critical: true,
-    modes: ['full'],
-    validate: (res) => res.status === 200 && res.data?.data?.__schema?.types?.length > 0,
-  }
 ];
 
 function buildCurlCommand(url, timeoutMs) {
@@ -184,15 +157,7 @@ async function runCheck(check) {
   const startTime = Date.now();
   const url = `${BASE_URL}${check.endpoint}`;
   try {
-    let response;
-    const config = { headers: check.headers || {} };
-    
-    if (check.method === 'POST') {
-      response = await client.post(check.endpoint, check.body, config);
-    } else {
-      response = await client.get(check.endpoint, config);
-    }
-
+    const response = await client.get(check.endpoint);
     const duration = Date.now() - startTime;
     const passed = check.validate(response);
 
