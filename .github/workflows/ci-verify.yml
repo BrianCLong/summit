@@ -37,16 +37,15 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
 
       - name: Dependency audit (critical CVEs only)
         run: |
           echo "=== Scanning for Critical CVEs ==="
-          pnpm audit --audit-level critical || {
-            echo "::error::Critical CVEs detected - CI BLOCKED"
-            echo "::error::Run 'pnpm audit' locally and document exceptions if needed"
-            exit 1
-          }
+          for i in 1 2 3; do pnpm audit --audit-level critical && exit 0 || { echo "Retry $i..."; sleep 15; }; done
+          echo "::error::Critical CVEs detected - CI BLOCKED"
+          echo "::error::Run 'pnpm audit' locally and document exceptions if needed"
+          exit 1
         continue-on-error: false # BLOCKING: critical CVEs block merge
 
       - name: Snyk security scan
@@ -114,7 +113,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
 
       - name: Media provenance gate
         run: npx tsx scripts/ci/verify_media_provenance.ts
@@ -172,7 +171,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
 
       - name: Generate SBOM
         run: |
@@ -254,7 +253,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
 
       - name: GraphQL schema compatibility check
         run: |
@@ -286,7 +285,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
 
       - name: Verify control coverage
         run: |
@@ -462,3 +461,11 @@ jobs:
           echo "- ℹ️ Compliance Evidence" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Security and compliance verified" >> $GITHUB_STEP_SUMMARY
+
+  ci-metrics:
+    name: CI Metrics
+    needs: [security-scan, policy-compliance, governance-checks, mcp-ux-lint, provenance, schema-validation, compliance-evidence, ga-evidence-completeness, ci-verify-gate]
+    if: always()
+    uses: ./.github/workflows/_reusable-ci-metrics.yml
+    with:
+      workflow_name: 'CI Verify'

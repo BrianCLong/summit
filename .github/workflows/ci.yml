@@ -48,7 +48,7 @@ jobs:
         with:
           node-version: '18'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
+      - run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - run: pnpm run lint
 
   typecheck:
@@ -68,7 +68,7 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - name: Typecheck
         run: pnpm typecheck
 
@@ -89,7 +89,7 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - name: Unit Tests
         run: pnpm -w test:unit || pnpm -w test:unit
       - name: Attach evidence
@@ -173,7 +173,7 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - name: SOC Control Unit Tests
         run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
       - name: Upload SOC compliance reports
@@ -207,3 +207,11 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  ci-metrics:
+    name: CI Metrics
+    needs: [config-guard, lint, typecheck, unit-tests, integration-test, security-compliance, soc-controls, verify-versions]
+    if: always()
+    uses: ./.github/workflows/_reusable-ci-metrics.yml
+    with:
+      workflow_name: 'CI'
