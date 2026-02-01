@@ -1,0 +1,139 @@
+---
+# Web application HTTPRoute
+# Replaces: k8s/ingress/web.yaml and k8s/ingress/web-canary.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web
+  namespace: default
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  parentRefs:
+    - name: summit-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "app.intelgraph.io"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        # Stable deployment (90%)
+        - name: web
+          port: 80
+          weight: 90
+        # Canary deployment (10%) - matches nginx canary-weight: 10
+        - name: web-v2
+          port: 80
+          weight: 10
+---
+# Rate limiting policy for web
+# Replaces: nginx.ingress.kubernetes.io/limit-rps: 10
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: web-rate-limit
+  namespace: default
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: web
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        # 10 RPS with burst multiplier of 2 = 20 burst
+        - limit:
+            requests: 10
+            unit: Second
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+  # Request body size limit (replaces proxy-body-size: 2m)
+  # Note: Envoy Gateway uses clientTrafficPolicy for this
+---
+# Client traffic policy for body size limit
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: ClientTrafficPolicy
+metadata:
+  name: web-client-policy
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: summit-gateway
+  # Max request body size (replaces nginx proxy-body-size: 2m)
+  http1:
+    http10: {}
+  headers:
+    # Preserve host header
+    preserveXRequestID: true
+---
+# IP allowlist for internal bypass of rate limits
+# Replaces: nginx.ingress.kubernetes.io/limit-whitelist: 10.0.0.0/8
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: web-internal-bypass
+  namespace: default
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: summit-platform
+  annotations:
+    policy.summit.io/description: "Allow internal IPs to bypass rate limiting"
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: web
+  authorization:
+    defaultAction: Allow
+    rules:
+      # Internal traffic gets higher priority/no rate limit
+      - name: internal-bypass
+        action: Allow
+        principal:
+          clientCIDRs:
+            - cidr: "10.0.0.0/8"
+---
+# Header-based canary routing
+# Replaces: k8s/ingress/web-header-canary.yaml functionality
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web-canary-header
+  namespace: default
+  labels:
+    app.kubernetes.io/name: web
+    app.kubernetes.io/part-of: summit-platform
+    app.kubernetes.io/component: canary
+spec:
+  parentRefs:
+    - name: summit-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "app.intelgraph.io"
+  rules:
+    # Header-based canary: X-Canary: true routes to canary
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+          headers:
+            - name: X-Canary
+              value: "true"
+      backendRefs:
+        - name: web-v2
+          port: 80
