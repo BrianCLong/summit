@@ -17,6 +17,8 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+- `archsim-foundation` - Runs architecture simulation and validation.
+- `evidence-gate` - Verifies evidence bundle completeness.
 
 ## Rename Plan
 
