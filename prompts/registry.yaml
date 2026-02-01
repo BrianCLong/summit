@@ -58,6 +58,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cti-subsumption-pipeline
+    version: v1
+    path: prompts/cti/cti-subsumption-pipeline@v1.md
+    sha256: d2a0b611b7e0545d881586f92250d7f990cc43d9fa3924f0a7798ff6d66a4d16
+    description: Document the CTI subsumption pipeline architecture, security, evals, ops, and product spec.
+    scope:
+      paths:
+        - docs/cti/CTI_SUBSUMPTION_PIPELINE.md
+        - docs/roadmap/STATUS.json
+        - prompts/cti/cti-subsumption-pipeline@v1.md
+        - prompts/registry.yaml
+        - agents/examples/CTI_SUBSUMPTION_PIPELINE_20260131.json
+      domains:
+        - cti
+        - governance
+        - docs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md
