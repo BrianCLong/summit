@@ -1,0 +1,9 @@
+{
+  "version": "v99",
+  "task_id": "task-abc",
+  "from_agent": "agent-a",
+  "to_agent": "agent-b",
+  "intent": "analyze_data",
+  "inputs": [],
+  "trace": {}
+}

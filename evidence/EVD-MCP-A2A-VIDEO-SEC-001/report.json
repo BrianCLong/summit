@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-MCP-A2A-VIDEO-SEC-001",
+  "area": "security",
+  "summary": "Security Policy and Schemas established.",
+  "artifacts": [
+    "schemas/evidence/report.v1.schema.json",
+    "schemas/evidence/metrics.v1.schema.json",
+    "schemas/evidence/stamp.v1.schema.json"
+  ]
+}

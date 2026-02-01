@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/metrics.v1.schema.json",
+  "title": "Evidence Metrics v1",
+  "type": "object",
+  "properties": {
+    "metrics": {
+       "type": "object",
+       "patternProperties": {
+         ".*": { "type": ["number", "string", "boolean", "object"] }
+       }
+    }
+  }
+}

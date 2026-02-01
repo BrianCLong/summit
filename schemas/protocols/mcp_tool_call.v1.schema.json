@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/protocols/mcp_tool_call.v1.schema.json",
+  "title": "MCP Tool Call v1",
+  "type": "object",
+  "required": ["version", "tool", "action", "args", "request_id", "permissions"],
+  "properties": {
+    "version": { "type": "string", "const": "v1" },
+    "request_id": { "type": "string" },
+    "tool": { "type": "string" },
+    "action": { "type": "string" },
+    "args": { "type": "object" },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "extensions": { "type": "object" }
+  },
+  "additionalProperties": false
+}

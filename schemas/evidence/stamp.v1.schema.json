@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/stamp.v1.schema.json",
+  "title": "Evidence Stamp v1",
+  "type": "object",
+  "required": ["created_at", "git_sha"],
+  "properties": {
+    "created_at": { "type": "string", "format": "date-time" },
+    "git_sha": { "type": "string" },
+    "pipeline": { "type": "string" }
+  },
+  "additionalProperties": false
+}

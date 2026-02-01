@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/protocols/a2a_task_envelope.v1.schema.json",
+  "title": "A2A Task Envelope v1",
+  "type": "object",
+  "required": ["version", "from_agent", "to_agent", "task_id", "intent", "inputs", "trace"],
+  "properties": {
+    "version": { "type": "string", "const": "v1" },
+    "task_id": { "type": "string" },
+    "from_agent": { "type": "string" },
+    "to_agent": { "type": "string" },
+    "intent": { "type": "string" },
+    "inputs": { "type": "array" },
+    "artifacts": { "type": "array" },
+    "auth": { "type": "object" },
+    "trace": { "type": "object" },
+    "extensions": { "type": "object" }
+  },
+  "additionalProperties": false
+}
