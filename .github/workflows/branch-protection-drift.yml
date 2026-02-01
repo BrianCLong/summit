@@ -256,6 +256,12 @@ jobs:
           2. Add/remove entries from `always_required` section
           3. Create PR for review
 
+          **Option C: Sync via Workflow**
+
+          1. Run the [Sync Branch Protection](${{ github.server_url }}/${{ github.repository }}/actions/workflows/sync-branch-protection.yml) workflow manually.
+             - Branch: `${{ steps.branch.outputs.branch }}`
+             - Dry Run: `false`
+
           ---
 
           ### Links
@@ -312,7 +318,6 @@ jobs:
 
               console.log(`Updated issue #${issueNumber}`);
             }
-
 
       - name: Auto-Close on Resolution
         if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true'
