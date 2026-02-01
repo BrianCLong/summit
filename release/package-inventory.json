@@ -1,0 +1,4948 @@
+[
+  {
+    "name": "@intelgraph/agent-governance",
+    "path": "agents/governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/multimodal-fusion",
+    "path": "agents/multimodal",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/multi-llm-orchestrator",
+    "path": "agents/orchestrator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/a11y-lab",
+    "path": "apps/a11y-lab",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/analytics-engine",
+    "path": "apps/analytics-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/api",
+    "path": "apps/api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/command-console",
+    "path": "apps/command-console",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/compliance-console",
+    "path": "apps/compliance-console",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/field-kit",
+    "path": "apps/field-kit",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/gateway",
+    "path": "apps/gateway",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-analytics-service",
+    "path": "apps/graph-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/intelgraph-api",
+    "path": "apps/intelgraph-api",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/labeling-ui",
+    "path": "apps/labeling-ui",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ml-engine",
+    "path": "apps/ml-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mobile",
+    "path": "apps/mobile",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mobile-interface",
+    "path": "apps/mobile-interface",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/search-engine",
+    "path": "apps/search-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "apps-server",
+    "path": "apps/server",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "slo-exporter",
+    "path": "apps/slo-exporter",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@switchboard/web",
+    "path": "apps/switchboard-web",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "tri-pane",
+    "path": "apps/tri-pane",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ui",
+    "path": "apps/ui",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "validator-worker",
+    "path": "apps/validator-worker",
+    "private": true,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/web",
+    "path": "apps/web",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "webapp",
+    "path": "apps/webapp",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/workflow-engine",
+    "path": "apps/workflow-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cli",
+    "path": "cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "intelgraph-client",
+    "path": "client",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/api-svc-template",
+    "path": "companyos/services/api-svc-template",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/companyos-api",
+    "path": "companyos/services/companyos-api",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/incident-api",
+    "path": "companyos/services/incident-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/tenant-api",
+    "path": "companyos/services/tenant-api",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/pr-review",
+    "path": "devtools/pr-review",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@libs/audit",
+    "path": "libs/audit/node",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ingest-worker",
+    "path": "libs/ingest-worker/node",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/3d-visualization",
+    "path": "packages/3d-visualization",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/acs-learner",
+    "path": "packages/acs-learner",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/acs-simulator",
+    "path": "packages/acs-simulator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/adapter-sdk",
+    "path": "packages/adapter-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/adc",
+    "path": "packages/adc",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/advanced-caching",
+    "path": "packages/advanced-caching",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/adversarial-ai",
+    "path": "packages/adversarial-ai",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/aer-ledger",
+    "path": "packages/aer-ledger",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/afl-store",
+    "path": "packages/afl-store",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/agent-ecosystem",
+    "path": "packages/agent-ecosystem",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@summit/agent-gym",
+    "path": "packages/agent-gym",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@summit/agent-gym-metrics",
+    "path": "packages/agent-gym-metrics",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/agent-identification",
+    "path": "packages/agent-identification",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/agent-lab",
+    "path": "packages/agent-lab",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/agent-negotiation",
+    "path": "packages/agent-negotiation",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@summit/agent-registry",
+    "path": "packages/agent-registry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.1.4"
+  },
+  {
+    "name": "@intelgraph/agent-runtime",
+    "path": "packages/agent-runtime",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/agent-trace",
+    "path": "packages/agent-trace",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@safety/ai-safety-suite",
+    "path": "packages/ai-safety-suite",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ai-wellbeing-predictors",
+    "path": "packages/ai-wellbeing-predictors",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/anomaly-detection",
+    "path": "packages/anomaly-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/api-analytics",
+    "path": "packages/api-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/api-framework",
+    "path": "packages/api-framework",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/api-gateway-core",
+    "path": "packages/api-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/api-management",
+    "path": "packages/api-management",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/ark",
+    "path": "packages/ark",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/atl",
+    "path": "packages/atl",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/attack-surface",
+    "path": "packages/attack-surface",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/attribution-engine",
+    "path": "packages/attribution-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audio-analytics",
+    "path": "packages/audio-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audio-enhancement",
+    "path": "packages/audio-enhancement",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audio-forensics",
+    "path": "packages/audio-forensics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audio-intelligence",
+    "path": "packages/audio-intelligence",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audio-processing",
+    "path": "packages/audio-processing",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audio-synthesis",
+    "path": "packages/audio-synthesis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/authentication",
+    "path": "packages/authentication",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/authority-compiler",
+    "path": "packages/authority-compiler",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/authz-core",
+    "path": "packages/authz-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/autonomous-ops",
+    "path": "packages/autonomous-ops",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/battle-fusion",
+    "path": "packages/battle-fusion",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/battle-types",
+    "path": "packages/battle-types",
+    "private": null,
+    "publishConfig": {
+      "access": "public"
+    },
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/behavior-merge-engine",
+    "path": "packages/behavior-merge-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/behavioral-analysis",
+    "path": "packages/behavioral-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/bilateral-relations",
+    "path": "packages/bilateral-relations",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/biometrics",
+    "path": "packages/biometrics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/bitemporal",
+    "path": "packages/bitemporal",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/blockchain",
+    "path": "packages/blockchain",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/business-glossary",
+    "path": "packages/business-glossary",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/business-rules",
+    "path": "packages/business-rules",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cache",
+    "path": "packages/cache",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cache-core",
+    "path": "packages/cache-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/canary-lattice",
+    "path": "packages/canary-lattice",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/canonical-entities",
+    "path": "packages/canonical-entities",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/canonical-schema",
+    "path": "packages/canonical-schema",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/catalog-analytics",
+    "path": "packages/catalog-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/causal-inference",
+    "path": "packages/causal-inference",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cep-engine",
+    "path": "packages/cep-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/chain-of-custody",
+    "path": "packages/chain-of-custody",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/charting",
+    "path": "packages/charting",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ci-analytics",
+    "path": "packages/ci-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/cib-detector",
+    "path": "packages/cib-detector",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@summit/cli",
+    "path": "packages/cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cloud-abstraction",
+    "path": "packages/cloud-abstraction",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cloud-governance",
+    "path": "packages/cloud-governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cloud-platform",
+    "path": "packages/cloud-platform",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cnn-framework",
+    "path": "packages/cnn-framework",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/cogsec-model",
+    "path": "packages/cogsec-model",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/collaboration",
+    "path": "packages/collaboration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/collection-coordination",
+    "path": "packages/collection-coordination",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/comint-analyzer",
+    "path": "packages/comint-analyzer",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/commenting",
+    "path": "packages/commenting",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/common-types",
+    "path": "packages/common-types",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/community",
+    "path": "packages/community",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/competitive-execution",
+    "path": "packages/competitive-execution",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/compliance-monitor",
+    "path": "packages/compliance-monitor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/component-tracker",
+    "path": "packages/component-tracker",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/computer-vision",
+    "path": "packages/computer-vision",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/conflict-intel",
+    "path": "packages/conflict-intel",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/connector-sdk",
+    "path": "packages/connector-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/connectors",
+    "path": "packages/connectors",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/content-verification",
+    "path": "packages/content-verification",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/convergence-tracking",
+    "path": "packages/convergence-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/copilot-agent-runtime",
+    "path": "packages/copilot-agent-runtime",
+    "private": null,
+    "publishConfig": null,
+    "version": "1.0.0"
+  },
+  {
+    "name": "@intelgraph/corruption-tracking",
+    "path": "packages/corruption-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/counterintel-ops",
+    "path": "packages/counterintel-ops",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/covert-operations",
+    "path": "packages/covert-operations",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/covert-ops",
+    "path": "packages/covert-ops",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cqrs",
+    "path": "packages/cqrs",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/crisis-diplomacy",
+    "path": "packages/crisis-diplomacy",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/crsp",
+    "path": "packages/crsp",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cryptanalysis-engine",
+    "path": "packages/cryptanalysis-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cryptographic-agility",
+    "path": "packages/cryptographic-agility",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cybercrime-monitor",
+    "path": "packages/cybercrime-monitor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cybint-bulwark",
+    "path": "packages/cybint-bulwark",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/darkweb-intel",
+    "path": "packages/darkweb-intel",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/dashboard-framework",
+    "path": "packages/dashboard-framework",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-augmentation",
+    "path": "packages/data-augmentation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-catalog",
+    "path": "packages/data-catalog",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-integration",
+    "path": "packages/data-integration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-lineage",
+    "path": "packages/data-lineage",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-monetization-types",
+    "path": "packages/data-monetization-types",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-warehouse",
+    "path": "packages/data-warehouse",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/database-sharding",
+    "path": "packages/database-sharding",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/decentralized-identity",
+    "path": "packages/decentralized-identity",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/deception-detector",
+    "path": "packages/deception-detector",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/deception-tech",
+    "path": "packages/deception-tech",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/decision-graph",
+    "path": "packages/decision-graph",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/decision-ledger",
+    "path": "packages/decision-ledger",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/decision-policy",
+    "path": "packages/decision-policy",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/decision-support",
+    "path": "packages/decision-support",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/deep-learning-core",
+    "path": "packages/deep-learning-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/deepfake-detection",
+    "path": "packages/deepfake-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/design-space",
+    "path": "packages/design-space",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/digital-signatures",
+    "path": "packages/digital-signatures",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/digital-twin-brain",
+    "path": "packages/digital-twin-brain",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/dimensional-modeling",
+    "path": "packages/dimensional-modeling",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/diplomatic-comms",
+    "path": "packages/diplomatic-comms",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/diplomatic-personnel",
+    "path": "packages/diplomatic-personnel",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/diplomatic-tracking",
+    "path": "packages/diplomatic-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/disinformation-detection",
+    "path": "packages/disinformation-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/distributed-training",
+    "path": "packages/distributed-training",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/dlp-core",
+    "path": "packages/dlp-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/document-governance",
+    "path": "packages/document-governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/document-verification",
+    "path": "packages/document-verification",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/dpec",
+    "path": "packages/dpec",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/drug-intelligence",
+    "path": "packages/drug-intelligence",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/economic-diplomacy",
+    "path": "packages/economic-diplomacy",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/edge-ai",
+    "path": "packages/edge-ai",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/edge-computing",
+    "path": "packages/edge-computing",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/edge-runtime",
+    "path": "packages/edge-runtime",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/edge-sync",
+    "path": "packages/edge-sync",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/election-disruption-detection",
+    "path": "packages/election-disruption-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/emerging-threats",
+    "path": "packages/emerging-threats",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/entity-extraction",
+    "path": "packages/entity-extraction",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/entity-linking",
+    "path": "packages/entity-linking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/entity-resolution-core",
+    "path": "packages/entity-resolution",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/error-handling",
+    "path": "packages/error-handling",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/errors",
+    "path": "packages/errors",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/esg-reporting",
+    "path": "packages/esg-reporting",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/espionage-tracking",
+    "path": "packages/espionage-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/etl-assistant",
+    "path": "packages/etl-assistant",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/etl-framework",
+    "path": "packages/etl-framework",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/etl-pipelines",
+    "path": "packages/etl-pipelines",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/eval-funnel",
+    "path": "packages/eval-funnel",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/event-booster",
+    "path": "packages/event-booster",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/event-bus",
+    "path": "packages/event-bus",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/event-sourcing",
+    "path": "packages/event-sourcing",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/event-streaming",
+    "path": "packages/event-streaming",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/events-producer",
+    "path": "packages/events-producer",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/evidence",
+    "path": "packages/evidence",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/experiment-intent",
+    "path": "packages/experiment-intent",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@summit/explainability-sdk",
+    "path": "packages/explainability-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/extension-api",
+    "path": "packages/extension-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/extension-sdk",
+    "path": "packages/extension-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/extensions",
+    "path": "packages/extensions",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/extremism-monitor",
+    "path": "packages/extremism-monitor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/face-analysis",
+    "path": "packages/face-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/facial-recognition",
+    "path": "packages/facial-recognition",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/fake-account-detection",
+    "path": "packages/fake-account-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/feature-engineering",
+    "path": "packages/feature-engineering",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/feature-flags",
+    "path": "packages/feature-flags",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/federated-campaign-radar",
+    "path": "packages/federated-campaign-radar",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/federated-learning",
+    "path": "packages/federated-learning",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/finance-normalizer-types",
+    "path": "packages/finance-normalizer-types",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/financial-crime",
+    "path": "packages/financial-crime",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/flow-governance",
+    "path": "packages/flow-governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/forecasting",
+    "path": "packages/forecasting",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/foreign-fighters",
+    "path": "packages/foreign-fighters",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/foreign-intelligence",
+    "path": "packages/foreign-intelligence",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/foreign-policy-analysis",
+    "path": "packages/foreign-policy-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/foundry",
+    "path": "packages/foundry",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/fusion-analytics",
+    "path": "packages/fusion-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/futures-analysis",
+    "path": "packages/futures-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/fztr-client",
+    "path": "packages/fztr-client",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/fztr-relay",
+    "path": "packages/fztr-relay",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/gateway-tariff",
+    "path": "packages/gateway-tariff",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/gdr",
+    "path": "packages/gdr",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/generative-models",
+    "path": "packages/generative-models",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/genui",
+    "path": "packages/genui",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/geolocation-engine",
+    "path": "packages/geolocation-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/geopolitical-analysis",
+    "path": "packages/geopolitical-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/geospatial",
+    "path": "packages/geospatial",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/geospatial-synthesis",
+    "path": "packages/geospatial-synthesis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/golden-path",
+    "path": "packages/golden-path",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/golden-records",
+    "path": "packages/golden-records",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/govbrief",
+    "path": "packages/govbrief",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/governance-hooks",
+    "path": "packages/governance-hooks",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-ai-core",
+    "path": "packages/graph-ai-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-algorithms",
+    "path": "packages/graph-algorithms",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-analytics",
+    "path": "packages/graph-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-database",
+    "path": "packages/graph-database",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-query",
+    "path": "packages/graph-query",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/graph-rag",
+    "path": "packages/graph-rag",
+    "private": null,
+    "publishConfig": null,
+    "version": "1.0.0"
+  },
+  {
+    "name": "@intelgraph/graph-reasoning",
+    "path": "packages/graph-reasoning",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summi7/graph-sync-validator",
+    "path": "packages/graph-sync-validator",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/graph-synthesis",
+    "path": "packages/graph-synthesis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-viz",
+    "path": "packages/graph-viz",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graphql-dataloader",
+    "path": "packages/graphql-dataloader",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/help-overlay",
+    "path": "packages/help-overlay",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/hierarchy-management",
+    "path": "packages/hierarchy-management",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/hit-protocol",
+    "path": "packages/hit-protocol",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/hitl-orchestrator",
+    "path": "packages/hitl-orchestrator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/hrn",
+    "path": "packages/hrn",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/humint-types",
+    "path": "packages/humint-types",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/i18n",
+    "path": "packages/i18n",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/identity-resolution",
+    "path": "packages/identity-resolution",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/image-forensics",
+    "path": "packages/image-forensics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/image-synthesis",
+    "path": "packages/image-synthesis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/incentive-sim",
+    "path": "packages/incentive-sim",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/influence-detection",
+    "path": "packages/influence-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/influence-mining",
+    "path": "packages/influence-mining",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ingest-connector-sdk",
+    "path": "packages/ingest-connector-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ingest-wizard",
+    "path": "packages/ingest-wizard",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/integration-modernization",
+    "path": "packages/integration-modernization",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/integration-twin",
+    "path": "packages/integration-twin",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/intelgraph-disarm",
+    "path": "packages/intelgraph-disarm",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/intent-decomposition",
+    "path": "packages/intent-decomposition",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/ioc-manager",
+    "path": "packages/ioc-manager",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/jira-integration",
+    "path": "packages/jira-integration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/kafka-integration",
+    "path": "packages/kafka-integration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/knowledge-graph",
+    "path": "packages/knowledge-graph",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/kompromat-sim",
+    "path": "packages/kompromat-sim",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/kpw-media",
+    "path": "packages/kpw-media",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/ktoon",
+    "path": "packages/ktoon",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/lakehouse",
+    "path": "packages/lakehouse",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/language-models",
+    "path": "packages/language-models",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ledger-server",
+    "path": "packages/ledger-server",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/license-registry-pkg",
+    "path": "packages/license-registry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/link-prediction",
+    "path": "packages/link-prediction",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/liquid-nano",
+    "path": "packages/liquid-nano",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/logger",
+    "path": "packages/logger",
+    "private": null,
+    "publishConfig": {
+      "access": "restricted"
+    },
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/logistics-automation-types",
+    "path": "packages/logistics-automation-types",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/logistics-intel",
+    "path": "packages/logistics-intel",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/lreg-exporter",
+    "path": "packages/lreg-exporter",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/maestro",
+    "path": "packages/maestro-cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/maestro-core",
+    "path": "packages/maestro-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/maestro-sdk",
+    "path": "packages/maestro-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@maestro/skills-tooling",
+    "path": "packages/maestro-skills",
+    "private": true,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@maestro/skill-recursive-context",
+    "path": "packages/maestro-skills/recursive-context-skill",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@maestro/skill-designos-extract",
+    "path": "packages/maestro-skills/skill-designos-extract",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@maestro/skill-github-pr",
+    "path": "packages/maestro-skills/skill-github-pr",
+    "private": null,
+    "publishConfig": null,
+    "version": "1.0.0"
+  },
+  {
+    "name": "@maestro/skill-ui-build-loop",
+    "path": "packages/maestro-skills/skill-ui-build-loop",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@maestro/skill-ui-components",
+    "path": "packages/maestro-skills/skill-ui-components",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@maestro/skill-voice-generation",
+    "path": "packages/maestro-skills/voice-generation-skill",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/malware-analysis",
+    "path": "packages/malware-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mandates",
+    "path": "packages/mandates",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/map-visualization",
+    "path": "packages/map-visualization",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mapping-dsl",
+    "path": "packages/mapping-dsl",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mass-behavior-dynamics",
+    "path": "packages/mass-behavior-dynamics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mcp",
+    "path": "packages/mcp",
+    "private": true,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/mcp-apps",
+    "path": "packages/mcp-apps",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@summit/mcp-gateway",
+    "path": "packages/mcp-gateway",
+    "private": true,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/mdm-analytics",
+    "path": "packages/mdm-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mdm-core",
+    "path": "packages/mdm-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mdm-governance",
+    "path": "packages/mdm-governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mdm-stewardship",
+    "path": "packages/mdm-stewardship",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mdm-sync",
+    "path": "packages/mdm-sync",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/media-manipulation",
+    "path": "packages/media-manipulation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/memory",
+    "path": "packages/memory",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mesh-eval-sdk",
+    "path": "packages/mesh-eval-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mesh-observability",
+    "path": "packages/mesh-observability",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mesh-sdk",
+    "path": "packages/mesh-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/message-queue-enhanced",
+    "path": "packages/message-queue-enhanced",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/messaging",
+    "path": "packages/messaging",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/metadata-discovery",
+    "path": "packages/metadata-discovery",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/metrics-exporter",
+    "path": "packages/metrics-exporter",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/migration-linter",
+    "path": "packages/migration-linter",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/migration-orchestrator",
+    "path": "packages/migration-orchestrator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/missile-intelligence",
+    "path": "packages/missile-intelligence",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ml-models",
+    "path": "packages/ml-models",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mlops-platform",
+    "path": "packages/mlops-platform",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mobile-sdk",
+    "path": "packages/mobile-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-explainability",
+    "path": "packages/model-explainability",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-interpretability",
+    "path": "packages/model-interpretability",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-monitoring",
+    "path": "packages/model-monitoring",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-optimization",
+    "path": "packages/model-optimization",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-serving",
+    "path": "packages/model-serving",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/modernization-engine",
+    "path": "packages/modernization-engine",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/multi-int-fusion",
+    "path": "packages/multi-int-fusion",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/multilateral-tracking",
+    "path": "packages/multilateral-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/narrative-engine",
+    "path": "packages/narrative-engine",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/narrative-ops-analyzer",
+    "path": "packages/narrative-ops-analyzer",
+    "private": true,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/narrative-tracking",
+    "path": "packages/narrative-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/network-graph",
+    "path": "packages/network-graph",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/network-interceptor",
+    "path": "packages/network-interceptor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/network-threat-detection",
+    "path": "packages/network-threat-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/neural-networks",
+    "path": "packages/neural-networks",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/nlp",
+    "path": "packages/nlp",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/no-code-builder",
+    "path": "packages/no-code-builder",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/nuclear-monitoring",
+    "path": "packages/nuclear-monitoring",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/object-detection",
+    "path": "packages/object-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/object-storage",
+    "path": "packages/object-storage",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/observability",
+    "path": "packages/observability",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ocr",
+    "path": "packages/ocr",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/olap-engine",
+    "path": "packages/olap-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/operations-center",
+    "path": "packages/operations-center",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/operations-management",
+    "path": "packages/operations-management",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/orchestration",
+    "path": "packages/orchestration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/orchestrator",
+    "path": "packages/orchestrator",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/organized-crime-tracker",
+    "path": "packages/organized-crime-tracker",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/osint-collector",
+    "path": "packages/osint-collector",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/osint-search",
+    "path": "packages/osint-search",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/packs",
+    "path": "packages/packs",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/partner-governance",
+    "path": "packages/partner-governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/plan-eval-platform",
+    "path": "packages/plan-eval-platform",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/platform-benchmarks",
+    "path": "packages/platform-benchmarks",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/platform-cache",
+    "path": "packages/platform-cache",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/platform-data",
+    "path": "packages/platform-data",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/platform-governance",
+    "path": "packages/platform-governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/platform-telemetry",
+    "path": "packages/platform-telemetry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/plugin-host",
+    "path": "packages/plugin-host",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/plugin-sdk",
+    "path": "packages/plugin-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/plugin-system",
+    "path": "packages/plugin-system",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/policy",
+    "path": "packages/policy",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/policy-audit",
+    "path": "packages/policy-audit",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/policy-cards",
+    "path": "packages/policy-cards",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/policy-types",
+    "path": "packages/policy-types",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/post-quantum-crypto",
+    "path": "packages/post-quantum-crypto",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/predictive-diplomacy",
+    "path": "packages/predictive-diplomacy",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/predictive-graph-intelligence",
+    "path": "packages/predictive-graph-intelligence",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/predictive-models",
+    "path": "packages/predictive-models",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/privacy-preserving",
+    "path": "packages/privacy-preserving",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/procurement-os",
+    "path": "packages/procurement-os",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/proliferation-networks",
+    "path": "packages/proliferation-networks",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/propaganda-analysis",
+    "path": "packages/propaganda-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-ledger-core",
+    "path": "packages/prov-ledger",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-ledger-client",
+    "path": "packages/prov-ledger-client",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-ledger-extensions",
+    "path": "packages/prov-ledger-extensions",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-ledger-sdk",
+    "path": "packages/prov-ledger-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-ledger-verifier",
+    "path": "packages/prov-ledger-verifier",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-manifest",
+    "path": "packages/prov-manifest",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/provenance",
+    "path": "packages/provenance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/provenance-visualizer",
+    "path": "packages/provenance-visualizer",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/purple-team",
+    "path": "packages/purple-team",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/pve",
+    "path": "packages/pve",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/quantum-ml",
+    "path": "packages/quantum-ml",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/quantum-optimization",
+    "path": "packages/quantum-optimization",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/quantum-simulation",
+    "path": "packages/quantum-simulation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/quantum-supply-chain",
+    "path": "packages/quantum-supply-chain",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/query-language",
+    "path": "packages/query-language",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/query-optimizer",
+    "path": "packages/query-optimizer",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/radicalization-detection",
+    "path": "packages/radicalization-detection",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/rate-limiter",
+    "path": "packages/rate-limiter",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/rate-limiting",
+    "path": "packages/rate-limiting",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/real-time-sync",
+    "path": "packages/real-time-sync",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@maestro/recursive-context-runtime",
+    "path": "packages/recursive-context-runtime",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/red-team",
+    "path": "packages/red-team",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/reference-data",
+    "path": "packages/reference-data",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/regional-readiness-engine",
+    "path": "packages/regional-readiness-engine",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/relationship-mining",
+    "path": "packages/relationship-mining",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/release-bundle",
+    "path": "packages/release-bundle",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/rest-api",
+    "path": "packages/rest-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/retrieval-engine",
+    "path": "packages/retrieval-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/rf-processor",
+    "path": "packages/rf-processor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/risk-forecasting",
+    "path": "packages/risk-forecasting",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/risk-scoring",
+    "path": "packages/risk-scoring",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/rnn-platform",
+    "path": "packages/rnn-platform",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/rpa",
+    "path": "packages/rpa",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/rptc",
+    "path": "packages/rptc",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/satellite-imagery",
+    "path": "packages/satellite-imagery",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sdk",
+    "path": "packages/sdk",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sdk-js",
+    "path": "packages/sdk-js",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sdk-ts",
+    "path": "packages/sdk-ts",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/security-defense",
+    "path": "packages/security-defense",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/semantic-analysis",
+    "path": "packages/semantic-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/semantic-search",
+    "path": "packages/semantic-search",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sentiment-analysis",
+    "path": "packages/sentiment-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/shared",
+    "path": "packages/shared",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sigint-collector",
+    "path": "packages/sigint-collector",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sigint-processor",
+    "path": "packages/sigint-processor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/signal-contracts",
+    "path": "packages/signal-contracts",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/signal-processing",
+    "path": "packages/signal-processing",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sim-harness",
+    "path": "packages/sim-harness",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/skillmesh",
+    "path": "packages/skillmesh",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@summit/skillpacks",
+    "path": "packages/skillpacks",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/slow-query-killer",
+    "path": "packages/slow-query-killer",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/smart-contract-sdk",
+    "path": "packages/smart-contract-sdk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/smart-contracts",
+    "path": "packages/smart-contracts",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/social-media-intel",
+    "path": "packages/social-media-intel",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/spatial-analysis",
+    "path": "packages/spatial-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/speaker-identification",
+    "path": "packages/speaker-identification",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/specflow",
+    "path": "packages/specflow",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/speech-recognition",
+    "path": "packages/speech-recognition",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/strands-agents",
+    "path": "packages/strands-agents",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/strategic-foresight-pkg",
+    "path": "packages/strategic-foresight",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/stream-analytics",
+    "path": "packages/stream-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/stream-processing",
+    "path": "packages/stream-processing",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/streaming-api",
+    "path": "packages/streaming-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/supplier-risk",
+    "path": "packages/supplier-risk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/supply-chain-ai",
+    "path": "packages/supply-chain-ai",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/supply-chain-mapper",
+    "path": "packages/supply-chain-mapper",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/supply-chain-types",
+    "path": "packages/supply-chain-types",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/supplychain-guard",
+    "path": "packages/supplychain-guard",
+    "private": null,
+    "publishConfig": null,
+    "version": "1.0.0"
+  },
+  {
+    "name": "@intelgraph/synthetic-data",
+    "path": "packages/synthetic-data",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/synthetic-media",
+    "path": "packages/synthetic-media",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/systemic-risk-engine",
+    "path": "packages/systemic-risk-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.1.0"
+  },
+  {
+    "name": "@intelgraph/targeting-support",
+    "path": "packages/targeting-support",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/task-routing",
+    "path": "packages/task-routing",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/maestro-tasks-core",
+    "path": "packages/tasks-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/technical-analysis",
+    "path": "packages/technical-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/technical-intelligence",
+    "path": "packages/technical-intelligence",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/telemetry-config",
+    "path": "packages/telemetry-config",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/telephony",
+    "path": "packages/telephony",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/terrorist-finance",
+    "path": "packages/terrorist-finance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/terrorist-tracking",
+    "path": "packages/terrorist-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/text-analytics",
+    "path": "packages/text-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/text-generation",
+    "path": "packages/text-generation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/third-party-risk",
+    "path": "packages/third-party-risk",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/threat-actors",
+    "path": "packages/threat-actors",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/threat-detection-core",
+    "path": "packages/threat-detection-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/threat-emulation",
+    "path": "packages/threat-emulation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/threat-hunting",
+    "path": "packages/threat-hunting",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/threat-intelligence",
+    "path": "packages/threat-intelligence",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/time-series",
+    "path": "packages/time-series",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/trafficking-networks",
+    "path": "packages/trafficking-networks",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/training-orchestration",
+    "path": "packages/training-orchestration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/training-strategies",
+    "path": "packages/training-strategies",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/transformers",
+    "path": "packages/transformers",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/treaty-monitor",
+    "path": "packages/treaty-monitor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/treaty-verification",
+    "path": "packages/treaty-verification",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/tri-pane-ux",
+    "path": "packages/tri-pane-ux",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/types",
+    "path": "packages/types",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/unified-analytics",
+    "path": "packages/unified-analytics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/v2-sandbox",
+    "path": "packages/v2-sandbox",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summitsec/vcr-kit",
+    "path": "packages/vcr-kit",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/version-control",
+    "path": "packages/version-control",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/video-analysis",
+    "path": "packages/video-analysis",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/visualization",
+    "path": "packages/visualization",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/vulnerability-intel",
+    "path": "packages/vulnerability-intel",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/vulnerability-intelligence",
+    "path": "packages/vulnerability-intelligence",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/watchlist-screening",
+    "path": "packages/watchlist-screening",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/web-scraper",
+    "path": "packages/web-scraper",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/websocket-client",
+    "path": "packages/websocket-client",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/wmd-tracking",
+    "path": "packages/wmd-tracking",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/work-graph",
+    "path": "packages/work-graph",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/workspace",
+    "path": "packages/workspace",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-ledger-service",
+    "path": "prov-ledger-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/acc-sdk",
+    "path": "sdk/acc",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/acx",
+    "path": "sdk/acx",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cab-sdk",
+    "path": "sdk/cab",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cce-sdk",
+    "path": "sdk/cce-ts",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/jpr",
+    "path": "sdk/jpr-ts",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/pcqp-sdk",
+    "path": "sdk/pcqp",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prer-sdk",
+    "path": "sdk/prer-ts",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "psc-runner-sdk",
+    "path": "sdk/psc-runner",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/rarl",
+    "path": "sdk/rarl",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/maestro-sdk",
+    "path": "sdk/typescript",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/zk-tx-client",
+    "path": "sdk/zk-tx-client",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "intelgraph-server",
+    "path": "server",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/admin-api",
+    "path": "services/admin-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/admin-automation",
+    "path": "services/admin-automation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/agent-execution-platform",
+    "path": "services/agent-execution-platform",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/agent-gateway",
+    "path": "services/agent-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/agent-runtime",
+    "path": "services/agent-runtime",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/agentic-mesh-evaluation",
+    "path": "services/agentic-mesh-evaluation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/agents",
+    "path": "services/agents",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ai-marketplace",
+    "path": "services/ai-marketplace",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "ai-nlq",
+    "path": "services/ai-nlq",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ai-sandbox",
+    "path": "services/ai-sandbox",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ai-security-scanner",
+    "path": "services/ai-security-scanner",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ai-service-platform",
+    "path": "services/ai-service-platform",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/alert-engine",
+    "path": "services/alert-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/analytics-service",
+    "path": "services/analytics-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/api-gateway",
+    "path": "services/api-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/approvals",
+    "path": "services/approvals",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audio-service",
+    "path": "services/audio-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/audit-blackbox-service",
+    "path": "services/audit-blackbox-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/auth-gateway",
+    "path": "services/auth-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/authenticity-service",
+    "path": "services/authenticity-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "authz-gateway",
+    "path": "services/authz-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/battle-api",
+    "path": "services/battle-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/battle-command-service",
+    "path": "services/battle-command-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/battle-fusion-service",
+    "path": "services/battle-fusion-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/battle-ingest-service",
+    "path": "services/battle-ingest-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/biometric-service",
+    "path": "services/biometric-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "maestro-build-hub",
+    "path": "services/build-hub",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/bundle-pipeline-service",
+    "path": "services/bundle-pipeline-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/catalog-service",
+    "path": "services/catalog-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "cep-service",
+    "path": "services/cep",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/chatops",
+    "path": "services/chatops",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/citizen-ai",
+    "path": "services/citizen-ai",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/citizen-service",
+    "path": "services/citizen-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cloud-orchestrator",
+    "path": "services/cloud-orchestrator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cloud-platform-service",
+    "path": "services/cloud-platform-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/coa-planner",
+    "path": "services/coa-planner",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/collaboration-service",
+    "path": "services/collaboration-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/companyos-sync",
+    "path": "services/companyos-sync",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/compliance-evaluator",
+    "path": "services/compliance-evaluator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/config-service",
+    "path": "services/config-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/control-tower-service",
+    "path": "services/control-tower-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/copilot",
+    "path": "services/copilot",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/cost-optimization",
+    "path": "services/cost-optimization",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/counterterrorism-service",
+    "path": "services/counterterrorism-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/crm",
+    "path": "services/crm",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/crypto-service",
+    "path": "services/crypto-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/csr",
+    "path": "services/csr",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/dashboard-service",
+    "path": "services/dashboard-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-discovery-fusion",
+    "path": "services/data-discovery-fusion",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-factory-service",
+    "path": "services/data-factory-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-marketplace",
+    "path": "services/data-marketplace",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-monetization-engine",
+    "path": "services/data-monetization-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-pool",
+    "path": "services/data-pool",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/data-spine",
+    "path": "services/data-spine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/datalab-service",
+    "path": "services/datalab-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/deception-detection-service",
+    "path": "services/deception-detection-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/decision-api",
+    "path": "services/decision-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/dialectic-agents",
+    "path": "services/dialectic-agents",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/digital-twin",
+    "path": "services/digital-twin",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/digital-twin-cognition",
+    "path": "services/digital-twin-cognition",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/disaster-recovery",
+    "path": "services/disaster-recovery",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/distributed-registry",
+    "path": "services/distributed-registry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/dl-training-service",
+    "path": "services/dl-training-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "docling-svc",
+    "path": "services/docling-svc",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/edge-gateway",
+    "path": "services/edge-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/edge-orchestrator",
+    "path": "services/edge-orchestrator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/election-integrity-service",
+    "path": "services/election-integrity-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/enrichment-service",
+    "path": "services/enrichment-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/entity-resolution",
+    "path": "services/entity-resolution",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/er-service",
+    "path": "services/er-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/esg-reporting-service",
+    "path": "services/esg-reporting-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/espionage-service",
+    "path": "services/espionage-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/etl-service",
+    "path": "services/etl-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/event-bus-service",
+    "path": "services/event-bus-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/exporter",
+    "path": "services/exporter",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/feature-flags-service",
+    "path": "services/feature-flags",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/federation-service",
+    "path": "services/federation-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/feed-processor",
+    "path": "services/feed-processor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/finance-normalizer-service",
+    "path": "services/finance-normalizer-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/foreign-intel-service",
+    "path": "services/foreign-intel-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/gateway-service",
+    "path": "services/gateway-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/geocoding-api",
+    "path": "services/geocoding-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/geoint-threat-platform",
+    "path": "services/geoint-threat-platform",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/geotemporal-api",
+    "path": "services/geotemporal-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/global-integration",
+    "path": "services/global-integration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "golden-sample",
+    "path": "services/golden-sample",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/gov-ai-governance",
+    "path": "services/gov-ai-governance",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/govtech-export-engine",
+    "path": "services/govtech-export-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-compute",
+    "path": "services/graph-compute",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "graph-core-service",
+    "path": "services/graph-core",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graph-db-service",
+    "path": "services/graph-db-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graphrag",
+    "path": "services/graphrag",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/graphrag-copilot",
+    "path": "services/graphrag-copilot",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/health-aggregator",
+    "path": "services/health-aggregator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "hello-service",
+    "path": "services/hello-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/humint-service",
+    "path": "services/humint-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/hypothesis-workbench",
+    "path": "services/hypothesis-workbench",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/i18n-service",
+    "path": "services/i18n-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/identity-fusion-service",
+    "path": "services/identity-fusion",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "ingest",
+    "path": "services/ingest",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ingest-adapters",
+    "path": "services/ingest-adapters",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "ingest-runner",
+    "path": "services/ingest-runner",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/innovation-sandbox",
+    "path": "services/innovation-sandbox",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "integration-gateway",
+    "path": "services/integration-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "0.0.1"
+  },
+  {
+    "name": "@intelgraph/intel-fusion",
+    "path": "services/intel",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/kb-service",
+    "path": "services/kb-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/labeling-service",
+    "path": "services/labeling-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/lakehouse-service",
+    "path": "services/lakehouse-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/license-registry",
+    "path": "services/license-registry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/logging-pipeline",
+    "path": "services/logging-pipeline",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/logistics-automation-service",
+    "path": "services/logistics-automation-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/marketplace",
+    "path": "services/marketplace",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mdm-service",
+    "path": "services/mdm-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/media-pipeline-service",
+    "path": "services/media-pipeline-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/metadata-service",
+    "path": "services/metadata-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mission-coordination-service",
+    "path": "services/mission-coordination-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ml-inference",
+    "path": "services/ml-inference",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/mlops-service",
+    "path": "services/mlops-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-hub-service",
+    "path": "services/model-hub-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-registry-service",
+    "path": "services/model-registry-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/model-serving-service",
+    "path": "services/model-serving-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "model-training-service",
+    "path": "services/model-training",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "mtif",
+    "path": "services/mtif",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "nl-cypher",
+    "path": "services/nl-cypher",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/nlp-service",
+    "path": "services/nlp-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/notification-router",
+    "path": "services/notification-router",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/operations-c2-service",
+    "path": "services/operations-c2-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "ops-guard",
+    "path": "services/ops-guard",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/orchestration-service",
+    "path": "services/orchestration",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/osint-service",
+    "path": "services/osint-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/pca-verifier",
+    "path": "services/pca-verifier",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/plugin-executor",
+    "path": "services/plugin-executor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/plugin-registry",
+    "path": "services/plugin-registry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "policy-audit-service",
+    "path": "services/policy-audit",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/policy-aware-cache",
+    "path": "services/policy-aware-cache",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "policy-compiler",
+    "path": "services/policy-compiler",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/policy-engine",
+    "path": "services/policy-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prd-generator",
+    "path": "services/prd-generator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "predictd",
+    "path": "services/predictd",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "prediction-service",
+    "path": "services/prediction-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "prer-service",
+    "path": "services/prer",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/privacy",
+    "path": "services/privacy",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/privacy-analytics-service",
+    "path": "services/privacy-analytics-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/procurement-automation",
+    "path": "services/procurement-automation",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prov-ledger",
+    "path": "services/prov-ledger",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/provenance-cli",
+    "path": "services/provenance-cli",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/quantum-service",
+    "path": "services/quantum-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/queue-manager",
+    "path": "services/queue-manager",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "realtime-service",
+    "path": "services/realtime",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/receipt-signer",
+    "path": "services/receipt-signer",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/receipt-worker",
+    "path": "services/receipt-worker",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/red-team-service",
+    "path": "services/red-team-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ref-data-service",
+    "path": "services/ref-data-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/regulatory-compliance-agents",
+    "path": "services/regulatory-compliance-agents",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/report-assembly",
+    "path": "services/report-assembly",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/reporting-service",
+    "path": "services/reporting",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/resilient-orchestrator",
+    "path": "services/resilient-orchestrator",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "risk-assessment-service",
+    "path": "services/risk-assessment-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/runbook-service",
+    "path": "services/runbooks",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/safe-analytics-workbench",
+    "path": "services/safe-analytics-workbench",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sandbox-gateway",
+    "path": "services/sandbox-gateway",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sandbox-tenant-profile",
+    "path": "services/sandbox-tenant-profile",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/scenario-engine-service",
+    "path": "services/scenario-engine-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/scenario-registry",
+    "path": "services/scenario-registry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/schema-ingest-wizard",
+    "path": "services/schema-ingest-wizard",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "scim-service",
+    "path": "services/scim",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/scoring-engine",
+    "path": "services/scoring-engine",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/search-indexer",
+    "path": "services/search-indexer",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/secure-elections",
+    "path": "services/secure-elections",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/self-upgrading-infrastructure",
+    "path": "services/self-upgrading-infrastructure",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sigint-service",
+    "path": "services/sigint-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sigint-telemetry",
+    "path": "services/sigint-telemetry",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/signal-bus-service",
+    "path": "services/signal-bus-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/smart-contracting-service",
+    "path": "services/smart-contracting-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/spacetime-service",
+    "path": "services/spacetime-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/spar",
+    "path": "services/spar",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sparql-endpoint",
+    "path": "services/sparql-endpoint",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/stix-taxii-ingestion",
+    "path": "services/stix-taxii-ingestion",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/strategic-foresight-service",
+    "path": "services/strategic-foresight",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/stream-processor",
+    "path": "services/stream-processor",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/streaming-ingest",
+    "path": "services/streaming-ingest",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sum",
+    "path": "services/sum",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "supply-chain-service",
+    "path": "services/supply-chain-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sync-service",
+    "path": "services/sync-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/synthdata-service",
+    "path": "services/synthdata",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/synthesis-service",
+    "path": "services/synthesis-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/talent-magnet",
+    "path": "services/talent-magnet",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "tenant-admin-service",
+    "path": "services/tenant-admin",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/threat-assessment-service",
+    "path": "services/threat-assessment-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/threat-library-service",
+    "path": "services/threat-library-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/timeseries-metrics",
+    "path": "services/timeseries-metrics",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/transcription-service",
+    "path": "services/transcription-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "tool-risk-registry",
+    "path": "services/trr",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/unified-audit",
+    "path": "services/unified-audit",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/universal-ingestion",
+    "path": "services/universal-ingestion",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/vision-api",
+    "path": "services/vision-api",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/warehouse-service",
+    "path": "services/warehouse-service",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/websocket-server",
+    "path": "services/websocket-server",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "worker-queue",
+    "path": "services/worker-queue",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/workflow-service",
+    "path": "services/workflow",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "xai-explain-anomaly",
+    "path": "services/xai-explain-anomaly",
+    "private": null,
+    "publishConfig": null,
+    "version": "1.0.0"
+  },
+  {
+    "name": "@intelgraph/zk-deconfliction",
+    "path": "services/zk-deconfliction",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "zk-tx",
+    "path": "services/zk-tx",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/admin-cli",
+    "path": "tools/admin-cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "agsm-dashboard",
+    "path": "tools/agsm-dashboard",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/aql-cli",
+    "path": "tools/aql",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "auditctl",
+    "path": "tools/auditctl",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "claim-verifier",
+    "path": "tools/claim-verifier",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/claude-code-cli",
+    "path": "tools/claude-code-cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "debt-detector",
+    "path": "tools/debt-detector",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/decs-cli",
+    "path": "tools/decs-cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@summit/deps-drift",
+    "path": "tools/deps-drift",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "issue-sweeper",
+    "path": "tools/issue-sweeper",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/plugin-cli",
+    "path": "tools/plugin-cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/promise-tracker",
+    "path": "tools/promise-tracker",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/prompt-system",
+    "path": "tools/prompt-system",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/replayctl",
+    "path": "tools/replayctl",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/sandbox-cli",
+    "path": "tools/sandbox-cli",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/scaffold-cli",
+    "path": "tools/scaffold-cli",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/security-gates",
+    "path": "tools/security-gates",
+    "private": true,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "@intelgraph/ses",
+    "path": "tools/ses",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  },
+  {
+    "name": "tesq",
+    "path": "tools/tesq",
+    "private": null,
+    "publishConfig": null,
+    "version": "4.2.3"
+  }
+]
