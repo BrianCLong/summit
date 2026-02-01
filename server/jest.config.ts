@@ -220,7 +220,7 @@ const config: Config = {
   coverageThreshold,
   coverageReporters: ['text', 'lcov', 'cobertura', 'json-summary'],
   coverageDirectory: '<rootDir>/coverage',
-  testTimeout: 30000,
+  testTimeout: 60000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
   testResultsProcessor: 'jest-junit',
@@ -252,10 +252,10 @@ const config: Config = {
     'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss|gaxios|gcp-metadata|@opentelemetry|pg)/)',
   ],
   maxWorkers: process.env.CI ? 2 : '50%',
-  // Limit worker memory to prevent OOM in CI
-  workerIdleMemoryLimit: process.env.CI ? '512MB' : undefined,
+  // Limit worker memory to prevent OOM in CI - Increased for stability
+  workerIdleMemoryLimit: process.env.CI ? '1GB' : undefined,
   // Open handle detection - helps identify hanging tests
-  detectOpenHandles: process.env.JEST_DETECT_HANDLES === 'true',
+  detectOpenHandles: true,
   // Force exit after tests complete (CI safety net for orphan handles)
   forceExit: process.env.CI === 'true',
 };

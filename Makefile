@@ -328,12 +328,11 @@ ga-report: ## Generate SOC evidence report for the current bundle
 ga-evidence: ## Create a minimal local evidence bundle for GA validation
 	@set -e; \
 	EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	if [ -d "$$EVIDENCE_DIR" ] && [ "$$(ls -A "$$EVIDENCE_DIR" 2>/dev/null)" ]; then \
-		echo "Evidence bundle already present at $$EVIDENCE_DIR"; \
-		exit 0; \
-	fi; \
-	node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$$EVIDENCE_DIR"; \
-	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
+	mkdir -p "$$EVIDENCE_DIR"; \
+	node scripts/compliance/generate-deterministic-sbom.mjs; \
+	cp .evidence/sbom.json "$$EVIDENCE_DIR/sbom.json"; \
+	node scripts/ci/generate-attestation.mjs --job ga-gate --out "$$EVIDENCE_DIR/attestation.json"; \
+	echo "Collected deterministic evidence bundle at $$EVIDENCE_DIR"
 
 evidence-bundle: ## Generate a deterministic PR evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [OUT=dir])
 	@BASE=$${BASE:-origin/main}; \
