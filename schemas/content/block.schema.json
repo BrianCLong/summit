@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/content/block.schema.json",
+  "title": "Content Block",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "body",
+    "language",
+    "audience",
+    "policy_tags",
+    "work_items",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "content-common.schema.json#/$defs/id"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["narrative", "procedure", "context", "risk", "metric"]
+    },
+    "body": {
+      "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+    },
+    "language": {
+      "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+    },
+    "audience": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "related_entities": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/nonEmptyString"
+      },
+      "uniqueItems": true
+    },
+    "policy_tags": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/policyTag"
+      },
+      "uniqueItems": true
+    },
+    "security_level": {
+      "$ref": "content-common.schema.json#/$defs/securityLevel"
+    },
+    "work_items": {
+      "type": "array",
+      "items": {
+        "$ref": "content-common.schema.json#/$defs/workItemRef"
+      }
+    },
+    "created_at": {
+      "$ref": "content-common.schema.json#/$defs/isoDateTime"
+    },
+    "updated_at": {
+      "$ref": "content-common.schema.json#/$defs/isoDateTime"
+    }
+  }
+}
