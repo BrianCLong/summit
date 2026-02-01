@@ -1,0 +1,26 @@
+{
+  "artifacts": [],
+  "backend": "solo_os",
+  "environment": {
+    "engine": "orchestration_engine"
+  },
+  "evidence_id": "EVD-ENTRE-502318-ENG-ORC-test_orch_mws",
+  "summary": {
+    "dry_run": true,
+    "executed_steps": [
+      {
+        "evidence_id": "EVD-ENTRE-502318-STEP-FETCH_SIGNALS",
+        "output": "Output for Fetch Signals",
+        "status": "completed",
+        "step": "Fetch Signals"
+      },
+      {
+        "evidence_id": "EVD-ENTRE-502318-STEP-GENERATE_CONTENT",
+        "output": "Output for Generate Content",
+        "status": "completed",
+        "step": "Generate Content"
+      }
+    ],
+    "status": "Workflows orchestrated"
+  }
+}
