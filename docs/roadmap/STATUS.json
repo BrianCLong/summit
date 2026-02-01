@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T00:00:00Z",
-  "revision_note": "Added ingress-nginx retirement subsumption bundle governance artifacts and gates",
+  "last_updated": "2026-01-31T00:55:00Z",
+  "revision_note": "Added structured content schemas, documentation, and prompt/task metadata for Brief/Claim/Block primitives.",
   "initiatives": [
     {
       "id": "A",
