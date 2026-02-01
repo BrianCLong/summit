@@ -317,7 +317,9 @@
       "@types/react": "18.3.11",
       "@types/react-dom": "18.3.0",
     "apollo-server-express": ">=3.13.0",
-      "redis": ">=5.9.0"
+    "redis": ">=5.9.0",
+    "@orval/mcp": ">=7.18.0",
+    "@orval/core": ">=7.19.0"
     }
   }
 }
