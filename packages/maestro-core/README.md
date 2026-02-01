@@ -1,4 +1,4 @@
-# @intelgraph/maestro-core
+# @maestro/core
 
 > Durable workflow orchestration engine for IntelGraph.
 
@@ -16,7 +16,7 @@ Maestro Core is a robust DAG (Directed Acyclic Graph) execution engine designed 
 ## Installation
 
 ```bash
-pnpm add @intelgraph/maestro-core
+pnpm add @maestro/core
 ```
 
 ## Quick Start
@@ -24,8 +24,8 @@ pnpm add @intelgraph/maestro-core
 ### 1. Initialize Postgres Store
 
 ```typescript
-import { Pool } from 'pg';
-import { PostgresStateStore } from '@intelgraph/maestro-core';
+import { Pool } from "pg";
+import { PostgresStateStore } from "@maestro/core";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const stateStore = new PostgresStateStore(pool);
@@ -34,12 +34,12 @@ const stateStore = new PostgresStateStore(pool);
 ### 2. Configure the Engine
 
 ```typescript
-import { MaestroEngine } from '@intelgraph/maestro-core';
+import { MaestroEngine } from "@maestro/core";
 
 const engine = new MaestroEngine(
   stateStore,
   artifactStore, // S3 or Local
-  policyEngine   // OPA or Basic
+  policyEngine // OPA or Basic
 );
 
 // Resume any active runs from before a crash
@@ -51,12 +51,12 @@ await engine.recover();
 To ensure events are reliably emitted, start the `OutboxProcessor` in your worker process:
 
 ```typescript
-import { OutboxProcessor } from '@intelgraph/maestro-core';
+import { OutboxProcessor } from "@maestro/core";
 
 const outbox = new OutboxProcessor(pool, {
   pollIntervalMs: 5000,
   maxRetries: 5,
-  batchSize: 10
+  batchSize: 10,
 });
 
 outbox.start();

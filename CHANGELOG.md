@@ -18,6 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 
+## [10.0.0] - Durable Orchestrator GA - 2026-02-01
+
+### Added
+- **Durable Postgres Store**: Implemented full persistence for workflow runs, step executions, and audit events.
+- **Atomic Transactions**: Ensured state changes are transactionally consistent with event logging and outbox emission.
+- **Crash Recovery**: Added `MaestroEngine.recover()` to automatically resume active workflows on startup.
+- **Reliable Outbox**: Implemented `OutboxProcessor` for guaranteed at-least-once event delivery to external systems.
+- **Observability**: Integrated OpenTelemetry tracing across all database operations and event publishing.
+
+### Changed
+- **Monorepo Standardization**: Standardized versioning to 10.0.0 across all core packages.
+- **Package Normalization**: Renamed core packages to `/core` and `/cli` for better scoping.
+- **Linting Architecture**: Migrated to ESLint flat configuration across the monorepo.
+
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
 ### Fixed

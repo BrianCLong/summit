@@ -29,7 +29,6 @@ export class PostgresStateStore implements StateStore {
     }
   }
 
-  // eslint-disable-next-line require-await
   async createRun(context: RunContext): Promise<void> {
     return tracer.startActiveSpan('createRun', async (span) => {
       span.setAttributes({
@@ -78,7 +77,6 @@ export class PostgresStateStore implements StateStore {
     });
   }
 
-  // eslint-disable-next-line require-await
   async updateRunStatus(
     runId: string,
     status: string,
@@ -166,7 +164,6 @@ export class PostgresStateStore implements StateStore {
     );
   }
 
-  // eslint-disable-next-line require-await
   async updateStepExecution(execution: StepExecution): Promise<void> {
     return tracer.startActiveSpan('updateStepExecution', async (span) => {
       span.setAttributes({

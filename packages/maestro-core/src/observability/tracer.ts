@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * Maestro Observability - Distributed Tracing and Metrics
  * Provides end-to-end visibility across workflow execution
  */
 
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { Resource } from '@opentelemetry/resources';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
@@ -39,18 +38,18 @@ export interface SpanOptions {
 }
 
 export class MaestroTracer extends EventEmitter {
-  private sdk: NodeSDK;
+  private sdk!: NodeSDK;
   private tracer: any;
   private meter: any;
 
   // Metrics
-  private workflowRunsTotal: Counter;
-  private workflowDuration: Histogram;
-  private stepExecutionsTotal: Counter;
-  private stepDuration: Histogram;
+  private workflowRunsTotal!: Counter;
+  private workflowDuration!: Histogram;
+  private stepExecutionsTotal!: Counter;
+  private stepDuration!: Histogram;
   private activeRunsValue = 0;
-  private costTotal: Counter;
-  private errorRate: Counter;
+  private costTotal!: Counter;
+  private errorRate!: Counter;
 
   constructor(private config: TracingConfig) {
     super();
@@ -62,7 +61,7 @@ export class MaestroTracer extends EventEmitter {
 
   private initializeSDK(): void {
     // Create resource
-    const resource = new Resource({
+    const resource = resourceFromAttributes({
       [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
       [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
       [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
@@ -148,7 +147,7 @@ export class MaestroTracer extends EventEmitter {
       {
         description: 'Number of currently active workflow runs',
       },
-      (observableResult) => {
+      (observableResult: any) => {
         observableResult.observe(this.activeRunsValue);
       },
     );

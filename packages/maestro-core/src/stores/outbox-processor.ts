@@ -86,7 +86,6 @@ export class OutboxProcessor {
       try {
         // SIMULATED PUBLISH
         // In a real system, this would call a message bus (Kafka, RabbitMQ, SNS)
-        // eslint-disable-next-line no-console
         console.log(`[Outbox] Publishing ${row.event_type} for run ${row.run_id}`);
         
         // Mark as published
@@ -97,7 +96,6 @@ export class OutboxProcessor {
         
         span.setStatus({ code: SpanStatusCode.OK });
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error(`[Outbox] Failed to publish ${row.id}:`, error);
         await this.pool.query(
           `UPDATE workflow_outbox SET retry_count = retry_count + 1, last_error = $1 WHERE id = $2`,

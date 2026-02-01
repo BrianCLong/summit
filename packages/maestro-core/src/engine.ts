@@ -182,9 +182,8 @@ export class MaestroEngine extends EventEmitter {
     while (remainingSteps.size > 0) {
       const readySteps: WorkflowStep[] = [];
       for (const stepId of remainingSteps) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const step = stepMap.get(stepId)!;
-        if (await this.areDepenciesSatisfied(context.run_id, step)) readySteps.push(step);
+        const step = stepMap.get(stepId);
+        if (step && await this.areDepenciesSatisfied(context.run_id, step)) readySteps.push(step);
       }
       if (readySteps.length === 0) throw new Error("Deadlock detected: steps remaining but none ready.");
       const prioritized = ForkDetector.prioritize(readySteps);
@@ -290,9 +289,8 @@ export class MaestroEngine extends EventEmitter {
           if (!stepIds.has(dep)) throw new Error(`Unknown dependency: ${dep} for step ${step.id}`);
         }
       }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const plugin = this.plugins.get(step.plugin)!;
-      plugin.validate(step.config);
+      const plugin = this.plugins.get(step.plugin);
+      if (plugin) plugin.validate(step.config);
     }
   }
 
@@ -323,9 +321,8 @@ export class MaestroEngine extends EventEmitter {
     this.emit("run:cancelled", { run_id: runId });
   }
 
-  // eslint-disable-next-line require-await
   async getRunStatus(runId: string): Promise<any> {
-    return this.stateStore.getRunDetails(runId);
+    return this.stateStore.getRunStatus(runId);
   }
 }
 
