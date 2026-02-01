@@ -65,6 +65,7 @@ module.exports = {
       statements: 85,
     },
   },
+  coverageReporters: ['json-summary', 'text', 'lcov'],
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
