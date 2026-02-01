@@ -10,6 +10,7 @@ include Makefile.merge-train
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke evidence-bundle
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: gmr-gate gmr-eval gmr-validate
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
@@ -93,6 +94,15 @@ lint:   ## Lint js/ts + python
 format: ## Format code
 	pnpm -w exec prettier -w . || true
 	$(VENV_BIN)/ruff format .
+
+gmr-gate: ## Run the GMR guardrail gate (requires DATABASE_URL)
+	@./metrics/scripts/run_gmr_gate.sh
+
+gmr-eval: ## Run deterministic GMR anomaly detection evals
+	@$(PYTHON) metrics/evals/eval_anomaly_detection.py
+
+gmr-validate: ## Validate GMR guardrail assets
+	@$(PYTHON) scripts/ci/validate_gmr_assets.py
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
