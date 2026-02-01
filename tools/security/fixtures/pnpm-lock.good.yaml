@@ -1,8 +1,5 @@
-# Good lockfile
-importers:
-  .:
-    dependencies:
-      hono: 4.11.7
+lockfileVersion: '9.0'
 packages:
   /hono@4.11.7:
-    resolution: {integrity: sha512-xxx}
+    resolution: { integrity: sha512-good }
+    engines: { node: '>=18' }

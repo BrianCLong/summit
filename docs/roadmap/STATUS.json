@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-18T00:00:00Z",
-  "revision_note": "Added required checks verifier scaffold and evidence schema alignment for Codespaces residency PR1.",
+  "last_updated": "2026-02-17T00:00:00Z",
+  "revision_note": "Added Hono supply-chain gate evidence bundle scaffolding and docs template.",
   "initiatives": [
     {
       "id": "A",

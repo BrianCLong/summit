@@ -11,6 +11,19 @@
       "report": "evidence/EVD-SDSBC-FOUNDATION-001/report.json",
       "metrics": "evidence/EVD-SDSBC-FOUNDATION-001/metrics.json",
       "stamp": "evidence/EVD-SDSBC-FOUNDATION-001/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-SUPPLYCHAIN-001": {
+      "report": "evidence/out/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/out/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/out/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-CI-002": {
+      "report": "evidence/out/HONO-ERRBOUNDARY-XSS/report.json",
+      "metrics": "evidence/out/HONO-ERRBOUNDARY-XSS/metrics.json",
+      "stamp": "evidence/out/HONO-ERRBOUNDARY-XSS/stamp.json"
+    },
+    "EVD-HONO-ERRBOUNDARY-XSS-DOCS-003": {
+      "report": "evidence/out/HONO-ERRBOUNDARY-XSS/report.json"
     }
   }
 }
