@@ -1,52 +1,56 @@
-from typing import List
 import json
+import os
+from typing import List, Any, Dict
+
+def _load_manifest(directory: str) -> Dict[str, Any]:
+    manifest_path = os.path.join(directory, "manifest.json")
+    if os.path.exists(manifest_path):
+        with open(manifest_path, 'r', encoding='utf-8') as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Failed to parse manifest: {e}")
+    return {}
 
 def to_context_pack(traj_paths: list[str]) -> bytes:
     """
     Deterministically converts trajectories into context packs.
-
-    Args:
-        traj_paths: List of file paths to trajectories.
-
-    Returns:
-        bytes: JSON encoded bytes of the context pack.
     """
-    # Sort paths for deterministic processing
     sorted_paths = sorted(traj_paths)
+    trajectories = []
 
-    pack = {}
+    # Heuristic: Load manifest from the directory of the first file
+    manifest_fields = set()
+    if sorted_paths:
+        manifest = _load_manifest(os.path.dirname(sorted_paths[0]))
+        manifest_fields.update(manifest.get("never_log_fields", []))
+
+    default_redact = {"secret"}
 
     for path in sorted_paths:
         try:
-            # Basic parsing of what implies a trajectory file (could be json)
-            # Since we don't have the file system in unit tests usually,
-            # this logic assumes path is the key or content is loaded.
-            # For this strict implementation task, we focus on the structure.
-            # Ideally we would read the file here:
-            # with open(path, 'r') as f:
-            #    data = json.load(f)
+            with open(path, 'r', encoding='utf-8') as f:
+                content = json.load(f)
 
-            # For the purpose of the task description "redact per manifest" and "no timestamps"
-            # We will simulate processing.
-            # In a real scenario, we'd load the content.
-            # Since I cannot see the manifest definition in the prompt,
-            # I will implement a placeholder that ensures:
-            # 1. Deterministic order (already sorted keys)
-            # 2. No timestamps (filtering keys)
+                if isinstance(content, dict):
+                    # Remove timestamps
+                    for key in ['timestamp', 'created_at', 'updated_at', 'date']:
+                        if key in content:
+                            del content[key]
 
-            # Using path as a placeholder for data content for now as we don't have sample files
-            data = {"id": path, "content": "placeholder"}
+                    # Redact fields
+                    for key in list(content.keys()):
+                        if key in default_redact or key in manifest_fields:
+                            content[key] = "[REDACTED]"
 
-            # Remove timestamp-like keys
-            keys_to_remove = [k for k in data.keys() if 'time' in k.lower() or 'date' in k.lower()]
-            for k in keys_to_remove:
-                del data[k]
+                trajectories.append(content)
+        except json.JSONDecodeError:
+            # Skip files that are not valid JSON? Or handle them?
+            # The previous implementation had a pass.
+            pass
+        except Exception as e:
+            # Re-raise if it's the manifest error? No, manifest error happens before loop.
+            pass
 
-            pack[path] = data
-
-        except Exception:
-            # Ensure failure is deterministic or handled
-            continue
-
-    # Return as bytes
-    return json.dumps(pack, sort_keys=True).encode('utf-8')
+    output = {"trajectories": trajectories}
+    return json.dumps(output, sort_keys=True, indent=2).encode('utf-8')
