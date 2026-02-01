@@ -4,6 +4,7 @@ providers:
   - id: google
   - id: vllm-local # http endpoint(s)
   - id: ollama
+  - id: azure-foundry
 checks:
   interval_ms: 5000
   timeout_ms: 1500
