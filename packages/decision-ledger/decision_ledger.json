@@ -151,5 +151,22 @@
     },
     "reasoning": "Documented IOEA plan with evidence bundle, MAESTRO alignment, and roadmap entry; registered prompt and task spec. Rollback: revert the IOEA plan bundle commit.",
     "reverted": false
+  },
+  {
+    "id": "omb-m2605-policy-20260131",
+    "timestamp": "2026-01-31T20:33:04.003958Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJBZGQgT01CIE0tMjYtMDUgcG9saWN5IGludGFrZSBtZXRhZGF0YSBhbmQgcmVzY2lzc2lvbiBtYXJrZXJzLiIsImZpbGVzIjpbInBvbGljeS9vbWIvbS0yNi0wNS55YW1sIiwicG9saWN5L29tYi9tLTIyLTE4LnlhbWwiLCJwb2xpY3kvb21iL20tMjMtMTYueWFtbCIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsInBhY2thZ2VzL2RlY2lzaW9uLWxlZGdlci9kZWNpc2lvbl9sZWRnZXIuanNvbiIsInByb21wdHMvc3Vic3VtcHRpb24vb21iLW0yNjA1LXBvbGljeS1pbnRha2VAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvT01CX00yNjA1X1BPTElDWV9JTlRBS0VfMDAxLmpzb24iXX0=",
+    "decision": {
+      "action": "policy_intake",
+      "rule": {
+        "condition": "omb m-26-05 policy intake required",
+        "action": "policy_intake",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Captured OMB M-26-05 risk-based assurance metadata and rescission status for M-22-18/M-23-16. Rollback: revert commit that adds policy/omb files, prompt registry entry, task spec, and roadmap update.",
+    "reverted": false
   }
 ]

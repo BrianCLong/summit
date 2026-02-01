@@ -453,6 +453,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: omb-m2605-policy-intake
+    version: v1
+    path: prompts/subsumption/omb-m2605-policy-intake@v1.md
+    sha256: 340243e4b9b984f3c0d8bed254c8e20e8cfce7cef72448bc68d5a2535f039be6
+    description: Capture OMB M-26-05 policy metadata and rescission markers as policy-as-code artifacts.
+    scope:
+      paths:
+        - policy/omb/
+        - packages/decision-ledger/decision_ledger.json
+        - docs/roadmap/STATUS.json
+        - prompts/subsumption/omb-m2605-policy-intake@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - governance
+        - compliance
+        - policy
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
