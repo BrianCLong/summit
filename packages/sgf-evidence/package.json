@@ -1,0 +1,16 @@
+{
+  "name": "@summit/sgf-evidence",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Deterministic evidence bundle generator for Summit Governance Fabric",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@summit/sgf-schema": "workspace:*",
+    "@summit/sgf-ledger": "workspace:*"
+  },
+  "private": true
+}

@@ -11660,6 +11660,39 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/sgf-evals:
+    dependencies:
+      '@summit/sgf-evidence':
+        specifier: workspace:*
+        version: link:../sgf-evidence
+      '@summit/sgf-ledger':
+        specifier: workspace:*
+        version: link:../sgf-ledger
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  packages/sgf-evidence:
+    dependencies:
+      '@summit/sgf-ledger':
+        specifier: workspace:*
+        version: link:../sgf-ledger
+      '@summit/sgf-schema':
+        specifier: workspace:*
+        version: link:../sgf-schema
+
+  packages/sgf-ledger:
+    dependencies:
+      '@summit/sgf-schema':
+        specifier: workspace:*
+        version: link:../sgf-schema
+
+  packages/sgf-schema: {}
+
   packages/shared:
     dependencies:
       zod:
@@ -74187,7 +74220,7 @@ snapshots:
       '@types/hapi__catbox': 12.1.0
       '@types/hapi__mimos': 4.1.4
       '@types/hapi__shot': 6.0.0
-      '@types/node': 25.1.0
+      '@types/node': 20.19.27
       joi: 17.13.3
 
   '@types/hapi__mimos@4.1.4':
