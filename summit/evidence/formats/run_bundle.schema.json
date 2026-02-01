@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Run Bundle",
+  "type": "object",
+  "required": ["run_id", "events"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "events": {"type": "array"}
+  }
+}

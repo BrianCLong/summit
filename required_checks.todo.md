@@ -8,15 +8,15 @@
 4. Look for "Require status checks to pass before merging".
 5. Copy the exact names of the required checks listed there.
 
-## Temporary Gate Names (Implemented in Plan)
+## Temporary Gate Names (Implemented)
 
 We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
 
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
+- `summit-ci/evidence-verify`: Validates evidence artifacts (schemas, determinism).
+- `summit-ci/prompt-determinism`: Verifies prompt construction determinism.
+- `summit-ci/tool-schema-drift`: Checks for MCP tool schema drift.
+- `summit-ci/policy-gates`: Enforces policy gates (dep delta, compaction invariants).
+- `summit-ci/unit`: Runs unit tests.
 
 ## Rename Plan
 
