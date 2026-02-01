@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import yaml from 'js-yaml';
 
 // Paths
 const __filename = fileURLToPath(import.meta.url);
@@ -9,26 +8,16 @@ const __dirname = path.dirname(__filename);
 const REPO_ROOT = path.resolve(__dirname, '../../');
 const POLICY_DIR = path.join(REPO_ROOT, 'agents/antigravity/policy');
 const TRADEOFF_LEDGER = path.join(REPO_ROOT, 'governance/tradeoffs/tradeoff_ledger.jsonl');
-const DECISIONS_DIR = path.join(REPO_ROOT, 'governance/decisions');
 
-// Types
-interface TradeoffEntry {
-  ts: string;
-  agent: string;
-  change_id: string;
-  summary: string;
-  tradeoff: {
-    cost_delta_percent: number;
-    reliability_delta: string;
-    velocity_delta: string;
-  };
-  risk: {
-    security_score: number;
-    reliability_score: number;
-  };
-  confidence: number;
-}
-
+// Helpers
+const loadYaml = (filepath) => {
+  try {
+    return yaml.load(fs.readFileSync(filepath, 'utf8'));
+  } catch (e) {
+    console.error(`Error loading YAML file: ${filepath}`, e);
+    process.exit(1);
+  }
+};
 
 const checkTradeoffLedger = () => {
   console.log('Verifying Tradeoff Ledger integrity...');
@@ -44,7 +33,7 @@ const checkTradeoffLedger = () => {
   lines.forEach((line, index) => {
     if (!line.trim()) return;
     try {
-      const entry = JSON.parse(line) as TradeoffEntry;
+      const entry = JSON.parse(line);
       // Basic validation schema
       if (!entry.ts || !entry.agent || !entry.change_id) {
         console.error(`❌ Invalid entry at line ${index + 1}: Missing required fields`);
@@ -66,8 +55,7 @@ const checkTradeoffLedger = () => {
 
 const checkPoliciesExist = () => {
   console.log('Verifying Antigravity Policy existence...');
-  const requiredFiles = ['CHARTER.yaml']; // In agents/antigravity/
-  const requiredPolicies = ['thresholds.yaml', 'change_classification.rego', 'merge_decision.rego']; // In agents/antigravity/policy/
+  const requiredPolicies = ['thresholds.yaml', 'change_classification.rego', 'merge_decision.rego'];
 
   let allExist = true;
 
@@ -90,17 +78,6 @@ const checkPoliciesExist = () => {
   if (allExist) console.log('✅ All policy artifacts present.');
   return allExist;
 };
-
-const validateDecisionRecord = (prId: string) => {
-  console.log(`Checking for Decision Record for PR ${prId}...
-`);
-  // In a real scenario, we might look for a file named ADR-AG-{PR_ID}.md or similar
-  // For now, we'll just scan the directory for a matching pattern or generic check
-
-  // This is a placeholder for actual PR-to-file logic
-  console.log(`ℹ️  Skipping specific file check for ${prId} (logic placeholder).`);
-  return true;
-}
 
 // Main execution
 const main = () => {
