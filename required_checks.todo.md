@@ -1,58 +1,23 @@
-# Required checks discovery
-1. In GitHub: Settings → Branches → Branch protection rules → required status checks.
-2. List exact check names (case-sensitive).
-3. Map to local scripts:
-   - ci:decks_evidence → ci/check_decks_evidence.py
-   - ci:deck_lint → ci/deck_lint.py
-   - ci:deck_build → ci/deck_build.sh
-4. If names differ, add an alias job in CI rather than renaming scripts.
+# Required Checks Discovery
 
-# Secure Indexing Required Checks Discovery
-- no-index-leak: (EVD-CURSOR-SECURE-INDEXING-SEC-001)
-- evidence-schema-validate
-- dep-delta
-- reuse-flow-e2e
-- perf-evidence: (EVD-CURSOR-SECURE-INDEXING-PERF-001)
+## Process to Identify Required Checks
 
-## Goal
-List the repository's *required* CI checks for the default branch, then map them to verifier names
-in `ci/verifiers/`.
+1. Go to repository Settings in GitHub.
+2. Navigate to **Branches** -> **Branch protection rules**.
+3. Edit the rule for `main` (or default branch).
+4. Look for "Require status checks to pass before merging".
+5. Copy the exact names of the required checks listed there.
 
-## GitHub UI steps
-1. Repo → Settings → Branches → Branch protection rules.
-2. Open the rule for the default branch.
-3. Under "Require status checks to pass", copy the exact check names.
+## Temporary Gate Names (Implemented in Plan)
 
-## GitHub API steps (alternative)
-Use the Branch Protection API to fetch required status checks for the branch:
-`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
 
-## Temporary convention
-Until discovered, we use temporary verifier names:
-- `ci:unit`
-- `ci:schema`
-- `ci:lint`
-- `ci:deps-delta`
-- `ci:deepsearchqa-fixtures`
-- `ci:codegen-drift`
-- `ci:determinism-smoke`
-- `ci:supply-chain-delta`
-- `ci:acp-policy`
-- `ci:acp-auth`
-- `ci:acp-install-dry-run`
+- `ci:unit` - Runs unit tests for new packages.
+- `ci:lint` - Runs linting.
+- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
+- `ci:security-gates` - Runs deny-by-default and redaction tests.
+- `verify:dependency-delta` - Ensures dependency changes are documented.
 
-## Rename plan
-Once real check names are known:
-1. Update CI config to emit the official check names.
-2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.
+## Rename Plan
 
-## Archimyst (archsim) checks
-- schema-validate
-- archsim-foundation
-- evidence-gate
-
-## Vind (vCluster in Docker) checks
-- summit/vind/smoke
-- summit/vind/lifecycle
-- summit/vind/bench
-- summit/vind/security
+Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
