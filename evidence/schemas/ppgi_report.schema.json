@@ -7,9 +7,17 @@
     "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9-]+$" },
     "summary": { "type": "string" },
     "artifacts": {
-      "type": "array",
-      "items": { "type": "string" },
-      "minItems": 1
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      ]
     }
   },
   "additionalProperties": true
