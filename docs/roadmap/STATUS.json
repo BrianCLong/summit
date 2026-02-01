@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-02T10:30:00Z",
-  "revision_note": "Added evidence validation helpers to remove external schema dependency",
+  "last_updated": "2026-02-02T00:00:00Z",
+  "revision_note": "Standardized CI test environment defaults and server test isolation guardrails.",
   "initiatives": [
     {
       "id": "A",
