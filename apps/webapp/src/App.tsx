@@ -70,14 +70,16 @@ export function App() {
                   <SearchIcon />
                 </IconButton>
               </Tooltip>
-              <IconButton
-                onClick={toggleMode}
-                color="inherit"
-                aria-label="toggle theme"
-                data-testid="theme-toggle"
-              >
-                {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
-              </IconButton>
+              <Tooltip title={mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+                <IconButton
+                  onClick={toggleMode}
+                  color="inherit"
+                  aria-label="toggle theme"
+                  data-testid="theme-toggle"
+                >
+                  {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
+                </IconButton>
+              </Tooltip>
             </Box>
           </Box>
           <Routes>
