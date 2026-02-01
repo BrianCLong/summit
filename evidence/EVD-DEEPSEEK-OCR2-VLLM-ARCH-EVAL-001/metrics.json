@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-DEEPSEEK-OCR2-VLLM-ARCH-EVAL-001",
+  "item_slug": "deepseek-ocr-mini-eval",
+  "metrics": {
+    "backend_selected": "auto",
+    "exact_match_rate_small": 1.0,
+    "smoke_mode": true
+  },
+  "run_id": "test-run-001"
+}
