@@ -63,27 +63,19 @@ jobs:
           echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
           echo "Checking branch: ${BRANCH}"
 
-      - name: Generate GitHub App Token
-        id: app-token
-        if: secrets.BRANCH_PROTECTION_APP_ID != '' && secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY != ''
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
-          private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
-
       - name: Validate branch protection read token
         env:
-          BRANCH_PROTECTION_TOKEN: ${{ steps.app-token.outputs.token || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+          BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
           if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
-            echo "::error::BRANCH_PROTECTION_READ_TOKEN or GitHub App Secrets are required to audit branch protection."
+            echo "::error::BRANCH_PROTECTION_READ_TOKEN is required to audit branch protection."
             exit 1
           fi
 
       - name: Run Drift Detection
         id: check
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
           mkdir -p "${{ env.OUT_DIR }}"
 
@@ -135,15 +127,15 @@ jobs:
             // Search for existing drift issues with matching title
             const titlePattern = `[Governance Drift] Branch protection does not match REQUIRED_CHECKS_POLICY (${branch})`;
 
-            // Use search to find issues across all pages (listForRepo is limited)
-            const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:governance "${titlePattern}"`;
-            core.info(`Searching with query: ${q}`);
+            // Use search API for deduplication (better for large repos)
+            const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:governance in:title "${titlePattern}"`;
 
             const searchResult = await github.rest.search.issuesAndPullRequests({
-              q: q
+              q: q,
+              per_page: 1
             });
 
-            const existingIssue = searchResult.data.items.find(issue => issue.title === titlePattern);
+            const existingIssue = searchResult.data.items.length > 0 ? searchResult.data.items[0] : null;
 
             if (existingIssue) {
               core.info(`Found existing issue #${existingIssue.number}`);
