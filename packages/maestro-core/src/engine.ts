@@ -4,7 +4,6 @@
  */
 
 import { EventEmitter } from 'events';
-import { v4 as uuid } from 'uuid';
 import { ForkDetector } from './fork_detector';
 
 export interface WorkflowStep {
