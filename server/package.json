@@ -46,6 +46,7 @@
     "@bull-board/express": "5.23.0",
     "@graphql-tools/schema": "10.0.30",
     "@intelgraph/maestro-core": "workspace:*",
+    "@intelgraph/osint-collector": "workspace:*",
     "@intelgraph/feature-flags": "workspace:*",
     "@intelgraph/telemetry-config": "workspace:*",
     "@node-saml/node-saml": "^5.1.0",
