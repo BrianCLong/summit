@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-TEXT2CYPHER-EXEC-001",
+  "item_slug": "text2cypher-exec",
+  "claims": ["Execution accuracy evidence slot is reserved for Text-to-Cypher evaluation."],
+  "decisions": [],
+  "findings": []
+}

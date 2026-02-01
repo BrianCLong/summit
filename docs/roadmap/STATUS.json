@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-15T00:00:00Z",
-  "revision_note": "Documented Git CVE mitigation rollout for CI and developer setup hardening; documented investigation/export RBAC verification updates tied to Task Brief #6.",
+  "last_updated": "2026-02-02T00:00:00Z",
+  "revision_note": "Seeded GraphRAG/Text-to-Cypher evidence slots and tightened evidence verification gate",
   "initiatives": [
     {
       "id": "A",
