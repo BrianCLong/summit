@@ -8,6 +8,14 @@ function getTenantId(req: Request): string {
     return (req as any).user?.tenantId || req.headers['x-tenant-id'] || 'default-tenant';
 }
 
+function getRoles(req: Request): string[] {
+    // Only trust verified roles from middleware (req.user)
+    if ((req as any).user?.roles && Array.isArray((req as any).user.roles)) {
+        return (req as any).user.roles;
+    }
+    return [];
+}
+
 router.post('/v1/search', async (req: Request, res: Response) => {
     try {
         const { collection, q, query_by, filter_by, page, per_page, facet_by, ...rest } = req.body;
@@ -81,7 +89,11 @@ router.post('/v1/search/suggest', async (req: Request, res: Response) => {
 });
 
 router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
-    // TODO: Add proper RBAC here
+    const roles = getRoles(req);
+    if (!roles.includes('admin')) {
+        logger.warn('Unauthorized reindex attempt', { tenantId: getTenantId(req), roles });
+        return res.status(403).json({ error: 'Forbidden: Admin role required' });
+    }
     res.json({ status: 'triggered', job_id: 'job-' + Date.now() });
 });
 
