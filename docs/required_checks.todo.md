@@ -1,21 +1,8 @@
-# Required Checks Discovery (TODO)
+# Required Checks Discovery
 
-## UI Steps
-
-1. GitHub UI → Settings → Branches → Branch protection rules.
-2. Record required status checks.
-
-## API Steps
-
-- `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
-
-## Current Checks (Temporary Convention)
-
-- `gate/evidence-validate`
-- `gate/osint-policy`
-- `gate/depdelta`
-
-## Plan
-
-1. Record official check names in `ci/required_checks.json` once discovered.
-2. Add a mapping file to preserve existing names for two releases.
+* [ ] GitHub UI: Verify branch protection settings.
+* [ ] Identify exact check names for:
+    * `summit-policy-gates`
+    * `summit-schema-validate`
+    * `summit-eval-fixtures`
+* [ ] Update CI configurations with correct names.
