@@ -1,0 +1,45 @@
+name: 'Graph Shape Guardrail'
+description: 'Checks graph degree distribution for regressions using skewness and top-k mass.'
+inputs:
+  label:
+    description: 'Node label to check'
+    required: true
+  neo4j-uri:
+    description: 'Neo4j URI'
+    required: false
+    default: 'bolt://localhost:7687'
+  neo4j-username:
+    description: 'Neo4j Username'
+    required: false
+    default: 'neo4j'
+  neo4j-password:
+    description: 'Neo4j Password'
+    required: false
+    default: 'password'
+  reservoir-size:
+    description: 'Reservoir size for sampling'
+    required: false
+    default: '50000'
+  metrics-file:
+    description: 'Path to metrics history file'
+    required: false
+    default: 'tools/graph-shape-guardrail/metrics.json'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: pip install -r ${{ github.action_path }}/requirements.txt
+
+    - name: Run Guardrail
+      shell: bash
+      env:
+        NEO4J_URI: ${{ inputs.neo4j-uri }}
+        NEO4J_USERNAME: ${{ inputs.neo4j-username }}
+        NEO4J_PASSWORD: ${{ inputs.neo4j-password }}
+      run: |
+        python ${{ github.action_path }}/guardrail.py \
+          --label "${{ inputs.label }}" \
+          --reservoir-size ${{ inputs.reservoir-size }} \
+          --metrics-file "${{ inputs.metrics-file }}"
