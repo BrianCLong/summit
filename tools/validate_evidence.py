@@ -1,70 +1,101 @@
+#!/usr/bin/env python3
 import json
-import argparse
 import sys
 from pathlib import Path
 
-try:
-    from jsonschema import validate, ValidationError
-except ImportError:
-    print("jsonschema not found. Please install it with 'pip install jsonschema'.")
-    sys.exit(1)
+import yaml
+from jsonschema import Draft202012Validator
 
-SCHEMAS = {
-    "report.json": "evidence/schema/report.schema.json",
-    "metrics.json": "evidence/schema/metrics.schema.json",
-    "stamp.json": "evidence/schema/stamp.schema.json",
-}
+ROOT = Path(__file__).resolve().parents[1]
+PACK_PATH = ROOT / "prompts" / "packs" / "research_productivity_v1" / "pack.yaml"
+SCHEMA_PATH = ROOT / "evidence" / "schemas" / "research_session.schema.json"
+FIXTURES_PATH = ROOT / "evidence" / "fixtures"
 
-def validate_file(file_path: Path):
-    if not file_path.exists():
-        print(f"Error: File {file_path} not found.")
-        return False
 
-    schema_path = None
-    for pattern, s_path in SCHEMAS.items():
-        if file_path.name.endswith(pattern):
-            schema_path = Path(s_path)
-            break
+def fail(message: str) -> None:
+    print(f"[FAIL] {message}", file=sys.stderr)
+    raise SystemExit(1)
 
-    if not schema_path:
-        print(f"Error: No schema found for file {file_path.name}")
-        return False
 
-    if not schema_path.exists():
-        print(f"Error: Schema file {schema_path} not found.")
-        return False
-
+def load_json(path: Path) -> dict:
     try:
-        with open(file_path, 'r') as f:
-            data = json.load(f)
-        with open(schema_path, 'r') as f:
-            schema = json.load(f)
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        fail(f"Unable to read JSON {path}: {exc}")
 
-        validate(instance=data, schema=schema)
-        print(f"OK: {file_path} is valid against {schema_path}")
-        return True
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON in {file_path}: {e}")
-        return False
-    except ValidationError as e:
-        print(f"Validation error in {file_path}: {e.message}")
-        return False
-    except Exception as e:
-        print(f"Unexpected error validating {file_path}: {e}")
-        return False
 
-def main():
-    parser = argparse.ArgumentParser(description="Validate evidence files against schemas.")
-    parser.add_argument("files", nargs="+", help="Files to validate.")
-    args = parser.parse_args()
+def load_pack_contracts() -> dict:
+    if not PACK_PATH.exists():
+        fail(f"Pack definition missing: {PACK_PATH}")
+    try:
+        pack = yaml.safe_load(PACK_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        fail(f"Unable to parse pack YAML {PACK_PATH}: {exc}")
+    templates = pack.get("templates", [])
+    contracts = {}
+    for template in templates:
+        template_id = template.get("id")
+        contract = template.get("output_contract", [])
+        if not template_id or not contract:
+            fail(f"Template missing id or output_contract in {PACK_PATH}")
+        contracts[template_id] = contract
+    return contracts
 
-    success = True
-    for file in args.files:
-        if not validate_file(Path(file)):
-            success = False
 
-    if not success:
-        sys.exit(1)
+def validate_fixture(path: Path, schema: dict, contracts: dict) -> list[str]:
+    errors = []
+    data = load_json(path)
+    validator = Draft202012Validator(schema)
+    for error in validator.iter_errors(data):
+        errors.append(error.message)
+
+    template_id = data.get("template_id")
+    outputs = data.get("outputs", {})
+    if template_id not in contracts:
+        errors.append(f"Unknown template_id '{template_id}'")
+    else:
+        for key in contracts[template_id]:
+            if key not in outputs:
+                errors.append(f"Missing output_contract key '{key}'")
+
+    return errors
+
+
+def main() -> int:
+    if not SCHEMA_PATH.exists():
+        fail(f"Schema not found: {SCHEMA_PATH}")
+
+    schema = load_json(SCHEMA_PATH)
+    contracts = load_pack_contracts()
+
+    if not FIXTURES_PATH.exists():
+        fail(f"Fixtures directory not found: {FIXTURES_PATH}")
+
+    fixture_paths = sorted(FIXTURES_PATH.glob("research_*.json"))
+    if not fixture_paths:
+        fail("No research fixtures found")
+
+    had_error = False
+    for fixture in fixture_paths:
+        expected_fail = fixture.name.startswith("research_fail_")
+        errors = validate_fixture(fixture, schema, contracts)
+        if expected_fail:
+            if not errors:
+                print(f"[FAIL] {fixture} expected to fail but passed")
+                had_error = True
+            else:
+                print(f"[PASS] {fixture} failed as expected")
+        else:
+            if errors:
+                print(f"[FAIL] {fixture} failed validation:")
+                for error in errors:
+                    print(f"  - {error}")
+                had_error = True
+            else:
+                print(f"[PASS] {fixture} validated")
+
+    return 1 if had_error else 0
+
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
