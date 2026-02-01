@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Solo OS Run Request",
+  "type": "object",
+  "properties": {
+    "engine": { "type": "string" },
+    "mode": { "enum": ["dry_run", "execute"] },
+    "payload": { "type": "object" },
+    "idempotency_key": { "type": "string" }
+  },
+  "required": ["engine", "mode", "payload"],
+  "additionalProperties": false
+}

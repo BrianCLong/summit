@@ -8,7 +8,8 @@ class SignalEngine:
         run_id = req.payload.get("run_id", "default")
         summary = {"status": "Market signals processed", "opportunities": []}
         metrics = {"signals_count": 0}
+        audit = req.payload.get("_audit")
 
-        evidence_path = write_engine_evidence(self.name, run_id, summary, metrics)
+        evidence_path = write_engine_evidence(self.name, run_id, summary, metrics, audit=audit)
 
         return RunResult(ok=True, evidence_path=evidence_path, summary=summary)
