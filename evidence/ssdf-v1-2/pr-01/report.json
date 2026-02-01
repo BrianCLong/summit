@@ -12,5 +12,6 @@
     }
   ],
   "claim_ids": ["ITEM:CLAIM-01", "ITEM:CLAIM-02", "ITEM:CLAIM-03"],
-  "decisions": ["Bundle skeleton added without enforcement gates."]
+  "decisions": ["Bundle skeleton added without enforcement gates."],
+  "summary": "Legacy report summary"
 }
