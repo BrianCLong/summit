@@ -1,0 +1,16 @@
+{
+  "evidence_id": "EVD-GEOM-EVAL-001",
+  "run_id": "eval-run-001",
+  "item_slug": "geometry-complexity",
+  "evd_ids": [
+    "EVD-GEOM-EVAL-001"
+  ],
+  "summary": {
+    "what_ran": "Synthetic geometry complexity evaluation",
+    "result": "pass"
+  },
+  "artifacts": {
+    "metrics": "metrics.json",
+    "stamp": "stamp.json"
+  }
+}
