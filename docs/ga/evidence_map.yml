@@ -10,3 +10,5 @@ required:
     artifact: docs/governance/GOVERNANCE_ACCEPTANCE.md
   - id: graph-sync-validator
     artifact: packages/graph-sync-validator/metrics.json
+  - id: build-attestation
+    artifact: evidence/attestation/EV_ATTESTATION_V1_<sha>/attestation.json

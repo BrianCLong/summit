@@ -1,0 +1,48 @@
+name: Attestation / PR Gate
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# ensure only one active CI per PR/Ref
+concurrency:
+  group: attestation-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-attestation:
+    name: Validate Attestation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+
+      - name: Run Determinism and Regression Tests
+        run: node --test scripts/ci/__tests__/attestation_determinism.test.mjs
+
+      - name: Generate Attestation
+        run: node scripts/ci/generate_attestation.mjs --out attestation.json server client scripts/ci
+
+      - name: Verify Attestation
+        run: node scripts/ci/verify_attestation.mjs --input attestation.json
+
+      - name: Emit Evidence
+        run: node scripts/ci/emit_attestation_evidence.mjs --attestation attestation.json --out-dir evidence-folder
+
+      - name: Upload Evidence Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: attestation-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence-folder
+          retention-days: 7
+          if-no-files-found: error
