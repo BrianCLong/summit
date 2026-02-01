@@ -1,0 +1,43 @@
+name: GraphPerf Performance Gate
+
+on:
+  pull_request:
+    paths:
+      - 'db/migrations/neo4j/**'
+      - 'graphperf/querylib/**'
+      - 'tools/graphperf/**'
+
+jobs:
+  graphperf-perf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install neo4j
+
+      - name: Run Benchmarks
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          GIT_COMMIT: ${{ github.sha }}
+        run: |
+          # This executes the benchmark runner which produces evidence artifacts
+          python3 tools/graphperf/runner.py
+
+      - name: Verify Evidence Artifacts
+        run: |
+          # Ensure generated evidence is compliant with Summit standards
+          python3 scripts/verify_evidence.py
+
+      - name: Enforce Performance Gate
+        run: |
+          # Block merge if P95 regression detected or plan shape changed unexpectedly
+          python3 tools/graphperf/check_budgets.py
