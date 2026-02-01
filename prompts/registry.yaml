@@ -847,6 +847,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-required-checks-verifier-scaffold
+    version: v1
+    path: prompts/ci/required-checks-verifier@v1.md
+    sha256: ae5c6e7af8c4b1e8c77e20f8bf6e31e3498ffa5828afe5db9c6a42aa8ccca82b
+    description: Scaffold Summit required checks verifier configuration and discovery notes.
+    scope:
+      paths:
+        - summit/ci/verifier/
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/ci/required-checks-verifier@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: qwen3-asr-scaffold
     version: v1
     path: prompts/asr/qwen3-asr-scaffold@v1.md
