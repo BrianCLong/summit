@@ -215,6 +215,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: gmr-guardrail-gate-scaffold
+    version: v1
+    path: prompts/governance/gmr-guardrail-gate-scaffold@v1.md
+    sha256: 0c62f7e18c11cabc65c2e96fb14562593672ccfa79c32897af6e07236ca2982b
+    description: Implement GA-grade GMR guardrail metrics, gate scaffolding, and evidence workflows.
+    scope:
+      paths:
+        - Makefile
+        - metrics/
+        - scripts/ci/validate_gmr_assets.py
+        - docs/roadmap/STATUS.json
+        - governance/decisions/
+        - governance/tradeoffs/
+        - prompts/governance/gmr-guardrail-gate-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - observability
+        - quality
+        - ci
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: lingbot-world-scaffold
     version: v1
     path: prompts/worldmodels/lingbot-world-scaffold.md
