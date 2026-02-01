@@ -33,16 +33,8 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
       - name: Install dependencies
@@ -66,16 +58,8 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
       - name: Install dependencies

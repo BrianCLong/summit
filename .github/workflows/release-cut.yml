@@ -136,13 +136,9 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-          with:
-            version: 9.12.0
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-          with:
-            version: 9.12.0
-
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -205,13 +201,9 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-          with:
-            version: 9.12.0
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-          with:
-            version: 9.12.0
-
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
