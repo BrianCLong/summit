@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVID-cti-20260131-8b1b8659",
+  "metrics": {
+    "ingest_count": 5,
+    "mapping_count": 5,
+    "success_rate": 1.0,
+    "fp_budget_used": 0.0
+  }
+}
