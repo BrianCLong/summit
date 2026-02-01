@@ -58,6 +58,7 @@ const config = {
       statements: 85,
     },
   },
+  coverageReporters: ['json-summary', 'text', 'lcov'],
   reporters: [
     'default',
     [
