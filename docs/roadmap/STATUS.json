@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-15T00:00:00Z",
-  "revision_note": "Switched branch protection drift workflow to GitHub App token authentication; documented investigation/export RBAC verification updates tied to Task Brief #6.",
+  "revision_note": "Documented Git CVE mitigation rollout for CI and developer setup hardening; documented investigation/export RBAC verification updates tied to Task Brief #6.",
   "initiatives": [
     {
       "id": "A",
