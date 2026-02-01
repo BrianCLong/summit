@@ -119,20 +119,20 @@
     "reverted": false
   },
   {
-    "id": "test-env-parity-20260203",
-    "timestamp": "2026-02-03T00:00:00Z",
+    "id": "bp-app-auth-001",
+    "timestamp": "2026-02-01T18:30:00Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiJ0ZXN0IGVudiBwYXJpdHkgKyBzZWVkIGxvZ2dpbmcgKyBkZXRlcm1pbmlzdGljIGlkcyArIHRpbWluZyB3YWl0IHVwZGF0ZSIsImZpbGVzIjpbIi5lbnYudGVzdCIsImplc3Quc2V0dXAuanMiLCJzZXJ2ZXIvdGVzdHMvc2V0dXAvamVzdC5zZXR1cC5janMiLCJzZXJ2ZXIvdGVzdHMvc2V0dXAvZ2xvYmFsU2V0dXAuY2pzIiwic2VydmVyL3NyYy9vYnNlcnZhYmlsaXR5L19fdGVzdHNfXy9vcGVyYXRpb25hbC1pbnRlbGxpZ2VuY2UudGVzdC50cyIsInNlcnZlci90ZXN0cy9jb25maWcudGVzdC50cyIsInNlcnZlci90ZXN0cy90ZXN0LWVudmlyb25tZW50LnRlc3QudHMiLCJURVNUSU5HLm1kIiwiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIl19",
+    "inputHash": "eyJjaGFuZ2UiOiJFbmFibGUgR2l0SHViIEFwcCBhdXRoZW50aWNhdGlvbiBmb3IgYnJhbmNoIHByb3RlY3Rpb24gZHJpZnQgd29ya2Zsb3dzIGFuZCBkb2N1bWVudCBzZXR1cC4iLCJmaWxlcyI6WyIuZ2l0aHViL3dvcmtmbG93cy9icmFuY2gtcHJvdGVjdGlvbi1kcmlmdC55bWwiLCIuZ2l0aHViL3dvcmtmbG93cy9icmFuY2gtcHJvdGVjdGlvbi1yZWNvbmNpbGUueW1sIiwiZG9jcy9jaS9CUkFOQ0hfUFJPVEVDVElPTl9EUklGVC5tZCIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsInByb21wdHMvY2kvYnJhbmNoLXByb3RlY3Rpb24tYXBwLWF1dGhAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvQlJBTkNIX1BST1RFQ1RJT05fQVBQX0FVVEhfVEFTSy5qc29uIl19",
     "decision": {
-      "action": "standardize_test_env_parity",
+      "action": "enable_github_app_auth",
       "rule": {
-        "condition": "seeded test flakiness requires parity and deterministic ids",
-        "action": "standardize_test_env_parity",
+        "condition": "branch protection drift workflows require elevated read access",
+        "action": "enable_github_app_auth",
         "max_cost": 0
       }
     },
-    "reasoning": "Standardized .env.test defaults, logged active test seed, replaced timing delay with event-driven scheduling, and removed nondeterministic IDs in observability tests. Rollback: git revert HEAD.",
+    "reasoning": "Enabled GitHub App installation tokens for branch protection drift workflows with fallback auth, plus documentation and governance updates. Rollback: revert commit once merged.",
     "reverted": false
   }
 ]

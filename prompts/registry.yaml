@@ -165,6 +165,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: branch-protection-app-auth
+    version: v1
+    path: prompts/ci/branch-protection-app-auth@v1.md
+    sha256: 62bed8d0e2ec19d778fee25e40b34e015e0e43e0066736d6a43910fb498afc08
+    description: Enable GitHub App authentication for branch protection drift workflows.
+    scope:
+      paths:
+        - .github/workflows/branch-protection-drift.yml
+        - .github/workflows/branch-protection-reconcile.yml
+        - docs/ci/BRANCH_PROTECTION_DRIFT.md
+        - docs/roadmap/STATUS.json
+        - prompts/ci/branch-protection-app-auth@v1.md
+        - prompts/registry.yaml
+        - agents/examples/BRANCH_PROTECTION_APP_AUTH_TASK.json
+      domains:
+        - ci
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md
