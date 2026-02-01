@@ -72,9 +72,10 @@ interface DifferentialPrivacyConfig {
 export class PromptInjectionDetector {
   private readonly injectionPatterns = [
     // Direct override attempts
-    /ignore\s+(previous|prior|above|all)\s+(instructions|prompts|rules|context)/gi,
+    /ignore\s+(previous|prior|above|all)\s+(instructions|prompts|rules|context|security)/gi,
     /disregard\s+(previous|prior|above|all)\s+(instructions|prompts|rules)/gi,
     /forget\s+(previous|prior|above|all)\s+(instructions|prompts|rules|context)/gi,
+    /reveal\s+(secrets|passwords|credentials)/gi,
 
     // System prompt extraction
     /show\s+(me\s+)?(the\s+)?(system\s+)?(prompt|instructions|rules)/gi,
@@ -83,10 +84,10 @@ export class PromptInjectionDetector {
     /print\s+(your\s+)?(system\s+)?(prompt|instructions|rules)/gi,
 
     // Role manipulation
-    /you\s+are\s+now\s+(a|an)\s+\w+/gi,
-    /act\s+as\s+(a|an)\s+\w+/gi,
+    /you\s+are\s+now\s+(a|an|the)?\s*\w+/gi,
+    /act\s+as\s+(a|an|the)?\s*\w+/gi,
     /pretend\s+(to\s+be|you\s+are)/gi,
-    /simulate\s+(a|an)\s+\w+/gi,
+    /simulate\s+(a|an|the)?\s*\w+/gi,
 
     // Jailbreak attempts
     /(DAN|STAN)(\s+mode)?/gi, // Relaxed to match just DAN/STAN

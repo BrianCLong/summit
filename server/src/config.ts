@@ -85,7 +85,7 @@ const ENV_VAR_HELP: Record<string, string> = {
   ANTHROPIC_API_KEY: 'Anthropic API Key (required if AI_ENABLED=true)',
 };
 
-const initializeConfig = () => {
+export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnError: true }) => {
   const isTest = process.env.NODE_ENV === 'test';
   const schema = isTest ? TestEnv : Env;
   
@@ -96,8 +96,10 @@ const initializeConfig = () => {
   if (parsed.success) {
     const data = parsed.data;
     if (data.AI_ENABLED && !data.OPENAI_API_KEY && !data.ANTHROPIC_API_KEY) {
-      console.error('\n❌ AI Configuration Error: AI_ENABLED=true requires either OPENAI_API_KEY or ANTHROPIC_API_KEY.\n');
-      process.exit(1);
+      const msg = '\n❌ AI Configuration Error: AI_ENABLED=true requires either OPENAI_API_KEY or ANTHROPIC_API_KEY.\n';
+      console.error(msg);
+      if (options.exitOnError) process.exit(1);
+      throw new Error(msg);
     }
   }
 
@@ -119,26 +121,18 @@ const initializeConfig = () => {
     console.error('  3. For production, generate strong secrets (e.g., openssl rand -base64 32)');
     console.error('  4. See docs/ONBOARDING.md for detailed setup instructions\n');
 
-    process.exit(1);
+    if (options.exitOnError) process.exit(1);
+    throw new Error('Environment Validation Failed');
   }
   const env = parsed.data;
   const present = Object.keys(env).length;
   if (env.NODE_ENV === 'production') {
     const insecureTokens = ['devpassword', 'changeme', 'secret', 'localhost'];
     const fail = (key: string, reason: string) => {
-      console.error('\n❌ Production Configuration Error\n');
-      console.error(`  Invariant GC-03 Violated: Production environment cannot use default secrets.`);
-      console.error(`  Variable: ${key}`);
-      console.error(`  Issue: ${reason}\n`);
-      console.error('Production deployments require secure configuration:');
-      console.error('  • JWT secrets must be >= 32 characters and cryptographically random');
-      console.error('  • Database passwords must not contain dev/test values');
-      console.error('  • CORS origins must use explicit HTTPS URLs (no wildcards)');
-      console.error('  • All connection strings must use production hosts (no localhost)\n');
-      console.error('To generate a secure secret:');
-      console.error('  openssl rand -base64 32\n');
-      console.error('See .env.production.sample for a production template.\n');
-      process.exit(1);
+      const msg = `\n❌ Production Configuration Error\n  Invariant GC-03 Violated: Production environment cannot use default secrets.\n  Variable: ${key}\n  Issue: ${reason}\n`;
+      console.error(msg);
+      if (options.exitOnError) process.exit(1);
+      throw new Error(msg);
     };
     const guardSecret = (key: keyof typeof env) => {
       const value = String(env[key]);
@@ -188,21 +182,27 @@ const initializeConfig = () => {
     console.log('🔒 GA Cloud Guard Active: Enforcing strict production constraints');
 
     if (env.NODE_ENV !== 'production') {
-      console.error('\n❌ GA Cloud Error: NODE_ENV must be "production" when GA_CLOUD is enabled.\n');
-      process.exit(1);
+      const msg = '\n❌ GA Cloud Error: NODE_ENV must be "production" when GA_CLOUD is enabled.\n';
+      console.error(msg);
+      if (options.exitOnError) process.exit(1);
+      throw new Error(msg);
     }
 
     if (!env.AWS_REGION) {
-      console.error('\n❌ GA Cloud Error: AWS_REGION is required when GA_CLOUD is enabled.\n');
-      process.exit(1);
+      const msg = '\n❌ GA Cloud Error: AWS_REGION is required when GA_CLOUD is enabled.\n';
+      console.error(msg);
+      if (options.exitOnError) process.exit(1);
+      throw new Error(msg);
     }
 
     // Ensure strictly no localhost in critical URLs for GA
     const criticalUrls = [env.DATABASE_URL, env.NEO4J_URI];
     criticalUrls.forEach(url => {
         if (url && (url.includes('localhost') || url.includes('127.0.0.1'))) {
-             console.error(`\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`);
-             process.exit(1);
+             const msg = `\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`;
+             console.error(msg);
+             if (options.exitOnError) process.exit(1);
+             throw new Error(msg);
         }
     });
   }
@@ -214,6 +214,14 @@ const initializeConfig = () => {
 };
 
 let _cfg: any = null;
+
+/**
+ * Reset config cache for testing
+ */
+export const resetConfig = () => {
+  _cfg = null;
+};
+
 export const cfg = new Proxy({} as any, {
   get: (_target, prop) => {
     if (!_cfg) {

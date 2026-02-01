@@ -1,0 +1,45 @@
+{
+  "componentId": "mc",
+  "displayName": "Maestro Conductor/Composer",
+  "flowsDir": "flows",
+  "tags": [
+    "mc"
+  ],
+  "flows": [
+    {
+      "id": "auto_improve_daily",
+      "path": "flows/auto_improve_daily.yaml",
+      "tags": [
+        "mc"
+      ]
+    },
+    {
+      "id": "pr_lifecycle",
+      "path": "flows/pr_lifecycle.yaml",
+      "tags": [
+        "mc"
+      ]
+    },
+    {
+      "id": "recapture_closed_prs",
+      "path": "flows/recapture_closed_prs.yaml",
+      "tags": [
+        "mc"
+      ]
+    },
+    {
+      "id": "self_check",
+      "path": "flows/self_check.yaml",
+      "tags": [
+        "mc"
+      ]
+    },
+    {
+      "id": "session_to_pr",
+      "path": "flows/session_to_pr.yaml",
+      "tags": [
+        "mc"
+      ]
+    }
+  ]
+}

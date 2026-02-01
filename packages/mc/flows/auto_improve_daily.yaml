@@ -1,0 +1,40 @@
+version: 1
+name: auto_improve_daily
+description: >
+  Daily autonomous improvement loop: scan, prioritize, fix, and PR.
+
+steps:
+  - id: scan_repo
+    agent: executor
+    inputs:
+      flow_name: "scan_repo_for_deficits"
+    outputs:
+      deficits: deficits
+
+  - id: prioritize
+    agent: predictive
+    inputs:
+      analytics_context:
+        deficits: "{{deficits}}"
+      question: "Rank these deficits by impact and risk."
+    outputs:
+      prioritized_actions: prioritized_deficits
+
+  - id: fix_top_n
+    agent: jules
+    loop_over: "{{prioritized_deficits}}"
+    limit: 3
+    inputs:
+      task_description: "{{item.description}}"
+    outputs:
+      code_diff: fix_diff
+      pr_metadata: fix_meta
+
+  - id: review_fixes
+    agent: reviewer
+    loop_over: "{{fix_diff}}"
+    inputs:
+      pr_diff: "{{item}}"
+    outputs:
+      verdict: fix_verdict
+      review_report: fix_review

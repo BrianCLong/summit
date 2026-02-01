@@ -1,0 +1,21 @@
+version: 1
+name: recapture_closed_prs
+description: >
+  Identify and recapture valuable changes from closed PRs using Codex.
+
+steps:
+  - id: identify_targets
+    agent: predictive
+    inputs:
+      question: "Which closed PRs contain high-value work worth recapturing?"
+    outputs:
+      prioritized_actions: target_prs
+
+  - id: recapture_each
+    agent: codex
+    loop_over: "{{target_prs}}"
+    inputs:
+      target_scope: "{{item}}"
+    outputs:
+      code_diff: recaptured_diff
+      pr_metadata: recaptured_meta

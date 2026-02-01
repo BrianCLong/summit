@@ -36,20 +36,7 @@ Configuration is validated at startup. If any required variable is missing or in
 ```bash
 # Check if current env is valid without starting the server
 npm run config:validate
-
-# Run core health probes (Standalone Mode)
-# Useful for verifying the binary before dependencies are UP
-SMOKE_MODE=standalone npm run test:smoke
-
-# Run end-to-end health probes (Full Mode - Default)
-# Requires PostgreSQL, Neo4j, and Redis to be reachable
-npm run test:smoke
 ```
-
-### Smoke prerequisites + modes
-- **Preflight**: `/health` must exist and be reachable; a 404 indicates a route mismatch.
-- **Standalone** (`SMOKE_MODE=standalone`): only core endpoints (`/health`, `/health/live`, `/healthz`) and should pass with minimal startup.
-- **Full** (`SMOKE_MODE=full`, default): includes readiness/metrics/docs and requires PostgreSQL, Neo4j, and Redis.
 
 ## 3. Environment Specifics
 

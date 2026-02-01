@@ -1,0 +1,471 @@
+# Agentic Threat Hunting Workflow
+# Orchestrates LLM-driven hunt queries over the knowledge graph
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: threat-hunt-workflow
+  namespace: intelgraph
+  labels:
+    app.kubernetes.io/name: threat-hunter
+    app.kubernetes.io/component: workflow
+    app.kubernetes.io/part-of: intelgraph
+    workflow-type: hunting
+data:
+  threat-hunt-workflow.json: |
+    {
+      "name": "agentic_threat_hunt",
+      "version": "1.0.0",
+      "description": "Orchestrates agentic threat hunting with LLM-driven query generation and auto-remediation",
+      "metadata": {
+        "tags": ["threat-hunting", "agentic", "llm", "auto-remediation"],
+        "author": "IntelGraph Security Team",
+        "created": "2024-01-15",
+        "slo_target_duration": "5m",
+        "precision_target": 0.91
+      },
+      "triggers": [
+        {
+          "type": "schedule",
+          "cron": "0 */4 * * *",
+          "enabled": true,
+          "description": "Run every 4 hours"
+        },
+        {
+          "type": "manual",
+          "enabled": true
+        },
+        {
+          "type": "webhook",
+          "enabled": true,
+          "path": "/api/v1/hunt/trigger"
+        },
+        {
+          "type": "event",
+          "enabled": true,
+          "event_type": "high_severity_alert",
+          "filter": "severity >= 8"
+        }
+      ],
+      "variables": {
+        "hunt_scope": "all",
+        "time_window_hours": 24,
+        "max_results_per_query": 100,
+        "confidence_threshold": 0.7,
+        "auto_remediate": false,
+        "remediation_approval_required": true,
+        "llm_model": "claude-3-opus",
+        "llm_temperature": 0.1,
+        "precision_mode": true
+      },
+      "tasks": [
+        {
+          "name": "initialize_hunt_context",
+          "type": "script",
+          "description": "Initialize hunt context with threat intelligence and baseline data",
+          "timeout": "30s",
+          "config": {
+            "script": "initialize-hunt-context.js",
+            "inputs": {
+              "hunt_id": "${workflow.workflowId}",
+              "scope": "${variables.hunt_scope}",
+              "time_window": "${variables.time_window_hours}"
+            }
+          },
+          "outputs": {
+            "hunt_context": "$.result.context",
+            "baseline_data": "$.result.baseline",
+            "active_threats": "$.result.active_threats"
+          }
+        },
+        {
+          "name": "llm_hypothesis_generation",
+          "type": "llm_chain",
+          "description": "Generate threat hunting hypotheses using LLM",
+          "timeout": "60s",
+          "depends_on": ["initialize_hunt_context"],
+          "config": {
+            "model": "${variables.llm_model}",
+            "temperature": "${variables.llm_temperature}",
+            "chain_type": "hypothesis_generation",
+            "system_prompt": "You are an expert threat hunter analyzing a knowledge graph for potential security threats. Generate specific, testable hypotheses based on the threat intelligence context.",
+            "user_prompt_template": "Based on the following threat context, generate 5 prioritized hunting hypotheses:\n\nActive Threats: ${initialize_hunt_context.active_threats}\nBaseline Anomalies: ${initialize_hunt_context.baseline_data.anomalies}\nRecent Alerts: ${initialize_hunt_context.hunt_context.recent_alerts}\n\nFor each hypothesis, specify:\n1. Hypothesis statement\n2. MITRE ATT&CK technique(s)\n3. Required Cypher query template\n4. Expected indicators\n5. Confidence level",
+            "output_parser": "json_hypotheses"
+          },
+          "outputs": {
+            "hypotheses": "$.result.hypotheses",
+            "priority_order": "$.result.priority_order"
+          }
+        },
+        {
+          "name": "cypher_query_generation",
+          "type": "llm_chain",
+          "description": "Generate optimized Cypher queries from hypotheses",
+          "timeout": "45s",
+          "depends_on": ["llm_hypothesis_generation"],
+          "config": {
+            "model": "${variables.llm_model}",
+            "temperature": 0,
+            "chain_type": "cypher_generation",
+            "system_prompt": "You are an expert Neo4j Cypher query developer specializing in threat hunting. Generate optimized, parameterized Cypher queries that are safe, efficient, and precise.",
+            "context": {
+              "schema": "${initialize_hunt_context.hunt_context.graph_schema}",
+              "templates": "file://cypher-templates/threat-patterns.cypher"
+            },
+            "validation": {
+              "enabled": true,
+              "max_complexity": 100,
+              "require_limits": true,
+              "forbidden_clauses": ["DELETE", "DETACH DELETE", "REMOVE", "SET"]
+            }
+          },
+          "outputs": {
+            "queries": "$.result.queries",
+            "query_metadata": "$.result.metadata"
+          }
+        },
+        {
+          "name": "parallel_hunt_execution",
+          "type": "parallel",
+          "description": "Execute hunt queries in parallel with rate limiting",
+          "timeout": "180s",
+          "depends_on": ["cypher_query_generation"],
+          "config": {
+            "max_parallelism": 5,
+            "rate_limit": "10/minute",
+            "items": "${cypher_query_generation.queries}",
+            "task_template": {
+              "type": "cypher_query",
+              "config": {
+                "query": "${item.query}",
+                "params": "${item.params}",
+                "timeout_ms": 30000,
+                "read_only": true
+              }
+            }
+          },
+          "outputs": {
+            "results": "$.result.all_results",
+            "execution_stats": "$.result.stats"
+          }
+        },
+        {
+          "name": "llm_result_analysis",
+          "type": "llm_chain",
+          "description": "Analyze hunt results using LLM for threat classification",
+          "timeout": "90s",
+          "depends_on": ["parallel_hunt_execution"],
+          "config": {
+            "model": "${variables.llm_model}",
+            "temperature": 0.1,
+            "chain_type": "result_analysis",
+            "system_prompt": "You are an expert threat analyst. Analyze the hunt results and classify findings by severity, confidence, and recommended actions. Focus on high-precision findings (target: 91% precision).",
+            "context": {
+              "hypotheses": "${llm_hypothesis_generation.hypotheses}",
+              "baseline": "${initialize_hunt_context.baseline_data}"
+            },
+            "output_schema": {
+              "findings": [
+                {
+                  "id": "string",
+                  "hypothesis_id": "string",
+                  "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+                  "confidence": "number",
+                  "classification": "string",
+                  "entities_involved": ["string"],
+                  "iocs_identified": ["string"],
+                  "ttps_matched": ["string"],
+                  "recommended_actions": ["string"],
+                  "auto_remediation_eligible": "boolean",
+                  "evidence_summary": "string"
+                }
+              ],
+              "precision_estimate": "number",
+              "false_positive_indicators": ["string"]
+            }
+          },
+          "outputs": {
+            "findings": "$.result.findings",
+            "high_severity_count": "$.result.findings[?(@.severity in ['CRITICAL', 'HIGH'])].length",
+            "precision_estimate": "$.result.precision_estimate"
+          }
+        },
+        {
+          "name": "correlation_enrichment",
+          "type": "script",
+          "description": "Enrich findings with correlation data from CTI/OSINT sources",
+          "timeout": "60s",
+          "depends_on": ["llm_result_analysis"],
+          "config": {
+            "script": "correlate-findings.js",
+            "inputs": {
+              "findings": "${llm_result_analysis.findings}",
+              "cti_sources": ["misp", "otx", "virustotal", "shodan", "censys"],
+              "osint_sources": ["pastebin", "github", "twitter", "reddit"]
+            }
+          },
+          "outputs": {
+            "enriched_findings": "$.result.enriched_findings",
+            "external_correlations": "$.result.correlations"
+          }
+        },
+        {
+          "name": "auto_remediation_evaluation",
+          "type": "decision",
+          "description": "Evaluate findings for auto-remediation eligibility",
+          "timeout": "15s",
+          "depends_on": ["correlation_enrichment"],
+          "config": {
+            "conditions": [
+              {
+                "name": "auto_remediate_enabled",
+                "condition": "${variables.auto_remediate} == true",
+                "next_task": "prepare_remediation_actions"
+              },
+              {
+                "name": "high_severity_findings",
+                "condition": "${llm_result_analysis.high_severity_count} > 0",
+                "next_task": "alert_security_team"
+              }
+            ],
+            "default_next": "generate_hunt_report"
+          }
+        },
+        {
+          "name": "prepare_remediation_actions",
+          "type": "script",
+          "description": "Prepare auto-remediation actions for eligible findings",
+          "timeout": "30s",
+          "depends_on": ["auto_remediation_evaluation"],
+          "condition": "${auto_remediation_evaluation.result} == 'auto_remediate_enabled'",
+          "config": {
+            "script": "prepare-remediation.js",
+            "inputs": {
+              "findings": "${correlation_enrichment.enriched_findings}",
+              "approval_required": "${variables.remediation_approval_required}"
+            }
+          },
+          "outputs": {
+            "remediation_plan": "$.result.plan",
+            "pending_approvals": "$.result.pending_approvals"
+          }
+        },
+        {
+          "name": "execute_remediation",
+          "type": "remediation",
+          "description": "Execute approved remediation actions",
+          "timeout": "300s",
+          "depends_on": ["prepare_remediation_actions"],
+          "config": {
+            "plan": "${prepare_remediation_actions.remediation_plan}",
+            "hooks": {
+              "pre_remediation": "validate-remediation-scope.js",
+              "post_remediation": "verify-remediation-success.js"
+            },
+            "rollback_on_failure": true,
+            "notification_channels": ["slack", "pagerduty"]
+          },
+          "outputs": {
+            "remediation_results": "$.result.results",
+            "entities_remediated": "$.result.entities_count"
+          }
+        },
+        {
+          "name": "alert_security_team",
+          "type": "notification",
+          "description": "Alert security team of high-severity findings",
+          "timeout": "10s",
+          "depends_on": ["correlation_enrichment"],
+          "condition": "${llm_result_analysis.high_severity_count} > 0",
+          "config": {
+            "channels": [
+              {
+                "type": "slack",
+                "channel": "#security-alerts",
+                "template": "high-severity-hunt-findings"
+              },
+              {
+                "type": "pagerduty",
+                "severity": "high",
+                "service_key": "${env.PAGERDUTY_SERVICE_KEY}"
+              },
+              {
+                "type": "email",
+                "recipients": ["security-team@company.com"],
+                "template": "hunt-findings-summary"
+              }
+            ],
+            "payload": {
+              "hunt_id": "${workflow.workflowId}",
+              "findings_count": "${llm_result_analysis.high_severity_count}",
+              "top_findings": "${correlation_enrichment.enriched_findings[0..5]}"
+            }
+          }
+        },
+        {
+          "name": "generate_hunt_report",
+          "type": "report",
+          "description": "Generate comprehensive threat hunt report",
+          "timeout": "45s",
+          "depends_on": ["correlation_enrichment", "execute_remediation"],
+          "config": {
+            "template": "threat-hunt-report",
+            "format": ["json", "pdf", "html"],
+            "sections": [
+              "executive_summary",
+              "hypotheses_tested",
+              "findings_detail",
+              "iocs_discovered",
+              "remediation_summary",
+              "recommendations",
+              "metrics"
+            ],
+            "data": {
+              "hunt_context": "${initialize_hunt_context.hunt_context}",
+              "hypotheses": "${llm_hypothesis_generation.hypotheses}",
+              "findings": "${correlation_enrichment.enriched_findings}",
+              "remediation": "${execute_remediation.remediation_results}",
+              "precision": "${llm_result_analysis.precision_estimate}"
+            }
+          },
+          "outputs": {
+            "report_url": "$.result.url",
+            "report_id": "$.result.id"
+          }
+        },
+        {
+          "name": "update_knowledge_graph",
+          "type": "graph_update",
+          "description": "Update knowledge graph with hunt findings",
+          "timeout": "30s",
+          "depends_on": ["generate_hunt_report"],
+          "config": {
+            "operations": [
+              {
+                "type": "create_nodes",
+                "label": "HuntExecution",
+                "data": {
+                  "hunt_id": "${workflow.workflowId}",
+                  "timestamp": "${workflow.startTime}",
+                  "findings_count": "${correlation_enrichment.enriched_findings.length}",
+                  "precision": "${llm_result_analysis.precision_estimate}"
+                }
+              },
+              {
+                "type": "create_relationships",
+                "from_label": "HuntExecution",
+                "to_label": "Entity",
+                "relationship": "DISCOVERED",
+                "entities": "${correlation_enrichment.enriched_findings[*].entities_involved}"
+              },
+              {
+                "type": "update_properties",
+                "label": "Entity",
+                "filter": "${correlation_enrichment.enriched_findings[*].iocs_identified}",
+                "properties": {
+                  "last_hunt_detection": "${workflow.startTime}",
+                  "threat_score": "INCREMENT"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "publish_metrics",
+          "type": "metrics",
+          "description": "Publish hunt metrics to observability stack",
+          "timeout": "10s",
+          "depends_on": ["update_knowledge_graph"],
+          "config": {
+            "metrics": [
+              {
+                "name": "threat_hunt_findings_total",
+                "type": "counter",
+                "value": "${correlation_enrichment.enriched_findings.length}",
+                "labels": {
+                  "severity": "all",
+                  "hunt_type": "agentic"
+                }
+              },
+              {
+                "name": "threat_hunt_precision",
+                "type": "gauge",
+                "value": "${llm_result_analysis.precision_estimate}",
+                "labels": {
+                  "hunt_id": "${workflow.workflowId}"
+                }
+              },
+              {
+                "name": "threat_hunt_duration_seconds",
+                "type": "histogram",
+                "value": "${workflow.duration_ms / 1000}",
+                "labels": {
+                  "hunt_type": "agentic"
+                }
+              },
+              {
+                "name": "threat_hunt_remediation_count",
+                "type": "counter",
+                "value": "${execute_remediation.entities_remediated}",
+                "labels": {
+                  "auto": "${variables.auto_remediate}"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "on_success": [
+        {
+          "type": "notification",
+          "channel": "slack",
+          "message": "Threat hunt completed: ${correlation_enrichment.enriched_findings.length} findings with ${llm_result_analysis.precision_estimate * 100}% precision"
+        },
+        {
+          "type": "metric",
+          "name": "threat_hunt_success",
+          "increment": 1
+        }
+      ],
+      "on_failure": [
+        {
+          "type": "notification",
+          "channel": "pagerduty",
+          "severity": "warning",
+          "message": "Threat hunt workflow failed: ${workflow.error}"
+        },
+        {
+          "type": "metric",
+          "name": "threat_hunt_failure",
+          "increment": 1
+        },
+        {
+          "type": "retry",
+          "max_attempts": 2,
+          "delay": "5m"
+        }
+      ],
+      "resources": {
+        "cpu_limit": "2",
+        "memory_limit": "4Gi",
+        "timeout": "30m",
+        "max_retries": 2
+      },
+      "observability": {
+        "trace": true,
+        "metrics": true,
+        "logs": true,
+        "custom_metrics": [
+          {
+            "name": "llm_tokens_used",
+            "value": "${llm_hypothesis_generation.tokens_used + llm_result_analysis.tokens_used}",
+            "labels": {"model": "${variables.llm_model}"}
+          }
+        ]
+      },
+      "slo_targets": {
+        "success_rate": 0.95,
+        "max_duration_ms": 300000,
+        "precision_target": 0.91,
+        "error_budget_minutes": 30
+      }
+    }

@@ -20,7 +20,7 @@
     "lint:a11y": "ESLINT_USE_FLAT_CONFIG=false eslint src/components/Layout.tsx src/pages/SignInPage.tsx --max-warnings=0",
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "storybook": "storybook dev -p 6006",

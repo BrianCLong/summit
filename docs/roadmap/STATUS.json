@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-15T00:00:00Z",
-  "revision_note": "Standardized test environment parity, added seed logging, and documented reproducible test guidance; documented investigation/export RBAC verification updates tied to Task Brief #6.",
+  "revision_note": "Excluded _worktrees from CJS ESM guard to unblock hooks; T1 env health: aligned work-graph demo/store/edge rules with ticket + evidence_bundle types and restored prepare builds; scaffolded Maestro MCP flow packs and Docker targets for ig/mc/sb/co + summit-platform; documented investigation/export RBAC verification updates tied to Task Brief #6.",
   "initiatives": [
     {
       "id": "A",
