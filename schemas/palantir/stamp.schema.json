@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Palantir Deterministic Stamp",
+  "type": "object",
+  "required": ["evidence_id", "generated_at", "git_sha", "config_hash"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "git_sha": { "type": "string" },
+    "config_hash": { "type": "string", "description": "SHA256 of the configuration used" }
+  },
+  "additionalProperties": false
+}

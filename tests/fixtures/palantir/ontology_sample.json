@@ -1,0 +1,14 @@
+{
+  "objectTypes": [
+    {
+      "apiName": "Person",
+      "display_name": "Person",
+      "properties": {
+        "name": "string",
+        "ssn": "string",
+        "auth_token": "string"
+      }
+    }
+  ],
+  "linkTypes": []
+}
