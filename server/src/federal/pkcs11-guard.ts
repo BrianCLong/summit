@@ -1,36 +1,21 @@
-// @ts-nocheck
-import * as pkcs11 from 'pkcs11js';
+import {
+  PKCS11,
+  CKF_SERIAL_SESSION,
+  CKF_RW_SESSION,
+  CKA_CLASS,
+  CKA_KEY_TYPE,
+  CKA_VALUE_LEN,
+  CKA_ENCRYPT,
+  CKA_DECRYPT,
+  CKA_TOKEN,
+  CKA_LABEL,
+  CKO_SECRET_KEY,
+  CKO_PRIVATE_KEY,
+  CKK_AES,
+  CKK_EC
+} from 'pkcs11js';
 import * as crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';
-
-// Type declarations for pkcs11js (not fully typed in the package)
-interface PKCS11Instance {
-  load(libPath: string): void;
-  C_Initialize(): void;
-  C_GetSlotList(tokenPresent: boolean): any[];
-  C_GetSlotInfo(slot: any): any;
-  C_GetTokenInfo(slot: any): any;
-  C_GetMechanismList(slot: any): number[];
-  C_OpenSession(slot: any, flags: number): any;
-  C_CloseSession(session: any): void;
-  C_Finalize(): void;
-  C_GenerateRandom(session: any, length: number): Buffer;
-  C_GenerateKey(session: any, mech: any, template: any[]): any;
-  C_EncryptInit(session: any, mech: any, key: any): void;
-  C_EncryptUpdate(session: any, data: Buffer): Buffer;
-  C_EncryptFinal(session: any): Buffer;
-  C_DestroyObject(session: any, object: any): void;
-  C_FindObjectsInit(session: any, template: any[]): void;
-  C_FindObjects(session: any, maxCount: number): any[];
-  C_FindObjectsFinal(session: any): void;
-  C_SignInit(session: any, mech: any, key: any): void;
-  C_Sign(session: any, data: Buffer): Buffer;
-}
-
-type PKCS11 = PKCS11Instance;
-type Slot = any;
-type Session = any;
-type Handle = any;
 
 // PKCS#11 Guard for Federal/Gov Pack - CloudHSM with strict mechanism allowlist
 export type AllowedMech = 'AES_GCM_256' | 'ECDSA_P384' | 'RSA_PSS_4096';
@@ -55,7 +40,8 @@ const ALLOWLIST: Record<
       if (!p || !iv || iv.length < 12) {
         throw new Error('AES-GCM requires IV >= 12 bytes');
       }
-      if (!p.ulTagBits || p.ulTagBits < 96) {
+      const tagBits = p.ulTagBits as number | undefined;
+      if (!tagBits || tagBits < 96) {
         throw new Error('AES-GCM requires tag >= 96 bits');
       }
       if (iv.length > 16) {
@@ -79,7 +65,8 @@ const ALLOWLIST: Record<
         throw new Error('RSA-PSS requires SHA-384 (0x60)'); // CKM_SHA384
       if (p.mgf !== 0x00000003)
         throw new Error('RSA-PSS requires MGF1-SHA384 (0x03)'); // CKG_MGF1_SHA384
-      if (!p.sLen || p.sLen < 48)
+      const sLen = p.sLen as number | undefined;
+      if (!sLen || sLen < 48)
         throw new Error('RSA-PSS salt length must be >= 48 bytes');
     },
   },
@@ -87,9 +74,9 @@ const ALLOWLIST: Record<
 
 export interface PKCS11Context {
   p11: PKCS11;
-  slot: Slot;
-  session: Session;
-  tokenInfo: Record<string, unknown>;
+  slot: Buffer;
+  session: Buffer;
+  tokenInfo: any;
   mechanisms: number[];
 }
 
@@ -120,7 +107,7 @@ export function initPKCS11(
   const span = otelService.createSpan('pkcs11.init');
 
   try {
-    const p11 = new (pkcs11 as any).PKCS11() as PKCS11Instance;
+    const p11 = new PKCS11();
     p11.load(libPath);
     p11.C_Initialize();
 
@@ -151,7 +138,7 @@ export function initPKCS11(
 
     const session = p11.C_OpenSession(
       slot,
-      (pkcs11 as any).CKF_SERIAL_SESSION | (pkcs11 as any).CKF_RW_SESSION,
+      CKF_SERIAL_SESSION | CKF_RW_SESSION,
     );
 
     otelService.addSpanAttributes({
@@ -269,16 +256,15 @@ export async function performHSMSelfTest(
     }
 
     // Test 2: Key generation (temporary AES key)
-    let hTempKey: Handle | null = null;
+    let hTempKey: Buffer | null = null;
     try {
-      const p11Constants = pkcs11 as any;
       const template = [
-        { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_SECRET_KEY },
-        { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_AES },
-        { type: p11Constants.CKA_VALUE_LEN, value: 32 }, // 256 bits
-        { type: p11Constants.CKA_ENCRYPT, value: true },
-        { type: p11Constants.CKA_DECRYPT, value: true },
-        { type: p11Constants.CKA_TOKEN, value: false }, // session key
+        { type: CKA_CLASS, value: CKO_SECRET_KEY },
+        { type: CKA_KEY_TYPE, value: CKK_AES },
+        { type: CKA_VALUE_LEN, value: 32 }, // 256 bits
+        { type: CKA_ENCRYPT, value: true },
+        { type: CKA_DECRYPT, value: true },
+        { type: CKA_TOKEN, value: false }, // session key
       ];
 
       const mech = enforceMech('AES_GCM_256');
@@ -312,10 +298,9 @@ export async function performHSMSelfTest(
     // Test 4: Digital signature (if ECDSA key available)
     try {
       // Look for existing ECDSA key for testing
-      const p11Constants = pkcs11 as any;
       ctx.p11.C_FindObjectsInit(ctx.session, [
-        { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_PRIVATE_KEY },
-        { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_EC },
+        { type: CKA_CLASS, value: CKO_PRIVATE_KEY },
+        { type: CKA_KEY_TYPE, value: CKK_EC },
       ]);
       const keys = ctx.p11.C_FindObjects(ctx.session, 1);
       ctx.p11.C_FindObjectsFinal(ctx.session);
@@ -338,10 +323,10 @@ export async function performHSMSelfTest(
       vendor: (ctx.tokenInfo.manufacturerID as string | undefined)?.trim() || 'unknown',
       model: (ctx.tokenInfo.model as string | undefined)?.trim() || 'unknown',
       serialNumber: (ctx.tokenInfo.serialNumber as string | undefined)?.trim() || 'unknown',
-      firmwareVersion: `${(ctx.tokenInfo.firmwareVersion as any)?.major || 0}.${(ctx.tokenInfo.firmwareVersion as any)?.minor || 0}`,
+      firmwareVersion: `${ctx.tokenInfo.firmwareVersion?.major || 0}.${ctx.tokenInfo.firmwareVersion?.minor || 0}`,
       fipsMode: ((ctx.tokenInfo.flags as number) & CKF_FIPS_MODE) !== 0,
       supportedMechanisms: ctx.mechanisms.map(
-        (m) => `0x${m.toString(16).padStart(8, '0')}`,
+        (m: number) => `0x${m.toString(16).padStart(8, '0')}`,
       ),
       allowlistCompliance: Object.keys(ALLOWLIST).every((name) =>
         ctx.mechanisms.includes(ALLOWLIST[name as AllowedMech].mech),
@@ -391,11 +376,10 @@ export function aes256gcmEncrypt(
 
   try {
     // Find AES key by label
-    const p11Constants = pkcs11 as any;
     ctx.p11.C_FindObjectsInit(ctx.session, [
-      { type: p11Constants.CKA_LABEL, value: Buffer.from(keyLabel) },
-      { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_SECRET_KEY },
-      { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_AES },
+      { type: CKA_LABEL, value: Buffer.from(keyLabel) },
+      { type: CKA_CLASS, value: CKO_SECRET_KEY },
+      { type: CKA_KEY_TYPE, value: CKK_AES },
     ]);
     const keys = ctx.p11.C_FindObjects(ctx.session, 1);
     ctx.p11.C_FindObjectsFinal(ctx.session);
@@ -452,11 +436,10 @@ export function ecdsaP384Sign(
 
   try {
     // Find ECDSA private key by label
-    const p11Constants = pkcs11 as any;
     ctx.p11.C_FindObjectsInit(ctx.session, [
-      { type: p11Constants.CKA_LABEL, value: Buffer.from(keyLabel) },
-      { type: p11Constants.CKA_CLASS, value: p11Constants.CKO_PRIVATE_KEY },
-      { type: p11Constants.CKA_KEY_TYPE, value: p11Constants.CKK_EC },
+      { type: CKA_LABEL, value: Buffer.from(keyLabel) },
+      { type: CKA_CLASS, value: CKO_PRIVATE_KEY },
+      { type: CKA_KEY_TYPE, value: CKK_EC },
     ]);
     const keys = ctx.p11.C_FindObjects(ctx.session, 1);
     ctx.p11.C_FindObjectsFinal(ctx.session);
