@@ -24,6 +24,7 @@ jobs:
       - name: Enqueue if ready
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           pr=${{ github.event.pull_request.number }}
 
