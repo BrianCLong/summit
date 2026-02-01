@@ -19,7 +19,6 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
-        with:
           cache: 'pnpm'
           node-version: "20"
 

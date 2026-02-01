@@ -108,7 +108,6 @@ jobs:
 
       - name: Checkout at Commit
         uses: actions/checkout@v4 # v6
-        with:
           ref: ${{ inputs.commit_sha }}
           fetch-depth: 0
 
@@ -140,7 +139,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
           node-version: 20
           cache: "pnpm"
 
@@ -236,7 +234,6 @@ jobs:
 
       - name: Upload Hotfix Bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
           name: hotfix-bundle-${{ steps.version.outputs.tag }}
           path: hotfix-assets/
           retention-days: 90
@@ -281,12 +278,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
           ref: ${{ inputs.commit_sha }}
 
       - name: Download Hotfix Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
           name: hotfix-bundle-${{ needs.verify-hotfix.outputs.tag }}
           path: hotfix-assets
 
@@ -349,7 +344,6 @@ jobs:
 
       - name: Upload Hotfix Record
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
           name: hotfix-record-${{ needs.verify-hotfix.outputs.tag }}
           path: hotfix-assets/hotfix_record.json
           retention-days: 90

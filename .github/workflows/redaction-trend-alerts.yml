@@ -51,7 +51,6 @@ jobs:
       - name: Download Site Artifact
         id: download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
           name: release-ops-site
           path: ${{ env.SITE_DIR }}
         continue-on-error: true
@@ -107,7 +106,6 @@ jobs:
 
       - name: Upload Alert Report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        with:
           name: redaction-trend-alert-report
           path: artifacts/release-train/redaction_trend_alert*
           retention-days: 30
@@ -170,7 +168,6 @@ jobs:
 
       - name: Download Alert Report
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
           name: redaction-trend-alert-report
           path: artifacts
 
@@ -262,7 +259,6 @@ jobs:
         if: needs.check-trends.outputs.issue_action == 'create'
         id: create
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('issue_body.md', 'utf8');
@@ -281,7 +277,6 @@ jobs:
       - name: Update Issue
         if: needs.check-trends.outputs.issue_action == 'update'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('issue_body.md', 'utf8');
@@ -368,7 +363,6 @@ jobs:
       - name: Close Resolved Issues
         if: steps.check-close.outputs.should_close == 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             const issueNumbers = '${{ steps.check-close.outputs.issue_numbers }}'.split('\n').filter(n => n);
 

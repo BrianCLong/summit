@@ -13,7 +13,6 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           node-version: '18'
 
       - name: Install Dependencies
@@ -25,6 +24,5 @@ jobs:
       - name: Upload Evidence
         if: always()
         uses: actions/upload-artifact@v3
-        with:
           name: supplychain-drift-evidence
           path: artifacts/supplychain/drift/

@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
           fetch-depth: 0 # Full history required for Gitleaks
 
       - name: Gitleaks secret scanning
@@ -32,7 +31,6 @@ jobs:
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version: "20"
           cache: pnpm
 
@@ -59,7 +57,6 @@ jobs:
       - name: Upload security scan results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         if: always()
-        with:
           name: security-scan-results
           path: |
             gitleaks-report.json
@@ -74,7 +71,6 @@ jobs:
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
-        with:
           version: v0.45.0 # Pinned for legacy Rego syntax compatibility
 
       - name: OPA policy check
@@ -96,7 +92,6 @@ jobs:
       - name: Upload OPA test results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         if: always()
-        with:
           name: opa-test-results
           path: |
             policies/test-results.json
@@ -109,7 +104,6 @@ jobs:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version: "20"
           cache: pnpm
 
@@ -147,7 +141,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: actions/setup-node@v4 # v6
-        with:
           cache: 'pnpm'
           node-version: "20"
 
@@ -167,7 +160,6 @@ jobs:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version: "20"
           cache: pnpm
 
@@ -199,7 +191,6 @@ jobs:
       - name: Upload SBOM
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         if: always()
-        with:
           name: sbom
           path: sbom.json
           retention-days: 90 # 2 years retention
@@ -207,7 +198,6 @@ jobs:
       - name: Upload SLSA provenance
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         if: always()
-        with:
           name: slsa-provenance
           path: provenance.json
           retention-days: 90 # 2 years retention
@@ -235,7 +225,6 @@ jobs:
 
       - name: Upload evidence bundle
         uses: actions/upload-artifact@v4
-        with:
           name: golden-evidence-bundle
           path: evidence
 
@@ -244,12 +233,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
           fetch-depth: 0 # Needed for schema diff
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version: "20"
           cache: pnpm
 
@@ -281,7 +268,6 @@ jobs:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version: "20"
           cache: pnpm
 
@@ -312,7 +298,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: actions/setup-node@v4 # v6
-        with:
           cache: 'pnpm'
           node-version: "20"
       - name: Ensure evidence bundle exists
@@ -363,7 +348,6 @@ jobs:
       - name: Upload evidence index
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
-        with:
           name: ga-evidence-index-${{ github.sha }}
           path: |
             dist/evidence/${{ github.sha }}/control_evidence_index.json

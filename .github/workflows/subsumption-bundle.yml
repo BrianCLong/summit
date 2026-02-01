@@ -15,7 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
           node-version: "20"
       - name: Verify subsumption bundle
         run: node scripts/ci/verify_subsumption_bundle.mjs --bundle subsumption/item-UNKNOWN

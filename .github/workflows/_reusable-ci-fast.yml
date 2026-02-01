@@ -20,12 +20,10 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
           run_install: false
 
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
-        with:
           cache: 'pnpm'
           node-version: "20.11.x"
 
@@ -42,7 +40,6 @@ jobs:
       - name: Upload Jest results (debug)
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
           retention-days: 14
           name: fast-jest-results
           path: |

@@ -38,7 +38,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
           fetch-depth: 0
 
       - name: Download Time Series
@@ -220,7 +219,6 @@ jobs:
 
       - name: Upload Drift Report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        with:
           name: governance-drift-report-${{ github.run_number }}
           path: drift_report.json
           retention-days: 30

@@ -18,13 +18,10 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
           node-version: '18'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: 9
 
       - name: Get pnpm store directory
         shell: bash
@@ -33,7 +30,6 @@ jobs:
 
       - name: Setup pnpm cache
         uses: actions/cache@v4
-        with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
@@ -57,7 +53,6 @@ jobs:
       - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: playwright-report
           path: artifacts/e2e/playwright-report/
           retention-days: 7
@@ -65,7 +60,6 @@ jobs:
       - name: Upload Evidence
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: golden-path-evidence
           path: artifacts/evidence/goldenpath-frontend/
           retention-days: 7

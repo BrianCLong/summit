@@ -101,7 +101,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install yq
@@ -111,7 +110,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
           cache: 'pnpm'
           node-version: "20"
 

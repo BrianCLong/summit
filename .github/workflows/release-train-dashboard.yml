@@ -69,7 +69,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
           fetch-depth: 0 # Full history for tag detection
 
       - name: Install Dependencies
@@ -103,7 +102,6 @@ jobs:
 
       - name: Upload Dashboard JSON
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        with:
           name: release-train-dashboard
           path: |
             artifacts/release-train/dashboard.json
@@ -157,7 +155,6 @@ jobs:
     steps:
       - name: Download Dashboard
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
           name: release-train-dashboard
 
       - name: Check for Blocked Candidates

@@ -52,7 +52,6 @@ jobs:
       - name: Download Site Artifact
         id: download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
           name: release-ops-site
           path: ${{ env.SITE_DIR }}
         continue-on-error: true
@@ -306,7 +305,6 @@ jobs:
         if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
         id: create
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('issue_body.md', 'utf8');
@@ -337,7 +335,6 @@ jobs:
       - name: Update Issue
         if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('issue_body.md', 'utf8');
@@ -393,7 +390,6 @@ jobs:
       - name: Auto-Close Resolved Issues
         if: steps.analyze.outputs.tier == 'GREEN' && github.event.inputs.dry_run != 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             // Find open error budget issues and close them
             const issues = await github.rest.issues.listForRepo({

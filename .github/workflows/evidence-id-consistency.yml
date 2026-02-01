@@ -18,17 +18,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
           fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
           node-version: "20"
           cache: "pnpm"
 
@@ -41,7 +38,6 @@ jobs:
       - name: Upload Evidence Artifacts
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: evidence-id-consistency-${{ github.sha }}
           path: artifacts/governance/evidence-id-consistency/${{ github.sha }}/
           retention-days: 30

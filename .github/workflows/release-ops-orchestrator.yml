@@ -86,7 +86,6 @@ jobs:
     steps:
       - name: Checkout (shallow)
         uses: actions/checkout@v4 # v4
-        with:
           fetch-depth: 2
 
       - name: Check for loop avoidance
@@ -147,7 +146,6 @@ jobs:
       # =========================================================================
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
           fetch-depth: 0 # Full history for tag detection
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -625,7 +623,6 @@ jobs:
 
       - name: "Upload Artifact Bundle"
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        with:
           name: release-ops-cycle-${{ github.run_id }}
           path: artifacts/release-train/
           retention-days: 30
