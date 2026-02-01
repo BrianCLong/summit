@@ -847,29 +847,21 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: qwen3-asr-scaffold
+  - id: er-service-requirements
     version: v1
-    path: prompts/asr/qwen3-asr-scaffold@v1.md
-    sha256: 58d8b8c189745d63cdf6bf12cfaef24fd77f5671b6c3e62b346bd66566d2f265
-    description: Scaffold deny-by-default Qwen3-ASR integration with guardrails and evidence runner.
+    path: prompts/operations/er-service-requirements@v1.md
+    sha256: 256c993088b3345423ea5fdb998436d1c986d114aa791aacc7b4f57b179ef4ce
+    description: Restore er-service requirements.txt for Docker builds.
     scope:
       paths:
-        - asr/
-        - docs/asr/
-        - tests/
-        - required_checks.todo.md
-        - NOTICE.third_party.md
+        - services/er-service/requirements.txt
         - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/asr/qwen3-asr-scaffold@v1.md
+        - prompts/operations/er-service-requirements@v1.md
         - prompts/registry.yaml
-        - agents/examples/
       domains:
-        - asr
+        - operations
+        - ci
         - governance
-        - documentation
-        - security
-        - testing
     verification:
       tiers_required:
         - C
@@ -877,5 +869,4 @@ prompts:
         permitted: 0
         retirement_target: 0
     allowed_operations:
-      - create
       - edit

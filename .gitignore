@@ -361,5 +361,6 @@ bin/
 release-assets/
 evidence-staging/
 *.txt
+!services/er-service/requirements.txt
 tmp-test/
 _worktrees/
