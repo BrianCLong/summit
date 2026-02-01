@@ -1,0 +1,43 @@
+{
+  "task_id": "INFOOPS_ENDURANCE_PLAN_20260131",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "infoops-endurance-plan",
+    "version": "v1",
+    "sha256": "e170ff76ca504e72c26b5fa55b139da64e32b661813df6d46ae8dc58c0368d85",
+    "path": "prompts/research/infoops-endurance-plan@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/infoops_endurance/plan.md",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json",
+      "prompts/research/infoops-endurance-plan@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/INFOOPS_ENDURANCE_PLAN_20260131.json"
+    ],
+    "domains": ["research", "governance", "roadmap"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/infoops_endurance/plan.md",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Plan doc documents evidence bundle, MAESTRO alignment, and validation gates.",
+    "Roadmap entry references IOEA plan and summary counts are consistent.",
+    "DecisionLedger entry recorded with rollback posture."
+  ],
+  "stop_conditions": [
+    "Any requirement to change policy-as-code or security gates.",
+    "Evidence bundle or DecisionLedger entry cannot be recorded deterministically."
+  ]
+}

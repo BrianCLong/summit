@@ -132,6 +132,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: infoops-endurance-plan
+    version: v1
+    path: prompts/research/infoops-endurance-plan@v1.md
+    sha256: e170ff76ca504e72c26b5fa55b139da64e32b661813df6d46ae8dc58c0368d85
+    description: Document InfoOps Endurance & Ambiguity plan and register roadmap entry with evidence posture.
+    scope:
+      paths:
+        - docs/infoops_endurance/plan.md
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/research/infoops-endurance-plan@v1.md
+        - prompts/registry.yaml
+        - agents/examples/INFOOPS_ENDURANCE_PLAN_20260131.json
+      domains:
+        - research
+        - governance
+        - roadmap
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: notion-issue-migration-fix
     version: v1
     path: prompts/integrations/notion-issue-migration-fix.md
