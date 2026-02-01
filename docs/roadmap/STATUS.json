@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-14T00:00:00Z",
-  "revision_note": "Added governed content primitive schemas and governance drift brief example.",
+  "last_updated": "2026-02-01T12:00:00Z",
+  "revision_note": "Documented Linear↔GitHub sync invariants for governance tickets.",
   "initiatives": [
     {
       "id": "A",
