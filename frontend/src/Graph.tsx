@@ -132,8 +132,10 @@ const Graph: React.FC<GraphProps> = ({ elements, neighborhoodMode }) => {
 
     if (neighborhoodMode) {
       cy.on('tap', 'node', handler);
+      return () => {
+        cy.removeListener('tap', 'node', handler);
+      };
     } else {
-      cy.removeListener('tap', 'node', handler);
       reset();
     }
   }, [neighborhoodMode]);
