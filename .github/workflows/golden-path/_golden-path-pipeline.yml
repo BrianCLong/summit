@@ -117,6 +117,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
@@ -126,7 +128,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -193,6 +194,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
@@ -202,7 +205,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -267,6 +269,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
@@ -276,7 +280,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

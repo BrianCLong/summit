@@ -14,6 +14,8 @@ jobs:
       COMPOSE_DOCKER_CLI_BUILD: '1'
     steps:
       - uses: actions/checkout@v4 # v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -22,7 +24,6 @@ jobs:
         run: corepack enable
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 9
           run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4
@@ -108,6 +109,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4 # v4
         with:
@@ -119,7 +122,6 @@ jobs:
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 9
           run_install: false
 
       - name: Cache pnpm store

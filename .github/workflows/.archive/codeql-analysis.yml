@@ -34,6 +34,8 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: +security-and-quality
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -42,7 +44,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build project
@@ -63,6 +64,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -71,7 +74,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run ESLint SARIF
@@ -98,6 +100,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -106,7 +110,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate TypeScript SARIF

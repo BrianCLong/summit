@@ -182,6 +182,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -521,6 +523,8 @@ jobs:
           echo "Generating SBOMs..."
           syft ${REGISTRY}/${IMAGE_NAME}/api:v${RC_VERSION} -o json > sbom.json || echo "{}" > sbom.json
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20

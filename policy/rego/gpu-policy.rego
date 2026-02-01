@@ -1,4 +1,5 @@
 package gpu.policy
+import future.keywords.if
 # Example policy: Deny GPU usage for non-ML workloads
 deny contains msg if {
   input.workload.type != "ml"

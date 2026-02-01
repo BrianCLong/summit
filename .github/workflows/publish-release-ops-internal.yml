@@ -39,11 +39,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
-          node-version: "20"
 
       - name: Find Orchestrator Run
         id: find-run

@@ -1,4 +1,5 @@
 package summit.gates.migration
+import future.keywords.if
 
 default allow := false
 

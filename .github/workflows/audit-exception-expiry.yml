@@ -19,11 +19,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4
       - name: Use Node.js 20
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ] || [ -f pnpm-lock.yaml ] || [ -f yarn.lock ]; then

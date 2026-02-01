@@ -41,6 +41,8 @@ jobs:
         if: ${{ vars.DOCS_DISABLE == '1' }}
         run: echo "Docs build disabled (DOCS_DISABLE=1). Skipping."
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         if: ${{ vars.DOCS_DISABLE != '1' }}
         uses: actions/setup-node@v4

@@ -1,4 +1,5 @@
 package release_gates
+import future.keywords.if
 
 default allow = false
 

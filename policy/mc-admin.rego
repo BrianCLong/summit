@@ -1,4 +1,5 @@
 package mc.admin
+import future.keywords.if
 
 default allow := false
 

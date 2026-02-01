@@ -85,7 +85,6 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -165,7 +164,6 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -223,7 +221,6 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -332,7 +329,6 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -380,6 +376,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

@@ -23,7 +23,6 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
         # Version read from package.json packageManager field
 
       - name: Install dependencies

@@ -1,4 +1,5 @@
 package intelgraph.authz
+import future.keywords.if
 
 test_data_scientist_can_read_dataset if {
     allow with input as {

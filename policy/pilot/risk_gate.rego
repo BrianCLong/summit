@@ -1,4 +1,6 @@
 package pilot.gate
+import future.keywords.if
+import future.keywords.in
 
 default allow := false
 
