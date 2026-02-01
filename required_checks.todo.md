@@ -37,6 +37,9 @@ Until discovered, we use temporary verifier names:
 - `ci:codegen-drift`
 - `ci:determinism-smoke`
 - `ci:supply-chain-delta`
+- `ci:acp-policy`
+- `ci:acp-auth`
+- `ci:acp-install-dry-run`
 
 ## Rename plan
 Once real check names are known:
