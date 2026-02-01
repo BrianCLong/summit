@@ -3,6 +3,7 @@
  * Enforces spending limits and circuit breakers for workflow executions
  */
 
+import axios from "axios";
 import { EventEmitter } from 'events';
 
 export interface BudgetLimits {

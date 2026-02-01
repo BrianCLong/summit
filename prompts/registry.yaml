@@ -1,31 +1,5 @@
 version: 1
 prompts:
-  - id: structured-content-primitives
-    version: v1
-    path: prompts/content/structured-content-primitives@v1.md
-    sha256: 258e133b40b69ec695a0a9bd1992da5eca9aa092af5471789c43563f512b706e
-    description: Define unified Brief/Claim/Block content primitives with evidence and governance alignment.
-    scope:
-      paths:
-        - docs/content/
-        - schemas/content/
-        - docs/roadmap/STATUS.json
-        - prompts/content/structured-content-primitives@v1.md
-        - prompts/registry.yaml
-        - agents/examples/STRUCTURED_CONTENT_PRIMITIVES_20260131.json
-      domains:
-        - content
-        - governance
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
@@ -43,6 +17,35 @@ prompts:
         - prompts/evidence/keel-evidence-templates@v1.md
         - prompts/registry.yaml
         - agents/examples/KEEL_EVIDENCE_TEMPLATES_20260130.json
+      domains:
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: cta-leaders-ingest-scaffold
+    version: v1
+    path: prompts/evidence/cta-leaders-ingest-scaffold@v1.md
+    sha256: 4d3953f51bb92d0568295bf8fdbde77e615d283c247a331c27da643cee031aa6
+    description: Scaffold CTA leaders evidence ingest bundle and verification stub.
+    scope:
+      paths:
+        - evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/
+        - evidence/index.json
+        - ci/verify_evidence.py
+        - summit/fixtures/cta_leaders_2026_01/
+        - docs/roadmap/STATUS.json
+        - deps.delta.md
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/evidence/cta-leaders-ingest-scaffold@v1.md
+        - prompts/registry.yaml
+        - agents/examples/CTA_LEADERS_INGEST_20260131.json
       domains:
         - evidence
         - governance
@@ -864,6 +867,55 @@ prompts:
         - documentation
         - governance
         - planning
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: predictd-build-context
+    version: v1
+    path: prompts/operations/predictd-build-context@v1.md
+    sha256: 56cee7d6520c8e89718b7965242f0dd26475a099c5515e4dc189221276e4141a
+    description: Reduce predictd Docker build context to prevent BuildKit grpc failures.
+    scope:
+      paths:
+        - services/predictd/Dockerfile
+        - docs/roadmap/STATUS.json
+        - prompts/operations/predictd-build-context@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - ci
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit
+  - id: mcp-integration-docs
+    version: v1
+    path: prompts/subsumption/mcp-integration-docs@v1.md
+    sha256: 188c84effc6a685b6d9cb6c4478279d8f2efa1aa0327ba752a15eb0f569c85d7
+    description: Generate MCP integration security + product documentation and roadmap update.
+    scope:
+      paths:
+        - docs/security/THREATMODEL-mcp.md
+        - docs/security/SECURITY-CONTROLS-mcp.md
+        - docs/product/PRD-mcp-integrations.md
+        - docs/roadmap/STATUS.json
+        - prompts/subsumption/mcp-integration-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - security
+        - product
+        - governance
     verification:
       tiers_required:
         - C
