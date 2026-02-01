@@ -1,0 +1,16 @@
+{
+  "claims": [
+    {
+      "backing": "ITEM:CLAIM-01",
+      "claim_id": "ITEM:CLAIM-01"
+    }
+  ],
+  "decisions": [
+    "Data handling and decision logs captured for governance traceability.",
+    "Readiness assertion referenced for escalation."
+  ],
+  "evidence_id": "EVD-INGNGX-GOV-003",
+  "generated_by": "manual",
+  "item_slug": "ingress-nginx-retirement",
+  "notes": ["governance_docs_ready"]
+}

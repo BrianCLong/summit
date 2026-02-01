@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-INGNGX-EVAL-001",
+  "item_slug": "ingress-nginx-retirement",
+  "metrics": {
+    "deny_fixtures": 2,
+    "allow_fixtures": 1
+  }
+}
