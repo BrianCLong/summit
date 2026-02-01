@@ -492,7 +492,6 @@ export class BudgetManager extends EventEmitter {
     alert: BudgetAlert,
   ): Promise<void> {
     try {
-      const axios = require('axios');
       await axios.post(webhook, alert, {
         timeout: 5000,
         headers: {
