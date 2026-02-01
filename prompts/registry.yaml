@@ -26,6 +26,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: context-management-scaffold
+    version: v1
+    path: prompts/context/context-management-scaffold@v1.md
+    sha256: 24bccc42357dc463660a1fee08cae3d524b601e08c41a225e164a771cc419f69
+    description: Scaffold Summit context management interfaces and evidence anchors.
+    scope:
+      paths:
+        - summit/context/
+        - schemas/context_management/
+        - evidence/EVD-DEEPAGENTS-CONTEXT-001/
+        - evidence/index.json
+        - required_checks.todo.md
+        - NOTICE
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/context/context-management-scaffold@v1.md
+        - prompts/registry.yaml
+        - agents/examples/CONTEXT_COMPRESSION_SCAFFOLD_20260201.json
+      domains:
+        - context
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md

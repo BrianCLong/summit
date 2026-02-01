@@ -112,6 +112,14 @@
       "path": "evidence/EVD-youtu-vl-4b-instruct-LIC-001",
       "files": ["report.json", "metrics.json", "stamp.json"],
       "area": "license"
+    },
+    "EVD-DEEPAGENTS-CONTEXT-001": {
+      "evidence_id": "EVD-DEEPAGENTS-CONTEXT-001",
+      "files": [
+        "evidence/EVD-DEEPAGENTS-CONTEXT-001/report.json",
+        "evidence/EVD-DEEPAGENTS-CONTEXT-001/metrics.json",
+        "evidence/EVD-DEEPAGENTS-CONTEXT-001/stamp.json"
+      ]
     }
   }
 }

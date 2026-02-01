@@ -56,3 +56,8 @@ Once real check names are known:
 - summit/vind/lifecycle
 - summit/vind/bench
 - summit/vind/security
+
+## Context management checks (Deep Agents roadmap)
+- ci/context-evals
+- ci/evidence-schemas
+- ci/deps-delta

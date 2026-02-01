@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T00:55:00Z",
-  "revision_note": "Added structured content schemas, documentation, and prompt/task metadata for Brief/Claim/Block primitives.",
+  "last_updated": "2026-02-01T00:00:00Z",
+  "revision_note": "Added context compression scaffolding and evidence schema anchors.",
   "initiatives": [
     {
       "id": "A",
@@ -104,6 +104,13 @@
           "name": "KTOON core libraries",
           "status": "in-progress",
           "owner": "Amp"
+        },
+        {
+          "id": "D2",
+          "name": "Context compression scaffolding",
+          "status": "in-progress",
+          "owner": "Codex",
+          "evidence": "Scaffolded Summit context compression interfaces, events, thresholds, and evidence placeholders."
         }
       ]
     },
@@ -221,7 +228,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 15,
-    "total": 22,
+    "total": 23,
     "ga_blockers": [
       "OSINT integration merges blocked until required checks policy is enforceable, CI stability is proven, and provenance/evidence schemas validate end-to-end."
     ]
