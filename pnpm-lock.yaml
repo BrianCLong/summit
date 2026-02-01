@@ -486,7 +486,7 @@ importers:
         version: 30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.4.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.6.2
         version: 4.21.0
@@ -529,7 +529,7 @@ importers:
         version: 7.1.4
       ts-jest:
         specifier: ^29.4.5
-        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@25.0.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@25.0.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.6.2
         version: 4.21.0
@@ -2301,7 +2301,7 @@ importers:
 
   apps/validator-worker:
     dependencies:
-      '@summi7/graph-sync-validator':
+      '@summit/graph-sync-validator':
         specifier: workspace:*
         version: link:../../packages/graph-sync-validator
       bullmq:
@@ -3868,7 +3868,7 @@ importers:
 
   packages/agent-gym-metrics:
     dependencies:
-      '@intelgraph/agent-gym':
+      '@summit/agent-gym':
         specifier: workspace:*
         version: link:../agent-gym
       uuid:
@@ -4974,13 +4974,13 @@ importers:
 
   packages/cli:
     dependencies:
-      '@intelgraph/agent-registry':
+      '@summit/agent-registry':
         specifier: workspace:*
         version: link:../agent-registry
-      '@intelgraph/foundry':
+      '@summit/foundry':
         specifier: workspace:^
         version: link:../foundry
-      '@intelgraph/orchestrator':
+      '@summit/orchestrator':
         specifier: workspace:^
         version: link:../orchestrator
       chalk:
@@ -8732,7 +8732,7 @@ importers:
       '@intelgraph/maestro-core':
         specifier: workspace:*
         version: link:../../maestro-core
-      '@intelgraph/maestro-recursive-context-runtime':
+      '@maestro/recursive-context-runtime':
         specifier: workspace:*
         version: link:../../recursive-context-runtime
       uuid:
@@ -10027,7 +10027,7 @@ importers:
 
   packages/orchestrator:
     dependencies:
-      '@intelgraph/policy':
+      '@summit/policy':
         specifier: workspace:*
         version: link:../policy
       fs-extra:
@@ -11695,10 +11695,10 @@ importers:
 
   packages/sgf-evals:
     dependencies:
-      '@intelgraph/sgf-evidence':
+      '@summit/sgf-evidence':
         specifier: workspace:*
         version: link:../sgf-evidence
-      '@intelgraph/sgf-ledger':
+      '@summit/sgf-ledger':
         specifier: workspace:*
         version: link:../sgf-ledger
     devDependencies:
@@ -11711,16 +11711,16 @@ importers:
 
   packages/sgf-evidence:
     dependencies:
-      '@intelgraph/sgf-ledger':
+      '@summit/sgf-ledger':
         specifier: workspace:*
         version: link:../sgf-ledger
-      '@intelgraph/sgf-schema':
+      '@summit/sgf-schema':
         specifier: workspace:*
         version: link:../sgf-schema
 
   packages/sgf-ledger:
     dependencies:
-      '@intelgraph/sgf-schema':
+      '@summit/sgf-schema':
         specifier: workspace:*
         version: link:../sgf-schema
 
@@ -12087,7 +12087,7 @@ importers:
 
   packages/specflow:
     dependencies:
-      '@intelgraph/work-graph':
+      '@summit/work-graph':
         specifier: workspace:*
         version: link:../work-graph
       commander:
@@ -12312,16 +12312,16 @@ importers:
 
   packages/summit-platform:
     dependencies:
-      '@intelgraph/flows-co':
+      '@summit/flows-co':
         specifier: workspace:*
         version: link:../co
-      '@intelgraph/flows-ig':
+      '@summit/flows-ig':
         specifier: workspace:*
         version: link:../ig
-      '@intelgraph/flows-mc':
+      '@summit/flows-mc':
         specifier: workspace:*
         version: link:../mc
-      '@intelgraph/flows-sb':
+      '@summit/flows-sb':
         specifier: workspace:*
         version: link:../sb
 
@@ -13620,6 +13620,9 @@ importers:
       '@intelgraph/maestro-core':
         specifier: workspace:*
         version: link:../packages/maestro-core
+      '@intelgraph/osint-collector':
+        specifier: workspace:*
+        version: link:../packages/osint-collector
       '@intelgraph/telemetry-config':
         specifier: workspace:*
         version: link:../packages/telemetry-config
@@ -97835,27 +97838,6 @@ snapshots:
       esbuild: 0.27.2
       jest-util: 30.2.0
 
-  ts-jest@29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@25.0.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)))(typescript@5.9.3):
-    dependencies:
-      bs-logger: 0.2.6
-      fast-json-stable-stringify: 2.1.0
-      handlebars: 4.7.8
-      jest: 30.2.0(@types/node@25.0.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3))
-      json5: 2.2.3
-      lodash.memoize: 4.1.2
-      make-error: 1.3.6
-      semver: 7.7.3
-      type-fest: 4.41.0
-      typescript: 5.9.3
-      yargs-parser: 21.1.1
-    optionalDependencies:
-      '@babel/core': 7.28.5
-      '@jest/transform': 30.2.0
-      '@jest/types': 30.2.0
-      babel-jest: 30.2.0(@babel/core@7.28.5)
-      esbuild: 0.27.2
-      jest-util: 30.2.0
-
   ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3):
     dependencies:
       bs-logger: 0.2.6
@@ -97925,6 +97907,27 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.8
       jest: 30.2.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      json5: 2.2.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.7.3
+      type-fest: 4.41.0
+      typescript: 5.9.3
+      yargs-parser: 21.1.1
+    optionalDependencies:
+      '@babel/core': 7.29.0
+      '@jest/transform': 30.2.0
+      '@jest/types': 30.2.0
+      babel-jest: 30.2.0(@babel/core@7.29.0)
+      esbuild: 0.27.2
+      jest-util: 30.2.0
+
+  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@25.0.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3)))(typescript@5.9.3):
+    dependencies:
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      handlebars: 4.7.8
+      jest: 30.2.0(@types/node@25.0.3)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.3)(typescript@5.9.3))
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
