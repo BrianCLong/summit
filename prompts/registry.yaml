@@ -678,6 +678,31 @@ prompts:
         - governance
         - security
         - product
+  - id: agentops-incident-response-foundation
+    version: v1
+    path: prompts/architecture/agentops-incident-response-foundation@v1.md
+    sha256: e4c9b2ca0701e7afac751378bb3efa4eff97a79fb68a171e363a096e0233be75
+    description: AgentOps incident-response evidence scaffolding and roadmap alignment.
+    scope:
+      paths:
+        - agentops/
+        - docs/roadmap/STATUS.json
+        - prompts/architecture/agentops-incident-response-foundation@v1.md
+        - prompts/registry.yaml
+      domains:
+        - architecture
+        - governance
+        - reliability
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: secrets-handling-guidance
     version: v1
     path: prompts/docs/secrets-handling-guidance@v1.md
