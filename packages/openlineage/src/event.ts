@@ -1,16 +1,8 @@
 import { z } from 'zod';
-import { v7 as uuidv7, v4 as uuidv4 } from 'uuid';
 import { SourceCodeJobFacet, DocumentationJobFacet, SqlJobFacet } from './facets/core.js';
 import { TenantFacet, SecurityFacet, BuildFacet } from './facets/summit.js';
-
-// Use v7 if available (node-uuid likely supports it in recent versions), fall back to v4
-const generateUuid = () => {
-  try {
-    return uuidv7();
-  } catch (e) {
-    return uuidv4();
-  }
-};
+import { generateRunId } from './runid.js';
+import { SummitProvenanceFacet } from './facets/summit.js';
 
 export interface Job {
   namespace: string;
@@ -64,6 +56,31 @@ export class OpenLineageClient {
     this.producer = producer;
   }
 
+  createRunEventWithProvenance(params: {
+    eventType: EventType;
+    job: Job;
+    runId: string;
+    provenance: SummitProvenanceFacet;
+    inputs?: InputDataset[];
+    outputs?: OutputDataset[];
+    runFacets?: Run['facets'];
+    eventTime?: string;
+  }): RunEvent {
+    const { eventType, job, runId, provenance, inputs, outputs, runFacets, eventTime } = params;
+    return this.createRunEvent({
+      eventType,
+      job,
+      runId,
+      inputs,
+      outputs,
+      runFacets: {
+        ...runFacets,
+        summit_provenance: provenance,
+      },
+      eventTime,
+    });
+  }
+
   createRunEvent(params: {
     eventType: EventType;
     job: Job;
@@ -79,7 +96,7 @@ export class OpenLineageClient {
       eventType,
       eventTime: eventTime || new Date().toISOString(),
       run: {
-        runId: runId || generateUuid(),
+        runId: runId || generateRunId(),
         facets: runFacets,
       },
       job,

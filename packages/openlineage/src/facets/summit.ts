@@ -25,3 +25,30 @@ export const BuildFacetSchema = BaseFacetSchema.extend({
 });
 
 export type BuildFacet = z.infer<typeof BuildFacetSchema>;
+
+export const SummitProvenanceFacetSchema = BaseFacetSchema.extend({
+  runManifestDigest: z.object({
+    sha256: z.string(),
+  }),
+  attestations: z.array(
+    z.object({
+      uri: z.string().url(),
+      digest: z.object({
+        sha256: z.string(),
+      }),
+      predicateType: z.string().url(),
+    })
+  ),
+  sboms: z
+    .array(
+      z.object({
+        uri: z.string().url(),
+        digest: z.object({
+          sha256: z.string(),
+        }),
+      })
+    )
+    .optional(),
+});
+
+export type SummitProvenanceFacet = z.infer<typeof SummitProvenanceFacetSchema>;
