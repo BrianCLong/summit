@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0.0",
-  "description": "Canonical policy for MVP-4 Stabilization release gate requirements",
-  "last_updated": "2026-01-07",
+  "version": "2.0.0",
+  "description": "Canonical policy for release gate requirements",
+  "last_updated": "2026-02-01",
   "owner": "Platform Engineering",
 
   "always_required": [
@@ -20,6 +20,11 @@
       "name": "Unit Tests & Coverage",
       "workflow": "unit-test-coverage.yml",
       "rationale": "Test suite and coverage gates must pass for all code changes"
+    },
+    {
+      "name": "SOC Controls",
+      "workflow": "soc-controls.yml",
+      "rationale": "SOC control verification is required for audit readiness"
     },
     {
       "name": "CI Core (Primary Gate)",

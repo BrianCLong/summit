@@ -30,6 +30,14 @@ Summit uses GitHub Actions with **reusable workflows** for reproducible, governa
 | `ga-verification`   | GA readiness checks                      | 10m     |
 | `governance-gate`   | Governance lockfile verification         | 5m      |
 
+### SOC Compliance Gate (`soc-controls.yml`)
+
+**Status**: BLOCKING - PRs cannot merge if the SOC controls check fails.
+
+| Job           | Purpose                          | Timeout |
+| ------------- | -------------------------------- | ------- |
+| `SOC Controls` | SOC control unit test execution | 15m     |
+
 ### Required Checks for Branch Protection
 
 Configure these in repo Settings > Branches > main:
@@ -41,6 +49,7 @@ ci-core / unit-tests
 ci-core / integration-tests
 ci-core / ga-verification
 ci-core / governance-gate
+SOC Controls
 ```
 
 ## Concurrency Control

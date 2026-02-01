@@ -119,21 +119,20 @@
     "reverted": false
   },
   {
-    "id": "9c4b0f2d1a",
-    "timestamp": "2026-01-31T12:07:57Z",
+    "id": "soc-controls-001",
+    "timestamp": "2026-02-01T01:20:00Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiJxd2VuMy1hc3Igc2NhZmZvbGQiLCJmaWxlcyI6WyJhc3IvIiwiZG9jcy9hc3IvcXdlbjNfYXNyLm1kIiwidGVzdHMvdGVzdF9hc3JfY29udHJhY3QucHkiLCJ0ZXN0cy90ZXN0X3JlZGFjdGlvbi5weSIsInJlcXVpcmVkX2NoZWNrcy50b2RvLm1kIiwiTk9USUNFLnRoaXJkX3BhcnR5Lm1kIiwiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIl19",
+    "inputHash": "eyJjaGFuZ2UiOiJpbnRlZ3JhdGUgU09DIGNvbnRyb2xzIHdvcmtmbG93IGFuZCByZXF1aXJlZCBjaGVja3MiLCJmaWxlcyI6WyIuZ2l0aHViL3dvcmtmbG93cy9zb2MtY29udHJvbHMueW1sIiwiZG9jcy9jaS9SRVFVSVJFRF9DSEVDS1NfUE9MSUNZLnltbCIsImRvY3MvY2kvUkVRVUlSRURfQ0hFQ0tTX1BPTElDWS5qc29uIiwiZG9jcy9jaS9SRVFVSVJFRF9DSEVDS1MubWQiLCJkb2NzL2NpL1JFQURNRS5tZCIsImRvY3MvY2kvU09DX0NPTVBMSUFOQ0UubWQiLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iXX0=",
     "decision": {
-      "action": "scaffold_asr_provider",
+      "action": "integrate_soc_controls_ci",
       "rule": {
-        "condition": "deny-by-default ASR integration required",
-        "action": "scaffold_asr_provider",
+        "condition": "SOC control verification must be enforced in CI required checks",
+        "action": "integrate_soc_controls_ci",
         "max_cost": 0
       }
     },
-    "reasoning": "Implemented Qwen3-ASR scaffold with redaction gate, evidence runner, and required-check mapping; defaults remain disabled.",
-    "rollback": "Remove asr/ scaffold, docs/asr entry, and tests; revert required_checks.todo.md and NOTICE.third_party.md updates.",
+    "reasoning": "Added dedicated SOC controls workflow, updated required checks policy/docs, and documented execution path. Rollback: revert commit and rerun branch protection reconciliation.",
     "reverted": false
   }
 ]
