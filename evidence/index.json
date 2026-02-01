@@ -63,7 +63,12 @@
     "EVD-WECHAT2NBLM-NORM-002": {},
     "EVD-WECHAT2NBLM-CONN-003": {},
     "EVD-WECHAT2NBLM-PIPE-004": {},
-    "EVD-WECHAT2NBLM-POL-005": {}
+    "EVD-WECHAT2NBLM-POL-005": {},
+    "EVID-20260131-ufar-0001": {
+      "report": "evidence/EVID-20260131-ufar-0001/report.json",
+      "metrics": "evidence/EVID-20260131-ufar-0001/metrics.json",
+      "stamp": "evidence/EVID-20260131-ufar-0001/stamp.json"
+    }
   },
   "items": [
     { "id": "EVD-CTA-LEADERS-2026-01-INGEST-001", "path": "evidence/EVD-CTA-LEADERS-2026-01-INGEST-001/report.json" },
@@ -73,7 +78,8 @@
     { "id": "EVD-SDSBC-CODEGEN-001", "path": "evidence/EVD-SDSBC-CODEGEN-001/report.json" },
     { "id": "EVD-APPLEQAI-HCI-001", "path": "evidence/EVD-APPLEQAI-HCI-001/report.json" },
     { "id": "EVD-APPLEQAI-PRIV-002", "path": "evidence/EVD-APPLEQAI-PRIV-002/report.json" },
-    { "id": "EVD-APPLEQAI-EVAL-003", "path": "evidence/EVD-APPLEQAI-EVAL-003/report.json" }
+    { "id": "EVD-APPLEQAI-EVAL-003", "path": "evidence/EVD-APPLEQAI-EVAL-003/report.json" },
+    { "id": "EVID-20260131-ufar-0001", "path": "evidence/EVID-20260131-ufar-0001/report.json" }
   ],
   "version": 1
 }
