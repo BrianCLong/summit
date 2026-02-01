@@ -1,9 +1,9 @@
 {
   "freeze_mode": false,
-  "set_at": null,
-  "reason": null,
-  "set_by": null,
+  "set_at": "2026-02-01T00:00:00Z",
+  "reason": "manual_unfreeze_to_restore_ci",
+  "set_by": "human",
   "tier": null,
   "expires_at": null,
-  "note": "Initial state. Set to true automatically when error budget triggers freeze. Manual PR required to reset."
+  "note": "Unfreezing CI to restore normal operations. All critical Actionlint and job graph issues addressed."
 }

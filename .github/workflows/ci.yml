@@ -96,11 +96,9 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs \
+          node scripts/ci/generate-attestation.mjs \
             --job unit-tests \
-            --runner ${{ runner.os }} \
-            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
-            --out artifacts/stamp.json
+            --out artifacts/attestation-unit-tests.json
         shell: bash
       - name: Generate Metrics
         if: always()
@@ -108,6 +106,29 @@ jobs:
         with:
           name: coverage-report
           path: server/coverage/
+
+  coverage-gate:
+    name: Coverage Gate
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Download Coverage Report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: server/coverage/
+      - name: Check coverage thresholds
+        run: |
+          pnpm coverage:gate --scope=server --base=origin/main
+        shell: bash
 
   integration-test:
     runs-on: ubuntu-latest
@@ -195,11 +216,9 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs \
+          node scripts/ci/generate-attestation.mjs \
             --job verify-versions \
-            --runner ${{ runner.os }} \
-            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
-            --out artifacts/stamp.json
+            --out artifacts/attestation-verify-versions.json
         shell: bash
       - name: Upload artifacts
         if: always()
@@ -207,3 +226,25 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  evidence-gate:
+    name: Final Evidence Gate
+    runs-on: ubuntu-latest
+    needs: [unit-tests, soc-controls, verify-versions]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all attestations
+        uses: actions/download-artifact@v4
+        with:
+          path: all-attestations
+      - name: Consolidate Evidence
+        run: |
+          mkdir -p final-evidence
+          find all-attestations -name "attestation-*.json" -exec cp {} final-evidence/ \;
+          node scripts/ci/generate-attestation.mjs --job final-gate --out final-evidence/final-attestation.json
+      - name: Upload Final Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: final-evidence-bundle
+          path: final-evidence/
