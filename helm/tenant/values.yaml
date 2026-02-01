@@ -1,4 +1,0 @@
-tenant: default
-networkPolicy:
-  enabled: true
-  allowNamespaces: [] # e.g. ["redis", "monitoring"]

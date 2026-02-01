@@ -1,9 +1,7 @@
-name: CI
+name: "Enforce Policy"
 
 on:
   pull_request:
-    branches: [ main ]
-  push:
     branches: [ main ]
 
 jobs:
@@ -12,19 +10,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
           version: 9
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Run policy check
+      - name: Check Policy
         run: |
-          # Placeholder for policy check
-          pnpm --version
+          echo "Running policy checks..."
+          # Add policy check commands here

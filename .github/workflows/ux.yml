@@ -1,15 +1,10 @@
-name: UX Governance
+name: "UX Governance"
 
 on:
   pull_request:
     paths:
       - 'client/**'
-      - 'summit/ux/**'
-  push:
-    branches: [ main ]
-    paths:
-      - 'client/**'
-      - 'summit/ux/**'
+      - 'ux/**'
 
 jobs:
   ux-governance:
@@ -17,24 +12,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
           version: 9
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Generate UX Report
+      - name: UX Checks
         run: |
-          # Placeholder for UX report generation
+          echo "Running UX governance checks..."
+          # Placeholder for actual UX checks
           echo "{}" > ux-governance-report.json
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
         with:
           name: ux-governance-report
           path: ux-governance-report.json

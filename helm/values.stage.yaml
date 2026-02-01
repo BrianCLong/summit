@@ -1,3 +1,0 @@
-replicaCount: 2
-featureFlags:
-  someRiskyPath: false

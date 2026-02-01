@@ -1,10 +1,8 @@
-name: Governance Check
+name: "Governance Check"
 
 on:
   pull_request:
-    branches: [ main ]
-  push:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   governance-check:
@@ -12,19 +10,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
           version: 9
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Verify Governance Policies
+      - name: Generate Provenance
         run: |
-          # Placeholder for governance verification
-          echo "Verifying governance..."
+          echo '{"provenance": true, "timestamp": "'$(date -u)'"}' > pr-provenance.json
+
+      - name: Upload Provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-provenance
+          path: pr-provenance.json

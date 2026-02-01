@@ -1,10 +1,9 @@
-name: Compliance Drift Check
+name: "Compliance Drift Check"
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-  pull_request:
-    branches: [ main ]
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
 
 jobs:
   compliance-drift-check:
@@ -12,19 +11,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
           version: 9
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'pnpm'
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Check for compliance drift
+      - name: Run Compliance Check
         run: |
-          # Placeholder for actual compliance check
-          echo "Checking compliance..."
+          echo "Checking for compliance drift..."
+          # Add compliance check logic here

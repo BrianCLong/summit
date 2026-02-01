@@ -1,23 +1,14 @@
 {
   "evidence": [
     {
-      "evidence_id": "EVD-FTRLIM-2024-001",
-      "area": "ftrlim",
-      "description": "FTRL-Proximal Instance Matching Training Run 2024-001",
+      "evidence_id": "EVD-2026-01-31-001",
+      "area": "governance",
+      "description": "Initial Evidence Pack schema validation",
       "files": [
-        "evidence/EVD-FTRLIM-2024-001/report.json",
-        "evidence/EVD-FTRLIM-2024-001/metrics.json",
-        "evidence/EVD-FTRLIM-2024-001/stamp.json"
-      ]
-    },
-    {
-      "evidence_id": "EVD-uplift-2601-17950-001",
-      "area": "uplift",
-      "description": "UPLiFT Feature Upsampling Validation Run 001",
-      "files": [
-        "summit/eval/uplift/evidence/report.json",
-        "summit/eval/uplift/evidence/metrics.json",
-        "summit/eval/uplift/evidence/stamp.json"
+        "evidence/schemas/index.schema.json",
+        "evidence/schemas/report.schema.json",
+        "evidence/schemas/metrics.schema.json",
+        "evidence/schemas/stamp.schema.json"
       ]
     }
   ]
