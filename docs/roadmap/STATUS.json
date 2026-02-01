@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-01T18:30:00Z",
-  "revision_note": "Documented GitHub App authentication for branch protection drift workflows and updated workflow auth sources.",
+  "last_updated": "2026-02-01T00:00:00Z",
+  "revision_note": "Consolidated prompt metadata for Jest network teardown shim, governed tests, and LFS exceptions.",
   "initiatives": [
     {
       "id": "A",
