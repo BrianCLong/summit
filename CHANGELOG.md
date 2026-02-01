@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Implemented Competitive Intelligence Protocol v1.1 (Scaffolding, Governance, CI).
+
 ## [5.0.0-ga] - 2026-01-23
 
 ### General Availability Release

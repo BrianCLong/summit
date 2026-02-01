@@ -25744,17 +25744,17 @@ packages:
       '@deck.gl/core': ~9.2.0
       '@luma.gl/core': ~9.2.4
 
-  '@definitelytyped/header-parser@0.2.20':
-    resolution: {integrity: sha512-97YPAlUo8XjWNtZ+6k+My+50/ljE2iX6KEPjOZ1Az1RsZdKwJ6taAX3F5g6SY1SJr50bzdm2RZzyQNdRmHcs4w==}
-    engines: {node: '>=18.18.0'}
+  '@definitelytyped/header-parser@0.2.21':
+    resolution: {integrity: sha512-NcPS+fL0mhTp8n9amRJ7UKwPDolbAuYKOiW7PKJSxp5oIhwkuszw2eKJbWtlxB37TN1dC1thMgu955O/FjWJ8A==}
+    engines: {node: '>=20.17.0'}
 
-  '@definitelytyped/typescript-versions@0.1.9':
-    resolution: {integrity: sha512-Qjalw9eNlcTjXhzx0Q6kHKuRCOUt/M5RGGRGKsiYlm/nveGvPX9liZSQlGXZVwyQ5I9qvq/GdaWiPchQ+ZXOrQ==}
-    engines: {node: '>=18.18.0'}
+  '@definitelytyped/typescript-versions@0.1.10':
+    resolution: {integrity: sha512-4aBop464n0PUxrlzj1FpAfiNa5P5ENycB0K/Ho22Ay8xAGEGXUpLkaWtFsn2R+Jfn4ldd7lJqfqw0z29sAingQ==}
+    engines: {node: '>=20.17.0'}
 
-  '@definitelytyped/utils@0.1.8':
-    resolution: {integrity: sha512-4JINx4Rttha29f50PBsJo48xZXx/He5yaIWJRwVarhYAN947+S84YciHl+AIhQNRPAFkg8+5qFngEGtKxQDWXA==}
-    engines: {node: '>=18.18.0'}
+  '@definitelytyped/utils@0.1.9':
+    resolution: {integrity: sha512-I5nOEPWD4hkZuy4LXi0tJnH+N+NeXRWwIdgOWdA4TmC/WnVKVy1YO1L8nLc8k/Enw195un2Rulnp2LOHfJriDw==}
+    engines: {node: '>=20.17.0'}
 
   '@derhuerst/http-basic@8.2.4':
     resolution: {integrity: sha512-F9rL9k9Xjf5blCz8HsJRO4diy111cayL2vkY2XE4r4t3n0yPXVYy3KD3nJ1qbrSn9743UWSXH4IwuCa/HWlGFw==}
@@ -53120,9 +53120,9 @@ packages:
     engines: {node: '>= 8'}
     hasBin: true
 
-  which@4.0.0:
-    resolution: {integrity: sha512-GlaYyEb07DPxYCKhKzplCWBJtvxZcZMrL+4UkrTSJHHPyZU4mYYTv3qaOe77H7EODLSSopAUFAc6W8U4yqvscg==}
-    engines: {node: ^16.13.0 || >=18.0.0}
+  which@6.0.0:
+    resolution: {integrity: sha512-f+gEpIKMR9faW/JgAgPK1D7mekkFoqbmiwvNzuhsHetni20QSgzg9Vhn0g2JSJkkfehQnqdUAx7/e15qS1lPxg==}
+    engines: {node: ^20.17.0 || >=22.9.0}
     hasBin: true
 
   whois@2.16.1:
@@ -57951,27 +57951,27 @@ snapshots:
       '@luma.gl/core': 9.2.5
       preact: 10.28.1
 
-  '@definitelytyped/header-parser@0.2.20':
+  '@definitelytyped/header-parser@0.2.21':
     dependencies:
-      '@definitelytyped/typescript-versions': 0.1.9
-      '@definitelytyped/utils': 0.1.8
+      '@definitelytyped/typescript-versions': 0.1.10
+      '@definitelytyped/utils': 0.1.9
       semver: 7.7.3
     transitivePeerDependencies:
       - bare-abort-controller
       - react-native-b4a
 
-  '@definitelytyped/typescript-versions@0.1.9': {}
+  '@definitelytyped/typescript-versions@0.1.10': {}
 
-  '@definitelytyped/utils@0.1.8':
+  '@definitelytyped/utils@0.1.9':
     dependencies:
       '@qiwi/npm-registry-client': 8.9.1
-      '@types/node': 18.19.130
+      '@types/node': 25.1.0
       cachedir: 2.4.0
       charm: 1.0.2
-      minimatch: 9.0.5
+      minimatch: 10.1.1
       tar: 7.5.7
       tar-stream: 3.1.7
-      which: 4.0.0
+      which: 6.0.0
     transitivePeerDependencies:
       - bare-abort-controller
       - react-native-b4a
@@ -81012,7 +81012,7 @@ snapshots:
 
   dts-critic@3.3.11(typescript@5.9.3):
     dependencies:
-      '@definitelytyped/header-parser': 0.2.20
+      '@definitelytyped/header-parser': 0.2.21
       command-exists: 1.2.9
       rimraf: 3.0.2
       semver: 6.3.1
@@ -81025,9 +81025,9 @@ snapshots:
 
   dtslint@4.2.1(typescript@5.9.3):
     dependencies:
-      '@definitelytyped/header-parser': 0.2.20
-      '@definitelytyped/typescript-versions': 0.1.9
-      '@definitelytyped/utils': 0.1.8
+      '@definitelytyped/header-parser': 0.2.21
+      '@definitelytyped/typescript-versions': 0.1.10
+      '@definitelytyped/utils': 0.1.9
       dts-critic: 3.3.11(typescript@5.9.3)
       fs-extra: 6.0.1
       json-stable-stringify: 1.3.0
@@ -98555,7 +98555,7 @@ snapshots:
     dependencies:
       isexe: 2.0.0
 
-  which@4.0.0:
+  which@6.0.0:
     dependencies:
       isexe: 3.1.1
 
