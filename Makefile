@@ -9,7 +9,7 @@ include Makefile.merge-train
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
-.PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: demo demo-down demo-check demo-seed demo-smoke check-case-collisions
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
@@ -395,7 +395,7 @@ conductor-logs: ## Tail Conductor logs
 	@tail -n 20 .run/client.log 2>/dev/null || echo "No client logs."
 
 # UX Governance
-.PHONY: ux-governance-check ux-governance-audit ux-governance-report check-case-collisions
+.PHONY: ux-governance-check ux-governance-audit ux-governance-report
 ux-governance-check: ## Run UX governance validation on current codebase
 	@echo "Running UX governance validation..."
 	@node scripts/ux-ci-enforcer.cjs
@@ -407,9 +407,6 @@ ux-governance-audit: ## Perform complete UX governance audit
 ux-governance-report: ## Generate UX governance report
 	@echo "Generating UX governance report..."
 	@cat ux-governance-decision-package.json
-
-check-case-collisions: ## Detect case-insensitive path collisions
-	@node scripts/maintainers/check-case-collisions.mjs
 
 # Pipeline Orchestration
 pipelines-list: ## List registered pipelines
@@ -437,3 +434,6 @@ eval-skills-changed: ## Run eval skills changed in the current diff
 
 eval-skills-all: ## Run the full eval skills suite
 	@npx tsx evals/runner/run_skill_suite.ts
+
+check-case-collisions: ## Detect case-insensitive path collisions in git index
+	@node scripts/maintainers/check-case-collisions.mjs
