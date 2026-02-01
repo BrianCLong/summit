@@ -1,38 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Report",
+  "title": "evidence report",
   "type": "object",
-  "required": ["evidence_id", "item_slug"],
+  "required": ["evidence_id", "item_slug", "area", "summary", "sources"],
   "properties": {
-    "evidence_id": { "type": "string" },
+    "evidence_id": { "type": "string", "pattern": "^EVD-[a-z0-9\\-]+-[A-Z]{2,6}-\\d{3}$" },
     "item_slug": { "type": "string" },
-    "run_id": { "type": "string" },
-    "evd_ids": { "type": "array", "items": { "type": "string" } },
-    "summary": {
-      "anyOf": [
-        { "type": "string" },
-        {
-          "type": "object",
-          "required": ["what_ran", "result"],
-          "properties": {
-            "what_ran": { "type": "string" },
-            "result": { "type": "string" }
-          },
-          "additionalProperties": true
+    "area": { "type": "string" },
+    "summary": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ref", "type"],
+        "properties": {
+          "ref": { "type": "string" },
+          "type": { "type": "string", "enum": ["model_card", "license", "paper", "repo", "other"] }
         }
-      ]
+      }
     },
-    "artifacts": {
-      "type": "object",
-      "properties": {
-        "metrics": { "type": "string" },
-        "stamp": { "type": "string" }
-      },
-      "additionalProperties": true
-    },
-    "claims": { "type": "array", "items": { "type": "string" } },
-    "decisions": { "type": "array", "items": { "type": "object" } },
-    "findings": { "type": "array", "items": { "type": "object" } }
+    "assumptions": { "type": "array", "items": { "type": "string" } }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

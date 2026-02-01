@@ -1,91 +1,117 @@
 {
-  "version": 1.0,
-  "items": [
-    {
-      "id": "EVD-PIPELINE-RESILIENCE-001",
-      "path": "evidence/report.json",
+  "version": "1.0",
+  "items": {
+    "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
-      "category": "pipeline"
+      "category": "pipeline",
+      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
-      "id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
-      "path": "evidence/report.json",
+    "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
-      "category": "dynamic-intent"
+      "category": "dynamic-intent",
+      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
-      "id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
-      "path": "fixtures/ambiguities/critical.json",
+    "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
-      "category": "dynamic-intent"
+      "category": "dynamic-intent",
+      "artifacts": ["fixtures/ambiguities/critical.json"]
     },
-    {
+    "EVD-vfgnn-ATT-001": {
       "evidence_id": "EVD-vfgnn-ATT-001",
-      "report": "evidence/legacy/EVD-VFGNN-ATT-001/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-vfgnn-NEG-001": {
       "evidence_id": "EVD-vfgnn-NEG-001",
-      "report": "evidence/legacy/EVD-VFGNN-NEG-001/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-      "report": "evidence/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-ATLAS-SCHEMA-001": {
       "evidence_id": "EVD-ATLAS-SCHEMA-001",
-      "report": "evidence/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-ATLAS-PLNR-001": {
       "evidence_id": "EVD-ATLAS-PLNR-001",
-      "report": "evidence/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-ATLAS-XFER-001": {
       "evidence_id": "EVD-ATLAS-XFER-001",
-      "report": "evidence/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-ATLAS-ATLS-001": {
       "evidence_id": "EVD-ATLAS-ATLS-001",
-      "report": "evidence/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-ATLAS-ATLS-002": {
       "evidence_id": "EVD-ATLAS-ATLS-002",
-      "report": "evidence/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-ATLAS-GOV-001": {
       "evidence_id": "EVD-ATLAS-GOV-001",
-      "report": "evidence/report.json"
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
-    {
+    "EVD-260119895-keel-ARCH-001": {
       "evidence_id": "EVD-260119895-keel-ARCH-001",
-      "report": "evidence/templates/report.json"
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
     },
-    {
+    "EVD-260119895-keel-STAB-002": {
       "evidence_id": "EVD-260119895-keel-STAB-002",
-      "report": "evidence/templates/report.json"
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
     },
-    {
+    "EVD-260119895-keel-DSCL-003": {
       "evidence_id": "EVD-260119895-keel-DSCL-003",
-      "report": "evidence/templates/report.json"
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
     },
-    {
+    "EVD-260119895-keel-BENCH-004": {
       "evidence_id": "EVD-260119895-keel-BENCH-004",
-      "report": "evidence/templates/report.json"
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
     },
-    {
+    "EVD-SSDF12-BNDL-001": {
       "evidence_id": "EVD-SSDF12-BNDL-001",
-      "report": "evidence/ssdf-v1-2/pr-01/report.json"
+      "files": [
+        "evidence/ssdf-v1-2/pr-01/report.json",
+        "evidence/ssdf-v1-2/pr-01/metrics.json",
+        "evidence/ssdf-v1-2/pr-01/stamp.json"
+      ]
     },
-    {
+    "EVD-EXPB-CORE-001": {
       "evidence_id": "EVD-EXPB-CORE-001",
-      "report": "evidence/report.json"
+      "files": [
+        "evidence/runs/expectation-baselines/report.json",
+        "evidence/runs/expectation-baselines/metrics.json",
+        "evidence/runs/expectation-baselines/stamp.json"
+      ]
     },
-    {
+    "EVD-PRIVTEL-SCHEMA-001": {
       "evidence_id": "EVD-PRIVTEL-SCHEMA-001",
-      "report": "evidence/privtel/report.json"
+      "files": [
+        "evidence/privtel/report.json",
+        "evidence/privtel/metrics.json",
+        "evidence/privtel/stamp.json"
+      ]
     },
-    {
-      "evidence_id": "EVD-SIP2601-HARV-001",
-      "report": "evidence/SIP2601/initial/report.json"
+    "EVD-youtu-vl-4b-instruct-LIC-001": {
+      "path": "evidence/EVD-youtu-vl-4b-instruct-LIC-001",
+      "files": ["report.json", "metrics.json", "stamp.json"],
+      "area": "license"
     }
-  ]
+  }
 }
