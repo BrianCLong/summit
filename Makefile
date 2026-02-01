@@ -9,7 +9,7 @@ include Makefile.merge-train
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
-.PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: demo demo-down demo-check demo-seed demo-smoke check-case-collisions
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
@@ -434,3 +434,6 @@ eval-skills-changed: ## Run eval skills changed in the current diff
 
 eval-skills-all: ## Run the full eval skills suite
 	@npx tsx evals/runner/run_skill_suite.ts
+
+check-case-collisions: ## Detect case-insensitive path collisions in git index
+	@node scripts/maintainers/check-case-collisions.mjs
