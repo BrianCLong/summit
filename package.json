@@ -321,6 +321,7 @@
   "workspaces": [
     "packages/*",
     "packages/maestro-skills/*",
+    "packages/lineage/*",
     "client",
     "server"
   ],
