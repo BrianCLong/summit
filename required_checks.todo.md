@@ -37,6 +37,10 @@ Until discovered, we use temporary verifier names:
 - `ci:codegen-drift`
 - `ci:determinism-smoke`
 - `ci:supply-chain-delta`
+- `summit-gate/data-residency`
+- `summit-gate/codespaces-ownership`
+- `summit-evidence/validate`
+- `summit-verifier/required-checks`
 
 ## Rename plan
 Once real check names are known:
@@ -47,3 +51,8 @@ Once real check names are known:
 - schema-validate
 - archsim-foundation
 - evidence-gate
+
+## Codespaces data residency rollout
+1. Confirm whether required checks include the Summit gates for residency and ownership.
+2. Map any provider-specific check names to `summit/ci/verifier/required_checks.json`.
+3. Record discrepancies in this file and update CI to emit aligned check names.
