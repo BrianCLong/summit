@@ -116,6 +116,15 @@ conditional_required:
       - "^server/src/maestro/api-types"
       - "^packages/.*/schema"
 
+  - name: "SLO Smoke Gate"
+    workflow: "slo-smoke-gate.yml"
+    rationale: "Validates SLOs (p95 < 1.5s, error rate < 1%) to block performance regressions"
+    when_paths_match:
+      - "^server/"
+      - "^packages/"
+      - "^k6/"
+      - "^ops/docker-compose"
+
 # Informational Checks
 # --------------------
 # These checks are NOT blocking for promotion.
