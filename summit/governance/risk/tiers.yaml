@@ -1,0 +1,13 @@
+levels:
+  low:
+    requires_approval: false
+    retention_days: 30
+    allowed_side_effects: ["read"]
+  medium:
+    requires_approval: false
+    retention_days: 90
+    allowed_side_effects: ["read", "write"]
+  high:
+    requires_approval: true
+    retention_days: 3650
+    allowed_side_effects: ["read", "write", "delete", "external_email"]
