@@ -2,36 +2,75 @@
 
 ## Supported Versions
 
-We provide security updates for the following versions:
-
-| Version | Status |
-| ------- | ------ |
-| v5.3.x  | GA Release Candidate (Active) |
-| v5.2.x  | Maintenance (LTS) |
-| < v5.0  | Deprecated |
-
-## Hardening Summary (v5.3.1)
-
-The platform has been hardened against common threat vectors:
-- **Supply Chain**: All GitHub Actions pinned by SHA; OPA-based provenance gate enforced in CI.
-- **Agentic Security**: Mandatory prompt injection detection in `BaseAgentArchetype`.
-- **Auditing**: Tamper-evident, persistent `IAuditSink` for all privileged paths.
-- **Secrets**: Cryptographically enforced minimum lengths and production environment guards.
+| Version | Supported          |
+| ------- | ------------------ |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-**DO NOT** create public GitHub issues for security vulnerabilities.
+Please report security vulnerabilities to **security@summit.ai**.
 
-Please report security vulnerabilities by emailing: security@intelgraph.io
+We will acknowledge receipt within 24 hours and provide a timeline for triage and remediation.
 
-### Response Timeline
-- **Acknowledgement**: Within 24 hours.
-- **Triaging**: Within 72 hours.
-- **Remediation**: 
-  - *Critical*: 24 hours.
-  - *High*: 7 days.
-  - *Medium/Low*: 30 days.
+### Disclosure Policy
 
-## Disclosure Policy
+- **Embargo:** We request a 30-day embargo on public disclosure to allow for remediation.
+- **Bounty:** We do not currently offer a bug bounty program.
+- **Safe Harbor:** We will not take legal action against researchers who discover and report vulnerabilities in good faith and in accordance with this policy.
 
-We follow a 90-day coordinated disclosure policy. We will not publicly disclose a vulnerability until a patch is available or 90 days have passed since the initial report.
+### Incident Response & Triage
+
+- **Triage Runbook**: For the standardized process of handling vulnerabilities and alerts, see the [Security Triage Runbook](docs/runbooks/security-triage.md).
+- **Incident Response**: For critical security incidents, refer to the [Security Incident Response Runbook](docs/runbooks/security-incident-response.md) and the [Incident Response Playbook](docs/ops/INCIDENT_RESPONSE.md).
+
+### Governance & Backlog
+
+- **Security Backlog**: We maintain a deterministic backlog of security and governance items at [SECURITY_BACKLOG.md](docs/governance/SECURITY_BACKLOG.md).
+- **Provenance Policy**: Requirements for supply-chain integrity are defined in [PROVENANCE.md](docs/ga/PROVENANCE.md).
+
+### Evidence
+
+For compliance evidence regarding vulnerability management, see [Evidence Index](docs/compliance/EVIDENCE_INDEX.md).
+
+## Threat Model (MAESTRO Aligned)
+
+We utilize the **MAESTRO Threat Modeling Framework** to secure our agentic AI environment. See [Summit MAESTRO Framework](docs/security/threat-modeling-framework.md) for the detailed methodology.
+
+### Assets
+
+- **Customer Data:** PII, usage metrics, and proprietary graph data stored in **Neo4j** and **PostgreSQL**.
+- **Intellectual Property:** Source code, ML models (PyTorch/ONNX), and proprietary algorithms (Rust crates for graph processing).
+- **Availability:** The ability for the platform to serve requests via the **IntelGraph API**.
+- **Agent Integrity:** The alignment and correct behavior of autonomous agents (Jules, Maestro).
+
+### Threats
+
+- **Adversarial AI:** Prompt injection, goal hijacking, model abuse, and data poisoning.
+- **Unauthorized Access:** External attackers gaining access to data or systems.
+- **Insider Threat:** Malicious or negligent employees compromising security.
+- **Supply Chain Attack:** Compromise of third-party dependencies (Rust crates, NPM packages, Python libs) or build tools.
+- **Denial of Service:** Attacks aiming to disrupt service availability.
+
+### Mitigations
+
+- **AI Guardrails:** Input/Output validation, deterministic safety checks, and adversarial testing.
+- **Identity & Access Management:** Strong authentication (MFA), least privilege (RBAC) enforced via API Gateway.
+- **Encryption:** Data encrypted at rest (AES-256 via **HashiCorp Vault/KMS**) and in transit (TLS 1.2+).
+- **Vulnerability Management:** Regular scanning of code and dependencies (**Trivy**, **Dependabot**).
+- **Policy Enforcement:** **OPA/Conftest** policies for configuration validation in CI/CD.
+- **Monitoring & Alerting:** Comprehensive observability stack (**Prometheus**, **Grafana**) to detect anomalies.
+
+## Scope & Exclusions
+
+**Covered:**
+
+- Application security (code, dependencies, build pipeline).
+- Infrastructure as Code configuration.
+- Operational runbooks and incident response policies.
+
+**Excluded (Out of Scope):**
+
+- Physical security of data centers (managed by Cloud Provider).
+- Personnel security (background checks, HR policies).
+- Third-party audits (SOC2/ISO certification reports are available upon request but not stored in this repo).
