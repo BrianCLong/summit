@@ -100,6 +100,26 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-PHYSFM-20260127-EVID-001": {
+      "title": "Evidence Skeleton",
+      "files": ["evidence/index.json", "evidence/schemas/report.schema.json"]
+    },
+    "EVD-PHYSFM-20260127-CI-001": {
+      "title": "Required Checks",
+      "files": ["required_checks.todo.md", "scripts/ci/required-checks-assert.sh"]
+    },
+    "EVD-PHYSFM-20260127-DATA-001": {
+      "title": "Dataset Manifests",
+      "files": ["data/manifests/science/the_well.manifest.json", "data/manifests/science/aion1_surveys.manifest.json"]
+    },
+    "EVD-PHYSFM-20260127-EVAL-001": {
+      "title": "Eval Harness",
+      "files": ["eval/science/run.py", "evidence/items/PHYSFM-20260127/report.json"]
+    },
+    "EVD-PHYSFM-20260127-GOV-001": {
+      "title": "Governance Gates",
+      "files": ["scripts/ci/provenance-lint.py", "scripts/ci/deps-delta-check.sh"]
     }
   }
 }

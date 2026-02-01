@@ -1,0 +1,6 @@
+{
+  "omnimodal": {
+    "enabled": true,
+    "modality": "imaging"
+  }
+}

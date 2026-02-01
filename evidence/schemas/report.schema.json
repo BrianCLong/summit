@@ -12,7 +12,7 @@
       "type": "object"
     },
     "summary": {
-      "type": "string"
+      "type": ["string", "object"]
     },
     "artifacts": {
       "type": ["array", "object"]
