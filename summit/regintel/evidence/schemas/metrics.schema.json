@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RegIntelMetrics",
+  "type": "object",
+  "required": ["evidence_id", "fact_precision", "fact_recall", "citation_coverage"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "fact_precision": { "type": "number", "minimum": 0, "maximum": 1 },
+    "fact_recall": { "type": "number", "minimum": 0, "maximum": 1 },
+    "citation_coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+    "latency_seconds": { "type": "number" }
+  },
+  "additionalProperties": false
+}

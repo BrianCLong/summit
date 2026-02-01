@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RegIntelReport",
+  "type": "object",
+  "required": ["evidence_id", "run_id", "facts", "deltas", "risk_score"],
+  "properties": {
+    "evidence_id": { "type": "string", "pattern": "^regintel/.*$" },
+    "run_id": { "type": "string" },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fact_id", "source_snapshot_id", "content", "citations"],
+        "properties": {
+          "fact_id": { "type": "string" },
+          "source_snapshot_id": { "type": "string" },
+          "content": { "type": "string" },
+          "citations": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "extracted_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "deltas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["delta_id", "change_type", "description"],
+        "properties": {
+          "delta_id": { "type": "string" },
+          "change_type": { "type": "string", "enum": ["added", "modified", "removed"] },
+          "description": { "type": "string" },
+          "affected_facts": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "risk_score": {
+      "type": "object",
+      "properties": {
+        "total": { "type": "number" },
+        "breakdown": { "type": "object" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
