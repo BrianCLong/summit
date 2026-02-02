@@ -1,5 +1,18 @@
 # Repo Assumptions & Verifications
 
+## S-ADK Reality Check (2026-02-05)
+### Verified
+- `cli/` provides the `summit` CLI entrypoint (commander-based).
+- `artifacts/agent-runs/` exists for evidence output.
+- `fixtures/` is available for deterministic test inputs.
+
+### Assumptions (Deferred pending confirmation)
+- `summit adk` subcommands are acceptable under the existing CLI contract.
+- CI gates for deterministic evidence will be added later.
+
+### Must-not-touch (S-ADK scope)
+- Governance-required checks and security baselines.
+
 ## Verified
 1.  **Repo Structure**: Top-level directories include `api/`, `apis/`, `api-schemas/`, `apps/`, `bindings/`, `alerting/`, `RUNBOOKS/`, `SECURITY/`.
 2.  **Package Location**: `packages/` is the standard location for modules.

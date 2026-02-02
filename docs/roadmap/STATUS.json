@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-05T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "s-adk-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Summit S-ADK manifest, CLI workflow, and deterministic evidence outputs."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
