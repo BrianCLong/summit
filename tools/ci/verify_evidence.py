@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import json
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+NARDOM_ID = re.compile(r"^EVD-NARDOM-[A-Z]+-[0-9]{3}$")
 
 def fail(msg: str) -> None:
     print(f"[verify_evidence] FAIL: {msg}", file=sys.stderr)
@@ -15,11 +17,53 @@ def load(p: Path):
     except Exception as e:
         fail(f"cannot read/parse {p}: {e}")
 
+def contains_time_keys(data) -> bool:
+    if isinstance(data, dict):
+        for key, value in data.items():
+            lower_key = key.lower()
+            if (
+                "timestamp" in lower_key
+                or lower_key == "time"
+                or lower_key.endswith("_time")
+                or lower_key.endswith("_timestamp")
+                or lower_key.endswith("_at")
+            ):
+                return True
+            if contains_time_keys(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if contains_time_keys(item):
+                return True
+    return False
+
 def main() -> None:
     idx_path = ROOT / "evidence" / "index.json"
     if not idx_path.exists():
         fail("missing evidence/index.json")
     idx = load(idx_path)
+
+    map_entries = idx.get("map", {})
+    if map_entries:
+        if not isinstance(map_entries, dict):
+            fail("evidence/index.json 'map' must be an object")
+        for evd_id, artifacts in map_entries.items():
+            if not NARDOM_ID.match(evd_id):
+                fail(f"invalid narrative evidence id: {evd_id}")
+            if not isinstance(artifacts, list) or not artifacts:
+                fail(f"{evd_id} must map to a non-empty list of artifacts")
+            for artifact in artifacts:
+                if not isinstance(artifact, str):
+                    fail(f"{evd_id} artifact paths must be strings")
+                fp = ROOT / artifact
+                if not fp.exists():
+                    fail(f"{evd_id} missing file: {fp}")
+                if fp.name != "stamp.json":
+                    payload = load(fp)
+                    if contains_time_keys(payload):
+                        fail(
+                            f"{evd_id} timestamps must be isolated to stamp.json: {fp}"
+                        )
 
     items = idx.get("items", {})
     if not isinstance(items, dict) or not items:

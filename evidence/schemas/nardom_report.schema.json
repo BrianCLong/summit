@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit-nardom-evidence-report",
+  "type": "object",
+  "required": ["run_id", "items"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "area", "artifacts"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-NARDOM-[A-Z]+-[0-9]{3}$"
+          },
+          "area": {"type": "string"},
+          "artifacts": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -168,5 +168,22 @@
     },
     "reasoning": "Captured OMB M-26-05 risk-based assurance metadata and rescission status for M-22-18/M-23-16. Rollback: revert commit that adds policy/omb files, prompt registry entry, task spec, and roadmap update.",
     "reverted": false
+  },
+  {
+    "id": "nardom-evidence-20260202",
+    "timestamp": "2026-02-02T12:10:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJuYXJyYXRpdmUgaW50ZWwgZXZpZGVuY2Ugc2NhZmZvbGRpbmcgKG5hcmRvbSkiLCJmaWxlcyI6WyJkb2NzL25hcnJhdGl2ZV9pbnRlbC9SRUFETUUubWQiLCJldmlkZW5jZS9uYXJyYXRpdmVfaW50ZWwvaW5kZXguanNvbiIsImV2aWRlbmNlL25hcnJhdGl2ZV9pbnRlbC9tZXRyaWNzLmpzb24iLCJldmlkZW5jZS9uYXJyYXRpdmVfaW50ZWwvcmVwb3J0Lmpzb24iLCJldmlkZW5jZS9uYXJyYXRpdmVfaW50ZWwvc3RhbXAuanNvbiIsImV2aWRlbmNlL2luZGV4Lmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL25hcmRvbV9pbmRleC5zY2hlbWEuanNvbiIsImV2aWRlbmNlL3NjaGVtYXMvbmFyZG9tX21ldHJpY3Muc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL25hcmRvbV9yZXBvcnQuc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL25hcmRvbV9zdGFtcC5zY2hlbWEuanNvbiIsInJlcXVpcmVkX2NoZWNrcy50b2RvLm1kIiwidG9vbHMvY2kvdmVyaWZ5X2V2aWRlbmNlLnB5IiwiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIiwicGFja2FnZXMvZGVjaXNpb24tbGVkZ2VyL2RlY2lzaW9uX2xlZGdlci5qc29uIl19",
+    "decision": {
+      "action": "scaffold_nardom_evidence_bundle",
+      "rule": {
+        "condition": "narrative intel evidence scaffolding required",
+        "action": "scaffold_nardom_evidence_bundle",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added NARDOM evidence templates, schemas, verifier updates, and roadmap status update. Rollback: revert commit that adds narrative intel evidence scaffolding.",
+    "reverted": false
   }
 ]

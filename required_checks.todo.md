@@ -7,6 +7,8 @@
 3. Edit the rule for `main` (or default branch).
 4. Look for "Require status checks to pass before merging".
 5. Copy the exact names of the required checks listed there.
+6. Confirm names via the GitHub API:
+   - `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
 
 ## Temporary Gate Names (Implemented in Plan)
 
@@ -15,6 +17,7 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:unit` - Runs unit tests for new packages.
 - `ci:lint` - Runs linting.
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
+- `ci:narrative-evidence` - Validates NARDOM evidence bundles and timestamp isolation.
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
 
