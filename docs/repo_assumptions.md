@@ -1,21 +1,22 @@
-# Repo Assumptions (Subsumption Bundle Scaffold)
+# Repo Assumptions (Narrative Intelligence Subsumption)
 
-## Verified
+## Verified (Local Inspection)
+- `docs/security/` and `docs/ops/runbooks/` exist and are active documentation surfaces.
+- Feature flags are documented under `docs/FEATURE_FLAGS.md` and related docs.
+- Playwright configuration exists in the repo root (`playwright.config.ts`).
 
-- Repo state: Intentionally constrained to local verification; external branch protection state is deferred pending governance access.
-
-## Assumed (must validate)
-
-- CI uses GitHub Actions.
-- Node runtime is available for CI scripts.
-- Evidence artifacts are acceptable as JSON outputs under `evidence/`.
+## Deferred Pending Verification
+- Exact service runtime locations for narrative analytics modules.
+- CI check names and required gates for narrative intelligence changes.
+- Existing evidence schema naming and signing conventions used by runtime services.
 
 ## Must-not-touch
+- Existing workflows unless a new job file is explicitly required.
+- Security policy files under `docs/security/` outside this narrative data-handling scope.
+- Production connectors without tenant-level gating and explicit approvals.
 
-- Existing workflows (modify only by adding new workflow or a single job if conventions require).
-- Public API surfaces and packages unless explicitly required by a gate.
-
-## Validation plan
-
-- Discover required checks (see `docs/required_checks.todo.md`).
-- Confirm Node version and package manager conventions.
+## Validation Plan (Before PR-1 Merge)
+- Locate feature flag evaluation path and tenant allowlist controls.
+- Confirm centralized logging/audit pathways for evidence packs.
+- Identify artifact naming conventions and hash signing flows.
+- Confirm API patterns (REST/GraphQL/WebSocket) and endpoint ownership.
