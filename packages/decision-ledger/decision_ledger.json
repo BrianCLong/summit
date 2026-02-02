@@ -168,5 +168,22 @@
     },
     "reasoning": "Captured OMB M-26-05 risk-based assurance metadata and rescission status for M-22-18/M-23-16. Rollback: revert commit that adds policy/omb files, prompt registry entry, task spec, and roadmap update.",
     "reverted": false
+  },
+  {
+    "id": "io-cogwar-radar-brief-20260202",
+    "timestamp": "2026-02-02T09:29:45Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJBZGQgSU8vQ29nV2FyIHJhZGFyIGJyaWVmLCBwcm9tcHQgcmVnaXN0cnkgZW50cnksIHRhc2sgc3BlYywgYW5kIHJvYWRtYXAgdXBkYXRlIiwiZmlsZXMiOlsiZG9jcy9icmllZnMvaW8tY29nd2FyLXJhZGFyLTIwMjcubWQiLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iLCJwcm9tcHRzL2RvY3MvaW8tY29nd2FyLXJhZGFyLWJyaWVmQHYxLm1kIiwicHJvbXB0cy9yZWdpc3RyeS55YW1sIiwiYWdlbnRzL2V4YW1wbGVzL0lPX0NPR1dBUl9SQURBUl9CUklFRl8yMDI2MDIwMi5qc29uIiwicGFja2FnZXMvZGVjaXNpb24tbGVkZ2VyL2RlY2lzaW9uX2xlZGdlci5qc29uIl19",
+    "decision": {
+      "action": "document_cogwar_radar_brief",
+      "rule": {
+        "condition": "defensive IO/CogWar brief required with governance artifacts",
+        "action": "document_cogwar_radar_brief",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Documented IO/CogWar radar brief with evidence-first structure, registered the prompt/task spec, updated roadmap status, and recorded rollback guidance.",
+    "reverted": false
   }
 ]
