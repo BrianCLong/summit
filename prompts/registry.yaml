@@ -314,26 +314,26 @@ prompts:
     allowed_operations:
       - create
       - edit
-- id: pr-17730-update
-  version: v1
-  path: prompts/pr/pr-17730-update@v1.md
-  sha256: 63e31d8f30399c75de748c1841630ba4cb10d216dabe99757c5e142711c54417
-  description: Update PR 17730 documentation and roadmap content.
-  scope:
-    paths:
-      - docs/
-      - prompts/pr/pr-17730-update@v1.md
-      - prompts/registry.yaml
-    domains:
-      - documentation
-      - governance
-      - ip
-  verification:
-    tiers_required:
-      - C
-    debt_budget:
-      permitted: 0
-      retirement_target: 0
-  allowed_operations:
-    - create
-    - edit
+  - id: pr-17730-update
+    version: v1
+    path: prompts/pr/pr-17730-update@v1.md
+    sha256: 63e31d8f30399c75de748c1841630ba4cb10d216dabe99757c5e142711c54417
+    description: Update PR 17730 documentation and roadmap content.
+    scope:
+      paths:
+        - docs/
+        - prompts/pr/pr-17730-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - ip
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
