@@ -1,43 +1,16 @@
-# repo_assumptions.md
+# Repo Assumptions & Verifications
 
 ## Verified
+1.  **Package Location**: `packages/` is the standard location for modules.
+2.  **Package Scope**: `@intelgraph` is the naming convention (e.g., `@intelgraph/disinformation-detection`).
+3.  **Validation Library**: `ajv` is present in root `devDependencies`.
+4.  **Testing**: `vitest` and `jest` are available. I will use `vitest` as it seems to be the modern standard in this repo (found in `scripts/` and root `package.json`).
+5.  **Workspace**: `pnpm` workspaces are used.
 
-- Repository contents inspected locally; subsumption bundles and verifier script exist.
-- CI uses GitHub Actions workflows under `.github/workflows/`.
-- Evidence schemas and index live under `evidence/`.
+## Assumptions
+1.  **New Package**: `packages/disinfo-ops` is a new package and does not conflict with existing work (verified by absence).
+2.  **Schema Standard**: We are defining new schemas for "Ops-first" pipeline, but loosely aligning with `evidence/*.schema.json` conventions (e.g., separating report, metrics, stamp).
 
-## Assumed (validate ASAP)
-
-- Required status check names remain to be confirmed against branch protection.
-- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
-
-## Must-not-touch (until validated)
-
-- Public API surfaces in `packages/**` (no breaking changes).
-- Existing GA gates / branch protection requirements.
-- Deployment configs / secrets / infra definitions.
-
-## Validation plan
-
-- Enumerate required checks via GitHub branch protection UI/API.
-- Confirm test runner (jest/vitest) and lint tooling.
-
-## Ingress NGINX Retirement Bundle (Assumptions)
-
-### Verified
-
-- Bundle manifest and docs are now present under `subsumption/ingress-nginx-retirement` and `docs/**`.
-
-### Assumed (validate)
-
-- GitHub Actions required checks can be updated to include bundle-specific gates.
-- CI runners have Node.js 20+ available for the bundle verifier and deny gate scripts.
-
-### Must-not-touch (blast radius)
-
-- Runtime API surfaces and production deployment logic outside CI gating.
-
-### Validation plan
-
-- Confirm required check names in branch protection.
-- Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.
+## Must-not-touch
+*   `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+*   Security scanning workflows (unless required).
