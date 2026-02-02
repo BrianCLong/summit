@@ -1,29 +1,27 @@
 # Repo Assumptions & Verifications
 
 ## Verified
-1.  **Repo Structure**: Top-level directories include `api/`, `apis/`, `api-schemas/`, `apps/`, `bindings/`, `alerting/`, `RUNBOOKS/`, `SECURITY/`.
-2.  **Package Location**: `packages/` is the standard location for modules.
-3.  **Package Scope**: `@intelgraph` is the naming convention (e.g., `@intelgraph/disinformation-detection`).
-4.  **Validation Library**: `ajv` is present in root `devDependencies`.
-5.  **Testing**: `vitest` and `jest` are available for Node.js; `pytest` is used for Python `api/` (Verified via `api/` check).
-6.  **Workspace**: `pnpm` workspaces are used.
-7.  **Governance**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` exists and defines the "CI Core (Primary Gate)" and other required checks.
-8.  **Runtime (`api/`)**:
-    - **Language**: Python 3.9 (Verified via `api/Dockerfile`).
-    - **Framework**: FastAPI (Verified via `api/main.py`).
-    - **Database**: Neo4j and Redis drivers present.
-    - **Observability**: OpenTelemetry configured.
-9.  **Bindings**: `bindings/ibrs-node` is a Node.js binding backed by Rust (`@napi-rs/cli`).
-10. **Server Entry Point**: `server/src/app.ts` (Express app configuration)
-11. **Feature Flags**: `feature-flags/flags.yaml`
+1.  **Repo Structure**: Top-level directories include `apps/`, `packages/`, `server/`, `client/`, `scripts/`, `docs/`, `api/`, `apis/`, `api-schemas/`, `bindings/`, `alerting/`, `RUNBOOKS/`, `SECURITY/`. (Verified via repo root listing.)
+2.  **App Surface**: `apps/web/` exists alongside multiple application entrypoints. (Verified via `apps/` listing.)
+3.  **Package Location**: `packages/` is the standard location for modules. (Verified via repo root listing.)
+4.  **Package Scope**: `@intelgraph` is the naming convention (e.g., `@intelgraph/disinformation-detection`). (Verified via `package.json` workspace usage.)
+5.  **Validation Library**: `ajv` is present in root `devDependencies`. (Verified via `package.json`.)
+6.  **Testing**: `vitest` and `jest` are available for Node.js via root scripts; Playwright is present for e2e. (Verified via `package.json`.)
+7.  **Workspace**: `pnpm` workspaces are used. (Verified via `package.json`.)
+8.  **Governance**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` exists and enumerates required checks, including "CI Core (Primary Gate)", "GA Gate", "Release Readiness Gate", "SOC Controls", "Unit Tests & Coverage", and "ga / gate". (Verified via policy file.)
+9.  **RBAC Utilities**: `rbac/` exists with role inference and drift monitor utilities. (Verified via `rbac/` listing.)
+10. **Audit Artifacts**: `audit/` exists with evidence registries and compliance mappings. (Verified via `audit/` listing.)
+11. **Server Entry Point**: `server/src/app.ts` is present as the Express app configuration. (Verified via repo path.)
+12. **Feature Flags**: `feature-flags/flags.yaml` exists. (Verified via repo path.)
+13. **Security Baseline**: `docs/security/CIS_CONTROLS_CHECKLIST.md` exists. (Verified via docs path.)
 
 ## Assumptions
-1.  **New Package**: `packages/disinfo-ops` is a new package and does not conflict with existing work (verified by absence).
-2.  **Schema Standard**: We are defining new schemas for "Ops-first" pipeline, but loosely aligning with `evidence/*.schema.json` conventions (e.g., separating report, metrics, stamp).
-3.  **Required Checks**: Required status check names remain to be confirmed against branch protection.
-4.  **Deterministic Evidence**: Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
-5.  **Platform Spine**: New services will use Python/FastAPI to match `api/` spine.
-6.  **Queue**: `maestro` package likely handles orchestration; specific queue technology (Celery vs Redis Queues) needs confirmation.
+1.  **CogSec Package Placement**: The CogSec core package should live under `packages/` once the architecture target is confirmed by owners. (Deferred pending target package taxonomy decision.)
+2.  **Schema Standard**: New evidence schemas should align with existing evidence/stamp/report separation conventions. (Deferred pending evidence schema review.)
+3.  **Required Checks**: Branch protection in GitHub should align to `docs/ci/REQUIRED_CHECKS_POLICY.yml`; branch protection API parity is deferred pending drift validation run.
+4.  **Deterministic Evidence**: Summit prefers deterministic evidence artifacts with stable hashes and no timestamps. (Deferred pending confirmation with evidence contracts.)
+5.  **Platform Spine**: New services should align with existing API spines, with placement determined after reviewing current service boundaries. (Deferred pending service ownership input.)
+6.  **Queue**: `maestro` orchestration details remain to be confirmed. (Deferred pending queue ownership review.)
 
 ## Must-not-touch
 *   `docs/ci/REQUIRED_CHECKS_POLICY.yml` (Governance-controlled).
@@ -33,6 +31,17 @@
 *   Deployment configs / secrets / infra definitions.
 *   `SECURITY/*` baselines (Extend only, don't rewrite).
 *   `api/main.py` existing endpoints (wargame simulation) should be preserved.
+
+## CogSec Radar - Repo Reality Check
+
+### CogSec Verified
+1.  **Required Checks Source**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` is authoritative for required checks. (Verified.)
+2.  **Audit & RBAC Surfaces**: `audit/` and `rbac/` directories exist for audit artifacts and RBAC utilities. (Verified.)
+3.  **Docs Baselines**: `docs/security/CIS_CONTROLS_CHECKLIST.md` exists for security baseline references. (Verified.)
+
+### CogSec Deferred Pending
+1.  **GA Plan Location**: `docs/reports/GA-Plan.md` is not present; the current GA plan artifact is under `docs/archive/root-history/GA-Plan.md`. (Intentionally constrained pending governance direction.)
+2.  **RBAC Middleware Location**: Specific API RBAC middleware entrypoints remain to be pinpointed. (Deferred pending targeted search within `server/` and `apps/`.)
 
 ## Repository Validation plan
 *   Enumerate required checks via GitHub branch protection UI/API.
