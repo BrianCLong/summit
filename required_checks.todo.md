@@ -17,6 +17,9 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+- `slopguard_policy` - Runs evaluator + produces evidence + fails on deny.
+- `slopguard_citations` - Runs citation checks.
+- `dataset_hygiene` - Validates provenance tags + optional filter.
 
 ## Rename Plan
 

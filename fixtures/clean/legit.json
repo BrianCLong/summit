@@ -1,0 +1,9 @@
+{
+  "kind": "review",
+  "text": "The authors present a novel approach to graph neural networks. The experiments are thorough and the results are convincing. I recommend acceptance.",
+  "meta": {
+    "llm_assisted": false,
+    "llm_tools": [],
+    "human_verifier": "peer_reviewer"
+  }
+}
