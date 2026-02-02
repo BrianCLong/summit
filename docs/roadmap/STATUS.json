@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
+  "last_updated": "2026-02-02T09:09:17Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "cw-ruua-isrhamas-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
     }
   ]
 }

@@ -1,0 +1,44 @@
+pack_id: cw-ruua-isrhamas
+version: 0.1.0
+title: "Cognitive warfare comparison: Russia–Ukraine vs Israel–Hamas"
+sources:
+  - id: item_claim_01
+    title: "Lessons on Public-Facing Information Operations in Current Conflicts"
+    url: "https://www.armyupress.army.mil/Portals/7/military-review/Archives/English/MA-25/Information-Operations/Information-Operations-UA.pdf"
+  - id: item_claim_04
+    title: "A Primer on Russian Cognitive Warfare"
+    url: "https://understandingwar.org/research/cognitive-warfare/a-primer-on-russian-cognitive-warfare/"
+  - id: item_claim_05
+    title: "Decoding manipulative narratives in cognitive warfare"
+    url: "https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2025.1566022/full"
+  - id: item_claim_06
+    title: "Hostages of the Mind: Hamas's Strategic Use of Captivity in Cognitive Warfare"
+    url: "https://www.washingtoninstitute.org/policy-analysis/hostages-mind-hamass-strategic-use-captivity-cognitive-warfare"
+  - id: item_claim_07
+    title: "Israel's Struggle with the Information Dimension and the Israel-Gaza War"
+    url: "https://www.armyupress.army.mil/journals/military-review/online-exclusive/2024-ole/dr-dostri-israel-gaza-war/"
+  - id: item_claim_08
+    title: "Smoke and mirrors: Building EU resilience against manipulation through cognitive security"
+    url: "https://www.iss.europa.eu/publications/briefs/smoke-and-mirrors-building-eu-resilience-against-manipulation-through-cognitive"
+dimensions:
+  - id: horizon_tempo
+    label: "Horizon & tempo"
+  - id: strategic_goals
+    label: "Strategic goals"
+  - id: core_narratives
+    label: "Core narratives"
+  - id: tactics_channels
+    label: "Tactics & channels"
+  - id: audiences
+    label: "Target audiences"
+  - id: cognitive_levers
+    label: "Cognitive levers"
+  - id: outcome_patterns
+    label: "Outcome patterns"
+conflicts:
+  - id: ru_ua
+    label: "Russia–Ukraine"
+  - id: isr_hamas
+    label: "Israel–Hamas"
+evidence_id:
+  pattern: "EVID:CW-RUUA-ISR-{claim_id}-{8hex}"
