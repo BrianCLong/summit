@@ -1,43 +1,32 @@
-# repo_assumptions.md
+# Repo Assumptions & Reality Check
 
-## Verified
+## Verified (via exploration)
 
-- Repository contents inspected locally; subsumption bundles and verifier script exist.
-- CI uses GitHub Actions workflows under `.github/workflows/`.
-- Evidence schemas and index live under `evidence/`.
+*   **Runtime**: `api/` is a Python application using FastAPI (`api/main.py`).
+*   **Auth**: Existing auth stub in `api/main.py` checks `X-API-Key` header.
+*   **Schemas**: `api-schemas/` is the source of truth for schemas (`api-schemas/v1/openapi-spec-v1.json` exists).
+*   **CI Policy**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` exists and defines required checks.
+*   **Telemetry**: OpenTelemetry is used in `api/main.py`.
+*   **Dependencies**: Python dependencies are listed in `requirements.in`.
+*   **Tests**: Python tests exist in `tests/` and are configured via `pytest.ini`.
 
-## Assumed (validate ASAP)
+## Assumptions (to be validated/enforced)
 
-- Required status check names remain to be confirmed against branch protection.
-- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
+*   **FactAPI Pro Location**: New service module will be placed in `api/factapi_pro/`.
+*   **CI Integration**: New Python tests in `tests/api/factapi_pro/` can be run via `pytest`.
+*   **Feature Flags**: `FACTAPI_PRO_ENABLED` environment variable will control feature availability (default: false).
+*   **Metering**: `metrics.json` will be generated deterministically in `artifacts/factapi-pro/`.
 
-## Must-not-touch (until validated)
+## Must-not-touch files
 
-- Public API surfaces in `packages/**` (no breaking changes).
-- Existing GA gates / branch protection requirements.
-- Deployment configs / secrets / infra definitions.
+*   `docs/ci/REQUIRED_CHECKS_POLICY.yml` (Policy-as-code).
+*   `.github/workflows/*` (CI workflows).
+*   `SECURITY/*` (Security baselines).
 
-## Validation plan
+## Validation Checklist
 
-- Enumerate required checks via GitHub branch protection UI/API.
-- Confirm test runner (jest/vitest) and lint tooling.
-
-## Ingress NGINX Retirement Bundle (Assumptions)
-
-### Verified
-
-- Bundle manifest and docs are now present under `subsumption/ingress-nginx-retirement` and `docs/**`.
-
-### Assumed (validate)
-
-- GitHub Actions required checks can be updated to include bundle-specific gates.
-- CI runners have Node.js 20+ available for the bundle verifier and deny gate scripts.
-
-### Must-not-touch (blast radius)
-
-- Runtime API surfaces and production deployment logic outside CI gating.
-
-### Validation plan
-
-- Confirm required check names in branch protection.
-- Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.
+- [x] Identify API runtime + entrypoints under `api/` (Python/FastAPI).
+- [x] Locate existing auth patterns (API Key header).
+- [x] Locate telemetry/metering primitives (OpenTelemetry).
+- [x] Locate schema tooling (`api-schemas/`).
+- [x] Confirm required CI checks from `docs/ci/REQUIRED_CHECKS_POLICY.yml`.
