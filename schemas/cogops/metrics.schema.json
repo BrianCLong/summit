@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CogOps Metrics",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "resilience_score",
+    "indicator_scores",
+    "effect_proxy_scores"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "report_id": {
+      "type": "string",
+      "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+    },
+    "resilience_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "indicator_scores": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "effect_proxy_scores": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "notes": {"type": "string"}
+  },
+  "additionalProperties": false
+}

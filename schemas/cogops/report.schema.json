@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CogOps Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "report_id",
+    "source",
+    "findings",
+    "indicators",
+    "effect_proxies",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "report_id": {
+      "type": "string",
+      "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+    },
+    "source": {
+      "type": "object",
+      "required": ["fixture_id", "input_ref"],
+      "properties": {
+        "fixture_id": {"type": "string"},
+        "input_ref": {"type": "string"},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "summary", "severity", "surfaces", "evidence_ids"],
+        "properties": {
+          "id": {"type": "string"},
+          "summary": {"type": "string"},
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "surfaces": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "indicators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "score", "confidence", "evidence_ids"],
+        "properties": {
+          "name": {"type": "string"},
+          "score": {"type": "number", "minimum": 0, "maximum": 1},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "effect_proxies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "value", "delta", "window"],
+        "properties": {
+          "name": {"type": "string"},
+          "value": {"type": "number"},
+          "delta": {"type": "number"},
+          "window": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "source_ref", "selector", "observation"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+          },
+          "source_ref": {"type": "string"},
+          "selector": {"type": "string"},
+          "observation": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

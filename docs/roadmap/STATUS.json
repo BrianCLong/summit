@@ -6,6 +6,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "cogops-subsumption",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added CogOps defensive subsumption docs and schemas; implementation deferred pending module placement. Docs and schemas added; implementation deferred pending module placement."
     }
   ]
 }
