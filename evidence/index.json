@@ -4,17 +4,17 @@
     "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
-      "artifacts": ["fixtures/ambiguities/critical.json"]
+      "files": ["fixtures/ambiguities/critical.json"]
     },
     "EVD-vfgnn-ATT-001": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
@@ -100,6 +100,15 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-WSJ-AI-FUNDRAISING-FRENZY-MKT-001": {
+      "files": [
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/report.json",
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/metrics.json",
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/stamp.json"
+      ],
+      "title": "WSJ Technology Newsletter: AI Fundraising Frenzy",
+      "category": "market-intel"
     }
   }
 }
