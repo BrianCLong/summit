@@ -15,6 +15,7 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:unit` - Runs unit tests for new packages.
 - `ci:lint` - Runs linting.
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
+- `ci:verify-rag-evidence` - Validates new RAG evidence schemas and artifacts.
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
 

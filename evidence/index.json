@@ -1,6 +1,16 @@
 {
   "version": "1.0",
   "items": {
+    "EVD-RAGSHRED-EVID-001": {
+      "files": [
+        "evidence/schemas/rag_report.schema.json",
+        "evidence/schemas/rag_metrics.schema.json",
+        "evidence/schemas/rag_stamp.schema.json"
+      ]
+    },
+    "EVD-RAGSHRED-EVID-002": {
+      "files": ["tools/ci/verify_rag_evidence.py"]
+    },
     "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit RAG Metrics",
+  "type": "object",
+  "required": ["run_id", "metrics"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {"type": ["number", "string", "boolean", "null"]}
+    }
+  },
+  "additionalProperties": false
+}
