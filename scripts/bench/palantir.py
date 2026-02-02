@@ -38,9 +38,16 @@ def run_benchmark(output_dir: Path, scenario: str):
     # Execute Workload
     runtime_ms = benchmark_traversal(graph, hops=3)
 
-    # Mock other metrics for now
-    memory_mb = 128.0
-    cost_est = 0.0002
+    # Memory Pressure Simulation (Mocked but conceptually complete)
+    # Palantir Foundry transforms are memory hungry.
+    # We measure peak RSS here in a real impl.
+    import os, psutil
+    process = psutil.Process(os.getpid())
+    memory_mb = process.memory_info().rss / 1024 / 1024
+
+    # Cost Estimate (Summit Efficiency vs Palantir Compute Units)
+    # Assume $0.0001 per sec per GB
+    cost_est = (runtime_ms / 1000) * (memory_mb / 1024) * 0.0001
 
     writer = PalantirEvidenceWriter(
         root_dir=output_dir,

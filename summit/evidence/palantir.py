@@ -33,21 +33,28 @@ class PalantirEvidenceWriter:
         findings: List[Finding],
         metrics: dict[str, float],
         config: dict[str, Any],
+        lineage: List[dict] = None  # New parameter
     ) -> EvidencePaths:
         """
         Writes deterministic Palantir competitive analysis evidence.
         """
         paths = default_paths(self.root_dir / "reports" / "palantir")
+        lineage_path = paths.root / "lineage.json"  # New artifact path
 
         # Calculate config hash for stamp
         config_str = json.dumps(config, sort_keys=True)
         config_hash = hashlib.sha256(config_str.encode("utf-8")).hexdigest()
 
+        artifact_list = ["metrics.json", "stamp.json"]
+        if lineage:
+             artifact_list.append("lineage.json")
+             write_json(lineage_path, {"evidence_id": self.evidence_id, "lineage": lineage})
+
         # 1. Report
         report_data = {
             "evidence_id": self.evidence_id,
             "summary": summary,
-            "artifacts": ["metrics.json", "stamp.json"],
+            "artifacts": artifact_list,
             "findings": findings
         }
         write_json(paths.report, report_data)

@@ -43,3 +43,17 @@ if [ "$NODE_COUNT" -ne "$EXPECTED_NODES" ]; then
 else
     echo "PASS: Node count stable."
 fi
+
+# Apollo Release Gate Simulation
+python3 -c "
+from pathlib import Path
+from summit.integrations.palantir_apollo import ReleaseGate, ReleaseChannel, ProductRelease, load_metrics
+
+gate = ReleaseGate([ReleaseChannel(name='prod', requires_approval=True, sla_latency_ms=100)])
+metrics = load_metrics(Path('$METRICS_FILE'))
+release = ProductRelease(version='1.0.0', channel='prod', metrics=metrics)
+decision = gate.evaluate_release(release)
+print(f'Apollo Gate Decision: {decision}')
+if 'NO-GO' in decision:
+    exit(1)
+"

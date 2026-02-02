@@ -32,6 +32,13 @@ class SummitTool:
     risk: ToolRisk
     config: Dict[str, Any]
 
+@dataclass
+class FoundryDataset:
+    rid: str
+    alias: str
+    schema: Dict[str, str]
+    inputs: List[str]
+
 
 class PalantirImporter:
     """
@@ -75,6 +82,24 @@ class PalantirImporter:
                 config=action
             ))
         return tools
+
+    def import_datasets(self, dataset_json: List[Dict[str, Any]]) -> List[FoundryDataset]:
+        """
+        Imports Foundry Dataset definitions.
+        """
+        datasets = []
+        for ds in dataset_json:
+            schema_map = {}
+            for field in ds.get("schema", {}).get("fields", []):
+                schema_map[field["name"]] = field["type"]
+
+            datasets.append(FoundryDataset(
+                rid=ds.get("rid", "unknown"),
+                alias=ds.get("alias", "unknown"),
+                schema=schema_map,
+                inputs=ds.get("provenance", {}).get("input_rids", [])
+            ))
+        return datasets
 
     def import_ontology(self, ontology_json: Dict[str, Any]) -> SummitGraphSchema:
         """

@@ -23,6 +23,7 @@
 | **Data Integration** (Foundry) | **Ingest Pipelines** | Opaque failures, long debugging loops, "magical" transformations. | Deterministic ingest, explicit provenance hashes, local reproducibility. |
 | **Ontology Mapping** | **Graph Schema Definition** | Rigid ontology locks, hard to refactor. | Schema-as-code, migration-safe, versioned graph schemas. |
 | **Investigation** (Gotham) | **Graph Exploration** | "Black box" query paths, hard to audit *why* a link was made. | **Evidence Budgeting**, full query audit log, deterministic traversals. |
+| **Case Management** (Gotham) | **Case Fabric** | Ad-hoc notes, disconnected from graph state. | **Audit-Logged Cases**: Every entity link, comment, and status change is an immutable `AuditEvent`. |
 | **AI Agents** (AIP) | **Agentic Workflow** | Hallucinations, lack of citations, "magic" tool use. | **Constraint-Aware Agents**, explicit citations, evidence-backed reasoning. |
 | **Deployment** (Apollo) | **Release Orchestrator** | Heavyweight, proprietary, hard to rollback. | GitOps-native, reversible by default, evidence-gated releases. |
 
