@@ -1,0 +1,17 @@
+{
+  "deny_external_publish": {
+    "intervention": {
+      "channel": "external_publish",
+      "simulate_only": false,
+      "human_approval": false
+    },
+    "expect": "deny"
+  },
+  "allow_simulate_only": {
+    "intervention": {
+      "channel": "internal_review",
+      "simulate_only": true
+    },
+    "expect": "allow"
+  }
+}

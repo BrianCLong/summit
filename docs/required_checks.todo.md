@@ -11,9 +11,10 @@
 
 ## Current Checks (Temporary Convention)
 
-- `gate/evidence-validate`
-- `gate/osint-policy`
-- `gate/depdelta`
+- `summit-evidence-validate`
+- `summit-policy-tests`
+- `summit-sim-determinism`
+- `summit-dependency-delta`
 
 ## Plan
 

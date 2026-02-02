@@ -100,6 +100,34 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-NARRDOM-NOG-001": {
+      "files": [
+        "evidence/EVD-NARRDOM-NOG-001/report.json",
+        "evidence/EVD-NARRDOM-NOG-001/metrics.json",
+        "evidence/EVD-NARRDOM-NOG-001/stamp.json"
+      ]
+    },
+    "EVD-NARRDOM-GOV-001": {
+      "files": [
+        "evidence/EVD-NARRDOM-GOV-001/report.json",
+        "evidence/EVD-NARRDOM-GOV-001/metrics.json",
+        "evidence/EVD-NARRDOM-GOV-001/stamp.json"
+      ]
+    },
+    "EVD-NARRDOM-SIM-001": {
+      "files": [
+        "evidence/EVD-NARRDOM-SIM-001/report.json",
+        "evidence/EVD-NARRDOM-SIM-001/metrics.json",
+        "evidence/EVD-NARRDOM-SIM-001/stamp.json"
+      ]
+    },
+    "EVD-NARRDOM-AUD-001": {
+      "files": [
+        "evidence/EVD-NARRDOM-AUD-001/report.json",
+        "evidence/EVD-NARRDOM-AUD-001/metrics.json",
+        "evidence/EVD-NARRDOM-AUD-001/stamp.json"
+      ]
     }
   }
 }

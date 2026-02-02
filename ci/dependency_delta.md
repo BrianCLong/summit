@@ -6,3 +6,5 @@ Every PR that adds/removes deps must:
 - include tests or a justification if no tests apply
 
 This is enforced by CI via `ci/check_dependency_delta.py`.
+
+- 2026-02-03: No dependency changes. Evidence + NARRDOM scaffolding only.
