@@ -143,6 +143,7 @@ import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
+import { factFlowRouter } from './factflow/index.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -412,6 +413,11 @@ export const createApp = async () => {
 
   // Other routes
   // app.use('/api/policy', policyRouter);
+  if (cfg.FACTFLOW_ENABLED) {
+    app.use('/api/factflow', factFlowRouter);
+    appLogger.info('FactFlow module enabled');
+  }
+
   app.use('/api/policies', policyManagementRouter);
   app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
