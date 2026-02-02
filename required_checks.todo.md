@@ -7,6 +7,8 @@
 3. Edit the rule for `main` (or default branch).
 4. Look for "Require status checks to pass before merging".
 5. Copy the exact names of the required checks listed there.
+6. GitHub API (read-only): `GET /repos/{owner}/{repo}/branches/{branch}/protection` and map
+   `required_status_checks.contexts` and `required_status_checks.checks`.
 
 ## Temporary Gate Names (Implemented in Plan)
 
@@ -17,6 +19,7 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+- `tmp_gate_feature_flags_off` - Ensures default feature flags remain disabled.
 
 ## Rename Plan
 

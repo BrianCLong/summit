@@ -8,6 +8,6 @@
 
 ## Notes
 
-- Rationale: Evidence schema test hardening and governance metadata updates only.
+- Rationale: Defensive-only cogwar scaffolding, evidence gates, and schemas.
 - Risk: None (no dependency changes).
 - Rollback: Revert this change.

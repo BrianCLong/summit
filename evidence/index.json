@@ -100,6 +100,48 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-nato-cogwar-techfamilies-ai-001": {
+      "files": [
+        "evidence/EVD-nato-cogwar-techfamilies-ai-001/report.json",
+        "evidence/EVD-nato-cogwar-techfamilies-ai-001/metrics.json",
+        "evidence/EVD-nato-cogwar-techfamilies-ai-001/stamp.json"
+      ]
+    },
+    "EVD-nato-cogwar-techfamilies-synth-001": {
+      "files": [
+        "evidence/EVD-nato-cogwar-techfamilies-synth-001/report.json",
+        "evidence/EVD-nato-cogwar-techfamilies-synth-001/metrics.json",
+        "evidence/EVD-nato-cogwar-techfamilies-synth-001/stamp.json"
+      ]
+    },
+    "EVD-nato-cogwar-techfamilies-iw-001": {
+      "files": [
+        "evidence/EVD-nato-cogwar-techfamilies-iw-001/report.json",
+        "evidence/EVD-nato-cogwar-techfamilies-iw-001/metrics.json",
+        "evidence/EVD-nato-cogwar-techfamilies-iw-001/stamp.json"
+      ]
+    },
+    "EVD-nato-cogwar-techfamilies-gov-001": {
+      "files": [
+        "evidence/EVD-nato-cogwar-techfamilies-gov-001/report.json",
+        "evidence/EVD-nato-cogwar-techfamilies-gov-001/metrics.json",
+        "evidence/EVD-nato-cogwar-techfamilies-gov-001/stamp.json"
+      ]
+    },
+    "EVD-nato-cogwar-techfamilies-xr-001": {
+      "files": [
+        "evidence/EVD-nato-cogwar-techfamilies-xr-001/report.json",
+        "evidence/EVD-nato-cogwar-techfamilies-xr-001/metrics.json",
+        "evidence/EVD-nato-cogwar-techfamilies-xr-001/stamp.json"
+      ]
+    },
+    "EVD-nato-cogwar-techfamilies-neuro-001": {
+      "files": [
+        "evidence/EVD-nato-cogwar-techfamilies-neuro-001/report.json",
+        "evidence/EVD-nato-cogwar-techfamilies-neuro-001/metrics.json",
+        "evidence/EVD-nato-cogwar-techfamilies-neuro-001/stamp.json"
+      ]
     }
   }
 }
