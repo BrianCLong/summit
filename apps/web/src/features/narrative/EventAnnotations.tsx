@@ -3,7 +3,8 @@
  */
 
 import React, { useState } from 'react';
-import type { EventMarker, EVENT_TYPE_COLORS } from './types/narrative-viz-types';
+import type { EventMarker } from './types/narrative-viz-types';
+import { EVENT_TYPE_COLORS } from './types/narrative-viz-types';
 
 interface EventAnnotationsProps {
     events: EventMarker[];

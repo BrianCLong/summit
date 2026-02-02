@@ -17,8 +17,8 @@ import {
 import type {
     ArcDataPoint,
     ChartConfig,
-    DEFAULT_THEME_COLORS,
 } from './types/narrative-viz-types';
+import { DEFAULT_THEME_COLORS } from './types/narrative-viz-types';
 
 interface NarrativeArcChartProps {
     arcs: ArcDataPoint[];
@@ -178,10 +178,10 @@ export const NarrativeArcChart: React.FC<NarrativeArcChartProps> = ({
                             </div>
                             <span
                                 className={`text-xs px-2 py-1 rounded ${arc.outlook === 'improving'
-                                        ? 'bg-green-900 text-green-300'
-                                        : arc.outlook === 'degrading'
-                                            ? 'bg-red-900 text-red-300'
-                                            : 'bg-gray-700 text-gray-300'
+                                    ? 'bg-green-900 text-green-300'
+                                    : arc.outlook === 'degrading'
+                                        ? 'bg-red-900 text-red-300'
+                                        : 'bg-gray-700 text-gray-300'
                                     }`}
                             >
                                 {arc.outlook}

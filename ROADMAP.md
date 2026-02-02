@@ -166,28 +166,28 @@
 
 ### STORIES
 
-#### Story 4.1: Narrative Arc Data API
+#### Story 4.1: Narrative Arc Data API [DONE]
 *   **Description:** Expose a new GraphQL/REST endpoint that returns time-series data for Story Arcs from a simulation run.
 *   **Acceptance Criteria:**
-    *   [ ] `GET /api/narrative/:simId/arcs`.
-    *   [ ] Returns JSON: `[{ tick: 0, theme: "Fear", momentum: 0.5 }, ...]`.
-    *   [ ] Cached for performance on finished simulations.
+    *   [x] `GET /api/narrative/:simId/arcs`.
+    *   [x] Returns JSON: `[{ tick: 0, theme: "Fear", momentum: 0.5 }, ...]`.
+    *   [x] Cached for performance on finished simulations.
 *   **Labels:** `product:summit`, `area:api`, `type:backend`, `estimate:3d`, `priority:p2`
 
-#### Story 4.2: Momentum Chart Component
+#### Story 4.2: Momentum Chart Component [DONE]
 *   **Description:** Build a Recharts multi-line chart component in `apps/web` to visualize the Arc data.
 *   **Acceptance Criteria:**
-    *   [ ] X-Axis: Time/Ticks. Y-Axis: Momentum (0-1).
-    *   [ ] Distinct colors per Theme.
-    *   [ ] Tooltip showing "Top Contributing Entities" at that timestamp.
+    *   [x] X-Axis: Time/Ticks. Y-Axis: Momentum (0-1).
+    *   [x] Distinct colors per Theme.
+    *   [x] Tooltip showing "Top Contributing Entities" at that timestamp.
 *   **Labels:** `product:summit`, `area:frontend`, `type:feature`, `estimate:5d`, `priority:p2`
 
-#### Story 4.3: Arc "Key Moments" Annotations
+#### Story 4.3: Arc "Key Moments" Annotations [DONE]
 *   **Description:** Overlay "Intervention Events" (e.g., Agent Actions) on the timeline to show cause-and-effect.
 *   **Acceptance Criteria:**
-    *   [ ] API includes `events[]` with timestamps.
-    *   [ ] Chart renders vertical markers for significant events.
-    *   [ ] Clicking a marker shows the Event details in a side panel.
+    *   [x] API includes `events[]` with timestamps.
+    *   [x] Chart renders vertical markers for significant events.
+    *   [x] Clicking a marker shows the Event details in a side panel.
 *   **Labels:** `product:summit`, `area:ux`, `type:enhancement`, `estimate:3d`, `priority:p3`
 
 ---
