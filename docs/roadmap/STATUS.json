@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
+  "last_updated": "2026-02-03T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "nds-v0-1-scaffold",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold Narrative Dominance Suite standards, security handling, and module entrypoint."
     }
   ]
 }
