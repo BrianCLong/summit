@@ -5,7 +5,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+      "notes": "Added CogSec evidence bundle scaffolding, verification gate, and sources."
     }
   ]
 }
