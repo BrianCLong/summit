@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Disinfo Production Report",
+  "type": "object",
+  "required": ["evidence_id", "claims", "verdicts", "limitations"],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text"],
+        "properties": {
+          "id": {"type": "string"},
+          "text": {"type": "string"},
+          "verdict": {"type": "string", "enum": ["TRUE", "FALSE", "UNCLEAR", "MIXED"]},
+          "confidence": {"type": "number"},
+          "rationale": {"type": "string"}
+        }
+      }
+    },
+    "verdicts": {"type": "object", "description": "Aggregated verdicts or summary"},
+    "evidence_pointers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_id": {"type": "string"},
+          "url": {"type": "string"},
+          "snippet": {"type": "string"}
+        }
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

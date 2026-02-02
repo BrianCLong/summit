@@ -41,3 +41,22 @@
 
 - Confirm required check names in branch protection.
 - Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.
+
+## Disinformation Production Architecture (2026)
+
+### Verified (from public repo signals)
+
+- Repo has active security hardening, branch protections, CodeQL workflows, and strict CI expectations.
+- CI/governance appears policy-driven and sensitive to workflow naming/config.
+
+### Assumed (must validate in local checkout before PRs)
+
+- Exact monorepo workspace layout and where CLIs live.
+- Existing evidence schema conventions.
+- Existing job/queue infrastructure (if any) and preferred runtime (Node vs Python).
+
+### Must-not-touch (until validated)
+
+- `docs/ci/REQUIRED_CHECKS_POLICY.yml` and any governance sync automation.
+- CodeQL workflow configs unless required for the added job.
+- Security scanning configurations (secret scanning/push protection assumptions).

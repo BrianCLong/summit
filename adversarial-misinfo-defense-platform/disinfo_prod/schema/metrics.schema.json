@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Disinfo Production Metrics",
+  "type": "object",
+  "required": ["evidence_id", "latency_ms", "cache_hit"],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "latency_ms": {"type": "number"},
+    "cache_hit": {"type": "boolean"},
+    "retrieval_counts": {
+        "type": "object",
+        "properties": {
+            "local": {"type": "integer"},
+            "live": {"type": "integer"}
+        }
+    }
+  }
+}
