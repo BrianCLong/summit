@@ -1,0 +1,42 @@
+{
+  "task_id": "COGNITIVE_IW_FOUNDATION_20260203",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "cognitive-iw-foundation",
+    "version": "v1",
+    "sha256": "a3ce4cc1194d6d828e2dc3d3dc03bb80abab337a629162b0d5eda1424558b15b",
+    "path": "prompts/cognitive/cognitive-iw-foundation@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "api-schemas/cognitive-iw/",
+      "GOLDEN/datasets/cognitive-iw/",
+      "docs/standards/nato-cognitive-alerts.md",
+      "repo_assumptions.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/COGNITIVE_IW_FOUNDATION_20260203.json",
+      "prompts/cognitive/cognitive-iw-foundation@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["cognitive", "governance", "schemas", "documentation", "datasets"],
+    "exclusions": ["SECURITY/", "THIRD_PARTY_NOTICES/"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["schema-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Cognitive I&W schemas and fixtures are added without raw content.",
+    "Standards documentation captures pattern-first constraints.",
+    "Roadmap status entry reflects the new initiative."
+  ],
+  "stop_conditions": [
+    "Required prompt hash is missing from prompts/registry.yaml.",
+    "Changes exceed declared scope or touch excluded paths."
+  ]
+}

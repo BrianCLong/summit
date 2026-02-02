@@ -1,5 +1,35 @@
 version: 1
 prompts:
+  - id: cognitive-iw-foundation
+    version: v1
+    path: prompts/cognitive/cognitive-iw-foundation@v1.md
+    sha256: a3ce4cc1194d6d828e2dc3d3dc03bb80abab337a629162b0d5eda1424558b15b
+    description: Add initial Cognitive I&W schemas, fixtures, and standards documentation.
+    scope:
+      paths:
+        - api-schemas/cognitive-iw/
+        - GOLDEN/datasets/cognitive-iw/
+        - docs/standards/nato-cognitive-alerts.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/COGNITIVE_IW_FOUNDATION_20260203.json
+        - prompts/cognitive/cognitive-iw-foundation@v1.md
+        - prompts/registry.yaml
+      domains:
+        - cognitive
+        - governance
+        - schemas
+        - documentation
+        - datasets
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md

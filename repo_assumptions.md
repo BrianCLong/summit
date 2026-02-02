@@ -1,5 +1,23 @@
 # Repo Assumptions & Verifications
 
+## NATO Cognitive Alerts (Requested)
+
+### Verified
+- MIT license present at repo root.
+- Key top-level directories present: `alerting/`, `active-measures-module/`,
+  `adversarial-misinfo-defense-platform/`, `api/`, `api-schemas/`, `apps/`,
+  `RUNBOOKS/`, `SECURITY/`.
+
+### Assumed
+- JS/TS monorepo using `pnpm`, Jest, and linting.
+- Alert ingestion and UI surfaces can consume new alert types.
+
+### Must-not-touch (until verified)
+- `THIRD_PARTY_NOTICES/` and existing license headers.
+- `.pnpm-store/` contents.
+- Existing security policy configs under `.security/` or `SECURITY/` without review.
+
+
 ## Verified
 1.  **Repo Structure**: Top-level directories include `api/`, `apis/`, `api-schemas/`, `apps/`, `bindings/`, `alerting/`, `RUNBOOKS/`, `SECURITY/`.
 2.  **Package Location**: `packages/` is the standard location for modules.

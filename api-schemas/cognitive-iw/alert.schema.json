@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.summit.io/cognitive-iw/alert.schema.json",
+  "title": "Cognitive I&W Alert",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "alert_id",
+    "evidence_id",
+    "feature_flag",
+    "indicator_set",
+    "severity",
+    "status",
+    "summary",
+    "context",
+    "provenance",
+    "redaction"
+  ],
+  "properties": {
+    "alert_id": {
+      "type": "string",
+      "description": "Stable alert identifier (non-PII)."
+    },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVID:nato-cognitive-alerts:[a-f0-9]{8}$",
+      "description": "Deterministic evidence identifier derived from sorted inputs + config."
+    },
+    "feature_flag": {
+      "type": "string",
+      "const": "cognitive_iw_enabled"
+    },
+    "indicator_set": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "indicator_id",
+          "triggered",
+          "score",
+          "threshold",
+          "window",
+          "evidence"
+        ],
+        "properties": {
+          "indicator_id": {
+            "type": "string",
+            "enum": [
+              "detect_spike",
+              "detect_coordination",
+              "detect_emotion_spike"
+            ]
+          },
+          "triggered": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "window": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["start", "end", "bucket_minutes"],
+            "properties": {
+              "start": { "type": "string", "format": "date-time" },
+              "end": { "type": "string", "format": "date-time" },
+              "bucket_minutes": { "type": "integer", "minimum": 1 }
+            }
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["series_hash", "config_hash"],
+            "properties": {
+              "series_hash": { "type": "string" },
+              "config_hash": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "acknowledged", "closed"]
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 280,
+      "description": "Pattern-based summary without adjudicating truth or intent."
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cluster_ids",
+        "platforms",
+        "event_count",
+        "time_bounds",
+        "pattern_first"
+      ],
+      "properties": {
+        "cluster_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "platforms": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "event_count": { "type": "integer", "minimum": 0 },
+        "time_bounds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "properties": {
+            "start": { "type": "string", "format": "date-time" },
+            "end": { "type": "string", "format": "date-time" }
+          }
+        },
+        "pattern_first": { "type": "boolean", "const": true }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generator", "version", "config_hash"],
+      "properties": {
+        "generator": { "type": "string" },
+        "version": { "type": "string" },
+        "config_hash": { "type": "string" }
+      }
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw_content_included"],
+      "properties": {
+        "raw_content_included": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}
