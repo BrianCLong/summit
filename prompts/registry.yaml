@@ -314,3 +314,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: pr-17707-update
+    version: v1
+    path: prompts/pr/pr-17707-update@v1.md
+    sha256: 842813fc69743a4cf171f05d2c40206f007875706ad6d3e1170fab4bf9814f78
+    description: Update PR 17707 scoped changes.
+    scope:
+      paths:
+        - .github/
+        - deps/
+        - docs/
+        - evidence/
+        - required_checks.todo.md
+        - tools/
+        - prompts/pr/pr-17707-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+
