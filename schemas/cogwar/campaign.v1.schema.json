@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/cogwar/campaign.v1.schema.json",
+  "title": "Cognitive Campaign Spec v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "campaign_id",
+    "actors",
+    "channels",
+    "narratives",
+    "timing",
+    "indicators",
+    "attribution",
+    "evidence"
+  ],
+  "properties": {
+    "schema_version": { "const": "cogwar.campaign.v1" },
+    "campaign_id": { "type": "string", "pattern": "^CW-[A-Z0-9]{8}$" },
+    "actors": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/actor" },
+      "minItems": 1
+    },
+    "channels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/channel" },
+      "minItems": 1
+    },
+    "narratives": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/narrative" },
+      "minItems": 1
+    },
+    "timing": { "$ref": "#/$defs/timing" },
+    "indicators": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/indicator" },
+      "maxItems": 200
+    },
+    "attribution": { "$ref": "#/$defs/attribution" },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence_ref" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "actor": {
+      "type": "object",
+      "required": ["actor_id", "label", "actor_type"],
+      "properties": {
+        "actor_id": { "type": "string", "pattern": "^ACT-[A-Z0-9]{6}$" },
+        "label": { "type": "string" },
+        "actor_type": {
+          "type": "string",
+          "enum": ["state", "proxy", "media", "botnet", "unknown"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "channel": {
+      "type": "object",
+      "required": ["channel_type"],
+      "properties": {
+        "channel_type": {
+          "type": "string",
+          "enum": [
+            "web",
+            "social",
+            "messaging",
+            "tv",
+            "radio",
+            "print",
+            "mixed"
+          ]
+        },
+        "platform": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "narrative": {
+      "type": "object",
+      "required": ["narrative_id", "theme", "frames"],
+      "properties": {
+        "narrative_id": { "type": "string", "pattern": "^NAR-[A-Z0-9]{6}$" },
+        "theme": { "type": "string" },
+        "frames": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "timing": {
+      "type": "object",
+      "required": ["event_hooks"],
+      "properties": {
+        "event_hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["event_type"],
+            "properties": {
+              "event_type": {
+                "type": "string",
+                "enum": [
+                  "nato_summit",
+                  "aid_announcement",
+                  "ramstein_meeting",
+                  "election",
+                  "other"
+                ]
+              },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "indicator": {
+      "type": "object",
+      "required": ["indicator_id", "kind", "pattern"],
+      "properties": {
+        "indicator_id": { "type": "string", "pattern": "^IND-[A-Z0-9]{6}$" },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "keyword",
+            "domain_typosquat",
+            "claim_cluster",
+            "engagement_spike",
+            "crosspost"
+          ]
+        },
+        "pattern": { "type": "string" },
+        "max_matches": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "default": 50
+        }
+      },
+      "additionalProperties": false
+    },
+    "attribution": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["UNATTRIBUTED", "ATTRIBUTED"] },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "ATTRIBUTED" } } },
+          "then": { "properties": { "evidence_refs": { "minItems": 1 } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "evidence_ref": {
+      "type": "object",
+      "required": ["evidence_id", "source", "locator"],
+      "properties": {
+        "evidence_id": { "type": "string", "pattern": "^EVID-[A-Z0-9]{10}$" },
+        "source": { "type": "string" },
+        "locator": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,197 @@
+{
+  "campaigns": [
+    {
+      "actors": [
+        {
+          "actor_id": "ACT-AN0001",
+          "actor_type": "media",
+          "label": "Influence operators and media proxies"
+        }
+      ],
+      "attribution": {
+        "confidence": 0,
+        "status": "UNATTRIBUTED"
+      },
+      "campaign_id": "CW-ANATO001",
+      "channels": [
+        {
+          "channel_type": "social",
+          "platform": "mixed"
+        },
+        {
+          "channel_type": "web",
+          "platform": "blog networks"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "EVID-ANATO00001",
+          "locator": "https://www.thecipherbrief.com/russia-narratives-ukraine",
+          "source": "The Cipher Brief: Kremlin narratives"
+        },
+        {
+          "evidence_id": "EVID-ANATO00002",
+          "locator": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12460417/",
+          "source": "PMC: Decoding manipulative narratives in cognitive warfare"
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "IND-AN0001",
+          "kind": "keyword",
+          "pattern": "anti-NATO"
+        },
+        {
+          "indicator_id": "IND-AN0002",
+          "kind": "claim_cluster",
+          "pattern": "NATO expansion caused the conflict"
+        }
+      ],
+      "narratives": [
+        {
+          "frames": [
+            "NATO expansion caused the conflict",
+            "Russia is defending Russian speakers",
+            "De-Nazification narrative"
+          ],
+          "narrative_id": "NAR-AN0001",
+          "theme": "Anti-NATO and defensive Russia framing"
+        }
+      ],
+      "schema_version": "cogwar.campaign.v1",
+      "timing": {
+        "event_hooks": [
+          {
+            "event_type": "ramstein_meeting",
+            "notes": "Narrative alignment with defense coordination meetings."
+          }
+        ]
+      }
+    },
+    {
+      "actors": [
+        {
+          "actor_id": "ACT-DB0001",
+          "actor_type": "proxy",
+          "label": "Pro-Russian influence ecosystem"
+        }
+      ],
+      "attribution": {
+        "confidence": 0,
+        "status": "UNATTRIBUTED"
+      },
+      "campaign_id": "CW-DBOMB001",
+      "channels": [
+        {
+          "channel_type": "web",
+          "platform": "news clone sites"
+        },
+        {
+          "channel_type": "social",
+          "platform": "mixed"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "EVID-DBOMB00001",
+          "locator": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12460417/",
+          "source": "PMC: Decoding manipulative narratives in cognitive warfare"
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "IND-DB0001",
+          "kind": "keyword",
+          "pattern": "dirty bomb"
+        },
+        {
+          "indicator_id": "IND-DB0002",
+          "kind": "claim_cluster",
+          "pattern": "Kyiv authorities planned a dirty bomb"
+        }
+      ],
+      "narratives": [
+        {
+          "frames": [
+            "Kyiv authorities planned a dirty bomb",
+            "Ukraine intends to implicate Russia"
+          ],
+          "narrative_id": "NAR-DB001A",
+          "theme": "Dirty bomb allegations"
+        }
+      ],
+      "schema_version": "cogwar.campaign.v1",
+      "timing": {
+        "event_hooks": [
+          {
+            "event_type": "aid_announcement",
+            "notes": "Narrative spikes aligned with major aid announcements."
+          }
+        ]
+      }
+    },
+    {
+      "actors": [
+        {
+          "actor_id": "ACT-NU0001",
+          "actor_type": "state",
+          "label": "State-aligned messaging"
+        }
+      ],
+      "attribution": {
+        "confidence": 0,
+        "status": "UNATTRIBUTED"
+      },
+      "campaign_id": "CW-NUKE0001",
+      "channels": [
+        {
+          "channel_type": "tv",
+          "platform": "state media"
+        },
+        {
+          "channel_type": "web",
+          "platform": "news portals"
+        }
+      ],
+      "evidence": [
+        {
+          "evidence_id": "EVID-NUKE00001",
+          "locator": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12460417/",
+          "source": "PMC: Decoding manipulative narratives in cognitive warfare"
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "IND-NU0001",
+          "kind": "keyword",
+          "pattern": "nuclear threat"
+        },
+        {
+          "indicator_id": "IND-NU0002",
+          "kind": "engagement_spike",
+          "pattern": "daily volume peak"
+        }
+      ],
+      "narratives": [
+        {
+          "frames": [
+            "Nuclear escalation is imminent",
+            "Deterrence rhetoric spikes after geopolitical events"
+          ],
+          "narrative_id": "NAR-NU0001",
+          "theme": "Nuclear threats and escalation rhetoric"
+        }
+      ],
+      "schema_version": "cogwar.campaign.v1",
+      "timing": {
+        "event_hooks": [
+          {
+            "event_type": "nato_summit",
+            "notes": "Narrative intensity aligned with summits and major events."
+          }
+        ]
+      }
+    }
+  ],
+  "schema_version": "cogwar.campaign.v1"
+}

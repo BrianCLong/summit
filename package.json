@@ -29,6 +29,7 @@
     "test:release-bundle-sdk": "cd packages/release-bundle && pnpm test",
     "test:release-scripts": "node --test scripts/release/__tests__/*.test.mjs",
     "test:docs-governance": "node --test scripts/ci/__tests__/governance_docs_verifier.test.mjs",
+    "test:cogwar": "node --test tests/cogwar/*.test.mjs",
     "test:control-evidence": "node --test scripts/evidence/tests/control_evidence_index.test.mjs",
     "test:soc-report": "PYTHONPATH=. python3 -m unittest scripts.evidence.tests.test_soc_report",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",

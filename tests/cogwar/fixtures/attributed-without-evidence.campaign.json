@@ -1,0 +1,31 @@
+{
+  "schema_version": "cogwar.campaign.v1",
+  "campaign_id": "CW-ATTR0001",
+  "actors": [
+    { "actor_id": "ACT-AT0001", "label": "Test actor", "actor_type": "unknown" }
+  ],
+  "channels": [{ "channel_type": "web", "platform": "test" }],
+  "narratives": [
+    {
+      "narrative_id": "NAR-AT0001",
+      "theme": "Test",
+      "frames": ["Test frame"]
+    }
+  ],
+  "timing": { "event_hooks": [{ "event_type": "other" }] },
+  "indicators": [
+    { "indicator_id": "IND-AT0001", "kind": "keyword", "pattern": "test" }
+  ],
+  "attribution": {
+    "status": "ATTRIBUTED",
+    "confidence": 0.6,
+    "evidence_refs": []
+  },
+  "evidence": [
+    {
+      "evidence_id": "EVID-ATTR00001",
+      "source": "Test source",
+      "locator": "https://example.com"
+    }
+  ]
+}

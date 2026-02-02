@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
+  "last_updated": "2026-02-02T09:15:31Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "ru-ua-cogwar-lab",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
     }
   ]
 }
