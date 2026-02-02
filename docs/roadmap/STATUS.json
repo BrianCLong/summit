@@ -6,6 +6,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "IO-COGWAR-RADAR-2027",
+      "status": "done",
+      "owner": "codex",
+      "notes": "Added IO/CogWar Radar 2027 brief and prompt registration. Published defensive-only IO/CogWar Radar 2027 brief and governance alignment notes."
     }
   ]
 }
