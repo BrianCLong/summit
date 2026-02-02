@@ -63,7 +63,7 @@ function resolveTemplate(template, matrixCombo) {
   let result = template;
   for (const [key, value] of Object.entries(matrixCombo)) {
     const escapedKey = String(key).replace(/\./g, '\\.');
-    const regex = new RegExp('\\$\\s*\\{\\{\\s*matrix\\.' + escapedKey + '\\s*\\}\\}', 'g');
+    const regex = new RegExp('\$\s*\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
     result = result.replace(regex, String(value));
   }
   return result;
