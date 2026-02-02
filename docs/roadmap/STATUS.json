@@ -1,0 +1,11 @@
+{
+  "updated": "2026-02-02",
+  "items": [
+    {
+      "id": "runbook-cognitive-security-defense",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
+    }
+  ]
+}
