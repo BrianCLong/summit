@@ -34,6 +34,21 @@
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
+    "EVD-COGWAR-2026-EVENT-001": {
+      "title": "Event Schema Validation",
+      "category": "cogwar-event",
+      "files": ["schema/event.yaml"]
+    },
+    "EVD-COGWAR-2026-EVENT-002": {
+      "title": "Event Playbook Run Output",
+      "category": "cogwar-event",
+      "files": ["evidence/reports/event_report.json", "evidence/reports/event_metrics.json"]
+    },
+    "EVD-COGWAR-2026-EVENT-003": {
+      "title": "Event Fusion Correlator Results",
+      "category": "cogwar-event",
+      "files": []
+    },
     "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
       "title": "Structured memory schema & examples",
       "files": [
