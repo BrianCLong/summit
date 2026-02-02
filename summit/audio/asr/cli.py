@@ -5,13 +5,13 @@ import json
 import os
 from dataclasses import asdict
 
-from .providers.qwen3_asr_stub import Qwen3ASRProvider
+from .providers.qwen3_asr_provider import Qwen3ASRProvider
 from .security import redact_for_logs
 from .types import ASRRequest
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Summit ASR CLI (Qwen3-ASR stub)")
+    parser = argparse.ArgumentParser(description="Summit ASR CLI (Qwen3-ASR)")
     parser.add_argument("--audio", required=True)
     parser.add_argument(
         "--audio-type",
@@ -21,6 +21,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--language")
     parser.add_argument("--timestamps", action="store_true")
     parser.add_argument("--backend", default="transformers")
+    parser.add_argument("--device", default="auto")
+    parser.add_argument("--attention-backend", default="auto")
     return parser.parse_args()
 
 
@@ -34,15 +36,17 @@ def main() -> int:
         audio_type=args.audio_type,
         language=args.language,
         return_timestamps=args.timestamps,
+        device=args.device,
+        attention_backend=args.attention_backend
     )
     provider = Qwen3ASRProvider(backend=args.backend)
 
     try:
         result = provider.transcribe(request)
-    except NotImplementedError:
+    except Exception as e:
         print(
             json.dumps(
-                {"error": "provider not wired", "request": redact_for_logs(asdict(request))},
+                {"error": str(e), "request": redact_for_logs(asdict(request))},
                 ensure_ascii=False,
             )
         )

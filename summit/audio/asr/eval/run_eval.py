@@ -27,7 +27,7 @@ def main() -> int:
             "license": "Apache-2.0",
             "paper": "arXiv:2601.21337",
         },
-        "summary": "scaffold_only",
+        "summary": {"status": "scaffold_only"},
         "artifacts": ["report.json", "metrics.json", "stamp.json", "index.json"],
     }
     metrics = {
@@ -39,8 +39,13 @@ def main() -> int:
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     index = {
-        "version": 1.0,
-        "items": [{"id": EVIDENCE_ID, "path": "report.json"}],
+        "version": "1.0",
+        "items": [
+            {
+                "evidence_id": EVIDENCE_ID,
+                "files": ["report.json", "metrics.json", "stamp.json"]
+            }
+        ],
     }
 
     write_json(outdir / "report.json", report)
