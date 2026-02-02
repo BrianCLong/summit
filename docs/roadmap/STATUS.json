@@ -24,6 +24,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+    },
+    {
+      "id": "ip-defense-claims-c481-s510",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Drafted CRM and simulation apparatus dependent claim continuations for eval governance, redaction/pseudonymization, and training gates."
     }
   ]
 }
