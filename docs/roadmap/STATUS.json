@@ -1,11 +1,29 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
+  "last_updated": "2026-02-03T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "io-cogwar-radar-2027-brief",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "One-pager mapping IO/CogWar radar scope to Summit/IntelGraph defensive capabilities."
+    },
+    {
+      "id": "runbook-cognitive-security-defense",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
+    },
+    {
+      "id": "ip-defense-claims-c391-s420",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     }
   ]
 }
