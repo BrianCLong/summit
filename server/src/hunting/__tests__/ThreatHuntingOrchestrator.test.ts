@@ -345,6 +345,7 @@ describe('ThreatHuntingOrchestrator', () => {
   });
 
   afterEach(() => {
+    orchestrator.dispose();
     jest.clearAllMocks();
   });
 
@@ -899,6 +900,8 @@ describe('Integration Tests', () => {
         expect(results.metrics).toBeDefined();
         expect(results.findings).toBeDefined();
       }
+
+      orchestrator.dispose();
     }, 30000); // 30 second timeout
   });
 
@@ -930,6 +933,8 @@ describe('Integration Tests', () => {
         // Precision should be at or above target
         expect(results.metrics.precisionEstimate).toBeGreaterThanOrEqual(0.85); // Allow 6% margin
       }
+
+      orchestrator.dispose();
     }, 30000);
   });
 });
