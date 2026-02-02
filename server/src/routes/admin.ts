@@ -7,6 +7,7 @@ import { ensureAuthenticated } from '../middleware/auth.js';
 import { authorize } from '../middleware/authorization.js';
 import GAEnrollmentService from '../services/GAEnrollmentService.js';
 import { getPostgresPool } from '../config/database.js';
+import { clearShadowCache } from '../middleware/ShadowTrafficMiddleware.js';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -283,6 +284,53 @@ router.post('/failover/status', express.json(), (req, res) => {
     res.json({ ok: true, region, status });
   } catch (error: any) {
     res.status(400).json({ ok: false, error: error.message });
+  }
+});
+
+// Shadow Traffic Admin APIs
+router.get('/shadow/configs', async (req, res) => {
+  try {
+    const pool = getPostgresPool();
+    const result = await pool.query('SELECT * FROM shadow_traffic_configs');
+    res.json(result.rows);
+  } catch (error: any) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.post('/shadow/configs', express.json(), async (req, res) => {
+  const { tenantId, targetUrl, samplingRate, compareResponses } = req.body;
+  if (!tenantId || !targetUrl) {
+    return res.status(400).json({ ok: false, error: 'tenantId and targetUrl are required' });
+  }
+  try {
+    const pool = getPostgresPool();
+    await pool.query(
+      `INSERT INTO shadow_traffic_configs (tenant_id, target_url, sampling_rate, compare_responses)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (tenant_id) DO UPDATE 
+       SET target_url = EXCLUDED.target_url, 
+           sampling_rate = EXCLUDED.sampling_rate, 
+           compare_responses = EXCLUDED.compare_responses,
+           updated_at = CURRENT_TIMESTAMP`,
+      [tenantId, targetUrl, samplingRate ?? 0, compareResponses ?? false]
+    );
+    clearShadowCache(tenantId);
+    res.json({ ok: true, message: 'Shadow traffic config updated' });
+  } catch (error: any) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.delete('/shadow/configs/:tenantId', async (req, res) => {
+  const { tenantId } = req.params;
+  try {
+    const pool = getPostgresPool();
+    await pool.query('DELETE FROM shadow_traffic_configs WHERE tenant_id = $1', [tenantId]);
+    clearShadowCache(tenantId);
+    res.json({ ok: true, message: 'Shadow traffic config deleted' });
+  } catch (error: any) {
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 

@@ -1,48 +1,76 @@
 import { Request, Response, NextFunction } from 'express';
 import { shadowService, ShadowConfig } from '../services/ShadowService.js';
-import { REGIONAL_CONFIG, getCurrentRegion } from '../config/regional-config.js';
+import { getPostgresPool } from '../db/postgres.js';
+import { LRUCache } from 'lru-cache';
 
-// Global shadow configuration (could be moved to DB)
-let shadowConfig: Record<string, ShadowConfig> = {};
+const configCache = new LRUCache<string, ShadowConfig>({
+    max: 1000,
+    ttl: 60 * 1000, // 1 minute
+});
 
-export const setShadowConfig = (tenantId: string, config: ShadowConfig | null) => {
-    if (config === null) {
-        delete shadowConfig[tenantId];
-    } else {
-        shadowConfig[tenantId] = config;
+export const getShadowConfig = async (tenantId: string): Promise<ShadowConfig | undefined> => {
+    if (configCache.has(tenantId)) {
+        return configCache.get(tenantId);
+    }
+
+    try {
+        const pool = getPostgresPool();
+        const result = await pool.query(
+            'SELECT target_url as "targetUrl", sampling_rate as "samplingRate", compare_responses as "compareResponses" FROM shadow_traffic_configs WHERE tenant_id = $1',
+            [tenantId]
+        );
+
+        const config = result.rows.length > 0 ? (result.rows[0] as ShadowConfig) : undefined;
+        if (config) {
+            configCache.set(tenantId, config);
+        }
+        return config;
+    } catch (error: any) {
+        // Fallback for bootstrap or if table doesn't exist yet
+        if (error.message.includes('relation "shadow_traffic_configs" does not exist')) {
+            return undefined;
+        }
+        throw error;
     }
 };
 
-export const shadowTrafficMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const clearShadowCache = (tenantId: string) => {
+    configCache.delete(tenantId);
+};
+
+export const shadowTrafficMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const tenantId = (req as any).user?.tenantId || (req as any).tenantId;
 
-    if (!tenantId || !shadowConfig[tenantId]) {
+    if (!tenantId) {
         return next();
     }
 
-    const config = shadowConfig[tenantId];
+    try {
+        const config = await getShadowConfig(tenantId);
 
-    // Sampling check
-    if (Math.random() > config.samplingRate) {
-        return next();
+        if (!config) {
+            return next();
+        }
+
+        // Sampling check
+        if (Math.random() > config.samplingRate) {
+            return next();
+        }
+
+        // Identify shadow request to avoid infinite loops
+        if (req.headers['x-summit-shadow-request'] === 'true') {
+            return next();
+        }
+
+        shadowService.shadow({
+            method: req.method,
+            url: req.originalUrl,
+            headers: req.headers,
+            body: req.body
+        }, config);
+    } catch (error) {
+        console.error('[ShadowTrafficMiddleware] Error:', error);
     }
-
-    // Identify shadow request to avoid infinite loops
-    if (req.headers['x-summit-shadow-request'] === 'true') {
-        return next();
-    }
-
-    // Capture request and shadow it
-    // We do this AFTER next() or concurrently. Usually fire-and-forget before next()
-    // but capturing the body might need to be careful with streams.
-    // Express json() middleware should have already parsed the body.
-
-    shadowService.shadow({
-        method: req.method,
-        url: req.originalUrl,
-        headers: req.headers,
-        body: req.body
-    }, config);
 
     next();
 };

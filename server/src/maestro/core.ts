@@ -25,11 +25,15 @@ export interface MaestroRunOptions {
 
 export class Maestro {
   constructor(
-    private ig: IntelGraphClient,
+    public ig: IntelGraphClient,
     private costMeter: CostMeter,
     private llm: OpenAILLM,
     private config: MaestroConfig,
   ) { }
+
+  async getTask(taskId: string): Promise<Task | null> {
+    return this.ig.getTask(taskId);
+  }
 
   async createRun(
     userId: string,
@@ -145,6 +149,26 @@ export class Maestro {
             };
           }
         }
+
+        // === SHADOW TRAFFIC INTEGRATION (Task #101) ===
+        if (!(task.input as any)?._isShadow) {
+          try {
+            const { getShadowConfig } = await import('../middleware/ShadowTrafficMiddleware.js');
+            const shadowConfig = await getShadowConfig(tenantId);
+            if (shadowConfig && Math.random() <= shadowConfig.samplingRate) {
+              const { shadowService } = await import('../services/ShadowService.js');
+              // Mirror the execution task call
+              shadowService.shadow({
+                method: 'POST',
+                url: `/api/maestro/tasks/${task.id}/execute`,
+                headers: { 'content-type': 'application/json' },
+                body: { ...task, input: { ...task.input, _isShadow: true } }
+              }, shadowConfig);
+            }
+          } catch (shadowError) {
+            logger.warn({ taskId: task.id, error: (shadowError as Error).message }, 'Maestro: Shadow trigger failed');
+          }
+        }
       }
 
       // === GOVERNANCE CHECK (Story 1.1) ===
@@ -224,6 +248,20 @@ export class Maestro {
           errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s). Risk score: ${governanceDecision.riskScore.toFixed(2)}`,
           updatedAt: now
         });
+
+        // === HITL INTEGRATION (Task #102) ===
+        try {
+          const { createApproval } = await import('../services/approvals.js');
+          await createApproval({
+            requesterId: task.agent.id,
+            action: 'maestro_task_execution',
+            payload: { taskId: task.id, taskKind: task.kind, riskScore: governanceDecision.riskScore },
+            reason: `Governance policy flagged for review. Risk: ${governanceDecision.riskScore.toFixed(2)}. ${governanceDecision.reason}`,
+            runId: task.runId
+          });
+        } catch (approvalError) {
+          logger.error({ taskId: task.id, error: (approvalError as Error).message }, 'Maestro: Failed to create approval record');
+        }
 
         // Return task in pending_approval state - execution halts here
         return {
