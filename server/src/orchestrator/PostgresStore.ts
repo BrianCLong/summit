@@ -1,4 +1,6 @@
-import { Pool, PoolClient } from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg;
+type PoolClient = any;
 import { v4 as uuidv4 } from 'uuid';
 import {
     orchestratorTasksTotal,

@@ -23,7 +23,7 @@ export class SearchIndexService {
       },
       extractField: (document: SearchableItem, fieldName: string) => {
         // Access nested fields if necessary
-        const record = document as Record<string, unknown>;
+        const record = document as any;
         return record[fieldName];
       }
     });
@@ -46,7 +46,7 @@ export class SearchIndexService {
   }
 
   // Hook for Entity Upsert
-  public async onEntityUpsert(entity: Record<string, unknown>) {
+  public async onEntityUpsert(entity: any) {
     if (process.env.SEARCH_ENABLED !== 'true') return;
 
     // Map entity to SearchableItem
@@ -119,7 +119,7 @@ export class SearchIndexService {
             const hasTag = query.filters.tags.some(t => result.tags && result.tags.includes(t));
             if (!hasTag) return false;
           }
-          if (query.filters.source && query.filters.source.length > 0 && !query.filters.source.includes(result.source)) return false;
+          if (query.filters.source && query.filters.source.length > 0 && !query.filters.source.includes(result.source || '')) return false;
 
           if (query.filters.timeRange) {
             const created = new Date(result.createdAt).getTime();
@@ -132,7 +132,7 @@ export class SearchIndexService {
       queries: [query.q],
     };
 
-    const results = this.miniSearch.search(query.q, opts) as Array<SearchableItem & { score: number; match: Record<string, string[]> }>;
+    const results = this.miniSearch.search(query.q, opts) as any as Array<SearchableItem & { score: number; match: Record<string, string[]> }>;
 
     // Pagination (manual slicing since minisearch returns all sorted by score)
     const limit = query.limit || 20;
@@ -238,7 +238,7 @@ export class SearchIndexService {
             prefix: true
           },
           extractField: (document: SearchableItem, fieldName: string) => {
-            const record = document as Record<string, unknown>;
+            const record = document as any;
             return record[fieldName];
           }
         });

@@ -87,7 +87,7 @@ export class DecisionAnalysisPipeline {
 
       const entityClaimsResults = await Promise.all(claimsPromises);
       const allClaims = entityClaimsResults
-        .filter(Boolean)
+        .filter((ec): ec is NonNullable<typeof ec> => !!ec)
         .flatMap(ec => ec.claims.map((c: any) => c.claim).filter(Boolean));
 
       // Step 2: Call the model service to propose a recommendation and rationale.

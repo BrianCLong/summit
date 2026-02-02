@@ -1336,7 +1336,7 @@ importers:
         version: 16.12.0
       graphql-ws:
         specifier: ^6.0.6
-        version: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(ws@8.19.0)
+        version: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)(ws@8.19.0)
       immer:
         specifier: ^10.2.0
         version: 10.2.0
@@ -1800,7 +1800,7 @@ importers:
         version: 16.12.0
       graphql-ws:
         specifier: ^6.0.6
-        version: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(ws@8.19.0)
+        version: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)(ws@8.19.0)
       immer:
         specifier: ^10.2.0
         version: 10.2.0
@@ -2442,7 +2442,7 @@ importers:
         version: 16.12.0
       graphql-ws:
         specifier: 6.0.6
-        version: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(ws@8.19.0)
+        version: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)(ws@8.19.0)
       immer:
         specifier: 10.2.0
         version: 10.2.0
@@ -13715,44 +13715,44 @@ importers:
         specifier: 10.0.30
         version: 10.0.30(graphql@16.12.0)
       '@intelgraph/connector-sdk':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/connector-sdk
       '@intelgraph/face-analysis':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/face-analysis
       '@intelgraph/feature-flags':
         specifier: workspace:*
         version: link:../packages/feature-flags
       '@intelgraph/image-forensics':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/image-forensics
       '@intelgraph/maestro-core':
         specifier: workspace:*
         version: link:../packages/maestro-core
       '@intelgraph/object-detection':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/object-detection
       '@intelgraph/ocr':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/ocr
       '@intelgraph/osint-collector':
         specifier: workspace:*
         version: link:../packages/osint-collector
       '@intelgraph/post-quantum-crypto':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/post-quantum-crypto
       '@intelgraph/satellite-imagery':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/satellite-imagery
       '@intelgraph/telemetry-config':
         specifier: workspace:*
         version: link:../packages/telemetry-config
       '@intelgraph/video-analysis':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../packages/video-analysis
       '@kubernetes/client-node':
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: ^0.20.0
+        version: 0.20.0
       '@node-saml/node-saml':
         specifier: ^5.1.0
         version: 5.1.0
@@ -13808,8 +13808,8 @@ importers:
         specifier: 1.38.0
         version: 1.38.0
       '@react-email/render':
-        specifier: ^2.0.4
-        version: 2.0.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: ^0.0.12
+        version: 0.0.12
       '@socket.io/redis-adapter':
         specifier: 8.3.0
         version: 8.3.0(socket.io-adapter@2.5.6)
@@ -13946,8 +13946,8 @@ importers:
         specifier: 16.12.0
         version: 16.12.0
       graphql-query-complexity:
-        specifier: ^1.1.0
-        version: 1.1.0(graphql@16.12.0)
+        specifier: ^0.12.0
+        version: 0.12.0(graphql@16.12.0)
       graphql-subscriptions:
         specifier: 2.0.0
         version: 2.0.0(graphql@16.12.0)
@@ -13973,7 +13973,7 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
       isomorphic-dompurify:
-        specifier: ^2.35.0
+        specifier: ^2.20.0
         version: 2.35.0(canvas@2.11.2)
       joi:
         specifier: 17.13.3
@@ -13988,14 +13988,14 @@ importers:
         specifier: 9.0.2
         version: 9.0.2
       juice:
-        specifier: ^11.1.0
+        specifier: ^11.0.0
         version: 11.1.0
       kafkajs:
         specifier: ^2.2.4
         version: 2.2.4
       kysely:
-        specifier: ^0.28.11
-        version: 0.28.11
+        specifier: ^0.27.2
+        version: 0.27.6
       lodash:
         specifier: 4.17.23
         version: 4.17.23
@@ -14006,13 +14006,13 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
       mjml:
-        specifier: ^4.18.0
+        specifier: ^4.15.3
         version: 4.18.0
       morgan:
         specifier: 1.10.1
         version: 1.10.1
       mysql2:
-        specifier: ^3.16.2
+        specifier: ^3.9.1
         version: 3.16.2
       natural:
         specifier: 6.12.0
@@ -14051,7 +14051,7 @@ importers:
         specifier: ^12.5.4
         version: 12.5.4
       pg-cursor:
-        specifier: ^2.17.0
+        specifier: ^2.11.0
         version: 2.17.0(pg@8.16.3)
       pgvector:
         specifier: 0.1.8
@@ -14062,9 +14062,6 @@ importers:
       pino-http:
         specifier: 10.5.0
         version: 10.5.0
-      pkcs11js:
-        specifier: ^2.1.6
-        version: 2.1.6
       prom-client:
         specifier: 15.1.3
         version: 15.1.3
@@ -14095,6 +14092,9 @@ importers:
       tesseract.js:
         specifier: 5.1.1
         version: 5.1.1
+      uWebSockets.js:
+        specifier: https://github.com/uNetworking/uWebSockets.js.git#v20.43.0
+        version: https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06
       uuid:
         specifier: 9.0.1
         version: 9.0.1
@@ -14125,7 +14125,7 @@ importers:
         version: 9.39.1
       '@graphql-codegen/cli':
         specifier: 5.0.7
-        version: 5.0.7(@fastify/websocket@11.2.0)(@types/node@20.19.27)(enquirer@2.4.1)(graphql@16.12.0)(typescript@5.9.3)
+        version: 5.0.7(@fastify/websocket@11.2.0)(@types/node@20.19.27)(enquirer@2.4.1)(graphql@16.12.0)(typescript@5.9.3)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
       '@graphql-codegen/introspection':
         specifier: 4.0.3
         version: 4.0.3(graphql@16.12.0)
@@ -14293,7 +14293,7 @@ importers:
         version: 9.0.0
       pg-mem:
         specifier: 3.0.5
-        version: 3.0.5(kysely@0.28.11)
+        version: 3.0.5(kysely@0.27.6)
       pptxgenjs:
         specifier: ^4.0.1
         version: 4.0.1
@@ -27493,6 +27493,7 @@ packages:
 
   '@graphql-tools/executor-graphql-ws@2.0.7':
     resolution: {integrity: sha512-J27za7sKF6RjhmvSOwOQFeNhNHyP4f4niqPnerJmq73OtLx9Y2PGOhkXOEB0PjhvPJceuttkD2O1yMgEkTGs3Q==}
+    version: 2.0.7
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
@@ -28721,8 +28722,8 @@ packages:
   '@kamilkisiela/fast-url-parser@1.1.4':
     resolution: {integrity: sha512-gbkePEBupNydxCelHCESvFSFM8XPh1Zs/OAVRW/rKpEqPAl5PbOM90Si8mv9bvnR53uPD2s/FiRxdvSejpRJew==}
 
-  '@kubernetes/client-node@1.4.0':
-    resolution: {integrity: sha512-Zge3YvF7DJi264dU1b3wb/GmzR99JhUpqTvp+VGHfwZT+g7EOOYNScDJNZwXy9cszyIGPIs0VHr+kk8e95qqrA==}
+  '@kubernetes/client-node@0.20.0':
+    resolution: {integrity: sha512-xxlv5GLX4FVR/dDKEsmi4SPeuB49aRc35stndyxcC73XnUEEwF39vXbROpHOirmDse8WE9vxOjABnSVS+jb7EA==}
 
   '@kwsites/file-exists@1.1.1':
     resolution: {integrity: sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw==}
@@ -33474,12 +33475,9 @@ packages:
       react: 19.2.1
       react-dom: 19.2.1
 
-  '@react-email/render@2.0.4':
-    resolution: {integrity: sha512-kht2oTFQ1SwrLpd882ahTvUtNa9s53CERHstiTbzhm6aR2Hbykp/mQ4tpPvsBGkKAEvKRlDEoooh60Uk6nHK1g==}
-    engines: {node: '>=20.0.0'}
-    peerDependencies:
-      react: 19.2.1
-      react-dom: 19.2.1
+  '@react-email/render@0.0.12':
+    resolution: {integrity: sha512-S8WRv/PqECEi6x0QJBj0asnAb5GFtJaHlnByxLETLkgJjc76cxMYDH4r9wdbuJ4sjkcbpwP3LPnVzwS+aIjT7g==}
+    engines: {node: '>=18.0.0'}
 
   '@react-leaflet/core@2.1.0':
     resolution: {integrity: sha512-Qk7Pfu8BSarKGqILj4x7bCSZ1pjuAPZ+qmRwH5S7mDS91VSbVVsJSrW4qA+GPrro8t69gFYVMWb1Zc4yFmPiVg==}
@@ -37247,9 +37245,6 @@ packages:
 
   '@types/statuses@2.0.6':
     resolution: {integrity: sha512-xMAgYwceFhRA2zY+XbEA7mxYbA093wdiW8Vu6gZPGWy9cmOyU9XesH1tNcEWsKFd5Vzrqx5T3D38PWx1FIIXkA==}
-
-  '@types/stream-buffers@3.0.8':
-    resolution: {integrity: sha512-J+7VaHKNvlNPJPEJXX/fKa9DZtR/xPMwuIbe+yNOwp1YB+ApUOBv2aUpEoBJEi8nJgbgs1x8e73ttg0r1rSUdw==}
 
   '@types/strip-bom@3.0.0':
     resolution: {integrity: sha512-xevGOReSYGM7g/kUBZzPqCrR/KYAo+F0yiPc85WFTJa0MSLtyFTVTU6cJu/aV4mid7IffDIWqo69THF2o4JiEQ==}
@@ -43398,10 +43393,10 @@ packages:
     peerDependencies:
       graphql: '>=15'
 
-  graphql-query-complexity@1.1.0:
-    resolution: {integrity: sha512-6sfAX+9CgkcPeZ7UiuBwgTGA+M1FYgHrQOXvORhQGd6SiaXbNVkLDcJ9ZSvNgzyChIfH0uPFFOY3Jm4wFZ4qEA==}
+  graphql-query-complexity@0.12.0:
+    resolution: {integrity: sha512-fWEyuSL6g/+nSiIRgIipfI6UXTI7bAxrpPlCY1c0+V3pAEUo1ybaKmSBgNr1ed2r+agm1plJww8Loig9y6s2dw==}
     peerDependencies:
-      graphql: ^15.0.0 || ^16.0.0
+      graphql: ^14.6.0 || ^15.0.0 || ^16.0.0
 
   graphql-redis-subscriptions@2.7.0:
     resolution: {integrity: sha512-IK4uCKx1UNhkcnG9lIqFWz9PpltSbuM8RygwGoB/e1HZMuKpAGeqqfHFeLKkQjjubvk4tAdUdx48AUkTAXJ17Q==}
@@ -43454,6 +43449,7 @@ packages:
 
   graphql-ws@6.0.6:
     resolution: {integrity: sha512-zgfER9s+ftkGKUZgc0xbx8T7/HMO4AV5/YuYiFc+AtgcO5T0v8AxYYNQ+ltzuzDZgNkYJaFspm5MMYLjQzrkmw==}
+    version: 6.0.6
     engines: {node: '>=20'}
     peerDependencies:
       '@fastify/websocket': ^10 || ^11
@@ -45432,6 +45428,10 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  jsonpath-plus@7.2.0:
+    resolution: {integrity: sha512-zBfiUPM5nD0YZSBT/o/fbCUlCcepMIdP0CJZxM1+KgA4f2T206f6VAg9e7mX35+KlMaIc5qXW34f3BnwJ3w+RA==}
+    engines: {node: '>=12.0.0'}
+
   jsonpointer@5.0.1:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
     engines: {node: '>=0.10.0'}
@@ -45568,6 +45568,10 @@ packages:
 
   kuromoji@0.1.2:
     resolution: {integrity: sha512-V0dUf+C2LpcPEXhoHLMAop/bOht16Dyr+mDiIE39yX3vqau7p80De/koFqpiTcL1zzdZlc3xuHZ8u5gjYRfFaQ==}
+
+  kysely@0.27.6:
+    resolution: {integrity: sha512-FIyV/64EkKhJmjgC0g2hygpBv5RNWVPyNCqSAD7eTCv6eFWNIi4PN1UvdSJGicN/o35bnevgis4Y0UDC0qi8jQ==}
+    engines: {node: '>=14.0.0'}
 
   kysely@0.28.11:
     resolution: {integrity: sha512-zpGIFg0HuoC893rIjYX1BETkVWdDnzTzF5e0kWXJFg5lE0k1/LfNWBejrcnOFu8Q2Rfq/hTDTU7XLUM8QOrpzg==}
@@ -47695,9 +47699,6 @@ packages:
   oauth-sign@0.9.0:
     resolution: {integrity: sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==}
 
-  oauth4webapi@3.8.3:
-    resolution: {integrity: sha512-pQ5BsX3QRTgnt5HxgHwgunIRaDXBdkT23tf8dfzmtTIL2LTpdmxgbpbBm0VgFWAIDlezQvQCTgnVIUmHupXHxw==}
-
   ob1@0.81.5:
     resolution: {integrity: sha512-iNpbeXPLmaiT9I5g16gFFFjsF3sGxLpYG2EGP3dfFB4z+l9X60mp/yRzStHhMtuNt8qmf7Ww80nOPQHngHhnIQ==}
     engines: {node: '>=18.18'}
@@ -47887,9 +47888,6 @@ packages:
 
   openid-client@5.7.1:
     resolution: {integrity: sha512-jDBPgSVfTnkIh71Hg9pRvtJc6wTwqjRkN88+gCFtYWrlP4Yx2Dsrow8uPi3qLr/aeymPF3o2+dS+wOpglK04ew==}
-
-  openid-client@6.8.1:
-    resolution: {integrity: sha512-VoYT6enBo6Vj2j3Q5Ec0AezS+9YGzQo1f5Xc42lreMGlfP4ljiXPKVDvCADh+XHCV/bqPu/wWSiCVXbJKvrODw==}
 
   opentracing@0.14.7:
     resolution: {integrity: sha512-vz9iS7MJ5+Bp1URw8Khvdyw1H/hGvzHWlKQ7eRrQojSCDL1/SrWfrY9QebLw97n2deyRtzHRC3MkQfVNUCo91Q==}
@@ -48554,10 +48552,6 @@ packages:
   pkce-challenge@5.0.1:
     resolution: {integrity: sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==}
     engines: {node: '>=16.20.0'}
-
-  pkcs11js@2.1.6:
-    resolution: {integrity: sha512-+t5jxzB749q8GaEd1yNx3l98xYuaVK6WW/Vjg1Mk1Iy5bMu/A5W4O/9wZGrpOknWF6lFQSb12FXX+eSNxdriwA==}
-    engines: {node: '>=18.0.0'}
 
   pkg-conf@2.1.0:
     resolution: {integrity: sha512-C+VUP+8jis7EsQZIhDYmS5qlNtjv2yP4SNtjXK9AP1ZcTRlnSfuumaTnRfYZnYgUUYVIKqL0fRvmUGDV2fmp6g==}
@@ -52803,6 +52797,10 @@ packages:
     resolution: {integrity: sha512-ya4mg/30vm+DOWfBg4YK3j2WD6TWtRkCbasOJr40CseYENzCUby/7rIvXA99JGsQHeNxLbnXdyLLxKSv3tauFw==}
     engines: {node: '>=12.17'}
 
+  uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06:
+    resolution: {tarball: https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06}
+    version: 20.43.0
+
   ua-parser-js@1.0.41:
     resolution: {integrity: sha512-LbBDqdIC5s8iROCUjMbW1f5dJQTEFB1+KO9ogbvlb3nm9n4YHa5p4KTvFPWvh2Hs8gZMBuiB1/8+pdfe/tDPug==}
     hasBin: true
@@ -54680,7 +54678,7 @@ snapshots:
       rxjs: 7.8.2
       tslib: 2.8.1
     optionalDependencies:
-      graphql-ws: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(ws@8.19.0)
+      graphql-ws: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)(ws@8.19.0)
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       subscriptions-transport-ws: 0.9.19(graphql@16.12.0)
@@ -61174,6 +61172,57 @@ snapshots:
       - uWebSockets.js
       - utf-8-validate
 
+  '@graphql-codegen/cli@5.0.7(@fastify/websocket@11.2.0)(@types/node@20.19.27)(enquirer@2.4.1)(graphql@16.12.0)(typescript@5.9.3)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)':
+    dependencies:
+      '@babel/generator': 7.28.5
+      '@babel/template': 7.27.2
+      '@babel/types': 7.28.5
+      '@graphql-codegen/client-preset': 4.8.3(graphql@16.12.0)
+      '@graphql-codegen/core': 4.0.2(graphql@16.12.0)
+      '@graphql-codegen/plugin-helpers': 5.1.1(graphql@16.12.0)
+      '@graphql-tools/apollo-engine-loader': 8.0.27(graphql@16.12.0)
+      '@graphql-tools/code-file-loader': 8.1.27(graphql@16.12.0)
+      '@graphql-tools/git-loader': 8.0.31(graphql@16.12.0)
+      '@graphql-tools/github-loader': 8.0.22(@types/node@20.19.27)(graphql@16.12.0)
+      '@graphql-tools/graphql-file-loader': 8.1.8(graphql@16.12.0)
+      '@graphql-tools/json-file-loader': 8.0.25(graphql@16.12.0)
+      '@graphql-tools/load': 8.1.7(graphql@16.12.0)
+      '@graphql-tools/prisma-loader': 8.0.17(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
+      '@graphql-tools/url-loader': 8.0.33(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
+      '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
+      '@whatwg-node/fetch': 0.10.13
+      chalk: 5.6.2
+      cosmiconfig: 8.3.6(typescript@5.9.3)
+      debounce: 1.2.1
+      detect-indent: 6.1.0
+      graphql: 16.12.0
+      graphql-config: 5.1.5(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(typescript@5.9.3)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
+      inquirer: 8.2.7(@types/node@20.19.27)
+      is-glob: 4.0.3
+      jiti: 1.21.7
+      json-to-pretty-yaml: 1.2.2
+      listr2: 4.0.5(enquirer@2.4.1)
+      log-symbols: 4.1.0
+      micromatch: 4.0.8
+      shell-quote: 1.8.3
+      string-env-interpolation: 1.0.1
+      ts-log: 2.2.7
+      tslib: 2.8.1
+      yaml: 2.8.2
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - '@fastify/websocket'
+      - '@types/node'
+      - bufferutil
+      - cosmiconfig-toml-loader
+      - crossws
+      - enquirer
+      - graphql-sock
+      - supports-color
+      - typescript
+      - uWebSockets.js
+      - utf-8-validate
+
   '@graphql-codegen/cli@5.0.7(@fastify/websocket@11.2.0)(@types/node@25.0.3)(enquirer@2.4.1)(graphql@16.12.0)(typescript@5.9.3)':
     dependencies:
       '@babel/generator': 7.28.5
@@ -61857,13 +61906,13 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@graphql-tools/executor-graphql-ws@2.0.7(@fastify/websocket@11.2.0)(graphql@16.12.0)':
+  '@graphql-tools/executor-graphql-ws@2.0.7(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)':
     dependencies:
       '@graphql-tools/executor-common': 0.0.6(graphql@16.12.0)
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
       '@whatwg-node/disposablestack': 0.0.6
       graphql: 16.12.0
-      graphql-ws: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(ws@8.19.0)
+      graphql-ws: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)(ws@8.19.0)
       isomorphic-ws: 5.0.0(ws@8.19.0)
       tslib: 2.8.1
       ws: 8.19.0
@@ -61880,7 +61929,7 @@ snapshots:
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
       '@whatwg-node/disposablestack': 0.0.6
       graphql: 16.12.0
-      graphql-ws: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(ws@8.19.0)
+      graphql-ws: 6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)(ws@8.19.0)
       isows: 1.0.7(ws@8.19.0)
       tslib: 2.8.1
       ws: 8.19.0
@@ -62067,7 +62116,7 @@ snapshots:
       '@babel/types': 7.29.0
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
       graphql: 16.12.0
-      tslib: 2.6.2
+      tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
@@ -62080,7 +62129,7 @@ snapshots:
       '@babel/types': 7.29.0
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
       graphql: 16.12.0
-      tslib: 2.6.2
+      tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
 
@@ -62102,7 +62151,7 @@ snapshots:
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
       graphql: 16.12.0
       resolve-from: 5.0.0
-      tslib: 2.6.2
+      tslib: 2.8.1
 
   '@graphql-tools/import@7.1.8(graphql@16.12.0)':
     dependencies:
@@ -62205,6 +62254,34 @@ snapshots:
   '@graphql-tools/prisma-loader@8.0.17(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)':
     dependencies:
       '@graphql-tools/url-loader': 8.0.33(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)
+      '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
+      '@types/js-yaml': 4.0.9
+      '@whatwg-node/fetch': 0.10.13
+      chalk: 5.6.2
+      debug: 4.4.3(supports-color@8.1.1)
+      dotenv: 16.6.1
+      graphql: 16.12.0
+      graphql-request: 6.1.0(graphql@16.12.0)
+      http-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.6
+      jose: 5.10.0
+      js-yaml: 4.1.1
+      lodash: 4.17.23
+      scuid: 1.1.0
+      tslib: 2.8.1
+      yaml-ast-parser: 0.0.43
+    transitivePeerDependencies:
+      - '@fastify/websocket'
+      - '@types/node'
+      - bufferutil
+      - crossws
+      - supports-color
+      - uWebSockets.js
+      - utf-8-validate
+
+  '@graphql-tools/prisma-loader@8.0.17(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)':
+    dependencies:
+      '@graphql-tools/url-loader': 8.0.33(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
       '@types/js-yaml': 4.0.9
       '@whatwg-node/fetch': 0.10.13
@@ -62343,7 +62420,30 @@ snapshots:
 
   '@graphql-tools/url-loader@8.0.33(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)':
     dependencies:
-      '@graphql-tools/executor-graphql-ws': 2.0.7(@fastify/websocket@11.2.0)(graphql@16.12.0)
+      '@graphql-tools/executor-graphql-ws': 2.0.7(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
+      '@graphql-tools/executor-http': 1.3.3(@types/node@20.19.27)(graphql@16.12.0)
+      '@graphql-tools/executor-legacy-ws': 1.1.24(graphql@16.12.0)
+      '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
+      '@graphql-tools/wrap': 10.1.4(graphql@16.12.0)
+      '@types/ws': 8.18.1
+      '@whatwg-node/fetch': 0.10.13
+      '@whatwg-node/promise-helpers': 1.3.2
+      graphql: 16.12.0
+      isomorphic-ws: 5.0.0(ws@8.19.0)
+      sync-fetch: 0.6.0-2
+      tslib: 2.8.1
+      ws: 8.19.0
+    transitivePeerDependencies:
+      - '@fastify/websocket'
+      - '@types/node'
+      - bufferutil
+      - crossws
+      - uWebSockets.js
+      - utf-8-validate
+
+  '@graphql-tools/url-loader@8.0.33(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)':
+    dependencies:
+      '@graphql-tools/executor-graphql-ws': 2.0.7(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
       '@graphql-tools/executor-http': 1.3.3(@types/node@20.19.27)(graphql@16.12.0)
       '@graphql-tools/executor-legacy-ws': 1.1.24(graphql@16.12.0)
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
@@ -62366,7 +62466,7 @@ snapshots:
 
   '@graphql-tools/url-loader@8.0.33(@fastify/websocket@11.2.0)(@types/node@25.0.3)(graphql@16.12.0)':
     dependencies:
-      '@graphql-tools/executor-graphql-ws': 2.0.7(@fastify/websocket@11.2.0)(graphql@16.12.0)
+      '@graphql-tools/executor-graphql-ws': 2.0.7(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
       '@graphql-tools/executor-http': 1.3.3(@types/node@25.0.3)(graphql@16.12.0)
       '@graphql-tools/executor-legacy-ws': 1.1.24(graphql@16.12.0)
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
@@ -63910,30 +64010,26 @@ snapshots:
 
   '@kamilkisiela/fast-url-parser@1.1.4': {}
 
-  '@kubernetes/client-node@1.4.0':
+  '@kubernetes/client-node@0.20.0':
     dependencies:
       '@types/js-yaml': 4.0.9
-      '@types/node': 24.10.9
-      '@types/node-fetch': 2.6.13
-      '@types/stream-buffers': 3.0.8
-      form-data: 4.0.5
-      hpagent: 1.2.0
+      '@types/node': 20.19.27
+      '@types/request': 2.48.13
+      '@types/ws': 8.18.1
+      byline: 5.0.0
       isomorphic-ws: 5.0.0(ws@8.19.0)
       js-yaml: 4.1.1
-      jsonpath-plus: 10.3.0
-      node-fetch: 3.3.2
-      openid-client: 6.8.1
+      jsonpath-plus: 7.2.0
+      request: 2.88.2
       rfc4648: 1.5.4
-      socks-proxy-agent: 8.0.5
       stream-buffers: 3.0.3
-      tar-fs: 3.1.1
+      tar: 7.5.7
+      tslib: 2.8.1
       ws: 8.19.0
+    optionalDependencies:
+      openid-client: 5.7.1
     transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
       - bufferutil
-      - react-native-b4a
-      - supports-color
       - utf-8-validate
 
   '@kwsites/file-exists@1.1.1':
@@ -70524,10 +70620,10 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@react-email/render@2.0.4(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@react-email/render@0.0.12':
     dependencies:
       html-to-text: 9.0.5
-      prettier: 3.7.4
+      js-beautify: 1.15.4
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
@@ -76931,10 +77027,6 @@ snapshots:
   '@types/stats.js@0.17.4': {}
 
   '@types/statuses@2.0.6': {}
-
-  '@types/stream-buffers@3.0.8':
-    dependencies:
-      '@types/node': 20.19.27
 
   '@types/strip-bom@3.0.0': {}
 
@@ -85592,6 +85684,30 @@ snapshots:
       - uWebSockets.js
       - utf-8-validate
 
+  graphql-config@5.1.5(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(typescript@5.9.3)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06):
+    dependencies:
+      '@graphql-tools/graphql-file-loader': 8.1.8(graphql@16.12.0)
+      '@graphql-tools/json-file-loader': 8.0.25(graphql@16.12.0)
+      '@graphql-tools/load': 8.1.7(graphql@16.12.0)
+      '@graphql-tools/merge': 9.1.6(graphql@16.12.0)
+      '@graphql-tools/url-loader': 8.0.33(@fastify/websocket@11.2.0)(@types/node@20.19.27)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)
+      '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
+      cosmiconfig: 8.3.6(typescript@5.9.3)
+      graphql: 16.12.0
+      jiti: 2.6.1
+      minimatch: 9.0.5
+      string-env-interpolation: 1.0.1
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - '@fastify/websocket'
+      - '@types/node'
+      - bufferutil
+      - crossws
+      - supports-color
+      - typescript
+      - uWebSockets.js
+      - utf-8-validate
+
   graphql-config@5.1.5(@fastify/websocket@11.2.0)(@types/node@25.0.3)(graphql@16.12.0)(typescript@5.9.3):
     dependencies:
       '@graphql-tools/graphql-file-loader': 8.1.8(graphql@16.12.0)
@@ -85638,7 +85754,7 @@ snapshots:
       lodash.merge: 4.6.2
       lodash.mergewith: 4.6.2
 
-  graphql-query-complexity@1.1.0(graphql@16.12.0):
+  graphql-query-complexity@0.12.0(graphql@16.12.0):
     dependencies:
       graphql: 16.12.0
       lodash.get: 4.4.2
@@ -85697,11 +85813,12 @@ snapshots:
     dependencies:
       graphql: 16.12.0
 
-  graphql-ws@6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(ws@8.19.0):
+  graphql-ws@6.0.6(@fastify/websocket@11.2.0)(graphql@16.12.0)(uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06)(ws@8.19.0):
     dependencies:
       graphql: 16.12.0
     optionalDependencies:
       '@fastify/websocket': 11.2.0
+      uWebSockets.js: https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06
       ws: 8.19.0
 
   graphql-yoga@5.7.0(graphql@16.12.0):
@@ -89420,6 +89537,8 @@ snapshots:
       '@jsep-plugin/regex': 1.0.4(jsep@1.4.0)
       jsep: 1.4.0
 
+  jsonpath-plus@7.2.0: {}
+
   jsonpointer@5.0.1: {}
 
   jsonschema@1.5.0: {}
@@ -89602,7 +89721,10 @@ snapshots:
       doublearray: 0.0.2
       zlibjs: 0.3.1
 
-  kysely@0.28.11: {}
+  kysely@0.27.6: {}
+
+  kysely@0.28.11:
+    optional: true
 
   langium@3.3.1:
     dependencies:
@@ -92412,8 +92534,6 @@ snapshots:
 
   oauth-sign@0.9.0: {}
 
-  oauth4webapi@3.8.3: {}
-
   ob1@0.81.5:
     dependencies:
       flow-enums-runtime: 0.0.6
@@ -92628,11 +92748,6 @@ snapshots:
       lru-cache: 6.0.0
       object-hash: 2.2.0
       oidc-token-hash: 5.2.0
-
-  openid-client@6.8.1:
-    dependencies:
-      jose: 6.1.3
-      oauth4webapi: 3.8.3
 
   opentracing@0.14.7: {}
 
@@ -93155,6 +93270,18 @@ snapshots:
 
   pg-int8@1.0.1: {}
 
+  pg-mem@3.0.5(kysely@0.27.6):
+    dependencies:
+      functional-red-black-tree: 1.0.1
+      immutable: 4.3.7
+      json-stable-stringify: 1.3.0
+      lru-cache: 6.0.0
+      moment: 2.30.1
+      object-hash: 2.2.0
+      pgsql-ast-parser: 12.0.1
+    optionalDependencies:
+      kysely: 0.27.6
+
   pg-mem@3.0.5(kysely@0.28.11):
     dependencies:
       functional-red-black-tree: 1.0.1
@@ -93424,8 +93551,6 @@ snapshots:
   pirates@4.0.7: {}
 
   pkce-challenge@5.0.1: {}
-
-  pkcs11js@2.1.6: {}
 
   pkg-conf@2.1.0:
     dependencies:
@@ -99005,6 +99130,8 @@ snapshots:
       typewise-core: 1.2.0
 
   typical@7.3.0: {}
+
+  uWebSockets.js@https://codeload.github.com/uNetworking/uWebSockets.js/tar.gz/1977b5039938ad863d42fc4958d48c17e5a1fa06: {}
 
   ua-parser-js@1.0.41: {}
 

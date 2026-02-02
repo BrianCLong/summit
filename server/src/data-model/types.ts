@@ -82,4 +82,9 @@ export interface ConnectorContext {
   pipelineKey: string;
   correlationId?: string;
   logger: any; // Using any for now to avoid logger dependency circularity
+  metrics?: any;
+  emitter?: any;
+  signal?: AbortSignal;
+  rateLimiter?: any;
+  stateStore?: any;
 }

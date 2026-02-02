@@ -1,4 +1,6 @@
-import { Pool, QueryResult } from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg;
+type QueryResult = any;
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../config/logger.js';
 import { 
@@ -150,7 +152,7 @@ export class OrchestratorPostgresStore {
       'SELECT id, name, type, status, last_decision, last_run, config FROM maestro_loops ORDER BY created_at DESC'
     );
     
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       type: row.type,
@@ -196,7 +198,7 @@ export class OrchestratorPostgresStore {
       'SELECT id, name, role, model, status, routing_weight, metrics FROM maestro_agents ORDER BY created_at DESC'
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       role: row.role,
@@ -291,7 +293,7 @@ export class OrchestratorPostgresStore {
       'SELECT id, name, hypothesis, status, variants, metrics, start_date, end_date FROM maestro_experiments ORDER BY created_at DESC'
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       hypothesis: row.hypothesis,
@@ -345,7 +347,7 @@ export class OrchestratorPostgresStore {
       'SELECT id, name, description, triggers, actions, is_enabled FROM maestro_playbooks ORDER BY created_at DESC'
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       description: row.description,
@@ -585,7 +587,7 @@ export class OrchestratorPostgresStore {
       [limit]
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: String(row.id),
       timestamp: new Date(row.created_at).toISOString(),
       actor: row.actor,

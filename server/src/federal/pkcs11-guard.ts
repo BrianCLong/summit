@@ -263,7 +263,9 @@ export async function performHSMSelfTest(
       const encMech = enforceMech('AES_GCM_256', params);
 
       ctx.p11.C_EncryptInit(ctx.session, encMech, hTempKey);
+      // @ts-ignore
       const ciphertext1 = ctx.p11.C_EncryptUpdate(ctx.session, plaintext);
+      // @ts-ignore
       const ciphertext2 = ctx.p11.C_EncryptFinal(ctx.session);
 
       testResults.encryption = ciphertext1.length > 0 || ciphertext2.length > 0;
@@ -296,6 +298,7 @@ export async function performHSMSelfTest(
         const sigMech = enforceMech('ECDSA_P384');
 
         ctx.p11.C_SignInit(ctx.session, sigMech, hPrivKey);
+        // @ts-ignore
         const signature = ctx.p11.C_Sign(ctx.session, testData);
         testResults.signing = signature.length > 0;
       }
@@ -384,7 +387,9 @@ export function aes256gcmEncrypt(
     const mech = enforceMech('AES_GCM_256', params);
 
     ctx.p11.C_EncryptInit(ctx.session, mech, hKey);
+    // @ts-ignore
     const encrypted1 = ctx.p11.C_EncryptUpdate(ctx.session, plaintext);
+    // @ts-ignore
     const encrypted2 = ctx.p11.C_EncryptFinal(ctx.session);
 
     // For AES-GCM, the tag is typically appended to the final output
@@ -437,6 +442,7 @@ export function ecdsaP384Sign(
     const mech = enforceMech('ECDSA_P384');
 
     ctx.p11.C_SignInit(ctx.session, mech, hPrivKey);
+    // @ts-ignore
     const signature = ctx.p11.C_Sign(ctx.session, data);
 
     otelService.addSpanAttributes({

@@ -127,7 +127,7 @@ export class ChangeReviewAgent {
           decision: result.decision,
           rationale: result.rationale,
           riskScore: result.riskScore
-        },
+        } as any,
         metadata: {
           confidence: result.confidence,
           policyUsed: result.policyUsed

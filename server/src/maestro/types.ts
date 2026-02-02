@@ -38,6 +38,18 @@ export interface MaestroPlaybook {
   triggers: string[];
   actions: string[];
   isEnabled: boolean;
+  signature?: string;
+  version?: string;
+}
+
+export type Playbook = MaestroPlaybook;
+
+export interface PlaybookSignature {
+  playbookId: string;
+  version: string;
+  signature: string;
+  signer: string;
+  timestamp: string;
 }
 
 export interface MaestroAuditEvent {
@@ -84,4 +96,79 @@ export interface ConsensusProposal<T = any> {
   status: 'voting' | 'approved' | 'rejected' | 'expired';
   deadline: string;
   createdAt: string;
+}
+
+export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval' | 'cancelled';
+
+export interface Task {
+  id: string;
+  runId: string;
+  parentTaskId?: string;
+  status: TaskStatus;
+  agent: {
+    id: string;
+    name: string;
+    kind: 'llm' | 'tool' | 'human';
+    modelId?: string;
+  };
+  kind: string;
+  description: string;
+  input: Record<string, any>;
+  output?: Record<string, any>;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Run {
+  id: string;
+  tenantId?: string;
+  user: { id: string };
+  requestText: string;
+  status?: 'pending' | 'running' | 'completed' | 'failed';
+  reasoningBudget?: any;
+  reasoningBudgetEvidence?: any;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface Artifact {
+  id: string;
+  runId: string;
+  taskId: string;
+  kind: 'text' | 'image' | 'data';
+  label: string;
+  data: any;
+  createdAt: string;
+}
+
+export interface RunCostSummary {
+  runId: string;
+  totalCostUSD: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  byModel: Record<string, {
+    costUSD: number;
+    inputTokens: number;
+    outputTokens: number;
+  }>;
+}
+
+export interface CostSample {
+  id: string;
+  runId: string;
+  timestamp: string;
+  cost: number;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export interface AuditEvent {
+  id: string;
+  timestamp: string;
+  tenantId: string;
+  userId: string;
+  action: string;
+  details: any;
 }

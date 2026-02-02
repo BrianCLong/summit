@@ -603,7 +603,7 @@ router.post(
     const tenantId = getTenantId(req);
     const assessment = await soxService!.performAssessment(tenantId, {
       sections: req.body.sections as any[],
-    });
+    } as any);
 
     logger.info(
       {

@@ -2,7 +2,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { createHmac, randomUUID } from 'crypto';
 import pino from 'pino';
 
-const logger = pino({ name: 'BillingAdapter' });
+const logger = (pino as any)({ name: 'BillingAdapter' });
 
 export interface UsageRecord {
   tenant_id: string;
