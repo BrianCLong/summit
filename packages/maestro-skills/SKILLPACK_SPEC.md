@@ -8,7 +8,7 @@ Each skill MUST reside in its own directory (e.g., `packages/maestro-skills/skil
 
 - **`skill.yaml`**: The canonical identity, interface, and security contract.
 - **`SKILL.md`**: Human-readable mission control documentation.
-- **`src/`**: TypeScript implementation of the skill. MUST implement the `StepPlugin` interface from `@maestro/core`.
+- **`src/`**: TypeScript implementation of the skill. MUST implement the `StepPlugin` interface from `@maestro/maestro-core`.
 - **`scripts/`**: Utility scripts for validation, testing, or maintenance.
 - **`tests/`**: Unit and integration tests.
 - **`package.json`**: Standard NPM package definition.
@@ -66,11 +66,11 @@ governance:
 The entry point (e.g., `src/index.ts`) must export a class implementing `StepPlugin`.
 
 ```typescript
-import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@maestro/core';
+import { StepPlugin, RunContext, WorkflowStep, StepExecution } from "@maestro/maestro-core";
 
 export class MySkill implements StepPlugin {
-    name = "my-skill";
-    // ... implementation
+  name = "my-skill";
+  // ... implementation
 }
 ```
 
@@ -79,10 +79,10 @@ export class MySkill implements StepPlugin {
 - **Signed Manifests**: Ensure supply-chain trust.
 - **Sandboxed Execution**: Skills execute within the Maestro Engine's context, with access limited by the manifest.
 - **Automatic Evidence**: The `StepPlugin` execution result's `metadata` field MUST include an "evidence bundle" containing:
-    - Input parameters used.
-    - Checksums of generated artifacts.
-    - Execution trace ID.
-    - Any policy decisions made during execution.
+  - Input parameters used.
+  - Checksums of generated artifacts.
+  - Execution trace ID.
+  - Any policy decisions made during execution.
 
 ## Governance Moats
 

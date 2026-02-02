@@ -24,7 +24,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {
-    "@maestro/core": "workspace:^",
+    "@intelgraph/maestro-core": "workspace:^",
     "chalk": "^5.6.2",
     "commander": "^14.0.1",
     "figlet": "^1.7.0",

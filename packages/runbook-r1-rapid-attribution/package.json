@@ -21,7 +21,7 @@
   "author": "IntelGraph CTI Team",
   "license": "PROPRIETARY",
   "dependencies": {
-    "@intelgraph/runbook-engine": "file:../../engine",
+    "@intelgraph/runbook-engine": "workspace:*",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
