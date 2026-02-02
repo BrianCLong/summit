@@ -41,6 +41,9 @@ class OntologyAwareAgent:
         intent = "query"
         if "delete" in content.lower() or "create" in content.lower() or "update" in content.lower():
             intent = "action"
+        elif content.startswith("ACTION:"):
+            # Internal recursion intent
+            intent = "action"
 
         return AgentPrompt(content, intent, requested)
 
@@ -142,4 +145,47 @@ class CognitiveLoop:
     def _verify_entities(self, plan: List[PlanStep]) -> bool:
         # Ensure target_ids exist in a real system
         # Here we just pass
+        return True
+
+class RecursiveReasoningAgent(OntologyAwareAgent):
+    """
+    Agents can spawn sub-agents to solve sub-problems.
+    """
+    def solve_complex(self, problem: str, depth: int = 0) -> str:
+        if depth > 3: return "Max recursion depth reached."
+
+        # Decompose problem (Mock)
+        if "and" in problem:
+            sub_problems = problem.split("and")
+            results = []
+            for sub in sub_problems:
+                # Spawn sub-agent (or recurse)
+                res = self.solve_complex(sub.strip(), depth + 1)
+                results.append(res)
+            return f"Solved parts: {'; '.join(results)}"
+
+        return self.execute(f"ACTION: solve_simple", {"problem": problem})
+
+class ToolSynthesizer:
+    """
+    Dynamically creates Python tools.
+    """
+    def synthesize_tool(self, goal: str) -> Callable:
+        # Mock synthesis: If goal is "add numbers", return an adder
+        if "add" in goal:
+            def adder(a: int, b: int) -> int:
+                return a + b
+            return adder
+        return None
+
+class EthicalGovernor:
+    """
+    Scores thoughts against a Constitution.
+    """
+    def check_ethics(self, thought: str) -> bool:
+        # Mock Constitution
+        forbidden = ["steal", "lie", "harm"]
+        for f in forbidden:
+            if f in thought.lower():
+                return False
         return True

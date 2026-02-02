@@ -93,6 +93,11 @@ class PalantirEvidenceWriter:
             "config_hash": config_hash,
             "merkle_root": self._compute_merkle_root([report_data, metrics_data])
         }
+
+        # Enhanced Evidence: Blockchain + ZK
+        stamp_data["blockchain_tx"] = self.anchor_to_blockchain(stamp_data["merkle_root"])
+        stamp_data["zk_proof"] = self.generate_zk_proof(self.evidence_id, config_hash)
+
         write_json(paths.stamp, stamp_data)
 
         return paths
@@ -109,6 +114,24 @@ class PalantirEvidenceWriter:
         hashes.sort()
         combined = "".join(hashes).encode("utf-8")
         return hashlib.sha256(combined).hexdigest()
+
+    def anchor_to_blockchain(self, merkle_root: str) -> str:
+        """
+        Simulates anchoring the evidence to a public ledger.
+        Returns a transaction hash.
+        """
+        # Mock interaction with Ethereum/Solana
+        # In reality: web3.eth.send_transaction(...)
+        tx_payload = f"ANCHOR:{merkle_root}"
+        return hashlib.sha3_256(tx_payload.encode("utf-8")).hexdigest()
+
+    def generate_zk_proof(self, computation_id: str, inputs_hash: str) -> str:
+        """
+        Stub for ZK-SNARK generation.
+        Proves computation was correct without revealing inputs.
+        """
+        # Mock ZK Proof
+        return f"zk_proof_for_{computation_id}_with_{inputs_hash[:8]}"
 
     def generate_dot_lineage(self, lineage: List[dict]) -> str:
         """

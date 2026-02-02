@@ -141,3 +141,72 @@ class TemporalGraphEngine:
         # Simplistic implementation finding any 2 valid nodes
         if len(self.nodes) < 2: return []
         return [[self.nodes[0].id, self.nodes[1].id]]
+
+class HyperGraph:
+    """
+    Advanced Gotham Superset: Hyperedges + Probabilistic Edges + Time Travel.
+    """
+    def __init__(self):
+        self.snapshots: Dict[str, List[Dict]] = {} # time -> [edges]
+        self.entities: Dict[str, set] = {} # canonical_id -> {aliases}
+
+    def add_hyperedge(self, source_ids: List[str], type: str, confidence: float, timestamp: str):
+        """
+        Records an N-way relationship with confidence.
+        """
+        edge = {
+            "sources": source_ids,
+            "type": type,
+            "confidence": confidence,
+            "timestamp": timestamp
+        }
+        if timestamp not in self.snapshots:
+            self.snapshots[timestamp] = []
+        self.snapshots[timestamp].append(edge)
+
+    def resolve_entities(self, raw_name: str) -> str:
+        """
+        Entity Resolution: Merges similar names.
+        """
+        # 1. Exact Match
+        for canonical, aliases in self.entities.items():
+            if raw_name in aliases:
+                return canonical
+
+        # 2. Fuzzy Match (Jaro-Winkler mock)
+        for canonical in self.entities:
+            # Simple substring matching for mock
+            if canonical.lower() in raw_name.lower() or raw_name.lower() in canonical.lower():
+                self.entities[canonical].add(raw_name)
+                return canonical
+            # Handle "John S." vs "John Smith"
+            if raw_name.endswith(".") and raw_name[:-1].lower() in canonical.lower():
+                self.entities[canonical].add(raw_name)
+                return canonical
+
+        # 3. Create New
+        self.entities[raw_name] = {raw_name}
+        return raw_name
+
+    def time_travel_query(self, query_time: str, min_confidence: float = 0.8) -> List[Dict]:
+        """
+        Returns the graph state as it existed at `query_time`.
+        """
+        # In a real system, this would be an interval tree
+        # Here we just look for exact snapshot or previous
+        valid_edges = []
+        sorted_times = sorted(self.snapshots.keys())
+
+        target_snapshot = None
+        for t in sorted_times:
+            if t <= query_time:
+                target_snapshot = t
+            else:
+                break
+
+        if target_snapshot:
+            for edge in self.snapshots[target_snapshot]:
+                if edge["confidence"] >= min_confidence:
+                    valid_edges.append(edge)
+
+        return valid_edges
