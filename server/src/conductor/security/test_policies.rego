@@ -50,16 +50,17 @@ mock_user_blocked_location := {
 # Test cases for RBAC
 
 test_viewer_can_preview if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,
     "action": "preview_routing",
+    "expert": "LLM_LIGHT",
     "task": "simple query without PII"
   }
   allow with input as test_input
 }
 
 test_viewer_cannot_conduct_osint if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,
     "action": "conduct",
     "task": "OSINT query", 
@@ -69,7 +70,7 @@ test_viewer_cannot_conduct_osint if {
 }
 
 test_analyst_can_conduct_graph if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_analyst,
     "action": "conduct",
     "task": "graph analysis query",
@@ -79,7 +80,7 @@ test_analyst_can_conduct_graph if {
 }
 
 test_admin_can_conduct_osint if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_admin,
     "action": "conduct", 
     "task": "OSINT investigation",
@@ -91,34 +92,34 @@ test_admin_can_conduct_osint if {
 # Test cases for PII detection
 
 test_pii_ssn_detected if {
-  test_input := {"task": "Find user with SSN 123-45-6789"}
+  test_input := { "mock_hour": 12,"task": "Find user with SSN 123-45-6789"}
   contains_pii with input as test_input
 }
 
 test_pii_email_detected if {
-  test_input := {"task": "Contact john.doe@example.com for information"}
+  test_input := { "mock_hour": 12,"task": "Contact john.doe@example.com for information"}
   contains_pii with input as test_input
 }
 
 test_pii_phone_detected if {
-  test_input := {"task": "Call (555) 123-4567 for details"}
+  test_input := { "mock_hour": 12,"task": "Call (555) 123-4567 for details"}
   contains_pii with input as test_input
 }
 
 test_pii_credit_card_detected if {
-  test_input := {"task": "Process payment for 4111-1111-1111-1111"}
+  test_input := { "mock_hour": 12,"task": "Process payment for 4111-1111-1111-1111"}
   contains_pii with input as test_input
 }
 
 test_no_pii_clean_text if {
-  test_input := {"task": "Analyze general market trends"}
+  test_input := { "mock_hour": 12,"task": "Analyze general market trends"}
   not contains_pii with input as test_input
 }
 
 # Test cases for cost limits
 
 test_cost_within_budget if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_analyst,
     "action": "conduct",
     "task": "simple query",
@@ -128,7 +129,7 @@ test_cost_within_budget if {
 }
 
 test_cost_exceeds_budget if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": {
       "id": "poor-user",
       "roles": ["analyst"],
@@ -149,7 +150,7 @@ test_cost_exceeds_budget if {
 # Test cases for rate limiting
 
 test_rate_within_limits if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": {
       "id": "normal-user",
       "roles": ["analyst"],
@@ -166,7 +167,7 @@ test_rate_within_limits if {
 }
 
 test_rate_exceeds_limits if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": {
       "id": "heavy-user",
       "roles": ["analyst"],
@@ -185,7 +186,7 @@ test_rate_exceeds_limits if {
 # Test cases for geographic restrictions
 
 test_geographic_access_allowed if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_analyst,
     "action": "conduct",
     "task": "analysis query"
@@ -194,7 +195,7 @@ test_geographic_access_allowed if {
 }
 
 test_geographic_access_blocked if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_blocked_location,
     "action": "conduct",
     "task": "analysis query"
@@ -205,7 +206,7 @@ test_geographic_access_blocked if {
 # Test cases for business hours
 
 test_business_hours_emergency_user if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": {
       "id": "emergency-user",
       "roles": ["emergency"],
@@ -224,7 +225,7 @@ test_business_hours_emergency_user if {
 # Test cases for sensitive data access
 
 test_sensitive_data_admin_allowed if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_admin,
     "action": "conduct",
     "task": "PII analysis"
@@ -233,7 +234,7 @@ test_sensitive_data_admin_allowed if {
 }
 
 test_sensitive_data_viewer_denied if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,
     "action": "conduct", 
     "task": "PII analysis"
@@ -244,7 +245,7 @@ test_sensitive_data_viewer_denied if {
 # Test cases for expert access
 
 test_graph_access_with_permission if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_analyst,
     "expert": "GRAPH_TOOL"
   }
@@ -252,7 +253,7 @@ test_graph_access_with_permission if {
 }
 
 test_osint_access_without_permission if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,
     "expert": "OSINT_TOOL"
   }
@@ -260,7 +261,7 @@ test_osint_access_without_permission if {
 }
 
 test_files_access_with_permission if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_analyst,
     "expert": "FILES_TOOL"
   }
@@ -268,7 +269,7 @@ test_files_access_with_permission if {
 }
 
 test_llm_access_allowed if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,
     "expert": "LLM_LIGHT"
   }
@@ -295,7 +296,7 @@ test_cost_estimation_llm_heavy if {
 # Test cases for complete authorization flow
 
 test_complete_authorization_success if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_analyst,
     "action": "conduct",
     "task": "analyze market trends",
@@ -305,7 +306,7 @@ test_complete_authorization_success if {
 }
 
 test_complete_authorization_pii_blocked if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,  # Low clearance
     "action": "conduct",
     "task": "find user with email john.doe@example.com",
@@ -315,7 +316,7 @@ test_complete_authorization_pii_blocked if {
 }
 
 test_complete_authorization_role_blocked if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,
     "action": "admin_operations",
     "task": "system administration"
@@ -324,7 +325,7 @@ test_complete_authorization_role_blocked if {
 }
 
 test_complete_authorization_geo_blocked if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_blocked_location,
     "action": "conduct",
     "task": "simple query",
@@ -336,7 +337,7 @@ test_complete_authorization_geo_blocked if {
 # Test cases for emergency override
 
 test_emergency_override_allowed if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": {
       "id": "emergency-user",
       "roles": ["emergency"],
@@ -358,17 +359,17 @@ test_emergency_override_allowed if {
 # Test cases for audit requirements
 
 test_audit_required_admin_ops if {
-  test_input := {"action": "admin_operations"}
+  test_input := { "mock_hour": 12,"action": "admin_operations"}
   audit_required with input as test_input
 }
 
 test_audit_required_pii if {
-  test_input := {"task": "query with SSN 123-45-6789"}
+  test_input := { "mock_hour": 12,"task": "query with SSN 123-45-6789"}
   audit_required with input as test_input
 }
 
 test_audit_required_high_cost if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "task": "extremely complex analysis requiring extensive processing and multiple expert consultations with detailed reporting",
     "expert": "LLM_HEAVY"
   }
@@ -376,19 +377,19 @@ test_audit_required_high_cost if {
 }
 
 test_audit_required_osint if {
-  test_input := {"expert": "OSINT_TOOL"}
+  test_input := { "mock_hour": 12,"expert": "OSINT_TOOL"}
   audit_required with input as test_input
 }
 
 # Test cases for warnings
 
 test_warnings_pii_detected if {
-  test_input := {"task": "contact user at john.doe@example.com"}
+  test_input := { "mock_hour": 12,"task": "contact user at john.doe@example.com"}
   count(warnings) > 0 with input as test_input
 }
 
 test_warnings_high_cost if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "task": "extremely detailed complex analysis requiring extensive processing",
     "expert": "LLM_HEAVY"
   }
@@ -398,7 +399,7 @@ test_warnings_high_cost if {
 # Integration tests combining multiple conditions
 
 test_integration_analyst_graph_query if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_analyst,
     "action": "conduct",
     "task": "find connections between entities A and B",
@@ -418,7 +419,7 @@ test_integration_analyst_graph_query if {
 }
 
 test_integration_viewer_restricted_access if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_viewer,
     "action": "conduct", 
     "task": "gather intelligence on target organization",
@@ -431,7 +432,7 @@ test_integration_viewer_restricted_access if {
 }
 
 test_integration_pii_high_clearance if {
-  test_input := {
+  test_input := { "mock_hour": 12,
     "user": mock_user_admin,  # High clearance
     "action": "conduct",
     "task": "investigate fraud case involving SSN 123-45-6789",

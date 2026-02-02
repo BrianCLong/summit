@@ -4,7 +4,7 @@ Comprehensive Demo of Revolutionary Misinformation Defense Capabilities
 
 This script demonstrates the most powerful and valuable innovations in misinformation defense:
 1. Cognitive Dissonance Modeling
-2. Quantum-Inspired Information Analysis  
+2. Quantum-Inspired Information Analysis
 3. Neurosymbolic Reasoning with Artificial Consciousness
 """
 
@@ -37,13 +37,13 @@ def demo_cognitive_dissonance_analysis():
 
     print("Analyzing content for cognitive dissonance potential:")
     print(f"Content: {content}")
-    
+
     # Analyze for cognitive impact
     result = cognitive_system.analyze_content_for_cognitive_impact(
-        content, 
+        content,
         target_audience=["vaccine_skeptical", "health_conscious"]
     )
-    
+
     print(f"\nPredicted Dissonance Score: {result['predicted_dissonance_score']:.3f}")
     print(f"High Risk Audiences: {result['high_risk_audiences']}")
     print(f"Recommended Mitigation: {result['recommended_mitigation']}")
@@ -68,21 +68,21 @@ def demo_quantum_inspired_analysis():
 
     print("Analyzing content with quantum-inspired methods:")
     print(f"Content: {content[:100]}...")
-    
+
     # Assess threat using quantum methods
     result = quantum_system.assess_threat_using_quantum_methods(content)
-    
+
     print(f"\nInfo ID: {result['info_id']}")
     print(f"Threat Score: {result['threat_score']:.3f}")
     print(f"Recommended Action: {result['recommended_action']}")
-    
+
     print("\nQuantum Properties:")
     for prop, value in result['quantum_properties'].items():
         if isinstance(value, float):
             print(f"  {prop}: {value:.3f}")
         else:
             print(f"  {prop}: {value}")
-    
+
     print("\nMisinfo Propensity Analysis:")
     for prop, value in result['misinfo_propensity'].items():
         if isinstance(value, float):
@@ -104,25 +104,25 @@ def demo_neurosymbolic_consciousness_analysis():
     consciousness_system = platform["neurosymbolic_consciousness_system"]
 
     # Example content to analyze
-    content = ("Everyone knows that climate change is the biggest hoax ever perpetrated on the public. " 
+    content = ("Everyone knows that climate change is the biggest hoax ever perpetrated on the public. "
                "Scientists all agree that the Earth's climate has always changed and this is just a natural cycle. "
                "Only naive people believe in this scam.")
 
     print("Analyzing content with neurosymbolic consciousness modeling:")
     print(f"Content: {content[:100]}...")
-    
+
     # Assess content with consciousness modeling
     result = consciousness_system.assess_content_with_consciousness_modeling(content)
-    
+
     print(f"\nAwareness Level: {result['consciousness_state']['awareness_level']:.3f}")
     print(f"Cognitive Load: {result['consciousness_state']['cognitive_load']:.3f}")
     print(f"Attended Elements: {result['consciousness_state']['attended_elements']}")
     print(f"Working Memory Load: {result['consciousness_state']['working_memory_load']}")
-    
+
     print(f"\nThreat Score: {result['threat_score']:.3f}")
     print(f"Recommendation: {result['recommendation']}")
     print(f"Confidence in Assessment: {result['confidence_in_assessment']:.3f}")
-    
+
     print(f"\nMisinformation Signatures:")
     for category, signatures in result['misinformation_signatures'].items():
         if signatures:
@@ -152,32 +152,32 @@ def demo_integrated_advanced_analysis():
 
     print("Running integrated advanced analysis combining:")
     print("- Cognitive Dissonance Modeling")
-    print("- Quantum-Inspired Analysis") 
+    print("- Quantum-Inspired Analysis")
     print("- Neurosymbolic Consciousness Modeling")
     print(f"\nAnalyzing content: '{content_text[0][:60]}...'")
-    
+
     # Run integrated analysis
     content_dict = {"text": content_text}
     results = detector.detect_with_advanced_analysis(content_dict)
-    
+
     print(f"\nIntegrated Threat Score: {results['integrated_threat_score']:.3f}")
     print(f"Unified Recommendation: {results['unified_recommendation']}")
     print(f"Confidence in Assessment: {results['confidence_in_integrated_assessment']:.3f}")
-    
+
     print(f"\nCognitive Analysis Results:")
     cognitive_results = results['cognitive_analysis']
     if 'error' not in cognitive_results:
         print(f"  Dissonance Score: {cognitive_results.get('dissonance_score', 0.0):.3f}")
         print(f"  Potential Conflicts: {cognitive_results.get('potential_conflicts', 0)}")
         print(f"  Emotional Manipulation Indicators: {cognitive_results.get('emotional_manipulation_indicators', 0)}")
-    
+
     print(f"\nQuantum Analysis Results:")
     quantum_results = results['quantum_analysis']
     if 'error' not in quantum_results:
         print(f"  Avg. Entanglement Potential: {quantum_results.get('avg_entanglement_potential', 0.0):.3f}")
         print(f"  Coherence Metrics Count: {len(quantum_results.get('coherence_metrics', []))}")
         print(f"  Quantum Signature Anomalies: {len(quantum_results.get('quantum_signature_anomalies', []))}")
-    
+
     print(f"\nConsciousness Analysis Results:")
     consciousness_results = results['consciousness_analysis']
     if 'error' not in consciousness_results:
@@ -208,13 +208,13 @@ def demo_reflective_consciousness_mode():
 
     print("Engaging reflective consciousness mode for deep analysis:")
     print(f"Content: {complex_content[:100]}...")
-    
+
     # Engage reflective mode
     reflection_result = consciousness_system.engage_reflective_mode(complex_content, reflection_depth=2)
-    
+
     print(f"\nInitial Threat Score: {reflection_result['threat_score']:.3f}")
     print(f"Final Recommendation: {reflection_result['recommendation']}")
-    
+
     if 'reflection_process' in reflection_result:
         print(f"\nReflection Process:")
         print(f"  Depth Achieved: {reflection_result['reflection_process']['depth_achieved']}")
@@ -240,15 +240,15 @@ def demo_conscious_dialogue():
     print("Initiating conscious dialogue between conflicting contents:")
     print(f"Content 1: {content1}")
     print(f"Content 2: {content2}")
-    
+
     # Initiate conscious dialogue
     dialogue_result = consciousness_system.initiate_conscious_dialogue(content1, content2)
-    
+
     print(f"\nDialogue Analysis:")
     print(f"  Agreement Ratio: {dialogue_result['dialogue_analysis']['agreement_ratio']:.3f}")
     print(f"  Disagreement Ratio: {dialogue_result['dialogue_analysis']['disagreement_ratio']:.3f}")
     print(f"  Dialogue Type: {dialogue_result['dialogue_analysis']['dialogue_type']}")
-    
+
     print(f"\nCommon Ground: {len(dialogue_result['common_ground'])} concepts")
     print(f"Points of Tension: {len(dialogue_result['point_of_tension'])}")
     print(f"Synthesis Opportunities: {len(dialogue_result['synthesis_opportunity'])}")

@@ -115,6 +115,11 @@ def create_parser() -> argparse.ArgumentParser:
     advanced_parser.add_argument("--skip-quantum", action="store_true", help="Skip quantum-inspired analysis")
     advanced_parser.add_argument("--skip-consciousness", action="store_true", help="Skip consciousness modeling analysis")
 
+    # Multi-dimensional analysis subcommand
+    multidim_parser = subparsers.add_parser("multidim", help="Run multi-dimensional analysis with all techniques")
+    multidim_parser.add_argument("--text", help="Text content to analyze with multi-dimensional techniques")
+    multidim_parser.add_argument("--file", help="File to analyze with multi-dimensional techniques")
+
     return parser
 
 
@@ -482,6 +487,84 @@ def run_advanced_analysis(args: argparse.Namespace, platform: dict[str, Any]) ->
         return 1
 
 
+def run_multidimensional_analysis(args: argparse.Namespace, platform: dict[str, Any]) -> int:
+    """
+    Run multi-dimensional analysis with all advanced techniques
+    """
+    setup_logging(args.log_level)
+    logger = logging.getLogger(__name__)
+
+    try:
+        logger.info("Starting multi-dimensional analysis with all advanced techniques...")
+
+        detector = platform["detector"]
+
+        content_dict = {}
+
+        if args.text:
+            content_dict["text"] = [args.text]
+        elif args.file:
+            # Analyze file (determine type from extension)
+            file_path = Path(args.file)
+            if not file_path.exists():
+                logger.error(f"File not found: {file_path}")
+                return 1
+
+            # Determine file type
+            suffix = file_path.suffix.lower()
+
+            if suffix in [".txt", ".md"]:
+                # Text file
+                with open(file_path, encoding="utf-8") as f:
+                    content = f.read()
+                content_dict["text"] = [content]
+                logger.info("Text file loaded for multi-dimensional analysis")
+
+            elif suffix in [".jpg", ".jpeg", ".png", ".gif"]:
+                # Image file
+                content_dict["image"] = [str(file_path)]
+                logger.info("Image file loaded for multi-dimensional analysis")
+
+            elif suffix in [".mp3", ".wav", ".flac"]:
+                # Audio file
+                content_dict["audio"] = [str(file_path)]
+                logger.info("Audio file loaded for multi-dimensional analysis")
+
+            elif suffix in [".mp4", ".avi", ".mov"]:
+                # Video file
+                content_dict["video"] = [str(file_path)]
+                logger.info("Video file loaded for multi-dimensional analysis")
+
+            else:
+                logger.error(f"Unsupported file type: {suffix}")
+                return 1
+        else:
+            logger.error("Either --text or --file must be specified")
+            return 1
+
+        # Run multi-dimensional analysis with all techniques
+        results = detector.detect_with_multi_dimensional_analysis(
+            content_dict=content_dict
+        )
+
+        print("Multi-Dimensional Analysis Results:")
+        print(json.dumps(results, indent=2, default=str))
+        print("\nDetailed Multi-Dimensional Summary:")
+        print(f"Integrated Threat Score: {results.get('integrated_threat_score', 0.0):.3f}")
+        print(f"Multi-Dimensional Score: {results.get('multi_dimensional_score', 0.0):.3f}")
+        print(f"Dimensional Consistency: {results.get('dimensional_consistency', 0.0):.3f}")
+        print(f"Unified Recommendation: {results.get('unified_recommendation', 'PENDING')}")
+        print(f"Confidence in Assessment: {results.get('confidence_in_integrated_assessment', 0.0):.3f}")
+
+        logger.info("Multi-dimensional analysis completed")
+
+        return 0
+
+    except Exception as e:
+        logger.error(f"Error during multi-dimensional analysis: {e!s}", exc_info=True)
+        return 1
+
+
 def main() -> int:
     """
     Main entry point for the application
@@ -512,6 +595,8 @@ def main() -> int:
         return run_bidirectional_detection(args, platform)
     elif args.command == "advanced":
         return run_advanced_analysis(args, platform)
+    elif args.command == "multidim":
+        return run_multidimensional_analysis(args, platform)
     else:
         print(f"Unknown command: {args.command}")
         return 1

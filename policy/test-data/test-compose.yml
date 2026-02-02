@@ -1,0 +1,26 @@
+services:
+  good-service:
+    image: nginx:1.21.6@sha256:2834dc507516af02784808c5f48b7cbe38b8ed5d0f4837f16e78d00deb7e7767
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    cap_drop:
+      - ALL
+    networks:
+      - app-network
+
+  bad-service:
+    image: redis:latest # Uses :latest tag
+    privileged: true # Privileged mode
+    user: "0" # Root user
+    ports:
+      - "0.0.0.0:6379:6379" # Binds to all interfaces
+
+networks:
+  app-network:
+    driver: bridge

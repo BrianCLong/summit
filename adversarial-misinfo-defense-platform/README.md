@@ -155,6 +155,9 @@ python main.py advanced --text "Complex misinformation content here"
 
 # Skip specific analysis components during advanced analysis
 python main.py advanced --text "Content to analyze" --skip-cognitive --skip-quantum
+
+# Run multi-dimensional analysis with all techniques integrated
+python main.py multidim --text "Highly complex content requiring full analysis"
 ```
 
 ## Requirements

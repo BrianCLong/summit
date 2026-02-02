@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conductor-server
+  namespace: conductor
+spec:
+  template:
+    spec:
+      containers:
+        - name: server
+          image: conductor-server:v1.0.0
+          securityContext:
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4000
