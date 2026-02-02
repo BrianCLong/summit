@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Branch Protection Audit Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "target_branch",
+    "state"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "enum": [1] },
+    "kind": { "type": "string", "const": "branch_protection_audit" },
+    "target_branch": { "type": "string", "minLength": 1 },
+    "state": {
+      "type": "string",
+      "enum": [
+        "VERIFIED_MATCH",
+        "VERIFIED_DRIFT",
+        "UNVERIFIABLE_PERMISSIONS",
+        "UNVERIFIABLE_RATE_LIMIT",
+        "UNVERIFIABLE_ERROR"
+      ]
+    },
+    "diff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["missing_in_github", "extra_in_github", "strict_mismatch"],
+      "properties": {
+        "missing_in_github": { "type": "array", "items": { "type": "string" } },
+        "extra_in_github": { "type": "array", "items": { "type": "string" } },
+        "strict_mismatch": { "type": "boolean" }
+      }
+    },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "http_status"],
+      "properties": {
+        "code": { "type": "string" },
+        "http_status": { "oneOf": [{ "type": "integer" }, { "type": "null" }] }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "const": "VERIFIED_DRIFT" } } },
+      "then": { "required": ["diff"], "properties": { "diff": {} } }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "UNVERIFIABLE_PERMISSIONS",
+              "UNVERIFIABLE_RATE_LIMIT",
+              "UNVERIFIABLE_ERROR"
+            ]
+          }
+        }
+      },
+      "then": { "required": ["error"], "properties": { "error": {} } }
+    }
+  ]
+}

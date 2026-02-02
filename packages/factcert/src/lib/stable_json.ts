@@ -1,21 +1,14 @@
-export function stableStringify(obj: any): string {
-  if (obj === undefined) return '';
-  if (obj === null) return 'null';
+import stringify from 'fast-json-stable-stringify';
 
-  if (typeof obj !== 'object' || obj === null) {
-    return JSON.stringify(obj);
+/**
+ * Deterministically stringify a JSON object.
+ * Keys are sorted.
+ * @param data The data to stringify.
+ * @returns The stable JSON string.
+ */
+export function stableJson(data: unknown): string {
+  if (data === undefined) {
+    return ''; // Or throw error? For now empty string seems safe for hashing empty.
   }
-
-  if (Array.isArray(obj)) {
-    return '[' + obj.map(stableStringify).join(',') + ']';
-  }
-
-  const keys = Object.keys(obj).sort();
-  const parts = keys.map(key => {
-    const val = stableStringify(obj[key]);
-    if (val === '') return null; // JSON.stringify omits undefined properties
-    return JSON.stringify(key) + ':' + val;
-  }).filter(x => x !== null);
-
-  return '{' + parts.join(',') + '}';
+  return stringify(data);
 }

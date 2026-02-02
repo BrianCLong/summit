@@ -1,75 +1,95 @@
 import { createHash } from 'node:crypto';
-import { stableStringify } from './stable_json.js';
+import { stableJson } from './stable_json.js';
 
-export interface ChainEvent {
-  seq: number;
+export interface ChainEvent<T = unknown> {
+  index: number;
   prev_hash: string;
-  type: string;
-  payload: any;
-  event_hash: string;
+  data: T;
+  hash: string;
 }
 
 export class HashChain {
   private events: ChainEvent[] = [];
 
-  constructor(events?: ChainEvent[]) {
-    if (events && events.length > 0) {
-      this.events = events;
-    } else {
-      // Genesis block
-      this.events.push({
-        seq: 0,
-        prev_hash: '',
-        type: 'GENESIS',
-        payload: {},
-        event_hash: '0'.repeat(64)
-      });
-    }
+  constructor(initialEvents: ChainEvent[] = []) {
+    this.events = initialEvents;
   }
 
-  addEvent(type: string, payload: any): ChainEvent {
-    const lastEvent = this.events[this.events.length - 1];
-    const seq = lastEvent.seq + 1;
-    const prev_hash = lastEvent.event_hash;
-
-    // Hash content: seq + prev_hash + type + stable_payload
-    const content = `${seq}:${prev_hash}:${type}:${stableStringify(payload)}`;
-    const event_hash = createHash('sha256').update(content).digest('hex');
-
-    const event: ChainEvent = {
-      seq,
-      prev_hash,
-      type,
-      payload,
-      event_hash
-    };
-
-    this.events.push(event);
-    return event;
+  get length(): number {
+    return this.events.length;
   }
 
-  getChain(): ChainEvent[] {
+  get allEvents(): ChainEvent[] {
     return this.events;
   }
 
+  get lastHash(): string {
+    return this.events.length > 0
+      ? this.events[this.events.length - 1].hash
+      : '0000000000000000000000000000000000000000000000000000000000000000'; // Genesis hash (32 bytes hex)
+  }
+
+  /**
+   * Add a new event to the chain.
+   * @param data The event data.
+   * @returns The created event.
+   */
+  addEvent<T>(data: T): ChainEvent<T> {
+    const prev_hash = this.lastHash;
+    const index = this.events.length;
+
+    // Construct the payload to hash.
+    // We include index and prev_hash to bind position and history.
+    const payload = {
+      index,
+      prev_hash,
+      data
+    };
+
+    const hash = createHash('sha256').update(stableJson(payload)).digest('hex');
+
+    const event: ChainEvent<T> = {
+      index,
+      prev_hash,
+      data,
+      hash
+    };
+
+    this.events.push(event as ChainEvent);
+    return event;
+  }
+
+  /**
+   * Verify the integrity of the chain.
+   * @returns True if valid, false otherwise.
+   */
   verify(): boolean {
-    // Check Genesis
-    if (this.events.length === 0) return false;
-    const genesis = this.events[0];
-    if (genesis.seq !== 0 || genesis.event_hash !== '0'.repeat(64)) return false;
+    if (this.events.length === 0) return true;
 
-    for (let i = 1; i < this.events.length; i++) {
+    let expectedPrevHash = '0000000000000000000000000000000000000000000000000000000000000000';
+
+    for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
-      const prev = this.events[i-1];
 
-      if (event.prev_hash !== prev.event_hash) return false;
-      if (event.seq !== prev.seq + 1) return false;
+      // Check index
+      if (event.index !== i) return false;
 
-      const content = `${event.seq}:${event.prev_hash}:${event.type}:${stableStringify(event.payload)}`;
-      const calculatedHash = createHash('sha256').update(content).digest('hex');
+      // Check prev_hash linking
+      if (event.prev_hash !== expectedPrevHash) return false;
 
-      if (calculatedHash !== event.event_hash) return false;
+      // Check hash integrity
+      const payload = {
+        index: event.index,
+        prev_hash: event.prev_hash,
+        data: event.data
+      };
+      const calculatedHash = createHash('sha256').update(stableJson(payload)).digest('hex');
+
+      if (calculatedHash !== event.hash) return false;
+
+      expectedPrevHash = event.hash;
     }
+
     return true;
   }
 }

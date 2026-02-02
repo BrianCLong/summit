@@ -1,43 +1,27 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "FactCert Controls Report",
   "type": "object",
-  "required": ["report_id", "generated_at", "controls"],
   "properties": {
-    "report_id": {"type": "string"},
-    "generated_at": {"type": "string", "format": "date-time"},
-    "policy_version": {"type": "string"},
+    "report_id": { "type": "string" },
+    "credential_id": { "type": "string" },
     "controls": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "category", "status", "evidence"],
         "properties": {
-          "id": {"type": "string"},
-          "name": {"type": "string"},
-          "category": {
-            "type": "string",
-            "enum": ["security", "availability", "confidentiality", "integrity", "privacy"]
-          },
-          "description": {"type": "string"},
-          "status": {
-            "type": "string",
-            "enum": ["pass", "fail", "exception", "manual_review"]
-          },
-          "evidence": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["ref", "hash"],
-              "properties": {
-                "ref": {"type": "string", "description": "Pointer to evidence artifact or event ID"},
-                "hash": {"type": "string", "description": "Hash of the referenced evidence"},
-                "comment": {"type": "string"}
-              }
-            }
-          }
-        }
+          "control_id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "enum": ["pass", "fail", "partial", "not_applicable"] },
+          "evidence": { "type": "string" }
+        },
+        "required": ["control_id", "status"]
       }
-    }
-  }
+    },
+    "period_start": { "type": "string", "format": "date-time" },
+    "period_end": { "type": "string", "format": "date-time" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "signature": { "$ref": "stamp.schema.json" }
+  },
+  "required": ["report_id", "credential_id", "controls", "period_start", "period_end"]
 }

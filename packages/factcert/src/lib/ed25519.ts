@@ -1,57 +1,94 @@
-import { generateKeyPairSync, createPrivateKey, createPublicKey, sign as cryptoSign, verify as cryptoVerify } from 'node:crypto';
+import { generateKeyPairSync, sign as cryptoSign, verify as cryptoVerify, createPrivateKey, createPublicKey } from 'node:crypto';
 
-// Utilities for Hex <-> Base64URL
-const hexToBuf = (hex: string) => Buffer.from(hex, 'hex');
-const bufToHex = (buf: Buffer) => buf.toString('hex');
-const bufToBase64Url = (buf: Buffer) => buf.toString('base64url');
-const base64UrlToBuf = (str: string) => Buffer.from(str, 'base64url');
-
-export interface Keypair {
-  publicKeyHex: string;
-  privateKeyHex: string;
+export interface KeyPair {
+  publicKey: string; // Hex (32 bytes -> 64 hex chars)
+  privateKey: string; // Hex (d + x) (64 bytes -> 128 hex chars)
 }
 
-export function generateKeypair(): Keypair {
-  const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+function base64UrlToHex(str: string): string {
+  return Buffer.from(str, 'base64url').toString('hex');
+}
 
-  const pubJwk = publicKey.export({ format: 'jwk' });
+function hexToBase64Url(str: string): string {
+  return Buffer.from(str, 'hex').toString('base64url');
+}
+
+/**
+ * Generate a new Ed25519 key pair.
+ * @returns The key pair in hex format.
+ */
+export function generateEd25519KeyPair(): KeyPair {
+  const { privateKey, publicKey } = generateKeyPairSync('ed25519');
+
   const privJwk = privateKey.export({ format: 'jwk' });
+  const pubJwk = publicKey.export({ format: 'jwk' });
 
-  // Ed25519 JWK uses 'x' for public key and 'd' for private key
-  const publicKeyHex = bufToHex(base64UrlToBuf(pubJwk.x!));
-  const privateKeyHex = bufToHex(base64UrlToBuf(privJwk.d!));
+  if (!privJwk.d || !pubJwk.x) {
+    throw new Error('Failed to export JWK keys');
+  }
 
-  return { publicKeyHex, privateKeyHex };
+  const d = base64UrlToHex(privJwk.d);
+  const x = base64UrlToHex(pubJwk.x);
+
+  return {
+    privateKey: d + x, // Concatenate d and x to form a self-contained private key string
+    publicKey: x
+  };
 }
 
-export function sign(message: string, keys: Keypair): string {
-  const privateKey = createPrivateKey({
-    key: {
-      kty: 'OKP',
-      crv: 'Ed25519',
-      d: bufToBase64Url(hexToBuf(keys.privateKeyHex)),
-      x: bufToBase64Url(hexToBuf(keys.publicKeyHex))
-    },
+/**
+ * Sign a message using an Ed25519 private key.
+ * @param message The message to sign (string).
+ * @param privateKeyHex The private key in hex format (must be 128 chars / 64 bytes: d + x).
+ * @returns The signature in hex format.
+ */
+export function sign(message: string, privateKeyHex: string): string {
+  // We expect privateKeyHex to contain both d and x (concatenated).
+  // Length check: 128 hex chars.
+  if (privateKeyHex.length !== 128) {
+    throw new Error('Invalid private key length. Expected 128 hex characters (d + x).');
+  }
+
+  const dHex = privateKeyHex.slice(0, 64);
+  const xHex = privateKeyHex.slice(64);
+
+  const jwk = {
+    kty: 'OKP',
+    crv: 'Ed25519',
+    d: hexToBase64Url(dHex),
+    x: hexToBase64Url(xHex)
+  };
+
+  try {
+    const privateKey = createPrivateKey({
+      key: jwk,
+      format: 'jwk'
+    });
+    const signature = cryptoSign(null, Buffer.from(message), privateKey);
+    return signature.toString('hex');
+  } catch (error) {
+    throw new Error(`Signing failed: ${(error as Error).message}`);
+  }
+}
+
+/**
+ * Verify a signature using an Ed25519 public key.
+ * @param message The message that was signed.
+ * @param signatureHex The signature in hex format.
+ * @param publicKeyHex The public key in hex format.
+ * @returns True if valid, false otherwise.
+ */
+export function verify(message: string, signatureHex: string, publicKeyHex: string): boolean {
+  const jwk = {
+    kty: 'OKP',
+    crv: 'Ed25519',
+    x: hexToBase64Url(publicKeyHex)
+  };
+
+  const publicKey = createPublicKey({
+    key: jwk,
     format: 'jwk'
   });
 
-  const signature = cryptoSign(null, Buffer.from(message, 'utf8'), privateKey);
-  return signature.toString('hex');
-}
-
-export function verify(message: string, signatureHex: string, publicKeyHex: string): boolean {
-  try {
-    const publicKey = createPublicKey({
-      key: {
-        kty: 'OKP',
-        crv: 'Ed25519',
-        x: bufToBase64Url(hexToBuf(publicKeyHex))
-      },
-      format: 'jwk'
-    });
-
-    return cryptoVerify(null, Buffer.from(message, 'utf8'), publicKey, Buffer.from(signatureHex, 'hex'));
-  } catch (error) {
-    return false;
-  }
+  return cryptoVerify(null, Buffer.from(message), publicKey, Buffer.from(signatureHex, 'hex'));
 }

@@ -27,7 +27,7 @@ jobs:
           # If this was a release trigger, we would point to the real manifest.
           echo "Verifying provenance policy integrity..."
           opa test policy/ -v
-          
+
           # Check if we have evidence to validate (only on release or when explicitly provided)
           if [ -f "evidence/provenance-input.json" ]; then
             bash scripts/ci/enforce-provenance.sh evidence/provenance-input.json
