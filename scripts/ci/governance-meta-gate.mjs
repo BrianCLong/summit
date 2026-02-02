@@ -8,7 +8,7 @@ import { execSync } from 'node:child_process';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildPolicyEvidence, buildDeterminismEvidence, buildBranchProtectionEvidence, buildGovernanceSummary, VerificationState } from './lib/governance-evidence.mjs';
+import { buildPolicyEvidence, buildDeterminismEvidence, buildBranchProtectionEvidence, buildGovernanceSummary, VerificationState } from './lib/governance_evidence.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');

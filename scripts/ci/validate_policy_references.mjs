@@ -1,20 +1,45 @@
 #!/usr/bin/env node
 /**
- * Policy Reference Validator
+ * Policy Reference Validator (Unified)
  *
- * Cross-references REQUIRED_CHECKS_POLICY.yml against actual workflow files
- * to ensure policy doesn't reference non-existent workflows or checks.
+ * Cross-references REQUIRED_CHECKS_POLICY.yml against actual workflow files.
+ * Supports matrix expansion, levenshtein suggestions, and evidence generation.
  */
 
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
+import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
+import {
+  hashStringList,
+  normalizeRelativePath,
+  sha256Hex,
+  writeDeterministicJson,
+} from './lib/governance_evidence.mjs';
 
-const POLICY_PATH = 'docs/ci/REQUIRED_CHECKS_POLICY.yml';
-const WORKFLOWS_DIR = '.github/workflows';
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(__dirname, '../..');
 const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
 const MAX_SUGGESTIONS = 3;
+
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const current = argv[i];
+    if (current === '--') continue;
+    if (current === '--policy') { args.policy = argv[++i]; continue; }
+    if (current.startsWith('--policy=')) { args.policy = current.split('=')[1]; continue; }
+    if (current === '--workflows') { args.workflows = argv[++i]; continue; }
+    if (current.startsWith('--workflows=')) { args.workflows = current.split('=')[1]; continue; }
+    if (current === '--evidence-out') { args.evidenceOut = argv[++i]; continue; }
+    if (current.startsWith('--evidence-out=')) { args.evidenceOut = current.split('=')[1]; continue; }
+    if (current === '--allowlist') { args.allowlist = argv[++i]; continue; }
+    if (current.startsWith('--allowlist=')) { args.allowlist = current.split('=')[1]; continue; }
+    if (current === '--allow-prefix-match') { args.allowPrefixMatch = true; continue; }
+    if (current === '--help') { args.help = true; continue; }
+  }
+  return args;
+}
 
 function levenshtein(a, b) {
   const matrix = [];
@@ -63,47 +88,14 @@ function resolveTemplate(template, matrixCombo) {
   let result = template;
   for (const [key, value] of Object.entries(matrixCombo)) {
     const escapedKey = String(key).replace(/\./g, '\\.');
-    const regex = new RegExp('\\$\\{\\{\\s*matrix\\.' + escapedKey + '\\s*\\}\\}', 'g');
+    const regex = new RegExp('\$\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
     result = result.replace(regex, String(value));
   }
   return result;
 }
 
-export function extractCheckNames(workflow, fileName) {
-  const checkNames = new Set();
-  const workflowName = normalizeCheckName(workflow?.name || fileName.replace(/\\.ya?ml$/, ''));
-  if (!workflow?.jobs) return checkNames;
-  for (const [jobId, job] of Object.entries(workflow.jobs)) {
-    const jobNameTemplate = job?.name || jobId;
-    if (job?.strategy?.matrix) {
-      const matrixCombinations = expandMatrix(job.strategy.matrix);
-      if (matrixCombinations.length > 0) {
-        for (const comboObj of matrixCombinations) {
-          const resolvedJobName = normalizeCheckName(resolveTemplate(jobNameTemplate, comboObj));
-          if (job?.name) {
-            checkNames.add(resolvedJobName);
-            checkNames.add(normalizeCheckName(`${workflowName} / ${resolvedJobName}`));
-          } else {
-            const values = Object.values(comboObj).map(String).join(', ');
-            const ghDefaultName = normalizeCheckName(`${jobId} (${values})`);
-            checkNames.add(ghDefaultName);
-            checkNames.add(normalizeCheckName(`${workflowName} / ${ghDefaultName}`));
-          }
-        }
-      }
-      checkNames.add(normalizeCheckName(jobNameTemplate));
-    } else {
-      const jobName = normalizeCheckName(jobNameTemplate);
-      checkNames.add(jobName);
-      checkNames.add(normalizeCheckName(`${workflowName} / ${jobName}`));
-    }
-    checkNames.add(normalizeCheckName(jobId));
-  }
-  checkNames.add(workflowName);
-  return checkNames;
-}
-
 export function expandMatrix(matrix) {
+  if (!matrix || typeof matrix !== 'object') return [];
   const { include = [], exclude = [], ...dimensions } = matrix;
   const keys = Object.keys(dimensions).filter(k => Array.isArray(dimensions[k]));
   if (keys.length === 0 && include.length === 0) return [];
@@ -133,6 +125,40 @@ export function expandMatrix(matrix) {
   return combinations;
 }
 
+export function extractCheckNames(workflow, fileName) {
+  const checkNames = new Set();
+  const workflowName = normalizeCheckName(workflow?.name || fileName.replace(/\.ya?ml$/, ''));
+  checkNames.add(workflowName);
+  if (!workflow?.jobs) return checkNames;
+  for (const [jobId, job] of Object.entries(workflow.jobs)) {
+    const jobNameTemplate = job?.name || jobId;
+    if (job?.strategy?.matrix) {
+      const matrixCombinations = expandMatrix(job.strategy.matrix);
+      if (matrixCombinations.length > 0) {
+        for (const comboObj of matrixCombinations) {
+          const resolvedJobName = normalizeCheckName(resolveTemplate(jobNameTemplate, comboObj));
+          if (job?.name) {
+            checkNames.add(resolvedJobName);
+            checkNames.add(normalizeCheckName(`${workflowName} / ${resolvedJobName}`));
+          } else {
+            const values = Object.values(comboObj).map(String).join(', ');
+            const ghDefaultName = normalizeCheckName(`${jobId} (${values})`);
+            checkNames.add(ghDefaultName);
+            checkNames.add(normalizeCheckName(`${workflowName} / ${ghDefaultName}`));
+          }
+        }
+      }
+      checkNames.add(normalizeCheckName(jobNameTemplate));
+    } else {
+      const jobName = normalizeCheckName(jobNameTemplate);
+      checkNames.add(jobName);
+      checkNames.add(normalizeCheckName(`${workflowName} / ${jobName}`));
+    }
+    checkNames.add(normalizeCheckName(jobId));
+  }
+  return checkNames;
+}
+
 function loadWorkflows(workflowsDir) {
   const resolved = resolve(workflowsDir);
   const workflows = new Map();
@@ -149,16 +175,15 @@ function loadWorkflows(workflowsDir) {
 
 function extractPolicyReferences(policy) {
   const references = [];
-  if (Array.isArray(policy.always_required)) {
-    for (const check of policy.always_required) {
-      references.push({ name: normalizeCheckName(check.name), workflow: check.workflow, section: 'always_required' });
+  const add = (arr, section) => {
+    if (Array.isArray(arr)) {
+      for (const check of arr) {
+        if (check?.name) references.push({ name: normalizeCheckName(check.name), workflow: check.workflow, section });
+      }
     }
-  }
-  if (Array.isArray(policy.conditional_required)) {
-    for (const check of policy.conditional_required) {
-      references.push({ name: normalizeCheckName(check.name), workflow: check.workflow, section: 'conditional_required' });
-    }
-  }
+  };
+  add(policy.always_required, 'always_required');
+  add(policy.conditional_required, 'conditional_required');
   if (policy.branch_protection?.required_status_checks?.contexts) {
     for (const context of policy.branch_protection.required_status_checks.contexts) {
       references.push({ name: normalizeCheckName(context), workflow: null, section: 'branch_protection.contexts' });
@@ -168,37 +193,84 @@ function extractPolicyReferences(policy) {
 }
 
 async function main() {
-  console.log('Policy Reference Validator (Hardened)');
-  const policy = yaml.load(readFileSync(resolve(POLICY_PATH), 'utf8'));
-  const workflows = loadWorkflows(WORKFLOWS_DIR);
-  const references = extractPolicyReferences(policy);
+  const args = parseArgs(process.argv.slice(2));
+  const policyPath = args.policy || 'docs/ci/REQUIRED_CHECKS_POLICY.yml';
+  const workflowsDir = args.workflows || '.github/workflows';
+  const evidenceOut = args.evidenceOut || 'artifacts/governance/required-checks-policy.evidence.json';
+  const allowlistPath = args.allowlist || 'docs/ci/REQUIRED_CHECKS_ALLOWLIST.yml';
+
+  console.log('Policy Reference Validator');
   
+  let policyRaw = '';
+  let policy = {};
+  try {
+    policyRaw = readFileSync(resolve(ROOT, policyPath), 'utf8');
+    policy = yaml.load(policyRaw);
+  } catch (err) {
+    console.error(`❌ Failed to load policy: ${err.message}`);
+    process.exit(1);
+  }
+
+  const workflows = loadWorkflows(resolve(ROOT, workflowsDir));
+  const references = extractPolicyReferences(policy);
+  const allowlist = existsSync(resolve(ROOT, allowlistPath)) ? yaml.load(readFileSync(resolve(ROOT, allowlistPath), 'utf8')) : {};
+  const allowlistedSet = new Set((allowlist.allowlisted_checks || []).map(normalizeCheckName));
+
   const allCheckNamesSet = new Set();
   for (const names of workflows.values()) {
     for (const name of names) allCheckNamesSet.add(name);
   }
 
+  const missingRequiredChecks = [];
+  const allowlistedUsed = [];
   let errors = 0;
+
   for (const ref of references) {
     if (ref.workflow && !workflows.has(ref.workflow)) {
       console.error(`❌ Workflow file "${ref.workflow}" not found (referenced by "${ref.name}")`);
       errors++;
+      missingRequiredChecks.push(ref.name);
       continue;
     }
     const checkSet = ref.workflow ? workflows.get(ref.workflow) : allCheckNamesSet;
     if (!checkSet.has(ref.name)) {
+      if (allowlistedSet.has(ref.name)) {
+        allowlistedUsed.push(ref.name);
+        continue;
+      }
       const suggestions = findClosestMatches(ref.name, Array.from(checkSet));
       console.error(`❌ Check "${ref.name}" not found in ${ref.workflow || 'any workflow'}`);
       if (suggestions.length > 0) console.error(`   Did you mean: ${suggestions.join(', ')}?`);
       errors++;
+      missingRequiredChecks.push(ref.name);
     }
   }
 
-  if (errors > 0) process.exit(1);
+  const verdict = errors === 0 ? 'PASS' : 'FAIL';
+  const evidence = {
+    schema_version: 1,
+    kind: 'required_checks_policy_validation',
+    policy_path: normalizeRelativePath(ROOT, resolve(ROOT, policyPath)),
+    policy_sha256: sha256Hex(Buffer.from(policyRaw, 'utf8')),
+    allowlisted_checks_used: allowlistedUsed.sort(),
+    known_checks_count: allCheckNamesSet.size,
+    missing_required_checks: missingRequiredChecks.sort(),
+    verdict
+  };
+
+  if (!existsSync(dirname(resolve(ROOT, evidenceOut)))) readdirSync(ROOT); // Ensure dir exists hack or just use mkdir
+  writeDeterministicJson(resolve(ROOT, evidenceOut), evidence);
+
+  if (errors > 0) {
+    console.error(`\nFound ${errors} policy reference errors.`);
+    process.exit(1);
+  }
   console.log('✅ All policy references validated against workflows.');
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((err) => {
-  console.error(err);
-  process.exit(2);
-});
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(2);
+  });
+}

@@ -4,6 +4,24 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import yaml from 'js-yaml';
 
+export const VerificationState = {
+  VERIFIED_MATCH: 'VERIFIED_MATCH',
+  VERIFIED_DRIFT: 'VERIFIED_DRIFT',
+  UNVERIFIABLE_PERMISSIONS: 'UNVERIFIABLE_PERMISSIONS',
+  UNVERIFIABLE_ERROR: 'UNVERIFIABLE_ERROR',
+  RATE_LIMITED: 'RATE_LIMITED',
+  NO_PROTECTION: 'NO_PROTECTION'
+};
+
+class GitHubApiError extends Error {
+  constructor(message, { status, kind } = {}) {
+    super(message);
+    this.name = 'GitHubApiError';
+    this.status = status ?? null;
+    this.kind = kind ?? 'unknown';
+  }
+}
+
 function normalizeContexts(contexts) {
   const cleaned = contexts.filter(v => typeof v === 'string').map(v => v.trim()).filter(v => v.length > 0);
   return Array.from(new Set(cleaned)).sort();
@@ -19,7 +37,8 @@ function sortKeysDeep(value) {
   return value;
 }
 
-function stableJson(value) { return `${JSON.stringify(sortKeysDeep(value), null, 2)}\n`; }
+function stableJson(value) { return `${JSON.stringify(sortKeysDeep(value), null, 2)}
+`; }
 function hashObject(value) { return createHash('sha256').update(stableJson(value)).digest('hex'); }
 
 async function execFileAsync(command, args, options = {}) {
@@ -47,25 +66,27 @@ async function ghApi(endpoint, options = {}) {
   return result.stdout;
 }
 
-export const VerificationState = {
-  VERIFIED_MATCH: 'VERIFIED_MATCH',
-  VERIFIED_DRIFT: 'VERIFIED_DRIFT',
-  UNVERIFIABLE_PERMISSIONS: 'UNVERIFIABLE_PERMISSIONS',
-  UNVERIFIABLE_ERROR: 'UNVERIFIABLE_ERROR',
-  RATE_LIMITED: 'RATE_LIMITED',
-  NO_PROTECTION: 'NO_PROTECTION'
-};
-
 export function classifyHttpError(status, headers, body) {
+  const normalizedMessage = String(body || '').toLowerCase();
   if (status === 403) {
     const remaining = headers?.get?.('X-RateLimit-Remaining') ?? headers?.['x-ratelimit-remaining'];
-    if (remaining === '0' || remaining === 0) return { state: VerificationState.RATE_LIMITED, message: 'Rate limit exceeded' };
+    if (remaining === '0' || remaining === 0 || normalizedMessage.includes('rate limit')) 
+      return { state: VerificationState.RATE_LIMITED, message: 'Rate limit exceeded' };
     const message = typeof body === 'string' ? body : body?.message ?? 'Forbidden';
-    if (message.includes('Must have admin rights') || message.includes('Resource not accessible')) return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message };
+    if (message.includes('Must have admin rights') || message.includes('Resource not accessible')) 
+      return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message };
     return { state: VerificationState.UNVERIFIABLE_ERROR, message: `403: ${message}` };
   }
   if (status === 404) return { state: VerificationState.NO_PROTECTION, message: 'No protection' };
   return { state: VerificationState.UNVERIFIABLE_ERROR, message: `HTTP ${status}` };
+}
+
+function classifyGitHubApiError({ status, message, remaining }) {
+  const res = classifyHttpError(status, { 'x-ratelimit-remaining': remaining }, message);
+  if (res.state === VerificationState.RATE_LIMITED) return 'rate_limited';
+  if (res.state === VerificationState.UNVERIFIABLE_PERMISSIONS) return 'permission';
+  if (res.state === VerificationState.NO_PROTECTION) return 'not_configured';
+  return 'unknown';
 }
 
 export async function fetchRequiredStatusChecks({ repo, branch }) {
@@ -78,11 +99,35 @@ export async function fetchRequiredStatusChecks({ repo, branch }) {
       return res;
     } catch (err) {
       const status = Number(err.message.match(/\b(\d{3})\b/)?.[1] || 0);
-      if (status) return { ...classifyHttpError(status, {}, { message: err.message }), required_contexts: [], strict: false };
+      if (status) return { ...classifyHttpError(status, {}, err.message), required_contexts: [], strict: false };
       throw err;
     }
   }
-  return { state: VerificationState.UNVERIFIABLE_ERROR, required_contexts: [], strict: false, error: 'gh not available' };
+  
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (!token) {
+    return { state: VerificationState.UNVERIFIABLE_ERROR, required_contexts: [], strict: false, error: 'Missing GITHUB_TOKEN or GH_TOKEN' };
+  }
+
+  try {
+    const response = await fetch(`https://api.github.com/${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+      }
+    });
+    if (!response.ok) {
+      const body = await response.text();
+      return { ...classifyHttpError(response.status, response.headers, body), required_contexts: [], strict: false };
+    }
+    const data = await response.json();
+    const res = normalizeRequiredStatusChecks(data, 'https');
+    res.state = VerificationState.VERIFIED_MATCH;
+    return res;
+  } catch (error) {
+    return { state: VerificationState.UNVERIFIABLE_ERROR, required_contexts: [], strict: false, error: error.message };
+  }
 }
 
 function normalizeRequiredStatusChecks(data, source) {
@@ -107,4 +152,28 @@ export function computeDiff(p, a) {
   return { missing_in_github: m, extra_in_github: e, strict_mismatch: p.required_status_checks.strict !== a.strict };
 }
 
-export function stableJsonExport(v) { return stableJson(v); }
+function parseRemoteRepo(url) {
+  const match = url.match(/github\.com[:/](.+?)\/(.+?)(\.git)?$/);
+  return match ? `${match[1]}/${match[2]}` : null;
+}
+
+async function inferRepoFromGit() {
+  try {
+    const { stdout } = await execFileAsync('git', ['config', '--get', 'remote.origin.url']);
+    return parseRemoteRepo(stdout.trim());
+  } catch (error) {
+    return null;
+  }
+}
+
+export {
+  GitHubApiError,
+  classifyGitHubApiError,
+  ghApi,
+  hashObject,
+  inferRepoFromGit,
+  normalizeContexts,
+  sortKeysDeep,
+  stableJson,
+  stableJson as stableJsonExport
+};
