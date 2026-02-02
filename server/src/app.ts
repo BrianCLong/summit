@@ -32,6 +32,8 @@ import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mo
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import { securityHeaders } from './middleware/securityHeaders.js';
+import { securityHardening } from './middleware/security-hardening.js';
+import { abuseGuard } from './middleware/abuseGuard.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
@@ -131,7 +133,7 @@ import integrationAdminRouter from './routes/integrations/integration-admin.js';
 import securityAdminRouter from './routes/security/security-admin.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
-import adminTenantsRouter from './routes/admin/tenants.js';
+import adminGateway from './routes/admin/gateway.js';
 import onboardingRouter from './routes/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
 import i18nRouter from './routes/i18n.js';
@@ -141,6 +143,7 @@ import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
+import factFlowRouter from './factflow/routes.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -204,6 +207,7 @@ export const createApp = async () => {
   // Rate limiting - applied early to prevent abuse
   // Public rate limit applies to all routes as baseline protection
   app.use(publicRateLimit);
+  app.use(abuseGuard.middleware());
 
   // Enhanced Pino HTTP logger with correlation and trace context
   const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
@@ -240,6 +244,7 @@ export const createApp = async () => {
     }),
   );
   app.use(sanitizeInput);
+  app.use(securityHardening);
   app.use(piiGuardMiddleware);
   app.use(safetyModeMiddleware);
 
@@ -491,7 +496,7 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
-  app.use('/api/admin', adminTenantsRouter);
+  app.use('/api/admin', adminGateway);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
   app.use('/api/security', securityAdminRouter);
@@ -512,6 +517,9 @@ export const createApp = async () => {
   app.use('/api/intel-graph', intelGraphRouter);
   app.use('/api/graphrag', graphragRouter);
   app.use('/api/intent', intentRouter);
+  if (cfg.FACTFLOW_ENABLED) {
+    app.use('/api/factflow', factFlowRouter);
+  }
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
@@ -567,11 +575,11 @@ export const createApp = async () => {
     // Adapt LLM for V2 Handlers
     const llmServiceV2 = {
       callCompletion: async (runId: string, taskId: string, payload: any) => {
-         const result = await llmClient.callCompletion(payload.messages[payload.messages.length-1].content, payload.model);
-         return {
-           content: typeof result === 'string' ? result : (result as any).content || JSON.stringify(result),
-           usage: { total_tokens: 0 }
-         };
+        const result = await llmClient.callCompletion(payload.messages[payload.messages.length - 1].content, payload.model);
+        return {
+          content: typeof result === 'string' ? result : (result as any).content || JSON.stringify(result),
+          usage: { total_tokens: 0 }
+        };
       }
     };
 

@@ -11,9 +11,7 @@ import {
   normalizeReasoningBudget,
   type ReasoningBudgetContract,
 } from './budget.js';
-import { AgentGovernanceService } from './governance-service.js';
-import logger from '../utils/logger.js';
-import { metrics } from '../monitoring/metrics.js';
+
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -31,7 +29,7 @@ export class Maestro {
     private costMeter: CostMeter,
     private llm: OpenAILLM,
     private config: MaestroConfig,
-  ) {}
+  ) { }
 
   async createRun(
     userId: string,
@@ -115,8 +113,22 @@ export class Maestro {
       const tenantId = (task.input as any)?.tenantId;
 
       if (tenantId) {
-          const guard = ResidencyGuard.getInstance();
-          await guard.validateAgentExecution(tenantId);
+        const guard = ResidencyGuard.getInstance();
+        await guard.validateAgentExecution(tenantId);
+
+        // === GLOBAL STEERING CHECK (Task #96) ===
+        const { maestroGlobalAgent } = await import('./agents/MaestroGlobalAgent.js');
+        const steeringResult = await maestroGlobalAgent.evaluateRouting(task);
+        if (!steeringResult.allowed) {
+          logger.warn({
+            taskId: task.id,
+            tenantId,
+            advice: steeringResult.advice,
+            reason: steeringResult.reason
+          }, 'Task execution in non-optimal region detected');
+          // For now, we allow execution but log the warning. 
+          // Future iterations could automate task handoff.
+        }
       }
 
       // === GOVERNANCE CHECK (Story 1.1) ===
@@ -338,11 +350,9 @@ export class Maestro {
 
       const executable = tasks.filter(t => t.status === 'queued');
 
-      const results = [];
-      for (const task of executable) {
-        const res = await this.executeTask(task);
-        results.push(res);
-      }
+      const results = await Promise.all(
+        executable.map(task => this.executeTask(task))
+      );
 
       const costSummary = await this.costMeter.summarize(run.id);
 

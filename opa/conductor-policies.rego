@@ -86,13 +86,13 @@ resource_role_mapping := {
 # Rate limiting check
 rate_limited if {
     # Check user rate limits
-    user_requests := conductor_metrics.user_requests[input.subject.sub]
+    user_requests := data.conductor_metrics.user_requests[input.subject.sub]
     user_requests > user_rate_limits[input.subject.roles[0]]
 }
 
 rate_limited if {
     # Check tenant rate limits
-    tenant_requests := conductor_metrics.tenant_requests[input.subject.tenant]
+    tenant_requests := data.conductor_metrics.tenant_requests[input.subject.tenant]
     tenant_requests > tenant_rate_limits["default"]
 }
 
@@ -416,4 +416,6 @@ explanations := {
     "key_operation_denied": "Key operation not permitted for user clearance level"
 } if {
     not allow
+    # Safe lookup for required role, defaulting to "unknown" if not applicable
+    required_role := object.get(resource_role_mapping[input.resource.type], input.action, "unknown")
 }
