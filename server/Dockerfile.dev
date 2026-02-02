@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -18,20 +18,38 @@ RUN apk add --no-cache \
     freetype-dev \
     curl
 
-# Install nodemon globally (as root)
+# Install nodemon globally
 RUN npm install -g nodemon
 
 # Create a non-root user
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Copy package files and install as root
+# Set npm resilience and skip browser downloads
+ENV PUPPETEER_SKIP_DOWNLOAD=1 \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_ENGINE_STRICT=false
+
+RUN npm config set fetch-retries 5 \
+ && npm config set fetch-retry-mintimeout 20000 \
+ && npm config set fetch-retry-maxtimeout 120000 \
+ && npm config set fetch-timeout 600000
+
+# Copy package files and internal tarballs
 COPY package*.json intelgraph-feature-flags-4.2.3.tgz intelgraph-telemetry-config-4.2.3.tgz maestro-core-4.2.3.tgz ./
 
-# Replace workspace dependencies with local tarballs to avoid "Unsupported URL Type workspace:" error
-RUN sed -i 's|"@intelgraph/feature-flags": "workspace:\*"|"@intelgraph/feature-flags": "file:./intelgraph-feature-flags-4.2.3.tgz"|g' package.json && \
-    sed -i 's|"@intelgraph/telemetry-config": "workspace:\*"|"@intelgraph/telemetry-config": "file:./intelgraph-telemetry-config-4.2.3.tgz"|g' package.json && \
-    sed -i 's|"@maestro/core": "workspace:\*"|"@maestro/core": "file:./maestro-core-4.2.3.tgz"|g' package.json
+# Update package.json to use local file: dependencies instead of workspace:
+RUN node -e 'const fs = require("fs"); \
+    const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); \
+    pkg.dependencies["@intelgraph/feature-flags"] = "file:./intelgraph-feature-flags-4.2.3.tgz"; \
+    pkg.dependencies["@intelgraph/telemetry-config"] = "file:./intelgraph-telemetry-config-4.2.3.tgz"; \
+    pkg.dependencies["@intelgraph/maestro-core"] = "file:./maestro-core-4.2.3.tgz"; \
+    fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));'
 
+# Remove lockfile to avoid workspace protocol issues
+RUN rm -f package-lock.json
+
+# Install dependencies
 RUN npm install --legacy-peer-deps
 
 # Copy source code and set permissions
@@ -46,5 +64,5 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhos
 # Expose ports
 EXPOSE 4000 9229
 
-# Start development server with debugging
+# Start development server
 CMD ["npm", "run", "dev"]

@@ -8,8 +8,9 @@ include Makefile.merge-train
 .PHONY: db-migrate db-seed sbom k6 supply-chain/sbom supply-chain/sign
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
-.PHONY: dev-prereqs dev-up dev-down dev-smoke
-.PHONY: demo demo-down demo-check demo-seed demo-smoke check-case-collisions
+.PHONY: dev-prereqs dev-up dev-down dev-smoke evidence-bundle
+.PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: gmr-gate gmr-eval gmr-validate
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
@@ -93,6 +94,15 @@ lint:   ## Lint js/ts + python
 format: ## Format code
 	pnpm -w exec prettier -w . || true
 	$(VENV_BIN)/ruff format .
+
+gmr-gate: ## Run the GMR guardrail gate (requires DATABASE_URL)
+	@./metrics/scripts/run_gmr_gate.sh
+
+gmr-eval: ## Run deterministic GMR anomaly detection evals
+	@$(PYTHON) metrics/evals/eval_anomaly_detection.py
+
+gmr-validate: ## Validate GMR guardrail assets
+	@$(PYTHON) scripts/ci/validate_gmr_assets.py
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
@@ -325,6 +335,11 @@ ga-evidence: ## Create a minimal local evidence bundle for GA validation
 	node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$$EVIDENCE_DIR"; \
 	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
 
+evidence-bundle: ## Generate a deterministic PR evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [OUT=dir])
+	@BASE=$${BASE:-origin/main}; \
+	OUT=$${OUT:-evidence-bundle-$$(git rev-parse --short HEAD)-$$(date +%Y%m%d%H%M%S)}; \
+	python3 scripts/maintainers/gen-evidence-bundle.py --out "$$OUT" --base "$$BASE"
+
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
 
@@ -434,6 +449,3 @@ eval-skills-changed: ## Run eval skills changed in the current diff
 
 eval-skills-all: ## Run the full eval skills suite
 	@npx tsx evals/runner/run_skill_suite.ts
-
-check-case-collisions: ## Detect case-insensitive path collisions in git index
-	@node scripts/maintainers/check-case-collisions.mjs

@@ -94,7 +94,7 @@ const router = express.Router();
 router.use(ensureAuthenticated, authorize('manage_users'));
 
 // GA Signals Endpoint
-router.get('/admin/ga/signals', async (_req, res) => {
+router.get('/ga/signals', async (_req, res) => {
   try {
     const config = await GAEnrollmentService.getConfig();
 
@@ -128,7 +128,7 @@ router.get('/admin/ga/signals', async (_req, res) => {
 });
 
 // GA Config Endpoint (Rollback/Throttle)
-router.post('/admin/ga/config', express.json(), async (req, res) => {
+router.post('/ga/config', express.json(), async (req, res) => {
   try {
     const { status, maxTenants, maxUsers } = req.body;
     const updates: any = {};
@@ -145,7 +145,7 @@ router.post('/admin/ga/config', express.json(), async (req, res) => {
   }
 });
 
-router.get('/admin/config', (req, res) => {
+router.get('/config', (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
   if (
     tenantId &&
@@ -157,7 +157,7 @@ router.get('/admin/config', (req, res) => {
   res.json(memConfig);
 });
 
-router.post('/admin/config', express.json(), (req, res) => {
+router.post('/config', express.json(), (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
   const allowed = Object.keys(memConfig).filter(
     (k) => !['TENANT_OVERRIDES', 'TENANT_DEFAULTS'].includes(k),
@@ -215,7 +215,7 @@ router.post('/admin/config', express.json(), (req, res) => {
 });
 
 // Add endpoint to manage tenant defaults
-router.post('/admin/tenant-defaults', express.json(), (req, res) => {
+router.post('/tenant-defaults', express.json(), (req, res) => {
   const { tenantId, config } = req.body;
 
   if (!tenantId) {
@@ -243,12 +243,12 @@ router.post('/admin/tenant-defaults', express.json(), (req, res) => {
 });
 
 // Health check endpoint for secret rotation
-router.get('/admin/health', (req, res) => {
+router.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 // Get all tenant defaults
-router.get('/admin/tenant-defaults', (req, res) => {
+router.get('/tenant-defaults', (req, res) => {
   res.json({
     tenantDefaults: memConfig.TENANT_DEFAULTS,
   });
@@ -259,7 +259,7 @@ export default router;
 // n8n flows admin (read/write server/config/n8n-flows.json)
 const n8nCfgPath = path.resolve(__dirname, '../../config/n8n-flows.json');
 
-router.get('/admin/n8n-flows', (_req, res) => {
+router.get('/n8n-flows', (_req, res) => {
   try {
     const raw = fs.readFileSync(n8nCfgPath, 'utf8');
     return res.json(JSON.parse(raw));
@@ -272,7 +272,7 @@ router.get('/admin/n8n-flows', (_req, res) => {
   }
 });
 
-router.post('/admin/n8n-flows', express.json(), (req, res) => {
+router.post('/n8n-flows', express.json(), (req, res) => {
   const body = req.body || {};
   const allowedPrefixes = Array.isArray(body.allowedPrefixes)
     ? body.allowedPrefixes
@@ -296,7 +296,7 @@ router.post('/admin/n8n-flows', express.json(), (req, res) => {
 });
 
 // OPA admin utilities
-router.get('/admin/opa/validate', async (_req, res) => {
+router.get('/opa/validate', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -335,7 +335,7 @@ router.get('/admin/opa/validate', async (_req, res) => {
   }
 });
 
-router.post('/admin/opa/reload', async (_req, res) => {
+router.post('/opa/reload', async (_req, res) => {
   // Stub: Typically OPA data reloads are handled via bundles; provide a no-op success
   return res.json({
     ok: true,
@@ -344,7 +344,7 @@ router.post('/admin/opa/reload', async (_req, res) => {
 });
 
 // OPA bundle source: attempt to read status plugin for bundle revision/version
-router.get('/admin/opa/bundle-source', async (_req, res) => {
+router.get('/opa/bundle-source', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base) return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
@@ -383,7 +383,7 @@ router.get('/admin/opa/bundle-source', async (_req, res) => {
 });
 
 // OPA bundle status (checks whether data.maestro.n8n.allowed_flows exists)
-router.get('/admin/opa/bundle-status', async (_req, res) => {
+router.get('/opa/bundle-status', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base) return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
@@ -403,7 +403,7 @@ router.get('/admin/opa/bundle-status', async (_req, res) => {
 });
 
 // Push current n8n allowed flows into OPA data API (writes to data.maestro.n8n.allowed_flows)
-router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
+router.post('/opa/push-n8n-flows', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -428,7 +428,7 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
 });
 
 // Sync n8n allowed flows FROM OPA into local config file
-router.post('/admin/opa/sync-n8n-flows', async (_req, res) => {
+router.post('/opa/sync-n8n-flows', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -466,7 +466,7 @@ const secretManager = new SecretManager();
 const serviceRegistry = new MockServiceRegistry();
 
 // Secret Rotation API
-router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
+router.post('/secrets/rotate', express.json(), async (req, res) => {
   const { secretName, newVersion, services } = req.body;
 
   if (!secretName || !newVersion || !services) {
@@ -504,7 +504,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
 });
 
 // Temporal runtime toggle
-router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
+router.post('/temporal/toggle', async (req, res) => {
   const enabled = Boolean(req.body?.enabled);
   try {
     if (enabled) {
@@ -523,7 +523,7 @@ router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
 });
 
 // Push prefixes (allowed/denied) to OPA
-router.post('/admin/opa/push-n8n-prefixes', async (_req, res) => {
+router.post('/opa/push-n8n-prefixes', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -562,7 +562,7 @@ router.post('/admin/opa/push-n8n-prefixes', async (_req, res) => {
 });
 
 // Sync prefixes FROM OPA
-router.post('/admin/opa/sync-n8n-prefixes', async (_req, res) => {
+router.post('/opa/sync-n8n-prefixes', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -596,66 +596,3 @@ router.post('/admin/opa/sync-n8n-prefixes', async (_req, res) => {
   }
 });
 
-// OPA bundle status (checks whether data.maestro.n8n.allowed_flows exists)
-router.get('/admin/opa/bundle-status', async (_req, res) => {
-  try {
-    const base = process.env.OPA_BASE_URL || '';
-    if (!base) return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
-    const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, {
-      timeout: 3000,
-    });
-    const flows = r.data?.result || {};
-    const keys = Object.keys(flows || {});
-    return res.json({
-      ok: true,
-      allowedFlowsCount: keys.length,
-      sample: keys.slice(0, 10),
-    });
-  } catch (e: any) {
-    return res.json({ ok: false, message: e?.message || 'lookup failed' });
-  }
-});
-
-// Push current n8n allowed flows into OPA data API (writes to data.maestro.n8n.allowed_flows)
-router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
-  try {
-    const base = process.env.OPA_BASE_URL || '';
-    if (!base)
-      return res
-        .status(200)
-        .json({ ok: false, message: 'OPA_BASE_URL not set' });
-    let cfg: any = { allowedFlows: [] };
-    try {
-      cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
-    } catch { }
-    const map: Record<string, boolean> = {};
-    for (const f of cfg.allowedFlows || []) map[f] = true;
-    await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, {
-      timeout: 5000,
-    });
-    return res.json({ ok: true, count: Object.keys(map).length });
-  } catch (e: any) {
-    return res
-      .status(200)
-      .json({ ok: false, message: e?.message || 'push failed' });
-  }
-});
-
-// Temporal runtime toggle
-router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
-  const enabled = Boolean(req.body?.enabled);
-  try {
-    if (enabled) {
-      await enableTemporal();
-    } else {
-      await disableTemporal();
-    }
-    (memConfig as any).TEMPORAL_ENABLED = enabled;
-    process.env.TEMPORAL_ENABLED = enabled ? 'true' : 'false';
-    return res.json({ ok: true, enabled });
-  } catch (e: any) {
-    return res
-      .status(500)
-      .json({ ok: false, error: e?.message || 'temporal toggle failed' });
-  }
-});

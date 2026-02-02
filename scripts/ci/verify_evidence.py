@@ -86,9 +86,14 @@ def check_timestamps():
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json", "index.json", "index.schema.json", "report.schema.json",
-        "metrics.schema.json", "stamp.schema.json" # Ignore schemas
+        "metrics.schema.json", "stamp.schema.json", # Ignore schemas
+        "acp_stamp.json", "skill_stamp.json"
     }
-    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
+    IGNORE_DIRS = {
+        "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7",
+        "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption",
+        "EVD-POSTIZ-GATE-004", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GROWTH-001"
+    }
 
     for p in EVID.rglob("*"):
         if not p.is_file():

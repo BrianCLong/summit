@@ -125,6 +125,12 @@ conditional_required:
       - "^k6/"
       - "^ops/docker-compose"
 
+  - name: "OPA Policy Tests"
+    workflow: "opa-policy-test.yml"
+    rationale: "Validates OPA/Rego policies with 90% coverage requirement"
+    when_paths_match:
+      - "^policy/"
+
 # Informational Checks
 # --------------------
 # These checks are NOT blocking for promotion.

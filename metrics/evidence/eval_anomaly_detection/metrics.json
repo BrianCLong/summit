@@ -1,0 +1,13 @@
+{
+  "anomalies": [200, 280, 360, 440, 520, 600, 680, 760],
+  "anomaly_types": ["ingestion_drop", "loader_drop", "schema_drift_spike"],
+  "detections": [200, 280, 360, 440, 520, 600, 680, 760],
+  "precision": 1.0,
+  "recall": 1.0,
+  "series_length": 960,
+  "settings": {
+    "multiplier": 3.0,
+    "seed": 1337,
+    "window": 168
+  }
+}

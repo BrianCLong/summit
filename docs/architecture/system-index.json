@@ -1,0 +1,174 @@
+{
+  "$schema": "https://summit.example.com/architecture/system-index.schema.json",
+  "version": "0.1.0",
+  "schema_version": "0.1.0",
+  "generated_at": "2026-01-31T00:20:07Z",
+  "authority": [
+    "docs/SUMMIT_READINESS_ASSERTION.md",
+    "docs/governance/CONSTITUTION.md",
+    "docs/governance/META_GOVERNANCE.md",
+    "docs/governance/AGENT_MANDATES.md",
+    "agent-contract.json"
+  ],
+  "components": [
+    {
+      "id": "summit.web",
+      "name": "Summit Web Application",
+      "type": "frontend",
+      "path": "apps/web/",
+      "owner": "Web App Zone",
+      "contracts": ["docs/governance/CONSTITUTION.md"],
+      "dependencies": ["summit.api", "summit.graph"],
+      "runtime": ["browser", "vite"],
+      "data_stores": []
+    },
+    {
+      "id": "summit.api",
+      "name": "Summit API Server",
+      "type": "service",
+      "path": "server/",
+      "owner": "Server Zone",
+      "contracts": ["agent-contract.json", "docs/governance/AGENT_MANDATES.md"],
+      "dependencies": ["summit.graph", "summit.postgres", "summit.opa"],
+      "runtime": ["nodejs", "apollo"],
+      "data_stores": ["summit.postgres", "summit.neo4j"]
+    },
+    {
+      "id": "summit.graph",
+      "name": "IntelGraph Core",
+      "type": "graph-service",
+      "path": "graph-service/",
+      "owner": "Server Zone",
+      "contracts": ["PROVENANCE_SCHEMA.md"],
+      "dependencies": ["summit.neo4j"],
+      "runtime": ["nodejs"],
+      "data_stores": ["summit.neo4j"]
+    },
+    {
+      "id": "summit.opa",
+      "name": "OPA Policy Engine",
+      "type": "policy-engine",
+      "path": "opa/",
+      "owner": "Governance Zone",
+      "contracts": ["docs/governance/RULEBOOK.md"],
+      "dependencies": [],
+      "runtime": ["opa"],
+      "data_stores": []
+    },
+    {
+      "id": "summit.postgres",
+      "name": "PostgreSQL",
+      "type": "database",
+      "path": "db/",
+      "owner": "Server Zone",
+      "contracts": ["docs/governance/CONSTITUTION.md"],
+      "dependencies": [],
+      "runtime": ["postgres"],
+      "data_stores": []
+    },
+    {
+      "id": "summit.neo4j",
+      "name": "Neo4j",
+      "type": "graph-database",
+      "path": "db/",
+      "owner": "Server Zone",
+      "contracts": ["PROVENANCE_SCHEMA.md"],
+      "dependencies": [],
+      "runtime": ["neo4j"],
+      "data_stores": []
+    },
+    {
+      "id": "summit.orchestration",
+      "name": "Maestro Orchestration",
+      "type": "orchestrator",
+      "path": "orchestration/",
+      "owner": "Server Zone",
+      "contracts": ["docs/SUMMIT_READINESS_ASSERTION.md"],
+      "dependencies": ["summit.api"],
+      "runtime": ["nodejs"],
+      "data_stores": []
+    },
+    {
+      "id": "summit.agents",
+      "name": "Agent Runtime & Specs",
+      "type": "agent-runtime",
+      "path": "agents/",
+      "owner": "Governance Zone",
+      "contracts": ["agent-contract.json", "docs/ga/AGENT-RUN-LIFECYCLE.md"],
+      "dependencies": ["summit.orchestration"],
+      "runtime": ["nodejs"],
+      "data_stores": []
+    },
+    {
+      "id": "summit.governance",
+      "name": "Governance Controls",
+      "type": "governance",
+      "path": "docs/governance/",
+      "owner": "Governance Zone",
+      "contracts": ["docs/governance/META_GOVERNANCE.md"],
+      "dependencies": [],
+      "runtime": [],
+      "data_stores": []
+    }
+  ],
+  "flows": [
+    {
+      "id": "flow.web-to-api",
+      "name": "User requests from Web to API",
+      "source": "summit.web",
+      "target": "summit.api",
+      "contracts": ["docs/governance/CONSTITUTION.md"],
+      "data": ["graphql", "authn"],
+      "provenance_required": true
+    },
+    {
+      "id": "flow.api-to-graph",
+      "name": "API queries graph",
+      "source": "summit.api",
+      "target": "summit.graph",
+      "contracts": ["PROVENANCE_SCHEMA.md"],
+      "data": ["entities", "relationships"],
+      "provenance_required": true
+    },
+    {
+      "id": "flow.api-to-policy",
+      "name": "Policy checks",
+      "source": "summit.api",
+      "target": "summit.opa",
+      "contracts": ["docs/governance/RULEBOOK.md"],
+      "data": ["policy", "decision"],
+      "provenance_required": true
+    }
+  ],
+  "contracts": [
+    {
+      "id": "contract.readiness",
+      "path": "docs/SUMMIT_READINESS_ASSERTION.md",
+      "authority": "Chief Architect",
+      "scope": ["runtime", "governance", "quality"]
+    },
+    {
+      "id": "contract.agent",
+      "path": "agent-contract.json",
+      "authority": "GA Hardening Contract",
+      "scope": ["agent-runtime", "governance"]
+    }
+  ],
+  "queries": [
+    {
+      "id": "who-can-touch-branch-protection",
+      "intent": "Resolve roles that can modify branch protection",
+      "response_shape": "role -> permissions -> resources"
+    },
+    {
+      "id": "what-depends-on-graph",
+      "intent": "Find components that depend on summit.graph",
+      "response_shape": "component -> dependency"
+    },
+    {
+      "id": "what-requires-provenance",
+      "intent": "List flows that require provenance enforcement",
+      "response_shape": "flow -> contracts"
+    }
+  ]
+}
