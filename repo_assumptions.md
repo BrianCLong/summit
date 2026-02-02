@@ -1,43 +1,36 @@
-# repo_assumptions.md
+# Repo Assumptions & Reality Check
 
-## Verified
+## 1.3 Repo Reality Check (Verified vs ASSUMPTION)
 
-- Repository contents inspected locally; subsumption bundles and verifier script exist.
-- CI uses GitHub Actions workflows under `.github/workflows/`.
-- Evidence schemas and index live under `evidence/`.
+### Verified (public repo surface)
 
-## Assumed (validate ASAP)
+* **Repo exists**: Top-level directories include `api/`, `apis/`, `api-schemas/`, `apps/`, `bindings/`, `alerting/`, `RUNBOOKS/`, `SECURITY/`.
+* **Governance**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` exists and defines the "CI Core (Primary Gate)" and other required checks.
+* **Runtime (`api/`)**:
+  * **Language**: Python 3.9 (Verified via `api/Dockerfile`).
+  * **Framework**: FastAPI (Verified via `api/main.py`).
+  * **Auth**: Single stubbed API Key (`verify_api_key` in `api/main.py`). **Migration Required**.
+  * **Tenancy**: No multi-tenancy context found in `api/main.py`. **Build Required**.
+  * **Database**: Neo4j and Redis drivers present.
+  * **Observability**: OpenTelemetry configured.
+* **Bindings**: `bindings/ibrs-node` is a Node.js binding backed by Rust (`@napi-rs/cli`).
 
-- Required status check names remain to be confirmed against branch protection.
-- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
+### ASSUMPTIONS (must validate before executing PRs)
 
-## Must-not-touch (until validated)
+* **New Services**: Will use Python/FastAPI to match `api/` spine.
+* **Queue**: `maestro` package likely handles orchestration, but specific queue technology (Celery vs Redis Queues) for Platform Spine needs definition.
+* **OpenAPI**: `api/openapi.yaml` exists; assumed to be source-of-truth or generated.
 
-- Public API surfaces in `packages/**` (no breaking changes).
-- Existing GA gates / branch protection requirements.
-- Deployment configs / secrets / infra definitions.
+### Validation Checklist
 
-## Validation plan
+* [x] Verify `api/` runtime (Python 3.9 / FastAPI).
+* [x] Verify Auth pattern (Stub API Key).
+* [x] Verify Tenancy (None).
+* [x] Verify Governance Policy (`docs/ci/REQUIRED_CHECKS_POLICY.yml`).
+* [ ] Verify `maestro` queue mechanism.
 
-- Enumerate required checks via GitHub branch protection UI/API.
-- Confirm test runner (jest/vitest) and lint tooling.
+### Must-not-touch (until validated)
 
-## Ingress NGINX Retirement Bundle (Assumptions)
-
-### Verified
-
-- Bundle manifest and docs are now present under `subsumption/ingress-nginx-retirement` and `docs/**`.
-
-### Assumed (validate)
-
-- GitHub Actions required checks can be updated to include bundle-specific gates.
-- CI runners have Node.js 20+ available for the bundle verifier and deny gate scripts.
-
-### Must-not-touch (blast radius)
-
-- Runtime API surfaces and production deployment logic outside CI gating.
-
-### Validation plan
-
-- Confirm required check names in branch protection.
-- Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.
+* `docs/ci/REQUIRED_CHECKS_POLICY.yml` (Governance-controlled).
+* `.github/workflows/*` (Avoid CI breakage).
+* `SECURITY/*` baselines (Extend only, don't rewrite).
