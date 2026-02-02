@@ -8,6 +8,8 @@ A comprehensive platform for detecting and defending against adversarial misinfo
 - **Autonomous Tactic Evolution**: Self-evolving detection libraries that adapt to new adversarial techniques
 - **Adversarial Training**: GAN-based adversarial sample generation with LLM-assisted library extension
 - **Red/Blue Team Operations**: Scenario builder UI for adversarial exercises
+- **Bidirectional Processing**: Advanced forward and backward pass analysis with temperature controls
+- **Temperature-Controlled Detection**: Nuanced probabilistic outputs with tunable sensitivity
 - **Validation Suite**: Comprehensive benchmarking against state-of-the-art attacks
 
 ## Installation
@@ -94,6 +96,35 @@ print(results)
 - `PATENT_CLAIM_CHECKLIST.md`: Intellectual property mapping
 - `VALIDATION_REPORT.md`: Performance benchmarks
 - `example_usage.py`: Usage examples
+
+## Bidirectional Processing and Temperature Controls
+
+The platform now features advanced bidirectional processing capabilities with dynamic temperature controls:
+
+### Bidirectional Detection
+
+- Forward pass: Standard detection on original content
+- Backward pass: Detection on perturbed content variants
+- Fusion methods: Combine results using weighted average, max, min, or concatenation
+
+### Temperature Scaling
+
+- Adjustable sensitivity for detection outputs
+- Dynamic temperature based on detection confidence
+- Fine-tuned probabilistic analysis
+
+### Usage Examples
+
+```bash
+# Run bidirectional detection with custom temperature
+python main.py bidirectional --text "This may be false information" --temperature 1.2
+
+# Run with bidirectional processing disabled
+python main.py bidirectional --text "This may be false information" --disable-bidirectional
+
+# Analyze a file with bidirectional processing
+python main.py bidirectional --file /path/to/content.txt --temperature 0.8
+```
 
 ## Requirements
 
