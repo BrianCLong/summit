@@ -43,6 +43,7 @@ import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import narrativeRouter from './routes/narrative-routes.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
@@ -429,6 +430,7 @@ export const createApp = async () => {
   }
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
+  app.use('/api/narrative', narrativeRouter); // Visualization endpoints
   app.use('/api/predictive', predictiveRouter);
   app.use('/api/export', disclosuresRouter); // Mount export under /api/export as per spec
   app.use('/disclosures', disclosuresRouter); // Keep old mount for compat
