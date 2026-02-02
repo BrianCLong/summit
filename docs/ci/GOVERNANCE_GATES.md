@@ -32,7 +32,7 @@ Governance Meta Gate / meta-gate
 
 Blocks merges only when:
 - Policy validation returns FAIL
-- Determinism scan returns FAIL  
+- Determinism scan returns FAIL
 - Branch protection returns VERIFIED_DRIFT
 
 Does NOT block when:

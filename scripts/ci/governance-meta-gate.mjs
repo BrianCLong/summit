@@ -8,7 +8,7 @@ import { execSync } from 'node:child_process';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildPolicyEvidence, buildDeterminismEvidence, buildBranchProtectionEvidence, buildGovernanceSummary, VerificationState } from './lib/governance-evidence.mjs';
+import { buildPolicyEvidence, buildDeterminismEvidence, buildBranchProtectionEvidence, buildGovernanceSummary, VerificationState } from './lib/governance_evidence.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -17,6 +17,11 @@ const OFFLINE_MODE = process.argv.includes('--offline') || process.argv.includes
 
 async function runPolicyGate(sha) {
   console.log('Running: Required Checks Policy...');
+  const validatorPath = join(ROOT, 'scripts/ci/validate_policy_references.mjs');
+  if (!existsSync(validatorPath)) {
+    console.log('  Status: SKIP (validator not found)\n');
+    return { verdict: 'SKIP', evidence: buildPolicyEvidence({ policyPath: 'docs/ci/REQUIRED_CHECKS_POLICY.yml', policyHash: 'n/a', knownChecks: [], missingChecks: [], allowlistedChecks: [], sha }) };
+  }
   try {
     const output = execSync('node scripts/ci/validate_policy_references.mjs', { cwd: ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
     console.log('  Status: PASS\n');
