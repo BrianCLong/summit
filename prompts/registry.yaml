@@ -314,3 +314,28 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: pr-17714-update
+    version: v1
+    path: prompts/pr/pr-17714-update@v1.md
+    sha256: 197e7e05eb008021a4b9b25ea569189ac652b99b5deeda908b979aa678a1b328
+    description: Update PR 17714 scoped changes.
+    scope:
+      paths:
+        - docs/
+        - nds/
+        - prompts/pr/pr-17714-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+
