@@ -100,6 +100,13 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-pppt-501608-core-001": {
+      "files": [
+        "evidence/pppt-501608/report.json",
+        "evidence/pppt-501608/metrics.json",
+        "evidence/pppt-501608/stamp.json"
+      ]
     }
   }
 }

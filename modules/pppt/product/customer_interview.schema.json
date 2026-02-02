@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CustomerInterview",
+  "type": "object",
+  "required": ["customer_segment", "q_why_us", "q_what_keeps_you", "captured_by", "classification"],
+  "properties": {
+    "customer_segment": {"type": "string"},
+    "q_why_us": {"type": "string", "minLength": 10},
+    "q_what_keeps_you": {"type": "string", "minLength": 10},
+    "captured_by": {"type": "string"},
+    "classification": {"enum": ["public", "internal", "confidential"]}
+  },
+  "additionalProperties": false
+}

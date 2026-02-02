@@ -21,3 +21,7 @@ We are using these names in our CI pipelines until the official required check n
 ## Rename Plan
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+
+## PPPT Specific Checks (Discovery)
+- `tools/pppt/validate_evidence.py`
+- `tools/pppt/validate_fixtures.py`
