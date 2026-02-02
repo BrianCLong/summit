@@ -1,4 +1,5 @@
 import { ResidencyGuard } from '../../data-residency/residency-guard.js';
+import { RegionalFailoverService } from '../../services/RegionalFailoverService.js';
 
 export interface RoutingDecision {
     targetRegion: string;
@@ -38,24 +39,34 @@ export class GlobalTrafficSteering {
         }
 
         const primaryRegion = config.primaryRegion;
+        const failoverService = RegionalFailoverService.getInstance();
 
+        // 1. Resolve effective target based on health
+        const effectiveTarget = failoverService.resolveTargetRegion(primaryRegion);
+
+        if (effectiveTarget !== primaryRegion) {
+            return {
+                targetRegion: effectiveTarget,
+                isOptimal: false,
+                reason: `Primary region ${primaryRegion} is DOWN. Failing over to ${effectiveTarget}.`
+            };
+        }
+
+        // 2. Check if we are already in the optimal region
         if (primaryRegion === this.currentRegion) {
             return {
                 targetRegion: this.currentRegion,
                 isOptimal: true,
-                reason: 'Current region matches tenant primary residency.'
+                reason: 'Current region matches tenant primary residency and is healthy.'
             };
         }
 
-        // If current region is in allowedRegions, it might be "optimal enough" for read operations
-        // but for Task #96 we focus on primary steering.
         const isAllowed = config.allowedRegions.includes(this.currentRegion);
-
         if (isAllowed && config.residencyMode !== 'strict') {
             return {
                 targetRegion: this.currentRegion,
                 isOptimal: true,
-                reason: 'Current region is an allowed secondary region (Preferred mode).'
+                reason: 'Current region is an allowed secondary region (Preferred mode) and is healthy.'
             };
         }
 
