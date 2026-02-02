@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import axios from 'axios';
-import { DeliveryStatus, WebhookEventType } from '../types';
+import { DeliveryStatus, WebhookEventType } from '../types.js';
 
 // Mock functions declared before mocks
 const mockQueueAdd = jest.fn();
@@ -26,9 +26,9 @@ jest.unstable_mockModule('../../queues/config', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { WebhookService, backoffForAttempt, processDelivery } = await import('../service');
-const { signPayload, verifySignature } = await import('../signature');
-const { recordDeliveryMetric } = await import('../metrics');
+const { WebhookService, backoffForAttempt, processDelivery } = await import('../service.js');
+const { signPayload, verifySignature } = await import('../signature.js');
+const { recordDeliveryMetric } = await import('../metrics.js');
 
 describe('webhook signatures', () => {
   it('validates HMAC signatures', () => {

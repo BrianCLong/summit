@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/architecture/summit-graph.schema.json",
+  "title": "Summit World Model Graph Schema",
+  "description": "Canonical schema for Summit architecture nodes, edges, and provenance fields.",
+  "type": "object",
+  "required": ["nodes", "edges", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "provenance": { "$ref": "#/$defs/provenance" }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "type", "name", "authority", "lifecycle"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "service",
+            "frontend",
+            "agent",
+            "queue",
+            "database",
+            "graph-database",
+            "policy-engine",
+            "orchestrator",
+            "workflow",
+            "repo",
+            "integration",
+            "control",
+            "document"
+          ]
+        },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "path": { "type": "string" },
+        "environment": { "type": "string", "enum": ["dev", "staging", "prod", "shared"] },
+        "authority": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "lifecycle": {
+          "type": "string",
+          "enum": ["active", "deprecated", "deferred", "governed-exception"]
+        },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["id", "type", "from", "to", "authority", "provenance_required"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "depends_on",
+            "reads_from",
+            "writes_to",
+            "enforces",
+            "emits",
+            "triggers",
+            "governs",
+            "owned_by",
+            "deploys_to",
+            "authored_by",
+            "ingests_from",
+            "references"
+          ]
+        },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "authority": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "provenance_required": { "type": "boolean" },
+        "data": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source", "timestamp", "actor", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "source": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "actor": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "hash": { "type": "string" }
+      }
+    }
+  }
+}

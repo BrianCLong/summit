@@ -1,0 +1,25 @@
+---
+# GatewayClass defines the controller that implements Gateway resources
+# This is a cluster-scoped resource (like IngressClass)
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy
+  labels:
+    app.kubernetes.io/name: envoy-gateway
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  description: "Envoy Gateway controller for Summit platform ingress"
+---
+# Optional: GatewayClass for internal services (if needed)
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy-internal
+  labels:
+    app.kubernetes.io/name: envoy-gateway
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  description: "Envoy Gateway controller for internal Summit services"

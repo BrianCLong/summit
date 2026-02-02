@@ -14,13 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -33,13 +38,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -47,16 +57,11 @@ jobs:
       - name: Lint Reason Codes
         run: node scripts/release/lint-reason-codes.mjs
 
-  ga-risk-gate:
-    name: GA Risk Gate
-    uses: ./.github/workflows/ga-risk-gate.yml
-    with:
-      ref: ${{ github.sha }}
-    secrets: inherit
+  # NOTE: ga-risk-gate job removed - referenced workflow file does not exist
+  # TODO: Re-enable when ga-risk-gate.yml is created
 
   security-scan:
     name: Vulnerability and Security Scan
-    needs: [ga-risk-gate]
     uses: ./.github/workflows/ci-security.yml
     with:
       run_dast: false # DAST is too slow for a PR check
@@ -67,10 +72,10 @@ jobs:
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
+        uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
         run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
@@ -82,12 +87,13 @@ jobs:
         run: node scripts/sbom-policy-check.mjs
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14
 
+<<<<<<< HEAD
   skills-vet:
     name: Skills Vet (advisory)
     runs-on: ubuntu-latest
@@ -110,3 +116,5 @@ jobs:
       - name: Vet Skills (advisory)
         continue-on-error: true
         run: pnpm skill vet --all --advisory
+=======
+>>>>>>> main

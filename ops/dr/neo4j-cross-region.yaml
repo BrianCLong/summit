@@ -14,8 +14,8 @@ data:
   neo4j.conf: |
     dbms.default_listen_address=0.0.0.0
     dbms.routing.enabled=true
-    causal_clustering.discovery_type=K8S
-    causal_clustering.k8s.service_port_name=discovery
+    dbms.cluster.endpoints=$(POD_IP):6000
+    dbms.kubernetes.discovery.service_port_name=discovery
     dbms.security.procedures.unrestricted=apoc.*
 ---
 apiVersion: v1
@@ -45,7 +45,7 @@ spec:
     app.kubernetes.io/component: core
   ports:
     - name: discovery
-      port: 5000
+      port: 6000
       targetPort: discovery
 ---
 apiVersion: v1
@@ -106,7 +106,7 @@ spec:
                       - us-east-1
       containers:
         - name: neo4j
-          image: neo4j:5.22.0-enterprise
+          image: neo4j:2025.01-enterprise
           imagePullPolicy: IfNotPresent
           ports:
             - name: bolt
@@ -114,7 +114,7 @@ spec:
             - name: http
               containerPort: 7474
             - name: discovery
-              containerPort: 5000
+              containerPort: 6000
           env:
             - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
               value: "yes"
@@ -122,6 +122,8 @@ spec:
               value: /conf/neo4j.conf
             - name: NEO4J_dbms_mode
               value: CORE
+            - name: NEO4J_dbms_cluster_endpoints
+              value: summit-neo4j-discovery:6000
             - name: NEO4J_causal__clustering_expected__core__cluster__size
               value: "4"
             - name: NEO4J_causal__clustering_kubernetes_service__name
@@ -199,7 +201,7 @@ spec:
                       - us-west-2
       containers:
         - name: neo4j
-          image: neo4j:5.22.0-enterprise
+          image: neo4j:2025.01-enterprise
           imagePullPolicy: IfNotPresent
           ports:
             - name: bolt
@@ -207,7 +209,7 @@ spec:
             - name: http
               containerPort: 7474
             - name: discovery
-              containerPort: 5000
+              containerPort: 6000
           env:
             - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
               value: "yes"
@@ -215,6 +217,8 @@ spec:
               value: /conf/neo4j.conf
             - name: NEO4J_dbms_mode
               value: CORE
+            - name: NEO4J_dbms_cluster_endpoints
+              value: summit-neo4j-discovery:6000
             - name: NEO4J_causal__clustering_expected__core__cluster__size
               value: "4"
             - name: NEO4J_causal__clustering_kubernetes_service__name
@@ -292,7 +296,7 @@ spec:
                       - us-east-1
       containers:
         - name: neo4j
-          image: neo4j:5.22.0-enterprise
+          image: neo4j:2025.01-enterprise
           imagePullPolicy: IfNotPresent
           ports:
             - name: bolt
@@ -381,7 +385,7 @@ spec:
                       - us-west-2
       containers:
         - name: neo4j
-          image: neo4j:5.22.0-enterprise
+          image: neo4j:2025.01-enterprise
           imagePullPolicy: IfNotPresent
           ports:
             - name: bolt
@@ -470,7 +474,7 @@ spec:
                       - eu-central-1
       containers:
         - name: neo4j
-          image: neo4j:5.22.0-enterprise
+          image: neo4j:2025.01-enterprise
           imagePullPolicy: IfNotPresent
           ports:
             - name: bolt

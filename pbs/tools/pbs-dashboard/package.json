@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/pbs-dashboard",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "type": "module",
   "description": "Static dashboard generator for PBS backtest reports",
   "scripts": {

@@ -1,0 +1,47 @@
+{
+  "task_id": "MAESTRO_REASONING_BUDGET_TOOLGRAPH_V1",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "maestro-reasoning-budget-tool-graph",
+    "version": "v1",
+    "sha256": "f006e7ecaea63d8a7f00b39c9598589499e34aa72608b611e46092bdfa074d43",
+    "path": "prompts/maestro/maestro-reasoning-budget-tool-graph@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/maestro/",
+      "server/src/routes/maestro_routes.ts",
+      "server/src/intelgraph/client-impl.ts",
+      "policy/maestro/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/MAESTRO_REASONING_BUDGET_TOOLGRAPH_TASK.json",
+      "prompts/maestro/maestro-reasoning-budget-tool-graph@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["maestro", "governance", "policy", "verification"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "server/src/maestro/__tests__/budget.test.ts",
+      "server/src/maestro/__tests__/tool-graph.test.ts",
+      "server/src/maestro/__tests__/noise-harness.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Reasoning budgets are normalized and recorded on Maestro runs.",
+    "Tool dependency graphs can synthesize and verify connected task graphs.",
+    "Noise harness applies deterministic drift signals for tool testing.",
+    "OPA policy evaluates budget limits for run starts."
+  ],
+  "stop_conditions": [
+    "OPA evaluation errors on start_run.",
+    "Budget evidence cannot be recorded in run updates.",
+    "Unit tests for Maestro scaffolds fail."
+  ]
+}

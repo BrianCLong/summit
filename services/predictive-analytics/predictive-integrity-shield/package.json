@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/predictive-integrity-shield",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Predictive Integrity Shield - Detects prediction reliability issues and self-heals",
   "type": "module",
   "main": "dist/index.js",

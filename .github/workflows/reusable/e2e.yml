@@ -13,8 +13,8 @@ jobs:
       DOCKER_BUILDKIT: '1'
       COMPOSE_DOCKER_CLI_BUILD: '1'
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/checkout@v4 # v4
+      - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -25,7 +25,7 @@ jobs:
           version: 9
           run_install: false
       - name: Cache pnpm store
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@v4 # v4
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -42,7 +42,7 @@ jobs:
       - name: Bootstrap repo (make bootstrap)
         run: make bootstrap
       - name: Cache Docker layers
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@v4 # v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml', 'server/package.json', 'client/package.json') }}
@@ -100,14 +100,16 @@ jobs:
     env:
       NODE_VERSION: '20.x'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
+      DOCKER_BUILDKIT: '1'
+      COMPOSE_DOCKER_CLI_BUILD: '1'
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -115,11 +117,79 @@ jobs:
       - name: Enable corepack
         run: corepack enable
 
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Cache pnpm store
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: build-artifacts
+        continue-on-error: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run smoke E2E suite
-        run: pnpm run smoke:ci
+      - name: Bootstrap repo (make bootstrap)
+        run: make bootstrap
+
+      - name: Cache Docker layers
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml', 'server/package.json', 'client/package.json') }}
+          restore-keys: ${{ runner.os }}-buildx-
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build API image (cached)
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile.dev
+          tags: summit/api:ci
+          push: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Build client image (cached)
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          context: ./client
+          file: ./client/Dockerfile.dev
+          tags: summit/web:ci
+          push: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      # Move cache to prevent unbounded growth
+      - name: Rotate Docker cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+
+      - name: Bring up stack (make up)
+        run: make up
+
+      - name: Golden path smoke tests
+        run: make smoke
+
+      - name: Compose logs on failure
+        if: failure()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
+
+      - name: Tear down stack
+        if: always()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v

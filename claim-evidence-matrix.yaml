@@ -1,0 +1,147 @@
+# claim-evidence-matrix.yaml
+# Maps marketing claims to automated evidence
+#
+# This file establishes the contractual link between marketing claims
+# and the mechanical evidence that substantiates them. CI validates
+# that all referenced tests and workflows exist.
+#
+# Schema:
+#   claims[].id           - Unique identifier (CLAIM-{PILLAR}-{NUM})
+#   claims[].pillar       - Narrative pillar (Truth, Safety, Control)
+#   claims[].statement    - The marketing claim text
+#   claims[].source       - Source document containing the claim
+#   claims[].mechanical_evidence[].component - Code component name
+#   claims[].mechanical_evidence[].tests     - Test file globs
+#   claims[].mechanical_evidence[].ci_jobs   - CI job references
+
+version: "1.0.0"
+last_updated: "2026-01-27"
+
+claims:
+  # ============================================================================
+  # TRUTH PILLAR
+  # ============================================================================
+  - id: CLAIM-TRUTH-01
+    pillar: Truth
+    statement: "The system does not hallucinate or lie about data origin."
+    source: docs/marketing/NARRATIVE_ARCHITECTURE.md
+    mechanical_evidence:
+      - component: ProvenanceLedger
+        description: "Immutable audit log of all data transformations"
+        tests:
+          - "server/src/provenance/__tests__/*.test.ts"
+          - "server/src/audit/__tests__/ledger*.test.ts"
+        ci_jobs:
+          - "ci-core / unit-tests"
+          - "ci-core / integration-tests"
+      - component: ArtifactSigning
+        description: "Cryptographic attestation of artifacts"
+        tests:
+          - "server/src/security/__tests__/signing*.test.ts"
+        ci_jobs:
+          - "supply-chain-attest / attest"
+          - "sbom-scan / sbom"
+
+  - id: CLAIM-TRUTH-02
+    pillar: Truth
+    statement: "Every insight is traceable from ingestion to transformation to consumption."
+    source: docs/marketing/NARRATIVE_ARCHITECTURE.md
+    mechanical_evidence:
+      - component: LineageTracker
+        description: "Data lineage graph construction and query"
+        tests:
+          - "server/src/graph/__tests__/lineage*.test.ts"
+          - "server/src/intelgraph/__tests__/provenance*.test.ts"
+        ci_jobs:
+          - "ci-core / unit-tests"
+
+  # ============================================================================
+  # SAFETY PILLAR
+  # ============================================================================
+  - id: CLAIM-SAFETY-01
+    pillar: Safety
+    statement: "The system protects itself and its users from harm."
+    source: docs/marketing/NARRATIVE_ARCHITECTURE.md
+    mechanical_evidence:
+      - component: TenantSafePostgres
+        description: "Database wrapper enforcing tenant isolation"
+        tests:
+          - "server/src/db/__tests__/tenant*.test.ts"
+          - "server/src/database/__tests__/isolation*.test.ts"
+        ci_jobs:
+          - "ci-core / integration-tests"
+          - "ci-core / soc-control-verification"
+      - component: OPA_Gates
+        description: "Policy-as-code authorization layer"
+        tests:
+          - "policies/**/*.rego"
+          - ".ci/policies/**/*.rego"
+        ci_jobs:
+          - "ci-core / soc-control-verification"
+
+  - id: CLAIM-SAFETY-02
+    pillar: Safety
+    statement: "Identity is verified via short-lived JWTs and step-up authentication."
+    source: docs/marketing/NARRATIVE_ARCHITECTURE.md
+    mechanical_evidence:
+      - component: AuthenticationService
+        description: "JWT issuance and validation"
+        tests:
+          - "server/src/auth/__tests__/*.test.ts"
+          - "server/src/security/__tests__/jwt*.test.ts"
+        ci_jobs:
+          - "ci-core / unit-tests"
+          - "ci-core / integration-tests"
+
+  # ============================================================================
+  # CONTROL PILLAR
+  # ============================================================================
+  - id: CLAIM-CONTROL-01
+    pillar: Control
+    statement: "The operator is always in command of cost and risk."
+    source: docs/marketing/NARRATIVE_ARCHITECTURE.md
+    mechanical_evidence:
+      - component: BudgetTracker
+        description: "Resource consumption tracking and limits"
+        tests:
+          - "server/src/orchestration/__tests__/budget*.test.ts"
+          - "server/src/maestro/__tests__/cost*.test.ts"
+        ci_jobs:
+          - "ci-core / unit-tests"
+      - component: QuotaManager
+        description: "Tenant resource quota enforcement"
+        tests:
+          - "server/src/orchestration/__tests__/quota*.test.ts"
+        ci_jobs:
+          - "ci-core / unit-tests"
+
+  - id: CLAIM-CONTROL-02
+    pillar: Control
+    statement: "Priority workloads get resources while enforcing strict quotas."
+    source: docs/marketing/NARRATIVE_ARCHITECTURE.md
+    mechanical_evidence:
+      - component: MaestroOrchestrator
+        description: "Workload priority and scheduling"
+        tests:
+          - "server/src/maestro/__tests__/*.test.ts"
+          - "packages/maestro-*/__tests__/*.test.ts"
+        ci_jobs:
+          - "ci-core / unit-tests"
+          - "ci-core / integration-tests"
+
+# ============================================================================
+# VERIFICATION METADATA
+# ============================================================================
+verification:
+  required_ci_workflows:
+    - ci-core.yml
+    - supply-chain-attest.yml
+    - sbom-scan.yml
+
+  evidence_retention_days: 90
+
+  audit_frequency: quarterly
+
+  exceptions:
+    # Claims that are verified through manual review rather than automated tests
+    - claim_id: null  # No exceptions currently

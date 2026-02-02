@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/rarl",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Risk-adaptive rate limiter SDK",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,12 @@
     "build": "tsc -p tsconfig.json",
     "clean": "rm -rf dist"
   },
-  "keywords": ["rate-limiter", "quota", "risk", "sdk"],
+  "keywords": [
+    "rate-limiter",
+    "quota",
+    "risk",
+    "sdk"
+  ],
   "author": "Summit Platform",
   "license": "MIT",
   "dependencies": {},

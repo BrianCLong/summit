@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-catalog",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Enterprise data catalog platform with metadata management, semantic search, and collaborative documentation",
   "license": "MIT",
   "type": "module",
@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

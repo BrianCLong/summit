@@ -1,0 +1,10 @@
+{
+  "items": [
+    {
+      "evidence_id": "EVD-ATP-LATENT-EVIDENCE-002",
+      "report": "examples/report.json",
+      "metrics": "examples/metrics.json",
+      "stamp": "examples/stamp.json"
+    }
+  ]
+}
