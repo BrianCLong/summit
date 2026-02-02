@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["findings", "toolchain"],
+  "properties": {
+    "toolchain": { "type": "object" },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": ["tool", "rule_id", "severity", "file", "fingerprint", "message"],
+      "properties": {
+        "tool": { "type": "string" },
+        "rule_id": { "type": "string" },
+        "severity": { "type": "string", "enum": ["info","minor","major","critical","blocker"] },
+        "message": { "type": "string" },
+        "file": { "type": "string" },
+        "line": { "type": "integer", "minimum": 1 },
+        "fingerprint": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
