@@ -84,6 +84,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cogres-evidence-pr1
+    version: v1
+    path: prompts/evidence/cogres-evidence-pr1@v1.md
+    sha256: 9f2bc8eb4a7259823375fdbd73d06e074cd1eb7083d5fdddf5073cb91f166561
+    description: Scaffold CogRes evidence schemas, validator entrypoint, and roadmap telemetry.
+    scope:
+      paths:
+        - evidence/schemas/
+        - tools/evidence/validate_bundle.py
+        - docs/roadmap/STATUS.json
+        - prompts/evidence/cogres-evidence-pr1@v1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

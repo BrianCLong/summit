@@ -5,28 +5,46 @@
   "required": ["version"],
   "properties": {
     "version": {
-      "type": "string"
+      "anyOf": [
+        { "type": "integer", "enum": [1] },
+        { "type": "string" }
+      ]
     },
     "items": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["files"],
-        "properties": {
-          "evidence_id": { "type": "string" },
-          "files": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
-          "artifacts": {
-            "type": "array",
-            "items": { "type": "string" }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["evidence_id", "files"],
+            "properties": {
+              "evidence_id": { "type": "string" },
+              "files": { "type": "array", "items": { "type": "string" } }
+            }
           }
         },
-        "additionalProperties": true
-      }
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["files"],
+            "properties": {
+              "evidence_id": { "type": "string" },
+              "files": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "title": { "type": "string" },
+              "category": { "type": "string" },
+              "artifacts": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      ]
     },
     "map": {
       "type": "object",

@@ -1,17 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Stamp",
+  "title": "summit.evidence.stamp",
   "type": "object",
-  "required": ["evidence_id", "generated_at"],
-  "properties": {
-    "evidence_id": {
-      "type": "string"
+  "anyOf": [
+    {
+      "required": ["evidence_id", "created_at", "toolchain"],
+      "properties": {
+        "evidence_id": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "toolchain": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
     },
-    "created_at": {
-      "type": "string"
-    },
-    "generated_at": {
-      "type": "string"
+    {
+      "required": ["evidence_id", "generated_at"],
+      "properties": {
+        "evidence_id": { "type": "string" },
+        "created_at": { "type": "string" },
+        "generated_at": { "type": "string" }
+      }
     }
-  }
+  ],
+  "additionalProperties": true
 }
