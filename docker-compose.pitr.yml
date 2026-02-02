@@ -11,8 +11,8 @@ services:
     container_name: summit-postgres-pitr
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
-      POSTGRES_USER: ${POSTGRES_USER:-summit}
+      POSTGRES_DB: ${POSTGRES_DB:-maestro}
+      POSTGRES_USER: ${POSTGRES_USER:-maestro}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       # WAL-G Configuration
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID for WAL archiving}
@@ -32,7 +32,7 @@ services:
       - postgres_pitr_wal:/var/lib/postgresql/wal
       - postgres_pitr_logs:/var/log/postgresql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}']
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-maestro} -d ${POSTGRES_DB:-maestro}']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -50,7 +50,7 @@ services:
     container_name: summit-postgres-exporter
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres-pitr:5432/${POSTGRES_DB:-summit_dev}?sslmode=disable
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-maestro}:${POSTGRES_PASSWORD}@postgres-pitr:5432/${POSTGRES_DB:-maestro}?sslmode=disable
     ports:
       - '9187:9187'
     depends_on:
@@ -82,7 +82,7 @@ services:
     environment:
       PGHOST: postgres-pitr
       PGPORT: 5432
-      PGUSER: ${POSTGRES_USER:-summit}
+      PGUSER: ${POSTGRES_USER:-maestro}
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
