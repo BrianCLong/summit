@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/factcert",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc",
+    "issue": "tsx src/cli/issue.ts",
+    "pack": "tsx src/cli/pack.ts",
+    "verify-pack": "tsx src/cli/verify-pack.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.0",
+    "fast-json-stable-stringify": "^2.1.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.0",
+    "typescript": "^5.7.0",
+    "@types/node": "^20.0.0",
+    "tsx": "^4.19.0",
+    "@types/fast-json-stable-stringify": "^2.0.0",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1"
+  }
+}
