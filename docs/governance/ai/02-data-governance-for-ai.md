@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 2: Data Governance for AI (rights, provenance, and minimization)
 
 1.  Define what data can be used for training/fine-tuning (and who approves).

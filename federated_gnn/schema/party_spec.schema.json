@@ -1,0 +1,12 @@
+{
+  "$id": "party_spec.schema.json",
+  "type": "object",
+  "required": ["party_id", "trust_domain", "signing_key_id", "feature_namespaces"],
+  "properties": {
+    "party_id": {"type": "string"},
+    "trust_domain": {"type": "string"},
+    "signing_key_id": {"type": "string"},
+    "feature_namespaces": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

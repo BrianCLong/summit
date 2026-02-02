@@ -1,5 +1,5 @@
 import { AFLStore } from '@intelgraph/afl-store';
-import { applyTariffToRequest } from '../middleware/tariff';
+import { applyTariffToRequest } from '../middleware/tariff.js';
 
 const store = new AFLStore(process.env.AFL_REDIS_URL);
 

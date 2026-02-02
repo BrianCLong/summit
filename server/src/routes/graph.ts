@@ -1,14 +1,14 @@
 // @ts-nocheck
 import express, { Request, Response, NextFunction } from 'express';
-import { Neo4jGraphService } from '../services/GraphService';
-import { Neo4jGraphAnalyticsService } from '../services/GraphAnalyticsService';
-import { GraphPatternService } from '../services/GraphPatternService';
-import { InvestigationSessionService } from '../services/InvestigationSessionService';
-import { ensureAuthenticated } from '../middleware/auth'; // Assuming this exists based on context
-import { TenantId } from '../graph/types';
-import logger from '../utils/logger';
-import { provenanceLedger } from '../provenance/ledger';
-import QuotaManager from '../lib/resources/quota-manager';
+import { Neo4jGraphService } from '../services/GraphService.js';
+import { Neo4jGraphAnalyticsService } from '../services/GraphAnalyticsService.js';
+import { GraphPatternService } from '../services/GraphPatternService.js';
+import { InvestigationSessionService } from '../services/InvestigationSessionService.js';
+import { ensureAuthenticated } from '../middleware/auth.js'; // Assuming this exists based on context
+import { TenantId } from '../graph/types.js';
+import logger from '../utils/logger.js';
+import { provenanceLedger } from '../provenance/ledger.js';
+import QuotaManager from '../lib/resources/quota-manager.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();

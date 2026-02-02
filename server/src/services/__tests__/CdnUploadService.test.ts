@@ -2,16 +2,8 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
-import { CdnUploadService } from '../CdnUploadService.js';
 
 const sendMock = jest.fn().mockResolvedValue({});
-
-jest.mock('@aws-sdk/client-s3', () => {
-  return {
-    S3Client: jest.fn(() => ({ send: sendMock })),
-    PutObjectCommand: jest.fn((args) => args),
-  };
-});
 
 describe('CdnUploadService', () => {
   beforeEach(() => {
@@ -19,6 +11,13 @@ describe('CdnUploadService', () => {
   });
 
   it('uploads assets and returns CDN URLs', async () => {
+    jest.resetModules();
+    await jest.unstable_mockModule('@aws-sdk/client-s3', () => ({
+      S3Client: jest.fn(() => ({ send: sendMock })),
+      PutObjectCommand: jest.fn((args) => args),
+    }));
+
+    const { CdnUploadService } = await import('../CdnUploadService.js');
     const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'cdn-upload-'));
     const filePath = path.join(tmpDir, 'file.jpg');
     await fs.writeFile(filePath, 'content');

@@ -1,0 +1,9 @@
+On branch work
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   pnpm-lock.yaml
+	modified:   verification/webapp_failed.png
+	modified:   verification/webapp_loaded.png
+
+no changes added to commit (use "git add" and/or "git commit -a")

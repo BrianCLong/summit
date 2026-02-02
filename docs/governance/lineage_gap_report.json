@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-01-25T09:00:00Z",
+  "gaps": [
+    {
+      "gap_id": "GAP-LIN-001",
+      "name": "Non-Deterministic Lineage IDs",
+      "description": "ProvenanceLedgerV2 generates random IDs (prov_${timestamp}_${random}) for new entries. This prevents deterministic replay of lineage events from logs or upstream jobs.",
+      "severity": "P0",
+      "blast_radius": "Compliance, Audit, Recovery",
+      "recoverability": "No (without manual reconciliation)",
+      "recommended_fix": "Enforce deterministic IDs based on job/run/step context or payload hash."
+    },
+    {
+      "gap_id": "GAP-LIN-002",
+      "name": "Missing Graph Recovery Automation",
+      "description": "No automated procedure exists to rebuild the Neo4j Canonical Graph from the Postgres Ledger. Recovery relies on tribal knowledge.",
+      "severity": "P1",
+      "blast_radius": "Availability, RTO",
+      "recoverability": "Yes (Manual)",
+      "recommended_fix": "Implement and test automated graph rebuilding script."
+    },
+    {
+      "gap_id": "GAP-LIN-003",
+      "name": "Undefined Lineage Durability Tiers",
+      "description": "No formal definition of Hot/Warm/Cold tiers for lineage data, leading to ambiguity in RPO/RTO expectations.",
+      "severity": "P2",
+      "blast_radius": "Operations, Cost",
+      "recoverability": "N/A",
+      "recommended_fix": "Document durability tiers and align with compliance requirements."
+    }
+  ]
+}

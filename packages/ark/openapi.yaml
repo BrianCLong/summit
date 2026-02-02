@@ -1,0 +1,329 @@
+openapi: 3.0.0
+info:
+  title: Agentic Reasoning Kernel (ARK) API
+  version: 0.1.0
+  description: API for Summit's Agentic Reasoning Kernel (Runtime, Governance, Orchestration).
+servers:
+  - url: /api/v1/ark
+paths:
+  # --- Run API ---
+  /runs:
+    post:
+      summary: Create a new agent run
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tenant_id:
+                  type: string
+                project_id:
+                  type: string
+                policy_profile:
+                  type: string
+                initial_prompt:
+                  type: string
+      responses:
+        '201':
+          description: Run created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+
+  /runs/{id}:
+    get:
+      summary: Get run metadata and status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Run details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Run'
+
+  /runs/{id}/events:
+    post:
+      summary: Append an event to the run ledger (Internal/System use)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: Event appended
+
+  /runs/{id}/trace:
+    get:
+      summary: Get full event stream for a run
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event stream
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+
+  /runs/{id}/replay:
+    post:
+      summary: Deterministically replay a past run
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Replay started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  new_run_id:
+                    type: string
+
+  # --- Tool Registry API ---
+  /tools:
+    get:
+      summary: List registered tools
+      responses:
+        '200':
+          description: List of tools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tool'
+
+  /tools/register:
+    post:
+      summary: Register a new tool
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tool'
+      responses:
+        '201':
+          description: Tool registered
+
+  /tools/{toolId}/schema:
+    get:
+      summary: Get tool input/output schema
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tool schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  input:
+                    type: object
+                  output:
+                    type: object
+
+  /tools/{toolId}/test:
+    post:
+      summary: Execute tool in sandbox (Test mode)
+      parameters:
+        - name: toolId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inputs:
+                  type: object
+      responses:
+        '200':
+          description: Tool execution result
+
+  # --- Evidence API ---
+  /evidence:
+    post:
+      summary: Ingest evidence
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Evidence'
+      responses:
+        '201':
+          description: Evidence stored
+
+  /evidence/{id}:
+    get:
+      summary: Get evidence details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evidence details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+
+  /claims/link:
+    post:
+      summary: Link a claim/output to evidence
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimLink'
+      responses:
+        '201':
+          description: Link created
+
+  # --- Memory API ---
+  /memory/write:
+    post:
+      summary: Write to memory (Policy filtered)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                metadata:
+                  type: object
+      responses:
+        '201':
+          description: Memory written
+
+  /memory/query:
+    post:
+      summary: Query memory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                filters:
+                  type: object
+      responses:
+        '200':
+          description: Search results
+
+  /memory/distill-skill:
+    post:
+      summary: Trigger skill distillation from run traces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                run_ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '202':
+          description: Distillation job started
+
+components:
+  schemas:
+    Run:
+      type: object
+      properties:
+        run_id:
+          type: string
+        status:
+          type: string
+          enum: [pending, running, paused, completed, failed, cancelled]
+        tenant_id:
+          type: string
+        project_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    Event:
+      type: object
+      properties:
+        event_id:
+          type: string
+        type:
+          type: string
+        ts:
+          type: string
+          format: date-time
+        payload:
+          type: object
+    Tool:
+      type: object
+      properties:
+        tool_id:
+          type: string
+        name:
+          type: string
+        risk_class:
+          type: string
+          enum: [low, medium, high, critical]
+    Evidence:
+      type: object
+      properties:
+        evidence_id:
+          type: string
+        content_hash:
+          type: string
+    ClaimLink:
+      type: object
+      properties:
+        claim_id:
+          type: string
+        output_id:
+          type: string
+        evidence_ids:
+          type: array
+          items:
+            type: string

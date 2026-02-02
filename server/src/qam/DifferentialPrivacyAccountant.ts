@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { EventEmitter } from 'events';
-import { createLogger } from '../config/logger';
+import { createLogger } from '../config/logger.js';
 
 const logger = createLogger('DifferentialPrivacyAccountant');
 

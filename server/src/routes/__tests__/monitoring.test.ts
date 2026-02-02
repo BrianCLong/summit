@@ -26,13 +26,13 @@ jest.unstable_mockModule('../../monitoring/metrics', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const monitoringRouter = (await import('../monitoring')).default;
+const monitoringRouter = (await import('../monitoring.js')).default;
 const {
   goldenPathStepTotal,
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   uiErrorBoundaryCatchTotal,
-} = await import('../../monitoring/metrics');
+} = await import('../../monitoring/metrics.js');
 
 const app = express();
 app.use(express.json());

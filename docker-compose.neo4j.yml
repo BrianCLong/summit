@@ -1,6 +1,6 @@
 services:
   neo4j-ephemeral:
-    image: neo4j:5.22-community
+    image: neo4j:2025.01
     container_name: neo4j-ephemeral
     environment:
       - NEO4J_AUTH=neo4j/testtest1
