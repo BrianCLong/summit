@@ -12,6 +12,7 @@ import {
   hashBuffer,
   normalizeRelativePath,
   scanTimestampKeys,
+  scanTimestampValues,
   sortEvidenceEntries,
   writeJsonFile,
 } from './lib/evidence_id_consistency.mjs';
@@ -105,6 +106,7 @@ const deterministicScan = [];
 for (const filePath of [reportPath, metricsPath, aiLedgerPath]) {
   const payload = JSON.parse(await fs.readFile(filePath, 'utf8'));
   deterministicScan.push(...scanTimestampKeys(payload));
+  deterministicScan.push(...scanTimestampValues(payload));
 }
 if (deterministicScan.length > 0) {
   console.error(

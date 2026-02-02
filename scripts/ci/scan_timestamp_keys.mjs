@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs/promises';
 import process from 'node:process';
-import { scanTimestampKeys } from './lib/evidence_id_consistency.mjs';
+import { scanTimestampKeys, scanTimestampValues } from './lib/evidence_id_consistency.mjs';
 
 const args = process.argv.slice(2);
 const mode = args[0];
@@ -25,8 +25,12 @@ if (!requireTimestamps && !disallowTimestamps) {
 let found = [];
 for (const file of files) {
   const raw = await fs.readFile(file, 'utf8');
-  const parsed = JSON.parse(raw);
-  const matches = scanTimestampKeys(parsed);
+  const parsed = JSON.parse(raw.replace(/^\uFEFF/, ''));
+  const keyMatches = scanTimestampKeys(parsed);
+  const valueMatches = scanTimestampValues(parsed);
+  const matches = disallowTimestamps
+    ? Array.from(new Set([...keyMatches, ...valueMatches]))
+    : keyMatches;
   if (matches.length > 0) {
     found.push({ file, matches });
   }

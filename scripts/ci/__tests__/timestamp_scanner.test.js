@@ -209,6 +209,21 @@ describe('scanTimestampValues', () => {
     };
     expect(scanTimestampValues(payload)).toEqual([]);
   });
+
+  test('detects embedded ISO8601 timestamps in strings', () => {
+    const payload = {
+      log: 'Started at 2026-01-01T00:00:00Z for tenant A',
+    };
+    expect(scanTimestampValues(payload)).toEqual(['log']);
+  });
+
+  test('detects epoch timestamps in string values', () => {
+    const payload = {
+      epochMs: '1735689600000',
+      epochS: '1735689600',
+    };
+    expect(scanTimestampValues(payload).sort()).toEqual(['epochMs', 'epochS']);
+  });
 });
 
 describe('isLikelyEpoch', () => {
@@ -236,6 +251,40 @@ describe('isLikelyEpoch', () => {
     expect(isLikelyEpoch(undefined)).toBe(false);
     expect(isLikelyEpoch(NaN)).toBe(false);
     expect(isLikelyEpoch(Infinity)).toBe(false);
+  });
+});
+
+describe('isTimestampValue', () => {
+  test('detects ISO8601 datetime strings', () => {
+    expect(isTimestampValue('2026-01-01T00:00:00Z')).toBe(true);
+    expect(isTimestampValue('2026-01-01T12:30:45.123Z')).toBe(true);
+    expect(isTimestampValue('2026-01-01T00:00:00+00:00')).toBe(true);
+  });
+
+  test('detects ISO8601 date-only strings', () => {
+    expect(isTimestampValue('2026-01-01')).toBe(true);
+    expect(isTimestampValue('1999-12-31')).toBe(true);
+  });
+
+  test('detects embedded ISO8601 inside strings', () => {
+    expect(isTimestampValue('Started at 2026-01-01T00:00:00Z')).toBe(true);
+  });
+
+  test('detects epoch strings', () => {
+    expect(isTimestampValue('1735689600000')).toBe(true);
+    expect(isTimestampValue('1735689600')).toBe(true);
+  });
+
+  test('rejects invalid date formats', () => {
+    expect(isTimestampValue('01-01-2026')).toBe(false);
+    expect(isTimestampValue('2026/01/01')).toBe(false);
+    expect(isTimestampValue('January 1, 2026')).toBe(false);
+  });
+
+  test('rejects non-strings', () => {
+    expect(isTimestampValue(1735689600000)).toBe(false);
+    expect(isTimestampValue(null)).toBe(false);
+    expect(isTimestampValue({})).toBe(false);
   });
 });
 
