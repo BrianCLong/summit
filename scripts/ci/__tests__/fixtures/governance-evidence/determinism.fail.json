@@ -1,0 +1,18 @@
+{
+  "findings": [
+    {
+      "file": "artifacts/evidence-id-consistency/report.json",
+      "pointer": "meta.created_at"
+    },
+    {
+      "file": "artifacts/evidence-id-consistency/report.json",
+      "pointer": "meta.updated_at"
+    }
+  ],
+  "kind": "determinism_scan",
+  "scanned_files_count": 3,
+  "scanned_files_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "scanned_root": "artifacts/evidence-id-consistency",
+  "schema_version": 1,
+  "verdict": "FAIL"
+}

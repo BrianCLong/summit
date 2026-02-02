@@ -100,7 +100,7 @@ conditional_required:
       - "^\\.github/workflows/supply-chain"
       - "^scripts/security/"
 
-  - name: "Docker Build"
+  - name: "Docker Build & Security Scan"
     workflow: "docker-build.yml"
     rationale: "Docker image build and security validation"
     when_paths_match:
@@ -108,7 +108,7 @@ conditional_required:
       - "^docker-compose"
       - "^\\.dockerignore$"
 
-  - name: "Schema Compatibility"
+  - name: "Schema Compatibility Check"
     workflow: "schema-compat.yml"
     rationale: "API schema backward compatibility checks"
     when_paths_match:
