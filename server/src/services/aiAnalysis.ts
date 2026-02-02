@@ -1,26 +1,31 @@
-// @ts-ignore
-import { default as pino } from 'pino';
+import logger from '../utils/logger.js';
+import { z } from 'zod/v4';
 
-// @ts-ignore
-const logger: pino.Logger = (pino as any)();
+export const EntityExtractionSchema = z.object({
+  text: z.string(),
+  label: z.string(),
+  confidence: z.number().min(0).max(1),
+  start: z.number(),
+  end: z.number(),
+});
 
-interface EntityExtractionResult {
-  entities: Array<{
-    text: string;
-    label: string;
-    confidence: number;
-    start: number;
-    end: number;
-  }>;
-  relationships: Array<{
-    source: string;
-    target: string;
-    type: string;
-    confidence: number;
-  }>;
-}
+export const RelationshipExtractionSchema = z.object({
+  source: z.string(),
+  target: z.string(),
+  type: z.string(),
+  confidence: z.number().min(0).max(1),
+});
 
-interface TextAnalysisOptions {
+export const AnalysisResultSchema = z.object({
+  entities: z.array(EntityExtractionSchema),
+  relationships: z.array(RelationshipExtractionSchema),
+});
+
+export type EntityExtractionResult = z.infer<typeof AnalysisResultSchema>;
+export type EntityExtraction = z.infer<typeof EntityExtractionSchema>;
+export type RelationshipExtraction = z.infer<typeof RelationshipExtractionSchema>;
+
+export interface TextAnalysisOptions {
   extractEntities?: boolean;
   extractRelationships?: boolean;
   confidenceThreshold?: number;
@@ -106,8 +111,8 @@ export class AIAnalysisService {
     options: TextAnalysisOptions = {},
   ): Promise<EntityExtractionResult> {
     try {
-      const entities: EntityExtractionResult['entities'] = [];
-      const relationships: EntityExtractionResult['relationships'] = [];
+      const entities: EntityExtraction[] = [];
+      const relationships: RelationshipExtraction[] = [];
 
       // Extract entities using patterns
       for (const [entityType, patterns] of Object.entries(
@@ -115,6 +120,8 @@ export class AIAnalysisService {
       )) {
         for (const pattern of patterns) {
           let match;
+          // Reset lastIndex for global regex
+          pattern.lastIndex = 0;
           while ((match = pattern.exec(text)) !== null) {
             const entityText = match[1] || match[0];
             const confidence = this.calculateEntityConfidence(
@@ -139,6 +146,8 @@ export class AIAnalysisService {
       if (options.extractRelationships) {
         for (const relationPattern of this.relationshipPatterns) {
           let match;
+          // Reset lastIndex for global regex
+          relationPattern.pattern.lastIndex = 0;
           while ((match = relationPattern.pattern.exec(text)) !== null) {
             const source = match[1]?.trim();
             const target = match[3]?.trim();
@@ -163,14 +172,17 @@ export class AIAnalysisService {
         `AI Analysis completed. Entities Found: ${uniqueEntities.length}, Relationships Found: ${uniqueRelationships.length}, Text Length: ${text.length}`,
       );
 
-      return {
+      const result = {
         entities: uniqueEntities.sort((a, b) => b.confidence - a.confidence),
         relationships: uniqueRelationships.sort(
           (a, b) => b.confidence - a.confidence,
         ),
       };
+
+      // Validate result against schema
+      return AnalysisResultSchema.parse(result);
     } catch (error: any) {
-      logger.error(`AI Analysis failed. Error: ${(error as Error).message}`);
+      logger.error(`AI Analysis failed. Error: ${error.message}`);
       return { entities: [], relationships: [] };
     }
   }
@@ -419,8 +431,8 @@ export class AIAnalysisService {
    * Remove duplicate entities
    */
   private deduplicateEntities(
-    entities: EntityExtractionResult['entities'],
-  ): EntityExtractionResult['entities'] {
+    entities: EntityExtraction[],
+  ): EntityExtraction[] {
     const seen = new Set<string>();
     return entities.filter((entity) => {
       const key = `${entity.text.toLowerCase()}-${entity.label}`;
@@ -434,8 +446,8 @@ export class AIAnalysisService {
    * Remove duplicate relationships
    */
   private deduplicateRelationships(
-    relationships: EntityExtractionResult['relationships'],
-  ): EntityExtractionResult['relationships'] {
+    relationships: RelationshipExtraction[],
+  ): RelationshipExtraction[] {
     const seen = new Set<string>();
     return relationships.filter((rel) => {
       const key = `${rel.source.toLowerCase()}-${rel.type}-${rel.target.toLowerCase()}`;

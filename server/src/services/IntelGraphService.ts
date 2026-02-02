@@ -1,4 +1,3 @@
-// @ts-nocheck
 // server/src/services/IntelGraphService.ts
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import { randomUUID } from 'crypto';
@@ -7,7 +6,7 @@ import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema.
 import { AppError, NotFoundError, DatabaseError } from '../lib/errors.js';
 import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import { Counter, Histogram } from 'prom-client';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 // --- Zod Validation Schemas for Service Layer ---
 const CreateEntitySchema = z.object({ name: z.string().min(1), description: z.string().optional() });
@@ -35,7 +34,7 @@ const intelGraphOperationsCounter = new Counter({
  * @description A hardened, production-ready singleton service for all IntelGraph interactions.
  */
 export class IntelGraphService {
-  private static instance: IntelGraphService;
+  private static instance: IntelGraphService | null = null;
   private driver: Driver;
   private ledger: ProvenanceLedgerV2;
 
@@ -251,7 +250,7 @@ export class IntelGraphService {
 
       const cypher = `MATCH (n:${label}) WHERE ${whereClauses.join(' AND ')} RETURN n LIMIT $limit`;
       const result = await session.run(cypher, params);
-      return result.records.map(r => r.get('n').properties);
+      return result.records.map((r: any) => r.get('n').properties);
     });
   }
 

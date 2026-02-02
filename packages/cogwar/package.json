@@ -1,0 +1,11 @@
+{
+  "name": "@summit/cogwar",
+  "version": "1.0.0",
+  "description": "Summit Cognitive Warfare Simulation Module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
