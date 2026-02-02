@@ -97,7 +97,6 @@ const config: Config = {
     'src/maestro/runs/__tests__/',
     'src/memory/__tests__/',
     'src/metering/__tests__/',
-    'src/middleware/__tests__/',
     'src/nlp/__tests__/',
     'src/observability/__tests__/',
     'src/pii/__tests__/',
