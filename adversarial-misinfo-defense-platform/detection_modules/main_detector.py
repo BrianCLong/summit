@@ -331,6 +331,65 @@ class AdversarialMisinfoDetector:
 
         return aggregation
 
+    def detect_with_bidirectional_control(
+        self,
+        content_dict: dict[str, Any],
+        temperature: float = 1.0,
+        enable_bidirectional: bool = True
+    ) -> dict[str, Any]:
+        """
+        Enhanced detection using bidirectional processing and temperature controls
+
+        Args:
+            content_dict: Dictionary with keys as modality types and values as content
+            temperature: Temperature value for probabilistic outputs
+            enable_bidirectional: Whether to enable bidirectional processing
+
+        Returns:
+            Detection results with bidirectional analysis
+        """
+        from ..bidirectional_temp_control import BidirectionalTemperatureController
+
+        # Initialize controller with this detector instance
+        controller = BidirectionalTemperatureController(self)
+
+        # Perform bidirectional detection
+        results = controller.detect_with_bidirectional_control(
+            content_dict=content_dict,
+            temperature_override=None  # Use default temperatures in controller
+        )
+
+        return results
+
+    def apply_temperature_scaling(self, logits: list[float], temperature: float) -> list[float]:
+        """
+        Apply temperature scaling to logits for more nuanced detection
+
+        Args:
+            logits: Raw output scores from detection models
+            temperature: Temperature scaling factor
+
+        Returns:
+            Temperature-scaled probabilities
+        """
+        import numpy as np
+
+        if temperature == 0:
+            # Return argmax (greedy selection)
+            scaled_logits = [0.0] * len(logits)
+            scaled_logits[np.argmax(logits)] = 1.0
+            return scaled_logits
+
+        # Apply temperature scaling
+        np_logits = np.array(logits)
+        scaled_logits = np_logits / temperature
+
+        # Convert to probabilities using softmax
+        exp_scaled = np.exp(scaled_logits - np.max(scaled_logits))  # Numerical stability
+        probs = exp_scaled / np.sum(exp_scaled)
+
+        return probs.tolist()
+
     def generate_adversarial_samples(
         self, content_dict: dict[str, list[Any]], num_samples: int = 5
     ) -> dict[str, Any]:

@@ -14,6 +14,7 @@ from .detection_modules.main_detector import AdversarialMisinfoDetector
 from .red_blue_team import RedBlueTeamExerciseManager
 from .tactic_evolution import AutonomousTacticEvolver
 from .validation_suite import ValidationBenchmark
+from .bidirectional_temp_control import BidirectionalTemperatureController, BidirectionalProcessor, BidirectionalConfig
 
 
 # Convenience functions
@@ -21,12 +22,20 @@ def create_platform():
     """
     Create and initialize the complete adversarial misinformation defense platform
     """
+    from .bidirectional_temp_control import BidirectionalConfig
+
+    detector = AdversarialMisinfoDetector()
+    config = BidirectionalConfig()
+    controller = BidirectionalTemperatureController(detector, config)
+
     return {
-        "detector": AdversarialMisinfoDetector(),
+        "detector": detector,
         "trainer": AdversarialTrainingEngine(),
         "evolver": AutonomousTacticEvolver(),
         "exercise_manager": RedBlueTeamExerciseManager(),
         "validator": ValidationBenchmark(),
+        "bidirectional_controller": controller,
+        "bidirectional_config": config,
     }
 
 
@@ -36,5 +45,8 @@ __all__ = [
     "AutonomousTacticEvolver",
     "RedBlueTeamExerciseManager",
     "ValidationBenchmark",
+    "BidirectionalTemperatureController",
+    "BidirectionalProcessor",
+    "BidirectionalConfig",
     "create_platform",
 ]

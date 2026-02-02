@@ -349,6 +349,83 @@ def example_tactic_evolution(platform):
         return None
 
 
+def example_bidirectional_detection_with_temperature_control(platform):
+    """
+    Example of bidirectional detection with temperature controls
+    """
+    if not platform:
+        return
+
+    print("\n" + "=" * 60)
+    print("EXAMPLE: Bidirectional Detection with Temperature Control")
+    print("=" * 60)
+
+    try:
+        # Get bidirectional controller
+        detector = platform["detector"]
+        controller = platform["bidirectional_controller"]
+
+        # Create content dictionary for multimodal analysis
+        content_dict = {
+            'text': [
+                "This is clearly false information spreading rapidly online",
+                "This is factual content verified by multiple sources"
+            ]
+        }
+
+        print("Running bidirectional detection with temperature controls...")
+
+        # Run detection with bidirectional processing and temperature controls
+        results = detector.detect_with_bidirectional_control(
+            content_dict=content_dict,
+            temperature=1.2,  # Higher temperature for more exploration
+            enable_bidirectional=True
+        )
+
+        print("\nBidirectional Detection Results:")
+        print(f"  Timestamp: {results.get('timestamp', 'N/A')}")
+        print(f"  Aggregated Score: {results.get('aggregated_score', 0.0):.3f}")
+        print(f"  Overall Confidence: {results.get('overall_confidence', 0.0):.3f}")
+        print(f"  Risk Level: {results.get('risk_level', 'N/A')}")
+
+        # Show temperature summary
+        temp_summary = results.get('temperature_summary', {})
+        print(f"\n  Temperature Summary:")
+        for modality, temp in temp_summary.items():
+            print(f"    {modality}: {temp}")
+
+        # Show detailed results for each modality
+        processed_modalities = results.get('processed_modalities', {})
+        for modality, modality_results in processed_modalities.items():
+            print(f"\n  {modality.upper()} Modality Results:")
+            forward_results = modality_results.get('forward_results', [])
+            backward_results = modality_results.get('backward_results', [])
+
+            print(f"    Forward Pass Results: {len(forward_results)} items")
+            print(f"    Backward Pass Results: {len(backward_results)} items")
+            print(f"    Temperature Used: {modality_results.get('temperature_used', 0.0)}")
+
+        print("\n✓ Bidirectional detection with temperature control completed successfully!")
+
+        # Example of applying temperature scaling
+        print("\nExample of Temperature Scaling:")
+        logits_example = [0.1, 0.8, 0.4, 0.9, 0.2]
+        scaled_probs = detector.apply_temperature_scaling(logits_example, temperature=0.8)
+        print(f"Original logits: {logits_example}")
+        print(f"Scaled probabilities (T=0.8): {scaled_probs}")
+
+        # Example of getting temperature analytics
+        analytics = controller.get_temperature_analytics()
+        print(f"\nTemperature Analytics:")
+        print(f"  Current Temperatures: {analytics.get('current_temperatures', {})}")
+        print(f"  Adjustment Counts: {analytics.get('adjustment_counts', {})}")
+
+        return results
+    except Exception as e:
+        print(f"❌ Error during bidirectional detection: {e!s}")
+        return None
+
+
 def main():
     """
     Main example function demonstrating all platform capabilities
@@ -365,6 +442,7 @@ def main():
     example_red_blue_team_exercises()
     example_adversarial_training(platform)
     example_tactic_evolution(platform)
+    example_bidirectional_detection_with_temperature_control(platform)
 
     print("\n" + "=" * 60)
     print("ALL EXAMPLES COMPLETED")
