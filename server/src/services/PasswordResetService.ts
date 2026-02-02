@@ -22,6 +22,8 @@ import argon2 from 'argon2';
 import { getPostgresPool } from '../config/database.js';
 import logger from '../utils/logger.js';
 import type { Pool, PoolClient } from 'pg';
+import { EmailService } from '../email-service/EmailService.js';
+import { cfg } from '../config.js';
 
 interface PasswordResetRequest {
   email: string;
@@ -34,8 +36,36 @@ export class PasswordResetService {
     return getPostgresPool();
   }
   private tokenExpirationMs = 60 * 60 * 1000; // 1 hour
+  private _emailService: EmailService | null = null;
 
   constructor() { }
+
+  private async getEmailService(): Promise<EmailService> {
+    if (this._emailService) return this._emailService;
+
+    this._emailService = new EmailService({
+      provider: {
+        provider: 'smtp',
+        smtp: {
+          host: cfg.SMTP_HOST || 'localhost',
+          port: cfg.SMTP_PORT,
+          secure: cfg.SMTP_PORT === 465,
+          auth: cfg.SMTP_USER ? {
+            user: cfg.SMTP_USER,
+            pass: cfg.SMTP_PASS || '',
+          } : undefined,
+        },
+        from: {
+          name: cfg.EMAIL_FROM_NAME,
+          email: cfg.EMAIL_FROM_ADDRESS,
+        },
+      },
+      queue: { enabled: false, concurrency: 1, retryAttempts: 0, retryBackoff: 'fixed', retryDelay: 0 }, // Sync for now
+    });
+
+    await this._emailService.initialize();
+    return this._emailService;
+  }
 
   /**
    * Generate a secure random token
@@ -367,28 +397,38 @@ export class PasswordResetService {
   ): Promise<void> {
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${token}`;
 
-    // In production, use a proper email service (SendGrid, SES, etc.)
     logger.info({
-      message: 'Password reset email would be sent',
+      message: 'Sending password reset email',
       email,
       firstName,
-      resetUrl,
-      // Note: Never log the actual token in production
       tokenLength: token.length,
     });
 
-    // TODO: Implement actual email sending
-    // Example with nodemailer or SendGrid:
-    // await emailService.send({
-    //   to: email,
-    //   subject: 'Reset Your Password - IntelGraph',
-    //   template: 'password-reset',
-    //   data: {
-    //     firstName,
-    //     resetUrl,
-    //     expiresIn: '1 hour',
-    //   },
-    // });
+    try {
+      const emailService = await this.getEmailService();
+      await emailService.sendFromTemplate(
+        'password-reset',
+        email,
+        {
+          firstName,
+          resetUrl,
+          expiryHours: 1,
+        }
+      );
+
+      logger.info({
+        message: 'Password reset email sent successfully',
+        email,
+      });
+    } catch (error: any) {
+      logger.error({
+        message: 'Failed to send password reset email',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        email,
+      });
+      // We don't throw here to avoid revealing if the user exists or failing the request flow
+      // but in a production environment we might have a retry queue.
+    }
   }
 
   /**
