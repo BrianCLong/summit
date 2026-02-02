@@ -17,6 +17,9 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+- `ci/summit-semhl-unit` - Semantic highlighting interface tests.
+- `ci/summit-semhl-policy` - Semantic highlighting policy/deny-by-default tests.
+- `ci/summit-semhl-eval-smoke` - Semantic highlighting eval smoke + evidence write.
 
 ## Rename Plan
 
