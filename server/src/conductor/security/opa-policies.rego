@@ -23,10 +23,10 @@ contains_pii if {
         `[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`,
         
         # Credit card patterns
-        `\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}`,
+        `\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}`,
         
         # Phone number patterns
-        `\+?1?[-.\s]?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}`,
+        `\+?1?[-. ]?\(?[0-9]{3}\)?[-. ]?[0-9]{3}[-. ]?[0-9]{4}`,
         
         # Bank account patterns
         `\b\d{8,17}\b`
@@ -116,6 +116,12 @@ geographic_access_allowed if {
     input.user.location in allowed_regions
 }
 
+# PII violation check
+pii_violation if {
+    contains_pii
+    not allow_sensitive_data
+}
+
 # Final authorization decision
 allow if {
     # Basic RBAC check
@@ -135,7 +141,7 @@ allow if {
     geographic_access_allowed
     
     # PII protection - deny if PII detected and user lacks clearance
-    not (contains_pii; not allow_sensitive_data)
+    not pii_violation
 }
 
 # Cost estimation helper
@@ -159,13 +165,13 @@ estimate_task_cost(task, expert) := cost if {
 
 task_complexity_multiplier(task) := multiplier if {
     word_count := count(split(task, " "))
-    
-    # Simple heuristic for complexity
-    multiplier := 1.0 if word_count <= 10
-    multiplier := 1.5 if word_count > 10; word_count <= 50
-    multiplier := 2.0 if word_count > 50; word_count <= 100
-    multiplier := 3.0 if word_count > 100
+    multiplier := calculate_multiplier(word_count)
 }
+
+calculate_multiplier(wc) := 1.0 if wc <= 10
+calculate_multiplier(wc) := 1.5 if { wc > 10; wc <= 50 }
+calculate_multiplier(wc) := 2.0 if { wc > 50; wc <= 100 }
+calculate_multiplier(wc) := 3.0 if wc > 100
 
 # Audit logging requirements
 audit_required if {
@@ -190,18 +196,18 @@ audit_required if {
 }
 
 # Warnings and recommendations
-warnings[msg] {
+warnings contains msg if {
     contains_pii
     msg := "PII detected in task input - ensure proper data handling"
 }
 
-warnings[msg] {
+warnings contains msg if {
     estimated_cost := estimate_task_cost(input.task, input.expert)
-    estimated_cost > 0.5
+    estimated_cost > 0.05
     msg := sprintf("High estimated cost: $%.2f", [estimated_cost])
 }
 
-warnings[msg] {
+warnings contains msg if {
     input.user.requests_last_hour > (input.user.rate_limit * 0.8)
     msg := "Approaching rate limit"
 }
