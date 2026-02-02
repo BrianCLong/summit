@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-07T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "promptspec-foundation-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
