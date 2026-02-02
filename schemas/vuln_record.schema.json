@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/vuln_record.schema.json",
+  "title": "VulnRecord",
+  "description": "Canonical vulnerability record for Summit",
+  "type": "object",
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "description": "VULNREC-<hash>"
+    },
+    "aliases": {
+      "type": "object",
+      "properties": {
+        "cve": { "type": "array", "items": { "type": "string" } },
+        "ghsa": { "type": "array", "items": { "type": "string" } },
+        "osv": { "type": "array", "items": { "type": "string" } },
+        "vendor": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "details": { "type": "string" },
+    "affected": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "package": { "type": "string" },
+          "ecosystem": { "type": "string" },
+          "versions": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["package", "ecosystem"]
+      }
+    },
+    "severity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "system": { "type": "string" },
+          "score": { "type": "string" },
+          "vector": { "type": "string" },
+          "source": { "type": "string" }
+        },
+        "required": ["system", "score", "source"]
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string" },
+          "source": { "type": "string" }
+        },
+        "required": ["url"]
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_name": { "type": "string" },
+          "source_url": { "type": "string" },
+          "retrieved_via": { "type": "string" },
+          "evidence_id": { "type": "string" },
+          "fingerprint": { "type": "string" }
+        },
+        "required": ["source_name", "evidence_id"]
+      }
+    },
+    "policy_flags": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" }
+    }
+  },
+  "required": ["record_id", "aliases", "provenance"]
+}

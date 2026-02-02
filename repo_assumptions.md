@@ -25,6 +25,33 @@
 5.  **Platform Spine**: New services will use Python/FastAPI to match `api/` spine.
 6.  **Queue**: `maestro` package likely handles orchestration; specific queue technology (Celery vs Redis Queues) needs confirmation.
 
+---
+
+## Vulnerability Resilience - OSV Ingestion (Assumptions)
+
+### Vuln Verified
+- **Python**: 3.12.12 in sandbox; 3.9 in `api/Dockerfile`.
+- **Pydantic**: v2 present in `requirements.in`.
+- **Structure**: `summit/`, `scripts/`, `tests/` directories exist at root.
+- **Policies**: `tests/test_neverlog.py` and `tests/test_evidence_determinism.py` exist.
+- **Schemas**: `schemas/` exists for global JSON schemas.
+- **Flags**: `summit/flags.py` exists for feature flag management.
+
+### Vuln Assumed (validate)
+- `summit/vuln/` is the appropriate place for core vulnerability logic in Python.
+- `scripts/vuln/` is appropriate for ingestion entry points.
+- `tests/vuln/` is appropriate for module-specific tests.
+- `artifacts/vuln-intel/hand-cve-private-sector/` is the target for evidence.
+
+### Vuln Must-not-touch
+- Existing vulnerability scanning tools like `scripts/scan-vulnerabilities.sh` (interop only).
+- `api/main.py` existing endpoints.
+- Base evidence schemas in `schemas/`.
+
+### Vuln Validation plan
+- Verify OSV API response format matches assumptions.
+- Confirm deterministic output of `VulnRecord` normalization.
+
 ## Must-not-touch
 *   `docs/ci/REQUIRED_CHECKS_POLICY.yml` (Governance-controlled).
 *   Security scanning workflows (unless required).
