@@ -113,7 +113,7 @@ const VerificationState = {
 /**
  * Parse error response to determine verification state.
  */
-function parseErrorState(status, headers, body) {
+function classifyHttpError(status, headers, body) {
   if (status === 403) {
     // Check for rate limiting first
     const rateLimitRemaining = headers?.get?.('X-RateLimit-Remaining') ?? headers?.['x-ratelimit-remaining'];
@@ -127,7 +127,7 @@ function parseErrorState(status, headers, body) {
         message.includes('admin access')) {
       return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message };
     }
-    return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message: `403: ${message}` };
+    return { state: VerificationState.UNVERIFIABLE_ERROR, message: `403: ${message}` };
   }
   if (status === 404) {
     // Branch exists but has no protection configured
@@ -149,22 +149,16 @@ async function fetchRequiredStatusChecks({ repo, branch }) {
     } catch (error) {
       // gh CLI error - try to parse the message for state
       const message = error.message || String(error);
-      if (message.includes('403') || message.includes('Must have admin')) {
+      const statusMatch = message.match(/\bHTTP\s+(\d{3})\b/) || message.match(/\b(\d{3})\b/);
+      const status = statusMatch ? Number(statusMatch[1]) : null;
+      if (status) {
+        const classified = classifyHttpError(status, {}, { message });
         return {
-          state: VerificationState.UNVERIFIABLE_PERMISSIONS,
+          state: classified.state,
           required_contexts: [],
           strict: false,
           source: 'gh',
-          error: message
-        };
-      }
-      if (message.includes('404') || message.includes('Not Found')) {
-        return {
-          state: VerificationState.NO_PROTECTION,
-          required_contexts: [],
-          strict: false,
-          source: 'gh',
-          error: 'Branch protection not configured'
+          error: classified.message
         };
       }
       throw error;
@@ -191,7 +185,7 @@ async function fetchRequiredStatusChecks({ repo, branch }) {
     } catch {
       body = await response.text().catch(() => '');
     }
-    const errorState = parseErrorState(response.status, response.headers, body);
+    const errorState = classifyHttpError(response.status, response.headers, body);
     return {
       state: errorState.state,
       required_contexts: [],
@@ -302,6 +296,7 @@ async function inferRepoFromGit() {
 
 export {
   computeDiff,
+  classifyHttpError,
   fetchRequiredStatusChecks,
   ghApi,
   hashObject,

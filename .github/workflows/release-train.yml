@@ -1,4 +1,4 @@
-name: release-train
+name: Release Train
 
 on:
   workflow_dispatch:

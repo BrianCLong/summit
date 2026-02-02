@@ -144,6 +144,9 @@ jobs:
       - name: Verify Lane 2 flags default OFF
         run: python3 scripts/ci/verify_lane2_flags.py
 
+      - name: Validate required checks policy references
+        run: node scripts/ci/validate_policy_references.mjs
+
   mcp-ux-lint:
     name: MCP Tool UX Lint
     runs-on: ubuntu-latest

@@ -17,6 +17,7 @@ import yaml from 'js-yaml';
 
 const POLICY_PATH = 'docs/ci/REQUIRED_CHECKS_POLICY.yml';
 const WORKFLOWS_DIR = '.github/workflows';
+const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
 
 function parseArgs(argv) {
   const args = { policy: POLICY_PATH, workflows: WORKFLOWS_DIR };
@@ -44,6 +45,13 @@ function printHelp() {
   console.log('  --policy <path>     Policy file (default: docs/ci/REQUIRED_CHECKS_POLICY.yml)');
   console.log('  --workflows <dir>   Workflows directory (default: .github/workflows)');
   console.log('  --help              Show this help');
+}
+
+function normalizeCheckName(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+  return value.replace(ANSI_PATTERN, '').replace(/\s+/g, ' ').trim();
 }
 
 /**
@@ -92,14 +100,17 @@ function loadWorkflows(workflowsDir) {
  */
 function extractCheckNames(workflow, fileName) {
   const checkNames = new Set();
-  const workflowName = workflow?.name || fileName.replace(/\.ya?ml$/, '');
+  const workflowName = normalizeCheckName(
+    workflow?.name || fileName.replace(/\.ya?ml$/, ''),
+  );
 
   if (!workflow?.jobs) {
     return checkNames;
   }
 
   for (const [jobId, job] of Object.entries(workflow.jobs)) {
-    const jobName = job?.name || jobId;
+    const jobName = normalizeCheckName(job?.name || jobId);
+    const jobIdName = normalizeCheckName(jobId);
 
     // Handle matrix jobs
     if (job?.strategy?.matrix) {
@@ -108,18 +119,26 @@ function extractCheckNames(workflow, fileName) {
         for (const combo of matrixCombinations) {
           // Format: "Job Name (value1, value2, ...)"
           const suffix = combo.join(', ');
-          checkNames.add(`${jobName} (${suffix})`);
+          checkNames.add(normalizeCheckName(`${jobName} (${suffix})`));
+          checkNames.add(normalizeCheckName(`${jobIdName} (${suffix})`));
+          checkNames.add(normalizeCheckName(`${workflowName} / ${jobName} (${suffix})`));
+          checkNames.add(normalizeCheckName(`${workflowName} / ${jobIdName} (${suffix})`));
         }
       }
       // Also add the base name for partial matching
       checkNames.add(jobName);
+      checkNames.add(jobIdName);
     } else {
       checkNames.add(jobName);
+      checkNames.add(jobIdName);
     }
 
     // Some workflows use the format "Workflow / Job"
-    checkNames.add(`${workflowName} / ${jobName}`);
+    checkNames.add(normalizeCheckName(`${workflowName} / ${jobName}`));
+    checkNames.add(normalizeCheckName(`${workflowName} / ${jobIdName}`));
   }
+
+  checkNames.add(workflowName);
 
   return checkNames;
 }
@@ -165,7 +184,7 @@ function extractPolicyReferences(policy) {
   if (Array.isArray(policy.always_required)) {
     for (const check of policy.always_required) {
       references.push({
-        name: check.name,
+        name: normalizeCheckName(check.name),
         workflow: check.workflow,
         section: 'always_required'
       });
@@ -176,7 +195,7 @@ function extractPolicyReferences(policy) {
   if (Array.isArray(policy.conditional_required)) {
     for (const check of policy.conditional_required) {
       references.push({
-        name: check.name,
+        name: normalizeCheckName(check.name),
         workflow: check.workflow,
         section: 'conditional_required'
       });
@@ -187,7 +206,7 @@ function extractPolicyReferences(policy) {
   if (Array.isArray(policy.informational)) {
     for (const check of policy.informational) {
       references.push({
-        name: check.name,
+        name: normalizeCheckName(check.name),
         workflow: check.workflow,
         section: 'informational'
       });
@@ -198,7 +217,7 @@ function extractPolicyReferences(policy) {
   if (policy.branch_protection?.required_status_checks?.contexts) {
     for (const context of policy.branch_protection.required_status_checks.contexts) {
       references.push({
-        name: context,
+        name: normalizeCheckName(context),
         workflow: null,
         section: 'branch_protection.contexts'
       });
@@ -213,13 +232,12 @@ function extractPolicyReferences(policy) {
  */
 function validateReferences(references, workflows) {
   const errors = [];
-  const warnings = [];
 
   // Build a set of all known check names across all workflows
   const allCheckNames = new Set();
   for (const [fileName, names] of workflows) {
     for (const name of names) {
-      allCheckNames.add(name);
+      allCheckNames.add(normalizeCheckName(name));
     }
   }
 
@@ -239,18 +257,17 @@ function validateReferences(references, workflows) {
 
     // For branch protection contexts, check if any workflow produces this check name
     if (ref.section === 'branch_protection.contexts') {
-      // Check for exact or partial match
       const hasMatch = allCheckNames.has(ref.name) ||
         Array.from(allCheckNames).some(n =>
-          n.startsWith(ref.name) ||
-          ref.name.includes(' / ') && n.includes(ref.name.split(' / ')[1])
+          n.startsWith(`${ref.name} (`) ||
+          (ref.name.includes(' / ') && n.includes(ref.name.split(' / ')[1]))
         );
 
       if (!hasMatch) {
-        warnings.push({
+        errors.push({
           type: 'unmatched_context',
           reference: ref,
-          message: `Context "${ref.name}" may not match any workflow job name`
+          message: `Context "${ref.name}" does not match any workflow job name`
         });
       }
     }
@@ -259,23 +276,22 @@ function validateReferences(references, workflows) {
     if (ref.workflow && ref.name) {
       const workflowChecks = workflows.get(ref.workflow);
       if (workflowChecks && !workflowChecks.has(ref.name)) {
-        // Try partial match
-        const hasPartialMatch = Array.from(workflowChecks).some(n =>
-          n.includes(ref.name) || ref.name.includes(n)
-        );
+        const normalized = Array.from(workflowChecks).map(normalizeCheckName);
+        const hasMatch = normalized.includes(ref.name) ||
+          normalized.some(n => n.startsWith(`${ref.name} (`) || n.includes(ref.name));
 
-        if (!hasPartialMatch) {
-          warnings.push({
+        if (!hasMatch) {
+          errors.push({
             type: 'name_mismatch',
             reference: ref,
-            message: `Check name "${ref.name}" not found in ${ref.workflow}. Available: ${Array.from(workflowChecks).slice(0, 3).join(', ')}...`
+            message: `Check name "${ref.name}" not found in ${ref.workflow}.`
           });
         }
       }
     }
   }
 
-  return { errors, warnings };
+  return { errors };
 }
 
 async function main() {
@@ -310,7 +326,7 @@ async function main() {
   const references = extractPolicyReferences(policy);
   console.log(`Found ${references.length} policy references to validate\n`);
 
-  const { errors, warnings } = validateReferences(references, workflows);
+  const { errors } = validateReferences(references, workflows);
 
   if (errors.length > 0) {
     console.log('ERRORS (blocking):');
@@ -321,27 +337,13 @@ async function main() {
     console.log('');
   }
 
-  if (warnings.length > 0) {
-    console.log('WARNINGS (non-blocking):');
-    console.log('------------------------');
-    for (const warning of warnings) {
-      console.log(`  ⚠ ${warning.message}`);
-    }
-    console.log('');
-  }
-
-  if (errors.length === 0 && warnings.length === 0) {
+  if (errors.length === 0) {
     console.log('✓ All policy references are valid\n');
     process.exit(0);
   }
 
-  if (errors.length > 0) {
-    console.log(`\n✗ Validation failed with ${errors.length} error(s)`);
-    process.exit(1);
-  }
-
-  console.log(`\n⚠ Validation passed with ${warnings.length} warning(s)`);
-  process.exit(0);
+  console.log(`\n✗ Validation failed with ${errors.length} error(s)`);
+  process.exit(1);
 }
 
 main().catch(error => {

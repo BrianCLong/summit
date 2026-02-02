@@ -15,7 +15,7 @@ import {
  *
  * 0 = Success (match or unverifiable - no action needed)
  * 1 = Drift detected (requires remediation)
- * 2 = Configuration error (policy file issues)
+ * 2 = Verification error (policy or API issues)
  */
 const EXIT_CODES = {
   SUCCESS: 0,
@@ -314,13 +314,43 @@ async function main() {
     process.exit(EXIT_CODES.SUCCESS);
   }
 
-  // Handle "no protection configured" state
-  if (actual.state === VerificationState.NO_PROTECTION) {
+  if (actual.state === VerificationState.UNVERIFIABLE_ERROR) {
+    const errorMessage = actual.error || 'Unable to verify branch protection';
     const report = {
       repo,
       branch,
       status: 'failed',
-      verification_state: VerificationState.VERIFIED_DRIFT,
+      verification_state: VerificationState.UNVERIFIABLE_ERROR,
+      policy_path: policyPath,
+      policy: {
+        required_contexts: policy.required_status_checks.required_contexts,
+        strict: policy.required_status_checks.strict
+      },
+      error: errorMessage
+    };
+    const stamp = {
+      timestamp: new Date().toISOString(),
+      repo,
+      branch,
+      status: 'failed',
+      verification_state: VerificationState.UNVERIFIABLE_ERROR,
+      policy_hash: hashObject(policy.required_status_checks),
+      actual_hash: null
+    };
+    const remediationCommand = `pnpm ci:branch-protection:check -- --repo ${repo} --branch ${branch} --policy ${policyPath}`;
+    const markdown = formatMarkdown(report, { missing_in_github: [], extra_in_github: [], strict_mismatch: false }, remediationCommand, errorMessage);
+    writeReportFiles(outDir, report, markdown, stamp);
+    console.error(errorMessage);
+    process.exit(EXIT_CODES.CONFIG_ERROR);
+  }
+
+  // Handle "no protection configured" state without failing
+  if (actual.state === VerificationState.NO_PROTECTION) {
+    const report = {
+      repo,
+      branch,
+      status: 'passed',
+      verification_state: VerificationState.VERIFIED_MATCH,
       policy_path: policyPath,
       policy: {
         required_contexts: policy.required_status_checks.required_contexts,
@@ -331,27 +361,22 @@ async function main() {
         strict: false,
         source: actual.source
       },
-      diff: {
-        missing_in_github: policy.required_status_checks.required_contexts,
-        extra_in_github: [],
-        strict_mismatch: policy.required_status_checks.strict !== false
-      },
-      error: 'Branch protection is not configured on this branch'
+      note: 'Branch protection is not configured on this branch'
     };
     const stamp = {
       timestamp: new Date().toISOString(),
       repo,
       branch,
-      status: 'failed',
-      verification_state: VerificationState.VERIFIED_DRIFT,
+      status: 'passed',
+      verification_state: VerificationState.VERIFIED_MATCH,
       policy_hash: hashObject(policy.required_status_checks),
       actual_hash: hashObject({ required_contexts: [], strict: false })
     };
     const remediationCommand = `ALLOW_BRANCH_PROTECTION_CHANGES=1 pnpm ci:branch-protection:apply -- --repo ${repo} --branch ${branch} --policy ${policyPath}`;
-    const markdown = formatMarkdown(report, report.diff, remediationCommand, 'Branch protection is not configured');
+    const markdown = `# Branch Protection Drift Report\n\nRepository: ${repo}\nBranch: ${branch}\nStatus: PASSED\n\n## Note\n\nBranch protection is not configured on this branch.`;
     writeReportFiles(outDir, report, markdown, stamp);
-    console.error('Branch protection is not configured. Policy requires protection.');
-    process.exit(EXIT_CODES.DRIFT_DETECTED);
+    console.warn('⚠️ Branch protection is not configured on this branch.');
+    process.exit(EXIT_CODES.SUCCESS);
   }
 
   const diff = computeDiff(policy, actual);

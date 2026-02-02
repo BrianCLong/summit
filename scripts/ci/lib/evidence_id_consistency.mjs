@@ -102,24 +102,26 @@ export function hashString(value) {
 
 // Comprehensive timestamp key patterns (case-insensitive matching)
 const TIMESTAMP_KEYS = new Set([
-  // snake_case variants
   'timestamp', 'time', 'date', 'datetime',
   'created_at', 'updated_at', 'deleted_at',
-  'generated_at', 'started_at', 'finished_at', 'ended_at',
-  'modified_at', 'last_update', 'last_modified',
-  'expires_at', 'expired_at',
-  'duration_ms', 'elapsed_ms', 'duration', 'elapsed',
-  // camelCase variants (normalized to lowercase for matching)
   'createdat', 'updatedat', 'deletedat',
-  'generatedat', 'startedat', 'finishedat', 'endedat',
-  'modifiedat', 'lastupdate', 'lastmodified',
-  'expiresat', 'expiredat',
-  'durationms', 'elapsedms',
+  'generated_at', 'generatedat',
+  'started_at', 'startedat',
+  'finished_at', 'finishedat',
+  'ended_at', 'endedat',
+  'modified_at', 'modifiedat',
+  'last_update', 'lastupdate',
+  'last_modified', 'lastmodified',
+  'expires_at', 'expiresat',
+  'duration_ms', 'durationms',
+  'elapsed_ms', 'elapsedms',
 ]);
 
 // ISO8601/RFC3339 patterns for value scanning (match anywhere in the string)
 const TIMESTAMP_VALUE_PATTERNS = [
+  // ISO8601 / RFC3339
   /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?/,
+  // ISO8601 date only
   /\d{4}-\d{2}-\d{2}/,
 ];
 
