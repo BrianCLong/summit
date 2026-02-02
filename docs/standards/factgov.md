@@ -1,5 +1,10 @@
 # FactGov Standards & Data Handling
 
+## Core Principles
+* **Audit Packs**: Preference for file-based evidence over UI-only displays.
+* **Validators**: All attestations must be cryptographically signed by authorized validators.
+* **Data Handling**: Strict field-level redaction for all highly sensitive metadata.
+
 ## Data Classification
 
 | Data Type | Classification | Notes |
