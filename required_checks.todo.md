@@ -1,16 +1,37 @@
-# Required Checks Discovery (TODO)
+# Required Checks Todo List
 
-1) In GitHub repo settings:
-   - Settings → Branches → Branch protection rules
-   - Note required status checks and required workflows.
+This file tracks the status of CI check discovery and alignment with branch protection rules.
 
-2) Via API (preferred):
-   - Use GitHub REST API to fetch branch protection and list required checks.
+## Current status
+GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
 
-3) Map to Summit gates:
-   - Replace placeholder gate names in CI with exact required check names.
+## Known check names (Verify these)
+- CI Core (Primary Gate) / CI Core Gate ✅
+- CI / Unit Tests
+- GA Gate
+- Release Readiness Gate
+- SOC Controls
+- Unit Tests & Coverage
 
-## Temporary gate names (until mapped)
+## Temporary names (Mapping needed)
+We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `lint`
+- `typecheck`
+- `build`
+- `test`
+
+Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+
+## Temporary gates (Summit Harness & Skills)
+- ci/summit-harness-evidence
+- ci/summit-tool-policy
+- Use `skills/*` jobs with stable names (If actual required checks differ, add a rename PR that preserves history).
 - summit-skillsec
 - summit-evidence
 - summit-harness-mock
+
+## Required checks discovery (one-time for Memory Privacy)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
+2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
+4) Add PR to rename temporary checks to required names once known
