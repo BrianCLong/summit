@@ -25,6 +25,7 @@ describeIf('CollaborationHub presence channels', () => {
   let httpServer: ReturnType<typeof createServer>;
   let io: import('socket.io').Server;
   let port: number;
+  const clients: ClientSocket[] = [];
 
   beforeAll(async () => {
     const { Server } = await import('socket.io');
@@ -42,8 +43,17 @@ describeIf('CollaborationHub presence channels', () => {
   });
 
   afterAll(async () => {
+    for (const client of clients) {
+      client.close();
+    }
     io.close();
-    await new Promise<void>((resolve) => httpServer.close(() => resolve()));
+    await new Promise<void>((resolve) => {
+      const timer = setTimeout(resolve, 2000);
+      httpServer.close(() => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
   });
 
   it('broadcasts presence updates to channel members', async () => {
@@ -54,9 +64,31 @@ describeIf('CollaborationHub presence channels', () => {
         forceNew: true,
         reconnection: false,
         timeout: 5000,
+        path: '/socket.io',
       });
+      clients.push(client);
       try {
-        await waitForEvent(client, 'connect');
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(
+            () => reject(new Error('Timed out waiting for connect')),
+            5000,
+          );
+          const cleanup = () => {
+            clearTimeout(timeout);
+            client.off('connect', onConnect);
+            client.off('connect_error', onError);
+          };
+          const onConnect = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = (err: Error) => {
+            cleanup();
+            reject(err);
+          };
+          client.once('connect', onConnect);
+          client.once('connect_error', onError);
+        });
         return client;
       } catch (err) {
         client.close();

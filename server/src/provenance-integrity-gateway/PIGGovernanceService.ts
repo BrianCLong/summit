@@ -413,12 +413,13 @@ export class PIGGovernanceService extends EventEmitter {
     const safeScore = (value: number) =>
       Number.isFinite(value) ? value : 0;
 
-    const overallScore = Math.round(
+    const rawOverallScore = Math.round(
       (safeScore(assetRisk.score) * 0.2) +
       (safeScore(narrativeRisk.score) * 0.3) +
       (safeScore(incidentRisk.score) * 0.3) +
       (safeScore(complianceRisk.score) * 0.2)
     );
+    const overallScore = Number.isFinite(rawOverallScore) ? rawOverallScore : 0;
 
     const assessment: RiskAssessment = {
       tenantId,
