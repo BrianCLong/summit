@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "ticker": "ACME",
+    "period": "Q3 2024",
+    "date": "2024-10-15"
+  },
+  "transcript": {
+    "text": "Operator: Good day everyone. CEO: We are pleased to report strong growth. We expect full year revenue to be between $500M and $520M. Our margins are improving to 25%.",
+    "segments": [
+      {
+        "speaker": "CEO",
+        "text": "We expect full year revenue to be between $500M and $520M."
+      }
+    ]
+  },
+  "filings": [
+    {
+      "accession_number": "0000000000-24-000000",
+      "form_type": "8-K",
+      "filed_date": "2024-10-15",
+      "content": "Item 2.02 Results of Operations and Financial Condition. On October 15, 2024, ACME Corp announced expectations of full year revenue of $500-520 million."
+    }
+  ]
+}
