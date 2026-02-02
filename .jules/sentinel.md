@@ -42,3 +42,8 @@
 **Vulnerability:** The `/sign-manifest` endpoint in `server/src/routes/exports.ts` used a hardcoded fallback (`'dev-secret'`) when `EXPORT_SIGNING_SECRET` was missing, without checking the environment. This meant that a production deployment with a missing secret configuration would silently become vulnerable to signature forgery.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
 **Prevention:** Use a "Fail-Closed" pattern: Explicitly check for the existence of the secret. If missing in production, throw an error and halt the operation (or startup). Never allow a fallback to a hardcoded string in production code paths.
+
+## 2025-10-27 - [MEDIUM] Missing Timeout in Admin Secret Rotation
+**Vulnerability:** The `/admin/secrets/rotate` endpoint in `server/src/routes/admin.ts` performed `axios.get` calls to service health endpoints without a configured timeout. A malicious or hanging service could block the request indefinitely, leading to resource exhaustion (DoS).
+**Learning:** `axios` defaults to no timeout. Loops over external network calls must always strictly enforce timeouts to prevent cascading failures.
+**Prevention:** Enforce a default timeout on all `axios` instances or explicit timeouts on individual calls.
