@@ -1,25 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Report",
   "type": "object",
-  "required": ["evidence_id", "summary"],
+  "required": ["findings", "toolchain"],
   "properties": {
-    "evidence_id": {
-      "type": "string",
-      "pattern": "^EVD-[A-Za-z0-9-]+$"
-    },
-    "item": {
-      "type": "object"
-    },
-    "summary": {
-      "type": "string"
-    },
-    "artifacts": {
-      "type": ["array", "object"]
-    },
-    "item_slug": {
-      "type": "string"
+    "toolchain": { "type": "object" },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
     }
   },
-  "additionalProperties": true
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": ["tool", "rule_id", "severity", "file", "fingerprint", "message"],
+      "properties": {
+        "tool": { "type": "string" },
+        "rule_id": { "type": "string" },
+        "severity": { "type": "string", "enum": ["info","minor","major","critical","blocker"] },
+        "message": { "type": "string" },
+        "file": { "type": "string" },
+        "line": { "type": "integer", "minimum": 1 },
+        "fingerprint": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
 }
