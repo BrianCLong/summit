@@ -1,0 +1,29 @@
+name: fraud_triage
+nodes:
+  - id: ingest_alert
+    type: ingest
+    next: analyze_patterns
+  - id: analyze_patterns
+    type: agent_task
+    agent: agent_fraud_detect
+    next: propose_action
+  - id: propose_action
+    type: agent_task
+    agent: agent_fraud_detect
+    next: hitl_review
+  - id: hitl_review
+    type: hitl_review
+    required_role: "fraud_analyst"
+    next_approved: execute_block
+    next_denied: close_alert
+  - id: execute_block
+    type: execute
+    tool: "block_account"
+    data_class: FINANCIAL_SENSITIVE
+    next: evidence_emit
+  - id: close_alert
+    type: execute
+    tool: "mark_false_positive"
+    next: evidence_emit
+  - id: evidence_emit
+    type: evidence_writer

@@ -1,0 +1,5 @@
+agent_finance_shadow:
+  - read_credit_report
+  - analyze_income
+  - draft_decision_memo
+  # No execute tools allowed
