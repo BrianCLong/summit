@@ -168,5 +168,22 @@
     },
     "reasoning": "Captured OMB M-26-05 risk-based assurance metadata and rescission status for M-22-18/M-23-16. Rollback: revert commit that adds policy/omb files, prompt registry entry, task spec, and roadmap update.",
     "reverted": false
+  },
+  {
+    "id": "portal-kombat-venezuela-io-001",
+    "timestamp": "2026-02-02T00:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAicG9ydGFsIGtvbWJhdCB2ZW5lenVlbGEgZXZpZGVuY2Ugc2NhZmZvbGQgKyB0aW1lc3RhbXAgZ3VhcmQiLCAiZmlsZXMiOiBbImV2aWRlbmNlL3BvcnRhbC1rb21iYXQtdmVuZXp1ZWxhLyIsICJldmlkZW5jZS9pbmRleC5qc29uIiwgInN1bW1pdC9pby9ldmlkZW5jZS92YWxpZGF0ZS5weSIsICJ0ZXN0cy9pby90ZXN0X2V2aWRlbmNlX3NjaGVtYXMucHkiXX0=",
+    "decision": {
+      "action": "scaffold_portal_kombat_venezuela_evidence",
+      "rule": {
+        "condition": "portal kombat evidence bundle and validator guard required",
+        "action": "scaffold_portal_kombat_venezuela_evidence",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Created Portal Kombat Venezuela evidence bundle, index entries, timestamp guard, prompt/task registration, and roadmap status update. Rollback: revert commit adding evidence bundle, validator guard, registry entry, task spec, and status file.",
+    "reverted": false
   }
 ]

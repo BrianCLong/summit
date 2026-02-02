@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "id": "portal-kombat-venezuela-io-scaffold",
+      "status": "in_progress",
+      "owner": "codex-agent",
+      "notes": "Evidence bundle scaffold, timestamp guard, prompt/task registration."
+    }
+  ]
+}

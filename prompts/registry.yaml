@@ -1062,3 +1062,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: portal-kombat-venezuela-evidence-scaffold
+    version: v1
+    path: prompts/io/portal-kombat-venezuela-evidence-scaffold@v1.md
+    sha256: 7813e4503618e16611ed397e598383615787a32b4de341d71637d482d0ec0133
+    description: Scaffold Portal Kombat Venezuela evidence bundle and timestamp guard.
+    scope:
+      paths:
+        - agents/examples/PORTAL_KOMBAT_VENEZUELA_IO_SCAFFOLD_001.json
+        - docs/roadmap/STATUS.json
+        - evidence/index.json
+        - evidence/portal-kombat-venezuela/
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/io/portal-kombat-venezuela-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+        - summit/io/evidence/README.md
+        - summit/io/evidence/validate.py
+        - tests/io/test_evidence_schemas.py
+      domains:
+        - evidence
+        - io
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,16 @@
+{
+  "evidence_id": "EVD-PORTALKOMBAT-VEN-POLAR-004",
+  "title": "Polarization framing examples (reported)",
+  "summary": "Summit IO records reported framing that polarizes U.S. discourse around the Venezuela event, with narratives shifting between legitimizing intervention and illegal-kidnapping claims.",
+  "sources": [
+    "https://dfrlab.org/2026/01/10/how-russias-influence-machine-mobilized-immediately-after-maduros-capture/",
+    "https://cyabra.com/reports/us-venezuela-uncovering-coordinated-influence-operation-campaign/"
+  ],
+  "findings": [
+    "Narrative framing includes alternating claims to polarize domestic U.S. discourse about legitimacy and legality of the capture.",
+    "Summit IO classification hooks will map these frames into standardized stance tags."
+  ],
+  "limitations": [
+    "Frame taxonomy alignment is Deferred pending classifier schema review."
+  ]
+}

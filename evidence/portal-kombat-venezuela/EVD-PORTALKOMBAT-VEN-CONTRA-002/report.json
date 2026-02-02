@@ -1,0 +1,15 @@
+{
+  "evidence_id": "EVD-PORTALKOMBAT-VEN-CONTRA-002",
+  "title": "Contradictory claim/debunk saturation signals (reported)",
+  "summary": "Public reporting describes coordinated asset reuse where AI-generated media circulated with both assertive and debunking narratives around Venezuela coverage. Summit IO records the pattern for contradiction-detector scaffolding.",
+  "sources": [
+    "https://dfrlab.org/2026/01/10/how-russias-influence-machine-mobilized-immediately-after-maduros-capture/"
+  ],
+  "findings": [
+    "Reported campaigns pushed opposing interpretations using overlapping media assets, indicating contradiction saturation tactics.",
+    "Summit IO contradiction detector fixtures model shared media hashes across opposing stance clusters."
+  ],
+  "limitations": [
+    "Asset hash provenance is Deferred pending dataset ingestion and hash extraction."
+  ]
+}
