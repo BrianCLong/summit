@@ -5,7 +5,7 @@ on:
   # Runs on pushes to main (post-merge) or PRs from internal branches if configured via pull_request_target (careful!)
   push:
     branches: [main]
-  
+
   # Allow manual trigger for authorized users
   workflow_dispatch:
 
