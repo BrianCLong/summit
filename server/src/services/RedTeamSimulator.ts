@@ -43,7 +43,7 @@ export class RedTeamSimulator extends EventEmitter {
       timestamp: new Date()
     };
 
-    eventBus.emit('red-team:campaign-update', eventPayload);
+    eventBus.emit('red-team:campaign-update', { ...eventPayload, tags: ['simulate-only'] });
 
     // Legacy event for backward compatibility
     eventBus.emit('raw-event', {
@@ -77,7 +77,8 @@ export class RedTeamSimulator extends EventEmitter {
         simulationId: result.id,
         type,
         targetId,
-        timestamp: new Date()
+        timestamp: new Date(),
+        tags: ['simulate-only']
       });
 
       // Legacy event for backward compatibility
