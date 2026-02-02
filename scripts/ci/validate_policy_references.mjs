@@ -63,7 +63,7 @@ function resolveTemplate(template, matrixCombo) {
   let result = template;
   for (const [key, value] of Object.entries(matrixCombo)) {
     const escapedKey = String(key).replace(/\./g, '\\.');
-    const regex = new RegExp('\$\s*\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
+    const regex = new RegExp('\\$\\{\\{\\s*matrix\\.' + escapedKey + '\\s*\\}\\}', 'g');
     result = result.replace(regex, String(value));
   }
   return result;
@@ -71,7 +71,7 @@ function resolveTemplate(template, matrixCombo) {
 
 export function extractCheckNames(workflow, fileName) {
   const checkNames = new Set();
-  const workflowName = normalizeCheckName(workflow?.name || fileName.replace(/\.ya?ml$/, ''));
+  const workflowName = normalizeCheckName(workflow?.name || fileName.replace(/\\.ya?ml$/, ''));
   if (!workflow?.jobs) return checkNames;
   for (const [jobId, job] of Object.entries(workflow.jobs)) {
     const jobNameTemplate = job?.name || jobId;
@@ -80,7 +80,6 @@ export function extractCheckNames(workflow, fileName) {
       if (matrixCombinations.length > 0) {
         for (const comboObj of matrixCombinations) {
           const resolvedJobName = normalizeCheckName(resolveTemplate(jobNameTemplate, comboObj));
-          console.log(`DEBUG: jobId=${jobId} combo=${JSON.stringify(comboObj)} resolvedJobName="${resolvedJobName}"`);
           if (job?.name) {
             checkNames.add(resolvedJobName);
             checkNames.add(normalizeCheckName(`${workflowName} / ${resolvedJobName}`));
@@ -148,10 +147,58 @@ function loadWorkflows(workflowsDir) {
   return workflows;
 }
 
-async function main() {
-  console.log('Policy Reference Validator (Hardened)');
-  // Minimal main to unblock tests, actual logic remains in lib
-  process.exit(0);
+function extractPolicyReferences(policy) {
+  const references = [];
+  if (Array.isArray(policy.always_required)) {
+    for (const check of policy.always_required) {
+      references.push({ name: normalizeCheckName(check.name), workflow: check.workflow, section: 'always_required' });
+    }
+  }
+  if (Array.isArray(policy.conditional_required)) {
+    for (const check of policy.conditional_required) {
+      references.push({ name: normalizeCheckName(check.name), workflow: check.workflow, section: 'conditional_required' });
+    }
+  }
+  if (policy.branch_protection?.required_status_checks?.contexts) {
+    for (const context of policy.branch_protection.required_status_checks.contexts) {
+      references.push({ name: normalizeCheckName(context), workflow: null, section: 'branch_protection.contexts' });
+    }
+  }
+  return references;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch(() => process.exit(2));
+async function main() {
+  console.log('Policy Reference Validator (Hardened)');
+  const policy = yaml.load(readFileSync(resolve(POLICY_PATH), 'utf8'));
+  const workflows = loadWorkflows(WORKFLOWS_DIR);
+  const references = extractPolicyReferences(policy);
+  
+  const allCheckNamesSet = new Set();
+  for (const names of workflows.values()) {
+    for (const name of names) allCheckNamesSet.add(name);
+  }
+
+  let errors = 0;
+  for (const ref of references) {
+    if (ref.workflow && !workflows.has(ref.workflow)) {
+      console.error(`❌ Workflow file "${ref.workflow}" not found (referenced by "${ref.name}")`);
+      errors++;
+      continue;
+    }
+    const checkSet = ref.workflow ? workflows.get(ref.workflow) : allCheckNamesSet;
+    if (!checkSet.has(ref.name)) {
+      const suggestions = findClosestMatches(ref.name, Array.from(checkSet));
+      console.error(`❌ Check "${ref.name}" not found in ${ref.workflow || 'any workflow'}`);
+      if (suggestions.length > 0) console.error(`   Did you mean: ${suggestions.join(', ')}?`);
+      errors++;
+    }
+  }
+
+  if (errors > 0) process.exit(1);
+  console.log('✅ All policy references validated against workflows.');
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) main().catch((err) => {
+  console.error(err);
+  process.exit(2);
+});
