@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "week_of": {
+      "type": "string",
+      "format": "date",
+      "description": "The Monday of the week being reported (YYYY-MM-DD)."
+    },
+    "git": {
+      "type": "object",
+      "properties": {
+        "commits_count": { "type": "integer" },
+        "merged_prs_count": { "type": "integer" }
+      },
+      "required": ["commits_count", "merged_prs_count"]
+    },
+    "sales": {
+      "type": "object",
+      "properties": {
+        "outreach_count": { "type": "integer" },
+        "replies_count": { "type": "integer" },
+        "meetings_booked": { "type": "integer" },
+        "loi_signed": { "type": "integer" },
+        "pilots_paid": { "type": "integer" },
+        "revenue_collected": { "type": "integer" }
+      },
+      "required": ["outreach_count", "replies_count", "meetings_booked", "loi_signed", "pilots_paid", "revenue_collected"]
+    },
+    "hiring": {
+      "type": "object",
+      "properties": {
+        "candidates_pipeline": { "type": "integer" },
+        "interviews_booked": { "type": "integer" },
+        "offers_extended": { "type": "integer" },
+        "offers_accepted": { "type": "integer" }
+      },
+      "required": ["candidates_pipeline", "interviews_booked", "offers_extended", "offers_accepted"]
+    },
+    "ship": {
+      "type": "object",
+      "properties": {
+        "milestone_deployable": { "type": "boolean" }
+      },
+      "required": ["milestone_deployable"]
+    }
+  },
+  "required": ["week_of", "git", "sales", "hiring", "ship"]
+}
