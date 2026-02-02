@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FactCert Audit Trail",
+  "type": "object",
+  "required": ["id", "events", "final_hash"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identifier for this audit trail segment."
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["seq", "prev_hash", "type", "payload"],
+        "properties": {
+          "seq": {"type": "integer"},
+          "prev_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "type": {"type": "string"},
+          "payload": {"type": "object"},
+          "event_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "final_hash": {
+      "type": "string",
+      "description": "Hash of the last event in the chain."
+    }
+  }
+}

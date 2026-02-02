@@ -1,0 +1,6 @@
+{
+  "id": "USR-12345",
+  "name": "Alice Auditor",
+  "role": "verifier",
+  "email": "alice@example.com"
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FactCert Deterministic Stamp",
+  "type": "object",
+  "required": ["version", "target_hash", "signatures"],
+  "properties": {
+    "version": {"type": "string", "const": "1.0.0"},
+    "target_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sequence": {"type": "integer"},
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kid", "sig"],
+        "properties": {
+          "kid": {"type": "string", "description": "Key ID of the signer"},
+          "sig": {"type": "string", "pattern": "^[0-9a-f]+$", "description": "Hex encoded signature"}
+        }
+      }
+    }
+  }
+}

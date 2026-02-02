@@ -1,0 +1,20 @@
+{
+  "name": "@intelgraph/factcert",
+  "version": "1.0.0",
+  "description": "Regulated-grade fact-checker credentialing and audit trail",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.16",
+    "@types/node": "^25.0.3"
+  }
+}

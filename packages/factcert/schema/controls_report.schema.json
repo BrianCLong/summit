@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FactCert Controls Report",
+  "type": "object",
+  "required": ["report_id", "generated_at", "controls"],
+  "properties": {
+    "report_id": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "policy_version": {"type": "string"},
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "status", "evidence"],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "category": {
+            "type": "string",
+            "enum": ["security", "availability", "confidentiality", "integrity", "privacy"]
+          },
+          "description": {"type": "string"},
+          "status": {
+            "type": "string",
+            "enum": ["pass", "fail", "exception", "manual_review"]
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["ref", "hash"],
+              "properties": {
+                "ref": {"type": "string", "description": "Pointer to evidence artifact or event ID"},
+                "hash": {"type": "string", "description": "Hash of the referenced evidence"},
+                "comment": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
