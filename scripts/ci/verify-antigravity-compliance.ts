@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import yaml from 'js-yaml';
+import { z } from 'zod';
 
 // Paths
 const __filename = fileURLToPath(import.meta.url);
@@ -11,24 +11,25 @@ const POLICY_DIR = path.join(REPO_ROOT, 'agents/antigravity/policy');
 const TRADEOFF_LEDGER = path.join(REPO_ROOT, 'governance/tradeoffs/tradeoff_ledger.jsonl');
 const DECISIONS_DIR = path.join(REPO_ROOT, 'governance/decisions');
 
-// Types
-interface TradeoffEntry {
-  ts: string;
-  agent: string;
-  change_id: string;
-  summary: string;
-  tradeoff: {
-    cost_delta_percent: number;
-    reliability_delta: string;
-    velocity_delta: string;
-  };
-  risk: {
-    security_score: number;
-    reliability_score: number;
-  };
-  confidence: number;
-}
+// Schemas
+const TradeoffEntrySchema = z.object({
+  ts: z.string(),
+  agent: z.string(),
+  change_id: z.string(),
+  summary: z.string(),
+  tradeoff: z.object({
+    cost_delta_percent: z.number(),
+    reliability_delta: z.string(),
+    velocity_delta: z.string(),
+  }),
+  risk: z.object({
+    security_score: z.number(),
+    reliability_score: z.number(),
+  }),
+  confidence: z.number(),
+}).strict();
 
+type TradeoffEntry = z.infer<typeof TradeoffEntrySchema>;
 
 const checkTradeoffLedger = () => {
   console.log('Verifying Tradeoff Ledger integrity...');
@@ -44,18 +45,22 @@ const checkTradeoffLedger = () => {
   lines.forEach((line, index) => {
     if (!line.trim()) return;
     try {
-      const entry = JSON.parse(line) as TradeoffEntry;
-      // Basic validation schema
-      if (!entry.ts || !entry.agent || !entry.change_id) {
-        console.error(`❌ Invalid entry at line ${index + 1}: Missing required fields`);
+      const json = JSON.parse(line);
+      const result = TradeoffEntrySchema.safeParse(json);
+
+      if (!result.success) {
+        console.error(`❌ Invalid entry at line ${index + 1}: ${result.error.message}`);
         isValid = false;
+        return;
       }
-      if (entry.agent === 'antigravity' && (!entry.confidence || !entry.tradeoff)) {
-        console.error(`❌ Invalid Antigravity entry at line ${index + 1}: Missing confidence or tradeoff data`);
-        isValid = false;
+
+      const entry = result.data;
+      if (entry.agent === 'antigravity' && entry.confidence < 0.8) {
+        console.warn(`⚠️  Low confidence entry at line ${index + 1}: ${entry.confidence}`);
       }
-    } catch (e) {
-      console.error(`❌ Invalid JSON at line ${index + 1}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error(`❌ Invalid JSON at line ${index + 1}: ${msg}`);
       isValid = false;
     }
   });
@@ -91,14 +96,26 @@ const checkPoliciesExist = () => {
   return allExist;
 };
 
-const validateDecisionRecord = (prId: string) => {
-  console.log(`Checking for Decision Record for PR ${prId}...
-`);
-  // In a real scenario, we might look for a file named ADR-AG-{PR_ID}.md or similar
-  // For now, we'll just scan the directory for a matching pattern or generic check
+const validateDecisionRecords = () => {
+  console.log('Scanning Decision Records (ADRs)...');
 
-  // This is a placeholder for actual PR-to-file logic
-  console.log(`ℹ️  Skipping specific file check for ${prId} (logic placeholder).`);
+  if (!fs.existsSync(DECISIONS_DIR)) {
+    console.error('❌ Decisions directory not found!');
+    return false;
+  }
+
+  const files = fs.readdirSync(DECISIONS_DIR);
+  const adrFiles = files.filter(f => f.startsWith('ADR-AG-') && f.endsWith('.md'));
+
+  if (adrFiles.length === 0) {
+    console.warn('⚠️  No Antigravity Decision Records (ADR-AG-*) found.');
+    // We don't fail here as there might not be any required for this specific run, 
+    // but in CI we might want to check against a specific list.
+  } else {
+    console.log(`✅ Found ${adrFiles.length} decision records.`);
+    adrFiles.forEach(f => console.log(`  - ${f}`));
+  }
+
   return true;
 }
 
@@ -108,8 +125,9 @@ const main = () => {
 
   const policiesValid = checkPoliciesExist();
   const ledgerValid = checkTradeoffLedger();
+  const adrsScanned = validateDecisionRecords();
 
-  if (!policiesValid || !ledgerValid) {
+  if (!policiesValid || !ledgerValid || !adrsScanned) {
     console.error("\nFAILED: Governance checks failed.");
     process.exit(1);
   }

@@ -1,5 +1,9 @@
 import type { FeatureVector } from './FeatureStore.js';
+import { z } from 'zod';
 export type { FeatureVector } from './FeatureStore.js';
+
+const FeatureVectorSchema = z.record(z.string(), z.number());
+const RiskWindowSchema = z.enum(['24h', '7d', '30d']);
 
 export type RiskResult = {
   score: number;
@@ -20,16 +24,35 @@ export class RiskEngine {
     private readonly weights: FeatureVector,
     private readonly bias: number,
     private readonly version = 'v1',
-  ) { }
+  ) {
+    // Validate initialization parameters
+    FeatureVectorSchema.parse(weights);
+    if (!Number.isFinite(bias)) {
+      throw new Error(`Invalid bias: ${bias}. Bias must be a finite number.`);
+    }
+    Object.values(weights).forEach((w) => {
+      if (!Number.isFinite(w)) {
+        throw new Error(`Invalid weight: ${w}. Weights must be finite numbers.`);
+      }
+    });
+  }
 
   score(features: FeatureVector, window: RiskResult['window']): RiskResult {
+    // Validate inputs
+    FeatureVectorSchema.parse(features);
+    RiskWindowSchema.parse(window);
+
     let z = this.bias;
     const contributions = Object.keys(features).map((f) => {
       const w = this.weights[f] ?? 0;
       const v = features[f] ?? 0;
       const delta = w * v;
-      z += delta;
-      return { feature: f, value: v, weight: w, delta };
+
+      // Handle NaN/Infinity from multiplication if any
+      const safeDelta = Number.isFinite(delta) ? delta : 0;
+      z += safeDelta;
+
+      return { feature: f, value: v, weight: w, delta: safeDelta };
     });
     const s = 1 / (1 + Math.exp(-z));
     const band =
