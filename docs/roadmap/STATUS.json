@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
+  "last_updated": "2026-02-05T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "ru-ua-cogwar-lab-2025",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Lane 1 CogWar evidence and campaign schema foundations."
     }
   ]
 }
