@@ -1,29 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "FactCert Cryptographic Stamp",
+  "title": "FactCert Stamp",
   "type": "object",
   "properties": {
-    "version": {
-      "type": "string",
-      "const": "1.0.0"
-    },
-    "hash": {
-      "type": "string",
-      "description": "SHA-256 hash of the canonicalized credential payload"
-    },
-    "signature": {
-      "type": "string",
-      "description": "Ed25519 signature of the hash (hex encoded)"
-    },
-    "publicKey": {
-      "type": "string",
-      "description": "Public key used to verify the signature (PEM or hex)"
-    },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Timestamp when the stamp was created"
-    }
+    "version": { "type": "string", "enum": ["1.0"] },
+    "signer_id": { "type": "string" },
+    "signature": { "type": "string", "pattern": "^[0-9a-f]+$" },
+    "algorithm": { "type": "string", "enum": ["Ed25519"] },
+    "payload_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "timestamp": { "type": "string", "format": "date-time" }
   },
-  "required": ["version", "hash", "signature", "publicKey", "timestamp"]
+  "required": ["version", "signer_id", "signature", "algorithm", "payload_hash"]
 }

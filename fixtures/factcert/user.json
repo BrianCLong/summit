@@ -1,7 +1,7 @@
 {
-  "id": "did:factcert:user:12345",
+  "id": "USR_12345",
   "name": "Jane Doe",
   "email": "jane.doe@example.com",
-  "specializations": ["Health", "Science"],
-  "level": "Professional"
+  "role": "Reviewer",
+  "domain": "Finance"
 }
