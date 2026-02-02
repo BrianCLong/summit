@@ -1,5 +1,6 @@
 import logger from '../utils/logger.js';
-import { z } from 'zod/v4';
+import * as zod from 'zod/v4';
+const z = zod.z;
 
 export const EntityExtractionSchema = z.object({
   text: z.string(),
@@ -21,9 +22,9 @@ export const AnalysisResultSchema = z.object({
   relationships: z.array(RelationshipExtractionSchema),
 });
 
-export type EntityExtractionResult = z.infer<typeof AnalysisResultSchema>;
-export type EntityExtraction = z.infer<typeof EntityExtractionSchema>;
-export type RelationshipExtraction = z.infer<typeof RelationshipExtractionSchema>;
+export type EntityExtractionResult = zod.infer<typeof AnalysisResultSchema>;
+export type EntityExtraction = zod.infer<typeof EntityExtractionSchema>;
+export type RelationshipExtraction = zod.infer<typeof RelationshipExtractionSchema>;
 
 export interface TextAnalysisOptions {
   extractEntities?: boolean;
