@@ -364,3 +364,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agentic-80-problem-standard
+    version: v1
+    path: prompts/docs/agentic-80-problem-standard@v1.md
+    sha256: c60e61c94487e69b5247335c17e078b32def8b6fc5e89caf06f313b5a65032a9
+    description: Document the agentic verification standard (80% problem) with security and runbook guidance.
+    scope:
+      paths:
+        - docs/standards/the-80-problem-in-agentic-coding.md
+        - docs/security/data-handling/the-80-problem-in-agentic-coding.md
+        - docs/ops/runbooks/the-80-problem-in-agentic-coding.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/agentic-80-problem-standard@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
