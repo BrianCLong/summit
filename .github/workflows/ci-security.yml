@@ -70,6 +70,7 @@ jobs:
         uses: actions/checkout@v4 # v4.1.7
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Gitleaks
@@ -122,15 +123,15 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Semgrep CI ruleset
         uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
         with:
           config: p/ci
-          generateSarif: true
-          sarifFile: ${{ env.REPORT_DIR }}/semgrep.sarif
-          auditOn: push
+        env:
+           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
       - name: Upload Semgrep SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
@@ -153,6 +154,7 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Ensure SNYK_TOKEN is configured
@@ -193,6 +195,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.0
       - name: Prepare report directory
@@ -228,6 +231,7 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Build server image for scanning
@@ -276,6 +280,7 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.5
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
@@ -301,6 +306,7 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Install Checkov
         run: pip install --no-cache-dir checkov==3.2.23
       - name: Run Checkov across Terraform and Helm assets
@@ -331,6 +337,8 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Install Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.1.0
         with:
@@ -402,6 +410,7 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Execute baseline checks
         run: |
           chmod +x scripts/security/baseline-check.sh
@@ -422,6 +431,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
@@ -559,7 +569,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-aggregated
           path: aggregated-security/security-summary.json
       - name: Record dashboard location
         id: dashboard
