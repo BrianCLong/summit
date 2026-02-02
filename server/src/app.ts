@@ -144,6 +144,7 @@ import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
 import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
+import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -323,11 +324,12 @@ export const createApp = async () => {
     );
   };
 
-  // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], (req, res, next) => {
     if (isPublicWebhook(req)) return next();
     return tenantContextMiddleware()(req, res, next);
   });
+
+  app.use(['/api', '/graphql'], shadowTrafficMiddleware);
 
   app.use(['/api', '/graphql'], admissionControl);
 
