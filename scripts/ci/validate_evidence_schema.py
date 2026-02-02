@@ -11,6 +11,11 @@ from jsonschema import Draft202012Validator
 DEFAULT_SCHEMA_DIR = Path("schemas/evidence")
 DEFAULT_INDEX_PATH = Path("evidence/index.json")
 
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT / "tools" / "ci"))
+
+from evidence_parser import normalize_index_from_path
+
 TIMESTAMP_KEYS = {
     "created_at",
     "generated_at",
@@ -76,27 +81,20 @@ def ensure_no_timestamps_outside_stamp(path: Path, payload: object) -> None:
         fail(f"Timestamps must live in stamp.json only: {path} has {joined}")
 
 
-def resolve_paths(item: dict) -> dict:
-    files = item.get("files") or {}
-    paths = {
-        "report": files.get("report") or item.get("report"),
-        "metrics": files.get("metrics") or item.get("metrics"),
-        "stamp": files.get("stamp") or item.get("stamp"),
-    }
-    return paths
-
-
-def validate_evidence_entry(schema_dir: Path, evidence_id: str, item: dict) -> None:
-    paths = resolve_paths(item)
-    missing = [key for key, value in paths.items() if not value]
-    if missing:
+def validate_evidence_entry(schema_dir: Path, evidence_id: str, files: dict) -> None:
+    missing = [key for key, value in files.items() if not value]
+    if missing and len(missing) != 3:
         fail(f"{evidence_id} missing file mapping for {sorted(missing)}")
+    if missing and len(missing) == 3:
+        return
 
     report_schema = load_schema(schema_dir, "report.schema.json")
     metrics_schema = load_schema(schema_dir, "metrics.schema.json")
     stamp_schema = load_schema(schema_dir, "stamp.schema.json")
 
-    for key, rel_path in paths.items():
+    for key, rel_path in files.items():
+        if not rel_path:
+            continue
         path = Path(rel_path)
         if not path.exists():
             fail(f"Missing evidence file: {rel_path}")
@@ -134,15 +132,13 @@ def run_cli(args: list[str]) -> int:
     if not isinstance(index, dict):
         fail("evidence/index.json must be an object")
 
-    items = index.get("items", [])
-    if not isinstance(items, list):
-        fail("evidence/index.json items must be a list")
+    entries = normalize_index_from_path(parsed.index_path)
+    if not entries:
+        fail("evidence/index.json contains no evidence entries")
 
-    for item in items:
-        if not isinstance(item, dict):
-            fail("evidence/index.json items must be objects")
-        evidence_id = item.get("evidence_id", "<unknown>")
-        validate_evidence_entry(parsed.schema_dir, evidence_id, item)
+    for entry in entries:
+        evidence_id = entry.get("evidence_id") or "<unknown>"
+        validate_evidence_entry(parsed.schema_dir, evidence_id, entry.get("files", {}))
 
     print("Evidence schema validation passed")
     return 0

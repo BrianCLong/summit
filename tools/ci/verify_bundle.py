@@ -2,11 +2,16 @@ import json
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import jsonschema
 
+ROOT = Path(__file__).resolve().parents[2]
 # Add root to sys.path to allow importing summit_sim
 sys.path.append(os.getcwd())
+sys.path.append(str(ROOT / "tools" / "ci"))
+
+from evidence_parser import normalize_index_from_path
 
 def load_json(filepath):
     with open(filepath) as f:
@@ -34,13 +39,15 @@ def validate_evidence_files():
 
         # Collect all referenced files to validate
         files_to_validate = []
-        for item in index_data.get("items", []):
-            if "report" in item:
-                files_to_validate.append((item["report"], report_schema))
-            if "metrics" in item:
-                files_to_validate.append((item["metrics"], metrics_schema))
-            if "stamp" in item:
-                files_to_validate.append((item["stamp"], stamp_schema))
+        entries = normalize_index_from_path(Path("evidence/index.json"))
+        for entry in entries:
+            files = entry.get("files", {})
+            if files.get("report"):
+                files_to_validate.append((files["report"], report_schema))
+            if files.get("metrics"):
+                files_to_validate.append((files["metrics"], metrics_schema))
+            if files.get("stamp"):
+                files_to_validate.append((files["stamp"], stamp_schema))
 
         # Validate unique files
         validated = set()

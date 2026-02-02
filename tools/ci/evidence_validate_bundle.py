@@ -9,6 +9,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.append(str(Path(__file__).resolve().parent))
+from evidence_parser import iter_entry_files, normalize_index
+
 # Schemas are in summit/evidence/schemas/
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_DIR = ROOT / "summit/evidence/schemas"
@@ -91,33 +94,30 @@ def main():
     check_timestamps(index_data, "index.json")
     validate_schema(index_data, "evidence.index.schema.json")
 
-    # Check items in index
-    if "evidence" not in index_data:
-        die("index.json missing 'evidence' list")
+    entries = normalize_index(index_data)
+    if not entries:
+        die("index.json contains no evidence entries")
 
-    for item in index_data["evidence"]:
-        path_str = item.get("path")
-        if not path_str:
-            die("Evidence item missing path")
+    for entry in entries:
+        raw = entry.get("raw", {})
+        schema_path = raw.get("schema_path") if isinstance(raw, dict) else None
+        for path_str in iter_entry_files(entry):
+            full_path = bundle / path_str
+            if not full_path.exists():
+                die(f"Evidence file missing: {full_path}")
 
-        full_path = bundle / path_str
-        if not full_path.exists():
-            die(f"Evidence file missing: {full_path}")
+            check_stable_keys(full_path)
+            data = json.loads(full_path.read_text())
+            check_timestamps(data, path_str)
 
-        check_stable_keys(full_path)
-        data = json.loads(full_path.read_text())
-        check_timestamps(data, path_str)
-
-        # Use schema_path if available
-        schema_name = item.get("schema_path")
-        if schema_name:
-            validate_schema(data, schema_name)
-        elif "report.json" in path_str:
-             validate_schema(data, "evidence.report.schema.json")
-        elif "metrics.json" in path_str:
-             validate_schema(data, "evidence.metrics.schema.json")
-        elif "stamp.json" in path_str:
-             validate_schema(data, "evidence.stamp.schema.json")
+            if schema_path:
+                 validate_schema(data, schema_path)
+            elif "report.json" in path_str:
+                 validate_schema(data, "evidence.report.schema.json")
+            elif "metrics.json" in path_str:
+                 validate_schema(data, "evidence.metrics.schema.json")
+            elif "stamp.json" in path_str:
+                 validate_schema(data, "evidence.stamp.schema.json")
 
     print("PASS: Bundle is valid.")
 

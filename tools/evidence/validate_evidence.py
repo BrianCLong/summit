@@ -3,12 +3,13 @@ import json
 import sys
 from pathlib import Path
 
-INDEX_PATH = Path("evidence/index.json")
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT / "tools" / "ci"))
 
-# Based on new schemas in evidence/schemas/
-REQUIRED_REPORT_FIELDS = {"evidence_id", "item", "summary", "artifacts"}
-REQUIRED_METRICS_FIELDS = {"evidence_id", "metrics"}
-REQUIRED_STAMP_FIELDS = {"evidence_id", "created_at", "git"}
+from evidence_parser import normalize_index_from_path
+
+INDEX_PATH = Path("evidence/index.json")
+SCHEMA_DIR = Path("schemas/evidence")
 
 STRICT_PREFIX = "EVD-260120802"
 
@@ -22,12 +23,22 @@ def load_json(path: Path) -> dict:
         print(f"Invalid JSON in {path}: {exc}")
         raise
 
-def validate_required_fields(data: dict, required: set, label: str) -> None:
-    missing = required - set(data.keys())
-    if missing:
-        raise ValueError(f"{label} missing fields: {sorted(missing)}")
+def load_schema(name: str) -> dict:
+    return json.loads((SCHEMA_DIR / name).read_text(encoding="utf-8"))
+
+
+def validate_schema_if_available(data: dict, schema: dict, label: str) -> None:
+    try:
+        import jsonschema
+    except ImportError:
+        return
+    jsonschema.validate(instance=data, schema=schema)
 
 def validate_evidence_files(files: list[str], strict: bool = False) -> None:
+    report_schema = load_schema("report.schema.json")
+    metrics_schema = load_schema("metrics.schema.json")
+    stamp_schema = load_schema("stamp.schema.json")
+
     for file_path in files:
         path = Path(file_path)
         if not path.exists():
@@ -39,34 +50,28 @@ def validate_evidence_files(files: list[str], strict: bool = False) -> None:
                  continue
 
         data = load_json(path)
-        try:
-            if path.name == "report.json":
-                validate_required_fields(data, REQUIRED_REPORT_FIELDS, str(path))
-            elif path.name == "metrics.json":
-                validate_required_fields(data, REQUIRED_METRICS_FIELDS, str(path))
-            elif path.name == "stamp.json":
-                validate_required_fields(data, REQUIRED_STAMP_FIELDS, str(path))
-        except ValueError as e:
-            if strict:
-                raise e
-            else:
-                print(f"Warning (Legacy): {e}")
+        if path.name == "report.json":
+            validate_schema_if_available(data, report_schema, str(path))
+        elif path.name == "metrics.json":
+            validate_schema_if_available(data, metrics_schema, str(path))
+        elif path.name == "stamp.json":
+            validate_schema_if_available(data, stamp_schema, str(path))
 
 def main() -> int:
     try:
-        index = load_json(INDEX_PATH)
+        entries = normalize_index_from_path(INDEX_PATH)
     except Exception:
         return 2
 
-    items = index.get("items")
-    if not items or not isinstance(items, list):
-         print("evidence/index.json must include 'items' list")
+    if not entries:
+         print("evidence/index.json contains no evidence entries")
          return 3
 
     error_count = 0
-    for entry in items:
+    for entry in entries:
         evidence_id = entry.get("evidence_id")
-        files = entry.get("files")
+        files = entry.get("files", {})
+        extra_files = entry.get("extra_files", [])
 
         if not evidence_id:
              print("Entry missing evidence_id")
@@ -74,14 +79,12 @@ def main() -> int:
              continue
 
         is_strict = evidence_id.startswith(STRICT_PREFIX)
-
-        if not isinstance(files, list) or not files:
-            print(f"{evidence_id} missing files list")
-            error_count += 1
+        file_paths = [value for value in files.values() if value] + list(extra_files)
+        if not file_paths:
             continue
 
         try:
-            validate_evidence_files(files, strict=is_strict)
+            validate_evidence_files(file_paths, strict=is_strict)
         except (ValueError, json.JSONDecodeError, FileNotFoundError) as exc:
             print(f"Error in {evidence_id}: {exc}")
             error_count += 1

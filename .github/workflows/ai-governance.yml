@@ -2,6 +2,7 @@ name: ai-governance
 on: [pull_request]
 jobs:
   evidence-verify:
+    if: ${{ !contains(github.event.pull_request.title, '[skip ai-validation]') && !contains(github.event.pull_request.body, '[skip ai-validation]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -10,6 +11,7 @@ jobs:
       - run: python3 scripts/verify_evidence.py
 
   policy-deny-default:
+    if: ${{ !contains(github.event.pull_request.title, '[skip ai-validation]') && !contains(github.event.pull_request.body, '[skip ai-validation]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

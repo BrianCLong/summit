@@ -13,6 +13,9 @@ else:
     EVID = ROOT / "evidence"
 
 SCHEMAS = EVID / "schemas"
+sys.path.append(str(ROOT / "tools" / "ci"))
+
+from evidence_parser import iter_entry_files, normalize_index_from_path
 
 def fail(msg):
     print(f"evidence-verify: FAIL: {msg}", file=sys.stderr)
@@ -129,32 +132,18 @@ def main():
 
     index = load_json(index_path)
 
-    items = []
-    if "items" in index and isinstance(index["items"], list):
-        items = index["items"]
-    elif "evidence" in index and isinstance(index["evidence"], dict):
-        for evd_id, data in index["evidence"].items():
-            item = data.copy()
-            item["evidence_id"] = evd_id
-            # Convert report/metrics/stamp paths to list of files
-            files = []
-            if "report" in item: files.append(item["report"])
-            if "metrics" in item: files.append(item["metrics"])
-            if "stamp" in item: files.append(item["stamp"])
-            item["files"] = files
-            items.append(item)
-    else:
+    entries = normalize_index_from_path(index_path)
+    if not entries:
         fail("index.json must have 'items' list or 'evidence' object")
 
-    print(f"Found {len(items)} items in index.")
+    print(f"Found {len(entries)} items in index.")
 
-    for item in items:
-        # Support both 'files' (plan) and 'paths' (existing)
-        files = item.get("files", item.get("paths", []))
-        evd_id = item.get("evidence_id")
+    for entry in entries:
+        files = iter_entry_files(entry)
+        evd_id = entry.get("evidence_id")
 
         if not evd_id:
-            fail(f"Item in index missing evidence_id: {item}")
+            fail(f"Item in index missing evidence_id: {entry}")
 
         print(f"Verifying {evd_id}...")
 

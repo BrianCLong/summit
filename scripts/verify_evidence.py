@@ -16,6 +16,9 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT / "tools" / "ci"))
+
+from evidence_parser import iter_entry_files, normalize_index_from_path
 EVID = ROOT / "evidence"
 IOHUNTER_FIXTURES = EVID / "fixtures" / "iohunter"
 
@@ -101,7 +104,8 @@ def main() -> int:
     if missing:
         print(f"FAIL missing evidence files: {missing}")
         return 2
-    index = load(EVID / "index.json")
+    index_path = EVID / "index.json"
+    index = load(index_path)
     if not isinstance(index, dict):
         print("FAIL index.json must be a JSON object")
         return 3
@@ -110,12 +114,31 @@ def main() -> int:
         if not isinstance(index["items"], (list, dict)):
             print("FAIL index.json 'items' must be an array or object")
             return 3
-    elif "evidence" in index:
+    elif "evidence" in index or "entries" in index:
         # Legacy support
         pass
     else:
         print("FAIL index.json must contain top-level 'items' array or 'evidence' object")
         return 3
+
+    entries = normalize_index_from_path(index_path)
+    if not entries:
+        print("FAIL index.json contains no evidence entries")
+        return 3
+
+    for entry in entries:
+        evidence_id = entry.get("evidence_id") or "<unknown>"
+        for rel_path in iter_entry_files(entry):
+            fpath = ROOT / rel_path
+            if not fpath.exists():
+                print(f"FAIL missing evidence file for {evidence_id}: {rel_path}")
+                return 3
+            if fpath.name == "report.json":
+                validate_report(load(fpath))
+            elif fpath.name == "metrics.json":
+                validate_metrics(load(fpath))
+            elif fpath.name == "stamp.json":
+                validate_stamp(load(fpath))
     # determinism: forbid timestamps outside stamp.json (simple heuristic)
     forbidden = []
     # Legacy ignore list to allow existing files to pass
