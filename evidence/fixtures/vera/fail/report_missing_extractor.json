@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-VERA-FAIL-001",
+  "item_slug": "fail-fixture",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "text": "Missing extractor",
+      "confidence": 0.5
+    }
+  ],
+  "assessments": []
+}
