@@ -110,3 +110,34 @@
 
 ### FactGov Must-not-touch (until validated)
 - Existing wargame simulation endpoints in `api/main.py`.
+
+---
+
+## Disinfo News Ecosystem - Content Integrity (Assumptions)
+
+### Disinfo Verified
+- `packages/` workspace structure is supported.
+- `scripts/monitoring/` is established for drift detection scripts.
+- `fixtures/` is the standard for test data.
+
+### Disinfo Assumed (validate)
+- New TypeScript module in `packages/disinfo-news-ecosystem` is preferred over expanding the existing Python platform for this capability.
+- CI/CD will automatically incorporate the new `disinfo.yml` workflow.
+
+### Disinfo Must-not-touch (until validated)
+- Global `pnpm-lock.yaml` integrity (regenerate after merge).
+
+---
+
+## FactCert - Regulated Credentialing (Assumptions)
+
+### FactCert Verified
+- `packages/` directory exists for new subsystem placement.
+- Deterministic artifact standard is required for credential issuance.
+
+### FactCert Assumed (validate)
+- `packages/factcert` is the correct location for core schemas and crypto libs.
+- Ed25519 is the approved signing algorithm for deterministic audit trails.
+
+### FactCert Must-not-touch (until validated)
+- Existing `evidence/` schemas used by other subsystems.
