@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-10T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
@@ -24,6 +24,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+    },
+    {
+      "id": "kg-evidence-foundation",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence run schema alignment and verifier gate for KG foundation lane."
     }
   ]
 }

@@ -30,6 +30,12 @@ Once official names are known, we will alias these jobs or rename them in the wo
 - summit-evidence
 - summit-harness-mock
 
+## Knowledge Graph foundation gates (mapping required)
+- ci/evidence-verify
+- ci/kg-fixtures
+- ci/dependency-delta
+- ci/content-safety
+
 ## Required checks discovery (one-time for Memory Privacy)
 1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
