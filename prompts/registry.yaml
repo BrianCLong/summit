@@ -84,6 +84,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: defense-claims-continuation-pack
+    version: v1
+    path: prompts/ip/defense-claims-continuation-pack@v1.md
+    sha256: afcc72d18bdb737a45b48b10f4a57a10d4df8999756a7a2762ca15cca80603e4
+    description: Append defense CRM and simulation apparatus dependent claims C451–C480/S451–S480 with roadmap status update.
+    scope:
+      paths:
+        - docs/ip/defense_crm_claims_v1.md
+        - docs/ip/defense_simulation_apparatus_claims_v1.md
+        - docs/roadmap/STATUS.json
+        - prompts/ip/defense-claims-continuation-pack@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ip
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

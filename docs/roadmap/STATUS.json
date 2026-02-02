@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
+  "last_updated": "2026-02-03T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "ip-claims-continuation-pack-c451-s480",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     }
   ]
 }
