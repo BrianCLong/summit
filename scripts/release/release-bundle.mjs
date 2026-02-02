@@ -237,8 +237,8 @@ async function main() {
              checksums += `${shasum}  ${relPath}\n`;
          }
      }
-     writeFileSync(join(DIST_RELEASE, 'checksums.txt'), checksums);
-     console.log('   Wrote checksums.txt');
+     writeFileSync(join(DIST_RELEASE, 'SHA256SUMS'), checksums);
+     console.log('   Wrote SHA256SUMS');
   } catch (e) {
       console.warn('⚠️  Could not generate checksums (missing shasum/sha256sum?)');
   }
