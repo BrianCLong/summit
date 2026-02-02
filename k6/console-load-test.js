@@ -3,6 +3,8 @@ import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
 
 export let errorRate = new Rate('errors');
+import { config } from './config.js';
+
 
 export let options = {
   stages: [
@@ -17,7 +19,7 @@ export let options = {
 };
 
 export default function () {
-  const res = http.get('http://console.topicality.co');
+  const res = http.get(config.baseUrl);
 
   check(res, {
     'is status 200': (r) => r.status === 200,

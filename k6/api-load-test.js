@@ -1,6 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
+import { config, headers as commonHeaders } from './config.js';
 
 export let errorRate = new Rate('errors');
 
@@ -11,13 +12,13 @@ export let options = {
     { duration: '1m', target: 0 }, // ramp down to 0 users
   ],
   thresholds: {
-    http_req_duration: ['p(95)<500'], // 95% of requests should be below 500ms
-    errors: ['rate<0.01'], // error rate should be below 1%
+    ...config.thresholds,
+    errors: ['rate<0.01'], // custom metric threshold
   },
 };
 
 export default function () {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = commonHeaders;
   const query = `
     query {
       org(id: "some-org-id") {
@@ -26,7 +27,7 @@ export default function () {
     }
   `;
   const res = http.post(
-    'http://api.topicality.co/graphql',
+    `${config.baseUrl}/graphql`,
     JSON.stringify({ query: query }),
     { headers: headers },
   );

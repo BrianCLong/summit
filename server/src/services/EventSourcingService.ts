@@ -177,7 +177,8 @@ export class EventSourcingService {
         await managedClient!.query('BEGIN');
       }
 
-      if (this.usePartitions) {
+      // [PERF] Per-append partition checks are now handled by PartitionMaintenanceService
+      if (this.usePartitions && process.env.DB_SKIP_PARTITION_CHECK !== '1') {
         await managedClient!.query(
           'SELECT ensure_event_store_partition($1, $2, $3)',
           [event.tenantId, this.monthsAhead, this.retentionMonths],
@@ -197,7 +198,8 @@ export class EventSourcingService {
         values,
       );
 
-      if (this.usePartitions) {
+      // [PERF] Optional dual-write bypass for migrated environments
+      if (this.usePartitions && process.env.DB_EVENT_STRICT_PARTITIONING !== '1') {
         await managedClient!.query(
           `INSERT INTO ${this.legacyEventTable} (
             event_id, event_type, aggregate_type, aggregate_id, aggregate_version,

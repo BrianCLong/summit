@@ -31,7 +31,8 @@ export const options = {
     },
   },
   thresholds: {
-    'http_req_duration': ['p(95)<2000'], // 95% of requests must complete below 2s
+    ...config.thresholds,
+    'http_req_duration': ['p(95)<2000'], // Override with more lenient global for mixed scenarios
     'errors_cases': ['rate<0.05'],
     'errors_graphql': ['rate<0.01'],
     'errors_search': ['rate<0.01'],

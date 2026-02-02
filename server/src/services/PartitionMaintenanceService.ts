@@ -37,15 +37,47 @@ export class PartitionMaintenanceService {
     logger.info('Starting partition maintenance');
     const pool = getPostgresPool();
 
-    // Outbox Events (using DB function)
+    const monthsAhead =
+      Number(process.env.DB_PARTITION_MONTHS_AHEAD || 2) || 2;
+    const retentionMonths =
+      Number(process.env.DB_PARTITION_RETENTION_MONTHS || 18) || 18;
+
+    // 1. Event Store Partitions (Core App Logic)
     try {
-      await pool.write('SELECT ensure_outbox_partition($1, $2)', [2, 6]);
-      logger.info({ tableName: 'outbox_events' }, 'Partition maintenance successful');
+      if (process.env.DB_PARTITIONS_V1 === '1') {
+        const { rows } = await pool.write(
+          'SELECT ensure_event_store_partitions_for_all($1, $2) AS counts',
+          [monthsAhead, retentionMonths],
+        );
+        logger.info(
+          { tableName: 'event_store_partitioned', tenants: rows[0]?.counts || 0 },
+          'Event store partition maintenance successful',
+        );
+      }
     } catch (error) {
-      logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain partitions for table');
+      logger.error({ tableName: 'event_store_partitioned', error }, 'Failed to maintain event store partitions');
     }
 
-    // Other tables (manual logic)
+    // 2. HIPAA Log Partitions
+    try {
+      const { rows } = await pool.write('SELECT ensure_hipaa_log_partitions_for_all() AS counts');
+      logger.info(
+        { tableName: 'hipaa_logs', tenants: rows[0]?.counts || 0 },
+        'HIPAA log partition maintenance successful',
+      );
+    } catch (error) {
+      logger.error({ tableName: 'hipaa_logs', error }, 'Failed to maintain HIPAA log partitions');
+    }
+
+    // 3. Outbox Events (using DB function)
+    try {
+      await pool.write('SELECT ensure_outbox_partition($1, $2)', [monthsAhead, retentionMonths]);
+      logger.info({ tableName: 'outbox_events' }, 'Outbox partition maintenance successful');
+    } catch (error) {
+      logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain outbox partitions');
+    }
+
+    // 4. Other tables (manual logic)
     for (const tableName of TABLES_TO_MAINTAIN) {
       try {
         await this.ensureNextMonthPartition(pool, tableName);
