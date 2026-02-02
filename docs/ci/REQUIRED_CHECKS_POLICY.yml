@@ -29,14 +29,12 @@ branch_protection:
   required_status_checks:
     strict: true
     contexts:
-      - "CI Core (Primary Gate)"
-      - "CI / config-guard"
-      - "CI / unit-tests"
+      - "CI Core (Primary Gate) / CI Core Gate ✅"
+      - "CI / Unit Tests"
       - "GA Gate"
       - "Release Readiness Gate"
       - "SOC Controls"
       - "Unit Tests & Coverage"
-      - "ga / gate"
 
 # Always Required Checks
 # ----------------------
@@ -59,7 +57,7 @@ always_required:
     workflow: "soc-controls.yml"
     rationale: "SOC control verification is required for audit readiness"
 
-  - name: "CI Core (Primary Gate)"
+  - name: "CI Core (Primary Gate) / CI Core Gate ✅"
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
@@ -100,7 +98,7 @@ conditional_required:
       - "^\\.github/workflows/supply-chain"
       - "^scripts/security/"
 
-  - name: "Docker Build"
+  - name: "Docker Build & Security Scan"
     workflow: "docker-build.yml"
     rationale: "Docker image build and security validation"
     when_paths_match:
@@ -108,7 +106,7 @@ conditional_required:
       - "^docker-compose"
       - "^\\.dockerignore$"
 
-  - name: "Schema Compatibility"
+  - name: "Schema compatibility guard"
     workflow: "schema-compat.yml"
     rationale: "API schema backward compatibility checks"
     when_paths_match:
