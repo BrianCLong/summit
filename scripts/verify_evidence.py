@@ -123,7 +123,9 @@ def main() -> int:
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
-        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
+        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json",
+        "metrics.json", "report.json", "ATTESTATION_SUMMARY.md", "sources.json",
+        "exec_brief_pack.json"
     }
     IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out"}
 

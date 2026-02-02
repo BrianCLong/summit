@@ -185,10 +185,10 @@ jobs:
       - name: Generate SBOMs (SPDX + CycloneDX)
         if: inputs.sbom
         id: sbom
-        uses: anchore/syft-action@v0
+        uses: anchore/sbom-action@v0
         with:
-          image-ref: ${{ steps.image-uri.outputs.uri }}
-          output-formats: spdx-json, cyclonedx-json
+          image: ${{ steps.image-uri.outputs.uri }}
+          format: spdx-json, cyclonedx-json
 
       - name: Rename SBOMs
         if: inputs.sbom
