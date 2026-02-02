@@ -49,6 +49,16 @@ class CaseAuditLogger:
         )
         emit(event)
 
+    # CRUD wrappers
+    def create_case(self, case_id: str, title: str) -> None:
+        self.log_case_update(case_id, "create", {"title": title})
+
+    def add_comment(self, case_id: str, content: str) -> None:
+        self.log_case_update(case_id, "comment_add", {"content_len": len(content)})
+
+    def close_case(self, case_id: str, reason: str) -> None:
+        self.log_case_update(case_id, "status_change", {"new_status": "CLOSED", "reason": reason})
+
 class GothamImporter:
     """
     Imports Gotham Investigation Cases into Summit Graph Traversals.

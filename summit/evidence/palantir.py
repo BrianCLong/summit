@@ -33,22 +33,31 @@ class PalantirEvidenceWriter:
         findings: List[Finding],
         metrics: dict[str, float],
         config: dict[str, Any],
-        lineage: List[dict] = None  # New parameter
+        lineage: List[dict] = None,
+        extra_artifacts: Dict[str, Any] = None  # New: Generic artifact support
     ) -> EvidencePaths:
         """
         Writes deterministic Palantir competitive analysis evidence.
         """
         paths = default_paths(self.root_dir / "reports" / "palantir")
-        lineage_path = paths.root / "lineage.json"  # New artifact path
 
         # Calculate config hash for stamp
         config_str = json.dumps(config, sort_keys=True)
         config_hash = hashlib.sha256(config_str.encode("utf-8")).hexdigest()
 
         artifact_list = ["metrics.json", "stamp.json"]
+
+        # Lineage (Foundry)
         if lineage:
              artifact_list.append("lineage.json")
-             write_json(lineage_path, {"evidence_id": self.evidence_id, "lineage": lineage})
+             write_json(paths.root / "lineage.json", {"evidence_id": self.evidence_id, "lineage": lineage})
+
+        # Extras (Gotham/Apollo cases, logs, etc)
+        if extra_artifacts:
+            for name, content in extra_artifacts.items():
+                filename = f"{name}.json"
+                artifact_list.append(filename)
+                write_json(paths.root / filename, {"evidence_id": self.evidence_id, name: content})
 
         # 1. Report
         report_data = {

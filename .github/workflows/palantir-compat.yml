@@ -1,0 +1,49 @@
+name: Palantir Compatibility & Drift Check
+
+on:
+  push:
+    paths:
+      - 'summit/integrations/palantir*'
+      - 'summit/evidence/palantir.py'
+      - 'scripts/bench/palantir.py'
+      - 'scripts/monitoring/palantir-drift.sh'
+      - 'schemas/palantir/**'
+  pull_request:
+    paths:
+      - 'summit/integrations/palantir*'
+      - 'summit/evidence/palantir.py'
+      - 'scripts/bench/palantir.py'
+      - 'schemas/palantir/**'
+
+jobs:
+  bench-and-drift:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: |
+          pip install pytest networkx psutil
+
+      - name: Run Security Tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          pytest tests/test_palantir_security.py tests/test_palantir_policy.py
+
+      - name: Run Drift Detector
+        run: |
+          chmod +x scripts/monitoring/palantir-drift.sh
+          ./scripts/monitoring/palantir-drift.sh
+
+      - name: Verify Evidence Schema
+        run: |
+          # Simple check to ensure schemas are valid JSON
+          for f in schemas/palantir/*.json; do
+            echo "Checking $f..."
+            python3 -c "import json; json.load(open('$f'))"
+          done
