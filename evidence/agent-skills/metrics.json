@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-AGENTSKILLS-SKILLSEC-001",
+  "metrics": {
+    "skills_scanned": 0,
+    "npx_findings": 0
+  }
+}

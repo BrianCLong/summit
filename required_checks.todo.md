@@ -1,23 +1,16 @@
-# Required Checks Discovery
+# Required Checks Discovery (TODO)
 
-## Process to Identify Required Checks
+1) In GitHub repo settings:
+   - Settings → Branches → Branch protection rules
+   - Note required status checks and required workflows.
 
-1. Go to repository Settings in GitHub.
-2. Navigate to **Branches** -> **Branch protection rules**.
-3. Edit the rule for `main` (or default branch).
-4. Look for "Require status checks to pass before merging".
-5. Copy the exact names of the required checks listed there.
+2) Via API (preferred):
+   - Use GitHub REST API to fetch branch protection and list required checks.
 
-## Temporary Gate Names (Implemented in Plan)
+3) Map to Summit gates:
+   - Replace placeholder gate names in CI with exact required check names.
 
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
-
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
-
-## Rename Plan
-
-Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+## Temporary gate names (until mapped)
+- summit-skillsec
+- summit-evidence
+- summit-harness-mock
