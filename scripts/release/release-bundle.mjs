@@ -228,7 +228,7 @@ async function main() {
   // 6d. Checksums
   console.log('\n🔏 Generating Checksums...');
   try {
-     const files = runSilent(`find ${DIST_RELEASE} -type f -not -name "checksums.txt"`).split('\n').filter(Boolean);
+     const files = runSilent(`find ${DIST_RELEASE} -type f -not -name "SHA256SUMS"`).split('\n').filter(Boolean);
      let checksums = '';
      for (const file of files) {
          const relPath = file.replace(`${DIST_RELEASE}/`, '');

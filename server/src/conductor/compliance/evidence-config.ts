@@ -106,7 +106,6 @@ export const getS3LifecyclePolicy = () => ({
         },
       },
       // Legal hold items are exempt from expiration
-      Status: 'Enabled',
     },
     {
       ID: 'ConductorNonCriticalCleanup',

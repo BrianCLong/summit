@@ -104,9 +104,6 @@ export function auditFirstMiddleware(
         metadata: {
           requestId: (req as any).id || (req.headers['x-request-id'] as string),
           correlationId: (req as any).correlationId || (req.headers['x-correlation-id'] as string),
-          requestId: (req as any).id || req.headers['x-request-id'],
-          // @ts-ignore
-          correlationId: (req as any).correlationId || req.headers['x-correlation-id'],
           sessionId: (req as any).sessionID,
         },
       });

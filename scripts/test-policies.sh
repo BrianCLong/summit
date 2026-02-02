@@ -78,19 +78,33 @@ test_opa_policies() {
         local passed_tests
         local failed_tests
         
-        total_tests=$(echo "$test_output" | jq '.tests | length' 2>/dev/null || echo "unknown")
-        passed_tests=$(echo "$test_output" | jq '[.tests[] | select(.pass == true)] | length' 2>/dev/null || echo "0")
-        failed_tests=$(echo "$test_output" | jq '[.tests[] | select(.pass == false)] | length' 2>/dev/null || echo "0")
+        # New OPA version returns an array directly, or an object with .tests
+        if echo "$test_output" | jq -e 'type == "array"' >/dev/null 2>&1; then
+            total_tests=$(echo "$test_output" | jq '. | length' 2>/dev/null || echo "0")
+            failed_tests=$(echo "$test_output" | jq '[.[] | select(.fail == true)] | length' 2>/dev/null || echo "0")
+            passed_tests=$((total_tests - failed_tests))
+        else
+            total_tests=$(echo "$test_output" | jq '.tests | length' 2>/dev/null || echo "unknown")
+            passed_tests=$(echo "$test_output" | jq '[.tests[] | select(.pass == true)] | length' 2>/dev/null || echo "0")
+            failed_tests=$(echo "$test_output" | jq '[.tests[] | select(.pass == false)] | length' 2>/dev/null || echo "0")
+        fi
         
-        if [ "$failed_tests" = "0" ]; then
+        if [ "$failed_tests" = "0" ] && [ "$total_tests" != "0" ]; then
             pass "All $passed_tests OPA unit tests passed"
             return 0
+        elif [ "$total_tests" = "0" ]; then
+            warn "No OPA unit tests found in $POLICY_DIR"
+            return 0 # Not necessarily a failure
         else
             fail "$failed_tests out of $total_tests OPA unit tests failed"
             
             # Show failed tests
             echo "Failed tests:"
-            echo "$test_output" | jq -r '.tests[] | select(.pass == false) | "  - " + .package + "." + .name' 2>/dev/null || true
+            if echo "$test_output" | jq -e 'type == "array"' >/dev/null 2>&1; then
+                echo "$test_output" | jq -r '.[] | select(.fail == true) | "  - " + .package + "." + .name' 2>/dev/null || true
+            else
+                echo "$test_output" | jq -r '.tests[] | select(.pass == false) | "  - " + .package + "." + .name' 2>/dev/null || true
+            fi
             return 1
         fi
     else

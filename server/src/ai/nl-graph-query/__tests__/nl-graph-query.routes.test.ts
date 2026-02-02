@@ -1,12 +1,13 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { getNlGraphQueryService } from '../index.js';
 
 let nlGraphQueryRouter: express.Router;
 
-jest.mock('../index.js', () => ({
-  getNlGraphQueryService: jest.fn(),
+const getNlGraphQueryServiceMock = jest.fn();
+
+jest.unstable_mockModule('../index.js', () => ({
+  getNlGraphQueryService: getNlGraphQueryServiceMock,
 }));
 
 const run = process.env.NO_NETWORK_LISTEN !== 'true';
@@ -24,7 +25,7 @@ describeIf('nl-graph-query routes', () => {
 
   beforeEach(() => {
     compile.mockReset();
-    (getNlGraphQueryService as jest.Mock).mockReturnValue({ compile });
+    getNlGraphQueryServiceMock.mockReturnValue({ compile });
   });
 
   it('returns explanation payload and metadata on successful compile', async () => {

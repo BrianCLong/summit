@@ -594,58 +594,6 @@ export class ExtractionJobService {
           // entities.push(...embeddingResults);
           break;
 
-        case 'object_detection':
-          if (
-            mediaSource.media_type === 'IMAGE' ||
-            mediaSource.media_type === 'VIDEO'
-          ) {
-            const detectionResults = await this.runObjectDetection(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...detectionResults);
-          }
-          break;
-
-        case 'speech_to_text':
-          if (
-            mediaSource.media_type === 'AUDIO' ||
-            mediaSource.media_type === 'VIDEO'
-          ) {
-            const transcriptionResults = await this.runSpeechToText(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...transcriptionResults);
-          }
-          break;
-
-        case 'face_detection':
-          if (
-            mediaSource.media_type === 'IMAGE' ||
-            mediaSource.media_type === 'VIDEO'
-          ) {
-            const faceResults = await this.runFaceDetection(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...faceResults);
-          }
-          break;
-
-        case 'text_analysis':
-          if (
-            mediaSource.media_type === 'TEXT' ||
-            mediaSource.media_type === 'DOCUMENT'
-          ) {
-            const textResults = await this.runTextAnalysis(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...textResults);
-          }
-          break;
-
         default:
           throw new Error(`Unknown extraction method: ${method}`);
       }

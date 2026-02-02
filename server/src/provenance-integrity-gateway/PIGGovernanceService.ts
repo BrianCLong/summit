@@ -709,13 +709,14 @@ export class PIGGovernanceService extends EventEmitter {
    */
   private async loadTenantConfigs(): Promise<void> {
     const result = await pool.query(`SELECT * FROM pig_governance_configs`);
+    const rows = result?.rows ?? [];
 
-    for (const row of result.rows) {
+    for (const row of rows) {
       const config = this.parseConfig(row.config);
       this.tenantConfigs.set(row.tenant_id, config);
     }
 
-    logger.info({ count: result.rows.length }, 'Loaded tenant governance configs');
+    logger.info({ count: rows.length }, 'Loaded tenant governance configs');
   }
 
   /**
@@ -844,7 +845,10 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId, thirtyDaysAgo]
     );
 
-    const { critical_count, high_count, total_count } = result.rows[0];
+    const row = result?.rows?.[0] ?? { critical_count: 0, high_count: 0, total_count: 0 };
+    const critical_count = Number(row.critical_count ?? 0);
+    const high_count = Number(row.high_count ?? 0);
+    const total_count = Number(row.total_count ?? 0);
 
     const score = Math.min(100, Math.round(
       (critical_count * 30) + (high_count * 15) + (total_count * 5)

@@ -1,8 +1,9 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
 import { io as createClient, type Socket as ClientSocket } from 'socket.io-client';
 import { createCollaborationHub } from '../collaborationHub.js';
+
+jest.unmock('socket.io');
 
 const waitForEvent = <T>(socket: ClientSocket, event: string) =>
   new Promise<T>((resolve, reject) => {
@@ -21,24 +22,27 @@ const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
 
 describeIf('CollaborationHub presence channels', () => {
   let httpServer: ReturnType<typeof createServer>;
-  let io: Server;
+  let io: import('socket.io').Server;
   let port: number;
 
-  beforeAll((done) => {
+  beforeAll(async () => {
+    const { Server } = await import('socket.io');
     httpServer = createServer();
     io = new Server(httpServer, {
       cors: { origin: '*' },
     });
     createCollaborationHub(io, { presenceThrottleMs: 5 });
-    httpServer.listen(() => {
-      port = (httpServer.address() as { port: number }).port;
-      done();
+    await new Promise<void>((resolve) => {
+      httpServer.listen(() => {
+        port = (httpServer.address() as { port: number }).port;
+        resolve();
+      });
     });
   });
 
-  afterAll((done) => {
+  afterAll(async () => {
     io.close();
-    httpServer.close(done);
+    await new Promise<void>((resolve) => httpServer.close(() => resolve()));
   });
 
   it('broadcasts presence updates to channel members', async () => {

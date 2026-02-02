@@ -64,7 +64,9 @@ class JWTSecurityManager {
     await this.loadCurrentKey();
 
     // Setup key rotation schedule
-    this.scheduleKeyRotation();
+    if (process.env.NODE_ENV !== 'test' && process.env.JWT_ROTATION_DISABLED !== 'true') {
+      this.scheduleKeyRotation();
+    }
 
     console.log('✅ JWT Security Manager initialized');
   }
@@ -166,6 +168,9 @@ class JWTSecurityManager {
    * Schedule automatic key rotation
    */
   private scheduleKeyRotation(): void {
+    if (this.rotationTimer) {
+      clearInterval(this.rotationTimer);
+    }
     this.rotationTimer = setInterval(async () => {
       try {
         if (this.currentKey && this.currentKey.expiresAt <= new Date()) {
@@ -422,6 +427,7 @@ class JWTSecurityManager {
     console.log('🛑 Shutting down JWT Security Manager...');
     if (this.rotationTimer) {
       clearInterval(this.rotationTimer);
+      this.rotationTimer = null;
     }
     if (this.redis) {
       await this.redis.quit();

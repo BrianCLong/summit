@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import allowlist from '../../.maestro/persisted-queries.json';
+import allowlist from '../../../.maestro/persisted-queries.json';
 
 export function enforcePersisted(req: any, res: any, next: any) {
   const { query, extensions, id } = req.body || {};
