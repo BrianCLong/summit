@@ -21,3 +21,9 @@ We are using these names in our CI pipelines until the official required check n
 ## Rename Plan
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+
+## Required checks discovery (one-time for Memory Privacy)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
+2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
+4) Add PR to rename temporary checks to required names once known

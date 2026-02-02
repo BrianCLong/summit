@@ -100,6 +100,26 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
+      "title": "Structured memory schema & examples",
+      "files": ["evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/report.json", "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/metrics.json", "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/stamp.json"]
+    },
+    "EVD-MITTR-AIMEM-PRIV-POLICY-002": {
+      "title": "Deny-by-default policy proofs",
+      "files": ["evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/report.json", "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/metrics.json", "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/stamp.json"]
+    },
+    "EVD-MITTR-AIMEM-PRIV-LEAK-003": {
+      "title": "Context leak eval results",
+      "files": ["evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/report.json", "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/metrics.json", "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/stamp.json"]
+    },
+    "EVD-MITTR-AIMEM-PRIV-DSAR-004": {
+      "title": "User control API contract tests",
+      "files": ["evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/report.json", "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/metrics.json", "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/stamp.json"]
+    },
+    "EVD-MITTR-AIMEM-PRIV-EGRESS-005": {
+      "title": "Tool egress redaction tests",
+      "files": ["evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/report.json", "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/metrics.json", "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/stamp.json"]
     }
   }
 }
