@@ -4,6 +4,15 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import yaml from 'js-yaml';
 
+class GitHubApiError extends Error {
+  constructor(message, { status, kind } = {}) {
+    super(message);
+    this.name = 'GitHubApiError';
+    this.status = status ?? null;
+    this.kind = kind ?? 'unknown';
+  }
+}
+
 function normalizeContexts(contexts) {
   const cleaned = contexts
     .filter(value => typeof value === 'string')
@@ -97,15 +106,39 @@ async function ghApi(endpoint, options = {}) {
   return result.stdout;
 }
 
+function classifyGitHubApiError({ status, message, remaining }) {
+  const normalizedMessage = String(message || '').toLowerCase();
+  if (status === 403) {
+    if (remaining === '0' || normalizedMessage.includes('rate limit')) {
+      return 'rate_limited';
+    }
+    return 'permission';
+  }
+  if (status === 404) {
+    return 'not_configured';
+  }
+  return 'unknown';
+}
+
 async function fetchRequiredStatusChecks({ repo, branch }) {
   const endpoint = `repos/${repo}/branches/${branch}/protection/required_status_checks`;
   if (await isGhAvailable()) {
-    const output = await ghApi(endpoint);
-    return parseRequiredStatusChecks(output, 'gh');
+    try {
+      const output = await ghApi(endpoint);
+      return parseRequiredStatusChecks(output, 'gh');
+    } catch (error) {
+      const statusMatch = String(error?.message || '').match(/HTTP (\d{3})/i);
+      const status = statusMatch ? Number(statusMatch[1]) : null;
+      const kind = classifyGitHubApiError({ status, message: error?.message });
+      throw new GitHubApiError(error?.message || 'GitHub API error', { status, kind });
+    }
   }
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   if (!token) {
-    throw new Error('Missing GITHUB_TOKEN or GH_TOKEN for GitHub API access.');
+    throw new GitHubApiError('Missing GITHUB_TOKEN or GH_TOKEN for GitHub API access.', {
+      status: null,
+      kind: 'permission'
+    });
   }
   const response = await fetch(`https://api.github.com/${endpoint}`, {
     headers: {
@@ -116,7 +149,16 @@ async function fetchRequiredStatusChecks({ repo, branch }) {
   });
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(`GitHub API error ${response.status}: ${body}`);
+    const remaining = response.headers.get('X-RateLimit-Remaining');
+    const kind = classifyGitHubApiError({
+      status: response.status,
+      message: body,
+      remaining
+    });
+    throw new GitHubApiError(`GitHub API error ${response.status}: ${body}`, {
+      status: response.status,
+      kind
+    });
   }
   const data = await response.json();
   return normalizeRequiredStatusChecks(data, 'https');
@@ -218,6 +260,8 @@ async function inferRepoFromGit() {
 export {
   computeDiff,
   fetchRequiredStatusChecks,
+  GitHubApiError,
+  classifyGitHubApiError,
   ghApi,
   hashObject,
   inferRepoFromGit,
