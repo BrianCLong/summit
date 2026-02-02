@@ -100,6 +100,69 @@ export function hashString(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
+// Comprehensive timestamp key patterns (case-insensitive matching)
+const TIMESTAMP_KEYS = new Set([
+  // snake_case variants
+  'timestamp', 'time', 'date', 'datetime',
+  'created_at', 'updated_at', 'deleted_at',
+  'generated_at', 'started_at', 'finished_at', 'ended_at',
+  'modified_at', 'last_update', 'last_modified',
+  'expires_at', 'expired_at',
+  'duration_ms', 'elapsed_ms', 'duration', 'elapsed',
+  // camelCase variants (normalized to lowercase for matching)
+  'createdat', 'updatedat', 'deletedat',
+  'generatedat', 'startedat', 'finishedat', 'endedat',
+  'modifiedat', 'lastupdate', 'lastmodified',
+  'expiresat', 'expiredat',
+  'durationms', 'elapsedms',
+]);
+
+// ISO8601/RFC3339 patterns for value scanning (match anywhere in the string)
+const TIMESTAMP_VALUE_PATTERNS = [
+  /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?/,
+  /\d{4}-\d{2}-\d{2}/,
+];
+
+const EPOCH_STRING_PATTERN = /1\d{9,12}/g;
+
+/**
+ * Detect if a numeric value is likely a Unix epoch timestamp.
+ * Checks for milliseconds (13+ digits) or seconds (10 digits) in valid range.
+ */
+export function isLikelyEpoch(value) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return false;
+  // Milliseconds: 2000-01-01 (946684800000) to 2100-01-01 (4102444800000)
+  if (value > 946684800000 && value < 4102444800000) return true;
+  // Seconds: 2000-01-01 (946684800) to 2100-01-01 (4102444800)
+  if (value > 946684800 && value < 4102444800) return true;
+  return false;
+}
+
+/**
+ * Check if a string value matches timestamp patterns.
+ */
+function isLikelyEpochString(value) {
+  if (typeof value !== 'string') return false;
+  const matches = value.match(EPOCH_STRING_PATTERN);
+  if (!matches) return false;
+  return matches.some((match) => {
+    const numeric = Number(match);
+    return Number.isFinite(numeric) && isLikelyEpoch(numeric);
+  });
+}
+
+export function isTimestampValue(value) {
+  if (typeof value !== 'string') return false;
+  if (TIMESTAMP_VALUE_PATTERNS.some((pattern) => pattern.test(value))) {
+    return true;
+  }
+  return isLikelyEpochString(value);
+}
+
+/**
+ * Scan for timestamp keys in an object structure.
+ * Returns array of paths where timestamp keys are found.
+ */
 export function scanTimestampKeys(value, prefix = '') {
   const matches = [];
   if (Array.isArray(value)) {
@@ -111,24 +174,45 @@ export function scanTimestampKeys(value, prefix = '') {
   if (!value || typeof value !== 'object') {
     return matches;
   }
-  const timestampKeys = new Set([
-    'timestamp',
-    'time',
-    'created_at',
-    'updated_at',
-    'last_update',
-    'started_at',
-    'finished_at',
-    'ended_at',
-    'duration_ms',
-  ]);
   for (const [key, child] of Object.entries(value)) {
     const lowerKey = key.toLowerCase();
     const nextPath = prefix ? `${prefix}.${key}` : key;
-    if (timestampKeys.has(lowerKey)) {
+    if (TIMESTAMP_KEYS.has(lowerKey)) {
       matches.push(nextPath);
     }
     matches.push(...scanTimestampKeys(child, nextPath));
+  }
+  return matches;
+}
+
+/**
+ * Scan for timestamp values (not just keys) in an object structure.
+ * Returns array of paths where timestamp-like values are found.
+ */
+export function scanTimestampValues(value, prefix = '') {
+  const matches = [];
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => {
+      matches.push(...scanTimestampValues(entry, `${prefix}[${index}]`));
+    });
+    return matches;
+  }
+  if (value === null || value === undefined) {
+    return matches;
+  }
+  if (typeof value === 'string' && isTimestampValue(value)) {
+    if (prefix) matches.push(prefix);
+    return matches;
+  }
+  if (typeof value === 'number' && isLikelyEpoch(value)) {
+    if (prefix) matches.push(prefix);
+    return matches;
+  }
+  if (typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      const nextPath = prefix ? `${prefix}.${key}` : key;
+      matches.push(...scanTimestampValues(child, nextPath));
+    }
   }
   return matches;
 }
