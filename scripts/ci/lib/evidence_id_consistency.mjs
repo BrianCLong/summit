@@ -117,6 +117,16 @@ const TIMESTAMP_KEYS = new Set([
   'elapsed_ms', 'elapsedms',
 ]);
 
+// Keys that suggest the value might be a timestamp (for epoch detection)
+const EPOCH_SUGGESTIVE_KEY_PATTERNS = [
+  /timestamp/i, /time$/i, /^time/i,
+  /_at$/i, /at$/i,
+  /date/i,
+  /_ms$/i, /ms$/i,
+  /epoch/i, /unix/i,
+  /^ts$/i, /^dt$/i,
+];
+
 // ISO8601/RFC3339 patterns for value scanning (match anywhere in the string)
 const TIMESTAMP_VALUE_PATTERNS = [
   // ISO8601 / RFC3339
@@ -188,8 +198,25 @@ export function scanTimestampKeys(value, prefix = '') {
 }
 
 /**
+ * Check if a key name suggests the value might be a timestamp.
+ */
+function isEpochSuggestiveKey(keyPath) {
+  if (!keyPath) return false;
+  // Extract the final key from the path
+  const parts = keyPath.split(/[.\[\]]+/).filter(Boolean);
+  const lastKey = parts[parts.length - 1] || '';
+  // Check if any pattern matches
+  return EPOCH_SUGGESTIVE_KEY_PATTERNS.some(pattern => pattern.test(lastKey));
+}
+
+/**
  * Scan for timestamp values (not just keys) in an object structure.
  * Returns array of paths where timestamp-like values are found.
+ *
+ * False positive controls:
+ * - ISO8601 strings are always flagged (high confidence)
+ * - Epoch numbers are only flagged if the key name suggests time
+ * - Epoch strings embedded in text are only flagged if they're the only content
  */
 export function scanTimestampValues(value, prefix = '') {
   const matches = [];
@@ -202,12 +229,28 @@ export function scanTimestampValues(value, prefix = '') {
   if (value === null || value === undefined) {
     return matches;
   }
-  if (typeof value === 'string' && isTimestampValue(value)) {
-    if (prefix) matches.push(prefix);
+  if (typeof value === 'string') {
+    // ISO8601 patterns are always flagged (high confidence)
+    if (TIMESTAMP_VALUE_PATTERNS.some((pattern) => pattern.test(value))) {
+      if (prefix) matches.push(prefix);
+      return matches;
+    }
+    // Epoch strings: only flag if the string IS the epoch (not embedded in text)
+    // and the key suggests time
+    const trimmed = value.trim();
+    if (/^1\d{9,12}$/.test(trimmed) && isEpochSuggestiveKey(prefix)) {
+      const numeric = Number(trimmed);
+      if (Number.isFinite(numeric) && isLikelyEpoch(numeric)) {
+        if (prefix) matches.push(prefix);
+      }
+    }
     return matches;
   }
-  if (typeof value === 'number' && isLikelyEpoch(value)) {
-    if (prefix) matches.push(prefix);
+  if (typeof value === 'number') {
+    // Epoch numbers: only flag if the key suggests time
+    if (isLikelyEpoch(value) && isEpochSuggestiveKey(prefix)) {
+      if (prefix) matches.push(prefix);
+    }
     return matches;
   }
   if (typeof value === 'object') {
