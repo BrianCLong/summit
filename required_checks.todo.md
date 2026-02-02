@@ -7,6 +7,7 @@
 3. Edit the rule for `main` (or default branch).
 4. Look for "Require status checks to pass before merging".
 5. Copy the exact names of the required checks listed there.
+6. Update `ci/gates/memory_privacy_gates.yml` to match exact check names (for Memory Privacy gates).
 
 ## Temporary Gate Names (Implemented in Plan)
 
@@ -17,6 +18,11 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+
+### Memory Privacy Gates
+- `ci/memory-privacy-foundation`
+- `ci/memory-privacy-eval`
+- `ci/memory-privacy-evidence`
 
 ## Rename Plan
 

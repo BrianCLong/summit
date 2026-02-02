@@ -1,0 +1,9 @@
+gates:
+  - name: ci/memory-privacy-foundation
+    description: Lint/unit tests for core/memory + core/privacy and manifest checks.
+
+  - name: ci/memory-privacy-eval
+    description: Runs eval/privacy_memory and generates evidence.
+
+  - name: ci/memory-privacy-evidence
+    description: Validates evidence/index.json and stamp.json.
