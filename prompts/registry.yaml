@@ -314,3 +314,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+- id: pr-17722-update
+  version: v1
+  path: prompts/pr/pr-17722-update@v1.md
+  sha256: 221c1aba64cb432caaa160efcb33c774793720d06424f731a750c90ebb97c8d0
+  description: Update PR 17722 scoped changes.
+  scope:
+    paths:
+      - ci/
+      - docs/
+      - evidence/
+      - src/
+      - tests/
+      - prompts/pr/pr-17722-update@v1.md
+      - prompts/registry.yaml
+    domains:
+      - documentation
+      - governance
+      - operations
+  verification:
+    tiers_required:
+      - C
+    debt_budget:
+      permitted: 0
+      retirement_target: 0
+  allowed_operations:
+    - create
+    - edit
