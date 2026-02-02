@@ -39,7 +39,7 @@ try {
     '--format=esm',
     '--target=node20',
     '--sourcemap',
-    '--outfile=dist/index.js',
+    '--outfile=dist-new/index.js',
     '--packages=external',
     '--external:@intelgraph/*',
     '--external:./node_modules/*',
