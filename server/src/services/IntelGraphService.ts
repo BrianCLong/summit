@@ -6,7 +6,8 @@ import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema.
 import { AppError, NotFoundError, DatabaseError } from '../lib/errors.js';
 import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import { Counter, Histogram } from 'prom-client';
-import { z } from 'zod/v4';
+import * as zod from 'zod/v4';
+const z = zod.z;
 
 // --- Zod Validation Schemas for Service Layer ---
 const CreateEntitySchema = z.object({ name: z.string().min(1), description: z.string().optional() });
@@ -79,7 +80,7 @@ export class IntelGraphService {
     }
   }
 
-  async createEntity(entityData: z.infer<typeof CreateEntitySchema>, owner: string, tenantId: string): Promise<Entity> {
+  async createEntity(entityData: zod.infer<typeof CreateEntitySchema>, owner: string, tenantId: string): Promise<Entity> {
     return this.measure('createEntity', async (session) => {
       const { name, description } = CreateEntitySchema.parse(entityData);
       const now = new Date().toISOString();
@@ -93,7 +94,7 @@ export class IntelGraphService {
     });
   }
 
-  async createClaim(claimData: z.infer<typeof CreateClaimSchema>, owner: string, tenantId: string): Promise<Claim> {
+  async createClaim(claimData: zod.infer<typeof CreateClaimSchema>, owner: string, tenantId: string): Promise<Claim> {
     return this.measure('createClaim', async (session) => {
       const { statement, confidence, entityId } = CreateClaimSchema.parse(claimData);
       const now = new Date().toISOString();
