@@ -5,7 +5,7 @@
 2.  **Package Location**: `packages/` is the standard location for modules.
 3.  **Package Scope**: `@intelgraph` is the naming convention (e.g., `@intelgraph/disinformation-detection`).
 4.  **Validation Library**: `ajv` is present in root `devDependencies`.
-5.  **Testing**: `vitest` and `jest` are available. I will use `vitest` as it seems to be the modern standard in this repo (found in `scripts/` and root `package.json`).
+5.  **Testing**: `vitest` and `jest` are available for Node.js; `pytest` is used for Python `api/` (Verified via `api/` check).
 6.  **Workspace**: `pnpm` workspaces are used.
 7.  **Governance**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` exists and defines the "CI Core (Primary Gate)" and other required checks.
 8.  **Runtime (`api/`)**:
@@ -32,10 +32,11 @@
 *   Existing GA gates / branch protection requirements.
 *   Deployment configs / secrets / infra definitions.
 *   `SECURITY/*` baselines (Extend only, don't rewrite).
+*   `api/main.py` existing endpoints (wargame simulation) should be preserved.
 
 ## Repository Validation plan
 *   Enumerate required checks via GitHub branch protection UI/API.
-*   Confirm test runner (jest/vitest) and lint tooling.
+*   Confirm test runner (pytest for api, jest/vitest for server).
 *   Verify `maestro` queue mechanism.
 
 ---
@@ -94,3 +95,18 @@
 ### FactFlow Must-not-touch (until validated)
 - Existing security workflows.
 - `server/src/middleware/auth.ts` (unless absolutely necessary, use existing auth).
+
+---
+
+## FactGov - Regulated Procurement (Assumptions)
+
+### FactGov Verified
+- `api/` service is intended to host the FactGov module.
+- `api/` currently uses simple API Key authentication (`X-API-Key`).
+
+### FactGov Assumed (validate)
+- `api/` service can be integrated into the broader system (e.g. via API Gateway or direct calls).
+- Python 3.11+ is the target version (based on `api/Dockerfile` check).
+
+### FactGov Must-not-touch (until validated)
+- Existing wargame simulation endpoints in `api/main.py`.
