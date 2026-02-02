@@ -36,6 +36,10 @@ export function onNeo4jDriverReady(_callback: (event: { reason: string }) => voi
   // No-op in tests
 }
 
+export function transformNeo4jIntegers<T>(value: T): T {
+  return value;
+}
+
 export const neo = {
   session: () => mockSession,
   run: async (_query: string, _params?: any) => ({ records: [] }),
@@ -55,6 +59,7 @@ export default {
   isNeo4jMockMode,
   closeNeo4jDriver,
   onNeo4jDriverReady,
+  transformNeo4jIntegers,
   neo,
   instrumentSession,
 };

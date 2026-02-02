@@ -71,7 +71,9 @@ def example_text_detection(platform):
         results = detector.detect_text_misinfo(sample_texts)
 
         print("\nDetection Results:")
-        for i, (text, result) in enumerate(zip(sample_texts, results, strict=False)):
+        for i in range(min(len(sample_texts), len(results))):
+            text = sample_texts[i]
+            result = results[i]
             misinfo_score = result.get("misinfo_score", 0.0)
             confidence = result.get("confidence", 0.0)
             is_misinfo = result.get("is_misinfo", False)
@@ -116,7 +118,9 @@ def example_image_detection(platform):
         results = detector.detect_image_misinfo(sample_images)
 
         print("\nDetection Results:")
-        for i, (image_path, result) in enumerate(zip(sample_images, results, strict=False)):
+        for i in range(min(len(sample_images), len(results))):
+            image_path = sample_images[i]
+            result = results[i]
             misinfo_score = result.get("misinfo_score", 0.0)
             confidence = result.get("confidence", 0.0)
             is_manipulated = result.get("is_manipulated", False)
@@ -157,7 +161,9 @@ def example_audio_detection(platform):
         results = detector.detect_audio_misinfo(sample_audio)
 
         print("\nDetection Results:")
-        for i, (audio_path, result) in enumerate(zip(sample_audio, results, strict=False)):
+        for i in range(min(len(sample_audio), len(results))):
+            audio_path = sample_audio[i]
+            result = results[i]
             misinfo_score = result.get("misinfo_score", 0.0)
             confidence = result.get("confidence", 0.0)
             is_deepfake = result.get("is_deepfake", False)
