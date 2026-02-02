@@ -41,3 +41,22 @@
 - evidence/fewshot5x-agentic-coding/EVD-FEWSHOT5X-EVAL-001/stamp.json
 - evidence/ai-influence-ops/EVD-ai-influence-ops-EVIDENCE-001/report.json
 - evidence/index.json (updated)
+
+## Defense IP Claims Verification (CRM & Simulation)
+1) **Rule provenance tests:**
+   - Verify each policy decision includes rule IDs.
+   - Verify rule provenance metadata (author, approval, date) is present.
+2) **Approval credential tests:**
+   - Verify revoked credentials result in denial.
+   - Verify step-up authentication is required for high-risk actions.
+3) **Poisoning tests:**
+   - Verify suspicious source drift triggers quarantine.
+   - Verify external publish is denied for quarantined sources.
+4) **Consensus tests:**
+   - Verify high disagreement among models leads to monitoring-only mode.
+5) **Semantic canary tests:**
+   - Verify unsafe semantics triggers modification or denial.
+   - Verify canary rollback rules are enforced.
+6) **DR/COOP tests:**
+   - Verify audit unavailability triggers denial of external publishing.
+   - Verify recovery proof artifact is required after failover.
