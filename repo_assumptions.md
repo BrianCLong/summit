@@ -1,28 +1,40 @@
 # Repo Assumptions & Verifications
 
 ## Verified
-1.  **Package Location**: `packages/` is the standard location for modules.
-2.  **Package Scope**: `@intelgraph` is the naming convention (e.g., `@intelgraph/disinformation-detection`).
-3.  **Validation Library**: `ajv` is present in root `devDependencies`.
-4.  **Testing**: `vitest` and `jest` are available. I will use `vitest` as it seems to be the modern standard in this repo (found in `scripts/` and root `package.json`).
-5.  **Workspace**: `pnpm` workspaces are used.
+1.  **Repo Structure**: Top-level directories include `api/`, `apis/`, `api-schemas/`, `apps/`, `bindings/`, `alerting/`, `RUNBOOKS/`, `SECURITY/`.
+2.  **Package Location**: `packages/` is the standard location for modules.
+3.  **Package Scope**: `@intelgraph` is the naming convention (e.g., `@intelgraph/disinformation-detection`).
+4.  **Validation Library**: `ajv` is present in root `devDependencies`.
+5.  **Testing**: `vitest` and `jest` are available. I will use `vitest` as it seems to be the modern standard in this repo (found in `scripts/` and root `package.json`).
+6.  **Workspace**: `pnpm` workspaces are used.
+7.  **Governance**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` exists and defines the "CI Core (Primary Gate)" and other required checks.
+8.  **Runtime (`api/`)**:
+    - **Language**: Python 3.9 (Verified via `api/Dockerfile`).
+    - **Framework**: FastAPI (Verified via `api/main.py`).
+    - **Database**: Neo4j and Redis drivers present.
+    - **Observability**: OpenTelemetry configured.
+9.  **Bindings**: `bindings/ibrs-node` is a Node.js binding backed by Rust (`@napi-rs/cli`).
 
 ## Assumptions
 1.  **New Package**: `packages/disinfo-ops` is a new package and does not conflict with existing work (verified by absence).
 2.  **Schema Standard**: We are defining new schemas for "Ops-first" pipeline, but loosely aligning with `evidence/*.schema.json` conventions (e.g., separating report, metrics, stamp).
 3.  **Required Checks**: Required status check names remain to be confirmed against branch protection.
 4.  **Deterministic Evidence**: Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
+5.  **Platform Spine**: New services will use Python/FastAPI to match `api/` spine.
+6.  **Queue**: `maestro` package likely handles orchestration; specific queue technology (Celery vs Redis Queues) needs confirmation.
 
 ## Must-not-touch
-*   `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+*   `docs/ci/REQUIRED_CHECKS_POLICY.yml` (Governance-controlled).
 *   Security scanning workflows (unless required).
 *   Public API surfaces in `packages/**` (no breaking changes).
 *   Existing GA gates / branch protection requirements.
 *   Deployment configs / secrets / infra definitions.
+*   `SECURITY/*` baselines (Extend only, don't rewrite).
 
 ## Repository Validation plan
 *   Enumerate required checks via GitHub branch protection UI/API.
 *   Confirm test runner (jest/vitest) and lint tooling.
+*   Verify `maestro` queue mechanism.
 
 ---
 
