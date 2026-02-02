@@ -26,6 +26,9 @@ Once official names are known, we will alias these jobs or rename them in the wo
 - ci/summit-harness-evidence
 - ci/summit-tool-policy
 - Use `skills/*` jobs with stable names (If actual required checks differ, add a rename PR that preserves history).
+- summit-skillsec
+- summit-evidence
+- summit-harness-mock
 
 ## Required checks discovery (one-time for Memory Privacy)
 1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
