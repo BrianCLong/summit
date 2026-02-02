@@ -1,23 +1,24 @@
-# Required Checks Discovery
+# Required Checks Todo
 
-## Process to Identify Required Checks
+## Discovery Steps
 
-1. Go to repository Settings in GitHub.
-2. Navigate to **Branches** -> **Branch protection rules**.
-3. Edit the rule for `main` (or default branch).
-4. Look for "Require status checks to pass before merging".
-5. Copy the exact names of the required checks listed there.
+1. **Check GitHub Branch Protection**
+   - Go to Repo Settings -> Branches -> Rulesets/Protection.
+   - List required status checks.
 
-## Temporary Gate Names (Implemented in Plan)
+2. **List Required Checks via API**
+   - Use `gh api repos/:owner/:repo/branches/main/protection/required_status_checks`
 
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
+## Planned Gates
 
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
+1. **Passive Context Budget**
+   - Name: `test-agents-md-budget`
+   - Command: `pytest summit/agent/context/tests/test_agents_md_budget.py`
 
-## Rename Plan
+2. **Sanitizer Check**
+   - Name: `test-agents-md-sanitizer`
+   - Command: `pytest summit/agent/context/tests/test_agents_md_sanitizer.py`
 
-Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+3. **Skill Reliability Gate**
+   - Name: `eval-skill-reliability`
+   - Command: `python3 summit/evals/context_reliability/agentsmd_vs_skills/run.py`
