@@ -17,6 +17,8 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+- `ci/prompt-registry-immutability` - Ensures prompt version files are immutable.
+- `ci/prompt-eval-gate` - Ensures prompts pass evaluations before promotion.
 
 ## Rename Plan
 

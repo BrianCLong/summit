@@ -11,7 +11,6 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["files"],
         "properties": {
           "evidence_id": { "type": "string" },
           "files": {
@@ -25,6 +24,10 @@
             "items": { "type": "string" }
           }
         },
+        "anyOf": [
+          { "required": ["files"] },
+          { "required": ["artifacts"] }
+        ],
         "additionalProperties": true
       }
     },
