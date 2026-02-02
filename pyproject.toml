@@ -8,7 +8,9 @@ version = "4.0.0"
 description = "IntelGraph Core Repository"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "jsonschema",
+]
 
 [project.optional-dependencies]
 otel = []
