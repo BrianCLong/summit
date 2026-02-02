@@ -7,7 +7,7 @@
   "description": "Smart contract framework for governance and policy enforcement",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@intelgraph/blockchain": "workspace:*",

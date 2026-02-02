@@ -34,20 +34,22 @@ export class PostgresStore {
 
     /**
      * Phase B: Dual-insert helper
+     * Ensures event_seq identity across legacy and partitioned tables.
      */
     private async insertEvent(client: PoolClient, event: { id: string; tenant_id: string; type: string; run_id: string; task_id: string; payload: any }) {
-        // 1. Insert to legacy table
-        await client.query(
+        // 1. Insert to legacy table and get generated sequence
+        const res = await client.query(
             `INSERT INTO orchestrator_events (id, tenant_id, type, run_id, task_id, payload)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING event_seq`,
             [event.id, event.tenant_id, event.type, event.run_id, event.task_id, JSON.stringify(event.payload)]
         );
+        const event_seq = res.rows[0].event_seq;
 
-        // 2. Insert to partitioned table (Phase B)
+        // 2. Insert to partitioned table (Phase B) with same sequence
         await client.query(
-            `INSERT INTO orchestrator_events_p (id, tenant_id, type, run_id, task_id, payload)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-            [event.id, event.tenant_id, event.type, event.run_id, event.task_id, JSON.stringify(event.payload)]
+            `INSERT INTO orchestrator_events_p (id, event_seq, tenant_id, type, run_id, task_id, payload)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [event.id, event_seq, event.tenant_id, event.type, event.run_id, event.task_id, JSON.stringify(event.payload)]
         );
     }
 
@@ -55,16 +57,18 @@ export class PostgresStore {
      * Phase B: Dual-insert helper for outbox
      */
     async insertOutbox(client: PoolClient, outbox: { tenant_id: string; event_type: string; payload: any }) {
+        // 1. Insert to legacy table
         const query = `INSERT INTO orchestrator_outbox (tenant_id, event_type, payload) VALUES ($1, $2, $3) RETURNING id`;
         const res = await client.query(query, [outbox.tenant_id, outbox.event_type, JSON.stringify(outbox.payload)]);
+        const outbox_id = res.rows[0].id;
 
-        // Dual-write to partitioned table
+        // 2. Dual-write to partitioned table with same id
         await client.query(
-            `INSERT INTO orchestrator_outbox_p (tenant_id, event_type, payload) VALUES ($1, $2, $3)`,
-            [outbox.tenant_id, outbox.event_type, JSON.stringify(outbox.payload)]
+            `INSERT INTO orchestrator_outbox_p (id, tenant_id, event_type, payload) VALUES ($1, $2, $3, $4)`,
+            [outbox_id, outbox.tenant_id, outbox.event_type, JSON.stringify(outbox.payload)]
         );
 
-        return res.rows[0].id;
+        return outbox_id;
     }
 
     async claimReadyTasks(workerId: string, limit: number, leaseMs: number): Promise<Task[]> {
@@ -210,6 +214,15 @@ export class PostgresStore {
                 const month = parseInt(matches[2]);
                 const partDate = new Date(year, month - 1, 1);
                 if (partDate < cutoff) {
+                    // Safety Guard: For outbox, ensure no pending work exists in the partition
+                    if (tableName === 'orchestrator_outbox') {
+                        const check = await this.pool.query(`SELECT 1 FROM ${partName} WHERE status NOT IN ('SENT', 'DEAD') LIMIT 1`);
+                        if (check.rowCount! > 0) {
+                            logger.warn({ partName }, 'Skipping outbox partition drop: contains non-terminal messages');
+                            continue;
+                        }
+                    }
+
                     await this.pool.query(`DROP TABLE IF EXISTS ${partName}`);
                     dropped.push(partName);
                     logger.info({ partName, tableName }, 'Dropped old partition');

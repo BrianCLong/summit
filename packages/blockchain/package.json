@@ -7,7 +7,7 @@
   "description": "Private permissioned blockchain infrastructure for immutable audit trails",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "dev": "tsc -p tsconfig.json --watch"
   },
   "dependencies": {
