@@ -107,6 +107,14 @@ def create_parser() -> argparse.ArgumentParser:
     bidirectional_parser.add_argument("--temperature", "-t", type=float, default=1.0, help="Temperature for probabilistic outputs (default: 1.0)")
     bidirectional_parser.add_argument("--disable-bidirectional", action="store_true", help="Disable bidirectional processing")
 
+    # Advanced analysis subcommand
+    advanced_parser = subparsers.add_parser("advanced", help="Run advanced analysis with cognitive, quantum, and consciousness modeling")
+    advanced_parser.add_argument("--text", help="Text content to analyze with advanced techniques")
+    advanced_parser.add_argument("--file", help="File to analyze with advanced techniques")
+    advanced_parser.add_argument("--skip-cognitive", action="store_true", help="Skip cognitive dissonance analysis")
+    advanced_parser.add_argument("--skip-quantum", action="store_true", help="Skip quantum-inspired analysis")
+    advanced_parser.add_argument("--skip-consciousness", action="store_true", help="Skip consciousness modeling analysis")
+
     return parser
 
 

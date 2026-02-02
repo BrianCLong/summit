@@ -1,30 +1,34 @@
-name: GA Evidence Pack
+name: GA Evidence Pipeline
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
 
 jobs:
   evidence-pack:
-    name: Generate GA Evidence Bundle
+    name: GA Evidence Bundle & Gate
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
+        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
+          cache: "pnpm"
+          node-version: "20"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        uses: pnpm/action-setup@v4
         with:
           version: 10.0.0
 
@@ -36,9 +40,12 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Verify Evidence Bundle (Strict)
+        run: node scripts/ci/verify_ga_evidence_bundle.mjs dist/ga-evidence
+
       - name: Upload Evidence Bundle
-        if: always()
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
         with:
           name: ga-evidence-bundle-${{ github.sha }}
           path: |
@@ -53,27 +60,27 @@ jobs:
           echo "## GA Evidence Bundle Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f dist/ga-evidence/GA_EVIDENCE_MANIFEST.yml ]; then
+          if [ -f dist/ga-evidence/bundle.manifest.json ]; then
             echo "### Evidence Manifest" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`yaml" >> $GITHUB_STEP_SUMMARY
-            cat dist/ga-evidence/GA_EVIDENCE_MANIFEST.yml >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+            cat dist/ga-evidence/bundle.manifest.json >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           fi
           if [ -f dist/ga-evidence/ga_verify_report.md ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### GA Verify Report" >> $GITHUB_STEP_SUMMARY
             cat dist/ga-evidence/ga_verify_report.md >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Verify Evidence Integrity
+      - name: Verify Integrity (Final Check)
         if: always()
         run: |
-          if [ -f dist/ga-evidence/evidence.sha256 ]; then
+          if [ -f dist/ga-evidence/bundle.contents.txt ]; then
             cd dist/ga-evidence
-            sha256sum -c evidence.sha256 --quiet
+            sha256sum -c bundle.contents.txt --quiet
             echo "✓ Evidence integrity verified"
           else
-            echo "⚠ Evidence hash ledger not found"
+            echo "✗ Evidence contents listing not found"
             exit 1
           fi

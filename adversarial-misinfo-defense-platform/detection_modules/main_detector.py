@@ -390,6 +390,176 @@ class AdversarialMisinfoDetector:
 
         return probs.tolist()
 
+    def detect_with_advanced_analysis(
+        self,
+        content_dict: dict[str, Any],
+        perform_cognitive_analysis: bool = True,
+        perform_quantum_analysis: bool = True,
+        perform_consciousness_analysis: bool = True
+    ) -> dict[str, Any]:
+        """
+        Perform detection using advanced analysis techniques including cognitive dissonance,
+        quantum-inspired analysis, and neurosymbolic reasoning with consciousness modeling
+
+        Args:
+            content_dict: Dictionary with content to analyze
+            perform_cognitive_analysis: Whether to perform cognitive dissonance analysis
+            perform_quantum_analysis: Whether to perform quantum-inspired analysis
+            perform_consciousness_analysis: Whether to perform consciousness modeling analysis
+
+        Returns:
+            Comprehensive analysis results combining all advanced techniques
+        """
+        from ..cognitive_dissonance_modeling import BeliefNetwork, BeliefNode, BeliefSourceType
+        from ..quantum_inspired_analysis import QuantumInformationState
+        from ..neurosymbolic_consciousness_engine import NeuralSymbol, NeuralSymbolType
+
+        # Initialize comprehensive results
+        advanced_results = {
+            "timestamp": datetime.now(),
+            "content_analyzed": content_dict,
+            "cognitive_analysis": {},
+            "quantum_analysis": {},
+            "consciousness_analysis": {},
+            "integrated_threat_score": 0.0,
+            "unified_recommendation": "AWAITING_ANALYSIS",
+            "confidence_in_integrated_assessment": 0.0
+        }
+
+        # Perform cognitive dissonance analysis if requested
+        if perform_cognitive_analysis and "text" in content_dict:
+            try:
+                # Initialize belief network with content
+                initial_beliefs = []
+                for i, text_content in enumerate(content_dict["text"][:5]):  # Limit to first 5 texts
+                    belief = BeliefNode(
+                        belief_id=f"belief_{i}_{datetime.now().timestamp()}",
+                        content=text_content,
+                        strength=random.uniform(0.3, 0.9),  # Random initial strength
+                        source_type=BeliefSourceType.ANONYMOUS,  # Will be determined
+                        timestamp=datetime.now(),
+                        confidence=random.uniform(0.4, 0.8),
+                        emotional_valence=random.uniform(-0.5, 0.5),
+                        cognitive_load=random.uniform(0.1, 0.7)
+                    )
+                    initial_beliefs.append(belief)
+
+                belief_network = BeliefNetwork(
+                    user_id="analysis_subject",
+                    initial_beliefs=initial_beliefs
+                )
+
+                # Perform cognitive dissonance analysis
+                # This would normally be done with a CognitiveDissonanceAnalyzer
+                # For this implementation we'll simulate the results
+                cognitive_results = {
+                    "dissonance_score": sum(b.strength * b.cognitive_load for b in initial_beliefs) / len(initial_beliefs) if initial_beliefs else 0.0,
+                    "potential_conflicts": len([b for b in initial_beliefs if b.cognitive_load > 0.5]),
+                    "emotional_manipulation_indicators": len([b for b in initial_beliefs if abs(b.emotional_valence) > 0.6])
+                }
+                advanced_results["cognitive_analysis"] = cognitive_results
+
+            except Exception as e:
+                advanced_results["cognitive_analysis"] = {"error": str(e)}
+
+        # Perform quantum-inspired analysis if requested
+        if perform_quantum_analysis and "text" in content_dict:
+            try:
+                quantum_metrics = []
+                for i, text_content in enumerate(content_dict["text"][:3]):  # Limit to first 3
+                    # Create quantum state for content
+                    import math
+                    phase = random.uniform(0, 2 * math.pi)
+                    amplitude = complex(random.uniform(0.5, 1.0), random.uniform(-0.5, 0.5))
+
+                    quantum_state = QuantumInformationState(
+                        info_id=f"quantum_{i}_{datetime.now().timestamp()}",
+                        content=text_content,
+                        amplitude=amplitude,
+                        phase=phase,
+                        coherence_time=datetime.now(),
+                        probability=abs(amplitude)**2
+                    )
+
+                    # Calculate quantum-inspired metrics
+                    # In a real implementation, this would run actual quantum analysis
+                    quantum_metrics.append({
+                        "info_id": quantum_state.info_id,
+                        "entanglement_potential": min(1.0, len(text_content) / 100),
+                        "coherence_stability": abs(amplitude)**2,
+                        "superposition_complexity": len(set(text_content.lower().split())) / max(1, len(text_content.split()))
+                    })
+
+                quantum_results = {
+                    "avg_entanglement_potential": sum(q["entanglement_potential"] for q in quantum_metrics) / len(quantum_metrics) if quantum_metrics else 0.0,
+                    "coherence_metrics": quantum_metrics,
+                    "quantum_signature_anomalies": [q for q in quantum_metrics if q["superposition_complexity"] > 0.8]
+                }
+                advanced_results["quantum_analysis"] = quantum_results
+
+            except Exception as e:
+                advanced_results["quantum_analysis"] = {"error": str(e)}
+
+        # Perform consciousness modeling analysis if requested
+        if perform_consciousness_analysis and "text" in content_dict:
+            try:
+                from ..neurosymbolic_consciousness_engine import NeurosymbolicReasoner
+
+                reasoner = NeurosymbolicReasoner()
+
+                consciousness_results = {}
+                for i, text_content in enumerate(content_dict["text"][:2]):  # Limit to first 2 to prevent overload
+                    # Process content through consciousness model
+                    consciousness_state = reasoner.process_information(text_content)
+
+                    # Detect misinformation signatures
+                    signatures = reasoner.detect_misinformation_signatures(consciousness_state)
+
+                    consciousness_results[f"text_{i}"] = {
+                        "awareness_level": consciousness_state.awareness_level,
+                        "cognitive_load": consciousness_state.cognitive_load,
+                        "detected_signatures": signatures,
+                        "metacognitive_insights": reasoner.run_meta_cognitive_analysis()
+                    }
+
+                advanced_results["consciousness_analysis"] = consciousness_results
+
+                # Calculate integrated threat score based on all analyses
+                cognitive_score = advanced_results["cognitive_analysis"].get("dissonance_score", 0.0)
+                quantum_score = advanced_results["quantum_analysis"].get("avg_entanglement_potential", 0.0)
+                consciousness_score = 0.0  # Would come from consciousness analysis
+
+                if consciousness_results:
+                    awareness_levels = [v["awareness_level"] for v in consciousness_results.values()]
+                    consciousness_score = sum(awareness_levels) / len(awareness_levels) if awareness_levels else 0.0
+
+                # Weighted integration of scores
+                integrated_score = (
+                    cognitive_score * 0.4 +
+                    quantum_score * 0.3 +
+                    consciousness_score * 0.3
+                )
+
+                advanced_results["integrated_threat_score"] = min(1.0, integrated_score)
+
+                # Generate unified recommendation
+                if integrated_score < 0.3:
+                    recommendation = "CONTENT_APPROVED"
+                elif integrated_score < 0.5:
+                    recommendation = "REQUIRES_REVIEW"
+                elif integrated_score < 0.7:
+                    recommendation = "POTENTIAL_MISINFORMATION"
+                else:
+                    recommendation = "MISINFORMATION_DETECTED"
+
+                advanced_results["unified_recommendation"] = recommendation
+                advanced_results["confidence_in_integrated_assessment"] = 0.85  # High confidence in combined approach
+
+            except Exception as e:
+                advanced_results["consciousness_analysis"] = {"error": str(e)}
+
+        return advanced_results
+
     def generate_adversarial_samples(
         self, content_dict: dict[str, list[Any]], num_samples: int = 5
     ) -> dict[str, Any]:

@@ -15,6 +15,9 @@ from .red_blue_team import RedBlueTeamExerciseManager
 from .tactic_evolution import AutonomousTacticEvolver
 from .validation_suite import ValidationBenchmark
 from .bidirectional_temp_control import BidirectionalTemperatureController, BidirectionalProcessor, BidirectionalConfig
+from .cognitive_dissonance_modeling import create_cognitive_dissonance_system
+from .quantum_inspired_analysis import create_quantum_defense_system
+from .neurosymbolic_consciousness_engine import create_neurosymbolic_consciousness_system
 
 
 # Convenience functions
@@ -28,6 +31,11 @@ def create_platform():
     config = BidirectionalConfig()
     controller = BidirectionalTemperatureController(detector, config)
 
+    # Initialize advanced systems
+    cognitive_dissonance_system = create_cognitive_dissonance_system()
+    quantum_defense_system = create_quantum_defense_system()
+    neurosymbolic_consciousness_system = create_neurosymbolic_consciousness_system()
+
     return {
         "detector": detector,
         "trainer": AdversarialTrainingEngine(),
@@ -36,6 +44,9 @@ def create_platform():
         "validator": ValidationBenchmark(),
         "bidirectional_controller": controller,
         "bidirectional_config": config,
+        "cognitive_dissonance_system": cognitive_dissonance_system,
+        "quantum_defense_system": quantum_defense_system,
+        "neurosymbolic_consciousness_system": neurosymbolic_consciousness_system,
     }
 
 
@@ -48,5 +59,8 @@ __all__ = [
     "BidirectionalTemperatureController",
     "BidirectionalProcessor",
     "BidirectionalConfig",
+    "create_cognitive_dissonance_system",
+    "create_quantum_defense_system",
+    "create_neurosymbolic_consciousness_system",
     "create_platform",
 ]
