@@ -744,8 +744,7 @@ export const createApp = async () => {
       '/graphql',
       express.json(),
       authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-      advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
-      // Note: Type assertion needed due to duplicate @apollo/server in monorepo node_modules
+      ...(process.env.SKIP_RATE_LIMITS === 'true' ? [] : [advancedRateLimiter.middleware()]), // Applied AFTER authentication to enable per-user limits
       expressMiddleware(apollo as any, {
         context: async ({ req }) => getContext({ req: req as any })
       }) as unknown as express.RequestHandler,
@@ -754,7 +753,7 @@ export const createApp = async () => {
     appLogger.warn('GraphQL disabled via SKIP_GRAPHQL');
   }
 
-  if (!safetyState.killSwitch && !safetyState.safeMode) {
+  if (!safetyState.killSwitch && !safetyState.safeMode && process.env.NODE_ENV !== 'test') {
     // Start background trust worker if enabled
     startTrustWorker();
     // Start retention worker if enabled
@@ -765,8 +764,8 @@ export const createApp = async () => {
     });
   } else {
     appLogger.warn(
-      { safetyState },
-      'Skipping background workers because safety mode or kill switch is enabled',
+      { safetyState, env: process.env.NODE_ENV },
+      'Skipping background workers because safety mode, kill switch or test environment is enabled',
     );
   }
 
@@ -783,8 +782,10 @@ export const createApp = async () => {
 
   appLogger.info('Anomaly detector activated.');
 
-  // Start regional failover monitoring
-  failoverOrchestrator.start();
+  if (process.env.NODE_ENV !== 'test') {
+    // Start regional failover monitoring
+    failoverOrchestrator.start();
+  }
 
   // Global Error Handler - must be last
   app.use(centralizedErrorHandler);

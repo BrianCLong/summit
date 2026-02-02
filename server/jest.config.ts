@@ -170,7 +170,7 @@ const config: Config = {
     '^pkcs11js$': '<rootDir>/tests/mocks/pkcs11js.js',
     '^graphql-iso-date$': '<rootDir>/tests/mocks/graphql-iso-date.cjs',
     '^pptxgenjs$': '<rootDir>/tests/mocks/pptxgenjs.ts',
-    '.*config/database(\\.js)?$': '<rootDir>/tests/mocks/db-config.ts',
+    // '.*config/database(\\.js)?$': '<rootDir>/tests/mocks/db-config.ts',
     '^html-to-text$': '<rootDir>/tests/mocks/html-to-text.ts',
     '^mjml$': '<rootDir>/tests/mocks/mjml.ts',
     '.*TemplateRenderer.*': '<rootDir>/tests/mocks/template-renderer.ts',
@@ -249,11 +249,11 @@ const config: Config = {
   bail: false,
   errorOnDeprecated: true,
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }],
-    '^.+\\.js$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }],
+    '^.+\\.m?tsx?$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }],
+    '^.+\\.m?js$': ['ts-jest', { useESM: true, tsconfig: 'tsconfig.test.json' }],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(\\.pnpm|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss|gaxios|gcp-metadata|@opentelemetry|pg)/)',
+    'node_modules/(?!(@intelgraph|p-limit|yocto-queue|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|pptxgenjs|jszip|@exodus/bytes|jsdom|html-encoding-sniffer|pg-boss|gaxios|gcp-metadata|@opentelemetry|pg)/)',
   ],
   maxWorkers: process.env.CI ? 2 : '50%',
   // Limit worker memory to prevent OOM in CI
