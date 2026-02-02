@@ -1,5 +1,13 @@
 # Patent Claims: Summit Defense Simulation Apparatus
 
+## Defined Terms
+
+- **Graph invariant**: A consistency rule applied to a versioned narrative snapshot prior to simulation.
+- **Reconciliation proof artifact**: A logged record enumerating integrity checks and pass/fail outcomes for a simulation snapshot.
+- **Appeal artifact**: A structured objection record containing the appealed decision identifier, objection category, and supporting references.
+- **Causal assumptions artifact**: A structured record capturing identification assumptions, covariates, and methodology identifiers used for causal lift estimation.
+- **Validity window**: A time-bounded interval during which an appeal or causal estimate remains eligible for gating decisions.
+
 ## Base Claims
 
 S1. A simulation apparatus for evaluating adversarial misinformation defense actions, comprising:
@@ -119,13 +127,13 @@ S390. The apparatus of claim S381, wherein the apparatus generates a partner com
 
 ## Cluster 9: Graph integrity constraints + reconciliation invariants for simulation inputs (S391–S400)
 
-S391. The apparatus of claim S1, wherein the apparatus enforces graph invariants on a versioned snapshot prior to executing counterfactual simulation.
-S392. The apparatus of claim S391, wherein the graph invariants include schema constraints that restrict permitted node types, edge types, and required properties per node type.
-S393. The apparatus of claim S391, wherein the graph invariants include referential integrity constraints requiring that each edge references existing nodes.
-S394. The apparatus of claim S391, wherein the graph invariants include temporal consistency constraints requiring that temporal edges do not violate chronological ordering associated with events.
+S391. The apparatus of claim S1, wherein the apparatus enforces graph integrity constraints on a versioned snapshot prior to executing counterfactual simulation.
+S392. The apparatus of claim S391, wherein the graph integrity constraints include schema constraints that restrict permitted node types, edge types, and required properties per node type.
+S393. The apparatus of claim S391, wherein the graph integrity constraints include referential integrity constraints requiring that each edge references existing nodes.
+S394. The apparatus of claim S391, wherein the graph integrity constraints include temporal consistency constraints requiring that temporal edges do not violate chronological ordering associated with events.
 S395. The apparatus of claim S391, wherein the apparatus generates a reconciliation proof artifact indicating which constraints were checked and whether each constraint passed or failed for a snapshot used in simulation.
 S396. The apparatus of claim S395, wherein the apparatus records the reconciliation proof artifact in an audit log linked to a snapshot hash and a replay manifest identifier.
-S397. The apparatus of claim S391, wherein the apparatus excludes external publishing actions from ranking when any graph invariant fails and outputs monitoring-only actions.
+S397. The apparatus of claim S391, wherein the apparatus excludes external publishing actions from ranking when any graph integrity constraint fails and outputs monitoring-only actions.
 S398. The apparatus of claim S1, wherein the apparatus performs conflict resolution for duplicate narrative state merges by selecting a canonical narrative identifier based on confidence scores and lineage completeness.
 S399. The apparatus of claim S398, wherein the apparatus records a merge decision artifact comprising merge rationale and contributing sources in an audit log linked to ranked outputs.
 S400. The apparatus of claim S391, wherein the apparatus enforces a constraint requiring lineage completeness above a threshold for narrative states referenced by output permitted external publishing actions.
@@ -133,7 +141,7 @@ S400. The apparatus of claim S391, wherein the apparatus enforces a constraint r
 ## Cluster 10: Appeals workflow for ranked outputs and policy decisions (S401–S410)
 
 S401. The apparatus of claim S1, wherein the apparatus provides an appeals workflow enabling a human operator to challenge a policy decision used in ranking a candidate defense action.
-S402. The apparatus of claim S401, wherein the appeals workflow receives an appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts.
+S402. The apparatus of claim S401, wherein the appeals workflow receives a structured appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts.
 S403. The apparatus of claim S402, wherein objection categories include at least incorrect jurisdiction tagging, incorrect authenticity evaluation, incorrect risk scoring, or incorrect policy rule application.
 S404. The apparatus of claim S401, wherein the apparatus re-evaluates a candidate defense action by re-running policy evaluation using a stored structured defense action object and a policy bundle hash referenced in the appealed decision identifier.
 S405. The apparatus of claim S404, wherein the apparatus produces an appeal resolution decision comprising uphold, modify, or reverse and an explanation.
@@ -187,6 +195,8 @@ S423. A simulation apparatus comprising a processor and a memory storing instruc
 2. **Forecast drift is conservative:** drift triggers monitoring-only and/or requires re-calibration approval.
 3. **Partner overlays only restrict:** never expand permissions; conflicts default deny.
 4. **Audit binding:** record jurisdiction tags, forecast drift events, partner overlay hashes with snapshot hash + policy bundle hash.
+
+---
 
 ## CI VERIFIER SPEC
 

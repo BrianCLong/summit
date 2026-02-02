@@ -1,82 +1,14 @@
-<<<<<<< HEAD
 # Patent Claims: Summit Defense CRM
 
+## Defined Terms
+
+- **Graph invariant**: A consistency rule applied to the narrative operating graph that must hold before updates are committed.
+- **Reconciliation proof artifact**: A logged record that enumerates each integrity check, its inputs, and pass/fail result for a proposed update.
+- **Appeal artifact**: A structured objection record containing the appealed decision identifier, objection category, and supporting references.
+- **Causal assumptions artifact**: A structured record capturing identification assumptions, covariates, and methodology identifiers used for causal lift estimation.
+- **Validity window**: A time-bounded interval during which an appeal or causal estimate remains eligible for gating decisions.
+
 ## Base Claims
-
-C1. A non-transitory computer-readable medium storing instructions that, when executed by a processor, cause a system to:
-- Maintain a narrative operating graph comprising a plurality of narrative states and edges representing relationships between said narrative states;
-- Generate candidate defense actions based on the narrative states;
-- Evaluate the candidate defense actions against a policy bundle; and
-- Execute at least one of the candidate defense actions.
-
----
-
-## Cluster 1: Graph integrity constraints + reconciliation invariants
-
-C421. A non-transitory computer-readable medium storing instructions that, when executed by a processor, cause a system to perform operations for enforcing graph integrity in a narrative operating graph, the operations comprising:
-1. Maintaining a narrative operating graph comprising a plurality of narrative states and edges representing relationships between said narrative states;
-2. Receiving a proposed update to the narrative operating graph derived from an output of an artificial intelligence agent;
-3. Enforcing a plurality of graph invariants on the narrative operating graph prior to committing the proposed update, wherein the graph invariants include at least schema constraints, referential integrity constraints, and temporal consistency constraints;
-4. Generating a reconciliation proof artifact indicating pass or fail status for each of the plurality of graph invariants checked for the proposed update;
-5. Recording the reconciliation proof artifact in an append-only audit log linked to a pre-update snapshot hash and a post-update snapshot hash of the narrative operating graph; and
-6. Rejecting the proposed update and restricting system outputs to monitoring-only actions when any of the plurality of graph invariants fails.
-
-C391. The medium of claim C1, wherein the instructions cause the system to enforce graph invariants on the narrative operating graph prior to committing updates derived from agent outputs.
-C392. The medium of claim C391, wherein the graph invariants include schema constraints that restrict permitted node types, edge types, and required properties per node type.
-C393. The medium of claim C391, wherein the graph invariants include referential integrity constraints requiring that each edge references existing nodes and that deleted nodes are not referenced by remaining edges.
-C394. The medium of claim C391, wherein the graph invariants include temporal consistency constraints requiring that temporal edges do not violate a chronological ordering associated with events.
-C395. The medium of claim C391, wherein the system generates a reconciliation proof artifact indicating which constraints were checked and whether each constraint passed or failed for a proposed update.
-C396. The medium of claim C395, wherein the system records the reconciliation proof artifact in the audit log linked to a pre-update snapshot hash and a post-update snapshot hash.
-C397. The medium of claim C391, wherein the system rejects a proposed update and restricts outputs to monitoring-only actions when any graph invariant fails.
-C398. The medium of claim C391, wherein the system performs conflict resolution for duplicate narrative state merges by selecting a canonical narrative identifier based on confidence scores and lineage completeness.
-C399. The medium of claim C398, wherein the system records a merge decision artifact comprising merge rationale and contributing sources in the audit log.
-C400. The medium of claim C391, wherein the system validates that updates do not decrease lineage completeness below a threshold for narrative states referenced by external publishing defense actions.
-
-## Cluster 2: Human dispute resolution + appeals workflow
-
-C422. A non-transitory computer-readable medium storing instructions that, when executed by a processor, cause a system to perform operations for managing appeals of defense action decisions, the operations comprising:
-1. Providing an appeals workflow enabling a human operator to challenge a policy decision associated with a candidate defense action;
-2. Receiving an appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts;
-3. Re-evaluating the candidate defense action by re-running policy evaluation using a stored structured defense action object and a policy bundle hash referenced in the appealed decision identifier;
-4. Producing an appeal resolution decision comprising one of uphold, modify, or reverse, and an explanation for the appeal resolution decision; and
-5. Recording the appeal artifact and the appeal resolution decision in an append-only audit log.
-
-C401. The medium of claim C1, wherein the instructions cause the system to provide an appeals workflow enabling a human operator to challenge a policy decision associated with a candidate defense action.
-C402. The medium of claim C401, wherein the appeals workflow receives an appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts.
-C403. The medium of claim C402, wherein objection categories include at least incorrect jurisdiction tagging, incorrect authenticity evaluation, incorrect risk scoring, or incorrect policy rule application.
-C404. The medium of claim C401, wherein the system re-evaluates the candidate defense action by re-running policy evaluation using a stored structured defense action object and a policy bundle hash referenced in the appealed decision identifier.
-C405. The medium of claim C404, wherein the system produces an appeal resolution decision comprising uphold, modify, or reverse and an explanation.
-C406. The medium of claim C405, wherein reversing a deny decision for an external publishing defense action requires dual-control approvals and step-up authentication.
-C407. The medium of claim C401, wherein the system records appeal artifacts, re-evaluation outputs, and appeal resolution decisions in an append-only audit log.
-C408. The medium of claim C401, wherein the system enforces a time-bound validity window for appeals and denies late appeals absent elevated approval.
-C409. The medium of claim C401, wherein the system computes appeal analytics comprising reversal rate and most frequent objection categories and stores aggregated appeal analytics in the audit log.
-C410. The medium of claim C401, wherein the system restricts external publishing defense actions to monitoring-only while an appeal is pending for an associated narrative state above a risk threshold.
-
-## Cluster 3: Outcome attribution + causal lift estimation guardrails
-
-C423. A non-transitory computer-readable medium storing instructions that, when executed by a processor, cause a system to perform operations for causal lift estimation of defense actions, the operations comprising:
-1. Executing a defense action in response to a narrative state in a narrative operating graph;
-2. Estimating a causal lift of the executed defense action on at least one outcome metric using a causal inference procedure;
-3. Generating a causal assumptions artifact comprising at least one of a covariate set, a matching rule, or an identification strategy;
-4. Storing the causal assumptions artifact in an audit log linked to a snapshot hash of the narrative operating graph and a policy bundle hash; and
-5. Computing a lift confidence interval and associating a validity window with the causal lift estimate, the validity window defined by an expiration timestamp.
-
-C411. The medium of claim C1, wherein the instructions cause the system to estimate a causal lift of an executed defense action on at least one outcome metric using a causal inference procedure.
-C412. The medium of claim C411, wherein the system generates a causal assumptions artifact comprising at least one of a covariate set, a matching rule, a randomization indicator, or an identification strategy identifier.
-C413. The medium of claim C412, wherein the causal assumptions artifact is stored in the audit log linked to a snapshot hash and a policy bundle hash.
-C414. The medium of claim C411, wherein the system restricts causal lift estimation to actions that satisfy a data quality policy and have lineage completeness above a threshold.
-C415. The medium of claim C411, wherein the system computes a lift confidence interval and stores the confidence interval with an expiration timestamp in a stamp artifact.
-C416. The medium of claim C415, wherein the system denies using an expired causal lift estimate to gate execution or ranking decisions.
-C417. The medium of claim C411, wherein the system performs sensitivity analysis by varying at least one causal assumption and records sensitivity results as an evidence artifact.
-C418. The medium of claim C411, wherein the system adjusts causal lift estimates for interference effects across linked narrative states using edges in the narrative operating graph.
-C419. The medium of claim C411, wherein the system records attribution explanations that identify which narrative state changes are attributed to an executed defense action versus external events.
-C420. The medium of claim C411, wherein the system restricts external publishing defense actions to monitoring-only when causal lift estimation indicates negative trust impact beyond a threshold.
-=======
-# Defense CRM Dependent Claims (v1)
-
-This document contains dependent claims for the Defense CRM family, focusing on data provenance, adversarial evaluation, supply-chain controls, formal verification, policy simulation, and federated defense.
-
-## Independent Claim C1
 
 C1. A non-transitory computer-readable medium storing instructions that, when executed by one or more processors, cause the processors to perform operations for adversarial misinformation defense, the operations comprising:
 - ingesting content items from one or more sources to generate a plurality of source records;
@@ -84,6 +16,8 @@ C1. A non-transitory computer-readable medium storing instructions that, when ex
 - evaluating candidate defense actions against a set of governance policies using a policy engine, the governance policies being defined as structured-control objects with deny-by-default enforcement for external publishing;
 - binding an audit record of the evaluating to a snapshot hash of the narrative operating graph and a policy bundle hash; and
 - executing approved defense actions through an execution interface, while recording the executing in an append-only audit log.
+
+---
 
 ## Cluster 1: Data provenance lineage (C91–C104)
 
@@ -163,31 +97,6 @@ C178. The medium of claim C171, wherein the instructions cause the system to rec
 C179. The medium of claim C171, wherein the instructions cause the system to restrict federated sharing to technique indicators and robustness regressions and to prohibit sharing of message content templates across tenants absent explicit approval.
 C180. The medium of claim C171, wherein the instructions cause the system to generate a federated defense report summarizing aggregated technique trends and recommended monitoring-only actions for each tenant.
 
-... [C181–C360 intentionally omitted for brevity] ...
-
-## CONTINUATION MOAT CLUSTERS (Independent Claims)
-
-### Moat Cluster A: Jurisdiction & Geofence (C360.1)
-C360.1 A non-transitory computer-readable medium storing instructions that, when executed by one or more processors, cause the processors to perform operations for multi-jurisdictional governance of AI defense actions, the operations comprising:
-- associating candidate defense actions with jurisdiction tags derived from at least one of target audience location, channel availability region, or applicable legal scope;
-- enforcing geofence rules that restrict execution connectors to publishing only in permitted jurisdictions;
-- evaluating jurisdiction-specific constraints based on the jurisdiction tags and outputting a deny decision when a required constraint set is unavailable or when a geofence rule violation is detected; and
-- recording a geofence violation event in an audit log linked to a policy bundle hash and a connector identifier.
-
-### Moat Cluster B: Forecasting & Drift (C360.2)
-C360.2 A non-transitory computer-readable medium storing instructions that, when executed by one or more processors, cause the processors to perform operations for evidence-weighted forecasting in an AI defense platform, the operations comprising:
-- computing forecast trajectories for narrative states using evidence-weighted inputs derived from lineage manifests and source reliability scores;
-- storing a forecast explanation artifact identifying input features and forecast evidence weights contributing to a forecast;
-- detecting a forecast drift event when observed outcomes deviate from predicted trajectories beyond a threshold; and
-- restricting external publishing defense actions to monitoring-only when forecast drift events exceed a threshold frequency within a rolling time window.
-
-### Moat Cluster C: Partner Overlay & Brand Safety (C360.3)
-C360.3 A non-transitory computer-readable medium storing instructions that, when executed by one or more processors, cause the processors to perform operations for multi-party policy enforcement, the operations comprising:
-- applying partner overlay policy bundles representing contractual or brand safety constraints for at least one channel, platform, or partner, wherein the partner overlay policy bundles are restrictive-only and cannot increase permissions relative to governance policies;
-- computing an effective policy decision by combining governance policies with partner overlay policy bundles;
-- denying execution when a partner overlay policy bundle conflicts with a governance policy and a conflict resolution rule is not satisfied; and
-- recording partner overlay hashes and partner identifiers in an audit log for each executed defense action.
-
 ## Cluster 7: Jurisdiction/time-zone-aware constraints + geofenced execution (C361–C370)
 
 C361. The medium of claim C1, wherein the instructions cause the system to associate candidate defense actions with jurisdiction tags derived from at least one of target audience location, channel availability region, or applicable legal scope.
@@ -227,6 +136,69 @@ C388. The medium of claim C387, wherein the policy engine modifies an external p
 C389. The medium of claim C381, wherein the system denies external publishing defense actions when a required partner overlay policy bundle is unavailable or not attested.
 C390. The medium of claim C381, wherein the system generates a partner compliance report comprising counts of allowed, denied, and modified defense actions under partner overlay policy bundles.
 
+## Cluster 10: Graph integrity constraints + reconciliation invariants (C391–C400)
+
+C391. The medium of claim C1, wherein the instructions cause the system to enforce graph integrity constraints on the narrative operating graph prior to committing updates derived from agent outputs.
+C392. The medium of claim C391, wherein the graph integrity constraints include schema constraints that restrict permitted node types, edge types, and required properties per node type.
+C393. The medium of claim C391, wherein the graph integrity constraints include referential integrity constraints requiring that each edge references existing nodes and that deleted nodes are not referenced by remaining edges.
+C394. The medium of claim C391, wherein the graph integrity constraints include temporal consistency constraints requiring that temporal edges do not violate a chronological ordering associated with events.
+C395. The medium of claim C391, wherein the system generates a reconciliation proof artifact indicating which constraints were checked and whether each constraint passed or failed for a proposed update.
+C396. The medium of claim C395, wherein the system records the reconciliation proof artifact in the audit log linked to a pre-update snapshot hash and a post-update snapshot hash.
+C397. The medium of claim C391, wherein the system rejects a proposed update and restricts outputs to monitoring-only actions when any graph integrity constraint fails.
+C398. The medium of claim C391, wherein the system performs conflict resolution for duplicate narrative state merges by selecting a canonical narrative identifier based on confidence scores and lineage completeness.
+C399. The medium of claim C398, wherein the system records a merge decision artifact comprising merge rationale and contributing sources in the audit log.
+C400. The medium of claim C391, wherein the system validates that updates do not decrease lineage completeness below a threshold for narrative states referenced by external publishing defense actions.
+
+## Cluster 11: Human dispute resolution + appeals workflow (C401–C410)
+
+C401. The medium of claim C1, wherein the instructions cause the system to provide an appeals workflow enabling a human operator to challenge a policy decision associated with a candidate defense action.
+C402. The medium of claim C401, wherein the appeals workflow receives a structured appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts.
+C403. The medium of claim C402, wherein objection categories include at least incorrect jurisdiction tagging, incorrect authenticity evaluation, incorrect risk scoring, or incorrect policy rule application.
+C404. The medium of claim C401, wherein the system re-evaluates the candidate defense action by re-running policy evaluation using a stored structured defense action object and a policy bundle hash referenced in the appealed decision identifier.
+C405. The medium of claim C404, wherein the system produces an appeal resolution decision comprising uphold, modify, or reverse and an explanation.
+C406. The medium of claim C405, wherein reversing a deny decision for an external publishing defense action requires dual-control approvals and step-up authentication.
+C407. The medium of claim C401, wherein the system records appeal artifacts, re-evaluation outputs, and appeal resolution decisions in an append-only audit log.
+C408. The medium of claim C401, wherein the system enforces a time-bound validity window for appeals and denies late appeals absent elevated approval.
+C409. The medium of claim C401, wherein the system computes appeal analytics comprising reversal rate and most frequent objection categories and stores aggregated appeal analytics in the audit log.
+C410. The medium of claim C401, wherein the system restricts external publishing defense actions to monitoring-only while an appeal is pending for an associated narrative state above a risk threshold.
+
+## Cluster 12: Outcome attribution + causal lift estimation guardrails (C411–C420)
+
+C411. The medium of claim C1, wherein the instructions cause the system to estimate a causal lift of an executed defense action on at least one outcome metric using a causal inference procedure.
+C412. The medium of claim C411, wherein the system generates a causal assumptions artifact comprising at least one of a covariate set, a matching rule, a randomization indicator, or an identification strategy identifier.
+C413. The medium of claim C412, wherein the causal assumptions artifact is stored in the audit log linked to a snapshot hash and a policy bundle hash.
+C414. The medium of claim C411, wherein the system restricts causal lift estimation to actions that satisfy a data quality policy and have lineage completeness above a threshold.
+C415. The medium of claim C411, wherein the system computes a lift confidence interval and stores the confidence interval with an expiration timestamp in a stamp artifact.
+C416. The medium of claim C415, wherein the system denies using an expired causal lift estimate to gate execution or ranking decisions.
+C417. The medium of claim C411, wherein the system performs sensitivity analysis by varying at least one causal assumption and records sensitivity results as an evidence artifact.
+C418. The medium of claim C411, wherein the system adjusts causal lift estimates for interference effects across linked narrative states using edges in the narrative operating graph.
+C419. The medium of claim C411, wherein the system records attribution explanations that identify which narrative state changes are attributed to an executed defense action versus external events.
+C420. The medium of claim C411, wherein the system restricts external publishing defense actions to monitoring-only when causal lift estimation indicates negative trust impact beyond a threshold.
+
+## Cluster 13: Higher-order reconciliation + audit log binding (C421-C423)
+
+C421. A non-transitory computer-readable medium storing instructions that, when executed by a processor, cause a system to perform operations for enforcing graph integrity in a narrative operating graph, the operations comprising:
+1. Maintaining a narrative operating graph comprising a plurality of narrative states and edges representing relationships between said narrative states;
+2. Receiving a proposed update to the narrative operating graph derived from an output of an artificial intelligence agent;
+3. Enforcing a plurality of graph invariants on the narrative operating graph prior to committing the proposed update, wherein the graph invariants include at least schema constraints, referential integrity constraints, and temporal consistency constraints;
+4. Generating a reconciliation proof artifact indicating pass or fail status for each of the plurality of graph invariants checked for the proposed update;
+5. Recording the reconciliation proof artifact in an append-only audit log linked to a pre-update snapshot hash and a post-update snapshot hash of the narrative operating graph; and
+6. Rejecting the proposed update and restricting system outputs to monitoring-only actions when any of the plurality of graph invariants fails.
+
+C422. A non-transitory computer-readable medium storing instructions that, when executed by a processor, cause a system to perform operations for managing appeals of defense action decisions, the operations comprising:
+1. Providing an appeals workflow enabling a human operator to challenge a policy decision associated with a candidate defense action;
+2. Receiving an appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts;
+3. Re-evaluating the candidate defense action by re-running policy evaluation using a stored structured defense action object and a policy bundle hash referenced in the appealed decision identifier;
+4. Producing an appeal resolution decision comprising one of uphold, modify, or reverse, and an explanation for the appeal resolution decision; and
+5. Recording the appeal artifact and the appeal resolution decision in an append-only audit log.
+
+C423. A non-transitory computer-readable medium storing instructions that, when executed by a processor, cause a system to perform operations for causal lift estimation of defense actions, the operations comprising:
+1. Executing a defense action in response to a narrative state in a narrative operating graph;
+2. Estimating a causal lift of the executed defense action on at least one outcome metric using a causal inference procedure;
+3. Generating a causal assumptions artifact comprising at least one of a covariate set, a matching rule, or an identification strategy;
+4. Storing the causal assumptions artifact in an audit log linked to a snapshot hash of the narrative operating graph and a policy bundle hash; and
+5. Computing a lift confidence interval and associating a validity window with the causal lift estimate, the validity window defined by an expiration timestamp.
+
 ---
 
 ## CONVERGENCE PROTOCOL
@@ -252,4 +224,3 @@ C390. The medium of claim C381, wherein the system generates a partner complianc
 - **overlay conflict** → deny; log conflict resolution failure.
 - **overlay permission expansion** → block (overlays never increase permissions).
 - **valid overlay** → allow; log partner overlay hashes.
->>>>>>> main
