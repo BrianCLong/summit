@@ -35,7 +35,7 @@ def test_pii_check_pass():
     assert ok, errs
 
 def test_pii_check_fail():
-    profile = {"email": "test@example.com"}
+    profile = {"email": "REDACTED"}
     ok, errs = pii_check(profile)
     assert not ok
     assert "email" in str(errs)
