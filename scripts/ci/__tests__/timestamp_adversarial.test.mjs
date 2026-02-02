@@ -5,7 +5,7 @@ import { scanTimestampKeys, scanTimestampValues } from '../lib/evidence_id_consi
 describe('Adversarial Timestamp Scanning', () => {
   describe('1A) False Positives Hunt', () => {
     test('should NOT flag large numeric IDs under ID-like keys', () => {
-      const input = { id: 1735689600, internal_hash_code: 1735689602 };
+      const input = { id: 1735689600, internal_hash_code: 1735689602, buildNumber: 1735689603 };
       const matches = scanTimestampValues(input);
       assert.strictEqual(matches.length, 0);
     });
