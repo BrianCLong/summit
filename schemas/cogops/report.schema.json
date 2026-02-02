@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CogOps Report",
+  "type": "object",
+  "required": [
+    "report_id",
+    "fixture_id",
+    "scope",
+    "findings",
+    "evidence",
+    "resilience_scorecard"
+  ],
+  "properties": {
+    "report_id": {
+      "type": "string",
+      "pattern": "^EVID-COGOPS-[0-9a-f]{12}$"
+    },
+    "fixture_id": { "type": "string" },
+    "scope": {
+      "type": "object",
+      "required": ["time_window", "region", "sources"],
+      "properties": {
+        "time_window": { "type": "string" },
+        "region": { "type": "string" },
+        "sources": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "indicator_id",
+          "indicator_type",
+          "severity",
+          "confidence",
+          "summary",
+          "evidence_refs"
+        ],
+        "properties": {
+          "indicator_id": {
+            "type": "string",
+            "pattern": "^EVID-COGOPS-[0-9a-f]{12}$"
+          },
+          "indicator_type": {
+            "type": "string",
+            "enum": [
+              "coordination",
+              "provenance_gap",
+              "amplification",
+              "synthetic_media"
+            ]
+          },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "summary": { "type": "string" },
+          "evidence_refs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^EVID-COGOPS-[0-9a-f]{12}$" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "source_ref", "selector", "observation"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVID-COGOPS-[0-9a-f]{12}$"
+          },
+          "source_ref": { "type": "string" },
+          "selector": { "type": "string" },
+          "observation": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "resilience_scorecard": {
+      "type": "object",
+      "required": ["overall_score", "proxies"],
+      "properties": {
+        "overall_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "proxies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["proxy_type", "value", "delta", "confidence", "evidence_refs"],
+            "properties": {
+              "proxy_type": {
+                "type": "string",
+                "enum": [
+                  "polarization",
+                  "trust_erosion",
+                  "decision_disruption"
+                ]
+              },
+              "value": { "type": "number" },
+              "delta": { "type": "number" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "evidence_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^EVID-COGOPS-[0-9a-f]{12}$"
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
