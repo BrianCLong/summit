@@ -14,6 +14,8 @@
     - **Database**: Neo4j and Redis drivers present.
     - **Observability**: OpenTelemetry configured.
 9.  **Bindings**: `bindings/ibrs-node` is a Node.js binding backed by Rust (`@napi-rs/cli`).
+10. **Server Entry Point**: `server/src/app.ts` (Express app configuration)
+11. **Feature Flags**: `feature-flags/flags.yaml`
 
 ## Assumptions
 1.  **New Package**: `packages/disinfo-ops` is a new package and does not conflict with existing work (verified by absence).
@@ -75,3 +77,20 @@
 ### FactMarkets Validation plan
 - Verify schemas against JSON Schema draft 2020-12.
 - Verify deterministic output via `stableStringify`.
+
+---
+
+## FactFlow - Evidence Ingestion (Assumptions)
+
+### FactFlow Verified
+- `server/src/app.ts` exists.
+- `feature-flags/flags.yaml` exists.
+
+### FactFlow Assumed (validate)
+- `server/src/factflow/` is used to contain the new module, keeping it close to the server logic but distinct.
+- `server/src/factflow/schema/` is used for module-specific schemas to avoid polluting the root `schemas/` directory initially.
+- New `EVD-` IDs will be generated using a SHA256 deterministic hash.
+
+### FactFlow Must-not-touch (until validated)
+- Existing security workflows.
+- `server/src/middleware/auth.ts` (unless absolutely necessary, use existing auth).

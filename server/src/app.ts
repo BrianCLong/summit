@@ -143,6 +143,7 @@ import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
+import factFlowRouter from './factflow/routes.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -516,6 +517,9 @@ export const createApp = async () => {
   app.use('/api/intel-graph', intelGraphRouter);
   app.use('/api/graphrag', graphragRouter);
   app.use('/api/intent', intentRouter);
+  if (cfg.FACTFLOW_ENABLED) {
+    app.use('/api/factflow', factFlowRouter);
+  }
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
