@@ -52,7 +52,12 @@ export function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
-          <CommandPalette open={openCmd} onClose={() => setOpenCmd(false)} />
+          <CommandPalette
+            open={openCmd}
+            onClose={() => setOpenCmd(false)}
+            toggleTheme={toggleMode}
+            mode={mode}
+          />
           <Box
             display="flex"
             justifyContent="space-between"
