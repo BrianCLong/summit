@@ -119,15 +119,31 @@ export class Maestro {
         // === GLOBAL STEERING CHECK (Task #96) ===
         const { maestroGlobalAgent } = await import('./agents/MaestroGlobalAgent.js');
         const steeringResult = await maestroGlobalAgent.evaluateRouting(task);
-        if (!steeringResult.allowed) {
-          logger.warn({
-            taskId: task.id,
-            tenantId,
-            advice: steeringResult.advice,
-            reason: steeringResult.reason
-          }, 'Task execution in non-optimal region detected');
-          // For now, we allow execution but log the warning. 
-          // Future iterations could automate task handoff.
+
+        if (steeringResult.action === 'STOP') {
+          const errorMsg = `Task execution forced STOP by Global Steering: ${steeringResult.reason}`;
+          logger.error({ taskId: task.id, reason: steeringResult.reason }, 'Maestro Steering: Execution stopped');
+          await this.ig.updateTask(task.id, { status: 'failed', errorMessage: errorMsg, updatedAt: now });
+          throw new Error(errorMsg);
+        }
+
+        if (steeringResult.action === 'REDIRECT') {
+          const { maestroHandoffService } = await import('./handoff-service.js');
+          const handoff = await maestroHandoffService.initiateHandoff(task, steeringResult.advice!);
+
+          if (handoff.success) {
+            const msg = `Task handed off to region ${steeringResult.advice}: ${handoff.message}`;
+            await this.ig.updateTask(task.id, {
+              status: 'succeeded', // In handoff scenario, local task is 'done' once handed off
+              output: { result: msg, handoffId: handoff.handoffId },
+              updatedAt: now
+            });
+
+            return {
+              task: { ...task, status: 'succeeded', output: { result: msg } } as Task,
+              artifact: null
+            };
+          }
         }
       }
 
