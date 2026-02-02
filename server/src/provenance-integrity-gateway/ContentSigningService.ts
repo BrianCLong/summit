@@ -9,6 +9,7 @@
 import * as crypto from 'crypto';
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import { tmpdir } from 'os';
 import { EventEmitter } from 'events';
 import { Counter, Histogram, Gauge } from 'prom-client';
 import pino from 'pino';
@@ -115,7 +116,9 @@ export interface ContentSigningServiceConfig {
 export const defaultContentSigningConfig: ContentSigningServiceConfig = {
   signingKeyId: 'official-content-signing',
   revocationKeyId: 'official-content-revocation',
-  storagePath: '/data/signed-assets',
+  storagePath: process.env.NODE_ENV === 'test'
+    ? path.join(tmpdir(), 'signed-assets')
+    : '/data/signed-assets',
   cdnBaseUrl: undefined,
   generateC2PA: true,
   claimGenerator: 'summit/pig/1.0',

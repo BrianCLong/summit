@@ -181,8 +181,10 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId]
     );
 
-    if (result.rows.length > 0) {
-      const config = this.parseConfig(result.rows[0].config);
+    const rows = result?.rows ?? [];
+
+    if (rows.length > 0) {
+      const config = this.parseConfig(rows[0].config);
       this.tenantConfigs.set(tenantId, config);
       return config;
     }
