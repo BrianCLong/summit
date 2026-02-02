@@ -1,0 +1,13 @@
+{
+  "eventId": "drift-neg-001",
+  "type": "Decision",
+  "subType": "ComplianceDrift",
+  "result": "DENY",
+  "metadata": {
+    "firstPolicyBundleHash": "hash-v1",
+    "secondPolicyBundleHash": "hash-v2",
+    "affectedActionType": "EXTERNAL_PUBLISH",
+    "driftDetectedAt": "2026-01-20T10:00:00Z",
+    "safeModeTriggered": true
+  }
+}
