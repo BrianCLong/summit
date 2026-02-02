@@ -182,8 +182,9 @@ export class AIAnalysisService {
 
       // Validate result against schema
       return AnalysisResultSchema.parse(result);
-    } catch (error: any) {
-      logger.error(`AI Analysis failed. Error: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`AI Analysis failed. Error: ${errorMessage}`);
       return { entities: [], relationships: [] };
     }
   }
@@ -203,57 +204,63 @@ export class AIAnalysisService {
       context: string;
     }>
   > {
-    const relationships = [];
+    try {
+      const relationships = [];
 
-    // Check for co-occurrence relationships
-    for (let i = 0; i < entities.length; i++) {
-      for (let j = i + 1; j < entities.length; j++) {
-        const entity1 = entities[i];
-        const entity2 = entities[j];
+      // Check for co-occurrence relationships
+      for (let i = 0; i < entities.length; i++) {
+        for (let j = i + 1; j < entities.length; j++) {
+          const entity1 = entities[i];
+          const entity2 = entities[j];
 
-        const cooccurrenceContext = this.findCooccurrenceContext(
-          entity1,
-          entity2,
-          text,
-        );
-        if (cooccurrenceContext) {
-          relationships.push({
-            source: entity1,
-            target: entity2,
-            type: 'RELATED_TO',
-            confidence: 0.6,
-            context: cooccurrenceContext,
-          });
+          const cooccurrenceContext = this.findCooccurrenceContext(
+            entity1,
+            entity2,
+            text,
+          );
+          if (cooccurrenceContext) {
+            relationships.push({
+              source: entity1,
+              target: entity2,
+              type: 'RELATED_TO',
+              confidence: 0.6,
+              context: cooccurrenceContext,
+            });
+          }
         }
       }
-    }
 
-    // Apply semantic relationship patterns
-    for (const relationPattern of this.relationshipPatterns) {
-      let match;
-      const regex = new RegExp(relationPattern.pattern.source, 'gi');
-      while ((match = regex.exec(text)) !== null) {
-        const source = match[1]?.trim();
-        const target = match[3]?.trim();
+      // Apply semantic relationship patterns
+      for (const relationPattern of this.relationshipPatterns) {
+        let match;
+        const regex = new RegExp(relationPattern.pattern.source, 'gi');
+        while ((match = regex.exec(text)) !== null) {
+          const source = match[1]?.trim();
+          const target = match[3]?.trim();
 
-        if (
-          source &&
-          target &&
-          entities.includes(source) &&
-          entities.includes(target)
-        ) {
-          relationships.push({
-            source,
-            target,
-            type: relationPattern.type,
-            confidence: 0.85,
-            context: match[0],
-          });
+          if (
+            source &&
+            target &&
+            entities.includes(source) &&
+            entities.includes(target)
+          ) {
+            relationships.push({
+              source,
+              target,
+              type: relationPattern.type,
+              confidence: 0.85,
+              context: match[0],
+            });
+          }
         }
       }
+      return relationships.sort((a, b) => b.confidence - a.confidence);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(`Relationship analysis failed: ${errorMessage}`);
+      return [];
     }
-
-    return relationships.sort((a, b) => b.confidence - a.confidence);
   }
 
   /**
@@ -262,7 +269,7 @@ export class AIAnalysisService {
   public async generateEntityInsights(
     entityId: string,
     entityType: string,
-    properties: any,
+    properties: Record<string, unknown>,
   ): Promise<{
     insights: string[];
     suggestedRelationships: Array<{
@@ -276,61 +283,87 @@ export class AIAnalysisService {
       description: string;
     }>;
   }> {
-    const insights = [];
-    const suggestedRelationships = [];
-    const riskFactors = [];
+    try {
+      const insights: string[] = [];
+      const suggestedRelationships: Array<{
+        type: string;
+        reason: string;
+        confidence: number;
+      }> = [];
+      const riskFactors: Array<{
+        factor: string;
+        severity: string;
+        description: string;
+      }> = [];
 
-    // Generate type-specific insights
-    switch (entityType) {
-      case 'PERSON':
-        if (properties.email?.endsWith('.gov')) {
-          insights.push(
-            'Government employee - requires additional compliance checks',
-          );
-          riskFactors.push({
-            factor: 'Government Affiliation',
-            severity: 'medium',
-            description: 'Subject may be bound by government regulations',
-          });
+      // Generate type-specific insights
+      switch (entityType) {
+        case 'PERSON': {
+          const email = properties.email as string | undefined;
+          if (email?.endsWith('.gov')) {
+            insights.push(
+              'Government employee - requires additional compliance checks',
+            );
+            riskFactors.push({
+              factor: 'Government Affiliation',
+              severity: 'medium',
+              description: 'Subject may be bound by government regulations',
+            });
+          }
+          const role = properties.role as string | undefined;
+          if (role?.toLowerCase().includes('ceo')) {
+            insights.push('Executive-level position - high influence potential');
+            suggestedRelationships.push({
+              type: 'LEADS',
+              reason: 'CEO role suggests organizational leadership',
+              confidence: 0.9,
+            });
+          }
+          break;
         }
-        if (properties.role?.toLowerCase().includes('ceo')) {
-          insights.push('Executive-level position - high influence potential');
-          suggestedRelationships.push({
-            type: 'LEADS',
-            reason: 'CEO role suggests organizational leadership',
-            confidence: 0.9,
-          });
-        }
-        break;
 
-      case 'ORGANIZATION':
-        if (properties.industry === 'Finance') {
-          insights.push('Financial sector - subject to regulatory oversight');
-          riskFactors.push({
-            factor: 'Financial Regulations',
-            severity: 'high',
-            description:
-              'Subject to banking and financial compliance requirements',
-          });
+        case 'ORGANIZATION': {
+          const industry = properties.industry as string | undefined;
+          if (industry === 'Finance') {
+            insights.push('Financial sector - subject to regulatory oversight');
+            riskFactors.push({
+              factor: 'Financial Regulations',
+              severity: 'high',
+              description:
+                'Subject to banking and financial compliance requirements',
+            });
+          }
+          break;
         }
-        break;
 
-      case 'EVENT':
-        if (properties.importance === 'HIGH') {
-          insights.push(
-            'High-priority event - likely involves key stakeholders',
-          );
-          suggestedRelationships.push({
-            type: 'ATTENDED_BY',
-            reason:
-              'High-importance events typically have executive attendance',
-            confidence: 0.8,
-          });
+        case 'EVENT': {
+          const importance = properties.importance as string | undefined;
+          if (importance === 'HIGH') {
+            insights.push(
+              'High-priority event - likely involves key stakeholders',
+            );
+            suggestedRelationships.push({
+              type: 'ATTENDED_BY',
+              reason:
+                'High-importance events typically have executive attendance',
+              confidence: 0.8,
+            });
+          }
+          break;
         }
-        break;
+      }
+
+      return { insights, suggestedRelationships, riskFactors };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error(`Insight generation failed: ${errorMessage}`);
+      return {
+        insights: [],
+        suggestedRelationships: [],
+        riskFactors: [],
+      };
     }
-
-    return { insights, suggestedRelationships, riskFactors };
   }
 
   /**

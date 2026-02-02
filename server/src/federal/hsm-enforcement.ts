@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import * as crypto from 'node:crypto';
-import { PKCS11, CKF_SERIAL_SESSION, CKF_RW_SESSION } from 'pkcs11js';
+import * as pkcs11 from 'pkcs11js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
 // HSM-only crypto enforcement for Federal/Gov Pack FIPS compliance
@@ -155,7 +155,7 @@ class HSMEnforcement {
       const libPath =
         process.env.CLOUDHSM_PKCS11_LIB ||
         '/opt/cloudhsm/lib/libcloudhsm_pkcs11.so';
-      const p11 = new PKCS11();
+      const p11 = new pkcs11.PKCS11();
       p11.load(libPath);
       p11.C_Initialize();
 
@@ -168,7 +168,7 @@ class HSMEnforcement {
       const tokenInfo = p11.C_GetTokenInfo(slot);
       const sessionHandle = p11.C_OpenSession(
         slot,
-        CKF_SERIAL_SESSION | CKF_RW_SESSION,
+        pkcs11.CKF_SERIAL_SESSION | pkcs11.CKF_RW_SESSION,
       );
 
       // Get available mechanisms
@@ -209,13 +209,13 @@ class HSMEnforcement {
       // SafeNet Luna HSM probe
       const libPath =
         process.env.LUNA_PKCS11_LIB || '/usr/lib/libCryptoki2_64.so';
-      const pkcs11 = await import('pkcs11js').catch(() => null);
+      const pkcs11Lib = await import('pkcs11js').catch(() => null);
 
-      if (!pkcs11) {
+      if (!pkcs11Lib) {
         throw new Error('PKCS#11 library not available');
       }
 
-      const p11 = new pkcs11.PKCS11();
+      const p11 = new pkcs11Lib.PKCS11();
       p11.load(libPath);
       p11.C_Initialize();
 

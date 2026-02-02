@@ -774,6 +774,37 @@ const registerNetworkTeardown = () => {
     const originalListen = proto.listen;
     proto.listen = function (...args) {
       trackedServers.add(this);
+      if (process.env.NO_NETWORK_LISTEN === 'true') {
+        const [first, second, third, fourth] = args;
+        // Normalize listen args to avoid binding 0.0.0.0 in restricted envs.
+        if (first && typeof first === 'object') {
+          const opts = { ...first };
+          if (!opts.host || opts.host === '0.0.0.0') {
+            opts.host = '127.0.0.1';
+          }
+          args = [opts, second, third].filter((v) => v !== undefined);
+        } else {
+          let port = first;
+          let host = second;
+          let backlog = third;
+          let cb = fourth;
+          if (typeof host === 'function') {
+            cb = host;
+            host = undefined;
+            backlog = undefined;
+          } else if (typeof backlog === 'function') {
+            cb = backlog;
+            backlog = undefined;
+          }
+          if (!host || host === '0.0.0.0') {
+            host = '127.0.0.1';
+          }
+          const normalized = [port, host];
+          if (backlog !== undefined) normalized.push(backlog);
+          if (cb !== undefined) normalized.push(cb);
+          args = normalized;
+        }
+      }
       return originalListen.apply(this, args);
     };
     proto.__jestListenWrapped = true;

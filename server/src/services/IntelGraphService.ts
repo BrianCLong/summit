@@ -16,6 +16,22 @@ const AttachEvidenceSchema = z.object({ claimId: z.string().uuid(), sourceURI: z
 const TagPolicySchema = z.object({ label: z.string().min(1), sensitivity: z.enum(['public', 'internal', 'confidential', 'secret', 'top-secret']) });
 const CreateDecisionSchema = z.object({ question: z.string().min(1), recommendation: z.string().min(1), rationale: z.string().min(1) });
 
+export interface DecisionProvenance {
+  decision: Decision;
+  claims: Array<{
+    claim: Claim;
+    evidences: Evidence[];
+  }>;
+}
+
+export interface EntityClaims {
+  entity: Entity;
+  claims: Array<{
+    claim: Claim;
+    policies: PolicyLabel[];
+  }>;
+}
+
 // --- Prometheus Metrics ---
 const intelGraphRequestLatency = new Histogram({
   name: 'intelgraph_service_request_latency_seconds',
@@ -67,13 +83,14 @@ export class IntelGraphService {
       const result = await fn(session);
       intelGraphOperationsCounter.inc({ method: methodName, status: 'success' });
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       intelGraphOperationsCounter.inc({ method: methodName, status: 'error' });
       if (error instanceof AppError) {
         throw error; // Re-throw known application errors
       }
       // Wrap unknown errors in a standard DatabaseError
-      throw new DatabaseError(`IntelGraphService.${methodName} failed: ${error.message}`);
+      throw new DatabaseError(`IntelGraphService.${methodName} failed: ${errorMessage}`);
     } finally {
       end();
       await session.close();
@@ -160,7 +177,10 @@ export class IntelGraphService {
     });
   }
 
-  async getDecisionProvenance(decisionId: string, tenantId: string): Promise<any> {
+  async getDecisionProvenance(
+    decisionId: string,
+    tenantId: string,
+  ): Promise<DecisionProvenance> {
     return this.measure('getDecisionProvenance', async (session) => {
       const result = await session.run(
         `MATCH (d:Decision {id: $decisionId, tenantId: $tenantId})
@@ -179,7 +199,10 @@ export class IntelGraphService {
     });
   }
 
-  async getEntityClaims(entityId: string, tenantId: string): Promise<any> {
+  async getEntityClaims(
+    entityId: string,
+    tenantId: string,
+  ): Promise<EntityClaims> {
     return this.measure('getEntityClaims', async (session) => {
       const result = await session.run(
         `MATCH (e:Entity {id: $entityId, tenantId: $tenantId})
@@ -200,16 +223,23 @@ export class IntelGraphService {
 
   // --- Generic Graph Methods used by other services (e.g. EntityResolver) ---
 
-  async getNodeById(tenantId: string, nodeId: string): Promise<any> {
+  async getNodeById(
+    tenantId: string,
+    nodeId: string,
+  ): Promise<Record<string, unknown> | null> {
     return this.measure('getNodeById', async (session) => {
       const result = await session.run('MATCH (n {id: $nodeId, tenantId: $tenantId}) RETURN n', { nodeId, tenantId });
       return result.records[0]?.get('n').properties;
     });
   }
 
-  async ensureNode(tenantId: string, label: string, properties: Record<string, any>): Promise<any> {
+  async ensureNode(
+    tenantId: string,
+    label: string,
+    properties: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
     return this.measure('ensureNode', async (session) => {
-      const props: any = { ...properties, tenantId };
+      const props: Record<string, unknown> = { ...properties, tenantId };
       // Ensure id exists
       if (!props.id) props.id = randomUUID();
 
@@ -223,7 +253,13 @@ export class IntelGraphService {
     });
   }
 
-  async createEdge(tenantId: string, fromNodeId: string, toNodeId: string, relationshipType: string, properties: Record<string, any> = {}): Promise<any> {
+  async createEdge(
+    tenantId: string,
+    fromNodeId: string,
+    toNodeId: string,
+    relationshipType: string,
+    properties: Record<string, unknown> = {},
+  ): Promise<Record<string, unknown>> {
     return this.measure('createEdge', async (session) => {
       const props = { ...properties, tenantId };
       const result = await session.run(
@@ -237,12 +273,20 @@ export class IntelGraphService {
     });
   }
 
-  async findSimilarNodes(tenantId: string, label: string, properties: Record<string, any>, limit: number = 100): Promise<any[]> {
+  async findSimilarNodes(
+    tenantId: string,
+    label: string,
+    properties: Record<string, unknown>,
+    limit: number = 100,
+  ): Promise<Record<string, unknown>[]> {
     return this.measure('findSimilarNodes', async (session) => {
       // Basic implementation for now: exact match on properties provided
       // In production this might use vector search or fulltext index
       const whereClauses: string[] = ['n.tenantId = $tenantId'];
-      const params: Record<string, any> = { tenantId, limit: neo4j.int(limit) };
+      const params: Record<string, unknown> = {
+        tenantId,
+        limit: neo4j.int(limit),
+      };
 
       Object.entries(properties).forEach(([key, value], index) => {
         whereClauses.push(`n.${key} = $val${index}`);
@@ -251,7 +295,7 @@ export class IntelGraphService {
 
       const cypher = `MATCH (n:${label}) WHERE ${whereClauses.join(' AND ')} RETURN n LIMIT $limit`;
       const result = await session.run(cypher, params);
-      return result.records.map((r: any) => r.get('n').properties);
+      return result.records.map((r: Record<string, any>) => r.get('n').properties);
     });
   }
 

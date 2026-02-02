@@ -1,19 +1,4 @@
-import {
-  PKCS11,
-  CKF_SERIAL_SESSION,
-  CKF_RW_SESSION,
-  CKA_CLASS,
-  CKA_KEY_TYPE,
-  CKA_VALUE_LEN,
-  CKA_ENCRYPT,
-  CKA_DECRYPT,
-  CKA_TOKEN,
-  CKA_LABEL,
-  CKO_SECRET_KEY,
-  CKO_PRIVATE_KEY,
-  CKK_AES,
-  CKK_EC
-} from 'pkcs11js';
+import * as pkcs11 from 'pkcs11js';
 import * as crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 
@@ -73,7 +58,7 @@ const ALLOWLIST: Record<
 };
 
 export interface PKCS11Context {
-  p11: PKCS11;
+  p11: pkcs11.PKCS11;
   slot: Buffer;
   session: Buffer;
   tokenInfo: any;
@@ -107,7 +92,7 @@ export function initPKCS11(
   const span = otelService.createSpan('pkcs11.init');
 
   try {
-    const p11 = new PKCS11();
+    const p11 = new pkcs11.PKCS11();
     p11.load(libPath);
     p11.C_Initialize();
 
@@ -138,7 +123,7 @@ export function initPKCS11(
 
     const session = p11.C_OpenSession(
       slot,
-      CKF_SERIAL_SESSION | CKF_RW_SESSION,
+      pkcs11.CKF_SERIAL_SESSION | pkcs11.CKF_RW_SESSION,
     );
 
     otelService.addSpanAttributes({
@@ -259,12 +244,12 @@ export async function performHSMSelfTest(
     let hTempKey: Buffer | null = null;
     try {
       const template = [
-        { type: CKA_CLASS, value: CKO_SECRET_KEY },
-        { type: CKA_KEY_TYPE, value: CKK_AES },
-        { type: CKA_VALUE_LEN, value: 32 }, // 256 bits
-        { type: CKA_ENCRYPT, value: true },
-        { type: CKA_DECRYPT, value: true },
-        { type: CKA_TOKEN, value: false }, // session key
+        { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_SECRET_KEY },
+        { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_AES },
+        { type: pkcs11.CKA_VALUE_LEN, value: 32 }, // 256 bits
+        { type: pkcs11.CKA_ENCRYPT, value: true },
+        { type: pkcs11.CKA_DECRYPT, value: true },
+        { type: pkcs11.CKA_TOKEN, value: false }, // session key
       ];
 
       const mech = enforceMech('AES_GCM_256');
@@ -299,8 +284,8 @@ export async function performHSMSelfTest(
     try {
       // Look for existing ECDSA key for testing
       ctx.p11.C_FindObjectsInit(ctx.session, [
-        { type: CKA_CLASS, value: CKO_PRIVATE_KEY },
-        { type: CKA_KEY_TYPE, value: CKK_EC },
+        { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_PRIVATE_KEY },
+        { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_EC },
       ]);
       const keys = ctx.p11.C_FindObjects(ctx.session, 1);
       ctx.p11.C_FindObjectsFinal(ctx.session);
@@ -377,9 +362,9 @@ export function aes256gcmEncrypt(
   try {
     // Find AES key by label
     ctx.p11.C_FindObjectsInit(ctx.session, [
-      { type: CKA_LABEL, value: Buffer.from(keyLabel) },
-      { type: CKA_CLASS, value: CKO_SECRET_KEY },
-      { type: CKA_KEY_TYPE, value: CKK_AES },
+      { type: pkcs11.CKA_LABEL, value: Buffer.from(keyLabel) },
+      { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_SECRET_KEY },
+      { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_AES },
     ]);
     const keys = ctx.p11.C_FindObjects(ctx.session, 1);
     ctx.p11.C_FindObjectsFinal(ctx.session);
@@ -437,9 +422,9 @@ export function ecdsaP384Sign(
   try {
     // Find ECDSA private key by label
     ctx.p11.C_FindObjectsInit(ctx.session, [
-      { type: CKA_LABEL, value: Buffer.from(keyLabel) },
-      { type: CKA_CLASS, value: CKO_PRIVATE_KEY },
-      { type: CKA_KEY_TYPE, value: CKK_EC },
+      { type: pkcs11.CKA_LABEL, value: Buffer.from(keyLabel) },
+      { type: pkcs11.CKA_CLASS, value: pkcs11.CKO_PRIVATE_KEY },
+      { type: pkcs11.CKA_KEY_TYPE, value: pkcs11.CKK_EC },
     ]);
     const keys = ctx.p11.C_FindObjects(ctx.session, 1);
     ctx.p11.C_FindObjectsFinal(ctx.session);
