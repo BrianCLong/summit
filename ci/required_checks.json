@@ -1,0 +1,23 @@
+{
+  "required_checks": [
+    "Validate Release Policy",
+    "Lint Reason Codes",
+    "Security Scan",
+    "SBOM",
+    "Summit Influence Evidence",
+    "Summit Influence Evals",
+    "Summit Neverlog",
+    "Summit Supply Chain",
+    "Policy Compliance",
+    "GA Evidence Completeness",
+    "MCP Tool UX Lint"
+  ],
+  "renames": {
+    "ci:unit": "Unit Tests",
+    "ci:schema": "Schema Validation",
+    "ci:lint": "Lint",
+    "ci:deps-delta": "Dependency Delta"
+  },
+  "last_updated": "2026-01-30",
+  "notes": "Populate with exact required status check names from branch protection rules."
+}

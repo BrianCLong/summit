@@ -4,9 +4,9 @@
 
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { pool } from '../db/pg';
-import { neo } from '../db/neo4j';
-import { redis } from '../subscriptions/pubsub';
+import { pool } from '../db/pg.js';
+import { neo } from '../db/neo4j.js';
+import { redis } from '../subscriptions/pubsub.js';
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
 import fs from 'fs/promises';

@@ -7,8 +7,10 @@ Tests for CVE-2025-4517 (tarfile arbitrary file write) and related vulnerabiliti
 import os
 import tarfile
 import tempfile
-import pytest
 from pathlib import Path
+
+import pytest
+
 from api.security.tar_extraction import SecureTarExtractor, extract_tar_safe
 
 

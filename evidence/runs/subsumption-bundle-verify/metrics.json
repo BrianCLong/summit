@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-AUTOMATION-TURN-6-GOV-001",
+  "metrics": {
+    "errors_count": 0,
+    "files_checked": 0,
+    "verifier_ms": 0
+  }
+}

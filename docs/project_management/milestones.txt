@@ -1,8 +1,0 @@
-MVP0
-MVP1-Core-Graph
-MVP1-Copilot
-MVP1-Federation
-MVP1-Simulation
-MVP1-Collaboration
-MVP1-Predictive-AI
-

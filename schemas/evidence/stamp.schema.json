@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "anyOf": [{ "required": ["created_at"] }, { "required": ["generated_at"] }],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "git_sha": { "type": "string" },
+    "runner": { "type": "string" }
+  },
+  "additionalProperties": true
+}

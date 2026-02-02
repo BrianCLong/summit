@@ -1,0 +1,43 @@
+{
+  "$id": "https://summit.local/schemas/procedure.schema.json",
+  "type": "object",
+  "required": ["id", "version", "steps"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9._-]+$"
+    },
+    "version": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "object"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/step"
+      },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["type", "name"],
+      "properties": {
+        "type": {
+          "enum": ["graph.query", "enrich.http", "score.model", "notify.slack", "export.csv"]
+        },
+        "name": {
+          "type": "string"
+        },
+        "with": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
