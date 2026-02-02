@@ -6,6 +6,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "io-cogwar-radar-2027",
+      "status": "brief-complete",
+      "owner": "codex",
+      "notes": "IO/CogWar Radar brief and PR stack. Next: Proceed with PR1 (ontology + evidence ID spec)."
     }
   ]
 }
