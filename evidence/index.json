@@ -100,6 +100,21 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-AISLOPFT20260201-POLICY-001": {
+      "files": ["evidence/slopguard/policy/report.json", "evidence/slopguard/policy/metrics.json", "evidence/slopguard/policy/stamp.json"]
+    },
+    "EVD-AISLOPFT20260201-DETECT-002": {
+      "files": ["evidence/slopguard/detect/report.json", "evidence/slopguard/detect/metrics.json", "evidence/slopguard/detect/stamp.json"]
+    },
+    "EVD-AISLOPFT20260201-CIT-003": {
+      "files": ["evidence/slopguard/citations/report.json", "evidence/slopguard/citations/metrics.json", "evidence/slopguard/citations/stamp.json"]
+    },
+    "EVD-AISLOPFT20260201-DATA-004": {
+      "files": ["evidence/slopguard/dataset/report.json", "evidence/slopguard/dataset/metrics.json", "evidence/slopguard/dataset/stamp.json"]
+    },
+    "EVD-AISLOPFT20260201-AUDIT-005": {
+      "files": ["evidence/slopguard/audit/report.json", "evidence/slopguard/audit/metrics.json", "evidence/slopguard/audit/stamp.json"]
     }
   }
 }

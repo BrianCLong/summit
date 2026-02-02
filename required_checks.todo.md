@@ -1,23 +1,12 @@
-# Required Checks Discovery
+# Required checks discovery (SlopGuard)
 
-## Process to Identify Required Checks
+The following CI gates are planned for SlopGuard. These should be mapped to real CI check names once discovered in the repo settings.
 
-1. Go to repository Settings in GitHub.
-2. Navigate to **Branches** -> **Branch protection rules**.
-3. Edit the rule for `main` (or default branch).
-4. Look for "Require status checks to pass before merging".
-5. Copy the exact names of the required checks listed there.
+1. `slopguard_policy`: Evaluates artifact against SlopGuard policy.
+2. `slopguard_citations`: Validates citations in research artifacts.
+3. `dataset_hygiene`: Ensures dataset provenance tags are present.
 
-## Temporary Gate Names (Implemented in Plan)
-
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
-
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
-
-## Rename Plan
-
-Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+## TODO
+- [ ] Verify branch protection rules for required check names.
+- [ ] Integrate SlopGuard CLI into the CI pipeline.
+- [ ] Rename temporary gate names to match repository standards.
