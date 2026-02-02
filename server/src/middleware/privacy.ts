@@ -1,4 +1,4 @@
-import { redact } from '../privacy/redact';
+import { redact } from '../privacy/redact.js';
 export function privacyLogger(req: any, res: any, next: any) {
   const old = res.json;
   res.json = function (body: any) {

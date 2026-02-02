@@ -1,9 +1,0 @@
-{
-  "task_id": "CHAOS_SIGNER_OPA_OUTAGE_TEST",
-  "status": "completed",
-  "summary": "Added chaos test coverage for signer and OPA outage fail-closed behavior with runbook execution evidence.",
-  "artifacts": [
-    "evidence/chaos-privileged-ops-outage.json"
-  ],
-  "generated_at": "2026-01-10T09:15:00Z"
-}

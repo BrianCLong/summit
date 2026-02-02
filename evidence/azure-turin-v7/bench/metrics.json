@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-AZURETURINV7-BENCH-001",
+  "metrics": {
+    "cpu_burn_ms": 3673.595665,
+    "cpu_burn_ops_per_sec": 2722128.647764506
+  }
+}

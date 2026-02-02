@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/govbrief",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Pipeline for ingesting .gov research and generating proof-carrying strategy briefs",
   "type": "module",
   "main": "dist/index.js",

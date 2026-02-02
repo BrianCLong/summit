@@ -1,4 +1,4 @@
-import { getPostgresPool } from '../../db/postgres';
+import { getPostgresPool } from '../../db/postgres.js';
 
 const ticketLinksResolvers = {
     Query: {
@@ -19,7 +19,7 @@ const ticketLinksResolvers = {
 
             const res = await pool.query(query, queryParams);
 
-            return res.rows.map(row => ({
+            return res.rows.map((row: any) => ({
                 ...row,
                 externalId: row.external_id || row.externalId,
             }));

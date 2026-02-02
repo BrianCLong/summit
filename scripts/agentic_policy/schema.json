@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "status": { "type": "string", "enum": ["pass", "fail", "warn"] },
+    "checks": {
+      "type": "object",
+      "properties": {
+        "plan_exists": { "type": "boolean" },
+        "plan_valid": { "type": "boolean" },
+        "clean_code": { "type": "boolean" }
+      }
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rule": { "type": "string" },
+          "message": { "type": "string" },
+          "file": { "type": "string" }
+        }
+      }
+    }
+  }
+}

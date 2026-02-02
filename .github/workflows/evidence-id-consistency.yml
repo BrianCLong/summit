@@ -1,47 +1,75 @@
-name: Governance / Evidence ID Consistency
+name: Evidence ID Consistency Gate
 
 on:
-  push:
-    branches: [main, develop]
+  workflow_dispatch:
   pull_request:
-    branches: [main]
 
 permissions:
   contents: read
-  pull-requests: read
 
 jobs:
   evidence-id-consistency:
+    name: Verify Evidence ID Consistency
     runs-on: ubuntu-latest
-    timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: "20"
-          cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Run Evidence ID Consistency Gate (3x)
+        run: |
+          RUN_ID="${{ github.run_id }}"
+          SHA="${{ github.sha }}"
+          OUT_BASE="artifacts/evidence-id-consistency"
 
-      - name: Run Evidence ID Consistency Check
-        run: pnpm run ci:evidence-id-consistency -- --sha=${{ github.sha }}
+          node scripts/ci/verify_evidence_id_consistency.mjs --sha="$SHA" --run-id="$RUN_ID" --out-dir="$OUT_BASE/run1"
+          node scripts/ci/verify_evidence_id_consistency.mjs --sha="$SHA" --run-id="$RUN_ID" --out-dir="$OUT_BASE/run2"
+          node scripts/ci/verify_evidence_id_consistency.mjs --sha="$SHA" --run-id="$RUN_ID" --out-dir="$OUT_BASE/run3"
+
+      - name: Verify Deterministic Artifacts Match
+        run: |
+          OUT_BASE="artifacts/evidence-id-consistency"
+
+          cmp "$OUT_BASE/run1/report.json" "$OUT_BASE/run2/report.json"
+          cmp "$OUT_BASE/run1/report.json" "$OUT_BASE/run3/report.json"
+
+          cmp "$OUT_BASE/run1/metrics.json" "$OUT_BASE/run2/metrics.json"
+          cmp "$OUT_BASE/run1/metrics.json" "$OUT_BASE/run3/metrics.json"
+
+          cmp "$OUT_BASE/run1/ai_ledger.json" "$OUT_BASE/run2/ai_ledger.json"
+          cmp "$OUT_BASE/run1/ai_ledger.json" "$OUT_BASE/run3/ai_ledger.json"
+
+      - name: Enforce Timestamp Placement
+        run: |
+          OUT_BASE="artifacts/evidence-id-consistency"
+          node scripts/ci/scan_timestamp_keys.mjs --disallow \
+            "$OUT_BASE/run1/report.json" \
+            "$OUT_BASE/run1/metrics.json" \
+            "$OUT_BASE/run1/ai_ledger.json"
+          node scripts/ci/scan_timestamp_keys.mjs --require "$OUT_BASE/run1/stamp.json"
+
+      - name: Validate Stamp Schema
+        run: |
+          OUT_BASE="artifacts/evidence-id-consistency"
+          npx --yes ajv-cli validate \
+            -s schemas/evidence/evidence-id-consistency-stamp.schema.json \
+            -d "$OUT_BASE/run1/stamp.json"
+
+      - name: Create Auditor Bundle
+        run: |
+          OUT_BASE="artifacts/evidence-id-consistency"
+          BUNDLE_NAME="auditor-bundle-${{ github.run_id }}.tar.gz"
+          tar -czf "$OUT_BASE/$BUNDLE_NAME" -C "$OUT_BASE" run1
+          sha256sum "$OUT_BASE/$BUNDLE_NAME" > "$OUT_BASE/$BUNDLE_NAME.sha256"
 
       - name: Upload Evidence Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: evidence-id-consistency-${{ github.sha }}
-          path: artifacts/governance/evidence-id-consistency/${{ github.sha }}/
+          name: evidence-id-consistency-${{ github.run_id }}
+          path: artifacts/evidence-id-consistency/
           retention-days: 30

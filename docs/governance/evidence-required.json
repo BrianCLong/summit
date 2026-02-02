@@ -1,0 +1,19 @@
+{
+  "required_files": [
+    {
+      "path": "docs/governance/CONSTITUTION.md",
+      "threshold_days": 30,
+      "owner": "Governance"
+    },
+    {
+      "path": "docs/governance/EVIDENCE.md",
+      "threshold_days": 90,
+      "owner": "Governance"
+    },
+    {
+      "path": "SECURITY_GA_GATE.md",
+      "threshold_days": 30,
+      "owner": "Security"
+    }
+  ]
+}

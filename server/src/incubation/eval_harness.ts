@@ -1,6 +1,6 @@
 // @ts-nocheck
-import { IncubationSandbox } from './sandbox.ts';
-import { RecursiveCriticCapability, RestrictedToolPlannerCapability } from './candidates.ts';
+import { IncubationSandbox } from './sandbox.js';
+import { RecursiveCriticCapability, RestrictedToolPlannerCapability } from './candidates.js';
 
 async function main() {
   const sandbox = new IncubationSandbox();

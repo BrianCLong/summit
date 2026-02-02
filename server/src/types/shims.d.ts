@@ -346,4 +346,8 @@ declare module '@intelgraph/feature-flags' {
   export default anyExport;
 }
 
+declare module 'compression' {
+  const anyExport: any;
+  export = anyExport;
+}
 

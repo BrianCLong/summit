@@ -1,0 +1,7 @@
+{
+  "ok": false,
+  "errors": [
+    "Policy contains forbidden keyword"
+  ],
+  "evidenceId": "TEST-EVID-2"
+}
