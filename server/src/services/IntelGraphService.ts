@@ -116,7 +116,7 @@ export class IntelGraphService {
     });
   }
 
-  async attachEvidence(evidenceData: z.infer<typeof AttachEvidenceSchema>, owner: string, tenantId: string): Promise<Evidence> {
+  async attachEvidence(evidenceData: zod.infer<typeof AttachEvidenceSchema>, owner: string, tenantId: string): Promise<Evidence> {
     return this.measure('attachEvidence', async (session) => {
       const { claimId, sourceURI, hash, content } = AttachEvidenceSchema.parse(evidenceData);
       const now = new Date().toISOString();
@@ -138,7 +138,7 @@ export class IntelGraphService {
     });
   }
 
-  async tagPolicy(policyData: z.infer<typeof TagPolicySchema>, targetNodeId: string, owner: string, tenantId: string): Promise<PolicyLabel> {
+  async tagPolicy(policyData: zod.infer<typeof TagPolicySchema>, targetNodeId: string, owner: string, tenantId: string): Promise<PolicyLabel> {
     return this.measure('tagPolicy', async (session) => {
       const { label, sensitivity } = TagPolicySchema.parse(policyData);
       const now = new Date().toISOString();
@@ -255,7 +255,7 @@ export class IntelGraphService {
     });
   }
 
-  async createDecision(decisionData: z.infer<typeof CreateDecisionSchema>, informedByClaimIds: string[], owner: string, tenantId: string): Promise<Decision> {
+  async createDecision(decisionData: zod.infer<typeof CreateDecisionSchema>, informedByClaimIds: string[], owner: string, tenantId: string): Promise<Decision> {
     return this.measure('createDecision', async (session) => {
       const { question, recommendation, rationale } = CreateDecisionSchema.parse(decisionData);
       const now = new Date().toISOString();
