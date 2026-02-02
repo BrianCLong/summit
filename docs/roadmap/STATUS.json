@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-31T00:55:00Z",
-  "revision_note": "Added structured content schemas, documentation, and prompt/task metadata for Brief/Claim/Block primitives.",
+  "last_updated": "2026-02-01T20:01:24Z",
+  "revision_note": "Added deterministic intel ingest core scaffold and CI determinism gate artifacts.",
   "initiatives": [
     {
       "id": "A",
@@ -38,7 +38,7 @@
           "name": "Connector SDK & Registry",
           "status": "partial",
           "owner": "Jules",
-          "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
+          "evidence": "Deterministic intel ingest core scaffold added (packages/intel_ingest, ci/gates/intel_ingest_determinism.sh) alongside existing CSVConnector.ts; SDK framework incomplete",
           "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },

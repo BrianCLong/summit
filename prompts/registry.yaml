@@ -26,6 +26,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: deterministic-intel-ingest
+    version: v1
+    path: prompts/ingest/deterministic-intel-ingest@v1.md
+    sha256: bca50247042fc4cff08a386550ee5f998e78311c719fa0fa882589390aadf069
+    description: Integrate deterministic intel-ingestion core scaffolding with evidence artifacts and CI gate.
+    scope:
+      paths:
+        - packages/__init__.py
+        - packages/intel_ingest/
+        - cli/intel_ingest.py
+        - schemas/source_document.schema.json
+        - ci/gates/intel_ingest_determinism.sh
+        - tests/test_source_document_roundtrip.py
+        - docs/roadmap/STATUS.json
+        - prompts/ingest/deterministic-intel-ingest@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ingest
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
