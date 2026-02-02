@@ -171,6 +171,10 @@ const config: Config = {
     '^graphql-iso-date$': '<rootDir>/tests/mocks/graphql-iso-date.cjs',
     '^pptxgenjs$': '<rootDir>/tests/mocks/pptxgenjs.ts',
     '.*config/database(\\.js)?$': '<rootDir>/tests/mocks/db-config.ts',
+    '^html-to-text$': '<rootDir>/tests/mocks/html-to-text.ts',
+    '^mjml$': '<rootDir>/tests/mocks/mjml.ts',
+    '.*TemplateRenderer.*': '<rootDir>/tests/mocks/template-renderer.ts',
+    '.*monitoring/metrics(\\.js)?$': '<rootDir>/tests/mocks/metrics.ts',
 
     '@intelgraph/feature-flags': '<rootDir>/tests/mocks/feature-flags.ts',
     '@intelgraph/attack-surface': '<rootDir>/tests/mocks/attack-surface.ts',

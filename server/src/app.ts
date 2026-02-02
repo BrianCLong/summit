@@ -143,6 +143,7 @@ import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
+import { buildApprovalsRouter } from './routes/approvals.js';
 import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
@@ -520,6 +521,8 @@ export const createApp = async () => {
   app.use('/api/graphrag', graphragRouter);
   app.use('/api/intent', intentRouter);
   app.get('/metrics', metricsRoute);
+  // Re-added Approvals Router with Maestro context
+  app.use('/api/approvals', authenticateToken, buildApprovalsRouter());
 
   // Initialize SummitInvestigate Platform Routes
   SummitInvestigate.initialize(app);
@@ -550,6 +553,7 @@ export const createApp = async () => {
   const maestroQueries = new MaestroQueries(igClient);
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
+  app.use('/api/approvals', authenticateToken, buildApprovalsRouter(maestro)); // Re-mount with maestro context
   process.stdout.write('[DEBUG] Maestro router built\n');
 
   // Initialize Maestro V2 Engine & Handlers (Stable-DiffCoder Integration)
