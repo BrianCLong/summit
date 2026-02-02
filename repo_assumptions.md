@@ -1,43 +1,25 @@
-# repo_assumptions.md
+# Repo Assumptions & Reality Check
 
-## Verified
+## Verified Paths & Conventions
+- **Monorepo**: Uses `pnpm` workspaces defined in `pnpm-workspace.yaml`.
+- **Packages**: Located in `packages/`. `maestro-core` serves as a reference for package structure.
+- **Evidence Schemas**:
+  - Root `schemas/` contains core evidence schemas (`evidence.report.schema.json`, etc.).
+  - `evidence/schemas/` contains domain-specific/legacy schemas.
+  - New schemas for `factcert` will be placed in `packages/factcert/schema/`.
+- **CI Workflows**:
+  - `ci.yml`, `ci-pr.yml` are main entry points.
+  - `security-tests.yml`, `compliance.yml` handle specific gates.
+- **TypeScript**: `tsconfig.json` extends `tsconfig.base.json`.
 
-- Repository contents inspected locally; subsumption bundles and verifier script exist.
-- CI uses GitHub Actions workflows under `.github/workflows/`.
-- Evidence schemas and index live under `evidence/`.
+## Must-Not-Touch (Until Validated)
+- `policies/*`: Governance policies.
+- `security/*`: Security configurations.
+- `.github/workflows/*`: CI definitions (unless adding new specific job).
+- `evidence/index.json`: Master evidence index (automated).
 
-## Assumed (validate ASAP)
-
-- Required status check names remain to be confirmed against branch protection.
-- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
-
-## Must-not-touch (until validated)
-
-- Public API surfaces in `packages/**` (no breaking changes).
-- Existing GA gates / branch protection requirements.
-- Deployment configs / secrets / infra definitions.
-
-## Validation plan
-
-- Enumerate required checks via GitHub branch protection UI/API.
-- Confirm test runner (jest/vitest) and lint tooling.
-
-## Ingress NGINX Retirement Bundle (Assumptions)
-
-### Verified
-
-- Bundle manifest and docs are now present under `subsumption/ingress-nginx-retirement` and `docs/**`.
-
-### Assumed (validate)
-
-- GitHub Actions required checks can be updated to include bundle-specific gates.
-- CI runners have Node.js 20+ available for the bundle verifier and deny gate scripts.
-
-### Must-not-touch (blast radius)
-
-- Runtime API surfaces and production deployment logic outside CI gating.
-
-### Validation plan
-
-- Confirm required check names in branch protection.
-- Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.
+## Validation Commands
+- Build: `pnpm build`
+- Test: `pnpm test`
+- Verify Schema: `npx ajv validate -s <schema> -d <data>`
+- Run Scripts: `npx tsx scripts/...`
