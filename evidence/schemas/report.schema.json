@@ -6,7 +6,7 @@
   "properties": {
     "evidence_id": {
       "type": "string",
-      "pattern": "^EVD-[A-Za-z0-9-]+$"
+      "pattern": "^EVD-[A-Za-z0-9_-]+$"
     },
     "item": {
       "type": "object"

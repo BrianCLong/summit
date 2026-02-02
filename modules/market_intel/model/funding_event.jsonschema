@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Funding Event",
+  "type": "object",
+  "required": ["company", "amount", "round", "citations"],
+  "properties": {
+    "company": { "type": "string" },
+    "amount": { "type": "number" },
+    "currency": { "type": "string", "default": "USD" },
+    "round": { "type": "string" },
+    "valuation": { "type": "number" },
+    "investors": { "type": "array", "items": { "type": "string" } },
+    "date": { "type": "string", "format": "date" },
+    "citations": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    }
+  }
+}
