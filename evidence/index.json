@@ -100,6 +100,16 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-INTEL-TARGET-MANUS-001": {
+      "files": [
+        "docs/intel/targets/manus/TARGET.yml",
+        "docs/intel/targets/manus/FINDINGS.ndjson",
+        "docs/intel/targets/manus/EVIDENCE_MAP.yml",
+        "docs/intel/targets/manus/PROVENANCE.json",
+        "docs/intel/targets/manus/DECISIONS.yml",
+        "docs/intel/targets/manus/PR_STACK.yml"
+      ]
     }
   }
 }
