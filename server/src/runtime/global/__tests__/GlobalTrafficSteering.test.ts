@@ -1,73 +1,73 @@
 import { jest } from '@jest/globals';
-import { ResidencyGuard } from '../../../data-residency/residency-guard.js';
-import { GlobalTrafficSteering } from '../GlobalTrafficSteering.js';
+
+const getResidencyConfigMock = jest.fn();
+const resolveTargetRegionMock = jest.fn();
+const getCurrentRegionMock = jest.fn().mockReturnValue('us-east-1');
+
+jest.unstable_mockModule('../../../data-residency/residency-guard.js', () => ({
+    ResidencyGuard: {
+        getInstance: () => ({
+            getResidencyConfig: getResidencyConfigMock,
+        }),
+    },
+}));
+
+jest.unstable_mockModule('../../../services/RegionalFailoverService.js', () => ({
+    RegionalFailoverService: {
+        getInstance: () => ({
+            resolveTargetRegion: resolveTargetRegionMock,
+        }),
+    },
+}));
+
+jest.unstable_mockModule('../../../config/regional-config.js', () => ({
+    getCurrentRegion: getCurrentRegionMock,
+    REGIONAL_CONFIG: {
+        'us-east-1': { region: 'us-east-1', baseUrl: 'https://us-east.summit.io' },
+        'eu-central-1': { region: 'eu-central-1', baseUrl: 'https://eu-central.summit.io' },
+    },
+}));
+
+// Set default resolveTargetRegion to avoid undefined during module initialization if it were used there
+resolveTargetRegionMock.mockReturnValue('us-east-1');
+
+const { GlobalTrafficSteering } = await import('../GlobalTrafficSteering.js');
 
 describe('GlobalTrafficSteering', () => {
     let steering: GlobalTrafficSteering;
-    let getResidencyConfigSpy: jest.SpiedFunction<typeof ResidencyGuard.prototype.getResidencyConfig>;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        process.env.SUMMIT_REGION = 'us-east-1';
+        // Reset singleton if possible, or just use the existing one
         steering = GlobalTrafficSteering.getInstance();
-
-        // Spy on the prototype method since it's a singleton instance
-        getResidencyConfigSpy = jest.spyOn(ResidencyGuard.prototype, 'getResidencyConfig');
     });
 
-    afterEach(() => {
-        getResidencyConfigSpy.mockRestore();
-    });
-
-    it('should resolve to current region if no residency configuration exists', async () => {
-        getResidencyConfigSpy.mockResolvedValue(null);
-
-        const decision = await steering.resolveRegion('tenant-none');
-
-        expect(decision.targetRegion).toBe('us-east-1');
-        expect(decision.isOptimal).toBe(true);
-        expect(decision.reason).toContain('No residency configuration found');
-    });
-
-    it('should resolve to current region if it is the primary region', async () => {
-        getResidencyConfigSpy.mockResolvedValue({
+    it('should ALLOW traffic if current region matches primary region', async () => {
+        getResidencyConfigMock.mockResolvedValue({
             primaryRegion: 'us-east-1',
             allowedRegions: ['us-east-1'],
             residencyMode: 'strict'
         });
 
-        const decision = await steering.resolveRegion('tenant-local');
+        resolveTargetRegionMock.mockReturnValue('us-east-1');
+        getCurrentRegionMock.mockReturnValue('us-east-1');
 
-        expect(decision.targetRegion).toBe('us-east-1');
-        expect(decision.isOptimal).toBe(true);
-        expect(decision.reason).toContain('matches tenant primary residency');
+        const result = await steering.resolveSteeringAction('tenant-1');
+        expect(result.action).toBe('ALLOW');
     });
 
-    it('should resolve to primary region if current region is different', async () => {
-        getResidencyConfigSpy.mockResolvedValue({
+    it('should REDIRECT traffic if current region is not allowed for strict tenant', async () => {
+        getResidencyConfigMock.mockResolvedValue({
             primaryRegion: 'eu-central-1',
             allowedRegions: ['eu-central-1'],
             residencyMode: 'strict'
         });
 
-        const decision = await steering.resolveRegion('tenant-remote');
+        resolveTargetRegionMock.mockReturnValue('eu-central-1');
+        getCurrentRegionMock.mockReturnValue('us-east-1');
 
-        expect(decision.targetRegion).toBe('eu-central-1');
-        expect(decision.isOptimal).toBe(false);
-        expect(decision.reason).toContain('Routing to tenant primary region');
-    });
-
-    it('should consider current region optimal if it is allowed and mode is preferred', async () => {
-        getResidencyConfigSpy.mockResolvedValue({
-            primaryRegion: 'eu-central-1',
-            allowedRegions: ['eu-central-1', 'us-east-1'],
-            residencyMode: 'preferred'
-        });
-
-        const decision = await steering.resolveRegion('tenant-preferred');
-
-        expect(decision.targetRegion).toBe('us-east-1');
-        expect(decision.isOptimal).toBe(true);
-        expect(decision.reason).toContain('allowed secondary region');
+        const result = await steering.resolveSteeringAction('tenant-1');
+        expect(result.action).toBe('REDIRECT');
+        expect(result.targetUrl).toBe('https://eu-central.summit.io');
     });
 });

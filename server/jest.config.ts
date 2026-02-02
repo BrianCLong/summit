@@ -73,7 +73,7 @@ const config: Config = {
     'src/chatops/',
     'src/compliance/__tests__/',
     'src/connectors/__tests__/',
-    'src/data-residency/__tests__/',
+    // 'src/data-residency/__tests__/',
     'src/db/__tests__/',
     'src/entities/comments/__tests__/',
     'src/evidence/__tests__/',
