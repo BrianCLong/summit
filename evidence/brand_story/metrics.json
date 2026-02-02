@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-SPB-PLAN-001",
+  "metrics": {
+    "coherence": 1.0,
+    "authenticity": 0.95,
+    "interactivity": 0.9
+  }
+}

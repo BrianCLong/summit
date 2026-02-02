@@ -100,6 +100,15 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-SPB-PLAN-001": {
+      "title": "Brand Story Series Plan",
+      "category": "brand_story",
+      "artifacts": [
+        "evidence/brand_story/report.json",
+        "evidence/brand_story/metrics.json",
+        "evidence/brand_story/stamp.json"
+      ]
     }
   }
 }
