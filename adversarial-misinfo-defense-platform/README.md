@@ -97,6 +97,31 @@ print(results)
 - `VALIDATION_REPORT.md`: Performance benchmarks
 - `example_usage.py`: Usage examples
 
+## Revolutionary Advanced Analysis Capabilities
+
+The platform now features unprecedented analysis capabilities including cognitive dissonance modeling, quantum-inspired information analysis, and neurosymbolic reasoning with artificial consciousness modeling:
+
+### Cognitive Dissonance Modeling
+
+- Models users' belief systems as interconnected networks
+- Detects contradictory information causing psychological tension
+- Measures emotional manipulation and source credibility conflicts
+- Suggests interventions to reduce harmful dissonance
+
+### Quantum-Inspired Information Analysis
+
+- Models information propagation using quantum mechanics principles
+- Detects entanglement patterns between content pieces
+- Identifies quantum interference effects in misinformation spread
+- Analyzes coherence preservation in information streams
+
+### Neurosymbolic Reasoning with Artificial Consciousness
+
+- Combines neural networks with symbolic reasoning systems
+- Implements artificial consciousness layers (phenomenal, access, reporting, monitoring)
+- Performs metacognitive awareness and self-monitoring
+- Executes goal-directed reasoning with intentionality
+
 ## Bidirectional Processing and Temperature Controls
 
 The platform now features advanced bidirectional processing capabilities with dynamic temperature controls:
@@ -124,6 +149,12 @@ python main.py bidirectional --text "This may be false information" --disable-bi
 
 # Analyze a file with bidirectional processing
 python main.py bidirectional --file /path/to/content.txt --temperature 0.8
+
+# Run advanced analysis with cognitive, quantum, and consciousness modeling
+python main.py advanced --text "Complex misinformation content here"
+
+# Skip specific analysis components during advanced analysis
+python main.py advanced --text "Content to analyze" --skip-cognitive --skip-quantum
 ```
 
 ## Requirements
