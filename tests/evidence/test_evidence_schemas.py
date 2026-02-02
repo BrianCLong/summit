@@ -32,3 +32,17 @@ def test_evidence_metrics_schema_rejects_missing_metrics() -> None:
     payload = load_json(bundle / "metrics.json")
     with pytest.raises(ValueError):
         validate_metrics(payload)
+
+def test_evidence_report_schema_rejects_missing_environment() -> None:
+    bundle = FIXTURE_DIR / "pass_bundle"
+    payload = load_json(bundle / "report.json")
+    del payload["environment"]
+    with pytest.raises(ValueError, match="Missing required keys"):
+        validate_report(payload)
+
+def test_evidence_stamp_schema_rejects_missing_run_id() -> None:
+    bundle = FIXTURE_DIR / "pass_bundle"
+    payload = load_json(bundle / "stamp.json")
+    del payload["run_id"]
+    with pytest.raises(ValueError, match="Missing required keys"):
+        validate_stamp(payload)

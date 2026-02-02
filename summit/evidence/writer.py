@@ -36,43 +36,34 @@ def init_evidence_bundle(root: Path, *, run_id: str) -> EvidencePaths:
     p = default_paths(root)
 
     # report.json
-    # Requires: evidence_id, summary, artifacts
-    # Optional: run_id, results
     write_json(p.report, {
-        "evidence_id": f"EVD-AGENT-{run_id}", # distinct ID for the report itself
+        "evidence_id": f"EVD-AGENT-{run_id}",
         "summary": "Agent Composer Run",
         "artifacts": [],
         "run_id": run_id,
-        "results": []
+        "environment": "production",
+        "backend": "unknown"
     })
 
     # metrics.json
-    # Requires: evidence_id, metrics
-    # Optional: run_id, counters, timers_ms
     write_json(p.metrics, {
         "evidence_id": f"EVD-AGENT-{run_id}",
         "metrics": {},
-        "run_id": run_id,
-        "counters": {},
-        "timers_ms": {}
+        "run_id": run_id
     })
 
     # stamp.json
-    # Requires: evidence_id, generated_at
-    # Optional: run_id, created_at
     # Use timezone-aware UTC
     now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     write_json(p.stamp, {
         "evidence_id": f"EVD-AGENT-{run_id}",
-        "generated_at": now,
+        "created_at": now,
         "run_id": run_id,
-        "created_at": now
+        "git_commit": "unknown"
     })
 
     # index.json
-    # Requires: run_id, evidence
     write_json(p.index, {
-        "run_id": run_id,
         "evidence": {}
     })
 
@@ -86,20 +77,17 @@ def init_evidence(paths: EvidencePaths, run_id: str, item_slug: str, evidence_id
     eid = evidence_id or f"EVD-AGENT-{run_id}"
     write_json(paths.report, {
         "run_id": run_id,
-        "item_slug": item_slug,
-        "events": [],
         "evidence_id": eid,
         "summary": f"Report for {item_slug}",
-        "item": {"id": item_slug},
-        "artifacts": []
+        "artifacts": [],
+        "environment": "production",
+        "backend": "unknown"
     })
     write_json(paths.metrics, {
         "run_id": run_id,
-        "item_slug": item_slug,
         "metrics": {},
         "evidence_id": eid
     })
     write_json(paths.index, {
-        "run_id": run_id,
         "evidence": {}
     })

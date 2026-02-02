@@ -1,10 +1,9 @@
 {
-  "items": [
-    {
-      "evidence_id": "EVD-SCOUT-CI-005",
+  "evidence": {
+    "EVD-SCOUT-CI-005": {
       "report": "report.json",
       "metrics": "metrics.json",
       "stamp": "stamp.json"
     }
-  ]
+  }
 }
