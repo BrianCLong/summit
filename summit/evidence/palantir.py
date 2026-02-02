@@ -52,6 +52,11 @@ class PalantirEvidenceWriter:
              artifact_list.append("lineage.json")
              write_json(paths.root / "lineage.json", {"evidence_id": self.evidence_id, "lineage": lineage})
 
+             # DOT Visualization
+             dot_content = self.generate_dot_lineage(lineage)
+             artifact_list.append("lineage.dot")
+             (paths.root / "lineage.dot").write_text(dot_content, encoding="utf-8")
+
         # Extras (Gotham/Apollo cases, logs, etc)
         if extra_artifacts:
             for name, content in extra_artifacts.items():
@@ -90,3 +95,24 @@ class PalantirEvidenceWriter:
         write_json(paths.stamp, stamp_data)
 
         return paths
+
+    def generate_dot_lineage(self, lineage: List[dict]) -> str:
+        """
+        Generates Graphviz DOT syntax for lineage visualization.
+        """
+        lines = ["digraph Lineage {", "  rankdir=LR;", "  node [shape=box, style=filled, fillcolor=lightgrey];"]
+
+        # We assume lineage is a list of node definitions or edges
+        # Just a simple heuristic for this generic writer
+        for item in lineage:
+            # If item represents a Dataset with inputs
+            if "rid" in item and "inputs" in item:
+                target = item["rid"]
+                label = item.get("alias", target)
+                lines.append(f'  "{target}" [label="{label}"];')
+
+                for src in item.get("inputs", []):
+                    lines.append(f'  "{src}" -> "{target}";')
+
+        lines.append("}")
+        return "\n".join(lines)

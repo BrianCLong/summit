@@ -34,9 +34,46 @@ class PalantirActionWrapper:
         )
         emit(event)
 
-        # 3. Enforcement
-        if decision != "allow":
+        # 3. MPA & Break-Glass Checks
+        if decision == "needs_approval":
+            # Check for Multi-Party Authorization
+            if self._check_mpa(params):
+                decision = "allow (MPA)"
+            # Check for Break-Glass
+            elif self._check_break_glass(params):
+                decision = "allow (Break-Glass)"
+                # Emit SEVERITY 1 Alert
+                emit(AuditEvent(
+                    event_type="security_alert",
+                    actor=self.actor_id,
+                    action="break_glass",
+                    decision="alert",
+                    metadata={"severity": "CRITICAL", "reason": params.get("break_glass_reason")}
+                ))
+
+        # 4. Enforcement
+        if decision not in ["allow", "allow (MPA)", "allow (Break-Glass)"]:
             raise PermissionError(f"Action '{self.tool.name}' denied: {decision}")
 
-        # 4. Execution (Mocked)
-        return f"Executed {self.tool.name} with {params}"
+        # 5. Execution (Mocked)
+        return f"Executed {self.tool.name} with {params} [{decision}]"
+
+    def _check_mpa(self, params: dict) -> bool:
+        """
+        Validates Multi-Party Authorization.
+        Requires 'approver_1' and 'approver_2' signatures in params.
+        """
+        a1 = params.get("approver_1")
+        a2 = params.get("approver_2")
+        # In real logic, verify crypto signatures and ensure a1 != a2 != actor
+        return bool(a1 and a2 and a1 != a2 and a1 != self.actor_id)
+
+    def _check_break_glass(self, params: dict) -> bool:
+        """
+        Validates Break-Glass Protocol.
+        Requires 'break_glass_reason' and 'break_glass_token'.
+        """
+        reason = params.get("break_glass_reason")
+        token = params.get("break_glass_token")
+        # In real logic, verify token is a valid emergency token
+        return bool(reason and token == "EMERGENCY_OVERRIDE")
