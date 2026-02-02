@@ -80,8 +80,8 @@ conditional_required:
     workflow: "workflow-lint.yml"
     rationale: "Validates GitHub Actions workflow syntax and safety"
     when_paths_match:
-      - "^\.github/workflows/"
-      - "^\.github/actions/"
+      - '^\.github/workflows/'
+      - '^\.github/actions/'
 
   - name: "CodeQL"
     workflow: "codeql.yml"
@@ -97,10 +97,10 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^package\.json$"
-      - "^pnpm-lock\.yaml$"
-      - "^server/package\.json$"
-      - "^\.github/workflows/supply-chain"
+      - '^package\.json$'
+      - '^pnpm-lock\.yaml$'
+      - '^server/package\.json$'
+      - '^\.github/workflows/supply-chain'
       - "^scripts/security/"
 
   - name: "Docker Build & Security Scan"
@@ -109,9 +109,9 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^\.dockerignore$"
+      - '^\.dockerignore$'
 
-  - name: "Schema Compatibility Check"
+  - name: "Schema compatibility guard / schema-compat"
     workflow: "schema-compat.yml"
     rationale: "API schema backward compatibility checks"
     when_paths_match:
