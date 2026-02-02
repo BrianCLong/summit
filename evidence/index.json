@@ -100,6 +100,13 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-ai-coding-tools-senior-foundation-001": {
+      "files": [
+        "evidence/EVD-ai-coding-tools-senior-foundation-001/report.json",
+        "evidence/EVD-ai-coding-tools-senior-foundation-001/metrics.json",
+        "evidence/EVD-ai-coding-tools-senior-foundation-001/stamp.json"
+      ]
     }
   }
 }

@@ -132,6 +132,11 @@ def main():
     items = []
     if "items" in index and isinstance(index["items"], list):
         items = index["items"]
+    elif "items" in index and isinstance(index["items"], dict):
+        for evd_id, data in index["items"].items():
+            item = data.copy()
+            item["evidence_id"] = evd_id
+            items.append(item)
     elif "evidence" in index and isinstance(index["evidence"], dict):
         for evd_id, data in index["evidence"].items():
             item = data.copy()
