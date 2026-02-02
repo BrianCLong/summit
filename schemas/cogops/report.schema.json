@@ -1,0 +1,131 @@
+{
+  "$id": "https://summit.dev/schemas/cogops/report",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CogOps Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "campaign_id",
+    "summary",
+    "evidence",
+    "indicators",
+    "effect_proxies"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "campaign_id": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/evidence_item" },
+      "minItems": 1
+    },
+    "indicators": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/indicator" }
+    },
+    "effect_proxies": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/effect_proxy" }
+    },
+    "surfaces": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/surface" }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "evidence_item": {
+      "type": "object",
+      "required": ["id", "source_ref", "selector", "observation"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+        },
+        "source_ref": {
+          "type": "string"
+        },
+        "selector": {
+          "type": "string"
+        },
+        "observation": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "indicator": {
+      "type": "object",
+      "required": ["name", "score"],
+      "properties": {
+        "name": { "type": "string" },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "effect_proxy": {
+      "type": "object",
+      "required": ["name", "delta"],
+      "properties": {
+        "name": { "type": "string" },
+        "delta": { "type": "number" },
+        "window": {
+          "type": "string",
+          "description": "Deterministic window label (e.g., P7D)"
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^EVID-COGOPS-[a-f0-9]{12}$"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "surface": {
+      "type": "object",
+      "required": ["type", "label"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["identity", "institution", "trust_network"]
+        },
+        "label": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
