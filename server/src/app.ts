@@ -144,6 +144,7 @@ import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
 import factFlowRouter from './factflow/routes.js';
+import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -779,6 +780,9 @@ export const createApp = async () => {
   }
 
   appLogger.info('Anomaly detector activated.');
+
+  // Start regional failover monitoring
+  failoverOrchestrator.start();
 
   // Global Error Handler - must be last
   app.use(centralizedErrorHandler);

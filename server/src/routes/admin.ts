@@ -254,6 +254,38 @@ router.get('/tenant-defaults', (req, res) => {
   });
 });
 
+import { RegionalAvailabilityService } from '../services/RegionalAvailabilityService.js';
+
+// Regional Failover Admin APIs
+router.get('/failover/status', (req, res) => {
+  const availability = RegionalAvailabilityService.getInstance();
+  res.json(availability.getStatus());
+});
+
+router.post('/failover/mode', express.json(), (req, res) => {
+  const { mode } = req.body;
+  if (mode !== 'AUTOMATIC' && mode !== 'MANUAL_PROMOTION_ACTIVE') {
+    return res.status(400).json({ ok: false, error: 'Invalid mode' });
+  }
+  const availability = RegionalAvailabilityService.getInstance();
+  availability.setFailoverMode(mode);
+  res.json({ ok: true, mode });
+});
+
+router.post('/failover/status', express.json(), (req, res) => {
+  const { region, status } = req.body;
+  if (!region || !['HEALTHY', 'DEGRADED', 'DOWN'].includes(status)) {
+    return res.status(400).json({ ok: false, error: 'Invalid region or status' });
+  }
+  try {
+    const availability = RegionalAvailabilityService.getInstance();
+    availability.setRegionStatus(region, status);
+    res.json({ ok: true, region, status });
+  } catch (error: any) {
+    res.status(400).json({ ok: false, error: error.message });
+  }
+});
+
 export default router;
 
 // n8n flows admin (read/write server/config/n8n-flows.json)
