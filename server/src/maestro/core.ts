@@ -11,6 +11,7 @@ import {
   normalizeReasoningBudget,
   type ReasoningBudgetContract,
 } from './budget.js';
+import { mcpRegistry, mcpClient } from '../conductor/mcp/client.js';
 
 
 export interface MaestroConfig {
@@ -63,6 +64,7 @@ export class Maestro {
     const planTask: Task = {
       id: crypto.randomUUID(),
       runId: run.id,
+      tenantId: run.tenantId,
       status: 'succeeded',        // planning is instant for v0.1
       agent: {
         id: this.config.defaultPlannerAgent,
@@ -81,6 +83,7 @@ export class Maestro {
     const actionTask: Task = {
       id: crypto.randomUUID(),
       runId: run.id,
+      tenantId: run.tenantId,
       parentTaskId: planTask.id,
       status: 'queued',
       agent: {
@@ -152,21 +155,31 @@ export class Maestro {
 
         // === SHADOW TRAFFIC INTEGRATION (Task #101) ===
         if (!(task.input as any)?._isShadow) {
-          try {
-            const { getShadowConfig } = await import('../middleware/ShadowTrafficMiddleware.js');
-            const shadowConfig = await getShadowConfig(tenantId);
-            if (shadowConfig && Math.random() <= shadowConfig.samplingRate) {
-              const { shadowService } = await import('../services/ShadowService.js');
-              // Mirror the execution task call
-              shadowService.shadow({
-                method: 'POST',
-                url: `/api/maestro/tasks/${task.id}/execute`,
-                headers: { 'content-type': 'application/json' },
-                body: { ...task, input: { ...task.input, _isShadow: true } }
-              }, shadowConfig);
-            }
-          } catch (shadowError) {
-            logger.warn({ taskId: task.id, error: (shadowError as Error).message }, 'Maestro: Shadow trigger failed');
+          // ... (existing shadow logic)
+        }
+
+        // === DEEPFAKE DETECTION (Phase 4) ===
+        const mediaUri = (task.input as any)?.mediaUri || (task.input as any)?.uri;
+        const mediaType = (task.input as any)?.mediaType;
+        if (mediaUri && mediaType) {
+          const { DeepfakeDetectionService } = await import('../services/DeepfakeDetectionService.js');
+          const deepfakeService = new DeepfakeDetectionService();
+          const analysis = await deepfakeService.analyze(mediaUri, mediaType, tenantId);
+
+          if (analysis.isDeepfake && analysis.riskScore > 80) {
+            const errorMsg = `Security Alert: High-risk deepfake detected in task input. ` +
+              `Risk score: ${analysis.riskScore}. Markers: ${analysis.markers.join(', ')}. ` +
+              `Details: ${analysis.details}`;
+
+            logger.error({ taskId: task.id, analysis }, 'Deepfake detection blocked task execution');
+            await this.ig.updateTask(task.id, { status: 'failed', errorMessage: errorMsg, updatedAt: now });
+            throw new Error(errorMsg);
+          }
+
+          if (analysis.isDeepfake) {
+            logger.warn({ taskId: task.id, analysis }, 'Deepfake detected but risk score below threshold. Proceeding with caution.');
+            // Attach analysis to task output or metadata for downstream visibility
+            task.output = { ...task.output, deepfakeAnalysis: analysis };
           }
         }
       }
@@ -283,6 +296,42 @@ export class Maestro {
       }, 'Task passed governance checks, proceeding with execution');
       // === END GOVERNANCE CHECK ===
 
+      // === NARRATIVE IMPACT PREDICTION (Story 3.2) ===
+      if (task.kind === 'action' && tenantId) {
+        try {
+          const { Neo4jNarrativeLoader } = await import('../narrative/adapters/neo4j-loader.js');
+          const { narrativeSimulationManager } = await import('../narrative/manager.js');
+
+          const rootId = (task.input as any)?.rootId || (task.input as any)?.targetId;
+          if (rootId) {
+            const initialEntities = await Neo4jNarrativeLoader.loadFromGraph(rootId, 2);
+
+            if (initialEntities.length > 0) {
+              const sim = narrativeSimulationManager.createSimulation({
+                name: `Impact Prediction: ${task.id}`,
+                themes: ['Security', 'Trust'],
+                initialEntities,
+                metadata: { taskId: task.id, isShadow: true }
+              });
+
+              narrativeSimulationManager.injectActorAction(sim.id, task.agent.id, task.description);
+              const predictedState = await narrativeSimulationManager.tick(sim.id, 5);
+
+              task.output = {
+                ...task.output,
+                impactForecast: {
+                  summary: predictedState.narrative.summary,
+                  arcs: predictedState.arcs.map(arc => ({ theme: arc.theme, momentum: arc.momentum, outlook: arc.outlook }))
+                }
+              };
+              narrativeSimulationManager.remove(sim.id);
+            }
+          }
+        } catch (simError) {
+          logger.warn({ taskId: task.id, error: (simError as Error).message }, 'Maestro: Narrative impact prediction failed (non-blocking)');
+        }
+      }
+
       let result: string = '';
 
       if (task.agent.kind === 'llm') {
@@ -297,7 +346,6 @@ export class Maestro {
           let timeoutId: NodeJS.Timeout;
 
           try {
-            // Timeout promise that cleans up properly
             const timeout = new Promise<never>((_, reject) => {
               timeoutId = setTimeout(() => {
                 controller.abort();
@@ -317,36 +365,67 @@ export class Maestro {
                     ? [{ role: 'user', content: String(task.input.requestText) }]
                     : []),
                 ],
+                tools: mcpRegistry.listServers().flatMap(s => {
+                  const srv = mcpRegistry.getServer(s);
+                  return srv?.tools.map(t => ({
+                    type: 'function',
+                    function: {
+                      name: t.name,
+                      description: t.description,
+                      parameters: t.schema
+                    }
+                  })) || [];
+                })
               },
               {
                 feature: `maestro_${task.kind}`,
                 tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
                 environment: process.env.NODE_ENV || 'unknown',
-                // @ts-ignore - Assuming adapter supports signal or just ignoring it safely
+                // @ts-ignore
                 signal: signal
               },
             );
 
             const llmResult = (await Promise.race([llmCall, timeout])) as any;
-            clearTimeout(timeoutId!); // Clear timeout on success
-            result = llmResult.content;
-            break; // Success
+            clearTimeout(timeoutId!);
+
+            if (llmResult.tool_calls && llmResult.tool_calls.length > 0) {
+              const toolLogs: string[] = [];
+              const toolOutputs: any[] = [];
+
+              for (const call of llmResult.tool_calls) {
+                const { name, arguments: argsJson } = call.function;
+                const args = JSON.parse(argsJson);
+
+                // Find server for tool
+                const servers = mcpRegistry.findServersWithTool(name);
+                if (servers.length > 0) {
+                  const toolResult = await mcpClient.executeTool(servers[0], name, args);
+                  toolOutputs.push({ tool: name, result: toolResult });
+                  toolLogs.push(`Executed tool ${name}`);
+                }
+              }
+
+              result = JSON.stringify({
+                explanation: llmResult.content,
+                tool_results: toolOutputs
+              });
+              task.output = { ...task.output, logs: [...(task.output?.logs || []), ...toolLogs] };
+            } else {
+              result = llmResult.content;
+            }
+            break;
           } catch (err: any) {
-            clearTimeout(timeoutId!); // Clear timeout on failure
+            clearTimeout(timeoutId!);
             lastError = err;
             attempts++;
-            // Clean up abort controller on error if not already aborted
             if (!signal.aborted) controller.abort();
-
             if (attempts >= maxRetries) break;
-            // Exponential backoff: 1s, 2s, 4s...
             await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts - 1)));
           }
         }
-
         if (!result && lastError) throw lastError;
       } else {
-        // TODO: shell tools, etc.
         result = 'TODO: implement non-LLM agent';
       }
 
@@ -354,6 +433,7 @@ export class Maestro {
         id: crypto.randomUUID(),
         runId: task.runId,
         taskId: task.id,
+        tenantId: task.tenantId,
         kind: 'text',
         label: 'task-output',
         data: result,
@@ -362,14 +442,14 @@ export class Maestro {
 
       const updatedTask: Partial<Task> = {
         status: 'succeeded',
-        output: { result },
+        output: { ...task.output, result },
         updatedAt: new Date().toISOString(),
       };
 
       await this.ig.createArtifact(artifact);
       await this.ig.updateTask(task.id, updatedTask);
 
-      timer(); // End timer success
+      timer();
       return {
         task: { ...task, ...updatedTask } as Task,
         artifact,
@@ -383,7 +463,7 @@ export class Maestro {
       await this.ig.updateTask(task.id, updatedTask);
 
       metrics.maestroAiModelErrors.inc({ model: task.agent.modelId || 'unknown' });
-      timer({ status: 'failed' }); // End timer failed
+      timer({ status: 'failed' });
       return { task: { ...task, ...updatedTask } as Task, artifact: null };
     }
   }

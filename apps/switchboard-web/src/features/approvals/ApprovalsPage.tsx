@@ -2,117 +2,133 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchApprovals, approveApproval, rejectApproval } from './api';
 import { Approval } from './types';
+import { TaskDetailView } from './TaskDetailView';
 
 export const ApprovalsPage: React.FC = () => {
-    const queryClient = useQueryClient();
-    const { data: approvals, isLoading } = useQuery({
-        queryKey: ['approvals', 'pending'],
-        queryFn: () => fetchApprovals('pending'),
-    });
+  const queryClient = useQueryClient();
+  const { data: approvals, isLoading } = useQuery({
+    queryKey: ['approvals', 'pending'],
+    queryFn: () => fetchApprovals('pending'),
+  });
 
-    const [processingId, setProcessingId] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [selectedApproval, setSelectedApproval] = useState<Approval | null>(null);
 
-    const approveMutation = useMutation({
-        mutationFn: ({ id, reason }: { id: string; reason?: string }) => approveApproval(id, reason),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['approvals'] });
-            setProcessingId(null);
-        },
-    });
+  const approveMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => approveApproval(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      setProcessingId(null);
+    },
+  });
 
-    const rejectMutation = useMutation({
-        mutationFn: ({ id, reason }: { id: string; reason?: string }) => rejectApproval(id, reason),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['approvals'] });
-            setProcessingId(null);
-        },
-    });
+  const rejectMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => rejectApproval(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['approvals'] });
+      setProcessingId(null);
+    },
+  });
 
-    const handleApprove = (id: string) => {
-        setProcessingId(id);
-        approveMutation.mutate({ id, reason: 'Approved by human operator via Switchboard' });
-    };
+  const handleApprove = (id: string) => {
+    setProcessingId(id);
+    approveMutation.mutate({ id, reason: 'Approved by human operator via Switchboard' });
+  };
 
-    const handleReject = (id: string) => {
-        const reason = window.prompt('Enter rejection reason:');
-        if (reason !== null) {
-            setProcessingId(id);
-            rejectMutation.mutate({ id, reason });
-        }
-    };
+  const handleReject = (id: string) => {
+    const reason = window.prompt('Enter rejection reason:');
+    if (reason !== null) {
+      setProcessingId(id);
+      rejectMutation.mutate({ id, reason });
+    }
+  };
 
-    return (
-        <div className="approvals-container">
-            <div className="section-header">
-                <h2>Task Inbox</h2>
-                <p className="description">Review and authorize high-risk agent actions requiring human-in-the-loop validation.</p>
-            </div>
+  return (
+    <div className="approvals-container">
+      <div className="section-header">
+        <h2>Task Inbox</h2>
+        <p className="description">Review and authorize high-risk agent actions requiring human-in-the-loop validation.</p>
+      </div>
 
-            {isLoading ? (
-                <div className="loading-state">Loading pending approvals...</div>
-            ) : approvals?.length === 0 ? (
-                <div className="empty-state">
-                    <div className="icon">🛡️</div>
-                    <h3>All Clear</h3>
-                    <p>No agent tasks are currently awaiting approval. Your agents are operating within policy bounds.</p>
-                </div>
-            ) : (
-                <div className="approvals-list">
-                    <table className="approvals-table">
-                        <thead>
-                            <tr>
-                                <th>Agent / Requester</th>
-                                <th>Action</th>
-                                <th>Risk Context</th>
-                                <th>Requested At</th>
-                                <th className="actions-col">Decision</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {approvals?.map((approval) => (
-                                <tr key={approval.id} className={processingId === approval.id ? 'row-processing' : ''}>
-                                    <td>
-                                        <div className="requester-info">
-                                            <span className="agent-badge">Agent</span>
-                                            <code>{approval.requester_id}</code>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span className="action-tag">{approval.action?.replace('maestro_', '')}</span>
-                                    </td>
-                                    <td>
-                                        <div className="reason-text">{approval.reason}</div>
-                                        {approval.payload?.riskScore && (
-                                            <div className="risk-indicator">
-                                                Risk Score: <span className="score">{approval.payload.riskScore.toFixed(2)}</span>
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td>{new Date(approval.created_at).toLocaleString()}</td>
-                                    <td className="actions-cell">
-                                        <button
-                                            className="btn-approve"
-                                            onClick={() => handleApprove(approval.id)}
-                                            disabled={!!processingId}
-                                        >
-                                            Authorize
-                                        </button>
-                                        <button
-                                            className="btn-reject"
-                                            onClick={() => handleReject(approval.id)}
-                                            disabled={!!processingId}
-                                        >
-                                            Deny
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+      {isLoading ? (
+        <div className="loading-state">Loading pending approvals...</div>
+      ) : approvals?.length === 0 ? (
+        <div className="empty-state">
+          <div className="icon">🛡️</div>
+          <h3>All Clear</h3>
+          <p>No agent tasks are currently awaiting approval. Your agents are operating within policy bounds.</p>
+        </div>
+      ) : (
+        <div className="approvals-list">
+          <table className="approvals-table">
+            <thead>
+              <tr>
+                <th>Agent / Requester</th>
+                <th>Action</th>
+                <th>Risk Context</th>
+                <th>Requested At</th>
+                <th className="actions-col">Decision</th>
+              </tr>
+            </thead>
+            <tbody>
+              {approvals?.map((approval) => (
+                <tr key={approval.id} className={processingId === approval.id ? 'row-processing' : ''}>
+                  <td>
+                    <div className="requester-info">
+                      <span className="agent-badge">Agent</span>
+                      <code>{approval.requester_id}</code>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="action-tag">{approval.action?.replace('maestro_', '')}</span>
+                  </td>
+                  <td>
+                    <div className="reason-text">{approval.reason}</div>
+                    {approval.payload?.riskScore && (
+                      <div className="risk-indicator">
+                        Risk Score: <span className="score">{approval.payload.riskScore.toFixed(2)}</span>
+                      </div>
+                    )}
+                  </td>
+                  <td>{new Date(approval.created_at).toLocaleString()}</td>
+                  <td className="actions-cell">
+                    <button
+                      className="btn-inspect"
+                      onClick={() => setSelectedApproval(approval)}
+                      disabled={!!processingId}
+                    >
+                      Inspect
+                    </button>
+                    <button
+                      className="btn-approve"
+                      onClick={() => handleApprove(approval.id)}
+                      disabled={!!processingId}
+                    >
+                      Authorize
+                    </button>
+                    <button
+                      className="btn-reject"
+                      onClick={() => handleReject(approval.id)}
+                      disabled={!!processingId}
+                    >
+                      Deny
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-            <style>{`
+      {selectedApproval && (
+        <TaskDetailView
+          approval={selectedApproval}
+          onClose={() => setSelectedApproval(null)}
+        />
+      )}
+
+      <style>{`
         .approvals-container {
           padding: 2rem;
           max-width: 1200px;
@@ -190,13 +206,23 @@ export const ApprovalsPage: React.FC = () => {
           display: flex;
           gap: 0.75rem;
         }
-        .btn-approve, .btn-reject {
+        .btn-approve, .btn-reject, .btn-inspect {
           padding: 0.5rem 1rem;
           border-radius: 6px;
           font-weight: 500;
           cursor: pointer;
           transition: all 0.2s;
           border: none;
+        }
+        .btn-inspect {
+          background: rgba(255, 255, 255, 0.08);
+          color: #888;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-inspect:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.15);
+          color: #fff;
+          border-color: rgba(255, 255, 255, 0.3);
         }
         .btn-approve {
           background: #0078ff;
@@ -232,6 +258,6 @@ export const ApprovalsPage: React.FC = () => {
           pointer-events: none;
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };

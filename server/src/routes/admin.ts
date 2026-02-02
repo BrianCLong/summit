@@ -1,6 +1,7 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import axios from 'axios';
 import { enableTemporal, disableTemporal } from '../temporal/control.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
@@ -337,6 +338,7 @@ router.delete('/shadow/configs/:tenantId', async (req, res) => {
 export default router;
 
 // n8n flows admin (read/write server/config/n8n-flows.json)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const n8nCfgPath = path.resolve(__dirname, '../../config/n8n-flows.json');
 
 router.get('/n8n-flows', (_req, res) => {

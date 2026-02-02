@@ -122,6 +122,7 @@ export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pendin
 export interface Task {
   id: string;
   runId: string;
+  tenantId?: string;
   parentTaskId?: string;
   status: TaskStatus;
   agent: {
@@ -153,6 +154,7 @@ export interface Artifact {
   id: string;
   runId: string;
   taskId: string;
+  tenantId?: string;
   kind: string;
   label: string;
   data: any;
