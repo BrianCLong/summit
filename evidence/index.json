@@ -100,6 +100,27 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-HARDMATSLLM-MAT-001": {
+      "files": [
+        "evidence/EVD-HARDMATSLLM-MAT-001/report.json",
+        "evidence/EVD-HARDMATSLLM-MAT-001/metrics.json",
+        "evidence/EVD-HARDMATSLLM-MAT-001/stamp.json"
+      ]
+    },
+    "EVD-HARDMATSLLM-MAT-002": {
+      "files": [
+        "evidence/EVD-HARDMATSLLM-MAT-002/report.json",
+        "evidence/EVD-HARDMATSLLM-MAT-002/metrics.json",
+        "evidence/EVD-HARDMATSLLM-MAT-002/stamp.json"
+      ]
+    },
+    "EVD-HARDMATSLLM-MAT-003": {
+      "files": [
+        "evidence/EVD-HARDMATSLLM-MAT-003/report.json",
+        "evidence/EVD-HARDMATSLLM-MAT-003/metrics.json",
+        "evidence/EVD-HARDMATSLLM-MAT-003/stamp.json"
+      ]
     }
   }
 }

@@ -8,6 +8,6 @@
 
 ## Notes
 
-- Rationale: Evidence schema test hardening and governance metadata updates only.
+- Rationale: Materials Redesign plugin implementation (using standard library only).
 - Risk: None (no dependency changes).
 - Rollback: Revert this change.
