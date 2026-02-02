@@ -1,4 +1,9 @@
-# Required Checks Discovery
+# Required checks discovery (TODO)
+1. In GitHub: Settings → Branches → Branch protection rules → note required checks.
+2. Or via API: list branch protection required status checks contexts.
+3. Replace temporary gate names in this repo with the actual required contexts.
+
+# Required Checks Discovery (Legacy/Detailed)
 
 ## Process to Identify Required Checks
 

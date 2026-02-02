@@ -100,6 +100,19 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-NANOCLAW-EVIDENCE-001": {
+      "title": "schemas + index",
+      "artifacts": [
+        "evidence/schema/report.schema.json",
+        "evidence/schema/metrics.schema.json",
+        "evidence/schema/stamp.schema.json",
+        "evidence/index.json"
+      ]
+    },
+    "EVD-NANOCLAW-CI-002": {
+      "title": "required checks discovery doc",
+      "artifacts": ["required_checks.todo.md"]
     }
   }
 }
