@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-02T22:15:10Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
@@ -24,6 +24,13 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+    },
+    {
+      "id": "distrl-repo-reality-check",
+      "area": "docs",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Captured distributed RL subsumption repo assumptions and verification anchors."
     }
   ]
 }
