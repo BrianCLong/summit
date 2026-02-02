@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit_evidence_stamp",
+  "type": "object",
+  "required": ["run_id", "created_at"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "git_sha": {"type": "string"}
+  }
+}

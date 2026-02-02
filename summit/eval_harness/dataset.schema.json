@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Eval Dataset Item",
+  "type": "object",
+  "required": ["id", "case_type", "question", "expected_behavior"],
+  "properties": {
+    "id": {"type": "string"},
+    "case_type": {
+      "type": "string",
+      "enum": ["accuracy", "out_of_scope", "guardrails"]
+    },
+    "question": {"type": "string"},
+    "reference_answer": {"type": "string"},
+    "expected_behavior": {
+      "type": "string",
+      "enum": ["answer", "refuse"]
+    }
+  },
+  "additionalProperties": false
+}
