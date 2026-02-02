@@ -22,9 +22,10 @@ We are using these names in our CI pipeline definitions, but they might be repor
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 
-## Temporary gates (Summit Harness)
+## Temporary gates (Summit Harness & Skills)
 - ci/summit-harness-evidence
 - ci/summit-tool-policy
+- Use `skills/*` jobs with stable names (If actual required checks differ, add a rename PR that preserves history).
 
 ## Required checks discovery (one-time for Memory Privacy)
 1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks

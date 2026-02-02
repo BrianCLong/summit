@@ -1,5 +1,5 @@
 ---
 name: "good-minimal"
-description: "fixture: should pass static scan"
+description: "fixture: benign skill"
 ---
-This is a good skill.
+Hello world.
