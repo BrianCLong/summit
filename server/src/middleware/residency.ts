@@ -20,12 +20,17 @@ export const residencyEnforcement = async (req: Request, res: Response, next: Ne
             if (req.path.startsWith('/auth') || req.path.startsWith('/public')) {
                 return next();
             }
-             // Fail safe
+            // Fail safe
             // console.warn('Residency enforcement skipped due to missing tenantId');
             return next();
         }
 
         const guard = ResidencyGuard.getInstance();
+        const { globalTrafficSteering } = await import('../runtime/global/GlobalTrafficSteering.js');
+
+        const decision = await globalTrafficSteering.resolveRegion(tenantId);
+        res.setHeader('X-Summit-Steering-Advice', decision.targetRegion);
+        res.setHeader('X-Summit-Steering-Reason', decision.reason);
 
         // Determine context.
         // For GET requests, it's mostly 'compute' (processing) + 'retrieval' (implied).

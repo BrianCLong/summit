@@ -85,7 +85,7 @@ const config: Config = {
     'src/ingest/__tests__/',
     'src/intel/cti/__tests__/',
     'src/lib/resources/__tests__/',
-    'src/maestro/__tests__/',
+    // 'src/maestro/__tests__/',
     'src/audit/__tests__/',
     'src/__tests__/fuzz',
     'src/__tests__/risk/',
@@ -122,6 +122,8 @@ const config: Config = {
   ],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   moduleNameMapper: {
+    '.*governance-service.*$': '<rootDir>/tests/mocks/agent-governance-service.ts',
+    '.*provenance/ledger.*$': '<rootDir>/tests/mocks/provenance-ledger.ts',
     '^jsdom$': '<rootDir>/tests/mocks/jsdom.ts',
     '.*lib/telemetry/diagnostic-snapshotter(\\.js)?$': '<rootDir>/tests/mocks/diagnostic-snapshotter.ts',
     '.*DeterministicExportService(\\.js)?$': '<rootDir>/tests/mocks/deterministic-export-service.ts',
