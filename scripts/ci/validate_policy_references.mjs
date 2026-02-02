@@ -6,12 +6,11 @@
  * Supports matrix expansion, levenshtein suggestions, and evidence generation.
  */
 
-import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 import {
-  hashStringList,
   normalizeRelativePath,
   sha256Hex,
   writeDeterministicJson,
@@ -35,7 +34,6 @@ function parseArgs(argv) {
     if (current.startsWith('--evidence-out=')) { args.evidenceOut = current.split('=')[1]; continue; }
     if (current === '--allowlist') { args.allowlist = argv[++i]; continue; }
     if (current.startsWith('--allowlist=')) { args.allowlist = current.split('=')[1]; continue; }
-    if (current === '--allow-prefix-match') { args.allowPrefixMatch = true; continue; }
     if (current === '--help') { args.help = true; continue; }
   }
   return args;
@@ -54,7 +52,11 @@ function levenshtein(a, b) {
       if (b.charAt(i - 1) === a.charAt(j - 1)) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
       }
     }
   }
@@ -88,7 +90,7 @@ function resolveTemplate(template, matrixCombo) {
   let result = template;
   for (const [key, value] of Object.entries(matrixCombo)) {
     const escapedKey = String(key).replace(/\./g, '\\.');
-    const regex = new RegExp('\$\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
+    const regex = new RegExp('\$\s*\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
     result = result.replace(regex, String(value));
   }
   return result;
@@ -199,7 +201,7 @@ async function main() {
   const evidenceOut = args.evidenceOut || 'artifacts/governance/required-checks-policy.evidence.json';
   const allowlistPath = args.allowlist || 'docs/ci/REQUIRED_CHECKS_ALLOWLIST.yml';
 
-  console.log('Policy Reference Validator');
+  console.log('Policy Reference Validator (Hardened)');
   
   let policyRaw = '';
   let policy = {};
@@ -258,7 +260,6 @@ async function main() {
     verdict
   };
 
-  if (!existsSync(dirname(resolve(ROOT, evidenceOut)))) readdirSync(ROOT); // Ensure dir exists hack or just use mkdir
   writeDeterministicJson(resolve(ROOT, evidenceOut), evidence);
 
   if (errors > 0) {
