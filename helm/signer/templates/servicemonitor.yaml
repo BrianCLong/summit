@@ -1,0 +1,17 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "signer.fullname" . }}
+  labels:
+    release: {{ .Values.serviceMonitor.release | default "prometheus" }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "signer.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  endpoints:
+    - port: metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+      path: {{ .Values.serviceMonitor.path }}
+{{- end }}

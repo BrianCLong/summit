@@ -1,0 +1,6 @@
+apiVersion: v2
+name: summit-umbrella
+description: Umbrella chart for Summit microservices with mesh, security, and release controls.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

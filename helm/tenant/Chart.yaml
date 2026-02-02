@@ -1,0 +1,4 @@
+apiVersion: v2
+name: tenant
+version: 0.1.0
+description: Per-tenant namespace isolation for IntelGraph

@@ -1,0 +1,28 @@
+# chart-testing (ct) configuration for Helm charts under helm/
+chart-dirs:
+  - .
+
+excluded-charts: []
+
+chart-repos:
+  - prometheus-community=https://prometheus-community.github.io/helm-charts
+  - grafana=https://grafana.github.io/helm-charts
+  - jetstack=https://charts.jetstack.io
+  - external-secrets=https://charts.external-secrets.io
+  - bitnami=https://charts.bitnami.com/bitnami
+  - open-telemetry=https://open-telemetry.github.io/opentelemetry-helm-charts
+
+target-branch: main
+validate-maintainers: false
+check-version-increment: true
+lint: true
+install: false
+helm-extra-args: --timeout 600s
+upgrade: true
+validate-chart-schema: true
+kubernetes-versions:
+  - v1.28.0
+  - v1.29.0
+  - v1.30.0
+additional-commands:
+  - helm template {chart} --values ../ci-values.yaml | kubeconform -summary -strict -ignore-missing-schemas

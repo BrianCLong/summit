@@ -327,7 +327,7 @@
     },
     "overrides": {
       "@orval/mcp": ">=7.18.0",
-      "@orval/core": ">=7.21.0",
+      "@orval/core": ">=7.19.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
       "debug": ">=4.3.5",
@@ -370,8 +370,7 @@
       "apollo-server-express": ">=3.13.0",
       "redis": ">=5.9.0",
       "@types/express": "4.17.21",
-      "@types/express-serve-static-core": "4.19.6",
-      "xxhash": "npm:xxhash-wasm@^1.0.2"
+      "@types/express-serve-static-core": "4.19.6"
     },
     "peerDependencyRules": {
       "allowedVersions": {

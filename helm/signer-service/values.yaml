@@ -1,0 +1,62 @@
+image:
+  repository: ghcr.io/BrianCLong/intelgraph/signer-service
+  tag: ''
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 8443
+
+signingKey:
+  enabled: true
+  secretName: signer-key
+  secretKey: private.pem
+  mountPath: /etc/signer
+
+config:
+  logLevel: info
+  kmsKeyId: ''
+  healthCheckPath: /healthz
+
+policyBundles:
+  enabled: true
+  registryUrl: https://policies.example.com
+  refreshInterval: 5m
+  configPath: /etc/signer/bundles/bundles.yaml
+  bundles:
+    - name: access-control
+      revision: v1.2.0
+      checksum: sha256:deadbeef
+      path: bundles/access-control.tar.gz
+    - name: ledger-audit
+      revision: v0.9.1
+      checksum: sha256:feedface
+      path: bundles/ledger-audit.tar.gz
+
+env: []
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts: []
+  tls: []
+
+serviceMonitor:
+  enabled: true
+  path: /metrics
+  interval: 30s
+  scrapeTimeout: 5s
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,126 @@
+grafana:
+  defaultDashboardsTimezone: utc
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'intelgraph'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          options:
+            path: /var/lib/grafana/dashboards/intelgraph
+  dashboards:
+    intelgraph:
+      api-overview.json: |
+        {
+          "annotations": {"list": []},
+          "panels": [],
+          "schemaVersion": 38,
+          "title": "IntelGraph API Overview",
+          "version": 1
+        }
+      signer-overview.json: |
+        {
+          "annotations": {"list": []},
+          "title": "Signer Service Overview",
+          "schemaVersion": 38,
+          "refresh": "30s",
+          "panels": [
+            {
+              "type": "graph",
+              "title": "Request Rate",
+              "targets": [
+                {"expr": "sum(rate(http_requests_total{service=\"signer-service\"}[5m]))"}
+              ]
+            },
+            {
+              "type": "graph",
+              "title": "Error Ratio",
+              "targets": [
+                {"expr": "sum(rate(http_requests_total{service=\"signer-service\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"signer-service\"}[5m]))"}
+              ]
+            },
+            {
+              "type": "stat",
+              "title": "Bundle Freshness",
+              "targets": [
+                {"expr": "max(opa_bundle_downloads_successful{bundle=\"access-control\"})"}
+              ]
+            }
+          ],
+          "version": 1
+        }
+      policy-bundles.json: |
+        {
+          "annotations": {"list": []},
+          "title": "Policy Bundles",
+          "schemaVersion": 38,
+          "panels": [
+            {
+              "type": "stat",
+              "title": "Bundle Downloads (5m)",
+              "targets": [
+                {"expr": "sum(increase(opa_bundle_downloads_successful[5m]))"}
+              ]
+            },
+            {
+              "type": "graph",
+              "title": "Bundle Download Latency",
+              "targets": [
+                {"expr": "histogram_quantile(0.9, sum(rate(opa_bundle_download_duration_seconds_bucket[5m])) by (le))"}
+              ]
+            }
+          ],
+          "version": 1
+        }
+alertmanager:
+  config:
+    route:
+      receiver: 'default'
+      group_by: ['alertname', 'service']
+    receivers:
+      - name: 'default'
+        slack_configs:
+          - api_url: ${SLACK_WEBHOOK_URL}
+            channel: '#intelgraph-alerts'
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    scrapeInterval: 30s
+  additionalPrometheusRulesMap:
+    signer-service:
+      groups:
+        - name: signer-service.rules
+          rules:
+            - alert: SignerServiceDown
+              expr: sum(up{service=\"signer-service\"}) == 0
+              for: 5m
+              labels:
+                severity: critical
+              annotations:
+                summary: Signer service is not reporting as up
+                description: No healthy signer-service pods detected for 5 minutes.
+            - alert: SignerHighErrorRate
+              expr: sum(rate(http_requests_total{service=\"signer-service\",status=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"signer-service\"}[5m])) > 0.05
+              for: 10m
+              labels:
+                severity: warning
+              annotations:
+                summary: Elevated error ratio on signer-service
+                description: Error ratio above 5% over the last 10 minutes.
+    policy-bundles:
+      groups:
+        - name: policy-bundles.rules
+          rules:
+            - alert: PolicyBundleStale
+              expr: max(time() - opa_bundle_download_last_success_timestamp_seconds) > 900
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                summary: Policy bundles have not refreshed in the last 15 minutes
+                description: Verify policy registry availability and bundle webhook status.

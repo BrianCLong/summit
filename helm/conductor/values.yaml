@@ -1,0 +1,41 @@
+image:
+  tag: dev
+
+env: []
+envFrom: []
+
+secrets:
+  existingSecret: ''
+  keys:
+    databaseUrl: DATABASE_URL
+    redisUrl: REDIS_URL
+  databaseUrl: ''
+  redisUrl: ''
+
+priceAware:
+  enabled: true
+  pricingRefreshEnabled: true
+  capacityFuturesEnabled: true
+  failOpen: true
+  forcePoolId: ''
+  reservedDiscount: 0.8
+  pricingSignalsJson: ''
+
+migrations:
+  enabled: false
+  hook: true
+  seedPricing: false
+  image: postgres:16-alpine
+  annotations: {}
+
+configMapEnv:
+  enabled: false
+  data: {}
+
+security:
+  allowedPrincipals:
+    - 'spiffe://intelgraph.local/ns/intelgraph/sa/webapp-sa'
+    - 'spiffe://intelgraph.local/ns/intelgraph/sa/batch-jobs-sa'
+  allowedPorts:
+    - '4000'
+    - '8080'

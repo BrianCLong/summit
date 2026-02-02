@@ -1,0 +1,284 @@
+namespace: summit
+createNamespace: false
+
+defaults:
+  imagePullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
+  namespaceLabels:
+    istio-injection: "enabled"
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+  probes:
+    liveness:
+      path: /healthz
+      port: http
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 3
+      failureThreshold: 5
+    readiness:
+      path: /healthz
+      port: http
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+    startup:
+      enabled: true
+      path: /startup
+      port: http
+      failureThreshold: 30
+      periodSeconds: 5
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    metrics:
+      - type: Resource
+        resource:
+          name: cpu
+          target:
+            type: Utilization
+            averageUtilization: 70
+      - type: Resource
+        resource:
+          name: memory
+          target:
+            type: Utilization
+            averageUtilization: 75
+    extraMetrics: []
+  mesh:
+    enabled: true
+    annotations:
+      sidecar.istio.io/inject: "true"
+      proxy.istio.io/config: '{"holdApplicationUntilProxyStarts": true}'
+    peerAuthentication:
+      mtlsMode: STRICT
+    destinationRule:
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+  ingress:
+    enabled: true
+    className: istio
+    clusterIssuer: letsencrypt-production
+    tlsSecretTemplate: "{{ .name }}-tls"
+  externalSecret:
+    enabled: true
+    refreshInterval: 1h
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: summit-vault
+  networkPolicy:
+    enabled: true
+    ingressFrom:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: summit
+    allowIstioIngress: true
+    egress:
+      - to:
+          - namespaceSelector: {}
+        ports:
+          - protocol: TCP
+            port: 53
+          - protocol: UDP
+            port: 53
+blueGreen:
+  enabled: true
+  activeColor: blue
+  standbyColor: green
+  promotionJob:
+    enabled: true
+    image: bitnami/kubectl:1.29
+    pullPolicy: IfNotPresent
+    serviceAccountName: ""
+    resources: {}
+
+resourceQuota:
+  enabled: true
+  hard:
+    requests.cpu: "4"
+    requests.memory: 8Gi
+    limits.cpu: "8"
+    limits.memory: 16Gi
+    pods: "50"
+    persistentvolumeclaims: "20"
+
+limitRange:
+  enabled: true
+  default:
+    cpu: 500m
+    memory: 512Mi
+  defaultRequest:
+    cpu: 200m
+    memory: 256Mi
+  max:
+    cpu: 2
+    memory: 2Gi
+  min:
+    cpu: 100m
+    memory: 128Mi
+
+workloads:
+  server:
+    enabled: true
+    image:
+      repository: ghcr.io/brianclong/summit-server
+      tag: "latest"
+    service:
+      port: 80
+      targetPort: 4000
+    ingress:
+      enabled: true
+      host: api.summit.local
+      path: /
+    env:
+      - name: NODE_ENV
+        value: production
+      - name: LOG_LEVEL
+        value: info
+    externalSecrets:
+      - name: server-secrets
+        data:
+          - secretKey: DATABASE_URL
+            remoteRef:
+              key: summit/database
+              property: url
+  client:
+    enabled: true
+    image:
+      repository: ghcr.io/brianclong/summit-client
+      tag: "latest"
+    service:
+      port: 80
+      targetPort: 3000
+    ingress:
+      enabled: true
+      host: app.summit.local
+      path: /
+    probes:
+      readiness:
+        path: /healthz
+  ai-service:
+    enabled: true
+    image:
+      repository: ghcr.io/brianclong/summit-ai-service
+      tag: "latest"
+    service:
+      port: 8081
+      targetPort: 8081
+    ingress:
+      enabled: true
+      host: ai.summit.local
+      path: /
+    hpa:
+      maxReplicas: 5
+    externalSecrets:
+      - name: ai-secrets
+        data:
+          - secretKey: OPENAI_API_KEY
+            remoteRef:
+              key: summit/ai
+              property: openai
+  nlp-service:
+    enabled: true
+    image:
+      repository: ghcr.io/brianclong/summit-nlp-service
+      tag: "latest"
+    service:
+      port: 8082
+      targetPort: 8082
+    ingress:
+      enabled: true
+      host: nlp.summit.local
+      path: /
+  osint-service:
+    enabled: true
+    image:
+      repository: ghcr.io/brianclong/summit-osint-service
+      tag: "latest"
+    service:
+      port: 8083
+      targetPort: 8083
+    ingress:
+      enabled: true
+      host: osint.summit.local
+      path: /
+  worker-python:
+    enabled: true
+    image:
+      repository: ghcr.io/brianclong/summit-worker
+      tag: "latest"
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 6
+    probes:
+      liveness:
+        path: /healthz
+        port: metrics
+      readiness:
+        path: /healthz
+        port: metrics
+    service:
+      port: 9090
+      targetPort: 9090
+  redis:
+    enabled: true
+    image:
+      repository: redis
+      tag: 7.2
+    service:
+      port: 6379
+      targetPort: 6379
+    hpa:
+      enabled: false
+    mesh:
+      enabled: false
+    probes:
+      liveness:
+        path: /health
+        port: 6379
+      readiness:
+        path: /health
+        port: 6379
+  postgres:
+    enabled: true
+    image:
+      repository: postgres
+      tag: 15
+    service:
+      port: 5432
+      targetPort: 5432
+    hpa:
+      enabled: false
+    mesh:
+      enabled: false
+    externalSecrets:
+      - name: postgres-admin
+        data:
+          - secretKey: POSTGRES_PASSWORD
+            remoteRef:
+              key: summit/database
+              property: password
+  neo4j:
+    enabled: true
+    image:
+      repository: neo4j
+      tag: 5
+    service:
+      port: 7687
+      targetPort: 7687
+    mesh:
+      enabled: false
+    hpa:
+      enabled: false

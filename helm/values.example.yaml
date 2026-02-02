@@ -1,0 +1,118 @@
+# values for the signer-service chart
+image:
+  repository: ghcr.io/BrianCLong/intelgraph/signer-service
+  tag: v1.2.3
+  pullPolicy: IfNotPresent
+config:
+  logLevel: debug
+  kmsKeyId: arn:aws:kms:us-east-1:123456789012:key/abc-def
+  healthCheckPath: /healthz
+policyBundles:
+  registryUrl: https://policies.example.com
+  refreshInterval: 2m
+  configPath: /etc/signer/bundles/bundles.yaml
+  bundles:
+    - name: access-control
+      revision: v1.3.0
+      checksum: sha256:abcd1234
+      path: bundles/access-control.tar.gz
+    - name: ledger-audit
+      revision: v1.0.0
+      checksum: sha256:9876ffff
+      path: bundles/ledger-audit.tar.gz
+signingKey:
+  secretName: signer-key
+  secretKey: private.pem
+  mountPath: /etc/signer
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  scrapeTimeout: 5s
+
+---
+# values for the policy-bundles chart
+registry:
+  url: https://policies.example.com
+  credentialsSecret: policy-registry-credentials
+bundles:
+  - name: baseline-controls
+    revision: v1.0.1
+    path: bundles/baseline-controls.tar.gz
+    checksum: sha256:1234abcd
+    labels:
+      tier: baseline
+      owner: platform
+  - name: privileged-access
+    revision: v0.3.0
+    path: bundles/privileged-access.tar.gz
+    checksum: sha256:beefcafe
+    labels:
+      tier: restricted
+      owner: security
+
+---
+# monitoring overrides when installing kube-prometheus-stack
+prometheus:
+  additionalScrapeConfigs: []
+  additionalPrometheusRulesMap:
+    signer-service:
+      groups:
+        - name: signer-service.rules
+          rules:
+            - alert: SignerServiceDown
+              expr: sum(up{service="signer-service"}) == 0
+              for: 5m
+              labels:
+                severity: critical
+              annotations:
+                summary: Signer service pods are unavailable
+                description: No healthy signer-service targets discovered by Prometheus.
+            - alert: SignerErrorRatio
+              expr: sum(rate(http_requests_total{service="signer-service",status=~"5.."}[5m])) / sum(rate(http_requests_total{service="signer-service"}[5m])) > 0.05
+              for: 10m
+              labels:
+                severity: warning
+              annotations:
+                summary: Elevated signer service error ratio
+                description: Error ratio exceeded 5% for the signer service.
+    policy-bundles:
+      groups:
+        - name: policy-bundles.rules
+          rules:
+            - alert: PolicyBundleStale
+              expr: max(time() - opa_bundle_download_last_success_timestamp_seconds) > 900
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                summary: Policy bundles stale
+                description: Bundles have not refreshed in over 15 minutes.
+grafana:
+  defaultDashboardsTimezone: utc
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: intelgraph
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          options:
+            path: /var/lib/grafana/dashboards/intelgraph
+  dashboards:
+    intelgraph:
+      signer-overview.json: |
+        {
+          "title": "Signer Service Overview",
+          "panels": [],
+          "schemaVersion": 38,
+          "version": 1
+        }
+      policy-bundles.json: |
+        {
+          "title": "Policy Bundles",
+          "panels": [],
+          "schemaVersion": 38,
+          "version": 1
+        }

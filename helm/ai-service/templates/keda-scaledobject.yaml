@@ -1,0 +1,17 @@
+{{- if .Values.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "ai-service.fullname" . }}-celery
+  namespace: {{ .Release.Namespace }}
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: {{ include "ai-service.fullname" . }}-worker
+  triggers:
+    - type: redis
+      metadata:
+        address: {{ .Values.keda.redisAddress }}
+        listName: {{ .Values.keda.queueName }}
+        listLength: "{{ .Values.keda.queueLength }}"
+{{- end }}

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: summit-service
+version: 0.1.0
+type: library
+description: Library chart for Summit services to standardize deployments, HPAs, ingress, mesh, and security.

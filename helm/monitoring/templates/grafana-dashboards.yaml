@@ -1,0 +1,22 @@
+{{- $dashboardLabel := .Values.grafana.dashboardLabel | default "grafana_dashboard" -}}
+{{- $first := true -}}
+{{- range $folder, $dashboards := .Values.grafana.dashboards }}
+{{- range $filename, $content := $dashboards }}
+{{- if not $first }}
+---
+{{- end }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "monitoring.fullname" $ }}-{{ $folder | replace "_" "-" }}-{{ $filename | replace "." "-" }}
+  labels:
+    {{ $dashboardLabel }}: "1"
+    app.kubernetes.io/name: {{ include "monitoring.name" $ }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    grafana_folder: {{ $folder | quote }}
+data:
+  {{ $filename }}: |
+{{ $content | nindent 4 }}
+{{- $first = false -}}
+{{- end }}
+{{- end }}

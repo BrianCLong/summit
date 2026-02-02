@@ -1,0 +1,23 @@
+{{- if and .Values.policyBundles.enabled (.Values.policyBundles.bundles | len | gt 0) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "signer-service.policyBundlesName" . }}
+  labels:
+    {{- include "signer-service.labels" . | nindent 4 }}
+data:
+  bundles.yaml: |
+    services:
+      - name: policy-registry
+        url: {{ .Values.policyBundles.registryUrl }}
+    bundles:
+    {{- range .Values.policyBundles.bundles }}
+      - name: {{ .name }}
+        service: policy-registry
+        revision: {{ default "latest" .revision | quote }}
+        url: {{ printf "%s/%s" $.Values.policyBundles.registryUrl .path | quote }}
+        {{- if .checksum }}
+        sha256: {{ .checksum | quote }}
+        {{- end }}
+    {{- end }}
+{{- end }}

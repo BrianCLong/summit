@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: conductor
+  labels:
+    app: conductor
+spec:
+  selector:
+    matchLabels:
+      app: conductor
+  strategy:
+    blueGreen:
+      activeService: conductor
+      previewService: conductor-preview
+      autoPromotionEnabled: false
+  template:
+    metadata:
+      labels:
+        app: conductor
+    spec:
+      containers:
+        - name: app
+          image: ghcr.io/BrianCLong/intelgraph/conductor:{{ .Values.image.tag | default "dev" }}
+          imagePullPolicy: IfNotPresent
+          {{- $hasExistingSecret := and .Values.secrets (not (empty .Values.secrets.existingSecret)) }}
+          {{- $hasInlineSecret := and (not $hasExistingSecret) (or (and .Values.secrets (not (empty .Values.secrets.databaseUrl))) (and .Values.secrets (not (empty .Values.secrets.redisUrl)))) }}
+          {{- $configMapEnabled := and .Values.configMapEnv.enabled (gt (len .Values.configMapEnv.data) 0) }}
+          {{- $hasEnvFromList := gt (len .Values.envFrom) 0 }}
+          {{- if or $hasExistingSecret $hasInlineSecret $hasEnvFromList $configMapEnabled }}
+          envFrom:
+            {{- if $hasExistingSecret }}
+            - secretRef:
+                name: {{ .Values.secrets.existingSecret }}
+            {{- end }}
+            {{- if $hasInlineSecret }}
+            - secretRef:
+                name: conductor-secrets
+            {{- end }}
+            {{- if $configMapEnabled }}
+            - configMapRef:
+                name: conductor-env
+            {{- end }}
+            {{- with .Values.envFrom }}
+{{ toYaml . | indent 12 }}
+            {{- end }}
+          {{- end }}
+          env:
+            - name: WASM_RUNNER
+              value: '{{ .Values.wasm.runner }}'
+            - name: SUPPLYCHAIN_ENFORCE_SIG
+              value: '{{ .Values.supplyChain.enforceSignature }}'
+            - name: SUPPLYCHAIN_ENFORCE_PROV
+              value: '{{ .Values.supplyChain.enforceProvenance }}'
+            - name: SUPPLYCHAIN_BLOCK_SEVERITY
+              value: '{{ .Values.supplyChain.blockOnVulnSeverity }}'
+            - name: PRICE_AWARE_ENABLED
+              value: '{{ default true .Values.priceAware.enabled }}'
+            - name: PRICING_REFRESH_ENABLED
+              value: '{{ default true .Values.priceAware.pricingRefreshEnabled }}'
+            - name: CAPACITY_FUTURES_ENABLED
+              value: '{{ default true .Values.priceAware.capacityFuturesEnabled }}'
+            - name: PRICE_AWARE_FAIL_OPEN
+              value: '{{ default true .Values.priceAware.failOpen }}'
+            {{- if ne (default "" .Values.priceAware.forcePoolId) "" }}
+            - name: PRICE_AWARE_FORCE_POOL_ID
+              value: '{{ .Values.priceAware.forcePoolId }}'
+            {{- end }}
+            {{- if ne (toString (default "" .Values.priceAware.reservedDiscount)) "" }}
+            - name: RESERVED_CAPACITY_DISCOUNT
+              value: '{{ .Values.priceAware.reservedDiscount }}'
+            {{- end }}
+            {{- if ne (default "" .Values.priceAware.pricingSignalsJson) "" }}
+            - name: PRICING_SIGNALS_JSON
+              value: '{{ .Values.priceAware.pricingSignalsJson }}'
+            {{- end }}
+            {{- with .Values.env }}
+{{ toYaml . | indent 12 }}
+            {{- end }}

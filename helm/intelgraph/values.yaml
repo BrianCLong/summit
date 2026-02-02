@@ -1,0 +1,60 @@
+namespace: intelgraph-dev
+
+image:
+  app:
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/app
+    tag: 'latest'
+  web:
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/web
+    tag: 'latest'
+
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:<ACCOUNT_ID>:certificate/<CERT_ID>
+    alb.ingress.kubernetes.io/group.name: intelgraph-dev
+  hosts:
+    - host: dev.topicality.co
+      paths:
+        - path: /
+          pathType: Prefix
+
+env:
+  NODE_ENV: production
+  GRAPH_URI: bolt://neo4j.intelgraph-dev.svc.cluster.local:7687
+  GRAPH_USER: neo4j
+  GRAPH_PASSWORD_SECRET: neo4j-auth
+  POSTGRES_URI_SECRET: pg-uri
+  REDIS_URI_SECRET: redis-uri
+  S3_BUCKET: intelgraph-dev-artifacts
+
+signer:
+  enabled: true
+  replicas: 1
+  image:
+    repository: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/intelgraph/signer
+    tag: 'latest'
+  service:
+    port: 8081
+  bundle:
+    url: https://artifacts.intelgraph.dev/policy/maestro-policy-bundle.tgz
+    signerKeyId: opa-signer-dev
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+neo4j:
+  acceptLicenseAgreement: 'yes'
+  neo4j:
+    password: 'please-reset-in-secret' # overridden by secret
+  resources:
+    cpu: '1'
+    memory: '2Gi'

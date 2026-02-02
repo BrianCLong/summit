@@ -20,7 +20,5 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install dependencies
-        run: pip install jsonschema
       - name: Validate evidence bundle
         run: python tools/evidence_validate.py --schemas evidence/schemas --index evidence/index.json

@@ -1,0 +1,5 @@
+auth_type: md5
+min_pool_size: 5
+max_client_conn: 2000
+default_pool_size: 50
+server_tls_sslmode: require

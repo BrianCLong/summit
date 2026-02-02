@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: conductor-dr
+  labels:
+    app.kubernetes.io/name: conductor
+spec:
+  host: conductor.intelgraph.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL

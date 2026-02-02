@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sandbox-gateway.fullname" . }}-config
+  labels:
+    {{- include "sandbox-gateway.labels" . | nindent 4 }}
+data:
+  config.json: |
+    {
+      "rateLimiting": {
+        "windowMs": {{ .Values.config.rateLimiting.windowMs }},
+        "max": {{ .Values.config.rateLimiting.max }}
+      },
+      "cors": {
+        "origins": {{ .Values.config.cors.origins | toJson }}
+      },
+      "sandbox": {
+        "defaultExpirationDays": {{ .Values.config.sandbox.defaultExpirationDays }},
+        "maxConcurrentSandboxes": {{ .Values.config.sandbox.maxConcurrentSandboxes }},
+        "enabledPresets": {{ .Values.config.sandbox.enabledPresets | toJson }}
+      },
+      "promotion": {
+        "requiredApprovals": {{ .Values.config.promotion.requiredApprovals }},
+        "autoPromoteThreshold": {{ .Values.config.promotion.autoPromoteThreshold }}
+      }
+    }

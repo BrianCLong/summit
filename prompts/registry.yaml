@@ -29,32 +29,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: summit-competitive-subsumption-bundle
-    version: v1
-    path: prompts/competitive/summit-competitive-subsumption-bundle.md
-    sha256: cb4f02b6053df9ec4b7d71fe544f2f12715a09671e2ef6f92ff67e151fe2dff4
-    description: Competitive Subsumption & Transcendence Bundle prompt for OSINT/GraphRAG/agent orchestration.
-    scope:
-      paths:
-        - docs/competitive/
-        - scripts/ci/
-        - .github/workflows/
-        - docs/ga/evidence_map.yml
-        - prompts/competitive/summit-competitive-subsumption-bundle.md
-        - prompts/registry.yaml
-      domains:
-        - competitive-intel
-        - governance
-        - product-strategy
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

@@ -1,0 +1,335 @@
+# Global defaults for Summit umbrella deployment
+namespace: summit
+createNamespace: false
+
+# Defaults applied to all services unless overridden
+common:
+  imagePullSecrets: []
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    cpu:
+      averageUtilization: 70
+    memory:
+      averageUtilization: 75
+    customMetrics: []
+  probes:
+    liveness:
+      path: /healthz
+      initialDelaySeconds: 20
+      periodSeconds: 10
+    readiness:
+      path: /healthz
+      initialDelaySeconds: 10
+      periodSeconds: 10
+    startup:
+      enabled: true
+      path: /healthz
+      failureThreshold: 30
+      periodSeconds: 5
+  service:
+    type: ClusterIP
+  ingress:
+    enabled: true
+    className: istio
+    tls:
+      enabled: true
+      secretName: summit-tls
+      clusterIssuer: summit-issuer
+  blueGreen:
+    enabled: true
+    activeColor: blue
+    standbyColor: green
+    promotionJob:
+      enabled: true
+      image: bitnami/kubectl:1.30
+      serviceAccountName: summit-bluegreen
+
+namespaceResources:
+  limitRange:
+    enabled: true
+    default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 250m
+      memory: 256Mi
+    max:
+      cpu: "2"
+      memory: 4Gi
+    min:
+      cpu: 100m
+      memory: 128Mi
+  resourceQuota:
+    enabled: true
+    hard:
+      requests.cpu: "4"
+      requests.memory: 8Gi
+      limits.cpu: "8"
+      limits.memory: 16Gi
+      pods: "50"
+      persistentvolumeclaims: "10"
+
+mesh:
+  enabled: true
+  sidecarInjection: true
+  mtlsMode: STRICT
+  destinationRules:
+    - host: server
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: client
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: ai-service
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: worker-python
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+
+istio-config:
+  sidecarInjection:
+    enabled: true
+    namespaceLabel: istio-injection
+  peerAuthentication:
+    enabled: true
+    mtlsMode: STRICT
+  destinationRules:
+    - host: server
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: client
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: ai-service
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+    - host: worker-python
+      trafficPolicy:
+        tls:
+          mode: ISTIO_MUTUAL
+
+networkPolicies:
+  enabled: true
+  ingressNamespaces:
+    - istio-system
+  egressNamespaces:
+    - kube-system
+    - monitoring
+
+externalSecrets:
+  storeRef:
+    kind: ClusterSecretStore
+    name: summit-secrets
+  manifests:
+    - name: server-secret
+      target:
+        name: server-secret
+      data:
+        - secretKey: jwt-secret
+          remoteRef:
+            key: summit/server
+            property: jwt-secret
+        - secretKey: jwt-refresh-secret
+          remoteRef:
+            key: summit/server
+            property: jwt-refresh-secret
+    - name: neo4j-secret
+      target:
+        name: neo4j-secret
+      data:
+        - secretKey: password
+          remoteRef:
+            key: summit/neo4j
+            property: password
+    - name: postgres-secret
+      target:
+        name: postgres-secret
+      data:
+        - secretKey: password
+          remoteRef:
+            key: summit/postgres
+            property: password
+    - name: ai-service-secret
+      target:
+        name: ai-service-secret
+      data:
+        - secretKey: api-key
+          remoteRef:
+            key: summit/ai-service
+            property: api-key
+
+metering:
+  sinks:
+    - name: s3
+      type: s3
+      bucket: intelgraph-billing
+      prefix: parquet/
+  partitions:
+    tenantKey: tenant_id_p
+    dateKey: ingest_date
+  storagePrefix: parquet/
+
+# Service inventory
+server:
+  enabled: true
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/server
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  service:
+    port: 4000
+    type: ClusterIP
+  env:
+    - name: NODE_ENV
+      value: production
+    - name: PORT
+      value: "4000"
+    - name: NEO4J_URI
+      value: bolt://neo4j:7687
+    - name: POSTGRES_HOST
+      value: postgres
+    - name: POSTGRES_USER
+      value: intelgraph
+    - name: REDIS_HOST
+      value: redis
+    - name: REDIS_PORT
+      value: "6379"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  secrets:
+    - name: neo4j-secret
+      key: password
+      env: NEO4J_PASSWORD
+    - name: postgres-secret
+      key: password
+      env: POSTGRES_PASSWORD
+    - name: server-secret
+      key: jwt-secret
+      env: JWT_SECRET
+    - name: server-secret
+      key: jwt-refresh-secret
+      env: JWT_REFRESH_SECRET
+  ingress:
+    hosts:
+      - host: api.summit.local
+        paths:
+          - path: /
+            pathType: Prefix
+  hpa:
+    customMetrics:
+      - name: cypher_query_rate
+        averageValue: 10
+  networkPolicy:
+    tiers:
+      allowedIngressLabels:
+        - matchLabels:
+            istio: ingressgateway
+      allowedEgressFQDNs:
+        - postgresql.example.internal
+
+client:
+  enabled: true
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/client
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  service:
+    port: 80
+  resources:
+    requests:
+      cpu: 150m
+      memory: 192Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  ingress:
+    hosts:
+      - host: app.summit.local
+        paths:
+          - path: /
+            pathType: Prefix
+  probes:
+    liveness:
+      path: /
+    readiness:
+      path: /
+    startup:
+      enabled: false
+
+ai-service:
+  enabled: true
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/ai-service
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  service:
+    port: 8080
+  env:
+    - name: PORT
+      value: "8080"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 750m
+      memory: 768Mi
+  secrets:
+    - name: ai-service-secret
+      key: api-key
+      env: AI_API_KEY
+  ingress:
+    hosts:
+      - host: ai.summit.local
+        paths:
+          - path: /
+            pathType: Prefix
+
+worker-python:
+  enabled: true
+  image:
+    repository: ghcr.io/BrianCLong/intelgraph/worker-python
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 2
+  env:
+    - name: WORKER_MODE
+      value: live
+  service:
+    port: 9000
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 800m
+      memory: 1Gi
+  probes:
+    liveness:
+      path: /healthz
+    readiness:
+      path: /healthz
+    startup:
+      path: /healthz

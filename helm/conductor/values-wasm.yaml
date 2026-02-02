@@ -1,0 +1,11 @@
+wasm:
+  enabled: true
+  runner: 'wasmtime' # wasmtime | node-wasi
+  limits:
+    cpuMs: 1000
+    memMiB: 128
+    timeoutMs: 5000
+supplyChain:
+  enforceSignature: true
+  enforceProvenance: true
+  blockOnVulnSeverity: 'CRITICAL'

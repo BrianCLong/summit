@@ -1,0 +1,30 @@
+{{- if and .Values.blueGreen.enabled .Values.blueGreen.promotionJob.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "umbrella.fullname" . }}-promote-color
+  namespace: {{ .Values.namespace }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ default "default" .Values.blueGreen.promotionJob.serviceAccountName }}
+      containers:
+        - name: promote
+          image: {{ .Values.blueGreen.promotionJob.image }}
+          imagePullPolicy: {{ .Values.blueGreen.promotionJob.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - >-
+              for svc in {{ range $name, $cfg := .Values.workloads }}{{ if $cfg.enabled }}{{ $name }} {{ end }}{{ end }}; do
+                active={{ .Values.blueGreen.activeColor }};
+                kubectl -n {{ .Values.namespace }} patch service ${svc} -p '{"spec":{"selector":{"deployment-color":"'"${active}"'"}}}';
+              done
+          resources:
+{{ toYaml .Values.blueGreen.promotionJob.resources | indent 12 }}
+{{- end }}

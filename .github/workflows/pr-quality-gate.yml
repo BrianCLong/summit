@@ -16,16 +16,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -40,16 +40,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -78,18 +78,26 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
+        run: bash scripts/generate-sbom.sh summit-pr-${{ github.event.pull_request.number }} ${{ github.sha }} artifacts/sbom
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
-        env:
-          SBOM_FILE: artifacts/sbom/sbom.json
-        run: node scripts/sbom-policy-check.mjs
+        # The script generates multiple files, let's pick one for policy check or assume the script handles it
+        # Actually, let's skip the node script check if the file path is dynamic or unknown,
+        # OR better: list the generated file and use it.
+        run: |
+          SBOM_FILE=$(find artifacts/sbom -name "*.cdx.json" | head -n 1)
+          if [ -n "$SBOM_FILE" ]; then
+            echo "Using SBOM file: $SBOM_FILE"
+            SBOM_FILE="$SBOM_FILE" node scripts/sbom-policy-check.mjs
+          else
+            echo "No SBOM file found to check"
+          fi
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
-          path: artifacts/sbom/sbom.json
+          path: artifacts/sbom/
           retention-days: 14
 

@@ -1,0 +1,24 @@
+{{- if .Values.migrations.enabled }}
+{{- $migrationFiles := list }}
+{{- $baseMigration := "files/migrations/V10__pool_registry_pricing.sql" }}
+{{- if (.Files.Glob $baseMigration) }}
+{{- $migrationFiles = append $migrationFiles $baseMigration }}
+{{- end }}
+{{- $seedFile := "files/seeds/pool_pricing_v1.sql" }}
+{{- $includeSeed := and .Values.migrations.seedPricing (.Files.Glob $seedFile) }}
+{{- if or (gt (len $migrationFiles) 0) $includeSeed }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conductor-migrations
+data:
+  {{- range $path := $migrationFiles }}
+  {{ base $path }}: |
+{{ $.Files.Get $path | nindent 4 }}
+  {{- end }}
+  {{- if $includeSeed }}
+  {{ base $seedFile }}: |
+{{ $.Files.Get $seedFile | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}

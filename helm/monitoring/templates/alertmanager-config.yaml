@@ -1,0 +1,13 @@
+{{- if .Values.alertmanager.config }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "monitoring.fullname" . }}-alertmanager
+  labels:
+    app.kubernetes.io/name: {{ include "monitoring.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+type: Opaque
+stringData:
+  alertmanager.yaml: |
+{{ .Values.alertmanager.config | toYaml | indent 4 }}
+{{- end }}

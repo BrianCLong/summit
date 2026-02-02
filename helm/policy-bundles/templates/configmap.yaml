@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "policy-bundles.fullname" . }}
+  labels:
+    {{- include "policy-bundles.labels" . | nindent 4 }}
+  {{- if .Values.configMap.annotations }}
+  annotations:
+    {{- toYaml .Values.configMap.annotations | nindent 4 }}
+  {{- end }}
+data:
+  bundles.yaml: |
+    services:
+      - name: policy-registry
+        url: {{ .Values.registry.url }}
+        {{- if .Values.registry.credentialsSecret }}
+        credentialsSecret: {{ .Values.registry.credentialsSecret }}
+        {{- end }}
+    bundles:
+    {{- range .Values.bundles }}
+      - name: {{ .name }}
+        service: policy-registry
+        revision: {{ default "latest" .revision | quote }}
+        url: {{ printf "%s/%s" $.Values.registry.url .path | quote }}
+        {{- if .checksum }}
+        sha256: {{ .checksum | quote }}
+        {{- end }}
+        {{- if .labels }}
+        labels:
+          {{- toYaml .labels | nindent 10 }}
+        {{- end }}
+    {{- end }}

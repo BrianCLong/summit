@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: { { include "worker-python.fullname" . } }
+  labels: { { - include "worker-python.labels" . | nindent 4 } }
+spec:
+  replicas: { { .Values.replicas | default 1 } }
+  selector:
+    matchLabels: { { - include "worker-python.selectorLabels" . | nindent 6 } }
+  template:
+    metadata:
+      labels: { { - include "worker-python.selectorLabels" . | nindent 8 } }
+    spec:
+      serviceAccountName: { { include "worker-python.fullname" . } }
+      containers:
+        - name: worker
+          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          imagePullPolicy: { { .Values.image.pullPolicy } }
+          env: { { - toYaml .Values.env | nindent 12 } }
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 1
+              memory: 512Mi

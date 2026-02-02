@@ -1,0 +1,63 @@
+# AI Service Platform Helm Values
+
+replicaCount: 2
+
+image:
+  repository: ai-platform/ai-service-platform
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 4100
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: ai-platform.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: ai-platform-tls
+      hosts:
+        - ai-platform.example.com
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+env:
+  NODE_ENV: production
+  LOG_LEVEL: info
+  AI_PLATFORM_PORT: "4100"
+
+redis:
+  enabled: true
+  architecture: standalone
+
+compliance:
+  fedrampEnabled: false
+  auditRetentionDays: 365
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

@@ -1,0 +1,84 @@
+{{- if .Values.migrations.enabled }}
+{{- $migrationFiles := list }}
+{{- $baseMigration := "files/migrations/V10__pool_registry_pricing.sql" }}
+{{- if (.Files.Glob $baseMigration) }}
+{{- $migrationFiles = append $migrationFiles $baseMigration }}
+{{- end }}
+{{- $seedFile := "files/seeds/pool_pricing_v1.sql" }}
+{{- $includeSeed := and .Values.migrations.seedPricing (.Files.Glob $seedFile) }}
+{{- if or (gt (len $migrationFiles) 0) $includeSeed }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: conductor-migrations
+  labels:
+    app: conductor
+  {{- $hasUserAnnotations := gt (len .Values.migrations.annotations) 0 }}
+  {{- if or .Values.migrations.hook $hasUserAnnotations }}
+  annotations:
+    {{- if .Values.migrations.hook }}
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- end }}
+    {{- with .Values.migrations.annotations }}
+{{ toYaml . | indent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: conductor
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: {{ .Values.migrations.image | default "postgres:16-alpine" }}
+          imagePullPolicy: IfNotPresent
+          {{- $hasExistingSecret := and .Values.secrets (not (empty .Values.secrets.existingSecret)) }}
+          {{- $hasInlineSecret := and (not $hasExistingSecret) (or (and .Values.secrets (not (empty .Values.secrets.databaseUrl))) (and .Values.secrets (not (empty .Values.secrets.redisUrl)))) }}
+          {{- $configMapEnabled := and .Values.configMapEnv.enabled (gt (len .Values.configMapEnv.data) 0) }}
+          {{- $hasEnvFromList := gt (len .Values.envFrom) 0 }}
+          {{- if or $hasExistingSecret $hasInlineSecret $hasEnvFromList $configMapEnabled }}
+          envFrom:
+            {{- if $hasExistingSecret }}
+            - secretRef:
+                name: {{ .Values.secrets.existingSecret }}
+            {{- end }}
+            {{- if $hasInlineSecret }}
+            - secretRef:
+                name: conductor-secrets
+            {{- end }}
+            {{- if $configMapEnabled }}
+            - configMapRef:
+                name: conductor-env
+            {{- end }}
+            {{- with .Values.envFrom }}
+{{ toYaml . | indent 12 }}
+            {{- end }}
+          {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -euo pipefail
+              if [ -z "${DATABASE_URL:-}" ]; then
+                echo "DATABASE_URL must be set for migrations" >&2
+                exit 1
+              fi
+              for file in $(ls -1 /migrations/*.sql | sort); do
+                echo "Applying ${file}..."
+                psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -f "${file}"
+              done
+          volumeMounts:
+            - name: migrations
+              mountPath: /migrations
+              readOnly: true
+      volumes:
+        - name: migrations
+          configMap:
+            name: conductor-migrations
+            defaultMode: 0444
+{{- end }}
+{{- end }}

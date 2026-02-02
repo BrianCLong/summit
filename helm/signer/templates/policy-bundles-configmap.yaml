@@ -1,0 +1,32 @@
+{{- if and .Values.policyBundles.enabled (or .Values.policyBundles.sources .Values.policyBundles.inlinePolicies) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "signer.fullname" . }}-bundles
+  labels:
+    app.kubernetes.io/name: {{ include "signer.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  {{ default "bundles.yaml" .Values.policyBundles.fileName }}: |
+    bundles:
+    {{- range .Values.policyBundles.sources }}
+      - name: {{ .name }}
+        url: {{ .url }}
+        {{- if .checksum }}
+        checksum: {{ .checksum }}
+        {{- end }}
+        {{- if .signatureKey }}
+        signatureKey: {{ .signatureKey }}
+        {{- end }}
+        {{- if .service }}
+        service: {{ .service }}
+        {{- end }}
+        {{- if .trigger }}
+        trigger: {{ .trigger }}
+        {{- end }}
+    {{- end }}
+  {{- range $filename, $content := .Values.policyBundles.inlinePolicies }}
+  {{ $filename }}: |
+{{ $content | nindent 4 }}
+  {{- end }}
+{{- end }}

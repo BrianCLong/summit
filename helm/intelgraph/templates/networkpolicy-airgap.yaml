@@ -1,0 +1,425 @@
+# Air-Gap Network Isolation Policies for Federal/Gov Pack
+# Implements strict egress control with explicit allow-listing
+
+# Default deny all egress traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-egress
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    policy-type: "egress-control"
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+    air-gap: "{{ .Values.federal.airGap.enabled | default false }}"
+spec:
+  podSelector: {}  # Apply to all pods in namespace
+  policyTypes:
+  - Egress
+  egress: []  # Deny all egress by default
+
+---
+# Allow internal cluster communication only
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-internal-cluster
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    policy-type: "internal-allow"
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  # Allow communication within same namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ .Values.namespace | default "intelgraph" }}
+
+  # Allow communication to system namespaces (DNS, etc.)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 53    # DNS TCP
+    - protocol: UDP
+      port: 53    # DNS UDP
+
+  # Allow communication to monitoring namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090  # Prometheus
+    - protocol: TCP
+      port: 3000  # Grafana
+
+---
+# Federal conductor specific policies
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: conductor-federal-policy
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: conductor-federal
+    policy-type: "application-specific"
+spec:
+  podSelector:
+    matchLabels:
+      app: conductor
+      deployment: federal
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress: Only allow from specific sources
+  ingress:
+  # Allow from same namespace pods
+  - from:
+    - podSelector:
+        matchLabels:
+          component: intelgraph
+    ports:
+    - protocol: TCP
+      port: 8000  # HTTPS API
+    - protocol: TCP
+      port: 9090  # Metrics
+
+  # Allow from ingress controllers with proper classification
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-system
+    - podSelector:
+        matchLabels:
+          classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+    ports:
+    - protocol: TCP
+      port: 8000
+
+  # Egress: Strictly controlled outbound communication
+  egress:
+  # Database communication
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-federal
+    ports:
+    - protocol: TCP
+      port: 5432
+
+  # Redis communication
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-federal
+    ports:
+    - protocol: TCP
+      port: 6379
+
+  # SPIRE server communication
+  - to:
+    - podSelector:
+        matchLabels:
+          app: spire-server
+    ports:
+    - protocol: TCP
+      port: 8081
+
+  {{- if not .Values.federal.airGap.enabled }}
+  # S3/WORM storage (only if not strictly air-gapped)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS to AWS S3
+    - protocol: TCP
+      port: 80   # HTTP redirect to HTTPS
+  {{- end }}
+
+---
+{{- if .Values.federal.airGap.enabled }}
+# Air-gap monitoring policy - blocks external network access
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: airgap-monitor-policy
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    policy-type: "airgap-enforcement"
+    classification: {{ .Values.federal.classification | default "UNCLASSIFIED" }}
+spec:
+  podSelector:
+    matchLabels:
+      component: airgap-monitor
+  policyTypes:
+  - Egress
+  egress:
+  # Only allow communication to conductor for logging violations
+  - to:
+    - podSelector:
+        matchLabels:
+          app: conductor
+          deployment: federal
+    ports:
+    - protocol: TCP
+      port: 8000
+
+  # Allow DNS resolution for logging
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+{{- end }}
+
+---
+# FIPS validator sidecar policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: fips-validator-policy
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    policy-type: "fips-enforcement"
+spec:
+  podSelector:
+    matchLabels:
+      component: fips-validator
+  policyTypes:
+  - Egress
+  egress:
+  # No external communication allowed for FIPS validator
+  # Only localhost communication with main container
+  - to: []
+    ports: []
+
+---
+# Break-glass emergency override policy (disabled by default)
+{{- if .Values.federal.breakGlass.emergencyNetworkOverride }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: breakglass-emergency-override
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    policy-type: "emergency-override"
+    break-glass: "active"
+  annotations:
+    break-glass.intelgraph.io/session-id: "{{ .Values.federal.breakGlass.activeSessionId }}"
+    break-glass.intelgraph.io/expires-at: "{{ .Values.federal.breakGlass.expiresAt }}"
+spec:
+  podSelector:
+    matchLabels:
+      break-glass: "authorized"
+  policyTypes:
+  - Egress
+  egress:
+  # Emergency external communication (strictly time-limited)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS for emergency communications
+    - protocol: TCP
+      port: 22   # SSH for emergency access
+{{- end }}
+
+---
+# Database network policy (PostgreSQL Federal)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-federal-policy
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: postgres-federal
+    policy-type: "database-isolation"
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-federal
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress: Only from conductor and backup systems
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: conductor
+          deployment: federal
+    ports:
+    - protocol: TCP
+      port: 5432
+
+  # Allow from backup/maintenance pods
+  - from:
+    - podSelector:
+        matchLabels:
+          component: database-maintenance
+    ports:
+    - protocol: TCP
+      port: 5432
+
+  # Egress: Minimal required communication
+  egress:
+  # DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+
+  {{- if not .Values.federal.airGap.enabled }}
+  # Backup to external storage (if not air-gapped)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS for backup storage
+  {{- end }}
+
+---
+# Redis network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-federal-policy
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: redis-federal
+    policy-type: "cache-isolation"
+spec:
+  podSelector:
+    matchLabels:
+      app: redis-federal
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress: Only from conductor
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: conductor
+          deployment: federal
+    ports:
+    - protocol: TCP
+      port: 6379
+
+  # Egress: DNS only
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+
+---
+# SPIRE agent network policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: spire-agent-policy
+  namespace: {{ .Values.namespace | default "intelgraph" }}
+  labels:
+    app: spire-agent
+    policy-type: "identity-infrastructure"
+spec:
+  podSelector:
+    matchLabels:
+      app: spire-agent
+  policyTypes:
+  - Egress
+
+  # Egress: Communication to SPIRE server only
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: spire-server
+    ports:
+    - protocol: TCP
+      port: 8081  # SPIRE server API
+
+  # DNS resolution
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+
+---
+# Classification-based network segmentation
+{{- range $level := list "UNCLASSIFIED" "CONFIDENTIAL" "SECRET" }}
+{{- if eq $level $.Values.federal.classification }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: classification-{{ $level | lower }}-isolation
+  namespace: {{ $.Values.namespace | default "intelgraph" }}
+  labels:
+    classification: "{{ $level }}"
+    policy-type: "classification-isolation"
+spec:
+  podSelector:
+    matchLabels:
+      classification: "{{ $level }}"
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Only allow communication within same classification level
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          classification: "{{ $level }}"
+    - namespaceSelector:
+        matchLabels:
+          classification: "{{ $level }}"
+
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          classification: "{{ $level }}"
+    - namespaceSelector:
+        matchLabels:
+          classification: "{{ $level }}"
+
+  # Allow system services (DNS, etc.)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+{{- end }}
+{{- end }}

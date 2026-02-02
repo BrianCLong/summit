@@ -1,0 +1,59 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: summit-helm-baseline
+  annotations:
+    policies.kyverno.io/category: Summit Hardening
+    policies.kyverno.io/description: Enforces baseline settings for Helm-rendered workloads
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: require-run-as-non-root
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+                - Deployment
+      validate:
+        message: "Containers must run as non-root"
+        pattern:
+          spec:
+            ~(ephemeral)?containers:
+              - securityContext:
+                  runAsNonRoot: true
+    - name: require-requests-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+                - Deployment
+      validate:
+        message: "Resource requests and limits are required"
+        pattern:
+          spec:
+            ~(ephemeral)?containers:
+              - resources:
+                  limits:
+                    memory: "*"
+                    cpu: "*"
+                  requests:
+                    memory: "*"
+                    cpu: "*"
+    - name: add-release-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Service
+                - Deployment
+                - StatefulSet
+                - DaemonSet
+      mutate:
+        mutateExistingOnPolicyUpdate: true
+        patchStrategicMerge:
+          metadata:
+            labels:
+              app.kubernetes.io/managed-by: summit-ci

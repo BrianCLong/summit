@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "server.fullname" . }}-graphql-test"
+  labels:
+    {{- include "server.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  restartPolicy: Never
+  containers:
+  - name: graphql-test
+    image: curlimages/curl:8.1.0
+    command: ["/bin/sh"]
+    args:
+      - -c
+      - |
+        echo "Testing GraphQL endpoint accessibility..."
+        # Test GraphQL endpoint returns valid response (even if introspection is disabled)
+        curl -f -X POST -H "Content-Type: application/json" \
+          -d '{"query":"query { __typename }"}' \
+          http://{{ include "server.fullname" . }}:{{ .Values.service.port }}/graphql
+
+        echo "Testing metrics endpoint..."
+        curl -f http://{{ include "server.fullname" . }}:{{ .Values.service.port }}/metrics
+
+        echo "GraphQL and monitoring endpoints are accessible!"

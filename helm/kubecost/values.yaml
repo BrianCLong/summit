@@ -1,0 +1,4 @@
+prometheus:
+  serviceAddress: http://prometheus.monitoring.svc.cluster.local:9090
+aggregation:
+  storageClass: gp2
