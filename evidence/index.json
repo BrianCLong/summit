@@ -100,6 +100,20 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-PAPERTRAIL-SCHEMA-001": {
+      "files": [
+        "evidence/EVD-PAPERTRAIL-SCHEMA-001/report.json",
+        "evidence/EVD-PAPERTRAIL-SCHEMA-001/metrics.json",
+        "evidence/EVD-PAPERTRAIL-SCHEMA-001/stamp.json"
+      ]
+    },
+    "EVD-PAPERTRAIL-REDACT-002": {
+      "files": [
+        "evidence/EVD-PAPERTRAIL-REDACT-002/report.json",
+        "evidence/EVD-PAPERTRAIL-REDACT-002/metrics.json",
+        "evidence/EVD-PAPERTRAIL-REDACT-002/stamp.json"
+      ]
     }
   }
 }
