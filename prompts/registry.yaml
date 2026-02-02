@@ -346,3 +346,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: pr-17716-update
+    version: v1
+    path: prompts/pr/pr-17716-update@v1.md
+    sha256: a992d48d41bc24d12b11db1eceb47bf87fe7e16fc558012dd6abacc91467654a
+    description: Update PR 17716 scoped changes.
+    scope:
+      paths:
+        - agents/
+        - docs/
+        - evidence/
+        - packages/
+        - prompts/
+        - required_checks.todo.md
+        - tools/
+        - prompts/pr/pr-17716-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+
