@@ -90,11 +90,25 @@ class PalantirEvidenceWriter:
             "evidence_id": self.evidence_id,
             "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "git_sha": self.git_sha,
-            "config_hash": config_hash
+            "config_hash": config_hash,
+            "merkle_root": self._compute_merkle_root([report_data, metrics_data])
         }
         write_json(paths.stamp, stamp_data)
 
         return paths
+
+    def _compute_merkle_root(self, artifacts: List[dict]) -> str:
+        """
+        Computes a simple Merkle Root for Holographic Evidence.
+        """
+        hashes = []
+        for artifact in artifacts:
+            s = json.dumps(artifact, sort_keys=True).encode("utf-8")
+            hashes.append(hashlib.sha256(s).hexdigest())
+
+        hashes.sort()
+        combined = "".join(hashes).encode("utf-8")
+        return hashlib.sha256(combined).hexdigest()
 
     def generate_dot_lineage(self, lineage: List[dict]) -> str:
         """

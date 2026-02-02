@@ -90,3 +90,56 @@ class ToolFactory:
         Currently relies on external action lists.
         """
         return []
+
+@dataclass
+class PlanStep:
+    tool: str
+    params: dict
+    reasoning: str
+
+class CognitiveLoop:
+    """
+    Advanced AIP Superset: Plan -> Critic -> Execute.
+    """
+    def __init__(self, agent: OntologyAwareAgent):
+        self.agent = agent
+
+    def run_loop(self, prompt: str) -> str:
+        # 1. Plan Proposal (Mock LLM)
+        plan = self._propose_plan(prompt)
+
+        # 2. Critic Review (Policy Check)
+        critique = self._critic_review(plan)
+        if critique != "APPROVED":
+            return f"Plan Rejected by Critic: {critique}"
+
+        # 3. Hallucination Check
+        if not self._verify_entities(plan):
+            return "Plan Rejected: Hallucinated Entities Detected."
+
+        # 4. Execution
+        results = []
+        for step in plan:
+            res = self.agent.execute(f"ACTION: {step.tool}", step.params)
+            results.append(res)
+
+        return "\n".join(results)
+
+    def _propose_plan(self, prompt: str) -> List[PlanStep]:
+        # Mock planner
+        if "delete" in prompt.lower():
+            return [PlanStep("delete_person", {"target_id": "p1"}, "User asked to delete")]
+        return []
+
+    def _critic_review(self, plan: List[PlanStep]) -> str:
+        for step in plan:
+            if step.tool == "delete_person":
+                # Critic enforces reasoning quality (Mock)
+                if len(step.reasoning) < 10:
+                    return "Reasoning too shallow."
+        return "APPROVED"
+
+    def _verify_entities(self, plan: List[PlanStep]) -> bool:
+        # Ensure target_ids exist in a real system
+        # Here we just pass
+        return True

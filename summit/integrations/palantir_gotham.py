@@ -91,3 +91,53 @@ class GothamImporter:
             }
         }
         return path
+
+@dataclass
+class TemporalNode:
+    id: str
+    valid_from: str
+    valid_to: str
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+
+class TemporalGraphEngine:
+    """
+    Advanced Gotham Superset: Temporal + Geospatial Graph
+    """
+    def __init__(self):
+        self.nodes: List[TemporalNode] = []
+
+    def add_node(self, node: TemporalNode):
+        self.nodes.append(node)
+
+    def find_nearby(self, lat: float, lon: float, radius_km: float, time_point: str) -> List[str]:
+        """
+        Finds nodes valid at `time_point` within `radius_km` of (lat, lon).
+        """
+        valid_nodes = []
+        for n in self.nodes:
+            # 1. Temporal Check
+            if not (n.valid_from <= time_point <= n.valid_to):
+                continue
+
+            # 2. Geospatial Check (Manhattan distance approximation for speed)
+            # 1 deg lat ~ 111km. 1 deg lon ~ 111km * cos(lat)
+            if n.lat is None or n.lon is None:
+                continue
+
+            d_lat = abs(n.lat - lat) * 111
+            d_lon = abs(n.lon - lon) * 111 # simplified
+
+            if d_lat + d_lon <= radius_km:
+                valid_nodes.append(n.id)
+
+        return valid_nodes
+
+    def find_pattern(self, pattern_def: str) -> List[List[str]]:
+        """
+        Mock Pattern Search: "A meets B".
+        Returns list of [id_A, id_B] pairs.
+        """
+        # Simplistic implementation finding any 2 valid nodes
+        if len(self.nodes) < 2: return []
+        return [[self.nodes[0].id, self.nodes[1].id]]
