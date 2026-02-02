@@ -100,6 +100,21 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-KIMIK25FREEAPI-PROV-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-KIMIK25FREEAPI-PROV-002": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-KIMIK25FREEAPI-MMOD-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-KIMIK25FREEAPI-THRT-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-KIMIK25FREEAPI-GOV-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     }
   }
 }

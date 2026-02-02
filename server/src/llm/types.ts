@@ -1,7 +1,7 @@
 
 import type { PaletteCandidateSet, PaletteRequestOptions, PaletteUsageRecord } from './palette/types.js';
 
-export type ProviderId = "openai" | "anthropic" | "mock" | "groq" | "openrouter" | "other";
+export type ProviderId = "openai" | "anthropic" | "mock" | "groq" | "openrouter" | "nvidia-nim" | "other";
 export type ModelId = string;
 export type Role = "system" | "user" | "assistant" | "tool";
 export type ModelClass = "smart" | "fast" | "balanced" | "vision" | "embedding";
@@ -14,9 +14,14 @@ export interface ToolCallInvocation {
   id: string;
 }
 
+export type MultiModalPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "video_url"; video_url: { url: string } };
+
 export interface ChatMessage {
   role: Role;
-  content: string | null;
+  content: string | MultiModalPart[] | null;
   name?: string;
   toolCalls?: ToolCallInvocation[];
   toolCallId?: string; // For role: 'tool'
@@ -40,6 +45,7 @@ export interface ChatCompletionRequest {
   // Provider agnostic hints
   temperature?: number;
   jsonMode?: boolean;
+  mode?: "instant" | "thinking";
 }
 
 export interface ChatCompletionResult {
