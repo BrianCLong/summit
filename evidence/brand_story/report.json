@@ -1,0 +1,14 @@
+{
+  "evidence_id": "EVD-SPB500250-REPORT-001",
+  "summary": "Brand Story Module Smoke Test Pass",
+  "item": {
+    "slug": "brand-story-smoke",
+    "description": "Smoke test run of brand story planner"
+  },
+  "artifacts": {
+    "plan_mission": "Empower junior devs",
+    "episode_count": 5,
+    "plan_file": "evidence/brand_story/plan.json",
+    "hooks_file": "evidence/brand_story/hooks.json"
+  }
+}

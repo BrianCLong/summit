@@ -18,6 +18,9 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
 
+## Brand Story Module
+- `verify:brand-story-evidence` - Validates brand story evidence artifacts (runs `python3 tools/validate_brand_story.py`).
+
 ## Rename Plan
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.

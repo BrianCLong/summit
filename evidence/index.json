@@ -4,44 +4,90 @@
     "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
-      "artifacts": ["fixtures/ambiguities/critical.json"]
+      "artifacts": [
+        "fixtures/ambiguities/critical.json"
+      ]
     },
     "EVD-vfgnn-ATT-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-vfgnn-NEG-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-SCHEMA-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-PLNR-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-XFER-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-ATLS-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-ATLS-002": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-GOV-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-260119895-keel-ARCH-001": {
       "files": [
@@ -93,13 +139,59 @@
       ]
     },
     "EVD-openviking-contextfs-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-openviking-retrieval-002": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-openviking-trace-003": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-SPB500250-REPORT-001": {
+      "title": "Brand Story Module Evidence Report",
+      "artifacts": [
+        "evidence/brand_story/report.json",
+        "evidence/brand_story/metrics.json",
+        "evidence/brand_story/stamp.json"
+      ]
+    },
+    "EVD-SPB500250-SCHEMA-001": {
+      "title": "Brand Story Schema Check",
+      "artifacts": [
+        "evidence/schemas/brand_story_report.schema.json",
+        "evidence/schemas/brand_story_metrics.schema.json",
+        "evidence/schemas/brand_story_stamp.schema.json"
+      ]
+    },
+    "EVD-SPB500250-PLAN-001": {
+      "title": "Brand Story Plan Artifact",
+      "artifacts": [
+        "evidence/brand_story/plan.json"
+      ]
+    },
+    "EVD-SPB500250-HOOKS-001": {
+      "title": "Brand Story Hooks Artifact",
+      "artifacts": [
+        "evidence/brand_story/hooks.json"
+      ]
+    },
+    "EVD-SPB500250-POLICY-001": {
+      "title": "Brand Story Policy Check",
+      "artifacts": [
+        "evidence/brand_story/report.json"
+      ]
     }
   }
 }
