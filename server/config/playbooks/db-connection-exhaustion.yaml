@@ -1,0 +1,59 @@
+id: db-connection-exhaustion
+name: Database Connection Pool Exhaustion
+description: Remediate database connection pool exhaustion by killing idle connections and scaling pools
+triggerPatterns:
+  - connection.?pool
+  - too.?many.?connections
+  - database.?timeout
+  - connection.?refused
+severity:
+  - high
+  - critical
+steps:
+  - name: Kill idle connections
+    actionType: kill_connections
+    parameters:
+      database: primary
+      threshold: 300
+      idle_only: true
+    onFailure: continue
+  
+  - name: Increase connection pool size
+    actionType: scale_connection_pool
+    parameters:
+      database: primary
+      max_connections: 200
+      min_connections: 50
+    onFailure: abort
+  
+  - name: Enable connection timeout
+    actionType: update_db_config
+    parameters:
+      database: primary
+      idle_timeout: 60
+      max_lifetime: 3600
+    onFailure: continue
+  
+  - name: Restart connection pool
+    actionType: restart_service
+    parameters:
+      service: db-connection-manager
+      graceful: true
+      timeout: 30
+    condition: severity == 'critical'
+    onFailure: rollback
+
+rollbackSteps:
+  - name: Restore original pool size
+    actionType: scale_connection_pool
+    parameters:
+      database: primary
+      max_connections: 100
+      min_connections: 20
+  
+  - name: Restore original timeouts
+    actionType: update_db_config
+    parameters:
+      database: primary
+      idle_timeout: 300
+      max_lifetime: 7200

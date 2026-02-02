@@ -100,6 +100,9 @@ const resolvers = {
   CogSecCampaign: cognitiveSecurityResolvers.CogSecCampaign,
   CogSecIncident: cognitiveSecurityResolvers.CogSecIncident,
   VerificationAppeal: cognitiveSecurityResolvers.VerificationAppeal,
+  AudienceSegment: (cognitiveSecurityResolvers as any).AudienceSegment,
+  NarrativeCascade: (cognitiveSecurityResolvers as any).NarrativeCascade,
+  NarrativeConflict: (cognitiveSecurityResolvers as any).NarrativeConflict,
   Ticket: ticketLinksResolvers.Ticket,
 };
 
