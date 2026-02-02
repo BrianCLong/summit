@@ -1,6 +1,7 @@
 {
   "evidence_id": "EVD-mcp-a2a-mental-model-interop-001",
   "item_slug": "mcp-a2a-mental-model",
+  "summary": "Documented the MCP/A2A layered interop model and Summit control/data plane mapping.",
   "claims": [
     "Documented the MCP/A2A layered interop model and Summit control/data plane mapping.",
     "Established initial evidence scaffolding for the MCP/A2A mental model workstream."

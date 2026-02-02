@@ -1,0 +1,6 @@
+[
+  {"marker": "late_data_policy", "status": "success"},
+  {"marker": "schema_contract", "status": "failure", "details": "unexpected column found"},
+  {"marker": "file_format_checks", "status": "success"},
+  {"marker": "cost_budget", "status": "success"}
+]

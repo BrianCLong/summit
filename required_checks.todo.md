@@ -17,6 +17,10 @@ We are using these names in our CI pipelines until the official required check n
 - `ci:evidence` - Validates evidence artifacts (schemas, determinism).
 - `ci:security-gates` - Runs deny-by-default and redaction tests.
 - `verify:dependency-delta` - Ensures dependency changes are documented.
+- `gate.latedata` - Deny-by-default check for late arriving data policy.
+- `gate.schemadrift` - Deny-by-default check for schema drift policy.
+- `gate.fileformat` - Deny-by-default check for file format correctness (JSON).
+- `gate.costbudget` - Deny-by-default check for cost budget policy.
 
 ## Rename Plan
 

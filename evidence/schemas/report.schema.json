@@ -6,10 +6,10 @@
   "properties": {
     "evidence_id": {
       "type": "string",
-      "pattern": "^EVD-[A-Za-z0-9-]+$"
+      "pattern": "^(EVD|EVID)-[A-Za-z0-9-_]+$"
     },
     "item": {
-      "type": "object"
+      "type": ["object", "string"]
     },
     "summary": {
       "type": "string"
@@ -19,6 +19,18 @@
     },
     "item_slug": {
       "type": "string"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "ok"],
+        "properties": {
+          "name": {"type": "string"},
+          "ok": {"type": "boolean"},
+          "details": {"type": "string"}
+        }
+      }
     }
   },
   "additionalProperties": true

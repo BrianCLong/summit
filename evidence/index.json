@@ -100,6 +100,13 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-LEARN-SNOWFLAKE-DE-OPER-001": {
+      "files": [
+        "evidence/EVD-LEARN-SNOWFLAKE-DE-OPER-001/report.json",
+        "evidence/EVD-LEARN-SNOWFLAKE-DE-OPER-001/metrics.json",
+        "evidence/EVD-LEARN-SNOWFLAKE-DE-OPER-001/stamp.json"
+      ]
     }
   }
 }
