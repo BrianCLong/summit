@@ -41,3 +41,16 @@
 - evidence/fewshot5x-agentic-coding/EVD-FEWSHOT5X-EVAL-001/stamp.json
 - evidence/ai-influence-ops/EVD-ai-influence-ops-EVIDENCE-001/report.json
 - evidence/index.json (updated)
+
+## Defense Claims Verifier (Appends)
+7) summit/graph-integrity
+- Command: `python3 -m summit.ci.graph_integrity --validate`
+- Tests: malformed updates rejected; reconciliation proof artifacts logged.
+
+8) summit/appeals
+- Command: `python3 -m summit.ci.appeals --re-evaluate`
+- Tests: appealed decisions re-evaluated deterministically; overrides require approvals.
+
+9) summit/causal-guardrails
+- Command: `python3 -m summit.ci.causal_guardrails --check`
+- Tests: lift estimate requires assumptions artifact; stale estimates rejected.
