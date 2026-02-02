@@ -97,16 +97,85 @@ async function ghApi(endpoint, options = {}) {
   return result.stdout;
 }
 
+/**
+ * Verification state for branch protection drift detection.
+ * Used to distinguish between actual drift vs permission/error conditions.
+ */
+const VerificationState = {
+  VERIFIED_MATCH: 'VERIFIED_MATCH',
+  VERIFIED_DRIFT: 'VERIFIED_DRIFT',
+  UNVERIFIABLE_PERMISSIONS: 'UNVERIFIABLE_PERMISSIONS',
+  UNVERIFIABLE_ERROR: 'UNVERIFIABLE_ERROR',
+  RATE_LIMITED: 'RATE_LIMITED',
+  NO_PROTECTION: 'NO_PROTECTION'
+};
+
+/**
+ * Parse error response to determine verification state.
+ */
+function parseErrorState(status, headers, body) {
+  if (status === 403) {
+    // Check for rate limiting first
+    const rateLimitRemaining = headers?.get?.('X-RateLimit-Remaining') ?? headers?.['x-ratelimit-remaining'];
+    if (rateLimitRemaining === '0' || rateLimitRemaining === 0) {
+      return { state: VerificationState.RATE_LIMITED, message: 'GitHub API rate limit exceeded' };
+    }
+    // Permission-related 403
+    const message = typeof body === 'string' ? body : body?.message ?? 'Forbidden';
+    if (message.includes('Must have admin rights') ||
+        message.includes('Resource not accessible') ||
+        message.includes('admin access')) {
+      return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message };
+    }
+    return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message: `403: ${message}` };
+  }
+  if (status === 404) {
+    // Branch exists but has no protection configured
+    return { state: VerificationState.NO_PROTECTION, message: 'Branch protection not configured' };
+  }
+  const message = typeof body === 'string' ? body : body?.message ?? `HTTP ${status}`;
+  return { state: VerificationState.UNVERIFIABLE_ERROR, message };
+}
+
 async function fetchRequiredStatusChecks({ repo, branch }) {
   const endpoint = `repos/${repo}/branches/${branch}/protection/required_status_checks`;
+
   if (await isGhAvailable()) {
-    const output = await ghApi(endpoint);
-    return parseRequiredStatusChecks(output, 'gh');
+    try {
+      const output = await ghApi(endpoint);
+      const result = parseRequiredStatusChecks(output, 'gh');
+      result.state = VerificationState.VERIFIED_MATCH; // Will be updated by caller if drift detected
+      return result;
+    } catch (error) {
+      // gh CLI error - try to parse the message for state
+      const message = error.message || String(error);
+      if (message.includes('403') || message.includes('Must have admin')) {
+        return {
+          state: VerificationState.UNVERIFIABLE_PERMISSIONS,
+          required_contexts: [],
+          strict: false,
+          source: 'gh',
+          error: message
+        };
+      }
+      if (message.includes('404') || message.includes('Not Found')) {
+        return {
+          state: VerificationState.NO_PROTECTION,
+          required_contexts: [],
+          strict: false,
+          source: 'gh',
+          error: 'Branch protection not configured'
+        };
+      }
+      throw error;
+    }
   }
+
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   if (!token) {
     throw new Error('Missing GITHUB_TOKEN or GH_TOKEN for GitHub API access.');
   }
+
   const response = await fetch(`https://api.github.com/${endpoint}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -114,12 +183,28 @@ async function fetchRequiredStatusChecks({ repo, branch }) {
       'X-GitHub-Api-Version': '2022-11-28'
     }
   });
+
   if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`GitHub API error ${response.status}: ${body}`);
+    let body;
+    try {
+      body = await response.json();
+    } catch {
+      body = await response.text().catch(() => '');
+    }
+    const errorState = parseErrorState(response.status, response.headers, body);
+    return {
+      state: errorState.state,
+      required_contexts: [],
+      strict: false,
+      source: 'https',
+      error: errorState.message
+    };
   }
+
   const data = await response.json();
-  return normalizeRequiredStatusChecks(data, 'https');
+  const result = normalizeRequiredStatusChecks(data, 'https');
+  result.state = VerificationState.VERIFIED_MATCH;
+  return result;
 }
 
 function parseRequiredStatusChecks(output, source) {
@@ -224,5 +309,6 @@ export {
   loadPolicy,
   normalizeContexts,
   sortKeysDeep,
-  stableJson
+  stableJson,
+  VerificationState
 };

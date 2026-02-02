@@ -6,8 +6,22 @@ import {
   hashObject,
   inferRepoFromGit,
   loadPolicy,
-  stableJson
+  stableJson,
+  VerificationState
 } from './lib/branch-protection.mjs';
+
+/**
+ * Exit codes for branch protection drift detection.
+ *
+ * 0 = Success (match or unverifiable - no action needed)
+ * 1 = Drift detected (requires remediation)
+ * 2 = Configuration error (policy file issues)
+ */
+const EXIT_CODES = {
+  SUCCESS: 0,
+  DRIFT_DETECTED: 1,
+  CONFIG_ERROR: 2
+};
 
 function parseArgs(argv) {
   const args = {};
@@ -244,6 +258,7 @@ async function main() {
       repo,
       branch,
       status: 'failed',
+      verification_state: VerificationState.UNVERIFIABLE_ERROR,
       policy_path: policyPath,
       policy: {
         required_contexts: policy.required_status_checks.required_contexts,
@@ -263,17 +278,92 @@ async function main() {
     const markdown = formatMarkdown(report, { missing_in_github: [], extra_in_github: [], strict_mismatch: false }, remediationCommand, errorMessage);
     writeReportFiles(outDir, report, markdown, stamp);
     console.error(errorMessage);
-    process.exit(2);
+    process.exit(EXIT_CODES.CONFIG_ERROR);
+  }
+
+  // Handle permission-related states gracefully (exit 0 with warning)
+  if (actual.state === VerificationState.UNVERIFIABLE_PERMISSIONS ||
+      actual.state === VerificationState.RATE_LIMITED) {
+    const warningMessage = actual.state === VerificationState.RATE_LIMITED
+      ? 'Rate limited - skipping branch protection verification'
+      : `Cannot verify branch protection: ${actual.error || 'insufficient permissions'}`;
+    const report = {
+      repo,
+      branch,
+      status: 'skipped',
+      verification_state: actual.state,
+      policy_path: policyPath,
+      policy: {
+        required_contexts: policy.required_status_checks.required_contexts,
+        strict: policy.required_status_checks.strict
+      },
+      warning: warningMessage
+    };
+    const stamp = {
+      timestamp: new Date().toISOString(),
+      repo,
+      branch,
+      status: 'skipped',
+      verification_state: actual.state,
+      policy_hash: hashObject(policy.required_status_checks),
+      actual_hash: null
+    };
+    const markdown = `# Branch Protection Drift Report\n\nRepository: ${repo}\nBranch: ${branch}\nStatus: SKIPPED\n\n## Warning\n\n${warningMessage}\n\nThis is not a failure - branch protection verification requires \`administration:read\` permission.\n`;
+    writeReportFiles(outDir, report, markdown, stamp);
+    console.warn(`⚠️ ${warningMessage}`);
+    process.exit(EXIT_CODES.SUCCESS);
+  }
+
+  // Handle "no protection configured" state
+  if (actual.state === VerificationState.NO_PROTECTION) {
+    const report = {
+      repo,
+      branch,
+      status: 'failed',
+      verification_state: VerificationState.VERIFIED_DRIFT,
+      policy_path: policyPath,
+      policy: {
+        required_contexts: policy.required_status_checks.required_contexts,
+        strict: policy.required_status_checks.strict
+      },
+      actual: {
+        required_contexts: [],
+        strict: false,
+        source: actual.source
+      },
+      diff: {
+        missing_in_github: policy.required_status_checks.required_contexts,
+        extra_in_github: [],
+        strict_mismatch: policy.required_status_checks.strict !== false
+      },
+      error: 'Branch protection is not configured on this branch'
+    };
+    const stamp = {
+      timestamp: new Date().toISOString(),
+      repo,
+      branch,
+      status: 'failed',
+      verification_state: VerificationState.VERIFIED_DRIFT,
+      policy_hash: hashObject(policy.required_status_checks),
+      actual_hash: hashObject({ required_contexts: [], strict: false })
+    };
+    const remediationCommand = `ALLOW_BRANCH_PROTECTION_CHANGES=1 pnpm ci:branch-protection:apply -- --repo ${repo} --branch ${branch} --policy ${policyPath}`;
+    const markdown = formatMarkdown(report, report.diff, remediationCommand, 'Branch protection is not configured');
+    writeReportFiles(outDir, report, markdown, stamp);
+    console.error('Branch protection is not configured. Policy requires protection.');
+    process.exit(EXIT_CODES.DRIFT_DETECTED);
   }
 
   const diff = computeDiff(policy, actual);
   const driftDetected = diff.missing_in_github.length > 0 || diff.extra_in_github.length > 0 || diff.strict_mismatch;
   const status = driftDetected ? 'failed' : 'passed';
+  const verificationState = driftDetected ? VerificationState.VERIFIED_DRIFT : VerificationState.VERIFIED_MATCH;
 
   const report = {
     repo,
     branch,
     status,
+    verification_state: verificationState,
     policy_path: policyPath,
     policy: {
       required_contexts: policy.required_status_checks.required_contexts,
@@ -292,6 +382,7 @@ async function main() {
     repo,
     branch,
     status,
+    verification_state: verificationState,
     policy_hash: hashObject(policy.required_status_checks),
     actual_hash: hashObject({ required_contexts: actual.required_contexts, strict: actual.strict })
   };
@@ -303,11 +394,11 @@ async function main() {
 
   if (driftDetected) {
     console.error('Branch protection drift detected. See drift.md for details.');
-    process.exit(1);
+    process.exit(EXIT_CODES.DRIFT_DETECTED);
   }
 
-  console.log('Branch protection matches policy.');
-  process.exit(0);
+  console.log('✅ Branch protection matches policy.');
+  process.exit(EXIT_CODES.SUCCESS);
 }
 
 main().catch(error => {
