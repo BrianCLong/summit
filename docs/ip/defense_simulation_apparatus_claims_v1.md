@@ -80,7 +80,7 @@ S155. The apparatus of claim S1, wherein the apparatus checks that modify decisi
 S156. The apparatus of claim S155, wherein the apparatus records the counterexample artifact and a policy bundle hash in an append-only audit log.
 S157. The apparatus of claim S1, wherein the apparatus performs a policy constraint compliance check confirming that each output permitted defense action satisfies all applicable hard constraints derived from governance policies.
 S158. The apparatus of claim S157, wherein the apparatus denies producing an output permitted defense action when the compliance check yields an unsatisfied constraint and records an unsatisfied-constraint explanation.
-S159. Relative to Cluster 3, the apparatus of claim S1, wherein the apparatus validates determinism by re-running counterfactual simulations using canonical ordering and fixed seeds specified in a replay manifest and confirming byte-identical ranked outputs.
+S159. The apparatus of claim S1, wherein the apparatus validates determinism by re-running counterfactual simulations using canonical ordering and fixed seeds specified in a replay manifest and confirming byte-identical ranked outputs.
 S160. The apparatus of claim S1, wherein the apparatus digitally signs a replay manifest or proof artifact and stores a signature identifier linked to snapshot hash and policy bundle hash.
 
 ## Cluster 5: Policy simulation (“what-if” governance changes) in ranking (S161–S170)
@@ -96,7 +96,20 @@ S168. The apparatus of claim S1, wherein the apparatus gates rollout of a new po
 S169. The apparatus of claim S1, wherein the apparatus computes a policy coverage metric and excludes from ranking any candidate defense action whose required fields are not governed by at least one applicable rule.
 S170. The apparatus of claim S1, wherein the apparatus stores policy delta reports as redacted artifacts excluding never-log fields.
 
-## Cluster 6: Continuous compliance monitoring + drift detection for ranking (S211–S220)
+## Cluster 6: Cross-org federated defense in simulation (S171–S180)
+
+S171. The apparatus of claim S1, wherein the apparatus operates in a multi-tenant configuration and maintains tenant-isolated simulation inputs comprising tenant-specific snapshots and tenant-specific governance policies.
+S172. The apparatus of claim S171, wherein the apparatus receives federated aggregates comprising technique indicator rates computed across tenants without receiving raw artifacts.
+S173. The apparatus of claim S172, wherein the apparatus conditions transition function parameters on the federated aggregates to adjust simulated adversarial response likelihood.
+S174. The apparatus of claim S171, wherein the apparatus applies thresholding rules that exclude federated aggregates that do not satisfy minimum aggregation criteria.
+S175. The apparatus of claim S171, wherein the apparatus applies a privacy budget to the use of federated aggregates and restricts further use when the privacy budget is exceeded.
+S176. The apparatus of claim S171, wherein the apparatus performs secure aggregation such that a coordinator cannot access individual tenant contributions to a federated aggregate.
+S177. The apparatus of claim S171, wherein the apparatus outputs tenant-specific rankings that incorporate federated robustness regression alerts while respecting tenant-specific governance constraints.
+S178. The apparatus of claim S171, wherein the apparatus denies applying a federated recommendation when inconsistent with a tenant’s governance policies and records the denial reason.
+S179. The apparatus of claim S171, wherein the replay manifest includes identifiers of federated aggregates used and privacy parameters associated with the federated aggregates.
+S180. The apparatus of claim S171, wherein the apparatus records federated aggregate usage events in an audit log without recording raw tenant contributions.
+
+## Cluster 7: Continuous compliance monitoring + drift detection for ranking (S211–S220)
 
 S211. The apparatus of claim S1, wherein the apparatus executes a continuous compliance monitor that evaluates ranked outputs and permitted defense action outputs against governance policies after ranking is produced.
 S212. The apparatus of claim S211, wherein the apparatus detects a compliance drift event when a defense action permitted under a first policy bundle hash would be denied under a second policy bundle hash.
@@ -109,7 +122,7 @@ S218. The apparatus of claim S217, wherein the compliance proof artifact is link
 S219. The apparatus of claim S211, wherein the apparatus detects policy misconfiguration by identifying conflicting rule outcomes for a same structured defense action object and triggers conflict-safe mode.
 S220. The apparatus of claim S211, wherein the apparatus denies producing an output permitted defense action when a required compliance proof artifact is missing.
 
-## Cluster 7: Authenticity / watermark / provenance deepening in simulation (S221–S230)
+## Cluster 8: Authenticity / watermark / provenance deepening in simulation (S221–S230)
 
 S221. The apparatus of claim S1, wherein the apparatus computes an authenticity signal for an artifact referenced by a candidate defense action, the authenticity signal comprising at least one of watermark status, provenance chain completeness, or authenticity confidence score.
 S222. The apparatus of claim S221, wherein the watermark status is selected from present, absent, invalid, or unknown.
@@ -122,7 +135,7 @@ S228. The apparatus of claim S221, wherein the apparatus outputs an authenticity
 S229. The apparatus of claim S221, wherein the apparatus stores authenticity signals as nodes linked to artifacts in the narrative operating graph.
 S230. The apparatus of claim S221, wherein the apparatus binds authenticity signals to lineage manifests and includes a lineage hash reflecting authenticity signals in the replay manifest.
 
-## Cluster 8: Human accountability / UX safety constraints in ranking (S231–S240)
+## Cluster 9: Human accountability / UX safety constraints in ranking (S231–S240)
 
 S231. The apparatus of claim S1, wherein the apparatus outputs a recommendation requiring completion of a human review checklist prior to forwarding any external publishing action to an execution interface.
 S232. The apparatus of claim S231, wherein the checklist includes confirmations that required attribution fields and uncertainty fields are present and that integrity verification outputs are recorded.
@@ -135,7 +148,7 @@ S238. The apparatus of claim S1, wherein the apparatus outputs a structured rati
 S239. The apparatus of claim S1, wherein the apparatus denies forwarding an external publishing action when a required checklist step is missing and records a denial reason.
 S240. The apparatus of claim S1, wherein the apparatus records post-execution operator review notes as structured fields excluding never-log fields and links the notes to calibration updates when permitted by governance policies.
 
-## Cluster 9: Connector boundary governance + SBOM attestations (S241–S250)
+## Cluster 10: Connector boundary governance + SBOM attestations (S241–S250)
 
 S241. The apparatus of claim S1, wherein candidate defense actions include a connector identifier and the apparatus evaluates whether a connector capability grant permits the candidate defense actions prior to outputting a permitted defense action.
 S242. The apparatus of claim S241, wherein the connector capability grant specifies at least one of permitted channels, permitted audiences, permitted content types, permitted rate limits, or permitted time windows.
@@ -148,7 +161,7 @@ S248. The apparatus of claim S1, wherein the apparatus uses connector-specific c
 S249. The apparatus of claim S1, wherein the apparatus records failed connector authorization checks and denial reasons in an audit log.
 S250. The apparatus of claim S1, wherein the apparatus outputs a monitoring-only action when a connector capability grant does not permit any external publishing action under applicable governance policies.
 
-## Cluster 10: Multi-tenant template inheritance + harmonization (S251–S260)
+## Cluster 11: Multi-tenant template inheritance + harmonization (S251–S260)
 
 S251. The apparatus of claim S1, wherein the apparatus operates in a multi-tenant configuration and applies a governance policy template shared across a plurality of tenants.
 S252. The apparatus of claim S251, wherein each tenant has a tenant override policy bundle and the apparatus computes an effective policy bundle hash by deterministically combining the governance policy template and the tenant override policy bundle.
@@ -161,7 +174,7 @@ S258. The apparatus of claim S1, wherein the apparatus re-ranks candidate defens
 S259. The apparatus of claim S1, wherein the apparatus records conflict resolution outcomes for tenant overrides in an append-only audit log linked to policy bundle hashes.
 S260. The apparatus of claim S1, wherein the apparatus outputs a governance template version identifier and a tenant override version identifier with ranked outputs.
 
-## Cluster 11: Review workflow health + alert storm safety (S261–S270)
+## Cluster 12: Review workflow health + alert storm safety (S261–S270)
 
 S261. The apparatus of claim S1, wherein the apparatus computes queue health metrics for a human review workflow comprising at least one of backlog size, average review time, or approval throughput.
 S262. The apparatus of claim S261, wherein the apparatus excludes external publishing actions from ranking when queue health metrics degrade beyond a threshold and outputs monitoring-only actions.
@@ -174,7 +187,7 @@ S268. The apparatus of claim S1, wherein the apparatus outputs an overload artif
 S269. The apparatus of claim S1, wherein the apparatus requires explicit approval to resume outputting external publishing recommendations after an overload safe mode is entered and records the approval in an audit log.
 S270. The apparatus of claim S1, wherein the apparatus simulates operational cost of approvals and includes the operational cost as a penalty term in multi-objective ranking.
 
-## Cluster 12: Policy rule provenance + per-rule explainability (S271–S280)
+## Cluster 13: Policy rule provenance + per-rule explainability (S271–S280)
 
 S271. The apparatus of claim S1, wherein governance policies comprise governance rules each having rule provenance metadata comprising at least one of author identifier, approval identifier, effective date, or jurisdiction scope.
 S272. The apparatus of claim S271, wherein the policy decision includes identifiers of governance rules evaluated and an outcome per rule indicating satisfied, violated, or not applicable.
@@ -187,7 +200,7 @@ S278. The apparatus of claim S271, wherein the apparatus generates a policy trac
 S279. The apparatus of claim S278, wherein the policy trace artifact excludes never-log fields and is stored as a redacted artifact linked to snapshot hash.
 S280. The apparatus of claim S271, wherein the apparatus denies producing output permitted defense actions under governance rules lacking rule provenance metadata absent approval.
 
-## Cluster 13: Credentialed approvals + delegation + revocation (S281–S290)
+## Cluster 14: Credentialed approvals + delegation + revocation (S281–S290)
 
 S281. The apparatus of claim S1, wherein approval tokens are cryptographically signed by an approver credential and the apparatus verifies a signature prior to forwarding an external publishing action.
 S282. The apparatus of claim S281, wherein the apparatus supports delegated approvals using a delegation credential having a bounded scope comprising at least one of permitted channels, time windows, or risk thresholds.
@@ -200,7 +213,7 @@ S288. The apparatus of claim S1, wherein the replay manifest includes approver c
 S289. The apparatus of claim S1, wherein the apparatus enforces separation-of-duties by requiring that a proposer credential differs from an approver credential.
 S290. The apparatus of claim S1, wherein the apparatus records credential verification failures and denial reasons in an append-only audit log.
 
-## Cluster 14: Adversarial data poisoning defenses (S291–S300)
+## Cluster 15: Adversarial data poisoning defenses (S291–S300)
 
 S291. The apparatus of claim S1, wherein the apparatus detects potential data poisoning by identifying anomalous shifts in source reliability scores or embedding distributions for simulation inputs.
 S292. The apparatus of claim S291, wherein the apparatus excludes suspected poisoned sources from transition function parameterization and increases uncertainty for predicted impact metrics.
@@ -213,7 +226,7 @@ S298. The apparatus of claim S291, wherein the apparatus performs backtesting ac
 S299. The apparatus of claim S291, wherein the apparatus denies outputting external publishing actions when poisoning risk exceeds a threshold for sources referenced by a lineage manifest.
 S300. The apparatus of claim S291, wherein the apparatus outputs a poisoning explanation artifact identifying contributing anomaly features, excluding never-log fields.
 
-## Cluster 15: Cross-model consensus + disagreement handling (S301–S310)
+## Cluster 16: Cross-model consensus + disagreement handling (S301–S310)
 
 S301. The apparatus of claim S1, wherein the apparatus obtains independent assessments from a plurality of models for at least one of manipulation technique labels, integrity risks, or candidate defense actions.
 S302. The apparatus of claim S301, wherein the apparatus computes a disagreement score representing variance among the independent assessments.
@@ -226,7 +239,7 @@ S308. The apparatus of claim S301, wherein the apparatus generates a consensus e
 S309. The apparatus of claim S301, wherein the policy engine applies stricter constraints to actions generated under high disagreement scores.
 S310. The apparatus of claim S301, wherein the apparatus recalibrates model weights when observed outcomes deviate from predicted impact metrics beyond a threshold.
 
-## Cluster 16: Semantic canarying + harm-minimization constraints (S311–S320)
+## Cluster 17: Semantic canarying + harm-minimization constraints (S311–S320)
 
 S311. The apparatus of claim S1, wherein the apparatus performs a semantic safety check on candidate defense actions using a harm-minimization constraint set stored in governance policies.
 S312. The apparatus of claim S311, wherein the semantic safety check evaluates at least one of defamation risk, impersonation risk, or protected-class targeting risk.
@@ -239,7 +252,7 @@ S318. The apparatus of claim S311, wherein the apparatus restricts candidate def
 S319. The apparatus of claim S311, wherein the apparatus computes a harm-minimization score and uses the score as a constraint in ranking.
 S320. The apparatus of claim S311, wherein the apparatus requires approval to override a failed semantic safety check and records the override in an audit log.
 
-## Cluster 17: Disaster recovery + continuity-of-operations (S321–S330)
+## Cluster 18: Disaster recovery + continuity-of-operations (S321–S330)
 
 S321. The apparatus of claim S1, wherein the apparatus maintains immutable backups of audit logs, policy bundles, and replay manifests with periodic snapshot hashes.
 S322. The apparatus of claim S321, wherein the apparatus generates a recovery proof artifact indicating that restored artifacts match stored snapshot hashes.
@@ -252,7 +265,7 @@ S328. The apparatus of claim S321, wherein the apparatus requires a recovery app
 S329. The apparatus of claim S321, wherein the apparatus preserves determinism by maintaining consistent replay manifests and fixed-seed settings across failover events.
 S330. The apparatus of claim S321, wherein the apparatus denies producing output permitted defense actions when a recovery proof artifact is missing for a reporting period.
 
-## Cluster 18: Jurisdiction/time-zone-aware constraints + geofenced ranking/output (S361–S370)
+## Cluster 19: Jurisdiction/time-zone-aware constraints + geofenced ranking/output (S361–S370)
 
 S361. The apparatus of claim S1, wherein candidate defense actions include jurisdiction tags derived from at least one of target audience location, channel availability region, or applicable legal scope.
 S362. The apparatus of claim S361, wherein the policy engine evaluates jurisdiction-specific constraints based on the jurisdiction tags and denies outputting an external publishing action when a required constraint set is unavailable.
@@ -265,7 +278,7 @@ S368. The apparatus of claim S361, wherein the apparatus requires approval for a
 S369. The apparatus of claim S361, wherein the apparatus outputs monitoring-only actions when jurisdiction tags are ambiguous or below a confidence threshold.
 S370. The apparatus of claim S361, wherein the apparatus outputs a jurisdiction rationale artifact describing how jurisdiction tags were derived, excluding never-log fields.
 
-## Cluster 19: Evidence-weighted forecasting + forecast drift in simulation (S371–S380)
+## Cluster 20: Evidence-weighted forecasting + forecast drift in simulation (S371–S380)
 
 S371. The apparatus of claim S1, wherein the apparatus computes forecast trajectories for narrative states using evidence-weighted inputs derived from lineage manifests and source reliability scores.
 S372. The apparatus of claim S371, wherein forecast evidence weights increase for sources having verified provenance status and decrease for sources having unknown provenance status.
@@ -278,7 +291,7 @@ S378. The apparatus of claim S371, wherein the apparatus calibrates forecast par
 S379. The apparatus of claim S371, wherein the apparatus outputs a forecast explanation artifact identifying input features and forecast evidence weights contributing to a forecast, excluding never-log fields.
 S380. The apparatus of claim S371, wherein the replay manifest includes forecast model version identifiers and identifiers of forecast explanation artifacts used in ranking.
 
-## Cluster 20: Partner policy overlays + brand safety constraints in ranking (S381–S390)
+## Cluster 21: Partner policy overlays + brand safety constraints in ranking (S381–S390)
 
 S381. The apparatus of claim S1, wherein the apparatus applies partner overlay policy bundles representing contractual or brand safety constraints for at least one channel, platform, or partner.
 S382. The apparatus of claim S381, wherein partner overlay policy bundles are stored as versioned partner policy bundles each having a partner overlay hash.
@@ -291,7 +304,7 @@ S388. The apparatus of claim S387, wherein the policy engine modifies a candidat
 S389. The apparatus of claim S381, wherein the apparatus denies outputting an external publishing action when a required partner overlay policy bundle is unavailable or not attested.
 S390. The apparatus of claim S381, wherein the apparatus generates a partner compliance report comprising counts of allowed, denied, and modified actions under partner overlay policy bundles.
 
-## Cluster 21: Graph integrity constraints + reconciliation invariants for simulation inputs (S391–S400)
+## Cluster 22: Graph integrity constraints + reconciliation invariants for simulation inputs (S391–S400)
 
 S391. The apparatus of claim S1, wherein the apparatus enforces graph integrity constraints on a versioned snapshot prior to executing counterfactual simulation.
 S392. The apparatus of claim S391, wherein the graph integrity constraints include schema constraints that restrict permitted node types, edge types, and required properties per node type.
@@ -304,7 +317,7 @@ S398. The apparatus of claim S1, wherein the apparatus performs conflict resolut
 S399. The apparatus of claim S398, wherein the apparatus records a merge decision artifact comprising merge rationale and contributing sources in an audit log linked to ranked outputs.
 S400. The apparatus of claim S391, wherein the apparatus enforces a constraint requiring lineage completeness above a threshold for narrative states referenced by output permitted external publishing actions.
 
-## Cluster 22: Appeals workflow for ranked outputs and policy decisions (S401–S410)
+## Cluster 23: Appeals workflow for ranked outputs and policy decisions (S401–S410)
 
 S401. The apparatus of claim S1, wherein the apparatus provides an appeals workflow enabling a human operator to challenge a policy decision used in ranking a candidate defense action.
 S402. The apparatus of claim S401, wherein the appeals workflow receives a structured appeal artifact comprising an appealed decision identifier, an objection category, and supporting references to audit entries or proof artifacts.
@@ -317,7 +330,7 @@ S408. The apparatus of claim S401, wherein the apparatus enforces a time-bound v
 S409. The apparatus of claim S401, wherein the apparatus computes aggregated appeal analytics and records the analytics as redacted artifacts.
 S410. The apparatus of claim S401, wherein the apparatus excludes external publishing actions from ranking while an appeal is pending for an associated high-risk narrative state.
 
-## Cluster 23: Outcome attribution + causal lift guardrails in simulation calibration (S411–S420)
+## Cluster 24: Outcome attribution + causal lift guardrails in simulation calibration (S411–S420)
 
 S411. The apparatus of claim S1, wherein the apparatus estimates a causal lift of executed defense actions on at least one outcome metric and uses the causal lift to calibrate transition functions.
 S412. The apparatus of claim S411, wherein the apparatus generates a causal assumptions artifact comprising at least one of a covariate set, a matching rule, a randomization indicator, or an identification strategy identifier.
@@ -330,7 +343,7 @@ S418. The apparatus of claim S411, wherein the apparatus adjusts causal lift est
 S419. The apparatus of claim S411, wherein the apparatus records attribution explanations identifying which narrative state changes are attributed to executed defense actions versus external events.
 S420. The apparatus of claim S411, wherein the apparatus excludes external publishing actions from ranking when causal lift estimation indicates negative trust impact beyond a threshold.
 
-## Cluster 24: Higher-order reconciliation + audit log binding (S421-S423)
+## Cluster 25: Higher-order reconciliation + audit log binding (S421-S423)
 
 S421. A simulation apparatus comprising a processor and a memory storing instructions that, when executed by the processor, cause the apparatus to perform operations for enforcing graph integrity for simulation inputs, the operations comprising:
 1. Maintaining a versioned snapshot of a narrative operating graph;
