@@ -1,4 +1,4 @@
-# Required Checks Discovery
+# Required Checks Discovery (TODO)
 
 ## Process to Identify Required Checks
 
@@ -7,6 +7,18 @@
 3. Edit the rule for `main` (or default branch).
 4. Look for "Require status checks to pass before merging".
 5. Copy the exact names of the required checks listed there.
+
+## UI
+1. Repo Settings → Branches → Branch protection rules.
+2. Note all "Require status checks" names for the default branch.
+
+## API (GitHub)
+- REST: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+- GraphQL: query branchProtectionRules + requiredStatusChecks
+
+## Temporary naming convention
+- Use `skills/*` jobs with stable names.
+- If actual required checks differ, add a rename PR that preserves history.
 
 ## Temporary Gate Names (Implemented in Plan)
 
