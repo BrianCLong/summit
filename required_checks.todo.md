@@ -1,23 +1,17 @@
-# Required Checks Discovery
+# Required Checks Todo
 
-## Process to Identify Required Checks
+## GitHub Branch Protection Rules Mapping
 
-1. Go to repository Settings in GitHub.
-2. Navigate to **Branches** -> **Branch protection rules**.
-3. Edit the rule for `main` (or default branch).
-4. Look for "Require status checks to pass before merging".
-5. Copy the exact names of the required checks listed there.
+The following checks are part of the Step 3.5 Flash integration and must be mapped to branch protection rules once they report status:
 
-## Temporary Gate Names (Implemented in Plan)
+1. `ci/schema_validate` (mapped to `validate-evidence` in `evidence_ci_step35flash.yml`)
+2. `ci/determinism_lint` (covered by `validate-evidence`)
+3. `ci/provider_smoke_gate` (To be implemented)
+4. `ci/policy_fixtures_gate` (To be implemented)
 
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
+## Setup Steps
 
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
-
-## Rename Plan
-
-Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+1. Go to Repository Settings -> Branches -> [Branch Name]
+2. Enable "Require status checks to pass before merging"
+3. Search for and select:
+   - `validate-evidence`

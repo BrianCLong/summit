@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "StepFunChatProviderConfig",
+  "type": "object",
+  "required": ["api_key", "base_url"],
+  "properties": {
+    "api_key": { "type": "string" },
+    "base_url": { "type": "string", "pattern": "^https://.*" }
+  },
+  "additionalProperties": false
+}
