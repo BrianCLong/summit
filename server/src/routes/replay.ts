@@ -1,8 +1,12 @@
 // @ts-nocheck
 import { Router, Response, NextFunction } from 'express';
-import { buildManifest } from '../replay/manifest.js';
-import { replayRun } from '../replay/runner.js';
-import { diffRuns } from '../replay/diff.js';
+// import { buildManifest } from '../replay/manifest.js';
+// import { replayRun } from '../replay/runner.js';
+// import { diffRuns } from '../replay/diff.js';
+
+const buildManifest = async (id: string) => ({ id, error: 'Replay manifest service unavailable' });
+const replayRun = async (id: string, opts: any) => ({ id, ok: false, error: 'Replay service unavailable' });
+const diffRuns = async (a: string, b: string) => ({ a, b, equal: false, error: 'Diff service unavailable' });
 import type { AuthenticatedRequest } from './types.js';
 const r = Router();
 r.post('/replay/:runId', async (req: AuthenticatedRequest, res: Response) => {

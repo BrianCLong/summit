@@ -3,7 +3,7 @@ import { GraphQLError } from 'graphql';
 import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';
 import { DateTimeResolver, JSONResolver } from 'graphql-scalars';
-import { cacheService } from '../../services/cacheService.js';
+import { cacheService } from '../../services/CacheService.js';
 import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';
 import { logger } from '../../config/logger.js';
 import { UserFacingError } from '../../lib/errors.js';

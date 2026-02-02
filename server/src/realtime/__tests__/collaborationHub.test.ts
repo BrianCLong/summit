@@ -4,6 +4,7 @@ import { io as createClient, type Socket as ClientSocket } from 'socket.io-clien
 import { createCollaborationHub } from '../collaborationHub.js';
 
 jest.unmock('socket.io');
+jest.unmock('ws');
 
 const waitForEvent = <T>(socket: ClientSocket, event: string) =>
   new Promise<T>((resolve, reject) => {
@@ -33,7 +34,7 @@ describeIf('CollaborationHub presence channels', () => {
     });
     createCollaborationHub(io, { presenceThrottleMs: 5 });
     await new Promise<void>((resolve) => {
-      httpServer.listen(() => {
+      httpServer.listen(0, '127.0.0.1', () => {
         port = (httpServer.address() as { port: number }).port;
         resolve();
       });
@@ -46,11 +47,21 @@ describeIf('CollaborationHub presence channels', () => {
   });
 
   it('broadcasts presence updates to channel members', async () => {
-    const url = `http://localhost:${port}/collaboration`;
+    const baseUrl = `http://127.0.0.1:${port}`;
     const connectClient = async () => {
-      const client = createClient(url, { transports: ['websocket'] });
-      await waitForEvent(client, 'connect');
-      return client;
+      const client = createClient(`${baseUrl}/collaboration`, {
+        transports: ['websocket', 'polling'],
+        forceNew: true,
+        reconnection: false,
+        timeout: 5000,
+      });
+      try {
+        await waitForEvent(client, 'connect');
+        return client;
+      } catch (err) {
+        client.close();
+        throw err;
+      }
     };
 
     const clientA = await connectClient();
@@ -88,8 +99,8 @@ describeIf('CollaborationHub presence channels', () => {
       expect(update.userId).toBe('user-a');
       expect(update.cursor).toEqual({ x: 120, y: 240 });
     } finally {
-      clientA.disconnect();
-      clientB.disconnect();
+      clientA.close();
+      clientB.close();
     }
   });
 });

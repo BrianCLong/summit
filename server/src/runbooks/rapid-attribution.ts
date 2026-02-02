@@ -12,7 +12,7 @@ import { createSpan, businessMetrics } from '../observability/telemetry.js';
 import {
   registerEvidence,
   createClaim,
-} from '../../prov-ledger-service/src/ledger.js';
+} from '../../../prov-ledger-service/src/ledger.js';
 
 const logger = (pino as any)({ name: 'rapid-attribution-runbook' });
 

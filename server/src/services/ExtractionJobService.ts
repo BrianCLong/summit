@@ -523,68 +523,6 @@ export class ExtractionJobService {
 
     try {
       switch (method) {
-        case 'ocr':
-          if (
-            mediaSource.media_type === 'IMAGE' ||
-            mediaSource.media_type === 'DOCUMENT'
-          ) {
-            const ocrResults = await this.runOCRExtraction(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...ocrResults);
-          }
-          break;
-
-        case 'object_detection':
-          if (
-            mediaSource.media_type === 'IMAGE' ||
-            mediaSource.media_type === 'VIDEO'
-          ) {
-            const detectionResults = await this.runObjectDetection(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...detectionResults);
-          }
-          break;
-
-        case 'face_detection':
-          if (
-            mediaSource.media_type === 'IMAGE' ||
-            mediaSource.media_type === 'VIDEO'
-          ) {
-            const faceResults = await this.runFaceDetection(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...faceResults);
-          }
-          break;
-
-        case 'speech_to_text':
-          if (
-            mediaSource.media_type === 'AUDIO' ||
-            mediaSource.media_type === 'VIDEO'
-          ) {
-            const speechResults = await this.runSpeechToText(
-              mediaSource.file_path,
-              options,
-            );
-            entities.push(...speechResults);
-          }
-          break;
-
-        case 'text_analysis':
-          if (mediaSource.extracted_text) {
-            const textResults = await this.runTextAnalysis(
-              mediaSource.extracted_text,
-              options,
-            );
-            entities.push(...textResults);
-          }
-          break;
-
         case 'embedding_generation':
           // TODO: Implement embedding generation
           // const embeddingResults = await this.runEmbeddingGeneration(

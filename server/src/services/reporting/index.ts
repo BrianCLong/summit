@@ -4,7 +4,7 @@
  * Main entry point for the refactored reporting service
  */
 
-export { ReportingService } from './ReportingService.js';
+export { ReportServiceV2 as ReportingService } from './ReportServiceV2.js';
 export { ReportTemplateRegistry } from './ReportTemplateRegistry.js';
 export { ReportMetrics } from './ReportMetrics.js';
 export { ExporterFactory } from './exporters/ExporterFactory.js';

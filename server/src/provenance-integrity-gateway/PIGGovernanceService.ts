@@ -410,11 +410,14 @@ export class PIGGovernanceService extends EventEmitter {
       this.calculateComplianceRisk(tenantId),
     ]);
 
+    const safeScore = (value: number) =>
+      Number.isFinite(value) ? value : 0;
+
     const overallScore = Math.round(
-      (assetRisk.score * 0.2) +
-      (narrativeRisk.score * 0.3) +
-      (incidentRisk.score * 0.3) +
-      (complianceRisk.score * 0.2)
+      (safeScore(assetRisk.score) * 0.2) +
+      (safeScore(narrativeRisk.score) * 0.3) +
+      (safeScore(incidentRisk.score) * 0.3) +
+      (safeScore(complianceRisk.score) * 0.2)
     );
 
     const assessment: RiskAssessment = {
@@ -783,7 +786,10 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId]
     );
 
-    const { revoked_count, published_count, expired_count } = result.rows[0];
+    const row = result?.rows?.[0] ?? {};
+    const revoked_count = Number(row.revoked_count ?? 0);
+    const published_count = Number(row.published_count ?? 0);
+    const expired_count = Number(row.expired_count ?? 0);
 
     // Higher score = higher risk
     const revokedRatio = published_count > 0 ? revoked_count / published_count : 0;
@@ -814,10 +820,13 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId]
     );
 
-    const { high_risk_count, active_count, max_risk } = result.rows[0];
+    const row = result?.rows?.[0] ?? {};
+    const high_risk_count = Number(row.high_risk_count ?? 0);
+    const active_count = Number(row.active_count ?? 0);
+    const max_risk = Number(row.max_risk ?? 0);
 
     const score = Math.min(100, Math.max(
-      max_risk || 0,
+      max_risk,
       Math.round((high_risk_count / Math.max(1, active_count)) * 100)
     ));
 

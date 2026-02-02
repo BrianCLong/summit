@@ -6,7 +6,7 @@ import {
   SecurityEvent,
   ZeroTrustAuditLogger,
   createZeroTrustAuditLogger,
-} from '../../security/zero-trust/siem/audit-logger.js';
+} from '../security/zero-trust/siem/audit-logger.js';
 
 const tracer = trace.getTracer('policy-enforcer', '24.2.0');
 

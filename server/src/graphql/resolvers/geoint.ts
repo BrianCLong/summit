@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { geoIntService } from '../services/GeoIntService.js';
+import { geoIntService } from '../../services/GeoIntService.js';
 
 export const geoIntResolvers = {
   Query: {
