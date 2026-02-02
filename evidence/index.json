@@ -100,6 +100,26 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-NDS-CI-001": {
+      "title": "NDS evidence schema validation gate",
+      "category": "nds-ci",
+      "artifacts": ["tools/ci/verify_evidence.py", ".github/workflows/nds-ci.yml"]
+    },
+    "EVD-NDS-CI-002": {
+      "title": "NDS dependency delta gate",
+      "category": "nds-ci",
+      "artifacts": ["tools/ci/verify_dependency_delta.py", ".github/workflows/nds-ci.yml"]
+    },
+    "EVD-NDS-CI-003": {
+      "title": "NDS required checks discovery",
+      "category": "nds-ci",
+      "artifacts": ["required_checks.todo.md"]
+    },
+    "EVD-NDS-CI-004": {
+      "title": "NDS evidence index linkage",
+      "category": "nds-ci",
+      "artifacts": ["evidence/index.json"]
     }
   }
 }
