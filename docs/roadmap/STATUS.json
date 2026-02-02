@@ -1,11 +1,11 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-03T12:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+      "notes": "Governance evidence JSON artifacts, trust paradox schemas, fixtures, and deterministic gate runner."
     },
     {
       "id": "io-cogwar-radar-2027-brief",

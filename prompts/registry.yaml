@@ -84,6 +84,43 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: trust-paradox-pr1-evidence-scaffold
+    version: v1
+    path: prompts/evidence/trust-paradox-pr1-evidence-scaffold@v1.md
+    sha256: ac631e1ca9f52c445a1733cff052d781d94915b44502819073ca7b11d0d39cc9
+    description: Scaffold Trust Paradox evidence schemas, fixtures, and CI verification gates.
+    scope:
+      paths:
+        - .github/workflows/ci-evidence-verify.yml
+        - ci/verifier/
+        - evidence/trustparadox/
+        - evidence/schemas/trustparadox-index.schema.json
+        - evidence/schemas/trustparadox-metrics.schema.json
+        - evidence/schemas/trustparadox-report.schema.json
+        - evidence/schemas/trustparadox-stamp.schema.json
+        - fixtures/evidence/
+        - fixtures/policy/
+        - required_checks.todo.md
+        - deps/delta.md
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/evidence/trust-paradox-pr1-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+        - agents/examples/TRUST_PARADOX_PR1_EVIDENCE_SCAFFOLD_20260203.json
+      domains:
+        - evidence
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

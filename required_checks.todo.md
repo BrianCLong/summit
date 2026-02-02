@@ -30,6 +30,12 @@ Once official names are known, we will alias these jobs or rename them in the wo
 - summit-evidence
 - summit-harness-mock
 
+## Temporary gates (Trust Paradox governance)
+- ci_evidence_verify
+- ci_policy_deny_by_default
+- ci_trust_contract_required
+- ci_never_log_enforced
+
 ## Required checks discovery (one-time for Memory Privacy)
 1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks

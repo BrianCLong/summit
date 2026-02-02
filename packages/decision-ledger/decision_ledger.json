@@ -185,5 +185,22 @@
     },
     "reasoning": "Documented IO/CogWar radar brief with evidence-first structure, registered the prompt/task spec, updated roadmap status, and recorded rollback guidance.",
     "reverted": false
+  },
+  {
+    "id": "trustparadox-pr1-20260203",
+    "timestamp": "2026-02-03T12:45:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJ0cnVzdCBwYXJhZG94IGV2aWRlbmNlIHNjYWZmb2xkIGFuZCBDSSB2ZXJpZmllciIsImZpbGVzIjpbIi5naXRodWIvd29ya2Zsb3dzL2NpLWV2aWRlbmNlLXZlcmlmeS55bWwiLCJjaS92ZXJpZmllci92ZXJpZnlfZXZpZGVuY2UucHkiLCJjaS92ZXJpZmllci92ZXJpZnlfcG9saWN5X2ZpeHR1cmVzLnB5IiwiZXZpZGVuY2UvdHJ1c3RwYXJhZG94L3JlcG9ydC5qc29uIiwiZXZpZGVuY2UvdHJ1c3RwYXJhZG94L21ldHJpY3MuanNvbiIsImV2aWRlbmNlL3RydXN0cGFyYWRveC9zdGFtcC5qc29uIiwiZXZpZGVuY2UvdHJ1c3RwYXJhZG94L2luZGV4Lmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL3RydXN0cGFyYWRveC1yZXBvcnQuc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL3RydXN0cGFyYWRveC1tZXRyaWNzLnNjaGVtYS5qc29uIiwiZXZpZGVuY2Uvc2NoZW1hcy90cnVzdHBhcmFkb3gtc3RhbXAuc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL3RydXN0cGFyYWRveC1pbmRleC5zY2hlbWEuanNvbiIsImZpeHR1cmVzL2V2aWRlbmNlLyIsImZpeHR1cmVzL3BvbGljeS8iLCJyZXF1aXJlZF9jaGVja3MudG9kby5tZCIsImRlcHMvZGVsdGEubWQiLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iLCJwYWNrYWdlcy9kZWNpc2lvbi1sZWRnZXIvZGVjaXNpb25fbGVkZ2VyLmpzb24iLCJwcm9tcHRzL2V2aWRlbmNlL3RydXN0LXBhcmFkb3gtcHIxLWV2aWRlbmNlLXNjYWZmb2xkQHYxLm1kIiwicHJvbXB0cy9yZWdpc3RyeS55YW1sIiwiYWdlbnRzL2V4YW1wbGVzL1RSVVNUX1BBUkFET1hfUFIxX0VWSURFTkNFX1NDQUZGT0xEXzIwMjYwMjAzLmpzb24iXX0=",
+    "decision": {
+      "action": "scaffold_trust_paradox_pr1",
+      "rule": {
+        "condition": "trust paradox governance evidence scaffold required",
+        "action": "scaffold_trust_paradox_pr1",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Established Trust Paradox evidence schemas, fixtures, and CI verifier with deterministic stamp handling and roadmap status update. Rollback: revert commit ecffcb19.",
+    "reverted": false
   }
 ]
