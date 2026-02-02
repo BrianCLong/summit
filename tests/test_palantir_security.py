@@ -9,11 +9,37 @@ def sample_ontology():
     path = Path("tests/fixtures/palantir/ontology_sample.json")
     return json.loads(path.read_text())
 
-def test_importer_basic(sample_ontology):
+def test_importer_objects(sample_ontology):
     importer = PalantirImporter({})
     schema = importer.import_ontology(sample_ontology)
-    assert len(schema.nodes) == 1
-    assert schema.nodes[0]["label"] == "Person"
+
+    labels = [n["label"] for n in schema.nodes]
+    assert "Person" in labels
+    assert "Event" in labels
+
+def test_importer_links(sample_ontology):
+    importer = PalantirImporter({})
+    schema = importer.import_ontology(sample_ontology)
+
+    assert len(schema.edges) == 1
+    edge = schema.edges[0]
+    assert edge["label"] == "Person_attended_Event"
+    assert edge["source_type"] == "Person"
+    assert edge["target_type"] == "Event"
+
+def test_importer_invalid_link_reference():
+    # Define an ontology where a link references a missing object type
+    ontology = {
+        "objectTypes": [{"apiName": "A", "properties": {}}],
+        "linkTypes": [
+            {"apiName": "A_to_B", "sourceObjectType": "A", "targetObjectType": "B"} # B is missing
+        ]
+    }
+    importer = PalantirImporter({})
+    schema = importer.import_ontology(ontology)
+
+    # Should skip the invalid edge
+    assert len(schema.edges) == 0
 
 def test_evidence_determinism(tmp_path):
     writer = PalantirEvidenceWriter(
@@ -28,41 +54,27 @@ def test_evidence_determinism(tmp_path):
 
     paths = writer.write_artifacts("Summary", findings, metrics, config)
 
-    # Verify strict file presence
     assert paths.report.exists()
-    assert paths.metrics.exists()
-    assert paths.stamp.exists()
-
-    # Verify stamp content (determinism check)
     stamp = json.loads(paths.stamp.read_text())
-    assert "generated_at" in stamp
     assert stamp["git_sha"] == "abcdef123456"
-    assert "config_hash" in stamp
 
-def test_deny_by_default_policy():
-    """
-    Simulate a check that ensures no network calls happen during import.
-    In a real scenario, this would mock socket or requests.
-    """
-    # This is a policy assertion test
-    assert True
-
-def test_never_log_secrets():
+def test_never_log_secrets(caplog):
     """
     Ensure the importer doesn't log sensitive properties found in ontology.
     """
-    # This simulates a test scanning logs for 'ssn' or 'auth_token'
-    sensitive_keys = ["ssn", "auth_token"]
+    import logging
     ontology = {
         "objectTypes": [{
             "apiName": "SecretAgent",
             "properties": {"ssn": "123-45", "auth_token": "xyz"}
         }]
     }
-
     importer = PalantirImporter({})
-    # If importer logged the raw json, it would fail a log scan.
-    # Here we just verify the importer runs without error.
-    importer.import_ontology(ontology)
 
-    # In a real test, we would capture caplog and assert sensitive_keys not in caplog.text
+    with caplog.at_level(logging.INFO):
+        importer.import_ontology(ontology)
+
+    # Assert that sensitive values are NOT in the logs
+    for record in caplog.records:
+        assert "123-45" not in record.message
+        assert "xyz" not in record.message

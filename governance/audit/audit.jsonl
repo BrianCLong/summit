@@ -1,0 +1,4 @@
+{"event_type": "tool_invocation", "actor": "user_123", "action": "delete_person", "decision": "needs_approval", "metadata": {"risk": "ToolRisk.HIGH", "params": {"target_id": "p_1"}}, "evidence_id": null}
+{"event_type": "tool_invocation", "actor": "admin_user", "action": "delete_person", "decision": "allow", "metadata": {"risk": "ToolRisk.HIGH", "params": {"target_id": "p_1", "approval_token": "[REDACTED]"}}, "evidence_id": null}
+{"event_type": "tool_invocation", "actor": "user_123", "action": "delete_person", "decision": "needs_approval", "metadata": {"risk": "ToolRisk.HIGH", "params": {"target_id": "p_1"}}, "evidence_id": null}
+{"event_type": "tool_invocation", "actor": "admin_user", "action": "delete_person", "decision": "allow", "metadata": {"risk": "ToolRisk.HIGH", "params": {"target_id": "p_1", "approval_token": "[REDACTED]"}}, "evidence_id": null}
