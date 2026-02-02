@@ -18,6 +18,87 @@ import yaml from 'js-yaml';
 const POLICY_PATH = 'docs/ci/REQUIRED_CHECKS_POLICY.yml';
 const WORKFLOWS_DIR = '.github/workflows';
 const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
+const MAX_SUGGESTIONS = 3;
+
+/**
+ * Calculate Levenshtein distance between two strings.
+ */
+function levenshtein(a, b) {
+  const matrix = [];
+  const aLen = a.length;
+  const bLen = b.length;
+
+  if (aLen === 0) return bLen;
+  if (bLen === 0) return aLen;
+
+  for (let i = 0; i <= bLen; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= aLen; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= bLen; i++) {
+    for (let j = 1; j <= aLen; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[bLen][aLen];
+}
+
+/**
+ * Find closest matching strings using Levenshtein distance.
+ */
+function findClosestMatches(target, candidates, maxResults = MAX_SUGGESTIONS) {
+  const targetLower = target.toLowerCase();
+  const scored = [];
+
+  for (const candidate of candidates) {
+    const candidateLower = candidate.toLowerCase();
+
+    // Exact match shortcut
+    if (targetLower === candidateLower) {
+      continue;
+    }
+
+    // Calculate distance
+    const distance = levenshtein(targetLower, candidateLower);
+
+    // Also check substring containment as a strong signal
+    const containsTarget = candidateLower.includes(targetLower);
+    const targetContains = targetLower.includes(candidateLower);
+
+    // Score: prefer lower distance, boost containment matches
+    let score = distance;
+    if (containsTarget || targetContains) {
+      score = Math.min(score, distance * 0.5);
+    }
+
+    scored.push({ candidate, distance, score });
+  }
+
+  // Sort by score, then alphabetically for stability
+  scored.sort((a, b) => {
+    if (a.score !== b.score) return a.score - b.score;
+    return a.candidate.localeCompare(b.candidate);
+  });
+
+  // Filter to reasonable matches (distance < 50% of target length or containment)
+  const maxDistance = Math.max(target.length * 0.5, 10);
+  return scored
+    .filter(s => s.distance <= maxDistance || s.score < s.distance)
+    .slice(0, maxResults)
+    .map(s => s.candidate);
+}
 
 function parseArgs(argv) {
   const args = { policy: POLICY_PATH, workflows: WORKFLOWS_DIR };
@@ -233,41 +314,57 @@ function extractPolicyReferences(policy) {
 function validateReferences(references, workflows) {
   const errors = [];
 
-  // Build a set of all known check names across all workflows
-  const allCheckNames = new Set();
+  // Build a sorted array of all known check names across all workflows
+  const allCheckNames = [];
   for (const [fileName, names] of workflows) {
     for (const name of names) {
-      allCheckNames.add(normalizeCheckName(name));
+      const normalized = normalizeCheckName(name);
+      if (normalized && !allCheckNames.includes(normalized)) {
+        allCheckNames.push(normalized);
+      }
     }
   }
+  allCheckNames.sort();
 
-  // Build a set of all workflow file names
-  const allWorkflowFiles = new Set(workflows.keys());
+  // Build a sorted array of all workflow file names
+  const allWorkflowFiles = Array.from(workflows.keys()).sort();
 
   for (const ref of references) {
     // Check if workflow file exists (if specified)
-    if (ref.workflow && !allWorkflowFiles.has(ref.workflow)) {
+    if (ref.workflow && !allWorkflowFiles.includes(ref.workflow)) {
+      const suggestions = findClosestMatches(ref.workflow, allWorkflowFiles);
+      let message = `Workflow file "${ref.workflow}" not found (referenced by "${ref.name}" in ${ref.section})`;
+      if (suggestions.length > 0) {
+        message += `\n       Did you mean: ${suggestions.map(s => `"${s}"`).join(', ')}?`;
+      }
       errors.push({
         type: 'missing_workflow',
         reference: ref,
-        message: `Workflow file "${ref.workflow}" not found (referenced by "${ref.name}" in ${ref.section})`
+        suggestions,
+        message
       });
       continue;
     }
 
     // For branch protection contexts, check if any workflow produces this check name
     if (ref.section === 'branch_protection.contexts') {
-      const hasMatch = allCheckNames.has(ref.name) ||
-        Array.from(allCheckNames).some(n =>
+      const hasMatch = allCheckNames.includes(ref.name) ||
+        allCheckNames.some(n =>
           n.startsWith(`${ref.name} (`) ||
           (ref.name.includes(' / ') && n.includes(ref.name.split(' / ')[1]))
         );
 
       if (!hasMatch) {
+        const suggestions = findClosestMatches(ref.name, allCheckNames);
+        let message = `Context "${ref.name}" does not match any workflow job name`;
+        if (suggestions.length > 0) {
+          message += `\n       Did you mean: ${suggestions.map(s => `"${s}"`).join(', ')}?`;
+        }
         errors.push({
           type: 'unmatched_context',
           reference: ref,
-          message: `Context "${ref.name}" does not match any workflow job name`
+          suggestions,
+          message
         });
       }
     }
@@ -276,15 +373,21 @@ function validateReferences(references, workflows) {
     if (ref.workflow && ref.name) {
       const workflowChecks = workflows.get(ref.workflow);
       if (workflowChecks && !workflowChecks.has(ref.name)) {
-        const normalized = Array.from(workflowChecks).map(normalizeCheckName);
+        const normalized = Array.from(workflowChecks).map(normalizeCheckName).filter(Boolean).sort();
         const hasMatch = normalized.includes(ref.name) ||
           normalized.some(n => n.startsWith(`${ref.name} (`) || n.includes(ref.name));
 
         if (!hasMatch) {
+          const suggestions = findClosestMatches(ref.name, normalized);
+          let message = `Check name "${ref.name}" not found in ${ref.workflow}`;
+          if (suggestions.length > 0) {
+            message += `\n       Did you mean: ${suggestions.map(s => `"${s}"`).join(', ')}?`;
+          }
           errors.push({
             type: 'name_mismatch',
             reference: ref,
-            message: `Check name "${ref.name}" not found in ${ref.workflow}.`
+            suggestions,
+            message
           });
         }
       }
