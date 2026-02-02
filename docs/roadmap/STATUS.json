@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-02T00:00:00Z",
+  "last_updated": "2026-02-03T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+    },
+    {
+      "id": "io-cogwar-radar-2027-brief",
+      "status": "planned",
+      "owner": "codex",
+      "notes": "One-pager brief aligning the CogWar Radar MWS, governance guardrails, and deterministic artifacts."
     }
   ]
 }
