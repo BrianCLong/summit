@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-04T00:00:00Z",
   "initiatives": [
     {
       "id": "governance-evidence-contracts",
@@ -23,7 +23,13 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+    },
+    {
+      "id": "spec-driven-development-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
     }
   ]
 }
