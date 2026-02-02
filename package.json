@@ -131,6 +131,7 @@
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "cep:profile": "tsx packages/context-engineering/src/cli/profile.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "disinfo:analyze": "pnpm --filter @intelgraph/disinfo-news-ecosystem run analyze",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ci:ga:manifest": "node scripts/release/generate_ga_evidence_manifest.mjs --evidence-dir evidence --provenance evidence/provenance.json --out evidence/ga-evidence-manifest.json",
