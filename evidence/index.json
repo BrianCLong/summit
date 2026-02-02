@@ -78,13 +78,6 @@
         "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
     },
-    "EVD-EXPB-CORE-001": {
-      "files": [
-        "evidence/runs/expectation-baselines/report.json",
-        "evidence/runs/expectation-baselines/metrics.json",
-        "evidence/runs/expectation-baselines/stamp.json"
-      ]
-    },
     "EVD-PRIVTEL-SCHEMA-001": {
       "files": [
         "evidence/privtel/report.json",
@@ -100,6 +93,42 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-COGSEC-SOP-001": {
+      "title": "Cognitive Security SOP Compliance",
+      "category": "governance",
+      "artifacts": [
+        "evidence/EVD-COGSEC-SOP-001/report.json",
+        "evidence/EVD-COGSEC-SOP-001/metrics.json",
+        "evidence/EVD-COGSEC-SOP-001/stamp.json"
+      ]
+    },
+    "EVD-COGSEC-DRILL-001": {
+      "title": "Cognitive Security Drill Execution",
+      "category": "resilience",
+      "artifacts": [
+        "evidence/EVD-COGSEC-DRILL-001/report.json",
+        "evidence/EVD-COGSEC-DRILL-001/metrics.json",
+        "evidence/EVD-COGSEC-DRILL-001/stamp.json"
+      ]
+    },
+    "EVD-COGSEC-GOV-001": {
+      "title": "Rights Governance & Retention",
+      "category": "governance",
+      "artifacts": [
+        "evidence/EVD-COGSEC-GOV-001/report.json",
+        "evidence/EVD-COGSEC-GOV-001/metrics.json",
+        "evidence/EVD-COGSEC-GOV-001/stamp.json"
+      ]
+    },
+    "EVD-COGSEC-GATE-001": {
+      "title": "CI Gate Results",
+      "category": "pipeline",
+      "artifacts": [
+        "evidence/EVD-COGSEC-GATE-001/report.json",
+        "evidence/EVD-COGSEC-GATE-001/metrics.json",
+        "evidence/EVD-COGSEC-GATE-001/stamp.json"
+      ]
     }
   }
 }
