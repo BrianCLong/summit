@@ -42,3 +42,8 @@
 **Vulnerability:** The `/sign-manifest` endpoint in `server/src/routes/exports.ts` used a hardcoded fallback (`'dev-secret'`) when `EXPORT_SIGNING_SECRET` was missing, without checking the environment. This meant that a production deployment with a missing secret configuration would silently become vulnerable to signature forgery.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
 **Prevention:** Use a "Fail-Closed" pattern: Explicitly check for the existence of the secret. If missing in production, throw an error and halt the operation (or startup). Never allow a fallback to a hardcoded string in production code paths.
+
+## 2026-01-21 - [CRITICAL] Unauthenticated Operational & Administrative Endpoints
+**Vulnerability:** Several sensitive administrative and operational endpoints in `server/src/routes/ops.ts` were missing authentication and authorization middleware. This allowed unauthenticated users to trigger system maintenance, database backups, disaster recovery drills, and evidence integrity verification.
+**Learning:** Defaulting to open access in administrative routers is a high-risk pattern. Operational endpoints that interact with infrastructure or sensitive data must be explicitly protected by both authentication and role-based access control.
+**Prevention:** Apply `router.use(ensureAuthenticated)` at the top of all administrative route files to enforce a "deny-by-default" posture. Always verify that each endpoint has appropriate `ensureRole` checks.

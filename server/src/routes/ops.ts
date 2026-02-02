@@ -18,15 +18,14 @@ const drService = new DisasterRecoveryService();
 const isHotReloadEnabled = () =>
   (process.env.POLICY_HOT_RELOAD || '').toLowerCase() === 'true';
 
-// Protected by 'admin' role (assuming ensureRole middleware checks for this)
-// For now, we'll keep it open or assume the caller handles auth if not strictly enforced here in the prototype
-// In production: router.use(ensureRole('admin'));
+// All /ops routes require authentication
+router.use(ensureAuthenticated);
 
 /**
  * @route POST /ops/maintenance
  * @description Trigger system maintenance tasks (partitioning, cleanup)
  */
-router.post('/maintenance', async (req, res) => {
+router.post('/maintenance', ensureRole(['ADMIN', 'admin']), async (req, res) => {
     try {
         // Run asynchronously to avoid timeout
         runMaintenance().catch(err => logger.error('Async maintenance failed', err));
@@ -39,7 +38,6 @@ router.post('/maintenance', async (req, res) => {
 
 router.post(
   '/ops/policy/reload',
-  ensureAuthenticated,
   ensureRole(['ADMIN', 'admin']),
   async (req, res) => {
     if (!isHotReloadEnabled()) {
@@ -67,7 +65,6 @@ router.post(
 
 router.post(
   '/ops/policy/rollback',
-  ensureAuthenticated,
   ensureRole(['ADMIN', 'admin']),
   async (req, res) => {
     if (!isHotReloadEnabled()) {
@@ -98,7 +95,7 @@ router.post(
  * @route POST /ops/backup/:type
  * @description Trigger a specific backup
  */
-router.post('/backup/:type', async (req, res) => {
+router.post('/backup/:type', ensureRole(['ADMIN', 'admin']), async (req, res) => {
     const { type } = req.params;
     const { uploadToS3 } = req.body;
 
@@ -128,7 +125,7 @@ router.post('/backup/:type', async (req, res) => {
  * @route POST /ops/dr/drill
  * @description Trigger a DR drill simulation
  */
-router.post('/dr/drill', async (req, res) => {
+router.post('/dr/drill', ensureRole(['ADMIN', 'admin']), async (req, res) => {
     const { target } = req.body; // 'postgres' or 'neo4j'
 
     if (target && target !== 'postgres' && target !== 'neo4j') {
@@ -152,7 +149,7 @@ router.post('/dr/drill', async (req, res) => {
  * @route GET /ops/dr/status
  * @description Get DR status
  */
-router.get('/dr/status', async (req, res) => {
+router.get('/dr/status', ensureRole(['ADMIN', 'admin', 'OPERATOR']), async (req, res) => {
     try {
         const status = await drService.getStatus();
         res.json(status);
@@ -165,7 +162,7 @@ router.get('/dr/status', async (req, res) => {
  * @route POST /ops/evidence/verify
  * @description Trigger chunked evidence re-hashing for integrity verification
  */
-router.post('/evidence/verify', async (req, res) => {
+router.post('/evidence/verify', ensureRole(['ADMIN', 'admin']), async (req, res) => {
     if (process.env.EVIDENCE_INTEGRITY !== 'true') {
         return res.status(503).json({ ok: false, error: 'Evidence integrity verification is disabled' });
     }
@@ -194,7 +191,6 @@ router.post('/evidence/verify', async (req, res) => {
  */
 router.get(
   '/release-readiness/summary',
-  ensureAuthenticated,
   ensureRole(['ADMIN', 'OPERATOR']),
   async (req, res) => {
     try {
@@ -213,7 +209,6 @@ router.get(
  */
 router.get(
   '/release-readiness/evidence-index',
-  ensureAuthenticated,
   ensureRole(['ADMIN', 'OPERATOR']),
   async (req, res) => {
     try {
@@ -230,7 +225,7 @@ router.get(
  * @route GET /ops/system-health
  * @description Get system health status including kill-switch, safe-mode, backpressure
  */
-router.get('/system-health', async (req, res) => {
+router.get('/system-health', ensureRole(['ADMIN', 'admin', 'OPERATOR']), async (req, res) => {
   try {
     const status = await systemHealthService.getStatus();
     res.json(status);
@@ -246,7 +241,6 @@ router.get('/system-health', async (req, res) => {
  */
 router.post(
   '/system-health/kill-switch',
-  ensureAuthenticated,
   ensureRole(['ADMIN', 'admin']),
   async (req, res) => {
     const { enabled, reason } = req.body;
@@ -279,7 +273,6 @@ router.post(
  */
 router.post(
   '/system-health/safe-mode',
-  ensureAuthenticated,
   ensureRole(['ADMIN', 'admin']),
   async (req, res) => {
     const { enabled, reason } = req.body;
@@ -312,7 +305,6 @@ router.post(
  */
 router.post(
   '/policy-simulator',
-  ensureAuthenticated,
   ensureRole(['ADMIN', 'admin', 'OPERATOR']),
   async (req, res) => {
     const { action, resource, subject, context } = req.body;
