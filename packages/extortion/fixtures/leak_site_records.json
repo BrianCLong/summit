@@ -1,0 +1,18 @@
+[
+  {
+    "victim_name": "Global Manufacturing Corp",
+    "country": "Germany",
+    "sector": "Industrial",
+    "source": "SafePay Leak Site",
+    "first_seen_date": "2026-01-25",
+    "dataset_tags": ["blueprints", "erp-backup"]
+  },
+  {
+    "victim_name": "HealthData Services",
+    "country": "United States",
+    "sector": "Healthcare",
+    "source": "SafePay Leak Site",
+    "first_seen_date": "2026-01-26",
+    "dataset_tags": ["patient-records", "pii"]
+  }
+]

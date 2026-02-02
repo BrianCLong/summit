@@ -110,3 +110,21 @@
 
 ### FactGov Must-not-touch (until validated)
 - Existing wargame simulation endpoints in `api/main.py`.
+
+---
+
+## Extortion Pressure - Ransomware Risk (Assumptions)
+
+### Extortion Verified
+- **Docs location**: `docs/standards/`, `docs/security/data-handling/`, `docs/ops/runbooks/`.
+- **Package location**: `packages/extortion`.
+- **Feature flag**: `FEATURE_EXTORTION_PRESSURE` in `feature_flags.json`.
+- **Evidence IDs**: `EVD-EXTORTION-<date>-<hash>` (matches repo pattern prefix `EVD-`).
+
+### Extortion Assumed
+- Artifacts under `artifacts/extortion/` are acceptable for this module.
+- `never_log_scan.sh` and `check_determinism_extortion.sh` are required gates.
+
+### Extortion Must-not-touch
+- Core governance logic in `server/src/middleware/ensureTenant.ts`.
+- Existing CI workflow files in `.github/workflows/` (except when adding new specific jobs).
