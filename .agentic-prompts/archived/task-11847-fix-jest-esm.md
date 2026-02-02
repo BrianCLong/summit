@@ -16,28 +16,33 @@ Resolve all Jest ESM/CommonJS configuration mismatches for 100% passing tests.
 ## ✅ REQUIREMENTS
 
 ### 1. Create TypeScript Test Configuration
+
 - [ ] Create `tsconfig.test.json` with CommonJS module settings
 - [ ] Set `module: "commonjs"` for Jest compatibility
 - [ ] Extend from base `tsconfig.json`
 - [ ] Configure paths for test files
 
 ### 2. Update Jest Configuration
+
 - [ ] Modify `jest.config.ts` to use `tsconfig.test.json`
 - [ ] Configure proper ESM transform settings
 - [ ] Remove `transformIgnorePatterns` warnings
 - [ ] Enable correct preset for TypeScript + ESM
 
 ### 3. Fix Mock Implementations
+
 - [ ] Fix `server/tests/mcp-client.test.ts` mock types
 - [ ] Ensure mock return values match expected types
 - [ ] Update all test files with `import.meta` errors
 
 ### 4. Update CI Workflow
+
 - [ ] Modify `.github/workflows/ci-main.yml` to use test config
 - [ ] Add explicit `--project tsconfig.test.json` flag
 - [ ] Verify CI uses correct configuration
 
 ### 5. Validate All 510 Test Files
+
 - [ ] Run full test suite: `pnpm test`
 - [ ] Ensure zero failures
 - [ ] Verify no ESM/CommonJS warnings
@@ -47,11 +52,13 @@ Resolve all Jest ESM/CommonJS configuration mismatches for 100% passing tests.
 ## 📦 OUTPUT FILES
 
 ### New Files
+
 ```
 tsconfig.test.json
 ```
 
 ### Modified Files
+
 ```
 jest.config.ts
 server/tests/mcp-client.test.ts
@@ -64,6 +71,7 @@ package.json (if test scripts need updates)
 ## 🧪 VALIDATION CRITERIA
 
 ### Must All Pass:
+
 ```bash
 pnpm test                    # ✅ 0 failures, all tests passing
 pnpm typecheck               # ✅ 0 errors
@@ -72,6 +80,7 @@ pnpm build                   # ✅ Success
 ```
 
 ### Specific Checks:
+
 - ✅ No "import.meta not allowed" errors
 - ✅ No mock implementation type errors
 - ✅ No transformIgnorePatterns warnings
@@ -94,39 +103,30 @@ pnpm build                   # ✅ Success
     "resolveJsonModule": true,
     "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx"
-  ]
+  "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]
 }
 ```
 
 ### Step 2: Update `jest.config.ts`
 
 ```typescript
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
 const config: Config = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/server', '<rootDir>/packages'],
-  testMatch: ['**/*.test.ts', '**/*.spec.ts'],
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/server", "<rootDir>/packages"],
+  testMatch: ["**/*.test.ts", "**/*.spec.ts"],
   globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.test.json',
+    "ts-jest": {
+      tsconfig: "tsconfig.test.json",
       useESM: false,
     },
   },
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/server/src/$1',
+    "^@/(.*)$": "<rootDir>/server/src/$1",
   },
-  collectCoverageFrom: [
-    'server/src/**/*.ts',
-    '!server/src/**/*.d.ts',
-    '!server/src/**/*.test.ts',
-  ],
+  collectCoverageFrom: ["server/src/**/*.ts", "!server/src/**/*.d.ts", "!server/src/**/*.test.ts"],
   coverageThreshold: {
     global: {
       branches: 70,
@@ -149,11 +149,11 @@ const mockClient = {
 };
 
 // After (fixed with correct types):
-import { McpClient } from '../types';
+import { McpClient } from "../types";
 
-const mockClient: jest.Mocked<Pick<McpClient, 'request'>> = {
-  request: jest.fn().mockResolvedValue({ 
-    result: {} as Record<string, unknown> 
+const mockClient: jest.Mocked<Pick<McpClient, "request">> = {
+  request: jest.fn().mockResolvedValue({
+    result: {} as Record<string, unknown>,
   }),
 };
 ```
@@ -183,6 +183,7 @@ const mockClient: jest.Mocked<Pick<McpClient, 'request'>> = {
 ## 🚀 EXECUTION STEPS
 
 1. **Create branch:**
+
    ```bash
    git checkout main
    git pull origin main
@@ -196,6 +197,7 @@ const mockClient: jest.Mocked<Pick<McpClient, 'request'>> = {
    - Update CI workflow
 
 3. **Validate locally:**
+
    ```bash
    pnpm typecheck  # Must pass
    pnpm lint       # Must pass
@@ -204,24 +206,25 @@ const mockClient: jest.Mocked<Pick<McpClient, 'request'>> = {
    ```
 
 4. **Commit and push:**
+
    ```bash
    git add .
    git commit -m "🤖 Fix #11847: Resolve Jest ESM configuration
-   
+
    - Created tsconfig.test.json with CommonJS settings
    - Updated jest.config.ts to use test config
    - Fixed mock implementations with proper types
    - Updated CI workflow for test execution
    - All 510 tests now passing
-   
+
    Validation:
    - ✅ TypeScript: 0 errors
    - ✅ Lint: 0 errors
    - ✅ Tests: All passing (510/510)
    - ✅ Build: Success
-   
+
    Agentic execution via Claude Code"
-   
+
    git push origin agentic/fix-jest-esm-config
    ```
 
@@ -230,6 +233,7 @@ const mockClient: jest.Mocked<Pick<McpClient, 'request'>> = {
    gh pr create \
      --title "Fix #11847: Resolve Jest ESM configuration issues" \
      --body "## 🎯 Task Completion Report
+   ```
 
 **Issue:** Closes #11847
 **Priority:** 1 (BLOCKING)
@@ -257,15 +261,16 @@ const mockClient: jest.Mocked<Pick<McpClient, 'request'>> = {
 \`\`\`bash
 $ pnpm test
 Test Suites: 510 passed, 510 total
-Tests:       2,847 passed, 2,847 total
-Snapshots:   0 total
-Time:        47.123 s
+Tests: 2,847 passed, 2,847 total
+Snapshots: 0 total
+Time: 47.123 s
 \`\`\`
 
 🤖 **This PR was generated by agentic automation**" \
-     --assignee @me \
-     --label "agentic-execution,ready-for-review,priority-1"
-   ```
+ --assignee @me \
+ --label "agentic-execution,ready-for-review,priority-1"
+
+```
 
 6. **Monitor CI and merge when green**
 
@@ -295,3 +300,4 @@ Time:        47.123 s
 ---
 
 **BEGIN IMPLEMENTATION NOW**
+```

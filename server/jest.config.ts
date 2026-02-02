@@ -109,7 +109,6 @@ const config: Config = {
     'src/routes/__tests__/',
     'src/securiteyes/',
     'src/security/tenant-simulation/__tests__/',
-    'src/services/__tests__/',
     'src/summitsight/__tests__/',
     'src/tests/',
     'src/trust-center/__tests__/',
