@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Uncertainty-First Analytic Record (UFAR)",
+  "type": "object",
+  "properties": {
+    "uncertainty": {
+      "type": "object",
+      "properties": {
+        "epistemic": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Uncertainty arising from lack of knowledge or data."
+        },
+        "aleatoric": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Inherent randomness or variability in the system."
+        }
+      },
+      "required": ["epistemic", "aleatoric"]
+    },
+    "known_unknowns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Specific questions or data points that would reduce epistemic uncertainty."
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Presuppositions made during analysis."
+    },
+    "validation_plan": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Steps to test assumptions or resolve known unknowns."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Optional confidence score, must be accompanied by uncertainty fields."
+    }
+  },
+  "required": ["uncertainty", "known_unknowns", "assumptions", "validation_plan"]
+}
