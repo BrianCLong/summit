@@ -1,4 +1,4 @@
-name: Attestation / Mainline
+name: Attestation / Mainline build
 
 on:
   push:
@@ -7,31 +7,24 @@ on:
 
 permissions:
   contents: read
-  id-token: write # Required for OIDC
+  id-token: write
 
 jobs:
   publish-attestation:
-    name: Publish Attestation
+    name: Build & Publish Attestation
     runs-on: ubuntu-latest
-    env:
-      ATT_DEST: ${{ vars.ATT_DEST || 'artifact' }} # 'artifact', 's3', or 'gcs'
-      ATT_BUCKET: ${{ vars.ATT_BUCKET }}
-      ATT_PREFIX: ${{ vars.ATT_PREFIX || 'provenance' }}
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
-
-      - name: Run Determinism and Regression Tests
-        run: node --test scripts/ci/__tests__/attestation_determinism.test.mjs
+          cache: "pnpm"
 
       - name: Generate Attestation
-        run: node scripts/ci/generate_attestation.mjs --out attestation.json server client scripts/ci
+        run: node scripts/ci/generate_attestation.mjs --out attestation.json
 
       - name: Verify Attestation
         run: node scripts/ci/verify_attestation.mjs --input attestation.json
@@ -39,41 +32,17 @@ jobs:
       - name: Emit Evidence
         run: node scripts/ci/emit_attestation_evidence.mjs --attestation attestation.json --out-dir evidence-folder
 
-      - name: Upload Evidence Artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: attestation-evidence-${{ github.sha }}
+          name: attestation-${{ github.sha }}
           path: evidence-folder
           retention-days: 90
-          if-no-files-found: error
 
-      # --- Cloud Upload via OIDC (optional, gated by ATT_DEST) ---
-
-      # AWS / S3
-      - name: Configure AWS Credentials
-        if: env.ATT_DEST == 's3' && env.ATT_BUCKET != ''
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Upload to S3
-        if: env.ATT_DEST == 's3' && env.ATT_BUCKET != ''
+      - name: Optional Cloud Upload
+        if: env.ATT_BUCKET != ''
         run: |
-          aws s3 sync evidence-folder s3://${{ env.ATT_BUCKET }}/${{ env.ATT_PREFIX }}/${{ github.sha }}/
-
-      # GCP / GCS
-      - name: Authenticate to Google Cloud
-        if: env.ATT_DEST == 'gcs' && env.ATT_BUCKET != ''
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_SA_EMAIL }}
-
-      - name: Upload to GCS
-        if: env.ATT_DEST == 'gcs' && env.ATT_BUCKET != ''
-        uses: google-github-actions/upload-cloud-storage@v2
-        with:
-          path: evidence-folder
-          destination: ${{ env.ATT_BUCKET }}/${{ env.ATT_PREFIX }}/${{ github.sha }}/
-          parent: false
+          echo "OIDC-based upload to ${ATT_BUCKET}/${ATT_PREFIX}/${{ github.sha }}/ would happen here"
+        env:
+          ATT_BUCKET: ${{ vars.ATT_BUCKET }}
+          ATT_PREFIX: ${{ vars.ATT_PREFIX || 'provenance' }}

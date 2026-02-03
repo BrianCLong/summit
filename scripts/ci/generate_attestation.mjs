@@ -44,16 +44,20 @@ try {
     return files.sort();
   }
 
-  function hashFile(filepath) {
-    try {
-      const content = fs.readFileSync(filepath);
-      return createHash('sha256').update(content).digest('hex');
-    } catch (e) {
-      console.warn(`Warning: Failed to hash ${filepath}: ${e.message}`);
-      return null;
-    }
+  async function hashFile(filepath) {
+    return new Promise((resolve) => {
+      const hash = createHash('sha256');
+      const stream = fs.createReadStream(filepath);
+      stream.on('data', (data) => hash.update(data));
+      stream.on('end', () => resolve(hash.digest('hex')));
+      stream.on('error', (e) => {
+        console.warn(`Warning: Failed to hash ${filepath}: ${e.message}`);
+        resolve(null);
+      });
+    });
   }
 
+  const normalizedPositionals = positionals.map(p => p.replace(/\/+$/, ''));
   const manifest = [];
   const trackedFiles = getTrackedFiles();
   console.log(`Found ${trackedFiles.length} tracked files.`);
@@ -62,14 +66,14 @@ try {
     // Improved relevance matching:
     // 1. Matches exact directory or subpath if positionals provided
     // 2. Always matches package.json and pnpm-lock.yaml anywhere
-    const isRelevant = positionals.length === 0 ||
-                       positionals.some(dir => file === dir || file.startsWith(dir + path.sep) || file.startsWith(dir + '/')) ||
+    const isRelevant = normalizedPositionals.length === 0 ||
+                       normalizedPositionals.some(dir => file === dir || file.startsWith(dir + '/')) ||
                        file.endsWith('pnpm-lock.yaml') ||
                        file.endsWith('package.json') ||
                        file.includes('lock');
 
     if (isRelevant) {
-      const digest = hashFile(file);
+      const digest = await hashFile(file);
       if (digest) {
         manifest.push({
           path: file,
@@ -83,7 +87,7 @@ try {
     console.log('Including dist/ directory...');
     const distFiles = getUntrackedFiles('dist');
     for (const file of distFiles) {
-      const digest = hashFile(file);
+      const digest = await hashFile(file);
       if (digest) {
         manifest.push({
           path: file,

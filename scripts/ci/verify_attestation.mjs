@@ -6,6 +6,19 @@ const options = {
   input: { type: 'string', default: 'attestation.json' },
 };
 
+async function hashFile(filepath) {
+  return new Promise((resolve) => {
+    const hash = createHash('sha256');
+    const stream = fs.createReadStream(filepath);
+    stream.on('data', (data) => hash.update(data));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', (e) => {
+      console.warn(`Warning: Failed to hash ${filepath}: ${e.message}`);
+      resolve(null);
+    });
+  });
+}
+
 try {
   const { values } = parseArgs({ options });
   const inputPath = values.input;
@@ -33,8 +46,8 @@ try {
       continue;
     }
 
-    const content = fs.readFileSync(entry.path);
-    const actualDigest = `sha256:${createHash('sha256').update(content).digest('hex')}`;
+    const digest = await hashFile(entry.path);
+    const actualDigest = `sha256:${digest}`;
 
     if (actualDigest !== entry.digest) {
       console.error(`Digest mismatch for ${entry.path}`);

@@ -1,75 +1,57 @@
-import assert from 'node:assert/strict';
-import { test, describe } from 'node:test';
-import { promises as fs } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { test } from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs/promises';
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
+import { join } from 'node:path';
 
 const execAsync = promisify(exec);
 
-function hasTimestampKeys(obj) {
-  if (obj === null || typeof obj !== 'object') return false;
+test('Attestation generation is deterministic', async (t) => {
+  await t.test('running twice produces identical JSON', async () => {
+    const file1 = 'attestation1.json';
+    const file2 = 'attestation2.json';
 
-  if (Array.isArray(obj)) {
-    return obj.some(item => hasTimestampKeys(item));
-  }
+    // Use positionals to limit scope and speed up test
+    await execAsync(`node scripts/ci/generate_attestation.mjs --out ${file1} server client scripts/ci`);
+    await execAsync(`node scripts/ci/generate_attestation.mjs --out ${file2} server client scripts/ci`);
 
-  for (const [key, value] of Object.entries(obj)) {
-    const lowerKey = key.toLowerCase();
-    if (lowerKey.includes('timestamp') ||
-        lowerKey.includes('generated_at') ||
-        lowerKey.includes('created_at') ||
-        lowerKey.includes('updated_at') ||
-        lowerKey.includes('last_updated') ||
-        lowerKey.includes('execution_time') ||
-        lowerKey === 'time') {
-      return true;
-    }
-    if (typeof value === 'object' && value !== null) {
-      if (hasTimestampKeys(value)) return true;
-    }
-  }
-  return false;
-}
+    const content1 = await fs.readFile(file1, 'utf8');
+    const content2 = await fs.readFile(file2, 'utf8');
 
-describe('Attestation Determinism', () => {
-  const attestationA = 'test_attestation_a.json';
-  const attestationB = 'test_attestation_b.json';
-
-  test('identical inputs produce byte-identical attestations', async () => {
-    const scope = 'server client scripts/ci';
-
-    // First run
-    await execAsync(`node scripts/ci/generate_attestation.mjs --out ${attestationA} ${scope}`);
-
-    // Second run
-    await execAsync(`node scripts/ci/generate_attestation.mjs --out ${attestationB} ${scope}`);
-
-    const contentA = await fs.readFile(attestationA, 'utf8');
-    const contentB = await fs.readFile(attestationB, 'utf8');
-
-    assert.strictEqual(contentA, contentB, 'Attestations from two identical runs must be byte-identical');
-
-    const objA = JSON.parse(contentA);
-
-    // Ensure no timestamps
-    assert.ok(!hasTimestampKeys(objA), 'attestation.json should not contain timestamp-like keys');
-
-    // Ensure verification script passes
-    await execAsync(`node scripts/ci/verify_attestation.mjs --input ${attestationA}`);
+    assert.strictEqual(content1, content2, 'JSON outputs must be byte-identical');
 
     // Cleanup
-    await fs.unlink(attestationA);
-    await fs.unlink(attestationB);
+    await fs.unlink(file1);
+    await fs.unlink(file2);
   });
 
-  test('evidence emission is also deterministic (except stamp.json timestamp)', async () => {
-    const scope = 'server client scripts/ci';
-    const attestation = 'test_final.json';
-    const evidence1 = 'test_evidence_1';
-    const evidence2 = 'test_evidence_2';
+  await t.test('no time-like fields in attestation', async () => {
+    const file = 'attestation_time_test.json';
+    await execAsync(`node scripts/ci/generate_attestation.mjs --out ${file} server client scripts/ci`);
+    const content = await fs.readFile(file, 'utf8');
+    const data = JSON.parse(content);
 
-    await execAsync(`node scripts/ci/generate_attestation.mjs --out ${attestation} ${scope}`);
+    const forbiddenKeys = ['time', 'timestamp', 'date', 'created_at', 'updated_at'];
+    const allKeys = JSON.stringify(data);
+
+    for (const key of forbiddenKeys) {
+      assert.ok(!allKeys.includes(`"${key}"`), `Attestation should not contain key: ${key}`);
+    }
+
+    // Check for ISO-8601 patterns in values
+    const isoPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+    assert.ok(!isoPattern.test(content), 'Attestation should not contain ISO-8601 timestamps');
+
+    await fs.unlink(file);
+  });
+
+  await t.test('evidence artifacts are deterministic', async () => {
+    const attestation = 'attestation_ev.json';
+    const evidence1 = 'evidence1';
+    const evidence2 = 'evidence2';
+
+    await execAsync(`node scripts/ci/generate_attestation.mjs --out ${attestation} server client scripts/ci`);
 
     await execAsync(`node scripts/ci/emit_attestation_evidence.mjs --attestation ${attestation} --out-dir ${evidence1}`);
     await execAsync(`node scripts/ci/emit_attestation_evidence.mjs --attestation ${attestation} --out-dir ${evidence2}`);

@@ -21,8 +21,6 @@ jobs:
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 9
           run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4
@@ -118,8 +116,6 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 9
           run_install: false
 
       - name: Cache pnpm store
