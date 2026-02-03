@@ -20,34 +20,44 @@ export class MaestroGlobalAgent {
      */
     async evaluateRouting(task: Task): Promise<{
         allowed: boolean;
+        action: 'STAY' | 'REDIRECT' | 'STOP';
         advice?: string;
         reason: string;
     }> {
         const tenantId = (task.input as any)?.tenantId;
         if (!tenantId) {
-            return { allowed: true, reason: 'System operation or missing tenant context' };
+            return {
+                allowed: true,
+                action: 'STAY',
+                reason: 'System operation or missing tenant context'
+            };
         }
 
         const decision = await globalTrafficSteering.resolveRegion(tenantId);
 
         if (!decision.isOptimal) {
             // Log the sub-optimal routing for observability
-            logger.info({
+            logger.warn({
                 taskId: task.id,
                 tenantId,
                 currentRegion: process.env.SUMMIT_REGION || 'us-east-1',
                 optimalRegion: decision.targetRegion,
                 reason: decision.reason
-            }, 'Maestro Global Steering Advice');
+            }, 'Maestro Global Steering Advice: Sub-optimal region detected');
 
             return {
                 allowed: false,
+                action: 'REDIRECT',
                 advice: decision.targetRegion,
                 reason: decision.reason
             };
         }
 
-        return { allowed: true, reason: 'Routing is optimal' };
+        return {
+            allowed: true,
+            action: 'STAY',
+            reason: 'Routing is optimal'
+        };
     }
 }
 
