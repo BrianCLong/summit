@@ -1,7 +1,7 @@
 
-import { Actor, SocialPost } from '../types';
-import { NarrativeEvent } from '../../narrative/types';
-import { ActorClass, ActorProfile, isSwarmCandidate } from '../../narrative/primitives';
+import { Actor, SocialPost } from '../types.js';
+import { NarrativeEvent } from '../../narrative/types.js';
+import { ActorClass, ActorProfile, isSwarmCandidate } from '../../narrative/primitives.js';
 
 /**
  * SWARM SIGNATURE DETECTOR

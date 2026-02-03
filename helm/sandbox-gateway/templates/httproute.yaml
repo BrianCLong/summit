@@ -1,0 +1,97 @@
+{{- if and .Values.gatewayApi.enabled (not .Values.ingress.enabled) }}
+---
+# HTTPRoute for sandbox-gateway (Gateway API)
+# This replaces the Ingress resource when Gateway API is enabled
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "sandbox-gateway.fullname" . }}
+  labels:
+    {{- include "sandbox-gateway.labels" . | nindent 4 }}
+  {{- with .Values.gatewayApi.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+    - name: {{ .Values.gatewayApi.gatewayName }}
+      namespace: {{ .Values.gatewayApi.gatewayNamespace }}
+      {{- if .Values.gatewayApi.sectionName }}
+      sectionName: {{ .Values.gatewayApi.sectionName }}
+      {{- end }}
+  hostnames:
+    - {{ .Values.gatewayApi.host | quote }}
+  rules:
+    # GraphQL endpoint
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /graphql
+      backendRefs:
+        - name: {{ include "sandbox-gateway.fullname" . }}
+          port: {{ .Values.service.port }}
+          {{- if .Values.gatewayApi.canary.enabled }}
+          weight: {{ sub 100 (int .Values.gatewayApi.canary.weight) }}
+        - name: {{ include "sandbox-gateway.fullname" . }}-canary
+          port: {{ .Values.service.port }}
+          weight: {{ .Values.gatewayApi.canary.weight }}
+          {{- end }}
+      {{- if .Values.gatewayApi.timeout }}
+      timeouts:
+        request: {{ .Values.gatewayApi.timeout }}
+      {{- end }}
+
+    # Health endpoint
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /health
+      backendRefs:
+        - name: {{ include "sandbox-gateway.fullname" . }}
+          port: {{ .Values.service.port }}
+
+    # API v1 endpoint
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/v1
+      backendRefs:
+        - name: {{ include "sandbox-gateway.fullname" . }}
+          port: {{ .Values.service.port }}
+          {{- if .Values.gatewayApi.canary.enabled }}
+          weight: {{ sub 100 (int .Values.gatewayApi.canary.weight) }}
+        - name: {{ include "sandbox-gateway.fullname" . }}-canary
+          port: {{ .Values.service.port }}
+          weight: {{ .Values.gatewayApi.canary.weight }}
+          {{- end }}
+
+{{- if .Values.gatewayApi.canary.headerBased }}
+---
+# Header-based canary route
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "sandbox-gateway.fullname" . }}-canary
+  labels:
+    {{- include "sandbox-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: canary
+spec:
+  parentRefs:
+    - name: {{ .Values.gatewayApi.gatewayName }}
+      namespace: {{ .Values.gatewayApi.gatewayNamespace }}
+  hostnames:
+    - {{ .Values.gatewayApi.host | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+          headers:
+            - name: {{ .Values.gatewayApi.canary.headerName | default "X-Canary" }}
+              value: {{ .Values.gatewayApi.canary.headerValue | default "true" | quote }}
+      backendRefs:
+        - name: {{ include "sandbox-gateway.fullname" . }}-canary
+          port: {{ .Values.service.port }}
+{{- end }}
+
+{{- end }}

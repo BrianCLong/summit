@@ -1,5 +1,5 @@
-import { BaseEnvironment } from '../env';
-import { Observation, Action, StepResult } from '../types';
+import { BaseEnvironment } from '../env.js';
+import { Observation, Action, StepResult } from '../types.js';
 
 export class MCPToolChainEnvironment extends BaseEnvironment {
   public name = 'MCPToolChain';

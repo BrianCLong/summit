@@ -10,9 +10,9 @@
  * @module canonical-entities
  */
 
-export * from './types';
-export * from './edges';
-export * from './temporal';
-export * from './policy';
-export * from './validation';
-export * from './graphql-types';
+export * from './types.js';
+export * from './edges.js';
+export * from './temporal.js';
+export * from './policy.js';
+export * from './validation.js';
+export * from './graphql-types.js';
