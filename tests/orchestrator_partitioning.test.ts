@@ -24,13 +24,13 @@ describe('Orchestrator Partitioning Phase B (Dual-Write)', () => {
         const runId = uuidv4();
         const taskId = uuidv4();
 
-        // Create run and task in legacy tables
+        // Create run and task in legacy tables (they aren't partitioned yet in this phase)
         await pool.query('INSERT INTO orchestrator_runs (id, tenant_id, status) VALUES ($1, $2, $3)', [runId, tenantId, 'running']);
         await pool.query('INSERT INTO orchestrator_tasks (id, run_id, tenant_id, name, kind, status) VALUES ($1, $2, $3, $4, $5, $6)',
             [taskId, runId, tenantId, 'test task', 'ping', 'running']);
 
         // Complete task (triggers dual-write)
-        // We pass workerId 'test-worker' and version 1. In our restored store, 
+        // We pass workerId 'test-worker' and version 1. In our restored store,
         // completeTask expects taskId, workerId, version, result.
         await store.completeTask(taskId, 'test-worker', 1, { success: true });
 

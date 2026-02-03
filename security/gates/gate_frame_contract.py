@@ -10,15 +10,15 @@ from narratives.frames.stub import extract_frame
 from narratives.frames.validation import is_valid_frame_label
 
 
-def load_cases(path: pathlib.Path) -> list[dict[str, Any]]:
+def load_cases(path: pathlib.Path) -> List[Dict[str, Any]]:
     data = json.loads(path.read_text(encoding="utf-8"))
     return data.get("cases", [])
 
 
-def evaluate(cases: Iterable[dict[str, Any]]) -> list[str]:
-    failures: list[str] = []
+def evaluate(cases: Iterable[Dict[str, Any]]) -> List[str]:
+    failures: List[str] = []
     for case in cases:
-        event: dict[str, Any] = case.get("event", {})
+        event: Dict[str, Any] = case.get("event", {})
         expect_valid: Optional[bool] = case.get("expect_valid")
         label = extract_frame(event)
         valid = is_valid_frame_label(label)

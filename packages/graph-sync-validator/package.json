@@ -1,14 +1,16 @@
 {
-  "name": "@summi7/graph-sync-validator",
+  "name": "@summit/graph-sync-validator",
   "version": "0.1.0",
   "description": "Graph↔PG sync validator",
   "main": "src/compare/compare.mjs",
   "bin": {
-    "graph-sync-validate": "bin/graph-sync-validate.mjs"
+    "graph-sync-validate": "dist/cli.js"
   },
   "type": "module",
   "scripts": {
-    "validate": "node bin/graph-sync-validate.mjs"
+    "build": "tsc -p tsconfig.json",
+    "prepare": "pnpm run build",
+    "validate": "node dist/cli.js"
   },
   "dependencies": {},
   "devDependencies": {}

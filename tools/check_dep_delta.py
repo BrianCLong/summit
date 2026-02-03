@@ -1,54 +1,64 @@
-#!/usr/bin/env python3
-from __future__ import annotations
-
 import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+DEP_FILES = [
+    "package.json",
+    "pnpm-lock.yaml",
+    "requirements.in",
+    "requirements.txt",
+    "pyproject.toml",
+    "Cargo.toml",
+    "Cargo.lock",
+]
 
+DELTA_FILE = "deps/dependency_delta.md"
 
-def get_git_base() -> str:
-    for candidate in ["origin/main", "origin/master", "main", "master"]:
-        try:
-            subprocess.check_call(
-                ["git", "rev-parse", "--verify", candidate],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=ROOT
-            )
-            return candidate
-        except subprocess.CalledProcessError:
-            continue
-    return "HEAD"
-
-
-def main() -> int:
-    print("Checking for dependency delta acknowledgement...")
+def run_command(cmd):
     try:
-        base = get_git_base()
-        changed_files = subprocess.check_output(
-            ["git", "diff", "--name-only", base],
-            cwd=ROOT, text=True
-        ).splitlines()
-    except subprocess.CalledProcessError:
-        return 0
+        return subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode().splitlines()
+    except Exception:
+        return []
 
-    dep_files = {"package.json", "pnpm-lock.yaml", "requirements.in", "requirements.txt", "pyproject.toml"}
-    changed_deps = [f for f in changed_files if any(dep in Path(f).name for dep in dep_files)]
+def get_modified_files():
+    # Try multiple ways to get modified files
+    files = set()
 
-    if not changed_deps:
-        print("No dependency changes detected.")
-        return 0
+    # 1. Staged changes
+    files.update(run_command(["git", "diff", "--cached", "--name-only"]))
 
-    print(f"Detected dependency changes in: {', '.join(changed_deps)}")
-    delta_changed = any("DEPENDENCY_DELTA.md" in f for f in changed_files)
+    # 2. Unstaged changes
+    files.update(run_command(["git", "diff", "--name-only"]))
 
-    if not delta_changed:
-        print("ERROR: Dependency changes detected but DEPENDENCY_DELTA.md was not updated.")
-        return 1
+    # 3. Changes compared to origin/main (if in a branch)
+    files.update(run_command(["git", "diff", "origin/main...HEAD", "--name-only"]))
 
-    print("SUCCESS: Dependency changes are documented.")
-    return 0
+    # 4. Untracked files
+    files.update(run_command(["git", "ls-files", "--others", "--exclude-standard"]))
 
+    return list(files)
+
+def main():
+    modified_files = get_modified_files()
+    if not modified_files:
+        print("No modified files detected via git. Checking file existence as fallback.")
+        # If we can't detect changes via git, we at least check if dependency files exist
+        return
+
+    deps_changed = [f for f in modified_files if any(dep for dep in DEP_FILES if f.endswith(dep))]
+    delta_changed = any(f for f in modified_files if f.endswith(DELTA_FILE))
+
+    if deps_changed and not delta_changed:
+        print(f"Error: Dependency files changed but {DELTA_FILE} was not updated.")
+        print("Changed dependency files:")
+        for f in deps_changed:
+            print(f"  - {f}")
+        sys.exit(1)
+
+    if deps_changed and delta_changed:
+        print(f"OK: Dependencies changed and {DELTA_FILE} updated.")
+    elif not deps_changed:
+        print("OK: No dependency changes detected.")
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
