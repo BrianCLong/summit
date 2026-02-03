@@ -1,0 +1,55 @@
+{
+  "task_id": "PROMPTSPEC_FOUNDATION_LANE1_20260207",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "promptspec-foundation-lane1",
+    "version": "v1",
+    "sha256": "50e7d7c4e80bd32ecf7a092f7450e018f295438cbd3bbc20be48eddb32a3a904",
+    "path": "prompts/promptspec/promptspec-foundation-lane1@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "promptspec/",
+      "schemas/promptspec.schema.json",
+      "schemas/evidence.index.schema.json",
+      "evidence/index.py",
+      "evidence/write_evidence.py",
+      "eval/runner.py",
+      "eval/rubrics/",
+      "eval/fixtures/",
+      "policy/gate.py",
+      "policy/rules.json",
+      "docs/required_checks.todo.md",
+      "dependency_delta.md",
+      "tests/policy/test_denies_guarantees.py",
+      "tests/evidence/test_index_determinism.py",
+      "tests/promptspec/",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json"
+    ],
+    "domains": ["governance", "evidence", "eval", "policy", "promptspec", "docs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "pytest tests/policy tests/evidence tests/promptspec",
+      "make smoke"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "PromptSpec schema and clean-room pack added",
+    "Evidence index schema and deterministic writer added",
+    "Policy gate denies guaranteed earnings phrases",
+    "Deterministic index test passes"
+  ],
+  "stop_conditions": [
+    "Required checks discovery missing",
+    "Policy gate fails deny-by-default tests",
+    "Determinism violations detected"
+  ]
+}
