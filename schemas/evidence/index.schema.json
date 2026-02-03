@@ -1,9 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Index",
   "type": "object",
   "required": ["version", "items"],
   "properties": {
-    "version": { "type": "number" },
+    "version": { "type": "integer" },
     "items": {
       "type": "array",
       "items": {
