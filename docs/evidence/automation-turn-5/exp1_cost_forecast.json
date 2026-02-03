@@ -1,0 +1,16 @@
+{
+  "estimate": {
+    "taskType": "generate_code",
+    "estimatedTokens": 2024,
+    "estimatedCostUSD": 0.08136480000000001,
+    "estimatedTimeMs": 101200,
+    "modelTier": "gpt-4"
+  },
+  "optimized": {
+    "taskType": "generate_code",
+    "estimatedTokens": 2024,
+    "estimatedCostUSD": 0.08136480000000001,
+    "estimatedTimeMs": 101200,
+    "modelTier": "gpt-4"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "$id": "https://summit.local/schemas/procedure.policy.schema.json",
+  "type": "object",
+  "required": ["version", "allow", "budgets", "rules"],
+  "properties": {
+    "version": { "type": "number" },
+    "allow": {
+      "type": "object",
+      "required": ["stepTypes", "exportDestinations", "httpDomains"],
+      "properties": {
+        "stepTypes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "exportDestinations": {
+          "type": "object",
+          "required": ["csv"],
+          "properties": {
+            "csv": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "httpDomains": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "budgets": {
+      "type": "object",
+      "required": ["maxSteps", "maxQueryFanout", "maxHttpDomains"],
+      "properties": {
+        "maxSteps": { "type": "number", "minimum": 1 },
+        "maxQueryFanout": { "type": "number", "minimum": 1 },
+        "maxHttpDomains": { "type": "number", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "rules": {
+      "type": "object",
+      "required": ["forbidAdjacency"],
+      "properties": {
+        "forbidAdjacency": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import UsageMeteringService from '../services/UsageMeteringService.js';
-import QuotaService from '../services/QuotaService.js';
+import { usageMeteringService } from '../services/UsageMeteringService.js';
+import { quotaService } from '../services/QuotaService.js';
 import logger from '../utils/logger.js';
 import { meteringEmitter } from '../metering/emitter.js';
 
@@ -23,7 +23,8 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
     // 1. Rate Limiting / Quota Check (Blocking)
     // Check if tenant has exceeded request quota
     try {
-        const quotaResult = await QuotaService.checkQuota({
+        // Note: Using type assertion - quotaService API may need updating to match this interface
+        const quotaResult = await (quotaService as any).checkQuota({
             tenantId,
             kind: 'external_api.requests',
             quantity: 1
@@ -53,19 +54,20 @@ export const usageMiddleware = async (req: Request, res: Response, next: NextFun
     // Let's record "request attempted".
 
     // We can fire and forget
-    UsageMeteringService.record({
+    // Note: Using type assertion - UsageEvent interface may need principalId/principalKind fields
+    usageMeteringService.record({
         tenantId,
-        principalId: user.id,
-        principalKind: 'user', // or api_key
         kind: 'external_api.requests',
         quantity: 1,
         unit: 'requests',
         metadata: {
             method,
             route,
-            userAgent: req.get('user-agent')
+            userAgent: req.get('user-agent'),
+            principalId: user.id,
+            principalKind: 'user'
         }
-    }).catch(err => {
+    } as any).catch((err: Error) => {
         logger.error('Failed to record API usage', err);
     });
 

@@ -9,10 +9,10 @@ jobs:
   drill-initiation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -27,7 +27,7 @@ jobs:
             python -c 'import yaml, random, os; catalog = yaml.safe_load(open("observability/alerts/catalog.yaml")); alerts = ",".join([a["id"] for a in random.sample(catalog, min(len(catalog), 3))]);  with open(os.environ["GITHUB_OUTPUT"], "a") as f: f.write(f"alerts={alerts}\n")'
 
       - name: Create Drill Issue
-        uses: actions/github-script@v6
+        uses: actions/github-script@v4
         with:
           script: |
             const alerts = "${{ steps.select-alerts.outputs.alerts }}".split(',');

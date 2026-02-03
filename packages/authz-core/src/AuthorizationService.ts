@@ -25,8 +25,8 @@ import type {
   AuthorizationContext,
   Warrant,
   License,
-} from './types';
-import { AuthorizationError } from './types';
+} from './types.js';
+import { AuthorizationError } from './types.js';
 
 const logger = pino({ name: 'authz-service' });
 

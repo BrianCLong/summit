@@ -8,8 +8,8 @@
  * @module canonical-entities/temporal
  */
 
-import { BitemporalFields } from './types';
-import { GraphEdge, GraphSnapshot } from './edges';
+import { BitemporalFields } from './types.js';
+import { GraphEdge, GraphSnapshot } from './edges.js';
 
 // -----------------------------------------------------------------------------
 // Temporal Types

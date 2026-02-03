@@ -1,0 +1,79 @@
+name: GA Evidence Pack
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  evidence-pack:
+    name: Generate GA Evidence Bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4.0.0
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v4
+        with:
+          cache: 'pnpm'
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Evidence Pack with Determinism Check
+        run: node scripts/release/ga_evidence_pack.mjs --check-determinism
+        env:
+          NODE_ENV: production
+
+      - name: Upload Evidence Bundle
+        if: always()
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        with:
+          name: ga-evidence-bundle-${{ github.sha }}
+          path: |
+            dist/ga-evidence/
+            dist/ga-evidence.tgz
+          retention-days: 90
+          compression-level: 6
+
+      - name: Generate Evidence Summary
+        if: always()
+        run: |
+          echo "## GA Evidence Bundle Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f dist/ga-evidence/GA_EVIDENCE_MANIFEST.yml ]; then
+            echo "### Evidence Manifest" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`yaml" >> $GITHUB_STEP_SUMMARY
+            cat dist/ga-evidence/GA_EVIDENCE_MANIFEST.yml >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f dist/ga-evidence/ga_verify_report.md ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat dist/ga-evidence/ga_verify_report.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Verify Evidence Integrity
+        if: always()
+        run: |
+          if [ -f dist/ga-evidence/evidence.sha256 ]; then
+            cd dist/ga-evidence
+            sha256sum -c evidence.sha256 --quiet
+            echo "✓ Evidence integrity verified"
+          else
+            echo "⚠ Evidence hash ledger not found"
+            exit 1
+          fi

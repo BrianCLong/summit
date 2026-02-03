@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CommunityTransition",
+  "type": "object",
+  "required": ["transition_id", "from_snapshot_id", "to_snapshot_id", "edges"],
+  "properties": {
+    "transition_id": { "type": "string" },
+    "from_snapshot_id": { "type": "string" },
+    "to_snapshot_id": { "type": "string" },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from_community_uid", "to_community_uid", "weight", "kind"],
+        "properties": {
+          "from_community_uid": { "type": "string" },
+          "to_community_uid": { "type": "string" },
+          "weight": { "type": "number", "minimum": 0 },
+          "kind": {
+            "type": "string",
+            "enum": ["continue", "split", "merge", "birth", "death", "unknown"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "metadata": { "type": "object" }
+  },
+  "additionalProperties": false
+}

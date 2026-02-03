@@ -1,4 +1,4 @@
-import { Entity, Edge, Document, ConnectorContext } from '../data-model/types';
+import { Entity, Edge, Document, ConnectorContext } from '../data-model/types.js';
 
 export class NormalizationService {
 

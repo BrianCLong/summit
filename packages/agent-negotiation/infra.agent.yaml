@@ -1,0 +1,11 @@
+id: "infra-agent-01"
+role: "infrastructure"
+objective: "Maximize resource utilization while maintaining stability"
+constraints:
+  - "cpu_usage < 90%"
+  - "memory_usage < 85%"
+utility_function:
+  - metric: "resource_efficiency"
+    weight: 0.7
+  - metric: "cost"
+    weight: -0.3

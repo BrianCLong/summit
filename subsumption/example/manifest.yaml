@@ -1,0 +1,32 @@
+version: 1
+item:
+  slug: example
+  title: "EXAMPLE ITEM (placeholder until real ITEM provided)"
+  type: "missing"
+  date: "1970-01-01"
+  links: []
+required_checks:
+  status: "assumed"
+  assumed:
+    - "subsumption-bundle-verify"
+pr_stack:
+  - title: "feat(governance): add subsumption bundle contract + verifier gate"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+gates:
+  - name: "subsumption-bundle-verify"
+    path: "scripts/ci/verify_subsumption_bundle.mjs"
+evals:
+  - name: "fixtures-pass-fail"
+    type: "fixture"
+evidence_ids:
+  - "EVD-BUNDLE-GOV-001"
+  - "EVD-BUNDLE-GOV-003"
+  - "EVD-BUNDLE-GOV-004"
+docs:
+  - "docs/standards/subsumption-bundle.md"
+  - "docs/decisions/subsumption-bundle.md"
+  - "docs/ops/runbooks/subsumption-bundle.md"
+  - "docs/security/data-handling/subsumption-bundle.md"
+feature_flags: []

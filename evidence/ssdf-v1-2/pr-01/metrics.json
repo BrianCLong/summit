@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-SSDF12-BNDL-001",
+  "metrics": {
+    "bundle_artifacts": 3,
+    "fixtures_allow": 1,
+    "fixtures_deny": 2
+  }
+}

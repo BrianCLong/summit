@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WorldSim Evidence Report",
+  "type": "object",
+  "required": ["evidence_id", "item_slug", "claims", "decisions", "findings"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "item_slug": { "type": "string" },
+    "claims": { "type": "array", "items": { "type": "string" } },
+    "decisions": { "type": "array", "items": { "type": "object" } },
+    "findings": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": false
+}

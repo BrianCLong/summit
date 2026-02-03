@@ -4,7 +4,7 @@
  * Ensures idempotent request handling
  */
 
-import type { Request, Response, NextFunction, IdempotencyOptions, IdempotencyRecord } from '../types';
+import type { Request, Response, NextFunction, IdempotencyOptions, IdempotencyRecord } from '../types.js';
 
 /**
  * In-memory idempotency storage (for demo, use Redis in production)

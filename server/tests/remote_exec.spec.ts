@@ -1,4 +1,4 @@
-import { remoteExecStep } from '../src/steps/remoteExec';
+import { remoteExecStep } from '../src/steps/remoteExec.js';
 
 test('requires site', async () => {
   await expect(
