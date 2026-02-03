@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: FactGov API
+  description: Government procurement and auditability layer for Summit.
+  version: 0.1.0
+servers:
+  - url: http://localhost:4000/api/factgov
+    description: Local FactGov module
+paths:
+  /vendors:
+    get:
+      summary: List vendors
+      operationId: listVendors
+      tags: [Vendors]
+      responses:
+        '200':
+          description: A list of vendors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vendor'
+    post:
+      summary: Create a vendor
+      operationId: createVendor
+      tags: [Vendors]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VendorInput'
+      responses:
+        '201':
+          description: Created vendor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vendor'
+
+  /rfps:
+    get:
+      summary: List RFPs
+      operationId: listRFPs
+      tags: [RFPs]
+      responses:
+        '200':
+          description: List of RFPs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RFP'
+
+  /contracts:
+    get:
+      summary: List Contracts
+      operationId: listContracts
+      tags: [Contracts]
+      responses:
+        '200':
+          description: List of Contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contract'
+
+  /auditpacks/{id}:
+    get:
+      summary: Get Audit Pack
+      operationId: getAuditPack
+      tags: [Audit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit Pack ZIP
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+
+components:
+  schemas:
+    Vendor:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending_attestation, attested, suspended]
+        createdAt:
+          type: string
+          format: date-time
+    VendorInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    RFP:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        status:
+          type: string
+
+    Contract:
+      type: object
+      properties:
+        id:
+          type: string
+        vendorId:
+          type: string
+        amount:
+          type: number
