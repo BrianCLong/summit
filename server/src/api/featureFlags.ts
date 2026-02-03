@@ -1,13 +1,55 @@
 // server/src/api/featureFlags.ts
-import express, { Request, Response, Router } from 'express';
-import { FeatureFlagService } from '../featureFlags/FeatureFlagService';
-import { ConfigService } from '../featureFlags/ConfigService';
-import { EvaluationContext } from '../featureFlags/types';
+import express, { Request, Response, Router, NextFunction } from 'express';
+import { FeatureFlagService } from '../featureFlags/FeatureFlagService.js';
+import { ConfigService } from '../featureFlags/ConfigService.js';
+import { EvaluationContext } from '../featureFlags/types.js';
+import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.js';
 
 export interface FeatureFlagApiDependencies {
   featureFlagService: FeatureFlagService;
   configService: ConfigService;
 }
+
+/**
+ * Middleware to require authentication
+ * Assumes req.user is set by upstream auth middleware (e.g., passport, JWT)
+ */
+const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: 'You must be logged in to access this resource'
+    });
+  }
+  next();
+};
+
+/**
+ * Middleware to require admin role
+ * Feature flag mutation (create/update/delete) requires admin privileges
+ */
+const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: 'You must be logged in to access this resource'
+    });
+  }
+
+  const user = req.user as any;
+  const isAdmin = user.role === 'admin' || user.roles?.includes('admin') || user.isAdmin === true;
+
+  if (!isAdmin) {
+    return res.status(403).json({
+      error: 'Admin access required',
+      message: 'You do not have permission to modify feature flags',
+      requiredRole: 'admin',
+      yourRole: user.role || 'unknown'
+    });
+  }
+
+  next();
+};
 
 export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Router => {
   const router = express.Router();
@@ -76,14 +118,10 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Create a new feature flag (requires admin privileges)
-  router.post('/', async (req: Request, res: Response) => {
+  router.post('/', ensureAuthenticated, ensureRole(['admin', 'operator']), async (req: Request, res: Response) => {
     try {
       const { key, enabled = false, description, rolloutPercentage, targetUsers, targetGroups, conditions } = req.body;
 
-      // TODO: Add authentication and authorization check here
-      // if (!req.user.isAdmin) {
-      //   return res.status(403).json({ error: 'Admin access required' });
-      // }
 
       // Create the feature flag object
       const newFlag = {
@@ -117,12 +155,11 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Update a feature flag (requires admin privileges)
-  router.put('/:flagKey', async (req: Request, res: Response) => {
+  router.put('/:flagKey', ensureAuthenticated, ensureRole(['admin', 'operator']), async (req: Request, res: Response) => {
     try {
       const { flagKey } = req.params;
       const updateData = req.body;
 
-      // TODO: Add authentication and authorization check here
 
       // Update the flag
       // await deps.featureFlagService.updateFlag(flagKey, updateData);
@@ -140,11 +177,10 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Admin API: Delete a feature flag (requires admin privileges)
-  router.delete('/:flagKey', async (req: Request, res: Response) => {
+  router.delete('/:flagKey', ensureAuthenticated, ensureRole(['admin']), async (req: Request, res: Response) => {
     try {
       const { flagKey } = req.params;
 
-      // TODO: Add authentication and authorization check here
 
       // Delete the flag
       // await deps.featureFlagService.deleteFlag(flagKey);

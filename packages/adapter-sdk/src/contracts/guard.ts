@@ -1,6 +1,6 @@
-import type { AdapterDescriptor, AdapterRequest } from './adapter';
-import { AdapterLifecycleIntent, AdapterLifecycleStage } from './lifecycle';
-import type { PolicyDecision } from './policy';
+import type { AdapterDescriptor, AdapterRequest } from './adapter.js';
+import { AdapterLifecycleIntent, AdapterLifecycleStage } from './lifecycle.js';
+import type { PolicyDecision } from './policy.js';
 
 export interface LifecycleGuardContext {
   adapter: AdapterDescriptor;

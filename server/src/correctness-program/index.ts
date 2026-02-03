@@ -1,11 +1,11 @@
-import { AdminRepairService } from './adminTools';
-import { EventContractRegistry } from './eventContracts';
-import { GovernanceTracker } from './governance';
-import { InvariantRegistry, buildBooleanStateMachine } from './invariants';
-import { MigrationFactory, buildManifest } from './migrationFactory';
-import { RecordTimeline } from './observability';
-import { ReconciliationEngine } from './reconciliation';
-import { TruthMapRegistry, defaultTruthSources } from './domain';
+import { AdminRepairService } from './adminTools.js';
+import { EventContractRegistry } from './eventContracts.js';
+import { GovernanceTracker } from './governance.js';
+import { InvariantRegistry, buildBooleanStateMachine } from './invariants.js';
+import { MigrationFactory, buildManifest } from './migrationFactory.js';
+import { RecordTimeline } from './observability.js';
+import { ReconciliationEngine } from './reconciliation.js';
+import { TruthMapRegistry, defaultTruthSources } from './domain.js';
 import {
   CanonicalIdentityPolicy,
   DomainName,
@@ -13,7 +13,7 @@ import {
   EventSchema,
   MigrationManifest,
   TruthMapEntry,
-} from './types';
+} from './types.js';
 
 export class CorrectnessProgram {
   readonly truthMap = new TruthMapRegistry();

@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-youtu-vl-4b-instruct-LIC-001",
+  "item_slug": "youtu-vl-4b-instruct",
+  "area": "license",
+  "summary": "Captured upstream license text and key restriction for governance gating.",
+  "sources": [{ "ref": "HuggingFace model license file", "type": "license" }],
+  "assumptions": [
+    "Summit will treat geo-restricted artifacts as non-deployable in restricted regions unless legal approves."
+  ]
+}

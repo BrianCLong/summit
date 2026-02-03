@@ -1,7 +1,0 @@
-
-> intelgraph-server@4.0.1 typecheck /Users/brianlong/Developer/summit/server
-> tsc --noEmit
-
-src/routes/i18n.ts(421,1): error TS1005: '}' expected.
- ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  intelgraph-server@4.0.1 typecheck: `tsc --noEmit`
-Exit status 2

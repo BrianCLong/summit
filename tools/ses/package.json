@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ses",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Schema Evolution Simulator (SES) for what-if planning and migrations",
   "type": "module",
   "main": "dist/index.js",
@@ -14,7 +14,12 @@
     "dev": "vitest",
     "start": "node dist/index.js"
   },
-  "keywords": ["schema", "migration", "simulator", "what-if"],
+  "keywords": [
+    "schema",
+    "migration",
+    "simulator",
+    "what-if"
+  ],
   "author": "Summit Platform",
   "license": "MIT",
   "dependencies": {

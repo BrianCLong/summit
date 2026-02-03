@@ -1,2 +1,2 @@
 // Temporal pattern utilities
-export * from './pattern-matcher';
+export * from './pattern-matcher.js';
