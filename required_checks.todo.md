@@ -5,19 +5,6 @@ This file tracks the status of CI check discovery and alignment with branch prot
 ## Current status
 GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
 
-## GitHub UI steps
-
-1. Open repository **Settings** in GitHub.
-2. Navigate to **Branches** -> **Branch protection rules**.
-3. Edit the rule for `main` (or the default branch).
-4. Locate **Require status checks to pass before merging**.
-5. Copy the exact names of the required checks listed there.
-
-## GitHub API outline (optional)
-
-- `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
-- Use a personal access token with read access (do not commit or store tokens).
-
 ## Known check names (Verify these)
 - CI Core (Primary Gate) / CI Core Gate ✅
 - CI / Unit Tests
@@ -28,18 +15,15 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
 - `lint`
 - `typecheck`
 - `build`
 - `test`
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
-
-## Temporary gate names (replace once discovered)
-
-- `ci:cogsec-evidence` - Evidence bundle verification.
-- `ci:cogsec-governance` - Governance lint (future PR).
-- `ci:tests` - Standard test runner.
 
 ## Temporary gates (Summit Harness & Skills)
 - ci/summit-harness-evidence
@@ -48,10 +32,6 @@ Once official names are known, we will alias these jobs or rename them in the wo
 - summit-skillsec
 - summit-evidence
 - summit-harness-mock
-
-## Rename plan
-
-Once official names are confirmed, rename workflows or add aliases to match the branch protection rules exactly.
 
 ## Required checks discovery (one-time for Memory Privacy)
 1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
