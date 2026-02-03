@@ -391,3 +391,44 @@ S423. A simulation apparatus comprising a processor and a memory storing instruc
 - **overlay conflict** → deny; log conflict resolution failure.
 - **overlay permission expansion** → block (overlays never increase permissions).
 - **valid overlay** → allow; log partner overlay hashes.
+
+## Dependent Claims (S481–S510)
+
+### Cluster 1: Eval-only lanes + regression gates for ranking (S481–S490)
+
+S481. The apparatus of claim S1, wherein the apparatus operates an eval-only lane in which candidate defense actions, ranked outputs, and policy decisions are generated and recorded without enabling forwarding to an execution interface.
+S482. The apparatus of claim S481, wherein the apparatus restricts outputs in the eval-only lane to monitoring-only actions or internal advisories and excludes external publishing actions from forwarding.
+S483. The apparatus of claim S1, wherein the apparatus maintains regression suites comprising synthetic test corpora and expected policy outcomes for validating changes to at least one of policy bundles, transition function bundles, models, or tools.
+S484. The apparatus of claim S483, wherein the apparatus executes a regression gate that denies enabling a new bundle hash for production ranking when regression suite results deviate from expected outcomes beyond a threshold.
+S485. The apparatus of claim S483, wherein the apparatus records regression suite results as evidence artifacts linked to the bundle hash under test.
+S486. The apparatus of claim S481, wherein the apparatus generates an eval report comparing ranked outputs produced under a current bundle hash and a proposed bundle hash.
+S487. The apparatus of claim S486, wherein the eval report includes differences in allow, deny, and modify outcomes and differences in forecast or ranking metrics.
+S488. The apparatus of claim S481, wherein the apparatus requires approvals to promote a proposed bundle hash from the eval-only lane to production ranking and records promotion approvals in an audit log.
+S489. The apparatus of claim S1, wherein the replay manifest includes an eval-only lane identifier and promotion status identifier for ranked outputs.
+S490. The apparatus of claim S481, wherein the apparatus enters a safe mode that excludes external publishing actions from ranking when the eval-only lane detects a regression failure for a bundle hash proposed for production.
+
+### Cluster 2: Structured redaction policies + reversible pseudonymization for artifacts (S491–S500)
+
+S491. The apparatus of claim S1, wherein the apparatus applies structured redaction policies that specify redaction rules for fields of replay manifests, audit entries, and evidence artifacts.
+S492. The apparatus of claim S491, wherein the structured redaction policies are stored as versioned redaction policy bundles each having a redaction policy hash.
+S493. The apparatus of claim S491, wherein the apparatus performs reversible pseudonymization of selected identifiers by replacing identifiers with pseudonymization tokens and storing a re-identification key in a protected key store.
+S494. The apparatus of claim S493, wherein the apparatus restricts access to the re-identification key to a protected execution environment.
+S495. The apparatus of claim S493, wherein the apparatus requires dual-control approvals and step-up authentication prior to issuing a re-identification approval token for re-identification of a pseudonymization token.
+S496. The apparatus of claim S495, wherein the apparatus records a re-identification event linked to approver credential identifiers, a justification category, and the re-identification approval token in an audit log.
+S497. The apparatus of claim S491, wherein the apparatus generates a redaction proof artifact indicating which redaction rules were applied to an export or audit view.
+S498. The apparatus of claim S497, wherein the redaction proof artifact is linked to a snapshot hash or replay manifest identifier and recorded in an append-only audit log.
+S499. The apparatus of claim S491, wherein the apparatus denies export of artifacts when a required redaction policy bundle is missing or not attested.
+S500. The apparatus of claim S491, wherein the replay manifest includes redaction policy identifiers and redaction policy hashes for generated exports.
+
+### Cluster 3: Operator training + competency gating in recommendation workflow (S501–S510)
+
+S501. The apparatus of claim S1, wherein the apparatus maintains operator competency credentials indicating completion of training requirements for approving external publishing actions recommended by ranked outputs.
+S502. The apparatus of claim S501, wherein the apparatus denies forwarding an external publishing action for approval when an operator competency credential is missing, expired, or revoked.
+S503. The apparatus of claim S501, wherein training requirements include modules corresponding to at least one of governance policies, jurisdiction constraints, authenticity evaluation, or incident response.
+S504. The apparatus of claim S501, wherein the apparatus enforces recertification by requiring renewal of a competency credential within a time period stored only in a stamp artifact.
+S505. The apparatus of claim S501, wherein the apparatus outputs higher competency tier requirements for actions above a risk threshold and records tier requirements in a replay manifest.
+S506. The apparatus of claim S501, wherein the apparatus outputs a dual-control requirement when a proposed approver does not satisfy a required competency tier.
+S507. The apparatus of claim S501, wherein the apparatus records competency credential identifiers and tier identifiers linked to approval tokens in an audit log.
+S508. The apparatus of claim S501, wherein the apparatus generates aggregated training compliance reports comprising counts of approvals by competency tier and counts of denied approvals due to training status.
+S509. The apparatus of claim S501, wherein the apparatus excludes external publishing actions from ranking when staffing metrics indicate insufficient trained approvers are available.
+S510. The apparatus of claim S501, wherein the apparatus records training policy changes as policy RFC artifacts linked to policy bundle hashes.

@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Forked Hypothesis Ledger (FHL)",
+  "type": "object",
+  "properties": {
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hypothesisId": { "type": "string" },
+          "statement": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["ACTIVE", "REJECTED", "ACCEPTED", "DEFERRED"]
+          },
+          "uncertainty": { "$ref": "ufar.schema.json#/properties/uncertainty" },
+          "evidenceLinks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evidenceId": { "type": "string" },
+                "relationship": { "type": "string", "enum": ["SUPPORTING", "DISCONFIRMING", "NEUTRAL"] }
+              },
+              "required": ["evidenceId", "relationship"]
+            }
+          },
+          "rejectionRationale": {
+            "type": "string",
+            "description": "Mandatory if status is REJECTED."
+          },
+          "parentHypothesisId": {
+            "type": "string",
+            "description": "Reference to the hypothesis this was forked from."
+          }
+        },
+        "required": ["hypothesisId", "statement", "status", "evidenceLinks"]
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "investigationId": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["investigationId"]
+    }
+  },
+  "required": ["hypotheses", "metadata"]
+}
