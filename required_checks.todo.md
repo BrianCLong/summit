@@ -1,24 +1,40 @@
-# Required Checks Todo
+# Required Checks Todo List
 
-## Discovery Steps
+This file tracks the status of CI check discovery and alignment with branch protection rules.
 
-1. **Check GitHub Branch Protection**
-   - Go to Repo Settings -> Branches -> Rulesets/Protection.
-   - List required status checks.
+## Current status
+GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
 
-2. **List Required Checks via API**
-   - Use `gh api repos/:owner/:repo/branches/main/protection/required_status_checks`
+## Known check names (Verify these)
+- CI Core (Primary Gate) / CI Core Gate ✅
+- CI / Unit Tests
+- GA Gate
+- Release Readiness Gate
+- SOC Controls
+- Unit Tests & Coverage
 
-## Planned Gates
+## Temporary names (Mapping needed)
+We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
+- `lint`
+- `typecheck`
+- `build`
+- `test`
 
-1. **Passive Context Budget**
-   - Name: `test-agents-md-budget`
-   - Command: `pytest summit/agent/context/tests/test_agents_md_budget.py`
+Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 
-2. **Sanitizer Check**
-   - Name: `test-agents-md-sanitizer`
-   - Command: `pytest summit/agent/context/tests/test_agents_md_sanitizer.py`
+## Temporary gates (Summit Harness & Skills)
+- ci/summit-harness-evidence
+- ci/summit-tool-policy
+- Use `skills/*` jobs with stable names (If actual required checks differ, add a rename PR that preserves history).
+- summit-skillsec
+- summit-evidence
+- summit-harness-mock
 
-3. **Skill Reliability Gate**
-   - Name: `eval-skill-reliability`
-   - Command: `python3 summit/evals/context_reliability/agentsmd_vs_skills/run.py`
+## Required checks discovery (one-time for Memory Privacy)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
+2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
+4) Add PR to rename temporary checks to required names once known
