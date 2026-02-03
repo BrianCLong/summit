@@ -1,26 +1,19 @@
-name: ci/evidence-validate
+name: Evidence Verification
 
 on:
   push:
-    paths:
-      - "evidence/**"
-      - "tools/evidence_validate.py"
-      - ".github/workflows/evidence.yml"
+    branches: [ main ]
   pull_request:
-    paths:
-      - "evidence/**"
-      - "tools/evidence_validate.py"
-      - ".github/workflows/evidence.yml"
+    branches: [ main ]
 
 jobs:
-  evidence-validate:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - name: Install dependencies
-        run: pip install jsonschema
-      - name: Validate evidence bundle
-        run: python tools/evidence_validate.py --schemas evidence/schemas --index evidence/index.json
+          python-version: '3.11'
+      - name: Run Evidence Verifier
+        run: python tools/ci/verify_evidence.py
