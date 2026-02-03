@@ -1,31 +1,6 @@
 {
-  "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
-  "summary": "SketchDynamics evidence scaffold: PASS",
-  "steps": [
-    {
-      "name": "schema-setup",
-      "status": "pass",
-      "details": {
-        "what_ran": "Dynamic intent evidence skeleton"
-      }
-    },
-    {
-      "name": "fixtures",
-      "status": "pass",
-      "details": {
-        "what_ran": "Fixture bundle registration"
-      }
-    }
-  ],
-  "run_id": "run-002",
-  "item_slug": "sketchdynamics-pipeline",
-  "evd_ids": [
-    "EVD-SKETCHDYNAMICS-PIPELINE-001",
-    "EVD-SKETCHDYNAMICS-CLARIFY-001",
-    "EVD-SKETCHDYNAMICS-REFINE-001"
-  ],
-  "artifacts": {
-    "metrics": "evidence/metrics.json",
-    "stamp": "evidence/stamp.json"
-  }
+  "evidence_id": "EVD-VERA-TEXT-001",
+  "item_slug": "vera-ai-integration-scaffold",
+  "claims": [],
+  "assessments": []
 }
