@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "types": ["node"],
+    "noEmit": false,
+    "baseUrl": ".",
+    "paths": {
+      "@maestro/recursive-context-runtime": ["../../../packages/recursive-context-runtime/dist/index.d.ts"],
+      "@intelgraph/maestro-core": ["../../../packages/maestro-core/dist/engine.d.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}

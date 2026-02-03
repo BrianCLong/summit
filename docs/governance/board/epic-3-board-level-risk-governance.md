@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 3 — Board-Level Risk Governance (risk is a managed portfolio)
 
 1.  **Maintain enterprise risk register with owners, mitigations, ship dates.**

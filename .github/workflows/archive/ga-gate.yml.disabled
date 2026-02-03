@@ -1,0 +1,121 @@
+name: GA Gate
+
+on:
+  pull_request:
+    branches: [main]
+    # SAFETY: Conservative paths-ignore to prevent skipping required checks
+    # This workflow MUST run on any code/config/dependency changes
+    # Only skip for pure documentation changes
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/PULL_REQUEST_TEMPLATE/**"
+      - "LICENSE"
+      - ".gitignore"
+      # NOTE: We do NOT ignore:
+      # - .github/workflows/** (workflow changes must trigger this)
+      # - package.json, pnpm-lock.yaml, .pnpmfile.cjs (dependency changes must trigger this)
+      # - scripts/**, tools/** (build/test script changes must trigger this)
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ga-gate:
+    name: GA Readiness Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.11"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        # version is read from package.json packageManager field
+
+      - name: Install Dependencies
+        run: |
+          make bootstrap
+
+      - name: Run GA Gate
+        # CANONICAL ENTRYPOINT: Uses make ga -> scripts/ga-gate.sh
+        # This is the official GA verification entrypoint (equivalent to pnpm ga:verify)
+        run: |
+          make ga
+
+      - name: Upload SOC evidence report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          retention-days: 14
+          name: soc-evidence-report-${{ github.sha }}
+          path: |
+            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.md
+            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.pdf
+            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.json
+
+      - name: SOC evidence summary
+        if: always()
+        run: |
+          REPORT="dist/evidence/${GITHUB_SHA}/SOC_EVIDENCE_REPORT.json"
+          if [ -f "$REPORT" ]; then
+            STATUS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.validation_status || 'unknown');" "$REPORT")
+            COVERED=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.covered);" "$REPORT")
+            TOTAL=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.total_controls);" "$REPORT")
+            PCT=$(node -e "const r=require('./'+process.argv[1]); const pct=r.summary.total_controls ? Math.round((r.summary.covered/r.summary.total_controls)*100) : 0; console.log(pct);" "$REPORT")
+            NEW_COVERED=$(node -e "const r=require('./'+process.argv[1]); console.log((r.delta.newly_covered||[]).length);" "$REPORT")
+            NEW_DEFERRED=$(node -e "const r=require('./'+process.argv[1]); console.log((r.delta.newly_deferred||[]).length);" "$REPORT")
+            EXP_SOON=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.exceptions_expiring_soon);" "$REPORT")
+            echo "## SOC Evidence Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
+            echo "**Coverage:** ${COVERED}/${TOTAL} (${PCT}%)" >> $GITHUB_STEP_SUMMARY
+            echo "**Delta:** +${NEW_COVERED} covered, -${NEW_DEFERRED} regressions" >> $GITHUB_STEP_SUMMARY
+            echo "**Exceptions expiring soon:** ${EXP_SOON}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Artifacts: soc-evidence-report-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Generate GA Snapshot
+        if: always()
+        run: |
+          mkdir -p artifacts/ga
+          ./scripts/ga/ga-snapshot \
+            --out artifacts/ga/ga_snapshot.json \
+            --allow-missing \
+            --include-ci \
+            --include-release
+
+      - name: Upload GA Report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          retention-days: 14
+          name: ga-report
+          path: artifacts/ga/
+
+      - name: Job Summary
+        if: always()
+        run: |
+          if [ -f artifacts/ga/ga_report.md ]; then
+            cat artifacts/ga/ga_report.md >> $GITHUB_STEP_SUMMARY
+          fi

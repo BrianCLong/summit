@@ -1,0 +1,17 @@
+{
+  "$id": "alignment.schema.json",
+  "type": "object",
+  "required": ["join_strategy", "hash_algo"],
+  "properties": {
+    "join_strategy": {
+      "type": "string",
+      "enum": ["explicit_id", "hashed_join_key", "brokered_mapping"]
+    },
+    "hash_algo": {
+      "type": "string",
+      "enum": ["sha256", "sha512", "none"]
+    },
+    "salt": {"type": "string"}
+  },
+  "additionalProperties": false
+}

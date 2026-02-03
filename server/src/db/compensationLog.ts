@@ -5,8 +5,8 @@
 
 import { Driver, Session, Transaction } from 'neo4j-driver';
 import { randomUUID as uuid } from 'crypto';
-import logger from '../utils/logger';
-import { getNeo4jDriver } from './neo4j';
+import logger from '../utils/logger.js';
+import { getNeo4jDriver } from './neo4j.js';
 
 export interface CompensationEntry {
   id: string;

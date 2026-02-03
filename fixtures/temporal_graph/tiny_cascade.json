@@ -1,0 +1,35 @@
+{
+  "cascade_id": "cascade_demo_001",
+  "events": [
+    {
+      "event_time": "t0",
+      "actor_id": "actor_hash_1",
+      "target_id": "actor_hash_2",
+      "interaction_type": "share"
+    },
+    {
+      "event_time": "t1",
+      "actor_id": "actor_hash_2",
+      "target_id": "actor_hash_3",
+      "interaction_type": "share"
+    },
+    {
+      "event_time": "t2",
+      "actor_id": "actor_hash_4",
+      "target_id": "actor_hash_1",
+      "interaction_type": "reply"
+    },
+    {
+      "event_time": "t3",
+      "actor_id": "actor_hash_5",
+      "target_id": "actor_hash_6",
+      "interaction_type": "share"
+    },
+    {
+      "event_time": "t4",
+      "actor_id": "actor_hash_6",
+      "target_id": "actor_hash_5",
+      "interaction_type": "reply"
+    }
+  ]
+}

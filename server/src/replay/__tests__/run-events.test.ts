@@ -66,7 +66,7 @@ mockPg.pool.query.mockImplementation(async () => ({ rows: [], rowCount: 0 }));
 
 jest.mock('../../db/pg.js', () => mockPg);
 jest.mock('../../db/pg', () => mockPg);
-jest.mock('../../db/pg.ts', () => mockPg);
+jest.mock('../../db/pg.js', () => mockPg);
 
 jest.mock('../../security/crypto/index.js', () => ({
   createDefaultCryptoPipeline: jest.fn().mockImplementation(async () => null),

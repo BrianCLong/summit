@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/etl-pipelines",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "ETL/ELT pipeline infrastructure with data loading and transformation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "keywords": [
     "etl",

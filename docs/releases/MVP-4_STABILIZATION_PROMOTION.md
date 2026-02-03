@@ -1,3 +1,7 @@
+> **ARCHIVED: GA PROGRAM v1**
+> This document is part of the GA Program v1 archive. It is read-only and no longer active.
+> **Date:** 2026-01-25
+
 # MVP-4 Stabilization RC → GA Promotion Guide
 
 **Authority**: This document defines the canonical procedure for promoting MVP-4 stabilization release candidates to general availability.

@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Decision Audit Retention Note
 
 To align with zero-trust governance, all policy decision events are now sent to the centralized audit bus and marked for retention. The Trust Propagation Controller publishes structured `policy_decision` events (actor, action, outcome, trust score, correlation IDs) into the SIEM-backed audit pipeline to satisfy AU-2/AU-12 retention requirements.
