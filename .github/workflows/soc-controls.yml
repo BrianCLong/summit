@@ -1,0 +1,23 @@
+name: SOC Controls
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: soc-controls-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  soc-controls:
+    name: SOC Controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'

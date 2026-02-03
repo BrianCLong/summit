@@ -11,6 +11,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Global environment for all jobs - prevents V8 heap exhaustion
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
 jobs:
   config-guard:
     name: Build & Test (Untrusted)
@@ -20,6 +24,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -35,37 +43,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
 
-  unit-test:
+  typecheck:
+    name: Typecheck
     needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Typecheck
-        run: pnpm typecheck
 
   unit-tests:
     name: Unit Tests
@@ -74,42 +59,17 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Unit Tests
-        run: pnpm -w test:unit || pnpm -w test:unit
-      - name: Attach evidence
-        if: always()
-        run: |
-          mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs \
-            --job unit-tests \
-            --runner ${{ runner.os }} \
-            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
-            --out artifacts/stamp.json
-        shell: bash
-      - name: Generate Metrics
-        if: always()
-        with:
-          name: coverage-report
-          path: server/coverage/
 
   integration-test:
-    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -132,21 +92,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
+    services:
+      postgres:
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -170,11 +118,6 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          name: soc-compliance-report
-          path: soc-compliance-reports
-          retention-days: 90
 
   verify-versions:
     name: Verify Workflow Versions

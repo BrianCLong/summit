@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Cohort, CohortEvaluationResult, CohortMember } from './types.ts';
-import { TelemetryEvent } from '../telemetry/types.ts';
+import { Cohort, CohortEvaluationResult, CohortMember } from './types.js';
+import { TelemetryEvent } from '../telemetry/types.js';
 
 // Helper to read logs - reusing the structure from TelemetryService
 // In production, this would query a DB or OLAP store (ClickHouse, Snowflake, etc.)

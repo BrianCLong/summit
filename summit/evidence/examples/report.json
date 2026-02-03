@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-ATP-LATENT-EVIDENCE-002",
+  "summary": "Example report for evidence bundle.",
+  "environment": { "os": "linux", "python": "3.10" },
+  "backend": "text_cot",
+  "artifacts": []
+}

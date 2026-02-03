@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { CohortEvaluator } from './CohortEvaluator.ts';
-import { Cohort } from './types.ts';
+import { CohortEvaluator } from './CohortEvaluator.js';
+import { Cohort } from './types.js';
 import path from 'path';
 
 // In a real app, inject config

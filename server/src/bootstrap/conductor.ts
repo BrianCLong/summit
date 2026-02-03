@@ -6,16 +6,16 @@ import { ApolloServer } from '@apollo/server';
 import express, { Express } from 'express';
 // import { expressMiddleware } from '@as-integrations/express4';
 import cors from 'cors';
-import { typeDefs as schema } from '../graphql/schema/index.ts';
-import logger from '../config/logger';
+import { typeDefs as schema } from '../graphql/schema/index.js';
+import logger from '../config/logger.js';
 import {
   initializeConductorSystem,
   shutdownConductorSystem,
-} from '../conductor/config.ts';
-import GraphOpsServer from '../conductor/mcp/servers/graphops-server.ts';
-import FilesServer from '../conductor/mcp/servers/files-server.ts';
-import { createConductorGraphQLPlugin } from '../conductor/observability/index.ts';
-import { prometheusConductorMetrics } from '../conductor/observability/prometheus.ts';
+} from '../conductor/config.js';
+import GraphOpsServer from '../conductor/mcp/servers/graphops-server.js';
+import FilesServer from '../conductor/mcp/servers/files-server.js';
+import { createConductorGraphQLPlugin } from '../conductor/observability/index.js';
+import { prometheusConductorMetrics } from '../conductor/observability/prometheus.js';
 
 const conductorLogger = logger.child({ name: 'conductor-bootstrap' });
 
@@ -86,7 +86,7 @@ export async function wireConductor(options: {
     if (options.app) {
       options.app.get('/health/conductor', async (req, res) => {
         try {
-          const { getConductorHealth } = await import('../conductor/metrics');
+          const { getConductorHealth } = await import('../conductor/metrics.js');
           const health = await getConductorHealth();
 
           const statusCode =

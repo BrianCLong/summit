@@ -10,6 +10,7 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/summit/orchestration/runtime/internal/model"
 )
@@ -17,6 +18,7 @@ import (
 // Store persists workflow state and telemetry events.
 type Store struct {
 	db     *sql.DB
+	rdb    *redis.Client
 	mu     sync.RWMutex
 	runs   map[string]*model.Status
 	events map[string][]RunEvent
@@ -32,7 +34,7 @@ type RunEvent struct {
 }
 
 // OpenPostgres opens a Postgres-backed store. If dsn is empty the store operates in-memory.
-func OpenPostgres(ctx context.Context, dsn string) (*Store, error) {
+func OpenPostgres(ctx context.Context, dsn string, redisAddr string) (*Store, error) {
 	if dsn == "" {
 		return NewInMemoryStore(), nil
 	}
@@ -51,9 +53,30 @@ func OpenPostgres(ctx context.Context, dsn string) (*Store, error) {
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
 
-	store := &Store{db: db, runs: make(map[string]*model.Status), events: make(map[string][]RunEvent)}
+	var rdb *redis.Client
+	if redisAddr != "" {
+		opts, err := redis.ParseURL(redisAddr)
+		if err != nil {
+			opts = &redis.Options{Addr: redisAddr}
+		}
+		rdb = redis.NewClient(opts)
+		if err := rdb.Ping(ctx).Err(); err != nil {
+			_ = db.Close()
+			return nil, fmt.Errorf("ping redis: %w", err)
+		}
+	}
+
+	store := &Store{
+		db:     db,
+		rdb:    rdb,
+		runs:   make(map[string]*model.Status),
+		events: make(map[string][]RunEvent),
+	}
 	if err := store.ensureSchema(context.Background()); err != nil {
 		_ = db.Close()
+		if rdb != nil {
+			_ = rdb.Close()
+		}
 		return nil, err
 	}
 	return store, nil
@@ -69,10 +92,21 @@ func NewInMemoryStore() *Store {
 
 // Close closes the underlying database if present.
 func (s *Store) Close() error {
-	if s.db != nil {
-		return s.db.Close()
+	var err error
+	if s.rdb != nil {
+		if rErr := s.rdb.Close(); rErr != nil {
+			err = rErr
+		}
 	}
-	return nil
+	if s.db != nil {
+		if dbErr := s.db.Close(); dbErr != nil {
+			if err != nil {
+				return fmt.Errorf("redis: %v, db: %v", err, dbErr)
+			}
+			return dbErr
+		}
+	}
+	return err
 }
 
 func (s *Store) ensureSchema(ctx context.Context) error {
@@ -89,14 +123,16 @@ func (s *Store) ensureSchema(ctx context.Context) error {
       updated_at timestamptz not null default now()
     )`,
 		`create table if not exists chronos_events (
-      id bigserial primary key,
+      id bigserial,
       run_id text not null references chronos_runs(run_id) on delete cascade,
       node_id text not null,
       event_type text not null,
       channel text not null,
       payload jsonb,
-      created_at timestamptz not null default now()
-    )`,
+      created_at timestamptz not null default now(),
+      primary key (id, created_at)
+    ) partition by range (created_at)`,
+		`create table if not exists chronos_events_default partition of chronos_events default`,
 	}
 	for _, stmt := range stmts {
 		if _, err := s.db.ExecContext(ctx, stmt); err != nil {
@@ -135,12 +171,15 @@ func (s *Store) BeginRun(ctx context.Context, runID, actor string, tags map[stri
 	if err != nil {
 		return err
 	}
-	_, err = s.db.ExecContext(ctx, `
+	if _, err := s.db.ExecContext(ctx, `
     insert into chronos_runs (run_id, actor, state, current, tags)
     values ($1, $2, $3, $4, $5)
     on conflict (run_id) do update set state = excluded.state, updated_at = now()
-  `, runID, actor, "Running", "", tagsJSON)
-	return err
+  `, runID, actor, "Running", "", tagsJSON); err != nil {
+		return err
+	}
+
+	return s.invalidateRunCache(ctx, runID)
 }
 
 // MarkCurrent updates the active node for a run.
@@ -158,8 +197,11 @@ func (s *Store) MarkCurrent(ctx context.Context, runID, node string) error {
 	if s.db == nil {
 		return nil
 	}
-	_, err := s.db.ExecContext(ctx, `update chronos_runs set current = $2, updated_at = now() where run_id = $1`, runID, node)
-	return err
+	if _, err := s.db.ExecContext(ctx, `update chronos_runs set current = $2, updated_at = now() where run_id = $1`, runID, node); err != nil {
+		return err
+	}
+
+	return s.setRunCache(ctx, status)
 }
 
 // RecordHTTPCall stores metadata for an HTTP activity.
@@ -229,8 +271,10 @@ func (s *Store) Succeed(ctx context.Context, runID string) error {
 	if s.db == nil {
 		return nil
 	}
-	_, err := s.db.ExecContext(ctx, `update chronos_runs set state = 'Succeeded', current = '', updated_at = now() where run_id = $1`, runID)
-	return err
+	if _, err := s.db.ExecContext(ctx, `update chronos_runs set state = 'Succeeded', current = '', updated_at = now() where run_id = $1`, runID); err != nil {
+		return err
+	}
+	return s.invalidateRunCache(ctx, runID)
 }
 
 // Fail marks a run as failed with a message stored as the current field for quick diagnostics.
@@ -249,18 +293,49 @@ func (s *Store) Fail(ctx context.Context, runID, message string) error {
 	if s.db == nil {
 		return nil
 	}
-	_, err := s.db.ExecContext(ctx, `update chronos_runs set state = 'Failed', current = $2, updated_at = now() where run_id = $1`, runID, message)
+	if _, err := s.db.ExecContext(ctx, `update chronos_runs set state = 'Failed', current = $2, updated_at = now() where run_id = $1`, runID, message); err != nil {
+		return err
+	}
+	return s.invalidateRunCache(ctx, runID)
+}
+
+// Kill terminates a run immediately with a reason (Emergency Kill Switch).
+func (s *Store) Kill(ctx context.Context, runID, reason string) error {
+	s.mu.Lock()
+	status, ok := s.runs[runID]
+	if !ok {
+		status = &model.Status{RunID: runID}
+		s.runs[runID] = status
+	}
+	status.State = "Killed"
+	status.Current = reason
+	status.Updated = time.Now().UTC()
+	s.mu.Unlock()
+
+	if s.db == nil {
+		return nil
+	}
+	_, err := s.db.ExecContext(ctx, `update chronos_runs set state = 'Killed', current = $2, updated_at = now() where run_id = $1`, runID, reason)
 	return err
 }
 
 // Status fetches the current status for a run.
 func (s *Store) Status(ctx context.Context, runID string) (*model.Status, error) {
+	// Try memory cache first
 	s.mu.RLock()
 	status, ok := s.runs[runID]
 	s.mu.RUnlock()
 	if ok {
 		copy := *status
 		return &copy, nil
+	}
+
+	// Try Redis cache
+	if cached, err := s.getRunCache(ctx, runID); err == nil && cached != nil {
+		s.mu.Lock()
+		s.runs[runID] = cached
+		s.mu.Unlock()
+		return cached, nil
 	}
 
 	if s.db == nil {
@@ -284,7 +359,46 @@ func (s *Store) Status(ctx context.Context, runID string) (*model.Status, error)
 	s.runs[runID] = &fetched
 	s.mu.Unlock()
 
+	// Update Redis cache
+	_ = s.setRunCache(ctx, &fetched)
+
 	return &fetched, nil
+}
+
+func (s *Store) getRunCache(ctx context.Context, runID string) (*model.Status, error) {
+	if s.rdb == nil {
+		return nil, nil
+	}
+	val, err := s.rdb.Get(ctx, "run:"+runID).Result()
+	if err == redis.Nil {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var status model.Status
+	if err := json.Unmarshal([]byte(val), &status); err != nil {
+		return nil, err
+	}
+	return &status, nil
+}
+
+func (s *Store) setRunCache(ctx context.Context, status *model.Status) error {
+	if s.rdb == nil {
+		return nil
+	}
+	val, err := json.Marshal(status)
+	if err != nil {
+		return err
+	}
+	return s.rdb.Set(ctx, "run:"+status.RunID, val, 1*time.Hour).Err()
+}
+
+func (s *Store) invalidateRunCache(ctx context.Context, runID string) error {
+	if s.rdb == nil {
+		return nil
+	}
+	return s.rdb.Del(ctx, "run:"+runID).Err()
 }
 
 // Events returns recorded activity events for the run.

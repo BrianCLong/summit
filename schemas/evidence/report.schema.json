@@ -2,37 +2,53 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Report",
   "type": "object",
-  "required": ["evidence_id", "item_slug"],
+  "required": ["evidence_id", "item_slug", "patterns", "claims", "assessments"],
   "properties": {
     "evidence_id": { "type": "string" },
     "item_slug": { "type": "string" },
-    "run_id": { "type": "string" },
-    "evd_ids": { "type": "array", "items": { "type": "string" } },
-    "summary": {
-      "anyOf": [
-        { "type": "string" },
-        {
-          "type": "object",
-          "required": ["what_ran", "result"],
-          "properties": {
-            "what_ran": { "type": "string" },
-            "result": { "type": "string" }
-          },
-          "additionalProperties": true
+    "patterns": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["insider", "supply_chain", "fimi", "wireless", "agentic_ai", "humint", "ally_risk"]
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "confidence", "supported_by"],
+        "properties": {
+          "text": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "supported_by": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["url", "publisher"],
+              "properties": {
+                "url": { "type": "string", "format": "uri" },
+                "publisher": { "type": "string" }
+              }
+            }
+          }
         }
-      ]
+      }
     },
-    "artifacts": {
-      "type": "object",
-      "properties": {
-        "metrics": { "type": "string" },
-        "stamp": { "type": "string" }
-      },
-      "additionalProperties": true
-    },
-    "claims": { "type": "array", "items": { "type": "string" } },
-    "decisions": { "type": "array", "items": { "type": "object" } },
-    "findings": { "type": "array", "items": { "type": "object" } }
+    "assessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "recommended_controls"],
+        "properties": {
+          "pattern": { "type": "string" },
+          "recommended_controls": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

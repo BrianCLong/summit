@@ -2,8 +2,8 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { AuditLedger, hashPayload, safePayloadFromEvent, verifyAuditLedgerChain } from '../ledger.ts';
-import { LogEventBus } from '../../logging/logEventBus.ts';
+import { AuditLedger, hashPayload, safePayloadFromEvent, verifyAuditLedgerChain } from '../ledger.js';
+import { LogEventBus } from '../../logging/logEventBus.js';
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

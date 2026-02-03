@@ -16,7 +16,7 @@ describe('responseCache', () => {
       getCachedJson,
       setCachedJson,
       flushLocalCache,
-    } = await import('../responseCache.ts');
+    } = await import('../responseCache.js');
 
     flushLocalCache();
     const key = buildCacheKey('ns', 'item');

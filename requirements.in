@@ -19,3 +19,7 @@ requests
 urllib3>=2.6.0
 openlineage-dbt
 jsonschema
+beautifulsoup4
+deepdiff
+neo4j
+psycopg2-binary

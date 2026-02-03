@@ -2,8 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buildBundle } from '../src/bundle/builder';
-import { verifyBundle } from '../src/bundle/verifier';
+import { buildBundle } from '../src/bundle/builder.js';
+import { verifyBundle } from '../src/bundle/verifier.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

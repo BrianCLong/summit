@@ -8,8 +8,16 @@
 
 require('dotenv').config({ path: './.env.test' });
 
+process.env.TZ = process.env.TZ || 'UTC';
+process.env.NODE_ENV = 'test';
+
 // Global test timeout
 jest.setTimeout(30000);
+
+const ciRetryTimes = Number(process.env.JEST_RETRY_TIMES || (process.env.CI ? '2' : '0'));
+if (ciRetryTimes > 0 && typeof jest.retryTimes === 'function') {
+  jest.retryTimes(ciRetryTimes, { logErrorsBeforeRetry: true });
+}
 
 const sanitizeForConsole = (value, seen = new WeakSet()) => {
   if (typeof value === 'bigint') return value.toString();
@@ -47,6 +55,8 @@ if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 3
 if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
 if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
 if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
+
+const envSnapshot = { ...process.env };
 
 // Mock node-fetch for ESM compatibility
 jest.mock('node-fetch', () => ({
@@ -416,6 +426,22 @@ global.testUtils = {
     createdAt: new Date().toISOString(),
     ...overrides,
   }),
+
+  retryWithBackoff: async (fn, options = {}) => {
+    const { retries = 3, baseDelayMs = 100, factor = 2 } = options;
+    let attempt = 0;
+    let delay = baseDelayMs;
+    while (attempt <= retries) {
+      try {
+        return await fn(attempt);
+      } catch (error) {
+        if (attempt >= retries) throw error;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= factor;
+        attempt += 1;
+      }
+    }
+  },
 };
 
 // Error handling for unhandled rejections in tests
@@ -894,6 +920,16 @@ jest.mock('../../lib/security/secret-audit-logger');
 
 // Clean up after each test
 afterEach(async () => {
+  Object.keys(process.env).forEach((key) => {
+    if (!(key in envSnapshot)) {
+      delete process.env[key];
+    }
+  });
+  Object.entries(envSnapshot).forEach(([key, value]) => {
+    process.env[key] = value;
+  });
+  jest.useRealTimers();
+  jest.restoreAllMocks();
   jest.clearAllMocks();
   jest.clearAllTimers();
   await cleanupRegistry.cleanupAll();

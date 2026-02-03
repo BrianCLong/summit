@@ -1,4 +1,4 @@
-import { Document, Chunk } from '../data-model/types';
+import { Document, Chunk } from '../data-model/types.js';
 
 export class ChunkingService {
 

@@ -1,10 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Metrics",
-  "type": "object",
-  "required": ["evidence_id", "metrics"],
-  "properties": {
-    "evidence_id": {"type": "string"},
-    "metrics": {"type": "object", "additionalProperties": true}
-  }
+  "title": "summit evidence metrics",
+  "anyOf": [
+    {
+      "type": "object",
+      "required": ["run_id", "evidence_id", "metrics"],
+      "properties": {
+        "run_id": { "type": "string" },
+        "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9-]+$" },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "nodes_written": { "type": "integer", "minimum": 0 },
+            "edges_written": { "type": "integer", "minimum": 0 },
+            "validation_errors": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "required": ["metrics"],
+      "properties": {
+        "evidence_id": { "type": "string" },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": { "type": ["number", "string", "boolean"] }
+        }
+      },
+      "additionalProperties": false
+    }
+  ]
 }

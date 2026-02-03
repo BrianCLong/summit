@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
 import { getPostgresPool } from '../config/database.js';
-import { RetentionPolicy } from './types';
+import { RetentionPolicy } from './types.js';
 
 export interface RetentionStrategy {
   shouldRetain(item: any, policy: RetentionPolicy): boolean;

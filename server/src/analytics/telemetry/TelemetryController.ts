@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { telemetryService } from './TelemetryService.ts';
+import { telemetryService } from './TelemetryService.js';
 
 export const handleTelemetryEvent = (req: Request, res: Response) => {
   try {

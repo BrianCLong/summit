@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Funnel, FunnelReport, FunnelStep } from './types.ts';
-import { TelemetryEvent } from '../telemetry/types.ts';
+import { Funnel, FunnelReport, FunnelStep } from './types.js';
+import { TelemetryEvent } from '../telemetry/types.js';
 
 export class FunnelService {
     private logDir: string;

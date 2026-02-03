@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
-import { RetentionService } from '../RetentionService.ts';
+import { RetentionService } from '../RetentionService.js';
 
 const TEST_LOG_DIR = path.join(__dirname, 'test_logs_retention_' + Date.now());
 

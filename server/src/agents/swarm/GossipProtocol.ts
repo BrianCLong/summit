@@ -1,7 +1,7 @@
 import Redis from 'ioredis';
-import { getRedisClient } from '../../config/database.ts';
-import { SwarmMessage } from './types.ts';
-import logger from '../../utils/logger.ts';
+import { getRedisClient } from '../../config/database.js';
+import { SwarmMessage } from './types.js';
+import logger from '../../utils/logger.js';
 import { randomUUID } from 'crypto';
 
 export class GossipProtocol {

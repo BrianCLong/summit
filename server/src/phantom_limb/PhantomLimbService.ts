@@ -1,7 +1,7 @@
 // server/src/phantom_limb/PhantomLimbService.ts
 
 import { randomUUID } from 'crypto';
-import { AnalystArtifacts, DigitalGhost, GhostQueryResponse } from './phantom_limb.types';
+import { AnalystArtifacts, DigitalGhost, GhostQueryResponse } from './phantom_limb.types.js';
 
 /**
  * Service for managing the (simulated) resurrection of deceased analysts.

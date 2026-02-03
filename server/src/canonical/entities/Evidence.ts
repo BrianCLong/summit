@@ -6,8 +6,8 @@
  * with provenance tracking and policy labels.
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
-import { PolicyLabel } from './Decision.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { PolicyLabel } from './Decision.js';
 
 export interface EvidenceSource {
   /** Source system identifier */

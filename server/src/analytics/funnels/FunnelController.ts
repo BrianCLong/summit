@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { FunnelService } from './FunnelService.ts';
-import { Funnel } from './types.ts';
+import { FunnelService } from './FunnelService.js';
+import { Funnel } from './types.js';
 import path from 'path';
 
 const LOG_DIR = process.env.TELEMETRY_LOG_DIR || path.join(process.cwd(), 'logs', 'telemetry');

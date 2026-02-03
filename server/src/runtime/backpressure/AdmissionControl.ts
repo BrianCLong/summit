@@ -1,6 +1,6 @@
 
 import { Request, Response, NextFunction } from 'express';
-import { BackpressureController, PriorityClass } from './BackpressureController.ts';
+import { BackpressureController, PriorityClass } from './BackpressureController.js';
 
 /**
  * Middleware to enforce admission control.

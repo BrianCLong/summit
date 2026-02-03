@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { RetentionService } from './RetentionService.ts';
+import { RetentionService } from './RetentionService.js';
 import path from 'path';
 
 // Config

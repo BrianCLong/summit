@@ -1,0 +1,18 @@
+{
+  "queries": [
+    {
+      "id": "discovery-breadth",
+      "phase": "DISCOVERY",
+      "cypher": "MATCH (n:Entity {id: $id})-[r*1..2]-(m) RETURN n, r, m",
+      "tenant_scope": true
+    },
+    {
+      "id": "justification-proof",
+      "phase": "JUSTIFICATION",
+      "cypher": "MATCH (n:Entity {id: $id})-[r:SUPPORTED_BY]->(m:Entity) RETURN n, r, m ORDER BY m.id LIMIT 10",
+      "max_rows": 10,
+      "projection_allowlist": ["n", "r", "m"],
+      "tenant_scope": true
+    }
+  ]
+}

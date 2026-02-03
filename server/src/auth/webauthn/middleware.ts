@@ -1,6 +1,6 @@
 // Mock WebAuthn middleware
 import { Request, Response, NextFunction } from 'express';
-import { cfg } from '../../config.ts'; // Assuming config exists
+import { cfg } from '../../config.js'; // Assuming config exists
 
 export const requireStepUp = (req: Request, res: Response, next: NextFunction) => {
     // In production, check for MFA/Step-Up token

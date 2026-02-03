@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { SecretDriftDetector } from '../secret-drift';
+import { SecretDriftDetector } from '../secret-drift.js';
 import path from 'path';
 
 describe('SecretDriftDetector', () => {
@@ -46,7 +46,7 @@ describe('SecretDriftDetector', () => {
 
       // Mock readdirSync and statSync for traversal
       mockFs.readdirSync.mockImplementation((dir: string) => {
-        if (dir === path.resolve(process.cwd(), 'src')) return ['leaky.ts'];
+        if (dir === path.resolve(process.cwd(), 'src')) return ['leaky.js'];
         return [];
       });
       mockFs.statSync.mockReturnValue({ isDirectory: () => false });
@@ -55,7 +55,7 @@ describe('SecretDriftDetector', () => {
       const leaks = detector.detectLeakedSecrets();
       expect(leaks).toHaveLength(1);
       expect(leaks[0].secret).toBe('JWT_SECRET');
-      expect(leaks[0].file).toContain('leaky.ts');
+      expect(leaks[0].file).toContain('leaky.js');
     });
   });
 
