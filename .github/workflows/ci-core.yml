@@ -33,7 +33,7 @@ env:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
@@ -51,7 +51,7 @@ jobs:
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -70,7 +70,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -91,7 +91,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
 
@@ -148,7 +148,7 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
 
@@ -172,7 +172,7 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -215,7 +215,7 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
 
@@ -235,7 +235,7 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -267,7 +267,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Playwright)
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
@@ -304,7 +304,7 @@ jobs:
 
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       checks: write
@@ -337,7 +337,7 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       actions: read
@@ -371,7 +371,7 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs:
       - config-preflight
       - lint-typecheck

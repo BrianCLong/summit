@@ -68,7 +68,7 @@ jobs:
           path: |
             gitleaks-report.json
             snyk-report.json
-          retention-days: 90
+          retention-days: 30
 
   policy-compliance:
     name: Policy Compliance
@@ -104,7 +104,7 @@ jobs:
           name: opa-test-results
           path: |
             policies/test-results.json
-          retention-days: 90
+          retention-days: 30
 
   governance-checks:
     name: Governance Checks
@@ -219,7 +219,7 @@ jobs:
         with:
           name: sbom
           path: sbom.json
-          retention-days: 90 # 2 years retention
+          retention-days: 30 # 30 days retention
 
       - name: Upload SLSA provenance
         uses: actions/upload-artifact@v4 # v4.1.0
@@ -227,7 +227,7 @@ jobs:
         with:
           name: slsa-provenance
           path: provenance.json
-          retention-days: 90 # 2 years retention
+          retention-days: 30 # 30 days retention
 
       - name: Prepare evidence directory
         run: |
