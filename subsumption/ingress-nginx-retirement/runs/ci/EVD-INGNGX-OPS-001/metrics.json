@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-INGNGX-OPS-001",
+  "item_slug": "ingress-nginx-retirement",
+  "metrics": {
+    "monitor_enabled_by_default": 0,
+    "scan_scope_paths": 5
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "shared memory orch evidence report",
+  "type": "object",
+  "required": ["evidence_id", "summary", "artifacts"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-shared-memory-orch-[0-9]{3}$"
+    },
+    "item": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

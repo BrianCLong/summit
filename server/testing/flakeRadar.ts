@@ -1,5 +1,5 @@
-import { logger } from '../utils/logger';
-import { recordTestMetrics } from '../observability/metrics';
+import { logger } from '../utils/logger.js';
+import { recordTestMetrics } from '../observability/metrics.js';
 
 export interface FlakeAnalysis {
   testName: string;

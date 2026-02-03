@@ -1,9 +1,9 @@
-import { getPostgresPool } from '../db/postgres';
-import { TABLE_MAPPINGS, LIFECYCLE_POLICIES, getRetentionDays } from './policy';
-import { DataCategory } from './types';
-import baseLogger from '../config/logger';
-import { LegalHoldManager } from './legal-hold';
-import { LifecycleEvidence } from './evidence';
+import { getPostgresPool } from '../db/postgres.js';
+import { TABLE_MAPPINGS, LIFECYCLE_POLICIES, getRetentionDays } from './policy.js';
+import { DataCategory } from './types.js';
+import baseLogger from '../config/logger.js';
+import { LegalHoldManager } from './legal-hold.js';
+import { LifecycleEvidence } from './evidence.js';
 
 const logger = baseLogger.child({ name: 'retention-manager' });
 

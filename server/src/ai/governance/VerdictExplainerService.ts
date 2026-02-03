@@ -16,8 +16,8 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
-import { GovernanceVerdict, PolicyAction } from '../../governance/types.ts';
-import logger from '../../utils/logger.ts';
+import { GovernanceVerdict, PolicyAction } from '../../governance/types.js';
+import logger from '../../utils/logger.js';
 import {
   ExplainedVerdict,
   TechnicalDetail,
@@ -31,8 +31,8 @@ import {
   AIGovernanceConfig,
   ProvenanceMetadata,
   ChainOfCustodyEntry,
-} from './types.ts';
-import { GovernanceLLMClient, getGovernanceLLMClient } from './llm/index.ts';
+} from './types.js';
+import { GovernanceLLMClient, getGovernanceLLMClient } from './llm/index.js';
 
 // =============================================================================
 // Explanation Templates

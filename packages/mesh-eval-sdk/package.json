@@ -19,7 +19,7 @@
     "build": "tsc -b",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   },

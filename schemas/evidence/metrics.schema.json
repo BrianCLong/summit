@@ -2,6 +2,13 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Metrics",
   "type": "object",
-  "description": "Generic metrics schema allowing module-specific metrics.",
-  "additionalProperties": true
+  "required": ["evidence_id", "metrics"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
+  },
+  "additionalProperties": false
 }

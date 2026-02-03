@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { simpleMovingAverage, exponentialSmoothing, linearTrendForecast } from '../forecasting';
+import { simpleMovingAverage, exponentialSmoothing, linearTrendForecast } from '../forecasting.js';
 
 describe('Forecasting', () => {
     const linearData = [1, 2, 3, 4, 5];
