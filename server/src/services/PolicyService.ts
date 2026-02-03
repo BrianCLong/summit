@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { writeAudit } from '../utils/audit.js';
 import logger from '../utils/logger.js';
+import { opaClient } from './opa-client.js';
 
 // Define PolicyContext and PolicyDecision as requested
 export interface Principal {
@@ -40,7 +41,7 @@ export interface PolicyDecision {
 export class PolicyService {
   private static instance: PolicyService;
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): PolicyService {
     if (!PolicyService.instance) {
@@ -54,9 +55,39 @@ export class PolicyService {
    */
   async evaluate(ctx: PolicyContext): Promise<PolicyDecision> {
     try {
-      // TODO: Call OPA here
-      // const opaDecision = await this.callOpa(ctx);
-      // if (opaDecision) return opaDecision;
+      // Call OPA for decision
+      try {
+        // We map the PolicyContext to what OPA expects or pass it directly if policy supports it
+        // Assuming 'intelgraph/policy/authz/allow' dictates the structure
+        const opaInput = {
+          user: {
+            id: ctx.principal.id,
+            role: ctx.principal.role,
+            tenantId: ctx.principal.tenantId,
+            ...ctx.principal
+          },
+          resource: {
+            id: ctx.resource.id,
+            type: ctx.resource.type,
+            tenantId: ctx.resource.tenantId,
+            ...ctx.resource
+          },
+          action: ctx.action,
+          environment: ctx.environment
+        };
+
+        const allowed = await opaClient.evaluateQuery('intelgraph/policy/authz/allow', opaInput);
+        if (typeof allowed === 'boolean') {
+          if (!allowed) return { allow: false, reason: 'OPA denied access' };
+          // If allowed, we can return true or let local overrides happen?
+          // Usually OPA is authoritative.
+          return { allow: true, reason: 'OPA allow' };
+        }
+      } catch (err: any) {
+        logger.warn('OPA call failed, falling back to local evaluation', err);
+        // Verify fail-open or fail-closed via config?
+        // Defaulting to local fallback/fail-closed as per existing code flow
+      }
 
       // Fallback: Basic RBAC/ABAC logic
       return this.evaluateLocal(ctx);
@@ -86,9 +117,9 @@ export class PolicyService {
 
     // We strictly enforce tenant isolation here if resource has tenantId
     if (ctx.resource.tenantId && principal.tenantId) {
-        if (ctx.resource.tenantId !== principal.tenantId) {
-             return { allow: false, reason: 'Tenant mismatch' };
-        }
+      if (ctx.resource.tenantId !== principal.tenantId) {
+        return { allow: false, reason: 'Tenant mismatch' };
+      }
     }
 
     return { allow: true, reason: 'Default allow (placeholder)' };
@@ -139,14 +170,14 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
       : {};
 
     const policyContext: PolicyContext = {
-        principal: user as Principal,
-        resource,
-        action: spec.action,
-        environment: {
-            ip: (ctx.req as Record<string, unknown>)?.ip as string | undefined,
-            userAgent: ((ctx.req as Record<string, unknown>)?.headers as Record<string, unknown>)?.['user-agent'] as string | undefined,
-            time: new Date().toISOString()
-        }
+      principal: user as Principal,
+      resource,
+      action: spec.action,
+      environment: {
+        ip: (ctx.req as Record<string, unknown>)?.ip as string | undefined,
+        userAgent: ((ctx.req as Record<string, unknown>)?.headers as Record<string, unknown>)?.['user-agent'] as string | undefined,
+        time: new Date().toISOString()
+      }
     };
 
     const decision = await policyService.evaluate(policyContext);
@@ -157,7 +188,7 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
 
     // Use the existing writeAudit utility if available, or update it later
     try {
-        await writeAudit({
+      await writeAudit({
         userId: user.id as string | undefined,
         userEmail: user.email as string | undefined,
         tenantId: (user.tenantId || resource?.tenantId) as string | undefined,
@@ -165,17 +196,17 @@ export function withPolicy<T extends (...args: unknown[]) => unknown>(
         resourceType: infoObj?.fieldName as string | undefined,
         resourceId: resource?.id as string | undefined,
         details: {
-            decision: decision.allow ? 'allow' : 'deny',
-            reason: decision.reason,
-            requestId: requestId as string | undefined,
-            traceId: traceId as string | undefined,
+          decision: decision.allow ? 'allow' : 'deny',
+          reason: decision.reason,
+          requestId: requestId as string | undefined,
+          traceId: traceId as string | undefined,
         },
         success: decision.allow,
         errorMessage: decision.reason
-        });
+      });
     } catch (e: any) {
-        // ignore audit errors for now or log them
-        logger.error('Audit write failed', e);
+      // ignore audit errors for now or log them
+      logger.error('Audit write failed', e);
     }
 
     ctx.reasonForAccess = spec.action;

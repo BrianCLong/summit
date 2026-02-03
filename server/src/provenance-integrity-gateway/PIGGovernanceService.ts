@@ -176,12 +176,12 @@ export class PIGGovernanceService extends EventEmitter {
     }
 
     // Load from database or return default
-    const result = await pool.query(
-      `SELECT config FROM pig_governance_configs WHERE tenant_id = $1`,
+    const result = (await pool.query(
+      `SELECT * FROM pig_governance_configs WHERE tenant_id = $1`,
       [tenantId]
-    );
+    )) || { rows: [] };
 
-    if (result.rows.length > 0) {
+    if (result.rows && result.rows.length > 0) {
       const config = this.parseConfig(result.rows[0].config);
       this.tenantConfigs.set(tenantId, config);
       return config;
@@ -708,9 +708,9 @@ export class PIGGovernanceService extends EventEmitter {
    * Load tenant configurations from database
    */
   private async loadTenantConfigs(): Promise<void> {
-    const result = await pool.query(`SELECT * FROM pig_governance_configs`);
+    const result = (await pool.query(`SELECT * FROM pig_governance_configs`)) || { rows: [] };
 
-    for (const row of result.rows) {
+    for (const row of result.rows || []) {
       const config = this.parseConfig(row.config);
       this.tenantConfigs.set(row.tenant_id, config);
     }
@@ -780,7 +780,7 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId]
     );
 
-    const { revoked_count, published_count, expired_count } = result.rows[0];
+    const { revoked_count = 0, published_count = 0, expired_count = 0 } = result.rows[0] || {};
 
     // Higher score = higher risk
     const revokedRatio = published_count > 0 ? revoked_count / published_count : 0;
@@ -811,7 +811,7 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId]
     );
 
-    const { high_risk_count, active_count, max_risk } = result.rows[0];
+    const { high_risk_count = 0, active_count = 0, max_risk = 0 } = result.rows[0] || {};
 
     const score = Math.min(100, Math.max(
       max_risk || 0,
@@ -844,7 +844,7 @@ export class PIGGovernanceService extends EventEmitter {
       [tenantId, thirtyDaysAgo]
     );
 
-    const { critical_count, high_count, total_count } = result.rows[0];
+    const { critical_count = 0, high_count = 0, total_count = 0 } = result.rows[0] || {};
 
     const score = Math.min(100, Math.round(
       (critical_count * 30) + (high_count * 15) + (total_count * 5)
