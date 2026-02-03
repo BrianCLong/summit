@@ -1,32 +1,19 @@
-# Repo Assumptions (SDD bootstrap)
+# Repo Reality Check — Distributed RL Subsumption
 
-## Verified (from repository root listing)
+## Verified
+- MIT license.
+- Top-level dirs present: .ci, .github, ai, ai-ml-suite, agents, agentops,
+  artifacts/agent-runs, SECURITY, RUNBOOKS.
 
-- `.claude/`
-- `.agentic-prompts/`
-- `.agent-guidance/`
-- `.husky/`
-- `.githooks/`
-- `.github/`
+## Assumed (validate)
+- Python is acceptable under ai-ml-suite/ (tooling, lint, tests).
+- CI has a Python test lane we can extend.
+- Artifact conventions allow deterministic JSON outputs.
 
-## Assumed (must validate in-repo)
+## Must-not-touch (until verified)
+- Any production deployment workflows under .github/workflows/
+- Security policy enforcement under SECURITY/ and .security/
+- Branch protection / required checks policy files (if present)
 
-- `.claude/` contains agent configuration and may already use tasks or memory files.
-- `.husky/` or `.githooks/` are active for local backpressure.
-- Standard docs taxonomy exists under `docs/` for security/ops/standards.
-
-## Must-not-touch (until confirmed)
-
-- `GOLDEN/`
-- `THIRD_PARTY_NOTICES/`
-- `SECURITY/`
-- `.pnpm-store/`
-- `.venv_*`
-- Large generated directories (treat as immutable unless an issue explicitly targets them).
-
-## Validation checklist (before PR2+)
-
-- Locate existing agent workflow docs: search for “agentic”, “prompts”, “CLAUDE”, “tasks”.
-- Confirm whether `.husky/pre-commit` exists and how hooks are run in CI.
-- Confirm test runner + lint/typecheck commands used by Summit.
-- Identify current CI required checks (see `docs/CI_STANDARDS.md`).
+(Verification anchors: update this file with exact CI check names, lint rules,
+and artifact conventions once locally inspected.)

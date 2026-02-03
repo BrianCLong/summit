@@ -1,10 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Stamp",
   "type": "object",
-  "required": ["evidence_id", "generated_at"],
+  "required": ["evidence_id", "retrieved_at"],
   "properties": {
     "evidence_id": { "type": "string" },
-    "generated_at": { "type": "string", "format": "date-time" }
+    "retrieved_at": { "type": "string", "format": "date-time" },
+    "version": { "type": "string" }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

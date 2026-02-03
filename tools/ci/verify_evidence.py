@@ -23,7 +23,7 @@ def assert_type(obj: Any, t: type, ctx: str) -> None:
 def main() -> None:
     root = os.getcwd()
     index_path = os.path.join(root, "evidence", "index.json")
-    if not os.path.isfile(index_path):
+    if not os.path.exists(index_path):
         die(f"missing {index_path}")
     idx = load_json(index_path)
 
