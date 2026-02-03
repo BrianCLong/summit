@@ -1,0 +1,25 @@
+# Cognitive Security Retention Policy
+
+policy_id: COGSEC-RET-001
+default_retention_days: 30
+
+rules:
+  - data_type: raw_content
+    retention_days: 7
+    description: "Raw videos/images scraped for verification. Delete after triage if not evidence."
+
+  - data_type: analysis_report
+    retention_days: 365
+    description: "Final analysis artifacts (PDFs, JSON reports)."
+
+  - data_type: decision_log
+    retention_days: 1825
+    description: "Audit trail of decisions made (5 years)."
+
+  - data_type: pii
+    retention_days: 0
+    description: "PII must not be stored unless part of a legal hold."
+
+legal_hold_process:
+  enabled: true
+  approver: "Legal Lead"
