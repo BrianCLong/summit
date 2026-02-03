@@ -1,4 +1,4 @@
-import { KafkaClusterConfig, EOSProducerConfig, ConsumerGroupConfig } from './types';
+import { KafkaClusterConfig, EOSProducerConfig, ConsumerGroupConfig } from './types.js';
 
 /**
  * Default Kafka cluster configuration for high-throughput production use

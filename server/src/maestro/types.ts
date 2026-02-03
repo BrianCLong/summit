@@ -1,46 +1,88 @@
-export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval';
+// Maestro Orchestrator Types
 
-export interface UserRef {
-  id: string;
-}
-
-export interface AgentRef {
+export interface MaestroLoop {
   id: string;
   name: string;
-  kind: 'llm' | 'tool' | 'workflow' | 'graph-engine';
-  modelId?: string;        // e.g. "openai:gpt-4.1"
-  toolName?: string;       // e.g. "bash-shell"
+  type: string;
+  status: 'active' | 'paused' | 'inactive';
+  lastDecision?: string;
+  lastRun?: string;
+  config: Record<string, any>;
 }
 
-export interface Run {
+export interface MaestroAgent {
   id: string;
-  user: UserRef;
-  createdAt: string;
-  requestText: string;
+  name: string;
+  role: string;
+  model: string;
+  status: 'active' | 'inactive' | 'error';
+  routingWeight: number;
+  metrics: Record<string, number>;
 }
 
-export interface Task {
+export interface MaestroExperiment {
   id: string;
-  runId: string;
-  parentTaskId?: string;
-  status: TaskStatus;
-  agent: AgentRef;
-  kind: 'plan' | 'action' | 'subworkflow' | 'graph.analysis';
+  name: string;
+  hypothesis: string;
+  status: 'running' | 'completed' | 'failed' | 'paused';
+  variants: string[];
+  metrics: Record<string, any>;
+  startDate: string;
+  endDate: string;
+}
+
+export interface MaestroPlaybook {
+  id: string;
+  name: string;
   description: string;
-  input: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  errorMessage?: string;
+  triggers: string[];
+  actions: string[];
+  isEnabled: boolean;
+}
+
+export interface MaestroAuditEvent {
+  id: string;
+  timestamp: string;
+  actor: string;
+  action: string;
+  resource: string;
+  details: string;
+  status: string;
+}
+
+export interface CoordinationTask {
+  id: string;
+  title: string;
+  description: string;
+  status: 'pending' | 'in-progress' | 'completed' | 'failed';
+  ownerId: string;
+  participants: string[];
+  priority: number;
+  result?: any;
+  error?: string;
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+}
+
+export interface CoordinationChannel {
+  id: string;
+  topic: string;
+  participants: string[];
+  status: 'active' | 'inactive' | 'archived';
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Artifact {
+export interface ConsensusProposal<T = any> {
   id: string;
-  runId: string;
-  taskId: string;
-  kind: 'text' | 'json' | 'file' | 'graph';
-  label: string;
-  data: unknown; // or a typed union if you want stricter types
+  topic: string;
+  proposal: T;
+  coordinatorId: string;
+  voters: string[];
+  votes: Record<string, { decision: 'approve' | 'reject' | 'abstain'; reason?: string; weight?: number; timestamp: string }>;
+  status: 'voting' | 'approved' | 'rejected' | 'expired';
+  deadline: string;
   createdAt: string;
 }
 
@@ -49,10 +91,10 @@ export interface CostSample {
   runId: string;
   taskId: string;
   model: string;
-  vendor: 'openai' | 'anthropic' | 'google' | 'local';
+  vendor: string;
   inputTokens: number;
   outputTokens: number;
-  currency: 'USD';
+  currency: string;
   cost: number;
   createdAt: string;
   feature?: string;
@@ -65,91 +107,56 @@ export interface RunCostSummary {
   totalCostUSD: number;
   totalInputTokens: number;
   totalOutputTokens: number;
-  byModel: Record<string, {
-    costUSD: number;
-    inputTokens: number;
-    outputTokens: number;
-  }>;
+  byModel: Record<
+    string,
+    {
+      costUSD: number;
+      inputTokens: number;
+      outputTokens: number;
+    }
+  >;
 }
 
-// Coordination Types for Subagent Collaboration (Added in Phase 3)
-export interface CoordinationTask {
+export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval' | 'cancelled';
+
+export interface Task {
   id: string;
-  title: string;
+  runId: string;
+  tenantId?: string;
+  parentTaskId?: string;
+  status: TaskStatus;
+  agent: {
+    id: string;
+    name: string;
+    kind: string;
+    modelId: string;
+  };
+  kind: string;
   description: string;
-  assignedAgentIds: string[];
-  dependencies?: string[];
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  deadline?: Date;
-  payload: Record<string, any>;
-  status: 'pending' | 'delegated' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
-  result?: any;
-  error?: string;
+  input: any;
+  output?: any;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CoordinationChannel {
+export interface Run {
   id: string;
-  participants: string[];
-  topic: string;  // What they're coordinating about (e.g., "threat-analysis", "entity-resolution")
-  messages: CoordinationMessage[];
-  createdAt: Date;
-  updatedAt?: Date;
-  isActive: boolean;
+  user: { id: string };
+  tenantId?: string;
+  requestText: string;
+  createdAt: string;
+  reasoningBudget?: any; // ReasoningBudgetContract
+  reasoningBudgetEvidence?: any;
 }
 
-export interface CoordinationMessage {
+export interface Artifact {
   id: string;
-  senderId: string;
-  recipientId?: string;  // If null, broadcast to channel
-  timestamp: Date;
-  type: 'TASK_ASSIGNMENT' | 'TASK_RESULT' | 'REQUEST_HELP' | 'REQUEST_REVIEW' | 'CONSENSUS_PROPOSAL' | 'CONSENSUS_VOTE' | 'STATUS_UPDATE' | 'COORDINATION_MESSAGE';
-  content: string;
-  attachments?: any[];
-  correlationId?: string;  // For linking related messages
-  metadata?: Record<string, any>;
-}
-
-export interface ConsensusProposal<T = any> {
-  id: string;
-  coordinatorId: string;
-  topic: string;
-  proposal: T;
-  voters: string[];  // Agent IDs that should vote
-  votingDeadline: Date;
-  votes: Map<string, { vote: 'approve' | 'reject' | 'abstain'; timestamp: Date; rationale?: string }>;
-  status: 'draft' | 'in_voting' | 'passed' | 'rejected' | 'cancelled';
-  createdAt: Date;
-  updatedAt?: Date;
-  closedAt?: Date;
-}
-
-export interface AgentCoordinationMetrics {
-  coordinationMessagesSent: number;
-  coordinationMessagesReceived: number;
-  collaborativeTasksCompleted: number;
-  consensusDecisionsMade: number;
-  resourceSharingEvents: number;
-  conflictResolutionEvents: number;
-  averageCollaborationTimeMs: number;
-  updatedAt?: Date;
-}
-
-export interface PlaybookSignature {
-  algorithm: 'ed25519';
-  signature: string;
-  publicKey: string;
-  signedAt: string;
-}
-
-export interface Playbook {
-  id: string;
-  name: string;
-  description?: string;
-  triggers: string[];
-  actions: string[];
-  isEnabled: boolean;
-  version?: string;
-  signature?: PlaybookSignature;
+  runId: string;
+  taskId: string;
+  tenantId?: string;
+  kind: string;
+  label: string;
+  data: any;
+  createdAt: string;
 }

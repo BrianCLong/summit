@@ -83,7 +83,7 @@ async function hashFile(filePath: string): Promise<string> {
   const hash = createHash('sha256');
   const stream = createReadStream(filePath);
   stream.on('data', (chunk) => hash.update(chunk));
-  await finished(stream);
+  await finished(stream as unknown as NodeJS.ReadableStream);
   return hash.digest('hex');
 }
 

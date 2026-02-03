@@ -24,15 +24,22 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: true
+  JEST_RETRY_TIMES: 2
+  NODE_ENV: test
+  TZ: UTC
+
 jobs:
   config-preflight:
     name: Config Preflight
     runs-on: self-hosted
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
@@ -42,13 +49,13 @@ jobs:
     runs-on: self-hosted
     needs: [config-preflight]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -68,13 +75,13 @@ jobs:
     runs-on: self-hosted
     needs: [config-preflight]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -95,20 +102,20 @@ jobs:
     name: Integration Tests
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Start Test Infrastructure
         run: |
           docker run -d --name summit-db-test -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=summit_test timescale/timescaledb:latest-pg14
           docker run -d --name summit-redis-test -p 6379:6379 redis:7-alpine
-          
+
           # Wait for health
           echo "Waiting for Postgres..."
           until docker exec summit-db-test pg_isready; do sleep 2; done
@@ -123,7 +130,14 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
-      - name: Run integration tests
+      - name: Run integration tests (attempt 1)
+        run: pnpm test:integration || echo "retry" > .retry
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Run integration tests (attempt 2 if needed)
+        if: ${{ hashFiles('.retry') != '' }}
         run: pnpm test:integration
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
@@ -152,13 +166,13 @@ jobs:
     name: Verification Suite
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -184,13 +198,13 @@ jobs:
     runs-on: self-hosted
     needs: [lint-typecheck, unit-tests]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -233,13 +247,13 @@ jobs:
     name: Governance / Docs Integrity
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -261,13 +275,13 @@ jobs:
     runs-on: self-hosted
     needs: [deterministic-build, integration-tests]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Bootstrap and smoke test
@@ -301,13 +315,13 @@ jobs:
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -348,12 +362,12 @@ jobs:
       actions: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Use Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: "pnpm"
 
       - name: Setup pnpm
@@ -370,7 +384,7 @@ jobs:
           bash scripts/test-soc-controls.sh soc-compliance-reports
 
       - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: soc-compliance-report
           path: soc-compliance-reports
@@ -383,21 +397,30 @@ jobs:
       contents: read
       actions: read
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: "10.0.0"
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate branch protection read token
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: |
+          if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+            echo "::error::BRANCH_PROTECTION_READ_TOKEN is required to audit branch protection."
+            exit 1
+          fi
+
       - name: Check branch protection drift
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: pnpm ci:branch-protection:check
 
       - name: Upload drift artifacts

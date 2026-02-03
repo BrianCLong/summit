@@ -168,6 +168,7 @@
     "/Users/brianlong/Developer/summit/packages/gateway-tariff/src",
     "/Users/brianlong/Developer/summit/packages/gdr/src",
     "/Users/brianlong/Developer/summit/packages/generative-models/src",
+    "/Users/brianlong/Developer/summit/packages/genui/src",
     "/Users/brianlong/Developer/summit/packages/geo/src",
     "/Users/brianlong/Developer/summit/packages/geolocation-engine/src",
     "/Users/brianlong/Developer/summit/packages/geopolitical-analysis/src",
@@ -405,3164 +406,11 @@
     "/Users/brianlong/Developer/summit/packages/work-graph/src",
     "/Users/brianlong/Developer/summit/packages/workspace/src"
   ],
-  "checkedFiles": 6644,
+  "checkedFiles": 6690,
+  "currentViolations": 7615,
+  "existingViolations": 7615,
+  "newViolations": 0,
   "errors": [
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/features/export/index.ts",
-      "import": "./ExportCaseDialog.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/features/export/ExportCaseDialog.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/features/maestro/components/CommandPalette.tsx",
-      "import": "../../context/AuthContext.jsx",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/features/context/AuthContext.jsx"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.test.tsx",
-      "import": "./NlqModal.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/features/nlq/index.ts",
-      "import": "./NlqModal.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/features/nlq/NlqModal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/hooks/usePrefetch.ts",
-      "import": "../generated/graphql.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/generated/graphql.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/store/slices/graphSlice.jsx",
-      "import": "../graphql/graphData.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/store/graphql/graphData.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/client/src/store/slices/graphSlice.jsx",
-      "import": "../services/apollo.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/client/src/store/services/apollo.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/fuzz-inputs.test.ts",
-      "import": "../utils/input-sanitization.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/input-sanitization.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/provenance-enhancements.test.ts",
-      "import": "../services/provenance-ledger-beta.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/provenance-ledger-beta.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/provenance-enhancements.test.ts",
-      "import": "../types/provenance-beta.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/provenance-beta.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/security.integration.test.ts",
-      "import": "../middleware/express-validation-pipeline.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/express-validation-pipeline.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/security.integration.test.ts",
-      "import": "../middleware/redisRateLimiter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/redisRateLimiter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/security.integration.test.ts",
-      "import": "../utils/htmlSanitizer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/htmlSanitizer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/tenantIsolationGuard.test.ts",
-      "import": "../tenancy/TenantIsolationGuard.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/tenancy/TenantIsolationGuard.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/tenantIsolationGuard.test.ts",
-      "import": "../tenancy/killSwitch.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/tenancy/killSwitch.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/tenantIsolationGuard.test.ts",
-      "import": "../tenancy/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/tenancy/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/trust-center-api.test.ts",
-      "import": "../routes/trust-center-api.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/trust-center-api.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/__tests__/trust-center-api.test.ts",
-      "import": "../routes/trust-center-api.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/trust-center-api.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/advisor.ts",
-      "import": "./conductor/scheduling/pools.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/conductor/scheduling/pools.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/audit/AgentAuditLogger.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/EmployeeRegistry.ts",
-      "import": "./AgentEmployee.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/EmployeeRegistry.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/SupervisorAgent.ts",
-      "import": "./AgentEmployee.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/SupervisorAgent.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/WorkerAgent.ts",
-      "import": "./AgentEmployee.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/AgentEmployee.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/employees/WorkerAgent.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/employees/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/limits/EnforcementEngine.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "../../governance/PolicyEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/PolicyEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/index.ts",
-      "import": "./NegotiationRuntime.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/index.ts",
-      "import": "./NegotiationRuntime.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/NegotiationRuntime.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/negotiation/types.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/policy/PolicyHooks.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/policy/PolicyHooks.ts",
-      "import": "../audit/AgentAuditLogger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/audit/AgentAuditLogger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "./GossipProtocol.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/ConsensusEngine.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/swarm/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/swarm/GossipProtocol.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./TrustScoringService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./TrustScoringService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/TrustScoringService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/agents/trust/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/agents/trust/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/OCREngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/OCREngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/ObjectDetectionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/ObjectDetectionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/SpeechToTextEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/SpeechToTextEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/FaceDetectionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/FaceDetectionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/TextAnalysisEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/TextAnalysisEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./services/EmbeddingService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/services/EmbeddingService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "../services/MediaUploadService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/MediaUploadService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./engines/VideoFrameExtractor.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/engines/VideoFrameExtractor.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/ExtractionEngine.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/copilot.e2e.test.ts",
-      "import": "../copilot.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/copilot.e2e.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/governance.bypass.test.ts",
-      "import": "../governance.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/governance.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/governance.bypass.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/governance.bypass.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/guardrails.service.test.ts",
-      "import": "../guardrails.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/guardrails.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/guardrails.service.test.ts",
-      "import": "../redaction.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/redaction.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/guardrails.service.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/nl-query.service.test.ts",
-      "import": "../nl-query.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/__tests__/nl-query.service.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.ts",
-      "import": "./nl-query.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.ts",
-      "import": "./sandbox-executor.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/sandbox-executor.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.ts",
-      "import": "./graphrag-provenance.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/graphrag-provenance.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.ts",
-      "import": "./redaction.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/redaction.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.ts",
-      "import": "./guardrails.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/guardrails.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.ts",
-      "import": "./governance.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/governance.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/governance.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/graphrag-provenance.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/guardrails.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/guardrails.service.ts",
-      "import": "../../security/llm-guardrails.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/security/llm-guardrails.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/index.ts",
-      "import": "./copilot.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/copilot.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/index.ts",
-      "import": "./nl-query.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/index.ts",
-      "import": "./sandbox-executor.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/sandbox-executor.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/index.ts",
-      "import": "./graphrag-provenance.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/graphrag-provenance.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/index.ts",
-      "import": "./redaction.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/redaction.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/index.ts",
-      "import": "./guardrails.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/guardrails.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/query-patterns.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/query-patterns.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/cost-estimator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/cost-estimator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/validator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/validator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/explainer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/explainer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/nl-query.service.ts",
-      "import": "../nl-graph-query/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/redaction.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/sandbox-executor.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/copilot/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/sandbox-executor.service.ts",
-      "import": "../nl-graph-query/cost-estimator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/cost-estimator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/copilot/sandbox-executor.service.ts",
-      "import": "../nl-graph-query/validator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/validator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/FaceDetectionEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/OCREngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/ObjectDetectionEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/SpeechToTextEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/engines/TextAnalysisEngine.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.ts",
-      "import": "./llm/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.ts",
-      "import": "./llm/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.ts",
-      "import": "./llm/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./PolicySuggestionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./VerdictExplainerService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./BehavioralAnomalyService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./PolicySuggestionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/PolicySuggestionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./VerdictExplainerService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/VerdictExplainerService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./BehavioralAnomalyService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/BehavioralAnomalyService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.ts",
-      "import": "../../../services/llm/LLMRouter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/llm/LLMRouter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.ts",
-      "import": "../../../services/llm/interfaces.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/llm/interfaces.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.ts",
-      "import": "../../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.ts",
-      "import": "../../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.ts",
-      "import": "./GovernanceLLMClient.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/index.ts",
-      "import": "./GovernanceLLMClient.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/governance/llm/GovernanceLLMClient.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/governance/types.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/__tests__/explainer.test.ts",
-      "import": "../explainer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/explainer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/__tests__/nl-graph-query.routes.test.ts",
-      "import": "../index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/cost-estimator.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/explainer.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/index.ts",
-      "import": "./nl-graph-query.service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/nl-graph-query.service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/index.ts",
-      "import": "./query-patterns.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/query-patterns.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/index.ts",
-      "import": "./cost-estimator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/cost-estimator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/index.ts",
-      "import": "./validator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/validator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/index.ts",
-      "import": "./explainer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/explainer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/nl-graph-query.service.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/nl-graph-query.service.ts",
-      "import": "./query-patterns.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/query-patterns.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/nl-graph-query.service.ts",
-      "import": "./cost-estimator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/cost-estimator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/nl-graph-query.service.ts",
-      "import": "./validator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/validator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/nl-graph-query.service.ts",
-      "import": "./explainer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/explainer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/query-patterns.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/validator.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-graph-query/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-to-cypher/LLMServiceAdapter.ts",
-      "import": "./model-adapter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-to-cypher/model-adapter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-to-cypher/LLMServiceAdapter.ts",
-      "import": "../../services/LLMService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/LLMService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/nl-to-cypher/nl-to-cypher.service.ts",
-      "import": "./model-adapter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-to-cypher/model-adapter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/services/EmbeddingService.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ai/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/ai/types.ts",
-      "import": "../services/MediaUploadService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/MediaUploadService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
-      "import": "../db/neo4j.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/neo4j.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
-      "import": "./graphTypes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/graphTypes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
-      "import": "./algorithms/shortestPath.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/shortestPath.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
-      "import": "./algorithms/traversal.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/traversal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
-      "import": "./algorithms/centrality.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/centrality.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
-      "import": "./algorithms/community.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/community.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/GraphAnalysisService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/__tests__/algorithms.test.ts",
-      "import": "../algorithms/shortestPath.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/shortestPath.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/__tests__/algorithms.test.ts",
-      "import": "../algorithms/centrality.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/centrality.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/__tests__/algorithms.test.ts",
-      "import": "../algorithms/community.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/community.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/__tests__/algorithms.test.ts",
-      "import": "../algorithms/traversal.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/traversal.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/__tests__/algorithms.test.ts",
-      "import": "../graphTypes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/graphTypes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/centrality.ts",
-      "import": "../graphTypes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/graphTypes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/community.ts",
-      "import": "../graphTypes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/graphTypes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/shortestPath.ts",
-      "import": "../graphTypes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/graphTypes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analysis/algorithms/traversal.ts",
-      "import": "../graphTypes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analysis/graphTypes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/AnomalyDetectionService.ts",
-      "import": "../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/AnomalyDetectionService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.test.ts",
-      "import": "./AdoptionAnalyticsService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.test.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/index.ts",
-      "import": "./AdoptionAnalyticsService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/AdoptionAnalyticsService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/adoption/types.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyController.ts",
-      "import": "./AnomalyDetector.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyController.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/AnomalyDetector.comprehensive.test.ts",
-      "import": "../AnomalyDetector.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/AnomalyDetector.comprehensive.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/anomalies.test.ts",
-      "import": "../AnomalyDetector.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/AnomalyDetector.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/__tests__/anomalies.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/anomalies/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortController.ts",
-      "import": "./CohortEvaluator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortController.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.ts",
-      "import": "../telemetry/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/__tests__/cohorts.test.ts",
-      "import": "../CohortEvaluator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/CohortEvaluator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/__tests__/cohorts.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/cohorts/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./CompliancePredictionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/CompliancePredictionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./GapPredictionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/GapPredictionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./RemediationPrioritizer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/RemediationPrioritizer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.ts",
-      "import": "./EvidenceQualityScorer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/EvidenceQualityScorer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/dictionary/__tests__/validator.test.ts",
-      "import": "../validator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/dictionary/validator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/PredictiveExecutionEngine.ts",
-      "import": "../../governance/PolicyEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/PolicyEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/PredictiveExecutionEngine.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/PredictiveExecutionEngine.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/PredictiveExecutionEngine.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/engine/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/index.ts",
-      "import": "./PredictiveExecutionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/engine/PredictiveExecutionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/index.ts",
-      "import": "./PredictiveExecutionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/engine/PredictiveExecutionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/index.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/engine/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/engine/types.ts",
-      "import": "../../governance/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/governance/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/ExperimentController.ts",
-      "import": "./ExperimentService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/ExperimentService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/ExperimentController.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/ExperimentService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/ExperimentService.ts",
-      "import": "../telemetry/TelemetryService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/__tests__/experiments.test.ts",
-      "import": "../ExperimentService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/ExperimentService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/__tests__/experiments.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/experiments/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/exports/ExportController.ts",
-      "import": "./ExportService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/exports/ExportService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/exports/__tests__/export.test.ts",
-      "import": "../ExportService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/exports/ExportService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/FunnelController.ts",
-      "import": "./FunnelService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/FunnelService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/FunnelController.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/FunnelService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/FunnelService.ts",
-      "import": "../telemetry/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/__tests__/funnels.test.ts",
-      "import": "../FunnelService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/FunnelService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/__tests__/funnels.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/funnels/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/index.ts",
-      "import": "./AnomalyDetectionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/AnomalyDetectionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/index.ts",
-      "import": "./policy/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/policy/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/index.ts",
-      "import": "./compliance/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/compliance/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyImpactAnalyzer.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyImpactAnalyzer.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyOptimizationEngine.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyOptimizationEngine.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyRecommendationService.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyRecommendationService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicySimulator.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicySimulator.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/index.ts",
-      "import": "./PolicyOptimizationEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyOptimizationEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/index.ts",
-      "import": "./PolicySimulator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicySimulator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/index.ts",
-      "import": "./PolicyRecommendationService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyRecommendationService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/policy/index.ts",
-      "import": "./PolicyImpactAnalyzer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/policy/PolicyImpactAnalyzer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/realtime/RealTimeAnalyticsService.ts",
-      "import": "../../streaming/KafkaConsumer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/streaming/KafkaConsumer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/realtime/RealTimeAnalyticsService.ts",
-      "import": "../../streaming/Logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/streaming/Logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/retention/RetentionController.ts",
-      "import": "./RetentionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/retention/RetentionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/retention/__tests__/retention.test.ts",
-      "import": "../RetentionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/retention/RetentionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryController.ts",
-      "import": "./TelemetryService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.ts",
-      "import": "./scrubber.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/scrubber.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/__tests__/telemetry.test.ts",
-      "import": "../scrubber.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/scrubber.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/__tests__/telemetry.test.ts",
-      "import": "../TelemetryService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/TelemetryService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/__tests__/telemetry.test.ts",
-      "import": "../allowlist.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/allowlist.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/allowlist.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/scrubber.ts",
-      "import": "./allowlist.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/analytics/telemetry/allowlist.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/behavioral.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/network.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/network.ts",
-      "import": "../forest.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/forest.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/network.ts",
-      "import": "../forest.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/forest.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/spatial.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/temporal.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/traffic.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/traffic.ts",
-      "import": "../traffic-engine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-engine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/detectors/traffic.ts",
-      "import": "../traffic-types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-engine.ts",
-      "import": "./traffic-types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/traffic-types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/api-schemas/__tests__/schema-snapshot.test.ts",
-      "import": "../../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../graphql/schema/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/schema/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../graphql/resolvers/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/resolvers/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../graphql/authDirective.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/authDirective.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app/makeServer.ts",
-      "import": "../lib/auth.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/auth.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./lib/telemetry/comprehensive-telemetry.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/comprehensive-telemetry.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./lib/telemetry/diagnostic-snapshotter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./lib/telemetry/anomaly-detector.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/anomaly-detector.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/audit-logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/audit-logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/audit-first.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/audit-first.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/correlation-id.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/correlation-id.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/feature-flag-context.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/feature-flag-context.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/sanitization.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/sanitization.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/pii-guard.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/pii-guard.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/errorHandler.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/errorHandler.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/rateLimiter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/rateLimiter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/TieredRateLimitMiddleware.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/TieredRateLimitMiddleware.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/circuitBreakerMiddleware.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/circuitBreakerMiddleware.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/overloadProtection.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/overloadProtection.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./runtime/backpressure/AdmissionControl.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/runtime/backpressure/AdmissionControl.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/httpCache.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/httpCache.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/safety-mode.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/safety-mode.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/residency.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/residency.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/request-profiling.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/request-profiling.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/securityHeaders.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/securityHeaders.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./data-residency/exceptions/routes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/data-residency/exceptions/routes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/monitoring.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/monitoring.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/billing.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/billing.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/entity-resolution.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/entity-resolution.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/workspaces.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/workspaces.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/ga-core-metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/ga-core-metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/nl-graph-query.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/nl-graph-query.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/disclosures.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/disclosures.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/narrative-sim.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/narrative-sim.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/receipts.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/receipts.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/predictive.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/predictive.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/policy.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/policy.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/policies/policy-management.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/policies/policy-management.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./http/metricsRoute.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/http/metricsRoute.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/monitoring-backpressure.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/monitoring-backpressure.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/rbacRoutes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/rbacRoutes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/middleware/licenseRuleValidationMiddleware.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/middleware/licenseRuleValidationMiddleware.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./lib/auth.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/auth.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./db/neo4j.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/neo4j.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./observability/tracer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/observability/tracer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./workers/trustScoreWorker.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/workers/trustScoreWorker.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./workers/retentionWorker.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/workers/retentionWorker.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/support-tickets.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/support-tickets.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/ticket-links.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/ticket-links.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/tenantContext.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/tenantContext.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/sharing.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/sharing.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/aurora.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/aurora.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/oracle.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/oracle.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/phantom_limb.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/phantom_limb.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/actions.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/actions.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/echelon2.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/echelon2.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/mnemosyne.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/mnemosyne.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/necromancer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/necromancer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/zero_day.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/zero_day.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/abyss.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/abyss.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/authRoutes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/authRoutes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/sso.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/sso.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/qaf.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/qaf.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/siem-platform.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/siem-platform.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/maestro.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/maestro.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/cases.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/cases.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/entity-comments.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/entity-comments.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/tenants.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/tenants.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./services/SummitInvestigate.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/SummitInvestigate.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./ingest/stream.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/ingest/stream.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/osint.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/osint.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/palettes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/palettes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./config/swagger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/swagger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/meta-orchestrator.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/meta-orchestrator.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/admin-smoke.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/admin-smoke.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/lineage.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/lineage.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/scenarios.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/scenarios.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/resource-costs.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/resource-costs.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/stream.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/stream.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/query-preview-stream.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/query-preview-stream.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/correctness-program.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/correctness-program.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/internal/command-console.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/internal/command-console.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/search-v1.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/search-v1.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/ontology.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/ontology.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/search-index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/search-index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/data-governance-routes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/data-governance-routes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/tenants/billing.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/tenants/billing.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/tenants/usage.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/tenants/usage.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/gtm-messaging.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/gtm-messaging.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/airgap.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/airgap.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/analytics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/analytics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/experiments.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/experiments.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/cohorts.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/cohorts.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/funnels.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/funnels.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/anomalies.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/anomalies.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/exports.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/exports.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/retention.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/retention.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/dr.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/dr.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/reporting.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/reporting.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/policy-profiles.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/policy-profiles.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/policy-proposals.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/policy-proposals.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/evidence.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/evidence.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/mastery.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/mastery.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/crypto-intelligence.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/crypto-intelligence.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/demo.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/demo.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/claims.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/claims.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/ops.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/ops.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/feature-flags.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/feature-flags.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/ml_review.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/ml_review.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/admin-flags.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/admin-flags.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/audit-events.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/audit-events.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./services/brand-packs/brand-pack.routes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/brand-packs/brand-pack.routes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./middleware/error-handling-middleware.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/error-handling-middleware.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/plugins/plugin-admin.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/plugins/plugin-admin.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/integrations/integration-admin.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/integrations/integration-admin.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/security/security-admin.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/security/security-admin.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/compliance/compliance-admin.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/compliance/compliance-admin.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/sandbox/sandbox-admin.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/sandbox/sandbox-admin.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/admin/tenants.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/admin/tenants.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/onboarding.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/onboarding.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/support-center.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/support-center.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/i18n.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/i18n.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/experimentation.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/experimentation.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/v4/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/v4/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/vector-store.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/vector-store.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/intel-graph.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/intel-graph.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/graphrag.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/graphrag.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./config/production-security.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/production-security.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/health.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/health.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/ai.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/ai.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/webhooks.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/webhooks.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./routes/maestro_routes.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/maestro_routes.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./maestro/core.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/maestro/core.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./maestro/queries.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/maestro/queries.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./intelgraph/client-impl.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/intelgraph/client-impl.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./maestro/cost_meter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/maestro/cost_meter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/schema.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/schema.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/resolvers/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/resolvers/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/plugins/persistedQueries.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/persistedQueries.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/plugins/pbac.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/pbac.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/plugins/resolverMetrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/resolverMetrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/plugins/auditLogger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/auditLogger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/validation/depthLimit.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/validation/depthLimit.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/plugins/rateLimitAndCache.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/rateLimitAndCache.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./graphql/plugins/httpStatusCodePlugin.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/httpStatusCodePlugin.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/app.ts",
-      "import": "./webhooks/webhook.worker.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/webhooks/webhook.worker.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/appFactory.ts",
-      "import": "./config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/appFactory.ts",
-      "import": "./utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/appFactory.ts",
-      "import": "./logging/structuredLogger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/logging/structuredLogger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/AuditTimelineRollupService.ts",
-      "import": "../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/AuditTimelineRollupService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/advanced-audit-system.test.ts",
-      "import": "../advanced-audit-system.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/advanced-audit-system.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/appendOnlyAuditStore.test.ts",
-      "import": "../appendOnlyAuditStore.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/appendOnlyAuditStore.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/forensics-logger.test.ts",
-      "import": "../forensics-logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/forensics-logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/forensics-logger.test.ts",
-      "import": "../forensics-logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/forensics-logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/forensics-logger.test.ts",
-      "import": "../forensics-logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/forensics-logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/forensics-logger.test.ts",
-      "import": "../forensics-logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/forensics-logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/forensics-logger.test.ts",
-      "import": "../forensics-logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/forensics-logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/ledger.test.ts",
-      "import": "../ledger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/ledger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/__tests__/ledger.test.ts",
-      "import": "../../logging/logEventBus.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/logging/logEventBus.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/advanced-audit-system.ts",
-      "import": "../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/advanced-audit-system.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/advanced-audit-system.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/advanced-audit-system.ts",
-      "import": "./AuditTimelineRollupService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/AuditTimelineRollupService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/emit.ts",
-      "import": "./index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/emit.ts",
-      "import": "./audit-v1.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/audit-v1.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/forensics-logger.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/index.ts",
-      "import": "./advanced-audit-system.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/advanced-audit-system.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/index.ts",
-      "import": "./emit.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/audit/emit.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/index.ts",
-      "import": "../config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/ledger.ts",
-      "import": "../logging/logEventBus.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/logging/logEventBus.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/audit/unified-schema.ts",
-      "import": "../provenance/ledger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/provenance/ledger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/__tests__/ForesightService.test.ts",
-      "import": "../services/ForesightService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/services/ForesightService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/__tests__/InventionService.test.ts",
-      "import": "../services/InventionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/services/InventionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/__tests__/InventionService.test.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/__tests__/InventionService.test.ts",
-      "import": "../services/PriorArtService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/services/PriorArtService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/__tests__/InventionService.test.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/__tests__/InventionService.test.ts",
-      "import": "../services/PriorArtService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/services/PriorArtService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/__tests__/InventionService.test.ts",
-      "import": "../services/InventionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/services/InventionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/ingestion/connectors.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/CompetitiveIntelligenceService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/ForesightService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/IngestionService.ts",
-      "import": "../ingestion/connectors.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/ingestion/connectors.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/IngestionService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/IngestionService.ts",
-      "import": "../../services/EmbeddingService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/EmbeddingService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/IngestionService.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/InventionService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/InventionService.ts",
-      "import": "./PriorArtService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/aurelius/services/PriorArtService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/InventionService.ts",
-      "import": "../../services/LLMService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/LLMService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/PriorArtService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/aurelius/services/PriorArtService.ts",
-      "import": "../../services/EmbeddingService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/EmbeddingService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/__tests__/multi-tenant-rbac.test.ts",
-      "import": "../multi-tenant-rbac.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/multi-tenant-rbac.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/authorization.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/github-actions-oidc.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/multi-tenant-rbac.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "./providers/LocalStubProvider.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/providers/LocalStubProvider.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "../../services/AuthService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/AuthService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.ts",
-      "import": "../../provenance/ledger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/provenance/ledger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/__tests__/sso.test.ts",
-      "import": "../SSOService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/SSOService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/sso/providers/LocalStubProvider.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth/sso/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth/webauthn/middleware.ts",
-      "import": "../../config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "./SSOProvider.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOProvider.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.ts",
-      "import": "../services/AuthService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/AuthService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/__tests__/SSOService.test.ts",
-      "import": "../SSOService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/auth-sso/__tests__/SSOService.test.ts",
-      "import": "../SSOProvider.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/auth-sso/SSOProvider.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupManager.ts",
-      "import": "./BackupService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupManager.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../cache/redis.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/cache/redis.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../db/neo4j.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/neo4j.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/backup/BackupService.ts",
-      "import": "../utils/metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingJobService.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingJobService.ts",
-      "import": "./BillingService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingJobService.ts",
-      "import": "../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/billing/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.ts",
-      "import": "../services/TenantCostService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/TenantCostService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.ts",
-      "import": "../services/DatabaseService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/DatabaseService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.ts",
-      "import": "../services/FraudService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/FraudService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.ts",
-      "import": "./adapters/FileBillingAdapter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/billing/adapters/FileBillingAdapter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/__tests__/BillingJobService.test.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/__tests__/BillingJobService.test.ts",
-      "import": "../BillingService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/billing/BillingService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/adapters/FileBillingAdapter.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/billing/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/adapters/FileBillingAdapter.ts",
-      "import": "../../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/entitlements/EntitlementsService.ts",
-      "import": "../../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/entitlements/EntitlementsService.ts",
-      "import": "../../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/entitlements/EntitlementsService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/billing/entitlements/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/entitlements/EntitlementsService.ts",
-      "import": "../../provenance/ledger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/provenance/ledger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/billing/entitlements/types.ts",
-      "import": "../../contracts/types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/contracts/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bin/provenance-verify.ts",
-      "import": "../types/provenance-beta.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/provenance-beta.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap/conductor.ts",
-      "import": "../graphql/schema/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/schema/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap/conductor.ts",
-      "import": "../conductor/config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/conductor/config.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap/conductor.ts",
-      "import": "../conductor/mcp/servers/graphops-server.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/conductor/mcp/servers/graphops-server.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap/conductor.ts",
-      "import": "../conductor/mcp/servers/files-server.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/conductor/mcp/servers/files-server.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap/conductor.ts",
-      "import": "../conductor/observability/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/conductor/observability/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap/conductor.ts",
-      "import": "../conductor/observability/prometheus.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/conductor/observability/prometheus.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap-secrets.ts",
-      "import": "./lib/secrets/SecretManager.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/secrets/SecretManager.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bootstrap-secrets.ts",
-      "import": "./config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/BulkOperationService.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/bulk/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/BulkOperationService.ts",
-      "import": "./handlers.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/bulk/handlers.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/BulkOperationService.ts",
-      "import": "../db/postgres.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/BulkOperationService.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/__tests__/BulkOperationService.test.ts",
-      "import": "../BulkOperationService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/bulk/BulkOperationService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/__tests__/BulkOperationService.test.ts",
-      "import": "../handlers.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/bulk/handlers.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/__tests__/BulkOperationService.test.ts",
-      "import": "../types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/bulk/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/__tests__/BulkOperationService.test.ts",
-      "import": "../../db/postgres.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/handlers.ts",
-      "import": "./types.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/bulk/types.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/handlers.ts",
-      "import": "../db/postgres.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/bulk/handlers.ts",
-      "import": "../config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/cache/CacheInvalidationService.ts",
-      "import": "../types/data-envelope.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/cache/CacheInvalidationService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/cache/CircuitBreakerStateStore.ts",
       "import": "../types/data-envelope.js",
@@ -3724,6 +572,18 @@
       "import": "../metrics/cacheMetrics.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/metrics/cacheMetrics.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/cache/tenant-cache-wrapper.ts",
+      "import": "../security/tenant-context.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/cache/tenant-cache-wrapper.ts",
+      "import": "../types/identity.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/types/identity.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/cache/warmers.ts",
@@ -10969,6 +7829,12 @@
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/apollo-v5-server.ts",
+      "import": "./plugins/graphqlCostPlugin.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/apollo-v5-server.ts",
       "import": "./plugins/resolverMetrics.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/resolverMetrics.js"
@@ -11406,6 +8272,18 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/policy/store.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/__tests__/graphqlCostPlugin.test.ts",
+      "import": "../graphqlCostPlugin.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/__tests__/graphqlCostPlugin.test.ts",
+      "import": "../../services/CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/__tests__/inputSanitizationPlugin.test.ts",
       "import": "../inputSanitizationPlugin.js",
       "kind": "missing",
@@ -11458,6 +8336,30 @@
       "import": "../../utils/logger.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../apollo-v5-server.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/apollo-v5-server.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../services/CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../services/TenantRateLimitService.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/graphqlCostPlugin.ts",
+      "import": "../../monitoring/metrics.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/plugins/inputSanitizationPlugin.ts",
@@ -11938,6 +8840,18 @@
       "import": "../../ai/nl-to-cypher/nl-to-cypher.service.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/ai/nl-to-cypher/nl-to-cypher.service.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/resolvers/graphragQueryResolvers.ts",
+      "import": "../../services/QuotaService.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/services/QuotaService.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/resolvers/graphragQueryResolvers.ts",
+      "import": "../../services/UsageMeteringService.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/services/UsageMeteringService.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/resolvers/graphragResolvers.ts",
@@ -12888,6 +9802,36 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.ts",
+      "import": "../../config/database.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.ts",
+      "import": "../../services/RateLimiter.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/services/RateLimiter.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.ts",
+      "import": "./CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/TenantRateLimitService.ts",
+      "import": "../../config/database.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/graphql/services/__tests__/CostCalculator.test.ts",
+      "import": "../CostCalculator.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/services/CostCalculator.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/graphql/subscriptionEngine.ts",
       "import": "../subscriptions/pubsub.js",
       "kind": "missing",
@@ -13162,162 +10106,6 @@
       "import": "../types/data-envelope.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/types/data-envelope.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./lib/auth.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/auth.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./graphql/middleware/wsPersistedQueries.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/middleware/wsPersistedQueries.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./app.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/app.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./graphql/schema.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/schema.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./graphql/resolvers/index.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/resolvers/index.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./graphql/subscriptionEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/graphql/subscriptionEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./services/DataRetentionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/DataRetentionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./db/neo4j.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/neo4j.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./routes/streaming.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/streaming.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./services/OSINTQueueService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/OSINTQueueService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./services/IngestionService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/IngestionService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./backup/BackupManager.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/backup/BackupManager.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./db/indexManager.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/indexManager.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./bootstrap-secrets.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/bootstrap-secrets.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./config/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./monitoring/metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./realtime/kafkaConsumer.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/realtime/kafkaConsumer.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./realtime/socket.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/realtime/socket.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./services/governance/PolicyWatcher.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/governance/PolicyWatcher.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./services/GACoremetricsService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/GACoremetricsService.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./utils/sampleData.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/sampleData.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./db/neo4j.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/neo4j.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./db/postgres.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./db/redis.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/redis.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/index.ts",
-      "import": "./services/governance/PolicyWatcher.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/governance/PolicyWatcher.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/ingest/__tests__/chunking.test.ts",
@@ -15172,48 +11960,6 @@
       "import": "../../config/logger.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/anomaly-detector.ts",
-      "import": "./diagnostic-snapshotter.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/anomaly-detector.ts",
-      "import": "./alerting-service.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/alerting-service.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/anomaly-detector.ts",
-      "import": "./correlation-engine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/correlation-engine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/comprehensive-telemetry.ts",
-      "import": "../observability/metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/observability/metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.ts",
-      "import": "./comprehensive-telemetry.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/comprehensive-telemetry.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.ts",
-      "import": "../../config/telemetry.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/telemetry.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/lib/telemetry/diagnostic-snapshotter.ts",
-      "import": "../../config.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/lib/tokcount-enhanced.ts",
@@ -18460,6 +15206,18 @@
       "import": "./types.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/narrative/types.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/neo4j/tenant-session-wrapper.ts",
+      "import": "../security/tenant-context.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/neo4j/tenant-session-wrapper.ts",
+      "import": "../types/identity.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/types/identity.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/notifications/NotificationService.ts",
@@ -21750,6 +18508,30 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/provenance/ledger.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/repositories/base-tenant-repository.ts",
+      "import": "../config/database.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/repositories/base-tenant-repository.ts",
+      "import": "../types/identity.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/types/identity.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/repositories/base-tenant-repository.ts",
+      "import": "../security/tenant-context.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/repositories/index.ts",
+      "import": "./base-tenant-repository.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/repositories/base-tenant-repository.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/resolvers/__tests__/WargameResolver.test.ts",
       "import": "../WargameResolver.js",
       "kind": "missing",
@@ -22048,6 +18830,12 @@
       "import": "../entity-comments.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/routes/entity-comments.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/__tests__/exports.security.test.ts",
+      "import": "../exports.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/routes/exports.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/routes/__tests__/finops.test.ts",
@@ -23647,6 +20435,12 @@
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/routes/exports.ts",
+      "import": "../utils/security.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/security.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/exports.ts",
       "import": "../exports/WatermarkVerificationService.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/exports/WatermarkVerificationService.js"
@@ -23662,6 +20456,12 @@
       "import": "../middleware/high-risk-approval.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/high-risk-approval.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/exports.ts",
+      "import": "../middleware/auth.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/auth.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/routes/feature-flags.ts",
@@ -24784,6 +21584,24 @@
       "import": "../middleware/osintRateLimiter.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/middleware/osintRateLimiter.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/osint.ts",
+      "import": "../db/postgres.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/osint.ts",
+      "import": "../../packages/osint-collector/src/collectors/SimpleFeedCollector.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/packages/osint-collector/src/collectors/SimpleFeedCollector.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/routes/osint.ts",
+      "import": "../../packages/osint-collector/src/types/index.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/packages/osint-collector/src/types/index.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/routes/palettes.ts",
@@ -26358,12 +23176,6 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/db/neo4j.js"
     },
     {
-      "file": "/Users/brianlong/Developer/summit/server/src/runtime/backpressure/AdmissionControl.ts",
-      "import": "./BackpressureController.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/runtime/backpressure/BackpressureController.js"
-    },
-    {
       "file": "/Users/brianlong/Developer/summit/server/src/safety/safety-v2.ts",
       "import": "../db/postgres.js",
       "kind": "missing",
@@ -26982,6 +23794,18 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/security/jwt-security.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/security/index.ts",
+      "import": "./tenant-context.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/security/index.ts",
+      "import": "./permissions.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/permissions.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/security/llm-guardrails.ts",
       "import": "../utils/logger.js",
       "kind": "missing",
@@ -27016,6 +23840,12 @@
       "import": "../config/logger.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/config/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.ts",
+      "import": "../types/identity.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/types/identity.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/security/tenant-simulation/run-simulation.ts",
@@ -27298,6 +24128,42 @@
       "import": "../config/database.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/AdvancedObservabilityMetaMonitoringSystem.ts",
+      "import": "../utils/logger.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/AdvancedObservabilityMetaMonitoringSystem.ts",
+      "import": "../monitoring/middleware.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/middleware.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/AdvancedObservabilityMetaMonitoringSystem.ts",
+      "import": "./EnhancedGovernanceRBACService.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/services/EnhancedGovernanceRBACService.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/AdvancedObservabilityMetaMonitoringSystem.ts",
+      "import": "./NextGenPerformanceOptimizationService.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/services/NextGenPerformanceOptimizationService.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/AdvancedSecurityObservabilityService.ts",
+      "import": "../utils/logger.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/AdvancedSecurityObservabilityService.ts",
+      "import": "../monitoring/middleware.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/middleware.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/services/AirgapService.ts",
@@ -27990,6 +24856,12 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/EnhancedGovernanceRBACService.ts",
+      "import": "../services/WarrantService.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/services/WarrantService.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/services/EntityResolutionService.ts",
       "import": "./BehavioralFingerprintService.js",
       "kind": "missing",
@@ -28218,6 +25090,18 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/services/graphTenantScope.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/GraphPerformanceOptimizer.ts",
+      "import": "../utils/logger.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/GraphPerformanceOptimizer.ts",
+      "import": "../monitoring/middleware.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/middleware.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/services/GraphRAGQueryService.ts",
       "import": "../utils/logger.js",
       "kind": "missing",
@@ -28438,6 +25322,18 @@
       "import": "../types/humint.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/types/humint.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/ImmutableAuditLogService.ts",
+      "import": "../utils/logger.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/ImmutableAuditLogService.ts",
+      "import": "../monitoring/middleware.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/middleware.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/services/InfluenceDetectionService.ts",
@@ -28720,6 +25616,18 @@
       "import": "../anomaly/types.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/anomaly/types.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/NextGenPerformanceOptimizationService.ts",
+      "import": "../utils/logger.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/services/NextGenPerformanceOptimizationService.ts",
+      "import": "../monitoring/middleware.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/middleware.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/services/OIDCAuthService.ts",
@@ -29254,36 +26162,6 @@
       "import": "../monitoring/metrics.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/QuotaService.ts",
-      "import": "../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/QuotaService.ts",
-      "import": "../types/usage.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/usage.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/QuotaService.ts",
-      "import": "./PricingEngine.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/PricingEngine.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/QuotaService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/QuotaService.ts",
-      "import": "../utils/metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/metrics.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/services/RTBFAuditService.ts",
@@ -30118,42 +26996,6 @@
       "import": "../db/postgres.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/UsageMeteringService.ts",
-      "import": "../db/postgres.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/db/postgres.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/UsageMeteringService.ts",
-      "import": "../config/database.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/config/database.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/UsageMeteringService.ts",
-      "import": "../types/usage.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/types/usage.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/UsageMeteringService.ts",
-      "import": "../utils/logger.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/UsageMeteringService.ts",
-      "import": "../utils/metrics.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/metrics.js"
-    },
-    {
-      "file": "/Users/brianlong/Developer/summit/server/src/services/UsageMeteringService.ts",
-      "import": "./FraudService.js",
-      "kind": "missing",
-      "resolved": "/Users/brianlong/Developer/summit/server/src/services/FraudService.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/services/UserManagementService.ts",
@@ -33696,6 +30538,12 @@
       "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/server/src/telemetry/metrics.ts",
+      "import": "../monitoring/metrics.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/monitoring/metrics.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/server/src/telemetry/otel-v2-bootstrap.ts",
       "import": "../utils/logger.js",
       "kind": "missing",
@@ -34198,6 +31046,60 @@
       "import": "../lib/errors.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/lib/errors.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/helpers/index.ts",
+      "import": "./tenant-context-helpers.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/tests/helpers/tenant-context-helpers.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/helpers/tenant-context-helpers.ts",
+      "import": "../../security/tenant-context.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/helpers/tenant-context-helpers.ts",
+      "import": "../../types/identity.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/types/identity.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/integration/neo4j-tenant-isolation.test.ts",
+      "import": "../../neo4j/tenant-session-wrapper.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/neo4j/tenant-session-wrapper.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/integration/neo4j-tenant-isolation.test.ts",
+      "import": "../helpers/tenant-context-helpers.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/tests/helpers/tenant-context-helpers.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/integration/neo4j-tenant-isolation.test.ts",
+      "import": "../../security/tenant-context.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/integration/tenant-isolation.test.ts",
+      "import": "../../repositories/base-tenant-repository.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/repositories/base-tenant-repository.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/integration/tenant-isolation.test.ts",
+      "import": "../helpers/tenant-context-helpers.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/tests/helpers/tenant-context-helpers.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/tests/integration/tenant-isolation.test.ts",
+      "import": "../../security/tenant-context.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/security/tenant-context.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/tests/llm-governance.test.ts",
@@ -34834,6 +31736,12 @@
       "import": "../utils/logger.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/server/src/utils/logger.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/server/src/utils/__tests__/security.test.ts",
+      "import": "../security.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/server/src/utils/security.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/server/src/utils/audit.ts",
@@ -39858,6 +36766,78 @@
       "resolved": "/Users/brianlong/Developer/summit/packages/futures-analysis/src/BackcastingEngine.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/evidence.ts",
+      "import": "./schema.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/schema.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/index.ts",
+      "import": "./schema.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/schema.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/index.ts",
+      "import": "./registry.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/registry.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/index.ts",
+      "import": "./lint.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/lint.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/index.ts",
+      "import": "./repair.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/repair.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/index.ts",
+      "import": "./policy.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/policy.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/index.ts",
+      "import": "./evidence.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/evidence.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/lint.ts",
+      "import": "./registry.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/registry.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/lint.ts",
+      "import": "./schema.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/schema.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/policy.ts",
+      "import": "./schema.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/schema.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/registry.ts",
+      "import": "./schema.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/schema.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/genui/src/repair.ts",
+      "import": "./schema.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/genui/src/schema.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/packages/geopolitical-analysis/src/calculators/base.ts",
       "import": "../types/index.js",
       "kind": "missing",
@@ -41856,6 +38836,12 @@
       "resolved": "/Users/brianlong/Developer/summit/packages/logistics-intel/src/logistics-tracker.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/packages/maestro-core/src/plugins/risk_assessment.ts",
+      "import": "../engine.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/maestro-core/src/engine.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/packages/maestro-core/src/templates/decision-run.ts",
       "import": "../engine.js",
       "kind": "missing",
@@ -42774,6 +39760,12 @@
       "resolved": "/Users/brianlong/Developer/summit/packages/narrative-engine/src/core/NarrativeState.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/packages/narrative-engine/src/core/NarrativeMarketSimulator.ts",
+      "import": "./types.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/narrative-engine/src/core/types.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/packages/narrative-engine/src/core/NarrativeSimulationStudio.ts",
       "import": "./SimulationEngine.js",
       "kind": "missing",
@@ -43273,6 +40265,18 @@
     },
     {
       "file": "/Users/brianlong/Developer/summit/packages/osint-collector/src/collectors/RSSFeedCollector.ts",
+      "import": "../types/index.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/osint-collector/src/types/index.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/osint-collector/src/collectors/SimpleFeedCollector.ts",
+      "import": "../core/CollectorBase.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/osint-collector/src/core/CollectorBase.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/osint-collector/src/collectors/SimpleFeedCollector.ts",
       "import": "../types/index.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/packages/osint-collector/src/types/index.js"
@@ -48666,6 +45670,12 @@
       "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/api/graphql.js"
     },
     {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/cli.ts",
+      "import": "./import/backlog-importer.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/backlog-importer.js"
+    },
+    {
       "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/demo.ts",
       "import": "./store/neo4j.js",
       "kind": "missing",
@@ -48724,6 +45734,42 @@
       "import": "./bus.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/events/bus.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/backlog-importer.ts",
+      "import": "../schema/nodes.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/schema/nodes.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/backlog-importer.ts",
+      "import": "../schema/edges.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/schema/edges.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/backlog-importer.ts",
+      "import": "./parsers.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/parsers.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/index.ts",
+      "import": "./parsers.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/parsers.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/index.ts",
+      "import": "./backlog-importer.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/backlog-importer.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/import/parsers.ts",
+      "import": "../schema/nodes.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/schema/nodes.js"
     },
     {
       "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/index.ts",
@@ -49036,8 +46082,25 @@
       "import": "./auto-triage.js",
       "kind": "missing",
       "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/triage/auto-triage.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/visualizations/index.ts",
+      "import": "./mermaid.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/visualizations/mermaid.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/visualizations/mermaid.ts",
+      "import": "../schema/nodes.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/schema/nodes.js"
+    },
+    {
+      "file": "/Users/brianlong/Developer/summit/packages/work-graph/src/visualizations/mermaid.ts",
+      "import": "../schema/edges.js",
+      "kind": "missing",
+      "resolved": "/Users/brianlong/Developer/summit/packages/work-graph/src/schema/edges.js"
     }
   ],
-  "timestamp": "2026-01-23",
-  "baselineEstablishedOn": "2026-01-23T07:46:58.071Z"
+  "timestamp": "2026-01-25"
 }

@@ -1,1 +1,0 @@
-Sensor reading alpha: 42.1

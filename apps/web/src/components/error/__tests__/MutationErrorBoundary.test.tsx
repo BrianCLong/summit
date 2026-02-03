@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import { MutationErrorBoundary } from '../MutationErrorBoundary';
+import { reportError } from '@/telemetry/metrics';
 
 // Mock dependencies
 vi.mock('@/telemetry/metrics', () => ({
@@ -99,8 +100,6 @@ describe('MutationErrorBoundary', () => {
   });
 
   it('reports errors with high severity', () => {
-    const { reportError } = require('@/telemetry/metrics');
-
     render(
       <MutationErrorBoundary operationName="critical update">
         <ThrowingComponent />

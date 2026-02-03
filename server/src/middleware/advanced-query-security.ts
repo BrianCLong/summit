@@ -11,7 +11,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import neo4j, { Driver, Session, DriverConfig } from 'neo4j-driver';
+import neo4j, { Driver, Session } from 'neo4j-driver';
 import logger from '../utils/logger.js';
 import { trackError } from '../monitoring/middleware.js';
 
@@ -46,6 +46,49 @@ const ADVANCED_INJECTION_PATTERNS = [
   /\{\{\w+\}\}/gi, // Template injection
   /\%\w+\%/gi, // Environment variable injection
 ];
+
+/**
+ * Helper: Sanitize string to prevent injection
+ */
+const sanitizeStringHelper = (str: string): string => {
+  // Remove or escape dangerous characters
+  return str
+    .replace(/'/g, "''") // Escape single quotes
+    .replace(/;/g, '') // Remove semicolons
+    .replace(/\-\-/g, '') // Remove comment starters
+    .replace(/\{\{/g, '{ {')  // Break template patterns
+    .replace(/\%\%/g, '% %')  // Break environment patterns
+    .substring(0, 10000); // Truncate extremely long strings (DoS protection)
+};
+
+/**
+ * Helper: Detect potential injection attacks in cypher
+ */
+const detectCypherInjectionHelper = (cypher: string): boolean => {
+  // Check for injection patterns in the cypher query
+  for (const pattern of ADVANCED_INJECTION_PATTERNS) {
+    if (pattern.test(cypher)) {
+      return true;
+    }
+  }
+
+  // Check for parameter substitution in dangerous positions
+  // This is a more sophisticated check for injection attempts
+  const dangerousPositions = [
+    { position: 'start', pattern: /(^|\b)(DROP|CREATE|ALTER|GRANT|REVOKE)\b/i },
+    { position: 'middle', pattern: /LIMIT\s+\w+\s*\+\s*\w+/i },
+    { position: 'middle', pattern: /SKIP\s+\w+\s*\+\s*\w+/i },
+    { position: 'any', pattern: /;\s*(CREATE|DROP|ALTER|GRANT|REVOKE)/i }
+  ];
+
+  for (const posCheck of dangerousPositions) {
+    if (posCheck.pattern.test(cypher)) {
+      return true;
+    }
+  }
+
+  return false;
+};
 
 /**
  * Secure Cypher Query Builder with parameterized queries
@@ -97,7 +140,7 @@ export class SecureCypherQueryBuilder {
       throw new Error('Cypher injection detected');
     }
     
-    const sessionConfig: neo4j.SessionConfig = {
+    const sessionConfig: any = {
       defaultAccessMode: neo4j.session.READ,
       database: options.database,
     };
@@ -190,29 +233,7 @@ export class SecureCypherQueryBuilder {
    * Detect potential injection attacks in cypher
    */
   detectCypherInjection(cypher: string): boolean {
-    // Check for injection patterns in the cypher query
-    for (const pattern of ADVANCED_INJECTION_PATTERNS) {
-      if (pattern.test(cypher)) {
-        return true;
-      }
-    }
-    
-    // Check for parameter substitution in dangerous positions
-    // This is a more sophisticated check for injection attempts
-    const dangerousPositions = [
-      { position: 'start', pattern: /(^|\b)(DROP|CREATE|ALTER|GRANT|REVOKE)\b/i },
-      { position: 'middle', pattern: /LIMIT\s+\w+\s*\+\s*\w+/i },
-      { position: 'middle', pattern: /SKIP\s+\w+\s*\+\s*\w+/i },
-      { position: 'any', pattern: /;\s*(CREATE|DROP|ALTER|GRANT|REVOKE)/i }
-    ];
-    
-    for (const posCheck of dangerousPositions) {
-      if (posCheck.pattern.test(cypher)) {
-        return true;
-      }
-    }
-    
-    return false;
+    return detectCypherInjectionHelper(cypher);
   }
 
   /**
@@ -327,14 +348,7 @@ export class SecureCypherQueryBuilder {
    * Sanitize string to prevent injection
    */
   private sanitizeString(str: string): string {
-    // Remove or escape dangerous characters
-    return str
-      .replace(/'/g, "''") // Escape single quotes
-      .replace(/;/g, '') // Remove semicolons
-      .replace(/\-\-/g, '') // Remove comment starters
-      .replace(/\{\{/g, '{ {')  // Break template patterns
-      .replace(/\%\%/g, '% %')  // Break environment patterns
-      .substring(0, 10000); // Truncate extremely long strings (DoS protection)
+    return sanitizeStringHelper(str);
   }
 
   /**
@@ -387,64 +401,29 @@ export const queryTimeoutMiddleware = (defaultTimeoutMs: number = 30000) => {
  * Advanced Input Validation Middleware
  * Addresses C-008: Missing input validation
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const advancedInputValidation = (schema: any) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // In a real system, we'd use Zod, Joi, or similar validation library
-      // Here we implement basic validation
-      
-      // Validate request body
-      if (req.body) {
-        const bodyValidation = await this.validateInput(req.body, schema);
-        if (!bodyValidation.valid) {
+      // Validate request body using Zod-like schema
+      if (req.body && schema && typeof schema.safeParseAsync === 'function') {
+        const result = await schema.safeParseAsync(req.body);
+        if (!result.success) {
           logger.warn({
             path: req.path,
-            validationErrors: bodyValidation.errors,
-            bodyKeys: Object.keys(req.body)
-          }, 'Request body validation failed');
+            ip: req.ip,
+            errors: result.error.errors
+          }, 'Input validation failed');
           
+          trackError('validation', 'InputValidationError');
           return res.status(400).json({
-            error: 'Invalid request body',
-            details: bodyValidation.errors,
-            code: 'BODY_VALIDATION_FAILED'
+            error: 'Input validation failed',
+            details: result.error.errors,
+            code: 'INPUT_VALIDATION_ERROR'
           });
         }
-      }
-      
-      // Validate query parameters
-      if (req.query) {
-        const queryValidation = await this.validateInput(req.query, schema);
-        if (!queryValidation.valid) {
-          logger.warn({
-            path: req.path,
-            validationErrors: queryValidation.errors,
-            queryKeys: Object.keys(req.query)
-          }, 'Query parameter validation failed');
-          
-          return res.status(400).json({
-            error: 'Invalid query parameters',
-            details: queryValidation.errors,
-            code: 'QUERY_VALIDATION_FAILED'
-          });
-        }
-      }
-      
-      // Validate URL parameters
-      if (req.params) {
-        const paramsValidation = await this.validateInput(req.params, schema);
-        if (!paramsValidation.valid) {
-          logger.warn({
-            path: req.path,
-            validationErrors: paramsValidation.errors,
-            paramKeys: Object.keys(req.params)
-          }, 'URL parameter validation failed');
-          
-          return res.status(400).json({
-            error: 'Invalid URL parameters',
-            details: paramsValidation.errors,
-            code: 'PARAMS_VALIDATION_FAILED'
-          });
-        }
+        // Use the validated/transformed data
+        req.body = result.data;
       }
       
       logger.debug({
@@ -532,7 +511,7 @@ export class SecureGraphDatabaseService {
     if (query.toUpperCase().includes('MATCH')) {
       // This is a simplified example - in practice you'd need a proper Cypher parser
       // to safely inject tenant restrictions
-      const tenantRestriction = ` AND e.tenantId = $tenantId`;
+      // const tenantRestriction = ` AND e.tenantId = $tenantId`;
       return query.replace(/MATCH\s+\(([^)]+)\)/gi, `MATCH ($1) WHERE $1.tenantId = $tenantId OR $1.tenantId IS NULL`);
     }
     
@@ -556,13 +535,167 @@ export class SecureGraphDatabaseService {
 }
 
 /**
+ * Detect various injection patterns in data
+ */
+const detectInjections = (data: any): string[] => {
+  const str = JSON.stringify(data, null, 0);
+  const injections: string[] = [];
+  
+  // SQL injection patterns
+  if (/(UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER).*?(FROM|INTO|WHERE|TABLE|DATABASE)/i.test(str)) {
+    injections.push('SQL_INJECTION');
+  }
+  
+  // NoSQL injection patterns
+  if (/\$where|regex|exec|eval/i.test(str)) {
+    injections.push('NOSQL_INJECTION');
+  }
+  
+  // Cypher injection patterns
+  if (detectCypherInjectionHelper(str)) {
+    injections.push('CYPHER_INJECTION');
+  }
+  
+  // XSS patterns
+  if (/<script|javascript:|on\w+=|data:/i.test(str)) {
+    injections.push('XSS_INJECTION');
+  }
+  
+  // Command injection patterns
+  if (/\|\||&&|;|\$\(|`|\$env:/i.test(str)) {
+    injections.push('COMMAND_INJECTION');
+  }
+  
+  // GraphQL injection patterns
+  if (/__schema|__type|__typename|IntrospectionQuery/i.test(str)) {
+    injections.push('GRAPHQL_INJECTION');
+  }
+  
+  // LDAP injection patterns
+  if (/\(|\)|\*|&|=|!/i.test(str) && str.length > 100) { // Basic LDAP pattern detection
+    injections.push('LDAP_INJECTION');
+  }
+  
+  // XML injection patterns
+  if (/<!DOCTYPE|<!ENTITY|<\?xml|CDATA/i.test(str)) {
+    injections.push('XML_INJECTION');
+  }
+  
+  return injections;
+};
+
+/**
+ * Detect header-specific injection patterns
+ */
+const detectHeaderInjections = (headers: any): string[] => {
+  const injectionTypes: string[] = [];
+  
+  for (const [headerName, headerValue] of Object.entries(headers)) {
+    if (typeof headerValue === 'string') {
+      // Check for header injection attempts
+      if (headerValue.includes('\n') || headerValue.includes('\r')) {
+        injectionTypes.push('HEADER_INJECTION');
+      }
+      
+      // Check for cookie injection in other headers
+      if (/cookie|set-cookie/i.test(headerName) && /document\.cookie|localStorage|sessionStorage/i.test(headerValue)) {
+        injectionTypes.push('COOKIE_INJECTION');
+      }
+    }
+  }
+  
+  return injectionTypes;
+};
+
+/**
+ * Sanitize input recursively
+ */
+const sanitizeInput = (input: any): any => {
+  if (typeof input === 'string') {
+    return sanitizeStringHelper(input);
+  }
+  
+  if (Array.isArray(input)) {
+    return input.map(item => sanitizeInput(item));
+  }
+  
+  if (input && typeof input === 'object') {
+    const sanitized: any = {};
+    for (const [key, value] of Object.entries(input)) {
+      sanitized[sanitizeStringHelper(key)] = sanitizeInput(value);
+    }
+    return sanitized;
+  }
+  
+  return input;
+};
+
+/**
+ * Validate and sanitize parameter values
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const validateAndSanitizeParam = (value: any, paramName: string): any => {
+  // In a real system, we'd have more specific validation per parameter type
+  if (typeof value === 'string') {
+    // Apply additional validation for specific parameter types
+    if (paramName.toLowerCase().includes('id')) {
+      // Validate ID patterns (UUID, numeric, etc)
+      if (!/^[a-zA-Z0-9\-_:]+$/.test(value)) {
+        logger.warn({
+          paramName,
+          paramValue: value
+        }, 'Potentially invalid ID parameter');
+      }
+    }
+    
+    return sanitizeStringHelper(value);
+  }
+  
+  return value;
+};
+
+/**
+ * Check request for various types of injection attempts
+ */
+const checkForInjections = async (req: Request): Promise<{ hasInjections: boolean; injectionTypes: string[] }> => {
+  const injectionTypes: string[] = [];
+
+  // Check body
+  if (req.body) {
+    const bodyInjections = detectInjections(req.body);
+    injectionTypes.push(...bodyInjections);
+  }
+
+  // Check query params
+  if (req.query) {
+    const queryInjections = detectInjections(req.query);
+    injectionTypes.push(...queryInjections);
+  }
+
+  // Check URL params
+  if (req.params) {
+    const paramsInjections = detectInjections(req.params);
+    injectionTypes.push(...paramsInjections);
+  }
+
+  // Check headers for injection patterns
+  const headerInjections = detectHeaderInjections(req.headers);
+  injectionTypes.push(...headerInjections);
+
+  return {
+    hasInjections: injectionTypes.length > 0,
+    injectionTypes: [...new Set(injectionTypes)] // Unique injection types
+  };
+};
+
+/**
  * Advanced Injection Protection Middleware
  * Provides comprehensive protection against various injection types
  */
 export const injectionProtectionMiddleware = () => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const checkResult = await this.checkForInjections(req);
+      const checkResult = await checkForInjections(req);
 
       if (checkResult.hasInjections) {
         logger.warn({
@@ -581,9 +714,9 @@ export const injectionProtectionMiddleware = () => {
       }
 
       // Sanitize inputs to remove potential injection vectors
-      if (req.body) req.body = this.sanitizeInput(req.body);
-      if (req.query) req.query = this.sanitizeInput(req.query);
-      if (req.params) req.params = this.sanitizeInput(req.params);
+      if (req.body) req.body = sanitizeInput(req.body);
+      if (req.query) req.query = sanitizeInput(req.query);
+      if (req.params) req.params = sanitizeInput(req.params);
 
       next();
     } catch (error) {
@@ -601,159 +734,6 @@ export const injectionProtectionMiddleware = () => {
     }
   };
 };
-
-/**
- * Check request for various types of injection attempts
- */
-private async checkForInjections(req: Request): Promise<{ hasInjections: boolean; injectionTypes: string[] }> {
-  const injectionTypes: string[] = [];
-
-  // Check body
-  if (req.body) {
-    const bodyInjections = this.detectInjections(req.body);
-    injectionTypes.push(...bodyInjections);
-  }
-
-  // Check query params
-  if (req.query) {
-    const queryInjections = this.detectInjections(req.query);
-    injectionTypes.push(...queryInjections);
-  }
-
-  // Check URL params
-  if (req.params) {
-    const paramsInjections = this.detectInjections(req.params);
-    injectionTypes.push(...paramsInjections);
-  }
-
-  // Check headers for injection patterns
-  const headerInjections = this.detectHeaderInjections(req.headers);
-  injectionTypes.push(...headerInjections);
-
-  return {
-    hasInjections: injectionTypes.length > 0,
-    injectionTypes: [...new Set(injectionTypes)] // Unique injection types
-  };
-}
-
-/**
- * Detect various injection patterns in data
- */
-private detectInjections(data: any): string[] {
-  const str = JSON.stringify(data, null, 0);
-  const injections: string[] = [];
-
-  // SQL injection patterns
-  if (/(UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER).*?(FROM|INTO|WHERE|TABLE|DATABASE)/i.test(str)) {
-    injections.push('SQL_INJECTION');
-  }
-
-  // NoSQL injection patterns
-  if (/\$where|regex|exec|eval/i.test(str)) {
-    injections.push('NOSQL_INJECTION');
-  }
-
-  // Cypher injection patterns
-  if (this.detectCypherInjection(str)) {
-    injections.push('CYPHER_INJECTION');
-  }
-
-  // XSS patterns
-  if (/<script|javascript:|on\w+=|data:/i.test(str)) {
-    injections.push('XSS_INJECTION');
-  }
-
-  // Command injection patterns
-  if (/\|\||&&|;|\$\(|`|\$env:/i.test(str)) {
-    injections.push('COMMAND_INJECTION');
-  }
-
-  // GraphQL injection patterns
-  if (/__schema|__type|__typename|IntrospectionQuery/i.test(str)) {
-    injections.push('GRAPHQL_INJECTION');
-  }
-
-  // LDAP injection patterns
-  if (/\(|\)|\*|&|=|!/i.test(str) && str.length > 100) { // Basic LDAP pattern detection
-    injections.push('LDAP_INJECTION');
-  }
-
-  // XML injection patterns
-  if (/<!DOCTYPE|<!ENTITY|<\?xml|CDATA/i.test(str)) {
-    injections.push('XML_INJECTION');
-  }
-
-  return injections;
-}
-
-/**
- * Detect header-specific injection patterns
- */
-private detectHeaderInjections(headers: any): string[] {
-  const injectionTypes: string[] = [];
-
-  for (const [headerName, headerValue] of Object.entries(headers)) {
-    if (typeof headerValue === 'string') {
-      // Check for header injection attempts
-      if (headerValue.includes('\n') || headerValue.includes('\r')) {
-        injectionTypes.push('HEADER_INJECTION');
-      }
-
-      // Check for cookie injection in other headers
-      if (/cookie|set-cookie/i.test(headerName) && /document\.cookie|localStorage|sessionStorage/i.test(headerValue)) {
-        injectionTypes.push('COOKIE_INJECTION');
-      }
-    }
-  }
-
-  return injectionTypes;
-}
-
-/**
- * Sanitize input recursively
- */
-private sanitizeInput(input: any): any {
-  if (typeof input === 'string') {
-    return this.sanitizeString(input);
-  }
-
-  if (Array.isArray(input)) {
-    return input.map(item => this.sanitizeInput(item));
-  }
-
-  if (input && typeof input === 'object') {
-    const sanitized: any = {};
-    for (const [key, value] of Object.entries(input)) {
-      sanitized[this.sanitizeString(key)] = this.sanitizeInput(value);
-    }
-    return sanitized;
-  }
-
-  return input;
-}
-
-/**
- * Validate and sanitize parameter values
- */
-private validateAndSanitizeParam(value: any, paramName: string): any {
-  // In a real system, we'd have more specific validation per parameter type
-  if (typeof value === 'string') {
-    // Apply additional validation for specific parameter types
-    if (paramName.toLowerCase().includes('id')) {
-      // Validate ID patterns (UUID, numeric, etc)
-      if (!/^[a-zA-Z0-9\-_:]+$/.test(value)) {
-        logger.warn({
-          paramName,
-          paramValue: value
-        }, 'Potentially invalid ID parameter');
-      }
-    }
-
-    return this.sanitizeString(value);
-  }
-
-  return value;
-}
 
 /**
  * Rate limiting with enhanced security beyond basic implementation
@@ -904,16 +884,6 @@ export const tenantRateLimiter = (
     
     next();
   };
-};
-
-// Export individual functions and middlewares
-export {
-  SecureCypherQueryBuilder,
-  queryTimeoutMiddleware,
-  advancedInputValidation,
-  injectionProtectionMiddleware,
-  enhancedRateLimiter,
-  tenantRateLimiter
 };
 
 export default {

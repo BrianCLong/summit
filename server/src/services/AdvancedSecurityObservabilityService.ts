@@ -21,7 +21,7 @@ interface SecurityEvent {
   tenantId: string;
   operation: string;
   resource: string;
-  status: 'success' | 'failure' | 'denied' | 'flagged' | 'quarantined';
+  status: 'success' | 'failure' | 'denied' | 'flagged' | 'quarantined' | 'pending';
   details: any;
   confidence: number; // 0.0 to 1.0
   evidencePaths: string[];
@@ -88,7 +88,7 @@ export class AdvancedSecurityObservabilityService {
   private securityEvents: SecurityEvent[];
   private securityMetrics: SecurityMetrics[];
   private threatIndicators: Map<string, ThreatIndicator>;
-  private config: SecurityObservabilityConfig;
+  readonly config: SecurityObservabilityConfig;
   private metricsBuffer: Map<string, { events: any[], lastFlush: number }>;
   
   constructor(config?: Partial<SecurityObservabilityConfig>) {
@@ -578,7 +578,7 @@ export class AdvancedSecurityObservabilityService {
     
     const authEvents = events.filter(e => e.eventType === 'auth');
     const accessEvents = events.filter(e => e.eventType === 'access');
-    const policyEvents = events.filter(e => e.eventType === 'policy' && e.status === 'violation');
+    const policyEvents = events.filter(e => e.eventType === 'policy' && (e.status as string) === 'violation');
     const threatEvents = events.filter(e => e.eventType === 'threat');
     
     const authSuccesses = authEvents.filter(e => e.status === 'success');

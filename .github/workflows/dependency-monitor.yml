@@ -8,7 +8,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 7 * * 1"
+    - cron: "0 03 * * *"
   workflow_dispatch:
 
 permissions:
@@ -46,7 +46,7 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
+        uses: actions/checkout@v4 # v4.1.7
 
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
@@ -89,3 +89,19 @@ jobs:
         run: |
           echo "::notice::Snyk scan skipped - SNYK_TOKEN not configured."
           echo "Add SNYK_TOKEN to repository secrets to enable Snyk dependency scanning."
+
+  check-drift:
+    name: Check Lockfile Drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # v4.1.7
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+      # Note: pnpm version is read from package.json "packageManager" field
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - name: Check Drift
+        run: ./scripts/check-lockfile-drift.sh

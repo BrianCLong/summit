@@ -5,13 +5,15 @@ include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
-.PHONY: db-migrate db-seed sbom k6
+.PHONY: db-migrate db-seed sbom k6 supply-chain/sbom supply-chain/sign
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
-.PHONY: dev-prereqs dev-up dev-down dev-smoke
+.PHONY: dev-prereqs dev-up dev-down dev-smoke evidence-bundle
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: gmr-gate gmr-eval gmr-validate
 
-COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+# Handle both .yaml and .yml extensions for dev compose
+COMPOSE_DEV_FILE ?= $(shell ls docker-compose.dev.yml 2>/dev/null || ls docker-compose.dev.yaml 2>/dev/null || echo "docker-compose.dev.yml")
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -72,11 +74,18 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	python3 -m venv $(VENV_DIR)
-	$(VENV_BIN)/pip install -U pip
-	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
-	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
-	$(VENV_BIN)/pre-commit install || true
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "Creating venv..."; \
+		$(PYTHON) -m venv $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR) --without-pip; \
+	fi
+	@if [ ! -f "$(VENV_BIN)/pip" ]; then \
+		echo "Installing pip..."; \
+		curl -sS https://bootstrap.pypa.io/get-pip.py | $(VENV_BIN)/python || true; \
+	fi
+	@$(VENV_BIN)/pip install -U pip || true
+	@$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]" || true
+	@$(VENV_BIN)/pip install pytest ruff mypy pre-commit || true
+	@$(VENV_BIN)/pre-commit install || true
 	pnpm install
 
 dev:
@@ -92,7 +101,16 @@ lint:   ## Lint js/ts + python
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	$(VVENV_BIN)/ruff format .
+	$(VENV_BIN)/ruff format .
+
+gmr-gate: ## Run the GMR guardrail gate (requires DATABASE_URL)
+	@./metrics/scripts/run_gmr_gate.sh
+
+gmr-eval: ## Run deterministic GMR anomaly detection evals
+	@$(PYTHON) metrics/evals/eval_anomaly_detection.py
+
+gmr-validate: ## Validate GMR guardrail assets
+	@$(PYTHON) scripts/ci/validate_gmr_assets.py
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
@@ -124,8 +142,15 @@ validate-ops: ## Validate observability assets (dashboards, alerts, runbooks)
 rollback-drill: ## Run simulated rollback drill
 	@node scripts/ops/rollback_drill.js
 
-sbom:   ## Generate CycloneDX SBOM
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+sbom:   ## Generate CycloneDX SBOM (Legacy target, calls scripts/generate-sbom.sh)
+	@bash scripts/generate-sbom.sh
+
+supply-chain/sbom: ## Generate modern SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
+	@bash scripts/generate-sbom.sh "summit-platform" "latest" "./artifacts/sbom"
+
+supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
+	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
+	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
@@ -194,7 +219,8 @@ pr-release:
 	  --node "$(NODE_VERSION)"
 
 provenance:
-	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+	@npm run generate:provenance
+	@echo "Provenance generated at .evidence/provenance.json"
 
 ci-check:
 	@pnpm install --frozen-lockfile
@@ -317,6 +343,11 @@ ga-evidence: ## Create a minimal local evidence bundle for GA validation
 	node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$$EVIDENCE_DIR"; \
 	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
 
+evidence-bundle: ## Generate a deterministic PR evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [OUT=dir])
+	@BASE=$${BASE:-origin/main}; \
+	OUT=$${OUT:-evidence-bundle-$$(git rev-parse --short HEAD)-$$(date +%Y%m%d%H%M%S)}; \
+	python3 scripts/maintainers/gen-evidence-bundle.py --out "$$OUT" --base "$$BASE"
+
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
 
@@ -415,3 +446,14 @@ test-security: ## Run security verifications
 test-compliance: ## Run compliance controls as tests
 	@echo "Running Compliance Tests..."
 	@node --test compliance/soc/*.test.mjs
+
+# Eval Skills
+.PHONY: eval-skill eval-skills-changed eval-skills-all
+eval-skill: ## Run a single eval skill (SKILL=...)
+	@npx tsx evals/runner/run_skill_eval.ts --skill $(SKILL)
+
+eval-skills-changed: ## Run eval skills changed in the current diff
+	@npx tsx evals/runner/run_skills_changed.ts
+
+eval-skills-all: ## Run the full eval skills suite
+	@npx tsx evals/runner/run_skill_suite.ts

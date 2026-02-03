@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "pnpm exec playwright test",
+    "test:e2e": "pnpm exec playwright test",
+    "test": "echo 'E2E tests require running server - use test:e2e'",
     "test:report": "pnpm exec playwright show-report",
     "ci:gate": "node ./scripts/ci-gate.mjs",
     "heatmap:build": "node ./scripts/emit-heatmap-snippet.mjs"

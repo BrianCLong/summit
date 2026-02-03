@@ -16,7 +16,13 @@ permissions:
   contents: read
 
 jobs:
+  pre-deploy-gate:
+    uses: ./.github/workflows/gate.yml
+    with:
+      region: us-east-1
+
   build-and-push:
+    needs: pre-deploy-gate
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,7 +42,7 @@ jobs:
             path: gateway/policy-lac
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -57,7 +63,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Security Scan (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
         with:
           scan-type: "fs"
           scan-ref: "."
@@ -79,10 +85,10 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
   deploy-infra:
-    needs: build-and-push
+    needs: [build-and-push, pre-deploy-gate]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -97,13 +103,26 @@ jobs:
     needs: deploy-infra
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Capture Governance Evidence
+        run: |
+          mkdir -p evidence-artifacts
+          aws sts get-caller-identity > evidence-artifacts/caller-identity.json
+          # Attempt to capture role policy, ignore failure if permission denied
+          aws iam get-role --role-name github-actions-deploy-role --query 'Role.AssumeRolePolicyDocument' --output json > evidence-artifacts/trust-policy.json || echo "Could not fetch trust policy" > evidence-artifacts/trust-policy-error.txt
+
+      - name: Upload Governance Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-evidence-deploy-k8s
+          path: evidence-artifacts/
 
       - name: Update Kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }}

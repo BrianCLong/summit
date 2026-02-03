@@ -146,12 +146,12 @@ collect_security_evidence() {
 
   # SBOM generation
   collect_evidence "sbom_generation" \
-    "echo 'SBOM generation placeholder - run npm run generate:sbom'" \
-    "$sec_dir/sbom-$RUN_ID.log"
+    "npm run generate:sbom" \
+    "$sec_dir/sbom-$RUN_ID.json"
 
   # Secret scan
   collect_evidence "secret_scan" \
-    "gitleaks detect --source . --no-git --report-format json 2>&1 || echo 'No leaks found'" \
+    "gitleaks detect --source . --no-git --report-format json 2>&1" \
     "$sec_dir/secret-scan-$RUN_ID.json"
 }
 
@@ -162,6 +162,11 @@ collect_governance_evidence() {
 
   echo "" >&2
   echo "=== Governance Evidence ===" >&2
+
+  # Antigravity Governance Check
+  collect_evidence "antigravity_governance" \
+    "npm run compliance:antigravity" \
+    "$gov_dir/antigravity-compliance-$RUN_ID.log"
 
   # Type safety audit state
   collect_evidence "type_safety_state" \
@@ -188,6 +193,27 @@ collect_governance_evidence() {
       "echo 'Skipped: GITHUB_TOKEN not available'" \
       "$gov_dir/release-blockers-$RUN_ID.json"
   fi
+
+  # AI Governance Evidence
+  collect_ai_evidence
+}
+
+# Collect AI Governance evidence
+collect_ai_evidence() {
+  local gov_dir="$OUTPUT_DIR/governance"
+
+  echo "" >&2
+  echo "=== AI Governance Evidence ===" >&2
+
+  # AI System Inventory
+  collect_evidence "ai_inventory" \
+    "npx tsx scripts/governance/generate_ai_inventory.ts" \
+    "$gov_dir/ai-inventory-$RUN_ID.json"
+
+  # Risk Assessment Verification
+  collect_evidence "risk_assessment_check" \
+    "ls compliance/assessments/*.md >/dev/null 2>&1 && echo 'Risk assessments found' || (echo 'Missing risk assessments' && exit 1)" \
+    "$gov_dir/risk-assessment-check-$RUN_ID.log"
 }
 
 # Collect audit evidence (from state files)

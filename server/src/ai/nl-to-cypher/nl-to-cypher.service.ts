@@ -241,7 +241,19 @@ export class NlToCypherService {
     }
 
     // Fallback to model adapter
-    return this.adapter.generate(prompt);
+    const systemInstruction = `You are a Neo4j Expert and Intelligence Analysis Copilot.
+Your goal is to translate natural language questions into efficient, read-only Cypher queries.
+
+## NEO4J PERFORMANCE GUIDANCE
+- Use batch patterns where applicable, but for read queries focus on index usage.
+- Avoid variable-length paths with unbounded depth (e.g. [*]). Always specify a max depth (e.g. [*..3]).
+- Always include a LIMIT clause (default 100) to prevent blowing up result sizes.
+- Treat the Neo4j graph as the source of truth for entity identity and relationships.
+
+## RESPONSE FORMAT
+Return ONLY the Cypher query. No markdown formatting, no explanations.`;
+
+    return this.adapter.generate(`${systemInstruction}\n\nUser Query: ${prompt}`);
   }
 
   private validateCypher(cypher: string): CypherValidationResult {

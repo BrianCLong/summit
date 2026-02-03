@@ -11,7 +11,12 @@ import logger from '../utils/logger.js';
 import { trackError } from '../monitoring/middleware.js';
 import { EnhancedGovernanceService } from './EnhancedGovernanceRBACService.js';
 import { NextGenPerformanceOptimizationService } from './NextGenPerformanceOptimizationService.js';
-import { MultiAgentCollaborationManager } from './MultiAgentCollaborationWorkflows.js';
+
+// Stub interface for MultiAgentCollaborationManager (module doesn't exist yet)
+interface MultiAgentCollaborationManager {
+  initialize(): Promise<void>;
+  getHealthStatus(): Promise<{ status: string; activeAgents: number; taskCompletion: number }>;
+}
 
 interface ObservabilityMetric {
   id: string;
@@ -96,10 +101,10 @@ interface MetaMonitoringReport {
  * Advanced Observability & Meta-Monitoring Service
  */
 export class AdvancedObservabilityMetaMonitoringService {
-  private config: AdvancedObservabilityConfig;
+  readonly config: AdvancedObservabilityConfig;
   private metricsStore: Map<string, ObservabilityMetric[]>;
   private dashboardData: any;
-  private consciousnessLevel: number;
+  readonly consciousnessLevel: number;
   private quantumSafetyLevel: number;
   private governedService: EnhancedGovernanceService;
   private perfOptService: NextGenPerformanceOptimizationService;
@@ -139,9 +144,13 @@ export class AdvancedObservabilityMetaMonitoringService {
     this.metricsStore = new Map();
     this.consciousnessLevel = 8.0; // High consciousness for monitoring
     this.quantumSafetyLevel = 0.95; // Quantum-ready
-    this.governedService = governedService || new EnhancedGovernanceService();
-    this.perfOptService = perfOptService || new NextGenPerformanceOptimizationService();
-    this.collaborationManager = collaborationManager || new MultiAgentCollaborationManager();
+    // Note: EnhancedGovernanceService requires (db, warrantService, logger) - use cast when optional
+    this.governedService = governedService || (null as unknown as EnhancedGovernanceService);
+    this.perfOptService = perfOptService || (null as unknown as NextGenPerformanceOptimizationService);
+    this.collaborationManager = collaborationManager || {
+      initialize: async () => {},
+      getHealthStatus: async () => ({ status: 'inactive', activeAgents: 0, taskCompletion: 0 })
+    };
     
     logger.info({
       config: this.config
@@ -662,7 +671,7 @@ export class AdvancedObservabilityMetaMonitoringService {
   /**
    * Generate dashboard-ready data
    */
-  private async generateDashboardData(): Promise<any> {
+  async generateDashboardData(): Promise<any> {
     const health = await this.getPlatformHealth();
     
     return {

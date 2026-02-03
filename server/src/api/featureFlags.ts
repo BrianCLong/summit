@@ -1,8 +1,8 @@
 // server/src/api/featureFlags.ts
 import express, { Request, Response, Router, NextFunction } from 'express';
-import { FeatureFlagService } from '../featureFlags/FeatureFlagService';
-import { ConfigService } from '../featureFlags/ConfigService';
-import { EvaluationContext } from '../featureFlags/types';
+import { FeatureFlagService } from '../featureFlags/FeatureFlagService.js';
+import { ConfigService } from '../featureFlags/ConfigService.js';
+import { EvaluationContext } from '../featureFlags/types.js';
 import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.js';
 
 export interface FeatureFlagApiDependencies {

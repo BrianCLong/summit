@@ -18,7 +18,7 @@
     "legacyMode": "New files cannot self-designate legacy mode; exemptions require documented issue and owner.",
     "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate"],
     "provenance": "Changes must cite evidence artifacts in PR summaries.",
-    "verificationSurfaces": ["docs/ga/genui/UI_CONTRACT.md"]
+    "verificationSurfaces": ["docs/ga/genui/UI_CONTRACT.md", "docs/ga/MVP4_GA_GATE_ARTIFACTS.md"]
   },
   "restrictedAreas": [
     {
@@ -54,6 +54,18 @@
       "paths": ["terraform/prod/"],
       "overrideLabel": "restricted-area-override",
       "notes": "Production infrastructure definitions cannot be modified by agents without a human override."
+    },
+    {
+      "name": "ToolingConfig",
+      "paths": [
+        "jest.config.ts",
+        "jest.config.js",
+        "package.json",
+        "pnpm-lock.yaml",
+        "tsconfig.json"
+      ],
+      "overrideLabel": "tooling-override",
+      "notes": "Global tooling configuration changes require human review to prevent drift."
     }
   ],
   "piiPatterns": [

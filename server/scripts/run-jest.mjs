@@ -9,7 +9,8 @@ const jestBin = path.join(__dirname, '..', '..', 'node_modules', 'jest', 'bin', 
 const baseArgs = [
   '--config',
   'jest.config.ts',
-  '--testPathIgnorePatterns=integration|/src/tests/|\\.e2e\\.',
+  // NOTE: testPathIgnorePatterns is defined in jest.config.ts with comprehensive
+  // exclusions for ESM/CJS incompatible tests. Do not override here.
   '--passWithNoTests',
 ];
 

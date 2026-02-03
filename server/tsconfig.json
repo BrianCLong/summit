@@ -3,6 +3,8 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "rootDir": ".",
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -26,7 +28,6 @@
   },
   "include": ["src/**/*"],
   "exclude": [
-    // POLICY: The exclude list is FROZEN. Do not add new files. See docs/ops/typescript/exclude-freeze-policy.md
     "node_modules",
     "dist",
     "tests/**",
@@ -101,7 +102,6 @@
     "src/runtime/breakers.ts",
     "src/services/llmBreaker.ts",
     "src/services/neighborhood-cache.ts",
-    "src/services/securityService.ts",
     "src/temporal/**",
     "src/routes/dlp.ts",
     "src/routes/siem.ts",

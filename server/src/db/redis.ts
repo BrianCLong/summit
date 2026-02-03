@@ -1,5 +1,5 @@
 // @ts-nocheck
-import Redis from 'ioredis';
+import Redis, { Cluster } from 'ioredis';
 import * as dotenv from 'dotenv';
 import pino from 'pino';
 
@@ -25,9 +25,9 @@ const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
 
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
-let redisClient: Redis | any;
+let redisClient: Redis | Cluster | any;
 
-export function getRedisClient(): Redis {
+export function getRedisClient(): Redis | Cluster {
   if (!redisClient) {
     try {
       if (REDIS_USE_CLUSTER) {
@@ -46,8 +46,14 @@ export function getRedisClient(): Redis {
           redisOptions: {
             password: REDIS_PASSWORD,
             tls: REDIS_TLS_ENABLED ? {} : undefined,
+            connectTimeout: 10000,
           },
           scaleReads: 'slave',
+          clusterRetryStrategy: (times) => {
+            const delay = Math.min(times * 100, 3000);
+            return delay;
+          },
+          enableOfflineQueue: true,
         });
       } else {
         redisClient = new Redis({
@@ -55,8 +61,13 @@ export function getRedisClient(): Redis {
           port: REDIS_PORT,
           password: REDIS_PASSWORD,
           tls: REDIS_TLS_ENABLED ? {} : undefined,
-          connectTimeout: 5000,
+          connectTimeout: 10000,
           lazyConnect: true,
+          retryStrategy: (times) => {
+            const delay = Math.min(times * 50, 2000);
+            return delay;
+          },
+          maxRetriesPerRequest: 3,
         });
       }
 
@@ -86,9 +97,9 @@ export function getRedisClient(): Redis {
       };
 
       const originalDel = redisClient.del.bind(redisClient);
-      redisClient.del = (async (key: string) => {
+      redisClient.del = (async (...keys: string[]) => {
         telemetry.subsystems.cache.dels.add(1);
-        return await originalDel(key);
+        return await originalDel(...keys);
       }) as any;
     } catch (error: any) {
       logger.warn(

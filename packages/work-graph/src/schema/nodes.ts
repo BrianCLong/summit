@@ -440,6 +440,56 @@ export const MilestoneSchema = BaseNodeSchema.extend({
 export type Milestone = z.infer<typeof MilestoneSchema>;
 
 // ============================================
+// Change Node
+// ============================================
+
+export const ChangeSchema = BaseNodeSchema.extend({
+  type: z.literal('change'),
+  status: z.enum(['draft', 'active', 'verified', 'archived']),
+  owner: z.string().optional(),
+  branch: z.string().optional(),
+  path: z.string().optional(), // Path to changes/<id>
+  implementsIntentId: z.string().optional(),
+  basedOnSpecId: z.string().optional(),
+});
+
+export type Change = z.infer<typeof ChangeSchema>;
+
+// ============================================
+// Findings Node
+// ============================================
+
+export const FindingsSchema = BaseNodeSchema.extend({
+  type: z.literal('findings'),
+  summary: z.string(),
+  dataSources: z.array(z.string()).default([]),
+  confidence: z.number().min(0).max(100).default(0),
+  supportsHypothesisId: z.string().optional(),
+});
+
+export type Findings = z.infer<typeof FindingsSchema>;
+
+// ============================================
+// EvidenceBundle Node
+// ============================================
+
+export const EvidenceBundleSchema = BaseNodeSchema.extend({
+  type: z.literal('evidence_bundle'),
+  rubricScore: z.number().min(0).max(100),
+  signer: z.string().optional(),
+  verifiesChangeId: z.string().optional(),
+  checks: z.array(
+    z.object({
+      category: z.enum(['completeness', 'correctness', 'coherence', 'security', 'compliance', 'performance', 'ux', 'provenance']),
+      status: z.enum(['pass', 'fail', 'warn', 'skip']),
+      details: z.string().optional(),
+    })
+  ).default([]),
+});
+
+export type EvidenceBundle = z.infer<typeof EvidenceBundleSchema>;
+
+// ============================================
 // Union Type
 // ============================================
 
@@ -460,7 +510,10 @@ export type WorkGraphNode =
   | Sprint
   | Board
   | Roadmap
-  | Milestone;
+  | Milestone
+  | Change
+  | Findings
+  | EvidenceBundle;
 
 export const WorkGraphNodeSchema = z.discriminatedUnion('type', [
   IntentSchema,
@@ -480,6 +533,9 @@ export const WorkGraphNodeSchema = z.discriminatedUnion('type', [
   BoardSchema,
   RoadmapSchema,
   MilestoneSchema,
+  ChangeSchema,
+  FindingsSchema,
+  EvidenceBundleSchema,
 ]);
 
 // Node type string literal

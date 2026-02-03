@@ -28,6 +28,9 @@ on:
 permissions:
   contents: read
   actions: read
+  security-events: write # Required by _reusable-ga-readiness.yml
+  id-token: write # Required for OIDC/Sigstore signing
+  pull-requests: write # Required by _reusable-ga-readiness.yml
 
 concurrency:
   group: release-ga-${{ github.ref_name || inputs.tag }}
@@ -66,7 +69,8 @@ jobs:
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
           # Check if this is a GA tag (not an RC tag)
-          if [[ "${TAG}" =~ -rc\. ]]; then
+          # SECURITY: Strict anchoring to prevent substring bypass
+          if [[ "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$ ]]; then
             echo "is_ga=false" >> $GITHUB_OUTPUT
             echo "Tag ${TAG} is an RC tag, skipping GA pipeline"
           else
@@ -86,7 +90,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
 
       - name: Check Freeze Mode
         run: |
@@ -115,7 +119,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
@@ -185,127 +189,18 @@ jobs:
           echo "| Status | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 2: Verification
-  # Run release readiness checks
+  # Stage 2: Verification (Hardened Readiness)
   # ═══════════════════════════════════════════════════════════════════════════
   verify:
     name: "2️⃣ Verification"
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/_reusable-ga-readiness.yml
     needs: [gate, lineage]
     if: needs.gate.outputs.is_ga == 'true'
-
-    outputs:
-      sha: ${{ steps.resolve.outputs.sha }}
-      verify_status: ${{ steps.verify.outputs.status }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
-        with:
-          fetch-depth: 0
-          ref: ${{ needs.gate.outputs.tag }}
-
-      - name: Resolve SHA
-        id: resolve
-        run: |
-          if [[ -z "${{ needs.gate.outputs.sha }}" ]]; then
-            SHA=$(git rev-parse HEAD)
-          else
-            SHA="${{ needs.gate.outputs.sha }}"
-          fi
-          echo "sha=${SHA}" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
-        with:
-          node-version: "20"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 10
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Security Guardrails
-        run: |
-          echo "🛡️ Running Security Guardrails..."
-
-          echo "1. Secrets Scan"
-          chmod +x scripts/ci/scan_secrets.sh
-          ./scripts/ci/scan_secrets.sh --full
-
-          echo "2. Dependency Audit"
-          node scripts/ci/security_audit_gate.mjs
-
-      - name: Run Release Ready
-        id: ready
-        run: |
-          echo "Running release:ready gate..."
-          if pnpm release:ready; then
-            echo "ready=true" >> $GITHUB_OUTPUT
-          else
-            echo "ready=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Compute Base Reference
-        id: base
-        run: |
-          TAG="${{ needs.gate.outputs.tag }}"
-          SHA="${{ steps.resolve.outputs.sha }}"
-
-          echo "Computing base reference for GA: ${TAG}"
-
-          chmod +x scripts/release/compute_base_for_commit.sh
-
-          # For GA, use same base as corresponding RC (ensures identical required checks)
-          BASE=$(scripts/release/compute_base_for_commit.sh --tag "${TAG}" --commit "${SHA}" --verbose 2>&1 | tail -1 || echo "${SHA}^")
-
-          echo "Computed base: ${BASE}"
-          echo "base=${BASE}" >> $GITHUB_OUTPUT
-
-      - name: Verify Green for Tag
-        id: verify
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          chmod +x scripts/release/verify-green-for-tag.sh
-
-          TAG="${{ needs.gate.outputs.tag }}"
-          SHA="${{ steps.resolve.outputs.sha }}"
-          BASE="${{ steps.base.outputs.base }}"
-
-          mkdir -p artifacts/verification
-          OUTPUT_FILE="artifacts/verification/REQUIRED_CHECKS.txt"
-
-          echo "Verifying with base: ${BASE}"
-
-          set +e
-          scripts/release/verify-green-for-tag.sh \
-            --tag "${TAG}" \
-            --commit "${SHA}" \
-            --base "${BASE}" \
-            --verbose 2>&1 | tee "${OUTPUT_FILE}"
-          EXIT_CODE=$?
-          set -e
-
-          if [[ ${EXIT_CODE} -eq 0 ]]; then
-            echo "status=passed" >> $GITHUB_OUTPUT
-          else
-            echo "status=failed" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload Verification Output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        with:
-          name: verification-output
-          path: artifacts/verification/
-          retention-days: 90
+    with:
+      ref: ${{ needs.gate.outputs.tag }}
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Stage 3: Build GA Bundle
-  # Create comprehensive GA release bundle
   # ═══════════════════════════════════════════════════════════════════════════
   build-bundle:
     name: "3️⃣ Build GA Bundle"
@@ -313,37 +208,7 @@ jobs:
     needs: [gate, lineage, verify]
     if: needs.gate.outputs.is_ga == 'true'
 
-    outputs:
-      bundle_path: ${{ steps.bundle.outputs.bundle_path }}
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
-        with:
-          fetch-depth: 0
-          ref: ${{ needs.gate.outputs.tag }}
-
-      - name: Build GA Bundle
-        id: bundle
-        run: |
-          chmod +x scripts/release/build-ga-bundle.sh
-
-          TAG="${{ needs.gate.outputs.tag }}"
-          SHA="${{ needs.verify.outputs.sha }}"
-          RC_TAG="${{ needs.lineage.outputs.rc_tag }}"
-          BUNDLE_DIR="staging/ga-bundle"
-
-          mkdir -p "${BUNDLE_DIR}"
-
-          scripts/release/build-ga-bundle.sh \
-            --tag "${TAG}" \
-            --sha "${SHA}" \
-            --rc-tag "${RC_TAG}" \
-            --workflow-run "${{ github.run_id }}" \
-            --output "${BUNDLE_DIR}"
-
-          echo "bundle_path=${BUNDLE_DIR}" >> $GITHUB_OUTPUT
-
       - name: Generate Provenance Manifest
         run: |
           if [[ -f scripts/release/generate_provenance_manifest.sh ]]; then
@@ -392,7 +257,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
           ref: ${{ needs.gate.outputs.tag }}
@@ -480,7 +345,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
 
       - name: Download All Artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
@@ -667,7 +532,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
 
       - name: Download GA Release Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4

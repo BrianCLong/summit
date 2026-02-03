@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
 
       - name: Determine Branch
         id: branch
@@ -63,10 +63,41 @@ jobs:
           echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
           echo "Checking branch: ${BRANCH}"
 
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        continue-on-error: true
+        with:
+          app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
+          private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
+
+      - name: Select branch protection token
+        id: auth
+        run: |
+          if [[ -n "${{ steps.app-token.outputs.token }}" ]]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
+            echo "auth_source=github-app" >> $GITHUB_OUTPUT
+            echo "::notice::GitHub App token acquired."
+            echo "✅ GitHub App token acquired." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
+            echo "auth_source=github-token" >> $GITHUB_OUTPUT
+            echo "::warning::GitHub App token unavailable; falling back to GITHUB_TOKEN."
+            echo "⚠️ Fell back to GITHUB_TOKEN." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Verify GitHub App installation
+        if: steps.auth.outputs.auth_source == 'github-app'
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          gh api "/repos/${{ github.repository }}/installation" >/dev/null
+          echo "✅ GitHub App installation verified." >> $GITHUB_STEP_SUMMARY
+
       - name: Run Drift Detection
         id: check
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           mkdir -p "${{ env.OUT_DIR }}"
 
@@ -118,14 +149,15 @@ jobs:
             // Search for existing drift issues with matching title
             const titlePattern = `[Governance Drift] Branch protection does not match REQUIRED_CHECKS_POLICY (${branch})`;
 
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'governance',
-              state: 'open'
+            // Use search API for deduplication (better for large repos)
+            const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:governance in:title "${titlePattern}"`;
+
+            const searchResult = await github.rest.search.issuesAndPullRequests({
+              q: q,
+              per_page: 1
             });
 
-            const existingIssue = issues.data.find(issue => issue.title === titlePattern);
+            const existingIssue = searchResult.data.items.length > 0 ? searchResult.data.items[0] : null;
 
             if (existingIssue) {
               core.info(`Found existing issue #${existingIssue.number}`);
@@ -246,6 +278,12 @@ jobs:
           2. Add/remove entries from `always_required` section
           3. Create PR for review
 
+          **Option C: Sync via Workflow**
+
+          1. Run the [Sync Branch Protection](${{ github.server_url }}/${{ github.repository }}/actions/workflows/sync-branch-protection.yml) workflow manually.
+             - Branch: `${{ steps.branch.outputs.branch }}`
+             - Dry Run: `false`
+
           ---
 
           ### Links
@@ -303,7 +341,6 @@ jobs:
               console.log(`Updated issue #${issueNumber}`);
             }
 
-
       - name: Auto-Close on Resolution
         if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
@@ -342,6 +379,7 @@ jobs:
           echo "## Branch Protection Drift Check" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ steps.branch.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Auth Source:** ${{ steps.auth.outputs.auth_source }}" >> $GITHUB_STEP_SUMMARY
           echo "**Drift Detected:** ${{ steps.check.outputs.drift_detected }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 

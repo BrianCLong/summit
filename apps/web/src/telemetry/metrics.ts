@@ -33,7 +33,7 @@ export const generateErrorFingerprint = (error: Error): string => {
   const stack = (error.stack || '')
     .split('\n')
     .slice(0, 3) // Take first 3 stack frames
-    .map(line => line.replace(/:\d+:\d+/g, ':N:N')) // Normalize line/col numbers
+    .map(line => line.replace(/\d+/g, 'N')) // Normalize all numbers including line/col
     .join('|');
 
   const raw = `${name}:${message}:${stack}`;

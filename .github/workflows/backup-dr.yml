@@ -39,7 +39,7 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: ${{ vars.AWS_ENABLED == 'true' }}
         with:
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
@@ -58,7 +58,7 @@ jobs:
           ./scripts/backup-enhanced.sh --set=$BACKUP_SET
 
       - name: Upload Backup Artifact
-        if: ${{ secrets.BACKUP_S3_BUCKET == '' }}
+        if: ${{ vars.AWS_ENABLED != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: summit-backup-${{ inputs.backup_set || 'full' }}-${{ github.run_id }}

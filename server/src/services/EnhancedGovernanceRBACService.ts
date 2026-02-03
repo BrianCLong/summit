@@ -902,7 +902,7 @@ export class EnhancedGovernanceService {
  * Initialize the enhanced governance service
  */
 export const initializeEnhancedGovernance = (db: Pool, warrantService: WarrantService) => {
-  const logger = pino();
+  const logger = (pino as any)();
   const service = new EnhancedGovernanceService(db, warrantService, logger);
   
   return {

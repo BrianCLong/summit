@@ -46,7 +46,10 @@ describe('generateErrorFingerprint', () => {
 
   it('normalizes numeric values in error messages', () => {
     const error1 = new Error('Failed to load 5 items');
+    error1.stack = 'Error: Failed to load 5 items\n  at test.js:10:15';
+
     const error2 = new Error('Failed to load 10 items');
+    error2.stack = 'Error: Failed to load 10 items\n  at test.js:10:15';
 
     const fingerprint1 = generateErrorFingerprint(error1);
     const fingerprint2 = generateErrorFingerprint(error2);

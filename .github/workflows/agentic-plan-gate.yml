@@ -1,0 +1,52 @@
+name: Agentic Plan Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  plan-check:
+    name: Agentic Policy Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Get list of changed files, filtering for existing files
+            FILES=$(git diff --name-only origin/${{ github.base_ref }} HEAD | tr '\n' ' ')
+            echo "files=$FILES" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Agentic Plan Gate
+        run: |
+          npx tsx scripts/agentic_policy/agentic_plan_gate.ts ${{ steps.changed-files.outputs.files }}
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentic-policy-report
+          path: artifacts/agentic_policy/

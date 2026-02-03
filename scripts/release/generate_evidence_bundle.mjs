@@ -1,54 +1,62 @@
-#!/usr/bin/env node
-
 import fs from 'fs';
+import crypto from 'crypto';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/**
+ * Generates an evidence bundle with SHA256 hashes of all provided files.
+ * Mandatory for GA bitwise reproducibility verification.
+ */
+function main() {
+  const files = process.argv.slice(2);
 
-async function main() {
-  const args = process.argv.slice(2);
-  const dryRun = args.includes('--dry-run');
+  if (files.length === 0) {
+    console.warn('No files provided to generate evidence bundle. Searching in artifacts/ directory...');
 
-  const commitSha = process.env.GITHUB_SHA || 'dev-sha';
-  const runId = process.env.GITHUB_RUN_ID || 'dev-run';
-  // Use first non-flag argument as output directory
-  const outputDir = args.find(a => !a.startsWith('--')) || 'evidence-bundle';
+    const supplyChainDir = path.join('artifacts', 'supplychain');
+    if (fs.existsSync(supplyChainDir)) {
+      const walkSync = (dir, filelist = []) => {
+        fs.readdirSync(dir).forEach(file => {
+          const filepath = path.join(dir, file);
+          if (fs.statSync(filepath).isDirectory()) {
+            filelist = walkSync(filepath, filelist);
+          } else {
+            filelist.push(filepath);
+          }
+        });
+        return filelist;
+      };
 
-  console.log(`Generating evidence bundle...`);
-  console.log(`Commit: ${commitSha}`);
-  console.log(`Run ID: ${runId}`);
-
-  const bundle = {
-    meta: {
-      version: '1.0.0',
-      generated_at: new Date().toISOString(),
-      commit_sha: commitSha,
-      workflow_run_id: runId
-    },
-    artifacts: {
-      sbom: 'sbom.json',
-      provenance: 'provenance.json',
-      test_summary: 'test-results.json'
+      const foundFiles = walkSync(supplyChainDir);
+      console.log(`Found ${foundFiles.length} supply chain artifacts.`);
+      files.push(...foundFiles);
     }
+  }
+
+  const bundle = files.map(f => {
+    if (!fs.existsSync(f)) {
+      console.error(`Error: File not found: ${f}`);
+      process.exit(1);
+    }
+    return {
+      file: f,
+      sha256: crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')
+    };
+  });
+
+  const output = {
+    generatedAt: new Date().toISOString(),
+    bundle
   };
 
-  if (dryRun) {
-    console.log('Dry run: Bundle structure generated.');
-    console.log(JSON.stringify(bundle, null, 2));
-    return;
+  const artifactsDir = 'artifacts';
+  if (!fs.existsSync(artifactsDir)) {
+    fs.mkdirSync(artifactsDir, { recursive: true });
   }
 
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
+  const outputPath = path.join(artifactsDir, 'evidence-bundle.json');
+  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
 
-  fs.writeFileSync(path.join(outputDir, 'bundle-manifest.json'), JSON.stringify(bundle, null, 2));
-  console.log(`Bundle manifest written to ${path.join(outputDir, 'bundle-manifest.json')}`);
+  console.log(`Evidence bundle generated at ${outputPath} with ${bundle.length} entries.`);
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+main();

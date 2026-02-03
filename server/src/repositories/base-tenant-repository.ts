@@ -7,7 +7,21 @@
  * 3. Cross-tenant access is prevented at the database layer
  */
 
-import { Pool, PoolClient, QueryResult } from 'pg';
+import { Pool } from 'pg';
+
+// Define types locally to work around ESM module resolution issues with @types/pg
+interface QueryResult<R = any> {
+  rows: R[];
+  rowCount: number | null;
+  command: string;
+  oid: number;
+  fields: Array<{ name: string; dataTypeID: number }>;
+}
+
+interface PoolClient {
+  query<R = any>(queryText: string, values?: any[]): Promise<QueryResult<R>>;
+  release(err?: Error | boolean): void;
+}
 import { getPostgresPool } from '../config/database.js';
 import { TenantId } from '../types/identity.js';
 import {

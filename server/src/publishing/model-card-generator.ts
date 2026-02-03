@@ -6,7 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import type { ModelCard, TransformRecord } from './proof-carrying-types';
+import type { ModelCard, TransformRecord } from './proof-carrying-types.js';
 
 export interface DataSource {
   id: string;
