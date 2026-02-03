@@ -1,9 +1,12 @@
 import hmac
 import hashlib
 import time
+import os
 from fastapi import HTTPException, status, Header, Request
 
-SECRET = b"test-secret"
+def get_secret() -> bytes:
+    # In production, this must be set. Default provided for dev/test only.
+    return os.getenv("FACTAPI_PRO_WEBHOOK_SECRET", "test-secret").encode()
 
 async def verify_webhook(
     request: Request,
@@ -20,13 +23,8 @@ async def verify_webhook(
 
     body = await request.body()
 
-    # Simple concatenation of timestamp + body for signature?
-    # Or just body. Usually standard is to sign the payload.
-    # Stripe signs timestamp.v1.body. GitHub signs body.
-    # The requirement says "signature-verified events".
-    # I will assume standard body signing for MWS.
-
-    expected_signature = hmac.new(SECRET, body, hashlib.sha256).hexdigest()
+    secret = get_secret()
+    expected_signature = hmac.new(secret, body, hashlib.sha256).hexdigest()
     if not hmac.compare_digest(f"sha256={expected_signature}", x_hub_signature):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

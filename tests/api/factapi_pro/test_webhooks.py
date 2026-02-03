@@ -21,6 +21,7 @@ def test_async_verify():
     assert "job_id" in data
     assert data["status"] == "queued"
 
+@patch.dict(os.environ, {"FACTAPI_PRO_WEBHOOK_SECRET": "test-secret"})
 def test_webhook_inbound_success():
     secret = b"test-secret"
     payload = json.dumps({"event": "payment_success"}).encode()
@@ -39,6 +40,7 @@ def test_webhook_inbound_success():
     assert response.status_code == 200
     assert response.json()["status"] == "received"
 
+@patch.dict(os.environ, {"FACTAPI_PRO_WEBHOOK_SECRET": "test-secret"})
 def test_webhook_inbound_invalid_signature():
     payload = json.dumps({"event": "payment_success"}).encode()
     timestamp = str(int(time.time()))
@@ -54,6 +56,7 @@ def test_webhook_inbound_invalid_signature():
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid signature"
 
+@patch.dict(os.environ, {"FACTAPI_PRO_WEBHOOK_SECRET": "test-secret"})
 def test_webhook_inbound_stale_timestamp():
     payload = json.dumps({"event": "payment_success"}).encode()
     # 10 minutes ago

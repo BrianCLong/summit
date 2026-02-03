@@ -1,0 +1,52 @@
+version: 1
+item:
+  title: "Item Unknown (Test)"
+  links: []
+  type: "unknown"
+  date_version: "unknown"
+  intriguing_claim: "A test item for unknown status."
+item_slug: "item-unknown"
+
+claim_registry:
+  mode: "missing-item"
+  claims_file: "subsumption/item-unknown/claims.yaml"
+
+prs:
+  - title: "feat(governance): add subsumption bundle framework verifier"
+    lane: "foundation"
+    owner: "master"
+    risk: "green"
+
+gates:
+  - name: "verify-subsumption-bundle"
+    required_checks_status: "assumed"
+    deny_by_default_required: true
+
+evidence:
+  schemas:
+    report: "evidence/schemas/report.schema.json"
+    metrics: "evidence/schemas/metrics.schema.json"
+    stamp: "evidence/schemas/stamp.schema.json"
+  index: "evidence/index.json"
+  required_ids:
+    - "EVD-SUBSUMPTION-FRAMEWORK-GOV-001"
+
+docs_targets:
+  - "docs/standards/subsumption-bundle-framework.md"
+
+fixtures:
+  deny_policy_dir: "subsumption/_template/fixtures/policy/deny"
+  tests:
+    positive:
+      - "subsumption/item-unknown/fixtures/allow"
+    negative:
+      - "subsumption/item-unknown/fixtures/deny"
+
+feature_flags: []
+dependency_delta:
+  required_if_deps_change: true
+  doc_root: "deps_delta"
+
+required_checks_discovery:
+  status: "assumed"
+  instructions: "docs/required_checks.todo.md"
