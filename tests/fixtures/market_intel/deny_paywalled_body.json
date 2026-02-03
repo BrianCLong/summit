@@ -1,0 +1,13 @@
+{
+  "evidence_id": "FIXTURE-DENY-PAYWALLED-BODY",
+  "summary": "This should fail because restricted source has a body.",
+  "claims": [],
+  "sources": [
+    {
+      "publisher": "WSJ",
+      "license_class": "restricted",
+      "url": "https://wsj.com/some-news",
+      "body": "This text should not be here."
+    }
+  ]
+}
