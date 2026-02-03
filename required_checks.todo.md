@@ -13,20 +13,11 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 - SOC Controls
 - Unit Tests & Coverage
 
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
-
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
-- `gate.latedata` - Deny-by-default check for late arriving data policy.
-- `gate.schemadrift` - Deny-by-default check for schema drift policy.
-- `gate.fileformat` - Deny-by-default check for file format correctness (JSON).
-- `gate.costbudget` - Deny-by-default check for cost budget policy.
-
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
 - `lint`
 - `typecheck`
 - `build`

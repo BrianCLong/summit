@@ -96,16 +96,17 @@ jobs:
           echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
           echo "Resolved commit: ${COMMIT}"
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "20"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -196,7 +197,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: verification-output
           path: artifacts/verification/
@@ -390,7 +391,7 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload RC Pipeline Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
           path: ${{ steps.assemble.outputs.bundle_dir }}
