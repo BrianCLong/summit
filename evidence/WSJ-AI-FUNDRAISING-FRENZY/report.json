@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-WSJ-AI-FUNDRAISING-FRENZY-MKT-001",
+  "summary": "WSJ Technology newsletter edition metadata captured; body not stored (restricted).",
+  "artifacts": [
+    "evidence/WSJ-AI-FUNDRAISING-FRENZY/report.json",
+    "evidence/WSJ-AI-FUNDRAISING-FRENZY/metrics.json",
+    "evidence/WSJ-AI-FUNDRAISING-FRENZY/stamp.json"
+  ]
+}

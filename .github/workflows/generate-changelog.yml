@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload Release Notes Artifact
         if: inputs.dry_run != true
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: release-notes-${{ github.run_id }}
           path: artifacts/release-train/release-notes.md

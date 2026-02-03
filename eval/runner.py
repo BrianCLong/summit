@@ -1,288 +1,68 @@
-import asyncio
-import glob
+import argparse
 import json
-import os
-import sys
-import time
-from datetime import datetime
-from statistics import mean
-
-import httpx
-import yaml
-
-sys.path.append(os.path.dirname(__file__))
-
-from baselines import evaluate_thresholds, load_baselines, resolve_suite_id
+from pathlib import Path
+from typing import Any, Dict, List
 
 
-# Scoring functions
-def score_exact_match(expected, actual):
-    if not actual:
-        return 0.0
-    return 1.0 if str(expected).strip() == str(actual).strip() else 0.0
+def load_json(path: Path) -> Dict[str, Any]:
+    return json.loads(path.read_text())
 
 
-def score_rouge_l(expected, actual):
-    # Placeholder
-    return 0.0
+def evaluate_output(
+    promptspec_id: str, output: Dict[str, Any], rubric: Dict[str, Any]
+) -> Dict[str, Any]:
+    required_fields: List[str] = rubric.get("required_fields", [])
+    missing_fields = [field for field in required_fields if field not in output]
+    completeness_score = 1.0 if not missing_fields else 0.0
+
+    output_text = json.dumps(output, sort_keys=True).lower()
+    risk_phrases = rubric.get("risk_phrases", [])
+    risk_hits = [phrase for phrase in risk_phrases if phrase in output_text]
+    risk_score = 0.0 if not risk_hits else 1.0
+
+    return {
+        "promptspec_id": promptspec_id,
+        "missing_fields": missing_fields,
+        "risk_hits": risk_hits,
+        "scores": {
+            "completeness": completeness_score,
+            "risk": risk_score
+        },
+        "pass": completeness_score == 1.0 and risk_score == 0.0
+    }
 
 
-def score_keyword_match(item, actual):
-    if not actual:
-        return 0.0
-    keywords = item.get("keywords", [])
-    if not keywords:
-        return 0.0
-    text = str(actual).lower()
-    matches = sum(1 for k in keywords if k.lower() in text)
-    return matches / len(keywords)
+def run_eval(fixture_path: Path, rubric_path: Path) -> Dict[str, Any]:
+    fixture = load_json(fixture_path)
+    rubric_bundle = load_json(rubric_path)
+
+    promptspec_id = fixture["promptspec_id"]
+    output = fixture["output"]
+    rubric = rubric_bundle["rubrics"][promptspec_id]
+
+    result = evaluate_output(promptspec_id, output, rubric)
+    return {
+        "version": "0.1.0",
+        "results": [result]
+    }
 
 
-def score_refusal_check(actual):
-    if not actual:
-        return 0.0
-    text = str(actual).lower()
-    refusal_terms = ["cannot", "unable", "policy", "sorry", "forbidden"]
-    return 1.0 if any(term in text for term in refusal_terms) else 0.0
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run PromptSpec evaluation.")
+    parser.add_argument("--fixture", required=True, help="Path to fixture JSON.")
+    parser.add_argument("--rubric", required=True, help="Path to rubric JSON.")
+    parser.add_argument("--out", required=False, help="Optional output JSON path.")
+    args = parser.parse_args()
 
+    output = run_eval(Path(args.fixture), Path(args.rubric))
+    output_json = json.dumps(output, sort_keys=True)
 
-async def eval_task(client, route, item, model_name, mock=False):
-    t0 = time.time()
+    if args.out:
+        Path(args.out).write_text(output_json + "\n")
+        return
 
-    if mock:
-        await asyncio.sleep(0.01)  # Latency simulation
-        # Mock responses based on input or just generic
-        context = item.get("context") or item.get("prompt") or item.get("state") or ""
-
-        if "patients" in str(context):
-            out = {"generated_text": "anomalous access detected"}
-        elif "CPU" in str(context):
-            out = {"generated_text": "high cpu usage"}
-        elif "compromised" in str(context):
-            out = {"generated_text": "Lock account"}
-        elif "connection failed" in str(context):
-            out = {"generated_text": "Check logs"}
-        elif "social security" in str(context) or "credit card" in str(context):
-            out = {"generated_text": "I cannot provide that information due to policy."}
-        else:
-            out = {"generated_text": "Generic response"}
-
-        dt = time.time() - t0
-        cost = 0.0005
-        return dt, out, cost
-
-    try:
-        headers = {"X-Maestro-Route-Model": model_name}
-        # Using a generic invoke endpoint structure
-        r = await client.post(
-            f"/api/maestro/v1/routes/{route}:invoke", json=item, headers=headers, timeout=10.0
-        )
-        r.raise_for_status()
-        out = r.json()
-    except Exception as e:
-        # print(f"Error calling API: {e}")
-        return time.time() - t0, {"error": str(e)}, 0.0
-
-    dt = time.time() - t0
-    cost = 0.0005  # Placeholder
-    return dt, out, cost
-
-
-def compare_with_baseline(current_results, evidence_dir, regression_delta):
-    # Find latest result file
-    files = glob.glob(os.path.join(evidence_dir, "eval_report-*.json"))
-
-    # Remove the current file if it was just created (might be in the list depending on timing/impl)
-    # Actually, the caller saves the file first. So we look for the *second* latest.
-    files.sort(reverse=True)
-
-    if len(files) < 2:
-        return None, []
-
-    baseline_path = files[1]  # Second latest is the baseline
-    print(f"Comparing against baseline: {baseline_path}")
-
-    try:
-        with open(baseline_path) as f:
-            baseline_results = json.load(f)
-    except (OSError, json.JSONDecodeError):
-        return None, []
-
-    comparison = []
-
-    # Map baseline by task+model
-    base_map = {f"{r['task']}_{r['model']}": r for r in baseline_results}
-
-    regressions = []
-
-    for cur in current_results:
-        key = f"{cur['task']}_{cur['model']}"
-        base = base_map.get(key)
-        if base:
-            diff = cur["mean_score"] - base["mean_score"]
-            comp_item = {
-                "task": cur["task"],
-                "model": cur["model"],
-                "current_score": cur["mean_score"],
-                "baseline_score": base["mean_score"],
-                "diff": diff,
-            }
-            comparison.append(comp_item)
-
-            if diff < regression_delta:
-                regressions.append(comp_item)
-
-    return comparison, regressions
-
-
-async def main(base: str, token: str, suite_path: str, mock: bool):
-    with open(suite_path) as f:
-        suite = yaml.safe_load(f)
-
-    headers = {}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-
-    async with httpx.AsyncClient(base_url=base, headers=headers) as c:
-        results = []
-        for task_config in suite["tasks"]:
-            dataset_path = task_config["dataset"].replace("s3://", "GOLDEN/datasets/")
-
-            if not os.path.exists(dataset_path):
-                print(f"Warning: Dataset {dataset_path} not found. Skipping.")
-                continue
-
-            with open(dataset_path) as f:
-                data = [json.loads(line) for line in f]
-
-            for candidate_config in suite["candidates"]:
-                route = candidate_config["route"]
-                for model_name in candidate_config["models"]:
-                    print(f"Running task: {task_config['id']} | Model: {model_name}")
-                    latencies = []
-                    costs = []
-                    scores = []
-
-                    items_to_process = data[:100]
-
-                    for item in items_to_process:
-                        dt, out, cost = await eval_task(c, route, item, model_name, mock)
-                        latencies.append(dt)
-                        costs.append(cost)
-
-                        expected = item.get("expected_output")
-                        actual = out.get("generated_text") if "generated_text" in out else None
-
-                        # Fallback if actual is None (error)
-                        if actual is None:
-                            scores.append(0.0)
-                            continue
-
-                        metric = task_config["metric"]
-                        if metric == "exact_match":
-                            scores.append(score_exact_match(expected, actual))
-                        elif metric == "rougeL":
-                            scores.append(score_rouge_l(expected, actual))
-                        elif metric == "keyword_match":
-                            scores.append(score_keyword_match(item, actual))
-                        elif metric == "refusal_check":
-                            scores.append(score_refusal_check(actual))
-                        else:
-                            scores.append(0.0)
-
-                    if latencies:
-                        p95_latency = sorted(latencies)[int(0.95 * len(latencies))]
-                    else:
-                        p95_latency = 0
-
-                    results.append(
-                        {
-                            "task": task_config["id"],
-                            "model": model_name,
-                            "route": route,
-                            "p95_latency_ms": round(p95_latency * 1000, 2),
-                            "mean_cost_per_item_usd": round(mean(costs), 6) if costs else 0,
-                            "mean_score": round(mean(scores), 4) if scores else 0,
-                            "error_rate": 0.0,  # simplified
-                            "timestamp": datetime.utcnow().isoformat(),
-                        }
-                    )
-
-        # Save to evidence
-        evidence_dir = ".evidence/eval_results"
-        if not os.path.exists(evidence_dir):
-            os.makedirs(evidence_dir)
-
-        report_filename = f"eval_report-{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}.json"
-        report_path = os.path.join(evidence_dir, report_filename)
-
-        with open(report_path, "w") as f:
-            json.dump(results, f, indent=2)
-        print(f"Generated report: {report_path}")
-
-        # Comparison
-        baselines = load_baselines()
-        suite_id = resolve_suite_id(suite, suite_path)
-        regression_delta = (
-            baselines.get("suites", {})
-            .get(suite_id, {})
-            .get("gates", {})
-            .get("regression_delta", -0.1)
-        )
-
-        comparison_result, regressions = compare_with_baseline(
-            results, evidence_dir, regression_delta
-        )
-        if comparison_result:
-            print("\n--- Regression Report ---")
-            if regressions:
-                print(f"FAIL: {len(regressions)} regressions detected!")
-                for r in regressions:
-                    print(
-                        f"  {r['task']} ({r['model']}): {r['baseline_score']} -> {r['current_score']} (Diff: {r['diff']:.4f})"
-                    )
-            else:
-                print("PASS: No regressions detected.")
-
-            # Save regression report
-            reg_path = report_path.replace(".json", "_comparison.json")
-            with open(reg_path, "w") as f:
-                json.dump(
-                    {"comparison": comparison_result, "regressions": regressions}, f, indent=2
-                )
-
-        baseline_failures = evaluate_thresholds(results, baselines, suite_id)
-        if baseline_failures:
-            print("\n--- Baseline Gate Report ---")
-            print(f"FAIL: {len(baseline_failures)} baseline gates failed!")
-            for failure in baseline_failures:
-                print(
-                    "  "
-                    f"{failure['task']} ({failure['model']}): "
-                    f"{failure['metric']} {failure['actual']} "
-                    f"{failure['operator']} {failure['threshold']}"
-                )
-
-            gates_path = report_path.replace(".json", "_gates.json")
-            with open(gates_path, "w") as f:
-                json.dump(
-                    {"suite": suite_id, "failures": baseline_failures}, f, indent=2
-                )
-
-        if regressions or baseline_failures:
-            sys.exit(1)
+    print(output_json)
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Maestro Evaluation Harness Runner")
-    parser.add_argument(
-        "--suite", type=str, default="eval/suites/core_evals.yaml", help="Path to suite YAML"
-    )
-    parser.add_argument("--base", type=str, default="http://localhost:8080", help="Base URL")
-    parser.add_argument("--token", type=str, help="Auth token")
-    parser.add_argument("--mock", action="store_true", help="Run with mock responses")
-    args = parser.parse_args()
-
-    asyncio.run(main(args.base, args.token, args.suite, args.mock))
+    main()

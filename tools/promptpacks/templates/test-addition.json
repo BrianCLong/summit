@@ -1,0 +1,8 @@
+{
+  "goal": "Add unit or integration tests for a specific module or function.",
+  "inputs": ["Source code to be tested", "Existing test suite (for reference)"],
+  "outputs": ["New test file or additional test cases"],
+  "constraints": ["Follow existing testing patterns (e.g., Jest, Pytest)", "Aim for high coverage of edge cases"],
+  "non_goals": ["Do not modify the source code being tested"],
+  "acceptance_tests": ["Verify that new tests pass", "Ensure overall coverage increases"]
+}
