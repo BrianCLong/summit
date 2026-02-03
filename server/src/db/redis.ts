@@ -7,45 +7,74 @@ dotenv.config();
 
 const logger = (pino as any)();
 
-const REDIS_HOST = process.env.REDIS_HOST || 'redis';
-const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
-const REDIS_USE_CLUSTER = process.env.REDIS_USE_CLUSTER === 'true';
-const REDIS_CLUSTER_NODES = process.env.REDIS_CLUSTER_NODES || '';
-const REDIS_TLS_ENABLED = process.env.REDIS_TLS_ENABLED === 'true';
-
-if (
-  process.env.NODE_ENV === 'production' &&
-  (!process.env.REDIS_PASSWORD || process.env.REDIS_PASSWORD === 'devpassword')
-) {
-  throw new Error(
-    'Security Error: REDIS_PASSWORD must be set and cannot be "devpassword" in production',
-  );
-}
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
-
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
-let redisClient: Redis | Cluster | any;
+// Map to store multiple Redis clients
+const clients = new Map<string, Redis | Cluster | any>();
 
-export function getRedisClient(): Redis | Cluster {
-  if (!redisClient) {
+interface RedisConfig {
+  host: string;
+  port: number;
+  password?: string;
+  useCluster: boolean;
+  clusterNodes: string;
+  tlsEnabled: boolean;
+}
+
+function getConfig(name: string): RedisConfig {
+  const prefix = name === 'default' ? 'REDIS' : `REDIS_${name.toUpperCase()}`;
+
+  // Fallback to default REDIS_* vars if specific ones aren't set
+  const getVar = (suffix: string) => process.env[`${prefix}_${suffix}`] || process.env[`REDIS_${suffix}`];
+
+  const host = getVar('HOST') || 'redis';
+  const port = parseInt(getVar('PORT') || '6379', 10);
+  const useCluster = getVar('USE_CLUSTER') === 'true';
+  const clusterNodes = getVar('CLUSTER_NODES') || '';
+  const tlsEnabled = getVar('TLS_ENABLED') === 'true';
+  let password = getVar('PASSWORD');
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (!password || password === 'devpassword')
+  ) {
+    throw new Error(
+      `Security Error: REDIS_PASSWORD (for ${name}) must be set and cannot be "devpassword" in production`,
+    );
+  }
+
+  return {
+    host,
+    port,
+    password: password || 'devpassword',
+    useCluster,
+    clusterNodes,
+    tlsEnabled
+  };
+}
+
+export function getRedisClient(name: string = 'default'): Redis | Cluster {
+  if (!clients.has(name)) {
     try {
-      if (REDIS_USE_CLUSTER) {
-        if (!REDIS_CLUSTER_NODES) {
-          throw new Error('Redis Cluster enabled but REDIS_CLUSTER_NODES is not defined');
+      const config = getConfig(name);
+      let client: Redis | Cluster;
+
+      if (config.useCluster) {
+        if (!config.clusterNodes) {
+          throw new Error(`Redis Cluster enabled for ${name} but CLUSTER_NODES is not defined`);
         }
 
-        const nodes = REDIS_CLUSTER_NODES.split(',').map((node) => {
+        const nodes = config.clusterNodes.split(',').map((node) => {
           const [host, port] = node.split(':');
           return { host, port: parseInt(port, 10) };
         });
 
-        logger.info({ nodes }, 'Initializing Redis Cluster');
+        logger.info({ nodes, name }, 'Initializing Redis Cluster');
 
-        redisClient = new Redis.Cluster(nodes, {
+        client = new Redis.Cluster(nodes, {
           redisOptions: {
-            password: REDIS_PASSWORD,
-            tls: REDIS_TLS_ENABLED ? {} : undefined,
+            password: config.password,
+            tls: config.tlsEnabled ? {} : undefined,
             connectTimeout: 10000,
           },
           scaleReads: 'slave',
@@ -56,11 +85,12 @@ export function getRedisClient(): Redis | Cluster {
           enableOfflineQueue: true,
         });
       } else {
-        redisClient = new Redis({
-          host: REDIS_HOST,
-          port: REDIS_PORT,
-          password: REDIS_PASSWORD,
-          tls: REDIS_TLS_ENABLED ? {} : undefined,
+        logger.info({ host: config.host, port: config.port, name }, 'Initializing Redis Client');
+        client = new Redis({
+          host: config.host,
+          port: config.port,
+          password: config.password,
+          tls: config.tlsEnabled ? {} : undefined,
           connectTimeout: 10000,
           lazyConnect: true,
           retryStrategy: (times) => {
@@ -71,16 +101,22 @@ export function getRedisClient(): Redis | Cluster {
         });
       }
 
-      redisClient.on('connect', () => logger.info('Redis client connected.'));
-      redisClient.on('error', (err: any) => {
+      client.on('connect', () => logger.info(`Redis client '${name}' connected.`));
+      client.on('error', (err: any) => {
         logger.warn(
-          `Redis connection failed - using mock responses. Error: ${err.message}`,
+          `Redis connection '${name}' failed - using mock responses. Error: ${err.message}`,
         );
-        redisClient = createMockRedisClient() as any;
+        // Replace the failed client in the map with a mock
+        // Note: This replaces the reference for future calls, but existing references might be broken?
+        // Actually, we usually just return the mock here.
+        // But since we are assigning to 'client' which is local, we need to update the map?
+        // The pattern in the original code was: redisClient = createMock...
+        clients.set(name, createMockRedisClient(name));
       });
 
-      const originalGet = redisClient.get.bind(redisClient);
-      redisClient.get = async (key: string) => {
+      // Attach Telemetry
+      const originalGet = client.get.bind(client);
+      client.get = async (key: string) => {
         const value = await originalGet(key);
         if (value) {
           telemetry.subsystems.cache.hits.add(1);
@@ -90,61 +126,66 @@ export function getRedisClient(): Redis | Cluster {
         return value;
       };
 
-      const originalSet = redisClient.set.bind(redisClient);
-      redisClient.set = async (key: string, value: string) => {
+      const originalSet = client.set.bind(client);
+      client.set = async (key: string, value: string) => {
         telemetry.subsystems.cache.sets.add(1);
         return await originalSet(key, value);
       };
 
-      const originalDel = redisClient.del.bind(redisClient);
-      redisClient.del = (async (...keys: string[]) => {
+      const originalDel = client.del.bind(client);
+      client.del = (async (...keys: string[]) => {
         telemetry.subsystems.cache.dels.add(1);
         return await originalDel(...keys);
       }) as any;
+
+      clients.set(name, client);
+
     } catch (error: any) {
       logger.warn(
-        `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,
+        `Redis initialization for '${name}' failed - using development mode. Error: ${(error as Error).message}`,
       );
-      redisClient = createMockRedisClient() as any;
+      clients.set(name, createMockRedisClient(name));
     }
   }
-  return redisClient;
+  return clients.get(name);
 }
 
-function createMockRedisClient() {
+function createMockRedisClient(name: string) {
   return {
     get: async (key: string) => {
-      logger.debug(`Mock Redis GET: Key: ${key}`);
+      logger.debug(`Mock Redis (${name}) GET: Key: ${key}`);
       return null;
     },
     set: async (key: string, value: string, ...args: any[]) => {
-      logger.debug(`Mock Redis SET: Key: ${key}, Value: ${value}`);
+      logger.debug(`Mock Redis (${name}) SET: Key: ${key}, Value: ${value}`);
       return 'OK';
     },
     del: async (...keys: string[]) => {
-      logger.debug(`Mock Redis DEL: Keys: ${keys.join(', ')}`);
+      logger.debug(`Mock Redis (${name}) DEL: Keys: ${keys.join(', ')}`);
       return keys.length;
     },
     exists: async (...keys: string[]) => {
-      logger.debug(`Mock Redis EXISTS: Keys: ${keys.join(', ')}`);
+      logger.debug(`Mock Redis (${name}) EXISTS: Keys: ${keys.join(', ')}`);
       return 0;
     },
     expire: async (key: string, seconds: number) => {
-      logger.debug(`Mock Redis EXPIRE: Key: ${key}, Seconds: ${seconds}`);
+      logger.debug(`Mock Redis (${name}) EXPIRE: Key: ${key}, Seconds: ${seconds}`);
       return 1;
     },
     quit: async () => { },
     on: () => { },
     connect: async () => { },
     options: { keyPrefix: 'summit:' },
-    duplicate: () => createMockRedisClient(),
+    duplicate: () => createMockRedisClient(name),
   };
 }
 
 export async function redisHealthCheck(): Promise<boolean> {
-  if (!redisClient) return false;
+  // Check default client at least
+  const defaultClient = clients.get('default');
+  if (!defaultClient) return false;
   try {
-    await redisClient.ping();
+    await defaultClient.ping();
     return true;
   } catch {
     return false;
@@ -152,9 +193,11 @@ export async function redisHealthCheck(): Promise<boolean> {
 }
 
 export async function closeRedisClient(): Promise<void> {
-  if (redisClient) {
-    await redisClient.quit();
-    logger.info('Redis client closed.');
-    redisClient = null as any; // Clear the client instance
+  for (const [name, client] of clients.entries()) {
+    if (client) {
+      await client.quit();
+      logger.info(`Redis client '${name}' closed.`);
+    }
   }
+  clients.clear();
 }
