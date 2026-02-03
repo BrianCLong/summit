@@ -154,7 +154,7 @@ jobs:
           docker rm -f summit-db-test summit-redis-test || true
 
       - name: Upload integration test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: integration-test-results
@@ -185,7 +185,7 @@ jobs:
         run: pnpm verify
 
       - name: Upload verification results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: verification-results
@@ -236,7 +236,7 @@ jobs:
           echo "✅ Build is deterministic (bit-for-bit reproducible)"
 
       - name: Upload build checksums
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: build-checksums
@@ -263,7 +263,7 @@ jobs:
         run: pnpm ci:docs-governance
 
       - name: Upload governance docs integrity report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: governance-docs-integrity
@@ -300,7 +300,7 @@ jobs:
         timeout-minutes: 10
 
       - name: Upload smoke test logs
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: smoke-test-logs
@@ -346,7 +346,7 @@ jobs:
         run: make down
 
       - name: Upload Playwright Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: playwright-report
@@ -424,7 +424,7 @@ jobs:
         run: pnpm ci:branch-protection:check
 
       - name: Upload drift artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: branch-protection-drift

@@ -38,7 +38,7 @@ jobs:
 
       - name: Upload Evidence Bundle
         if: always()
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: ga-evidence-bundle-${{ github.sha }}
           path: |
