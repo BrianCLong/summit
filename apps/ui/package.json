@@ -5,5 +5,6 @@
     "build": "node build.js"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "version": "4.2.3"
 }

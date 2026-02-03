@@ -1,5 +1,5 @@
 import request from 'supertest';
-import app from '../src/app';
+import app from '../src/app.js';
 test('provenance route', async () => {
   const res = await request(app).get('/api/provenance/v1.2.3');
   expect(res.status).toBe(200);

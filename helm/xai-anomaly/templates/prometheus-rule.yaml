@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "xai-anomaly.fullname" . }}
+  labels:
+    {{- include "xai-anomaly.labels" . | nindent 4 }}
+spec:
+  groups:
+  - name: xai-anomaly.rules
+    rules:
+    - alert: XaiAnomalyHighErrorRate
+      expr: rate(http_requests_total{job="{{ include "xai-anomaly.fullname" . }}", status=~"5.."}[5m]) > 0.05
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: High error rate in XAI Anomaly service
+        description: "{{ $labels.instance }} has error rate > 5% for 5 minutes."

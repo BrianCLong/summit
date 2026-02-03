@@ -240,3 +240,6 @@ export function applyRedaction<T extends { hashes?: { inputs?: Array<{ name: str
 
   return clone;
 }
+
+export * from './trace-model';
+export * from './replay-runner';

@@ -1,4 +1,4 @@
-import { Vendor } from './types';
+import { Vendor } from './types.js';
 import { randomUUID } from 'crypto';
 
 export class VendorService {

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResilienceMetric",
+  "type": "object",
+  "required": ["metric_id", "name", "value", "unit"],
+  "properties": {
+    "metric_id": { "type": "string" },
+    "name": { "type": "string" },
+    "value": { "type": "number" },
+    "unit": { "type": "string" },
+    "time_window": { "type": "string" },
+    "population_scope": { "type": "string" }
+  }
+}

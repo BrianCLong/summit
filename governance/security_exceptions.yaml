@@ -1,0 +1,11 @@
+exceptions:
+  - id: "SEC-EX-001"
+    description: "Allow generic user for legacy testing"
+    expires: "2026-02-01"
+    owner: "qa-team"
+    reason: "Migration to OIDC pending"
+  - id: "SEC-EX-002"
+    description: "Temporary open port for partner integration"
+    expires: "2026-03-01"
+    owner: "integrations-team"
+    reason: "Partner VPN setup delayed"
