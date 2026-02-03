@@ -84,6 +84,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: shared-memory-evidence-pr1
+    version: v1
+    path: prompts/evidence/shared-memory-evidence-pr1@v1.md
+    sha256: dd2e33f08fcf4743e414f6903bb0c5ce5adf9f16927953e3494e32979ab01193
+    description: Scaffold shared memory evidence schemas, bundle artifacts, and required checks mapping.
+    scope:
+      paths:
+        - evidence/EVD-shared-memory-orch-001/
+        - evidence/index.json
+        - evidence/schemas/shared-memory-orch-metrics.schema.json
+        - evidence/schemas/shared-memory-orch-report.schema.json
+        - evidence/schemas/shared-memory-orch-stamp.schema.json
+        - required_checks.todo.md
+        - tests/evidence/test_shared_memory_orch_schema.py
+        - docs/roadmap/STATUS.json
+        - prompts/evidence/shared-memory-evidence-pr1@v1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+        - docs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md

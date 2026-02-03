@@ -30,6 +30,10 @@ Until actual required check names are confirmed in the repo settings, the follow
 - `gate/evidence`
 - `gate/supplychain`
 - `gate/fimi`
+- `ci/shared-memory-unit`
+- `ci/shared-memory-policy`
+- `ci/shared-memory-determinism`
+- `ci/connector-scope-approval`
 
 ## Rename Plan
 Once the CI jobs are finalized, this document will be updated to reflect the canonical job names as they appear in the GitHub Actions UI.

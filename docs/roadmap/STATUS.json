@@ -1,6 +1,12 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-04T00:00:00Z",
   "initiatives": [
+    {
+      "id": "shared-memory-evidence-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence schema scaffolding, index update, and required checks mapping for shared memory lane."
+    },
     {
       "id": "sera-cli-proxy",
       "status": "in_progress",
