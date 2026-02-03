@@ -1,21 +1,31 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Report",
+  "title": "summit evidence report",
   "type": "object",
-  "required": ["evidence_id", "summary"],
+  "required": [
+    "evidence_id",
+    "summary",
+    "artifacts"
+  ],
   "properties": {
     "evidence_id": {
       "type": "string",
       "pattern": "^(EVD|EVID)-[A-Za-z0-9-_]+$"
     },
     "item": {
-      "type": ["object", "string"]
+      "type": [
+        "object",
+        "string"
+      ]
     },
     "summary": {
       "type": "string"
     },
     "artifacts": {
-      "type": ["array", "object"]
+      "type": [
+        "array",
+        "object"
+      ]
     },
     "item_slug": {
       "type": "string"
@@ -24,11 +34,20 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "ok"],
+        "required": [
+          "name",
+          "ok"
+        ],
         "properties": {
-          "name": {"type": "string"},
-          "ok": {"type": "boolean"},
-          "details": {"type": "string"}
+          "name": {
+            "type": "string"
+          },
+          "ok": {
+            "type": "boolean"
+          },
+          "details": {
+            "type": "string"
+          }
         }
       }
     }

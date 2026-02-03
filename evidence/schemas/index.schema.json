@@ -1,8 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Index",
+  "title": "summit evidence index",
   "type": "object",
-  "required": ["version"],
+  "required": [
+    "mappings"
+  ],
   "properties": {
     "version": {
       "type": "string"
@@ -12,39 +14,65 @@
       "additionalProperties": {
         "type": "object",
         "anyOf": [
-          { "required": ["files"] },
-          { "required": ["artifacts"] }
+          {
+            "required": [
+              "files"
+            ]
+          },
+          {
+            "required": [
+              "artifacts"
+            ]
+          }
         ],
         "properties": {
-          "evidence_id": { "type": "string" },
+          "evidence_id": {
+            "type": "string"
+          },
           "files": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": {
+              "type": "string"
+            }
           },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
           "artifacts": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": {
+              "type": "string"
+            }
           }
         },
         "additionalProperties": true
       }
     },
-    "map": {
+    "mappings": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["report", "metrics", "stamp"],
+        "required": [
+          "report",
+          "metrics",
+          "stamp"
+        ],
         "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
-        },
-        "additionalProperties": true
+          "report": {
+            "type": "string"
+          },
+          "metrics": {
+            "type": "string"
+          },
+          "stamp": {
+            "type": "string"
+          }
+        }
       }
     }
   },
-  "oneOf": [{ "required": ["items"] }, { "required": ["map"] }],
-  "additionalProperties": true
+  "additionalProperties": false
 }
