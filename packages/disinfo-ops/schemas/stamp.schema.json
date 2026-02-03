@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Disinfo Ops Stamp",
+  "type": "object",
+  "required": ["generated_at", "git_sha", "version"],
+  "properties": {
+    "generated_at": { "type": "string", "format": "date-time" },
+    "git_sha": { "type": "string" },
+    "version": { "type": "string" },
+    "agent_version": { "type": "string" }
+  },
+  "additionalProperties": false
+}
