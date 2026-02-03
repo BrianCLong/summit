@@ -1,0 +1,17 @@
+{
+  "eventId": "hil-pos-001",
+  "type": "Action",
+  "subType": "HumanApproval",
+  "status": "COMPLETED",
+  "metadata": {
+    "approvalToken": "token-002",
+    "operatorId": "op-001",
+    "checklist": {
+      "attributionPresent": true,
+      "uncertaintyPresent": true,
+      "integrityVerified": true
+    },
+    "notes": "All checklist items verified.",
+    "reviewLoadAtApproval": 2
+  }
+}

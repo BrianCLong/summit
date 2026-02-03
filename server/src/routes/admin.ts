@@ -337,6 +337,10 @@ router.delete('/shadow/configs/:tenantId', async (req, res) => {
 
 export default router;
 
+// ESM __dirname shim
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // n8n flows admin (read/write server/config/n8n-flows.json)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const n8nCfgPath = path.resolve(__dirname, '../../config/n8n-flows.json');
@@ -573,7 +577,7 @@ router.post('/secrets/rotate', express.json(), async (req, res) => {
       // In a real implementation, we might want to roll back here as well
       continue;
     }
-    const health = await axios.get(healthUrl).then(res => res.data);
+    const health = await axios.get(healthUrl, { timeout: 5000 }).then(res => res.data);
     if (health.status !== 'ok') {
       console.error(`Service ${service} is unhealthy after secret rotation. Rolling back...`);
       await secretManager.setSecret(secretName, 'current', previousSecret);
