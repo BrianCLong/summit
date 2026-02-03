@@ -1,5 +1,8 @@
 {
-  "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
-  "generated_at": "2026-02-01T12:00:00Z",
-  "ci_run_id": "run-002"
+  "evidence_id": "EVD-VERA-TEXT-001",
+  "generated_at": "2025-10-31T23:59:59Z",
+  "git_commit": "0000000000000000000000000000000000000000",
+  "tool_versions": {
+    "summit_verify": "1.0.0"
+  }
 }

@@ -1,0 +1,4 @@
+// This is a good example without global listeners
+function handleResize() {
+  console.log('resized');
+}
