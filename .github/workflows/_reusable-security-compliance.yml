@@ -51,7 +51,7 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version-file: .nvmrc
 
 
       - name: Setup Python
@@ -92,7 +92,7 @@ jobs:
           exit-code: "1"
 
       - name: Dependency Audit (NPM)
-        run: npm audit --audit-level=high
+        run: pnpm audit --audit-level=high
 
       # ═══════════════════════════════════════════════════════════════════════════
       # 3. Compliance & Licenses
