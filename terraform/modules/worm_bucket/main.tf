@@ -52,13 +52,13 @@ resource "aws_s3_bucket" "worm_bucket" {
   force_destroy       = false
 
   tags = {
-    Name            = var.bucket_name
-    Purpose         = "WORM Audit Storage"
-    Classification  = var.classification
-    Retention       = "${var.retention_years} years"
-    Compliance      = "FedRAMP High"
-    ManagedBy       = "Terraform"
-    Environment     = "Federal"
+    Name           = var.bucket_name
+    Purpose        = "WORM Audit Storage"
+    Classification = var.classification
+    Retention      = "${var.retention_years} years"
+    Compliance     = "FedRAMP High"
+    ManagedBy      = "Terraform"
+    Environment    = "Federal"
   }
 
   lifecycle {
@@ -227,10 +227,10 @@ resource "aws_s3_bucket_policy" "worm_policy" {
         }
       },
       {
-        Sid    = "RequireFederalAccess"
-        Effect = "Deny"
+        Sid       = "RequireFederalAccess"
+        Effect    = "Deny"
         Principal = "*"
-        Action = "s3:*"
+        Action    = "s3:*"
         Resource = [
           aws_s3_bucket.worm_bucket.arn,
           "${aws_s3_bucket.worm_bucket.arn}/*"
@@ -262,7 +262,7 @@ resource "aws_s3_bucket_policy" "worm_policy" {
         ]
         Condition = {
           StringEquals = {
-            "s3:x-amz-server-side-encryption" = "aws:kms"
+            "s3:x-amz-server-side-encryption"                = "aws:kms"
             "s3:x-amz-server-side-encryption-aws-kms-key-id" = var.kms_key_arn
           }
         }

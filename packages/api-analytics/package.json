@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/api-analytics",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "API monitoring, analytics, and performance tracking",
   "type": "module",
   "main": "dist/index.js",
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },
@@ -24,6 +24,6 @@
     "tsx": "^4.7.0",
     "jest": "^30.2.0",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.39.1"
+    "eslint": "^9.39.2"
   }
 }

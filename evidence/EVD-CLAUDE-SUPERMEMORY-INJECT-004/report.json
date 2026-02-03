@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INJECT-004",
+  "item_slug": "claude-supermemory",
+  "summary": "Scaffolding for EVD-CLAUDE-SUPERMEMORY-INJECT-004",
+  "artifacts": {
+    "metrics": "evidence/EVD-CLAUDE-SUPERMEMORY-INJECT-004/metrics.json",
+    "stamp": "evidence/EVD-CLAUDE-SUPERMEMORY-INJECT-004/stamp.json"
+  }
+}

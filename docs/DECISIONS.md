@@ -12,5 +12,6 @@ This log tracks architectural decisions. Each entry follows the ADR (Architectur
 | ID  | Date       | Title                        | Status   | Owner |
 | --- | ---------- | ---------------------------- | -------- | ----- |
 | 000 | YYYY-MM-DD | Decision Log Template (seed) | Proposed | Team  |
+| 0011 | 2026-01-28 | CI gate stabilization and GA gate enforcement | Accepted | Codex |
 
 Add subsequent decisions in increasing ID order and link to detailed ADRs in `docs/ADR/`.

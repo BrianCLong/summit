@@ -9,7 +9,7 @@
  * @module cache/DistributedCacheService
  */
 
-import { Redis } from 'ioredis';
+import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { LRUCache } from 'lru-cache';
 import {
@@ -81,15 +81,15 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 // ============================================================================
 
 export class DistributedCacheService {
-  private redis: Redis;
-  private subscriber: Redis | null = null;
+  private redis: Redis | any;
+  private subscriber: Redis | any | null = null;
   private l1Cache: any; // LRUCache instance
   private config: CacheConfig;
   private stats: CacheStats;
   private writeBuffer: Map<string, { value: unknown; ttl: number }> = new Map();
   private flushInterval: NodeJS.Timeout | null = null;
 
-  constructor(redis: Redis, config: Partial<CacheConfig> = {}) {
+  constructor(redis: Redis | any, config: Partial<CacheConfig> = {}) {
     this.redis = redis;
     this.config = {
       defaultTTLSeconds: config.defaultTTLSeconds ?? 300,
@@ -542,7 +542,7 @@ export class DistributedCacheService {
 // Export singleton factory
 let instance: DistributedCacheService | null = null;
 
-export function getDistributedCache(redis: Redis, config?: Partial<CacheConfig>): DistributedCacheService {
+export function getDistributedCache(redis: Redis | any, config?: Partial<CacheConfig>): DistributedCacheService {
   if (!instance) {
     instance = new DistributedCacheService(redis, config);
   }

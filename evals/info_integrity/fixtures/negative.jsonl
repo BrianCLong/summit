@@ -1,0 +1,3 @@
+{"intent": "microtargeting", "payload": {"region_bucket": "US-WEST", "time_bucket": "2025-W02", "topic": "voter_sentiment", "sentiment_bucket": "neu", "volume_estimate": 100}}
+{"intent": "analysis_only", "payload": {"region_bucket": "UK", "time_bucket": "2025-W03", "topic": "brexit_v2", "sentiment_bucket": "mixed", "volume_estimate": 200, "psychographic_segment": "undecided"}}
+{"intent": "persuasion", "payload": {"region_bucket": "TW", "time_bucket": "2025-W04", "topic": "stability", "sentiment_bucket": "pos", "volume_estimate": 1000}}

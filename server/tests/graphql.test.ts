@@ -1,7 +1,7 @@
 import request from 'supertest';
 import type { Express } from 'express';
 import type { Server } from 'http';
-import { createApp } from '../src/app';
+import { createApp } from '../src/app.js';
 import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
 const describeIf = process.env.NO_NETWORK_LISTEN === 'true'

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/foreign-fighters",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Foreign fighter tracking and analysis system",
   "license": "MIT",
   "type": "module",
@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {

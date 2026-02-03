@@ -1,0 +1,45 @@
+{
+  "task_id": "SHAI_HULUD_SUPPLY_CHAIN_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "shai-hulud-supply-chain",
+    "version": "v1",
+    "sha256": "d456a63f7e8531d579ed361ea4e30846516e0382982f19eda91af8c760969ca2",
+    "path": "prompts/subsumption/shai-hulud-supply-chain@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "subsumption/shai-hulud-supply-chain/",
+      "evidence/subsumption/shai-hulud-supply-chain/",
+      "evidence/schemas/subsumption_*.schema.json",
+      "evidence/index.json",
+      "docs/standards/shai-hulud-supply-chain.md",
+      "docs/security/data-handling/shai-hulud-supply-chain.md",
+      "docs/ops/runbooks/shai-hulud-supply-chain.md",
+      "docs/decisions/shai-hulud-supply-chain.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "security", "supply-chain"],
+    "exclusions": ["packages/**", "apps/**", "server/**", "client/**"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["evidence/subsumption/shai-hulud-supply-chain/report.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Subsumption manifest and docs targets exist.",
+    "Evidence index registers EVD-SUPPLYCHAIN-GOV-001.",
+    "Evidence artifacts are deterministic and timestamp-free outside stamp.json."
+  ],
+  "stop_conditions": [
+    "Required checks discovery indicates incompatible gate naming.",
+    "Evidence index schema mismatch requires migration."
+  ]
+}

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import stripeRouter from '../src/routes/stripe';
+import stripeRouter from '../src/routes/stripe.js';
 
 describe('Stripe raw-body route', () => {
   const app = express();

@@ -24,9 +24,9 @@ export {
   costGuard,
   CostGuardError,
   CostGuardService,
-} from './middleware';
+} from './middleware.js';
 
-export type { CostGuardContext, CostGuardOptions } from './middleware';
+export type { CostGuardContext, CostGuardOptions } from './middleware.js';
 
 // Stub for slow query killer
 export function killSlowQueries(thresholdMs: number = 30000): Promise<number> {
