@@ -11,6 +11,6 @@
 **Learning:** Performing multiple individual `neo.run` calls in a loop is a significant bottleneck due to round-trip latency. Batching these operations using Cypher's `UNWIND` clause can reduce the number of round-trips from N to 1, providing a major performance boost for write-heavy repository methods.
 **Action:** Always prefer `UNWIND` for batching insertions or updates in Neo4j repositories. Ensure per-item context (like `tenantId`) is preserved by including it in the batch parameters.
 
-## 2026-03-24 - [Persistent Imperative Instances in React]
-**Learning:** Initializing imperative libraries like Cytoscape or Socket.IO inside a `useEffect` with dependencies that change frequently (like graph data) causes expensive destroy/recreate cycles and redundant network connections.
-**Action:** Use `useRef` to persist the library instance across renders. Split the `useEffect` into a one-time initialization hook and separate update hooks that perform incremental changes (e.g., using `cy.json()` or `cy.add()`).
+## 2026-02-03 - [Batched PostgreSQL Inserts with Chunking]
+**Learning:** Inserting many records individually in a loop is a major performance bottleneck. Using multi-row `INSERT INTO ... VALUES (), (), ...` reduces round-trips from N to 1. However, PostgreSQL has a parameter limit (65,535), so large batches must be chunked (e.g., 100 records per batch) to avoid runtime errors.
+**Action:** Use multi-row `VALUES` for batched PostgreSQL inserts and always implement chunking to handle arbitrarily large input arrays safely.
