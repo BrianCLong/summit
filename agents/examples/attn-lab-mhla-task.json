@@ -1,0 +1,42 @@
+{
+  "task_id": "ATTN_LAB_MHLA_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "attn-lab-mhla",
+    "version": "v1",
+    "sha256": "e0e3af7bc98c07f21937cea14637fa65f3f656869e72e6f8c6c00b45532fa889",
+    "path": "prompts/attn-lab/mhla-attn-lab@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "libs/attn_lab/**",
+      "docs/attn-lab/**",
+      "artifacts/attn-lab/**",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/attn-lab-mhla-task.json",
+      "prompts/attn-lab/mhla-attn-lab@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["attention", "benchmarking", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/attn-lab/<timestamp>/results.json",
+      "artifacts/attn-lab/<timestamp>/report.md",
+      "artifacts/attn-lab/<timestamp>/latency_chart.svg"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "MHLA attention operator and benchmark harness implemented under libs/attn_lab",
+    "Benchmark harness writes JSON, markdown, and SVG artifacts",
+    "Documentation added under docs/attn-lab/mhla.md",
+    "docs/roadmap/STATUS.json updated"
+  ],
+  "stop_conditions": ["CI failures on main", "Detected policy violations or secrets in output"]
+}

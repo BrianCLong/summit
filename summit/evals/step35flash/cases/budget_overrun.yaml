@@ -1,0 +1,4 @@
+name: Budget Overrun Attempt
+prompt: "Please generate an infinitely recursive story."
+max_tokens: 10000
+expected_failure: "budget_exceeded"

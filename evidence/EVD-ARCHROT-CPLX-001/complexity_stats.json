@@ -1,0 +1,3075 @@
+{
+  "files": [
+    {
+      "imports": 12,
+      "lines": 557,
+      "path": "tools/benchmark_mini.py"
+    },
+    {
+      "imports": 4,
+      "lines": 35,
+      "path": "tools/validate_evidence_schemas.py"
+    },
+    {
+      "imports": 16,
+      "lines": 967,
+      "path": "tools/security_framework.py"
+    },
+    {
+      "imports": 4,
+      "lines": 15,
+      "path": "tools/validate_orchestration.py"
+    },
+    {
+      "imports": 9,
+      "lines": 285,
+      "path": "tools/ask_with_pack.py"
+    },
+    {
+      "imports": 7,
+      "lines": 401,
+      "path": "tools/browser_ai.py"
+    },
+    {
+      "imports": 7,
+      "lines": 176,
+      "path": "tools/ci_verify_tidemark_bundle.py"
+    },
+    {
+      "imports": 9,
+      "lines": 543,
+      "path": "tools/model_manager.py"
+    },
+    {
+      "imports": 9,
+      "lines": 522,
+      "path": "tools/policy_adaptive.py"
+    },
+    {
+      "imports": 3,
+      "lines": 159,
+      "path": "tools/raci_from_codeowners.py"
+    },
+    {
+      "imports": 12,
+      "lines": 265,
+      "path": "tools/px.py"
+    },
+    {
+      "imports": 5,
+      "lines": 109,
+      "path": "tools/overrides.py"
+    },
+    {
+      "imports": 5,
+      "lines": 174,
+      "path": "tools/mc.py"
+    },
+    {
+      "imports": 4,
+      "lines": 38,
+      "path": "tools/verify_evidence.py"
+    },
+    {
+      "imports": 13,
+      "lines": 838,
+      "path": "tools/anomaly_healer.py"
+    },
+    {
+      "imports": 3,
+      "lines": 115,
+      "path": "tools/runtime-evidence-bundle.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 18,
+      "path": "tools/budgets.py"
+    },
+    {
+      "imports": 0,
+      "lines": 722,
+      "path": "tools/proxy.js"
+    },
+    {
+      "imports": 6,
+      "lines": 138,
+      "path": "tools/evidence_validate.py"
+    },
+    {
+      "imports": 8,
+      "lines": 71,
+      "path": "tools/determinism_smoke.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/__init__.py"
+    },
+    {
+      "imports": 3,
+      "lines": 340,
+      "path": "tools/generate-soc-tests.js"
+    },
+    {
+      "imports": 0,
+      "lines": 19,
+      "path": "tools/freeze-pq.js"
+    },
+    {
+      "imports": 3,
+      "lines": 55,
+      "path": "tools/prompt_pack_lint.py"
+    },
+    {
+      "imports": 7,
+      "lines": 268,
+      "path": "tools/agent_audit.py"
+    },
+    {
+      "imports": 13,
+      "lines": 731,
+      "path": "tools/rag_enhanced.py"
+    },
+    {
+      "imports": 5,
+      "lines": 77,
+      "path": "tools/rag_query_mmr.py"
+    },
+    {
+      "imports": 2,
+      "lines": 34,
+      "path": "tools/audit-verify.ts"
+    },
+    {
+      "imports": 12,
+      "lines": 597,
+      "path": "tools/predictive_scaler.py"
+    },
+    {
+      "imports": 0,
+      "lines": 164,
+      "path": "tools/audit-routes.js"
+    },
+    {
+      "imports": 9,
+      "lines": 980,
+      "path": "tools/graph_streaming.py"
+    },
+    {
+      "imports": 0,
+      "lines": 204,
+      "path": "tools/remove-dead-code.js"
+    },
+    {
+      "imports": 4,
+      "lines": 49,
+      "path": "tools/codegen_check.py"
+    },
+    {
+      "imports": 3,
+      "lines": 64,
+      "path": "tools/check_dep_delta.py"
+    },
+    {
+      "imports": 14,
+      "lines": 922,
+      "path": "tools/multimodal_fusion.py"
+    },
+    {
+      "imports": 7,
+      "lines": 74,
+      "path": "tools/status_json.py"
+    },
+    {
+      "imports": 4,
+      "lines": 53,
+      "path": "tools/triggers.py"
+    },
+    {
+      "imports": 7,
+      "lines": 65,
+      "path": "tools/rag_index.py"
+    },
+    {
+      "imports": 5,
+      "lines": 101,
+      "path": "tools/validate_evidence.py"
+    },
+    {
+      "imports": 6,
+      "lines": 93,
+      "path": "tools/policy_check.py"
+    },
+    {
+      "imports": 10,
+      "lines": 424,
+      "path": "tools/scheduler.py"
+    },
+    {
+      "imports": 9,
+      "lines": 391,
+      "path": "tools/learner_traffic.py"
+    },
+    {
+      "imports": 6,
+      "lines": 267,
+      "path": "tools/validate-canary-config.py"
+    },
+    {
+      "imports": 6,
+      "lines": 270,
+      "path": "tools/agenda_build.py"
+    },
+    {
+      "imports": 12,
+      "lines": 394,
+      "path": "tools/symphony.py"
+    },
+    {
+      "imports": 8,
+      "lines": 118,
+      "path": "tools/federation.py"
+    },
+    {
+      "imports": 9,
+      "lines": 413,
+      "path": "tools/rag_ingest.py"
+    },
+    {
+      "imports": 4,
+      "lines": 335,
+      "path": "tools/extract-graphql-queries.js"
+    },
+    {
+      "imports": 1,
+      "lines": 25,
+      "path": "tools/turbo-remote-s3.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 19,
+      "path": "tools/rag_stats.py"
+    },
+    {
+      "imports": 11,
+      "lines": 320,
+      "path": "tools/incident_evidence_pack.py"
+    },
+    {
+      "imports": 3,
+      "lines": 104,
+      "path": "tools/generate-governance-bundle.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 182,
+      "path": "tools/session_sweeper.py"
+    },
+    {
+      "imports": 8,
+      "lines": 493,
+      "path": "tools/window_maximizer.py"
+    },
+    {
+      "imports": 7,
+      "lines": 469,
+      "path": "tools/ml_optimizer.py"
+    },
+    {
+      "imports": 4,
+      "lines": 65,
+      "path": "tools/rag_query.py"
+    },
+    {
+      "imports": 0,
+      "lines": 20,
+      "path": "tools/coverage-gate.js"
+    },
+    {
+      "imports": 8,
+      "lines": 274,
+      "path": "tools/usage_burndown.py"
+    },
+    {
+      "imports": 2,
+      "lines": 264,
+      "path": "tools/find-any.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 474,
+      "path": "tools/rag_query_enhanced.py"
+    },
+    {
+      "imports": 7,
+      "lines": 455,
+      "path": "tools/verify-bundle.py"
+    },
+    {
+      "imports": 17,
+      "lines": 705,
+      "path": "tools/provider_reconciler.py"
+    },
+    {
+      "imports": 16,
+      "lines": 433,
+      "path": "tools/otel_tracing.py"
+    },
+    {
+      "imports": 19,
+      "lines": 628,
+      "path": "tools/chaos_engineer.py"
+    },
+    {
+      "imports": 3,
+      "lines": 73,
+      "path": "tools/emit-audit.ts"
+    },
+    {
+      "imports": 17,
+      "lines": 561,
+      "path": "tools/federation_mesh.py"
+    },
+    {
+      "imports": 2,
+      "lines": 99,
+      "path": "tools/replay-receipt.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 217,
+      "path": "tools/migratevet/scanner.py"
+    },
+    {
+      "imports": 4,
+      "lines": 57,
+      "path": "tools/migratevet/models.py"
+    },
+    {
+      "imports": 1,
+      "lines": 5,
+      "path": "tools/migratevet/__init__.py"
+    },
+    {
+      "imports": 7,
+      "lines": 79,
+      "path": "tools/migratevet/cli.py"
+    },
+    {
+      "imports": 4,
+      "lines": 91,
+      "path": "tools/migratevet/postgres_rules.py"
+    },
+    {
+      "imports": 8,
+      "lines": 95,
+      "path": "tools/migratevet/tests/test_cli.py"
+    },
+    {
+      "imports": 3,
+      "lines": 43,
+      "path": "tools/secretsentry/secretsentry/report.py"
+    },
+    {
+      "imports": 9,
+      "lines": 180,
+      "path": "tools/secretsentry/secretsentry/scanner.py"
+    },
+    {
+      "imports": 1,
+      "lines": 5,
+      "path": "tools/secretsentry/secretsentry/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 77,
+      "path": "tools/secretsentry/secretsentry/rules.py"
+    },
+    {
+      "imports": 5,
+      "lines": 38,
+      "path": "tools/secretsentry/secretsentry/allowlist.py"
+    },
+    {
+      "imports": 1,
+      "lines": 6,
+      "path": "tools/secretsentry/secretsentry/__main__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 86,
+      "path": "tools/secretsentry/secretsentry/cli.py"
+    },
+    {
+      "imports": 3,
+      "lines": 9,
+      "path": "tools/secretsentry/tests/conftest.py"
+    },
+    {
+      "imports": 6,
+      "lines": 124,
+      "path": "tools/secretsentry/tests/test_scanner.py"
+    },
+    {
+      "imports": 6,
+      "lines": 144,
+      "path": "tools/pfd/pfd/report.py"
+    },
+    {
+      "imports": 2,
+      "lines": 12,
+      "path": "tools/pfd/pfd/__init__.py"
+    },
+    {
+      "imports": 16,
+      "lines": 302,
+      "path": "tools/pfd/pfd/core.py"
+    },
+    {
+      "imports": 7,
+      "lines": 103,
+      "path": "tools/pfd/pfd/pytest_plugin.py"
+    },
+    {
+      "imports": 7,
+      "lines": 58,
+      "path": "tools/pfd/tests/test_detector.py"
+    },
+    {
+      "imports": 1,
+      "lines": 24,
+      "path": "tools/deploy/waves.ts"
+    },
+    {
+      "imports": 8,
+      "lines": 97,
+      "path": "tools/issue-sweeper/test/main.test.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 50,
+      "path": "tools/issue-sweeper/src/report.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 53,
+      "path": "tools/issue-sweeper/src/detect.ts"
+    },
+    {
+      "imports": 9,
+      "lines": 220,
+      "path": "tools/issue-sweeper/src/index.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 60,
+      "path": "tools/issue-sweeper/src/ledger.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 77,
+      "path": "tools/issue-sweeper/src/github.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 20,
+      "path": "tools/audit-proof-cli/index.js"
+    },
+    {
+      "imports": 2,
+      "lines": 14,
+      "path": "tools/marketplace/verify.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 220,
+      "path": "tools/ppeg/ppeg/spec.py"
+    },
+    {
+      "imports": 21,
+      "lines": 363,
+      "path": "tools/ppeg/ppeg/codegen.py"
+    },
+    {
+      "imports": 2,
+      "lines": 15,
+      "path": "tools/ppeg/ppeg/__init__.py"
+    },
+    {
+      "imports": 5,
+      "lines": 101,
+      "path": "tools/ppeg/ppeg/diff_inspector.py"
+    },
+    {
+      "imports": 7,
+      "lines": 58,
+      "path": "tools/ppeg/ppeg/cli.py"
+    },
+    {
+      "imports": 4,
+      "lines": 46,
+      "path": "tools/ppeg/tests/test_diff_inspector.py"
+    },
+    {
+      "imports": 7,
+      "lines": 43,
+      "path": "tools/ppeg/tests/test_pipeline_execution.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/ppeg/tests/__init__.py"
+    },
+    {
+      "imports": 5,
+      "lines": 30,
+      "path": "tools/ppeg/tests/test_codegen.py"
+    },
+    {
+      "imports": 3,
+      "lines": 10,
+      "path": "tools/ppeg/tests/conftest.py"
+    },
+    {
+      "imports": 9,
+      "lines": 413,
+      "path": "tools/determinism/diff.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/determinism/__init__.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/determinism/tests/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 57,
+      "path": "tools/determinism/tests/test_diff.py"
+    },
+    {
+      "imports": 1,
+      "lines": 242,
+      "path": "tools/claude-code-cli/__tests__/output.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 182,
+      "path": "tools/claude-code-cli/__tests__/env.test.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 241,
+      "path": "tools/claude-code-cli/__tests__/golden.test.ts"
+    },
+    {
+      "imports": 9,
+      "lines": 259,
+      "path": "tools/claude-code-cli/src/cli.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 185,
+      "path": "tools/claude-code-cli/src/utils/output.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 95,
+      "path": "tools/claude-code-cli/src/utils/env.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 6,
+      "path": "tools/claude-code-cli/src/utils/index.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 96,
+      "path": "tools/claude-code-cli/src/types/index.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 112,
+      "path": "tools/claude-code-cli/src/commands/run.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 5,
+      "path": "tools/claude-code-cli/src/commands/index.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 69,
+      "path": "tools/cicd_observer/fetch.py"
+    },
+    {
+      "imports": 4,
+      "lines": 27,
+      "path": "tools/cicd_observer/stamp.py"
+    },
+    {
+      "imports": 1,
+      "lines": 24,
+      "path": "tools/cicd_observer/render.py"
+    },
+    {
+      "imports": 2,
+      "lines": 53,
+      "path": "tools/cicd_observer/compute.py"
+    },
+    {
+      "imports": 3,
+      "lines": 25,
+      "path": "tools/cicd_observer/ingest.py"
+    },
+    {
+      "imports": 9,
+      "lines": 65,
+      "path": "tools/cicd_observer/main.py"
+    },
+    {
+      "imports": 2,
+      "lines": 13,
+      "path": "tools/cicd_observer/tests/test_determinism.py"
+    },
+    {
+      "imports": 4,
+      "lines": 17,
+      "path": "tools/cicd_observer/tests/test_metrics_golden.py"
+    },
+    {
+      "imports": 8,
+      "lines": 701,
+      "path": "tools/migrations/migrate.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 66,
+      "path": "tools/rules/miner.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 4,
+      "path": "tools/rules/test/miner.spec.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 44,
+      "path": "tools/ast/postcondition-checker.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 12,
+      "path": "tools/ast/apply.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 30,
+      "path": "tools/ast/ast-parser.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 26,
+      "path": "tools/report-cli/index.js"
+    },
+    {
+      "imports": 3,
+      "lines": 277,
+      "path": "tools/federal/emit_merkle_and_sign.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 735,
+      "path": "tools/federal/oscal-ssp-export.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 541,
+      "path": "tools/federal/simulate-breakglass.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 488,
+      "path": "tools/federal/emass-bundle.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 30,
+      "path": "tools/contracts/assert_budgets.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 18,
+      "path": "tools/contracts/validate.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 8,
+      "path": "tools/contracts/test/validate.spec.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 40,
+      "path": "tools/claim-verifier/cli.js"
+    },
+    {
+      "imports": 9,
+      "lines": 57,
+      "path": "tools/claim-verifier/test/verify.test.js"
+    },
+    {
+      "imports": 4,
+      "lines": 33,
+      "path": "tools/maestro/index.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 8,
+      "path": "tools/owners/gen.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 6,
+      "path": "tools/k6/smoke.js"
+    },
+    {
+      "imports": 2,
+      "lines": 16,
+      "path": "tools/k6/smoke-apis.js"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/perf-predict/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 129,
+      "path": "tools/perf-predict/main.py"
+    },
+    {
+      "imports": 0,
+      "lines": 79,
+      "path": "tools/docforge/cli.js"
+    },
+    {
+      "imports": 0,
+      "lines": 51,
+      "path": "tools/docforge/__tests__/build.test.js"
+    },
+    {
+      "imports": 0,
+      "lines": 23,
+      "path": "tools/docforge/__tests__/linkcheck.test.js"
+    },
+    {
+      "imports": 0,
+      "lines": 23,
+      "path": "tools/docforge/__tests__/__fixtures__/sample_repo/tools/report.py"
+    },
+    {
+      "imports": 0,
+      "lines": 32,
+      "path": "tools/docforge/__tests__/__fixtures__/sample_repo/src/analytics.js"
+    },
+    {
+      "imports": 0,
+      "lines": 84,
+      "path": "tools/docforge/src/linkcheck.js"
+    },
+    {
+      "imports": 0,
+      "lines": 23,
+      "path": "tools/docforge/src/sitemap.js"
+    },
+    {
+      "imports": 0,
+      "lines": 61,
+      "path": "tools/docforge/src/markdown.js"
+    },
+    {
+      "imports": 0,
+      "lines": 52,
+      "path": "tools/docforge/src/search.js"
+    },
+    {
+      "imports": 0,
+      "lines": 106,
+      "path": "tools/docforge/src/fs-utils.js"
+    },
+    {
+      "imports": 0,
+      "lines": 19,
+      "path": "tools/docforge/src/sanitizers.js"
+    },
+    {
+      "imports": 0,
+      "lines": 197,
+      "path": "tools/docforge/src/templates.js"
+    },
+    {
+      "imports": 0,
+      "lines": 245,
+      "path": "tools/docforge/src/build.js"
+    },
+    {
+      "imports": 0,
+      "lines": 52,
+      "path": "tools/docforge/src/collect-adr.js"
+    },
+    {
+      "imports": 0,
+      "lines": 47,
+      "path": "tools/docforge/src/text.js"
+    },
+    {
+      "imports": 0,
+      "lines": 75,
+      "path": "tools/docforge/src/extractors/js.js"
+    },
+    {
+      "imports": 0,
+      "lines": 67,
+      "path": "tools/docforge/src/extractors/go.js"
+    },
+    {
+      "imports": 0,
+      "lines": 103,
+      "path": "tools/docforge/src/extractors/python.js"
+    },
+    {
+      "imports": 5,
+      "lines": 122,
+      "path": "tools/xra/xra/report.py"
+    },
+    {
+      "imports": 2,
+      "lines": 54,
+      "path": "tools/xra/xra/models.py"
+    },
+    {
+      "imports": 5,
+      "lines": 79,
+      "path": "tools/xra/xra/replay.py"
+    },
+    {
+      "imports": 4,
+      "lines": 26,
+      "path": "tools/xra/xra/__init__.py"
+    },
+    {
+      "imports": 5,
+      "lines": 172,
+      "path": "tools/xra/xra/explanations.py"
+    },
+    {
+      "imports": 7,
+      "lines": 173,
+      "path": "tools/xra/xra/metrics.py"
+    },
+    {
+      "imports": 11,
+      "lines": 128,
+      "path": "tools/xra/xra/cli.py"
+    },
+    {
+      "imports": 2,
+      "lines": 6,
+      "path": "tools/xra/tests/conftest.py"
+    },
+    {
+      "imports": 5,
+      "lines": 44,
+      "path": "tools/xra/tests/test_metrics.py"
+    },
+    {
+      "imports": 2,
+      "lines": 211,
+      "path": "tools/xra/dashboard/src/generateDashboard.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 3,
+      "path": "tools/test/bloom.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 163,
+      "path": "tools/agsm-dashboard/src/index.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 172,
+      "path": "tools/prompt-system/tests/core/engine.test.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 201,
+      "path": "tools/prompt-system/tests/core/validator.test.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 224,
+      "path": "tools/prompt-system/src/cli/context.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 192,
+      "path": "tools/prompt-system/src/cli/interactive.ts"
+    },
+    {
+      "imports": 10,
+      "lines": 312,
+      "path": "tools/prompt-system/src/cli/index.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 82,
+      "path": "tools/prompt-system/src/cli/generator.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 163,
+      "path": "tools/prompt-system/src/core/composer.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 220,
+      "path": "tools/prompt-system/src/core/validator.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 9,
+      "path": "tools/prompt-system/src/core/index.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 213,
+      "path": "tools/prompt-system/src/core/registry.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 215,
+      "path": "tools/prompt-system/src/core/engine.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 119,
+      "path": "tools/prompt-system/src/core/types.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 80,
+      "path": "tools/prompt-system/src/metrics/tracker.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 64,
+      "path": "tools/prompt-system/src/metrics/reporter.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 141,
+      "path": "tools/prompt-system/src/metrics/analytics.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 12,
+      "path": "tools/ses/vitest.config.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 62,
+      "path": "tools/ses/tests/simulator.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 57,
+      "path": "tools/ses/src/rollout.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 35,
+      "path": "tools/ses/src/simulator.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 148,
+      "path": "tools/ses/src/analyzer.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 60,
+      "path": "tools/ses/src/index.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 173,
+      "path": "tools/ses/src/migrator.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 42,
+      "path": "tools/ses/src/loader.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 126,
+      "path": "tools/ses/src/types.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 50,
+      "path": "tools/vscode/doc-lsp/server.js"
+    },
+    {
+      "imports": 0,
+      "lines": 23,
+      "path": "tools/vscode/doc-lsp/extension.js"
+    },
+    {
+      "imports": 0,
+      "lines": 46,
+      "path": "tools/vscode/intelgraph-docs/extension.js"
+    },
+    {
+      "imports": 5,
+      "lines": 24,
+      "path": "tools/fct/__init__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 153,
+      "path": "tools/fct/postprocessing.py"
+    },
+    {
+      "imports": 4,
+      "lines": 180,
+      "path": "tools/fct/metrics.py"
+    },
+    {
+      "imports": 7,
+      "lines": 99,
+      "path": "tools/fct/pareto.py"
+    },
+    {
+      "imports": 6,
+      "lines": 216,
+      "path": "tools/fct/lagrangian.py"
+    },
+    {
+      "imports": 3,
+      "lines": 56,
+      "path": "tools/fct/policy.py"
+    },
+    {
+      "imports": 4,
+      "lines": 73,
+      "path": "tools/solid_gate/schema.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/solid_gate/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 95,
+      "path": "tools/solid_gate/rules.py"
+    },
+    {
+      "imports": 2,
+      "lines": 40,
+      "path": "tools/solid_gate/git.py"
+    },
+    {
+      "imports": 3,
+      "lines": 17,
+      "path": "tools/solid_gate/__main__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 62,
+      "path": "tools/solid_gate/runner.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/solid_gate/tests/__init__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 120,
+      "path": "tools/solid_gate/tests/test_runner_golden.py"
+    },
+    {
+      "imports": 3,
+      "lines": 38,
+      "path": "tools/oci/push.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 159,
+      "path": "tools/merge-train/freeze_guard.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 24,
+      "path": "tools/dr-cli/index.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 316,
+      "path": "tools/promise-tracker/src/sync.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 219,
+      "path": "tools/promise-tracker/src/cli.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 326,
+      "path": "tools/promise-tracker/src/report.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 12,
+      "path": "tools/promise-tracker/src/index.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 204,
+      "path": "tools/promise-tracker/src/health.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 165,
+      "path": "tools/promise-tracker/src/init.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 199,
+      "path": "tools/promise-tracker/src/metrics.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 407,
+      "path": "tools/promise-tracker/src/extract.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 296,
+      "path": "tools/promise-tracker/src/schema.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 34,
+      "path": "tools/fuzz/api_fuzz.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 22,
+      "path": "tools/scba/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 18,
+      "path": "tools/scba/ci.py"
+    },
+    {
+      "imports": 8,
+      "lines": 81,
+      "path": "tools/scba/probes.py"
+    },
+    {
+      "imports": 2,
+      "lines": 42,
+      "path": "tools/scba/measurements.py"
+    },
+    {
+      "imports": 6,
+      "lines": 101,
+      "path": "tools/scba/attacks.py"
+    },
+    {
+      "imports": 4,
+      "lines": 87,
+      "path": "tools/scba/stats.py"
+    },
+    {
+      "imports": 3,
+      "lines": 52,
+      "path": "tools/scba/policies.py"
+    },
+    {
+      "imports": 8,
+      "lines": 63,
+      "path": "tools/scba/cli.py"
+    },
+    {
+      "imports": 8,
+      "lines": 105,
+      "path": "tools/scba/runner.py"
+    },
+    {
+      "imports": 7,
+      "lines": 103,
+      "path": "tools/scba/tests/test_scba.py"
+    },
+    {
+      "imports": 1,
+      "lines": 71,
+      "path": "tools/context_bundle/context_bundle.py"
+    },
+    {
+      "imports": 0,
+      "lines": 39,
+      "path": "tools/prsplit/stack.js"
+    },
+    {
+      "imports": 0,
+      "lines": 14,
+      "path": "tools/prsplit/areas.js"
+    },
+    {
+      "imports": 0,
+      "lines": 5,
+      "path": "tools/prsplit/test/areas.spec.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 13,
+      "path": "tools/summitctl/jest.config.js"
+    },
+    {
+      "imports": 3,
+      "lines": 39,
+      "path": "tools/summitctl/src/store.test.ts"
+    },
+    {
+      "imports": 8,
+      "lines": 31,
+      "path": "tools/summitctl/src/index.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 93,
+      "path": "tools/summitctl/src/git-ops.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 89,
+      "path": "tools/summitctl/src/store.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 16,
+      "path": "tools/summitctl/src/types.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 47,
+      "path": "tools/summitctl/src/utils.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 90,
+      "path": "tools/summitctl/src/commands/task.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 56,
+      "path": "tools/summitctl/src/commands/test.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 51,
+      "path": "tools/summitctl/src/commands/check.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 82,
+      "path": "tools/summitctl/src/commands/local-task.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 24,
+      "path": "tools/summitctl/src/commands/release.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 35,
+      "path": "tools/summitctl/src/commands/init.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 57,
+      "path": "tools/summitctl/src/commands/metrics.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 68,
+      "path": "tools/summitctl/src/commands/policy.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 35,
+      "path": "tools/summitctl/src/commands/__tests__/test.test.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 41,
+      "path": "tools/summitctl/src/commands/__tests__/check.test.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 44,
+      "path": "tools/deps-drift/index.js"
+    },
+    {
+      "imports": 0,
+      "lines": 35,
+      "path": "tools/deps-drift/__tests__/report.test.js"
+    },
+    {
+      "imports": 0,
+      "lines": 153,
+      "path": "tools/deps-drift/lib/report.js"
+    },
+    {
+      "imports": 0,
+      "lines": 201,
+      "path": "tools/deps-drift/lib/parsers.js"
+    },
+    {
+      "imports": 0,
+      "lines": 52,
+      "path": "tools/deps-drift/lib/scanner.js"
+    },
+    {
+      "imports": 0,
+      "lines": 13,
+      "path": "tools/ig-pack/index.js"
+    },
+    {
+      "imports": 4,
+      "lines": 87,
+      "path": "tools/lrt/lrt/api.py"
+    },
+    {
+      "imports": 5,
+      "lines": 46,
+      "path": "tools/lrt/lrt/canary.py"
+    },
+    {
+      "imports": 7,
+      "lines": 100,
+      "path": "tools/lrt/lrt/harness.py"
+    },
+    {
+      "imports": 3,
+      "lines": 15,
+      "path": "tools/lrt/lrt/__init__.py"
+    },
+    {
+      "imports": 8,
+      "lines": 115,
+      "path": "tools/lrt/lrt/leaderboard.py"
+    },
+    {
+      "imports": 2,
+      "lines": 20,
+      "path": "tools/lrt/lrt/defenses/ppc.py"
+    },
+    {
+      "imports": 4,
+      "lines": 8,
+      "path": "tools/lrt/lrt/defenses/__init__.py"
+    },
+    {
+      "imports": 2,
+      "lines": 16,
+      "path": "tools/lrt/lrt/defenses/rsr.py"
+    },
+    {
+      "imports": 2,
+      "lines": 17,
+      "path": "tools/lrt/lrt/defenses/ccc.py"
+    },
+    {
+      "imports": 5,
+      "lines": 36,
+      "path": "tools/lrt/lrt/agents/base.py"
+    },
+    {
+      "imports": 4,
+      "lines": 14,
+      "path": "tools/lrt/lrt/agents/__init__.py"
+    },
+    {
+      "imports": 3,
+      "lines": 22,
+      "path": "tools/lrt/lrt/agents/query_chain.py"
+    },
+    {
+      "imports": 4,
+      "lines": 32,
+      "path": "tools/lrt/lrt/agents/timing.py"
+    },
+    {
+      "imports": 3,
+      "lines": 26,
+      "path": "tools/lrt/lrt/agents/prompt_craft.py"
+    },
+    {
+      "imports": 8,
+      "lines": 92,
+      "path": "tools/lrt/tests/test_harness.py"
+    },
+    {
+      "imports": 5,
+      "lines": 147,
+      "path": "tools/auditctl/index.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 80,
+      "path": "tools/golden-prompts/validate.js"
+    },
+    {
+      "imports": 4,
+      "lines": 73,
+      "path": "tools/alertsync/sync.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/backup-orchestrator/__init__.py"
+    },
+    {
+      "imports": 10,
+      "lines": 162,
+      "path": "tools/backup-orchestrator/cli.py"
+    },
+    {
+      "imports": 1,
+      "lines": 25,
+      "path": "tools/security/vuln-classify.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 19,
+      "path": "tools/pm/risk_register.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 34,
+      "path": "tools/pm/scenario.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 91,
+      "path": "tools/pm/auto_planner.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 37,
+      "path": "tools/pm/assign_reviewers.js"
+    },
+    {
+      "imports": 2,
+      "lines": 21,
+      "path": "tools/pm/close_the_loop.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 13,
+      "path": "tools/pm/auto_slice.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 19,
+      "path": "tools/pm/heatmap.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 31,
+      "path": "tools/pm/wsjf_rice.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 20,
+      "path": "tools/pm/deps_cap_plan.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 21,
+      "path": "tools/pm/monte_carlo.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/pm/sprint_rollover.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 36,
+      "path": "tools/scpe/tests/test_scpe.py"
+    },
+    {
+      "imports": 1,
+      "lines": 28,
+      "path": "tools/scpe/src/scpe/errors.py"
+    },
+    {
+      "imports": 7,
+      "lines": 126,
+      "path": "tools/scpe/src/scpe/sbom.py"
+    },
+    {
+      "imports": 0,
+      "lines": 7,
+      "path": "tools/scpe/src/scpe/__init__.py"
+    },
+    {
+      "imports": 5,
+      "lines": 32,
+      "path": "tools/scpe/src/scpe/utils.py"
+    },
+    {
+      "imports": 6,
+      "lines": 60,
+      "path": "tools/scpe/src/scpe/config.py"
+    },
+    {
+      "imports": 9,
+      "lines": 198,
+      "path": "tools/scpe/src/scpe/validator.py"
+    },
+    {
+      "imports": 13,
+      "lines": 183,
+      "path": "tools/scpe/src/scpe/signatures.py"
+    },
+    {
+      "imports": 8,
+      "lines": 81,
+      "path": "tools/scpe/src/scpe/cli.py"
+    },
+    {
+      "imports": 9,
+      "lines": 86,
+      "path": "tools/scpe/src/scpe/receipt.py"
+    },
+    {
+      "imports": 0,
+      "lines": 4,
+      "path": "tools/sbom/diff.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 18,
+      "path": "tools/promptpack_lint/setup.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/promptpack_lint/tests/__init__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 75,
+      "path": "tools/promptpack_lint/tests/test_linter.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/promptpack_lint/src/promptpack_lint/__init__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 109,
+      "path": "tools/promptpack_lint/src/promptpack_lint/linter.py"
+    },
+    {
+      "imports": 4,
+      "lines": 47,
+      "path": "tools/promptpack_lint/src/promptpack_lint/cli.py"
+    },
+    {
+      "imports": 1,
+      "lines": 122,
+      "path": "tools/flake-preventer/chaos.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 35,
+      "path": "tools/flake-preventer/gate.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 119,
+      "path": "tools/flake-preventer/analyzer.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 183,
+      "path": "tools/flake-preventer/runner.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 20,
+      "path": "tools/flake-preventer/tests/chaos.spec.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 98,
+      "path": "tools/searchctl/searchctl.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 23,
+      "path": "tools/scaffold/new.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 38,
+      "path": "tools/scaffold/templates/service-ts/src/index.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 5,
+      "path": "tools/graph_validator/run.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/graph_validator/graph_validator/__init__.py"
+    },
+    {
+      "imports": 1,
+      "lines": 5,
+      "path": "tools/graph_validator/graph_validator/__main__.py"
+    },
+    {
+      "imports": 11,
+      "lines": 117,
+      "path": "tools/graph_validator/graph_validator/main.py"
+    },
+    {
+      "imports": 6,
+      "lines": 142,
+      "path": "tools/graph_validator/graph_validator/config/mapping.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/graph_validator/graph_validator/config/__init__.py"
+    },
+    {
+      "imports": 2,
+      "lines": 87,
+      "path": "tools/graph_validator/graph_validator/config/types.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/graph_validator/graph_validator/connectors/__init__.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/graph_validator/graph_validator/emit/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 10,
+      "path": "tools/graph_validator/graph_validator/emit/json.py"
+    },
+    {
+      "imports": 2,
+      "lines": 18,
+      "path": "tools/graph_validator/graph_validator/tests/test_evidence_ids.py"
+    },
+    {
+      "imports": 2,
+      "lines": 7,
+      "path": "tools/graph_validator/graph_validator/tests/conftest.py"
+    },
+    {
+      "imports": 2,
+      "lines": 11,
+      "path": "tools/graph_validator/graph_validator/tests/test_mapping_load.py"
+    },
+    {
+      "imports": 6,
+      "lines": 30,
+      "path": "tools/graph_validator/graph_validator/evidence/stamp.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/graph_validator/graph_validator/evidence/__init__.py"
+    },
+    {
+      "imports": 3,
+      "lines": 25,
+      "path": "tools/graph_validator/graph_validator/evidence/ids.py"
+    },
+    {
+      "imports": 3,
+      "lines": 14,
+      "path": "tools/graph_validator/graph_validator/checks/counts.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/graph_validator/graph_validator/checks/__init__.py"
+    },
+    {
+      "imports": 7,
+      "lines": 808,
+      "path": "tools/importer/index.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 29,
+      "path": "tools/evals/run_eval.py"
+    },
+    {
+      "imports": 5,
+      "lines": 79,
+      "path": "tools/prov-verifier/igprov/__main__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 37,
+      "path": "tools/exporter/cli.js"
+    },
+    {
+      "imports": 2,
+      "lines": 48,
+      "path": "tools/exporter/renderer.js"
+    },
+    {
+      "imports": 10,
+      "lines": 708,
+      "path": "tools/exporter/index.ts"
+    },
+    {
+      "imports": 10,
+      "lines": 274,
+      "path": "tools/summit-mds/summit.py"
+    },
+    {
+      "imports": 1,
+      "lines": 9,
+      "path": "tools/tip/__init__.py"
+    },
+    {
+      "imports": 8,
+      "lines": 138,
+      "path": "tools/tip/loader.py"
+    },
+    {
+      "imports": 7,
+      "lines": 804,
+      "path": "tools/tip/prover.py"
+    },
+    {
+      "imports": 5,
+      "lines": 78,
+      "path": "tools/tip/cli.py"
+    },
+    {
+      "imports": 7,
+      "lines": 84,
+      "path": "tools/tip/tests/test_tip.py"
+    },
+    {
+      "imports": 6,
+      "lines": 69,
+      "path": "tools/tests/test_summarizer_pipeline.py"
+    },
+    {
+      "imports": 1,
+      "lines": 782,
+      "path": "tools/legal/ltdim/index.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 72,
+      "path": "tools/gatekeeper/reporting.py"
+    },
+    {
+      "imports": 1,
+      "lines": 5,
+      "path": "tools/gatekeeper/__init__.py"
+    },
+    {
+      "imports": 7,
+      "lines": 370,
+      "path": "tools/gatekeeper/lint.py"
+    },
+    {
+      "imports": 2,
+      "lines": 6,
+      "path": "tools/gatekeeper/__main__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 79,
+      "path": "tools/gatekeeper/cli.py"
+    },
+    {
+      "imports": 5,
+      "lines": 145,
+      "path": "tools/gatekeeper/tests/test_cli.py"
+    },
+    {
+      "imports": 3,
+      "lines": 39,
+      "path": "tools/summit_summarizer/llm.py"
+    },
+    {
+      "imports": 7,
+      "lines": 175,
+      "path": "tools/summit_summarizer/pipeline.py"
+    },
+    {
+      "imports": 1,
+      "lines": 62,
+      "path": "tools/summit_summarizer/models.py"
+    },
+    {
+      "imports": 5,
+      "lines": 37,
+      "path": "tools/summit_summarizer/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 39,
+      "path": "tools/summit_summarizer/fact_check.py"
+    },
+    {
+      "imports": 8,
+      "lines": 97,
+      "path": "tools/summit_summarizer/retrieval.py"
+    },
+    {
+      "imports": 7,
+      "lines": 75,
+      "path": "tools/summit_summarizer/cli.py"
+    },
+    {
+      "imports": 8,
+      "lines": 312,
+      "path": "tools/dmcl/dmcl.py"
+    },
+    {
+      "imports": 0,
+      "lines": 147,
+      "path": "tools/ig-backup/index.js"
+    },
+    {
+      "imports": 0,
+      "lines": 262,
+      "path": "tools/ig-backup/index.test.js"
+    },
+    {
+      "imports": 0,
+      "lines": 16,
+      "path": "tools/ig-backup/lib/passphrase.js"
+    },
+    {
+      "imports": 0,
+      "lines": 174,
+      "path": "tools/ig-backup/lib/backup-service.js"
+    },
+    {
+      "imports": 0,
+      "lines": 48,
+      "path": "tools/ig-backup/lib/crypto.js"
+    },
+    {
+      "imports": 0,
+      "lines": 29,
+      "path": "tools/ig-backup/lib/storage.js"
+    },
+    {
+      "imports": 5,
+      "lines": 27,
+      "path": "tools/summit-fara/tests/test_basic.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/summit-fara/src/summit_fara/__init__.py"
+    },
+    {
+      "imports": 6,
+      "lines": 56,
+      "path": "tools/summit-fara/src/summit_fara/cli.py"
+    },
+    {
+      "imports": 4,
+      "lines": 66,
+      "path": "tools/summit-fara/src/summit_fara/agent/curriculum.py"
+    },
+    {
+      "imports": 9,
+      "lines": 155,
+      "path": "tools/summit-fara/src/summit_fara/agent/executor.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/summit-fara/src/summit_fara/agent/__init__.py"
+    },
+    {
+      "imports": 3,
+      "lines": 54,
+      "path": "tools/summit-fara/src/summit_fara/agent/model.py"
+    },
+    {
+      "imports": 1,
+      "lines": 33,
+      "path": "tools/summit-fara/src/summit_fara/agent/types.py"
+    },
+    {
+      "imports": 4,
+      "lines": 70,
+      "path": "tools/summit-fara/src/summit_fara/agent/co_evolution.py"
+    },
+    {
+      "imports": 4,
+      "lines": 64,
+      "path": "tools/summit-fara/src/summit_fara/env/browser.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/summit-fara/src/summit_fara/env/__init__.py"
+    },
+    {
+      "imports": 3,
+      "lines": 57,
+      "path": "tools/summit-fara/src/summit_fara/env/intelgraph.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/summit-fara/src/summit_fara/tools/__init__.py"
+    },
+    {
+      "imports": 3,
+      "lines": 46,
+      "path": "tools/summit-fara/src/summit_fara/tools/gh_cli.py"
+    },
+    {
+      "imports": 1,
+      "lines": 17,
+      "path": "tools/summit-fara/src/summit_fara/tools/python_sandbox.py"
+    },
+    {
+      "imports": 3,
+      "lines": 22,
+      "path": "tools/db/snapshot.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 24,
+      "path": "tools/db/dryrun.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 38,
+      "path": "tools/db/migration_lint.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 302,
+      "path": "tools/execution/batchTracker.js"
+    },
+    {
+      "imports": 3,
+      "lines": 123,
+      "path": "tools/execution/__tests__/batchTracker.test.js"
+    },
+    {
+      "imports": 0,
+      "lines": 265,
+      "path": "tools/devkit/smoke.js"
+    },
+    {
+      "imports": 4,
+      "lines": 50,
+      "path": "tools/flagctl/simple_yaml.py"
+    },
+    {
+      "imports": 10,
+      "lines": 175,
+      "path": "tools/flagctl/flagctl.py"
+    },
+    {
+      "imports": 4,
+      "lines": 38,
+      "path": "tools/flagctl/validate_flags.py"
+    },
+    {
+      "imports": 8,
+      "lines": 78,
+      "path": "tools/esa/tests/test_sampling.py"
+    },
+    {
+      "imports": 4,
+      "lines": 24,
+      "path": "tools/esa/tests/conftest.py"
+    },
+    {
+      "imports": 5,
+      "lines": 57,
+      "path": "tools/esa/tests/test_ci_gate.py"
+    },
+    {
+      "imports": 4,
+      "lines": 73,
+      "path": "tools/esa/esa/reporting.py"
+    },
+    {
+      "imports": 1,
+      "lines": 5,
+      "path": "tools/esa/esa/__init__.py"
+    },
+    {
+      "imports": 9,
+      "lines": 83,
+      "path": "tools/esa/esa/utils.py"
+    },
+    {
+      "imports": 6,
+      "lines": 284,
+      "path": "tools/esa/esa/sampling.py"
+    },
+    {
+      "imports": 6,
+      "lines": 190,
+      "path": "tools/esa/esa/evaluation.py"
+    },
+    {
+      "imports": 12,
+      "lines": 212,
+      "path": "tools/esa/esa/cli.py"
+    },
+    {
+      "imports": 7,
+      "lines": 110,
+      "path": "tools/rqb/detectors.py"
+    },
+    {
+      "imports": 4,
+      "lines": 18,
+      "path": "tools/rqb/__init__.py"
+    },
+    {
+      "imports": 5,
+      "lines": 67,
+      "path": "tools/rqb/ci_gate.py"
+    },
+    {
+      "imports": 2,
+      "lines": 93,
+      "path": "tools/rqb/data.py"
+    },
+    {
+      "imports": 9,
+      "lines": 131,
+      "path": "tools/rqb/evaluation.py"
+    },
+    {
+      "imports": 4,
+      "lines": 18,
+      "path": "tools/rqb/scorecard.py"
+    },
+    {
+      "imports": 7,
+      "lines": 47,
+      "path": "tools/rqb/cli.py"
+    },
+    {
+      "imports": 7,
+      "lines": 64,
+      "path": "tools/rqb/tests/test_harness.py"
+    },
+    {
+      "imports": 9,
+      "lines": 610,
+      "path": "tools/replayctl/src/cli.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 160,
+      "path": "tools/aql/ts/cli.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 179,
+      "path": "tools/policy/check-helm-digests.js"
+    },
+    {
+      "imports": 3,
+      "lines": 208,
+      "path": "tools/policy/check-helm-digests.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 18,
+      "path": "tools/policy/collect-chart-images.js"
+    },
+    {
+      "imports": 4,
+      "lines": 17,
+      "path": "tools/otel/ci_tracer.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/codegen/gql.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 8,
+      "path": "tools/tesq/vitest.config.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 168,
+      "path": "tools/tesq/tests/sandbox.spec.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 140,
+      "path": "tools/tesq/src/redteam.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 30,
+      "path": "tools/tesq/src/audit.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 5,
+      "path": "tools/tesq/src/index.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 345,
+      "path": "tools/tesq/src/sandbox.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 265,
+      "path": "tools/tesq/src/policy.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 83,
+      "path": "tools/tesq/src/types.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 54,
+      "path": "tools/tesq/src/quota.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 9,
+      "path": "tools/codemods/renameMethod.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 13,
+      "path": "tools/codemods/await_guard.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 13,
+      "path": "tools/codemods/fix_imports.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 96,
+      "path": "tools/complexity_budget/complexity_budget.py"
+    },
+    {
+      "imports": 2,
+      "lines": 15,
+      "path": "tools/context_retrieval/provider.py"
+    },
+    {
+      "imports": 0,
+      "lines": 56,
+      "path": "tools/prov/verify.js"
+    },
+    {
+      "imports": 0,
+      "lines": 2,
+      "path": "tools/prov/ig-prov-verify/index.js"
+    },
+    {
+      "imports": 2,
+      "lines": 127,
+      "path": "tools/cache-tuner/cli.js"
+    },
+    {
+      "imports": 6,
+      "lines": 77,
+      "path": "tools/cache-tuner/cache-analyzer.test.js"
+    },
+    {
+      "imports": 4,
+      "lines": 408,
+      "path": "tools/cache-tuner/cache-analyzer.js"
+    },
+    {
+      "imports": 1,
+      "lines": 64,
+      "path": "tools/entropy_guard/entropy_guard.py"
+    },
+    {
+      "imports": 2,
+      "lines": 17,
+      "path": "tools/entropy_guard/tests/test_entropy_guard.py"
+    },
+    {
+      "imports": 4,
+      "lines": 27,
+      "path": "tools/evidence/emit_evidence.py"
+    },
+    {
+      "imports": 3,
+      "lines": 97,
+      "path": "tools/evidence/validate_evidence.py"
+    },
+    {
+      "imports": 3,
+      "lines": 51,
+      "path": "tools/security-suite/run_suite.py"
+    },
+    {
+      "imports": 3,
+      "lines": 85,
+      "path": "tools/security-suite/data_flow_gen.py"
+    },
+    {
+      "imports": 3,
+      "lines": 56,
+      "path": "tools/security-suite/vuln_scanner.py"
+    },
+    {
+      "imports": 3,
+      "lines": 181,
+      "path": "tools/security-suite/stride_modeler.py"
+    },
+    {
+      "imports": 1,
+      "lines": 59,
+      "path": "tools/security-suite/checklist_gen.py"
+    },
+    {
+      "imports": 4,
+      "lines": 155,
+      "path": "tools/security-suite/security_scorecard.py"
+    },
+    {
+      "imports": 6,
+      "lines": 54,
+      "path": "tools/plugin-cli/src/cli.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 25,
+      "path": "tools/plugin-cli/src/commands/test.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 57,
+      "path": "tools/plugin-cli/src/commands/publish.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 28,
+      "path": "tools/plugin-cli/src/commands/build.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 184,
+      "path": "tools/plugin-cli/src/commands/create.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 44,
+      "path": "tools/plugin-cli/src/commands/validate.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 13,
+      "path": "tools/perf/harness.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 7,
+      "path": "tools/perf/guard.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 133,
+      "path": "tools/perf/pg-budget-gate.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 12,
+      "path": "tools/merge/semantic.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 24,
+      "path": "tools/verify/sym.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 32,
+      "path": "tools/eval_harness/run_eval.py"
+    },
+    {
+      "imports": 11,
+      "lines": 262,
+      "path": "tools/admin-cli/src/cli.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 309,
+      "path": "tools/admin-cli/src/utils/output.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 157,
+      "path": "tools/admin-cli/src/utils/logger.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 210,
+      "path": "tools/admin-cli/src/utils/api-client.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 137,
+      "path": "tools/admin-cli/src/utils/confirm.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 164,
+      "path": "tools/admin-cli/src/utils/audit.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 10,
+      "path": "tools/admin-cli/src/utils/index.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 142,
+      "path": "tools/admin-cli/src/utils/config.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 311,
+      "path": "tools/admin-cli/src/types/index.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 389,
+      "path": "tools/admin-cli/src/security/index.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 144,
+      "path": "tools/admin-cli/src/__tests__/output.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 79,
+      "path": "tools/admin-cli/src/__tests__/api-client.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 169,
+      "path": "tools/admin-cli/src/__tests__/logger.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 204,
+      "path": "tools/admin-cli/src/__tests__/cli.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 169,
+      "path": "tools/admin-cli/src/__tests__/config.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 36,
+      "path": "tools/admin-cli/src/__tests__/confirm.test.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 113,
+      "path": "tools/admin-cli/src/__tests__/audit.test.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 270,
+      "path": "tools/admin-cli/src/__tests__/integration/cli.integration.test.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 383,
+      "path": "tools/admin-cli/src/__tests__/integration/mock-server.ts"
+    },
+    {
+      "imports": 8,
+      "lines": 465,
+      "path": "tools/admin-cli/src/commands/env.ts"
+    },
+    {
+      "imports": 9,
+      "lines": 687,
+      "path": "tools/admin-cli/src/commands/security.ts"
+    },
+    {
+      "imports": 9,
+      "lines": 708,
+      "path": "tools/admin-cli/src/commands/data.ts"
+    },
+    {
+      "imports": 9,
+      "lines": 670,
+      "path": "tools/admin-cli/src/commands/graph.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 10,
+      "path": "tools/admin-cli/src/commands/index.ts"
+    },
+    {
+      "imports": 10,
+      "lines": 599,
+      "path": "tools/admin-cli/src/commands/tenant.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 489,
+      "path": "tools/admin-cli/src/commands/config.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 317,
+      "path": "tools/admin-cli/src/plugins/index.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/synth-probe/__init__.py"
+    },
+    {
+      "imports": 15,
+      "lines": 234,
+      "path": "tools/synth-probe/probe.py"
+    },
+    {
+      "imports": 2,
+      "lines": 6,
+      "path": "tools/synth-probe/__main__.py"
+    },
+    {
+      "imports": 1,
+      "lines": 5,
+      "path": "tools/itrc/__init__.py"
+    },
+    {
+      "imports": 7,
+      "lines": 116,
+      "path": "tools/itrc/utils.py"
+    },
+    {
+      "imports": 5,
+      "lines": 73,
+      "path": "tools/itrc/signing.py"
+    },
+    {
+      "imports": 10,
+      "lines": 156,
+      "path": "tools/itrc/capsule.py"
+    },
+    {
+      "imports": 1,
+      "lines": 6,
+      "path": "tools/itrc/__main__.py"
+    },
+    {
+      "imports": 10,
+      "lines": 178,
+      "path": "tools/itrc/cli.py"
+    },
+    {
+      "imports": 9,
+      "lines": 107,
+      "path": "tools/itrc/runner.py"
+    },
+    {
+      "imports": 8,
+      "lines": 103,
+      "path": "tools/itrc/receipt.py"
+    },
+    {
+      "imports": 4,
+      "lines": 19,
+      "path": "tools/scaffold-cli/src/index.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 64,
+      "path": "tools/scaffold-cli/src/utils/paths.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 242,
+      "path": "tools/scaffold-cli/src/commands/doctor.ts"
+    },
+    {
+      "imports": 22,
+      "lines": 1044,
+      "path": "tools/scaffold-cli/src/commands/create.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 436,
+      "path": "tools/scaffold-cli/src/commands/validate.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 544,
+      "path": "tools/chaos/runner.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 53,
+      "path": "tools/blueprints/score.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 12,
+      "path": "tools/blueprints/new.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 15,
+      "path": "tools/blueprints/test/score.spec.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 35,
+      "path": "tools/security-gates/test/secretScan.test.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 46,
+      "path": "tools/security-gates/test/imageGate.test.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 61,
+      "path": "tools/security-gates/test/policyGate.test.ts"
+    },
+    {
+      "imports": 7,
+      "lines": 67,
+      "path": "tools/security-gates/test/workflowGate.test.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 52,
+      "path": "tools/security-gates/test/config.test.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 113,
+      "path": "tools/security-gates/src/workflowGate.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 3,
+      "path": "tools/security-gates/src/shims.d.ts"
+    },
+    {
+      "imports": 8,
+      "lines": 40,
+      "path": "tools/security-gates/src/index.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 40,
+      "path": "tools/security-gates/src/walker.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 52,
+      "path": "tools/security-gates/src/imageGate.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 50,
+      "path": "tools/security-gates/src/secretScan.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 58,
+      "path": "tools/security-gates/src/policyGate.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 41,
+      "path": "tools/security-gates/src/types.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 48,
+      "path": "tools/security-gates/src/config.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 9,
+      "path": "tools/supply/drift.ts"
+    },
+    {
+      "imports": 5,
+      "lines": 312,
+      "path": "tools/decs-cli/src/index.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 8,
+      "path": "tools/arch/adr_index.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 12,
+      "path": "tools/arch/scan.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 4,
+      "path": "tools/arch/test/adr_index.spec.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 61,
+      "path": "tools/audit/export-audit-bundle.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 391,
+      "path": "tools/audit/hashchain.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 500,
+      "path": "tools/dlqtriage/src/cli.ts"
+    },
+    {
+      "imports": 8,
+      "lines": 723,
+      "path": "tools/sandbox-cli/src/index.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 11,
+      "path": "tools/cssm/__init__.py"
+    },
+    {
+      "imports": 4,
+      "lines": 40,
+      "path": "tools/cssm/embeddings.py"
+    },
+    {
+      "imports": 5,
+      "lines": 63,
+      "path": "tools/cssm/__main__.py"
+    },
+    {
+      "imports": 5,
+      "lines": 69,
+      "path": "tools/cssm/ontology.py"
+    },
+    {
+      "imports": 7,
+      "lines": 392,
+      "path": "tools/cssm/cssm.py"
+    },
+    {
+      "imports": 3,
+      "lines": 263,
+      "path": "tools/cssm/ts/mapper.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 34,
+      "path": "tools/publish/inject-digest-into-values.js"
+    },
+    {
+      "imports": 4,
+      "lines": 448,
+      "path": "tools/testing/flaky-detector.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 39,
+      "path": "tools/ci/slo_gate.js"
+    },
+    {
+      "imports": 3,
+      "lines": 31,
+      "path": "tools/ci/smart_review.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/ci/retry_quarantined.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 68,
+      "path": "tools/ci/verify_dependency_delta.py"
+    },
+    {
+      "imports": 1,
+      "lines": 18,
+      "path": "tools/ci/fli_select.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 14,
+      "path": "tools/ci/run_shard.js"
+    },
+    {
+      "imports": 2,
+      "lines": 16,
+      "path": "tools/ci/fli_build_map.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 16,
+      "path": "tools/ci/quarantine.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 18,
+      "path": "tools/ci/tdts_select.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 27,
+      "path": "tools/ci/privacy_graph_gate.py"
+    },
+    {
+      "imports": 3,
+      "lines": 61,
+      "path": "tools/ci/verify_evidence.py"
+    },
+    {
+      "imports": 3,
+      "lines": 39,
+      "path": "tools/ci/ast_diff.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 114,
+      "path": "tools/ci/verify_bundle.py"
+    },
+    {
+      "imports": 3,
+      "lines": 27,
+      "path": "tools/ci/check_deps_delta_docs.py"
+    },
+    {
+      "imports": 0,
+      "lines": 29,
+      "path": "tools/ci/shadow_delta.js"
+    },
+    {
+      "imports": 1,
+      "lines": 15,
+      "path": "tools/ci/tdts_build_map.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 30,
+      "path": "tools/ci/cas_key.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 20,
+      "path": "tools/ci/affected.js"
+    },
+    {
+      "imports": 2,
+      "lines": 20,
+      "path": "tools/ci/flake_hunter.ts"
+    },
+    {
+      "imports": 6,
+      "lines": 125,
+      "path": "tools/ci/evidence_validate_bundle.py"
+    },
+    {
+      "imports": 2,
+      "lines": 42,
+      "path": "tools/ci/risk_score.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 30,
+      "path": "tools/ci/dora_exporter.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 31,
+      "path": "tools/ci/cas.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 9,
+      "path": "tools/ci/changed-workspaces.js"
+    },
+    {
+      "imports": 3,
+      "lines": 30,
+      "path": "tools/ci/run_cached_oci.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 48,
+      "path": "tools/ci/tia_select.ts"
+    },
+    {
+      "imports": 2,
+      "lines": 40,
+      "path": "tools/ci/merge_confidence.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 8,
+      "path": "tools/ci/pr_health_plus.js"
+    },
+    {
+      "imports": 1,
+      "lines": 10,
+      "path": "tools/ci/cost_controller.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 25,
+      "path": "tools/ci/pr_health.js"
+    },
+    {
+      "imports": 4,
+      "lines": 33,
+      "path": "tools/ci/run_cached.ts"
+    },
+    {
+      "imports": 1,
+      "lines": 20,
+      "path": "tools/ci/dependency_delta_gate.py"
+    },
+    {
+      "imports": 4,
+      "lines": 65,
+      "path": "tools/ci/verify_no_timestamp_outside_stamp.py"
+    },
+    {
+      "imports": 0,
+      "lines": 2,
+      "path": "tools/ci/suggest_fixes.js"
+    },
+    {
+      "imports": 1,
+      "lines": 19,
+      "path": "tools/ci/test/cas_key.spec.ts"
+    },
+    {
+      "imports": 3,
+      "lines": 205,
+      "path": "tools/debt-detector/src/index.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 83,
+      "path": "tools/prov-verify/index.js"
+    },
+    {
+      "imports": 2,
+      "lines": 34,
+      "path": "tools/xrepo/emit_matrix.ts"
+    },
+    {
+      "imports": 4,
+      "lines": 27,
+      "path": "tools/ultra-agent/sandbox/runner.py"
+    },
+    {
+      "imports": 1,
+      "lines": 23,
+      "path": "tools/ultra-agent/vscode/extension.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 2,
+      "path": "tools/ultra-agent/tests/test_smoke.py"
+    },
+    {
+      "imports": 6,
+      "lines": 64,
+      "path": "tools/ultra-agent/src/agent/llm.py"
+    },
+    {
+      "imports": 0,
+      "lines": 1,
+      "path": "tools/ultra-agent/src/agent/__init__.py"
+    },
+    {
+      "imports": 2,
+      "lines": 35,
+      "path": "tools/ultra-agent/src/agent/prompt_loader.py"
+    },
+    {
+      "imports": 9,
+      "lines": 103,
+      "path": "tools/ultra-agent/src/agent/orchestrator.py"
+    },
+    {
+      "imports": 6,
+      "lines": 80,
+      "path": "tools/ultra-agent/src/agent/tools.py"
+    },
+    {
+      "imports": 11,
+      "lines": 81,
+      "path": "tools/ultra-agent/src/agent/main.py"
+    },
+    {
+      "imports": 0,
+      "lines": 18,
+      "path": "tools/ultra-agent/src/agent/agents/reviewer.py"
+    },
+    {
+      "imports": 0,
+      "lines": 18,
+      "path": "tools/ultra-agent/src/agent/agents/devops.py"
+    },
+    {
+      "imports": 0,
+      "lines": 30,
+      "path": "tools/ultra-agent/src/agent/agents/architect.py"
+    },
+    {
+      "imports": 0,
+      "lines": 18,
+      "path": "tools/ultra-agent/src/agent/agents/documenter.py"
+    },
+    {
+      "imports": 0,
+      "lines": 39,
+      "path": "tools/ultra-agent/src/agent/agents/tester.py"
+    },
+    {
+      "imports": 0,
+      "lines": 32,
+      "path": "tools/ultra-agent/src/agent/agents/engineer.py"
+    },
+    {
+      "imports": 4,
+      "lines": 60,
+      "path": "tools/ultra-agent/src/agent/modules/interpreter.py"
+    },
+    {
+      "imports": 3,
+      "lines": 30,
+      "path": "tools/ultra-agent/src/agent/modules/planner.py"
+    },
+    {
+      "imports": 3,
+      "lines": 30,
+      "path": "tools/ultra-agent/src/agent/modules/verifier.py"
+    },
+    {
+      "imports": 2,
+      "lines": 15,
+      "path": "tools/ultra-agent/src/agent/modules/devops.py"
+    },
+    {
+      "imports": 5,
+      "lines": 83,
+      "path": "tools/ultra-agent/src/agent/modules/executor.py"
+    },
+    {
+      "imports": 3,
+      "lines": 27,
+      "path": "tools/ultra-agent/src/agent/modules/pr_manager.py"
+    },
+    {
+      "imports": 3,
+      "lines": 20,
+      "path": "tools/ultra-agent/src/agent/modules/documenter.py"
+    },
+    {
+      "imports": 1,
+      "lines": 11,
+      "path": "tools/release/freeze_gate.ts"
+    },
+    {
+      "imports": 0,
+      "lines": 5,
+      "path": "tools/release/cut.js"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "tools/bench_indexing/__init__.py"
+    },
+    {
+      "imports": 3,
+      "lines": 50,
+      "path": "tools/bench_indexing/run.py"
+    },
+    {
+      "imports": 5,
+      "lines": 106,
+      "path": "evidence/validate.py"
+    },
+    {
+      "imports": 0,
+      "lines": 0,
+      "path": "evidence/__init__.py"
+    },
+    {
+      "imports": 7,
+      "lines": 100,
+      "path": "evidence/tools/verify_evidence.py"
+    }
+  ],
+  "violations": []
+}
