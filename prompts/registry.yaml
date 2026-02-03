@@ -228,6 +228,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sera-cli-proxy
+    version: v1
+    path: prompts/integrations/sera-cli-proxy@v1.md
+    sha256: 274b54b3a12f321fa647087bc2cc529c994dee37802c570a14abf7d2a05d3504
+    description: Implement Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails.
+    scope:
+      paths:
+        - cli/src/commands/sera-proxy.ts
+        - cli/src/sera-proxy/
+        - cli/__tests__/sera-proxy.test.ts
+        - docs/standards/sera-cli.md
+        - docs/security/data-handling/sera-cli.md
+        - docs/ops/runbooks/sera-cli.md
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/sera-cli-proxy@v1.md
+        - prompts/registry.yaml
+      domains:
+        - integrations
+        - cli
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md
