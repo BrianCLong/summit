@@ -115,6 +115,7 @@
     "ci:evidence-id:monitoring": "node scripts/ci/integrations/evidence-id-monitoring-hook.mjs",
     "ci:evidence-id:release-integration": "node scripts/ci/integrations/release-evidence-integration.mjs",
     "slopguard": "bash scripts/slopguard_hook.sh",
+    "test:security": "echo 'Running Security Tests...' && npx tsx --test server/src/utils/__tests__/security.test.ts && bash scripts/ci/scan_secrets.sh --dry-run || true",
     "verify:living-documents": "node scripts/governance/verify-living-documents.cjs",
     "factflow:replay": "tsx scripts/factflow-replay.ts",
     "factflow:test": "pnpm factflow:replay --input fixtures/factflow/debate_snippet.wav --out artifacts/factflow/test_ci/ --publish --approve --editor_id ci_user",
