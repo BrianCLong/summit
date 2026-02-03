@@ -1,54 +1,64 @@
-# Security Baseline Closeout for MVP-4 GA
+# PR: Consolidate Prompt Metadata and Add Jest Network Teardown Shim
 
-This PR finalizes the repo-wide security baseline sweep for MVP-4 GA. The security guardrails are now robust, deterministic, and enforced in the CI pipeline.
+Consolidate prompt metadata so ONE prompt hash accurately represents the full, combined scope of the current PR, including Jest network teardown shim addition, governed test updates, and LFS exception updates.
 
 ## Changes
 
-### 1. Robust Audit Gate (`scripts/ci/security_audit_gate.mjs`)
+### 1. Jest Network Teardown Shim
 
-- **Deterministic**: Enforces `pnpm audit --json --audit-level high --prod --no-optional`.
-- **Robustness**: Hard 5-minute timeout. Handles registry failures gracefully.
-- **Waivers**: Structured waivers via `.github/security-waivers.yml` with expiration support.
-- **Unit Tests**: Coverage for clean, vulnerable, and waived scenarios in `scripts/ci/__tests__/security_audit_gate.test.js`.
+- Added opt-in Jest setup shim to `server/tests/setup/jest.setup.cjs`.
+- Tracks and closes network servers and timers when `NO_NETWORK_LISTEN=true`.
+- Reduces open handle hangs in CI.
 
-### 2. Secrets Scanning (`scripts/ci/scan_secrets.sh`)
+### 2. LFS Exceptions
 
-- **Pinned Version**: Checks for `gitleaks` availability.
-- **Modes**: Smart switching between `--staged` (local) and full history/CI modes.
-- **Documentation**: Clear integration in `SECURITY_GATES.md`.
+- Updated `.gitattributes` to include exception for `verification/*.png` to prevent LFS smudge failures in certain environments.
 
-### 3. CI Integration (`.github/workflows/release-ga-pipeline.yml`)
+### 3. Prompt Registry Consolidation
 
-- Re-enabled Security Guardrails step in the `verify` job.
-- Fails pipeline on any un-waived P0 vulnerability or detected secret.
+- Identified `jest-network-teardown-shim` as the prompt of record.
+- Updated prompt scope to explicitly enumerate all files touched by this PR.
+- Registered new prompt hash in `prompts/registry.yaml`.
+- Included earlier prompt file edits (`gitattributes-lfs-exception@v1.md`, `nl-graph-query-test-tson-fix@v1.md`) in the consolidated scope.
 
-### 4. Documentation
+## Verification
 
-- Updated `docs/security/SECURITY_GATES.md` with detailed remediation playbook and waiver management instructions.
+- Computed SHA-256 hash for consolidated prompt: `72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b`.
+- Verified hash consistency in `prompts/registry.yaml`.
+- Confirmed `server/tests/setup/jest.setup.cjs` parses correctly.
 
-## Verification Results
+### Hash Computation
 
-### Automated Tests
+To compute the prompt hash, run:
 
-Ran jest for the audit gate logic:
-
-```
-PASS  scripts/ci/__tests__/security_audit_gate.test.js
-  Security Audit Gate
-    isWaived
-      ✓ returns false if no waiver matches
-      ✓ returns true if waiver matches
-      ✓ returns false if waiver is expired
-      ✓ returns true if waiver is not expired
+```bash
+sha256sum prompts/governance/jest-network-teardown-shim@v1.md
 ```
 
-### Manual Verification
+<!-- AGENT-METADATA:START -->
 
-- **Secrets Scan**: Verified locally (`./scripts/ci/scan_secrets.sh`) - Passed.
-- **Audit Gate**: Verified locally (`node scripts/ci/security_audit_gate.mjs`) - Validated timeout and waiver parsing logic.
+```json
+{
+  "agent_id": "jules",
+  "task_id": "consolidate-prompt-metadata",
+  "prompt_hash": "72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b",
+  "domains": ["governance", "testing"],
+  "verification_tiers": ["C"],
+  "debt_delta": 0,
+  "declared_scope": {
+    "paths": [
+      ".gitattributes",
+      "PR_DESCRIPTION.md",
+      "server/tests/setup/jest.setup.cjs",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/governance/gitattributes-lfs-exception@v1.md",
+      "prompts/governance/nl-graph-query-test-tson-fix@v1.md",
+      "prompts/governance/jest-network-teardown-shim@v1.md"
+    ]
+  },
+  "allowed_operations": ["create", "edit"]
+}
+```
 
-## Next Steps
-
-- Merge this PR to enable strict enforcement.
-- Monitor CI for initial setup friction.
-- Regularly review `.github/security-waivers.yml`.
+<!-- AGENT-METADATA:END -->

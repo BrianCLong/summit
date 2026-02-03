@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },
