@@ -7,8 +7,8 @@
 | **Summit** | **DIFFERENTIATOR** | Mature `apps/web` with complex UI (TriPane, MaestroConsole) and solid `server` integration. It is the operational core. |
 | **IntelGraph** | **FOUNDATION** | Stable graph logic in `server/src/graph` and `intelgraph/`. Provides the critical data layer for the stack. |
 | **Maestro** | **DIFFERENTIATOR** | Active development in `server/src/maestro`. Core runtime for agents, but governance features are still evolving. |
-| **Koshchei** | **EXPERIMENT** | Simulation engine (`server/src/narrative/engine.ts`) exists as a prototype but is not fully integrated with the graph or UI. |
-| **Switchboard** | **EXPERIMENT** | `apps/switchboard-web` is currently a shell/adapter view. Needs significant work to become a HITL review console. |
+| **Koshchei** | **DIFFERENTIATOR** | Narrative simulation engine (`server/src/narrative/`) now integrated with Neo4j graph hydration and MCP tool exposure. Production-ready for predictive analysis. |
+| **Switchboard** | **DIFFERENTIATOR** | `apps/switchboard-web` now provides HITL review console with task approval/rejection and context detail views. |
 | **companyOS** | **FOUNDATION** | `companyos/src` provides the identity/policy fabric (Identity, AuthZ), essential for governance but needs tighter integration. |
 
 ---
@@ -127,28 +127,28 @@
 
 ### STORIES
 
-#### Story 3.1: Neo4j Entity Loader for Narrative Engine
+#### Story 3.1: Neo4j Entity Loader for Narrative Engine [DONE]
 *   **Description:** Create an adapter in `server/src/narrative/adapters/neo4j-loader.ts` that fetches entities and relationships from Neo4j and converts them into `SimulationEntity` types.
 *   **Acceptance Criteria:**
-    *   [ ] Function `loadFromGraph(rootId: string, depth: number)` returns `SimulationEntity[]`.
-    *   [ ] Maps Neo4j labels (e.g., `Person`, `Topic`) to Simulation types.
-    *   [ ] Maps Neo4j relationships (e.g., `SUPPORTS`) to Simulation edges with weights.
+    *   [x] Function `loadFromGraph(rootId: string, depth: number)` returns `SimulationEntity[]`.
+    *   [x] Maps Neo4j labels (e.g., `Person`, `Topic`) to Simulation types.
+    *   [x] Maps Neo4j relationships (e.g., `SUPPORTS`) to Simulation edges with weights.
 *   **Labels:** `product:koshchei`, `area:backend`, `type:integration`, `estimate:5d`, `priority:p2`
 
-#### Story 3.2: Simulation Configuration UI - Graph Selector
+#### Story 3.2: Simulation Configuration UI - Graph Selector [DONE]
 *   **Description:** Update the Simulation Setup UI in Summit to allow users to pick a "Root Entity" from IntelGraph instead of typing manual JSON.
 *   **Acceptance Criteria:**
-    *   [ ] Entity Search Autocomplete (connected to IntelGraph Search).
-    *   [ ] "Depth" slider (1-3 hops).
-    *   [ ] "Import" button that populates the simulation state.
+    *   [x] Entity Search Autocomplete (connected to IntelGraph Search).
+    *   [x] "Depth" slider (1-3 hops).
+    *   [x] "Import" button that populates the simulation state.
 *   **Labels:** `product:summit`, `area:frontend`, `type:feature`, `estimate:5d`, `priority:p2`
 
-#### Story 3.3: Dynamic Attribute Mapping
+#### Story 3.3: Dynamic Attribute Mapping [DONE]
 *   **Description:** The graph data might lack "Sentiment" or "Resilience" scores. Implement a heuristic mapper that assigns default simulation values based on Graph node properties (e.g., PageRank = Influence).
 *   **Acceptance Criteria:**
-    *   [ ] Map `PageRank` score -> `Influence` (0-1).
-    *   [ ] Map `Betweenness` -> `Connectivity`.
-    *   [ ] Allow users to override these defaults in the config.
+    *   [x] Map `PageRank` score -> `Influence` (0-1).
+    *   [x] Map `Betweenness` -> `Connectivity`.
+    *   [x] Allow users to override these defaults in the config.
 *   **Labels:** `product:koshchei`, `area:datascience`, `type:algorithm`, `estimate:5d`, `priority:p3`
 
 ---
@@ -166,28 +166,28 @@
 
 ### STORIES
 
-#### Story 4.1: Narrative Arc Data API
+#### Story 4.1: Narrative Arc Data API [DONE]
 *   **Description:** Expose a new GraphQL/REST endpoint that returns time-series data for Story Arcs from a simulation run.
 *   **Acceptance Criteria:**
-    *   [ ] `GET /api/narrative/:simId/arcs`.
-    *   [ ] Returns JSON: `[{ tick: 0, theme: "Fear", momentum: 0.5 }, ...]`.
-    *   [ ] Cached for performance on finished simulations.
+    *   [x] `GET /api/narrative/:simId/arcs`.
+    *   [x] Returns JSON: `[{ tick: 0, theme: "Fear", momentum: 0.5 }, ...]`.
+    *   [x] Cached for performance on finished simulations.
 *   **Labels:** `product:summit`, `area:api`, `type:backend`, `estimate:3d`, `priority:p2`
 
-#### Story 4.2: Momentum Chart Component
+#### Story 4.2: Momentum Chart Component [DONE]
 *   **Description:** Build a Recharts multi-line chart component in `apps/web` to visualize the Arc data.
 *   **Acceptance Criteria:**
-    *   [ ] X-Axis: Time/Ticks. Y-Axis: Momentum (0-1).
-    *   [ ] Distinct colors per Theme.
-    *   [ ] Tooltip showing "Top Contributing Entities" at that timestamp.
+    *   [x] X-Axis: Time/Ticks. Y-Axis: Momentum (0-1).
+    *   [x] Distinct colors per Theme.
+    *   [x] Tooltip showing "Top Contributing Entities" at that timestamp.
 *   **Labels:** `product:summit`, `area:frontend`, `type:feature`, `estimate:5d`, `priority:p2`
 
-#### Story 4.3: Arc "Key Moments" Annotations
+#### Story 4.3: Arc "Key Moments" Annotations [DONE]
 *   **Description:** Overlay "Intervention Events" (e.g., Agent Actions) on the timeline to show cause-and-effect.
 *   **Acceptance Criteria:**
-    *   [ ] API includes `events[]` with timestamps.
-    *   [ ] Chart renders vertical markers for significant events.
-    *   [ ] Clicking a marker shows the Event details in a side panel.
+    *   [x] API includes `events[]` with timestamps.
+    *   [x] Chart renders vertical markers for significant events.
+    *   [x] Clicking a marker shows the Event details in a side panel.
 *   **Labels:** `product:summit`, `area:ux`, `type:enhancement`, `estimate:3d`, `priority:p3`
 
 ---
@@ -205,12 +205,12 @@
 
 ### STORIES
 
-#### Story 5.1: "Simulation Runner" Agent Capability
+#### Story 5.1: "Simulation Runner" Agent Capability [DONE]
 *   **Description:** Give Maestro Agents the tool/capability to start, step, and analyze a Koshchei simulation programmatically.
 *   **Acceptance Criteria:**
-    *   [ ] Tool `run_simulation(config_id)` available to Agents.
-    *   [ ] Tool `get_simulation_state(sim_id)` returns structured JSON.
-    *   [ ] Tool `inject_event(sim_id, event)` allows agent participation.
+    *   [x] Tool `run_simulation(config_id)` available to Agents (Implemented as `narrative.simulate`).
+    *   [x] Tool `get_simulation_state(sim_id)` returns structured JSON (Implemented as `narrative.get_state`).
+    *   [x] Tool `inject_event(sim_id, event)` allows agent participation (Implemented as `narrative.inject`).
 *   **Labels:** `product:maestro`, `area:ai`, `type:feature`, `estimate:8d`, `priority:p3`
 
 #### Story 5.2: Goal-Directed Planner (Adversarial)
@@ -244,12 +244,12 @@
 
 ### STORIES
 
-#### Story 6.1: Model Context Protocol (MCP) Server Support
+#### Story 6.1: Model Context Protocol (MCP) Server Support [DONE]
 *   **Description:** Implement an MCP-compliant server interface for Summit. This allows any MCP client (Claude, IDEs, external agents) to discover and call Summit tools/resources.
 *   **Acceptance Criteria:**
-    *   [ ] `server/src/maestro/mcp/` module handles MCP handshake.
-    *   [ ] Exposes `IntelGraph` search as an MCP Resource.
-    *   [ ] Exposes `Koshchei` simulation as an MCP Tool.
+    *   [x] `server/src/maestro/mcp/` module handles MCP handshake.
+    *   [x] Exposes `IntelGraph` search as an MCP Resource (Implemented via `graphops` server).
+    *   [x] Exposes `Koshchei` simulation as an MCP Tool (Implemented via `narrative` server).
 *   **Labels:** `product:maestro`, `area:interop`, `type:feature`, `estimate:10d`, `priority:p3`
 
 #### Story 6.2: LangChain "SummitGovernance" CallbackHandler
