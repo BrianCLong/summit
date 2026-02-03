@@ -13,21 +13,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-## [4.1.4] - MVP-4 - 2026-01-13
 
-### Changed
-- Release notes: docs/releases/MVP-4_RELEASE_NOTES.md
-
-## [4.1.3] - MVP-4 - 2026-01-13
-
-### Changed
-- Release notes: docs/releases/MVP-4_RELEASE_NOTES.md
-
-## [4.1.2] - MVP-4 - 2026-01-13
-
-### Changed
-- Release notes: docs/releases/MVP-4_RELEASE_NOTES.md
-
+### Added
+- **Infrastructure**: Enhanced Redis capabilities with functional data partitioning and cluster support.
+- **Disaster Recovery**: Added comprehensive backup and restore scripts for PostgreSQL and Redis, including S3 integration and integrity verification.
+- **Documentation**: Added documentation for Redis partitioning and Disaster Recovery procedures.
+- Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
+- Context manifest schema versioning and provenance validation for CEP core.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 

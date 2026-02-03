@@ -1,4 +1,4 @@
-import { RunTrace, StressProfile, ReplayResult, Sanction } from './types';
+import { RunTrace, StressProfile, ReplayResult, Sanction } from './types.js';
 
 function simulate(trace: RunTrace, stress: StressProfile) {
   let drift = 0;

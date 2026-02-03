@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
 
@@ -219,7 +219,7 @@ jobs:
             || echo "::warning::Failed to update audit log"
 
       - name: Upload Drift Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: governance-drift-report-${{ github.run_number }}
           path: drift_report.json

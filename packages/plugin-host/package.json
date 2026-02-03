@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/plugin-host",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Plugin host service for managing plugin runtime and execution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },

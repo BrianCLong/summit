@@ -1,6 +1,6 @@
 {
   "name": "switchboard-web",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -23,7 +23,7 @@
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.5",
+    "eslint-config-next": "15.0.8",
     "typescript": "^5.4.5",
     "vitest": "^4.0.10"
   }

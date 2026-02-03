@@ -1,0 +1,8 @@
+{
+  "party_id": "party-A",
+  "round_id": 1,
+  "model_hash": "abc",
+  "gradient_stats": {"l2_norm": 1.0},
+  "signature": "sig_key-123_abc",
+  "payload_path": "s3://..."
+}

@@ -1,0 +1,76 @@
+version: 1
+item:
+  slug: mcp-apps
+  title: "MCP Apps — interactive UI for MCP clients"
+  links:
+    - "https://modelcontextprotocol.io/docs/extensions/apps"
+    - "https://github.com/modelcontextprotocol/ext-apps"
+  date: "2026-01-26"
+  type: "spec/news"
+claims:
+  registry:
+    - id: "ITEM:CLAIM-01"
+      source: "https://modelcontextprotocol.io/docs/extensions/apps"
+      used_for: "UI rendering surface definition"
+    - id: "ITEM:CLAIM-02"
+      source: "https://github.com/modelcontextprotocol/ext-apps"
+      used_for: "standardized delivery concept"
+lanes:
+  foundation:
+    prs_max: 7
+  innovation:
+    feature_flag_default: off
+prs:
+  - title: "feat(subsumption): add mcp-apps bundle manifest + evidence schemas"
+    lane: foundation
+    owner: A
+    risk: green
+  - title: "feat(ci): add subsumption bundle verifier + deny-by-default policy fixtures"
+    lane: foundation
+    owner: B
+    risk: green
+  - title: "test(subsumption): add security fixtures + negative tests for approvals/scopes/ui"
+    lane: foundation
+    owner: C
+    risk: green
+  - title: "ci(workflows): run subsumption verifier on PRs touching bundle paths"
+    lane: foundation
+    owner: D
+    risk: green
+  - title: "feat(mcp-apps): add feature-flagged runtime stub + drift monitor + runbooks"
+    lane: innovation
+    owner: D/E
+    risk: yellow
+gates:
+  - name: "subsumption-bundle-verify"
+    type: "ci"
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - "evidence/**"
+      - "docs/**"
+evals:
+  - name: "fixtures:deny-by-default"
+    runner: "node scripts/ci/verify_subsumption_bundle.mjs --item mcp-apps --fixtures"
+evidence:
+  ids:
+    - "EVD-MCPAPPS-GOV-001"
+    - "EVD-MCPAPPS-GOV-002"
+    - "EVD-MCPAPPS-GOV-003"
+    - "EVD-MCPAPPS-SEC-001"
+    - "EVD-MCPAPPS-SEC-002"
+    - "EVD-MCPAPPS-SEC-003"
+    - "EVD-MCPAPPS-SEC-004"
+    - "EVD-MCPAPPS-OPS-001"
+docs:
+  targets:
+    - "docs/standards/mcp-apps.md"
+    - "docs/security/data-handling/mcp-apps.md"
+    - "docs/ops/runbooks/mcp-apps.md"
+    - "docs/decisions/mcp-apps.md"
+feature_flags:
+  - name: "MCP_APPS_ENABLED"
+    default: "false"
+required_checks:
+  status: "assumed"
+  names: []

@@ -1,0 +1,30 @@
+name: Supply Chain Guardrails Drift Check
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Drift Check
+        run: node scripts/monitoring/ai-guardrails-supplychain-drift.mjs
+
+      - name: Upload Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supplychain-drift-evidence
+          path: artifacts/supplychain/drift/

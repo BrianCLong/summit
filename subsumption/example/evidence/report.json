@@ -1,0 +1,19 @@
+{
+  "evidence_id": "EVD-BUNDLE-GOV-001",
+  "item_slug": "example",
+  "claims": ["CLAIM-EX-01"],
+  "decisions": [
+    {
+      "id": "DEC-EX-01",
+      "decision": "BUNDLE_CONTRACT_ESTABLISHED",
+      "rationale": "Establish baseline subsumption bundle contract prior to ITEM ingestion."
+    }
+  ],
+  "findings": [
+    {
+      "id": "FND-EX-01",
+      "summary": "Bundle contract scaffold exists with deterministic evidence outputs.",
+      "sources": ["SUMMIT_ORIGINAL"]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "report.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "item": { "type": "string" },
+    "status": { "type": "string" },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["item", "status", "notes"]
+}

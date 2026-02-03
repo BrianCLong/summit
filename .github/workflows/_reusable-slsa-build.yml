@@ -88,7 +88,7 @@ jobs:
       slsa-level: ${{ steps.slsa-check.outputs.level }}
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0
 
@@ -182,42 +182,36 @@ jobs:
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
-      - name: Generate SBOM
+      - name: Generate SBOMs (SPDX + CycloneDX)
         if: inputs.sbom
         id: sbom
+        uses: anchore/sbom-action@v0
+        with:
+          image-ref: ${{ steps.image-uri.outputs.uri }}
+          output-formats: spdx-json, cyclonedx-json
+
+      - name: Rename SBOMs
+        if: inputs.sbom
         run: |
-          set -euo pipefail
+          mv syft.spdx.json sbom.spdx.json
+          mv syft.cyclonedx.json sbom.cyclonedx.json
 
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
-
-          if [ "${{ inputs.push }}" = "true" ]; then
-            IMAGE="${{ steps.image-uri.outputs.uri }}"
-            syft "$IMAGE" -o cyclonedx-json=sbom.cdx.json
-            syft "$IMAGE" -o spdx-json=sbom.spdx.json
-          else
-            syft . -o cyclonedx-json=sbom.cdx.json
-            syft . -o spdx-json=sbom.spdx.json
-          fi
-
-          SBOM_DIGEST=$(sha256sum sbom.cdx.json | cut -d' ' -f1)
-          echo "digest=$SBOM_DIGEST" >> "$GITHUB_OUTPUT"
+      - name: Attest Build Provenance
+        if: inputs.push && inputs.sign
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
 
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push
-        run: |
-          set -euo pipefail
-
-          IMAGE="${{ steps.image-uri.outputs.uri }}"
-
-          cosign attest --yes \
-            --predicate sbom.cdx.json \
-            --type cyclonedx \
-            "$IMAGE"
-
-          cosign attest --yes \
-            --predicate sbom.spdx.json \
-            --type spdx \
-            "$IMAGE"
+        uses: actions/attest-sbom@v2
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          push-to-registry: true
 
       - name: Determine SLSA level
         id: slsa-check
@@ -237,11 +231,11 @@ jobs:
           echo "Achieved SLSA Level: $LEVEL"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |
-            sbom.cdx.json
+            sbom.cyclonedx.json
             sbom.spdx.json
           retention-days: 90
 

@@ -1,0 +1,10 @@
+{
+  "name": "@maestro/skill-github-pr",
+  "version": "1.0.0",
+  "description": "Summit Skill for GitHub PRs",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/maestro-core": "workspace:*"
+  }
+}

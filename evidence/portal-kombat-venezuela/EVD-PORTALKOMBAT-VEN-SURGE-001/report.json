@@ -1,0 +1,18 @@
+{
+  "evidence_id": "EVD-PORTALKOMBAT-VEN-SURGE-001",
+  "title": "Pravda/Portal Kombat Venezuela surge signals (reported)",
+  "summary": "Summit IO scaffold captures reported surge conditions for Pravda/Portal Kombat coverage tied to Venezuela in early January 2026. Timeline latency for the pivot is Deferred pending dashboard timestamp exports.",
+  "sources": [
+    "https://dfrlab.org/2026/01/10/how-russias-influence-machine-mobilized-immediately-after-maduros-capture/",
+    "https://csd.eu/blog/blogpost/2026/01/19/manufacturing-pravda-in-venezuela/",
+    "https://dfrlab.org/the-pravda-network/"
+  ],
+  "findings": [
+    "Public reporting documents a rapid narrative shift toward Venezuela coverage in Pravda/Portal Kombat-linked domains after the Maduro capture event.",
+    "Reporting indicates high-volume output scale in 2024, suitable for surge-baseline comparisons once feed exports are ingested."
+  ],
+  "limitations": [
+    "Pivot latency is Deferred pending time-stamped feed export validation.",
+    "Language-count validation is Deferred pending primary dataset access."
+  ]
+}
