@@ -9,7 +9,11 @@ This ledger tracks recent agent activity so humans can spot thrash, stalls, or c
 | TB-03   | agentic/codex/task-owner-guide | (pending) | Codex | in-progress      | HUMAN_OWNER_GUIDE.md authored.                            | 2026-01-01 |
 | TB-04   | (human-only)                   | n/a       | Human | human-only       | Restricted-path audit; requires override label.           | 2026-01-01 |
 | TB-06   | work                           | (pending) | Codex | in-progress      | GenUI plan scaffold + GA verification updates.            | 2026-01-14 |
-| TB-07   | work                           | (pending) | Codex | ready-for-review | Browser Ops extension blueprint runbook + roadmap update. | 2026-01-29 |
+| TB-07   | work                           | (pending) | Codex | ready-for-review | Browser Ops extension blueprint runbook + roadmap update. | 2026-01-23 |
+| GA-REL  | main                           | (tag)     | Agent | done             | Final GA Hardening + Tagging.                             | 2026-02-02 |
+| TB-03   | main                           | n/a       | Agent | done             | Created HUMAN_STEERING.md.                                | 2026-02-01 |
+| TB-01   | main                           | n/a       | Agent | done             | Hardened agent-contract.json.                             | 2026-02-01 |
+| TB-08   | main                           | n/a       | Agent | done             | Integrated Email & Multimodal Vision/Signal services.     | 2026-02-02 |
 
 ## How to update
 
