@@ -84,6 +84,29 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: svc-repo-recon
+    version: v1
+    path: prompts/governance/svc-repo-recon@v1.md
+    sha256: 6e0e7b88347517f8de0e6d1ae29bb6511cbe4a985702e2dc6875cee47812b54a
+    description: Capture verified repo assumptions and guardrails for Summit Verified Change (SVC) recon.
+    scope:
+      paths:
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/governance/svc-repo-recon@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md
