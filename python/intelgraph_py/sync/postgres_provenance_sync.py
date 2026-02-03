@@ -1,8 +1,11 @@
 import os
 import uuid
+
 from sqlalchemy import text
+
 from intelgraph_py.database import get_db
 from intelgraph_py.storage.neo4j_store import Neo4jStore
+
 
 class SyncEntity:
     """Mock Entity class compatible with Neo4jStore.upsert_entity"""

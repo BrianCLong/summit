@@ -5,8 +5,8 @@ await jest.unstable_mockModule('../neo4j', () => ({
   getDriver: jest.fn(),
 }));
 
-const { GraphStore } = await import('../store');
-const { runCypher } = await import('../neo4j');
+const { GraphStore } = await import('../store.js');
+const { runCypher } = await import('../neo4j.js');
 
 describe('GraphStore', () => {
   let store: GraphStore;

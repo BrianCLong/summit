@@ -1,17 +1,19 @@
 from __future__ import annotations
+
 import json
-from pathlib import Path
-from typing import List, Dict, Any, Optional
 import re
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 
 class LanguageTransferMatrix:
     def __init__(
         self,
         matrix_version: str,
-        source_languages: List[str],
-        target_languages: List[str],
-        transfer_values: List[List[float]],
-        provenance: Dict[str, Any]
+        source_languages: list[str],
+        target_languages: list[str],
+        transfer_values: list[list[float]],
+        provenance: dict[str, Any]
     ):
         self.matrix_version = matrix_version
         self.source_languages = source_languages
@@ -37,7 +39,7 @@ class LanguageTransferMatrix:
 
     @classmethod
     def from_json(cls, path: Path) -> LanguageTransferMatrix:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
         # In a real scenario, we'd use jsonschema here too

@@ -62,7 +62,7 @@ jobs:
     if: always() && (needs.governance-gate.result == 'success' || needs.governance-gate.result == 'skipped') && needs.build-server.result == 'success' && needs.build-client.result == 'success'
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
       - name: Download build artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:

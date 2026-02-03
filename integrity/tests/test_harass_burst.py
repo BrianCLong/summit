@@ -1,6 +1,8 @@
 import os
 from unittest import mock
+
 from integrity.detectors.harass_burst import detect
+
 
 def test_harass_burst_disabled_by_default():
     sig = {"targeting_bursts": [{"actor_count": 20, "target_id": "u1"}]}

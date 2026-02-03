@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class SkillFrontmatter:
@@ -7,7 +8,7 @@ class SkillFrontmatter:
     description: str
     license: Optional[str] = None
     compatibility: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     allowed_tools: Optional[str] = field(default=None, metadata={"alias": "allowed-tools"})
 
 @dataclass

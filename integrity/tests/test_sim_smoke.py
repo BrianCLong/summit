@@ -1,6 +1,8 @@
 import os
 from unittest import mock
+
 from integrity.sim.base import DatasetAdapter
+
 
 def test_sim_adapter_disabled_by_default():
     adapter = DatasetAdapter()
@@ -15,4 +17,4 @@ def test_sim_adapter_enabled_error():
         except NotImplementedError:
             pass
         else:
-            assert False, "Should have raised NotImplementedError"
+            raise AssertionError("Should have raised NotImplementedError")

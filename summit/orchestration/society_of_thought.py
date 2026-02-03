@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from summit.orchestration.policy.trace_redaction import TraceRedactor
+
 
 @dataclass(frozen=True)
 class Persona:
   name: str
   disposition: str
   goal: str
-  must_do: List[str]
-  must_not_do: List[str]
+  must_do: list[str]
+  must_not_do: list[str]
 
 DEFAULT_PERSONAS = [
   Persona(
@@ -48,13 +50,13 @@ class SocietyOfThoughtEngine:
     self.redactor = redactor or TraceRedactor()
     self.enabled = enabled
 
-  async def run(self, user_input: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+  async def run(self, user_input: str, context: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     if not self.enabled:
       # Assume llm_client has a 'complete' method as per the plan
       return {"mode": "baseline", "output": await self.llm.complete(user_input, context=context)}
 
     personas = DEFAULT_PERSONAS
-    debate: List[Dict[str, str]] = []
+    debate: list[dict[str, str]] = []
 
     # turn 1: Planner
     proposal = await self._persona_turn(personas[0], user_input, context)
@@ -75,7 +77,7 @@ class SocietyOfThoughtEngine:
 
     return {"mode": "society_of_thought", "debate": redacted_debate, "output": final}
 
-  async def _persona_turn(self, persona: Persona, user_input: str, context: Optional[Dict[str, Any]], prior: str = "") -> str:
+  async def _persona_turn(self, persona: Persona, user_input: str, context: Optional[dict[str, Any]], prior: str = "") -> str:
     system = (
       f"You are {persona.name}. Disposition: {persona.disposition}\n"
       f"Goal: {persona.goal}\n"

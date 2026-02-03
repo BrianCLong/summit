@@ -1,2 +1,2 @@
-export * from './factories';
-export * from './mocks';
+export * from './factories.js';
+export * from './mocks.js';

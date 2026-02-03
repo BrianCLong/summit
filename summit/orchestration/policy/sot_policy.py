@@ -1,5 +1,7 @@
 from __future__ import annotations
-from typing import List, Dict, Any
+
+from typing import Any, Dict, List
+
 
 class SocietyOfThoughtPolicy:
     """
@@ -9,7 +11,7 @@ class SocietyOfThoughtPolicy:
     def __init__(self, min_challenges: int = 2):
         self.min_challenges = min_challenges
 
-    def assert_ok(self, debate: List[Dict[str, str]], user_input: str, context: Dict[str, Any]):
+    def assert_ok(self, debate: list[dict[str, str]], user_input: str, context: dict[str, Any]):
         planner_turn = next((t for t in debate if t["persona"] == "Planner"), None)
         critic_turn = next((t for t in debate if t["persona"] == "CriticalVerifier"), None)
         reconciler_turn = next((t for t in debate if t["persona"] == "Reconciler"), None)
@@ -30,13 +32,13 @@ class SocietyOfThoughtPolicy:
         if not self._reconciler_addressed_critic(reconciler_turn["text"], challenges):
             raise ValueError("Audit failure: Reconciler did not address critic's specific points")
 
-    def _extract_challenges(self, text: str) -> List[str]:
+    def _extract_challenges(self, text: str) -> list[str]:
         # Simple heuristic: lines starting with - or * or numbers
         lines = text.splitlines()
         challenges = [l.strip() for l in lines if l.strip().startswith(('-', '*', '1.', '2.', '3.'))]
         return challenges
 
-    def _reconciler_addressed_critic(self, reconciler_text: str, challenges: List[str]) -> bool:
+    def _reconciler_addressed_critic(self, reconciler_text: str, challenges: list[str]) -> bool:
         if not challenges:
             return True # Nothing to address
 

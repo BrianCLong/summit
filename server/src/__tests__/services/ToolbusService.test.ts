@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { ToolbusService, ToolbusExecutionError } from '../../services/ToolbusService';
+import { ToolbusService, ToolbusExecutionError } from '../../services/ToolbusService.js';
 import { Connector, ConnectorAction } from '@intelgraph/connector-sdk';
 
 describe('ToolbusService', () => {

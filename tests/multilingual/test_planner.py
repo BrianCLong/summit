@@ -1,6 +1,12 @@
 import pytest
-from summit.planning.multilingual.planner import MultilingualScalingPlanner, PlanRequest, PlanResponse
+
 from summit.planning.multilingual.baseline import BaselinePlanner
+from summit.planning.multilingual.planner import (
+    MultilingualScalingPlanner,
+    PlanRequest,
+    PlanResponse,
+)
+
 
 def test_planner_interface_raises():
     planner = MultilingualScalingPlanner()

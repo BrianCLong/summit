@@ -1,5 +1,6 @@
 from summit.persona.drift import score_drift
 
+
 def test_drift_detects_change():
   b = {"lex_div": 0.10, "sentiment": 0.00}
   c = {"lex_div": 0.25, "sentiment": 0.20}

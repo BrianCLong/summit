@@ -1,11 +1,12 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Add root to path
 sys.path.append(os.getcwd())
 
 from federated_gnn.src.agg.robust import robust_aggregate
+
 
 class TestRobustAggregation(unittest.TestCase):
     def test_median_outlier(self):

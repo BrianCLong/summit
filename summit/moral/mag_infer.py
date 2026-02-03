@@ -19,7 +19,7 @@ def diffuse_moral_relevance(
     moral_seed_nodes: Iterable[Node],
     *,
     cfg: MagConfig = MagConfig(),
-) -> Dict[Node, float]:
+) -> dict[Node, float]:
     """
     Clean-room diffusion inspired by MAG:
     - deterministic power-iteration on a row-normalized adjacency
@@ -45,7 +45,7 @@ def diffuse_moral_relevance(
     t = [v / z for v in t]
 
     # Row-normalize adjacency deterministically
-    rows: List[List[Tuple[int, float]]] = [[] for _ in range(n)]
+    rows: list[list[tuple[int, float]]] = [[] for _ in range(n)]
     for src in nodes:
         m = subgraph.get(src, {})
         total = sum(float(w) for _, w in m.items() if w and w > 0)
@@ -79,7 +79,7 @@ def infer_foundation_vector(
     foundation_seeds: Mapping[str, Iterable[Node]],
     *,
     cfg: MagConfig = MagConfig(),
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Produce a foundation distribution by running diffusion per foundation seed-set
     and aggregating relevance mass (simple, interpretable baseline).

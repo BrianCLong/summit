@@ -1,15 +1,18 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Dict, List, Protocol
+
 from summit.protocols.envelope import SummitEnvelope
+
 
 @dataclass(frozen=True)
 class PolicyDecision:
   allowed: bool
-  reasons: List[str]
+  reasons: list[str]
 
 class PolicyRule(Protocol):
-    def check(self, env: SummitEnvelope) -> List[str]:
+    def check(self, env: SummitEnvelope) -> list[str]:
         ...
 
 class PolicyEngine:
@@ -17,12 +20,12 @@ class PolicyEngine:
   Deny-by-default.
   Allow requires explicit (agent, tool) allowlist + data-classification constraints.
   """
-  def __init__(self, allow_tools_by_agent: Dict[str, List[str]], rules: List[PolicyRule] = None):
+  def __init__(self, allow_tools_by_agent: dict[str, list[str]], rules: list[PolicyRule] = None):
     self._allow = allow_tools_by_agent
     self._rules = rules or []
 
   def evaluate(self, env: SummitEnvelope) -> PolicyDecision:
-    reasons: List[str] = []
+    reasons: list[str] = []
     allowed_tools = set(self._allow.get(env.sender, []))
     for tc in env.tool_calls:
       if tc.name not in allowed_tools:

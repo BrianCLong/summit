@@ -1,9 +1,9 @@
 {
   "evidence_id": "EVD-AUTOMATION-TURN-3-GOV-001",
   "metrics": {
-    "links_count": 7,
-    "claims_count": 7,
-    "findings_count": 7,
+    "links_count": 4,
+    "claims_count": 4,
+    "findings_count": 4,
     "takeaways_count": 4
   }
 }

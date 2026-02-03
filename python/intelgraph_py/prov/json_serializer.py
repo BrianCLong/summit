@@ -1,5 +1,7 @@
 import json
+
 import prov.model
+
 
 def serialize_document(doc: prov.model.ProvDocument) -> str:
     """Helper to serialize PROV document to JSON string."""

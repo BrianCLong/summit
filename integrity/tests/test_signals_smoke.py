@@ -1,6 +1,7 @@
 from integrity.signals.base import Event
 from integrity.signals.timing import burst_counts
 
+
 def test_burst_counts_deterministic():
     ev = [
         Event(ts_ms=0, actor_id="a", action="post", target_id=None, community_id="c1"),

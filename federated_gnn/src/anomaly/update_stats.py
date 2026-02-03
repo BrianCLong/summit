@@ -1,5 +1,6 @@
 import math
 
+
 def compute_norm(update: list[float]) -> float:
     return math.sqrt(sum(x*x for x in update))
 

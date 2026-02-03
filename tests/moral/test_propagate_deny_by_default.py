@@ -1,5 +1,7 @@
 from unittest.mock import patch
+
 import summit.graph.hooks.moral_layer as moral_layer
+
 
 def test_propagate_disabled():
     with patch.object(moral_layer, "MORAL_LAYER_ENABLED", False):

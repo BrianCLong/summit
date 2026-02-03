@@ -1,11 +1,13 @@
 from typing import Any, Dict, List
-from .foundations import normalize, UNKNOWN_KEY, MFT5
+
+from .foundations import MFT5, UNKNOWN_KEY, normalize
+
 
 def propagate_priors(
     graph: Any,
-    priors: Dict[str, Dict[str, float]],
+    priors: dict[str, dict[str, float]],
     alpha: float = 0.5
-) -> Dict[str, Dict[str, float]]:
+) -> dict[str, dict[str, float]]:
     """
     Propagate moral priors across the influence graph.
     Formula: Node posterior = normalize( α * node_prior + (1-α) * Σ_w neighbor_vector )

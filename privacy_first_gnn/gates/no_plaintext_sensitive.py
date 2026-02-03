@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+
 def verify_no_plaintext_sensitive(payload, sensitive_fields):
     """
     Recursively check if any sensitive fields are present in the payload as keys.

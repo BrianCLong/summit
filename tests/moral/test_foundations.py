@@ -1,5 +1,7 @@
 import pytest
-from summit.moral.foundations import normalize, UNKNOWN_KEY, MFT5
+
+from summit.moral.foundations import MFT5, UNKNOWN_KEY, normalize
+
 
 def test_normalize_standard():
     vec = {"care": 1.0, "fairness": 1.0}

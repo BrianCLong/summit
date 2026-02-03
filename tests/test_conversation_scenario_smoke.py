@@ -1,7 +1,9 @@
 import json
+
 from summit_sim.agents.agent_spec import AgentSpec
 from summit_sim.scenarios.conversation_abm import ConversationABM
 from summit_sim.scenarios.prompting import PromptBuilder
+
 
 def test_scenario_smoke():
     agent1 = AgentSpec(id="a1", role="User", traits=["Happy"])

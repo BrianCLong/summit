@@ -1,8 +1,8 @@
-import json
-import sys
-import re
-from pathlib import Path
 import argparse
+import json
+import re
+import sys
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -83,7 +83,10 @@ def main():
             fail(f"Item missing required fields: {item}")
 
         # Determine which schema to use.
-        if "summary" in report and "artifacts" in report:
+        if "summary" in report and "outputs" in report:
+             validate_schema(report, ROOT / "evidence" / "schemas" / "report.schema.json", context=item_id)
+             print(f"Validated {item_id} as Summit Report")
+        elif "summary" in report and "artifacts" in report:
             if "item_slug" in report and "area" in report:
                 validate_schema(report, ROOT / "evidence" / "schemas" / "agentic_report.schema.json", context=item_id)
                 print(f"Validated {item_id} as Agentic Report")

@@ -2,10 +2,12 @@ import json
 import os
 from datetime import datetime
 from typing import Any, Dict, List
+
 from .protocol import ParticipantUpdate
 
+
 # For simulation/mocking evidence writing
-def emit_federation_evidence(round_id: str, updates: List[Dict[str, Any]], evidence_path: str = "evidence/EVD-INFLUENCEGNN-FED-001") -> None:
+def emit_federation_evidence(round_id: str, updates: list[dict[str, Any]], evidence_path: str = "evidence/EVD-INFLUENCEGNN-FED-001") -> None:
     # In a real system, this would write to the file system
     # complying with evidence schemas.
     # Here we mock it or just verify structure.

@@ -1,8 +1,9 @@
 import json
 import sys
 from pathlib import Path
+
 try:
-    from jsonschema import validate, ValidationError
+    from jsonschema import ValidationError, validate
 except ImportError:
     print("WARNING: jsonschema not installed. Skipping evidence validation.")
     sys.exit(0)  # Permissive: exit 0 if dependency missing

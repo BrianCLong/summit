@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import re
 import sys
 
@@ -37,7 +37,7 @@ def scan_file(filepath):
         if filepath.endswith(skip):
             return True
 
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         try:
             content = f.read()
         except UnicodeDecodeError:

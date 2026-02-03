@@ -5,30 +5,31 @@ import { GraphQLError } from 'graphql';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
-import { VoiceGateway } from './gateways/VoiceGateway.ts';
+import { VoiceGateway } from './gateways/VoiceGateway.js';
 import pino from 'pino';
-import { getContext } from './lib/auth.ts';
+import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { typeDefs } from './graphql/schema.ts';
-import resolvers from './graphql/resolvers/index.ts';
-import { subscriptionEngine } from './graphql/subscriptionEngine.ts';
-import { DataRetentionService } from './services/DataRetentionService.ts';
-import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.ts';
-import { cfg } from './config.ts';
-import { initializeTracing, getTracer } from './observability/tracer.ts';
-import { streamingRateLimiter } from './routes/streaming.ts';
-import { startOSINTWorkers } from './services/OSINTQueueService.ts';
-import { ingestionService } from './services/IngestionService.ts';
-import { BackupManager } from './backup/BackupManager.ts';
-import { checkNeo4jIndexes } from './db/indexManager.ts';
+import { typeDefs } from './graphql/schema.js';
+import resolvers from './graphql/resolvers/index.js';
+import { subscriptionEngine } from './graphql/subscriptionEngine.js';
+import { DataRetentionService } from './services/DataRetentionService.js';
+import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
+import { cfg } from './config.js';
+import { initializeTracing, getTracer } from './observability/tracer.js';
+import { streamingRateLimiter } from './routes/streaming.js';
+import { startOSINTWorkers } from './services/OSINTQueueService.js';
+import { ingestionService } from './services/IngestionService.js';
+import { BackupManager } from './backup/BackupManager.js';
+import { checkNeo4jIndexes } from './db/indexManager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import { bootstrapSecrets } from './bootstrap-secrets.ts';
-import { logger } from './config/logger.ts';
-import { createApp } from './app.ts';
-import './monitoring/metrics.ts'; // Initialize Prometheus metrics collection
+import { bootstrapSecrets } from './bootstrap-secrets.js';
+import { logger } from './config/logger.js';
+import { createApp } from './app.js';
+import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
+import { partitionMaintenanceService } from './services/PartitionMaintenanceService.js';
 
 const startServer = async () => {
   // Initialize OpenTelemetry tracing early in the startup sequence
@@ -43,7 +44,7 @@ const startServer = async () => {
     process.env.KAFKA_ENABLED === 'true'
   ) {
     try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.ts');
+      const kafkaModule = await import('./realtime/kafkaConsumer.js');
       startKafkaConsumer = kafkaModule.startKafkaConsumer;
       stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
     } catch (error: any) {
@@ -61,7 +62,13 @@ const startServer = async () => {
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
 
-  await initializeNeo4jDriver();
+  if (process.env.REQUIRE_REAL_DBS !== 'false') {
+    if (!process.env.DISABLE_NEO4J) {
+      await initializeNeo4jDriver();
+    }
+  } else {
+    logger.info('REQUIRE_REAL_DBS=false, skipping Neo4j driver initialization');
+  }
 
   // Subscriptions with Persisted Query validation
 
@@ -146,16 +153,18 @@ const startServer = async () => {
     });
   }
 
-  const { initSocket, getIO } = await import('./realtime/socket.ts'); // JWT auth
+  const { initSocket, getIO } = await import('./realtime/socket.js'); // JWT auth
 
   const port = Number(cfg.PORT || 4000);
   httpServer.listen(port, async () => {
     logger.info(`Server listening on port ${port}`);
 
     // Initialize and start Data Retention Service
-    const neo4jDriver = getNeo4jDriver();
-    const dataRetentionService = new DataRetentionService(neo4jDriver);
-    dataRetentionService.startCleanupJob(); // Start the cleanup job
+    if (!process.env.DISABLE_NEO4J) {
+      const neo4jDriver = getNeo4jDriver();
+      const dataRetentionService = new DataRetentionService(neo4jDriver);
+      dataRetentionService.startCleanupJob(); // Start the cleanup job
+    }
 
     // Start OSINT Workers
     startOSINTWorkers();
@@ -165,25 +174,32 @@ const startServer = async () => {
     backupManager.startScheduler();
 
     // Start Policy Watcher (WS-2)
-    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.ts');
+    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
     const policyWatcher = PolicyWatcher.getInstance();
     policyWatcher.start();
 
     // Start GA Core Metrics Service
-    const { gaCoreMetrics } = await import('./services/GACoremetricsService.ts');
+    const { gaCoreMetrics } = await import('./services/GACoremetricsService.js');
     gaCoreMetrics.start();
 
     // Check Neo4j Indexes
-    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+    if (!process.env.DISABLE_NEO4J) {
+      checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+    }
+
+    // Start Partition Maintenance Service
+    partitionMaintenanceService.start();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
-    await startKafkaConsumer();
+    if (typeof startKafkaConsumer === 'function') {
+      await startKafkaConsumer();
+    }
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
       setTimeout(async () => {
         try {
-          const { createSampleData } = await import('./utils/sampleData.ts');
+          const { createSampleData } = await import('./utils/sampleData.js');
           await createSampleData();
         } catch (error: any) {
           logger.warn('Failed to create sample data, continuing without it');
@@ -195,16 +211,18 @@ const startServer = async () => {
   // Initialize Socket.IO
   const io = initSocket(httpServer);
 
-  const { closeNeo4jDriver } = await import('./db/neo4j.ts');
-  const { closePostgresPool } = await import('./db/postgres.ts');
-  const { closeRedisClient } = await import('./db/redis.ts');
+  const { closeNeo4jDriver } = await import('./db/neo4j.js');
+  const { closePostgresPool } = await import('./db/postgres.js');
+  const { closeRedisClient } = await import('./db/redis.js');
 
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
     // Stop Policy Watcher
-    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.ts');
+    const { PolicyWatcher } = await import('./services/governance/PolicyWatcher.js');
     PolicyWatcher.getInstance().stop();
+
+    partitionMaintenanceService.stop();
 
     wss.close();
     io.close(); // Close Socket.IO server
@@ -216,11 +234,14 @@ const startServer = async () => {
     // Shutdown OpenTelemetry
     await getTracer().shutdown();
 
-    await Promise.allSettled([
-      closeNeo4jDriver(),
+    const shutdownPromises = [
       closePostgresPool(),
       closeRedisClient(),
-    ]);
+    ];
+    if (!process.env.DISABLE_NEO4J) {
+      shutdownPromises.push(closeNeo4jDriver());
+    }
+    await Promise.allSettled(shutdownPromises);
     httpServer.close((err: any) => {
       if (err) {
         logger.error(

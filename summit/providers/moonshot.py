@@ -1,6 +1,8 @@
 import os
+from typing import Any, Dict, List, Optional
+
 import httpx
-from typing import List, Dict, Any, Optional
+
 
 class MoonshotProvider:
     """
@@ -15,11 +17,11 @@ class MoonshotProvider:
 
     async def chat_completion(
         self,
-        messages: List[Dict[str, Any]],
-        tools: Optional[List[Dict[str, Any]]] = None,
+        messages: list[dict[str, Any]],
+        tools: Optional[list[dict[str, Any]]] = None,
         model: str = "moonshotai/Kimi-K2.5",
         temperature: float = 0.7
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Sends a chat completion request.
         """

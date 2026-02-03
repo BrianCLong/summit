@@ -1,7 +1,8 @@
-import unittest
 import os
-import sys
 import subprocess
+import sys
+import unittest
+
 
 class TestBackdoorGates(unittest.TestCase):
     def test_backdoor_fixture_detected(self):

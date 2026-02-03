@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+import os
 import subprocess
 import sys
-import os
 
 # Lockfiles to watch for changes
 LOCKFILES = {

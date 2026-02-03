@@ -88,7 +88,7 @@ jobs:
       slsa-level: ${{ steps.slsa-check.outputs.level }}
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0
 
@@ -185,7 +185,7 @@ jobs:
       - name: Generate SBOMs (SPDX + CycloneDX)
         if: inputs.sbom
         id: sbom
-        uses: anchore/syft-action@v0
+        uses: anchore/sbom-action@v0
         with:
           image-ref: ${{ steps.image-uri.outputs.uri }}
           output-formats: spdx-json, cyclonedx-json

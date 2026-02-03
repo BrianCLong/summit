@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Metrics",
+  "title": "SummitEvidenceMetrics",
   "type": "object",
   "required": ["evidence_id", "metrics"],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "metrics": { "type": "object", "additionalProperties": { "type": ["number", "string", "boolean"] } },
-    "run_id": { "type": "string" },
-    "counters": { "type": "object", "additionalProperties": { "type": "number" } },
-    "timers_ms": { "type": "object", "additionalProperties": { "type": "number" } }
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9\\-]+$" },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": ["number", "string", "boolean"] }
+    }
   },
   "additionalProperties": false
 }

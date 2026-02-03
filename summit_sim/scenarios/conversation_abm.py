@@ -1,9 +1,11 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from summit_sim.agents.agent_spec import AgentSpec
 from summit_sim.agents.config import SimConfig
 
+
 class ConversationABM:
-    def __init__(self, agents: List[AgentSpec]):
+    def __init__(self, agents: list[AgentSpec]):
         self.agents = agents
         self.conversation_history = []
 

@@ -1,8 +1,8 @@
 import argparse
+import datetime
 import json
 import sys
 from pathlib import Path
-import datetime
 
 # Import the scorer
 # Use relative import if running as module, or adjust path
@@ -86,7 +86,7 @@ def run(emit_evidence: str = None):
 
         # Only stamp.json gets timestamp
         stamp = {
-            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+            "created_at": datetime.datetime.now(datetime.UTC).isoformat()
         }
 
         (output_dir / "report.json").write_text(json.dumps(report, indent=2))

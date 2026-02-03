@@ -1,9 +1,11 @@
-from typing import Dict, Any, Tuple
-from services.pipeline.prioritizer.base import Prioritizer
+from typing import Any, Dict, Tuple
+
 from packages.common.decision_record import DecisionRecord
+from services.pipeline.prioritizer.base import Prioritizer
+
 
 class GNNPrioritizerStub(Prioritizer):
-    def prioritize(self, item_context: Dict[str, Any]) -> Tuple[float, DecisionRecord]:
+    def prioritize(self, item_context: dict[str, Any]) -> tuple[float, DecisionRecord]:
         # GNN logic is stubbed out here.
         # Safe fallback: return neutral score with explicit explanation.
 

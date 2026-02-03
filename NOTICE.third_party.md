@@ -1,11 +1,16 @@
 # Third-Party Notices
 
-## A Pragmatic VLA Foundation Model
+This project incorporates concepts and patterns inspired by the following open-source projects:
 
-- Title: "A Pragmatic VLA Foundation Model"
-- Identifier: arXiv:2601.18692v1
-- Source: https://arxiv.org/html/2601.18692v1
-- License: Apache-2.0 (code repository)
-- Repository: https://github.com/robbyant/lingbot-vla
+## everything-claude-code
 
-This repository references the above work for research context only. No code has been copied.
+- **Source**: https://github.com/affaan-m/everything-claude-code
+- **License**: MIT
+- **Notice**: Concepts inspired by everything-claude-code. Clean-room implementation.
+
+## SCOUT (Language-based Trial and Error Falls Behind in the Era of Experience)
+
+- **Source**: https://huggingface.co/papers/2601.21754
+- **Repo**: https://github.com/Harry-mic/SCOUT
+- **License**: MIT
+- **Notice**: Concepts inspired by SCOUT. Clean-room implementation.

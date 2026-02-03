@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-
 SCHEMA_FILES = [
     "evidence/schemas/inhouse-data-agent-report.schema.json",
     "evidence/schemas/inhouse-data-agent-metrics.schema.json",

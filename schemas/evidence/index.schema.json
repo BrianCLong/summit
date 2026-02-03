@@ -1,24 +1,30 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Evidence Index",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "required": ["version", "items"],
   "properties": {
-    "version": { "type": "integer" },
+    "version": { "type": "number" },
     "items": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["evidence_id", "report", "metrics", "stamp"],
+        "required": ["evidence_id", "files"],
         "properties": {
           "evidence_id": { "type": "string" },
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
+          "files": {
+            "type": "object",
+            "required": ["report", "metrics", "stamp"],
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
         },
-        "additionalProperties": true
+        "additionalProperties": false
       }
     }
   },
-  "additionalProperties": true
+  "additionalProperties": false
 }

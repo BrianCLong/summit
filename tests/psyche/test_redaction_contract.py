@@ -1,5 +1,7 @@
 import pytest
-from summit.psyche.redaction import scrub_pii, assert_no_pii_in_evidence
+
+from summit.psyche.redaction import assert_no_pii_in_evidence, scrub_pii
+
 
 def test_scrub_pii_contract():
     text = "Hello world"

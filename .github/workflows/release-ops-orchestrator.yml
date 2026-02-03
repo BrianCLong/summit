@@ -85,7 +85,7 @@ jobs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
       - name: Checkout (shallow)
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 2
 
@@ -146,7 +146,7 @@ jobs:
       # A) CHECKOUT
       # =========================================================================
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0 # Full history for tag detection
           token: ${{ secrets.GITHUB_TOKEN }}

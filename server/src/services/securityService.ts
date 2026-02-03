@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { cacheService } from './CacheService';
+import { cacheService } from './CacheService.js';
 
 export interface User {
   id: string;

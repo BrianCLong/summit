@@ -1,11 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Evidence Index",
+  "title": "summit evidence index",
   "type": "object",
-  "required": ["version", "evidence"],
+  "required": ["mappings"],
   "properties": {
-    "version": { "type": "integer" },
-    "evidence": {
+    "mappings": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
@@ -17,5 +16,6 @@
         }
       }
     }
-  }
+  },
+  "additionalProperties": false
 }

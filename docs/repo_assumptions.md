@@ -1,19 +1,32 @@
-# Repo Assumptions & Reality Check
+# Repo Assumptions (SDD bootstrap)
 
-## Verified
-*   **Repo Structure**: `summit/` is the core Python package, `tests/` contains tests.
-*   **Package Management**: `requirements.in` lists `fastapi`, `uvicorn`, `httpx`, `pytest`.
-*   **Model Registry**: `summit/registry/model.py` defines schema, `summit/registry/store.py` loads it. No existing data files found in `summit/registry/`.
-*   **LLM Config**: `litellm.config.yaml` exists in root, implying use of `litellm` proxy, but no direct python usage found in `summit/`.
-*   **Sandbox**: `summit/agents/sandbox.py` handles tool execution sandbox.
-*   **Tests**: `tests/test_sandbox.py` exists, confirming `pytest` usage.
+## Verified (from repository root listing)
 
-## Assumptions
-*   **Provider Location**: Since no explicit "provider" module was found (only scattered adapters in `packages/`), we assume `summit/providers/` is the correct place for new core providers.
-*   **Registry Data**: We assume `summit/registry/data/` is the correct place to store registry JSON files.
-*   **Artifacts**: We assume `artifacts/` directory should be created in the root for outputs.
+- `.claude/`
+- `.agentic-prompts/`
+- `.agent-guidance/`
+- `.husky/`
+- `.githooks/`
+- `.github/`
 
-## Must-not-touch
-*   `.archive/`
-*   `.disabled/`
-*   `.quarantine/`
+## Assumed (must validate in-repo)
+
+- `.claude/` contains agent configuration and may already use tasks or memory files.
+- `.husky/` or `.githooks/` are active for local backpressure.
+- Standard docs taxonomy exists under `docs/` for security/ops/standards.
+
+## Must-not-touch (until confirmed)
+
+- `GOLDEN/`
+- `THIRD_PARTY_NOTICES/`
+- `SECURITY/`
+- `.pnpm-store/`
+- `.venv_*`
+- Large generated directories (treat as immutable unless an issue explicitly targets them).
+
+## Validation checklist (before PR2+)
+
+- Locate existing agent workflow docs: search for “agentic”, “prompts”, “CLAUDE”, “tasks”.
+- Confirm whether `.husky/pre-commit` exists and how hooks are run in CI.
+- Confirm test runner + lint/typecheck commands used by Summit.
+- Identify current CI required checks (see `docs/CI_STANDARDS.md`).

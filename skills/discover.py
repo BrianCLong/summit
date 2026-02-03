@@ -1,7 +1,9 @@
 import os
-from typing import List, Generator
-from .model import Skill
+from typing import Generator, List
+
 from .loader import load_skill
+from .model import Skill
+
 
 def find_skills(root_dir: str) -> Generator[Skill, None, None]:
     """

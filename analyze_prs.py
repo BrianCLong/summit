@@ -1,9 +1,10 @@
 import json
 import re
 
+
 def main():
     try:
-        with open('pr-open.json', 'r') as f:
+        with open('pr-open.json') as f:
             prs = json.load(f)
     except Exception as e:
         print(f"Error reading pr-open.json: {e}")

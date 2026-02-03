@@ -1,14 +1,16 @@
 from __future__ import annotations
+
 import json
-from dataclasses import dataclass, asdict
-from typing import Optional, Dict, Any, List
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class TransparencyReport:
     run_id: str
     item_slug: str
-    detector_versions: Dict[str, str]
-    thresholds: Dict[str, Any]
+    detector_versions: dict[str, str]
+    thresholds: dict[str, Any]
     false_positive_policy: str
     appeal_url: str
     redaction_proof: bool = True
@@ -16,8 +18,8 @@ class TransparencyReport:
 def generate_report(
     run_id: str,
     item_slug: str,
-    detector_versions: Dict[str, str],
-    thresholds: Dict[str, Any]
+    detector_versions: dict[str, str],
+    thresholds: dict[str, Any]
 ) -> str: # returns JSON string
 
     safe_thresholds = _redact(thresholds)

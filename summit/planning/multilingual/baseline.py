@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from .planner import MultilingualScalingPlanner, PlanRequest, PlanResponse
+
 
 class BaselinePlanner(MultilingualScalingPlanner):
     """

@@ -1,12 +1,12 @@
 {
   "evidence_id": "EVD-AUTOMATION-TURN-3-GOV-001",
   "item_slug": "automation-turn-3",
-  "claims": ["CLAIM-01", "CLAIM-02", "CLAIM-03", "CLAIM-04", "CLAIM-05", "CLAIM-06", "CLAIM-07"],
+  "claims": ["CLAIM-01", "CLAIM-02", "CLAIM-03", "CLAIM-04"],
   "decisions": [
     {
       "id": "DEC-001",
       "decision": "MODE_B_LINK_ONLY",
-      "rationale": "Proceed with governed bundle artifacts using link-only intake."
+      "rationale": "Proceed with governed bundle artifacts using link-only intake for agentic platform updates."
     },
     {
       "id": "DEC-002",
@@ -17,49 +17,30 @@
   "findings": [
     {
       "id": "FND-01",
-      "summary": "Fake OSS installer sites are used to distribute RMM malware via trusted developer tooling lookalikes.",
-      "sources": ["https://cyberpress.org/fake-sites-distribute-spyware/?utm_source=chatgpt.com"]
+      "summary": "GitHub Copilot SDK exposes an agentic execution loop that can be embedded into applications for native agent workflows.",
+      "sources": [
+        "https://github.blog/news-insights/company-news/build-an-agent-into-any-app-with-the-github-copilot-sdk/?utm_source=chatgpt.com"
+      ]
     },
     {
       "id": "FND-02",
-      "summary": "Malicious OSS package volume reached ~454k in 2025, increasing supply-chain exposure.",
+      "summary": "Claude models are integrated into ServiceNow agent tooling, signaling enterprise-grade, no-code workflow automation.",
       "sources": [
-        "https://www.infosecurity-magazine.com/news/454000-malicious-open-source/?utm_source=chatgpt.com"
+        "https://www.axios.com/2026/01/28/ai-anthropic-claude-servicenow-agents?utm_source=chatgpt.com"
       ]
     },
     {
       "id": "FND-03",
-      "summary": "WinRAR CVE-2025-8088 remains exploited by nation-linked actors via archive-based payload delivery.",
+      "summary": "MCP extensions expand into interactive app workflows (Slack, Figma, Canva), turning chat into an action control plane.",
       "sources": [
-        "https://www.pcgamer.com/software/security/google-says-a-winrar-exploit-for-windows-is-in-widespread-use-by-government-backed-threat-actors-linked-to-russia-and-china/?utm_source=chatgpt.com"
+        "https://www.theverge.com/news/867673/claude-mcp-app-interactive-slack-figma-canva?utm_source=chatgpt.com"
       ]
     },
     {
       "id": "FND-04",
-      "summary": "WorldLeaks data theft claims highlight extortion via bulk exfiltration without encryption.",
+      "summary": "Agentic autonomy raises prompt-injection and tool-abuse risks, requiring hardened security controls and auditability.",
       "sources": [
-        "https://www.techradar.com/pro/security/nike-investigating-mega-security-breach-as-hackers-claim-to-have-stolen-1-4tb-of-data?utm_source=chatgpt.com"
-      ]
-    },
-    {
-      "id": "FND-05",
-      "summary": "AI-generated, real-time malicious JavaScript raises the bar for static detection.",
-      "sources": [
-        "https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/?utm_source=chatgpt.com"
-      ]
-    },
-    {
-      "id": "FND-06",
-      "summary": "Supply-chain attacks expand through cloud integrations and SaaS trust relationships.",
-      "sources": [
-        "https://industrialcyber.co/reports/hacktivists-and-cybercriminals-expand-attacks-on-ics-ot-and-ai-systems-across-critical-infrastructure/?utm_source=chatgpt.com"
-      ]
-    },
-    {
-      "id": "FND-07",
-      "summary": "Phishing and credential theft remain core initial access vectors for ransomware/extortion operations.",
-      "sources": [
-        "https://www.cyfirma.com/news/weekly-intelligence-report-30-january-2026/?utm_source=chatgpt.com"
+        "https://www.barrons.com/articles/agentic-ai-cybersecurity-stocks-crowdstrike-ed44bfbf?utm_source=chatgpt.com"
       ]
     }
   ]

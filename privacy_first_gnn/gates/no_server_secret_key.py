@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+
 def verify_no_server_secret_key(config_dir):
     """
     Ensure no secret keys are stored in the config directory.

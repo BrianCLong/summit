@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import sys
-import json
 import argparse
+import json
+import sys
 from datetime import datetime
 
 # Stub for eval harness

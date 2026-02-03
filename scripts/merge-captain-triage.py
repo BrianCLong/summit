@@ -4,11 +4,12 @@ Merge Captain Branch Triage
 Analyzes branches and categorizes them for cleanup
 """
 
+import re
 import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime, timedelta
-import re
+from pathlib import Path
+
 
 def run_git_command(cmd):
     """Run a git command and return output"""
@@ -183,8 +184,8 @@ def main():
             for branch, _, _, _ in ancient:
                 f.write(f'echo "Closing ancient branch: {branch}"\n')
                 f.write(f'gh pr close $(gh pr list --head "{branch}" --json number -q ".[0].number") \\\n')
-                f.write(f'  --comment "⚠️ CLOSING: Branch too diverged (7000+ commits ahead). Please open fresh PR if needed." \\\n')
-                f.write(f'  --delete-branch || true\n\n')
+                f.write('  --comment "⚠️ CLOSING: Branch too diverged (7000+ commits ahead). Please open fresh PR if needed." \\\n')
+                f.write('  --delete-branch || true\n\n')
 
         # Already merged
         if already_merged:
@@ -192,8 +193,8 @@ def main():
             for branch, _, _ in already_merged:
                 f.write(f'echo "Closing merged branch: {branch}"\n')
                 f.write(f'gh pr close $(gh pr list --head "{branch}" --json number -q ".[0].number") \\\n')
-                f.write(f'  --comment "Closing: Changes already merged into main" \\\n')
-                f.write(f'  --delete-branch || true\n\n')
+                f.write('  --comment "Closing: Changes already merged into main" \\\n')
+                f.write('  --delete-branch || true\n\n')
 
         # Stale auto-remediation
         if stale_auto_remediation:
@@ -201,8 +202,8 @@ def main():
             for branch, _, _ in stale_auto_remediation:
                 f.write(f'echo "Closing stale auto-remediation: {branch}"\n')
                 f.write(f'gh pr close $(gh pr list --head "{branch}" --json number -q ".[0].number") \\\n')
-                f.write(f'  --comment "Superseded by newer state updates" \\\n')
-                f.write(f'  --delete-branch || true\n\n')
+                f.write('  --comment "Superseded by newer state updates" \\\n')
+                f.write('  --delete-branch || true\n\n')
 
     cleanup_script.chmod(0o755)
     print(f"🚀 Cleanup script generated: {cleanup_script}")
@@ -222,7 +223,7 @@ def main():
         print()
         print("Next steps:")
         print(f"  1. Review lists in {output_dir}/")
-        print(f"  2. Install gh CLI if not available")
+        print("  2. Install gh CLI if not available")
         print(f"  3. Run: {cleanup_script}")
 
     return 0

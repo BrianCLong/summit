@@ -1,5 +1,7 @@
 import asyncio
+
 from summit.orchestration.society_of_thought import SocietyOfThoughtEngine
+
 
 class MockLLM:
     async def complete(self, prompt, system_prompt=None, context=None):

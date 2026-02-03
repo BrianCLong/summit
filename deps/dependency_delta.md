@@ -1,9 +1,13 @@
-# Dependency delta (template)
+# Dependency Delta
 
-- PR: <fill>
-- Why needed:
-- Added:
-- Updated:
-- Removed:
-- Risk notes:
-- Rollback:
+## Summary
+
+- Added: none
+- Removed: none
+- Updated: none
+
+## Notes
+
+- Rationale: Evidence schema test hardening and governance metadata updates only.
+- Risk: None (no dependency changes).
+- Rollback: Revert this change.

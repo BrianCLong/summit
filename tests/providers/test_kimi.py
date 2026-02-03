@@ -1,8 +1,10 @@
 import os
 import unittest
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
 from summit.providers.moonshot import MoonshotProvider
 from summit.providers.together import TogetherProvider
+
 
 class TestKimiProviders(unittest.IsolatedAsyncioTestCase):
     async def test_moonshot_init(self):

@@ -1,13 +1,14 @@
-from typing import Any, Dict, List, Optional
-from datetime import datetime
 import logging
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 try:
     from openlineage.client import OpenLineageClient
-    from openlineage.client.run import Run as OLRun, RunEvent, RunState, Job
+    from openlineage.client.run import Job, RunEvent, RunState
+    from openlineage.client.run import Run as OLRun
     from openlineage.client.transport.console import ConsoleTransport
 except ImportError:
     logger.warning("OpenLineage client not found. Lineage events will not be emitted.")
@@ -27,7 +28,7 @@ class OpenLineageProducer:
         else:
             self.client = None
 
-    def emit_start(self, run_id: str, job_name: str, inputs: List[Any] = None, outputs: List[Any] = None, args: Dict[str, Any] = None):
+    def emit_start(self, run_id: str, job_name: str, inputs: list[Any] = None, outputs: list[Any] = None, args: dict[str, Any] = None):
         """
         Emit a START event for a run.
         """
@@ -52,7 +53,7 @@ class OpenLineageProducer:
         except Exception as e:
             logger.error(f"Failed to emit OpenLineage event: {e}")
 
-    def emit_complete(self, run_id: str, job_name: str, inputs: List[Any] = None, outputs: List[Any] = None):
+    def emit_complete(self, run_id: str, job_name: str, inputs: list[Any] = None, outputs: list[Any] = None):
         """
         Emit a COMPLETE event for a run.
         """

@@ -1,5 +1,5 @@
 import re
-from typing import List, Dict
+from typing import Dict, List
 
 # Basic patterns for redaction
 EMAIL_RE = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
@@ -20,7 +20,7 @@ class TraceRedactor:
         text = API_KEY_RE.sub(redact_secret, text)
         return text
 
-    def redact_debate(self, debate: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    def redact_debate(self, debate: list[dict[str, str]]) -> list[dict[str, str]]:
         redacted = []
         for turn in debate:
             redacted.append({

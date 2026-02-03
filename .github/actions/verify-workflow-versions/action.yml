@@ -1,1 +1,5 @@
-{ "name": "verify-workflow-versions", "description": "Ensure only allowed action major versions are used", "runs": { "using": "node20", "main": "index.cjs" } }
+name: verify-workflow-versions
+description: Ensure only allowed action major versions are used
+runs:
+  using: "node20"
+  main: "index.cjs"

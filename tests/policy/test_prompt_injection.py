@@ -1,6 +1,8 @@
 import json
-import pytest
 from pathlib import Path
+
+import pytest
+
 from summit.policy.engine import PolicyEngine
 from summit.policy.rules.prompt_injection import PromptInjectionRule
 from summit.protocols.envelope import SummitEnvelope, ToolCall

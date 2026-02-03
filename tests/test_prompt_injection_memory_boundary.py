@@ -1,5 +1,7 @@
 import pytest
+
 from summit_sim.agents.memory import NoOpMemory
+
 
 def test_retrieval_boundary_enforcement():
     memory = NoOpMemory()

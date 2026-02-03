@@ -1,7 +1,7 @@
-import os
 import json
-from typing import List, Dict, Any, Optional
+import os
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 # Feature flags
 SUMMIT_CAMPAIGNS_ENABLE = os.getenv("SUMMIT_CAMPAIGNS_ENABLE", "0") == "1"
@@ -15,7 +15,7 @@ class CampaignScore:
     model_version: str
 
 class CampaignExtractor:
-    def extract(self, graph: Dict[str, Any], window: Dict[str, str]) -> List[Any]:
+    def extract(self, graph: dict[str, Any], window: dict[str, str]) -> list[Any]:
         # returns list of CampaignSubgraph (stub)
         if not SUMMIT_CAMPAIGNS_ENABLE:
              # Controlled error or empty
@@ -23,7 +23,7 @@ class CampaignExtractor:
         return []
 
 class CampaignScorer:
-    def score(self, campaigns: List[Any], model_path: Optional[str] = None) -> List[CampaignScore]:
+    def score(self, campaigns: list[Any], model_path: Optional[str] = None) -> list[CampaignScore]:
         if not SUMMIT_CAMPAIGNS_ENABLE:
              return []
 
@@ -44,7 +44,7 @@ class CampaignScorer:
         return scores
 
 class CampaignExplainer:
-    def explain(self, campaign_id: str, score: CampaignScore) -> Dict[str, Any]:
+    def explain(self, campaign_id: str, score: CampaignScore) -> dict[str, Any]:
         if not SUMMIT_CAMPAIGNS_ENABLE:
              return {}
 

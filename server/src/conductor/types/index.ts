@@ -98,6 +98,7 @@ export interface MCPTool {
 
 export interface MCPServerConfig {
   url: string;
+  transport?: 'websocket' | 'local';
   name: string;
   tools: MCPTool[];
   authToken?: string;

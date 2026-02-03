@@ -1,6 +1,7 @@
-import pytest
 import json
 from pathlib import Path
+
+import pytest
 
 FIXTURE_DIR = Path(__file__).parents[1] / "fixtures"
 

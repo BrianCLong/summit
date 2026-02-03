@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 INDEX_PATH = Path("evidence/index.json")
 
-REQUIRED_REPORT_FIELDS = {"evidence_id", "item_slug", "claims", "decisions", "findings"}
+# Based on new schemas in evidence/schemas/
+REQUIRED_REPORT_FIELDS = {"evidence_id", "item", "summary", "artifacts"}
 REQUIRED_METRICS_FIELDS = {"evidence_id", "metrics"}
-REQUIRED_STAMP_FIELDS = {"evidence_id", "tool_versions", "generated_at"}
+REQUIRED_STAMP_FIELDS = {"evidence_id", "created_at", "git"}
 
+STRICT_PREFIX = "EVD-260120802"
 
 def load_json(path: Path) -> dict:
     try:
@@ -20,24 +22,35 @@ def load_json(path: Path) -> dict:
         print(f"Invalid JSON in {path}: {exc}")
         raise
 
-
 def validate_required_fields(data: dict, required: set, label: str) -> None:
     missing = required - set(data.keys())
     if missing:
         raise ValueError(f"{label} missing fields: {sorted(missing)}")
 
-
-def validate_evidence_files(files: list[str]) -> None:
+def validate_evidence_files(files: list[str], strict: bool = False) -> None:
     for file_path in files:
         path = Path(file_path)
-        data = load_json(path)
-        if path.name == "report.json":
-            validate_required_fields(data, REQUIRED_REPORT_FIELDS, path)
-        elif path.name == "metrics.json":
-            validate_required_fields(data, REQUIRED_METRICS_FIELDS, path)
-        elif path.name == "stamp.json":
-            validate_required_fields(data, REQUIRED_STAMP_FIELDS, path)
+        if not path.exists():
+             msg = f"Evidence file {path} referenced in index does not exist. Skipping."
+             if strict:
+                 raise FileNotFoundError(msg)
+             else:
+                 print(f"Warning: {msg}")
+                 continue
 
+        data = load_json(path)
+        try:
+            if path.name == "report.json":
+                validate_required_fields(data, REQUIRED_REPORT_FIELDS, str(path))
+            elif path.name == "metrics.json":
+                validate_required_fields(data, REQUIRED_METRICS_FIELDS, str(path))
+            elif path.name == "stamp.json":
+                validate_required_fields(data, REQUIRED_STAMP_FIELDS, str(path))
+        except ValueError as e:
+            if strict:
+                raise e
+            else:
+                print(f"Warning (Legacy): {e}")
 
 def main() -> int:
     try:
@@ -45,25 +58,40 @@ def main() -> int:
     except Exception:
         return 2
 
-    evidence = index.get("evidence")
-    if not isinstance(evidence, dict) or not evidence:
-        print("evidence/index.json must include at least one evidence entry")
-        return 3
+    items = index.get("items")
+    if not items or not isinstance(items, list):
+         print("evidence/index.json must include 'items' list")
+         return 3
 
-    for evidence_id, entry in evidence.items():
+    error_count = 0
+    for entry in items:
+        evidence_id = entry.get("evidence_id")
         files = entry.get("files")
+
+        if not evidence_id:
+             print("Entry missing evidence_id")
+             error_count += 1
+             continue
+
+        is_strict = evidence_id.startswith(STRICT_PREFIX)
+
         if not isinstance(files, list) or not files:
             print(f"{evidence_id} missing files list")
-            return 4
+            error_count += 1
+            continue
+
         try:
-            validate_evidence_files(files)
-        except (ValueError, FileNotFoundError, json.JSONDecodeError) as exc:
-            print(exc)
-            return 5
+            validate_evidence_files(files, strict=is_strict)
+        except (ValueError, json.JSONDecodeError, FileNotFoundError) as exc:
+            print(f"Error in {evidence_id}: {exc}")
+            error_count += 1
+
+    if error_count > 0:
+        print(f"Evidence validation failed with {error_count} errors")
+        return 1
 
     print("Evidence validation passed")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,53 +1,195 @@
-# Summit Platform
+# 🏔 Summit - Agentic AI OSINT Platform
 
-The unified intelligence analysis platform with AI-augmented graph analytics.
+> Open-source intelligence gathering powered by agentic AI, knowledge graphs, and real-time data ingestion.
 
-## 🚀 Deployment Status
+[![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
+[![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
-| Environment    | Status           | CI/CD                                              | Infra                                              |
-| :------------- | :--------------- | :------------------------------------------------- | :------------------------------------------------- |
-| **Production** | 🟢 **GA v1.0.0** | [GitHub Actions](.github/workflows/deploy-aws.yml) | [AWS EKS (Terraform)](terraform/environments/prod) |
-| **Staging**    | 🟢 Verified      | Manual Promotion                                   | AWS EKS                                            |
-| **Dev**        | 🔵 Hardened      | Auto-Deploy on Merge                               | AWS EKS                                            |
-| **Preview**    | 🧪 Ephemeral     | [PR Previews](.github/workflows/pr-preview.yml)    | AWS EKS (Spot)                                     |
+## ✨ Features
 
-## ✨ Core Features (v1.0.0)
+- **🤖 Agentic AI**: Multi-agent orchestration for autonomous research
+- **🕸 Knowledge Graphs**: Neo4j + GraphRAG for connected intelligence
+- **📡 Real-time Ingest**: Streaming connectors for CSV, S3, REST APIs
+- **🔍 Vector Search**: Semantic retrieval with embeddings
+- **📈 CompanyOS SDK**: Enterprise intelligence APIs
+- **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
 
-- **Psychographically Aware Engine**: Advanced agent-based modeling factoring in emotional climate and moral foundations.
-- **Privacy-Preserving Telemetry**: Centralized PII masking and deterministic ID anonymization for secure analysis.
-- **Resilient Intelligence Pipeline**: Integrated circuit breakers, multi-layer caching, and default-deny access control.
-- **AI-Augmented Graph Analytics**: GNN-driven prioritization and influence operation detection.
+## 🚀 Quickstart
 
-## 🛡️ Governance Status
+### Prerequisites
 
-![Fresh Evidence Rate (7d)](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/BrianCLong/summit/main/docs/governance/metrics/fresh-evidence-rate.json)
+- Node.js 18+
+- Docker & Docker Compose
+- Neo4j 5.x (via Docker)
 
-## 📚 Documentation
-
-- **[Infrastructure & Operations](infra/README.md):** The central hub for all DevOps tasks.
-- **[AWS Deployment Guide](docs/AWS_DEPLOYMENT.md):** Step-by-step instructions to go from zero to live.
-- **[Runbooks](docs/runbooks/):** Emergency procedures (Database Recovery, Rollbacks).
-- **[Governance](docs/GOVERNANCE.md):** Branch protection and security rules.
-- **[PR Previews](docs/devops/preview-environments.md):** How our ephemeral preview environments work.
-
-## 🛠️ Quick Start (Local)
+### Install & Run
 
 ```bash
-# Start the full stack locally
-docker-compose up
+# Clone repository
+git clone https://github.com/BrianCLong/summit.git
+cd summit
 
-# Access Services:
-# - Frontend: http://localhost:3000
-# - Neo4j: http://localhost:7474
-# - Postgres: localhost:5432
+# Install dependencies
+pnpm install
+
+# Start infrastructure (Neo4j, Postgres, Redis)
+docker-compose up -d
+
+# Run migrations
+pnpm db:migrate
+
+# Start dev server
+pnpm dev
 ```
 
-## 🔐 Architecture
+Server runs at `http://localhost:4000`
 
-The platform runs on a modern "Cattle" architecture on AWS:
+### First Query
 
-- **Compute:** EKS (Spot Instances)
-- **Data:** Aurora Serverless v2 (Postgres), ElastiCache (Redis), Neo4j (Self-Hosted on K8s)
-- **Security:** OIDC, Private Subnets, Trivy Scanning
+```bash
+# GraphQL playground
+curl -X POST http://localhost:4000/api/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ health { status version } }"}'
 
-For more details, see [infra/README.md](infra/README.md).
+# Or use the web UI
+open http://localhost:3000
+```
+
+## 🏛 Architecture
+
+Summit follows a modular microservices architecture:
+
+```
+┌──────────────────────────────────┐
+│ 👥 User Agents (Jules, Codex)   │
+└──────────┬───────────────────────┘
+           │
+           v
+┌──────────┬────────────────────────┐
+│ API Layer │ GraphQL + REST APIs    │
+└──────────┬────────────────────────┘
+           │
+   ┌───────┼────────┐
+   │       │        │
+   v       v        v
+┌────────┐ ┌────────┐ ┌────────┐
+│ Ingest │ │GraphRAG│ │ Agents │
+│ Engine │ │Pipeline│ │ Orchest│
+└────┬───┘ └───┬────┘ └───┬────┘
+     │         │          │
+     v         v          v
+┌─────────────────────────────────┐
+│ 📊 Data Layer                   │
+│ Neo4j | Postgres | Redis | Qdrant│
+└─────────────────────────────────┘
+```
+
+**Deep Dive Docs:**
+
+- [🏛 Architecture Overview](docs/architecture/README.md)
+- [🔌 Data Ingestion](docs/architecture/ingestion.md)
+- [🤖 Agent System](docs/architecture/agents.md)
+- [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
+- [🔒 Security](docs/security/README.md)
+
+## 📚 Key Components
+
+### Connectors
+
+Ingest data from multiple sources:
+
+- **REST APIs**: Poll external services
+- **CSV/S3**: Batch file processing
+- **Neo4j/Postgres**: Database replication
+- **Webhooks**: Real-time event streaming
+
+See: [Connector Documentation](docs/connectors/README.md)
+
+### GraphRAG
+
+Retrieval-augmented generation with knowledge graphs:
+
+- Entity extraction & linking
+- Multi-hop graph traversal
+- Vector similarity search
+- LLM-powered synthesis
+
+See: [GraphRAG Guide](docs/graphrag/README.md)
+
+### Agents
+
+Autonomous AI agents for research and analysis:
+
+- **Jules**: PR reviewer, code analyzer
+- **Codex**: Task brief generator
+- **Observer**: Telemetry and monitoring
+
+See: [Agent Development](docs/agents/README.md)
+
+## 📡 API Reference
+
+- [GraphQL Schema](docs/api/graphql.md)
+- [REST Endpoints](docs/api/rest.md)
+- [CompanyOS SDK](docs/api/companyos.md)
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+pnpm test
+
+# E2E tests
+pnpm test:e2e
+
+# Coverage report
+pnpm test:coverage
+```
+
+## 🛡 Security
+
+Summit follows security best practices:
+
+- Helmet.js for HTTP security headers
+- CORS with explicit origin whitelisting
+- Rate limiting and request validation
+- SQL injection prevention
+- Dependency scanning (Dependabot)
+
+See: [Security Policy](SECURITY.md)
+
+## 🚀 Deployment
+
+```bash
+# Build for production
+pnpm build
+
+# Docker deployment
+docker-compose -f docker-compose.prod.yml up -d
+
+# Kubernetes
+kubectl apply -f k8s/
+```
+
+See: [Deployment Guide](docs/deployment/README.md)
+
+## 🤝 Contributing
+
+We welcome contributions! Please see:
+
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Development Setup](docs/development/setup.md)
+
+## 📄 License
+
+[MIT License](LICENSE)
+
+## 👥 Team & Support
+
+- **GitHub Issues**: [Report bugs](https://github.com/BrianCLong/summit/issues)
+- **Discussions**: [Community forum](https://github.com/BrianCLong/summit/discussions)
+- **Documentation**: [Full docs](docs/)
+
+Built with ❤️ by [@BrianCLong](https://github.com/BrianCLong) and [contributors](https://github.com/BrianCLong/summit/graphs/contributors)

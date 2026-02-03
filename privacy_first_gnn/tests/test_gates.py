@@ -1,8 +1,11 @@
 import json
-import pytest
 from pathlib import Path
+
+import pytest
+
 from privacy_first_gnn.gates.no_plaintext_sensitive import verify_no_plaintext_sensitive
 from privacy_first_gnn.gates.no_server_secret_key import verify_no_server_secret_key
+
 
 @pytest.fixture
 def sensitive_fields():

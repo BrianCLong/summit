@@ -1,7 +1,7 @@
 import json
+import re
 import sys
 from pathlib import Path
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"

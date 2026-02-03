@@ -1,9 +1,9 @@
 
-import { OSINTProfile, OSINTEnrichmentResult, SocialMediaProfile, CorporateRecord, PublicRecord } from './types';
-import { OSINTSourceConnector, OSINTQuery } from './connectors/types';
-import { SocialMediaConnector } from './connectors/SocialMediaConnector';
-import { CorporateDBConnector } from './connectors/CorporateDBConnector';
-import { PublicRecordConnector } from './connectors/PublicRecordConnector';
+import { OSINTProfile, OSINTEnrichmentResult, SocialMediaProfile, CorporateRecord, PublicRecord } from './types.js';
+import { OSINTSourceConnector, OSINTQuery } from './connectors/types.js';
+import { SocialMediaConnector } from './connectors/SocialMediaConnector.js';
+import { CorporateDBConnector } from './connectors/CorporateDBConnector.js';
+import { PublicRecordConnector } from './connectors/PublicRecordConnector.js';
 
 /**
  * Extended enrichment result that includes raw results for claim extraction.

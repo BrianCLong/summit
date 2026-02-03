@@ -1,7 +1,9 @@
-from summit_misinfo.ead import ead_detector, EADState
-from summit_misinfo.signals import StreamEvent
 import os
 from unittest import mock
+
+from summit_misinfo.ead import EADState, ead_detector
+from summit_misinfo.signals import StreamEvent
+
 
 def test_ead_burst():
     state = EADState()

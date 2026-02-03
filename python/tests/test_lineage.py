@@ -1,8 +1,10 @@
-import pytest
 import uuid
 from unittest.mock import MagicMock, patch
+
+import pytest
 from intelgraph_py.lineage.openlineage_producer import OpenLineageProducer
 from openlineage.client.event_v2 import RunEvent, RunState
+
 
 class TestOpenLineageProducer:
     @patch("intelgraph_py.lineage.openlineage_producer.OpenLineageClient.from_environment")

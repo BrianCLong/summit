@@ -1,5 +1,6 @@
-from typing import Dict, Any, List
 from enum import Enum
+from typing import Any, Dict, List
+
 
 class DataClass(str, Enum):
   PUBLIC = "public"
@@ -13,7 +14,7 @@ NEVER_LOG_FIELDS = {
   "pii", "email", "phone", "ssn"
 }
 
-def redact_dict(d: Dict[str, Any]) -> Dict[str, Any]:
+def redact_dict(d: dict[str, Any]) -> dict[str, Any]:
   """
   Recursively redact keys that are in NEVER_LOG_FIELDS.
   Returns a new dictionary (shallow copy of levels modified).
@@ -30,12 +31,12 @@ def redact_dict(d: Dict[str, Any]) -> Dict[str, Any]:
       out[k] = v
   return out
 
-def redact_list(l: List[Any]) -> List[Any]:
+def redact_list(l: list[Any]) -> list[Any]:
   return [redact_dict(i) if isinstance(i, dict) else (redact_list(i) if isinstance(i, list) else i) for i in l]
 
 class PrivacyGuard:
     @staticmethod
-    def ensure_safe_for_logging(payload: Dict[str, Any]) -> Dict[str, Any]:
+    def ensure_safe_for_logging(payload: dict[str, Any]) -> dict[str, Any]:
         """
         Ensures payload does not contain secrets before logging.
         """

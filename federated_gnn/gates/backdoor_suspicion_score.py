@@ -1,9 +1,10 @@
 import json
 import sys
 
+
 def calculate_suspicion(envelope_path: str) -> float:
     try:
-        with open(envelope_path, 'r') as f:
+        with open(envelope_path) as f:
             envelope = json.load(f)
 
         stats = envelope.get("gradient_stats", {})

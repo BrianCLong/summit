@@ -1,5 +1,6 @@
-from packages.common.decision_record import DecisionRecord
 import os
+
+from packages.common.decision_record import DecisionRecord
 
 FEATURE_EXPLAINABILITY_REQUIRED = os.getenv("FEATURE_EXPLAINABILITY_REQUIRED", "false").lower() == "true"
 

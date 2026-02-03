@@ -1,8 +1,11 @@
-from typing import Dict, Any, List
-from .coord_anom import Finding, detect as detect_coord_anom
+from typing import Any, Dict, List
+
+from .coord_anom import Finding
+from .coord_anom import detect as detect_coord_anom
 from .harass_burst import detect as detect_harass_burst
 
-def run_all(signal_bundle: Dict[str, Any]) -> List[Finding]:
+
+def run_all(signal_bundle: dict[str, Any]) -> list[Finding]:
     """
     Runs all registered detectors.
     """

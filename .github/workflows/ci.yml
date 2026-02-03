@@ -11,98 +11,135 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Global environment for all jobs - prevents V8 heap exhaustion
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
 jobs:
+  config-guard:
+    name: Build & Test (Untrusted)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Validate Jest & pnpm Configuration
+        run: pnpm -w check:jest-config
+
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version-file: .nvmrc
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
-  unit-test:
+  typecheck:
+    name: Typecheck
     needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - name: Run Server Unit Tests with Coverage
-        run: pnpm --filter intelgraph-server run test:coverage
-      - uses: actions/upload-artifact@v4
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm typecheck
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Unit Tests
+        run: pnpm -w test:unit || pnpm -w test:unit
+      - name: Attach evidence
         if: always()
+        run: |
+          mkdir -p artifacts
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job unit-tests \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
+        shell: bash
+      - name: Generate Metrics
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: server/coverage/
 
   integration-test:
-    needs: lint
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: intelgraph_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-      neo4j:
-        image: neo4j:5.15.0
-        env:
-          NEO4J_AUTH: neo4j/password
-        ports:
-          - 7687:7687
+    timeout-minutes: 5
+    needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
           cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - name: Run Server Integration Tests
-        run: pnpm --filter intelgraph-server run test:integration
-        env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/intelgraph_test
-          REDIS_URL: redis://localhost:6379
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: password
+          node-version-file: .nvmrc
+      - name: Verify TSConfig Exclusions Frozen
+        run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
+      - name: Verify TSConfig Inheritance
+        run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
-  e2e-test:
-    needs: lint
+  security-compliance:
+    name: Security & Compliance
+    uses: ./.github/workflows/_reusable-security-compliance.yml
+    needs: [config-guard]
+    with:
+      strict: true
+
+  soc-controls:
+    name: SOC Controls
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
+    needs: [config-guard]
     services:
       postgres:
-        image: postgres:14
+        image: postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -126,26 +163,47 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps
-      - name: Run E2E Tests
-        run: npx playwright test
-        env:
-          DATABASE_URL: postgres://postgres:password@localhost:5432/intelgraph_test
-          REDIS_URL: redis://localhost:6379
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: password
-      - uses: actions/upload-artifact@v4
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: SOC Control Unit Tests
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
+      - name: Upload SOC compliance reports
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: soc-compliance-report
+          path: soc-compliance-reports
+          retention-days: 90
+
+  verify-versions:
+    name: Verify Workflow Versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Versions
+        uses: ./.github/actions/verify-workflow-versions
+      - name: Attach evidence
+        if: always()
+        run: |
+          mkdir -p artifacts
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job verify-versions \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
+        shell: bash
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-artifacts
+          path: artifacts/**

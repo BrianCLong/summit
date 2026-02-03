@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Any, Mapping
 
 NEVER_LOG_KEYS = {"password", "secret", "token", "api_key", "authorization"}

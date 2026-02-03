@@ -1,7 +1,9 @@
 # ci/check_dependency_delta.py
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 
 def main() -> int:
     root = Path(__file__).resolve().parents[1]

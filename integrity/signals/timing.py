@@ -1,5 +1,7 @@
 from collections import Counter
+
 from .base import Event
+
 
 def burst_counts(events):
     # bucket by minute (floor)

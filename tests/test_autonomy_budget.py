@@ -1,5 +1,7 @@
 import pytest
-from summit.policy.autonomy import enforce_budget, AutonomyBudget
+
+from summit.policy.autonomy import AutonomyBudget, enforce_budget
+
 
 def test_budget_denies_by_default():
   with pytest.raises(RuntimeError):

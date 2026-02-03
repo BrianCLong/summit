@@ -1,7 +1,10 @@
 import json
 import pathlib
+
 import pytest
+
 from evals.society_of_thought.run_eval import run_smoke
+
 
 def test_eval_artifacts_reproducibility(tmp_path, monkeypatch):
     # Setup temp evidence dir

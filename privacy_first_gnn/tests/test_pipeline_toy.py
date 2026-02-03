@@ -1,10 +1,13 @@
-import pytest
 import json
 from pathlib import Path
-from privacy_first_gnn.pipeline.ingest import ingest_telemetry
-from privacy_first_gnn.pipeline.infer import run_inference
+
+import pytest
+
 from privacy_first_gnn.he.api import HEInterface
 from privacy_first_gnn.he.mock_backend import MockHEBackend
+from privacy_first_gnn.pipeline.infer import run_inference
+from privacy_first_gnn.pipeline.ingest import ingest_telemetry
+
 
 @pytest.fixture
 def policy():

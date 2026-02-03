@@ -9,7 +9,7 @@ WorldPerspective = Literal["first_person", "third_person"]
 @dataclass(frozen=True)
 class WorldSeed:
     text_prompt: str
-    image_refs: List[str]
+    image_refs: list[str]
     perspective: WorldPerspective = "first_person"
 
 
@@ -17,7 +17,7 @@ class WorldSeed:
 class WorldHandle:
     provider: str
     world_id: str
-    lineage: List[str]
+    lineage: list[str]
 
 
 @dataclass(frozen=True)
@@ -31,7 +31,7 @@ class StepAction:
 @dataclass(frozen=True)
 class StepResult:
     frame_ref: str
-    state: Dict[str, Any]
+    state: dict[str, Any]
     latency_ms: int
 
 

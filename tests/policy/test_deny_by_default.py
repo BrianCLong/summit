@@ -1,6 +1,7 @@
 from summit.policy.engine import PolicyEngine
 from summit.protocols.envelope import SummitEnvelope, ToolCall
 
+
 def test_denies_unlisted_tool():
   engine = PolicyEngine(allow_tools_by_agent={"agentA": ["tool.safe"]})
   env = SummitEnvelope(

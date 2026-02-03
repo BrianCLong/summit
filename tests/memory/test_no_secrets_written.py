@@ -1,5 +1,6 @@
 from summit.memory.ledger import MemoryLedger
 
+
 def test_secrets_redacted(tmp_path):
     f = tmp_path / "ledger.jsonl"
     ledger = MemoryLedger(f)

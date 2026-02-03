@@ -1,5 +1,6 @@
-from typing import Any
 from collections import deque
+from typing import Any
+
 
 class LoopDetector:
     def __init__(self, history_size: int = 5):

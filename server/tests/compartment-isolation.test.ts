@@ -1,5 +1,5 @@
 import { ForbiddenError } from 'apollo-server-express';
-import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy';
+import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy.js';
 import { describe, it, test, expect } from '@jest/globals';
 
 describe('compartment-aware investigation isolation', () => {

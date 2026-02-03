@@ -1,14 +1,12 @@
 """Maestro Conductor API router for multi-agent orchestration."""
 
+import os
 from datetime import datetime
 
-import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from api.llm_provider import llm_provider
-from summit.orchestration.society_of_thought import SocietyOfThoughtEngine
-from summit.orchestration.policy.sot_policy import SocietyOfThoughtPolicy
 from maestro.models import (
     Agent,
     AgentType,
@@ -17,6 +15,8 @@ from maestro.models import (
     WorkItem,
     WorkItemStatus,
 )
+from summit.orchestration.policy.sot_policy import SocietyOfThoughtPolicy
+from summit.orchestration.society_of_thought import SocietyOfThoughtEngine
 
 router = APIRouter(prefix="/conductor", tags=["conductor"])
 

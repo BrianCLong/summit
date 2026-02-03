@@ -1,14 +1,15 @@
-import unittest
-from unittest.mock import MagicMock
-from datetime import datetime
-import sys
 import os
+import sys
+import unittest
+from datetime import datetime
+from unittest.mock import MagicMock
 
 # Add repo root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from maestro.models import Run, Artifact, ArtifactKind
+from maestro.models import Artifact, ArtifactKind, Run
 from maestro.provenance.exporter import ProvenanceExporter
+
 
 class TestProvenanceExporter(unittest.TestCase):
     def test_export_run(self):

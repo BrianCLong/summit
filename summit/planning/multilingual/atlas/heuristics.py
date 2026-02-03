@@ -1,6 +1,7 @@
 from __future__ import annotations
-from dataclasses import dataclass
+
 import math
+from dataclasses import dataclass
 
 # Heuristics derived from ATLAS public guidance for doubling K.
 ATLAS_K_DOUBLE_MODEL_MULT = 1.18

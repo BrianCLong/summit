@@ -1,5 +1,7 @@
 import pytest
+
 from summit.orchestration.policy.sot_policy import SocietyOfThoughtPolicy
+
 
 def test_policy_success():
     policy = SocietyOfThoughtPolicy(min_challenges=2)

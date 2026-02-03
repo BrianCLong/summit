@@ -1,37 +1,38 @@
-# Evidence Bundles
+# Summit Evidence System
 
-Evidence bundles capture machine-validated proof of governance, evaluation, and release readiness.
-All evidence artifacts must be registered in `evidence/index.json` and validated via
-`tools/evidence_validate.py`.
+## Overview
+This system enforces evidence schemas for all artifacts (Report, Metrics, Stamp).
 
-## Required files per evidence ID
+## Usage
 
-Each evidence ID must register the following files:
-
-- `report.json`: human-readable summary of what was validated.
-- `metrics.json`: machine-readable metrics (numeric or categorical).
-- `stamp.json`: the only file allowed to contain timestamps.
-
-## Timestamp containment
-
-Timestamp-like fields (`created_at`, `generated_at`, `updated_at`, `timestamp`, `time`, `ts`) are
-restricted to `stamp.json`. Any timestamp keys elsewhere fail validation.
-
-## Evidence ID format
-
-Evidence IDs must follow `EVD-<PROGRAM>-<AREA>-<NNN>` where `<NNN>` is a three-digit counter.
-Example (Arcee Trinity program): `EVD-ARCEE-TRINITY-LICENSE-001`.
-
-## Validation command
-
-Run the validator from repo root:
-
-```bash
-python tools/evidence_validate.py --schemas evidence/schemas --index evidence/index.json
+### 1. Register Evidence ID
+Add your evidence ID (e.g., `EVD-PROJECT-TYPE-001`) to `evidence/index.json`.
+The structure is:
+```json
+{
+  "items": {
+    "EVD-ID": {
+      "report": "path/to/report.json",
+      "metrics": "path/to/metrics.json",
+      "stamp": "path/to/stamp.json"
+    }
+  }
+}
 ```
 
-## Governance alignment
+### 2. Create Artifacts
+Ensure your artifacts match the schemas in `evidence/schemas/`.
 
-Evidence artifacts must reference authoritative policy, model registry, or evaluation sources.
-If evidence depends on a future decision, record it as `Deferred pending <artifact>` in the
-report summary and keep the stamp to immutable timestamps only.
+*   **Report**: `evidence_id`, `item` (source/ref), `summary`, `artifacts` list.
+*   **Metrics**: `evidence_id`, `metrics` dictionary.
+*   **Stamp**: `evidence_id`, `created_at`.
+
+### 3. Validate
+Run the validator locally:
+```bash
+python -m summit.evidence.validate
+```
+
+## CI Enforcement
+The CI script `ci/check_evidence.sh` runs the validator.
+It is disabled by default. Enable it by setting `SUMMIT_EVIDENCE_ENFORCE=1`.

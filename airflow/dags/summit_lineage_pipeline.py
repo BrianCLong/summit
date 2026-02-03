@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta, timezone
 import os
-from airflow import DAG
+from datetime import UTC, datetime, timedelta, timezone
+
 from airflow.operators.bash import BashOperator
+
+from airflow import DAG
 
 # Summit End-to-End Lineage Pipeline
 # Expressed in W3C PROV terms and stitched by OpenLineage run IDs.
@@ -9,7 +11,7 @@ from airflow.operators.bash import BashOperator
 default_args = {
     "owner": "summit",
     "depends_on_past": False,
-    "start_date": datetime(2024, 1, 1, tzinfo=timezone.utc),
+    "start_date": datetime(2024, 1, 1, tzinfo=UTC),
     "email_on_failure": False,
     "email_on_retry": False,
     "retries": 1,

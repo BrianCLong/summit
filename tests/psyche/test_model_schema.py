@@ -1,14 +1,17 @@
 import json
 import os
-import pytest
-import jsonschema
 from dataclasses import asdict
+
+import jsonschema
+import pytest
+
 from summit.psyche.model import PsychographicSignal
+
 
 # Helper to load schema
 def load_signal_schema():
     path = "src/summit/psyche/schemas/psychographic_signal.schema.json"
-    with open(path, "r") as f:
+    with open(path) as f:
         return json.load(f)
 
 def test_signal_model_creation():

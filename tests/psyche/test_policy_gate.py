@@ -1,5 +1,7 @@
 import pytest
-from summit.psyche.policy import enforce_policy, PolicyContext, PolicyDenied
+
+from summit.psyche.policy import PolicyContext, PolicyDenied, enforce_policy
+
 
 def test_policy_denies_disabled():
     ctx = PolicyContext(purpose="situational_awareness", subject_scope="document")

@@ -2,10 +2,11 @@ import os
 import re
 import sys
 
+
 def check_file(filepath):
     issues = []
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
     except Exception as e:
         print(f"Error reading {filepath}: {e}")

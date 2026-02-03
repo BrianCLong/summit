@@ -1,7 +1,8 @@
-import pytest
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
+
+import pytest
 
 # Assume we run pytest from repo root
 REPO_ROOT = Path.cwd()

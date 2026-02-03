@@ -2,7 +2,7 @@ import json
 import os
 import pathlib
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -27,7 +27,7 @@ def run_smoke():
     }
 
     stamp = {
-        "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+        "timestamp": datetime.now(UTC).isoformat() + "Z",
         "actor": "eval_harness"
     }
 
