@@ -1,21 +1,32 @@
-# Repo Assumptions (Subsumption Bundle Scaffold)
+# Repo Assumptions (SDD bootstrap)
 
-## Verified
+## Verified (from repository root listing)
 
-- Repo state: Intentionally constrained to local verification; external branch protection state is deferred pending governance access.
+- `.claude/`
+- `.agentic-prompts/`
+- `.agent-guidance/`
+- `.husky/`
+- `.githooks/`
+- `.github/`
 
-## Assumed (must validate)
+## Assumed (must validate in-repo)
 
-- CI uses GitHub Actions.
-- Node runtime is available for CI scripts.
-- Evidence artifacts are acceptable as JSON outputs under `evidence/`.
+- `.claude/` contains agent configuration and may already use tasks or memory files.
+- `.husky/` or `.githooks/` are active for local backpressure.
+- Standard docs taxonomy exists under `docs/` for security/ops/standards.
 
-## Must-not-touch
+## Must-not-touch (until confirmed)
 
-- Existing workflows (modify only by adding new workflow or a single job if conventions require).
-- Public API surfaces and packages unless explicitly required by a gate.
+- `GOLDEN/`
+- `THIRD_PARTY_NOTICES/`
+- `SECURITY/`
+- `.pnpm-store/`
+- `.venv_*`
+- Large generated directories (treat as immutable unless an issue explicitly targets them).
 
-## Validation plan
+## Validation checklist (before PR2+)
 
-- Discover required checks (see `docs/required_checks.todo.md`).
-- Confirm Node version and package manager conventions.
+- Locate existing agent workflow docs: search for “agentic”, “prompts”, “CLAUDE”, “tasks”.
+- Confirm whether `.husky/pre-commit` exists and how hooks are run in CI.
+- Confirm test runner + lint/typecheck commands used by Summit.
+- Identify current CI required checks (see `docs/CI_STANDARDS.md`).

@@ -1,0 +1,25 @@
+# Memory Privacy CI Gates - Temporary Configuration
+# These checks are required for GA readiness and will be mapped to branch protection names.
+
+gates:
+  - id: ci/memory-privacy-foundation
+    name: Memory Privacy Foundation
+    description: Unit tests and policy validation for memory core
+    trigger_paths:
+      - core/memory/**
+      - core/privacy/**
+    required: true
+
+  - id: ci/memory-privacy-eval
+    name: Memory Privacy Evaluation
+    description: Privacy-memory eval harness (leakage/redaction)
+    trigger_paths:
+      - eval/privacy_memory/**
+    required: true
+
+  - id: ci/memory-privacy-evidence
+    name: Memory Privacy Evidence
+    description: Validation of memory-specific evidence artifacts
+    trigger_paths:
+      - evidence/EVD-MITTR-AIMEM-PRIV-*/**
+    required: true

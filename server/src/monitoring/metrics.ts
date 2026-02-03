@@ -19,7 +19,7 @@ if (process.env.NODE_ENV !== 'test' && process.env.ZERO_FOOTPRINT !== 'true') {
       register,
       gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5], // Garbage collection buckets
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // Cleanup function to stop metrics collection
@@ -33,42 +33,42 @@ export function stopMetricsCollection() {
 // Custom Application Metrics
 
 function createHistogram(config: any) {
-    try {
-        return new client.Histogram(config);
-    } catch (e) {
-        return {
-            observe: () => {},
-            startTimer: () => () => {},
-            inc: () => {},
-            dec: () => {},
-            set: () => {},
-            labels: () => ({ observe: () => {}, inc: () => {}, dec: () => {}, set: () => {} })
-        } as any;
-    }
+  try {
+    return new client.Histogram(config);
+  } catch (e) {
+    return {
+      observe: () => { },
+      startTimer: () => () => { },
+      inc: () => { },
+      dec: () => { },
+      set: () => { },
+      labels: () => ({ observe: () => { }, inc: () => { }, dec: () => { }, set: () => { } })
+    } as any;
+  }
 }
 
 function createCounter(config: any) {
-    try {
-        return new client.Counter(config);
-    } catch (e) {
-        return {
-            inc: () => {},
-            labels: () => ({ inc: () => {} })
-        } as any;
-    }
+  try {
+    return new client.Counter(config);
+  } catch (e) {
+    return {
+      inc: () => { },
+      labels: () => ({ inc: () => { } })
+    } as any;
+  }
 }
 
 function createGauge(config: any) {
-    try {
-        return new client.Gauge(config);
-    } catch (e) {
-        return {
-            inc: () => {},
-            dec: () => {},
-            set: () => {},
-            labels: () => ({ inc: () => {}, dec: () => {}, set: () => {} })
-        } as any;
-    }
+  try {
+    return new client.Gauge(config);
+  } catch (e) {
+    return {
+      inc: () => { },
+      dec: () => { },
+      set: () => { },
+      labels: () => ({ inc: () => { }, dec: () => { }, set: () => { } })
+    } as any;
+  }
 }
 
 // HTTP Request metrics
@@ -369,44 +369,44 @@ export const pipelineLatencySeconds = createHistogram({
 
 // Register all metrics
 try {
-register.registerMetric(httpRequestDuration);
-register.registerMetric(httpRequestsTotal);
-register.registerMetric(graphqlRequestDuration);
-register.registerMetric(graphqlRequestsTotal);
-register.registerMetric(graphqlErrors);
-register.registerMetric(tenantScopeViolationsTotal);
-register.registerMetric(dbConnectionsActive);
-register.registerMetric(dbQueryDuration);
-register.registerMetric(dbQueriesTotal);
-register.registerMetric(vectorQueryDurationSeconds);
-register.registerMetric(vectorQueriesTotal);
-register.registerMetric(aiJobsQueued);
-register.registerMetric(aiJobsProcessing);
-register.registerMetric(aiJobDuration);
-register.registerMetric(aiJobsTotal);
-register.registerMetric(llmRequestDuration);
-register.registerMetric(llmTokensTotal);
-register.registerMetric(llmRequestsTotal);
-register.registerMetric(graphNodesTotal);
-register.registerMetric(graphEdgesTotal);
-register.registerMetric(graphOperationDuration);
-register.registerMetric(websocketConnections);
-register.registerMetric(websocketMessages);
-register.registerMetric(investigationsActive);
-register.registerMetric(investigationOperations);
-register.registerMetric(erMergeOutcomesTotal);
-register.registerMetric(deploymentRollbacksTotal);
-register.registerMetric(approvalsPending);
-register.registerMetric(approvalsApprovedTotal);
-register.registerMetric(approvalsRejectedTotal);
-register.registerMetric(applicationErrors);
-register.registerMetric(memoryUsage);
-register.registerMetric(pipelineUptimeRatio);
-register.registerMetric(pipelineFreshnessSeconds);
-register.registerMetric(pipelineCompletenessRatio);
-register.registerMetric(pipelineCorrectnessRatio);
-register.registerMetric(pipelineLatencySeconds);
-} catch (e) {}
+  register.registerMetric(httpRequestDuration);
+  register.registerMetric(httpRequestsTotal);
+  register.registerMetric(graphqlRequestDuration);
+  register.registerMetric(graphqlRequestsTotal);
+  register.registerMetric(graphqlErrors);
+  register.registerMetric(tenantScopeViolationsTotal);
+  register.registerMetric(dbConnectionsActive);
+  register.registerMetric(dbQueryDuration);
+  register.registerMetric(dbQueriesTotal);
+  register.registerMetric(vectorQueryDurationSeconds);
+  register.registerMetric(vectorQueriesTotal);
+  register.registerMetric(aiJobsQueued);
+  register.registerMetric(aiJobsProcessing);
+  register.registerMetric(aiJobDuration);
+  register.registerMetric(aiJobsTotal);
+  register.registerMetric(llmRequestDuration);
+  register.registerMetric(llmTokensTotal);
+  register.registerMetric(llmRequestsTotal);
+  register.registerMetric(graphNodesTotal);
+  register.registerMetric(graphEdgesTotal);
+  register.registerMetric(graphOperationDuration);
+  register.registerMetric(websocketConnections);
+  register.registerMetric(websocketMessages);
+  register.registerMetric(investigationsActive);
+  register.registerMetric(investigationOperations);
+  register.registerMetric(erMergeOutcomesTotal);
+  register.registerMetric(deploymentRollbacksTotal);
+  register.registerMetric(approvalsPending);
+  register.registerMetric(approvalsApprovedTotal);
+  register.registerMetric(approvalsRejectedTotal);
+  register.registerMetric(applicationErrors);
+  register.registerMetric(memoryUsage);
+  register.registerMetric(pipelineUptimeRatio);
+  register.registerMetric(pipelineFreshnessSeconds);
+  register.registerMetric(pipelineCompletenessRatio);
+  register.registerMetric(pipelineCorrectnessRatio);
+  register.registerMetric(pipelineLatencySeconds);
+} catch (e) { }
 
 // GraphRAG metrics for schema validation and caching
 export const graphragSchemaFailuresTotal = createCounter({
@@ -420,9 +420,9 @@ export const graphragCacheHitRatio = createGauge({
   help: 'Ratio of GraphRAG cache hits to total requests',
 });
 try {
-register.registerMetric(graphragSchemaFailuresTotal);
-register.registerMetric(graphragCacheHitRatio);
-} catch (e) {}
+  register.registerMetric(graphragSchemaFailuresTotal);
+  register.registerMetric(graphragCacheHitRatio);
+} catch (e) { }
 export const pbacDecisionsTotal = createCounter({
   registers: [],
   name: 'pbac_decisions_total',
@@ -430,8 +430,8 @@ export const pbacDecisionsTotal = createCounter({
   labelNames: ['decision'],
 });
 try {
-register.registerMetric(pbacDecisionsTotal);
-} catch (e) {}
+  register.registerMetric(pbacDecisionsTotal);
+} catch (e) { }
 
 export const admissionDecisionsTotal = createCounter({
   registers: [],
@@ -440,8 +440,8 @@ export const admissionDecisionsTotal = createCounter({
   labelNames: ['decision', 'policy'],
 });
 try {
-register.registerMetric(admissionDecisionsTotal);
-} catch (e) {}
+  register.registerMetric(admissionDecisionsTotal);
+} catch (e) { }
 
 // Docling service metrics
 export const doclingInferenceDuration = createHistogram({
@@ -452,8 +452,8 @@ export const doclingInferenceDuration = createHistogram({
   buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60],
 });
 try {
-register.registerMetric(doclingInferenceDuration);
-} catch (e) {}
+  register.registerMetric(doclingInferenceDuration);
+} catch (e) { }
 
 export const doclingInferenceTotal = createCounter({
   registers: [],
@@ -462,8 +462,8 @@ export const doclingInferenceTotal = createCounter({
   labelNames: ['model', 'status'],
 });
 try {
-register.registerMetric(doclingInferenceTotal);
-} catch (e) {}
+  register.registerMetric(doclingInferenceTotal);
+} catch (e) { }
 
 export const doclingCharactersProcessed = createCounter({
   registers: [],
@@ -472,8 +472,8 @@ export const doclingCharactersProcessed = createCounter({
   labelNames: ['model'],
 });
 try {
-register.registerMetric(doclingCharactersProcessed);
-} catch (e) {}
+  register.registerMetric(doclingCharactersProcessed);
+} catch (e) { }
 
 export const doclingCostUsd = createCounter({
   registers: [],
@@ -482,8 +482,8 @@ export const doclingCostUsd = createCounter({
   labelNames: ['model'],
 });
 try {
-register.registerMetric(doclingCostUsd);
-} catch (e) {}
+  register.registerMetric(doclingCostUsd);
+} catch (e) { }
 
 // New domain metrics
 export const graphExpandRequestsTotal = createCounter({
@@ -646,33 +646,65 @@ export const maestroJobExecutionDurationSeconds = createHistogram({
 });
 
 try {
-register.registerMetric(maestroDagExecutionDurationSeconds);
-register.registerMetric(maestroJobExecutionDurationSeconds);
+  register.registerMetric(maestroDagExecutionDurationSeconds);
+  register.registerMetric(maestroJobExecutionDurationSeconds);
 
-register.registerMetric(graphExpandRequestsTotal);
-register.registerMetric(aiRequestTotal);
-register.registerMetric(resolverLatencyMs);
-register.registerMetric(neighborhoodCacheHitRatio);
-register.registerMetric(neighborhoodCacheLatencyMs);
-register.registerMetric(graphqlResolverDurationSeconds);
-register.registerMetric(graphqlResolverErrorsTotal);
-register.registerMetric(graphqlResolverCallsTotal);
-register.registerMetric(webVitalValue);
-register.registerMetric(realtimeConflictsTotal);
-register.registerMetric(idempotentHitsTotal);
-register.registerMetric(businessUserSignupsTotal);
-register.registerMetric(businessApiCallsTotal);
-register.registerMetric(businessRevenueTotal);
-register.registerMetric(serviceAutoRemediationsTotal);
-register.registerMetric(goldenPathStepTotal);
-register.registerMetric(uiErrorBoundaryCatchTotal);
-register.registerMetric(maestroDeploymentsTotal);
-register.registerMetric(maestroPrLeadTimeHours);
-register.registerMetric(maestroChangeFailureRate);
-register.registerMetric(maestroMttrHours);
-register.registerMetric(breakerState);
-register.registerMetric(intelgraphJobQueueDepth);
-} catch (e) {}
+  register.registerMetric(graphExpandRequestsTotal);
+  register.registerMetric(aiRequestTotal);
+  register.registerMetric(resolverLatencyMs);
+  register.registerMetric(neighborhoodCacheHitRatio);
+  register.registerMetric(neighborhoodCacheLatencyMs);
+  register.registerMetric(graphqlResolverDurationSeconds);
+  register.registerMetric(graphqlResolverErrorsTotal);
+  register.registerMetric(graphqlResolverCallsTotal);
+  register.registerMetric(webVitalValue);
+  register.registerMetric(realtimeConflictsTotal);
+  register.registerMetric(idempotentHitsTotal);
+  register.registerMetric(businessUserSignupsTotal);
+  register.registerMetric(businessApiCallsTotal);
+  register.registerMetric(businessRevenueTotal);
+  register.registerMetric(serviceAutoRemediationsTotal);
+  register.registerMetric(goldenPathStepTotal);
+  register.registerMetric(uiErrorBoundaryCatchTotal);
+  register.registerMetric(maestroDeploymentsTotal);
+  register.registerMetric(maestroPrLeadTimeHours);
+  register.registerMetric(maestroChangeFailureRate);
+  register.registerMetric(maestroMttrHours);
+  register.registerMetric(breakerState);
+  register.registerMetric(intelgraphJobQueueDepth);
+} catch (e) { }
+
+// Narrative Simulation Metrics
+export const narrativeSimulationActiveSimulations = createGauge({
+  name: 'narrative_simulation_active_total',
+  help: 'Total number of active narrative simulations',
+});
+
+export const narrativeSimulationTicksTotal = createCounter({
+  name: 'narrative_simulation_ticks_total',
+  help: 'Total number of simulation ticks executed',
+  labelNames: ['simulation_id'],
+});
+
+export const narrativeSimulationEventsTotal = createCounter({
+  name: 'narrative_simulation_events_total',
+  help: 'Total number of events processed in simulations',
+  labelNames: ['simulation_id', 'event_type'],
+});
+
+export const narrativeSimulationDurationSeconds = createHistogram({
+  name: 'narrative_simulation_tick_duration_seconds',
+  help: 'Duration of a single simulation tick cycle',
+  labelNames: ['simulation_id'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10],
+});
+
+try {
+  register.registerMetric(narrativeSimulationActiveSimulations);
+  register.registerMetric(narrativeSimulationTicksTotal);
+  register.registerMetric(narrativeSimulationEventsTotal);
+  register.registerMetric(narrativeSimulationDurationSeconds);
+} catch (e) { }
 
 
 // Update memory usage periodically (skip in test to avoid open handles)
@@ -681,12 +713,12 @@ const shouldCollectMemory =
 if (shouldCollectMemory) {
   setInterval(() => {
     try {
-        const usage = process.memoryUsage();
-        memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
-        memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
-        memoryUsage.set({ component: 'external' }, usage.external);
-        memoryUsage.set({ component: 'rss' }, usage.rss);
-    } catch (e) {}
+      const usage = process.memoryUsage();
+      memoryUsage.set({ component: 'heap_used' }, usage.heapUsed);
+      memoryUsage.set({ component: 'heap_total' }, usage.heapTotal);
+      memoryUsage.set({ component: 'external' }, usage.external);
+      memoryUsage.set({ component: 'rss' }, usage.rss);
+    } catch (e) { }
   }, 30000);
 }
 
@@ -860,32 +892,32 @@ export const graphqlPerTenantOverageCount = createCounter({
 
 // Register metrics
 try {
-register.registerMetric(llmCostTotal);
-register.registerMetric(graphqlQueryCostHistogram);
-register.registerMetric(graphqlCostLimitExceededTotal);
-register.registerMetric(graphqlCostLimitRemaining);
-register.registerMetric(graphqlTenantCostUsage);
-register.registerMetric(graphqlCostRateLimitHits);
-register.registerMetric(graphqlPerTenantOverageCount);
-register.registerMetric(intelgraphJobsProcessed);
-register.registerMetric(intelgraphOutboxSyncLatency);
-register.registerMetric(intelgraphActiveConnections);
-register.registerMetric(intelgraphDatabaseQueryDuration);
-register.registerMetric(intelgraphHttpRequestDuration);
-register.registerMetric(intelgraphGraphragQueryTotal);
-register.registerMetric(intelgraphGraphragQueryDurationMs);
-register.registerMetric(intelgraphQueryPreviewsTotal);
-register.registerMetric(intelgraphQueryPreviewLatencyMs);
-register.registerMetric(intelgraphQueryPreviewErrorsTotal);
-register.registerMetric(intelgraphQueryPreviewExecutionsTotal);
-register.registerMetric(intelgraphGlassBoxRunsTotal);
-register.registerMetric(intelgraphGlassBoxRunDurationMs);
-register.registerMetric(intelgraphGlassBoxCacheHits);
-register.registerMetric(intelgraphCacheHits);
-register.registerMetric(intelgraphCacheMisses);
-register.registerMetric(copilotApiRequestTotal);
-register.registerMetric(copilotApiRequestDurationMs);
-} catch (e) {}
+  register.registerMetric(llmCostTotal);
+  register.registerMetric(graphqlQueryCostHistogram);
+  register.registerMetric(graphqlCostLimitExceededTotal);
+  register.registerMetric(graphqlCostLimitRemaining);
+  register.registerMetric(graphqlTenantCostUsage);
+  register.registerMetric(graphqlCostRateLimitHits);
+  register.registerMetric(graphqlPerTenantOverageCount);
+  register.registerMetric(intelgraphJobsProcessed);
+  register.registerMetric(intelgraphOutboxSyncLatency);
+  register.registerMetric(intelgraphActiveConnections);
+  register.registerMetric(intelgraphDatabaseQueryDuration);
+  register.registerMetric(intelgraphHttpRequestDuration);
+  register.registerMetric(intelgraphGraphragQueryTotal);
+  register.registerMetric(intelgraphGraphragQueryDurationMs);
+  register.registerMetric(intelgraphQueryPreviewsTotal);
+  register.registerMetric(intelgraphQueryPreviewLatencyMs);
+  register.registerMetric(intelgraphQueryPreviewErrorsTotal);
+  register.registerMetric(intelgraphQueryPreviewExecutionsTotal);
+  register.registerMetric(intelgraphGlassBoxRunsTotal);
+  register.registerMetric(intelgraphGlassBoxRunDurationMs);
+  register.registerMetric(intelgraphGlassBoxCacheHits);
+  register.registerMetric(intelgraphCacheHits);
+  register.registerMetric(intelgraphCacheMisses);
+  register.registerMetric(copilotApiRequestTotal);
+  register.registerMetric(copilotApiRequestDurationMs);
+} catch (e) { }
 // Maestro Orchestration Metrics (migrated from telemetry/metrics.ts)
 export const maestroOrchestrationRequests = createCounter({
   registers: [],
@@ -1096,7 +1128,7 @@ try {
   register.registerMetric(maestroDataSourcesActive);
   register.registerMetric(maestroWebScrapingRequests);
   register.registerMetric(maestroSynthesisOperations);
-} catch (e) {}
+} catch (e) { }
 
 export const metrics = {
   graphExpandRequestsTotal,
@@ -1177,4 +1209,8 @@ export const metrics = {
   maestroOrchestrationRequests,
   maestroActiveSessions,
   maestroOrchestrationErrors,
+  narrativeSimulationActiveSimulations,
+  narrativeSimulationTicksTotal,
+  narrativeSimulationEventsTotal,
+  narrativeSimulationDurationSeconds,
 };

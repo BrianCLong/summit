@@ -184,7 +184,7 @@ jobs:
           if [ -f "Dockerfile" ] && [ -n "$DOCKER_TAG" ]; then
             echo "Signing container image: $DOCKER_IMAGE:$DOCKER_TAG"
             cosign sign --yes $DOCKER_IMAGE:$DOCKER_TAG
-            
+
             # Attest container SBOM
             CONTAINER_SBOM="./sboms/summit-platform-container-${{ env.VERSION }}.cdx.json"
             if [ -f "$CONTAINER_SBOM" ]; then

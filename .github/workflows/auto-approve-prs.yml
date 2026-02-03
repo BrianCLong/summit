@@ -11,13 +11,13 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
-    
+
     steps:
       - name: Auto approve PR
         uses: hmarr/auto-approve-action@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
