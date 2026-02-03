@@ -1,17 +1,18 @@
 # summit/supplychain/canary/providers/http_probe.py
+from typing import Dict, Any
 
 class HttpProbe:
-    def __init__(self, name: str, headers: dict = None):
+    def __init__(self, name: str, headers: Dict[str, str] = None):
         self.name = name
         self.headers = headers or {}
 
-    def probe(self, url: str):
-        # In a real implementation, this would make an HTTP request.
-        # For the scaffold, we return a mock response.
+    def probe(self, target_url: str) -> Dict[str, Any]:
+        # In a real implementation, this would make actual HTTP requests.
+        # For this scaffold, we return a mock response that can be controlled in tests.
         return {
-            "probe_name": self.name,
-            "url": url,
-            "hash": "sha256:default_hash",
-            "redirect_url": None,
-            "status_code": 200
+            "url": target_url,
+            "headers": self.headers,
+            # Mock artifact metadata
+            "artifact_hash": "sha256:12345",
+            "content_length": 1000
         }
