@@ -1,17 +1,43 @@
-# Required Checks Todo
+# Required Checks Todo List
 
-## GitHub Branch Protection Rules Mapping
+This file tracks the status of CI check discovery and alignment with branch protection rules.
 
-The following checks are part of the Step 3.5 Flash integration and must be mapped to branch protection rules once they report status:
+## Current status
+GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
 
-1. `ci/schema_validate` (mapped to `validate-evidence` in `evidence_ci_step35flash.yml`)
-2. `ci/determinism_lint` (covered by `validate-evidence`)
-3. `ci/provider_smoke_gate` (To be implemented)
-4. `ci/policy_fixtures_gate` (To be implemented)
+## Known check names (Verify these)
+- CI Core (Primary Gate) / CI Core Gate ✅
+- CI / Unit Tests
+- GA Gate
+- Release Readiness Gate
+- SOC Controls
+- Unit Tests & Coverage
 
-## Setup Steps
+## Temporary names (Mapping needed)
+We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `lint`
+- `typecheck`
+- `build`
+- `test`
 
-1. Go to Repository Settings -> Branches -> [Branch Name]
-2. Enable "Require status checks to pass before merging"
-3. Search for and select:
-   - `validate-evidence`
+Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+
+## Temporary gates (Summit Harness & Skills)
+- ci/summit-harness-evidence
+- ci/summit-tool-policy
+- Use `skills/*` jobs with stable names (If actual required checks differ, add a rename PR that preserves history).
+- summit-skillsec
+- summit-evidence
+- summit-harness-mock
+
+## Temporary gates (Step 3.5 Flash Integration)
+- `ci/schema_validate` (mapped to `validate-evidence` in `evidence_ci_step35flash.yml`)
+- `ci/determinism_lint`
+- `ci/provider_smoke_gate`
+- `ci/policy_fixtures_gate`
+
+## Required checks discovery (one-time for Memory Privacy)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
+2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
+4) Add PR to rename temporary checks to required names once known
