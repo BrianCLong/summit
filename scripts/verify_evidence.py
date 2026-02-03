@@ -127,6 +127,9 @@ def main() -> int:
     }
     IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "reports"}
 
+    # ISO8601-like timestamp regex: 202x-xx-xxTxx:xx:xx
+    TIMESTAMP_RE = re.compile(r"202\d-\d{2}-\d{2}[T\s]\d{2}:\d{2}")
+
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
             continue
@@ -134,7 +137,7 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
+            if TIMESTAMP_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
