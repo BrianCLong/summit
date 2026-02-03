@@ -1,14 +1,16 @@
-name: evidence-validate
+name: Summit Gates
+
 on:
   pull_request:
   push:
     branches: [main]
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v3
         with:
           version: 9
       - uses: actions/setup-node@v4
@@ -16,17 +18,12 @@ jobs:
           node-version: 18
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Validate Fixtures (Pass)
-        run: node tools/evidence/validate.mjs
-        env:
-          EVIDENCE_OUT_DIR: evidence/fixtures/pass
-      - name: Validate Fixtures (Fail)
-        run: |
-          if node tools/evidence/validate.mjs; then
-            echo "Expected failure but passed"
-            exit 1
-          else
-            echo "Failed as expected"
-          fi
-        env:
-          EVIDENCE_OUT_DIR: evidence/fixtures/fail
+
+      - name: Install Python Dependencies
+        run: pip install jsonschema pytest
+
+      - name: Verify Evidence Artifacts
+        run: python3 tools/verify_evidence.py --index evidence/index.json
+
+      - name: Run Gate Tests (Deny-by-Default)
+        run: python3 -m pytest tests/test_gates_deny_by_default.py
