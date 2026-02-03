@@ -2,10 +2,34 @@
   "last_updated": "2026-02-03T00:00:00Z",
   "initiatives": [
     {
+      "id": "sera-cli-proxy",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
+    },
+    {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags."
+    },
+    {
+      "id": "promptspec-foundation-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+    },
+    {
+      "id": "nds-v0-1-scaffold",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold Narrative Dominance Suite standards, security handling, and module entrypoint."
+    },
+    {
+      "id": "cw-ruua-isrhamas-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
