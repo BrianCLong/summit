@@ -77,6 +77,8 @@ export const mockClient = {
 
 export const mockPool = {
   query: jest.fn().mockImplementation((text: string, params: any[]) => mockClient.query(text, params)),
+  read: jest.fn().mockImplementation((text: string, params: any[]) => mockClient.query(text, params)),
+  write: jest.fn().mockImplementation((text: string, params: any[]) => mockClient.query(text, params)),
   connect: jest.fn().mockResolvedValue(mockClient),
   on: jest.fn(),
   end: jest.fn().mockResolvedValue(undefined),

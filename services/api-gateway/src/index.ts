@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import express from 'express';
@@ -53,12 +52,39 @@ async function startServer() {
     }),
   );
 
-  // Health check
-  app.get('/health', (req, res) => {
+  // Health check - main endpoint
+  app.get(['/health', '/api/health'], (req, res) => {
     res.json({
-      status: 'healthy',
+      status: 'ok',
       timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0',
+      uptime: process.uptime(),
+      environment: NODE_ENV,
+    });
+  });
+
+  // K8s liveness probe
+  app.get('/health/live', (req, res) => {
+    res.json({ status: 'alive' });
+  });
+
+  // K8s readiness probe
+  app.get('/health/ready', (req, res) => {
+    res.json({ status: 'ready' });
+  });
+
+  // Standard K8s health endpoints
+  app.get('/healthz', (req, res) => {
+    res.json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    });
+  });
+
+  app.get('/readyz', (req, res) => {
+    res.json({
+      status: 'ready',
+      timestamp: new Date().toISOString(),
     });
   });
 

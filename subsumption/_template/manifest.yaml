@@ -1,0 +1,57 @@
+version: 1
+item:
+  title: "TEMPLATE: Replace with ITEM title"
+  links: []
+  type: "unknown"
+  date_version: "unknown"
+  intriguing_claim: "TEMPLATE: 1–2 sentences"
+item_slug: "_template"
+
+claim_registry:
+  mode: "missing-item"
+  claims_file: "subsumption/_template/claims.md"
+
+prs:
+  - title: "feat(governance): add subsumption bundle framework verifier"
+    lane: "foundation"
+    owner: "master"
+    risk: "green"
+
+gates:
+  - name: "verify-subsumption-bundle"
+    required_checks_status: "assumed"
+    deny_by_default_required: true
+
+evidence:
+  schemas:
+    report: "evidence/schemas/report.schema.json"
+    metrics: "evidence/schemas/metrics.schema.json"
+    stamp: "evidence/schemas/stamp.schema.json"
+  index: "evidence/index.json"
+  required_ids:
+    - "EVD-SUBSUMPTION-FRAMEWORK-GOV-001"
+
+docs_targets:
+  - "docs/standards/subsumption-bundle-framework.md"
+  - "docs/security/data-handling/subsumption-bundle-framework.md"
+  - "docs/ops/runbooks/subsumption-bundle-framework.md"
+  - "docs/required_checks.todo.md"
+  - "docs/repo_assumptions.md"
+  - "docs/decisions/subsumption-bundle-framework.md"
+
+fixtures:
+  deny_policy_dir: "subsumption/_template/fixtures/policy/deny"
+  tests:
+    positive:
+      - "subsumption/_template/fixtures/tests/positive/minimal_bundle"
+    negative:
+      - "subsumption/_template/fixtures/tests/negative/missing_docs"
+
+feature_flags: []
+dependency_delta:
+  required_if_deps_change: true
+  doc_root: "deps_delta"
+
+required_checks_discovery:
+  status: "assumed"
+  instructions: "docs/required_checks.todo.md"

@@ -197,12 +197,21 @@ function validateDocHeaders({ docPath, text, policy, nowUtcDate, warnStale }) {
   }
 
   const evidenceRaw = headers['Evidence-IDs'] ?? headers['Evidence-Ids'] ?? headers['Evidence-ids'];
-  if (evidenceRaw !== undefined && evidenceRaw.trim().length === 0) {
-    violations.push({
-      path: docPath,
-      type: 'invalid_evidence_ids',
-      message: 'Evidence-IDs header must not be empty.'
-    });
+  if (evidenceRaw !== undefined) {
+    const trimmed = evidenceRaw.trim();
+    if (trimmed.length === 0) {
+      violations.push({
+        path: docPath,
+        type: 'invalid_evidence_ids',
+        message: 'Evidence-IDs header must not be empty.'
+      });
+    } else if (statusRaw === 'active' && trimmed.toLowerCase() === 'none') {
+      violations.push({
+        path: docPath,
+        type: 'invalid_evidence_ids_none',
+        message: 'Active governance documents must have valid Evidence-IDs (cannot be "none").'
+      });
+    }
   }
 
   const lastReviewed = headers['Last-Reviewed'] ?? headers['Last Reviewed'] ?? headers['Last-Updated'] ?? headers['Last Updated'];

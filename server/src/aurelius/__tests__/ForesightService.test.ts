@@ -11,7 +11,7 @@ const mockDriver = {
   session: jest.fn(() => mockSession)
 };
 
-let ForesightService: typeof import('../services/ForesightService').ForesightService;
+let ForesightService: typeof import('../services/ForesightService.js').ForesightService;
 
 describe('ForesightService', () => {
   let service: ReturnType<typeof ForesightService.getInstance>;

@@ -1,17 +1,5 @@
-# Build artifacts
-dist
-build
-coverage
-.next
-.nuxt
-target
-node_modules
-.cache
-
-# Configs
-*.config.js
-*.config.ts
-.eslintrc.js
-
-# Generated
-packages/work-graph/packages/work-graph/src/integrations/github.ts
+_worktrees/**
+node_modules/**
+dist/**
+build/**
+coverage/**

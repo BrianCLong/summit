@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-CURSOR-SECURE-INDEXING-PERF-001",
+  "item": {
+    "id": "secure-indexing"
+  },
+  "summary": "Improvement factor: 35.91x",
+  "artifacts": [
+    "evidence/EVD-CURSOR-SECURE-INDEXING-PERF-001/metrics.json"
+  ]
+}

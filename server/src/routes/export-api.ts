@@ -2,9 +2,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import pino from 'pino';
-import { opaClient } from '../services/opa-client';
-import { businessMetrics, addSpanAttributes } from '../observability/telemetry';
-import { costGuard } from '../services/cost-guard';
+import { opaClient } from '../services/opa-client.js';
+import { businessMetrics, addSpanAttributes } from '../observability/telemetry.js';
+import { costGuard } from '../services/cost-guard.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import type { AuthenticatedRequest } from './types.js';
 

@@ -67,7 +67,8 @@ const verifyJiraSecret = (req: any, res: any, next: any) => {
   // Skip verification if secret is not configured
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
-      logger.warn('JIRA_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+      logger.error("JIRA_WEBHOOK_SECRET is missing in production. Blocking request.");
+      return res.status(500).json({ error: "Server configuration error" });
     }
     return next();
   }
@@ -90,7 +91,8 @@ const verifyLifecycleSecret = (req: any, res: any, next: any) => {
   // Skip verification if secret is not configured
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
-      logger.warn('LIFECYCLE_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+      logger.error("LIFECYCLE_WEBHOOK_SECRET is missing in production. Blocking request.");
+      return res.status(500).json({ error: "Server configuration error" });
     }
     return next();
   }

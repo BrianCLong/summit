@@ -1,4 +1,4 @@
-import { startKafkaSource } from '../src/conductor/events/engine';
+import { startKafkaSource } from '../src/conductor/events/engine.js';
 
 test('startKafkaSource throws without kafkajs', async () => {
   await expect(

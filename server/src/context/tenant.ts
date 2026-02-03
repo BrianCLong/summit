@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { trace, Span } from '@opentelemetry/api';
-import { pg } from '../db/pg';
-import baseLogger from '../config/logger';
+import { pg } from '../db/pg.js';
+import baseLogger from '../config/logger.js';
 
 const tracer = trace.getTracer('tenant-context', '24.3.0');
 const logger = baseLogger.child({ name: 'tenantContext' });

@@ -19,6 +19,7 @@ const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS
 
 export class MCPClient {
   private connections: Map<string, WebSocket> = new Map();
+  private localHandlers: Map<string, (request: MCPRequest) => Promise<MCPResponse>> = new Map();
   private pendingRequests: Map<
     string,
     {
@@ -41,12 +42,31 @@ export class MCPClient {
   }
 
   /**
+   * Register a local (in-process) MCP server handler
+   */
+  public registerLocalServer(
+    serverName: string,
+    handler: (request: MCPRequest) => Promise<MCPResponse>,
+  ): void {
+    this.localHandlers.set(serverName, handler);
+    logger.info(`Registered local MCP server: ${serverName}`);
+  }
+
+  /**
    * Connect to an MCP server
    */
   public async connect(serverName: string): Promise<void> {
     const config = this.servers[serverName];
     if (!config) {
       throw new Error(`MCP server '${serverName}' not configured`);
+    }
+
+    if (config.transport === 'local') {
+      if (!this.localHandlers.has(serverName)) {
+        throw new Error(`Local handler for server '${serverName}' not registered`);
+      }
+      logger.info(`Using local transport for MCP server: ${serverName}`);
+      return;
     }
 
     // Enforce allowlist
@@ -73,9 +93,39 @@ export class MCPClient {
         headers.Authorization = `Bearer ${config.authToken}`;
       }
 
-      // TODO: Implement certificate pinning here
-      // const ws = new WebSocket(config.url, { headers, ca: [trustedCA], cert: clientCert, key: clientKey, rejectUnauthorized: true });
-      const ws = new WebSocket(config.url, { headers });
+      // P2-3: Certificate pinning implementation
+      // Load trusted certificates if configured (production should use cert pinning)
+      const wsOptions: any = { headers };
+
+      if (process.env.MCP_CA_CERT_PATH) {
+        try {
+          const fs = require('fs');
+          const trustedCA = fs.readFileSync(process.env.MCP_CA_CERT_PATH, 'utf8');
+          wsOptions.ca = [trustedCA];
+          wsOptions.rejectUnauthorized = true;
+          logger.info(`Using certificate pinning for ${serverName} with CA from ${process.env.MCP_CA_CERT_PATH}`);
+        } catch (err) {
+          logger.warn(`Failed to load MCP CA certificate: ${err}. Proceeding without cert pinning.`);
+        }
+      }
+
+      if (process.env.MCP_CLIENT_CERT_PATH && process.env.MCP_CLIENT_KEY_PATH) {
+        try {
+          const fs = require('fs');
+          wsOptions.cert = fs.readFileSync(process.env.MCP_CLIENT_CERT_PATH, 'utf8');
+          wsOptions.key = fs.readFileSync(process.env.MCP_CLIENT_KEY_PATH, 'utf8');
+          logger.info(`Using mTLS client certificate for ${serverName}`);
+        } catch (err) {
+          logger.warn(`Failed to load MCP client certificate: ${err}`);
+        }
+      }
+
+      // NOTE: For production, configure:
+      // - MCP_CA_CERT_PATH=/path/to/ca.crt
+      // - MCP_CLIENT_CERT_PATH=/path/to/client.crt (optional mTLS)
+      // - MCP_CLIENT_KEY_PATH=/path/to/client.key (optional mTLS)
+
+      const ws = new WebSocket(config.url, wsOptions);
 
       ws.once('open', () => {
         logger.info(`Connected to MCP server: ${serverName} (${config.url})`);
@@ -185,6 +235,26 @@ export class MCPClient {
   }
 
   /**
+   * Get a resource from a specific MCP server
+   */
+  public async getResource(serverName: string, uri: string): Promise<any> {
+    if (!this.connections.has(serverName)) {
+      await this.connect(serverName);
+    }
+
+    const request: MCPRequest = {
+      jsonrpc: '2.0',
+      id: uuid(),
+      method: 'resources/read',
+      params: {
+        uri,
+      },
+    };
+
+    return this.sendRequest(serverName, request);
+  }
+
+  /**
    * List available tools on a server
    */
   public async listTools(serverName: string): Promise<MCPTool[]> {
@@ -222,6 +292,19 @@ export class MCPClient {
     serverName: string,
     request: MCPRequest,
   ): Promise<any> {
+    const config = this.servers[serverName];
+    if (config?.transport === 'local') {
+      const handler = this.localHandlers.get(serverName);
+      if (!handler) {
+        throw new Error(`No local handler registered for server '${serverName}'`);
+      }
+      const response = await handler(request);
+      if (response.error) {
+        throw new Error(`MCP Error: ${response.error.message}`);
+      }
+      return response.result;
+    }
+
     const ws = this.connections.get(serverName);
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       throw new Error(`No active connection to server '${serverName}'`);

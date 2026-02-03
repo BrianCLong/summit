@@ -1,10 +1,13 @@
 {
   "name": "@summit/work-graph",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Summit Work Graph - Graph-native engineering management with AI-powered planning",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "work-graph": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
@@ -57,16 +60,26 @@
     "./api": {
       "import": "./dist/api/index.js",
       "types": "./dist/api/index.d.ts"
+    },
+    "./visualizations": {
+      "import": "./dist/visualizations/index.js",
+      "types": "./dist/visualizations/index.d.ts"
+    },
+    "./import": {
+      "import": "./dist/import/index.js",
+      "types": "./dist/import/index.d.ts"
     }
   },
   "scripts": {
     "build": "tsc",
+    "prepare": "pnpm run build",
     "dev": "tsc --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "demo": "tsx src/demo.ts",
     "server": "tsx src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "cli": "tsx src/cli.ts"
   },
   "dependencies": {
     "@linear/sdk": "^22.0.0",

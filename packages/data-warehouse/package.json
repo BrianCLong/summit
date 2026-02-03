@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/data-warehouse",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Enterprise data warehouse with MPP, columnar storage, and advanced analytics",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

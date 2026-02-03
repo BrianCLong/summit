@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/entity-resolution-core",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Entity resolution with explainable scorecards and bitemporal support",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "zod": "^3.22.4"

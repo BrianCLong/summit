@@ -1,0 +1,26 @@
+{
+  "evidence_id": "EVD-PRIVTEL-SCHEMA-001",
+  "item_slug": "privtel",
+  "claims": [
+    "Telemetry event envelope fields are deny-by-default with explicit policy annotations.",
+    "Restricted PII fields are configured with non-allow transforms."
+  ],
+  "decisions": [
+    {
+      "decision": "Gate top-level telemetry envelope fields against an explicit allowlist.",
+      "rationale": "Enforces deny-by-default policies and blocks unclassified fields."
+    }
+  ],
+  "findings": [
+    {
+      "area": "telemetry-privacy",
+      "maestro_layers": ["Foundation", "Data", "Observability", "Security"],
+      "threats_considered": [
+        "Unclassified fields leaking identifiers",
+        "Restricted PII emitted without transform"
+      ],
+      "mitigations": ["Allowlist validation", "Restricted PII transform enforcement"]
+    }
+  ],
+  "summary": "Legacy report summary"
+}

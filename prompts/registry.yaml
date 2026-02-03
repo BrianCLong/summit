@@ -1,5 +1,190 @@
 version: 1
 prompts:
+  - id: structured-content-primitives
+    version: v1
+    path: prompts/content/structured-content-primitives@v1.md
+    sha256: 258e133b40b69ec695a0a9bd1992da5eca9aa092af5471789c43563f512b706e
+    description: Define unified Brief/Claim/Block content primitives with evidence and governance alignment.
+    scope:
+      paths:
+        - docs/content/
+        - schemas/content/
+        - docs/roadmap/STATUS.json
+        - prompts/content/structured-content-primitives@v1.md
+        - prompts/registry.yaml
+        - agents/examples/STRUCTURED_CONTENT_PRIMITIVES_20260131.json
+      domains:
+        - content
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: deterministic-intel-ingest
+    version: v1
+    path: prompts/ingest/deterministic-intel-ingest@v1.md
+    sha256: bca50247042fc4cff08a386550ee5f998e78311c719fa0fa882589390aadf069
+    description: Integrate deterministic intel-ingestion core scaffolding with evidence artifacts and CI gate.
+    scope:
+      paths:
+        - packages/__init__.py
+        - packages/intel_ingest/
+        - cli/intel_ingest.py
+        - schemas/source_document.schema.json
+        - ci/gates/intel_ingest_determinism.sh
+        - tests/test_source_document_roundtrip.py
+        - docs/roadmap/STATUS.json
+        - prompts/ingest/deterministic-intel-ingest@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ingest
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: keel-evidence-templates
+    version: v1
+    path: prompts/evidence/keel-evidence-templates@v1.md
+    sha256: e5a30955d6df4cfea44900137428a5dc84f25c8a9b22b3abdfc67b18a7ceca1d
+    description: Align Keel evidence templates and index entries for ARCH/STAB/DSCL/BENCH bundles.
+    scope:
+      paths:
+        - evidence/index.json
+        - summit/evidence/templates/keel-arch/
+        - summit/evidence/templates/keel-stab/
+        - summit/evidence/templates/keel-dscl/
+        - summit/evidence/templates/keel-bench/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/evidence/keel-evidence-templates@v1.md
+        - prompts/registry.yaml
+        - agents/examples/KEEL_EVIDENCE_TEMPLATES_20260130.json
+      domains:
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: background-sessions-pr1-evidence-scaffold
+    version: v1
+    path: prompts/background-sessions/pr1-evidence-scaffold.md
+    sha256: aeec36297d17ca2543569fd819c42aab3efcedac37b7c99df00865639ed97f0b
+    description: Scaffold Background Sessions evidence schemas, fixtures, and checks discovery.
+    scope:
+      paths:
+        - modules/background_sessions/
+        - docs/roadmap/STATUS.json
+        - prompts/background-sessions/pr1-evidence-scaffold.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: integrations-backlog-sync
+    version: v1
+    path: prompts/integrations/backlog-sync.md
+    sha256: e196bfe98de03f7f4ef7a63414c4fad60b171f9282989b719f2bdda25d6668dc
+    description: Align Jira/Linear/GitHub Projects backlog metadata for priority lanes.
+    scope:
+      paths:
+        - docs/integrations/
+        - scripts/verify-integrations.ts
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/
+      domains:
+        - integrations
+        - program-management
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: eval-baseline-ratchet
+    version: v1
+    path: prompts/eval/establish-eval-baselines@v1.md
+    sha256: 83812cd2cffecec04a8e3205951fe85a553f43e16ecde45aa23f7c8950ee8d63
+    description: Establish eval baseline gates and ratchet guidance for CI readiness.
+    scope:
+      paths:
+        - eval/
+        - tests/eval/
+        - packages/decision-ledger/decision_ledger.json
+        - docs/roadmap/STATUS.json
+        - prompts/eval/establish-eval-baselines@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - eval
+        - ci
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: notion-issue-migration-fix
+    version: v1
+    path: prompts/integrations/notion-issue-migration-fix.md
+    sha256: 51aa613e22286ce28308f0b67ade969829803d3681045b8be335ea5bb817c50c
+    description: Wire Notion issue migration verification and setup guidance.
+    scope:
+      paths:
+        - docs/integrations/
+        - scripts/verify-integrations.ts
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/
+        - prompts/registry.yaml
+        - agents/examples/
+        - .env.example
+      domains:
+        - integrations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md
@@ -129,56 +314,72 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: governance-docs-soc-controls
+  - id: io-cogwar-radar-brief
     version: v1
-    path: prompts/governance/governance-docs-soc-controls@v1.md
-    sha256: 34c74a151cb9bfa1dc22250d51139ad229da7bd6bbb4a5ad64593cefe7c7a01a
-    description: Governance docs consolidation, SOC control test gate, and deterministic GA verification updates.
+    path: prompts/docs/io-cogwar-radar-brief@v1.md
+    sha256: 29e1e846516778c390cf978558937aa16389e3e54a3d3d955d482f3796bdf70e
+    description: Draft a defensive IO/CogWar radar brief with roadmap status and governance artifacts.
     scope:
       paths:
-        - docs/governance/
-        - docs/ci/REQUIRED_CHECKS_POLICY.yml
-        - docs/SOC_CONTROL_UNIT_TESTS_PLAN.md
-        - scripts/ci/
-        - .github/workflows/
-        - server/tests/
-        - server/src/
-        - server/scripts/
-        - compliance/
-        - prompts/governance/governance-docs-soc-controls@v1.md
+        - docs/briefs/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/io-cogwar-radar-brief@v1.md
         - prompts/registry.yaml
-        - agents/examples/
+        - agents/examples/IO_COGWAR_RADAR_BRIEF_20260202.json
+        - packages/decision-ledger/decision_ledger.json
       domains:
-        - governance
-        - compliance
-        - ci
         - documentation
-        - testing
+        - governance
+        - info-ops
+        - cogwar
     verification:
       tiers_required:
-        - A
+        - C
       debt_budget:
         permitted: 0
-        retirement_target: 1
+        retirement_target: 0
     allowed_operations:
       - create
       - edit
-  - id: adr-pr-template-cleanup
+  - id: minimal-architecture-index
     version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
+    path: prompts/architecture/minimal-architecture-index@v1.md
+    sha256: 8d4d4c475473608cd79076f236b040625cbeb96f8f3b96e87023950764bfce7d
+    description: Create minimal architecture system index and Summit graph schema artifacts.
     scope:
       paths:
-        - .github/
-        - docs/ADR/
+        - docs/architecture/
+        - docs/roadmap/STATUS.json
+        - prompts/architecture/minimal-architecture-index@v1.md
+        - prompts/registry.yaml
         - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
+      domains:
+        - architecture
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: pr-17730-update
+    version: v1
+    path: prompts/pr/pr-17730-update@v1.md
+    sha256: 63e31d8f30399c75de748c1841630ba4cb10d216dabe99757c5e142711c54417
+    description: Update PR 17730 documentation and roadmap content.
+    scope:
+      paths:
+        - docs/
+        - prompts/pr/pr-17730-update@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
         - governance
-        - quality
+        - ip
     verification:
       tiers_required:
         - C

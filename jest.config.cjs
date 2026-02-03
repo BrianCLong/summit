@@ -11,7 +11,7 @@ module.exports = {
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts'],
+  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'pp_alerts', 'summit', 'core', 'api', 'eval'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
@@ -25,6 +25,7 @@ module.exports = {
     '/archive/',
     '/salvage/',
     '/pull/',
+    '/.cache/',
   ],
   watchPathIgnorePatterns: [
     '/node_modules/',
@@ -64,6 +65,7 @@ module.exports = {
       statements: 85,
     },
   },
+  coverageReporters: ['json-summary', 'text', 'lcov'],
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
@@ -87,6 +89,8 @@ module.exports = {
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
   testTimeout: 30000,
+  maxWorkers: '50%',
+  reporters: ['default', ['jest-junit', { outputDirectory: 'reports/junit' }]],
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },

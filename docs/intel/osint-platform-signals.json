@@ -1,0 +1,52 @@
+{
+  "date": "2026-01-25",
+  "observed_trends": [
+    "Shift to browser-native, installation-free investigation environments (SaaS)",
+    "Convergence of collection and analysis into unified 'full-stack' platforms",
+    "Persistent reliance on graph-based link analysis for sense-making",
+    "Growth of modular connector ecosystems for third-party data ingestion",
+    "Enterprise posture signaling via formal compliance certifications (ISO/IEC)"
+  ],
+  "platform_examples": [
+    {
+      "platform": "Maltego",
+      "signals": [
+        "Maltego One momentum: Browser-native platform, installation-free",
+        "Single login for tool access",
+        "Positioning as 'full-stack investigation hub' combining collection and analysis"
+      ]
+    },
+    {
+      "platform": "i2 Analyst's Notebook",
+      "signals": [
+        "Focus on 'visual relational analytics engine' over native collection",
+        " reliance on third-party OSINT data bridges (e.g., Social Links)",
+        "differentiation via deep analytic reasoning vs. collection"
+      ]
+    },
+    {
+      "platform": "1 TRACE",
+      "signals": [
+        "ISO/IEC 27001:2022 certification (Enterprise Compliance)",
+        "Modular OSINT + digital investigation suite",
+        "Integrated blockchain tracing and link graphing"
+      ]
+    },
+    {
+      "platform": "ShadowDragon",
+      "signals": [
+        "Specialization in social network mapping and threat data collection",
+        "High-volume source integration (hundreds of sources)",
+        "Integration-first strategy (feeding Maltego)"
+      ]
+    }
+  ],
+  "capability_categories": [
+    "Browser-Native Investigation",
+    "Unified Collection-Analysis Stack",
+    "Graph-Based Link Analysis",
+    "Modular Data Ingestion (Connectors)",
+    "Enterprise Compliance & Governance"
+  ],
+  "confidence": "high"
+}

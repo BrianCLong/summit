@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RefinementOp",
+  "type": "object",
+  "required": ["refinement_id", "anchor", "overlay", "scope"],
+  "properties": {
+    "refinement_id": { "type": "string" },
+    "anchor": {
+      "type": "object",
+      "required": ["frame_index", "frame_hash"],
+      "properties": {
+        "frame_index": { "type": "integer", "minimum": 0 },
+        "frame_hash": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "overlay": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["sketch", "text"] },
+        "strokes": { "type": "array", "items": { "type": "string" } },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": ["target"],
+      "properties": {
+        "target": { "type": "string", "enum": ["local", "global"] },
+        "region": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

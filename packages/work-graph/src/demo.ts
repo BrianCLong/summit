@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Summit Work Graph - Demo
  *
@@ -22,14 +23,14 @@ async function main() {
   const graphStore = new InMemoryGraphStore();
   const eventBus = new EventBus();
   const planner = new PlannerOrchestrator(graphStore);
-  const market = new WorkMarket(graphStore, eventBus);
+  const market = new WorkMarket(graphStore);
   const policyEngine = new PolicyEngine(graphStore);
   const simulator = new PortfolioSimulator(graphStore);
   const metrics = new MetricsDashboard(graphStore);
   const triage = new AutoTriageEngine(graphStore);
 
   // Subscribe to events
-  eventBus.subscribe('*', (event) => {
+  eventBus.subscribe({}, (event) => {
     console.log(`📡 Event: ${event.type}`);
   });
 
@@ -105,30 +106,26 @@ async function main() {
   // 5. Publish Work Contract
   console.log('\n📜 5. Publishing Work Contract...');
   const ticket = plan.tickets[0];
-  const contract = await market.publishContract({
-    ticketId: ticket.id,
-    title: ticket.title,
-    description: ticket.description,
-    requiredCapabilities: ['typescript', 'react'],
-    maxBudget: 100,
-    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    publishedBy: 'orchestrator',
-  });
+  const contract = await market.publishContract(ticket);
   console.log(`   ✓ Contract published: ${contract.id.slice(0, 8)}...`);
 
   // 6. Agents submit bids
   console.log('\n💰 6. Agents Bidding...');
   for (const agent of agents.filter(a => a.agentType === 'coding')) {
+    const estimatedHours = 4 + Math.random() * 4;
     const bid = await market.submitBid({
       contractId: contract.id,
       agentId: agent.id,
       cost: 50 + Math.random() * 30,
       costUnit: 'credits',
-      estimatedHours: 4 + Math.random() * 4,
+      estimatedHours,
       estimatedQuality: 70 + Math.random() * 25,
       confidence: 0.7 + Math.random() * 0.25,
       approach: `Will implement using ${agent.capabilities.join(', ')}`,
       toolsUsed: agent.capabilities,
+      riskFactors: [],
+      canStartAt: new Date(),
+      estimatedCompletion: new Date(Date.now() + estimatedHours * 60 * 60 * 1000),
     });
     console.log(`   ✓ ${agent.name} bid: ${bid.cost.toFixed(0)} credits, ${bid.estimatedHours.toFixed(1)}h`);
   }
@@ -219,7 +216,7 @@ async function main() {
   console.log('✅ Demo Complete!\n');
   console.log('Graph Contents:');
 
-  const allNodes = await graphStore.getNodes({});
+  const allNodes = await graphStore.getNodes<{ type: string }>({});
   const nodesByType: Record<string, number> = {};
   for (const node of allNodes) {
     nodesByType[node.type] = (nodesByType[node.type] || 0) + 1;
