@@ -1,33 +1,28 @@
-version: 1
+version: 1.0.0
 item:
-  slug: cipher-to-fear-extortion
-  title: "From Cipher to Fear: The psychology behind modern ransomware extortion"
-  type: "article"
-  date: "2026-01-27"
-  links: ["https://www.bleepingcomputer.com/news/security/from-cipher-to-fear-the-psychology-behind-modern-ransomware-extortion/"]
+  slug: item-unknown
+  title: "UNKNOWN (ITEM not provided)"
+  type: "unknown"
+  date: "unknown"
+  links: []
 claims:
-  registry: "subsumption/cipher-to-fear-extortion/claims.yaml"
+  registry: "subsumption/item-unknown/claims.yaml"
 required_checks:
-  discovery_status: "verified"
+  discovery_status: "assumed"
   checks:
     - "subsumption-bundle-verify"
-    - "extortion-gates"
 prs:
-  - title: "feat(extortion): implement ransomware extortion pressure model"
-    lane: "implementation"
-    owner: "Jules"
-    risk: "yellow"
+  - title: "feat(subsumption): add bundle manifest + evidence schemas"
+    lane: "foundation"
+    owner: "master"
+    risk: "green"
 gates:
   - id: "subsumption-bundle-verify"
     description: "Verify subsumption bundle completeness and determinism"
-  - id: "extortion-gates"
-    description: "Security and determinism gates for extortion artifacts"
 evidence_ids:
-  - "EVD-EXTORTION-20260127-LEAK"
-  - "EVD-EXTORTION-20260127-NOTE"
+  - "EVD-ITEMUNKNOWN-FND-001"
 docs:
-  - "docs/standards/cipher-to-fear-extortion-pressure.md"
-  - "docs/security/data-handling/cipher-to-fear-extortion-pressure.md"
-  - "docs/ops/runbooks/cipher-to-fear-extortion-pressure.md"
-feature_flags:
-  - "FEATURE_EXTORTION_PRESSURE"
+  - "docs/standards/item-unknown.md"
+  - "docs/security/data-handling/item-unknown.md"
+  - "docs/ops/runbooks/item-unknown.md"
+feature_flags: []
