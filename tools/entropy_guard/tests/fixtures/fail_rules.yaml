@@ -1,0 +1,7 @@
+version: 1
+rules:
+  - id: EG-TEST-FAIL
+    description: "Fail test rule"
+    mode: fail
+    match:
+      regex: "addEventListener\\("
