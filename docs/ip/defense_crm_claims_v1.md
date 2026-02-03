@@ -155,9 +155,9 @@ C244. The medium of claim C243, wherein the instructions cause the system to com
 C245. The medium of claim C243, wherein the instructions cause the system to deny execution of an external publishing defense action when an SBOM record or connector SBOM hash is missing or not attested.
 C246. The medium of claim C1, wherein the instructions cause the system to detect a dependency delta between a current SBOM record and a prior SBOM record and to require human approval prior to enabling the dependency delta for production execution.
 C247. The medium of claim C246, wherein the instructions cause the system to enter a safe mode that denies external publishing defense actions when a dependency delta is present and unapproved.
-C248. The medium of claim C1, wherein the instructions cause the system to require that each executed defense action references a connector identifier and a connector capability grant version identifier.
-C249. The medium of claim C1, wherein the instructions cause the system to maintain per-connector secrets in a secret manager and to restrict access to the secrets to a protected execution environment.
-C250. The medium of claim C1, wherein the instructions cause the system to record failed connector authorization attempts and associated denial reasons in the audit log.
+248. The medium of claim C1, wherein the instructions cause the system to require that each executed defense action references a connector identifier and a connector capability grant version identifier.
+249. The medium of claim C1, wherein the instructions cause the system to maintain per-connector secrets in a secret manager and to restrict access to the secrets to a protected execution environment.
+250. The medium of claim C1, wherein the instructions cause the system to record failed connector authorization attempts and associated denial reasons in the audit log.
 
 ## Cluster 11: Multi-tenant template inheritance + harmonization (C251–C260)
 
@@ -182,8 +182,8 @@ C265. The medium of claim C1, wherein the instructions cause the system to enfor
 C266. The medium of claim C265, wherein the fairness constraints enforce separation of duties by prohibiting assignment of both proposal and approval tasks for a same defense action to a same operator.
 C267. The medium of claim C1, wherein the instructions cause the system to maintain an alert fatigue score per operator derived from review load cap usage and alert storm frequency.
 C268. The medium of claim C267, wherein the system requires a second approver when an alert fatigue score exceeds a threshold.
-C269. The medium of claim C1, wherein the instructions cause the system to generate an overload artifact indicating which overload trigger caused throttling and to store the overload artifact in the audit log linked to a snapshot hash.
-C270. The medium of claim C1, wherein the instructions cause the system to require explicit approval to exit an overload safe mode and to record the approval in the audit log.
+269. The medium of claim C1, wherein the instructions cause the system to generate an overload artifact indicating which overload trigger caused throttling and to store the overload artifact in the audit log linked to a snapshot hash.
+270. The medium of claim C1, wherein the instructions cause the system to require explicit approval to exit an overload safe mode and to record the approval in the audit log.
 
 ## Cluster 13: Policy rule provenance + per-rule explainability (C271–C280)
 
@@ -194,9 +194,9 @@ C274. The medium of claim C273, wherein the rule-level explanation artifact is s
 C275. The medium of claim C271, wherein the instructions cause the system to detect rule drift by comparing outcomes per rule across time for a same defense action type and record a drift indicator.
 C276. The medium of claim C275, wherein the system enters a safe mode that denies external publishing when rule drift exceeds a threshold absent human review.
 C277. The medium of claim C271, wherein the instructions cause the system to enforce that modify decisions include a rule-to-edit mapping indicating which rule each modification satisfies.
-C278. The medium of claim C271, wherein the instructions cause the system to generate a policy trace artifact comprising an ordered list of rule evaluations and intermediate constraint values.
-C279. The medium of claim C278, wherein the policy trace artifact excludes never-log fields and is stored as a redacted artifact linked to snapshot hash.
-C280. The medium of claim C271, wherein the instructions cause the system to require human approval to activate governance rules lacking rule provenance metadata.
+278. The medium of claim C271, wherein the instructions cause the system to generate a policy trace artifact comprising an ordered list of rule evaluations and intermediate constraint values.
+279. The medium of claim C278, wherein the policy trace artifact excludes never-log fields and is stored as a redacted artifact linked to snapshot hash.
+280. The medium of claim C271, wherein the instructions cause the system to require human approval to activate governance rules lacking rule provenance metadata.
 
 ## Cluster 14: Credentialed approvals + delegation + revocation (C281–C290)
 
@@ -218,11 +218,11 @@ C292. The medium of claim C291, wherein the system quarantines suspected poisone
 C293. The medium of claim C292, wherein the system records quarantine events in the audit log linked to source identifiers and transformation identifiers.
 C294. The medium of claim C291, wherein the system computes a poisoning risk score per source and reduces weights of sources having poisoning risk scores above a threshold.
 C295. The medium of claim C291, wherein the system validates narrative state clusters using a robustness check that compares clustering outcomes across multiple feature sets and flags unstable clusters.
-C296. The medium of claim C295, wherein the system restricts defense actions to monitoring-only for narrative states associated with unstable clusters.
-C297. The medium of claim C291, wherein the system detects coordinated poisoning attempts using coordination indicators and synchronized posting windows.
-C298. The medium of claim C291, wherein the system requires human review of quarantine releases and records release approvals in the audit log.
-C299. The medium of claim C291, wherein the system executes a backtesting procedure on historical snapshots to determine whether suspected poisoned sources would have altered prior policy decisions.
-C300. The medium of claim C291, wherein the policy engine denies external publishing defense actions when poisoning risk exceeds a threshold for sources referenced by a lineage manifest.
+296. The medium of claim C295, wherein the system restricts defense actions to monitoring-only for narrative states associated with unstable clusters.
+297. The medium of claim C291, wherein the system detects coordinated poisoning attempts using coordination indicators and synchronized posting windows.
+298. The medium of claim C291, wherein the system requires human review of quarantine releases and records release approvals in the audit log.
+299. The medium of claim C291, wherein the system executes a backtesting procedure on historical snapshots to determine whether suspected poisoned sources would have altered prior policy decisions.
+300. The medium of claim C291, wherein the policy engine denies external publishing defense actions when poisoning risk exceeds a threshold for sources referenced by a lineage manifest.
 
 ## Cluster 16: Cross-model consensus + disagreement handling (C301–C310)
 
@@ -235,7 +235,7 @@ C306. The medium of claim C301, wherein the system records model identifiers and
 C307. The medium of claim C301, wherein the system routes high-disagreement cases to a red-team evaluation path prior to generating publishable defense actions.
 C308. The medium of claim C301, wherein the system generates a consensus explanation artifact describing which assessments agreed and which disagreed, excluding never-log fields.
 C309. The medium of claim C301, wherein the policy engine applies stricter constraints to defense actions generated under high disagreement scores.
-C310. The medium of claim C301, wherein the system recalibrates model weights when observed outcomes deviate from predicted impact metrics beyond a threshold.
+310. The medium of claim C301, wherein the system recalibrates model weights when observed outcomes deviate from predicted impact metrics beyond a threshold.
 
 ## Cluster 17: Semantic canarying + harm-minimization constraints (C311–C320)
 
@@ -248,7 +248,7 @@ C316. The medium of claim C315, wherein the system automatically rolls back the 
 C317. The medium of claim C311, wherein the system records semantic safety check outputs and failed constraints as redacted artifacts linked to a policy bundle hash.
 C318. The medium of claim C311, wherein the system restricts candidate defense actions to template-based messaging when semantic safety check confidence is below a threshold.
 C319. The medium of claim C311, wherein the system computes a harm-minimization score and includes the score as a constraint in ranking candidate defense actions.
-C320. The medium of claim C311, wherein the system requires human approval to override a failed semantic safety check and records the override in the audit log.
+320. The medium of claim C311, wherein the system requires human approval to override a failed semantic safety check and records the override in the audit log.
 
 ## Cluster 18: Disaster recovery + continuity-of-operations for governance/audit (C321–C330)
 
@@ -261,7 +261,7 @@ C326. The medium of claim C321, wherein the system records failover events and s
 C327. The medium of claim C321, wherein the system performs periodic integrity checks on backups and records results as proof artifacts.
 C328. The medium of claim C321, wherein the system requires a recovery approval token to resume external publishing after disaster recovery failover.
 C329. The medium of claim C321, wherein the system preserves replay manifests and verification proof artifacts across failover events.
-C330. The medium of claim C321, wherein the system denies execution when a recovery proof artifact is missing for a reporting period.
+330. The medium of claim C321, wherein the system denies execution when a recovery proof artifact is missing for a reporting period.
 
 ## Cluster 19: Jurisdiction/time-zone-aware constraints + geofenced execution (C361–C370)
 
@@ -274,7 +274,7 @@ C366. The medium of claim C364, wherein the instructions cause the system to sto
 C367. The medium of claim C365, wherein the system stores the geofence violation event in the audit log linked to a policy bundle hash and connector identifier.
 C368. The medium of claim C361, wherein the instructions cause the system to require human approval for defense actions spanning more than a threshold number of jurisdictions.
 C369. The medium of claim C361, wherein the instructions cause the system to restrict external publishing defense actions to monitoring-only when jurisdiction tags are ambiguous or below a confidence threshold.
-C370. The medium of claim C361, wherein the instructions cause the system to generate a jurisdiction rationale artifact describing how jurisdiction tags were derived, excluding never-log fields.
+370. The medium of claim C361, wherein the instructions cause the system to generate a jurisdiction rationale artifact describing how jurisdiction tags were derived, excluding never-log fields.
 
 ## Cluster 20: Evidence-weighted forecasting + forecast drift detection (C371–C380)
 
@@ -287,7 +287,7 @@ C376. The medium of claim C374, wherein the system restricts external publishing
 C377. The medium of claim C371, wherein the system performs backtesting of forecast trajectories on historical snapshots and records backtesting results as evidence artifacts.
 C378. The medium of claim C371, wherein the system calibrates forecast parameters using observed outcomes only when a data quality policy indicates sufficient reliability.
 C379. The medium of claim C371, wherein the system stores a forecast explanation artifact identifying input features and forecast evidence weights contributing to a forecast, excluding never-log fields.
-C380. The medium of claim C371, wherein the system binds forecasts and forecast explanation artifacts to a policy bundle hash and a replay manifest identifier.
+380. The medium of claim C371, wherein the system binds forecasts and forecast explanation artifacts to a policy bundle hash and a replay manifest identifier.
 
 ## Cluster 21: Contractual/brand safety constraints + partner policy overlays (C381–C390)
 
@@ -300,7 +300,7 @@ C386. The medium of claim C381, wherein the system records partner overlay hashe
 C387. The medium of claim C381, wherein the system enforces brand safety constraints that restrict references to protected topics or sensitive categories in external publishing defense actions.
 C388. The medium of claim C387, wherein the policy engine modifies an external publishing defense action by redacting or rewriting content to satisfy brand safety constraints and records a modify rationale.
 C389. The medium of claim C381, wherein the system denies external publishing defense actions when a required partner overlay policy bundle is unavailable or not attested.
-C390. The medium of claim C381, wherein the system generates a partner compliance report comprising counts of allowed, denied, and modified defense actions under partner overlay policy bundles.
+390. The medium of claim C381, wherein the system generates a partner compliance report comprising counts of allowed, denied, and modified defense actions under partner overlay policy bundles.
 
 ## Cluster 22: Graph integrity constraints + reconciliation invariants (C391–C400)
 
@@ -313,7 +313,7 @@ C396. The medium of claim C395, wherein the system records the reconciliation pr
 C397. The medium of claim C391, wherein the system rejects a proposed update and restricts outputs to monitoring-only actions when any graph integrity constraint fails.
 C398. The medium of claim C391, wherein the system performs conflict resolution for duplicate narrative state merges by selecting a canonical narrative identifier based on confidence scores and lineage completeness.
 C399. The medium of claim C398, wherein the system records a merge decision artifact comprising merge rationale and contributing sources in the audit log.
-C400. The medium of claim C391, wherein the system validates that updates do not decrease lineage completeness below a threshold for narrative states referenced by external publishing defense actions.
+400. The medium of claim C391, wherein the system validates that updates do not decrease lineage completeness below a threshold for narrative states referenced by external publishing defense actions.
 
 ## Cluster 23: Human dispute resolution + appeals workflow (C401–C410)
 
@@ -326,7 +326,7 @@ C406. The medium of claim C405, wherein reversing a deny decision for an externa
 C407. The medium of claim C401, wherein the system records appeal artifacts, re-evaluation outputs, and appeal resolution decisions in an append-only audit log.
 C408. The medium of claim C401, wherein the system enforces a time-bound validity window for appeals and denies late appeals absent elevated approval.
 C409. The medium of claim C401, wherein the system computes appeal analytics comprising reversal rate and most frequent objection categories and stores aggregated appeal analytics in the audit log.
-C410. The medium of claim C401, wherein the system restricts external publishing defense actions to monitoring-only while an appeal is pending for an associated narrative state above a risk threshold.
+410. The medium of claim C401, wherein the system restricts external publishing defense actions to monitoring-only while an appeal is pending for an associated narrative state above a risk threshold.
 
 ## Cluster 24: Outcome attribution + causal lift estimation guardrails (C411–C420)
 
@@ -339,7 +339,7 @@ C416. The medium of claim C415, wherein the system denies using an expired causa
 C417. The medium of claim C411, wherein the system performs sensitivity analysis by varying at least one causal assumption and records sensitivity results as an evidence artifact.
 C418. The medium of claim C411, wherein the system adjusts causal lift estimates for interference effects across linked narrative states using edges in the narrative operating graph.
 C419. The medium of claim C411, wherein the system records attribution explanations that identify which narrative state changes are attributed to an executed defense action versus external events.
-C420. The medium of claim C411, wherein the system restricts external publishing defense actions to monitoring-only when causal lift estimation indicates negative trust impact beyond a threshold.
+420. The medium of claim C411, wherein the system restricts external publishing defense actions to monitoring-only when causal lift estimation indicates negative trust impact beyond a threshold.
 
 ## Cluster 25: Higher-order reconciliation + audit log binding (C421-C423)
 
@@ -364,6 +364,45 @@ C423. A non-transitory computer-readable medium storing instructions that, when 
 3. Generating a causal assumptions artifact comprising at least one of a covariate set, a matching rule, or an identification strategy;
 4. Storing the causal assumptions artifact in an audit log linked to a snapshot hash of the narrative operating graph and a policy bundle hash; and
 5. Computing a lift confidence interval and associating a validity window with the causal lift estimate, the validity window defined by an expiration timestamp.
+
+## Cluster 26: Policy arbitration across overlays + precedence rules (C451–C460)
+
+C451. The medium of claim C1, wherein the instructions cause the system to apply a plurality of policy overlays comprising at least one of a governance policy template, a tenant override policy bundle, a partner overlay policy bundle, a jurisdiction constraint set, a locale constraint set, or a connector capability grant.
+C452. The medium of claim C451, wherein the system computes an effective policy decision by performing policy arbitration using deterministic precedence rules among the plurality of policy overlays.
+C453. The medium of claim C452, wherein the deterministic precedence rules specify that deny outcomes prevail over allow outcomes when policy overlays conflict.
+C454. The medium of claim C452, wherein the system generates an arbitration proof artifact comprising an ordered list of applied overlays, precedence rule identifiers, and intermediate outcomes.
+C455. The medium of claim C454, wherein the arbitration proof artifact is stored in an audit log linked to a policy bundle hash and a structured defense action object hash.
+C456. The medium of claim C451, wherein the system denies execution of external publishing defense actions when any required policy overlay is missing or not attested.
+C457. The medium of claim C452, wherein the system outputs a modify decision by applying a least-permissive modification that satisfies all applicable overlays.
+C458. The medium of claim C452, wherein the system detects an arbitration ambiguity event when two overlays yield incompatible modify requirements and enters conflict-safe mode.
+C459. The medium of claim C458, wherein the system restricts outputs to monitoring-only actions while the arbitration ambiguity event remains unresolved.
+C460. The medium of claim C451, wherein the system records identifiers and versions of all applied overlays in an append-only audit log for each executed defense action.
+
+## Cluster 27: Formal localization QA + back-translation + locale regression (C461–C470)
+
+C461. The medium of claim C1, wherein the instructions cause the system to perform localization quality assurance on a translated external publishing defense action prior to execution.
+C462. The medium of claim C461, wherein localization quality assurance comprises back-translation of a translated defense message into a source language and comparison of semantic equivalence against the source message.
+C463. The medium of claim C462, wherein the system computes a localization divergence score and denies execution when the localization divergence score exceeds a threshold.
+C464. The medium of claim C461, wherein localization quality assurance comprises verifying presence of locale-specific required disclaimers and required attribution fields.
+C465. The medium of claim C461, wherein the system maintains a localization regression suite comprising test cases for locale-specific constraints and executes the localization regression suite prior to enabling a new translation model version.
+C466. The medium of claim C465, wherein the system records localization regression results as evidence artifacts linked to translation model version identifiers.
+C467. The medium of claim C461, wherein the system restricts external publishing defense actions to template-based messaging when localization quality assurance confidence is below a threshold.
+C468. The medium of claim C461, wherein the system records localization QA artifacts, back-translation artifacts, and divergence scores in the audit log excluding never-log fields.
+C469. The medium of claim C461, wherein the policy engine modifies a translated defense action by substituting a pre-approved localized template when localization quality assurance fails.
+C470. The medium of claim C461, wherein the system requires human approval to override a localization quality assurance failure and records the override approval in the audit log.
+
+## Cluster 28: Cross-connector blast radius budgeting (C471–C480)
+
+C471. The medium of claim C1, wherein the instructions cause the system to maintain a blast radius budget defining limits on at least one of audience size, jurisdiction count, channel count, or publication frequency for external publishing defense actions.
+C472. The medium of claim C471, wherein the blast radius budget is maintained per connector identifier and per tenant identifier.
+C473. The medium of claim C471, wherein the system decrements the blast radius budget upon scheduling or executing an external publishing defense action and records budget consumption in the audit log.
+C474. The medium of claim C471, wherein the system denies execution when a blast radius budget would be exceeded and outputs monitoring-only actions.
+C475. The medium of claim C471, wherein the system computes a projected blast radius for a candidate defense action using predicted reach metrics and denies execution when projected blast radius exceeds the blast radius budget.
+C476. The medium of claim C471, wherein the system enforces cross-connector budgets that limit cumulative blast radius across multiple connectors within a rolling time window.
+C477. The medium of claim C471, wherein the system requires approvals to increase a blast radius budget and records budget change approvals with approver credential identifiers.
+C478. The medium of claim C471, wherein the system triggers canarying when a candidate defense action consumes more than a threshold portion of a blast radius budget.
+C479. The medium of claim C478, wherein the system automatically rolls back an external publishing defense action when trust impact exceeds a threshold during the canary and restores unused budget.
+C480. The medium of claim C471, wherein the system records a blast radius proof artifact comprising projected reach, budgets applied, and budget consumption outcomes linked to snapshot hash and policy bundle hash.
 
 ---
 
