@@ -240,6 +240,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: nog-governed-ops-docs
+    version: v1
+    path: prompts/docs/nog-governed-ops-docs@v1.md
+    sha256: 671b5dcfc2e1fe6ca3e0fb75a84a7e9cbbc661f8cb07ebdc1529699bd88c4646
+    description: Document governed narrative risk ops standards, security handling, and runbook updates.
+    scope:
+      paths:
+        - repo_assumptions.md
+        - docs/standards/nog-governed-agents.md
+        - docs/security/data-handling/nog-governed-agents.md
+        - docs/ops/runbooks/nog-governed-agents.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/NOG_GOVERNED_OPS_DOCS_TASK.json
+        - prompts/docs/nog-governed-ops-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
@@ -280,6 +309,33 @@ prompts:
         - documentation
         - governance
         - quality
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: io-cogwar-radar-brief
+    version: v1
+    path: prompts/docs/io-cogwar-radar-brief@v1.md
+    sha256: 29e1e846516778c390cf978558937aa16389e3e54a3d3d955d482f3796bdf70e
+    description: Draft a defensive IO/CogWar radar brief with roadmap status and governance artifacts.
+    scope:
+      paths:
+        - docs/briefs/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/io-cogwar-radar-brief@v1.md
+        - prompts/registry.yaml
+        - agents/examples/IO_COGWAR_RADAR_BRIEF_20260202.json
+        - packages/decision-ledger/decision_ledger.json
+      domains:
+        - documentation
+        - governance
+        - info-ops
+        - cogwar
     verification:
       tiers_required:
         - C
@@ -375,4 +431,26 @@ prompts:
     allowed_operations:
       - create
       - edit
-
+  - id: pr-17730-update
+    version: v1
+    path: prompts/pr/pr-17730-update@v1.md
+    sha256: 63e31d8f30399c75de748c1841630ba4cb10d216dabe99757c5e142711c54417
+    description: Update PR 17730 documentation and roadmap content.
+    scope:
+      paths:
+        - docs/
+        - prompts/pr/pr-17730-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - ip
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
