@@ -372,3 +372,7 @@ subsumption/**/runs/
 
 # Governance evidence artifacts (generated locally/CI)
 artifacts/governance/
+# Cogwar deterministic artifacts
+!dist/
+!dist/cogwar/
+!dist/cogwar/**
