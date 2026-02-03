@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FactMarkets Metrics",
+  "type": "object",
+  "required": ["processing_ms", "cache_hit"],
+  "properties": {
+    "processing_ms": { "type": "number" },
+    "cache_hit": { "type": "boolean" },
+    "claims_total": { "type": "integer" },
+    "claims_verified": { "type": "integer" }
+  }
+}

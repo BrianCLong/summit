@@ -120,7 +120,7 @@ export class ProvenanceIntegrityGateway extends EventEmitter {
       : deepfakeDetectionService;
 
     this.truthBundles = config.truthBundle
-      ? new TruthBundleService(config.truthBundle)
+      ? new TruthBundleService(config.truthBundle, this.contentSigning, this.deepfakeDetection)
       : truthBundleService;
 
     this.narrativeConflict = config.narrative
