@@ -1,0 +1,21 @@
+{
+  "name": "integration-gateway",
+  "version": "0.0.1",
+  "description": "Integration Gateway Service",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@intelgraph/mandates": "workspace:*",
+    "@intelgraph/connector-sdk": "workspace:*",
+    "@intelgraph/integration-twin": "workspace:*",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^20.17.5",
+    "@types/express": "^4.17.21"
+  }
+}

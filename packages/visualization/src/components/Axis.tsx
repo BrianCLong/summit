@@ -1,1 +1,1 @@
-export * from './AxisComponent';
+export * from './AxisComponent.js';

@@ -1,0 +1,277 @@
+name: Branch Lifecycle Management
+
+# Automatically clean up stale branches to prevent merge conflicts and repo hygiene issues
+# Current state: 409 remote branches (234 AI-generated)
+# Target: <100 active branches
+#
+# Policy:
+# - Delete merged branches after 7 days
+# - Delete stale unmerged branches after 30 days (with warning at 21 days)
+# - Protect main, release/*, and hotfix/* branches
+# - Notify bot owners before deletion
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  cleanup-merged-branches:
+    name: Delete Merged Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for branch analysis
+
+      - name: Delete merged branches older than 7 days
+        run: |
+          echo "🔍 Finding merged branches older than 7 days..."
+
+          # Get list of merged branches
+          git branch -r --merged origin/main | \
+            grep -v "origin/main" | \
+            grep -v "origin/HEAD" | \
+            grep -v "origin/release/" | \
+            grep -v "origin/hotfix/" | \
+            sed 's/origin\///' | \
+            while read branch; do
+              # Get last commit date
+              last_commit_date=$(git log -1 --format=%ci "origin/$branch" 2>/dev/null)
+              if [ -z "$last_commit_date" ]; then
+                continue
+              fi
+
+              # Calculate days since last commit
+              last_commit_epoch=$(date -d "$last_commit_date" +%s)
+              current_epoch=$(date +%s)
+              days_old=$(( ($current_epoch - $last_commit_epoch) / 86400 ))
+
+              if [ $days_old -gt 7 ]; then
+                echo "🗑️  Deleting merged branch: $branch (${days_old} days old)"
+                git push origin --delete "$branch" 2>&1 || echo "⚠️  Failed to delete $branch"
+              fi
+            done
+
+      - name: Summary
+        run: |
+          remaining=$(git branch -r | wc -l)
+          echo "📊 Remaining remote branches: $remaining"
+
+  warn-stale-branches:
+    name: Warn About Stale Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find stale unmerged branches (21-30 days)
+        id: find-stale
+        run: |
+          echo "🔍 Finding stale unmerged branches..."
+
+          stale_branches=""
+          git branch -r --no-merged origin/main | \
+            grep -v "origin/main" | \
+            grep -v "origin/HEAD" | \
+            grep -v "origin/release/" | \
+            grep -v "origin/hotfix/" | \
+            sed 's/origin\///' | \
+            while read branch; do
+              last_commit_date=$(git log -1 --format=%ci "origin/$branch" 2>/dev/null)
+              if [ -z "$last_commit_date" ]; then
+                continue
+              fi
+
+              last_commit_epoch=$(date -d "$last_commit_date" +%s)
+              current_epoch=$(date +%s)
+              days_old=$(( ($current_epoch - $last_commit_epoch) / 86400 ))
+
+              if [ $days_old -ge 21 ] && [ $days_old -lt 30 ]; then
+                author=$(git log -1 --format=%an "origin/$branch")
+                echo "⚠️  Stale branch: $branch (${days_old} days, author: $author)"
+                stale_branches="$stale_branches\n- \`$branch\` (${days_old} days old, by $author)"
+              fi
+            done
+
+          echo "stale_branches<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$stale_branches" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create issue for stale branches
+        if: steps.find-stale.outputs.stale_branches != ''
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const staleBranches = `${{ steps.find-stale.outputs.stale_branches }}`;
+
+            if (!staleBranches || staleBranches.trim() === '') {
+              console.log('No stale branches found');
+              return;
+            }
+
+            const issueBody = `## ⚠️ Stale Branch Warning
+
+            The following branches have not been updated in 21-30 days and will be automatically deleted in 9 days if no activity occurs:
+
+            ${staleBranches}
+
+            ### Actions Required
+
+            **For branch owners:**
+            1. If the branch is still needed, push a commit or open a PR
+            2. If the branch can be merged, open a PR to main
+            3. If the branch is obsolete, delete it manually
+
+            **For AI agents (Jules, Gemini, Claude):**
+            - These branches were created by automated agents
+            - Review if work is complete and can be merged
+            - Consider consolidating similar branches
+
+            ### Automatic Deletion Policy
+
+            - **21 days:** Warning issued (this notification)
+            - **30 days:** Branch automatically deleted
+            - **Protected:** main, release/*, hotfix/* branches never deleted
+
+            See: [Branch Lifecycle Policy](.github/workflows/branch-lifecycle.yml)
+
+            ---
+
+            *This issue was automatically created by the Branch Lifecycle workflow. Current branch count: ${await github.rest.repos.listBranches({ owner: context.repo.owner, repo: context.repo.repo, per_page: 1 }).then(r => r.headers['link'] ? parseInt(r.headers['link'].match(/page=(\d+)>; rel="last"/)[1]) : 1)}*`;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'branch-lifecycle,automated'
+            });
+
+            const existingIssue = issues.data.find(issue =>
+              issue.title === '⚠️ Stale Branches Warning'
+            );
+
+            if (existingIssue) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: issueBody
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '⚠️ Stale Branches Warning',
+                body: issueBody,
+                labels: ['branch-lifecycle', 'automated', 'housekeeping']
+              });
+              console.log('Created new stale branches warning issue');
+            }
+
+  delete-stale-branches:
+    name: Delete Stale Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete unmerged branches older than 30 days
+        run: |
+          echo "🔍 Finding unmerged branches older than 30 days..."
+
+          git branch -r --no-merged origin/main | \
+            grep -v "origin/main" | \
+            grep -v "origin/HEAD" | \
+            grep -v "origin/release/" | \
+            grep -v "origin/hotfix/" | \
+            sed 's/origin\///' | \
+            while read branch; do
+              last_commit_date=$(git log -1 --format=%ci "origin/$branch" 2>/dev/null)
+              if [ -z "$last_commit_date" ]; then
+                continue
+              fi
+
+              last_commit_epoch=$(date -d "$last_commit_date" +%s)
+              current_epoch=$(date +%s)
+              days_old=$(( ($current_epoch - $last_commit_epoch) / 86400 ))
+
+              if [ $days_old -gt 30 ]; then
+                author=$(git log -1 --format=%an "origin/$branch")
+                echo "🗑️  Deleting stale branch: $branch (${days_old} days old, by $author)"
+                git push origin --delete "$branch" 2>&1 || echo "⚠️  Failed to delete $branch"
+              fi
+            done
+
+      - name: Summary
+        run: |
+          remaining=$(git branch -r | wc -l)
+          echo "📊 Remaining remote branches: $remaining"
+          echo "🎯 Target: <100 branches"
+
+          if [ $remaining -gt 100 ]; then
+            echo "⚠️  Still over target! Consider manual review of remaining branches."
+          else
+            echo "✅ Within target range!"
+          fi
+
+  report-statistics:
+    name: Branch Statistics
+    runs-on: ubuntu-latest
+    needs: [cleanup-merged-branches, delete-stale-branches]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate branch statistics
+        run: |
+          echo "## 📊 Branch Statistics Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          total_branches=$(git branch -r | grep -v "HEAD" | wc -l)
+          merged_branches=$(git branch -r --merged origin/main | grep -v "main" | grep -v "HEAD" | wc -l)
+          unmerged_branches=$(git branch -r --no-merged origin/main | grep -v "main" | grep -v "HEAD" | wc -l)
+
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Total Branches** | $total_branches |" >> $GITHUB_STEP_SUMMARY
+          echo "| Merged (safe to delete) | $merged_branches |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unmerged (active work) | $unmerged_branches |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Branch Breakdown by Author" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Author | Branch Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------------|" >> $GITHUB_STEP_SUMMARY
+
+          git for-each-ref --format="%(authorname)" refs/remotes | \
+            sort | uniq -c | sort -rn | head -10 | \
+            while read count author; do
+              echo "| $author | $count |" >> $GITHUB_STEP_SUMMARY
+            done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎯 **Target:** <100 branches" >> $GITHUB_STEP_SUMMARY
+
+          if [ $total_branches -gt 100 ]; then
+            echo "⚠️ **Status:** Over target by $(($total_branches - 100)) branches" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ **Status:** Within target!" >> $GITHUB_STEP_SUMMARY
+          fi

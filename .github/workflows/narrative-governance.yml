@@ -1,0 +1,23 @@
+name: Narrative Governance Gate
+
+on:
+  pull_request:
+    paths:
+      - 'packages/narrative-engine/src/schema.graphql'
+
+jobs:
+  enforce-frame-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Frame Definition
+        run: |
+          if ! grep -q "type NarrativeFrame" packages/narrative-engine/src/schema.graphql; then
+            echo "Error: NarrativeFrame type definition missing from schema!"
+            exit 1
+          fi
+          if ! grep -q "invariantCore" packages/narrative-engine/src/schema.graphql; then
+            echo "Error: NarrativeFrame must have invariantCore!"
+            exit 1
+          fi
+          echo "Narrative Governance Check Passed: Frame Primitive Integrity Verified."

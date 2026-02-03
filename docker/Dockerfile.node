@@ -1,0 +1,54 @@
+# syntax=docker/dockerfile:1
+# Generic Node.js Dockerfile for Summit Services (prov-ledger, policy-lac, etc.)
+
+# --- Base Stage ---
+FROM node:18-alpine AS base
+WORKDIR /app
+# Install pnpm via corepack (preferred for newer Node versions)
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# --- Builder Stage ---
+FROM base AS builder
+# Copy workspace configs
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Copy all packages manifest (for workspace pruning if we were using turbo, 
+# but here we just copy specific package files or allow full install for simplicity in this context)
+# For a stricter build, we would use 'turbo prune'. 
+# Assuming standard monolithic copy for simplicity given current context:
+COPY . .
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Build command - configurable via build-arg
+ARG SERVICE_PATH
+WORKDIR /app/${SERVICE_PATH}
+RUN pnpm run build
+
+# --- Runner Stage ---
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy built artifacts and dependencies
+# In a monorepo, copying just node_modules is tricky without pruning. 
+# We copy the full built tree from builder for simplicity/reliability.
+COPY --from=builder --chown=nextjs:nodejs /app .
+
+# Set working directory to the specific service
+ARG SERVICE_PATH
+WORKDIR /app/${SERVICE_PATH}
+
+USER nextjs
+
+EXPOSE 3000
+EXPOSE 4000
+EXPOSE 4010
+
+CMD ["node", "dist/index.js"]

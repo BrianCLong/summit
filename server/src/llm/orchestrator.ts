@@ -6,13 +6,13 @@ import {
     ChatCompletionResult,
     LlmProvider,
     RoutingPolicy
-} from './types';
-import { DefaultRoutingPolicy } from './router/default-policy';
-import { MockProvider } from './providers/mock-provider';
-import { OpenAiProvider } from './providers/openai-provider';
-import { AnthropicProvider } from './providers/anthropic-provider';
-import { safetyPipeline } from './safety/pipeline';
-import { llmMeteringService } from './metering/service';
+} from './types.js';
+import { DefaultRoutingPolicy } from './router/default-policy.js';
+import { MockProvider } from './providers/mock-provider.js';
+import { OpenAiProvider } from './providers/openai-provider.js';
+import { AnthropicProvider } from './providers/anthropic-provider.js';
+import { safetyPipeline } from './safety/pipeline.js';
+import { llmMeteringService } from './metering/service.js';
 
 export class SummitLlmOrchestrator implements LlmOrchestrator {
     private providers: Map<string, LlmProvider> = new Map();

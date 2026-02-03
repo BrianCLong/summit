@@ -1,0 +1,38 @@
+id: research-productivity@v1
+version: 1
+license_note: "Derived from public prompting patterns; clean-room template text."
+templates:
+  - id: surface_uncertainty
+    title: "Surface uncertainty"
+    output_contract:
+      - facts
+      - consensus
+      - uncertain_or_disputed
+      - verification_needed
+  - id: define_scope
+    title: "Define scope"
+    output_contract:
+      - core_concepts
+      - related_areas
+      - excluded_topics
+      - justifications
+  - id: stress_test_conclusion
+    title: "Stress-test conclusion"
+    output_contract:
+      - assumptions
+      - weaknesses
+      - counterarguments
+      - verification_needed
+  - id: highlight_missing
+    title: "Highlight what's missing"
+    output_contract:
+      - gaps
+      - why_it_matters
+      - next_research_actions
+  - id: editorial_assistant
+    title: "Editorial assistant"
+    output_contract:
+      - technical_accuracy_flags
+      - logic_structure_issues
+      - unsupported_claims
+      - gaps_before_publication

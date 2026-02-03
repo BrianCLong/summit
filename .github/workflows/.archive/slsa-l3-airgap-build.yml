@@ -170,7 +170,7 @@ jobs:
 
       - name: Build container image (hermetic)
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
@@ -245,7 +245,7 @@ jobs:
         uses: docker/login-action@v3
       - name: Build Server
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: ./server
           file: ./server/Dockerfile
@@ -670,7 +670,7 @@ jobs:
           EOF
       - name: Build Web
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v4
         with:
           context: ./apps/web
           file: ./apps/web/Dockerfile

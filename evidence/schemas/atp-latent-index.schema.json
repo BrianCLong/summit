@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ATP-Latent Evidence Index",
+  "type": "object",
+  "required": ["evidence"],
+  "properties": {
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "files"],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "files": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

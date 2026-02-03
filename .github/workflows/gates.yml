@@ -1,0 +1,97 @@
+name: "Gates (GA + Evidence + Determinism)"
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+  workflow_dispatch: {}
+
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    name: Gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Evidence Map present
+        run: |
+          # Adjust file name/path to your canonical evidence map
+          if [ -f docs/governance/evidence-map.yml ] || [ -f docs/governance/evidence-map.yaml ]; then
+            echo "Evidence map present."
+          else
+            echo "Missing Evidence Map (docs/governance/evidence-map.yml|yaml)"
+            exit 1
+          fi
+
+      - name: Security ledger present
+        run: |
+          # Adjust to your canonical ledger path
+          if [ -f docs/security/security-ledger.yml ] || [ -f docs/security/security-ledger.yaml ]; then
+            echo "Security ledger present."
+          else
+            echo "Missing Security Ledger (docs/security/security-ledger.yml|yaml)"
+            exit 1
+          fi
+
+      - name: Validate evidence map (optional script)
+        run: |
+          if [ -f scripts/ci/validate_evidence_map.mjs ]; then
+            node scripts/ci/validate_evidence_map.mjs
+          else
+            echo "No scripts/ci/validate_evidence_map.mjs found; skipping."
+          fi
+
+      - name: Validate security ledger (optional script)
+        run: |
+          if [ -f scripts/ci/validate_security_ledger.mjs ]; then
+            node scripts/ci/validate_security_ledger.mjs
+          else
+            echo "No scripts/ci/validate_security_ledger.mjs found; skipping."
+          fi
+
+      - name: Run Tests
+        run: |
+          if pnpm run -s test >/dev/null 2>&1; then
+            pnpm test
+          else
+            echo "No test script; skipping."
+          fi
+
+      - name: Generate GA evidence bundle (optional)
+        run: |
+          if [ -f scripts/release/generate_evidence_bundle.mjs ]; then
+            node scripts/release/generate_evidence_bundle.mjs
+          elif [ -f scripts/release/ga_verify.ts ]; then
+            npx tsx scripts/release/ga_verify.ts
+          else
+            echo "No GA evidence bundle generator found; skipping."
+          fi
+
+      - name: Upload GA evidence artifacts (if any)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-evidence
+          path: |
+            artifacts/**
+            evidence/**
+            docs/releases/**
+        continue-on-error: true

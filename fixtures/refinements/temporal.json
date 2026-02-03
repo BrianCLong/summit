@@ -1,0 +1,15 @@
+{
+  "refinement_id": "refine-temporal-001",
+  "anchor": {
+    "frame_index": 0,
+    "frame_hash": "frame-0"
+  },
+  "overlay": {
+    "type": "text",
+    "text": "Delay the sweep by 0.5s"
+  },
+  "scope": {
+    "target": "local",
+    "region": "baseline"
+  }
+}

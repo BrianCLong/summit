@@ -24,15 +24,15 @@ check_file() {
     value=$(echo "$line" | sed -E 's/^\s*image:\s*//; s/#.*$//; s/["\'\']//g' | xargs)
     # Skip templated or variable images
     [[ -z "$value" ]] && continue
-    [[ "$value" =~ \{\{ ]] && continue
+    [[ "$value" == *"{{"* ]] && continue
     # Enforce no :latest
-    if [[ "$value" =~ :latest(\b|$) ]]; then
+    if [[ "$value" == *":latest"* ]]; then
       echo "${f}: uses :latest → $value" >> "$TMP_ERRORS"
       ERR=1
       continue
     fi
     # If image is from a registry (common pattern contains / or .) enforce digest
-    if [[ "$value" =~ / || "$value" =~ \..*\/ ]]; then
+    if [[ "$value" == *"/"* ]] || [[ "$value" == *"."*"/"* ]]; then
       if [[ "$value" != *@sha256:* ]]; then
         echo "${f}: not digest-pinned → $value" >> "$TMP_ERRORS"
         ERR=1
