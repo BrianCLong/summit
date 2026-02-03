@@ -1,0 +1,11 @@
+{
+  "artifacts": [],
+  "backend": "solo_os",
+  "environment": {
+    "engine": "content_engine"
+  },
+  "evidence_id": "EVD-ENTRE-502318-ENG-CON-test_content_engine",
+  "summary": {
+    "status": "Content briefs generated"
+  }
+}

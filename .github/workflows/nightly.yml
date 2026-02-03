@@ -14,10 +14,10 @@ jobs:
       matrix:
         package: [graph-sync-validator, intelgraph-server, summit-api, summit-web, connector-sdk]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
+      - uses: actions/checkout@v4 # v4.1.7
 
       - name: Setup Node
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4.0.3
+        uses: actions/setup-node@v4 # v4.0.3
         with:
           node-version: "20"
           cache: 'pnpm'
@@ -25,7 +25,7 @@ jobs:
       - name: Use pinned pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          version: 9.12.0
+
           run_install: false
 
       - name: Install
