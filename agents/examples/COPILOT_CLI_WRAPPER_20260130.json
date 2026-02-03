@@ -1,0 +1,40 @@
+{
+  "task_id": "COPILOT_CLI_WRAPPER_20260130",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "copilot-cli-wrapper",
+    "version": "v2",
+    "sha256": "60c6da31872702c2d21a789c4691b9abc4cde13b329be0cb0caa83024443b50e",
+    "path": "prompts/dev/copilot-cli-wrapper@v2.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "tools/copilot/",
+      "docs/dev/copilot-cli.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/dev/copilot-cli-wrapper@v2.md",
+      "prompts/registry.yaml",
+      "agents/examples/COPILOT_CLI_WRAPPER_20260130.json"
+    ],
+    "domains": ["developer-experience", "governance", "tooling", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["artifacts/copilot/*.md (when wrapper is executed)", "docs/dev/copilot-cli.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Wrapper exposes lane flag and transcript directory overrides.",
+    "Documentation reflects new override options.",
+    "Roadmap status file updated with revision note."
+  ],
+  "stop_conditions": [
+    "Prompt registry or task spec requirements cannot be met.",
+    "Copilot CLI flags required by governance are unavailable.",
+    "Sandbox or policy violation is detected."
+  ]
+}
