@@ -1,14 +1,53 @@
 {
-
-  "last_updated": "2026-02-03T00:00:00Z",
-  "revision_note": "Extended CPG innovation summary with 23rd-order imputed intention lattice",
- origin/main
+  "last_updated": "2026-02-08T00:00:00Z",
   "initiatives": [
+    {
+      "id": "adenhq-hive-subsumption-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "sera-cli-proxy",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
+    },
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags."
+    },
+    {
+      "id": "promptspec-foundation-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+    },
+    {
+      "id": "nds-v0-1-scaffold",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold Narrative Dominance Suite standards, security handling, and module entrypoint."
+    },
+    {
+      "id": "cw-ruua-isrhamas-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
+    },
+    {
+      "id": "narrative-ops-governed-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+    },
+    {
+      "id": "ru-ua-cogwar-lab",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -26,7 +65,13 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+    },
+    {
+      "id": "spec-driven-development-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
     }
   ]
 }
