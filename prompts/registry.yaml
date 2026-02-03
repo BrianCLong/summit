@@ -400,6 +400,7 @@ prompts:
     scope:
       paths:
         - docs/runbooks/
+        - docs/roadmap/
         - docs/roadmap/STATUS.json
         - agents/examples/
         - prompts/docs/runbooks-update@v1.md
