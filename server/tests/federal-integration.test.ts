@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { DualNotaryService } from '../src/federal/dual-notary';
-import { slsa3Verifier } from '../src/federal/slsa3-verifier';
-import { HSMEnforcement } from '../src/federal/hsm-enforcement';
-import { FederalAuditLogger } from '../src/federal/audit-logger';
+import { DualNotaryService } from '../src/federal/dual-notary.js';
+import { slsa3Verifier } from '../src/federal/slsa3-verifier.js';
+import { HSMEnforcement } from '../src/federal/hsm-enforcement.js';
+import { FederalAuditLogger } from '../src/federal/audit-logger.js';
 import fs from 'fs/promises';
 import crypto from 'crypto';
 

@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-INGEST-001",
+  "item": "flatten-structured-vector-search",
+  "summary": "Flattener unit fixtures and determinism verification.",
+  "artifacts": ["summit/ingest/flatten.py", "summit/ingest/flatten_policy.py"]
+}

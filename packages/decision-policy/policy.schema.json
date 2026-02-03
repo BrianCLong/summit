@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "risk_tolerance": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "extreme"]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "condition": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "max_cost": {
+              "type": "number"
+          }
+        },
+        "required": ["condition", "action"]
+      }
+    }
+  },
+  "required": ["version", "name", "risk_tolerance", "rules"]
+}

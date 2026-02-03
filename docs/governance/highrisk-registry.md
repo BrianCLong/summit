@@ -14,3 +14,4 @@ This registry defines the allowed and disallowed operational categories for the 
 | `foresight`                  | Medium (Yellow)     | **CONDITIONAL** | Scenario planning, future forecasting. Requires human oversight. |
 | `influence_operations`       | High (Red)          | **DENIED**      | Active manipulation of public opinion or social engineering.     |
 | `authoritarian_surveillance` | Critical (Hard Red) | **DENIED**      | Mass surveillance, privacy violation, oppression tools.          |
+| `ai_daas_amplification`      | High (Red)          | **DETECT**      | Use of AI to generate high-velocity, low-variance content.       |

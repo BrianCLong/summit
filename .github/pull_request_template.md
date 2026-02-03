@@ -1,18 +1,83 @@
-# Pull Request
+## Summary
 
-## 📝 Description
-Please include a summary of the change and which issue is fixed.
+<!-- What does this PR do? Link to Jira ticket or issue. -->
 
-## 🔗 Linked Issues
-*   Fixes #
-*   Related to #
+## Risk & Surface (Required)
 
-## 🧪 Testing
-- [ ] Unit tests passed
-- [ ] Integration tests passed
-- [ ] Verified in Dev environment
+<!-- Select the appropriate risk level and surface area. -->
 
-## 🛡️ Governance
-- [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
-- [ ] CHANGELOG.md updated (if applicable)
-- [ ] No secrets or sensitive data included
+**Risk Level** (Select one):
+
+- [ ] `risk:low` (Docs, comments, safe refactors)
+- [ ] `risk:medium` (Feature flags, backward-compatible changes)
+- [ ] `risk:high` (Database migrations, auth changes, critical path)
+- [ ] `risk:release-blocking` (Critical fixes only)
+
+**Surface Area** (Select all that apply):
+
+- [ ] `area:client`
+- [ ] `area:server`
+- [ ] `area:docs`
+- [ ] `area:infra`
+- [ ] `area:ci`
+- [ ] `area:policy`
+
+## Assumption Ledger
+
+<!-- State your assumptions, ambiguities, tradeoffs, and stop conditions. -->
+
+- **Assumptions**:
+- **Ambiguities**:
+- **Tradeoffs**:
+- **Stop Condition**:
+
+## Evidence Bundle
+
+<!-- Attach evidence that your change works and is safe. See docs/evidence-bundle-spec.md -->
+
+- [ ] **Tests**: New or updated tests passing?
+- [ ] **Screenshots**: Attached for UI changes?
+- [ ] **Evidence Generated**: Bundle attached or linked?
+- [ ] **Prompt Hash**: `prompts/registry.yaml` updated (if prompts changed)?
+
+## Security Impact
+
+- [ ] **Security Impact**: Does this change touch auth, PII, or crypto?
+  - If YES, link to [Security Triage/Backlog](docs/SECURITY_PHASE1_STARTER_PACK_BACKLOG.md).
+
+## Green CI Contract Checklist
+
+<!-- Must be checked before merge. See docs/governance/GREEN_CI_CONTRACT.md -->
+
+- [ ] **Lint**: Ran `pnpm lint` locally.
+- [ ] **Tests**: Ran `pnpm test:unit` locally.
+- [ ] **Determinism**: No leaked singletons or open handles.
+- [ ] **Evidence**: Added at least one test case or verification step.
+
+## CI & Merge Train Rules
+
+<!-- See docs/runbooks/CI_RELEASE_GATE_RUNBOOK.md and docs/release/DAILY_DASHBOARD.md -->
+
+**If CI is Blocked:**
+
+- [ ] Docs/Metadata PRs may proceed.
+- [ ] Behavior changes must wait for green CI.
+- [ ] Do not bypass gates without written approval from Release Captain.
+
+## Verification
+
+<!-- How did you verify this change? -->
+
+- [ ] Automated Test
+- [ ] Manual Verification
+- [ ] Snapshot / Screenshot
+
+<!-- AGENT-METADATA:START -->
+
+{
+"promptId": "",
+"taskId": "",
+"tags": []
+}
+
+<!-- AGENT-METADATA:END -->

@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { GraphOptimizer } from '../GraphOptimizer';
-import { OptimizationContext } from '../types';
-import { getRedisClient } from '../../../db/redis';
+import { GraphOptimizer } from '../GraphOptimizer.js';
+import { OptimizationContext } from '../types.js';
+import { getRedisClient } from '../../../db/redis.js';
 
 // Mock dependencies
 jest.mock('../../../db/redis', () => ({

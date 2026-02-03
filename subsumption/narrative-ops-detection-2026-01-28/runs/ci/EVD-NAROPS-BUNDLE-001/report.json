@@ -1,0 +1,22 @@
+{
+  "claims": [
+    {
+      "backing": "ITEM:METHOD-04",
+      "claim_id": "ITEM:METHOD-04"
+    },
+    {
+      "backing": "ITEM:METHOD-05",
+      "claim_id": "ITEM:METHOD-05"
+    }
+  ],
+  "decisions": [
+    "Foundation bundle verified (manifest/schemas/index/docs/fixtures).",
+    "Innovation analyzer remains feature-flag OFF by default."
+  ],
+  "evidence_id": "EVD-NAROPS-BUNDLE-001",
+  "generated_by": "scripts/ci/verify_subsumption_bundle.mjs",
+  "item_slug": "narrative-ops-detection-2026-01-28",
+  "notes": [
+    "verifier_ok"
+  ]
+}

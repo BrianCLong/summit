@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "categories": {
+    "direct_identifiers": ["name", "email", "phone", "ssn", "passport"],
+    "device_identifiers": ["ip", "mac", "device_id", "cookie", "session"],
+    "location_signals": ["gps", "geo", "address", "timezone"],
+    "credentials": ["token", "api_key", "password", "secret"],
+    "content": ["free_text", "file_path", "message_body"]
+  }
+}

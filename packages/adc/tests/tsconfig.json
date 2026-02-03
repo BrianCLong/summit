@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "baseUrl": "..",
+    "paths": {
+      "@intelgraph/afl-store": ["../afl-store/dist/index"]
+    }
+  },
+  "include": ["*.ts", "*.spec.ts"]
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClarificationTurn",
+  "type": "object",
+  "required": ["turn_id", "ui_spec", "response"],
+  "properties": {
+    "turn_id": { "type": "string" },
+    "ambiguity_id": { "type": "string" },
+    "ui_spec": {
+      "type": "object",
+      "required": ["kind", "prompt"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["confirm", "choice", "value", "asset-upload"]
+        },
+        "prompt": { "type": "string" },
+        "options": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": ["answer"],
+      "properties": {
+        "answer": { "type": "string" },
+        "selected_option": { "type": "string" },
+        "asset_ref": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
