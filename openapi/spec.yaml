@@ -557,6 +557,221 @@ components:
           type: string
           format: date-time
 
+    FcrPrivacyBudgetRequest:
+      type: object
+      required:
+        - tenant_id
+        - epsilon
+        - delta
+      properties:
+        tenant_id:
+          type: string
+        epsilon:
+          type: number
+        delta:
+          type: number
+
+    FcrSignal:
+      type: object
+      required:
+        - entity_id
+        - tenant_id
+        - observed_at
+        - signal_type
+        - confidence_local
+        - privacy_budget_cost
+        - version
+      properties:
+        entity_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        observed_at:
+          type: string
+          format: date-time
+        signal_type:
+          type: string
+          enum: [claim, media, url, account, coordination_feature]
+        narrative_claim_hash:
+          type: string
+        media_hashes:
+          type: object
+          properties:
+            phash:
+              type: string
+            ahash:
+              type: string
+            dhash:
+              type: string
+            sha256:
+              type: string
+        url:
+          type: object
+          properties:
+            normalized:
+              type: string
+            registered_domain:
+              type: string
+            public_archive:
+              type: string
+              format: uri
+        account_handle_hash:
+          type: string
+        channel_metadata:
+          type: object
+          properties:
+            platform:
+              type: string
+            region:
+              type: string
+            language:
+              type: string
+            reach:
+              type: number
+        coordination_features:
+          type: object
+          properties:
+            burstiness:
+              type: number
+            repost_similarity:
+              type: number
+            synchronized_windows:
+              type: integer
+            shared_hashtag_set:
+              type: integer
+        provenance_assertions:
+          type: object
+          properties:
+            c2pa_status:
+              type: string
+              enum: [pass, fail, error, unknown]
+            signer:
+              type: string
+            assertion_hash:
+              type: string
+            signature_chain:
+              type: string
+        confidence_local:
+          type: number
+        privacy_budget_cost:
+          type: object
+          required:
+            - epsilon
+            - delta
+          properties:
+            epsilon:
+              type: number
+            delta:
+              type: number
+        labels:
+          type: array
+          items:
+            type: string
+        version:
+          type: string
+          enum: [v1]
+
+    FcrCluster:
+      type: object
+      required:
+        - cluster_id
+        - centroid_hash
+        - signal_count
+        - tenant_count_bucket
+        - confidence
+        - first_observed_at
+        - last_observed_at
+      properties:
+        cluster_id:
+          type: string
+          format: uuid
+        centroid_hash:
+          type: string
+        signal_count:
+          type: integer
+        tenant_count_bucket:
+          type: string
+          enum: [1-2, 3-5, 6-10, 11+]
+        confidence:
+          type: number
+        first_observed_at:
+          type: string
+          format: date-time
+        last_observed_at:
+          type: string
+          format: date-time
+        public_artifacts:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - value
+            properties:
+              type:
+                type: string
+                enum: [url, media_hash]
+              value:
+                type: string
+        provenance_summary:
+          type: object
+          properties:
+            c2pa_pass_rate:
+              type: number
+            signer_set:
+              type: array
+              items:
+                type: string
+
+    FcrAlert:
+      type: object
+      required:
+        - alert_id
+        - cluster_id
+        - severity
+        - summary
+        - generated_at
+      properties:
+        alert_id:
+          type: string
+          format: uuid
+        cluster_id:
+          type: string
+          format: uuid
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        summary:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        response_pack:
+          type: object
+          properties:
+            playbook_id:
+              type: string
+            recommended_actions:
+              type: array
+              items:
+                type: string
+            diffusion_summary:
+              type: string
+
+    FcrIngestRequest:
+      type: object
+      required:
+        - tenant_id
+        - signals
+      properties:
+        tenant_id:
+          type: string
+        signals:
+          type: array
+          items:
+            $ref: '#/components/schemas/FcrSignal'
+
 paths:
   # Health & Monitoring
   /health:
@@ -606,6 +821,114 @@ paths:
                         type: number
                       total:
                         type: number
+
+  /api/fcr/budget:
+    post:
+      summary: Configure FCR privacy budget
+      description: Sets the differential privacy budget for a tenant.
+      operationId: setFcrBudget
+      tags:
+        - FederatedCampaignRadar
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FcrPrivacyBudgetRequest'
+      responses:
+        '200':
+          description: Budget configured
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/fcr/ingest:
+    post:
+      summary: Ingest FCR signals
+      description: Validates and ingests normalized FCR signals.
+      operationId: ingestFcrSignals
+      tags:
+        - FederatedCampaignRadar
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FcrIngestRequest'
+      responses:
+        '200':
+          description: Signals ingested
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  signals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FcrSignal'
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/fcr/run:
+    post:
+      summary: Run FCR pipeline
+      description: Ingests signals and returns clusters and alerts.
+      operationId: runFcrPipeline
+      tags:
+        - FederatedCampaignRadar
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FcrIngestRequest'
+      responses:
+        '200':
+          description: Pipeline results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  clusters:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FcrCluster'
+                  alerts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FcrAlert'
+        '422':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # Cases API
   /api/cases:
