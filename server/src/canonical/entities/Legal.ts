@@ -3,7 +3,7 @@
  * Canonical Entities: Legal & Authority
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface License extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'License';

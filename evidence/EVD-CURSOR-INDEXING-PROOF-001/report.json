@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-CURSOR-INDEXING-PROOF-001",
+  "summary": "unproven retrieval denied verified",
+  "artifacts": [
+    "summit/indexing/proofs/proofs.ts",
+    "summit/indexing/proofs/proofs.test.ts"
+  ]
+}

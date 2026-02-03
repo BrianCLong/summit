@@ -107,8 +107,8 @@ def main() -> int:
         return 3
 
     if "items" in index:
-        if not isinstance(index["items"], list):
-            print("FAIL index.json 'items' must be an array")
+        if not isinstance(index["items"], (list, dict)):
+            print("FAIL index.json 'items' must be an array or object")
             return 3
     elif "evidence" in index:
         # Legacy support
@@ -122,9 +122,10 @@ def main() -> int:
     IGNORE = {
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json"
+        "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
+        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
     }
-    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
+    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out"}
 
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):

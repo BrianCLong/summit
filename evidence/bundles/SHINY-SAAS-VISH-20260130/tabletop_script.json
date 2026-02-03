@@ -1,0 +1,30 @@
+{
+  "scenario": "ShinyHunters Vishing Campaign",
+  "injects": [
+    {
+      "time": "T+0",
+      "description": "Helpdesk receives a call from 'John Doe' claiming to be from IT Security. He says there is a data breach and needs to 'synchronize' the user's MFA device.",
+      "goal": "Test helpdesk response to impersonation."
+    },
+    {
+      "time": "T+15m",
+      "description": "User 'Alice' reports receiving a text message with an MFA code that she didn't request, followed by a call from 'IT' asking for the code.",
+      "goal": "Test user awareness and reporting flow."
+    },
+    {
+      "time": "T+30m",
+      "description": "SIEM alerts on 'SHINY-001': New MFA device enrolled for Alice, followed by OAuth consent for 'M365 Audit Tool'.",
+      "goal": "Test SOC detection and containment speed."
+    },
+    {
+      "time": "T+45m",
+      "description": "Alice's account begins bulk downloading files from SharePoint via the new OAuth app.",
+      "goal": "Test automated vs manual containment actions."
+    }
+  ],
+  "expected_outcomes": [
+    "Helpdesk refuses to provide MFA code or change settings without call-back.",
+    "User Alice reports the vishing attempt immediately.",
+    "SOC revokes Alice's sessions and the malicious OAuth token within 15 minutes of the alert."
+  ]
+}

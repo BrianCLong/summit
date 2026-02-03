@@ -5,6 +5,6 @@
   "main": "src/index.ts",
   "license": "MIT",
   "dependencies": {
-    "@maestro/core": "workspace:*"
+    "@intelgraph/maestro-core": "workspace:*"
   }
 }

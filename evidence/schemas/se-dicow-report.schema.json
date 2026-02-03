@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["evidence_id", "item", "config", "summary"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-SE-DICOW-[A-Z0-9-]+$"
+    },
+    "item": {
+      "type": "object"
+    },
+    "config": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}
