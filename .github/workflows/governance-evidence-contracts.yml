@@ -1,0 +1,52 @@
+name: Governance Evidence Contracts
+
+on:
+  pull_request:
+    paths:
+      - "scripts/ci/**"
+      - ".github/workflows/**"
+      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+      - "schemas/governance/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governance-evidence:
+    name: Validate Governance Evidence
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Governance Checks
+        run: pnpm governance:check
+
+      - name: Validate Evidence Schemas
+        run: pnpm governance:evidence:schemas
+
+      - name: Golden Evidence Tests
+        run: node --test scripts/ci/__tests__/governance_evidence_contracts.test.mjs
+
+      - name: Upload Governance Evidence
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: governance-evidence
+          path: artifacts/governance/*.evidence.json
+          retention-days: 14
