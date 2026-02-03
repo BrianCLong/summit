@@ -1,34 +1,22 @@
 # summit/fimi/surge/surge_detector.py
-
 from typing import List, Dict, Any
 
-class SurgeDetector:
-    """
-    Detects surges in narrative volume or activity during specific diplomatic windows.
-    """
-
-    def __init__(self, threshold: float = 2.0):
-        self.threshold = threshold
-
-    def detect_spikes(self, time_series: List[float]) -> List[int]:
-        """
-        Simple Z-score like anomaly detection.
-        Returns indices of detected spikes.
-        """
+class FIMISurgeDetector:
+    def detect_spikes(self, time_series: List[Dict[str, Any]], threshold: float = 2.0) -> List[Dict[str, Any]]:
         if not time_series:
             return []
 
-        avg = sum(time_series) / len(time_series)
-        spikes = []
-        for i, val in enumerate(time_series):
-            if val > avg * self.threshold:
-                spikes.append(i)
-        return spikes
+        # Simple anomaly detection: compare volume to average
+        volumes = [item["volume"] for item in time_series]
+        avg_volume = sum(volumes) / len(volumes)
 
-    def check_window(self, data: List[float], window_name: str) -> Dict[str, Any]:
-        spikes = self.detect_spikes(data)
-        return {
-            "window_name": window_name,
-            "surge_detected": len(spikes) > 0,
-            "spike_indices": spikes
-        }
+        spikes = []
+        for item in time_series:
+            if item["volume"] > avg_volume * threshold:
+                spikes.append({
+                    "timestamp": item["timestamp"],
+                    "volume": item["volume"],
+                    "score": item["volume"] / avg_volume,
+                    "type": "surge"
+                })
+        return spikes

@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-# Required checks discovery (SlopGuard)
-
-The following CI gates are planned for SlopGuard. These should be mapped to real CI check names once discovered in the repo settings.
-
-1. `slopguard_policy`: Evaluates artifact against SlopGuard policy.
-2. `slopguard_citations`: Validates citations in research artifacts.
-3. `dataset_hygiene`: Ensures dataset provenance tags are present.
-
-## TODO
-- [ ] Verify branch protection rules for required check names.
-- [ ] Integrate SlopGuard CLI into the CI pipeline.
-- [ ] Rename temporary gate names to match repository standards.
-=======
 # Required Checks Todo List
 
 This file tracks the status of CI check discovery and alignment with branch protection rules.
@@ -29,6 +15,9 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
 - `lint`
 - `typecheck`
 - `build`
@@ -49,4 +38,3 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
->>>>>>> origin/main
