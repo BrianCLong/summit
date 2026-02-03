@@ -1,0 +1,20 @@
+{
+  "role": "Fractional CMO",
+  "type": "fractional",
+  "responsibilities": [
+    "Do marketing"
+  ],
+  "outcomes": [
+    {
+      "metric": "Qualified Leads",
+      "target": "50/month",
+      "due_day": 90
+    },
+    {
+      "metric": "CAC",
+      "target": "<$100",
+      "due_day": 90
+    }
+  ],
+  "timeline_days": 90
+}
