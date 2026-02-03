@@ -1,0 +1,112 @@
+
+"""
+Represents a specific piece of content (image, text, video) that can be tracked across the network.
+"""
+type NarrativeArtifact {
+  artifactId: ID!
+  type: ArtifactType!
+  contentHash: String!
+  stegoFeatures: JSON
+  createdAt: DateTime!
+
+  "Records that contain this artifact"
+  appearedIn: [Record!]!
+
+  "Similar artifacts (e.g., variations of the same meme)"
+  similarArtifacts(minScore: Float = 0.8): [NarrativeArtifact!]!
+
+  "Coordination patterns that utilized this artifact"
+  utilizedInPatterns: [CoordinationPattern!]!
+}
+
+enum ArtifactType {
+  IMAGE
+  TEXT_SNIPPET
+  VIDEO_CLIP
+  AUDIO_CLIP
+}
+
+"""
+Represents a detected pattern of coordinated behavior between multiple entities.
+"""
+type CoordinationPattern {
+  patternId: ID!
+  type: CoordinationType!
+  confidence: Float!
+  detectedAt: DateTime!
+
+  "Entities suspected of participating in this coordination"
+  participants: [Entity!]!
+
+  "Artifacts used in this coordination"
+  utilizedArtifacts: [NarrativeArtifact!]!
+}
+
+enum CoordinationType {
+  TIME_SYNC
+  CONTENT_REUSE
+  CROSS_PLATFORM_CASCADE
+  LINK_SHARING_RING
+}
+
+"""
+Represents a stage in the narrative laundering lifecycle.
+"""
+type LaunderingStage {
+  stageId: ID!
+  name: String!
+  description: String
+
+  "The next stage in the pipeline"
+  nextStage: LaunderingStage
+}
+
+type LaunderingPath {
+  pathId: ID!
+  stages: [LaunderingStage!]!
+  entities: [Entity!]!
+  artifacts: [NarrativeArtifact!]!
+  confidence: Float!
+}
+
+extend type Query {
+  """
+  Find paths that resemble narrative laundering from a suspect entity to a target entity.
+  """
+  findLaunderingPaths(
+    sourceEntityId: ID!
+    targetEntityId: ID!
+    maxHops: Int = 5
+  ): [LaunderingPath]
+
+  """
+  Detect coordination patterns within a given time window.
+  """
+  detectCoordination(
+    startTime: DateTime!
+    endTime: DateTime!
+    minConfidence: Float = 0.8
+    filterByType: CoordinationType
+  ): [CoordinationPattern]
+
+  """
+  Find potential narrative artifacts based on a content hash or fuzzy match.
+  """
+  findArtifacts(
+    contentHash: String
+    fuzzyText: String
+  ): [NarrativeArtifact]
+}
+
+extend type Entity {
+  "Coordination patterns this entity is suspected of participating in"
+  suspectedCoordination: [CoordinationPattern!]!
+}
+
+extend type Record {
+  "Artifacts contained in this record"
+  artifacts: [NarrativeArtifact!]!
+
+  "The laundering stage this record is associated with, if any"
+  launderingStage: LaunderingStage
+}

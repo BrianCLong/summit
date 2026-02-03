@@ -1,33 +1,33 @@
-export { PaymentProcessor } from './PaymentProcessor';
+export { PaymentProcessor } from './PaymentProcessor.js';
 export type {
   PaymentIntent,
   PaymentMethod,
   PaymentProcessorConfig,
   RefundRequest,
-} from './PaymentProcessor';
+} from './PaymentProcessor.js';
 
-export { SubscriptionManager } from './SubscriptionManager';
+export { SubscriptionManager } from './SubscriptionManager.js';
 export type {
   BillingInterval,
   Plan,
   Subscription,
   SubscriptionStatus,
   UsageRecord,
-} from './SubscriptionManager';
+} from './SubscriptionManager.js';
 
-export { PaymentReconciliation } from './PaymentReconciliation';
+export { PaymentReconciliation } from './PaymentReconciliation.js';
 export type {
   Discrepancy,
   ReconciliationReport,
   Transaction,
-} from './PaymentReconciliation';
+} from './PaymentReconciliation.js';
 
-export { InvoiceService } from './InvoiceService';
+export { InvoiceService } from './InvoiceService.js';
 export type {
   Invoice,
   InvoiceLineItem,
   InvoiceStatus,
   TaxConfig,
-} from './InvoiceService';
+} from './InvoiceService.js';
 
-export { verifyStripeSig, handleWebhook } from './StripeWebhook';
+export { verifyStripeSig, handleWebhook } from './StripeWebhook.js';

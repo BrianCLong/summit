@@ -1,7 +1,7 @@
 // server/src/mnemosyne/MnemosyneService.ts
 
 import { randomUUID } from 'crypto';
-import { FalseMemoryPayload, MemoryFabricationJob, BeliefFormationReport } from './mnemosyne.types';
+import { FalseMemoryPayload, MemoryFabricationJob, BeliefFormationReport } from './mnemosyne.types.js';
 
 /**
  * Service for managing the (simulated) fabrication and implantation of false memories.

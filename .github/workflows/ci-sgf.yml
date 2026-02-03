@@ -1,0 +1,41 @@
+name: SGF CI
+
+on:
+  pull_request:
+    paths:
+      - 'packages/sgf-*/**'
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/sgf-*/**'
+
+concurrency:
+  group: sgf-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  test-sgf:
+    name: Test SGF
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build SGF
+        run: |
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
+          pnpm --filter "@summit/sgf-*" build
+      - name: Test SGF
+        run: pnpm --filter "@summit/sgf-*" test

@@ -1,9 +1,16 @@
 
-import { OSINTProfile, SocialMediaProfile, CorporateRecord, PublicRecord } from './types';
-import { OSINTSourceConnector, OSINTQuery } from './connectors/types';
-import { SocialMediaConnector } from './connectors/SocialMediaConnector';
-import { CorporateDBConnector } from './connectors/CorporateDBConnector';
-import { PublicRecordConnector } from './connectors/PublicRecordConnector';
+import { OSINTProfile, OSINTEnrichmentResult, SocialMediaProfile, CorporateRecord, PublicRecord } from './types.js';
+import { OSINTSourceConnector, OSINTQuery } from './connectors/types.js';
+import { SocialMediaConnector } from './connectors/SocialMediaConnector.js';
+import { CorporateDBConnector } from './connectors/CorporateDBConnector.js';
+import { PublicRecordConnector } from './connectors/PublicRecordConnector.js';
+
+/**
+ * Extended enrichment result that includes raw results for claim extraction.
+ */
+export interface EnrichmentOutput extends Partial<OSINTProfile> {
+  results: OSINTEnrichmentResult[];
+}
 
 export class OSINTEnrichmentService {
   private connectors: OSINTSourceConnector[];
@@ -16,7 +23,7 @@ export class OSINTEnrichmentService {
     ];
   }
 
-  async enrich(query: OSINTQuery): Promise<Partial<OSINTProfile>> {
+  async enrich(query: OSINTQuery): Promise<EnrichmentOutput> {
     const promises = this.connectors.map(c => c.search(query));
     const resultsSettled = await Promise.allSettled(promises);
 
@@ -57,6 +64,9 @@ export class OSINTEnrichmentService {
     const sourceCount = new Set(results.map(r => r.source)).size;
     profile.confidenceScore = Math.min(0.5 + (sourceCount * 0.1), 1.0); // Base 0.5 + 0.1 per unique source
 
-    return profile;
+    return {
+      ...profile,
+      results, // Include raw results for claim extraction (Turn #5)
+    };
   }
 }

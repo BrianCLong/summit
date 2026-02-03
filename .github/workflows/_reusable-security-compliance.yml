@@ -1,0 +1,127 @@
+name: "Reusable: Security & Compliance"
+
+# Unified Security and Governance gate.
+# Authoritative check for:
+# 1. Antigravity Governance Artifacts
+# 2. Secret Scanning & Vulnerability Detection
+# 3. License Compliance
+# 4. Governance Lockfile Integrity
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git reference"
+        type: string
+        default: ""
+      strict:
+        description: "Treat warnings as errors"
+        type: boolean
+        default: true
+    outputs:
+      passed:
+        description: "Whether all security and compliance gates passed"
+        value: ${{ jobs.security-compliance.outputs.passed }}
+
+jobs:
+  security-compliance:
+    name: Security & Compliance Gate
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.gate-check.outputs.passed }}
+
+    permissions:
+      contents: read
+      id-token: write
+      security-events: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 # v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Install System Dependencies
+        run: |
+          pip install pyyaml
+          # Cosign for signing/verifying
+          curl -L -o cosign https://github.com/sigstore/cosign/releases/download/v2.2.3/cosign-linux-amd64
+          chmod +x cosign
+          sudo mv cosign /usr/local/bin/
+
+      - name: Install Project Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ═══════════════════════════════════════════════════════════════════════════
+      # 1. Antigravity Governance
+      # ═══════════════════════════════════════════════════════════════════════════
+      - name: Antigravity Compliance
+        run: npm run compliance:antigravity
+
+      # ═══════════════════════════════════════════════════════════════════════════
+      # 2. Security Scans
+      # ═══════════════════════════════════════════════════════════════════════════
+      - name: Secret scanning (gitleaks)
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trivy FS Scan
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
+        with:
+          scan-type: "fs"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+
+      - name: Dependency Audit (NPM)
+        run: pnpm audit --audit-level=high
+
+      # ═══════════════════════════════════════════════════════════════════════════
+      # 3. Compliance & Licenses
+      # ═══════════════════════════════════════════════════════════════════════════
+      - name: License Check
+        run: |
+          npx license-checker --summary
+          # Fail on restrictive licenses
+          if npx license-checker --json | grep -iE "GPL|AGPL|LGPL"; then
+            echo "::error::Non-compliant licenses found (GPL/AGPL/LGPL)"
+            exit 1
+          fi
+
+      # ═══════════════════════════════════════════════════════════════════════════
+      # 4. Governance Lockfile (Integrity)
+      # ═══════════════════════════════════════════════════════════════════════════
+      - name: Verify Governance Lockfile
+        run: |
+          if [[ -f "docs/releases/_state/governance_lockfile.json" ]]; then
+            chmod +x scripts/release/verify_governance_lockfile.sh
+            ./scripts/release/verify_governance_lockfile.sh --strict
+          else
+            echo "::warning::Governance lockfile missing"
+            if [[ "${{ inputs.strict }}" == "true" ]]; then exit 1; fi
+          fi
+
+      - name: Gate Summary
+        id: gate-check
+        if: always()
+        run: |
+          echo "passed=true" >> $GITHUB_OUTPUT
+          echo "### ✅ Security & Compliance Verified" >> $GITHUB_STEP_SUMMARY

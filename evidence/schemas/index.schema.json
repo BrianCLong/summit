@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["evidence"],
+  "properties": {
+    "evidence": {
+      "type": "object",
+      "patternProperties": {
+        "^EVD-[A-Z0-9_-]+$": {
+          "type": "object",
+          "properties": {
+            "report": { "type": "string" },
+            "metrics": { "type": "string" },
+            "stamp": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

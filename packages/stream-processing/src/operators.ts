@@ -1,4 +1,4 @@
-import { StreamOperator } from './types';
+import { StreamOperator } from './types.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'stream-operators' });

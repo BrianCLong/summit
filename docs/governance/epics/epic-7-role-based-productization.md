@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 7 — Role-Based Productization (enterprise controls without bespoke code)
 
 1.  Define role templates (admin, auditor, operator, viewer, support) with least privilege.

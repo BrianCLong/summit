@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-VERA-TEXT-001",
+  "generated_at": "2025-10-31T23:59:59Z",
+  "git_commit": "0000000000000000000000000000000000000000",
+  "tool_versions": {
+    "summit_verify": "1.0.0"
+  }
+}

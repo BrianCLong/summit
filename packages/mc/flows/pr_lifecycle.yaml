@@ -1,0 +1,30 @@
+version: 1
+name: pr_lifecycle
+description: >
+  Full lifecycle: create PR, review, and (optionally) merge.
+
+steps:
+  - id: create_pr
+    agent: executor
+    inputs:
+      flow_name: "create_pr"
+      flow_inputs:
+        diff: "{{input.diff}}"
+        metadata: "{{input.metadata}}"
+
+  - id: review
+    agent: reviewer
+    inputs:
+      pr_diff: "{{input.diff}}"
+      pr_description: "{{input.metadata.description}}"
+    outputs:
+      verdict: review_verdict
+      review_report: review_report
+
+  - id: merge_if_approved
+    agent: executor
+    inputs:
+      flow_name: "merge_if_approved"
+      flow_inputs:
+        verdict: "{{review_verdict}}"
+        pr_id: "{{input.pr_id}}"

@@ -1,5 +1,0 @@
-Blast radius for api
-Degraded services (283): admin (hops=1), agent-gateway (hops=1), agents (hops=1), ai-marketplace (hops=1), ai-sandbox (hops=1), ai-security-scanner (hops=1), ai-service-platform (hops=1), ai-worker (hops=1), alert-engine (hops=1), analytics-service (hops=1), anomaly (hops=1), api-gateway (hops=1), attest (hops=1), audio-service (hops=1), audit (hops=1), audit_svc (hops=1), audit-blackbox-service (hops=1), authenticity-service (hops=1), authz-gateway (hops=1), autonomy (hops=1)
-…and 263 more
-Cascade risk score: 462.00
-Visualization: docs/architecture/blast-radius.png

@@ -1,0 +1,31 @@
+name: Experiment Aware Release
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  evaluate-learning-value:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # In a real scenario, this would install dependencies and run a script using the new package
+      # Here we simulate the check
+      - name: Calculate Learning Value
+        run: |
+          echo "Calculating Learning Value for Release Candidates..."
+          # Mock output simulating usage of @intelgraph/experiment-intent
+          echo "Experiment A (Feature Flag #123): Value Score 8.5"
+          echo "Experiment B (Cache Strategy): Value Score 3.2"
+
+          # Logic to decide if we should block or proceed based on learning
+          echo "LEARNING_VALUE=8.5" >> $GITHUB_ENV
+
+      - name: Gate Decision
+        run: |
+          if (( $(echo "$LEARNING_VALUE > 5.0" | bc -l) )); then
+            echo "High learning value detected. Proceeding with experimental release."
+          else
+            echo "Low learning value. Suggest standard rollout."
+          fi

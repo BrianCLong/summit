@@ -1,0 +1,2 @@
+{"id": "arithmetic-001", "task": "countdown", "input": "Reach 100 using [2, 5, 10, 20]", "expected_result": "10 * 10 = 100 or 20 * 5 = 100"}
+{"id": "arithmetic-002", "task": "countdown", "input": "Reach 24 using [4, 4, 4, 4]", "expected_result": "(4 + 4) * 4 - 4 = 28 - 4 = 24? No. 4*4 + 4 + 4 = 24"}

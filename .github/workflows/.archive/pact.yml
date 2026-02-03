@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '20' , cache: 'pnpm' }
       - run: npm ci || true
       - run: npx jest tests/contract/pact/policyPack.pact.test.ts || true
       - uses: actions/upload-artifact@v4

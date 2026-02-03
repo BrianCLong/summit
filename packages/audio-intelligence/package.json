@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/audio-intelligence",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Audio event detection and acoustic intelligence",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },

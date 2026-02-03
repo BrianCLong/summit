@@ -1,0 +1,77 @@
+name: GA Evidence Collection
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "server/**"
+      - "apps/**"
+      - "packages/**"
+      - "scripts/**"
+      - "docs/release/**"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (default: 5.3.1)"
+        required: false
+        default: "5.3.1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  ga-evidence:
+    name: "📦 Collect GA Evidence"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run GA Verification
+        run: pnpm ga:verify
+        env:
+          NODE_ENV: test
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: v0.61.0
+
+      - name: Generate Evidence Bundle
+        run: pnpm ga:evidence
+        env:
+          VERSION: ${{ github.event.inputs.version || '5.3.1' }}
+
+      - name: Upload Evidence Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-evidence-bundle-${{ github.event.inputs.version || '5.3.1' }}
+          path: dist/evidence/ga-v*.zip
+          retention-days: 90
+
+      - name: Evidence Summary
+        run: |
+          echo "### ✅ GA Evidence Collected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | `${{ github.event.inputs.version || '5.3.1' }}` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | `${{ github.sha }}` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | `ga-evidence-bundle` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The evidence bundle contains SBOMs, test proofs, and OPA policy evaluations required for GA promotion." >> $GITHUB_STEP_SUMMARY
