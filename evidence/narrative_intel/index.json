@@ -1,0 +1,10 @@
+{
+  "map": {
+    "EVD-NARDOM-FOUNDATION-001": [
+      "evidence/narrative_intel/report.json",
+      "evidence/narrative_intel/metrics.json",
+      "evidence/narrative_intel/stamp.json",
+      "evidence/narrative_intel/index.json"
+    ]
+  }
+}
