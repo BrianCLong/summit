@@ -1,0 +1,25 @@
+{
+  "artifacts": [],
+  "backend": "solo_os",
+  "environment": {
+    "engine": "revenue_engine"
+  },
+  "evidence_id": "EVD-ENTRE-502318-ENG-REV-test_rev_mws",
+  "summary": {
+    "leads": [
+      {
+        "current_state": "engaged",
+        "follow_up_draft": "Hi Alice, thanks for your interest! Let's chat about your needs.",
+        "name": "Alice",
+        "previous_state": "new"
+      },
+      {
+        "current_state": "qualified",
+        "follow_up_draft": "Hi Bob, it looks like we're a great fit. I've prepared some details for you.",
+        "name": "Bob",
+        "previous_state": "engaged"
+      }
+    ],
+    "status": "Revenue follow-up drafts generated"
+  }
+}
