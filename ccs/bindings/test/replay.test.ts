@@ -71,7 +71,7 @@ function buildCertificate(
     buckets.set(stratum, bucket);
   }
 
-  for (const [stratum, bucket] of buckets.entries()) {
+  for (const [_, bucket] of buckets.entries()) {
     bucket.sort((a, b) => {
       if (a.randomness === b.randomness) {
         return a.id.localeCompare(b.id);
@@ -153,9 +153,9 @@ tampered.cohort[0] = { ...tampered.cohort[0], id: 'bad' };
 let failed = false;
 try {
   verifyCertificate(participants, tampered);
-} catch (err) {
+} catch (_err) {
   failed = true;
 }
 
 assert.ok(failed, 'tampering should fail verification');
-console.log('TypeScript replay verification passed');
+// TypeScript replay verification passed

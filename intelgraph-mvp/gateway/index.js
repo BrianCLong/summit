@@ -1,6 +1,11 @@
-const { ApolloServer, gql } = require('apollo-server');
-const fs = require('fs');
-const path = require('path');
+import { ApolloServer, gql } from 'apollo-server';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const typeDefs = gql(fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf8'));
 
@@ -22,7 +27,7 @@ const resolvers = {
     neighbors: () => [],
   },
   Entity: {
-    __resolveType(obj, context, info){
+    __resolveType(obj, _context, _info){
       if(obj.name){
         return 'Person';
       }
@@ -34,5 +39,5 @@ const resolvers = {
 const server = new ApolloServer({ typeDefs, resolvers });
 
 server.listen({ port: 4000 }).then(({ url }) => {
-  console.log(`🚀 Gateway ready at ${url}`);
+  process.stdout.write(`🚀 Gateway ready at ${url}\n`);
 });

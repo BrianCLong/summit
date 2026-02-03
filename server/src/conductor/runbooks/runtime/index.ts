@@ -27,8 +27,8 @@ export {
   RunbookRuntimeEngine,
   DefaultStepExecutorRegistry,
   InMemoryRunbookDefinitionRepository,
-  RuntimeEngineConfig,
 } from './engine.js';
+export type { RuntimeEngineConfig } from './engine.js';
 
 // Executors
 export * from './executors/index.js';

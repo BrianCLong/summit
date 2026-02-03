@@ -2,8 +2,18 @@
 import { Pool, QueryResult } from 'pg';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, register } from 'prom-client';
+import { RedisService } from '../cache/redis.js';
 
 const tracer = trace.getTracer('maestro-postgres', '24.3.0');
+
+// Reviver to restore Date objects from JSON cache
+const jsonDateReviver = (key: string, value: any) => {
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/.test(value)) {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) return date;
+    }
+    return value;
+};
 
 const toInt = (value: string | undefined, fallback: number): number => {
   const parsed = Number.parseInt(value || '', 10);
@@ -18,21 +28,37 @@ const maxUses = toInt(process.env.PG_POOL_MAX_USES, 5000);
 const statementTimeoutMs = toInt(process.env.PG_STATEMENT_TIMEOUT_MS, 0);
 
 // Region-aware database metrics
+function createCounter(config: any) {
+    try {
+        return new Counter(config);
+    } catch (e) {
+        return { inc: () => {}, labels: () => ({ inc: () => {} }) } as any;
+    }
+}
+
+function createHistogram(config: any) {
+    try {
+        return new Histogram(config);
+    } catch (e) {
+        return { observe: () => {}, labels: () => ({ observe: () => {} }) } as any;
+    }
+}
+
 const dbConnectionsActive =
-  (register.getSingleMetric(
+  (register?.getSingleMetric(
     'db_connections_active_total',
   ) as Counter<string>) ||
-  new Counter({
+  createCounter({
     name: 'db_connections_active_total',
     help: 'Total active database connections',
     labelNames: ['region', 'pool_type', 'tenant_id'],
   });
 
 const dbQueryDuration =
-  (register.getSingleMetric(
+  (register?.getSingleMetric(
     'db_query_duration_seconds',
   ) as Histogram<string>) ||
-  new Histogram({
+  createHistogram({
     name: 'db_query_duration_seconds',
     help: 'Database query duration',
     labelNames: ['region', 'pool_type', 'operation', 'tenant_id'],
@@ -40,10 +66,10 @@ const dbQueryDuration =
   });
 
 const dbReplicationLag =
-  (register.getSingleMetric(
+  (register?.getSingleMetric(
     'db_replication_lag_seconds',
   ) as Histogram<string>) ||
-  new Histogram({
+  createHistogram({
     name: 'db_replication_lag_seconds',
     help: 'Database replication lag in seconds',
     labelNames: ['region', 'primary_region'],
@@ -213,15 +239,38 @@ export const pg = {
   read: async (
     query: string,
     params: any[] = [],
-    options?: { region?: string; tenantId?: string },
+    options?: { region?: string; tenantId?: string; cache?: { ttl: number; key: string } },
   ) => {
-    return _executeQuery(
+    if (options?.cache) {
+        try {
+            const redis = RedisService.getInstance();
+            const cached = await redis.get(options.cache.key);
+            if (cached) {
+                return JSON.parse(cached, jsonDateReviver);
+            }
+        } catch (e) {
+            console.warn('Cache retrieval failed:', e);
+        }
+    }
+
+    const result = await _executeQuery(
       'postgres.read',
       query,
       params,
       { ...options, poolType: 'read' },
       false,
     );
+
+    if (options?.cache && result) {
+        try {
+            const redis = RedisService.getInstance();
+            await redis.set(options.cache.key, JSON.stringify(result), options.cache.ttl);
+        } catch (e) {
+            console.warn('Cache set failed:', e);
+        }
+    }
+
+    return result;
   },
 
   // Explicit write method
@@ -243,15 +292,38 @@ export const pg = {
   readMany: async (
     query: string,
     params: any[] = [],
-    options?: { region?: string; tenantId?: string },
+    options?: { region?: string; tenantId?: string; cache?: { ttl: number; key: string } },
   ) => {
-    return _executeQuery(
+    if (options?.cache) {
+        try {
+            const redis = RedisService.getInstance();
+            const cached = await redis.get(options.cache.key);
+            if (cached) {
+                return JSON.parse(cached);
+            }
+        } catch (e) {
+             console.warn('Cache retrieval failed:', e);
+        }
+    }
+
+    const result = await _executeQuery(
       'postgres.read_many',
       query,
       params,
       { ...options, poolType: 'read' },
       true,
     );
+
+    if (options?.cache && result) {
+        try {
+            const redis = RedisService.getInstance();
+            await redis.set(options.cache.key, JSON.stringify(result), options.cache.ttl);
+        } catch (e) {
+            console.warn('Cache set failed:', e);
+        }
+    }
+
+    return result;
   },
 
   many: async (

@@ -1,7 +1,8 @@
 
-import { StreamingIngestService } from '../stream';
-import { getPostgresPool } from '../../db/postgres';
-import { applyContract } from '../../policy/contracts';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { StreamingIngestService } from '../stream.js';
+import { getPostgresPool } from '../../db/postgres.js';
+import { applyContract } from '../../policy/contracts.js';
 import { Kafka } from 'kafkajs';
 
 // Define mocks as module vars for access in jest.mock

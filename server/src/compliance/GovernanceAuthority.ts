@@ -1,7 +1,7 @@
-import { DataLineageSystem } from './DataLineageSystem';
-import { RetentionPolicyEngine } from './RetentionPolicyEngine';
-import { SchemaDriftDetector } from './SchemaDriftDetector';
-import { AuditCompactor } from './AuditCompactor';
+import { DataLineageSystem } from './DataLineageSystem.js';
+import { RetentionPolicyEngine } from './RetentionPolicyEngine.js';
+import { SchemaDriftDetector } from './SchemaDriftDetector.js';
+import { AuditCompactor } from './AuditCompactor.js';
 
 /**
  * Facade for the Data Governance Authority subsystem.

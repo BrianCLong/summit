@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/rf-processor",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "RF signal processing and analysis - Training framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "@intelgraph/sigint-collector": "workspace:*",

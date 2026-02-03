@@ -1,9 +1,10 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { generateKeyPairSync } from 'crypto';
 import {
   ForensicsCustodySystem,
   InMemoryCustodyLedger,
   InMemoryForensicsRepository,
-} from '../src/cases/forensics-custody-system';
+} from '../src/cases/forensics-custody-system.js';
 
 const fixedNow = () => new Date('2025-01-01T00:00:00.000Z');
 

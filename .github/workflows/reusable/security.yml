@@ -13,19 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # v4
       - name: Generate SBOM (SPDX)
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
         with:
           path: .
           output-file: sbom.spdx.json
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: sbom-spdx
           path: sbom.spdx.json
       - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # 0.24.0
         with:
           scan-type: fs
           format: table
@@ -37,7 +37,7 @@ jobs:
   trufflehog:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
       - uses: trufflesecurity/trufflehog@v3
@@ -46,8 +46,8 @@ jobs:
   license-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pilosus/action-pip-license-checker@v2
+      - uses: actions/checkout@v4 # v4
+      - uses: pilosus/action-pip-license-checker@cc7a461bfa27b44ad187b8578c881ef5138c13fd # v2
         with: { requirements: 'requirements.txt', fail: 'strong' }
       - uses: pilosus/action-licensefinder@v2
         with: { decisions-file: 'doc/license-decisions.yml' }
@@ -55,10 +55,10 @@ jobs:
   npm-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4 # v4
+      - uses: actions/setup-node@v4 # v4
         with: { node-version: ${{ inputs.node_version }}, cache: 'pnpm' }
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with: { version: 9 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true

@@ -1,33 +1,38 @@
-
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
-import monitoringRouter from '../monitoring';
-import {
+
+// Mock functions declared before mocks
+const mockInc = jest.fn();
+const mockObserve = jest.fn();
+const mockSet = jest.fn();
+const mockMetrics = jest.fn().mockResolvedValue('mocked_metrics');
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../monitoring/metrics', () => ({
+  goldenPathStepTotal: { inc: mockInc },
+  maestroDeploymentsTotal: { inc: mockInc },
+  maestroPrLeadTimeHours: { observe: mockObserve },
+  maestroChangeFailureRate: { set: mockSet },
+  maestroMttrHours: { observe: mockObserve },
+  uiErrorBoundaryCatchTotal: { inc: mockInc },
+  register: {
+    contentType: 'text/plain',
+    metrics: mockMetrics,
+  },
+  webVitalValue: {
+    set: mockSet,
+  },
+}));
+
+// Dynamic imports AFTER mocks are set up
+const monitoringRouter = (await import('../monitoring.js')).default;
+const {
   goldenPathStepTotal,
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
-} from '../../monitoring/metrics';
-
-// Mock metrics
-jest.mock('../../monitoring/metrics', () => {
-  const inc = jest.fn();
-  const observe = jest.fn();
-  return {
-    goldenPathStepTotal: { inc },
-    maestroDeploymentsTotal: { inc },
-    maestroPrLeadTimeHours: { observe },
-    maestroChangeFailureRate: { set: jest.fn() },
-    maestroMttrHours: { observe },
-    uiErrorBoundaryCatchTotal: { inc },
-    register: {
-      contentType: 'text/plain',
-      metrics: jest.fn().mockResolvedValue('mocked_metrics'),
-    },
-    webVitalValue: {
-      set: jest.fn(),
-    },
-  };
-});
+  uiErrorBoundaryCatchTotal,
+} = await import('../../monitoring/metrics.js');
 
 const app = express();
 app.use(express.json());
@@ -87,9 +92,10 @@ describe('Monitoring Routes', () => {
     expect(response.status).toBe(202);
     expect(goldenPathStepTotal.inc).not.toHaveBeenCalled();
     expect(maestroDeploymentsTotal.inc).not.toHaveBeenCalled();
-    expect(
-      (await import('../../monitoring/metrics')).uiErrorBoundaryCatchTotal.inc,
-    ).toHaveBeenCalledWith({ component: 'TestComponent', tenant_id: 'tenant-123' });
+    expect(uiErrorBoundaryCatchTotal.inc).toHaveBeenCalledWith({
+      component: 'TestComponent',
+      tenant_id: 'tenant-123',
+    });
   });
 
   describe('POST /telemetry/dora', () => {

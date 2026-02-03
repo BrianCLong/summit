@@ -1,8 +1,9 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import path from 'path';
 import {
   createDataPlatformHarness,
   loadFixtureText,
-} from '../helpers/dataPlatformHarness';
+} from '../helpers/dataPlatformHarness.js';
 
 describe('Data & Knowledge Platform golden path', () => {
   it('ingests, retrieves, and answers with cited evidence', async () => {

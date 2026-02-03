@@ -1,9 +1,10 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   ElectronicWarfareService,
   EWAsset,
   EWEffectType,
   SpectrumSignal,
-} from '../ElectronicWarfareService';
+} from '../ElectronicWarfareService.js';
 
 // Mock logger to avoid console output during tests
 jest.mock('../../utils/logger', () => ({

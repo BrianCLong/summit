@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/election-disruption-detection",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "State-of-the-art election disruption detection using multi-modal AI, adversarial ML, and real-time threat correlation",
   "type": "module",
   "main": "dist/index.js",

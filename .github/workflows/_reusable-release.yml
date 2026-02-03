@@ -62,15 +62,15 @@ jobs:
     if: always() && (needs.governance-gate.result == 'success' || needs.governance-gate.result == 'skipped') && needs.build-server.result == 'success' && needs.build-client.result == 'success'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # v6
       - name: Download build artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: build-artifacts-${{ github.run_id }}
           path: build-artifacts
           merge-multiple: true
       - name: Download governance reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         continue-on-error: true
         with:
           name: governance-gate-reports-${{ github.run_number }}
@@ -118,12 +118,13 @@ jobs:
             release-bundle/compliance-bundle-v${{ inputs.version }}.tgz \
             -C release-bundle/compliance .
       - name: Upload release artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: release-bundle
           path: release-bundle/
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
         with:
           tag_name: v${{ inputs.version }}
           name: Summit v${{ inputs.version }}

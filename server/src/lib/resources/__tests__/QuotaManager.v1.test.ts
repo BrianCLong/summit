@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { QuotaManager } from '../quota-manager.js';
 
 const quotaManager = QuotaManager.getInstance() as any;

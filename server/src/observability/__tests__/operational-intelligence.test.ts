@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { ObservabilityFabric } from '../operational-intelligence/fabric.js';
 import { RootCauseAnalyzer } from '../operational-intelligence/root-cause.js';
 import { AnomalyPredictor } from '../operational-intelligence/predictive.js';
@@ -5,10 +6,17 @@ import { FailureSimulator } from '../operational-intelligence/failure-simulator.
 import { FailureScenario, MetricSignal, ObservabilitySignal, ServiceDependencyEdge } from '../operational-intelligence/types.js';
 
 const now = Date.now();
+let idCounter = 0;
+
+const nextId = (prefix: string) => {
+  const id = `${prefix}-${idCounter}`;
+  idCounter += 1;
+  return id;
+};
 
 function buildMetric(partial: Partial<MetricSignal> = {}): MetricSignal {
   return {
-    id: `metric-${Math.random()}`,
+    id: nextId('metric'),
     kind: 'metric',
     name: 'latency_ms',
     value: 120,
@@ -21,7 +29,7 @@ function buildMetric(partial: Partial<MetricSignal> = {}): MetricSignal {
 
 function buildLog(service: string, severity: 'info' | 'warn' | 'error' | 'critical', correlationId: string): ObservabilitySignal {
   return {
-    id: `log-${Math.random()}`,
+    id: nextId('log'),
     kind: 'log',
     message: `${service} message`,
     service,
@@ -33,7 +41,7 @@ function buildLog(service: string, severity: 'info' | 'warn' | 'error' | 'critic
 
 function buildTrace(service: string, durationMs: number, correlationId: string, traceId?: string): ObservabilitySignal {
   return {
-    id: `trace-${Math.random()}`,
+    id: nextId('trace'),
     kind: 'trace',
     spanId: 'span-1',
     traceId: traceId ?? correlationId,

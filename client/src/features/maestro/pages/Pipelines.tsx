@@ -1,4 +1,5 @@
 import React from 'react';
+// @ts-ignore
 import { AutoSizer, List, ListRowRenderer } from 'react-virtualized';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { pipelineRecords, PipelineRecord } from '../mockData';

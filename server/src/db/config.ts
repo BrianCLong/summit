@@ -1,14 +1,10 @@
 
-import config from '../config/index.js';
+import { cfg } from '../config.js';
 
 export const dbConfig = {
   connectionConfig: {
-    host: config.postgres.host || 'localhost',
-    port: parseInt(String(config.postgres.port || '5432')),
-    database: config.postgres.database || 'postgres',
-    user: config.postgres.username || 'postgres',
-    password: config.postgres.password || 'postgres',
-    ssl: config.env === 'production' ? { rejectUnauthorized: false } : false,
+    connectionString: cfg.DATABASE_URL,
+    ssl: cfg.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   },
   idleTimeoutMs: 10000,
   connectionTimeoutMs: 5000,

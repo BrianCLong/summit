@@ -35,7 +35,7 @@ export function instrumentRedisClient(client: Redis, clientType: string = 'defau
     logger.info({ clientType }, 'Redis client disconnected');
   });
 
-  client.on('error', (error) => {
+  client.on('error', (error: Error) => {
     logger.error({ clientType, error: error.message }, 'Redis client error');
   });
 
@@ -104,7 +104,7 @@ export class InstrumentedRedisCache {
   constructor(
     private client: Redis,
     private cacheName: string = 'default',
-  ) {}
+  ) { }
 
   async get(key: string): Promise<string | null> {
     const tracer = getTracer();

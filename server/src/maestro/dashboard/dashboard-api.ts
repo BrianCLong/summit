@@ -35,7 +35,7 @@ router.get(
 
       // Calculate health metrics
       const totalRuns = runsStats.rows.reduce(
-        (sum, row) => sum + parseInt(row.count),
+        (sum: number, row: any) => sum + parseInt(row.count),
         0,
       );
       const successfulRuns =
@@ -45,7 +45,7 @@ router.get(
         runsStats.rows.find((row: any) => row.status === 'succeeded')
           ?.avg_duration || 180;
       const totalCost = runsStats.rows.reduce(
-        (sum, row) => sum + parseFloat(row.total_cost || 0),
+        (sum: number, row: any) => sum + parseFloat(row.total_cost || 0),
         0,
       );
 

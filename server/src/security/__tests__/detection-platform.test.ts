@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   ControlEffectivenessAnalyzer,
   DetectionRuleRegistry,
@@ -5,7 +6,7 @@ import {
   DetectionScenarioValidator,
   PurpleTeamRunbook,
   ThreatHuntingAnalytics,
-} from '../detection-platform';
+} from '../detection-platform.js';
 
 describe('Defensive detection platform', () => {
   const baseRule = {

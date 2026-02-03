@@ -1,5 +1,6 @@
-import { DetectionEngine } from '../DetectionEngine';
-import { SecuriteyesService } from '../SecuriteyesService';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { DetectionEngine } from '../DetectionEngine.js';
+import { SecuriteyesService } from '../SecuriteyesService.js';
 
 // Mock SecuriteyesService
 const mockSecuriteyesService = {

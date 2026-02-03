@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Determine Report Month
         id: month
@@ -63,7 +63,7 @@ jobs:
 
       - name: Download Site Artifact
         id: download
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
           name: release-ops-site
           path: ${{ env.SITE_DIR }}
@@ -162,11 +162,11 @@ jobs:
           CURRENT_STREAK=$(echo "${SLO_JSON}" | jq -r '.current_streak')
 
           # Build body
-          cat > issue_body.md << 'BODY_START'
+          cat > issue_body.md <<- 'BODY_START'
           ## Release Ops SLO Report
-BODY_START
+          BODY_START
 
-          cat >> issue_body.md << HEADER_EOF
+          cat >> issue_body.md <<- HEADER_EOF
 
           **Period:** ${MONTH_NAME} ${YEAR}
           **Generated:** $(date -u +"%Y-%m-%d %H:%M UTC")
@@ -201,7 +201,7 @@ BODY_START
               "| Longest Streak | \($m.longest_ok_streak) | ≥\($t.ok_streak_target) | \(if $m.longest_ok_streak >= $t.ok_streak_target then "Met" else "Not Met" end) |"
           ' >> issue_body.md
 
-          cat >> issue_body.md << 'FOOTER_EOF'
+          cat >> issue_body.md <<- 'FOOTER_EOF'
 
           ---
 
@@ -223,7 +223,7 @@ BODY_START
           fi
 
           # Add governance identity section
-          cat >> issue_body.md << GOV_SECTION_EOF
+          cat >> issue_body.md <<- GOV_SECTION_EOF
 
           ---
 
@@ -240,7 +240,7 @@ BODY_START
 
           GOV_SECTION_EOF
 
-          cat >> issue_body.md << 'LINKS_EOF'
+          cat >> issue_body.md <<- 'LINKS_EOF'
 
           ---
 
@@ -259,7 +259,7 @@ BODY_START
       - name: Create Issue
         if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
         id: create
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');
@@ -278,7 +278,7 @@ BODY_START
 
       - name: Update Issue
         if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');

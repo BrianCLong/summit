@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import config from './config/index.js';
+import { cfg } from './config.js';
 import logger from './utils/logger.js';
 import { auditLogDashboard } from './logging/structuredLogger.js';
 
@@ -28,7 +28,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
     }),
   );
 
-  app.use(cors({ origin: config.cors.origin, credentials: true }));
+  app.use(cors({ origin: cfg.CORS_ORIGIN, credentials: true }));
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(
@@ -39,7 +39,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
     res.status(200).json({
       status: 'OK',
       timestamp: new Date().toISOString(),
-      environment: config.env,
+      environment: cfg.NODE_ENV,
       version: '1.0.0',
     });
   });
@@ -50,7 +50,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
 
   if (lightweight) return app;
 
-  // In full mode, server.js wires DB + GraphQL + websockets.
+  // In full mode, server.ts wires DB + GraphQL + websockets.
   return app;
 }
 

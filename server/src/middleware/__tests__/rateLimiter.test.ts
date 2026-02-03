@@ -1,6 +1,7 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { publicRateLimit, authenticatedRateLimit } from '../rateLimiter';
+import { publicRateLimit, authenticatedRateLimit } from '../rateLimiter.js';
 
 const app = express();
 app.use('/public', publicRateLimit, (req, res) => res.status(200).send('Public OK'));

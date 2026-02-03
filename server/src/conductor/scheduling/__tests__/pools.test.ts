@@ -1,8 +1,9 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   pickCheapestEligible,
   type PoolCost,
   type PoolInfo,
-} from '../pools';
+} from '../pools.js';
 
 describe('pickCheapestEligible', () => {
   const pools: PoolInfo[] = [

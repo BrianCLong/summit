@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sdk-ts",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "IntelGraph TypeScript SDK",
   "main": "dist/client.js",
   "types": "dist/client.d.ts",

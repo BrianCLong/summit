@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Data Retention & Purge Policy
 
 **Scope**: all tenants, all environments. Applies to node/edge records, files, telemetry, and audit trails.

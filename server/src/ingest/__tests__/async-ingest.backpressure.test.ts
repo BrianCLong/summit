@@ -1,9 +1,10 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   AsyncIngestDispatcher,
   AsyncIngestWorker,
   InMemoryAsyncIngestRepository,
   calculateBackoffDelay,
-} from '../async-pipeline';
+} from '../async-pipeline.js';
 
 describe('Async ingestion backpressure and backoff', () => {
   const payload = {

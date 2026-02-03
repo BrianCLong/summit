@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Install yq
         run: |
@@ -137,7 +137,7 @@ jobs:
 
     steps:
       - name: Trigger Drift Detection
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({

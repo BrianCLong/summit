@@ -61,6 +61,10 @@ export default class Redis {
     return count;
   }
 
+  async psubscribe(pattern: string) {
+    return Promise.resolve();
+  }
+
   async keys(pattern: string) {
     const regex = new RegExp(pattern.replace('*', '.*'));
     return Array.from(mockRedisStorage.keys()).filter((k) => regex.test(k));
@@ -187,6 +191,103 @@ export default class Redis {
     return Promise.resolve();
   }
 
+  async publish(_channel: string, _message: string) {
+    return 0;
+  }
+
+  async subscribe(..._channels: string[]) {
+    return _channels.length;
+  }
+
+  async unsubscribe(..._channels: string[]) {
+    return _channels.length;
+  }
+
+  async hget(_key: string, _field: string) {
+    return null;
+  }
+
+  async hset(_key: string, _field: string, _value: string) {
+    return 1;
+  }
+
+  async hdel(_key: string, ..._fields: string[]) {
+    return _fields.length;
+  }
+
+  async hgetall(_key: string) {
+    return {};
+  }
+
+  async exists(..._keys: string[]) {
+    return 0;
+  }
+
+  async mget(..._keys: string[]) {
+    return _keys.map(() => null);
+  }
+
+  async mset(..._pairs: string[]) {
+    return 'OK';
+  }
+
+  async lpush(_key: string, ..._values: string[]) {
+    return _values.length;
+  }
+
+  async rpush(_key: string, ..._values: string[]) {
+    return _values.length;
+  }
+
+  async lrange(_key: string, _start: number, _stop: number) {
+    return [];
+  }
+
+  async llen(_key: string) {
+    return 0;
+  }
+
+  async lpop(_key: string) {
+    return null;
+  }
+
+  async rpop(_key: string) {
+    return null;
+  }
+
+  async srem(_key: string, ..._members: string[]) {
+    return _members.length;
+  }
+
+  async sismember(_key: string, _member: string) {
+    return 0;
+  }
+
+  async scard(_key: string) {
+    return 0;
+  }
+
+  async ttl(_key: string) {
+    return -1;
+  }
+
+  async pttl(_key: string) {
+    return -1;
+  }
+
+  scanStream(_options?: any) {
+    return {
+      on: (_event: string, _callback: (keys?: string[]) => void) => {
+        if (_event === 'end') {
+          setTimeout(() => _callback(), 0);
+        }
+        return this;
+      },
+      pause: () => {},
+      resume: () => {},
+    };
+  }
+
   duplicate() {
     return this;
   }
@@ -204,3 +305,21 @@ export default class Redis {
 }
 
 export { Redis };
+
+// Cluster mock for ioredis Cluster support
+export class Cluster extends Redis {
+  nodes: Redis[];
+
+  constructor(_startupNodes?: any[], _options?: any) {
+    super();
+    this.nodes = [this];
+  }
+
+  async connect() {
+    return Promise.resolve();
+  }
+
+  getNodes() {
+    return this.nodes;
+  }
+}

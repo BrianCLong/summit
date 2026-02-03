@@ -35,6 +35,7 @@ jobs:
       - name: Set up Node 18
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
 
       - name: Enable Corepack
@@ -144,6 +145,7 @@ jobs:
       - name: Set up Node 18
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
@@ -185,6 +187,7 @@ jobs:
       - name: Set up Node 18
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps

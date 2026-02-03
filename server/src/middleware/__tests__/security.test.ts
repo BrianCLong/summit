@@ -9,8 +9,32 @@
  * @module middleware/__tests__/security.test
  */
 
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
+
+// Mock functions declared before mocks
+const mockTrackError = jest.fn();
+const mockLoggerInfo = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockLoggerError = jest.fn();
+const mockLoggerDebug = jest.fn();
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../monitoring/middleware.js', () => ({
+  trackError: mockTrackError,
+}));
+
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  __esModule: true,
+  default: {
+    info: mockLoggerInfo,
+    warn: mockLoggerWarn,
+    error: mockLoggerError,
+    debug: mockLoggerDebug,
+  },
+}));
+
+// Dynamic imports will happen in beforeAll
 let createRateLimiter: typeof import('../security.js').createRateLimiter;
 let strictRateLimiter: typeof import('../security.js').strictRateLimiter;
 let authRateLimiter: typeof import('../security.js').authRateLimiter;
@@ -25,21 +49,6 @@ let securityHeaders: typeof import('../security.js').securityHeaders;
 let corsConfig: typeof import('../security.js').corsConfig;
 let requestLogger: typeof import('../security.js').requestLogger;
 let errorHandler: typeof import('../security.js').errorHandler;
-
-// Mock dependencies
-jest.mock('../../monitoring/middleware.js', () => ({
-  trackError: jest.fn(),
-}));
-
-jest.mock('../../utils/logger.js', () => ({
-  __esModule: true,
-  default: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    debug: jest.fn(),
-  },
-}));
 
 describe('Security Middleware', () => {
   let mockRequest: Partial<Request>;

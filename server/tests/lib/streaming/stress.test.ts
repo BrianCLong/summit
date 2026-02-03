@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { AdaptiveRateLimiter } from '../../../src/lib/streaming/rate-limiter.js';
 import Redis from 'ioredis';
 

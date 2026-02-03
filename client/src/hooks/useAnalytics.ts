@@ -21,7 +21,6 @@ import {
   AuditReadiness,
   ControlStatus,
   ControlEffectiveness,
-  EvidenceStatus,
   FrameworkStatus,
   TimeRange,
 } from '../services/analytics-api';
@@ -42,6 +41,9 @@ export interface TimeRangePreset {
   value: string;
   getRange: () => Partial<TimeRange>;
 }
+
+const getErrorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error && err.message ? err.message : fallback;
 
 // ============================================================================
 // Time Range Presets
@@ -116,11 +118,11 @@ export function useGovernanceMetrics(presetValue: string = '7d') {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load governance metrics',
+        error: getErrorMessage(err, 'Failed to load governance metrics'),
       }));
     }
   }, [timeRange]);
@@ -158,11 +160,11 @@ export function useVerdictDistribution(presetValue: string = '7d') {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load verdict distribution',
+        error: getErrorMessage(err, 'Failed to load verdict distribution'),
       }));
     }
   }, [timeRange]);
@@ -200,11 +202,11 @@ export function useVerdictTrends(presetValue: string = '7d') {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load verdict trends',
+        error: getErrorMessage(err, 'Failed to load verdict trends'),
       }));
     }
   }, [timeRange]);
@@ -242,11 +244,11 @@ export function usePolicyEffectiveness(presetValue: string = '7d', limit: number
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load policy effectiveness',
+        error: getErrorMessage(err, 'Failed to load policy effectiveness'),
       }));
     }
   }, [timeRange, limit]);
@@ -284,11 +286,11 @@ export function useAnomalies(presetValue: string = '7d') {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load anomalies',
+        error: getErrorMessage(err, 'Failed to load anomalies'),
       }));
     }
   }, [timeRange]);
@@ -325,11 +327,11 @@ export function useComplianceSummary() {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load compliance summary',
+        error: getErrorMessage(err, 'Failed to load compliance summary'),
       }));
     }
   }, []);
@@ -362,11 +364,11 @@ export function useAuditReadiness() {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load audit readiness',
+        error: getErrorMessage(err, 'Failed to load audit readiness'),
       }));
     }
   }, []);
@@ -399,11 +401,11 @@ export function useControlStatus(framework?: string) {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load control status',
+        error: getErrorMessage(err, 'Failed to load control status'),
       }));
     }
   }, [framework]);
@@ -436,11 +438,11 @@ export function useControlEffectiveness() {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load control effectiveness',
+        error: getErrorMessage(err, 'Failed to load control effectiveness'),
       }));
     }
   }, []);
@@ -473,11 +475,11 @@ export function useFrameworkStatus() {
         error: null,
         lastUpdated: new Date().toISOString(),
       });
-    } catch (err: any) {
+    } catch (err) {
       setState((prev) => ({
         ...prev,
         loading: false,
-        error: err.message || 'Failed to load framework status',
+        error: getErrorMessage(err, 'Failed to load framework status'),
       }));
     }
   }, []);

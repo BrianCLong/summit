@@ -24,7 +24,12 @@ import {
 import { mapGraphRAGError, UserFacingError } from '../lib/errors.js';
 import graphragConfig from '../config/graphrag.js';
 
-const serviceLogger = logger.child({ name: 'GraphRAGService' });
+const resolvedLogger = (logger as any)?.default ?? logger;
+const baseLogger =
+  resolvedLogger && typeof (resolvedLogger as any).child === 'function'
+    ? resolvedLogger
+    : { child: () => console };
+const serviceLogger = baseLogger.child({ name: 'GraphRAGService' });
 
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
@@ -519,7 +524,23 @@ export class GraphRAGService {
       )
       .join('\n');
 
-    return `You are an intelligence analyst with access to a knowledge graph. Answer the user's question based ONLY on the provided context.
+    return `You are an **intelligence analysis copilot** running inside the Summit platform.
+Your primary objective is to answer multi-step investigative questions by traversing the graph, not by guessing.
+You must minimize hallucinations by only asserting facts that are explicitly present in the graph or directly quoted from source documents.
+
+## RETRIEVAL AND REASONING RULES
+- Treat the Neo4j graph as the source of truth for: entity identity, relationships, temporal ordering, and network structure.
+- Prefer multi-hop graph queries (paths, communities, centrality, patterns) over flat keyword or embedding similarity when building an explanation.
+- When evidence is sparse or ambiguous, say so, and return the best-supported hypotheses instead of fabricating details.
+
+## BEHAVIOR FOR MULTI-STEP INTELLIGENCE TASKS
+- Clarify the analytical goal (mapping network, finding key intermediaries, tracing money/influence, validating a claim, etc.).
+- Compose an analytic narrative that explains both **what** is happening (facts from documents) and **how** actors connect across the network (paths, motifs, communities). Cite graph-level evidence explicitly.
+
+## HALLUCINATION CONTROL AND ANSWER FORMATTING
+- Do not infer new relationships that are not present in the graph unless explicitly asked to speculate; clearly label any speculation as hypothesis, not fact.
+- When the graph does not contain enough information, say "insufficient graph evidence".
+- Prefer concise, structured answers: short summary, then bullet-point findings linked to graph evidence.
 
 CONTEXT ENTITIES:
 ${entityContext}
@@ -531,7 +552,7 @@ USER QUESTION: ${question}
 
 RESPONSE REQUIREMENTS:
 - You MUST respond with valid JSON matching this exact schema
-- answer: string (comprehensive answer based on context)
+- answer: string (comprehensive answer based on context, following the analytic narrative style)
 - confidence: number (0-1, based on context completeness and certainty)
 - citations: object with entityIds array (entity IDs that support your answer)
 - why_paths: array of objects with from, to, relId, type (relationship paths that explain your reasoning)

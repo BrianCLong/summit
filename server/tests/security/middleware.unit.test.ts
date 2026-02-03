@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { securityHardening } from '../../src/middleware/security-hardening.js';
 import { errorHandler } from '../../src/middleware/errorHandler.js';
 

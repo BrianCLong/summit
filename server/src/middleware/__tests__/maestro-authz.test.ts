@@ -1,22 +1,28 @@
-import { maestroAuthzMiddleware } from '../maestro-authz';
-import { opaPolicyEngine } from '../../conductor/governance/opa-integration';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   requestFactory,
   responseFactory,
   nextFactory,
-} from '../../../../tests/factories/requestFactory';
+} from '../../../../tests/factories/requestFactory.js';
 
-jest.mock('../../conductor/governance/opa-integration', () => ({
+// Mock functions declared before mocks
+const mockEvaluatePolicy = jest.fn();
+const mockLoggerInfo = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockLoggerError = jest.fn();
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../conductor/governance/opa-integration', () => ({
   opaPolicyEngine: {
-    evaluatePolicy: jest.fn(),
+    evaluatePolicy: mockEvaluatePolicy,
   },
 }));
 
-jest.mock('../../utils/logger', () => {
+jest.unstable_mockModule('../../utils/logger', () => {
   const logger = {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    info: mockLoggerInfo,
+    warn: mockLoggerWarn,
+    error: mockLoggerError,
   };
 
   return {
@@ -26,11 +32,9 @@ jest.mock('../../utils/logger', () => {
   };
 });
 
-const mockLogger = require('../../utils/logger').default as {
-  info: jest.Mock;
-  warn: jest.Mock;
-  error: jest.Mock;
-};
+// Dynamic imports AFTER mocks are set up
+const { maestroAuthzMiddleware } = await import('../maestro-authz.js');
+const { opaPolicyEngine } = await import('../../conductor/governance/opa-integration.js');
 
 describe('maestroAuthzMiddleware', () => {
   const createRequest = () => {
@@ -66,7 +70,7 @@ describe('maestroAuthzMiddleware', () => {
   });
 
   it('allows a request when OPA approves and logs decision metadata', async () => {
-    (opaPolicyEngine.evaluatePolicy as jest.Mock).mockResolvedValue({
+    mockEvaluatePolicy.mockResolvedValue({
       allow: true,
       reason: 'allowed',
     });
@@ -94,7 +98,7 @@ describe('maestroAuthzMiddleware', () => {
     );
     expect(next).toHaveBeenCalled();
 
-    expect(mockLogger.info).toHaveBeenCalledWith(
+    expect(mockLoggerInfo).toHaveBeenCalledWith(
       'Maestro authorization allowed by OPA',
       expect.objectContaining({
         traceId: 'trace-123',
@@ -111,7 +115,7 @@ describe('maestroAuthzMiddleware', () => {
   });
 
   it('denies a request when OPA blocks and records decision context', async () => {
-    (opaPolicyEngine.evaluatePolicy as jest.Mock).mockResolvedValue({
+    mockEvaluatePolicy.mockResolvedValue({
       allow: false,
       reason: 'policy block',
       auditLog: { message: 'denied' },
@@ -133,7 +137,7 @@ describe('maestroAuthzMiddleware', () => {
     );
     expect(next).not.toHaveBeenCalled();
 
-    expect(mockLogger.warn).toHaveBeenCalledWith(
+    expect(mockLoggerWarn).toHaveBeenCalledWith(
       'Maestro authorization denied by OPA',
       expect.objectContaining({
         traceId: 'trace-123',

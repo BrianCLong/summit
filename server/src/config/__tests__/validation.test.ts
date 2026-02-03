@@ -1,4 +1,5 @@
-import { ConfigSchema } from '../schema';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { ConfigSchema } from '../schema.js';
 import { z } from 'zod';
 
 describe('Config Validation', () => {

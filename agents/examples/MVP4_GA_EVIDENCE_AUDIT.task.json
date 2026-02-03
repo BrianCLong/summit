@@ -1,0 +1,37 @@
+{
+  "task_id": "MVP4_GA_EVIDENCE_AUDIT",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "agent-native-loop-n4",
+    "version": "v1",
+    "sha256": "2fcf3ef5535a5dd116439d1fc8a665e03945e1c6981373895fd9344bd486b658",
+    "path": "prompts/governance/agent-native-loop-n4.md"
+  },
+  "declared_scope": {
+    "paths": ["docs/ga/", "docs/releases/MVP-4_RELEASE_NOTES_FINAL.md", "agents/examples/"],
+    "domains": ["governance", "ci", "quality", "observability"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "A",
+    "artifacts": [
+      "docs/ga/MVP4_GA_EVIDENCE_MAP.md",
+      "docs/ga/MVP4_GA_DEMO_RUNBOOK.md",
+      "docs/releases/MVP-4_RELEASE_NOTES_FINAL.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "GA evidence map enumerates claims with deterministic commands and status.",
+    "GA demo runbook provides fast proof steps under restricted profile.",
+    "Release notes include a verification summary aligned to executed commands."
+  ],
+  "stop_conditions": [
+    "Any claim lacks a command or evidence path.",
+    "Verification commands fail under restricted profile.",
+    "Scope expansion beyond docs/ga or release notes is required."
+  ]
+}

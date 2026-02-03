@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { MPSCChannel } from '../../../src/lib/streaming/channel-manager';
 
 describe('MPSCChannel', () => {

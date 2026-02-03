@@ -26,6 +26,3 @@ export function authorize(requiredPermission: Permission) {
 export { userHasPermission };
 
 export default authorize;
-
-// CommonJS compatibility for existing route files
-module.exports = { authorize, userHasPermission };

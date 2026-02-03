@@ -1,0 +1,33 @@
+name: Synthetic Amplification Detector
+id: DET-SYN-001
+version: 1.0.0
+severity: HIGH
+description: Detects high-velocity, low-variance content propagation indicative of AI/DaaS botnets.
+type: behavioral
+tags:
+  - threat:disinformation
+  - actor:daas
+  - technique:T1583
+
+inputs:
+  - source: narrative_events
+    filter: event_type == 'SHARE' OR event_type == 'AMPLIFY'
+
+logic:
+  window: 5m
+  aggregation_key: content_embedding_cluster
+  conditions:
+    - metric: event_count
+      operator: gt
+      threshold: 100 # Velocity threshold (shares per 5m)
+    - metric: semantic_variance
+      operator: lt
+      threshold: 0.05 # Variance threshold (cosine distance)
+
+response:
+  - action: alert
+    severity: HIGH
+    target: influence_detection_queue
+  - action: tag_actor
+    tag: probable_synthetic
+    confidence: 0.9

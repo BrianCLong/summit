@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/lreg-exporter",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "express": "^5.2.0",

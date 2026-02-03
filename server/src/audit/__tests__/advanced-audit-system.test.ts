@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { AdvancedAuditSystem } from '../advanced-audit-system.js';
 
 jest.mock('../../config/database.js', () => ({

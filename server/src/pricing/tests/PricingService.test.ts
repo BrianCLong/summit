@@ -1,5 +1,6 @@
-import { PricingService, PLANS } from '../PricingService';
-import { Quote } from '../types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { PricingService, PLANS } from '../PricingService.js';
+import { Quote } from '../types.js';
 
 describe('PricingService', () => {
   let service: PricingService;

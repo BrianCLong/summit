@@ -1,4 +1,5 @@
-import { mapCsvToGraph, enforceCap } from '../src/services/MigrationService';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { mapCsvToGraph, enforceCap } from '../src/services/MigrationService.js';
 
 describe('MigrationService', () => {
   describe('mapCsvToGraph', () => {

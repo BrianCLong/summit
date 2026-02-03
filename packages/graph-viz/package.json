@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/graph-viz",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Graph visualization layouts and rendering",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {},

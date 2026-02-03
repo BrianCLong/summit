@@ -10,6 +10,7 @@
  * @module runbooks/runtime/__tests__/runtime.test
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import {
   RunbookRuntimeEngine,
   InMemoryRunbookDefinitionRepository,
@@ -24,8 +25,8 @@ import {
   RapidAttributionRunbook,
   validateRapidAttributionInput,
   rapidAttributionExampleInput,
-} from '../index';
-import { LegalBasis, DataLicense } from '../../dags/types';
+} from '../index.js';
+import { LegalBasis, DataLicense } from '../../dags/types.js';
 
 // ============================================================================
 // Test Helpers

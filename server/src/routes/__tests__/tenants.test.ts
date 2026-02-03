@@ -1,18 +1,18 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
-import * as database from '../../config/database.js';
-import { ProvenanceRepo } from '../../repos/ProvenanceRepo.js';
 
-const mockTenantService = {
-  getTenantSettings: jest.fn(),
-  updateSettings: jest.fn(),
-  disableTenant: jest.fn(),
-  createTenant: jest.fn(),
-};
-
-const mockTenantUsageService = {
-  getTenantUsage: jest.fn(),
-};
+// Mock functions declared before mocks
+const mockGetTenantSettings = jest.fn();
+const mockUpdateSettings = jest.fn();
+const mockDisableTenant = jest.fn();
+const mockCreateTenant = jest.fn();
+const mockGetTenantUsage = jest.fn();
+const mockGetPostgresPool = jest.fn();
+const mockGetRedisClient = jest.fn();
+const mockAppendEntry = jest.fn();
+const mockRepoBy = jest.fn();
+const mockEnsurePolicy = jest.fn((_action: string, _resource: string) => (_req: any, _res: any, next: any) => next());
 
 let currentUser: any = {
   id: 'user-1',
@@ -20,8 +20,14 @@ let currentUser: any = {
   tenantId: 'tenant-1',
 };
 
-jest.mock('../../services/TenantService.js', () => ({
-  tenantService: mockTenantService,
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../services/TenantService.js', () => ({
+  tenantService: {
+    getTenantSettings: mockGetTenantSettings,
+    updateSettings: mockUpdateSettings,
+    disableTenant: mockDisableTenant,
+    createTenant: mockCreateTenant,
+  },
   createTenantSchema: {
     parse: (v: any) => v,
     extend: () => ({
@@ -35,44 +41,44 @@ jest.mock('../../services/TenantService.js', () => ({
   },
 }));
 
-jest.mock('../../services/TenantUsageService.js', () => ({
-  tenantUsageService: mockTenantUsageService,
+jest.unstable_mockModule('../../services/TenantUsageService.js', () => ({
+  tenantUsageService: {
+    getTenantUsage: mockGetTenantUsage,
+  },
 }));
 
-jest.mock('../../config/database.js', () => ({
-  getPostgresPool: jest.fn(() => ({
-    connect: jest.fn().mockResolvedValue({
-      query: jest.fn().mockResolvedValue({ rows: [{ id: 'event-1' }] }),
-      release: jest.fn(),
-    }),
-  })),
-  getRedisClient: jest.fn(() => null),
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getPostgresPool: mockGetPostgresPool,
+  getRedisClient: mockGetRedisClient,
 }));
 
-jest.mock('../../middleware/auth.js', () => ({
+jest.unstable_mockModule('../../middleware/auth.js', () => ({
   ensureAuthenticated: (req: any, _res: any, next: any) => {
     req.user = currentUser;
     return next();
   },
 }));
 
-const ensurePolicy = jest.fn((_action: string, _resource: string) => (_req: any, _res: any, next: any) => next());
-jest.mock('../../middleware/abac.js', () => ({ ensurePolicy }));
+jest.unstable_mockModule('../../middleware/abac.js', () => ({
+  ensurePolicy: mockEnsurePolicy,
+}));
 
-jest.mock('../../provenance/ledger.js', () => ({
+jest.unstable_mockModule('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn(),
+    appendEntry: mockAppendEntry,
   },
 }));
 
-const mockRepoBy = jest.fn();
-jest.mock('../../repos/ProvenanceRepo.js', () => ({
+jest.unstable_mockModule('../../repos/ProvenanceRepo.js', () => ({
   ProvenanceRepo: jest.fn().mockImplementation(() => ({
     by: mockRepoBy,
   })),
 }));
 
-const tenantsRouter = require('../tenants.js').default;
+// Dynamic imports AFTER mocks are set up
+const tenantsRouter = (await import('../tenants.js')).default;
+const { ProvenanceRepo } = await import('../../repos/ProvenanceRepo.js');
+const database = await import('../../config/database.js');
 
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
@@ -87,39 +93,39 @@ describeIf('tenants routes', () => {
     (ProvenanceRepo as jest.Mock).mockImplementation(() => ({
       by: mockRepoBy,
     }));
-    (database.getPostgresPool as jest.Mock).mockReturnValue({
+    mockGetPostgresPool.mockReturnValue({
       connect: jest.fn().mockResolvedValue({
         query: jest.fn().mockResolvedValue({ rows: [{ id: 'event-1' }] }),
         release: jest.fn(),
       }),
     });
-    (database.getRedisClient as jest.Mock).mockReturnValue(null);
+    mockGetRedisClient.mockReturnValue(null);
     currentUser = { id: 'user-1', role: 'admin', tenantId: 'tenant-1' };
-    mockTenantService.getTenantSettings.mockResolvedValue({
+    mockGetTenantSettings.mockResolvedValue({
       id: 'tenant-1',
       settings: { theme: 'light' },
       config: {},
       status: 'active',
     });
-    mockTenantService.updateSettings.mockResolvedValue({
+    mockUpdateSettings.mockResolvedValue({
       id: 'tenant-1',
       settings: { theme: 'dark' },
       config: {},
       status: 'active',
     });
-    mockTenantService.disableTenant.mockResolvedValue({
+    mockDisableTenant.mockResolvedValue({
       id: 'tenant-1',
       status: 'disabled',
       config: {},
       settings: {},
     });
-    mockTenantService.createTenant.mockResolvedValue({
+    mockCreateTenant.mockResolvedValue({
       id: 'tenant-1',
       name: 'Acme',
       slug: 'acme',
       residency: 'US',
     });
-    mockTenantUsageService.getTenantUsage.mockResolvedValue({
+    mockGetTenantUsage.mockResolvedValue({
       tenantId: 'tenant-1',
       range: { key: '7d', start: '2024-01-01T00:00:00.000Z', end: '2024-01-08T00:00:00.000Z' },
       totals: [{ kind: 'external_api.requests', unit: 'requests', total: 3 }],
@@ -143,7 +149,7 @@ describeIf('tenants routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.receipt).toBeDefined();
-    expect(mockTenantService.getTenantSettings).toHaveBeenCalledWith('tenant-1');
+    expect(mockGetTenantSettings).toHaveBeenCalledWith('tenant-1');
   });
 
   it('updates settings and issues receipt', async () => {
@@ -153,7 +159,7 @@ describeIf('tenants routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.settings.theme).toBe('dark');
     expect(res.body.receipt.action).toBe('TENANT_SETTINGS_UPDATED');
-    expect(mockTenantService.updateSettings).toHaveBeenCalledWith('tenant-1', { theme: 'dark' }, 'user-1');
+    expect(mockUpdateSettings).toHaveBeenCalledWith('tenant-1', { theme: 'dark' }, 'user-1');
   });
 
   it('disables tenant with receipt', async () => {
@@ -189,6 +195,6 @@ describeIf('tenants routes', () => {
     });
     expect(res.body.data.breakdown.byWorkflow[0]).toMatchObject({ workflow: 'ingest' });
     expect(res.body.data.breakdown.byEnvironment[0]).toMatchObject({ environment: 'prod' });
-    expect(mockTenantUsageService.getTenantUsage).toHaveBeenCalledWith('tenant-1', '7d');
+    expect(mockGetTenantUsage).toHaveBeenCalledWith('tenant-1', '7d');
   });
 });

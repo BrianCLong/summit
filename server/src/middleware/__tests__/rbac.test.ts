@@ -2,16 +2,26 @@
  * Tests for RBAC middleware
  */
 
-import {
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
+
+// Mock function declared before mock
+const mockHasPermission = jest.fn();
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../services/AuthService', () => ({
+  __esModule: true,
+  default: class MockAuthService {
+    hasPermission = mockHasPermission;
+  },
+}));
+
+// Dynamic imports AFTER mocks are set up
+const {
   requirePermission,
   requireAnyPermission,
   requireAllPermissions,
   requireRole,
-} from '../rbac';
-import AuthService from '../../services/AuthService';
-import { jest, describe, it, expect } from '@jest/globals';
-
-jest.mock('../../services/AuthService');
+} = await import('../rbac.js');
 
 describe('RBAC Middleware', () => {
   const requestFactory = (overrides: Record<string, unknown> = {}) => ({
@@ -45,14 +55,12 @@ describe('RBAC Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      const hasPermissionSpy = jest
-        .spyOn(AuthService.prototype, 'hasPermission')
-        .mockReturnValue(true);
+      mockHasPermission.mockReturnValue(true);
 
       const middleware = requirePermission('write');
       middleware(req as any, res, next);
 
-      expect(hasPermissionSpy).toHaveBeenCalledWith(user as any, 'write');
+      expect(mockHasPermission).toHaveBeenCalledWith(user as any, 'write');
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
     });
@@ -63,7 +71,7 @@ describe('RBAC Middleware', () => {
       const res = responseFactory();
       const next = nextFactory();
 
-      jest.spyOn(AuthService.prototype, 'hasPermission').mockReturnValue(false);
+      mockHasPermission.mockReturnValue(false);
 
       const middleware = requirePermission('write');
       middleware(req as any, res, next);

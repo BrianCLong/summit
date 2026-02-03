@@ -62,6 +62,19 @@ Also review `docs/SUMMIT_READINESS_ASSERTION.md` as part of the GA assertion pac
 - Load testing evidence is deferred pending a `k6`-enabled environment. (Evidence: `docs/releases/v4.0.0/MVP4-GA-READINESS.md`.)
 - GA readiness report requires a full CI rerun and security scan evidence before sign-off. (Evidence: `docs/release/GA_READINESS_REPORT.md`.)
 
+## Verification summary (restricted profile)
+
+Verified under `CI=1 ZERO_FOOTPRINT=true NO_NETWORK_LISTEN=true`:
+
+- GA evidence map and keyword scoping via `node --test testing/ga-verification/ga-features.ga.test.mjs`.
+- GA surface policy preflight via `node scripts/ga/verify-ga-surface.mjs`.
+- Accessibility gate wiring via file presence checks: `e2e/a11y-keyboard/a11y-gate.spec.ts` and `.github/workflows/a11y-keyboard-smoke.yml`.
+
+Deferred pending verification:
+
+- `pnpm run test:a11y-gate` (Playwright runtime required).
+- `make ga-verify` (full GA gate context required).
+
 ## Credits
 
 Release Captain: Jules. (Evidence: `docs/releases/v4.0.0/MVP4-GA-Readiness-Package.md`.)

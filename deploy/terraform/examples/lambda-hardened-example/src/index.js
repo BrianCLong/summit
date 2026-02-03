@@ -1,9 +1,11 @@
-exports.handler = async (event) => {
-    console.log('Event:', JSON.stringify(event, null, 2));
+exports.handler = (event) => {
+    // Event: ${JSON.stringify(event, null, 2)}
 
     // Simulate some work
     const start = Date.now();
-    while (Date.now() - start < 100) {}
+    while (Date.now() - start < 100) {
+      // Busy wait
+    }
 
     // Simulate random error for testing error handling
     if (event.force_error) {

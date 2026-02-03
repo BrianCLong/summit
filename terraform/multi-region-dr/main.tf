@@ -218,40 +218,40 @@ resource "aws_elasticache_global_replication_group" "redis_global" {
 }
 
 resource "aws_elasticache_replication_group" "primary" {
-  provider                     = aws.primary
-  replication_group_id         = "summit-redis-primary"
-  description                  = "Primary Redis Cluster"
-  engine                       = "redis"
-  engine_version               = "7.0"
-  node_type                    = "cache.t4g.medium"
-  num_cache_clusters           = 2
-  parameter_group_name         = "default.redis7"
-  port                         = 6379
-  automatic_failover_enabled   = true
-  multi_az_enabled             = true
-  at_rest_encryption_enabled   = true
-  transit_encryption_enabled   = true
-  subnet_group_name            = aws_elasticache_subnet_group.primary.name
+  provider                   = aws.primary
+  replication_group_id       = "summit-redis-primary"
+  description                = "Primary Redis Cluster"
+  engine                     = "redis"
+  engine_version             = "7.0"
+  node_type                  = "cache.t4g.medium"
+  num_cache_clusters         = 2
+  parameter_group_name       = "default.redis7"
+  port                       = 6379
+  automatic_failover_enabled = true
+  multi_az_enabled           = true
+  at_rest_encryption_enabled = true
+  transit_encryption_enabled = true
+  subnet_group_name          = aws_elasticache_subnet_group.primary.name
 }
 
 resource "aws_elasticache_replication_group" "secondary" {
-  provider                     = aws.secondary
-  replication_group_id         = "summit-redis-secondary"
-  description                  = "Secondary Redis Cluster"
-  global_replication_group_id  = aws_elasticache_global_replication_group.redis_global.global_replication_group_id
-  num_cache_clusters           = 1 # Read replica
-  at_rest_encryption_enabled   = true
-  transit_encryption_enabled   = true
+  provider                    = aws.secondary
+  replication_group_id        = "summit-redis-secondary"
+  description                 = "Secondary Redis Cluster"
+  global_replication_group_id = aws_elasticache_global_replication_group.redis_global.global_replication_group_id
+  num_cache_clusters          = 1 # Read replica
+  at_rest_encryption_enabled  = true
+  transit_encryption_enabled  = true
 }
 
 resource "aws_elasticache_replication_group" "tertiary" {
-  provider                     = aws.tertiary
-  replication_group_id         = "summit-redis-tertiary"
-  description                  = "Tertiary Redis Cluster"
-  global_replication_group_id  = aws_elasticache_global_replication_group.redis_global.global_replication_group_id
-  num_cache_clusters           = 1 # Read replica
-  at_rest_encryption_enabled   = true
-  transit_encryption_enabled   = true
+  provider                    = aws.tertiary
+  replication_group_id        = "summit-redis-tertiary"
+  description                 = "Tertiary Redis Cluster"
+  global_replication_group_id = aws_elasticache_global_replication_group.redis_global.global_replication_group_id
+  num_cache_clusters          = 1 # Read replica
+  at_rest_encryption_enabled  = true
+  transit_encryption_enabled  = true
 }
 
 # --- Neo4j Causal Cluster (Kubernetes Deployment via Helm) ---
@@ -349,13 +349,13 @@ resource "aws_sns_topic_subscription" "tertiary_sub" {
 resource "aws_sqs_queue_policy" "primary_policy" {
   provider  = aws.primary
   queue_url = aws_sqs_queue.sync_queue_primary.id
-  policy    = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "sns.amazonaws.com" }
-      Action = "sqs:SendMessage"
-      Resource = aws_sqs_queue.sync_queue_primary.arn
+      Action    = "sqs:SendMessage"
+      Resource  = aws_sqs_queue.sync_queue_primary.arn
       Condition = {
         ArnEquals = { "aws:SourceArn" = aws_sns_topic.global_sync_primary.arn }
       }

@@ -1,7 +1,8 @@
-import { RateLimiter } from '../RateLimiter.js';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 
 const store = new Map<string, { count: number; expiresAt: number }>();
 
+// Mock Redis - declared before mock
 const redisMock = {
   eval: jest.fn(async (_script: string, _keys: number, key: string, _points: number, windowMs: number) => {
     const now = Date.now();
@@ -19,9 +20,13 @@ const redisMock = {
   }),
 };
 
-jest.mock('../../config/database.js', () => ({
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../config/database.js', () => ({
   getRedisClient: () => redisMock,
 }));
+
+// Dynamic import AFTER mock is set up
+const { RateLimiter } = await import('../RateLimiter.js');
 
 describe('RateLimiter', () => {
   const limiter = new RateLimiter();

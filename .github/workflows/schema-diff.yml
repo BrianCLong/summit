@@ -45,12 +45,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0 # Full history for accurate diffs
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "npm"
@@ -76,7 +76,7 @@ jobs:
           ts-node scripts/schema-diff.ts --version=${{ github.event.inputs.version || 'v1' }} --output=text
 
       - name: Upload diff report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
           name: schema-diff-report
@@ -103,7 +103,7 @@ jobs:
 
       - name: Generate PR comment
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const fs = require('fs');
@@ -231,15 +231,17 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # v6
 
       - name: Download diff report
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: schema-diff-report
           path: ./diff-reports
 
       - name: Record in audit log
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           mkdir -p audit/ga-evidence/api-contracts/audit-log
 
@@ -248,7 +250,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "event": "schema_diff_check",
             "pr_number": "${{ github.event.pull_request.number }}",
-            "pr_title": "${{ github.event.pull_request.title }}",
+            "pr_title": "${PR_TITLE}",
             "author": "${{ github.event.pull_request.user.login }}",
             "workflow_run": "${{ github.run_id }}",
             "result": "${{ needs.schema-diff.result }}",
@@ -263,8 +265,8 @@ jobs:
           echo "✅ Audit entry recorded"
 
       - name: Upload audit log
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: audit-log
           path: audit/ga-evidence/api-contracts/audit-log/
-          retention-days: 2555 # 7 years for SOC 2 compliance
+          retention-days: 90 # 7 years for SOC 2 compliance

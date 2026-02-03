@@ -5,11 +5,12 @@ import {
   AttachmentService,
   detectPII,
   redactPII,
-} from '../src/services/AttachmentService';
-import { createProvenanceRecord } from './mocks/provenance';
+} from '../src/services/AttachmentService.js';
+import { createProvenanceRecord } from './mocks/provenance.js';
 import { describe, it, test, expect } from '@jest/globals';
 
-const TMP_DIR = path.join(__dirname, '..', '..', 'tmp-test');
+// Use process.cwd() since tests run from server directory
+const TMP_DIR = path.join(process.cwd(), '..', 'tmp-test');
 
 describe('AttachmentService', () => {
   it('stores file and computes sha256', async () => {

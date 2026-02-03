@@ -19,7 +19,7 @@ jobs:
           npm install -g npm-check-updates
           ./scripts/update-dependencies.sh
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v4
         with:
           commit-message: 'chore(deps): automated dependency updates'
           title: 'chore(deps): automated dependency updates'

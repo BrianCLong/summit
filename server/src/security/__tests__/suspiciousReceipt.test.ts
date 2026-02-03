@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { detectSuspiciousPayload, HEURISTIC_CONFIG } from '../suspiciousReceipt.js';
 
 describe('Suspicious Payload Detection', () => {

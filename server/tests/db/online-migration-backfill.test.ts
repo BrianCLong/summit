@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { newDb } from 'pg-mem';
 import { BackfillRunner, resetMigrationMetrics } from '../../src/db/online-migrations';
 

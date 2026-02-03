@@ -2,6 +2,7 @@
 // This mock is necessary to bypass the build system limitation in this sandbox
 // while verifying the integration code logic.
 // In a real environment, the workspace package would be linked correctly.
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 jest.mock('@intelgraph/attack-surface', () => {
   return {
     AttackSurfaceMonitor: class MockAttackSurfaceMonitor {
