@@ -1,0 +1,18 @@
+# Cognitive Security: Never-Log Fields
+# These fields must be redacted or excluded from all logs and evidence packs.
+
+fields:
+  - "ssn"
+  - "social_security_number"
+  - "passport_number"
+  - "credit_card"
+  - "ip_address"
+  - "home_address"
+  - "personal_email"
+  - "biometric_data"
+  - "political_affiliation"
+  - "religious_affiliation"
+  - "sexual_orientation"
+
+exceptions:
+  - "public_figure_verification" # Only allowed with Legal approval for specific investigations.

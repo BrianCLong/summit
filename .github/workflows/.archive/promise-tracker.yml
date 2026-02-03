@@ -182,7 +182,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9
+
 
       - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
@@ -283,7 +283,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9
+
 
       - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
@@ -333,7 +333,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9
+
 
       - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
