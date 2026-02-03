@@ -13,24 +13,15 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 - SOC Controls
 - Unit Tests & Coverage
 
-## Temporary Gate Names (Moltbook Relay Project)
-
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
-
-- `gate/evidence_contract` - Validates Moltbook Relay evidence artifacts and timestamp isolation.
-- `gate/agent_inventory_required` - Fails if unknown agents are used in runtime configs.
-- `gate/agent_surface_lint` - Fails on open admin/control surfaces without auth.
-- `gate/relay_policy` - Validates relay discovery/DM policies (auth+audit).
-- `gate/supplychain_verify` - Verifies signatures and provenance for skills/extensions.
-
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
 - `lint`
 - `typecheck`
 - `build`
 - `test`
-
-## Rename Plan
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 
