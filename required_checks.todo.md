@@ -15,16 +15,13 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
 - `lint`
 - `typecheck`
 - `build`
 - `test`
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
-- `nds-ci / nds_gates` - NDS evidence + dependency gates.
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 
