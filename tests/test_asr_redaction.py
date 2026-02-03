@@ -1,4 +1,4 @@
-from asr.security import redact_for_logs
+from summit.audio.asr.security import redact_for_logs
 
 
 def test_redact_for_logs_masks_sensitive_fields() -> None:
