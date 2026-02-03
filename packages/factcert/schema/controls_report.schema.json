@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FactCert Controls Report",
+  "type": "object",
+  "properties": {
+    "report_id": { "type": "string" },
+    "credential_id": { "type": "string" },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "control_id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "enum": ["pass", "fail", "partial", "not_applicable"] },
+          "evidence": { "type": "string" }
+        },
+        "required": ["control_id", "status"]
+      }
+    },
+    "period_start": { "type": "string", "format": "date-time" },
+    "period_end": { "type": "string", "format": "date-time" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "signature": { "$ref": "stamp.schema.json" }
+  },
+  "required": ["report_id", "credential_id", "controls", "period_start", "period_end"]
+}
