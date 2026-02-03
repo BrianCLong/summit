@@ -1,0 +1,10 @@
+{
+  "signal_type": "user_report",
+  "source": "security_hotline",
+  "timestamp": "2023-10-27T10:15:00Z",
+  "payload": {
+    "url": "https://youtube.com/watch?v=fakeceo",
+    "description": "Video claims to be CEO announcing layoffs",
+    "reporter": "employee@summit.internal"
+  }
+}
