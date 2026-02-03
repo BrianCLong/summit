@@ -2,6 +2,7 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { AUTOMATION_WORKFLOWS, runAutomationWorkflow } from './automation.js';
+import { registerOpenClawCommands } from './skills/cli.js';
 import { DoctorCheckResult, runDoctor } from './summit-doctor.js';
 import { initAgentScaffold } from './adk/init.js';
 import { validateManifestCommand } from './adk/validate.js';
@@ -47,6 +48,8 @@ async function main() {
   const program = new Command();
 
   program.name('summit').description('Summit developer toolbox CLI');
+
+  registerOpenClawCommands(program);
 
   (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
     program
