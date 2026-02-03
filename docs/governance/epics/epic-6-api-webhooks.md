@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 6 — API/Webhooks GA+ (developer surface that doesn’t embarrass you)
 
 1.  Lock GA API surface: endpoints, scopes, rate limits, error contracts.

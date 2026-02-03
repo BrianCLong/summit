@@ -12,6 +12,8 @@ import { GraphRAGService } from '../../services/GraphRAGService.js';
 import { QueryPreviewService } from '../../services/QueryPreviewService.js';
 import { GlassBoxRunService } from '../../services/GlassBoxRunService.js';
 import { NlToCypherService } from '../../ai/nl-to-cypher/nl-to-cypher.service.js';
+import { quotaService, QuotaExceededException } from '../../services/QuotaService.js';
+import { usageMeteringService } from '../../services/UsageMeteringService.js';
 
 export type Context = {
   pool: Pool;
@@ -98,14 +100,26 @@ export const graphragQueryResolvers = {
       try {
         const { graphRAGQueryService } = createServices(context);
 
-        //
-        // TODO: This is a placeholder for the quota service
-        //
-        // await quotaService.assert({
-        //   tenantId,
-        //   dimension: 'graph.queries',
-        //   quantity: 1,
-        // });
+        // Check quota before execution (P1-2 implementation)
+        try {
+          await quotaService.assert({
+            tenantId,
+            dimension: 'graph.queries',
+            quantity: 1,
+          });
+        } catch (error) {
+          if (error instanceof QuotaExceededException) {
+            throw new GraphQLError('Quota exceeded', {
+              extensions: {
+                code: 'QUOTA_EXCEEDED',
+                dimension: error.dimension,
+                used: error.used,
+                limit: error.limit,
+              },
+            });
+          }
+          throw error;
+        }
 
         const response = await graphRAGQueryService.query({
           investigationId: args.input.investigationId,
@@ -120,22 +134,22 @@ export const graphragQueryResolvers = {
           timeout: args.input.timeout,
         });
 
-        //
-        // TODO: This is a placeholder for the usage metering service
-        //
-        // await usageMeteringService.record({
-        //   id: '',
-        //   tenantId,
-        //   dimension: 'graph.queries',
-        //   quantity: 1,
-        //   unit: 'count',
-        //   source: 'graphrag',
-        //   metadata: {
-        //     investigationId: args.input.investigationId,
-        //   },
-        //   occurredAt: new Date().toISOString(),
-        //   recordedAt: new Date().toISOString(),
-        // });
+        // Record usage for billing/analytics (P1-2 implementation)
+        await usageMeteringService.record({
+          id: '',  // Will be auto-generated
+          tenantId,
+          dimension: 'graph.queries',
+          quantity: 1,
+          unit: 'count',
+          source: 'graphrag',
+          metadata: {
+            investigationId: args.input.investigationId,
+            question: args.input.question,
+            maxHops: args.input.maxHops,
+          },
+          occurredAt: new Date().toISOString(),
+          recordedAt: new Date().toISOString(),
+        });
 
         return response;
       } catch (error: any) {

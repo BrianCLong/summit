@@ -308,16 +308,20 @@ export class SBOMGenerator {
 
       const mergedSBOM: SBOMDocument = {
         bomFormat: 'CycloneDX',
-        specVersion: '1.5',
+        specVersion: '1.7',
         serialNumber: `urn:uuid:${crypto.randomUUID()}`,
         version: 1,
         metadata: {
           timestamp: new Date().toISOString(),
-          tools: [{ vendor: 'IntelGraph', name: 'sbom-merger', version: '1.0.0' }],
+          tools: [{ vendor: 'IntelGraph', name: 'sbom-merger', version: '1.1.0' }],
           component: {
             type: 'application',
             name: 'intelgraph-platform',
             version: process.env.VERSION || '0.0.0',
+          },
+          manufacture: {
+            name: 'IntelGraph Enterprise',
+            url: ['https://intelgraph.io'],
           },
         },
         components: mergedComponents,

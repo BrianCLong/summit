@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import fs from 'fs/promises';
-import { MaestroService } from '../MaestroService';
-import { runsRepo } from '../runs/runs-repo';
+import { MaestroService } from '../MaestroService.js';
+import { runsRepo } from '../runs/runs-repo.js';
 
 jest.mock('fs/promises');
 jest.mock('../runs/runs-repo', () => ({

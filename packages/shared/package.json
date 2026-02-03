@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/shared",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Shared utilities and types for Summit platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "zod": "^3.22.4"

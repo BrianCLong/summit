@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Trace Evidence Report",
+  "type": "object",
+  "required": ["evidence_id", "summary", "artifacts"],
+  "properties": {
+    "evidence_id": { "type": "string", "pattern": "^EVD-AGENTTRACE-[A-Z0-9_-]+$" },
+    "summary": { "type": "string" },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "results": { "type": "array" }
+  }
+}

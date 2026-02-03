@@ -3,7 +3,7 @@
 **Authority**: This document defines the canonical set of CI workflows that MUST pass before any release tag can be promoted from RC to GA.
 
 **Version**: 3.0.0
-**Last Updated**: 2026-01-08
+**Last Updated**: 2026-02-01
 **Owner**: Platform Engineering
 
 ---
@@ -152,6 +152,19 @@ These workflows **MUST** complete with `conclusion: success` for **every** commi
 - Verification suite completes
 - Build is deterministic (bit-for-bit reproducible)
 - Golden path smoke test succeeds
+
+### 5. SOC Controls
+
+| Field    | Value                                |
+| -------- | ------------------------------------ |
+| Workflow | `.github/workflows/soc-controls.yml` |
+| Name     | `SOC Controls`                       |
+| Triggers | Every PR/push to main                |
+
+**Guarantees**:
+
+- SOC control verification suite executes in CI
+- SOC compliance reports are uploaded as artifacts
 
 ---
 

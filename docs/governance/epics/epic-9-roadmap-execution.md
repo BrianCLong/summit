@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 9 — Wishbook-to-Roadmap Execution Kernel (beyond GA, no sprawl)
 
 1.  Build a single backlog view: wishbook items tagged to workflows and metrics.

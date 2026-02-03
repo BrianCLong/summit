@@ -6,7 +6,7 @@ export interface SearchableItem {
   tags?: string[];
   source?: string;
   createdAt: string;
-  originalObject: any;
+  originalObject: unknown;
 }
 
 export interface SearchQuery {

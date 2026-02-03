@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
 import * as crypto from 'crypto';
 
 const logger = baseLogger.child({ module: 'StateMerkleAnchor' });

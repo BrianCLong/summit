@@ -1,21 +1,23 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { EntityResolver } from '../engine/EntityResolver';
-import { provenanceLedger } from '../../provenance/ledger';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
-// Mock dependencies
-jest.mock('../../services/IntelGraphService', () => ({
+const mockGetInstance = jest.fn();
+const mockAppendEntry = jest.fn();
+
+jest.unstable_mockModule('../../services/IntelGraphService', () => ({
   IntelGraphService: {
-    getInstance: jest.fn()
-  }
+    getInstance: mockGetInstance,
+  },
 }));
 
-jest.mock('../../provenance/ledger', () => ({
+jest.unstable_mockModule('../../provenance/ledger', () => ({
   provenanceLedger: {
-    appendEntry: jest.fn()
-  }
+    appendEntry: mockAppendEntry,
+  },
 }));
 
-import { IntelGraphService } from '../../services/IntelGraphService';
+const { EntityResolver } = await import('../engine/EntityResolver.js');
+const { IntelGraphService } = await import('../../services/IntelGraphService.js');
+const { provenanceLedger } = await import('../../provenance/ledger.js');
 
 describe('EntityResolver', () => {
   let resolver: EntityResolver;
