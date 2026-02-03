@@ -1,0 +1,13 @@
+{
+  "items": [
+    {
+      "evidence_id": "EVD-QWEN3ASR06B-EVAL-001",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ]
+    }
+  ],
+  "version": "1.0"
+}
