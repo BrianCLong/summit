@@ -1,0 +1,10 @@
+tools:
+  - id: "search-tool"
+    allowed_context_spaces: ["work:acme", "personal"]
+    redaction_classes: ["pii", "financial"]
+  - id: "medical-analyzer"
+    allowed_context_spaces: ["health"]
+    redaction_classes: ["pii"]
+  - id: "billing-assistant"
+    allowed_context_spaces: ["finance"]
+    redaction_classes: []

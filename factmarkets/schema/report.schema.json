@@ -4,6 +4,51 @@
   "type": "object",
   "required": ["evidence_id", "summary", "claims", "limitations", "needs_review"],
   "properties": {
+    "provenance": {
+      "type": "object",
+      "required": ["validator_cert_id", "policy_version", "supervision_state", "review_trace_hash", "audit", "trust_center", "temporal"],
+      "properties": {
+        "validator_cert_id": { "type": "string" },
+        "policy_version": { "type": "string" },
+        "supervision_state": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+        "review_trace_hash": { "type": "string" },
+        "audit": {
+          "type": "object",
+          "required": ["audit_log_id", "attestation_uri", "audit_blackbox_hash"],
+          "properties": {
+            "audit_log_id": { "type": "string" },
+            "attestation_uri": { "type": "string" },
+            "audit_blackbox_hash": { "type": "string" }
+          }
+        },
+        "trust_center": {
+          "type": "object",
+          "required": ["assurance_level", "compliance_status", "certification_bundle_uri"],
+          "properties": {
+            "assurance_level": { "type": "string" },
+            "compliance_status": { "type": "string", "enum": ["COMPLIANT", "NON_COMPLIANT", "PARTIAL"] },
+            "certification_bundle_uri": { "type": "string" }
+          }
+        },
+        "temporal": {
+          "type": "object",
+          "required": ["issued_at"],
+          "properties": {
+            "issued_at": { "type": "string", "format": "date-time" },
+            "valid_until": { "type": "string", "format": "date-time" },
+            "bitemporal_ref": { "type": "string" }
+          }
+        },
+        "blockchain_anchor": {
+          "type": "object",
+          "properties": {
+            "chain_id": { "type": "string" },
+            "transaction_hash": { "type": "string" },
+            "block_number": { "type": "number" }
+          }
+        }
+      }
+    },
     "evidence_id": { "type": "string" },
     "summary": { "type": "string" },
     "claims": {
