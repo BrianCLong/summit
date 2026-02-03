@@ -1,12 +1,14 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import axios from 'axios';
 import { enableTemporal, disableTemporal } from '../temporal/control.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { authorize } from '../middleware/authorization.js';
 import GAEnrollmentService from '../services/GAEnrollmentService.js';
 import { getPostgresPool } from '../config/database.js';
+import { clearShadowCache } from '../middleware/ShadowTrafficMiddleware.js';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -94,7 +96,7 @@ const router = express.Router();
 router.use(ensureAuthenticated, authorize('manage_users'));
 
 // GA Signals Endpoint
-router.get('/admin/ga/signals', async (_req, res) => {
+router.get('/ga/signals', async (_req, res) => {
   try {
     const config = await GAEnrollmentService.getConfig();
 
@@ -128,7 +130,7 @@ router.get('/admin/ga/signals', async (_req, res) => {
 });
 
 // GA Config Endpoint (Rollback/Throttle)
-router.post('/admin/ga/config', express.json(), async (req, res) => {
+router.post('/ga/config', express.json(), async (req, res) => {
   try {
     const { status, maxTenants, maxUsers } = req.body;
     const updates: any = {};
@@ -145,7 +147,7 @@ router.post('/admin/ga/config', express.json(), async (req, res) => {
   }
 });
 
-router.get('/admin/config', (req, res) => {
+router.get('/config', (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
   if (
     tenantId &&
@@ -157,7 +159,7 @@ router.get('/admin/config', (req, res) => {
   res.json(memConfig);
 });
 
-router.post('/admin/config', express.json(), (req, res) => {
+router.post('/config', express.json(), (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
   const allowed = Object.keys(memConfig).filter(
     (k) => !['TENANT_OVERRIDES', 'TENANT_DEFAULTS'].includes(k),
@@ -215,7 +217,7 @@ router.post('/admin/config', express.json(), (req, res) => {
 });
 
 // Add endpoint to manage tenant defaults
-router.post('/admin/tenant-defaults', express.json(), (req, res) => {
+router.post('/tenant-defaults', express.json(), (req, res) => {
   const { tenantId, config } = req.body;
 
   if (!tenantId) {
@@ -243,23 +245,107 @@ router.post('/admin/tenant-defaults', express.json(), (req, res) => {
 });
 
 // Health check endpoint for secret rotation
-router.get('/admin/health', (req, res) => {
+router.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 // Get all tenant defaults
-router.get('/admin/tenant-defaults', (req, res) => {
+router.get('/tenant-defaults', (req, res) => {
   res.json({
     tenantDefaults: memConfig.TENANT_DEFAULTS,
   });
 });
 
+import { RegionalAvailabilityService } from '../services/RegionalAvailabilityService.js';
+
+// Regional Failover Admin APIs
+router.get('/failover/status', (req, res) => {
+  const availability = RegionalAvailabilityService.getInstance();
+  res.json(availability.getStatus());
+});
+
+router.post('/failover/mode', express.json(), (req, res) => {
+  const { mode } = req.body;
+  if (mode !== 'AUTOMATIC' && mode !== 'MANUAL_PROMOTION_ACTIVE') {
+    return res.status(400).json({ ok: false, error: 'Invalid mode' });
+  }
+  const availability = RegionalAvailabilityService.getInstance();
+  availability.setFailoverMode(mode);
+  res.json({ ok: true, mode });
+});
+
+router.post('/failover/status', express.json(), (req, res) => {
+  const { region, status } = req.body;
+  if (!region || !['HEALTHY', 'DEGRADED', 'DOWN'].includes(status)) {
+    return res.status(400).json({ ok: false, error: 'Invalid region or status' });
+  }
+  try {
+    const availability = RegionalAvailabilityService.getInstance();
+    availability.setRegionStatus(region, status);
+    res.json({ ok: true, region, status });
+  } catch (error: any) {
+    res.status(400).json({ ok: false, error: error.message });
+  }
+});
+
+// Shadow Traffic Admin APIs
+router.get('/shadow/configs', async (req, res) => {
+  try {
+    const pool = getPostgresPool();
+    const result = await pool.query('SELECT * FROM shadow_traffic_configs');
+    res.json(result.rows);
+  } catch (error: any) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.post('/shadow/configs', express.json(), async (req, res) => {
+  const { tenantId, targetUrl, samplingRate, compareResponses } = req.body;
+  if (!tenantId || !targetUrl) {
+    return res.status(400).json({ ok: false, error: 'tenantId and targetUrl are required' });
+  }
+  try {
+    const pool = getPostgresPool();
+    await pool.query(
+      `INSERT INTO shadow_traffic_configs (tenant_id, target_url, sampling_rate, compare_responses)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (tenant_id) DO UPDATE 
+       SET target_url = EXCLUDED.target_url, 
+           sampling_rate = EXCLUDED.sampling_rate, 
+           compare_responses = EXCLUDED.compare_responses,
+           updated_at = CURRENT_TIMESTAMP`,
+      [tenantId, targetUrl, samplingRate ?? 0, compareResponses ?? false]
+    );
+    clearShadowCache(tenantId);
+    res.json({ ok: true, message: 'Shadow traffic config updated' });
+  } catch (error: any) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+router.delete('/shadow/configs/:tenantId', async (req, res) => {
+  const { tenantId } = req.params;
+  try {
+    const pool = getPostgresPool();
+    await pool.query('DELETE FROM shadow_traffic_configs WHERE tenant_id = $1', [tenantId]);
+    clearShadowCache(tenantId);
+    res.json({ ok: true, message: 'Shadow traffic config deleted' });
+  } catch (error: any) {
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
 export default router;
 
+// ESM __dirname shim
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // n8n flows admin (read/write server/config/n8n-flows.json)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const n8nCfgPath = path.resolve(__dirname, '../../config/n8n-flows.json');
 
-router.get('/admin/n8n-flows', (_req, res) => {
+router.get('/n8n-flows', (_req, res) => {
   try {
     const raw = fs.readFileSync(n8nCfgPath, 'utf8');
     return res.json(JSON.parse(raw));
@@ -272,7 +358,7 @@ router.get('/admin/n8n-flows', (_req, res) => {
   }
 });
 
-router.post('/admin/n8n-flows', express.json(), (req, res) => {
+router.post('/n8n-flows', express.json(), (req, res) => {
   const body = req.body || {};
   const allowedPrefixes = Array.isArray(body.allowedPrefixes)
     ? body.allowedPrefixes
@@ -296,7 +382,7 @@ router.post('/admin/n8n-flows', express.json(), (req, res) => {
 });
 
 // OPA admin utilities
-router.get('/admin/opa/validate', async (_req, res) => {
+router.get('/opa/validate', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -335,7 +421,7 @@ router.get('/admin/opa/validate', async (_req, res) => {
   }
 });
 
-router.post('/admin/opa/reload', async (_req, res) => {
+router.post('/opa/reload', async (_req, res) => {
   // Stub: Typically OPA data reloads are handled via bundles; provide a no-op success
   return res.json({
     ok: true,
@@ -344,7 +430,7 @@ router.post('/admin/opa/reload', async (_req, res) => {
 });
 
 // OPA bundle source: attempt to read status plugin for bundle revision/version
-router.get('/admin/opa/bundle-source', async (_req, res) => {
+router.get('/opa/bundle-source', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base) return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
@@ -383,7 +469,7 @@ router.get('/admin/opa/bundle-source', async (_req, res) => {
 });
 
 // OPA bundle status (checks whether data.maestro.n8n.allowed_flows exists)
-router.get('/admin/opa/bundle-status', async (_req, res) => {
+router.get('/opa/bundle-status', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base) return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
@@ -403,7 +489,7 @@ router.get('/admin/opa/bundle-status', async (_req, res) => {
 });
 
 // Push current n8n allowed flows into OPA data API (writes to data.maestro.n8n.allowed_flows)
-router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
+router.post('/opa/push-n8n-flows', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -428,7 +514,7 @@ router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
 });
 
 // Sync n8n allowed flows FROM OPA into local config file
-router.post('/admin/opa/sync-n8n-flows', async (_req, res) => {
+router.post('/opa/sync-n8n-flows', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -466,7 +552,7 @@ const secretManager = new SecretManager();
 const serviceRegistry = new MockServiceRegistry();
 
 // Secret Rotation API
-router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
+router.post('/secrets/rotate', express.json(), async (req, res) => {
   const { secretName, newVersion, services } = req.body;
 
   if (!secretName || !newVersion || !services) {
@@ -491,7 +577,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
       // In a real implementation, we might want to roll back here as well
       continue;
     }
-    const health = await axios.get(healthUrl).then(res => res.data);
+    const health = await axios.get(healthUrl, { timeout: 5000 }).then(res => res.data);
     if (health.status !== 'ok') {
       console.error(`Service ${service} is unhealthy after secret rotation. Rolling back...`);
       await secretManager.setSecret(secretName, 'current', previousSecret);
@@ -504,7 +590,7 @@ router.post('/admin/secrets/rotate', express.json(), async (req, res) => {
 });
 
 // Temporal runtime toggle
-router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
+router.post('/temporal/toggle', async (req, res) => {
   const enabled = Boolean(req.body?.enabled);
   try {
     if (enabled) {
@@ -523,7 +609,7 @@ router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
 });
 
 // Push prefixes (allowed/denied) to OPA
-router.post('/admin/opa/push-n8n-prefixes', async (_req, res) => {
+router.post('/opa/push-n8n-prefixes', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -562,7 +648,7 @@ router.post('/admin/opa/push-n8n-prefixes', async (_req, res) => {
 });
 
 // Sync prefixes FROM OPA
-router.post('/admin/opa/sync-n8n-prefixes', async (_req, res) => {
+router.post('/opa/sync-n8n-prefixes', async (_req, res) => {
   try {
     const base = process.env.OPA_BASE_URL || '';
     if (!base)
@@ -596,66 +682,3 @@ router.post('/admin/opa/sync-n8n-prefixes', async (_req, res) => {
   }
 });
 
-// OPA bundle status (checks whether data.maestro.n8n.allowed_flows exists)
-router.get('/admin/opa/bundle-status', async (_req, res) => {
-  try {
-    const base = process.env.OPA_BASE_URL || '';
-    if (!base) return res.json({ ok: false, message: 'OPA_BASE_URL not set' });
-    const r = await axios.get(`${base}/v1/data/maestro/n8n/allowed_flows`, {
-      timeout: 3000,
-    });
-    const flows = r.data?.result || {};
-    const keys = Object.keys(flows || {});
-    return res.json({
-      ok: true,
-      allowedFlowsCount: keys.length,
-      sample: keys.slice(0, 10),
-    });
-  } catch (e: any) {
-    return res.json({ ok: false, message: e?.message || 'lookup failed' });
-  }
-});
-
-// Push current n8n allowed flows into OPA data API (writes to data.maestro.n8n.allowed_flows)
-router.post('/admin/opa/push-n8n-flows', async (_req, res) => {
-  try {
-    const base = process.env.OPA_BASE_URL || '';
-    if (!base)
-      return res
-        .status(200)
-        .json({ ok: false, message: 'OPA_BASE_URL not set' });
-    let cfg: any = { allowedFlows: [] };
-    try {
-      cfg = JSON.parse(fs.readFileSync(n8nCfgPath, 'utf8'));
-    } catch { }
-    const map: Record<string, boolean> = {};
-    for (const f of cfg.allowedFlows || []) map[f] = true;
-    await axios.put(`${base}/v1/data/maestro/n8n/allowed_flows`, map, {
-      timeout: 5000,
-    });
-    return res.json({ ok: true, count: Object.keys(map).length });
-  } catch (e: any) {
-    return res
-      .status(200)
-      .json({ ok: false, message: e?.message || 'push failed' });
-  }
-});
-
-// Temporal runtime toggle
-router.post('/admin/temporal/toggle', express.json(), async (req, res) => {
-  const enabled = Boolean(req.body?.enabled);
-  try {
-    if (enabled) {
-      await enableTemporal();
-    } else {
-      await disableTemporal();
-    }
-    (memConfig as any).TEMPORAL_ENABLED = enabled;
-    process.env.TEMPORAL_ENABLED = enabled ? 'true' : 'false';
-    return res.json({ ok: true, enabled });
-  } catch (e: any) {
-    return res
-      .status(500)
-      .json({ ok: false, error: e?.message || 'temporal toggle failed' });
-  }
-});
