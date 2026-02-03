@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mobile-sdk",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Shared mobile SDK for IntelGraph cross-platform applications with offline-first architecture",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,7 +32,7 @@
     "dev": "tsup --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest run"
   },
   "dependencies": {
     "idb": "^8.0.1",

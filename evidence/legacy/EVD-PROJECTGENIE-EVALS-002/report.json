@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-PROJECTGENIE-EVALS-002",
+  "item_slug": "legacy",
+  "summary": "Legacy report",
+  "artifacts": [],
+  "report_id": "REP-001",
+  "status": "draft",
+  "vfgnn_status": "initialized",
+  "title": "Legacy Report"
+}

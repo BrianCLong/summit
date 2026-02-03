@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PubSub } from 'graphql-subscriptions';
-import { SubscriptionEngine } from '../subscriptionEngine';
+import { SubscriptionEngine } from '../subscriptionEngine.js';
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

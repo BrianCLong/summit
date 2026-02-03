@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "policy_denials": { "type": "integer" },
+    "signals_generated": { "type": "integer" },
+    "latency_ms": { "type": "number" }
+  },
+  "required": ["policy_denials", "signals_generated"],
+  "additionalProperties": true
+}

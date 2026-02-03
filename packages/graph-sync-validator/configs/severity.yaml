@@ -1,0 +1,7 @@
+# Severity scoring configuration
+weights:
+  MISSING_NODE: 10
+  MISSING_REL: 7
+  PROP_MISMATCH: 6
+  ORPHAN_NODE: 3
+  ORPHAN_REL: 3

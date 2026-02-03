@@ -1,0 +1,14 @@
+version: 1
+default: deny
+rules:
+  - id: deny_prompt_injection
+    when:
+      query_contains_any:
+        - "ignore policies"
+        - "list all tenants"
+    action: deny
+  - id: allow_tenant_scoped_queries
+    when:
+      tenant_required: true
+      max_hops_lte: 3
+    action: allow

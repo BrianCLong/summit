@@ -39,7 +39,7 @@ jest.unstable_mockModule('../../validation/index.js', () => ({
 }));
 
 // Dynamic import AFTER mock is set up
-const { default: sanitizeRequest } = await import('../sanitize');
+const { default: sanitizeRequest } = await import('../sanitize.js');
 
 const requestFactory = (options: Record<string, any> = {}) => {
   return {

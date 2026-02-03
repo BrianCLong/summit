@@ -13,9 +13,9 @@
  */
 
 // Core services
-export { AuthorizationService } from './AuthorizationService';
-export { WarrantService } from './WarrantService';
-export { LicenseService } from './LicenseService';
+export { AuthorizationService } from './AuthorizationService.js';
+export { WarrantService } from './WarrantService.js';
+export { LicenseService } from './LicenseService.js';
 
 // Types and interfaces
 export type {
@@ -48,14 +48,14 @@ export type {
   Obligation,
   Condition,
   DecisionTrace,
-} from './types';
+} from './types.js';
 
 // Errors
 export {
   AuthorizationError,
   WarrantError,
   LicenseError,
-} from './types';
+} from './types.js';
 
 // Warrant service types
 export type {
@@ -63,7 +63,7 @@ export type {
   BindWarrantInput,
   ApproveWarrantInput,
   WarrantUsageInput,
-} from './WarrantService';
+} from './WarrantService.js';
 
 // License service types
 export type {
@@ -71,4 +71,4 @@ export type {
   AssignLicenseInput,
   AcceptTOSInput,
   LicenseEnforcementInput,
-} from './LicenseService';
+} from './LicenseService.js';

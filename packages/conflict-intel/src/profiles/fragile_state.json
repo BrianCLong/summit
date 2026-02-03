@@ -1,0 +1,24 @@
+{
+  "profileName": "Fragile State Prototype - Sudan Model",
+  "indicators": {
+    "connectivity_blackout": {
+      "threshold": 0.8,
+      "weight": 0.9
+    },
+    "paramilitary_mobilization": {
+      "threshold": 0.5,
+      "weight": 0.95
+    },
+    "hate_speech_velocity": {
+      "threshold": 200,
+      "unit": "posts_per_minute",
+      "weight": 0.85
+    }
+  },
+  "defaultResponseMode": "LOCKDOWN",
+  "humanitarianOverlays": [
+    "hospital_locations",
+    "aid_corridors",
+    "displacement_camps"
+  ]
+}

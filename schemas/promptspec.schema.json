@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PromptSpec",
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "version": {"type": "string"},
+    "description": {"type": "string"},
+    "inputs_schema": {"type": "object"},
+    "output_schema": {"type": "object"},
+    "prompt_template": {"type": "string"},
+    "policies": {
+      "type": "object",
+      "properties": {
+        "tools_allowed": {"type": "boolean"},
+        "deny_guaranteed_earnings": {"type": "boolean"}
+      },
+      "required": ["tools_allowed", "deny_guaranteed_earnings"],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "id",
+    "version",
+    "description",
+    "inputs_schema",
+    "output_schema",
+    "prompt_template",
+    "policies"
+  ],
+  "additionalProperties": false
+}
