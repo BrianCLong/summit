@@ -421,6 +421,44 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: federated-campaign-radar-implementation
+    version: v1
+    path: prompts/federated-campaign-radar-implementation.md
+    sha256: f24cb004a3529f2735297dc5d579498b74aa5e6decee63dcb73fc0c5e2678b6f
+    description: Implement Federated Campaign Radar schemas, services, policies, routes, and documentation.
+    scope:
+      paths:
+        - docs/federated-campaign-radar*.md
+        - docs/runbooks/federated-campaign-radar*.md
+        - docs/roadmap/STATUS.json
+        - schemas/fcr/
+        - server/src/services/fcr/
+        - server/src/routes/federated-campaign-radar.ts
+        - server/src/app.ts
+        - server/policies/
+        - server/src/provenance/
+        - fixtures/fcr-sample.json
+        - openapi/spec.yaml
+        - agents/examples/
+        - artifacts/agent-runs/
+        - prompts/federated-campaign-radar-implementation.md
+        - prompts/registry.yaml
+      domains:
+        - federation
+        - privacy
+        - governance
+        - provenance
+        - observability
+        - api
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
