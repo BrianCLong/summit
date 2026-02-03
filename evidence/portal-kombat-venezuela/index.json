@@ -1,0 +1,44 @@
+{
+  "items": [
+    {
+      "evidence_id": "EVD-PORTALKOMBAT-VEN-SURGE-001",
+      "files": [
+        "EVD-PORTALKOMBAT-VEN-SURGE-001/report.json",
+        "EVD-PORTALKOMBAT-VEN-SURGE-001/metrics.json",
+        "EVD-PORTALKOMBAT-VEN-SURGE-001/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-PORTALKOMBAT-VEN-CONTRA-002",
+      "files": [
+        "EVD-PORTALKOMBAT-VEN-CONTRA-002/report.json",
+        "EVD-PORTALKOMBAT-VEN-CONTRA-002/metrics.json",
+        "EVD-PORTALKOMBAT-VEN-CONTRA-002/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-PORTALKOMBAT-VEN-INAUTH-003",
+      "files": [
+        "EVD-PORTALKOMBAT-VEN-INAUTH-003/report.json",
+        "EVD-PORTALKOMBAT-VEN-INAUTH-003/metrics.json",
+        "EVD-PORTALKOMBAT-VEN-INAUTH-003/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-PORTALKOMBAT-VEN-POLAR-004",
+      "files": [
+        "EVD-PORTALKOMBAT-VEN-POLAR-004/report.json",
+        "EVD-PORTALKOMBAT-VEN-POLAR-004/metrics.json",
+        "EVD-PORTALKOMBAT-VEN-POLAR-004/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-PORTALKOMBAT-VEN-PROV-005",
+      "files": [
+        "EVD-PORTALKOMBAT-VEN-PROV-005/report.json",
+        "EVD-PORTALKOMBAT-VEN-PROV-005/metrics.json",
+        "EVD-PORTALKOMBAT-VEN-PROV-005/stamp.json"
+      ]
+    }
+  ]
+}

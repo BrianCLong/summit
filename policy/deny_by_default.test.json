@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "id": "test:blocked_domain",
+      "gate": "gate:external_retrieval",
+      "input": { "url": "http://malicious.com" },
+      "expected": "deny"
+    },
+    {
+      "id": "test:allowed_domain",
+      "gate": "gate:external_retrieval",
+      "input": { "url": "https://veraai.eu/results" },
+      "expected": "allow"
+    },
+    {
+      "id": "test:missing_provenance",
+      "gate": "gate:model_provenance",
+      "input": { "model": "vera-ai-image-v1", "hash": null },
+      "expected": "deny"
+    }
+  ]
+}
