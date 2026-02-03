@@ -61,7 +61,7 @@ jobs:
         continue-on-error: true # Non-blocking (token may not be available)
 
       - name: Upload security scan results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@v4 # v4.1.0
         if: always()
         with:
           name: security-scan-results
@@ -98,7 +98,7 @@ jobs:
           }
 
       - name: Upload OPA test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@v4 # v4.1.0
         if: always()
         with:
           name: opa-test-results
@@ -214,7 +214,7 @@ jobs:
         continue-on-error: true # Non-blocking for PRs, required for releases
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@v4 # v4.1.0
         if: always()
         with:
           name: sbom
@@ -222,7 +222,7 @@ jobs:
           retention-days: 90 # 2 years retention
 
       - name: Upload SLSA provenance
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@v4 # v4.1.0
         if: always()
         with:
           name: slsa-provenance
@@ -392,7 +392,7 @@ jobs:
 
       - name: Upload evidence index
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@v4 # v4.1.0
         with:
           name: ga-evidence-index-${{ github.sha }}
           path: |
