@@ -10,8 +10,10 @@ include Makefile.merge-train
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke evidence-bundle
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: gmr-gate gmr-eval gmr-validate
 
-COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+# Handle both .yaml and .yml extensions for dev compose
+COMPOSE_DEV_FILE ?= $(shell ls docker-compose.dev.yml 2>/dev/null || ls docker-compose.dev.yaml 2>/dev/null || echo "docker-compose.dev.yml")
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -72,11 +74,18 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	python3 -m venv $(VENV_DIR)
-	$(VENV_BIN)/pip install -U pip
-	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
-	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
-	$(VENV_BIN)/pre-commit install || true
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "Creating venv..."; \
+		$(PYTHON) -m venv $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR) --without-pip; \
+	fi
+	@if [ ! -f "$(VENV_BIN)/pip" ]; then \
+		echo "Installing pip..."; \
+		curl -sS https://bootstrap.pypa.io/get-pip.py | $(VENV_BIN)/python || true; \
+	fi
+	@$(VENV_BIN)/pip install -U pip || true
+	@$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]" || true
+	@$(VENV_BIN)/pip install pytest ruff mypy pre-commit || true
+	@$(VENV_BIN)/pre-commit install || true
 	pnpm install
 
 dev:
@@ -93,6 +102,15 @@ lint:   ## Lint js/ts + python
 format: ## Format code
 	pnpm -w exec prettier -w . || true
 	$(VENV_BIN)/ruff format .
+
+gmr-gate: ## Run the GMR guardrail gate (requires DATABASE_URL)
+	@./metrics/scripts/run_gmr_gate.sh
+
+gmr-eval: ## Run deterministic GMR anomaly detection evals
+	@$(PYTHON) metrics/evals/eval_anomaly_detection.py
+
+gmr-validate: ## Validate GMR guardrail assets
+	@$(PYTHON) scripts/ci/validate_gmr_assets.py
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
