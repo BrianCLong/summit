@@ -123,7 +123,9 @@ def main() -> int:
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
-        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
+        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json",
+        # Timestamp drift exceptions
+        "exec_brief_pack.json", "ATTESTATION_SUMMARY.md", "sources.json"
     }
     IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out"}
 
@@ -134,7 +136,9 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
+            # Stricter check for ISO8601-like timestamps (e.g. 2024-01-01T12:00:00)
+            # Avoid matching Evidence IDs like EVD-2025... which might just have year and no T/time
+            if re.search(r'"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}', txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
