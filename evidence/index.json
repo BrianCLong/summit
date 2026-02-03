@@ -4,44 +4,90 @@
     "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
-      "artifacts": ["fixtures/ambiguities/critical.json"]
+      "artifacts": [
+        "fixtures/ambiguities/critical.json"
+      ]
     },
     "EVD-vfgnn-ATT-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-vfgnn-NEG-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-SCHEMA-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-PLNR-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-XFER-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-ATLS-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-ATLS-002": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-ATLAS-GOV-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-260119895-keel-ARCH-001": {
       "files": [
@@ -93,13 +139,53 @@
       ]
     },
     "EVD-openviking-contextfs-001": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-openviking-retrieval-002": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
     },
     "EVD-openviking-trace-003": {
-      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-COGWAR-2026-SCHEMA-001": {
+      "area": "schema",
+      "files": [
+        "evidence/reports/schema_report.json"
+      ],
+      "description": "Cognitive domain schema validation report"
+    },
+    "EVD-COGWAR-2026-MODELTI-001": {
+      "area": "model_ti",
+      "files": [
+        "fixtures/model_ti/telemetry_sample.json"
+      ],
+      "description": "Model TI telemetry sample + redaction proof"
+    },
+    "EVD-COGWAR-2026-EVAL-001": {
+      "area": "eval",
+      "files": [
+        "fixtures/cognitive/coordinated_flood.json"
+      ],
+      "description": "Narrative flood fixture results"
+    },
+    "EVD-COGWAR-2026-PLAYBOOK-001": {
+      "area": "playbook",
+      "files": [
+        "docs/event_playbooks.md"
+      ],
+      "description": "Event playbook generation snapshot"
     }
   }
 }
