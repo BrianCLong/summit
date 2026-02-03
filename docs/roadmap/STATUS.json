@@ -5,13 +5,25 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
+      "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner. Includes CogSec evidence bundle scaffolding and verification gate."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
-      "status": "planned",
+      "status": "in_progress",
       "owner": "codex",
-      "notes": "One-pager brief aligning the CogWar Radar MWS, governance guardrails, and deterministic artifacts."
+      "notes": "One-pager brief mapping IO/CogWar radar scope to Summit/IntelGraph defensive capabilities, with governance guardrails and deterministic artifacts."
+    },
+    {
+      "id": "runbook-cognitive-security-defense",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
+    },
+    {
+      "id": "ip-defense-claims-c391-s420",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     }
   ]
 }
