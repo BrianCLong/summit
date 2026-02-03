@@ -1,15 +1,16 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { beforeEach, describe, expect, it } from '@jest/globals';
+import { beforeEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import type { QueryFeatures } from '../learning-to-rank.js';
 
-jest.mock('../../../db/postgres.js', () => ({
+jest.unstable_mockModule('../../../db/postgres.js', () => ({
   getPostgresPool: jest.fn(() => ({
     query: jest.fn().mockResolvedValue({ rows: [] }),
   })),
 }));
 
-jest.mock('../../../middleware/observability/otel-tracing.js', () => ({
+jest.unstable_mockModule('../../../middleware/observability/otel-tracing.js', () => ({
   otelService: {
     createSpan: jest.fn(() => ({
       addSpanAttributes: jest.fn(),
@@ -17,11 +18,6 @@ jest.mock('../../../middleware/observability/otel-tracing.js', () => ({
     })),
   },
 }));
-
-import { DecisionRecorder } from '../decision-recorder.js';
-import { LLMDecisionRouter } from '../llm-decision-router.js';
-import { ReplayRunner } from '../replay-runner.js';
-import { LearningToRankRouter, QueryFeatures } from '../learning-to-rank.js';
 
 const baseFeatures: QueryFeatures = {
   complexity: 0.6,
@@ -34,9 +30,20 @@ const baseFeatures: QueryFeatures = {
 };
 
 describe('LLMDecisionRouter audit trails', () => {
-  let recorder: DecisionRecorder;
-  let router: LLMDecisionRouter;
+  let DecisionRecorder: typeof import('../decision-recorder.js').DecisionRecorder;
+  let LLMDecisionRouter: typeof import('../llm-decision-router.js').LLMDecisionRouter;
+  let ReplayRunner: typeof import('../replay-runner.js').ReplayRunner;
+  let LearningToRankRouter: typeof import('../learning-to-rank.js').LearningToRankRouter;
+  let recorder: InstanceType<typeof DecisionRecorder>;
+  let router: InstanceType<typeof LLMDecisionRouter>;
   let logPath: string;
+
+  beforeAll(async () => {
+    ({ DecisionRecorder } = await import('../decision-recorder.js'));
+    ({ LLMDecisionRouter } = await import('../llm-decision-router.js'));
+    ({ ReplayRunner } = await import('../replay-runner.js'));
+    ({ LearningToRankRouter } = await import('../learning-to-rank.js'));
+  });
 
   beforeEach(async () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'llm-router-'));

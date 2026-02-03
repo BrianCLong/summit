@@ -1,33 +1,53 @@
-# IntelGraph Threat Modeling Framework
+# Summit MAESTRO Threat Modeling Framework
 
-> **Version**: 1.1.0
-> **Last Updated**: 2025-12-27
+> **Version**: 2.0.0 (MAESTRO Aligned)
+> **Last Updated**: 2025-01-20
 > **Owner**: Security Team
 > **Status**: Active
 
 ## Overview
 
-This document defines the lightweight, continuous threat modeling framework for IntelGraph/Summit. Every significant feature should have an attached threat model that:
+This document defines the threat modeling framework for Summit, now fully aligned with the **MAESTRO** (Multi-Agent Environment, Security, Threat, Risk, and Outcome) framework. As an agentic AI system, Summit requires a security approach that goes beyond traditional application security to address the unique risks of autonomous agents, tool use, and model interaction.
 
-- Identifies assets and their sensitivity
-- Maps entry points and trust boundaries
-- Enumerates threats using STRIDE + AI-specific categories
-- Documents mitigations and residual risks
-- Enables security review during code changes
+## The MAESTRO Framework
 
-## Goals
+MAESTRO is the de facto industry standard for securing agentic AI systems. It replaces flat application security models with a layered approach designed for autonomy.
 
-1. **Shift-left security** - Catch threats during design, not production
-2. **Developer-friendly** - Brief models, not 40-page documents
-3. **Continuous** - Threat models evolve with code
-4. **Actionable** - Clear mitigations tied to implementation
-5. **Auditable** - Track coverage and freshness automatically
+### 1. The MAESTRO Layers
 
-## Methodology: STRIDE + AI Extensions
+All threat models must analyze risks across these seven layers:
 
-We use **STRIDE** as our base framework with additional categories for AI/ML-specific threats.
+1.  **Foundation Models**: The underlying LLMs (e.g., GPT-4, Qwen). Risks include alignment failures, jailbreaks, and hazardous capabilities.
+2.  **Data Operations**: The retrieval and context pipeline (RAG, Vector Stores). Risks include data poisoning and context contamination.
+3.  **Agents**: The autonomous actors (e.g., Jules, Maestro). Risks include goal drift, loop exhaustion, and over-autonomy.
+4.  **Tools**: The external capabilities (GitHub, Jira, Linear). Risks include confused deputy attacks and excessive permissions.
+5.  **Infrastructure**: The hosting environment (K8s, Docker). Risks include container escape and side-channel attacks.
+6.  **Observability**: The monitoring plane. Risks include blind spots and log integrity failures.
+7.  **Security & Compliance**: The governance layer. Risks include policy bypass and audit gaps.
 
-### STRIDE Categories
+### 2. Core Security Expectations
+
+- **Adversarial Assumption**: Assume active attempts to manipulate prompts, poison data, and abuse tools.
+- **Risk-Based Approach**: Prioritize mitigations that measurably reduce specific risks to confidentiality, integrity, availability, and safety.
+- **Least Privilege**: Agents must operate with the minimum scope required for their immediate task.
+
+## Required MAESTRO Behaviors
+
+All Summit engineering and agentic workflows must demonstrate:
+
+1.  **Threat Modeling First**: Decompose systems into MAESTRO layers and identify cross-layer threats (e.g., Data Poisoning → Agent Misalignment → Tool Abuse).
+2.  **AI-Specific Mitigations**: Implement defenses such as:
+    -   **Input/Output Validation**: Strict schema checks on LLM inputs and tool outputs.
+    -   **Guardrails**: Deterministic checks (e.g., regex, logic gates) that override model decisions.
+    -   **Adversarial Training**: Testing against known jailbreak patterns.
+3.  **Continuous Monitoring**: Runtime checks for anomaly detection, ensuring agents do not deviate from expected behavior patterns.
+4.  **Benchmark Alignment**: Design components to map to emerging agent security benchmarks (e.g., MITRE ATLAS).
+
+## Threat Classification (STRIDE + AI Extensions)
+
+We use **STRIDE** for general threats and **MAESTRO-aligned extensions** for AI-specific risks.
+
+### STRIDE Categories (General)
 
 | Category                   | Description                              | Key Questions                               |
 | -------------------------- | ---------------------------------------- | ------------------------------------------- |
@@ -38,7 +58,7 @@ We use **STRIDE** as our base framework with additional categories for AI/ML-spe
 | **D**enial of Service      | Making systems unavailable               | Can the feature be overwhelmed or crashed?  |
 | **E**levation of Privilege | Gaining unauthorized access              | Can an attacker gain higher permissions?    |
 
-### AI/Agent-Specific Categories (Extension)
+### AI/Agent-Specific Categories (MAESTRO Extensions)
 
 | Category                  | Description                                   | Key Questions                            |
 | ------------------------- | --------------------------------------------- | ---------------------------------------- |
@@ -47,8 +67,9 @@ We use **STRIDE** as our base framework with additional categories for AI/ML-spe
 | **DP** - Data Poisoning   | Corrupting training or reference data         | Can adversaries influence model outputs? |
 | **GH** - Goal Hijacking   | Diverting agent from intended objectives      | Can agent goals be subverted?            |
 | **OA** - Over-Autonomy    | Agents taking unreviewed high-risk actions    | Are human checkpoints in place?          |
+| **TI** - Tool Interaction | Unsafe usage of external tools/APIs           | Can the agent be tricked into harmful actions via tools? |
 
-### Supply Chain, Insider, and Third-Party Categories (Extension)
+### Supply Chain & Operational Categories
 
 | Category              | Description                                                        | Key Questions                                                     |
 | --------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
@@ -60,93 +81,47 @@ We use **STRIDE** as our base framework with additional categories for AI/ML-spe
 
 Each threat model MUST include:
 
-### 1. Feature Overview
+### 1. Feature Overview & MAESTRO Mapping
 
-- **Name**: Feature/component name
-- **Description**: 1-2 sentence summary
-- **Owner**: Team/individual responsible
-- **Last Updated**: Date
-- **Risk Tier**: Critical / High / Medium / Low
+- **Name/Description**: Feature summary.
+- **MAESTRO Layers Involved**: List which of the 7 layers are touched.
+- **Risk Tier**: Critical / High / Medium / Low.
 
-### 2. Assets
+### 2. Assets & Trust Boundaries
 
-What are we protecting?
+- **Assets**: What are we protecting? (e.g., User Context, Auth Tokens).
+- **Trust Boundaries**: Where does trust change? (e.g., Agent → External Tool).
 
-```markdown
-| Asset              | Sensitivity | Description                   |
-| ------------------ | ----------- | ----------------------------- |
-| User credentials   | Critical    | Passwords, tokens, API keys   |
-| Investigation data | High        | Intelligence analysis results |
-```
+### 3. Threat Enumeration
 
-### 3. Entry Points
-
-Where can actors interact with the system?
+List threats using STRIDE/MAESTRO categories.
 
 ```markdown
-| Entry Point | Protocol | Authentication | Trust Level   |
-| ----------- | -------- | -------------- | ------------- |
-| GraphQL API | HTTPS    | JWT            | Authenticated |
-| WebSocket   | WSS      | JWT            | Authenticated |
+| ID  | Layer | Category | Threat            | Impact | Risk |
+| --- | ----- | -------- | ----------------- | ------ | ---- |
+| T1  | Agent | PI       | Prompt Injection  | High   | High |
 ```
 
-### 4. Trust Boundaries
+### 4. Mitigations & Controls
 
-Where does trust change?
+Map mitigations to specific threats.
 
 ```markdown
-| Boundary     | From      | To            | Controls            |
-| ------------ | --------- | ------------- | ------------------- |
-| Client → API | Untrusted | Authenticated | TLS, JWT validation |
+| Threat ID | Mitigation         | Layer    | Status      | Implementation         |
+| --------- | ------------------ | -------- | ----------- | ---------------------- |
+| T1        | Output Guardrails  | Security | Implemented | server/src/guardrails/ |
 ```
 
-### 5. Threats
+### 5. Residual Risk
 
-Enumerated threats with STRIDE/AI classification:
-
-```markdown
-| ID  | Category | Threat            | Likelihood | Impact | Risk |
-| --- | -------- | ----------------- | ---------- | ------ | ---- |
-| T1  | S        | Session hijacking | Medium     | High   | High |
-```
-
-### 6. Mitigations
-
-Controls addressing each threat:
-
-```markdown
-| Threat ID | Mitigation         | Status      | Implementation         |
-| --------- | ------------------ | ----------- | ---------------------- |
-| T1        | Short-lived tokens | Implemented | server/src/auth/jwt.ts |
-```
-
-### 7. Residual Risk
-
-What remains after mitigations?
-
-```markdown
-| Threat ID | Residual Risk               | Acceptance | Accepted By   |
-| --------- | --------------------------- | ---------- | ------------- |
-| T1        | Token theft during validity | Low        | Security Team |
-
-**Supply chain/insider/third-party coverage is mandatory.** Each threat model must include at least one SC, TP, and IN threat
-with explicit mitigations and automation hooks referencing `docs/security/control-implementations.json`.
-```
+Document what risks remain and who accepts them.
 
 ## Risk Scoring
 
-### Likelihood Scale
+### Likelihood & Impact
 
-- **High**: Likely to occur; known attack patterns exist
-- **Medium**: Possible under specific conditions
-- **Low**: Requires significant effort or unusual circumstances
-
-### Impact Scale
-
-- **Critical**: System-wide compromise, major data breach
-- **High**: Significant data exposure or service disruption
-- **Medium**: Limited data exposure or degraded service
-- **Low**: Minimal impact, easily recoverable
+- **Likelihood**: High (Known attacks), Medium (Possible), Low (Theoretical).
+- **Impact**: Critical (System compromise), High (Data leak), Medium (Service degradation), Low (Minor).
 
 ### Risk Matrix
 
@@ -155,15 +130,6 @@ with explicit mitigations and automation hooks referencing `docs/security/contro
 | **High**   | Medium     | High          | Critical    | Critical        |
 | **Medium** | Low        | Medium        | High        | Critical        |
 | **Low**    | Low        | Low           | Medium      | High            |
-
-## Risk Tiers for Features
-
-| Tier         | Criteria                               | Review Cadence | Approvers                 |
-| ------------ | -------------------------------------- | -------------- | ------------------------- |
-| **Critical** | Auth, multi-tenant, AI agents, secrets | 30 days        | Security Lead + Architect |
-| **High**     | Data ingestion, exports, integrations  | 60 days        | Security Team             |
-| **Medium**   | Core features, analytics               | 90 days        | Tech Lead                 |
-| **Low**      | UI components, internal tools          | 180 days       | Developer                 |
 
 ## Coverage Requirements
 
@@ -185,127 +151,35 @@ These directories/features MUST have threat models:
 | `Dockerfile*`, `docker/**`, `.github/workflows/**`                     | Build & Artifact Integrity | Critical  |
 | `services/**/connector/**`, `adapters/**`, `packages/**/connector*/**` | Third-Party Connectors     | High      |
 
-### Staleness Thresholds
-
-- **Critical** features: Alert if > 30 days old
-- **High** features: Alert if > 60 days old
-- **Medium** features: Alert if > 90 days old
-
 ## Workflow Integration
 
 ### 1. New Feature Development
 
-1. Create threat model from template during design
-2. Review with Security Team before implementation
-3. Reference threat model in PR description
-4. Run `scripts/security/enforce-threat-model-design.ts --base-ref main` on every ADR/design PR
-5. Update threat model and regenerate control automation if design changes
+1. Create threat model from template during design.
+2. **Decompose by MAESTRO Layers**.
+3. Review with Security Team.
+4. Reference threat model in PR description.
+5. Run `scripts/security/enforce-threat-model-design.ts --base-ref main`.
 
-### 2. Code Changes to Existing Features
+### 2. Code Changes
 
-1. CI checks if change touches covered paths
-2. If threat model exists: verify not stale
-3. If threat model missing: advisory comment on PR
-4. Update threat model if change affects threat surface
-
-### 3. Periodic Review
-
-1. Security Team reviews threat model index monthly
-2. Stale models flagged for owner action
-3. Annual comprehensive review of all models
-4. Regenerate `docs/security/generated/control-automation-plan.md` from the JSON control library
+1. CI checks if change touches covered paths.
+2. If threat model exists: verify not stale.
+3. If threat model missing: advisory comment on PR.
 
 ## File Locations
 
-```
+```text
 docs/security/
 ├── threat-modeling-framework.md    # This document
 ├── THREAT_MODEL_INDEX.md           # Index of all threat models
 └── threat-models/
     ├── template.md                 # Template for new models
-    ├── auth.md                     # Authentication threat model
-    ├── intelgraph-queries.md       # Graph query threat model
-    ├── maestro-runs.md             # AI orchestration threat model
-    └── [feature].md                # Additional feature models
+    └── [feature].md                # Feature models
 ```
-
-## CI Integration
-
-The `scripts/security/check-threat-model-coverage.ts` script:
-
-1. Detects changed files in PR
-2. Maps changes to required threat models
-3. Checks if threat model exists
-4. Verifies threat model freshness
-5. Posts advisory comment to PR
-
-**Phase 1 (Current)**: Advisory only - does not block PRs
-**Phase 2 (Future)**: Blocking for Critical tier features
-
-The `scripts/security/enforce-threat-model-design.ts` script:
-
-1. Detects new ADRs or design documents
-2. Verifies they reference an approved threat model and that `THREAT_MODEL_INDEX.md` is updated
-3. Blocks (`exit 1`) when missing, preventing feature design merges without an updated model
-
-The `scripts/security/generate-control-automation.ts` script:
-
-1. Reads `docs/security/control-implementations.json`
-2. Generates `docs/security/generated/control-automation-plan.md` for CI/ops consumption
-3. Ensures mitigations have executable controls for supply chain, insider, and third-party threats
-
-## Quick Reference
-
-### Creating a New Threat Model
-
-```bash
-cp docs/security/threat-models/template.md \
-   docs/security/threat-models/[feature].md
-# Edit with feature-specific content
-# Add entry to THREAT_MODEL_INDEX.md
-```
-
-### Running Coverage Check Locally
-
-```bash
-npx ts-node scripts/security/check-threat-model-coverage.ts \
-  --changed-files "server/src/auth/jwt.ts"
-```
-
-### Enforcing Design-Time Threat Models
-
-```bash
-npx ts-node scripts/security/enforce-threat-model-design.ts \
-  --base-ref main --format markdown
-```
-
-### Regenerating Control Automation Plan
-
-```bash
-npx ts-node scripts/security/generate-control-automation.ts
-```
-
-### Updating an Existing Model
-
-1. Edit the threat model file
-2. Update `last_updated` in frontmatter
-3. Update entry in `THREAT_MODEL_INDEX.md`
-4. Commit with message: `sec(threat-model): update [feature] threat model`
 
 ## References
 
+- [Cloud Security Alliance: MAESTRO Framework](https://cloudsecurityalliance.org/blog/2025/02/06/agentic-ai-threat-modeling-framework-maestro)
 - [STRIDE Threat Modeling](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats)
-- [OWASP Threat Modeling](https://owasp.org/www-community/Threat_Modeling)
-- [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework)
-- [IntelGraph Security Guidelines](./SECURITY_GUIDELINES.md)
-- [Existing Threat Model](../../SECURITY/threat-model.md)
-
-## Changelog
-
-| Version | Date       | Author        | Changes           |
-| ------- | ---------- | ------------- | ----------------- |
-| 1.0.0   | 2025-12-06 | Security Team | Initial framework |
-
----
-
-**Next Review**: 2026-03-06
+- [OWASP Top 10 for LLM](https://owasp.org/www-project-top-10-for-large-language-model-applications/)

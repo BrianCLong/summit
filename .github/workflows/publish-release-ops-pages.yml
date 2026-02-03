@@ -114,7 +114,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0 # Full history for snapshot branch access
 
@@ -234,7 +234,7 @@ jobs:
 
       - name: Upload Triage Packet
         if: steps.health-check.outputs.level == 'WARN' || steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: redaction-triage-${{ needs.check-trigger.outputs.artifact_run_id }}
           path: artifacts/redaction-triage/
@@ -416,11 +416,11 @@ jobs:
       # ========================================
       - name: Setup Pages
         if: inputs.dry_run != true
-        uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v4
 
       - name: Upload Pages Artifact
         if: inputs.dry_run != true
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v3
         with:
           path: site/release-ops
 

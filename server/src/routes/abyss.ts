@@ -11,9 +11,15 @@ const router = Router();
  */
 const extremeAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['x-abyss-authorization'];
-    if (authHeader === 'CONFIRM_FINAL_PROTOCOL_ARMING_SEQUENCE_OMEGA') {
+    const requiredHeader = process.env.ABYSS_SECURITY_HEADER;
+
+    // Fail secure: If env var is not set, access is denied.
+    if (requiredHeader && authHeader === requiredHeader) {
         next();
     } else {
+        if (!requiredHeader) {
+            console.error('Security Error: ABYSS_SECURITY_HEADER is not configured.');
+        }
         res.status(403).json({ message: 'Forbidden: Unimaginable authorization is required.' });
     }
 };

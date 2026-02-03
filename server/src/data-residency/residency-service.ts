@@ -27,11 +27,11 @@ interface ResidencyConfig {
 
 interface KMSConfig {
   provider:
-    | 'aws-kms'
-    | 'azure-keyvault'
-    | 'gcp-kms'
-    | 'hashicorp-vault'
-    | 'customer-managed';
+  | 'aws-kms'
+  | 'azure-keyvault'
+  | 'gcp-kms'
+  | 'hashicorp-vault'
+  | 'customer-managed';
   keyId: string;
   region: string;
   endpoint?: string;
@@ -281,9 +281,10 @@ export class DataResidencyService {
       const pool = getPostgresPool();
 
       // Get residency and KMS configs
+      const region = process.env.SUMMIT_REGION || 'us-east-1';
       const [residencyConfig, kmsConfig] = await Promise.all([
         this.getResidencyConfig(tenantId),
-        this.getKMSConfig(tenantId),
+        this.getKMSConfig(tenantId, region),
       ]);
 
       // Check residency compliance
@@ -369,7 +370,8 @@ export class DataResidencyService {
       const pool = getPostgresPool();
 
       // Get KMS config for decryption
-      const kmsConfig = await this.getKMSConfig(tenantId);
+      const region = process.env.SUMMIT_REGION || 'us-east-1';
+      const kmsConfig = await this.getKMSConfig(tenantId, region);
 
       let decryptedData: string;
 
@@ -419,7 +421,7 @@ export class DataResidencyService {
         ) VALUES ($1, now(), $2, $3, now())`,
           [tenantId, false, error.message],
         )
-        .catch(() => {}); // Non-fatal audit logging
+        .catch(() => { }); // Non-fatal audit logging
 
       throw error;
     } finally {
@@ -529,10 +531,10 @@ export class DataResidencyService {
           residency: residencyConfig,
           kms: kmsConfig
             ? {
-                provider: kmsConfig.provider,
-                region: kmsConfig.region,
-                keyId: kmsConfig.keyId.substring(0, 8) + '***',
-              }
+              provider: kmsConfig.provider,
+              region: kmsConfig.region,
+              keyId: kmsConfig.keyId.substring(0, 8) + '***',
+            }
             : null,
         },
         compliance: {
@@ -900,16 +902,22 @@ export class DataResidencyService {
     };
   }
 
-  private async getKMSConfig(tenantId: string): Promise<KMSConfig | null> {
+  private async getKMSConfig(tenantId: string, region?: string): Promise<KMSConfig | null> {
     const pool = getPostgresPool();
-    const result = await pool.query(
-      'SELECT * FROM kms_configs WHERE tenant_id = $1',
-      [tenantId],
-    );
+    let query = 'SELECT * FROM kms_configs WHERE tenant_id = $1';
+    const params: any[] = [tenantId];
+
+    if (region) {
+      query += ' AND (region = $2 OR region IS NULL)';
+      params.push(region);
+    }
+
+    const result = await pool.query(query, params);
 
     if (result.rows.length === 0) return null;
 
-    const row = result.rows[0];
+    // Prioritize regional match if multiple found
+    const row = result.rows.find(r => r.region === region) || result.rows[0];
     return {
       provider: row.provider,
       keyId: row.key_id,

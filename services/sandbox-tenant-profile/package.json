@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sandbox-tenant-profile",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Sandbox tenant profile management for research and data lab environments",
   "type": "module",
   "main": "dist/index.js",

@@ -10,7 +10,7 @@ jobs:
     name: Assurance Snapshot
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - name: Verify agent file checksums
         run: |
           AGENTS_MD_SHA256=$(grep '^AGENTS_MD_SHA256=' .github/governance_hashes | cut -d'=' -f2)
@@ -28,7 +28,7 @@ jobs:
           echo "Weekly assurance check passed at $(date)" > assurance-snapshot.txt
           echo "AGENTS.md hash: $(sha256sum AGENTS.md | awk '{print $1}')" >> assurance-snapshot.txt
           echo "AGENT_MANDATES.md hash: $(sha256sum docs/governance/AGENT_MANDATES.md | awk '{print $1}')" >> assurance-snapshot.txt
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@v4 # v6
         with:
           retention-days: 14
           name: assurance-snapshot-${{ github.run_id }}

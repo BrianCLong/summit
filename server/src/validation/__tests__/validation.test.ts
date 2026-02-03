@@ -4,7 +4,9 @@
 
 // Mock htmlSanitizer to avoid jsdom ESM issues
 // Simulate HTML entity escaping like DOMPurify would
-jest.mock('../../utils/htmlSanitizer', () => ({
+import { jest, describe, it, expect } from '@jest/globals';
+
+jest.unstable_mockModule('../../utils/htmlSanitizer.js', () => ({
   sanitizeHtml: (input: string) => {
     return input
       .replace(/&/g, '&amp;')
@@ -16,8 +18,7 @@ jest.mock('../../utils/htmlSanitizer', () => ({
   },
 }));
 
-import { describe, it, expect } from '@jest/globals';
-import {
+const {
   EntityIdSchema,
   EmailSchema,
   URLSchema,
@@ -31,7 +32,7 @@ import {
   QueryValidator,
   validateInput,
   validateInputSafe,
-} from '../index';
+} = await import('../index.js');
 
 describe('Input Validation Schemas', () => {
   describe('EntityIdSchema', () => {

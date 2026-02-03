@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { SimulationEngineService, SimulationConfig } from './SimulationEngineService';
+import { SimulationEngineService, SimulationConfig } from './SimulationEngineService.js';
 import { eventBus } from '../lib/events/event-bus.js';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 export interface CampaignOptions {
   name?: string;
@@ -43,7 +43,7 @@ export class RedTeamSimulator extends EventEmitter {
       timestamp: new Date()
     };
 
-    eventBus.emit('red-team:campaign-update', eventPayload);
+    eventBus.emit('red-team:campaign-update', { ...eventPayload, tags: ['simulate-only'] });
 
     // Legacy event for backward compatibility
     eventBus.emit('raw-event', {
@@ -77,7 +77,8 @@ export class RedTeamSimulator extends EventEmitter {
         simulationId: result.id,
         type,
         targetId,
-        timestamp: new Date()
+        timestamp: new Date(),
+        tags: ['simulate-only']
       });
 
       // Legacy event for backward compatibility

@@ -6,7 +6,7 @@
  *
  * Usage:
  * ```typescript
- * import { EmailSchema, SanitizationUtils, validateInput } from './validation';
+ * import { EmailSchema, SanitizationUtils, validateInput } from './validation.js';
  *
  * // Validate email
  * const result = EmailSchema.safeParse(userInput);

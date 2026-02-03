@@ -1,0 +1,8 @@
+{
+  "item_slug": "mcp-apps",
+  "metrics": {
+    "verifier_ok": 1,
+    "fixtures_deny": 3,
+    "fixtures_allow": 1
+  }
+}

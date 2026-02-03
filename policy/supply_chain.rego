@@ -5,7 +5,37 @@ import rego.v1
 # Supply chain security policies
 # SLSA compliance and software bill of materials validation
 
+# Mandatory Signatures & Provenance
+
+deny contains msg if {
+	not input.sboms_signed
+	msg := "Signed SBOM required"
+}
+
+deny contains msg if {
+	not input.provenance_signed
+	msg := "Signed provenance required"
+}
+
 # SLSA Provenance Validation
+
+# Require SPDX SBOM
+deny contains msg if {
+	not input.artifact.sbom_spdx
+	msg := "Artifact must include SPDX SBOM"
+}
+
+# Require CycloneDX SBOM
+deny contains msg if {
+	not input.artifact.sbom_cyclonedx
+	msg := "Artifact must include CycloneDX SBOM"
+}
+
+# Require Build Provenance Attestation
+deny contains msg if {
+	not input.artifact.provenance_attestation
+	msg := "Artifact must include Build Provenance Attestation"
+}
 
 # Require SLSA provenance for all artifacts
 deny contains msg if {
@@ -285,4 +315,38 @@ deny contains msg if {
 	]
 	count(missing) > 0
 	msg := sprintf("Evidence bundle missing components: %v", [missing])
+}
+
+# General Artifact Signing
+
+# Deny if SBOM is not signed
+deny contains msg if {
+	some i
+	artifact := input.artifacts[i]
+	not artifact.sbom_spdx
+	msg := sprintf("Artifact %s missing SPDX SBOM", [artifact.name])
+}
+
+# Deny if provenance is not signed
+deny contains msg if {
+	some i
+	artifact := input.artifacts[i]
+	not artifact.sbom_cyclonedx
+	msg := sprintf("Artifact %s missing CycloneDX SBOM", [artifact.name])
+}
+
+# Enforce Provenance Attestation presence
+deny contains msg if {
+	some i
+	artifact := input.artifacts[i]
+	not artifact.provenance_attestation
+	msg := sprintf("Artifact %s missing provenance attestation", [artifact.name])
+}
+
+# Enforce Signature Verification
+deny contains msg if {
+	some i
+	artifact := input.artifacts[i]
+	not artifact.signature_verification_passed
+	msg := sprintf("Artifact %s signature verification failed", [artifact.name])
 }

@@ -12,7 +12,7 @@ import type {
   SSEMessage,
   StreamEvent,
   StreamError,
-} from '../types';
+} from '../types.js';
 
 export interface SSEServerOptions {
   heartbeatInterval?: number;

@@ -1,0 +1,62 @@
+name: Deploy GA (OIDC + Gates)
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  id-token: write
+  contents: read
+  attestations: write
+
+jobs:
+  graph-sync:
+    uses: ./.github/workflows/graph-sync-gate.yml
+    secrets: inherit
+
+  ga-gates:
+    needs: graph-sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Metrics
+        uses: actions/download-artifact@v4
+        with:
+          name: graph-sync-metrics
+          path: packages/graph-sync-validator/
+
+      - name: Verify Evidence Bundle
+        run: node scripts/ci/verify_evidence_bundle.mjs
+
+      - name: Verify Evidence ID Consistency
+        run: node scripts/ci/verify_evidence_id_consistency.mjs
+
+      - name: Verify Governance Docs
+        run: node scripts/ci/verify_governance_docs.mjs
+
+      - name: Verify Security Ledger
+        run: node scripts/ci/verify_security_ledger.mjs
+
+      - name: Verify SBOM + SLSA
+        run: node scripts/ci/verify_supply_chain.mjs
+
+  deploy:
+    needs: ga-gates
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/summit-ga-deploy
+          aws-region: us-east-1
+
+      - name: Deploy
+        run: ./scripts/deploy/ga.sh
