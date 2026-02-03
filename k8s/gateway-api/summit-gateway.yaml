@@ -1,6 +1,5 @@
 ---
 # Primary Gateway for Summit platform external traffic
-# Replaces: ingress-nginx controller
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
