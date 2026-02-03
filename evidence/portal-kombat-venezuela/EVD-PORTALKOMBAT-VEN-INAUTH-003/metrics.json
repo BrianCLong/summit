@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-PORTALKOMBAT-VEN-INAUTH-003",
+  "metrics": {
+    "total_profiles_analyzed": null,
+    "inauthentic_profiles": 4036,
+    "inauthentic_pct": 23.59
+  }
+}
