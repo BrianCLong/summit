@@ -107,6 +107,49 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: promptspec-foundation-lane1
+    version: v1
+    path: prompts/promptspec/promptspec-foundation-lane1@v1.md
+    sha256: 50e7d7c4e80bd32ecf7a092f7450e018f295438cbd3bbc20be48eddb32a3a904
+    description: Scaffold PromptSpec, evidence index, eval rubric, and policy gate foundations.
+    scope:
+      paths:
+        - promptspec/
+        - schemas/promptspec.schema.json
+        - schemas/evidence.index.schema.json
+        - evidence/index.py
+        - evidence/write_evidence.py
+        - eval/runner.py
+        - eval/rubrics/
+        - eval/fixtures/
+        - policy/gate.py
+        - policy/rules.json
+        - docs/required_checks.todo.md
+        - dependency_delta.md
+        - tests/policy/test_denies_guarantees.py
+        - tests/evidence/test_index_determinism.py
+        - tests/promptspec/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/promptspec/promptspec-foundation-lane1@v1.md
+        - prompts/registry.yaml
+        - agents/examples/PROMPTSPEC_FOUNDATION_LANE1_20260207.json
+      domains:
+        - governance
+        - evidence
+        - eval
+        - policy
+        - promptspec
+        - docs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: integrations-backlog-sync
     version: v1
     path: prompts/integrations/backlog-sync.md
@@ -185,6 +228,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sera-cli-proxy
+    version: v1
+    path: prompts/integrations/sera-cli-proxy@v1.md
+    sha256: 274b54b3a12f321fa647087bc2cc529c994dee37802c570a14abf7d2a05d3504
+    description: Implement Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails.
+    scope:
+      paths:
+        - cli/src/commands/sera-proxy.ts
+        - cli/src/sera-proxy/
+        - cli/__tests__/sera-proxy.test.ts
+        - docs/standards/sera-cli.md
+        - docs/security/data-handling/sera-cli.md
+        - docs/ops/runbooks/sera-cli.md
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/sera-cli-proxy@v1.md
+        - prompts/registry.yaml
+      domains:
+        - integrations
+        - cli
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md
@@ -231,35 +304,6 @@ prompts:
         - documentation
         - operations
         - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: nog-governed-ops-docs
-    version: v1
-    path: prompts/docs/nog-governed-ops-docs@v1.md
-    sha256: 671b5dcfc2e1fe6ca3e0fb75a84a7e9cbbc661f8cb07ebdc1529699bd88c4646
-    description: Document governed narrative risk ops standards, security handling, and runbook updates.
-    scope:
-      paths:
-        - repo_assumptions.md
-        - docs/standards/nog-governed-agents.md
-        - docs/security/data-handling/nog-governed-agents.md
-        - docs/ops/runbooks/nog-governed-agents.md
-        - docs/roadmap/STATUS.json
-        - agents/examples/NOG_GOVERNED_OPS_DOCS_TASK.json
-        - prompts/docs/nog-governed-ops-docs@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - security
-        - operations
     verification:
       tiers_required:
         - C
@@ -370,53 +414,16 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: nardom-evidence-scaffold
+  - id: pr-17714-update
     version: v1
-    path: prompts/narrative/nardom-evidence-scaffold@v1.md
-    sha256: 817ae1e6712e726310ec424f701b7e0e67acc161af8b9acc9ea716941337abd2
-    description: Scaffold NARDOM narrative intelligence evidence bundles, schemas, and verifier updates.
+    path: prompts/pr/pr-17714-update@v1.md
+    sha256: 197e7e05eb008021a4b9b25ea569189ac652b99b5deeda908b979aa678a1b328
+    description: Update PR 17714 scoped changes.
     scope:
       paths:
-        - docs/narrative_intel/
-        - docs/roadmap/STATUS.json
-        - evidence/index.json
-        - evidence/narrative_intel/
-        - evidence/schemas/nardom_*.schema.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/narrative/nardom-evidence-scaffold@v1.md
-        - prompts/registry.yaml
-        - required_checks.todo.md
-        - tools/ci/verify_evidence.py
-        - agents/examples/NARDOM_EVIDENCE_SCAFFOLD_20260202.json
-      domains:
-        - governance
-        - evidence
-        - ci
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: pr-17716-update
-    version: v1
-    path: prompts/pr/pr-17716-update@v1.md
-    sha256: a992d48d41bc24d12b11db1eceb47bf87fe7e16fc558012dd6abacc91467654a
-    description: Update PR 17716 scoped changes.
-    scope:
-      paths:
-        - agents/
         - docs/
-        - evidence/
-        - packages/
-        - prompts/
-        - required_checks.todo.md
-        - tools/
-        - prompts/pr/pr-17716-update@v1.md
+        - nds/
+        - prompts/pr/pr-17714-update@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
