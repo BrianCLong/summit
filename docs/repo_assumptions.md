@@ -12,6 +12,17 @@
 *   **Modules**: `server/src/modules/` is the location for domain modules.
 *   **Testing**: Jest is used for testing (`server/__tests__`).
 
+## Narrative Intelligence Subsumption (PR-17713)
+### Verified (Local Inspection)
+- `docs/security/` and `docs/ops/runbooks/` exist and are active documentation surfaces.
+- Feature flags are documented under `docs/FEATURE_FLAGS.md` and related docs.
+- Playwright configuration exists in the repo root (`playwright.config.ts`).
+
+### Deferred Pending Verification
+- Exact service runtime locations for narrative analytics modules.
+- CI check names and required gates for narrative intelligence changes.
+- Existing evidence schema naming and signing conventions used by runtime services.
+
 ## Assumptions
 *   The `server/db/managed-migrations` path is correctly configured in the environment where `npm run migrate` runs.
 *   The `MigrationManager` is robust enough to handle new tables without manual intervention in the database structure (other than running the migration).
@@ -23,3 +34,9 @@
 *   `.archive/`
 *   `GOLDEN/datasets/`
 *   Existing migration files in `server/db/managed-migrations/` (unless fixing a bug, which is out of scope).
+
+## Validation Plan (Narrative Intelligence PR-1)
+- Locate feature flag evaluation path and tenant allowlist controls.
+- Confirm centralized logging/audit pathways for evidence packs.
+- Identify artifact naming conventions and hash signing flows.
+- Confirm API patterns (REST/GraphQL/WebSocket) and endpoint ownership.
