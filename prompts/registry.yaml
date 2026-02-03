@@ -26,6 +26,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: semhl-required-checks
+    version: v1
+    path: prompts/ci/semhl-required-checks@v1.md
+    sha256: 09fb75e7c769abfdcb3eaab9322f2160e92cbf08b0f1fe62eaac022aca644147
+    description: Update semantic highlighting required check guidance and roadmap status notes.
+    scope:
+      paths:
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/ci/semhl-required-checks@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SEMHL_REQUIRED_CHECKS_PR1.json
+      domains:
+        - documentation
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md
