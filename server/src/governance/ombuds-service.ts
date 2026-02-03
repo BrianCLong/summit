@@ -173,22 +173,22 @@ export class OmbudsService {
   async getDecisionsByCase(caseId: string): Promise<OmbudsDecision[]> {
     const pool = getPostgresPool();
     const res = await pool.query('SELECT * FROM ombuds_decisions WHERE case_id = $1', [caseId]);
-    return res.rows.map(row => this.mapRowToDecision(row));
+    return res.rows.map((row: any) => this.mapRowToDecision(row));
   }
 
   async getDecisionsByTenant(tenantId: string): Promise<OmbudsDecision[]> {
     const pool = getPostgresPool();
     const res = await pool.query('SELECT * FROM ombuds_decisions WHERE tenant_id = $1', [tenantId]);
-    return res.rows.map(row => this.mapRowToDecision(row));
+    return res.rows.map((row: any) => this.mapRowToDecision(row));
   }
 
   async getAllDecisions(): Promise<OmbudsDecision[]> {
     const pool = getPostgresPool();
     const res = await pool.query('SELECT * FROM ombuds_decisions');
-    return res.rows.map(row => this.mapRowToDecision(row));
+    return res.rows.map((row: any) => this.mapRowToDecision(row));
   }
 
-  private mapRowToDecision(row): OmbudsDecision {
+  private mapRowToDecision(row: any): OmbudsDecision {
     return {
       decisionId: row.decision_id,
       tenantId: row.tenant_id,

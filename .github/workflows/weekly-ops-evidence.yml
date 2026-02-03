@@ -34,7 +34,7 @@ jobs:
       # No secrets required by default
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ inputs.ref }}
 
@@ -94,8 +94,9 @@ jobs:
           fi
 
       - name: Upload ops evidence pack
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: ${{ steps.meta.outputs.artifact_upload_name }}
           path: ${{ steps.meta.outputs.output_dir }}/${{ steps.meta.outputs.tarball_name }}
           if-no-files-found: error
@@ -151,8 +152,9 @@ jobs:
           echo "snippet_path=evidence-index-entry.json" >> "$GITHUB_OUTPUT"
 
       - name: Upload index snippet
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: evidence-index-entry
           path: ${{ steps.emit.outputs.snippet_path }}
           if-no-files-found: error

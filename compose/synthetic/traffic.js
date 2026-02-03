@@ -13,7 +13,7 @@ async function tick() {
       body,
     });
     await res.body.text();
-  } catch (e) {
+  } catch (_e) {
     // swallow errors to keep load running
   }
 }

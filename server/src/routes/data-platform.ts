@@ -2,7 +2,7 @@ import express from 'express';
 import { IngestionService } from '../lib/data-platform/ingest/service.js';
 import { RetrievalService } from '../lib/data-platform/retrieval/service.js';
 import { RagService } from '../lib/data-platform/rag/service.js';
-import { pg } from '../db/pg';
+import { pg } from '../db/pg.js';
 
 const router = express.Router();
 const ingestionService = new IngestionService();
@@ -22,7 +22,7 @@ router.use(ensureTenant);
 
 // --- Collections ---
 
-router.post('/collections', async (req, res) => {
+router.post('/collections', async (req: any, res) => {
     try {
         const { name, description, sensitivity } = req.body;
         const tenantId = req.user.tenantId;
@@ -39,7 +39,7 @@ router.post('/collections', async (req, res) => {
     }
 });
 
-router.get('/collections', async (req, res) => {
+router.get('/collections', async (req: any, res) => {
     try {
         const tenantId = req.user.tenantId;
         const rows = await pg.many(
@@ -55,7 +55,7 @@ router.get('/collections', async (req, res) => {
 
 // --- Ingestion ---
 
-router.post('/documents/upload', async (req, res) => {
+router.post('/documents/upload', async (req: any, res) => {
     try {
         const { collectionId, title, sourceUri, mimeType, contentBase64 } = req.body;
         const tenantId = req.user.tenantId;
@@ -71,7 +71,7 @@ router.post('/documents/upload', async (req, res) => {
     }
 });
 
-router.get('/documents/:id', async (req, res) => {
+router.get('/documents/:id', async (req: any, res) => {
     try {
         const doc = await pg.oneOrNone(
             `SELECT * FROM documents WHERE id = $1 AND tenant_id = $2`,
@@ -87,7 +87,7 @@ router.get('/documents/:id', async (req, res) => {
 
 // --- Retrieval ---
 
-router.post('/retrieve', async (req, res) => {
+router.post('/retrieve', async (req: any, res) => {
     try {
         const { query, topK, collectionIds } = req.body;
         const result = await retrievalService.retrieve({
@@ -104,7 +104,7 @@ router.post('/retrieve', async (req, res) => {
 
 // --- RAG ---
 
-router.post('/rag/answer', async (req, res) => {
+router.post('/rag/answer', async (req: any, res) => {
     try {
         const { question, collectionIds, model } = req.body;
         const result = await ragService.answer({

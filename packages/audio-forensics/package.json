@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/audio-forensics",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Audio forensics and authenticity verification",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },

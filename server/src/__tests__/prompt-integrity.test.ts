@@ -1,4 +1,5 @@
-import { PromptRegistry } from '../../prompts/registry';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { PromptRegistry } from '../../prompts/registry.js';
 import fs from 'fs/promises';
 import path from 'path';
 

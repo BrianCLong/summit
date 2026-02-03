@@ -37,11 +37,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v4
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Find Orchestrator Run
@@ -185,14 +186,14 @@ jobs:
           ls -la internal-package/
 
       - name: Upload Internal Package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: release-ops-internal-${{ steps.find-run.outputs.run_id }}
           path: internal-package/
           retention-days: 30
 
       - name: Upload as Latest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: release-ops-internal-latest
           path: internal-package/

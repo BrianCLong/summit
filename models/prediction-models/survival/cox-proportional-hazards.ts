@@ -39,7 +39,7 @@ export class CoxProportionalHazards {
     maxIterations: number = 100,
     tolerance: number = 1e-6
   ): CoxModelResult {
-    const n = data.length;
+    const _n = data.length;
     const p = data[0].covariates.length;
 
     this.featureNames = featureNames || Array.from({ length: p }, (_, i) => `X${i}`);

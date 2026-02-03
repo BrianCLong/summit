@@ -1,4 +1,5 @@
-import { CausalGraphService } from '../services/CausalGraphService';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { CausalGraphService } from '../services/CausalGraphService.js';
 
 // Mock Neo4j driver and session
 const mockRun = jest.fn();

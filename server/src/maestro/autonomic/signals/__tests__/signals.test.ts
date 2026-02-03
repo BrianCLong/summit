@@ -1,6 +1,7 @@
 
-import { SignalsService } from '../signals-service';
-import { SignalType, HealthStatus } from '../types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { SignalsService } from '../signals-service.js';
+import { SignalType, HealthStatus } from '../types.js';
 
 describe('SignalsService', () => {
   let service: SignalsService;

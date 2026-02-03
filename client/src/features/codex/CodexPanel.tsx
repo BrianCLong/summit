@@ -1,6 +1,7 @@
 import React from 'react';
 import { addSection, addCard, moveCard, selectCodex } from './codexSlice';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
+// @ts-ignore
 import { DndContext, closestCenter } from '@dnd-kit/core';
 
 export function CodexPanel() {

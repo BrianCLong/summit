@@ -312,7 +312,7 @@ export class Neo4jCursorPagination {
  */
 export async function getTotalCount(
   queryFn: () => Promise<number>,
-  useCache: boolean = true,
+  _useCache: boolean = true,
 ): Promise<number> {
   try {
     return await queryFn();
@@ -351,20 +351,20 @@ export const paginationFieldResolvers = {
  * Example usage in GraphQL resolver
  */
 export const exampleResolver = {
-  entities: async (
-    parent: any,
+  entities: (
+    _parent: any,
     args: { first?: number; after?: string },
-    context: any,
-  ): Promise<Connection<any>> => {
+    _context: any,
+  ): Connection<any> => {
     const { limit, isForward, cursor } = validatePaginationInput(args);
 
     // Build query with cursor
-    const { where, params } = PostgresCursorPagination.buildWhereClause(
+    const { where: _where, params: _params } = PostgresCursorPagination.buildWhereClause(
       cursor,
       isForward,
     );
-    const orderBy = PostgresCursorPagination.buildOrderClause(isForward);
-    const limitClause = PostgresCursorPagination.buildLimitClause(limit);
+    const _orderBy = PostgresCursorPagination.buildOrderClause(isForward);
+    const _limitClause = PostgresCursorPagination.buildLimitClause(limit);
 
     // Execute query (example)
     // const items = await db.query(`SELECT * FROM entities WHERE ${where} ${orderBy} ${limitClause}`, params);

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit canonical event model",
+  "type": "object",
+  "required": ["actor", "action", "target"],
+  "properties": {
+    "actor": {
+      "type": "object",
+      "properties": {
+        "user_id": {"type": "string"},
+        "user_name": {"type": "string"},
+        "email": {"type": "string"}
+      }
+    },
+    "action": {"type": "string"},
+    "target": {
+      "type": "object",
+      "properties": {
+        "resource_id": {"type": "string"},
+        "resource_type": {"type": "string"},
+        "app": {"type": "string"}
+      }
+    },
+    "auth": {
+      "type": "object",
+      "properties": {
+        "session_id": {"type": "string"},
+        "mfa_method": {"type": "string"},
+        "oauth_client_id": {"type": "string"},
+        "oauth_scopes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "geo": {
+      "type": "object",
+      "properties": {
+        "ip": {"type": "string"},
+        "country": {"type": "string"},
+        "city": {"type": "string"}
+      }
+    },
+    "device": {
+      "type": "object",
+      "properties": {
+        "device_id": {"type": "string"},
+        "device_name": {"type": "string"},
+        "is_managed": {"type": "boolean"}
+      }
+    },
+    "bytes": {"type": "integer"},
+    "labels": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    }
+  },
+  "additionalProperties": true
+}

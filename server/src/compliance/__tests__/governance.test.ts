@@ -53,14 +53,14 @@ jest.unstable_mockModule('../../config/database.js', () => ({
   getPostgresPool: jest.fn(() => poolMock),
 }));
 
-let DataLineageSystem: typeof import('../DataLineageSystem').DataLineageSystem;
-let RetentionPolicyEngine: typeof import('../RetentionPolicyEngine').RetentionPolicyEngine;
-let SchemaDriftDetector: typeof import('../SchemaDriftDetector').SchemaDriftDetector;
+let DataLineageSystem: typeof import('../DataLineageSystem.js').DataLineageSystem;
+let RetentionPolicyEngine: typeof import('../RetentionPolicyEngine.js').RetentionPolicyEngine;
+let SchemaDriftDetector: typeof import('../SchemaDriftDetector.js').SchemaDriftDetector;
 
 beforeAll(async () => {
-  ({ DataLineageSystem } = await import('../DataLineageSystem'));
-  ({ RetentionPolicyEngine } = await import('../RetentionPolicyEngine'));
-  ({ SchemaDriftDetector } = await import('../SchemaDriftDetector'));
+  ({ DataLineageSystem } = await import('../DataLineageSystem.js'));
+  ({ RetentionPolicyEngine } = await import('../RetentionPolicyEngine.js'));
+  ({ SchemaDriftDetector } = await import('../SchemaDriftDetector.js'));
 });
 
 beforeEach(() => {

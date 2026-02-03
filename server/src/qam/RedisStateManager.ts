@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
 import * as crypto from 'crypto';
 import * as zlib from 'zlib';
 import { promisify } from 'util';
@@ -528,9 +528,9 @@ export class RedisStateManager extends EventEmitter {
           avgSize:
             recentStates.length > 0
               ? recentStates.reduce(
-                  (sum, s) => sum + (s.metadata.size || 0),
-                  0,
-                ) / recentStates.length
+                (sum, s) => sum + (s.metadata.size || 0),
+                0,
+              ) / recentStates.length
               : 0,
         },
         configuration: {
@@ -671,7 +671,7 @@ export class RedisStateManager extends EventEmitter {
 
     // Sort by timestamp to get latest
     const states = await Promise.all(
-      keys.map(async (key) => {
+      keys.map(async (key: string) => {
         const value = await this.redisClient.get(key);
         return value ? JSON.parse(value) : null;
       }),
@@ -681,7 +681,7 @@ export class RedisStateManager extends EventEmitter {
     if (validStates.length === 0) return null;
 
     validStates.sort(
-      (a, b) =>
+      (a: any, b: any) =>
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
     return validStates[0].stateId;

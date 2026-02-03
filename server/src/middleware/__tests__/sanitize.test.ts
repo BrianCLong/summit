@@ -30,18 +30,16 @@ const sanitizeValue = (input: any): any => {
   return input;
 };
 
-jest.mock('../../validation/index.js', () => ({
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../validation/index.js', () => ({
   SanitizationUtils: {
     sanitizeHTML: (input: string) => escapeHtml(String(input)),
     sanitizeUserInput: (input: any): any => sanitizeValue(input),
   },
 }));
 
-let sanitizeRequest: typeof import('../sanitize').default;
-
-beforeAll(async () => {
-  ({ default: sanitizeRequest } = await import('../sanitize'));
-});
+// Dynamic import AFTER mock is set up
+const { default: sanitizeRequest } = await import('../sanitize.js');
 
 const requestFactory = (options: Record<string, any> = {}) => {
   return {

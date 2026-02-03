@@ -1,9 +1,9 @@
-import { RedTeamSimulator } from '../RedTeamSimulator';
-import { SimulationEngineService } from '../SimulationEngineService';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { SimulationEngineService } from '../SimulationEngineService.js';
 import { EventEmitter } from 'events';
 
 // Mock dependencies
-jest.mock('../../utils/logger', () => ({
+jest.unstable_mockModule('../../utils/logger.js', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
@@ -13,13 +13,10 @@ jest.mock('../../utils/logger', () => ({
   }
 }));
 
-jest.mock('../../workers/eventBus', () => {
-  const EventEmitter = require('events');
+jest.unstable_mockModule('../../lib/events/event-bus.js', () => {
   const eventBus = new EventEmitter();
-  return { __esModule: true, default: eventBus };
+  return { eventBus };
 });
-
-const eventBus = require('../../workers/eventBus').default;
 
 // Mock SimulationEngineService as a class that extends EventEmitter
 class MockSimulationEngineService extends EventEmitter {
@@ -28,8 +25,15 @@ class MockSimulationEngineService extends EventEmitter {
 }
 
 describe('RedTeamSimulator', () => {
-  let redTeamSimulator: RedTeamSimulator;
+  let RedTeamSimulator: typeof import('../RedTeamSimulator.js').RedTeamSimulator;
+  let eventBus: EventEmitter;
+  let redTeamSimulator: InstanceType<typeof RedTeamSimulator>;
   let mockEngine: MockSimulationEngineService;
+
+  beforeAll(async () => {
+    ({ RedTeamSimulator } = await import('../RedTeamSimulator.js'));
+    ({ eventBus } = await import('../../lib/events/event-bus.js'));
+  });
 
   beforeEach(() => {
     // Instantiate the mock engine

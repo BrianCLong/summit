@@ -142,7 +142,7 @@ export function verifyCertificate(
     buckets.set(entry.stratum, bucket);
   }
 
-  for (const [stratum, bucket] of buckets.entries()) {
+  for (const [_, bucket] of buckets.entries()) {
     bucket.sort((a, b) => {
       if (a.randomness === b.randomness) {
         return a.id.localeCompare(b.id);

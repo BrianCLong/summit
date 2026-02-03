@@ -1,4 +1,5 @@
-import { GraphDetector } from '../GraphDetector';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { GraphDetector } from '../GraphDetector.js';
 import type { Driver } from 'neo4j-driver';
 
 const recordWith = (values: Record<string, number>) => ({

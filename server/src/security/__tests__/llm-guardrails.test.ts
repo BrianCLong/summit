@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PromptInjectionDetector, OutputSanitizer, InvertibilityAuditLogger, DifferentialPrivacyEngine, LLMGuardrailsService } from '../llm-guardrails.js';
 
 describe('PromptInjectionDetector', () => {

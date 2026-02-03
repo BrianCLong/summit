@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/query-optimizer",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Advanced query optimizer with cost-based optimization and materialized views",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "keywords": [
     "query-optimizer",

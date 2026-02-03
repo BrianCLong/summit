@@ -73,4 +73,25 @@ Bucket B PRs (8 PRs) require feature review before GA inclusion.
 
 ---
 
-_Documented by GA Release Commander_
+## FIX Closure Status (2026-W04)
+
+| Signal | Owner | Agreed next step | SLA | Status | Evidence |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Integration Test Errors | `@intelgraph/platform-core` | Fix TS errors in `integration.test.ts` | 2026-01-25 | **CLOSED** | [`integration.test.ts`](server/src/tests/canonical/integration.test.ts) updated |
+| Integration Test Errors | `@intelgraph/platform-core` | Fix TS errors in `tests/integration/*.test.ts` | 2026-01-25 | **CLOSED** | [`integration.test.ts`](server/src/tests/canonical/integration.test.ts) updated |
+| Missing Type Annotations | `@intelgraph/platform-core` | Add explicit type annotations | 2026-01-25 | **AT RISK** | [`integration.test.ts`](server/src/tests/canonical/integration.test.ts) |
+| Non-Blocking Tests | `@intelgraph/ops-team` | Re-enable `continue-on-error: false` | 2026-01-25 | **CLOSED** | [`.github/workflows/ci-core.yml`](.github/workflows/ci-core.yml) enforced |
+| Type Regression Risk | `@intelgraph/ops-team` | Add CI check for test types | 2026-01-25 | **AT RISK** | [`server/tsconfig.json`](server/tsconfig.json) excludes tests |
+| Deferred PR #15595 | `@intelgraph/finops-team` | Review deletions | 2026-01-25 | **OVERDUE** | `PENDING` |
+| Deferred PR #15580 | `@intelgraph/frontend-team` | Verify deletions | 2026-01-25 | **OVERDUE** | `PENDING` |
+| Deferred PR #15576 | `@intelgraph/security-team` | Review for data loss risk | 2026-01-25 | **OVERDUE** | `PENDING` |
+
+### Escalations
+
+- **Missing Type Annotations**: Pinged `@intelgraph/platform-core` for resolution. New review date: 2026-02-01.
+- **Type Regression Risk**: Requested `@intelgraph/ops-team` to include tests in CI typecheck. New review date: 2026-02-01.
+- **Deferred PRs**: Requested status from Engineering Manager for #15595, #15580, #15576. New review date: 2026-01-30.
+
+---
+
+_Documented by GA Release Commander (Jules)_

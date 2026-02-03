@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { FeatureFlagProvider } from '../../src/feature_flags/provider.js';
 import { FeatureFlags } from '../../src/feature_flags/registry.js';
 import { isEnabled, requireFlag } from '../../src/feature_flags/index.js';

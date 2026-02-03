@@ -1,0 +1,24 @@
+groups:
+  - name: gmr.alerting
+    interval: 5m
+    rules:
+      - alert: GMRMissingOrZero
+        expr: |
+          (sum(rate(cdc_rows_total[15m])) > 0)
+          and (sum(rate(graph_nodes_created_total[15m]) + rate(graph_edges_created_total[15m])) == 0)
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GMR missing or zero while CDC is active"
+          description: "Graph materialization counters flat while CDC ingestion is non-zero."
+      - alert: CDCVolumeDrop
+        expr: |
+          (sum(rate(cdc_rows_total[15m]))
+          < 0.6 * avg_over_time(sum(rate(cdc_rows_total[15m]))[6h:15m]))
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "CDC volume drop detected"
+          description: "CDC row rate has dropped more than 40% versus trailing average."

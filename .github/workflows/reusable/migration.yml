@@ -7,7 +7,7 @@ jobs:
   plan_and_verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # v4
       - name: Plan & shadow verify
         run: |
           chmod +x ops/db/migrate ops/db/verify

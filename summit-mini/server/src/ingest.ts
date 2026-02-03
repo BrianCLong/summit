@@ -45,7 +45,10 @@ export function extractGraph(content: string): Extracted {
   for (let i = 0; i < top.length; i++) {
     for (let j = i + 1; j < top.length; j++) {
       const w = 1; // keep simple
-      edges.push({ id: `e_${nanoid(10)}`, src: top[i]!.id, dst: top[j]!.id, kind: "cooccurs", weight: w });
+      const srcItem = top[i];
+      const dstItem = top[j];
+      if (!srcItem || !dstItem) { continue; } // Ensure items are not null/undefined
+      edges.push({ id: `e_${nanoid(10)}`, src: srcItem.id, dst: dstItem.id, kind: "cooccurs", weight: w });
     }
   }
 

@@ -123,7 +123,7 @@ export default function App() {
       setAppeals(appealsResponse.appeals ?? []);
       setAuditLog(auditResponse.logs ?? []);
       setPolicyProposals(policyResponse.proposals ?? []);
-    } catch (error) {
+    } catch (_error) {
       setStatus('Unable to refresh data. Check server logs.');
     }
   }, [client]);

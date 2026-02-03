@@ -64,15 +64,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 8
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -90,7 +88,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          chmod +x scripts/release/collect_evidence.sh
+          chmod +x scripts/release/generate_evidence_bundle.sh
 
           CATEGORY="${{ inputs.category || 'all' }}"
           ARGS="--category $CATEGORY"
@@ -100,7 +98,7 @@ jobs:
           fi
 
           # Run collection
-          ./scripts/release/collect_evidence.sh $ARGS 2>&1 | tee collection.log
+          ./scripts/release/generate_evidence_bundle.sh $ARGS 2>&1 | tee collection.log
 
           # Parse summary file for outputs
           SUMMARY_FILE=$(ls artifacts/evidence/evidence-summary-*.md 2>/dev/null | tail -1)
@@ -126,7 +124,7 @@ jobs:
 
       - name: Upload Evidence Artifacts
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: evidence-${{ steps.collect.outputs.run_id || github.run_id }}
           path: |
@@ -174,7 +172,7 @@ jobs:
 
     steps:
       - name: Download Evidence
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: evidence-${{ needs.collect.outputs.run_id || github.run_id }}
           path: evidence/
@@ -190,8 +188,8 @@ jobs:
           ls -la "$ARCHIVE_NAME"
 
       - name: Upload Release Archive
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: release-evidence-${{ github.ref_name }}
           path: evidence-*.tar.gz
-          retention-days: 365
+          retention-days: 90

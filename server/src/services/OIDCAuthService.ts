@@ -10,8 +10,8 @@ import jwt from 'jsonwebtoken';
 import axios from 'axios';
 import crypto from 'crypto';
 import { getPostgresPool } from '../config/database.js';
-import baseLogger from '../config/logger';
-import config from '../config/index.js';
+import baseLogger from '../config/logger.js';
+import { cfg } from '../config.js';
 
 const logger = baseLogger.child({ name: 'oidcAuth' });
 

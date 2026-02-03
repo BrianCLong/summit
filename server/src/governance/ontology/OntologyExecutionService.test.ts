@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { test, describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert';
 import { OntologyExecutionService } from './OntologyExecutionService.js';

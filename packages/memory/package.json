@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/memory",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Memory layer for AI agents",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

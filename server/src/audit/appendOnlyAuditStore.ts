@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
-import Ajv from 'ajv/dist/2020.js';
+import Ajv from 'ajv/dist/2020';
 import addFormats from 'ajv-formats';
 import pino, { type Logger } from 'pino';
 import auditEventSchema from '../../../schemas/audit_event_v1.json';

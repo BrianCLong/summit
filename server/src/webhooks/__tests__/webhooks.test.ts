@@ -1,29 +1,34 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import axios from 'axios';
-import { WebhookService, backoffForAttempt, processDelivery } from '../service';
-import { DeliveryStatus, WebhookEventType } from '../types';
-import { signPayload, verifySignature } from '../signature';
-import { recordDeliveryMetric } from '../metrics';
+import { DeliveryStatus, WebhookEventType } from '../types.js';
 
-jest.mock('bullmq');
+// Mock functions declared before mocks
+const mockQueueAdd = jest.fn();
+const mockRecordDeliveryMetric = jest.fn();
 
-jest.mock('../metrics', () => ({
-  recordDeliveryMetric: jest.fn(),
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('bullmq', () => ({
+  Queue: jest.fn(),
+  Worker: jest.fn(),
 }));
 
-const mockQueueAdd = jest.fn();
+jest.unstable_mockModule('../metrics', () => ({
+  recordDeliveryMetric: mockRecordDeliveryMetric,
+}));
 
-jest.mock('../../queues/config', () => {
-  const actual = jest.requireActual('../../queues/config');
-  return {
-    ...actual,
-    addJob: (
-      queueName: string,
-      jobName: string,
-      data: any,
-      options: any,
-    ) => mockQueueAdd(queueName, jobName, data, options),
-  };
-});
+jest.unstable_mockModule('../../queues/config', () => ({
+  addJob: (
+    queueName: string,
+    jobName: string,
+    data: any,
+    options: any,
+  ) => mockQueueAdd(queueName, jobName, data, options),
+}));
+
+// Dynamic imports AFTER mocks are set up
+const { WebhookService, backoffForAttempt, processDelivery } = await import('../service.js');
+const { signPayload, verifySignature } = await import('../signature.js');
+const { recordDeliveryMetric } = await import('../metrics.js');
 
 describe('webhook signatures', () => {
   it('validates HMAC signatures', () => {

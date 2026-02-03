@@ -1,5 +1,6 @@
 
-import PredictiveAnalyzer from '../predictive-analyzer';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import PredictiveAnalyzer from '../predictive-analyzer.js';
 
 describe('PredictiveAnalyzer', () => {
   let analyzer: typeof PredictiveAnalyzer;

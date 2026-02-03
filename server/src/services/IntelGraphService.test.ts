@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 // server/src/services/IntelGraphService.test.ts
-import { IntelGraphService } from './IntelGraphService';
-import { getNeo4jDriver } from '../config/database';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { IntelGraphService } from './IntelGraphService.js';
+import { getNeo4jDriver } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Mock the database driver
@@ -11,8 +13,8 @@ const mockGetNeo4jDriver = getNeo4jDriver as jest.Mock;
 const mockUuidv4 = uuidv4 as jest.Mock;
 
 describe('IntelGraphService', () => {
-  let mockSession;
-  let mockDriver;
+  let mockSession: any;
+  let mockDriver: any;
 
   beforeEach(() => {
     // Reset the service instance before each test to ensure isolation
@@ -21,7 +23,7 @@ describe('IntelGraphService', () => {
     // Mock the Neo4j session and its 'run' and 'close' methods
     mockSession = {
       run: jest.fn(),
-      close: jest.fn().mockResolvedValue(undefined),
+      close: (jest.fn() as any).mockResolvedValue(undefined),
     };
 
     // Mock the driver to return our mock session
@@ -85,11 +87,11 @@ describe('IntelGraphService', () => {
       expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (e:Entity');
       expect(mockSession.run.mock.calls[0][1]).toMatchObject({
         props: {
-            id: 'mock-uuid-1234',
-            ...entityData,
-            owner,
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
+          id: 'mock-uuid-1234',
+          ...entityData,
+          owner,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
         },
         tenantId,
       });
@@ -134,13 +136,13 @@ describe('IntelGraphService', () => {
       expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (c)-[:RELATES_TO]->(e)');
       expect(mockSession.run.mock.calls[0][1]).toMatchObject({
         props: {
-            id: 'mock-uuid-1234',
-            statement: claimData.statement,
-            confidence: claimData.confidence,
-            entityId: claimData.entityId,
-            owner,
-            createdAt: expect.any(String),
-            updatedAt: expect.any(String),
+          id: 'mock-uuid-1234',
+          statement: claimData.statement,
+          confidence: claimData.confidence,
+          entityId: claimData.entityId,
+          owner,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
         },
         entityId: claimData.entityId,
         tenantId,
@@ -172,123 +174,123 @@ describe('IntelGraphService', () => {
 
   describe('attachEvidence', () => {
     it('should create an evidence node, link it to a claim, and return the evidence', async () => {
-        const evidenceData = {
-            claimId: 'claim-uuid-123',
-            sourceURI: 'https://example.com/evidence',
-            hash: 'sha256-hash',
-            content: 'This is the evidence content.',
-        };
-        const owner = 'user-evi';
-        const tenantId = 'tenant-evi';
-        mockUuidv4.mockReturnValue('mock-uuid-evidence');
+      const evidenceData = {
+        claimId: 'claim-uuid-123',
+        sourceURI: 'https://example.com/evidence',
+        hash: 'sha256-hash',
+        content: 'This is the evidence content.',
+      };
+      const owner = 'user-evi';
+      const tenantId = 'tenant-evi';
+      mockUuidv4.mockReturnValue('mock-uuid-evidence');
 
-        const mockRecord = { get: jest.fn().mockReturnValue({ properties: { id: 'mock-uuid-evidence', ...evidenceData } }) };
-        mockSession.run.mockResolvedValue({ records: [mockRecord] });
+      const mockRecord = { get: jest.fn().mockReturnValue({ properties: { id: 'mock-uuid-evidence', ...evidenceData } }) };
+      mockSession.run.mockResolvedValue({ records: [mockRecord] });
 
-        const service = IntelGraphService.getInstance();
-        const result = await service.attachEvidence(evidenceData, owner, tenantId);
+      const service = IntelGraphService.getInstance();
+      const result = await service.attachEvidence(evidenceData, owner, tenantId);
 
-        expect(mockSession.run).toHaveBeenCalledTimes(1);
-        expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (c:Claim {id: $claimId, tenantId: $tenantId})');
-        expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (ev:Evidence');
-        expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (ev)-[:SUPPORTS]->(c)');
-        expect(mockSession.run.mock.calls[0][1]).toMatchObject({ props: { id: 'mock-uuid-evidence', ...evidenceData, owner, createdAt: expect.any(String), updatedAt: expect.any(String) }, claimId: evidenceData.claimId, tenantId });
-        expect(result.id).toBe('mock-uuid-evidence');
+      expect(mockSession.run).toHaveBeenCalledTimes(1);
+      expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (c:Claim {id: $claimId, tenantId: $tenantId})');
+      expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (ev:Evidence');
+      expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (ev)-[:SUPPORTS]->(c)');
+      expect(mockSession.run.mock.calls[0][1]).toMatchObject({ props: { id: 'mock-uuid-evidence', ...evidenceData, owner, createdAt: expect.any(String), updatedAt: expect.any(String) }, claimId: evidenceData.claimId, tenantId });
+      expect(result.id).toBe('mock-uuid-evidence');
     });
 
     it('should throw an AppError if the target claim does not exist', async () => {
-        const evidenceData = { claimId: 'non-existent-claim', sourceURI: 'http://a.b', hash: 'h', content: 'c' };
-        mockSession.run.mockResolvedValue({ records: [] });
-        const service = IntelGraphService.getInstance();
-        await expect(service.attachEvidence(evidenceData, 'u', 't')).rejects.toThrow('Claim with ID non-existent-claim not found for this tenant.');
+      const evidenceData = { claimId: 'non-existent-claim', sourceURI: 'http://a.b', hash: 'h', content: 'c' };
+      mockSession.run.mockResolvedValue({ records: [] });
+      const service = IntelGraphService.getInstance();
+      await expect(service.attachEvidence(evidenceData, 'u', 't')).rejects.toThrow('Claim with ID non-existent-claim not found for this tenant.');
     });
   });
 
   describe('tagPolicy', () => {
     it('should create a policy label, link it to a node, and return the policy', async () => {
-        const policyData = { label: 'PII', sensitivity: 'confidential' as const };
-        const targetNodeId = 'any-node-uuid';
-        const owner = 'user-policy';
-        const tenantId = 'tenant-policy';
-        mockUuidv4.mockReturnValue('mock-uuid-policy');
+      const policyData = { label: 'PII', sensitivity: 'confidential' as const };
+      const targetNodeId = 'any-node-uuid';
+      const owner = 'user-policy';
+      const tenantId = 'tenant-policy';
+      mockUuidv4.mockReturnValue('mock-uuid-policy');
 
-        const mockRecord = { get: jest.fn().mockReturnValue({ properties: { id: 'mock-uuid-policy', ...policyData } }) };
-        mockSession.run.mockResolvedValue({ records: [mockRecord] });
+      const mockRecord = { get: jest.fn().mockReturnValue({ properties: { id: 'mock-uuid-policy', ...policyData } }) };
+      mockSession.run.mockResolvedValue({ records: [mockRecord] });
 
-        const service = IntelGraphService.getInstance();
-        const result = await service.tagPolicy(policyData, targetNodeId, owner, tenantId);
+      const service = IntelGraphService.getInstance();
+      const result = await service.tagPolicy(policyData, targetNodeId, owner, tenantId);
 
-        expect(mockSession.run).toHaveBeenCalledTimes(1);
-        expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (n {id: $targetNodeId, tenantId: $tenantId})');
-        expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (p:PolicyLabel');
-        expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (n)-[:HAS_POLICY]->(p)');
-        expect(mockSession.run.mock.calls[0][1]).toMatchObject({ props: { id: 'mock-uuid-policy', ...policyData, owner, createdAt: expect.any(String), updatedAt: expect.any(String) }, targetNodeId, tenantId });
-        expect(result.id).toBe('mock-uuid-policy');
+      expect(mockSession.run).toHaveBeenCalledTimes(1);
+      expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (n {id: $targetNodeId, tenantId: $tenantId})');
+      expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (p:PolicyLabel');
+      expect(mockSession.run.mock.calls[0][0]).toContain('CREATE (n)-[:HAS_POLICY]->(p)');
+      expect(mockSession.run.mock.calls[0][1]).toMatchObject({ props: { id: 'mock-uuid-policy', ...policyData, owner, createdAt: expect.any(String), updatedAt: expect.any(String) }, targetNodeId, tenantId });
+      expect(result.id).toBe('mock-uuid-policy');
     });
 
     it('should throw an AppError if the target node does not exist', async () => {
-        const policyData = { label: 'L', sensitivity: 'public' as const };
-        mockSession.run.mockResolvedValue({ records: [] });
-        const service = IntelGraphService.getInstance();
-        await expect(service.tagPolicy(policyData, 'non-existent-node', 'u', 't')).rejects.toThrow('Node with ID non-existent-node not found for this tenant.');
+      const policyData = { label: 'L', sensitivity: 'public' as const };
+      mockSession.run.mockResolvedValue({ records: [] });
+      const service = IntelGraphService.getInstance();
+      await expect(service.tagPolicy(policyData, 'non-existent-node', 'u', 't')).rejects.toThrow('Node with ID non-existent-node not found for this tenant.');
     });
   });
 
   describe('getDecisionProvenance', () => {
     it('should retrieve a decision and its full provenance trail', async () => {
-        const decisionId = 'decision-1';
-        const tenantId = 'tenant-prov';
-        const mockProvenance = {
-            decision: { id: decisionId, name: 'Test Decision' },
-            claims: [
-                { claim: { id: 'claim-1', statement: 's1' }, evidences: [{ id: 'ev-1', content: 'c1' }] }
-            ]
-        };
-        const mockRecord = { get: jest.fn().mockReturnValue(mockProvenance) };
-        mockSession.run.mockResolvedValue({ records: [mockRecord] });
+      const decisionId = 'decision-1';
+      const tenantId = 'tenant-prov';
+      const mockProvenance = {
+        decision: { id: decisionId, name: 'Test Decision' },
+        claims: [
+          { claim: { id: 'claim-1', statement: 's1' }, evidences: [{ id: 'ev-1', content: 'c1' }] }
+        ]
+      };
+      const mockRecord = { get: jest.fn().mockReturnValue(mockProvenance) };
+      mockSession.run.mockResolvedValue({ records: [mockRecord] });
 
-        const service = IntelGraphService.getInstance();
-        const result = await service.getDecisionProvenance(decisionId, tenantId);
+      const service = IntelGraphService.getInstance();
+      const result = await service.getDecisionProvenance(decisionId, tenantId);
 
-        expect(mockSession.run).toHaveBeenCalledTimes(1);
-        expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (d:Decision {id: $decisionId, tenantId: $tenantId})');
-        expect(mockSession.run.mock.calls[0][1]).toEqual({ decisionId, tenantId });
-        expect(result).toEqual(mockProvenance);
+      expect(mockSession.run).toHaveBeenCalledTimes(1);
+      expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (d:Decision {id: $decisionId, tenantId: $tenantId})');
+      expect(mockSession.run.mock.calls[0][1]).toEqual({ decisionId, tenantId });
+      expect(result).toEqual(mockProvenance);
     });
 
     it('should throw an AppError if the decision is not found', async () => {
-        mockSession.run.mockResolvedValue({ records: [{ get: () => ({ decision: null, claims: [] }) }] });
-        const service = IntelGraphService.getInstance();
-        await expect(service.getDecisionProvenance('not-found', 't')).rejects.toThrow('Decision with ID not-found not found for this tenant.');
+      mockSession.run.mockResolvedValue({ records: [{ get: () => ({ decision: null, claims: [] }) }] });
+      const service = IntelGraphService.getInstance();
+      await expect(service.getDecisionProvenance('not-found', 't')).rejects.toThrow('Decision with ID not-found not found for this tenant.');
     });
   });
 
   describe('getEntityClaims', () => {
     it('should retrieve an entity and all its claims with policy labels', async () => {
-        const entityId = 'entity-1';
-        const tenantId = 'tenant-claims';
-        const mockEntityClaims = {
-            entity: { id: entityId, name: 'Test Entity' },
-            claims: [
-                { claim: { id: 'claim-1', statement: 's1' }, policies: [{ id: 'pol-1', label: 'l1' }] }
-            ]
-        };
-        const mockRecord = { get: jest.fn().mockReturnValue(mockEntityClaims) };
-        mockSession.run.mockResolvedValue({ records: [mockRecord] });
+      const entityId = 'entity-1';
+      const tenantId = 'tenant-claims';
+      const mockEntityClaims = {
+        entity: { id: entityId, name: 'Test Entity' },
+        claims: [
+          { claim: { id: 'claim-1', statement: 's1' }, policies: [{ id: 'pol-1', label: 'l1' }] }
+        ]
+      };
+      const mockRecord = { get: jest.fn().mockReturnValue(mockEntityClaims) };
+      mockSession.run.mockResolvedValue({ records: [mockRecord] });
 
-        const service = IntelGraphService.getInstance();
-        const result = await service.getEntityClaims(entityId, tenantId);
+      const service = IntelGraphService.getInstance();
+      const result = await service.getEntityClaims(entityId, tenantId);
 
-        expect(mockSession.run).toHaveBeenCalledTimes(1);
-        expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (e:Entity {id: $entityId, tenantId: $tenantId})');
-        expect(mockSession.run.mock.calls[0][1]).toEqual({ entityId, tenantId });
-        expect(result).toEqual(mockEntityClaims);
+      expect(mockSession.run).toHaveBeenCalledTimes(1);
+      expect(mockSession.run.mock.calls[0][0]).toContain('MATCH (e:Entity {id: $entityId, tenantId: $tenantId})');
+      expect(mockSession.run.mock.calls[0][1]).toEqual({ entityId, tenantId });
+      expect(result).toEqual(mockEntityClaims);
     });
 
     it('should throw an AppError if the entity is not found', async () => {
-        mockSession.run.mockResolvedValue({ records: [{ get: () => ({ entity: null, claims: [] }) }] });
-        const service = IntelGraphService.getInstance();
-        await expect(service.getEntityClaims('not-found', 't')).rejects.toThrow('Entity with ID not-found not found for this tenant.');
+      mockSession.run.mockResolvedValue({ records: [{ get: () => ({ entity: null, claims: [] }) }] });
+      const service = IntelGraphService.getInstance();
+      await expect(service.getEntityClaims('not-found', 't')).rejects.toThrow('Entity with ID not-found not found for this tenant.');
     });
   });
 });

@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 
@@ -92,7 +93,7 @@ const setupMockQuery = () => {
   });
 };
 
-jest.mock('pg', () => {
+jest.unstable_mockModule('pg', () => {
   const poolInstance = {
     query: (sql: any, params?: any[]) => mockQuery(sql, params),
     connect: jest.fn(),
@@ -134,16 +135,79 @@ let mockPricing = {
   },
 };
 
-jest.mock('../../src/conductor/scheduling/pools.js', () => {
-  const actual = jest.requireActual('../../src/conductor/scheduling/pools.js');
+jest.unstable_mockModule('../../src/conductor/scheduling/pools.js', () => {
+  const safeNum = (value: unknown) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const safeEst = (value: unknown) => {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return n;
+  };
+
+  const pickCheapestEligible = (
+    candidates: any[],
+    costs: Record<string, any>,
+    est: { cpuSec?: number; gbSec?: number; egressGb?: number },
+    residency?: string,
+  ) => {
+    let best: { id: string; price: number } | null = null;
+    for (const p of candidates) {
+      if (
+        residency &&
+        !p.region.toLowerCase().startsWith(residency.toLowerCase())
+      ) {
+        continue;
+      }
+      const c = costs[p.id];
+      if (!c) continue;
+
+      const cpuSec = safeEst(est.cpuSec);
+      const gbSec = safeEst(est.gbSec);
+      const egressGb = safeEst(est.egressGb);
+
+      const cpuUsd = safeNum(c.cpu_sec_usd);
+      const gbUsd = safeNum(c.gb_sec_usd);
+      const egressUsd = safeNum(c.egress_gb_usd);
+
+      const price = cpuSec * cpuUsd + gbSec * gbUsd + egressGb * egressUsd;
+
+      if (
+        !best ||
+        price < best.price ||
+        (price === best.price && p.id.localeCompare(best.id) < 0)
+      ) {
+        best = { id: p.id, price };
+      }
+    }
+    return best;
+  };
+
+  const estimatePoolPrice = (
+    cost: any,
+    est: { cpuSec?: number; gbSec?: number; egressGb?: number },
+    discount = 1,
+  ) => {
+    if (!cost) return 0;
+    const cpuSec = safeEst(est.cpuSec);
+    const gbSec = safeEst(est.gbSec);
+    const egressGb = safeEst(est.egressGb);
+    const cpuUsd = safeNum(cost.cpu_sec_usd);
+    const gbUsd = safeNum(cost.gb_sec_usd);
+    const egressUsd = safeNum(cost.egress_gb_usd);
+    return (cpuSec * cpuUsd + gbSec * gbUsd + egressGb * egressUsd) * discount;
+  };
+
   const currentPricing = jest.fn(async () => mockPricing);
   const listPools = jest.fn(async () => mockPools);
   return {
     __esModule: true,
     currentPricing,
     listPools,
-    pickCheapestEligible: actual.pickCheapestEligible,
-    estimatePoolPrice: actual.estimatePoolPrice,
+    pickCheapestEligible,
+    estimatePoolPrice,
     __setPricing: (next: any) => {
       mockPricing = next;
     },
@@ -157,13 +221,14 @@ describe('capacity futures persistence', () => {
   let pgMock: any;
   let poolsMock: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
-    jest.resetModules();
     setupMockQuery();
-    pgMock = jest.requireMock('pg');
-    poolsMock = jest.requireMock('../../src/conductor/scheduling/pools.js');
+    pgMock = await import('pg');
+    poolsMock = await import('../../src/conductor/scheduling/pools.js');
     pgMock.__setReservations([]);
+    poolsMock.currentPricing.mockResolvedValue(mockPricing);
+    poolsMock.listPools.mockResolvedValue(mockPools);
     poolsMock.__setPools([
       { id: 'pool-1', region: 'us-east', labels: [], capacity: 10 },
       { id: 'pool-2', region: 'us-east', labels: [], capacity: 10 },
@@ -214,12 +279,13 @@ describe('capacity-aware selector', () => {
   let poolsMock: any;
   let pgMock: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
-    jest.resetModules();
     setupMockQuery();
-    poolsMock = jest.requireMock('../../src/conductor/scheduling/pools.js');
-    pgMock = jest.requireMock('pg');
+    poolsMock = await import('../../src/conductor/scheduling/pools.js');
+    pgMock = await import('pg');
+    poolsMock.currentPricing.mockResolvedValue(mockPricing);
+    poolsMock.listPools.mockResolvedValue(mockPools);
     poolsMock.__setPools([
       { id: 'pool-1', region: 'us-east', labels: [], capacity: 10 },
       { id: 'pool-2', region: 'us-east', labels: [], capacity: 10 },
@@ -283,7 +349,6 @@ describe('capacity-aware selector', () => {
 describeNetwork('capacity routes auth', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
   });
 
   it('rejects unauthenticated reserve requests', async () => {

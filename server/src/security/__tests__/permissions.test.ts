@@ -1,4 +1,5 @@
-import { PERMISSIONS, normalizePermission, permissionsForRole, userHasPermission } from '../permissions';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { PERMISSIONS, normalizePermission, permissionsForRole, userHasPermission } from '../permissions.js';
 
 describe('permissions map', () => {
   it('treats admin as having wildcard access', () => {

@@ -1,4 +1,5 @@
-import { BillingAdapter } from '../billing/sink';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { BillingAdapter } from '../billing/sink.js';
 import { createHmac } from 'crypto';
 
 // Mock S3

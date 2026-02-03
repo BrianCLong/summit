@@ -1,10 +1,11 @@
 
-import { ReliabilityLoop } from '../reliability-loop';
-import { CostOptimizationLoop } from '../cost-loop';
-import { SignalsService } from '../../signals/signals-service';
-import { SLOPolicyEngine } from '../../policy/slo-policy-engine';
-import { SignalType, HealthStatus } from '../../signals/types';
-import { SLOAlertLevel } from '../../policy/types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { ReliabilityLoop } from '../reliability-loop.js';
+import { CostOptimizationLoop } from '../cost-loop.js';
+import { SignalsService } from '../../signals/signals-service.js';
+import { SLOPolicyEngine } from '../../policy/slo-policy-engine.js';
+import { SignalType, HealthStatus } from '../../signals/types.js';
+import { SLOAlertLevel } from '../../policy/types.js';
 
 describe('ReliabilityLoop', () => {
   let loop: ReliabilityLoop;

@@ -1,5 +1,5 @@
-import { Operation, OperationalTransform } from './operationalTransform';
-import logger from '../../utils/logger';
+import { Operation, OperationalTransform } from './operationalTransform.js';
+import logger from '../../utils/logger.js';
 
 interface DocumentState {
   version: number;
@@ -29,7 +29,7 @@ export class CollaborationManager {
     }
 
     if (clientVersion < 0 || clientVersion > doc.version) {
-       throw new Error('Invalid version');
+      throw new Error('Invalid version');
     }
 
     // Transform operation against all operations that happened since clientVersion
@@ -37,13 +37,13 @@ export class CollaborationManager {
     const concurrentOps = doc.history.slice(clientVersion);
 
     for (const pastOp of concurrentOps) {
-      [transformedOp, ] = OperationalTransform.transform(transformedOp, pastOp);
+      [transformedOp,] = OperationalTransform.transform(transformedOp, pastOp);
     }
 
     // Apply to state (simplified for text)
-    if (op.type === 'insert' && op.text && op.position !== undefined) {
+    if (op.type === 'insert' && op.text && op.position !== undefined && transformedOp.position !== undefined) {
       doc.content = doc.content.slice(0, transformedOp.position) + transformedOp.text + doc.content.slice(transformedOp.position);
-    } else if (op.type === 'delete' && op.count && op.position !== undefined) {
+    } else if (op.type === 'delete' && op.count && op.position !== undefined && transformedOp.position !== undefined && transformedOp.count !== undefined) {
       doc.content = doc.content.slice(0, transformedOp.position) + doc.content.slice(transformedOp.position + transformedOp.count);
     }
 

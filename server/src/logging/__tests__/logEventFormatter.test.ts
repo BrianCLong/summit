@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { formatLogEvent, redactSensitive } from '../logEventFormatter.js';
 import type { LogLevel } from '../logEventBus.js';
 

@@ -1,4 +1,5 @@
-import { DistributedCacheService } from '../DistributedCacheService';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { DistributedCacheService } from '../DistributedCacheService.js';
 import { Redis } from 'ioredis';
 
 // Mock Redis

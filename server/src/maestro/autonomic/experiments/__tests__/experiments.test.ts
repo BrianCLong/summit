@@ -1,6 +1,7 @@
 
-import { ExperimentationService } from '../experimentation-service';
-import { Experiment } from '../types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { ExperimentationService } from '../experimentation-service.js';
+import { Experiment } from '../types.js';
 
 describe('ExperimentationService', () => {
   let service: ExperimentationService;

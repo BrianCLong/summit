@@ -33,7 +33,7 @@ export class GAEnrollmentService {
   }
 
   private get pool(): Pool {
-    return getPostgresPool();
+    return getPostgresPool() as any;
   }
 
   public static getInstance(): GAEnrollmentService {

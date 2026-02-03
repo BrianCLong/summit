@@ -1,308 +1,18 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
+dotenv.config({ path: '.env.test' });
 const describeNetwork =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
-// Use unstable_mockModule for ESM mocking support
-jest.unstable_mockModule('../src/workers/trustScoreWorker', () => ({
-  startTrustWorker: jest.fn(),
-}));
-jest.unstable_mockModule('../src/workers/retentionWorker', () => ({
-  startRetentionWorker: jest.fn(),
-}));
-jest.unstable_mockModule('../src/ingest/stream', () => ({
-  streamIngest: {
-    start: jest.fn().mockImplementation(async () => { }),
-    stop: jest.fn(),
-  },
-}));
-jest.unstable_mockModule('../src/webhooks/webhook.worker', () => ({
-  webhookWorker: {},
-}));
-// Mock DeterministicExportService to avoid "require" redefinition error in Jest
-jest.unstable_mockModule('../src/services/DeterministicExportService', () => ({
-  DeterministicExportService: class {
-    createExportBundle() { return Promise.resolve({}); }
-    verifyExportBundle() { return Promise.resolve({}); }
-  }
-}));
-// Also mock with .js extension just in case
-jest.unstable_mockModule('../src/services/DeterministicExportService.js', () => ({
-  DeterministicExportService: class {
-    createExportBundle() { return Promise.resolve({}); }
-    verifyExportBundle() { return Promise.resolve({}); }
-  }
-}));
-// Mock PolicyEngine to avoid ESM import errors
-jest.unstable_mockModule('../src/services/PolicyEngine.js', () => ({
-  PolicyEngine: {
-    getInstance: () => ({
-      initialize: jest.fn<any>().mockResolvedValue(undefined),
-      evaluate: jest.fn<any>().mockResolvedValue({ allow: true }),
-      middleware: () => (req: any, res: any, next: any) => next(),
-    }),
-  },
-}));
-jest.unstable_mockModule('../src/services/governance/PolicyEngine.js', () => ({
-  PolicyEngine: {
-    getInstance: () => ({
-      initialize: jest.fn<any>().mockResolvedValue(undefined),
-      evaluate: jest.fn<any>().mockResolvedValue({ allow: true }),
-      middleware: () => (req: any, res: any, next: any) => next(),
-    }),
-  },
-}));
 
-// Mock Prompts Registry to avoid ESM import errors
-jest.unstable_mockModule('../src/prompts/registry.js', () => ({
-  PromptRegistry: class {
-    async initialize() { return Promise.resolve(); }
-    getPrompt() { return {}; }
-    render() { return ''; }
-  },
-  promptRegistry: {
-    initialize: jest.fn<any>().mockResolvedValue(undefined),
-    getPrompt: jest.fn<any>().mockReturnValue({}),
-    render: jest.fn<any>().mockReturnValue(''),
-  }
-}));
+import { pathToFileURL, fileURLToPath } from 'url';
 
-
-
-// Mock Neo4j to prevent connection attempts
-jest.unstable_mockModule('../src/db/neo4j.js', () => ({
-  getNeo4jDriver: jest.fn().mockReturnValue({
-    session: jest.fn().mockReturnValue({
-      run: jest.fn<any>().mockResolvedValue({ records: [] }),
-      close: jest.fn<any>().mockResolvedValue(undefined),
-    }),
-    close: jest.fn<any>().mockResolvedValue(undefined),
-  }),
-  initializeNeo4jDriver: jest.fn<any>().mockResolvedValue(undefined),
-  isNeo4jMockMode: jest.fn().mockReturnValue(true),
-  onNeo4jDriverReady: jest.fn(),
-}));
-
-jest.unstable_mockModule('../src/observability/tracer.js', () => {
-  const mockTracer = {
-    initialize: (jest.fn() as any).mockResolvedValue(undefined),
-    isInitialized: (jest.fn() as any).mockReturnValue(true),
-    startSpan: (jest.fn() as any).mockReturnValue({ end: jest.fn(), setAttribute: jest.fn(), recordException: jest.fn(), setStatus: jest.fn() }),
-    withSpan: (jest.fn() as any).mockImplementation((name: any, fn: any) => fn({ end: jest.fn(), setAttribute: jest.fn(), recordException: jest.fn(), setStatus: jest.fn() })),
-    shutdown: (jest.fn() as any).mockResolvedValue(undefined),
-    getTraceId: (jest.fn() as any).mockReturnValue('mock-trace-id'),
-    getSpanId: (jest.fn() as any).mockReturnValue('mock-span-id'),
-    setAttribute: jest.fn(),
-    recordException: jest.fn(),
-  };
-  return {
-    initializeTracing: jest.fn().mockReturnValue(mockTracer),
-    getTracer: jest.fn().mockReturnValue(mockTracer),
-    traced: jest.fn().mockReturnValue(() => (target: any, key: any, descriptor: any) => descriptor),
-    SpanKind: {},
-    SpanStatusCode: {},
-  };
-});
-jest.unstable_mockModule('../src/analytics/telemetry/TelemetryService', () => ({
-  telemetryService: {
-    track: jest.fn(),
-  },
-  TelemetryService: jest.fn().mockImplementation(() => ({
-    track: jest.fn(),
-  })),
-}));
-jest.unstable_mockModule('../src/lib/telemetry/diagnostic-snapshotter.js', () => ({
-  snapshotter: {
-    trackRequest: jest.fn(),
-    untrackRequest: jest.fn(),
-    triggerSnapshot: jest.fn(),
-  },
-}));
-jest.unstable_mockModule('argon2', () => {
-  const mockArgon2 = {
-    hash: (jest.fn() as any).mockResolvedValue('$argon2id$v=19$m=65536,t=3,p=4$628j...'),
-    verify: (jest.fn() as any).mockResolvedValue(true),
-  };
-  return {
-    ...mockArgon2,
-    default: mockArgon2,
-  };
-});
-jest.unstable_mockModule('pptxgenjs', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
-    addSlide: jest.fn(),
-    writeFile: jest.fn(),
-  })),
-}));
-jest.unstable_mockModule('pg', () => {
-  const mockUser = {
-    id: 'mock-user-id',
-    email: 'guardrails-test@example.com',
-    username: 'guardrails-test',
-    password_hash: 'hashed',
-    first_name: 'Guard',
-    last_name: 'Rails',
-    role: 'ADMIN',
-    is_active: true,
-    created_at: new Date(),
-    tenant_id: 'public',
-  };
-  const mockClient = {
-    query: (jest.fn() as any).mockImplementation((text: string, params: any[]) => {
-      // Logic for AuthService.register:
-      // 1. Check if user exists: SELECT id FROM users ...
-      // 2. Insert user: INSERT INTO users ...
-
-      const normalizedText = text.trim().toUpperCase();
-
-      if (normalizedText.startsWith('SELECT ID FROM USERS') || normalizedText.includes('SELECT ID FROM USERS')) {
-        // Return 0 rows to allow registration to proceed
-        return Promise.resolve({ rowCount: 0, rows: [] });
-      }
-
-      if (normalizedText.startsWith('INSERT INTO USERS') || normalizedText.includes('INSERT INTO USERS')) {
-        return Promise.resolve({ rowCount: 1, rows: [mockUser] });
-      }
-
-      if (normalizedText.startsWith('INSERT INTO USER_SESSIONS') || normalizedText.includes('INSERT INTO USER_SESSIONS')) {
-        return Promise.resolve({ rowCount: 1, rows: [] });
-      }
-
-      // Default fallback for other queries (like SELECT * FROM users for Login if we fell back to it)
-      if (text.includes('users')) {
-        return Promise.resolve({ rowCount: 1, rows: [mockUser] });
-      }
-
-      return Promise.resolve({ rowCount: 0, rows: [] });
-    }),
-    release: jest.fn(),
-    on: jest.fn(),
-  };
-  const mockPool = {
-    query: (jest.fn() as any).mockImplementation((text: string, params: any[]) => {
-      return mockClient.query(text, params);
-    }),
-    connect: (jest.fn() as any).mockResolvedValue(mockClient),
-    on: jest.fn(),
-    end: (jest.fn() as any).mockResolvedValue(undefined),
-    totalCount: 0,
-    idleCount: 0,
-    waitingCount: 0,
-  };
-  const pgMock = {
-    Pool: jest.fn(() => mockPool),
-    Client: jest.fn(() => mockClient),
-  };
-  return {
-    ...pgMock,
-    default: pgMock,
-  };
-});
-
-jest.unstable_mockModule('../src/db/pg', () => {
-  const mockUser = {
-    id: 'mock-user-id',
-    email: 'guardrails-test@example.com',
-    username: 'guardrails-test',
-    password_hash: 'hashed',
-    first_name: 'Guard',
-    last_name: 'Rails',
-    role: 'ADMIN',
-    is_active: true,
-    created_at: new Date(),
-  };
-  const mockResult = { rowCount: 1, rows: [mockUser] };
-  const mockPool = {
-    query: (jest.fn() as any).mockResolvedValue(mockResult),
-    connect: (jest.fn() as any).mockResolvedValue({
-      query: (jest.fn() as any).mockResolvedValue(mockResult),
-      release: jest.fn(),
-      on: jest.fn(),
-    }),
-    on: jest.fn(),
-    end: (jest.fn() as any).mockResolvedValue(undefined),
-  };
-  return {
-    pg: {
-      oneOrNone: (jest.fn() as any).mockResolvedValue(mockUser),
-      many: (jest.fn() as any).mockResolvedValue([mockUser]),
-      write: (jest.fn() as any).mockResolvedValue(mockUser),
-      read: (jest.fn() as any).mockResolvedValue(mockUser),
-      readMany: (jest.fn() as any).mockResolvedValue([mockUser]),
-      transaction: (jest.fn() as any).mockImplementation((cb: any) => cb({ query: (jest.fn() as any).mockResolvedValue(mockResult) })),
-      healthCheck: (jest.fn() as any).mockResolvedValue(true),
-      close: jest.fn(),
-      withTenant: (jest.fn() as any).mockImplementation((tenantId: string, cb: any) => cb({
-        oneOrNone: (jest.fn() as any).mockResolvedValue(mockUser),
-        many: (jest.fn() as any).mockResolvedValue([mockUser])
-      })),
-    },
-    pool: mockPool,
-    writePool: mockPool,
-    readPool: mockPool,
-  };
-});
-
-jest.unstable_mockModule('../src/db/postgres', () => {
-  const mockUser = {
-    id: 'mock-user-id',
-    email: 'guardrails-test@example.com',
-    username: 'guardrails-test',
-    password_hash: 'hashed',
-    first_name: 'Guard',
-    last_name: 'Rails',
-    role: 'ADMIN',
-    is_active: true,
-    created_at: new Date(),
-  };
-  const mockResult = { rowCount: 1, rows: [mockUser], command: 'MOCK', oid: 0, fields: [] };
-  const mockPool = {
-    query: (jest.fn() as any).mockResolvedValue(mockResult),
-    read: (jest.fn() as any).mockResolvedValue(mockResult),
-    write: (jest.fn() as any).mockResolvedValue(mockResult),
-    transaction: (jest.fn() as any).mockImplementation((cb: any) => cb({ query: (jest.fn() as any).mockResolvedValue(mockResult) })),
-    withTransaction: (jest.fn() as any).mockImplementation((cb: any) => cb({ query: (jest.fn() as any).mockResolvedValue(mockResult) })),
-    connect: (jest.fn() as any).mockResolvedValue({
-      query: (jest.fn() as any).mockResolvedValue(mockResult),
-      release: jest.fn(),
-    }),
-    end: (jest.fn() as any).mockResolvedValue(undefined),
-    on: jest.fn(),
-    healthCheck: (jest.fn() as any).mockResolvedValue([]),
-    slowQueryInsights: (jest.fn() as any).mockReturnValue([]),
-    pool: { query: jest.fn(), connect: jest.fn(), on: jest.fn(), end: jest.fn() },
-  };
-  return {
-    getPostgresPool: (jest.fn() as any).mockReturnValue(mockPool),
-    closePostgresPool: (jest.fn() as any).mockResolvedValue(undefined),
-  };
-});
-jest.unstable_mockModule('../src/graphql/plugins/rateLimitAndCache.js', () => ({
-  rateLimitAndCachePlugin: jest.fn().mockReturnValue({
-    requestDidStart: (jest.fn() as any).mockResolvedValue({}),
-  }),
-}));
-
-jest.unstable_mockModule('jsdom', () => ({
-  __esModule: true,
-  JSDOM: jest.fn().mockImplementation(() => ({
-    window: {
-      document: {
-        createElement: jest.fn(),
-      },
-    },
-  })),
-}));
-jest.unstable_mockModule('dompurify', () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => ({
-    sanitize: jest.fn((val) => val),
-  })),
-}));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 describeNetwork('Golden Path Guardrails - Negative Tests', () => {
@@ -319,9 +29,9 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
 
     try {
       // Import DB connections dynamically
-      const pgModule = await import('../src/db/pg');
+      const pgModule = await import('../src/db/pg.js');
       pg = pgModule.pg;
-      const neo4jModule = await import('../src/db/neo4j');
+      const neo4jModule = await import('../src/db/neo4j.js');
       getNeo4jDriver = neo4jModule.getNeo4jDriver;
 
       jest.setTimeout(30000);
@@ -330,20 +40,20 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
         fs.writeFileSync(logFile, 'DEBUG: Starting beforeAll\n');
       } catch (e) { console.error('Failed to write log file', e); }
 
-      const dbConfigModule = await import('../src/config/database');
+      const dbConfigModule = await import('../src/config/database.js');
       await dbConfigModule.connectPostgres();
       await dbConfigModule.connectNeo4j();
       await dbConfigModule.connectRedis();
       try { fs.appendFileSync(logFile, 'DEBUG: DB connected\n'); } catch (_) { }
 
-      const appModule = await import('../src/app');
+      const appModule = await import('../src/app.js');
       const createApp = appModule.createApp;
       app = await createApp();
       server = app.listen(0);
       try { fs.appendFileSync(logFile, 'DEBUG: Server started\n'); } catch (_) { }
 
       // Register a user to get a valid token
-      const registerRes = await request(server)
+      const registerRes = await request(app)
         .post('/graphql')
         .set('x-tenant-id', 'public')
         .send({
@@ -357,41 +67,52 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
           variables: {
             input: {
               email: 'guardrails-test@example.com',
-              password: 'password123',
+              password: 'Password123!',
               firstName: 'Guard',
               lastName: 'Rails',
+              username: 'guardrails',
             },
           },
         });
 
-      try { fs.appendFileSync(logFile, `DEBUG: Register response status: ${registerRes.status}\n`); } catch (_) { }
 
+      try { fs.appendFileSync(logFile, `DEBUG: Register response status: ${registerRes.status}\n`); } catch (_) { }
+      if (registerRes.status === 500) {
+        try { fs.appendFileSync(logFile, `DEBUG: Register 500 body: ${JSON.stringify(registerRes.body)}\n`); } catch (_) { }
+      }
       if (registerRes.body.errors) {
         try { fs.appendFileSync(logFile, `DEBUG: Register failed: ${JSON.stringify(registerRes.body.errors)}\n`); } catch (_) { }
-        const loginRes = await request(app)
-          .post('/graphql')
-          .set('x-tenant-id', 'public')
-          .send({
-            query: `
-              mutation Login($input: LoginInput!) {
-                  login(input: $input) {
-                  token
-                  }
+      }
+
+      const loginRes = await request(app)
+        .post('/graphql')
+        .set('x-tenant-id', 'public')
+        .send({
+          query: `
+            mutation Login($input: LoginInput!) {
+              login(input: $input) {
+                token
+                user {
+                  id
+                  email
+                }
               }
-              `,
-            variables: {
-              input: {
-                email: 'guardrails-test@example.com',
-                password: 'password123',
-              },
-            },
-          });
-        if (loginRes.body.errors) {
-          try { fs.appendFileSync(logFile, `DEBUG: Login failed: ${JSON.stringify(loginRes.body.errors)}\n`); } catch (_) { }
-          throw new Error('Could not register or login test user');
-        }
+            }
+          `,
+          variables: {
+            input: {
+              email: 'guardrails-test@example.com',
+              password: 'Password123!',
+            }
+          }
+        });
+
+      if (loginRes.body.data?.login?.token) {
         authToken = loginRes.body.data.login.token;
       } else {
+        if (!registerRes.body.data?.register) {
+          throw new Error(`Registration and Login both failed. Register Body: ${JSON.stringify(registerRes.body)}`);
+        }
         authToken = registerRes.body.data.register.token;
       }
       try { fs.appendFileSync(logFile, `DEBUG: Auth token retrieved: ${authToken}\n`); } catch (_) { }
@@ -566,7 +287,7 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
     // It might return a validation error or handle it.
     // Ideally 400 or 200 with user-facing error.
     if (res.status === 500) {
-      fail('Server crashed with 500 on huge input');
+      throw new Error('Server crashed with 500 on huge input');
     }
 
     // Checking for reasonable response time or error

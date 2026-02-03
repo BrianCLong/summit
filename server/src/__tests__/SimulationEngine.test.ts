@@ -2,8 +2,9 @@
  * Simulation Engine Tests
  */
 
-import { SimulationEngine } from '../simulation/SimulationEngine';
-import { ScenarioType, DisasterSubtype, AssetType, HealthStatus, TwinSyncState, DigitalTwinAsset } from '../types/digitalTwin';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { SimulationEngine } from '../simulation/SimulationEngine.js';
+import { ScenarioType, DisasterSubtype, AssetType, HealthStatus, TwinSyncState, DigitalTwinAsset } from '../types/digitalTwin.js';
 
 describe('SimulationEngine', () => {
   let engine: SimulationEngine;

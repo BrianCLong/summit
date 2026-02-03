@@ -1,10 +1,11 @@
 
 // server/src/lib/state/tests/state.test.ts
 
-import { ConsistencyEngine, ConsistencyLevel } from '../consistency-engine';
-import { GCounter, PNCounter, LWWRegister, ORSet, ConflictResolver } from '../conflict-resolver';
-import { TwoPhaseCommitCoordinator, TransactionParticipant, SagaCoordinator, SagaAction } from '../distributed-transaction';
-import { StateSyncClient } from '../state-sync';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { ConsistencyEngine, ConsistencyLevel } from '../consistency-engine.js';
+import { GCounter, PNCounter, LWWRegister, ORSet, ConflictResolver } from '../conflict-resolver.js';
+import { TwoPhaseCommitCoordinator, TransactionParticipant, SagaCoordinator, SagaAction } from '../distributed-transaction.js';
+import { StateSyncClient } from '../state-sync.js';
 import { WebSocket } from 'ws';
 
 jest.mock('ws');
@@ -64,11 +65,11 @@ describe('State Management', () => {
     });
 
     it('should merge LWW-Registers', () => {
-        const registerA = new LWWRegister('A', 'foo', 100);
-        const registerB = new LWWRegister('B', 'bar', 200);
-        const merged = registerA.merge(registerB);
-        expect(merged.value).toBe('bar');
-      });
+      const registerA = new LWWRegister('A', 'foo', 100);
+      const registerB = new LWWRegister('B', 'bar', 200);
+      const merged = registerA.merge(registerB);
+      expect(merged.value).toBe('bar');
+    });
 
     it('should merge OR-Sets', () => {
       const setA = new ORSet('A');
@@ -117,36 +118,36 @@ describe('State Management', () => {
     });
 
     it('should rollback a 2PC transaction if a participant fails', () => {
-        const coordinator = new TwoPhaseCommitCoordinator();
-        const participant1: TransactionParticipant = {
-          canCommit: () => true,
-          commit: jest.fn(),
-          rollback: jest.fn(),
-        };
-        const participant2: TransactionParticipant = {
-          canCommit: () => false,
-          commit: jest.fn(),
-          rollback: jest.fn(),
-        };
-        coordinator.addParticipant(participant1);
-        coordinator.addParticipant(participant2);
+      const coordinator = new TwoPhaseCommitCoordinator();
+      const participant1: TransactionParticipant = {
+        canCommit: () => true,
+        commit: jest.fn(),
+        rollback: jest.fn(),
+      };
+      const participant2: TransactionParticipant = {
+        canCommit: () => false,
+        commit: jest.fn(),
+        rollback: jest.fn(),
+      };
+      coordinator.addParticipant(participant1);
+      coordinator.addParticipant(participant2);
 
-        const result = coordinator.execute();
+      const result = coordinator.execute();
 
-        expect(result).toBe(false);
-        expect(participant1.rollback).toHaveBeenCalled();
-        expect(participant2.rollback).toHaveBeenCalled();
-      });
+      expect(result).toBe(false);
+      expect(participant1.rollback).toHaveBeenCalled();
+      expect(participant2.rollback).toHaveBeenCalled();
+    });
 
     it('should successfully execute a saga', async () => {
       const coordinator = new SagaCoordinator();
       const action1: SagaAction = {
-        execute: jest.fn().mockResolvedValue(undefined),
-        compensate: jest.fn().mockResolvedValue(undefined),
+        execute: jest.fn().mockResolvedValue(undefined) as any,
+        compensate: jest.fn().mockResolvedValue(undefined) as any,
       };
       const action2: SagaAction = {
-        execute: jest.fn().mockResolvedValue(undefined),
-        compensate: jest.fn().mockResolvedValue(undefined),
+        execute: jest.fn().mockResolvedValue(undefined) as any,
+        compensate: jest.fn().mockResolvedValue(undefined) as any,
       };
       coordinator.addAction(action1);
       coordinator.addAction(action2);
@@ -159,23 +160,23 @@ describe('State Management', () => {
     });
 
     it('should compensate a saga if an action fails', async () => {
-        const coordinator = new SagaCoordinator();
-        const action1: SagaAction = {
-          execute: jest.fn().mockResolvedValue(undefined),
-          compensate: jest.fn().mockResolvedValue(undefined),
-        };
-        const action2: SagaAction = {
-          execute: jest.fn().mockRejectedValue(new Error('Action failed')),
-          compensate: jest.fn().mockResolvedValue(undefined),
-        };
-        coordinator.addAction(action1);
-        coordinator.addAction(action2);
+      const coordinator = new SagaCoordinator();
+      const action1: SagaAction = {
+        execute: jest.fn().mockResolvedValue(undefined) as any,
+        compensate: jest.fn().mockResolvedValue(undefined) as any,
+      };
+      const action2: SagaAction = {
+        execute: (jest.fn() as any).mockRejectedValue(new Error('Action failed')),
+        compensate: jest.fn().mockResolvedValue(undefined) as any,
+      };
+      coordinator.addAction(action1);
+      coordinator.addAction(action2);
 
-        const result = await coordinator.execute();
+      const result = await coordinator.execute();
 
-        expect(result).toBe(false);
-        expect(action1.compensate).toHaveBeenCalled();
-      });
+      expect(result).toBe(false);
+      expect(action1.compensate).toHaveBeenCalled();
+    });
   });
 
   describe('StateSyncClient', () => {
@@ -186,7 +187,7 @@ describe('State Management', () => {
     };
 
     beforeEach(() => {
-      (WebSocket as jest.Mock).mockImplementation(() => mockWebSocket);
+      (WebSocket as any).mockImplementation(() => mockWebSocket);
       client = new StateSyncClient('ws://localhost:8080');
     });
 
@@ -197,8 +198,8 @@ describe('State Management', () => {
     });
 
     it('should queue operations when offline', () => {
-        client.performOperation({ type: 'update', key: 'foo', value: 'bar' });
-        expect(mockWebSocket.send).not.toHaveBeenCalled();
-      });
+      client.performOperation({ type: 'update', key: 'foo', value: 'bar' });
+      expect(mockWebSocket.send).not.toHaveBeenCalled();
+    });
   });
 });

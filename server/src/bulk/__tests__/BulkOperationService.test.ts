@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { BulkOperationService } from '../BulkOperationService.js';
 import { handlers } from '../handlers.js';
 import { BulkContext, BulkItemInput } from '../types.js';
@@ -25,10 +26,23 @@ jest.mock('../../config/logger.js', () => ({
 describe('BulkOperationService', () => {
   let service: BulkOperationService;
   let context: BulkContext;
+  let mockClient: any;
+  let mockPool: any;
 
   beforeEach(() => {
+    // Create a complete mock client with all required methods
+    mockClient = {
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+      release: jest.fn()
+    };
+
+    // Create mock pool that returns the mock client
+    mockPool = {
+      connect: jest.fn().mockResolvedValue(mockClient),
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 })
+    };
+
     service = new BulkOperationService();
-    const mockPool = (getPostgresPool as jest.Mock)();
     service.setPool(mockPool);
 
     context = {
@@ -36,10 +50,23 @@ describe('BulkOperationService', () => {
       userId: 'user-1',
       requestId: 'req-1'
     };
+
+    // Reset all mocks
+    jest.clearAllMocks();
   });
 
-  // Skipped due to test environment mock injection issues with getPostgresPool in handlers
-  test.skip('should execute best-effort bulk operation', async () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('should execute best-effort bulk operation via handler spy', async () => {
+    // Spy on the handler's execute method to bypass database calls
+    const handler = handlers['tags/apply'];
+    const executeSpy = jest.spyOn(handler, 'execute').mockResolvedValue([
+      { itemId: 'id1', status: 'success' },
+      { itemId: 'id2', status: 'success' }
+    ]);
+
     const payload = {
       items: [{ id: 'id1' }, { id: 'id2' }],
       requestId: 'req-1',
@@ -50,7 +77,14 @@ describe('BulkOperationService', () => {
 
     const response = await service.process(context, payload);
 
-    // Check results
+    expect(executeSpy).toHaveBeenCalledWith(
+      payload.items,
+      payload.params,
+      expect.objectContaining({ tenantId: 'tenant-1' })
+    );
+    expect(response.summary.total).toBe(2);
+    expect(response.summary.success).toBe(2);
+    expect(response.summary.failed).toBe(0);
   });
 
   test('should fail for unsupported operation', async () => {
@@ -65,15 +99,15 @@ describe('BulkOperationService', () => {
     await expect(service.process(context, payload)).rejects.toThrow('Unsupported bulk operation');
   });
 
-  // Skipped due to test environment mock injection issues with getPostgresPool
-  test.skip('should handle atomic rollback', async () => {
-     const handler = handlers['tags/apply'];
-     jest.spyOn(handler, 'execute').mockResolvedValueOnce([
-         { itemId: 'id1', status: 'success' },
-         { itemId: 'id2', status: 'failure', message: 'Simulated error' }
-     ]);
+  test('should handle atomic rollback when handler returns failures', async () => {
+    // Spy on handler to return mixed results
+    const handler = handlers['tags/apply'];
+    const executeSpy = jest.spyOn(handler, 'execute').mockResolvedValue([
+      { itemId: 'id1', status: 'success' },
+      { itemId: 'id2', status: 'failure', message: 'Simulated error' }
+    ]);
 
-     const payload = {
+    const payload = {
       items: [{ id: 'id1' }, { id: 'id2' }],
       requestId: 'req-1',
       operationType: 'tags/apply',
@@ -83,8 +117,62 @@ describe('BulkOperationService', () => {
 
     const response = await service.process(context, payload);
 
+    // Verify rollback was triggered
+    expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+    expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+    expect(mockClient.release).toHaveBeenCalled();
+
+    // All items should be marked as failed due to atomic rollback
     expect(response.summary.failed).toBe(2);
+    expect(response.summary.success).toBe(0);
     expect(response.results[0].status).toBe('failure');
     expect(response.results[0].code).toBe('ATOMIC_ROLLBACK');
+  });
+
+  test('should commit atomic operation when all items succeed', async () => {
+    const handler = handlers['tags/apply'];
+    jest.spyOn(handler, 'execute').mockResolvedValue([
+      { itemId: 'id1', status: 'success' },
+      { itemId: 'id2', status: 'success' }
+    ]);
+
+    const payload = {
+      items: [{ id: 'id1' }, { id: 'id2' }],
+      requestId: 'req-1',
+      operationType: 'tags/apply',
+      params: { tags: ['test'] },
+      atomic: true
+    };
+
+    const response = await service.process(context, payload);
+
+    // Verify commit was called
+    expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+    expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+    expect(mockClient.release).toHaveBeenCalled();
+
+    expect(response.summary.success).toBe(2);
+    expect(response.summary.failed).toBe(0);
+  });
+
+  test('should handle dry run without executing', async () => {
+    const handler = handlers['tags/apply'];
+    const executeSpy = jest.spyOn(handler, 'execute');
+
+    const payload = {
+      items: [{ id: 'id1' }, { id: 'id2' }],
+      requestId: 'req-1',
+      operationType: 'tags/apply',
+      params: { tags: ['test'] },
+      atomic: false,
+      dryRun: true
+    };
+
+    const response = await service.process(context, payload);
+
+    // Handler should not be called in dry run
+    expect(executeSpy).not.toHaveBeenCalled();
+    expect(response.summary.total).toBe(2);
+    expect(response.summary.success).toBe(2);
   });
 });

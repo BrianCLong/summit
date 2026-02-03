@@ -1,13 +1,14 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 jest.mock('../MaestroService.js', () => ({
   maestroService: {
     logAudit: jest.fn(),
   },
 }));
 
-import { MaestroEngine } from '../engine';
-import { MaestroDSL } from '../dsl';
-import { MaestroTask, MaestroTemplate } from '../model';
+import { MaestroEngine } from '../engine.js';
+import { MaestroDSL } from '../dsl.js';
+import { MaestroTask, MaestroTemplate } from '../model.js';
 
 // Mocks
 const mockDb = {

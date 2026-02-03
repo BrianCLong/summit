@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { ManifestValidator } from '../validator.js';
 import { PluginSandbox } from '../sandbox.js';
 

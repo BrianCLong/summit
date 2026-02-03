@@ -4,7 +4,7 @@
  */
 
 import Redis from 'ioredis';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 interface TokenBucketConfig {
   capacity: number; // Maximum tokens in bucket
@@ -151,13 +151,13 @@ export class RedisBucket {
     this.client = new (Redis as any)(redisUrl || process.env.REDIS_URL || 'redis://localhost:6379', {
       connectTimeout: 5000,
       commandTimeout: 2000,
-      retryStrategy: (times) => {
+      retryStrategy: (times: number) => {
         if (times > 3) return null;
         return times * 2 * 1000;
       },
     });
 
-    this.client.on('error', (error) => {
+    this.client.on('error', (error: any) => {
       logger.error('Redis client error:', error);
     });
 

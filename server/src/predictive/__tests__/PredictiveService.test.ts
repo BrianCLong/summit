@@ -1,6 +1,7 @@
-import { PredictiveService } from '../PredictiveService';
-import { getNeo4jDriver } from '../../config/database';
-import { WhatIfRequest } from '../../contracts/predictive/types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { PredictiveService } from '../PredictiveService.js';
+import { getNeo4jDriver } from '../../config/database.js';
+import { WhatIfRequest } from '../../contracts/predictive/types.js';
 
 // Mock getNeo4jDriver
 jest.mock('../../config/database', () => ({

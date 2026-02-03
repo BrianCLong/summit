@@ -1,13 +1,3 @@
-name: Reusable iac_plan
-on:
-  workflow_call:
-
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Placeholder for iac_plan
-        run: echo "Running iac_plan workflow placeholder"
 name: iac_plan
 
 on:
@@ -26,13 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0
 
       - name: Detect Terraform changes
         id: changes
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -53,7 +43,7 @@ jobs:
 
       - name: Set up Terraform
         if: steps.changes.outputs.changed == 'true'
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: 1.9.8
 
@@ -65,7 +55,7 @@ jobs:
 
       - name: Report skipped status
         if: steps.changes.outputs.changed != 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             core.summary.addHeading('IaC Plan')

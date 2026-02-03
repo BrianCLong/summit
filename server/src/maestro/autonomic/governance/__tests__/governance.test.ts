@@ -1,6 +1,7 @@
 
-import { GovernanceEngine } from '../governance-engine';
-import { AdaptationPlan } from '../../loops/types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { GovernanceEngine } from '../governance-engine.js';
+import { AdaptationPlan } from '../../loops/types.js';
 
 describe('GovernanceEngine', () => {
   let engine: GovernanceEngine;

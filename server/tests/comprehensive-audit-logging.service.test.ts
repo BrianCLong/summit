@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import * as jwt from 'jsonwebtoken';
 import { ComprehensiveAuditLoggingService } from '../src/services/ComprehensiveAuditLoggingService.js';
 import {

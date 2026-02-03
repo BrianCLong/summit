@@ -30,7 +30,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
   let authToken: string;
   let api!: SuperTest<Test>;
   let state!: IntegrationTestState;
-  let resetState?: () => void;
+  let resetState: (() => void) | undefined;
   let testCorrelationId: string;
 
   before(async function () {
@@ -147,6 +147,73 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         .timeout(TEST_CONFIG.api.timeout);
 
       expect(response.status).to.equal(401);
+    });
+
+    it('should deny unauthenticated investigation access', async () => {
+      const response = await api
+        .post('/api/investigations')
+        .send({ name: 'Unauthorized Investigation' })
+        .set('X-Correlation-ID', testCorrelationId)
+        .timeout(TEST_CONFIG.api.timeout);
+
+      expect(response.status).to.equal(401);
+    });
+
+    it('should deny viewer from investigation write access', async () => {
+      const response = await api
+        .post('/api/investigations')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('X-Test-Role', 'viewer')
+        .set('X-Correlation-ID', testCorrelationId)
+        .send({ name: 'Viewer Attempt' })
+        .timeout(TEST_CONFIG.api.timeout);
+
+      expect(response.status).to.equal(403);
+    });
+
+    it('should allow investigator to create investigations', async () => {
+      const response = await api
+        .post('/api/investigations')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('X-Test-Role', 'investigator')
+        .set('X-Correlation-ID', testCorrelationId)
+        .send({ name: 'Investigator Workspace', description: 'RBAC write test' })
+        .timeout(TEST_CONFIG.api.timeout);
+
+      expect(response.status).to.equal(201);
+      expect(response.body).to.have.property('id');
+    });
+
+    it('should allow viewers to read investigation analysis status', async () => {
+      const workspaceResponse = await api
+        .post('/api/investigations')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('X-Correlation-ID', testCorrelationId)
+        .send({ name: 'Viewer Read Workspace', description: 'RBAC read test' })
+        .timeout(TEST_CONFIG.api.timeout);
+
+      expect(workspaceResponse.status).to.equal(201);
+      const workspaceId = workspaceResponse.body.id;
+
+      const analysisResponse = await api
+        .post(`/api/investigations/${workspaceId}/analyze`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('X-Correlation-ID', testCorrelationId)
+        .send({ goal: 'RBAC read test', autonomy: 1 })
+        .timeout(TEST_CONFIG.api.timeout);
+
+      expect(analysisResponse.status).to.equal(202);
+      const analysisId = analysisResponse.body.analysisId;
+
+      const statusResponse = await api
+        .get(`/api/investigations/${workspaceId}/analyses/${analysisId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('X-Test-Role', 'viewer')
+        .set('X-Correlation-ID', testCorrelationId)
+        .timeout(TEST_CONFIG.api.timeout);
+
+      expect(statusResponse.status).to.equal(200);
+      expect(statusResponse.body).to.have.property('status');
     });
   });
 

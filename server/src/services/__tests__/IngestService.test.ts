@@ -2,41 +2,67 @@
  * IngestService Unit Tests
  */
 
-import { IngestService, IngestInput } from '../IngestService';
-import { Pool } from 'pg';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import type { IngestService as IngestServiceType, IngestInput } from '../IngestService.js';
+import type { Pool } from 'pg';
+import type { Driver } from 'neo4j-driver';
 
-jest.mock('../../config/database', () => ({
+// Mock functions declared before mocks
+const mockPgConnect = jest.fn();
+const mockPgQuery = jest.fn();
+const mockPgEnd = jest.fn();
+const mockRedisGet = jest.fn();
+const mockRedisSet = jest.fn();
+const mockRedisOn = jest.fn();
+const mockRedisQuit = jest.fn();
+const mockRedisSubscribe = jest.fn();
+const mockLoggerInfo = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockLoggerError = jest.fn();
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../config/database', () => ({
   getPostgresPool: jest.fn(() => ({
-    connect: jest.fn(),
-    query: jest.fn(),
-    end: jest.fn(),
+    connect: mockPgConnect,
+    query: mockPgQuery,
+    end: mockPgEnd,
   })),
   getRedisClient: jest.fn(() => ({
-    get: jest.fn(),
-    set: jest.fn(),
-    on: jest.fn(),
-    quit: jest.fn(),
-    subscribe: jest.fn(),
+    get: mockRedisGet,
+    set: mockRedisSet,
+    on: mockRedisOn,
+    quit: mockRedisQuit,
+    subscribe: mockRedisSubscribe,
   })),
 }));
-import { Driver } from 'neo4j-driver';
 
-// Mock dependencies
-jest.mock('pg');
-jest.mock('neo4j-driver');
-jest.mock('../../config/logger', () => ({
+jest.unstable_mockModule('pg', () => ({
+  Pool: jest.fn(),
+}));
+
+jest.unstable_mockModule('neo4j-driver', () => ({
+  __esModule: true,
+  default: {
+    driver: jest.fn(),
+  },
+}));
+
+jest.unstable_mockModule('../../config/logger', () => ({
   __esModule: true,
   default: {
     child: () => ({
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      info: mockLoggerInfo,
+      warn: mockLoggerWarn,
+      error: mockLoggerError,
     }),
   },
 }));
 
+// Dynamic imports AFTER mocks are set up
+const { IngestService } = await import('../IngestService.js');
+
 describe('IngestService', () => {
-  let ingestService: IngestService;
+  let ingestService: IngestServiceType;
   let mockPg: jest.Mocked<Pool>;
   let mockNeo4j: jest.Mocked<Driver>;
   let mockClient: any;
