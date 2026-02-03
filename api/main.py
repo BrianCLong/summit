@@ -143,6 +143,16 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 app = FastAPI()
 
+# FactGov Integration
+FACTGOV_ENABLED = os.environ.get("FACTGOV_ENABLED", "false").lower() == "true"
+if FACTGOV_ENABLED:
+    try:
+        from .factgov.routes import router as factgov_router
+        app.include_router(factgov_router, prefix="/api/factgov")
+        print("API service: FactGov module enabled.")
+    except ImportError as e:
+        print(f"API service: Failed to import FactGov module: {e}")
+
 # Include GNN router for link prediction endpoint
 try:
     from .gnn import router as gnn_router
