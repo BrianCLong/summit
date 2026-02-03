@@ -1,5 +1,7 @@
 {
   "evidence_id": "EVD-APPLEQAI-PRIV-002",
-  "timestamp": "2026-01-29T00:00:00Z",
-  "commit": "0000000"
+  "tool_versions": {
+    "generator": "manual"
+  },
+  "generated_at": "2026-02-16T00:00:00Z"
 }

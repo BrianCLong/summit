@@ -13,15 +13,18 @@ concurrency:
   group: ci-pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: true
+  JEST_RETRY_TIMES: 2
+  NODE_ENV: test
+  TZ: UTC
+  NODE_OPTIONS: --max-old-space-size=8192
+
 permissions:
   contents: read
   actions: read
   checks: write
   id-token: write # if you use OIDC in any job
-
-# Global environment for all jobs - prevents V8 heap exhaustion
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
 
 jobs:
   build-test:
@@ -44,8 +47,8 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - name: Install
@@ -70,7 +73,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - name: Install
@@ -86,8 +89,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
 
@@ -129,8 +132,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - name: Install dependencies
@@ -148,8 +151,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - name: Install dependencies
@@ -185,8 +188,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
 
@@ -214,8 +217,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - name: Install dependencies
@@ -249,7 +252,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
@@ -267,8 +270,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - uses: pnpm/action-setup@v4
         with: { version: 9 }
       - name: Install dependencies

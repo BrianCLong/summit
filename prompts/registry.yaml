@@ -1,5 +1,60 @@
 version: 1
 prompts:
+  - id: structured-content-primitives
+    version: v1
+    path: prompts/content/structured-content-primitives@v1.md
+    sha256: 258e133b40b69ec695a0a9bd1992da5eca9aa092af5471789c43563f512b706e
+    description: Define unified Brief/Claim/Block content primitives with evidence and governance alignment.
+    scope:
+      paths:
+        - docs/content/
+        - schemas/content/
+        - docs/roadmap/STATUS.json
+        - prompts/content/structured-content-primitives@v1.md
+        - prompts/registry.yaml
+        - agents/examples/STRUCTURED_CONTENT_PRIMITIVES_20260131.json
+      domains:
+        - content
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: deterministic-intel-ingest
+    version: v1
+    path: prompts/ingest/deterministic-intel-ingest@v1.md
+    sha256: bca50247042fc4cff08a386550ee5f998e78311c719fa0fa882589390aadf069
+    description: Integrate deterministic intel-ingestion core scaffolding with evidence artifacts and CI gate.
+    scope:
+      paths:
+        - packages/__init__.py
+        - packages/intel_ingest/
+        - cli/intel_ingest.py
+        - schemas/source_document.schema.json
+        - ci/gates/intel_ingest_determinism.sh
+        - tests/test_source_document_roundtrip.py
+        - docs/roadmap/STATUS.json
+        - prompts/ingest/deterministic-intel-ingest@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ingest
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
@@ -160,61 +215,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: lingbot-world-scaffold
-    version: v1
-    path: prompts/worldmodels/lingbot-world-scaffold.md
-    sha256: 538d8c7606c352ec21ec672ec86e504fdcc38e7d8c1546b6c8eda0a873111aa5
-    description: Scaffold clean-room world model interfaces and docs for LingBot-World alignment.
-    scope:
-      paths:
-        - docs/items/2601-20540-lingbot-world/
-        - docs/worldmodels/
-        - summit/worldmodels/
-        - NOTICE.third_party.md
-        - docs/roadmap/STATUS.json
-        - prompts/worldmodels/lingbot-world-scaffold.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - worldmodels
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: antigravity-moat-augmentation
-    version: v1
-    path: prompts/governance/antigravity-moat-augmentation@v1.md
-    sha256: 42d5cc33eafe54f7ab8eef7c16f9bbdc3a25a6f35a5790685e105c5b7d17a865
-    description: Establish Antigravity outcome ownership, policy-encoded judgment, and tradeoff ledger scaffolding.
-    scope:
-      paths:
-        - antigravity/
-        - decision_policy/
-        - tradeoff_ledger.jsonl
-        - docs/antigravity/
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/governance/antigravity-moat-augmentation@v1.md
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - policy
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
@@ -231,59 +231,6 @@ prompts:
         - documentation
         - operations
         - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: agent-registry-v0
-    version: v1
-    path: prompts/agents/agent-registry-v0.md
-    sha256: 87bba436d33f7b69ea50e655f0b2f4c008a8edb9d6f213d1e7853cceaf4a8ff7
-    description: Implement the Agent Registry v0 scaffolding with schema, loader, CLI, tests, and documentation.
-    scope:
-      paths:
-        - packages/agent-registry/
-        - packages/cli/
-        - docs/agents/
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/agents/agent-registry-v0.md
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - tooling
-        - agents
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: worldmodel-backend-scaffold
-    version: v1
-    path: prompts/worldmodels/worldmodel-backend-scaffold.md
-    sha256: df003b371b45c4d2b4301e341cc892b55db2bfc0ebcdf85c8b9937c7d3512616
-    description: Scaffold world-model backend interfaces and default-off flags.
-    scope:
-      paths:
-        - summit/worldmodels/
-        - docs/worldmodels/
-        - docs/roadmap/STATUS.json
-        - prompts/worldmodels/worldmodel-backend-scaffold.md
-        - prompts/registry.yaml
-      domains:
-        - worldmodels
-        - governance
-        - documentation
     verification:
       tiers_required:
         - C
@@ -317,33 +264,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: debezium-openlineage-subsumption
-    version: v1
-    path: prompts/subsumption/debezium-openlineage@v1.md
-    sha256: 06b14984ffbb6e08019d9efcd31353218466aeb9e9b1702d8c1496934858ff6c
-    description: Scaffold deterministic subsumption artifacts for Debezium OpenLineage integration.
-    scope:
-      paths:
-        - subsumption/debezium-openlineage/
-        - docs/standards/debezium-openlineage.md
-        - packages/decision-ledger/decision_ledger.json
-        - docs/roadmap/STATUS.json
-        - evidence/index.json
-        - prompts/subsumption/
-        - agents/examples/
-      domains:
-        - governance
-        - subsumption
-        - data-lineage
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
@@ -369,60 +289,24 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: telemetry-privacy-scaffold
+  - id: io-cogwar-radar-brief
     version: v1
-    path: prompts/privacy/telemetry-privacy-scaffold@v1.md
-    sha256: bd78474081a55b1ae48724911c234951ea1712483b5fc91a8afdf2ac3ee45828
-    description: Telemetry privacy allowlist, CI gate, and evidence scaffold for deny-by-default policy enforcement.
+    path: prompts/docs/io-cogwar-radar-brief@v1.md
+    sha256: 29e1e846516778c390cf978558937aa16389e3e54a3d3d955d482f3796bdf70e
+    description: Draft a defensive IO/CogWar radar brief with roadmap status and governance artifacts.
     scope:
       paths:
-        - telemetry/privacy/
-        - ci/check_telemetry_privacy.py
-        - tests/privacy/
-        - docs/privacy/
-        - evidence/privtel/
-        - evidence/index.json
-        - required_checks.todo.md
+        - docs/briefs/
         - docs/roadmap/STATUS.json
-        - governance/decisions/ADR-AG-PRIVTEL-001.md
-        - deps_delta/
-        - agents/examples/
-        - prompts/privacy/telemetry-privacy-scaffold@v1.md
+        - prompts/docs/io-cogwar-radar-brief@v1.md
         - prompts/registry.yaml
-      domains:
-        - privacy
-        - governance
-        - ci
-        - evidence
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: ssdf-v1.2-posture-assessment
-    version: v1
-    path: prompts/compliance/ssdf-v1.2-posture-assessment@v1.md
-    sha256: 1e0d1ea37cc4f6d359a90868d58b40c72941ce5b4575bbf43291cc9c11edae3f
-    description: Assess SSDF v1.2 posture, map controls, and draft NIST public comment artifacts.
-    scope:
-      paths:
-        - docs/compliance/
-        - docs/architecture/
-        - docs/standards/
-        - docs/roadmap/STATUS.json
+        - agents/examples/IO_COGWAR_RADAR_BRIEF_20260202.json
         - packages/decision-ledger/decision_ledger.json
-        - prompts/compliance/
-        - prompts/registry.yaml
       domains:
-        - compliance
-        - governance
-        - security
         - documentation
+        - governance
+        - info-ops
+        - cogwar
     verification:
       tiers_required:
         - C
@@ -432,148 +316,21 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: ssdf-v1.2-subsump-bundle
+  - id: minimal-architecture-index
     version: v1
-    path: prompts/compliance/ssdf-v1-2-subsump@v1.md
-    sha256: ff1f25223d1985ecb43e418f1c30b54bfb7dd3cd98751a61b1dffca164e987ac
-    description: Scaffold SSDF v1.2 subsumption bundle, evidence entries, fixtures, and backlog updates.
+    path: prompts/architecture/minimal-architecture-index@v1.md
+    sha256: 8d4d4c475473608cd79076f236b040625cbeb96f8f3b96e87023950764bfce7d
+    description: Create minimal architecture system index and Summit graph schema artifacts.
     scope:
       paths:
-        - subsumption/ssdf-v1-2/
-        - evidence/
-        - backlog/ssdf-v1-2.yaml
+        - docs/architecture/
         - docs/roadmap/STATUS.json
-        - prompts/compliance/ssdf-v1-2-subsump@v1.md
-        - prompts/registry.yaml
-      domains:
-        - compliance
-        - governance
-        - evidence
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: pr-lifecycle-report
-    version: v1
-    path: prompts/governance/pr-lifecycle-report.md
-    sha256: 7a8bdc4132e9aa65afaa4686b3a4fe467ff44efc29137d3d2d079c1bed60c2a9
-    description: Generate PR lifecycle report for security, integration chain, and OSINT categories.
-    scope:
-      paths:
-        - docs/pr-lifecycle-report.md
-        - scripts/pr-lifecycle-report.mjs
-        - prompts/governance/pr-lifecycle-report.md
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - program-management
-        - compliance
-  - id: narrative-analysis-update-20260124
-    version: v1
-    path: prompts/research/narrative-analysis-update-20260124.md
-    sha256: 1ebc24bda683cb0b153b0bed8f93ac8a39334c1bea75ee9b896831802c63fb8b
-    description: Daily narrative analysis and information operations research update for 2026-01-24.
-    scope:
-      paths:
-        - docs/research/
-        - docs/roadmap/STATUS.json
-        - prompts/research/
-        - agents/examples/
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - research
-  - id: narrative-analysis-update-20260129
-    version: v1
-    path: prompts/research/narrative-analysis-update-20260129.md
-    sha256: 517e5b854f95ce39902e954672bdcfc23ba4adc21597221189c60d42af57d553
-    description: Narrative intelligence frames contract scaffold for 2026-01-29.
-    scope:
-      paths:
-        - narratives/
-        - eval/narratives/
-        - security/gates/
-        - evidence/
-        - docs/roadmap/STATUS.json
-        - prompts/research/
-        - agents/examples/
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - research
-        - governance
-        - security
-  - id: siteimprove-agentic-content-intel
-    version: v1
-    path: prompts/competitive/siteimprove-agentic-content-intelligence.md
-    sha256: 81ddc325cbc19253c9d306cfa49801fecd09aea632e7c1ff133bf3e73ec761df
-    description: Competitive brief on Siteimprove's agentic content intelligence and Summit response actions.
-    scope:
-      paths:
-        - docs/competitive/
-        - docs/roadmap/STATUS.json
-        - prompts/competitive/
+        - prompts/architecture/minimal-architecture-index@v1.md
         - prompts/registry.yaml
         - agents/examples/
-      domains:
-        - competitive-intel
-        - product-strategy
-        - governance
-  - id: sar-agentic-app-runtime
-    version: v1
-    path: prompts/architecture/sar-agentic-app-runtime@v1.md
-    sha256: 0c2ea2abded4bee786ab44a93066948cac8bff1dc60d94cb3cd56faa15c367d8
-    description: Summit App Runtime architecture, governance, and compatibility plan with SAR deliverables.
-    scope:
-      paths:
-        - docs/architecture/sar-agentic-app-runtime.md
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/architecture/sar-agentic-app-runtime@v1.md
-        - prompts/registry.yaml
       domains:
         - architecture
         - governance
-        - security
-        - product
-  - id: secrets-handling-guidance
-    version: v1
-    path: prompts/docs/secrets-handling-guidance@v1.md
-    sha256: 47905844651ae4302a43cb54cc1ae0bcccffadffba5285b7f5fd266bbd03c2eb
-    description: Update contributor guidance with secrets handling and shell history hardening.
-    scope:
-      paths:
-        - CONTRIBUTING.md
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/docs/secrets-handling-guidance@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - security
-        - governance
-  - id: mcp-git-chain-hardening
-    version: v1
-    path: prompts/security/mcp-git-chain-hardening@v1.md
-    sha256: cd4b567258aa3fc30492b51228012212e2719c809e390bfc37dc6040a3f85109
-    description: Extract MCP Git server exploit chains and map Summit hardening controls.
-    scope:
-      paths:
-        - docs/security/
-        - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - agents/examples/
-        - prompts/security/mcp-git-chain-hardening@v1.md
-        - prompts/registry.yaml
-      domains:
-        - security
-        - governance
         - documentation
     verification:
       tiers_required:
@@ -584,292 +341,20 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: secure-mcp-evidence-scaffold
+  - id: pr-17730-update
     version: v1
-    path: prompts/security/secure-mcp-evidence-scaffold@v1.md
-    sha256: 36696b2c92abadd559bafff4f93a4573b764f4475c56f28ef46e0ad828ad7645
-    description: Secure MCP evidence schema alignment and verification gate scaffold.
+    path: prompts/pr/pr-17730-update@v1.md
+    sha256: 63e31d8f30399c75de748c1841630ba4cb10d216dabe99757c5e142711c54417
+    description: Update PR 17730 documentation and roadmap content.
     scope:
       paths:
-        - evidence/
-        - ci/verify_evidence.sh
-        - required_checks.todo.md
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/security/secure-mcp-evidence-scaffold@v1.md
-        - prompts/registry.yaml
-      domains:
-        - security
-        - governance
-        - ci
-        - evidence
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: mvp4-ga-gate-artifacts
-    version: v1
-    path: prompts/docs/mvp4-ga-gate-artifacts@v1.md
-    sha256: 2559438794396206479faeb3e06af19df340be2241d70e0e019f97cac76fef6d
-    description: Document and map MVP-4 GA gate artifact closure steps and verification surfaces.
-    scope:
-      paths:
-        - docs/ga/
-        - scripts/ga/
-        - agent-contract.json
-        - prompts/docs/mvp4-ga-gate-artifacts@v1.md
-        - prompts/registry.yaml
-        - agents/examples/
-      domains:
-        - governance
-        - ga-hardening
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: genui-plan-scaffold
-    version: v1
-    path: prompts/genui/genui-plan-scaffold@v1.md
-    sha256: 204eaff65c2739b657e996c6b551d47ae1ecdf8ce3b85be654c9372d71016e9b
-    description: Ship the Summit-native GenUI plan scaffold, GA docs, and verification updates.
-    scope:
-      paths:
-        - packages/genui/
-        - docs/ga/genui/
-        - docs/ga/MVP-4-GA-VERIFICATION.md
-        - docs/ga/verification-map.json
-        - scripts/ga/verify-ga-surface.mjs
-        - agent-contract.json
-        - docs/roadmap/STATUS.json
-        - AGENT_ACTIVITY.md
-        - prompts/genui/genui-plan-scaffold@v1.md
-        - prompts/registry.yaml
-      domains:
-        - genui
-        - governance
-        - documentation
-        - verification
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: governance-docs-soc-controls
-    version: v1
-    path: prompts/governance/governance-docs-soc-controls@v1.md
-    sha256: 34c74a151cb9bfa1dc22250d51139ad229da7bd6bbb4a5ad64593cefe7c7a01a
-    description: Governance docs consolidation, SOC control test gate, and deterministic GA verification updates.
-    scope:
-      paths:
-        - docs/governance/
-        - docs/ci/REQUIRED_CHECKS_POLICY.yml
-        - docs/SOC_CONTROL_UNIT_TESTS_PLAN.md
-        - docs/roadmap/STATUS.json
-        - scripts/ci/
-        - .github/workflows/
-        - server/tests/
-        - server/src/
-        - server/scripts/
-        - compliance/
-        - prompts/governance/governance-docs-soc-controls@v1.md
-        - prompts/registry.yaml
-        - agents/examples/
-      domains:
-        - governance
-        - compliance
-        - ci
-        - documentation
-        - testing
-    verification:
-      tiers_required:
-        - A
-      debt_budget:
-        permitted: 0
-        retirement_target: 1
-    allowed_operations:
-      - create
-      - edit
-  - id: subsumption-bundle-framework
-    version: v1
-    path: prompts/governance/subsumption-bundle-framework@v1.md
-    sha256: f09271d11c1411c92d68fd6bcb8aa9d647b5739ce15c27b60fb634f85519dbee
-    description: Scaffold subsumption bundle templates, verifier gates, and governance docs for deterministic intake.
-    scope:
-      paths:
-        - subsumption/
-        - scripts/ci/
-        - docs/standards/
-        - docs/security/data-handling/
-        - docs/ops/runbooks/
-        - docs/decisions/
-        - docs/repo_assumptions.md
-        - docs/required_checks.todo.md
-        - docs/roadmap/STATUS.json
-        - evidence/index.json
-        - deps_delta/
-        - backlog/
-        - .github/workflows/subsumption-bundle.yml
-        - prompts/governance/subsumption-bundle-framework@v1.md
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - documentation
-        - ci
-        - evidence
-        - operations
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: daily-disinfo-research-summary
-    version: v1
-    path: prompts/research/daily-disinfo-research-summary@v1.md
-    sha256: 575646f52234f5fc454ee92cad5ad78aba839e2ab3620810beb6212e6cf268bd
-    description: Daily research summary update for disinformation and information operations.
-    scope:
-      paths:
-        - docs/research/
-        - docs/roadmap/STATUS.json
-        - prompts/research/daily-disinfo-research-summary@v1.md
-        - prompts/registry.yaml
-      domains:
-        - research
-        - documentation
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: adr-pr-template-cleanup
-    version: v1
-    path: prompts/docs/adr-pr-template-cleanup@v1.md
-    sha256: 429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07
-    description: Update PR and ADR templates for current workflow guidance and formatting.
-    scope:
-      paths:
-        - .github/
-        - docs/ADR/
-        - agents/examples/
-        - prompts/docs/adr-pr-template-cleanup@v1.md
+        - docs/
+        - prompts/pr/pr-17730-update@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
         - governance
-        - quality
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: tidemark-evidence-scaffold
-    version: v1
-    path: prompts/temporal/tidemark-evidence-scaffold@v1.md
-    sha256: 3040c42ef8bfabcf9abbc1d95707d73ff85b6c35faa6ff65326d78cee052f58c
-    description: Scaffold tidemark temporal community evidence bundle and verification gate.
-    scope:
-      paths:
-        - evidence/
-        - schemas/trajectory/
-        - fixtures/temporal_graph/
-        - docs/required_checks.todo.md
-        - docs/roadmap/STATUS.json
-        - docs/dependency_delta.md
-        - tools/ci_verify_tidemark_bundle.py
-        - src/temporal_graph/config.py
-        - prompts/temporal/tidemark-evidence-scaffold@v1.md
-        - prompts/registry.yaml
-      domains:
-        - evidence
-        - governance
-        - ci
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: dynamic-intent-required-checks-module-map
-    version: v1
-    path: prompts/dynamic-intent/required-checks-module-map@v1.md
-    sha256: 1ebdb7be99bf75da2ae461d2a4e3c0c0511177ed854aebf72872cc02fb74b137
-    description: Document Dynamic Intent required checks discovery and module map placeholders.
-    scope:
-      paths:
-        - required_checks.todo.md
-        - docs/dynamic_intent/
-        - docs/deps_delta.md
-        - docs/roadmap/STATUS.json
-        - prompts/dynamic-intent/required-checks-module-map@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - planning
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: qwen3-asr-scaffold
-    version: v1
-    path: prompts/asr/qwen3-asr-scaffold@v1.md
-    sha256: 58d8b8c189745d63cdf6bf12cfaef24fd77f5671b6c3e62b346bd66566d2f265
-    description: Scaffold deny-by-default Qwen3-ASR integration with guardrails and evidence runner.
-    scope:
-      paths:
-        - asr/
-        - docs/asr/
-        - tests/
-        - required_checks.todo.md
-        - NOTICE.third_party.md
-        - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/asr/qwen3-asr-scaffold@v1.md
-        - prompts/registry.yaml
-        - agents/examples/
-      domains:
-        - asr
-        - governance
-        - documentation
-        - security
-        - testing
+        - ip
     verification:
       tiers_required:
         - C

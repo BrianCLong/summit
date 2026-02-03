@@ -14,9 +14,3 @@ This project incorporates concepts and patterns inspired by the following open-s
 - **Repo**: https://github.com/Harry-mic/SCOUT
 - **License**: MIT
 - **Notice**: Concepts inspired by SCOUT. Clean-room implementation.
-
-## Qwen/Qwen3-ASR-0.6B
-
-- **Source**: https://huggingface.co/Qwen/Qwen3-ASR-0.6B
-- **License**: Apache-2.0
-- **Notice**: Clean-room adapter scaffold references public model documentation.

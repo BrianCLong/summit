@@ -1,0 +1,16 @@
+{
+  "name": "@intelgraph/disinfo-ops",
+  "version": "0.0.1",
+  "description": "Production-grade disinformation detection operations",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^4.0.16",
+    "@types/node": "^25.0.3",
+    "ajv": "^8.17.1"
+  }
+}

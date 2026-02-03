@@ -1,24 +1,22 @@
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 @dataclass(frozen=True)
 class GateDecision:
     allowed: bool
     reason: str
 
+
 def evaluate(event: Dict[str, Any], policy: Dict[str, Any]) -> GateDecision:
-    # event: {"class": "...", "has_consent": bool, ...}
     if not policy.get("enabled", True):
         return GateDecision(True, "gate_disabled")
     cls = event.get("class", "unknown")
     has_consent = bool(event.get("has_consent", False))
 
-    allowed_by_class = policy.get("classes", {}).get(cls, "deny") == "allow"
+    allowed_by_class = policy["classes"].get(cls, "deny") == "allow"
     if not allowed_by_class:
         return GateDecision(False, f"class_denied:{cls}")
-    # Even if allowed by class, some might require consent.
-    # For now, command_decode is the only one 'allow' in policy, and it doesn't require consent in this simple logic.
-    # But if more were 'allow', we might need more complex checks.
     if cls != "command_decode" and not has_consent:
         return GateDecision(False, "consent_required")
     return GateDecision(True, "allowed")
