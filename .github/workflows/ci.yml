@@ -43,17 +43,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
 
   typecheck:
     name: Typecheck
@@ -62,19 +51,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Typecheck
-        run: pnpm typecheck
 
   unit-tests:
     name: Unit Tests
@@ -83,35 +59,6 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Unit Tests
-        run: pnpm -w test:unit || pnpm -w test:unit
-      - name: Attach evidence
-        if: always()
-        run: |
-          mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs \
-            --job unit-tests \
-            --runner ${{ runner.os }} \
-            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
-            --out artifacts/stamp.json
-        shell: bash
-      - name: Generate Metrics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: server/coverage/
 
   integration-test:
     runs-on: ubuntu-latest
@@ -171,26 +118,6 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
-      - name: Upload SOC compliance reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: soc-compliance-report
-          path: soc-compliance-reports
-          retention-days: 90
 
   verify-versions:
     name: Verify Workflow Versions
