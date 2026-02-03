@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Disinfo Ecosystem Stamp",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string" },
+    "content_hash": { "type": "string" }
+  },
+  "required": ["version", "content_hash"]
+}
