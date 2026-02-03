@@ -1,0 +1,47 @@
+name: Deployment Gate (SLO)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "Target environment (dev, staging, prod)"
+        required: true
+        type: string
+      skip-slo:
+        description: "Whether to skip SLO check"
+        required: false
+        type: boolean
+        default: false
+      slo-override-justification:
+        description: "Justification if SLO is overridden"
+        required: false
+        type: string
+    outputs:
+      gate-status:
+        description: "Status of the SLO gate"
+        value: ${{ jobs.slo-gate.outputs.status }}
+
+jobs:
+  slo-gate:
+    name: Pre-Deploy SLO Gate (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.check.outcome }}
+    if: ${{ inputs.environment == 'prod' && !inputs.skip-slo }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run SLO Check
+        id: check
+        env:
+          SLO_OVERRIDE: ${{ inputs.slo-override-justification != '' && 'true' || 'false' }}
+          SLO_OVERRIDE_JUSTIFICATION: ${{ inputs.slo-override-justification }}
+        run: node scripts/ci/predeploy-slo-check.mjs
+
+      - name: Upload SLO Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: predeploy-slo-${{ inputs.environment }}-${{ github.sha }}
+          path: artifacts/gates/predeploy-slo.json

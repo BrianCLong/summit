@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { AutoScalingPolicyGenerator, ServiceMetrics } from '../autoscaling';
+import { AutoScalingPolicyGenerator, ServiceMetrics } from '../autoscaling.js';
 
 describe('AutoScalingPolicyGenerator', () => {
   let generator: AutoScalingPolicyGenerator;

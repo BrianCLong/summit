@@ -15,12 +15,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 9
+
 
       - name: Install dependencies (Global)
         run: |
@@ -46,6 +47,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install Client Dependencies (Manual Workaround)
@@ -69,6 +71,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps

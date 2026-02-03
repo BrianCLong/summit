@@ -1,0 +1,44 @@
+{
+  "task_id": "DEBEZIUM_OPENLINEAGE_SUBSUMPTION_PR1",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "debezium-openlineage-subsumption",
+    "version": "v1",
+    "sha256": "06b14984ffbb6e08019d9efcd31353218466aeb9e9b1702d8c1496934858ff6c",
+    "path": "prompts/subsumption/debezium-openlineage@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "subsumption/debezium-openlineage/",
+      "docs/standards/debezium-openlineage.md",
+      "packages/decision-ledger/decision_ledger.json",
+      "docs/roadmap/STATUS.json",
+      "evidence/index.json",
+      "prompts/subsumption/",
+      "agents/examples/"
+    ],
+    "domains": ["governance", "subsumption", "data-lineage"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "subsumption/debezium-openlineage/evidence/report.json",
+      "subsumption/debezium-openlineage/evidence/metrics.json",
+      "subsumption/debezium-openlineage/evidence/stamp.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Subsumption bundle scaffold exists with manifest, license gate, and fixtures.",
+    "Evidence bundle is indexed in evidence/index.json.",
+    "Roadmap status metadata updated."
+  ],
+  "stop_conditions": [
+    "Required check name mismatch is discovered.",
+    "Governance policy blocks new subsumption bundles."
+  ]
+}

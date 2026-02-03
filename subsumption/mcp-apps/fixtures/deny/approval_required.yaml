@@ -1,0 +1,5 @@
+name: approval_required
+action: send_message
+approval_status: none
+expected: deny
+reason: "missing approval"

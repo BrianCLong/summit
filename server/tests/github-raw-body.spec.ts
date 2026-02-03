@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import githubRouter from '../src/routes/github';
+import githubRouter from '../src/routes/github.js';
 
 describe('GitHub raw-body route', () => {
   const app = express();

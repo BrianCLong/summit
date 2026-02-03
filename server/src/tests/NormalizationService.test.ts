@@ -1,5 +1,5 @@
-import { NormalizationService } from '../ingestion/NormalizationService';
-import { ConnectorContext } from '../data-model/types';
+import { NormalizationService } from '../ingestion/NormalizationService.js';
+import { ConnectorContext } from '../data-model/types.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('NormalizationService', () => {

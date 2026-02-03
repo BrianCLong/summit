@@ -1,0 +1,38 @@
+{
+  "task_id": "AUTOMATION_ADV_TOOL_USE_DOCS_001",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "automation-advanced-tool-use-framework",
+    "version": "v1",
+    "sha256": "cf2053545731cf37c27b9ed74490691cd670b94adb1e309b29b08f6104fde5cb",
+    "path": "prompts/automation/advanced-tool-use-framework@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/automation/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/automation/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "automation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Advanced tool-use prompt framework documented and linked from automation guide",
+    "Roadmap status updated to reflect documentation change"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Sandbox violation alert",
+    "Documentation contradicts code"
+  ]
+}

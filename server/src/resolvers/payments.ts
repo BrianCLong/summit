@@ -1,5 +1,5 @@
 import { recordRevenue } from '../monitoring/businessMetrics.js';
-import { wrapResolversWithPolicy } from './policyWrapper';
+import { wrapResolversWithPolicy } from './policyWrapper.js';
 
 const paymentsResolvers = {
   Query: {

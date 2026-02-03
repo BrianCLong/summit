@@ -1,0 +1,16 @@
+item: expectation-baselines
+deferred:
+  - title: "Cross-layer time-slice alignment engine"
+    owner: "TBD"
+    estimate: "M"
+    dependency: "Event normalization utilities"
+    reason_deferred: "Not required for MWS; feature flagged Lane 2 later"
+    related_claims: ["ITEM:CLAIM-03"]
+    required_gates_later: ["expectation-baseline-evals"]
+  - title: "Confidence elasticity + survivability scoring"
+    owner: "TBD"
+    estimate: "M"
+    dependency: "Claim persistence store"
+    reason_deferred: "Innovation lane; needs eval baselines"
+    related_claims: ["ITEM:CLAIM-05", "ITEM:CLAIM-06"]
+    required_gates_later: ["expectation-baseline-evals"]

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "xai-anomaly.fullname" . }}-grafana-dashboard
+  labels:
+    grafana_dashboard: "1"
+    {{- include "xai-anomaly.labels" . | nindent 4 }}
+data:
+  xai-anomaly-dashboard.json: |
+    {
+      "title": "XAI Anomaly Service",
+      "panels": [
+        {
+          "type": "graph",
+          "title": "Requests",
+          "targets": [
+            {
+              "expr": "rate(http_requests_total{job=\"{{ include \"xai-anomaly.fullname\" . }}\"}[1m])",
+              "legendFormat": "{{status}}"
+            }
+          ]
+        }
+      ]
+    }

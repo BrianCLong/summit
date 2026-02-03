@@ -1,7 +1,9 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { createHash } from 'crypto';
+import { createRequire } from 'node:module';
 import { describe, it, expect } from '@jest/globals';
+const require = createRequire(import.meta.url);
 const { verify } = require('../../tools/report-cli');
 
 describe('report cli', () => {

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/fhem-client",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "TypeScript client for the FHE micro-analytics service",
   "type": "module",
   "main": "dist/index.js",

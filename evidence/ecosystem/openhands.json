@@ -1,0 +1,40 @@
+{
+  "id": "63afee22-d78e-4d5f-ab33-f4d84b883ed1",
+  "resource_id": "405373af-b4ef-41ae-8196-39fe619f1ca6",
+  "timestamp": "2026-01-28T17:50:51.128Z",
+  "primaryArtifact": {
+    "id": "405373af-b4ef-41ae-8196-39fe619f1ca6",
+    "name": "OpenHands",
+    "type": "Tool",
+    "url": "https://github.com/All-Hands-AI/OpenHands",
+    "description": "AI software engineer that can write code, fix bugs, and implement features.",
+    "tags": [],
+    "maturity": "Alpha",
+    "capabilities": {
+      "tool_use": true,
+      "memory": false,
+      "planning": true,
+      "orchestration": false,
+      "evals": false,
+      "safety": false,
+      "observability": false,
+      "multi_agent": false,
+      "sandboxing": true
+    },
+    "signals": {
+      "license": "MIT",
+      "active_community": true
+    }
+  },
+  "provenance": {
+    "source": "initial_ecosystem.yaml",
+    "method": "seed",
+    "actor": "summit-agent-indexer"
+  },
+  "verification": {
+    "status": "unverified",
+    "tests_run": [],
+    "results": {}
+  },
+  "claims": []
+}
