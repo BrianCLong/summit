@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest";
 import { decide } from "../permissions";
 
 describe("Permissions Policy", () => {

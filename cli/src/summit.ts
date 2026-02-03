@@ -3,7 +3,6 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import { AUTOMATION_WORKFLOWS, runAutomationWorkflow } from './automation.js';
 import { DoctorCheckResult, runDoctor } from './summit-doctor.js';
-import { registerSeraProxyCommands } from './commands/sera-proxy.js';
 
 function renderResult(result: DoctorCheckResult): void {
   const statusIcon =
@@ -44,7 +43,6 @@ async function main() {
   const program = new Command();
 
   program.name('summit').description('Summit developer toolbox CLI');
-  registerSeraProxyCommands(program);
 
   (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
     program

@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["evidence_id", "summary", "artifacts"],
   "properties": {
-    "evidence_id": { "type": "string", "pattern": "^EVD-OPENWORK-[A-Z]+-[0-9]{3}$" },
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9\\-]+$" },
     "summary": { "type": "string" },
     "artifacts": { "type": "array", "items": { "type": "string" } }
   },
