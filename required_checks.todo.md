@@ -15,6 +15,9 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
 - `lint`
 - `typecheck`
 - `build`
@@ -29,12 +32,6 @@ Once official names are known, we will alias these jobs or rename them in the wo
 - summit-skillsec
 - summit-evidence
 - summit-harness-mock
-
-## Temporary gates (Step 3.5 Flash Integration)
-- `ci/schema_validate` (mapped to `validate-evidence` in `evidence_ci_step35flash.yml`)
-- `ci/determinism_lint`
-- `ci/provider_smoke_gate`
-- `ci/policy_fixtures_gate`
 
 ## Required checks discovery (one-time for Memory Privacy)
 1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks

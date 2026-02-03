@@ -1,18 +1,12 @@
 # Temporary Gate Names
 
-This document records the temporary names assigned to governance gates during the Summit GA transition.
+The following gate names are used as placeholders until the official names from branch protection rules are discovered.
 
-| Gate | Temporary Name | Job/Script | Lane |
-| --- | --- | --- | --- |
-| Evidence | `gate/evidence` | `tools/ci/verify_evidence.py` | Lane 1 |
-| Supply-chain | `gate/supplychain` | `summit/supplychain/canary/` | Lane 2 |
-| FIMI | `gate/fimi` | `summit/fimi/surge/` | Lane 2 |
-| Agentic Misuse | `gate/agentic_misuse` | `summit/evals/agentic_misuse/` | Lane 2 |
+| Temporary Name | PR Reference | Description |
+|----------------|--------------|-------------|
+| `gate/evidence` | PR2 | Validates evidence bundles against schemas and isolation rules. |
+| `gate/supplychain` | PR4 | Runs selective-update canary tests for supply chain integrity. |
+| `gate/fimi` | PR7 | Detects FIMI surge windows and diplomatic window spikes. |
 
-## Purpose
-These names are placeholders for use in branch protection rules and CI workflow definitions until a canonical naming registry is established.
-
-## Authority
-Owned by: Jules (Release Captain)
-Last Updated: 2026-02-02
-Status: Active
+## Mapping Plan
+Once the official required checks are identified via the discovery process documented in `required_checks.todo.md`, these temporary names will be mapped or renamed in `.github/workflows/` files.
