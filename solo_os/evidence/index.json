@@ -15,6 +15,28 @@
       "files": [
         "solo_os/evidence/index.json"
       ]
+    },
+    {
+      "evidence_id": "EVD-ENTRE-502318-GOV-001",
+      "files": [
+        "solo_os/evidence/samples/GOV/report.json",
+        "solo_os/evidence/samples/GOV/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ENTRE-502318-ENG-001",
+      "files": [
+        "solo_os/evidence/samples/ENG/report.json",
+        "solo_os/evidence/samples/ENG/metrics.json",
+        "solo_os/evidence/samples/ENG/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ENTRE-502318-CI-001",
+      "files": [
+        "solo_os/evidence/samples/CI/report.json",
+        "solo_os/evidence/samples/CI/stamp.json"
+      ]
     }
   ]
 }

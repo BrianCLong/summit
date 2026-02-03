@@ -1,8 +1,0 @@
-{
-  "action": "send_message",
-  "connector": "slack",
-  "governance": "approved",
-  "idempotency_key": "key_audit_123",
-  "mode": "execute",
-  "timestamp": "captured_at_write"
-}

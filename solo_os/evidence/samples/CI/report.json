@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-ENTRE-502318-CI-001",
+  "summary": "CI verifier passed",
+  "environment": {"job": "solo_os_verify"},
+  "backend": "solo_os",
+  "artifacts": ["report.json", "stamp.json"]
+}

@@ -364,3 +364,4 @@ evidence-staging/
 !services/er-service/requirements.txt
 tmp-test/
 _worktrees/
+solo_os/evidence/runs/
