@@ -81,6 +81,25 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
   }
 
   /**
+   * Dispose the orchestrator and cleanup listeners
+   */
+  dispose(): void {
+    if (this.llmExecutor) {
+      this.llmExecutor.off('hypotheses_generated', this.forwardHypothesesGenerated);
+      this.llmExecutor.off('queries_generated', this.forwardQueriesGenerated);
+      this.llmExecutor.off('results_analyzed', this.forwardResultsAnalyzed);
+    }
+
+    if (this.remediationHooks) {
+      this.remediationHooks.off('findings_enriched', this.forwardFindingsEnriched);
+      this.remediationHooks.off('remediation_completed', this.forwardRemediationCompleted);
+      this.remediationHooks.off('ioc_confirmed', this.forwardIocConfirmed);
+    }
+
+    this.removeAllListeners();
+  }
+
+  /**
    * Initialize the orchestrator
    */
   async initialize(): Promise<void> {
@@ -911,28 +930,26 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
   }
 
   /**
+   * Event handlers for forwarding
+   */
+  private forwardHypothesesGenerated = (data: any) => this.emit('hypotheses_generated', data);
+  private forwardQueriesGenerated = (data: any) => this.emit('queries_generated', data);
+  private forwardResultsAnalyzed = (data: any) => this.emit('results_analyzed', data);
+  private forwardFindingsEnriched = (data: any) => this.emit('findings_enriched', data);
+  private forwardRemediationCompleted = (data: any) => this.emit('remediation_completed', data);
+  private forwardIocConfirmed = (data: any) => this.emit('ioc_confirmed', data);
+
+  /**
    * Setup event forwarding from sub-components
    */
   private setupEventForwarding(): void {
-    this.llmExecutor.on('hypotheses_generated', (data) =>
-      this.emit('hypotheses_generated', data)
-    );
-    this.llmExecutor.on('queries_generated', (data) =>
-      this.emit('queries_generated', data)
-    );
-    this.llmExecutor.on('results_analyzed', (data) =>
-      this.emit('results_analyzed', data)
-    );
+    this.llmExecutor.on('hypotheses_generated', this.forwardHypothesesGenerated);
+    this.llmExecutor.on('queries_generated', this.forwardQueriesGenerated);
+    this.llmExecutor.on('results_analyzed', this.forwardResultsAnalyzed);
 
-    this.remediationHooks.on('findings_enriched', (data) =>
-      this.emit('findings_enriched', data)
-    );
-    this.remediationHooks.on('remediation_completed', (data) =>
-      this.emit('remediation_completed', data)
-    );
-    this.remediationHooks.on('ioc_confirmed', (data) =>
-      this.emit('ioc_confirmed', data)
-    );
+    this.remediationHooks.on('findings_enriched', this.forwardFindingsEnriched);
+    this.remediationHooks.on('remediation_completed', this.forwardRemediationCompleted);
+    this.remediationHooks.on('ioc_confirmed', this.forwardIocConfirmed);
   }
 
   /**

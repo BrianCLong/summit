@@ -88,6 +88,7 @@ Summit follows a modular microservices architecture:
 
 **Deep Dive Docs:**
 
+- [📈 Executive Briefing (2026-01-31)](docs/executive/2026-01-31-summit-platform-briefing.md)
 - [🏛 Architecture Overview](docs/architecture/README.md)
 - [🔌 Data Ingestion](docs/architecture/ingestion.md)
 - [🤖 Agent System](docs/architecture/agents.md)
