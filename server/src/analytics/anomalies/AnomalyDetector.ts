@@ -1,4 +1,4 @@
-import { TimeSeriesPoint, AnomalyEvent } from './types.ts';
+import { TimeSeriesPoint, AnomalyEvent } from './types.js';
 
 export class AnomalyDetector {
     // Z-Score implementation

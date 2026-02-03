@@ -9,6 +9,7 @@ services:
     networks:
       - default
       - observability
+      - intelgraph
 
   redis:
     image: redis:7-alpine
@@ -19,6 +20,7 @@ services:
     networks:
       - default
       - observability
+      - intelgraph
 
   postgres:
     image: postgres:16-alpine
@@ -30,6 +32,7 @@ services:
     networks:
       - default
       - observability
+      - intelgraph
 
   prov-ledger:
     build: ./services/prov-ledger
@@ -80,6 +83,7 @@ services:
     networks:
       - default
       - observability
+      - intelgraph
 
   api-gateway:
     build: ./services/api-gateway
@@ -105,11 +109,17 @@ services:
     build: ./server/infrastructure/backup-scripts
     volumes:
       - ./backups:/backups
+      - redis_data:/redis_data
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - REDIS_HOST=redis
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - S3_BUCKET
+      - S3_REGION
+      - S3_ENDPOINT
     depends_on:
       - postgres
       - redis

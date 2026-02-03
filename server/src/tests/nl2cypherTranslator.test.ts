@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { nl2cypher } from '../nl2cypher/index';
+import { nl2cypher } from '../nl2cypher/index.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('nl2cypher corpus', () => {

@@ -3,9 +3,9 @@ name: Policy Validation
 on:
   pull_request:
     paths:
-      - 'policies/**'
-      - 'packages/policy-cards/**'
-      - 'scripts/ci/policy_validate.ts'
+      - "policies/**"
+      - "packages/policy-cards/**"
+      - "scripts/ci/policy_validate.ts"
   push:
     branches:
       - main
@@ -16,20 +16,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: npm ci || npm install # Fallback if ci fails in this environment
+        run: pnpm install --frozen-lockfile
 
       - name: Build Policy Cards
         run: |
           cd packages/policy-cards
-          npm install
-          npm run build
+          pnpm install
+          pnpm run build
 
       - name: Run Policy Validation
         env:
@@ -43,7 +48,7 @@ jobs:
             echo "name: dummy" > "$POLICY_FILE"
           fi
 
-          npx tsx scripts/ci/policy_validate.ts
+          pnpm exec tsx scripts/ci/policy_validate.ts
 
       - name: Archive Artifacts
         if: always()

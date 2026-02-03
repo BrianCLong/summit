@@ -5,7 +5,7 @@
  * Represents a business, government agency, NGO, or other organizational entity
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface OrganizationIdentifiers {
   /** Legal registration numbers */

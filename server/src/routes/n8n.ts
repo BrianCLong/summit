@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
 import { ProvenanceLedgerService } from '../services/provenance-ledger.js';
 
 const logger = baseLogger.child({ name: 'route:n8n' });

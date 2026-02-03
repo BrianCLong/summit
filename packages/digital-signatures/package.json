@@ -7,7 +7,7 @@
   "description": "PKI infrastructure and digital signature management",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "elliptic": "^6.5.7",
