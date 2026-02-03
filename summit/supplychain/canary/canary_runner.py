@@ -1,34 +1,28 @@
 # summit/supplychain/canary/canary_runner.py
-
-import json
-from typing import List, Dict, Any
+from typing import Dict, List, Any
 
 class CanaryRunner:
-    """
-    Detects "selective update" patterns by comparing responses from multiple probes.
-    """
-
-    def __init__(self, probes):
-        self.probes = probes
+    def __init__(self, providers: List[Any]):
+        self.providers = providers
 
     def run_check(self, target_url: str) -> Dict[str, Any]:
-        results = []
-        for probe in self.probes:
-            results.append(probe.probe(target_url))
+        results = {}
+        for provider in self.providers:
+            results[provider.name] = provider.probe(target_url)
 
-        # Compare results
+        # Detect differentials
         if not results:
-            return {"status": "error", "message": "No probes ran"}
+            return {"status": "skipped", "reason": "no providers"}
 
-        first = results[0]
-        differential = False
-        for r in results[1:]:
-            if r["hash"] != first["hash"] or r["redirect_url"] != first["redirect_url"]:
-                differential = True
+        first_res = list(results.values())[0]
+        differential_detected = False
+        for res in results.values():
+            if res != first_res:
+                differential_detected = True
                 break
 
         return {
-            "status": "fail" if differential else "pass",
-            "differential_detected": differential,
-            "probe_results": results
+            "target": target_url,
+            "results": results,
+            "differential_detected": differential_detected
         }
