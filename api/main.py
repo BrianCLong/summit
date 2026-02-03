@@ -226,13 +226,39 @@ except Exception as e:
 # Initialize graph forecaster
 graph_forecaster = GraphForecaster(neo4j_uri=NEO4J_URI, user=NEO4J_USER, password=NEO4J_PASSWORD)
 
-# Try connecting (max attempts logic omitted for brevity in this cleanup, assuming container orchestration handles retries)
-try:
-    neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-except Exception:
-    pass
+# Initialize Neo4j Driver with retry
+max_attempts = 10
+delay = 5
+for attempt in range(max_attempts):
+    try:
+        print(f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})...")
+        neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+        neo4j_driver.verify_connectivity()
+        print("API service: Successfully connected to Neo4j.")
+        break
+    except ServiceUnavailable as e:
+        print(f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds...")
+        time.sleep(delay)
+    except Exception as e:
+        print(f"API service: An unexpected error occurred during Neo4j connection: {e}")
+        time.sleep(delay)
+else:
+    # We continue without Neo4j for now, but in prod this might be fatal
+    print("API service: Failed to connect to Neo4j after multiple attempts. Graph features disabled.")
 
-try:
-    redis_client = redis.from_url(REDIS_URL)
-except Exception:
-    pass
+# Initialize Redis Client with retry
+for attempt in range(max_attempts):
+    try:
+        print(f"API service: Attempting to connect to Redis (Attempt {attempt + 1}/{max_attempts})...")
+        redis_client = redis.from_url(REDIS_URL)
+        redis_client.ping()
+        print("API service: Successfully connected to Redis.")
+        break
+    except ConnectionError as e:
+        print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
+        time.sleep(delay)
+    except Exception as e:
+        print(f"API service: An unexpected error occurred during Redis connection: {e}")
+        time.sleep(delay)
+else:
+    print("API service: Failed to connect to Redis after multiple attempts. Caching disabled.")
