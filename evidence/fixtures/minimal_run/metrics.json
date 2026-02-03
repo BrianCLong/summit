@@ -1,7 +1,0 @@
-{
-  "run_id": "minimal-run-001",
-  "counters": {
-    "steps": 5,
-    "tool_calls": 2
-  }
-}
