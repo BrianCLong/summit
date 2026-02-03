@@ -336,6 +336,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: nog-governed-ops-docs
+    version: v1
+    path: prompts/docs/nog-governed-ops-docs@v1.md
+    sha256: 671b5dcfc2e1fe6ca3e0fb75a84a7e9cbbc661f8cb07ebdc1529699bd88c4646
+    description: Document governed narrative risk ops standards, security handling, and runbook updates.
+    scope:
+      paths:
+        - repo_assumptions.md
+        - docs/standards/nog-governed-agents.md
+        - docs/security/data-handling/nog-governed-agents.md
+        - docs/ops/runbooks/nog-governed-agents.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/NOG_GOVERNED_OPS_DOCS_TASK.json
+        - prompts/docs/nog-governed-ops-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

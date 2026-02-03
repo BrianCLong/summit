@@ -38,6 +38,12 @@
       "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
     },
     {
+      "id": "narrative-ops-governed-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+    },
+    {
       "id": "io-cogwar-radar-2027-brief",
       "status": "in_progress",
       "owner": "codex",
