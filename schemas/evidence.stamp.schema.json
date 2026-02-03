@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Evidence Stamp",
   "type": "object",
-  "required": ["evidence_id", "created_at"],
+  "required": ["evidence_id", "generated_at_utc"],
   "properties": {
     "evidence_id": {"type": "string"},
-    "created_at": {"type": "string", "format": "date-time"}
-  }
+    "generated_at_utc": {"type": "string"}
+  },
+  "additionalProperties": true
 }

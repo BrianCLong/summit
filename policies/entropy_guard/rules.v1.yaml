@@ -1,0 +1,12 @@
+version: 1
+rules:
+  - id: EG-001-global-listeners
+    description: "Avoid unbounded global listeners in reusable UI hooks/components."
+    mode: warn
+    match:
+      regex: "addEventListener\\("
+  - id: EG-002-cache-key-identity
+    description: "Avoid object identity cache keys that silently defeat caching."
+    mode: warn
+    match:
+      regex: "cache\\.(get|set)\\("

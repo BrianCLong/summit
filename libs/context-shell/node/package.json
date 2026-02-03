@@ -1,0 +1,15 @@
+{
+  "name": "@libs/context-shell",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "type": "module",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "scripts": {
+    "build": "tsc index.ts"
+  }
+}
