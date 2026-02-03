@@ -1,7 +1,8 @@
-# Dependency Delta Gate
-Add an entry here whenever repository lockfiles are modified.
+# Dependency Delta
 
-## 2026-01-31
-- Action: Add
-- Package: jsonschema
-- Reason: Architecture specification validation for `archsim` module.
+## Changes
+- No new external dependencies added.
+- Added internal module `summit/slopguard`.
+
+## Rationale
+SlopGuard is implemented using standard library and existing repo patterns.
