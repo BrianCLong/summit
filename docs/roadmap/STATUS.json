@@ -1,149 +1,32 @@
 {
-  "last_updated": "2026-01-16T05:10:00Z",
+
+  "last_updated": "2026-02-03T00:00:00Z",
   "revision_note": "Expanded Linear governance runbook and board spec with intent depth, evidence controls, and field requirements",
+ origin/main
   "initiatives": [
     {
-      "id": "A",
-      "name": "Secure LLM Copilot & Retrieval",
-      "epics": [
-        {
-          "id": "A1",
-          "name": "Local Vector Store",
-          "status": "rc-ready",
-          "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/ingest/service.ts (embedding ingestion + PGVector formatting), server/src/lib/data-platform/retrieval/service.ts (vector retrieval), server/src/memory/repositories/pageRepository.ts (pgvector storage)"
-        },
-        {
-          "id": "A2",
-          "name": "RAG Ingestion Pipeline",
-          "status": "rc-ready",
-          "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/lib/data-platform/rag/service.ts (RAG orchestration), server/src/lib/data-platform/ingest/service.ts (embedding ingest), server/src/maestro/graphrag-service.ts (GraphRAG assistant pipeline)"
-        },
-        {
-          "id": "A3",
-          "name": "Copilot Query Service",
-          "status": "rc-ready",
-          "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/services/CopilotIntegrationService.ts and server/src/services/CopilotNLQueryService.ts"
-        }
-      ]
+      "id": "governance-evidence-contracts",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
     },
     {
-      "id": "B",
-      "name": "Federation + Ingestion Mesh",
-      "epics": [
-        {
-          "id": "B1",
-          "name": "Connector SDK & Registry",
-          "status": "partial",
-          "owner": "Jules",
-          "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
-          "target_completion": "Sprint N+2"
-        },
-        {
-          "id": "B2",
-          "name": "RSS/Atom Connector",
-          "status": "not-started",
-          "owner": "Jules",
-          "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
-          "target_completion": "Sprint N+3"
-        },
-        {
-          "id": "B3",
-          "name": "STIX/TAXII Connector",
-          "status": "not-started",
-          "owner": "Jules",
-          "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
-          "target_completion": "Sprint N+3"
-        }
-      ]
+      "id": "io-cogwar-radar-2027-brief",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "One-pager mapping IO/CogWar radar scope to Summit/IntelGraph defensive capabilities."
     },
     {
-      "id": "C",
-      "name": "Platform Governance",
-      "epics": [
-        {
-          "id": "C1",
-          "name": "Policy-as-Code Engine",
-          "status": "rc-ready",
-          "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/data-governance/policy/PolicyEngine.ts and server/src/middleware/opa.ts (OPA integration)",
-          "notes": "Policy re-evaluation at execute time added 2025-12-30"
-        },
-        {
-          "id": "C2",
-          "name": "Immutable Audit Log",
-          "status": "rc-ready",
-          "owner": "Jules",
-          "evidence": "Merge evidence: cdfacf7e includes server/src/security/zero-trust/ImmutableAuditService.ts (immutable audit ledger), server/src/federal/worm-audit-chain.ts (WORM segments), server/src/provenance/ledger.ts (hash-chained provenance)"
-        },
-        {
-          "id": "C3",
-          "name": "Counterfactual Context Reassembly (CCR)",
-          "status": "not-started",
-          "owner": "Jules",
-          "evidence": "ADR 0010 defines CCR perturbation, divergence analysis, and enforcement hooks for MCP poisoning detection",
-          "blockers": [
-            "Need perturbation library and divergence metrics",
-            "Execution budget and observability controls not implemented"
-          ],
-          "target_completion": "Sprint N+2"
-        }
-      ]
+      "id": "runbook-cognitive-security-defense",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "D",
-      "name": "Serialization & Context Efficiency",
-      "epics": [
-        {
-          "id": "D1",
-          "name": "KTOON core libraries",
-          "status": "in-progress",
-          "owner": "Amp"
-        }
-      ]
-    },
-    {
-      "id": "E",
-      "name": "Graph-XAI Differentiation",
-      "epics": [
-        {
-          "id": "E1",
-          "name": "Research Publications",
-          "status": "not-started",
-          "owner": "Jules",
-          "evidence": "Publication plan and themes defined in ga-graphai/docs/explainability.md",
-          "target_completion": "Q3"
-        },
-        {
-          "id": "E2",
-          "name": "Public Explainability Benchmarks",
-          "status": "not-started",
-          "owner": "Jules",
-          "evidence": "Benchmark suite, metrics, and harness expectations codified in ga-graphai/docs/explainability.md",
-          "target_completion": "Q2"
-        },
-        {
-          "id": "E3",
-          "name": "Case Studies",
-          "status": "not-started",
-          "owner": "Jules",
-          "evidence": "Sector coverage, metrics, and distribution plan defined in ga-graphai/docs/explainability.md",
-          "target_completion": "Q4"
-        }
-      ]
+      "id": "ip-defense-claims-c391-s420",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     }
-  ],
-  "summary": {
-    "rc_ready": 5,
-    "partial": 1,
-    "incomplete": 0,
-    "not_started": 6,
-    "total": 12,
-    "ga_blockers": []
-  }
+  ]
 }

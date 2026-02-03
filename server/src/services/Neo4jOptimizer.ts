@@ -96,6 +96,8 @@ export class Neo4jOptimizer {
    * Optimized semantic search using vector index
    */
   getOptimizedSemanticSearchQuery(): string {
+    // TODO: Migrate to Cypher 25 Native Vector search for Neo4j 2025.01+
+    // db.index.vector.queryNodes is deprecated. Use native VECTOR type and vector search.
     return `
       CALL db.index.vector.queryNodes('entity_embedding_idx', $topK, $queryEmbedding)
       YIELD node, score
@@ -222,6 +224,8 @@ export class Neo4jOptimizer {
       'CREATE INDEX rel_tenant_type_idx IF NOT EXISTS FOR ()-[r:RELATIONSHIP]->() ON (r.tenantId, r.type)',
 
       // Vector index for embeddings
+      // TODO: Migrate to Cypher 25 for Neo4j 2025.01+
+      // Use CREATE VECTOR INDEX instead of CREATE INDEX ... OPTIONS.
       `CREATE INDEX entity_embedding_idx IF NOT EXISTS FOR (e:Entity) ON (e.embedding)
        OPTIONS {indexConfig: {
          \`vector.dimensions\`: 1536,

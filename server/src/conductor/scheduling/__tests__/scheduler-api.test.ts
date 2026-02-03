@@ -1,10 +1,10 @@
 import { jest } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import schedulerRouter from '../scheduler-api';
-import { costAwareScheduler } from '../cost-aware-scheduler';
+import schedulerRouter from '../scheduler-api.js';
+import { costAwareScheduler } from '../cost-aware-scheduler.js';
 import { choosePool } from '../selector.js';
-import { recordPoolSelectionAudit } from '../pool-selection-audit';
+import { recordPoolSelectionAudit } from '../pool-selection-audit.js';
 
 jest.mock('../cost-aware-scheduler', () => ({
   costAwareScheduler: {

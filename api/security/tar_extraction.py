@@ -12,11 +12,11 @@ Security Features:
 - Input validation
 """
 
+import logging
 import os
 import tarfile
 from pathlib import Path
-from typing import Optional, Set
-import logging
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +103,7 @@ class SecureTarExtractor:
     def extract_safe(
         tar_path: str,
         extract_to: str,
-        allowed_members: Optional[Set[str]] = None,
+        allowed_members: Optional[set[str]] = None,
         max_size: int = 1024 * 1024 * 1024,  # 1GB default
     ) -> int:
         """
@@ -241,7 +241,7 @@ class SecureTarExtractor:
 def extract_tar_safe(
     tar_path: str,
     extract_to: str,
-    allowed_members: Optional[Set[str]] = None,
+    allowed_members: Optional[set[str]] = None,
     max_size: int = 1024 * 1024 * 1024,
 ) -> int:
     """

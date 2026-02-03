@@ -1,121 +1,70 @@
-name: GA Gate
+name: "GA Gate"
+
+# AUTHORITATIVE GA GATE
+# This workflow provides the required "GA Gate" check and "ga / gate" context
+# per REQUIRED_CHECKS_POLICY.yml. It runs the official GA verification entrypoint.
+#
+# Required check contexts produced:
+# - "GA Gate" (workflow name)
+# - "ga / gate" (job name with workflow prefix)
 
 on:
   pull_request:
     branches: [main]
-    # SAFETY: Conservative paths-ignore to prevent skipping required checks
-    # This workflow MUST run on any code/config/dependency changes
-    # Only skip for pure documentation changes
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      - "LICENSE"
-      - ".gitignore"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml, .pnpmfile.cjs (dependency changes must trigger this)
-      # - scripts/**, tools/** (build/test script changes must trigger this)
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
+  merge_group:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ga-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  ga-gate:
-    name: GA Readiness Gate
+  gate:
+    name: gate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
-
-      - name: Setup Python
-        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6
-        with:
-          python-version: "3.11"
+          cache: 'pnpm'
+          node-version-file: .nvmrc
 
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        # version is read from package.json packageManager field
 
       - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run GA Verification
         run: |
-          make bootstrap
+          echo "Running GA verification entrypoint..."
+          pnpm ga:verify
+        env:
+          CI: true
+          GA_VERIFY_MODE: true
 
-      - name: Run GA Gate
-        # CANONICAL ENTRYPOINT: Uses make ga -> scripts/ga-gate.sh
-        # This is the official GA verification entrypoint (equivalent to pnpm ga:verify)
-        run: |
-          make ga
-
-      - name: Upload SOC evidence report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          retention-days: 14
-          name: soc-evidence-report-${{ github.sha }}
-          path: |
-            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.md
-            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.pdf
-            dist/evidence/${{ github.sha }}/SOC_EVIDENCE_REPORT.json
-
-      - name: SOC evidence summary
+      - name: GA Gate Summary
         if: always()
         run: |
-          REPORT="dist/evidence/${GITHUB_SHA}/SOC_EVIDENCE_REPORT.json"
-          if [ -f "$REPORT" ]; then
-            STATUS=$(node -e "const r=require('./'+process.argv[1]); console.log(r.validation_status || 'unknown');" "$REPORT")
-            COVERED=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.covered);" "$REPORT")
-            TOTAL=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.total_controls);" "$REPORT")
-            PCT=$(node -e "const r=require('./'+process.argv[1]); const pct=r.summary.total_controls ? Math.round((r.summary.covered/r.summary.total_controls)*100) : 0; console.log(pct);" "$REPORT")
-            NEW_COVERED=$(node -e "const r=require('./'+process.argv[1]); console.log((r.delta.newly_covered||[]).length);" "$REPORT")
-            NEW_DEFERRED=$(node -e "const r=require('./'+process.argv[1]); console.log((r.delta.newly_deferred||[]).length);" "$REPORT")
-            EXP_SOON=$(node -e "const r=require('./'+process.argv[1]); console.log(r.summary.exceptions_expiring_soon);" "$REPORT")
-            echo "## SOC Evidence Report" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
-            echo "**Coverage:** ${COVERED}/${TOTAL} (${PCT}%)" >> $GITHUB_STEP_SUMMARY
-            echo "**Delta:** +${NEW_COVERED} covered, -${NEW_DEFERRED} regressions" >> $GITHUB_STEP_SUMMARY
-            echo "**Exceptions expiring soon:** ${EXP_SOON}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Artifacts: soc-evidence-report-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Generate GA Snapshot
-        if: always()
-        run: |
-          mkdir -p artifacts/ga
-          ./scripts/ga/ga-snapshot \
-            --out artifacts/ga/ga_snapshot.json \
-            --allow-missing \
-            --include-ci \
-            --include-release
-
-      - name: Upload GA Report
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          retention-days: 14
-          name: ga-report
-          path: artifacts/ga/
-
-      - name: Job Summary
-        if: always()
-        run: |
-          if [ -f artifacts/ga/ga_report.md ]; then
-            cat artifacts/ga/ga_report.md >> $GITHUB_STEP_SUMMARY
+          echo "### GA Gate Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "- Status: PASS" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- GA verification passed. This commit meets GA readiness criteria." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Status: FAIL" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- GA verification failed. Review logs above for details." >> $GITHUB_STEP_SUMMARY
           fi

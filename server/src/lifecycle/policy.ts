@@ -1,4 +1,4 @@
-import { LifecyclePolicy, TableMapping } from './types';
+import { LifecyclePolicy, TableMapping } from './types.js';
 
 export const LIFECYCLE_POLICIES: Record<string, LifecyclePolicy> = {
   OPERATIONAL_METADATA: {

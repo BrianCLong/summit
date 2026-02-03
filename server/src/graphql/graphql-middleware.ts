@@ -36,7 +36,7 @@ export function applyMiddleware(
       const fieldRule = typeRules[fieldName] ?? typeRules['*'] ?? fallbackRule;
       const originalResolve = field.resolve ?? defaultFieldResolver;
 
-      field.resolve = async (parent, args, ctx, info) => {
+      field.resolve = async (parent: any, args: any, ctx: any, info: any) => {
         try {
           const allowed = await evaluateRule(fieldRule, parent, args, ctx, info);
           if (!allowed) {

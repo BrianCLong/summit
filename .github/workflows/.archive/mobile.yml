@@ -16,11 +16,12 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
 
       - name: Install dependencies
@@ -51,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -60,8 +61,9 @@ jobs:
           java-version: '17'
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
 
       - name: Install dependencies
@@ -83,11 +85,12 @@ jobs:
     runs-on: macos-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
 
       - name: Install dependencies
@@ -107,11 +110,12 @@ jobs:
     needs: validate
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 18
 
       - name: Install dependencies

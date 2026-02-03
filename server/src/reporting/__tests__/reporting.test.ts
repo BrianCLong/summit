@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { jest } from '@jest/globals';
-import { AccessControlService } from '../access-control';
-import { DeliveryService } from '../delivery-service';
-import { TemplateEngine } from '../template-engine';
-import { ReportScheduler } from '../scheduler';
-import { ReportingService } from '../service';
-import { AccessRule, ReportRequest, ReportTemplate } from '../types';
-import { VersionStore } from '../version-store';
+import { AccessControlService } from '../access-control.js';
+import { DeliveryService } from '../delivery-service.js';
+import { TemplateEngine } from '../template-engine.js';
+import { ReportScheduler } from '../scheduler.js';
+import { ReportingService } from '../service.js';
+import { AccessRule, ReportRequest, ReportTemplate } from '../types.js';
+import { VersionStore } from '../version-store.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
 import cron from 'node-cron';
 

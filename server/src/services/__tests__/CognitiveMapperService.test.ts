@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { CognitiveMapperService } from '../CognitiveMapperService';
-import { getNeo4jDriver } from '../../config/database';
+import { CognitiveMapperService } from '../CognitiveMapperService.js';
+import { getNeo4jDriver } from '../../config/database.js';
 import { Driver, Session, Result } from 'neo4j-driver';
 
 // Helper to define Record type since it's hard to import
