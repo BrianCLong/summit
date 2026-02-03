@@ -151,7 +151,6 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "20"
 
       - name: Run MCP UX Linter
@@ -319,7 +318,6 @@ jobs:
           version: 9
       - uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "20"
       - name: Ensure evidence bundle exists
         run: |
