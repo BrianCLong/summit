@@ -12,12 +12,14 @@
 This disclosure describes a **graph-native retrieval-augmented generation (GraphRAG) system** that uses Neo4j subgraph queries as structured context for LLM prompts. Unlike traditional RAG systems that retrieve flat documents, our system retrieves **multi-hop graph neighborhoods** (entities + relationships + properties) and transforms them into LLM-readable context with full provenance linking.
 
 **Core Innovation**:
+
 1. **Query Preview**: Users see exactly what will be retrieved before execution (transparency)
 2. **Explainable Retrieval Paths**: Every entity/edge included in context comes with reasoning (why was this selected?)
 3. **Provenance Linking**: Every LLM-generated insight is traceable back to source graph entities (audit-ready)
 4. **Temporal Subgraph Support**: Query historical graph states ("what did we know on 2024-03-15?")
 
 **Differentiation from Existing RAG**:
+
 - **LangChain RetrievalQA**: Retrieves flat documents → Our system retrieves structured graphs
 - **LlamaIndex GraphRAG**: Basic graph traversal → We provide explainable paths + query preview
 - **Microsoft GraphRAG**: Document-based chunking with graph augmentation → We use native graph queries as primary context
@@ -29,6 +31,7 @@ This disclosure describes a **graph-native retrieval-augmented generation (Graph
 ### 1.1 Technical Problem
 
 **Limitations of traditional RAG (document-based)**:
+
 - **Context loss**: Documents are chunked into flat text, losing relational structure
   - Example: "John Smith works for Acme Corp" → Two separate chunks, relationship lost
 - **No explainability**: Users don't know which documents were retrieved or why
@@ -36,12 +39,14 @@ This disclosure describes a **graph-native retrieval-augmented generation (Graph
 - **No temporal context**: Cannot query "what did the knowledge base contain on March 15?"
 
 **Limitations of existing GraphRAG systems**:
+
 - **No query preview**: Users submit queries blindly (black box retrieval)
 - **Opaque retrieval**: No explanation of why entities/edges were selected
 - **No provenance**: LLM outputs not linked back to source graph data
 - **Performance issues**: Naive graph traversal causes query explosion (millions of nodes)
 
 **Real-world failure scenario**:
+
 ```
 User: "Tell me about John Smith's connections to Russian entities"
 Traditional RAG: Retrieves 5 documents mentioning "John Smith" → Misses 12 relevant
@@ -54,6 +59,7 @@ Our system: Retrieves 2-hop neighborhood filtered by "Russian" tag → 23 entiti
 ### 1.2 User Experience Problem
 
 Intelligence analysts need to:
+
 - **Trust AI recommendations**: Cannot blindly trust LLM outputs in high-stakes investigations
 - **Audit results**: Must be able to trace every insight back to source data
 - **Understand retrieval**: Need transparency into what data informed the LLM
@@ -172,7 +178,7 @@ Intelligence analysts need to:
 
 ```typescript
 // server/src/services/graphrag/query-preview.ts
-import { Driver, Session } from 'neo4j-driver';
+import { Driver, Session } from "neo4j-driver";
 
 interface QueryPreview {
   estimated_nodes: number;
@@ -209,14 +215,19 @@ export class GraphRAGQueryPreview {
       const estimated_latency_ms = this.estimateLatency(estimated_nodes, estimated_edges);
 
       // Generate human-readable explanation
-      const explanation = this.generateExplanation(anchor_entity_id, filters, max_hops, estimated_nodes);
+      const explanation = this.generateExplanation(
+        anchor_entity_id,
+        filters,
+        max_hops,
+        estimated_nodes
+      );
 
       return {
         estimated_nodes,
         estimated_edges,
         estimated_latency_ms,
         cypher_query: cypher,
-        explanation
+        explanation,
       };
     } finally {
       await session.close();
@@ -236,18 +247,20 @@ export class GraphRAGQueryPreview {
       whereClauses.push(`b.risk_score >= ${filters.min_risk_score}`);
     }
     if (filters.entity_types && filters.entity_types.length > 0) {
-      const types = filters.entity_types.map(t => `'${t}'`).join(', ');
+      const types = filters.entity_types.map((t) => `'${t}'`).join(", ");
       whereClauses.push(`b.entity_type IN [${types}]`);
     }
     if (filters.date_range) {
-      whereClauses.push(`all(rel in relationships(path) WHERE rel.timestamp >= datetime('${filters.date_range.start}') AND rel.timestamp <= datetime('${filters.date_range.end}'))`);
+      whereClauses.push(
+        `all(rel in relationships(path) WHERE rel.timestamp >= datetime('${filters.date_range.start}') AND rel.timestamp <= datetime('${filters.date_range.end}'))`
+      );
     }
 
     if (whereClauses.length > 0) {
-      query += ` WHERE ${whereClauses.join(' AND ')}`;
+      query += ` WHERE ${whereClauses.join(" AND ")}`;
     }
 
-    query += ` RETURN path LIMIT 1000`;  // Safety limit
+    query += ` RETURN path LIMIT 1000`; // Safety limit
 
     return query;
   }
@@ -271,7 +284,7 @@ export class GraphRAGQueryPreview {
 
   private estimateLatency(nodes: number, edges: number): number {
     // Empirical formula: latency = 50ms + (nodes * 0.5ms) + (edges * 0.2ms)
-    return 50 + (nodes * 0.5) + (edges * 0.2);
+    return 50 + nodes * 0.5 + edges * 0.2;
   }
 
   private generateExplanation(
@@ -286,7 +299,7 @@ export class GraphRAGQueryPreview {
       explanation += `, filtered by risk_score >= ${filters.min_risk_score}`;
     }
     if (filters.entity_types && filters.entity_types.length > 0) {
-      explanation += `, limited to types: ${filters.entity_types.join(', ')}`;
+      explanation += `, limited to types: ${filters.entity_types.join(", ")}`;
     }
 
     explanation += `. Estimated ${estimated_nodes} entities will be retrieved.`;
@@ -297,12 +310,13 @@ export class GraphRAGQueryPreview {
 ```
 
 **User flow**:
+
 ```typescript
 // Client-side usage
 const preview = await graphragService.preview({
-  anchor_entity_id: 'E123',
+  anchor_entity_id: "E123",
   filters: { min_risk_score: 0.7 },
-  max_hops: 2
+  max_hops: 2,
 });
 
 // Show modal to user:
@@ -320,7 +334,7 @@ if (userApproves) {
 
 ```typescript
 // server/src/services/graphrag/explainable-paths.ts
-import { Path, Node, Relationship } from 'neo4j-driver';
+import { Path, Node, Relationship } from "neo4j-driver";
 
 interface EntityExplanation {
   entity_id: string;
@@ -340,30 +354,39 @@ export class ExplainablePathGenerator {
 
     for (const path of retrieved_paths) {
       const target_entity = path.end as Node;
-      const relationships = path.segments.map(seg => seg.relationship);
+      const relationships = path.segments.map((seg) => seg.relationship);
 
       const why_included: string[] = [];
 
       // Reason 1: Distance from anchor
       const hops = relationships.length;
-      why_included.push(`${hops} hop${hops > 1 ? 's' : ''} from anchor entity ${anchor_entity.properties.name}`);
+      why_included.push(
+        `${hops} hop${hops > 1 ? "s" : ""} from anchor entity ${anchor_entity.properties.name}`
+      );
 
       // Reason 2: Relationship types
-      const rel_types = relationships.map(r => r.type).join(' → ');
+      const rel_types = relationships.map((r) => r.type).join(" → ");
       why_included.push(`Connected via path: ${rel_types}`);
 
       // Reason 3: Filter satisfaction
       if (filters.min_risk_score && target_entity.properties.risk_score >= filters.min_risk_score) {
-        why_included.push(`risk_score = ${target_entity.properties.risk_score} (above threshold ${filters.min_risk_score})`);
+        why_included.push(
+          `risk_score = ${target_entity.properties.risk_score} (above threshold ${filters.min_risk_score})`
+        );
       }
 
-      if (filters.entity_types && filters.entity_types.includes(target_entity.properties.entity_type)) {
+      if (
+        filters.entity_types &&
+        filters.entity_types.includes(target_entity.properties.entity_type)
+      ) {
         why_included.push(`Entity type '${target_entity.properties.entity_type}' matches filter`);
       }
 
       // Reason 4: Semantic relevance (if using vector similarity)
       if (target_entity.properties.embedding_similarity) {
-        why_included.push(`Semantic similarity = ${target_entity.properties.embedding_similarity.toFixed(2)}`);
+        why_included.push(
+          `Semantic similarity = ${target_entity.properties.embedding_similarity.toFixed(2)}`
+        );
       }
 
       // Generate path string
@@ -377,7 +400,7 @@ export class ExplainablePathGenerator {
         entity_name: target_entity.properties.name,
         why_included,
         path_from_anchor,
-        relevance_score
+        relevance_score,
       });
     }
 
@@ -388,8 +411,8 @@ export class ExplainablePathGenerator {
   }
 
   private pathToString(path: Path): string {
-    const nodes = [path.start, ...path.segments.map(s => s.end)];
-    const rels = path.segments.map(s => s.relationship);
+    const nodes = [path.start, ...path.segments.map((s) => s.end)];
+    const rels = path.segments.map((s) => s.relationship);
 
     let result = nodes[0].properties.name;
     for (let i = 0; i < rels.length; i++) {
@@ -421,6 +444,7 @@ export class ExplainablePathGenerator {
 ```
 
 **Example output**:
+
 ```json
 {
   "entity_id": "E456",
@@ -444,9 +468,9 @@ export class ExplainablePathGenerator {
 // server/src/services/graphrag/provenance-linker.ts
 interface ProvenanceRecord {
   llm_output: string;
-  source_entities: string[];        // Entity IDs mentioned in output
-  retrieval_query: string;          // Original Cypher query
-  retrieved_subgraph_hash: string;  // SHA-256 of retrieved data
+  source_entities: string[]; // Entity IDs mentioned in output
+  retrieval_query: string; // Original Cypher query
+  retrieved_subgraph_hash: string; // SHA-256 of retrieved data
   llm_model: string;
   timestamp: Date;
 }
@@ -466,11 +490,11 @@ export class ProvenanceLinker {
     // Build provenance record
     const record: ProvenanceRecord = {
       llm_output,
-      source_entities: mentioned_entities.map(e => e.properties.id),
+      source_entities: mentioned_entities.map((e) => e.properties.id),
       retrieval_query: query_metadata.cypher_query,
       retrieved_subgraph_hash: subgraph_hash,
       llm_model: query_metadata.llm_model,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Store in PostgreSQL provenance table
@@ -505,13 +529,13 @@ export class ProvenanceLinker {
   private computeSubgraphHash(entities: Node[]): string {
     // Serialize entities deterministically
     const serialized = entities
-      .map(e => JSON.stringify(e.properties, Object.keys(e.properties).sort()))
+      .map((e) => JSON.stringify(e.properties, Object.keys(e.properties).sort()))
       .sort()
-      .join('|');
+      .join("|");
 
     // Compute SHA-256 hash
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(serialized).digest('hex');
+    const crypto = require("crypto");
+    return crypto.createHash("sha256").update(serialized).digest("hex");
   }
 
   private async saveToDatabase(record: ProvenanceRecord): Promise<void> {
@@ -525,7 +549,7 @@ export class ProvenanceLinker {
         record.retrieval_query,
         record.retrieved_subgraph_hash,
         record.llm_model,
-        record.timestamp
+        record.timestamp,
       ]
     );
   }
@@ -533,6 +557,7 @@ export class ProvenanceLinker {
 ```
 
 **Audit use case**:
+
 ```sql
 -- Find all LLM outputs that referenced Entity E456
 SELECT llm_output, timestamp, llm_model
@@ -558,6 +583,7 @@ RETURN path
 ```
 
 **Implementation**:
+
 ```typescript
 // server/src/services/graphrag/temporal-queries.ts
 export class TemporalGraphRAG {
@@ -578,7 +604,7 @@ export class TemporalGraphRAG {
     const session = this.driver.session();
     const result = await session.run(cypher, {
       anchor_id: anchor_entity_id,
-      as_of_date: as_of_date.toISOString()
+      as_of_date: as_of_date.toISOString(),
     });
 
     return this.parseSubgraphResult(result);
@@ -606,7 +632,7 @@ export class TemporalGraphRAG {
     const result = await session.run(cypher, {
       anchor_id: anchor_entity_id,
       start_date: start_date.toISOString(),
-      end_date: end_date.toISOString()
+      end_date: end_date.toISOString(),
     });
 
     return this.parseChangeLogs(result);
@@ -636,15 +662,16 @@ export class TemporalGraphRAG {
 
 ### 4.1 Query Latency
 
-| Graph Size | Hops | Nodes Retrieved | Query Latency (p95) |
-|------------|------|-----------------|---------------------|
-| 1M entities | 1 | 20-50 | 45 ms |
-| 1M entities | 2 | 100-300 | 180 ms |
-| 1M entities | 3 | 500-1500 | 850 ms |
-| 10M entities | 1 | 20-50 | 85 ms |
-| 10M entities | 2 | 100-300 | 420 ms |
+| Graph Size   | Hops | Nodes Retrieved | Query Latency (p95) |
+| ------------ | ---- | --------------- | ------------------- |
+| 1M entities  | 1    | 20-50           | 45 ms               |
+| 1M entities  | 2    | 100-300         | 180 ms              |
+| 1M entities  | 3    | 500-1500        | 850 ms              |
+| 10M entities | 1    | 20-50           | 85 ms               |
+| 10M entities | 2    | 100-300         | 420 ms              |
 
 **Key insights**:
+
 - 1-hop queries scale to 10M+ entities with <100ms latency
 - 2-hop queries are practical for real-time UX (<500ms)
 - 3-hop queries require caching or async execution for large graphs
@@ -655,13 +682,14 @@ export class TemporalGraphRAG {
 
 **Task**: "Identify all entities connected to John Smith with risk > 0.7"
 
-| RAG System | Precision | Recall | F1 Score |
-|------------|-----------|--------|----------|
-| Document RAG (LangChain) | 0.68 | 0.52 | 0.59 |
-| Basic GraphRAG (no explainability) | 0.82 | 0.74 | 0.78 |
-| **Our GraphRAG** (explainable paths) | **0.91** | **0.87** | **0.89** |
+| RAG System                           | Precision | Recall   | F1 Score |
+| ------------------------------------ | --------- | -------- | -------- |
+| Document RAG (LangChain)             | 0.68      | 0.52     | 0.59     |
+| Basic GraphRAG (no explainability)   | 0.82      | 0.74     | 0.78     |
+| **Our GraphRAG** (explainable paths) | **0.91**  | **0.87** | **0.89** |
 
 **Why we outperform**:
+
 - Structured graph context preserves relationships (vs. flat documents)
 - Explainable paths help LLM understand entity relevance
 - Provenance linking prevents hallucination (LLM can't invent entities)
@@ -670,12 +698,12 @@ export class TemporalGraphRAG {
 
 **Metric**: How accurate are estimated node counts?
 
-| Actual Nodes | Estimated Nodes | Error |
-|--------------|-----------------|-------|
-| 50 | 48 | -4% |
-| 120 | 135 | +12.5% |
-| 300 | 280 | -6.7% |
-| 1200 | 1450 | +20.8% |
+| Actual Nodes | Estimated Nodes | Error  |
+| ------------ | --------------- | ------ |
+| 50           | 48              | -4%    |
+| 120          | 135             | +12.5% |
+| 300          | 280             | -6.7%  |
+| 1200         | 1450            | +20.8% |
 
 **Average error**: ±10% (acceptable for preview UI)
 
@@ -683,17 +711,18 @@ export class TemporalGraphRAG {
 
 ## 5. Prior Art Comparison
 
-| Feature | LangChain RetrievalQA | LlamaIndex GraphRAG | Microsoft GraphRAG | **Our System** |
-|---------|----------------------|---------------------|-------------------|----------------|
-| Graph-native retrieval | ❌ (documents) | ✅ | Partial (hybrid) | ✅ |
-| Query preview | ❌ | ❌ | ❌ | ✅ |
-| Explainable retrieval | ❌ | ❌ | ❌ | ✅ |
-| Provenance linking | ❌ | ❌ | ❌ | ✅ |
-| Temporal queries | ❌ | ❌ | ❌ | ✅ |
-| Multi-hop reasoning | ❌ | ✅ | ✅ | ✅ |
-| Neo4j native | ❌ | Partial | ❌ | ✅ |
+| Feature                | LangChain RetrievalQA | LlamaIndex GraphRAG | Microsoft GraphRAG | **Our System** |
+| ---------------------- | --------------------- | ------------------- | ------------------ | -------------- |
+| Graph-native retrieval | ❌ (documents)        | ✅                  | Partial (hybrid)   | ✅             |
+| Query preview          | ❌                    | ❌                  | ❌                 | ✅             |
+| Explainable retrieval  | ❌                    | ❌                  | ❌                 | ✅             |
+| Provenance linking     | ❌                    | ❌                  | ❌                 | ✅             |
+| Temporal queries       | ❌                    | ❌                  | ❌                 | ✅             |
+| Multi-hop reasoning    | ❌                    | ✅                  | ✅                 | ✅             |
+| Neo4j native           | ❌                    | Partial             | ❌                 | ✅             |
 
 **Key differentiators**:
+
 - **Query preview**: We're the only system that shows users what will be retrieved before execution
 - **Explainable retrieval**: We provide reasoning for every entity/edge inclusion
 - **Provenance linking**: We maintain cryptographic audit trail linking outputs to sources
@@ -704,16 +733,19 @@ export class TemporalGraphRAG {
 ## 6. Competitive Advantages
 
 ### 6.1 vs. LangChain RetrievalQA
+
 - **Structured context**: Preserves graph relationships vs. flat document chunks
 - **Explainability**: Users see why entities were retrieved (not black box)
 - **Provenance**: Full audit trail for compliance
 
 ### 6.2 vs. LlamaIndex GraphRAG
+
 - **Query preview**: Users approve queries before execution (cost control)
 - **Temporal support**: Query historical states (not just current)
 - **Provenance ledger**: Cryptographic audit trail (not just metadata)
 
 ### 6.3 vs. Microsoft GraphRAG
+
 - **Native graph queries**: Use Cypher directly vs. document chunking + graph augmentation
 - **Explainable paths**: Show reasoning for entity inclusion
 - **Production-ready**: Deployed at scale (1M+ entities, <500ms latency)
@@ -790,11 +822,13 @@ type EntityExplanation {
 ## 8. Future Enhancements (H2-H3)
 
 ### H2 (v1 Production Hardening)
+
 - **Semantic similarity filtering**: Use entity embeddings for relevance scoring
 - **Multi-anchor queries**: Start from multiple entities simultaneously
 - **Cached subgraph templates**: Pre-compute common query patterns
 
 ### H3 (Moonshot)
+
 - **Self-improving retrieval**: Learn optimal hop depth/filters from user feedback
 - **Cross-investigation knowledge transfer**: Reuse successful query patterns
 - **Federated GraphRAG**: Query across multiple Neo4j instances (air-gapped environments)
@@ -814,11 +848,13 @@ type EntityExplanation {
 ### 9.2 Patentability Assessment
 
 **Preliminary opinion**: Moderate-to-strong patentability based on:
+
 - **Novel combination**: Query preview + explainability + provenance in single system
 - **Technical improvement**: Measurably better LLM accuracy (89% vs 59% F1)
 - **Non-obvious**: Using PROFILE for pre-execution cost estimation is non-obvious to practitioners
 
 **Recommended patent strategy**:
+
 1. **Method claims**: "Method for graph-based retrieval with query preview and explainable paths"
 2. **System claims**: "System for provenance-linked GraphRAG with temporal support"
 3. **Data structure claims**: "Provenance record linking LLM outputs to graph entities"
