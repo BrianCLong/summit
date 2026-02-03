@@ -1,0 +1,37 @@
+name: CI Governance
+
+on:
+  pull_request:
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - ".github/governance/**"
+      - "docs/**"
+      - "evidence/**"
+      - "backlog/**"
+
+jobs:
+  governance-bundle:
+    name: governance-bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/branch-protection-as-code/manifest.yaml
+
+  branch-protection-drift:
+    name: branch-protection-drift
+    if: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: mkdir -p .tmp
+      - env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: gh api /repos/${{ github.repository }}/branches/main/protection > .tmp/branch_protection_live.json
+      - run: node scripts/ci/verify_branch_protection.mjs

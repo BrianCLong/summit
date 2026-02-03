@@ -1,23 +1,27 @@
-import { register as defaultRegistry, Registry } from 'prom-client';
+import * as promClient from 'prom-client';
+
+const client: any = (promClient as any).default || promClient;
+const defaultRegistry = client.register;
+const Registry = client.Registry;
 
 // Lazy-load the legacy registry to avoid top-level await issues in test environments
-let cachedLegacy: Registry | null | undefined;
-async function getLegacyRegistry(): Promise<Registry | null> {
+let cachedLegacy: any | null | undefined;
+async function getLegacyRegistry(): Promise<any | null> {
   if (cachedLegacy !== undefined) return cachedLegacy;
   try {
     const mod: any = await import('../monitoring/metrics.js');
-    cachedLegacy = (mod.registry ?? mod.default ?? null) as Registry | null;
+    cachedLegacy = (mod.registry ?? mod.default ?? null);
   } catch {
     cachedLegacy = null;
   }
   return cachedLegacy;
 }
 
-let cachedMerged: Registry | null = null;
-async function getMerged(): Promise<Registry> {
+let cachedMerged: any | null = null;
+async function getMerged(): Promise<any> {
   if (cachedMerged) return cachedMerged;
   const legacy = await getLegacyRegistry();
-  if (!legacy || legacy === (defaultRegistry as unknown as Registry)) {
+  if (!legacy || legacy === defaultRegistry) {
     cachedMerged = defaultRegistry;
     return cachedMerged;
   }
@@ -40,7 +44,7 @@ export async function metricsText(): Promise<string> {
 
 export function metricsContentType(): string {
   // contentType is identical across registries; use default
-  return defaultRegistry.contentType;
+  return defaultRegistry.contentType || 'text/plain; version=0.0.4; charset=utf-8';
 }
 
 // Optional: expose individual registries for debugging routes

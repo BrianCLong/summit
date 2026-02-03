@@ -1,24 +1,63 @@
 {
   "name": "@summit/work-graph",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Summit Work Graph - Graph-native engineering management with AI-powered planning",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" },
-    "./schema": { "import": "./dist/schema/index.js", "types": "./dist/schema/index.d.ts" },
-    "./planner": { "import": "./dist/planner/index.js", "types": "./dist/planner/index.d.ts" },
-    "./agents": { "import": "./dist/agents/index.js", "types": "./dist/agents/index.d.ts" },
-    "./policy": { "import": "./dist/policy/index.js", "types": "./dist/policy/index.d.ts" },
-    "./portfolio": { "import": "./dist/portfolio/index.js", "types": "./dist/portfolio/index.d.ts" },
-    "./projections": { "import": "./dist/projections/index.js", "types": "./dist/projections/index.d.ts" },
-    "./store": { "import": "./dist/store/index.js", "types": "./dist/store/index.d.ts" },
-    "./events": { "import": "./dist/events/index.js", "types": "./dist/events/index.d.ts" },
-    "./metrics": { "import": "./dist/metrics/index.js", "types": "./dist/metrics/index.d.ts" },
-    "./integrations": { "import": "./dist/integrations/index.js", "types": "./dist/integrations/index.d.ts" },
-    "./triage": { "import": "./dist/triage/index.js", "types": "./dist/triage/index.d.ts" },
-    "./api": { "import": "./dist/api/index.js", "types": "./dist/api/index.d.ts" }
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./schema": {
+      "import": "./dist/schema/index.js",
+      "types": "./dist/schema/index.d.ts"
+    },
+    "./planner": {
+      "import": "./dist/planner/index.js",
+      "types": "./dist/planner/index.d.ts"
+    },
+    "./agents": {
+      "import": "./dist/agents/index.js",
+      "types": "./dist/agents/index.d.ts"
+    },
+    "./policy": {
+      "import": "./dist/policy/index.js",
+      "types": "./dist/policy/index.d.ts"
+    },
+    "./portfolio": {
+      "import": "./dist/portfolio/index.js",
+      "types": "./dist/portfolio/index.d.ts"
+    },
+    "./projections": {
+      "import": "./dist/projections/index.js",
+      "types": "./dist/projections/index.d.ts"
+    },
+    "./store": {
+      "import": "./dist/store/index.js",
+      "types": "./dist/store/index.d.ts"
+    },
+    "./events": {
+      "import": "./dist/events/index.js",
+      "types": "./dist/events/index.d.ts"
+    },
+    "./metrics": {
+      "import": "./dist/metrics/index.js",
+      "types": "./dist/metrics/index.d.ts"
+    },
+    "./integrations": {
+      "import": "./dist/integrations/index.js",
+      "types": "./dist/integrations/index.d.ts"
+    },
+    "./triage": {
+      "import": "./dist/triage/index.js",
+      "types": "./dist/triage/index.d.ts"
+    },
+    "./api": {
+      "import": "./dist/api/index.js",
+      "types": "./dist/api/index.d.ts"
+    }
   },
   "scripts": {
     "build": "tsc",
@@ -40,5 +79,7 @@
     "typescript": "^5.3.2",
     "tsx": "^4.6.2"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }

@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types.js';
 
 /**
  * Fast Gradient Sign Method (FGSM) Attack

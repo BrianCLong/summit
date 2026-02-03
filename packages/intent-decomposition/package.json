@@ -1,0 +1,51 @@
+{
+  "name": "@intelgraph/intent-decomposition",
+  "version": "0.1.0",
+  "description": "Intent decomposition pipeline for UI trajectories",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "summit-intent": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "test": "jest --passWithNoTests",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "intent",
+    "ui",
+    "summaries",
+    "bifact",
+    "summit"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "commander": "^14.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "20.19.27",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "schemas",
+    "prompts"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -21,12 +21,12 @@ jest.unstable_mockModule('../BillingService.js', () => ({
   },
 }));
 
-const { BillingJobService } = await import('../BillingJobService');
+const { BillingJobService } = await import('../BillingJobService.js');
 const { getPostgresPool } = await import('../../config/database.js');
 const { billingService } = await import('../BillingService.js');
 
 describe('BillingJobService', () => {
-  let jobService: BillingJobService;
+  let jobService: InstanceType<typeof BillingJobService>;
   let mockQuery: jest.MockedFunction<any>;
   let mockRelease: jest.MockedFunction<any>;
   let mockConnect: jest.MockedFunction<() => Promise<any>>;

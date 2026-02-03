@@ -15,7 +15,7 @@ export function canonicalJsonStringify(obj) {
   
   if (typeof obj === 'object') {
     // Sort keys in deterministic order
-    const sortedKeys = Object.keys(obj).sort((a, b) => a.localeCompare(b));
+    const sortedKeys = Object.keys(obj).sort(compareStringsCodepoint);
     const pairs = sortedKeys.map(key => {
       const value = canonicalJsonStringify(obj[key]);
       return `"${key}":${value}`;
@@ -60,7 +60,7 @@ export function hasTimestampKeys(obj) {
 /**
  * Canonical array sorter with platform-stable ordering
  */
-export function canonicalSort(arr, compareFn = (a, b) => a.localeCompare(b)) {
+export function canonicalSort(arr, compareFn = compareStringsCodepoint) {
   return [...arr].sort(compareFn);
 }
 
@@ -74,4 +74,13 @@ export function stablePathCompare(a, b) {
   
   // Use codepoint comparison for stability across locales
   return a === b ? 0 : a < b ? -1 : 1;
+}
+
+/**
+ * Platform-stable string comparer for deterministic sorting.
+ */
+export function compareStringsCodepoint(a, b) {
+  const left = String(a);
+  const right = String(b);
+  return left === right ? 0 : left < right ? -1 : 1;
 }

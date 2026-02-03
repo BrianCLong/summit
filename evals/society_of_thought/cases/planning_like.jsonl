@@ -1,0 +1,2 @@
+{"id": "plan-001", "task": "itinerary", "input": "Plan a 3-day trip to Tokyo visiting Shibuya, Shinjuku and Akihabara.", "constraints": ["minimal travel time", "include one sushi meal"]}
+{"id": "plan-002", "task": "deployment", "input": "Plan a rollout of a new microservice with zero downtime.", "constraints": ["canary deployment", "automatic rollback on 5xx error"]}

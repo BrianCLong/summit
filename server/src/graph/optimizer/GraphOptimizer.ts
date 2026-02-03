@@ -4,7 +4,7 @@ import { QueryCache } from './QueryCache.js';
 import { QueryCostEstimator } from './QueryCostEstimator.js';
 import { IndexAdvisor } from './IndexAdvisor.js';
 import { OptimizationContext, QueryPlan } from './types.js';
-import neo4j from 'neo4j-driver';
+import { transformNeo4jIntegers } from '../../db/neo4j.js';
 import { telemetry } from '../../lib/telemetry/comprehensive-telemetry.js';
 import { BatchQueryExecutor } from './BatchQueryExecutor.js';
 import { QueryProfiler } from './QueryProfiler.js';
@@ -96,7 +96,7 @@ export class GraphOptimizer {
       profiler.end('execution');
 
       // 4. Normalize
-      const normalized = this.transformNeo4jIntegers(rawResult);
+      const normalized = transformNeo4jIntegers(rawResult);
 
       // 5. Write Cache
       if (plan.cacheStrategy?.enabled) {
@@ -121,25 +121,6 @@ export class GraphOptimizer {
       await this.cache.invalidate(tenantId, labels);
   }
 
-  private transformNeo4jIntegers(obj: any): any {
-    if (obj === null || obj === undefined) return obj;
-    if (neo4j.isInt(obj)) return obj.inSafeRange() ? obj.toNumber() : obj.toString();
-    if (Array.isArray(obj)) return obj.map(v => this.transformNeo4jIntegers(v));
-    if (typeof obj === 'object') {
-      const newObj: any = {};
-      for (const k in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, k)) {
-            // Check if it's a Neo4j Record-like object
-            if (typeof obj.toObject === 'function') {
-                return this.transformNeo4jIntegers(obj.toObject());
-            }
-            newObj[k] = this.transformNeo4jIntegers(obj[k]);
-        }
-      }
-      return newObj;
-    }
-    return obj;
-  }
 }
 
 export const graphOptimizer = new GraphOptimizer();

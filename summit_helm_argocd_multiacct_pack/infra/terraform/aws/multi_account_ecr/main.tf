@@ -47,8 +47,8 @@ resource "aws_iam_role" "gha_dev" {
       Principal = { Federated = data.aws_iam_openid_connect_provider.dev.arn },
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
-        StringEquals = { "token.actions.githubusercontent.com:aud": var.oidc_audience },
-        StringLike   = { "token.actions.githubusercontent.com:sub": "repo:${var.github_org}/${var.github_repo}:*" }
+        StringEquals = { "token.actions.githubusercontent.com:aud": "sts.amazonaws.com" },
+        StringLike   = { "token.actions.githubusercontent.com:sub": "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main" }
       }
     }]
   })

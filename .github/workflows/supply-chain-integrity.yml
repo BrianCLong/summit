@@ -184,15 +184,22 @@ jobs:
           if [ -f "Dockerfile" ] && [ -n "$DOCKER_TAG" ]; then
             echo "Signing container image: $DOCKER_IMAGE:$DOCKER_TAG"
             cosign sign --yes $DOCKER_IMAGE:$DOCKER_TAG
-            
+
+            # Attest container SBOM
+            CONTAINER_SBOM="./sboms/summit-platform-container-${{ env.VERSION }}.cdx.json"
+            if [ -f "$CONTAINER_SBOM" ]; then
+               echo "Attesting Container SBOM: $CONTAINER_SBOM"
+               cosign attest --yes --predicate "$CONTAINER_SBOM" --type cyclonedx $DOCKER_IMAGE:$DOCKER_TAG
+            fi
+
             # Verify the signature
             cosign verify $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
           fi
 
-          # Sign SBOMs
+          # Sign SBOMs (Sign the artifacts themselves as well)
           for sbom in ./sboms/*.json; do
             if [ -f "$sbom" ]; then
-              echo "Signing SBOM: $sbom"
+              echo "Signing SBOM file: $sbom"
               cosign sign-blob --output-signature "${sbom}.sig" --yes "$sbom"
             fi
           done
