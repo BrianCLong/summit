@@ -1,0 +1,1312 @@
+[
+  {
+    "createdAt": "2026-02-02T08:55:25Z",
+    "number": 17699,
+    "title": "Moltbook Relay Security Governance Framework"
+  },
+  {
+    "createdAt": "2026-02-02T08:46:43Z",
+    "number": 17698,
+    "title": "docs: add CogWar Radar brief and roadmap status"
+  },
+  {
+    "createdAt": "2026-02-02T08:45:44Z",
+    "number": 17697,
+    "title": "Evidence contract + CI Gate scaffold (PR1)"
+  },
+  {
+    "createdAt": "2026-02-02T08:27:13Z",
+    "number": 17696,
+    "title": "Extortion Pressure Module Implementation"
+  },
+  {
+    "createdAt": "2026-02-02T08:20:20Z",
+    "number": 17695,
+    "title": "Multi-source Vulnerability Intelligence Pipeline"
+  },
+  {
+    "createdAt": "2026-02-02T08:05:10Z",
+    "number": 17694,
+    "title": "Implement Verifiable Agent Swarm Orchestrator"
+  },
+  {
+    "createdAt": "2026-02-02T07:51:52Z",
+    "number": 17692,
+    "title": "Forbes 2026 Trends Intake System"
+  },
+  {
+    "createdAt": "2026-02-02T07:35:00Z",
+    "number": 17689,
+    "title": "AI Coding Tools Integration Framework for Senior Engineers"
+  },
+  {
+    "createdAt": "2026-02-02T07:33:55Z",
+    "number": 17688,
+    "title": "feat: scaffold Portal Kombat (Pravda) Venezuela evidence bundle + stamp-only timestamp guard"
+  },
+  {
+    "createdAt": "2026-02-02T07:28:34Z",
+    "number": 17686,
+    "title": "Cosmos Subsumption Extension Implementation"
+  },
+  {
+    "createdAt": "2026-02-02T07:11:27Z",
+    "number": 17683,
+    "title": "Implement Agent Harness and Subagent Foundation"
+  },
+  {
+    "createdAt": "2026-02-02T07:06:06Z",
+    "number": 17682,
+    "title": "SlopGuard Governance Subsystem Implementation"
+  },
+  {
+    "createdAt": "2026-02-02T07:04:13Z",
+    "number": 17681,
+    "title": "Ingest Manus AI Acquisition Intel & Update OSINT Methodology"
+  },
+  {
+    "createdAt": "2026-02-02T06:59:10Z",
+    "number": 17680,
+    "title": "SlopGuard Anti-Slop Governance Subsystem"
+  },
+  {
+    "createdAt": "2026-02-02T06:57:11Z",
+    "number": 17678,
+    "title": "Integration of NVIDIA NIM Kimi K2.5 Provider"
+  },
+  {
+    "createdAt": "2026-02-02T06:55:03Z",
+    "number": 17677,
+    "title": "Implement CogWar 2026 Event Playbooks subsystem"
+  },
+  {
+    "createdAt": "2026-02-02T06:52:00Z",
+    "number": 17675,
+    "title": "Step 3.5 Flash Integration"
+  },
+  {
+    "createdAt": "2026-02-02T06:51:52Z",
+    "number": 17674,
+    "title": "Memory Privacy Foundation Implementation"
+  },
+  {
+    "createdAt": "2026-02-02T06:32:35Z",
+    "number": 17671,
+    "title": "Implement Financial Workflows with Human-in-the-Loop and Policy Gates"
+  },
+  {
+    "createdAt": "2026-02-02T06:25:47Z",
+    "number": 17669,
+    "title": "PR1: Memory Privacy Scaffolding & Gates"
+  },
+  {
+    "createdAt": "2026-02-02T06:21:53Z",
+    "number": 17668,
+    "title": "feat: implement cognitive domain foundation and governance"
+  },
+  {
+    "createdAt": "2026-02-02T06:21:04Z",
+    "number": 17667,
+    "title": "feat(observability): implement CI/CD observability best practices"
+  },
+  {
+    "createdAt": "2026-02-02T04:34:58Z",
+    "number": 17664,
+    "title": "Entropy Governance Layer Implementation"
+  },
+  {
+    "createdAt": "2026-02-02T04:32:13Z",
+    "number": 17663,
+    "title": "feat: Cognitive Security SOP & Governance Platform"
+  },
+  {
+    "createdAt": "2026-02-02T04:27:47Z",
+    "number": 17662,
+    "title": "Implement Entropy Governance Layer"
+  },
+  {
+    "createdAt": "2026-02-02T04:19:04Z",
+    "number": 17657,
+    "title": "feat(governance): add execution governor and critical path analysis"
+  },
+  {
+    "createdAt": "2026-02-02T04:15:37Z",
+    "number": 17656,
+    "title": "feat: Implement AGENTS.md passive context and skills telemetry"
+  },
+  {
+    "createdAt": "2026-02-02T04:10:47Z",
+    "number": 17653,
+    "title": "feat: Implement FactAPI Pro MWS"
+  },
+  {
+    "createdAt": "2026-02-02T04:10:15Z",
+    "number": 17652,
+    "title": "feat(platform): Week 1 Multi-Product Scaffolding"
+  },
+  {
+    "createdAt": "2026-02-02T04:06:52Z",
+    "number": 17651,
+    "title": "Initialize NanoClaw evidence scaffolding and CI discovery"
+  },
+  {
+    "createdAt": "2026-02-02T04:05:29Z",
+    "number": 17650,
+    "title": "Foundation: Evidence Scaffolding + CI Gates"
+  },
+  {
+    "createdAt": "2026-02-02T04:03:52Z",
+    "number": 17649,
+    "title": "Week 1 Execution Plan Implementation"
+  },
+  {
+    "createdAt": "2026-02-02T04:01:14Z",
+    "number": 17648,
+    "title": "Implement FactGov Module"
+  },
+  {
+    "createdAt": "2026-02-02T04:00:34Z",
+    "number": 17647,
+    "title": "Implement FactGov Module and API Integration"
+  },
+  {
+    "createdAt": "2026-02-02T03:23:10Z",
+    "number": 17634,
+    "title": "Add FactCheck-as-a-Service Business Plan"
+  },
+  {
+    "createdAt": "2026-02-02T03:22:00Z",
+    "number": 17632,
+    "title": "feat(disinfo-prod): deterministic evidence artifacts + schemas"
+  },
+  {
+    "createdAt": "2026-02-02T03:18:31Z",
+    "number": 17631,
+    "title": "Add synthetic dataset marketplace strategy document"
+  },
+  {
+    "createdAt": "2026-02-02T03:17:29Z",
+    "number": 17630,
+    "title": "Add Production-Grade Disinformation Detection Whitepaper"
+  },
+  {
+    "createdAt": "2026-02-02T03:14:34Z",
+    "number": 17629,
+    "title": "⚡ Bolt: Parallelize Maestro dependency checks"
+  },
+  {
+    "createdAt": "2026-02-02T03:10:19Z",
+    "number": 17628,
+    "title": "Add NVIDIA NIM provider support for Kimi K2.5"
+  },
+  {
+    "createdAt": "2026-02-02T03:05:53Z",
+    "number": 17627,
+    "title": "Resolve Dependency Hygiene Debt and EventEmitter Leak"
+  },
+  {
+    "createdAt": "2026-02-02T02:59:59Z",
+    "number": 17626,
+    "title": "chore: Add Summit GA Release Plan and Scope Documentation"
+  },
+  {
+    "createdAt": "2026-02-02T02:59:11Z",
+    "number": 17625,
+    "title": "feat: PR1 Evidence Foundation and Gates"
+  },
+  {
+    "createdAt": "2026-02-02T02:56:25Z",
+    "number": 17624,
+    "title": "🎨 Palette: Enhance Command Palette with functional actions"
+  },
+  {
+    "createdAt": "2026-02-02T02:56:16Z",
+    "number": 17623,
+    "title": "feat: add prompt paper trail governance scaffolding"
+  },
+  {
+    "createdAt": "2026-02-02T02:55:41Z",
+    "number": 17622,
+    "title": "feat(summit): implement governance evidence bundle and record policies"
+  },
+  {
+    "createdAt": "2026-02-02T02:54:46Z",
+    "number": 17621,
+    "title": "PR-1: Snowflake Operability Scaffolding & CI Gates"
+  },
+  {
+    "createdAt": "2026-02-02T02:54:01Z",
+    "number": 17620,
+    "title": "Feat: Add Brand Story module with evidence and evals"
+  },
+  {
+    "createdAt": "2026-02-02T02:45:38Z",
+    "number": 17619,
+    "title": "Implement Personal Brand Storytelling Module"
+  },
+  {
+    "createdAt": "2026-02-02T02:40:43Z",
+    "number": 17618,
+    "title": "feat(intel): establish foundation for intelligence pipeline"
+  },
+  {
+    "createdAt": "2026-02-02T02:38:20Z",
+    "number": 17617,
+    "title": "feat: Materials Redesign plugin foundation"
+  },
+  {
+    "createdAt": "2026-02-02T01:25:22Z",
+    "number": 17615,
+    "title": "feat: Implement Model Selection & Eval Harness (Lane 1)"
+  },
+  {
+    "createdAt": "2026-02-02T01:16:44Z",
+    "number": 17614,
+    "title": "feat: Agent Registry and Guardrails (Epic A)"
+  },
+  {
+    "createdAt": "2026-02-02T01:15:29Z",
+    "number": 17613,
+    "title": "feat(evidence): implement RAG evidence schemas and verification"
+  },
+  {
+    "createdAt": "2026-02-02T01:11:13Z",
+    "number": 17612,
+    "title": "feat(daao): Implement Difficulty-Aware Agent Orchestration in Maestro Core"
+  },
+  {
+    "createdAt": "2026-02-02T01:07:20Z",
+    "number": 17611,
+    "title": "Add Summit Platform Executive Briefing (2026-01-31)"
+  },
+  {
+    "createdAt": "2026-02-02T01:01:47Z",
+    "number": 17610,
+    "title": "Implement DAAO Orchestration Modules"
+  },
+  {
+    "createdAt": "2026-02-02T00:58:04Z",
+    "number": 17609,
+    "title": "Implement Difficulty-Aware Agent Orchestration in Maestro"
+  },
+  {
+    "createdAt": "2026-02-02T00:54:46Z",
+    "number": 17608,
+    "title": "feat(daao): implement Difficulty-Aware Agent Orchestration"
+  },
+  {
+    "createdAt": "2026-02-02T00:47:46Z",
+    "number": 17606,
+    "title": "Add February 1 2026 Intelligence Brief"
+  },
+  {
+    "createdAt": "2026-02-02T00:45:10Z",
+    "number": 17605,
+    "title": "feat: add Moonshot Kimi K2.5 provider adapter and evidence schemas"
+  },
+  {
+    "createdAt": "2026-02-02T00:29:48Z",
+    "number": 17604,
+    "title": "PR1: Evidence schemas and governance scaffolding for Kotlin Quality Gate"
+  },
+  {
+    "createdAt": "2026-02-02T00:28:52Z",
+    "number": 17603,
+    "title": "feat: scaffold evidence schemas and governance gates for Kotlin Quality"
+  },
+  {
+    "createdAt": "2026-02-02T00:28:33Z",
+    "number": 17602,
+    "title": "PR1: Evidence system scaffolding"
+  },
+  {
+    "createdAt": "2026-02-02T00:22:33Z",
+    "number": 17600,
+    "title": "PR1: Evidence system + required-check discovery + minimal harness"
+  },
+  {
+    "createdAt": "2026-02-02T00:20:21Z",
+    "number": 17599,
+    "title": "feat: Implement Kimi K2.5 Evidence System and Validation"
+  },
+  {
+    "createdAt": "2026-02-02T00:05:52Z",
+    "number": 17598,
+    "title": "feat: PR1 Foundation - Evidence system & Kimi K2.5 docs"
+  },
+  {
+    "createdAt": "2026-02-02T00:00:08Z",
+    "number": 17597,
+    "title": "Implement PPPT Growth Pack Framework"
+  },
+  {
+    "createdAt": "2026-02-01T23:59:34Z",
+    "number": 17596,
+    "title": "Implement Trustable AI Blueprint Lane 1"
+  },
+  {
+    "createdAt": "2026-02-01T23:55:47Z",
+    "number": 17595,
+    "title": "Science Pack Master Plan Implementation"
+  },
+  {
+    "createdAt": "2026-02-01T23:55:36Z",
+    "number": 17594,
+    "title": "docs: Palantir Competitive Teardown & Evidence Stack"
+  },
+  {
+    "createdAt": "2026-02-01T23:52:00Z",
+    "number": 17593,
+    "title": "fix(ci): unfreeze CI and fix actionlint config"
+  },
+  {
+    "createdAt": "2026-02-01T23:50:13Z",
+    "number": 17592,
+    "title": "Phase-Aware GraphRAG Engine Integration"
+  },
+  {
+    "createdAt": "2026-02-01T23:49:15Z",
+    "number": 17591,
+    "title": "Unify Data-Run Lineage and Build Attestations"
+  },
+  {
+    "createdAt": "2026-02-01T23:48:16Z",
+    "number": 17590,
+    "title": "Solo OS Core Contracts and Governance Guardrails"
+  },
+  {
+    "createdAt": "2026-02-01T23:45:15Z",
+    "number": 17589,
+    "title": "feat(archsim): implement foundation lane with deterministic simulation and audit"
+  },
+  {
+    "createdAt": "2026-02-01T23:44:04Z",
+    "number": 17588,
+    "title": "feat: implement deny-by-default assessment policy scaffold"
+  },
+  {
+    "createdAt": "2026-02-01T23:39:39Z",
+    "number": 17587,
+    "title": "feat: Geometry Monitor & Evidence Validation (VGT)"
+  },
+  {
+    "createdAt": "2026-02-01T23:36:06Z",
+    "number": 17586,
+    "title": "feat: Implement Lane 1 Protocol Foundation and Evidence System"
+  },
+  {
+    "createdAt": "2026-02-01T23:32:14Z",
+    "number": 17585,
+    "title": "feat: Implement Summit Agent Loop Core and Governance"
+  },
+  {
+    "createdAt": "2026-02-01T23:27:09Z",
+    "number": 17584,
+    "title": "Solo OS Subsumption for ENTRE-502318"
+  },
+  {
+    "createdAt": "2026-02-01T23:27:02Z",
+    "number": 17583,
+    "title": "feat(acp): integrate ACP Agent Registry"
+  },
+  {
+    "createdAt": "2026-02-01T23:24:47Z",
+    "number": 17582,
+    "title": "OpenWork Subsumption Skeleton Implementation"
+  },
+  {
+    "createdAt": "2026-02-01T23:22:05Z",
+    "number": 17581,
+    "title": "feat: MIT Sloan Startups 2026 Ingestion Pipeline"
+  },
+  {
+    "createdAt": "2026-02-01T23:21:04Z",
+    "number": 17580,
+    "title": "feat(compfeat): establish 5-PR foundation skeleton for clean-room subsumption"
+  },
+  {
+    "createdAt": "2026-02-01T23:18:46Z",
+    "number": 17579,
+    "title": "feat: Initial scaffolding for Summit Swarm (PR1)"
+  },
+  {
+    "createdAt": "2026-02-01T23:02:44Z",
+    "number": 17578,
+    "title": "Deterministic Build Attestation System"
+  },
+  {
+    "createdAt": "2026-02-01T23:00:09Z",
+    "number": 17577,
+    "title": "Graph Shape Guardrail Implementation"
+  },
+  {
+    "createdAt": "2026-02-01T23:00:04Z",
+    "number": 17576,
+    "title": "feat: Supply Chain Hardening & Evidence Framework"
+  },
+  {
+    "createdAt": "2026-02-01T22:56:38Z",
+    "number": 17575,
+    "title": "feat: Add graph-validator tool for monitoring degree drift"
+  },
+  {
+    "createdAt": "2026-02-01T22:52:27Z",
+    "number": 17574,
+    "title": "GraphPerf: Path Query Accelerator Integration"
+  },
+  {
+    "createdAt": "2026-02-01T22:42:02Z",
+    "number": 17573,
+    "title": "feat(governance): Implement DAE, AEG, and RTGO"
+  },
+  {
+    "createdAt": "2026-02-01T22:36:58Z",
+    "number": 17572,
+    "title": "OSINT Methodology Upgrade: Uncertainty-First & Hypothesis Ledger"
+  },
+  {
+    "createdAt": "2026-02-01T22:33:58Z",
+    "number": 17571,
+    "title": "CI Cost Optimization: Migrate to Hosted Runners & Reduce Retention"
+  },
+  {
+    "createdAt": "2026-02-01T22:33:16Z",
+    "number": 17570,
+    "title": "feat: initialize Narrative Intelligence service"
+  },
+  {
+    "createdAt": "2026-02-01T22:31:55Z",
+    "number": 17569,
+    "title": "PR-1: Transform Search in Run Panel"
+  },
+  {
+    "createdAt": "2026-02-01T22:30:30Z",
+    "number": 17568,
+    "title": "Add Graph Shape Guardrail tool"
+  },
+  {
+    "createdAt": "2026-02-01T22:29:55Z",
+    "number": 17567,
+    "title": "feat: add graph-validator tool for degree drift monitoring"
+  },
+  {
+    "createdAt": "2026-02-01T22:29:40Z",
+    "number": 17566,
+    "title": "feat: Add evidence artifact validator and deterministic hashing (PR0)"
+  },
+  {
+    "createdAt": "2026-02-01T22:27:34Z",
+    "number": 17565,
+    "title": "RegIntel Pipeline Skeleton & Source Framework"
+  },
+  {
+    "createdAt": "2026-02-01T22:27:22Z",
+    "number": 17564,
+    "title": "Implement CI Cost Guard Automation"
+  },
+  {
+    "createdAt": "2026-02-01T22:25:53Z",
+    "number": 17563,
+    "title": "Add ReasoningBudget schema and API scaffolding"
+  },
+  {
+    "createdAt": "2026-02-01T22:25:50Z",
+    "number": 17562,
+    "title": "Add Competitive KG Scaffolding"
+  },
+  {
+    "createdAt": "2026-02-01T22:23:13Z",
+    "number": 17561,
+    "title": "feat(ci): add retry logic and metrics to critical workflows"
+  },
+  {
+    "createdAt": "2026-02-01T22:06:07Z",
+    "number": 17560,
+    "title": "Implement OpenAI Responses Migration Tools & MCP Server Skeleton"
+  },
+  {
+    "createdAt": "2026-02-01T21:27:35Z",
+    "number": 17559,
+    "title": "feat: Implement MCP Async Tasks (SEP-1686)"
+  },
+  {
+    "createdAt": "2026-02-01T21:21:20Z",
+    "number": 17558,
+    "title": "feat(io): implement Portal Kombat Venezuela detection skeleton"
+  },
+  {
+    "createdAt": "2026-02-01T21:06:12Z",
+    "number": 17557,
+    "title": "feat: add Replit Agent subsumption scaffolding (evidence, policy, gated modules, tests)"
+  },
+  {
+    "createdAt": "2026-02-01T21:05:23Z",
+    "number": 17556,
+    "title": "feat(context): scaffold context compression primitives and evidence anchors"
+  },
+  {
+    "createdAt": "2026-02-01T19:51:53Z",
+    "number": 17550,
+    "title": "docs: add evidence-gated supply chain documentation pack"
+  },
+  {
+    "createdAt": "2026-02-01T19:51:36Z",
+    "number": 17546,
+    "title": "docs: track sandboxed AI execution pattern (items + roadmap)"
+  },
+  {
+    "createdAt": "2026-02-01T19:47:01Z",
+    "number": 17542,
+    "title": "chore(ci): add required-checks verifier scaffold for residency gates"
+  },
+  {
+    "createdAt": "2026-02-01T19:47:00Z",
+    "number": 17541,
+    "title": "chore(ci): add required-checks verifier scaffold for residency gates"
+  },
+  {
+    "createdAt": "2026-01-31T10:34:09Z",
+    "number": 17465,
+    "title": "feat: Add agent-browser tool adapter, policy, and evidence support"
+  },
+  {
+    "createdAt": "2026-01-31T02:32:14Z",
+    "number": 17392,
+    "title": "Evidence Bundle Generator + Release Evidence Standard"
+  },
+  {
+    "createdAt": "2026-01-31T02:07:45Z",
+    "number": 17387,
+    "title": "Create CI Unblocking Runbook and Health Tooling"
+  },
+  {
+    "createdAt": "2026-01-31T00:49:42Z",
+    "number": 17378,
+    "title": "fix: harden FCR validation, enforce atomic privacy-budget consumption, and add OpenAPI FCR endpoints"
+  },
+  {
+    "createdAt": "2026-01-31T00:49:37Z",
+    "number": 17377,
+    "title": "fix(release): normalize bundle-index paths and tighten determinism test"
+  },
+  {
+    "createdAt": "2026-01-31T00:40:42Z",
+    "number": 17376,
+    "title": "dev(gateway): add typesense + OPA to docker-compose.dev and permissive local policy"
+  },
+  {
+    "createdAt": "2026-01-31T00:37:29Z",
+    "number": 17371,
+    "title": "feat(agentops): add deterministic evidence writer, schemas, tests; small roadmap update"
+  },
+  {
+    "createdAt": "2026-01-31T00:33:11Z",
+    "number": 17365,
+    "title": "chore(ci): add branch protection payload generator and unit test"
+  },
+  {
+    "createdAt": "2026-01-31T00:33:08Z",
+    "number": 17364,
+    "title": "docs: expand research fusion runbook with governance, architecture, and verification checklist"
+  },
+  {
+    "createdAt": "2026-01-31T00:33:06Z",
+    "number": 17363,
+    "title": "docs: expand automated agents frontier runbook"
+  },
+  {
+    "createdAt": "2026-01-31T00:33:05Z",
+    "number": 17362,
+    "title": "docs(runbooks): expand Linear governance runbook and add machine-readable board spec"
+  },
+  {
+    "createdAt": "2026-01-31T00:32:46Z",
+    "number": 17360,
+    "title": "docs: expand supply chain integrity guidance, register prompt, and update roadmap status"
+  },
+  {
+    "createdAt": "2026-01-31T00:32:46Z",
+    "number": 17361,
+    "title": "docs(content-model): refine Brief/Claim/Block schemas, add block ordering and governance annotations"
+  },
+  {
+    "createdAt": "2026-01-31T00:32:45Z",
+    "number": 17359,
+    "title": "docs: add 23rd-order implication ladder to AI operating model memo and register prompt/task"
+  },
+  {
+    "createdAt": "2026-01-31T00:32:44Z",
+    "number": 17358,
+    "title": "docs: expand first-mover advantage spec; add prompt & task spec; update roadmap STATUS"
+  },
+  {
+    "createdAt": "2026-01-31T00:26:53Z",
+    "number": 17357,
+    "title": "docs: document artifact-inventory generation, verification, and evidence placement"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:22Z",
+    "number": 17356,
+    "title": "docs(raos): add Automation Turn 4 intel, register prompt/task spec, and refine CMMC exception"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:20Z",
+    "number": 17355,
+    "title": "docs: expand model-variant runtime slice with 23rd-order implication ladder"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:19Z",
+    "number": 17354,
+    "title": "feat: refine IO sponsor attribution outputs (confidence bands & category breakdowns)"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:19Z",
+    "number": 17353,
+    "title": "fix: correct cascade breadth calculation; add narrative cascade mapping & tests"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:14Z",
+    "number": 17352,
+    "title": "fix(skills): require SKILL.md and make install output deterministic; align skill frontmatter"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:11Z",
+    "number": 17351,
+    "title": "docs: expand agent skills governance runbook"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:10Z",
+    "number": 17350,
+    "title": "docs: expand agentic roadmap tooling vision"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:08Z",
+    "number": 17349,
+    "title": "fix: honor entity-map pk fields in graph-sync-validator (repairs & normalization)"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:04Z",
+    "number": 17348,
+    "title": "docs: expand content primitives runbook with governance rules, layouts, and exception model"
+  },
+  {
+    "createdAt": "2026-01-31T00:25:02Z",
+    "number": 17347,
+    "title": "feat(lineage): add deterministic OpenLineage emitter package with pipeline integration and sorting refactor"
+  },
+  {
+    "createdAt": "2026-01-31T00:24:22Z",
+    "number": 17346,
+    "title": "chore: remove deprecated @types/uuid from workspace manifests and add dependency-modernization notes"
+  },
+  {
+    "createdAt": "2026-01-31T00:24:18Z",
+    "number": 17345,
+    "title": "docs: add Switchboard competitive intel subsumption prompt"
+  },
+  {
+    "createdAt": "2026-01-31T00:24:16Z",
+    "number": 17344,
+    "title": "feat(prompts): add Ultra-Maximal Expansive Development Agent prompt and register in CompanyOS/Switchboard"
+  },
+  {
+    "createdAt": "2026-01-31T00:24:10Z",
+    "number": 17343,
+    "title": "fix: align evidence index with validators; add Postiz evidence bundles, policy schema, and CI specs"
+  },
+  {
+    "createdAt": "2026-01-31T00:24:07Z",
+    "number": 17342,
+    "title": "chore(subsumption,evidence): add Shai‑Hulud subsumption scaffold and restore evidence/index.json formatting"
+  },
+  {
+    "createdAt": "2026-01-31T00:23:58Z",
+    "number": 17341,
+    "title": "docs: add technology debt management strategy - Closes #16721, #8443, #8442, #8441, #8440, #8439"
+  },
+  {
+    "createdAt": "2026-01-31T00:23:46Z",
+    "number": 17339,
+    "title": "docs: expand cross-lingual narrative tracking spec, add prompt & registry"
+  },
+  {
+    "createdAt": "2026-01-31T00:23:46Z",
+    "number": 17340,
+    "title": "refactor: refine audience uptake scoring"
+  },
+  {
+    "createdAt": "2026-01-31T00:23:40Z",
+    "number": 17338,
+    "title": "refactor(threat-analytics): refine IO actor scoring overlap and add causal impact delta ratios"
+  },
+  {
+    "createdAt": "2026-01-31T00:15:47Z",
+    "number": 17337,
+    "title": "docs: add vendor management and technology partnerships - Closes #16721, #8443, #8442, #8441, #8440, #8439"
+  },
+  {
+    "createdAt": "2026-01-31T00:15:07Z",
+    "number": 17336,
+    "title": "worldmodels: add ActionSpace & CapabilityDescriptor interfaces, exports, flags, and docs"
+  },
+  {
+    "createdAt": "2026-01-31T00:07:29Z",
+    "number": 17335,
+    "title": "docs: add customer success communication templates - Closes #16721, #8443, #8442, #8441, #8440, #8439"
+  },
+  {
+    "createdAt": "2026-01-31T00:04:56Z",
+    "number": 17334,
+    "title": "feat(lineage): implement Lineage Collector and Debezium 3.4 config"
+  },
+  {
+    "createdAt": "2026-01-31T00:04:50Z",
+    "number": 17333,
+    "title": "test: add Keel stability numerics & gradient gates, register prompt, update roadmap"
+  },
+  {
+    "createdAt": "2026-01-31T00:04:47Z",
+    "number": 17332,
+    "title": "docs: add competitive subsumption prompt v1 scaffold and deterministic templates"
+  },
+  {
+    "createdAt": "2026-01-31T00:04:45Z",
+    "number": 17331,
+    "title": "docs: add Competitive Intelligence Subsumption Engine protocol and update roadmap status"
+  },
+  {
+    "createdAt": "2026-01-31T00:04:44Z",
+    "number": 17330,
+    "title": "docs: add competitive subsumption CI templates and PR checklist"
+  },
+  {
+    "createdAt": "2026-01-31T00:04:42Z",
+    "number": 17329,
+    "title": "feat(ci): add CI Subsumption Protocol v5 prompt, deterministic findings schema, validator, and CI gate"
+  },
+  {
+    "createdAt": "2026-01-31T00:04:40Z",
+    "number": 17328,
+    "title": "docs: add Competitive Intelligence Subsumption Protocol and targets scaffold"
+  },
+  {
+    "createdAt": "2026-01-31T00:01:06Z",
+    "number": 17327,
+    "title": "Implement Summit CI Subsumption Protocol for Kimi K2.5"
+  },
+  {
+    "createdAt": "2026-01-31T00:00:37Z",
+    "number": 17326,
+    "title": "docs: add comprehensive performance optimization runbooks - Closes #16721, #8443, #8442, #8441, #8440, #8439"
+  },
+  {
+    "createdAt": "2026-01-30T23:58:46Z",
+    "number": 17325,
+    "title": "Automated Branch Protection & Required Checks Governance"
+  },
+  {
+    "createdAt": "2026-01-30T23:55:19Z",
+    "number": 17324,
+    "title": "Calibrate health score computation"
+  },
+  {
+    "createdAt": "2026-01-30T23:54:42Z",
+    "number": 17323,
+    "title": "Replace Context Plumbing for Precision Policy"
+  },
+  {
+    "createdAt": "2026-01-30T23:53:06Z",
+    "number": 17322,
+    "title": "feat: add agent-skillpacks (lazy MCP loading) with intent-depth shard routing, policy gating, and evidence"
+  },
+  {
+    "createdAt": "2026-01-30T23:52:57Z",
+    "number": 17321,
+    "title": "fix: gate MCP sessions through capability firewall"
+  },
+  {
+    "createdAt": "2026-01-30T23:52:42Z",
+    "number": 17320,
+    "title": "feat(mcp): add pluggable transport abstraction, registry & WebSocket JSON-RPC adapter; harden connect cleanup"
+  },
+  {
+    "createdAt": "2026-01-30T23:52:35Z",
+    "number": 17319,
+    "title": "feat(aelab): add `--intention-order` control (default: 23) and sync CLI/docs/tests"
+  },
+  {
+    "createdAt": "2026-01-30T23:52:23Z",
+    "number": 17318,
+    "title": "feat: require 23rd-order imputed_intentions; update schema, sample, docs, validator, CLI & CI gate"
+  },
+  {
+    "createdAt": "2026-01-30T23:52:18Z",
+    "number": 17317,
+    "title": "docs: reinforce agentic runtime alignment with governance authorities"
+  },
+  {
+    "createdAt": "2026-01-30T23:52:07Z",
+    "number": 17316,
+    "title": "docs: extend Copilot trace governance checks"
+  },
+  {
+    "createdAt": "2026-01-30T23:52:03Z",
+    "number": 17315,
+    "title": "feat: add 23-level imputed_intentions to explicitation artifact"
+  },
+  {
+    "createdAt": "2026-01-30T23:51:54Z",
+    "number": 17314,
+    "title": "docs: add Summit Simplifier Contract, register prompt/task, and record 23rd-order imputed intention metric"
+  },
+  {
+    "createdAt": "2026-01-30T23:51:09Z",
+    "number": 17313,
+    "title": "Implement SkillForge configuration loading"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:52Z",
+    "number": 17312,
+    "title": "Microsoft GraphRAG Subsumption & Extraction Report"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:36Z",
+    "number": 17311,
+    "title": "docs: default to orchestrator-first multi-agent topology and add 23rd-order intent directive"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:34Z",
+    "number": 17310,
+    "title": "docs: add MCP/A2A protocol guidance to ROADMAP and register prompt"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:33Z",
+    "number": 17309,
+    "title": "docs: refine digital employee infrastructure agenda"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:32Z",
+    "number": 17308,
+    "title": "feat(orchestrator): add proof-carrying Plan IR, evidence bundles and deterministic replay harness"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:31Z",
+    "number": 17307,
+    "title": "docs: codify 23rd-order intent mandate in agentic reading order and register prompt"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:29Z",
+    "number": 17306,
+    "title": "docs: update sprint status template and roadmap STATUS.json"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:27Z",
+    "number": 17305,
+    "title": "feat: extend attention lab with imputed intention (23rd-order) metric"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:24Z",
+    "number": 17304,
+    "title": "feat(summit-agent): enhance planning evidence and verifier output logging"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:17Z",
+    "number": 17303,
+    "title": "docs: extend CPG moat with 23rd-order intent lattice and register prompt/task"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:17Z",
+    "number": 17302,
+    "title": "fix(switchboard): tighten evidence and skillset logging"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:08Z",
+    "number": 17300,
+    "title": "docs(onboarding): add Nori onboarding, XDG-aware agent installer, and Summit skillsets"
+  },
+  {
+    "createdAt": "2026-01-30T23:49:08Z",
+    "number": 17301,
+    "title": "feat(switchboard): capsules, ledgered evidence, replay, and ledger verification"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:59Z",
+    "number": 17299,
+    "title": "feat(skills): add Summit Skills CLI, evidence tooling, OPA policies, overlays, and CI vetting"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:46Z",
+    "number": 17298,
+    "title": "docs: expand grounded-claim contract ladder and register prompt"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:43Z",
+    "number": 17297,
+    "title": "docs: NRP — add Imputed Intention Ladder (Order 23) and register prompt/task"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:41Z",
+    "number": 17296,
+    "title": "docs: expand Model Mesh policy pack with 23rd-order governed intent ladder"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:40Z",
+    "number": 17295,
+    "title": "feat(context-shell): add policy-gated Context Shell, denylist-aware listings, and Maestro tools"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:32Z",
+    "number": 17294,
+    "title": "feat(context-shell): add policy-gated context shell with evidence logging and Maestro integration"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:28Z",
+    "number": 17293,
+    "title": "docs: add comprehensive team coordination and communication plan"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:26Z",
+    "number": 17292,
+    "title": "docs(mcp): add 23rd-order imputed intention ladder and prompt registry entry"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:13Z",
+    "number": 17291,
+    "title": "feat(provider-conformance): add conformance harness, adapters, CLI, docs, CI and tests"
+  },
+  {
+    "createdAt": "2026-01-30T23:48:01Z",
+    "number": 17290,
+    "title": "fix: harden Copilot CLI wrapper overrides (lane flag & transcript dir)"
+  },
+  {
+    "createdAt": "2026-01-30T23:47:57Z",
+    "number": 17289,
+    "title": "fix(context-pruning): harden pruning fallback and provenance-aware packing"
+  },
+  {
+    "createdAt": "2026-01-30T23:47:51Z",
+    "number": 17288,
+    "title": "fix(context-pruning): harden pruning fallback and provenance-aware packing"
+  },
+  {
+    "createdAt": "2026-01-30T23:47:39Z",
+    "number": 17287,
+    "title": "GA Gate Extension: Merge Queue, Attestations, and Confidence Dashboard"
+  },
+  {
+    "createdAt": "2026-01-30T23:46:16Z",
+    "number": 17286,
+    "title": "feat: add deny-by-default OSINT scope gate (policy, allowlist, CI verifier, tests, prompt registry)"
+  },
+  {
+    "createdAt": "2026-01-30T23:46:13Z",
+    "number": 17285,
+    "title": "docs(ga): refine recapture evidence bundle, correct naming, and align GA backlog/PR train"
+  },
+  {
+    "createdAt": "2026-01-30T23:46:12Z",
+    "number": 17284,
+    "title": "chore: document required checks registry output"
+  },
+  {
+    "createdAt": "2026-01-30T23:46:10Z",
+    "number": 17283,
+    "title": "fix: harden evidence verifier path and stamp checks"
+  },
+  {
+    "createdAt": "2026-01-30T23:46:04Z",
+    "number": 17282,
+    "title": "fix: align evidence scaffolding with existing bundle format"
+  },
+  {
+    "createdAt": "2026-01-30T23:46:01Z",
+    "number": 17281,
+    "title": "Operationalize Summit Competitive Subsumption Protocol"
+  },
+  {
+    "createdAt": "2026-01-30T23:45:59Z",
+    "number": 17280,
+    "title": "chore: reinforce evidence-lint to validate evidence/index paths"
+  },
+  {
+    "createdAt": "2026-01-30T23:45:11Z",
+    "number": 17279,
+    "title": "feat: Implement Competitive Intelligence Protocol (PR-0)"
+  },
+  {
+    "createdAt": "2026-01-30T23:44:52Z",
+    "number": 17278,
+    "title": "feat(competitive): implement CI protocol scaffolding and governance linter"
+  },
+  {
+    "createdAt": "2026-01-30T23:44:46Z",
+    "number": 17277,
+    "title": "Implement Context Pack Conversion in textualizer"
+  },
+  {
+    "createdAt": "2026-01-30T23:43:45Z",
+    "number": 17276,
+    "title": "Add PostgreSQL Client to RevocationDaemon"
+  },
+  {
+    "createdAt": "2026-01-30T23:37:53Z",
+    "number": 17274,
+    "title": "Maltego Subsumption Engine v4.1 Implementation"
+  },
+  {
+    "createdAt": "2026-01-30T23:34:09Z",
+    "number": 17273,
+    "title": "docs: add comprehensive security hardening and threat model"
+  },
+  {
+    "createdAt": "2026-01-30T23:32:57Z",
+    "number": 17272,
+    "title": "Implement BFS Traversal for Revocation Daemon"
+  },
+  {
+    "createdAt": "2026-01-30T23:32:42Z",
+    "number": 17271,
+    "title": "feat(governance): add branch protection and required checks verification"
+  },
+  {
+    "createdAt": "2026-01-30T23:30:54Z",
+    "number": 17270,
+    "title": "feat: Canonicalize Competitive Subsumption Engine v4.1 and add governance tools"
+  },
+  {
+    "createdAt": "2026-01-30T23:26:38Z",
+    "number": 17269,
+    "title": "Update Debezium 3.4 OpenLineage Docs"
+  },
+  {
+    "createdAt": "2026-01-30T23:26:18Z",
+    "number": 17268,
+    "title": "Implement Summit Competitive Intelligence Subsumption Protocol v1"
+  },
+  {
+    "createdAt": "2026-01-30T23:25:16Z",
+    "number": 17267,
+    "title": "CISTP v1 Competitive Intelligence Protocol Integration"
+  },
+  {
+    "createdAt": "2026-01-30T23:23:45Z",
+    "number": 17266,
+    "title": "Add Summit Competitive Subsumption & Transcendence Bundle v1 Prompt"
+  },
+  {
+    "createdAt": "2026-01-30T23:22:41Z",
+    "number": 17265,
+    "title": "Implement Summit Competitive Intelligence Protocol GA Edition"
+  },
+  {
+    "createdAt": "2026-01-30T23:19:03Z",
+    "number": 17262,
+    "title": "feat(ci): implement CISEv4 protocol"
+  },
+  {
+    "createdAt": "2026-01-30T23:16:16Z",
+    "number": 17261,
+    "title": "Integrate Summit model interface in sandbox"
+  },
+  {
+    "createdAt": "2026-01-30T23:14:28Z",
+    "number": 17259,
+    "title": "Implement deterministic RepoMapScout"
+  },
+  {
+    "createdAt": "2026-01-30T23:14:26Z",
+    "number": 17258,
+    "title": "Wire real tensors in summit/precision/detectors.py"
+  },
+  {
+    "createdAt": "2026-01-30T23:13:05Z",
+    "number": 17257,
+    "title": "feat(graphrag): Implement semantic-aware chunking subsystem"
+  },
+  {
+    "createdAt": "2026-01-30T23:12:53Z",
+    "number": 17256,
+    "title": "Add Summit Competitive Subsumption Protocol Prompt"
+  },
+  {
+    "createdAt": "2026-01-30T23:12:48Z",
+    "number": 17255,
+    "title": "docs: add comprehensive monitoring and observability strategy"
+  },
+  {
+    "createdAt": "2026-01-30T23:12:27Z",
+    "number": 17254,
+    "title": "Log errors in AcpClient notification handler"
+  },
+  {
+    "createdAt": "2026-01-30T23:12:13Z",
+    "number": 17253,
+    "title": "Define allowed FP8 scale methods"
+  },
+  {
+    "createdAt": "2026-01-30T23:11:41Z",
+    "number": 17252,
+    "title": "feat(testing): stabilize server coverage and verify e2e suite"
+  },
+  {
+    "createdAt": "2026-01-30T23:11:10Z",
+    "number": 17251,
+    "title": "Enforce RBAC Docs and Runtime Check Hook in K8s Onboarding"
+  },
+  {
+    "createdAt": "2026-01-30T23:09:43Z",
+    "number": 17250,
+    "title": "feat: GraphRAG Hybrid Retrieval & Community Detection"
+  },
+  {
+    "createdAt": "2026-01-30T23:07:46Z",
+    "number": 17249,
+    "title": "feat(graphrag): implement hybrid vector+graph retrieval"
+  },
+  {
+    "createdAt": "2026-01-30T23:00:05Z",
+    "number": 17248,
+    "title": "feat: Implement Temporally-Aware Entity Extraction"
+  },
+  {
+    "createdAt": "2026-01-30T22:55:35Z",
+    "number": 17247,
+    "title": "docs: add comprehensive incident response and disaster recovery guide"
+  },
+  {
+    "createdAt": "2026-01-30T22:55:16Z",
+    "number": 17246,
+    "title": "Real-Time Neo4j Stream Processing Implementation"
+  },
+  {
+    "createdAt": "2026-01-30T22:53:59Z",
+    "number": 17245,
+    "title": "Implement Temporal Graph Reasoning"
+  },
+  {
+    "createdAt": "2026-01-30T22:53:33Z",
+    "number": 17244,
+    "title": "Add Multi-Agent Orchestration Patterns Documentation"
+  },
+  {
+    "createdAt": "2026-01-30T22:49:24Z",
+    "number": 17243,
+    "title": "feat: UPLiFT Feature Upsampling Subsystem"
+  },
+  {
+    "createdAt": "2026-01-30T22:49:06Z",
+    "number": 17242,
+    "title": "feat(graphrag): Implement modular GraphRAG pipeline and governance"
+  },
+  {
+    "createdAt": "2026-01-30T22:43:29Z",
+    "number": 17241,
+    "title": "FTRLIM Distributed Instance Matching Framework"
+  },
+  {
+    "createdAt": "2026-01-30T22:38:02Z",
+    "number": 17240,
+    "title": "Implement composite indexing policy and artifacts"
+  },
+  {
+    "createdAt": "2026-01-30T22:36:59Z",
+    "number": 17239,
+    "title": "feat: Knowledge-First evidence scaffolding and system fixes"
+  },
+  {
+    "createdAt": "2026-01-30T22:36:29Z",
+    "number": 17238,
+    "title": "docs: add comprehensive 2026 deployment and release strategy"
+  },
+  {
+    "createdAt": "2026-01-30T22:33:51Z",
+    "number": 17237,
+    "title": "feat: Add Black-Box Compatible GraphRAG Foundation (PR1)"
+  },
+  {
+    "createdAt": "2026-01-30T22:33:08Z",
+    "number": 17236,
+    "title": "feat: WebApp Ingest Evidence Scaffolding"
+  },
+  {
+    "createdAt": "2026-01-30T22:29:48Z",
+    "number": 17235,
+    "title": "Implement Elasticsearch GraphRAG Backend (Lane 1)"
+  },
+  {
+    "createdAt": "2026-01-30T22:29:35Z",
+    "number": 17234,
+    "title": "docs: add comprehensive Q1 2026 operational readiness checklist"
+  },
+  {
+    "createdAt": "2026-01-30T22:27:22Z",
+    "number": 17233,
+    "title": "Automated KG Pipeline Foundational Scaffolding"
+  },
+  {
+    "createdAt": "2026-01-30T22:26:52Z",
+    "number": 17232,
+    "title": "feat: NebulaGraph Fusion GraphRAG Scaffolding & Evidence"
+  },
+  {
+    "createdAt": "2026-01-30T22:26:43Z",
+    "number": 17231,
+    "title": "feat: add forensic lineage trace architecture (PR1)"
+  },
+  {
+    "createdAt": "2026-01-30T22:26:16Z",
+    "number": 17230,
+    "title": "feat(summit_rt): implement incremental graph update foundation"
+  },
+  {
+    "createdAt": "2026-01-30T22:24:01Z",
+    "number": 17229,
+    "title": "feat: Multi-Region GraphRAG Architecture Skeleton"
+  },
+  {
+    "createdAt": "2026-01-30T22:23:40Z",
+    "number": 17228,
+    "title": "Enterprise & Production Readiness - Containerized GraphRAG Architecture"
+  },
+  {
+    "createdAt": "2026-01-30T22:20:20Z",
+    "number": 17227,
+    "title": "feat(mgi): foundation for multi-granular indexing (PR1-3)"
+  },
+  {
+    "createdAt": "2026-01-30T22:19:48Z",
+    "number": 17226,
+    "title": "feat: Integrate ROGRAG framework and fix evidence system"
+  },
+  {
+    "createdAt": "2026-01-30T22:17:32Z",
+    "number": 17225,
+    "title": "Foundational Hardware Acceleration Layer for GraphRAG"
+  },
+  {
+    "createdAt": "2026-01-30T22:17:31Z",
+    "number": 17224,
+    "title": "Implement KG Scaling Sharding/Partitioning Foundation"
+  },
+  {
+    "createdAt": "2026-01-30T22:16:45Z",
+    "number": 17223,
+    "title": "feat: LightRAG indexing optimizations and dual-level retrieval"
+  },
+  {
+    "createdAt": "2026-01-30T22:13:17Z",
+    "number": 17222,
+    "title": "Evidence scaffolding + CI verifier for graph-merge jobs"
+  },
+  {
+    "createdAt": "2026-01-30T22:07:25Z",
+    "number": 17221,
+    "title": "PR1: Evidence scaffolding + required-check discovery"
+  },
+  {
+    "createdAt": "2026-01-30T22:07:21Z",
+    "number": 17220,
+    "title": "feat: Add Neo4j vector indexes and query wrappers"
+  }
+]
