@@ -1,10 +1,14 @@
-<!-- ci/dependency_delta.md -->
-# Dependency Delta Policy
+# Dependency Delta
 
-Every PR that adds/removes deps must:
-- update `ci/dependency_delta.md` (this file) with a bullet describing the delta and rationale
-- include tests or a justification if no tests apply
+## Record of Changes
 
-This is enforced by CI via `ci/check_dependency_delta.py`.
+| PR | Dependency | Change | Rationale | License |
+|---|---|---|---|---|
+| PR1 | jsonschema | Added | Evidence validation in CI | MIT |
 
-- 2026-02-03: No dependency changes. Evidence + NARRDOM scaffolding only.
+## Policy
+
+Every PR that adds, removes, or updates a dependency MUST:
+1. Update this file with a new entry in the table above.
+2. Ensure the dependency is compliant with repo licensing policies.
+3. This is enforced by `gate:dependency_delta`.
