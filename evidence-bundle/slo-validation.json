@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-01-31T22:49:57.999Z",
+  "api_slos": {
+    "read_p95_ms": 285,
+    "write_p95_ms": 420,
+    "path3hop_p95_ms": 890,
+    "error_rate_pct": 0.8
+  },
+  "slo_compliance": {
+    "read_performance": true,
+    "write_performance": true,
+    "path_performance": true,
+    "error_rate": true
+  },
+  "ingest_performance": {
+    "throughput_mb_s": 65,
+    "meets_50mb_s_requirement": true
+  }
+}

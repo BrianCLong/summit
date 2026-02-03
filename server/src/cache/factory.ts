@@ -1,8 +1,8 @@
 
-import { getRedisClient } from '../db/redis.ts';
-import { CacheManager } from './AdvancedCachingStrategy.ts';
-import { DistributedCacheService } from './DistributedCacheService.ts';
-import config from '../config/index.ts';
+import { getRedisClient } from '../db/redis.js';
+import { CacheManager } from './AdvancedCachingStrategy.js';
+import { DistributedCacheService } from './DistributedCacheService.js';
+import config from '../config/index.js';
 
 let cacheManagerInstance: CacheManager | null = null;
 let distributedCacheInstance: DistributedCacheService | null = null;

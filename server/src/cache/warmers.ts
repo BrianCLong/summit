@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
-import { getPostgresPool, getRedisClient } from '../config/database.ts';
-import config from '../config/index.ts';
-import { cached } from './responseCache.ts';
-import { cacheSets, cacheHits, cacheMisses } from '../metrics/cacheMetrics.ts';
-import logger from '../utils/logger.ts';
+import { getPostgresPool, getRedisClient } from '../config/database.js';
+import config from '../config/index.js';
+import { cached } from './responseCache.js';
+import { cacheSets, cacheHits, cacheMisses } from '../metrics/cacheMetrics.js';
+import logger from '../utils/logger.js';
 
 export type CacheWarmer = {
   name: string;

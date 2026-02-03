@@ -30,6 +30,14 @@ Summit uses GitHub Actions with **reusable workflows** for reproducible, governa
 | `ga-verification`   | GA readiness checks                      | 10m     |
 | `governance-gate`   | Governance lockfile verification         | 5m      |
 
+### SOC Compliance Gate (`soc-controls.yml`)
+
+**Status**: BLOCKING - PRs cannot merge if the SOC controls check fails.
+
+| Job            | Purpose                         | Timeout |
+| -------------- | ------------------------------- | ------- |
+| `SOC Controls` | SOC control unit test execution | 15m     |
+
 ### Required Checks for Branch Protection
 
 Configure these in repo Settings > Branches > main:
@@ -41,6 +49,7 @@ ci-core / unit-tests
 ci-core / integration-tests
 ci-core / ga-verification
 ci-core / governance-gate
+SOC Controls
 ```
 
 ## Concurrency Control
@@ -236,4 +245,5 @@ gh run cancel <run-id>  # Cancel stale run
 - [BRANCH_PROTECTION_RECONCILIATION.md](./BRANCH_PROTECTION_RECONCILIATION.md) - Protection alignment
 - [CANARY_ROLLOUT.md](./CANARY_ROLLOUT.md) - Canary promotion process
 - [ACTIONS_PINNING.md](./ACTIONS_PINNING.md) - SHA pinning policy
+- [LINEAR_SYNC.md](./LINEAR_SYNC.md) - Linear ↔ GitHub sync invariants for governance tickets
 - [daily/2026-01-29-ci-cd-daily.md](./daily/2026-01-29-ci-cd-daily.md) - CI/CD daily report
