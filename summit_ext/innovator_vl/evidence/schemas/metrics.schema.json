@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "metrics.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "metrics": { "type": "object" },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["metrics", "warnings"]
+}

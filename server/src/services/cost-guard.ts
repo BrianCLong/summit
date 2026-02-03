@@ -1,5 +1,5 @@
 import pino from 'pino';
-import { businessMetrics, costTracker } from '../observability/telemetry';
+import { businessMetrics, costTracker } from '../observability/telemetry.js';
 import type { Request, Response, NextFunction } from 'express';
 
 const logger = (pino as any)({ name: 'cost-guard' });

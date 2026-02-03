@@ -9,8 +9,8 @@ import {
   governanceLimitEngine,
   estimateTaskCost,
   estimateTokenCount,
-} from './governance/limits';
-import { createBudgetController } from './admission/budget-control';
+} from './governance/limits.js';
+import { createBudgetController } from './admission/budget-control.js';
 import Redis from 'ioredis';
 
 export const conductorResolvers = {

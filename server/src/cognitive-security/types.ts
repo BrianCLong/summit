@@ -445,7 +445,11 @@ export interface Channel {
   metadata: Record<string, unknown>;
 }
 
-export interface Audience {
+// ============================================================================
+// Cognitive & Audience Layer
+// ============================================================================
+
+export interface AudienceSegment {
   /** Unique audience ID */
   id: string;
   /** Audience segment name */
@@ -453,7 +457,7 @@ export interface Audience {
   /** Description */
   description: string;
   /** Estimated size */
-  estimatedSize: number;
+  size: number;
   /** Demographics */
   demographics?: Record<string, unknown>;
   /** Geographic regions */
@@ -462,8 +466,111 @@ export interface Audience {
   vulnerabilityFactors: string[];
   /** Narrative IDs targeting this audience */
   narrativeIds: string[];
+
+  // Cognitive Attributes
+  trustInInstitutions: number; // 0.0 - 1.0
+  polarizationIndex: number;   // 0.0 - 1.0
+  fearSensitivity: number;     // 0.0 - 1.0
+  identityClusters: string[];
+
+  /** Cognitive Metrics */
+  resilienceScore: number;
+
   /** Created timestamp */
   createdAt: string;
+  /** Updated timestamp */
+  updatedAt: string;
+}
+
+export interface CognitiveState {
+  id: string;
+  segmentId: string;
+  timestamp: string;
+
+  /** State Vectors */
+  beliefVector: Record<string, number>; // Map of topic -> sentiment/belief strength
+  resilienceScore: number;   // Resistance to manipulation
+  emotionalValence: number;  // -1.0 (Negative) to 1.0 (Positive)
+  arousalLevel: number;      // 0.0 (Calm) to 1.0 (Agitated)
+}
+
+export type CognitiveAttackType =
+  | 'OVERLOAD'
+  | 'CONFUSION'
+  | 'MISTRUST'
+  | 'IDENTITY_THREAT'
+  | 'DESENSITIZATION'
+  | 'POLARIZATION_WEDGE';
+
+export interface CognitiveAttack {
+  id: string;
+  type: CognitiveAttackType;
+  name: string;
+  description: string;
+
+  /** Targets & Tactics */
+  targetSegmentIds: string[];
+  narrativeTacticId?: string;
+  campaignPhaseId?: string;
+  campaignId?: string;
+
+  /** Impact */
+  predictedImpact: number;
+  observedImpact?: number;
+  createdAt: string;
+}
+
+// ============================================================================
+// Influence Pathways & Early Warning
+// ============================================================================
+
+export interface NarrativeCascade {
+  id: string;
+  narrativeId: string;
+  startTime: string;
+  endTime?: string;
+
+  /** Structural */
+  originNodeId: string;
+  totalHops: number;
+  maxDepth: number;
+  uniqueActors: number;
+
+  /** Dynamics */
+  velocity: number;
+  viralityScore: number;
+
+  /** Involved entities */
+  originActorId?: string;
+  hopIds: string[];
+}
+
+export interface CascadeHop {
+  id: string;
+  cascadeId: string;
+  sourceActorId: string;
+  targetActorId: string;
+  platform: string;
+  timestamp: string;
+  delaySeconds?: number;
+
+  /** Content */
+  contentId?: string;
+  actionType: 'SHARE' | 'QUOTE' | 'REPLY';
+}
+
+export interface TippingPointIndicator {
+  id: string;
+  narrativeId: string;
+  metricName: string;
+  currentValue: number;
+  threshold: number;
+  isBreached: boolean;
+  breachedAt?: string;
+
+  /** Context */
+  segmentId?: string;
+  platform?: string;
 }
 
 // ============================================================================

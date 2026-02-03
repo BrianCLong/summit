@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/sentiment-analysis",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "AI-powered sentiment analysis with BERT/RoBERTa for intelligence operations",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

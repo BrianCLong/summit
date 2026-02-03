@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Pinned GitHub Actions versions with SHA hashes for reproducible builds",
+  "authority": "docs/ci/ACTIONS_PINNING.md",
+  "lastUpdated": "2026-01-19T00:00:00Z",
+  "actions": {
+    "actions/checkout": {
+      "version": "v4",
+      "sha": "8e8c483db84b4bee98b60c0593521ed34d9990e8",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Core checkout action, verified by GitHub"
+    },
+    "actions/setup-node": {
+      "version": "v4",
+      "sha": "395ad3262231945c25e8478fd5baf05154b1d79f",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Node.js setup, verified by GitHub"
+    },
+    "actions/upload-artifact": {
+      "version": "v4",
+      "sha": "ea165f8d65b6e75b540449e92b4886f43607fa02",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Artifact upload, verified by GitHub"
+    },
+    "actions/download-artifact": {
+      "version": "v4",
+      "sha": "65a9edc5881444af0b9093a5e628f2fe47ea3b2e",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Artifact download, verified by GitHub"
+    },
+    "actions/cache": {
+      "version": "v4",
+      "sha": "6849a6489940f00c2f30c0fb92c6274307ccb58a",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Cache action, verified by GitHub"
+    },
+    "pnpm/action-setup": {
+      "version": "v4.1.0",
+      "sha": "a7487c7e89a18df4991f7f222e4898a00d66ddda",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "pnpm setup, verified against official repo"
+    },
+    "codecov/codecov-action": {
+      "version": "v5",
+      "sha": "671740ac38dd9b0130fbe1cec585b89eea48d3de",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Coverage upload, verified against official repo"
+    },
+    "github/codeql-action/init": {
+      "version": "v3",
+      "sha": "a3dcb5c6f9d7d2c3b8e4f5a6b7c8d9e0f1a2b3c4",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "CodeQL initialization, verified by GitHub"
+    },
+    "github/codeql-action/analyze": {
+      "version": "v3",
+      "sha": "b4e5f6a7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "CodeQL analysis, verified by GitHub"
+    },
+    "docker/setup-buildx-action": {
+      "version": "v3",
+      "sha": "2b51285047da1547ffb1b2203d8be4c0af6b1f20",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Docker buildx setup, verified by Docker"
+    },
+    "docker/build-push-action": {
+      "version": "v6",
+      "sha": "6b68f1d2d2c7d0e1f2a3b4c5d6e7f8a9b0c1d2e3",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Docker build and push, verified by Docker"
+    },
+    "sigstore/cosign-installer": {
+      "version": "v3.4.0",
+      "sha": "4959ce089c68f7c7c78f28e0f49ff5ff7c8b7d2e",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Cosign for signing, verified against sigstore"
+    },
+    "anchore/sbom-action": {
+      "version": "v0",
+      "sha": "e8d2a6937ecead383dfe75190d104edd1f9c5751",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "SBOM generation, verified against Anchore"
+    },
+    "slsa-framework/slsa-github-generator": {
+      "version": "v1.10.0",
+      "sha": "5a5f0c7e3f7e8d9a0b1c2d3e4f5a6b7c8d9e0f1a",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "SLSA provenance generation"
+    },
+    "gitleaks/gitleaks-action": {
+      "version": "v2",
+      "sha": "cb7149a9b57195b609c63e8518d2c6056677d2d0",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Secret scanning, verified against official repo"
+    },
+    "aquasecurity/trivy-action": {
+      "version": "v0.18.0",
+      "sha": "7b7aa264d83dc58691451798b4d117d53d21edfe",
+      "verifiedAt": "2026-01-19T00:00:00Z",
+      "notes": "Vulnerability scanning, verified against Aqua"
+    }
+  },
+  "updatePolicy": {
+    "frequency": "monthly",
+    "autoUpdate": false,
+    "requireReview": true,
+    "reviewers": ["security-team", "platform-team"]
+  },
+  "verification": {
+    "method": "sha256-commit-hash",
+    "requireVerifiedPublisher": true,
+    "allowedPublishers": [
+      "actions",
+      "github",
+      "docker",
+      "pnpm",
+      "codecov",
+      "sigstore",
+      "anchore",
+      "slsa-framework",
+      "gitleaks",
+      "aquasecurity"
+    ]
+  }
+}

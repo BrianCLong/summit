@@ -4,7 +4,7 @@
  */
 
 import { Pool } from 'pg';
-import { AuditAccessLogRepo, AuditAccessLogInput } from '../repos/AuditAccessLogRepo';
+import { AuditAccessLogRepo, AuditAccessLogInput } from '../repos/AuditAccessLogRepo.js';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('AuditAccessLogRepo', () => {
