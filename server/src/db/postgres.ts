@@ -8,6 +8,7 @@ dotenv.config();
 import { dbConfig } from './config.js';
 import { logger as baseLogger, correlationStorage } from '../config/logger.js';
 import { ResidencyGuard } from '../data-residency/residency-guard.js';
+import { tenantRouter } from './tenantRouter.js';
 
 // Constants for pool monitoring and connection management
 const POOL_MONITOR_INTERVAL_MS = 30000; // 30 seconds
@@ -415,9 +416,9 @@ function initializePools(): void {
   // or distinct pool with same config if we want separation.
   // Using a separate read pool connected to same DB for now to respect pool sizing.
   const readPool = createPool(
-      'read-default',
-      'read',
-      dbConfig.readPoolSize
+    'read-default',
+    'read',
+    dbConfig.readPoolSize
   );
   readPoolWrappers = [readPool];
 
@@ -442,7 +443,7 @@ function createManagedPool(
       transaction: async () => ({} as any),
       withTransaction: async () => ({} as any),
       connect: async () => writePool.pool.connect(),
-      end: async () => {},
+      end: async () => { },
       on: () => ({} as any),
       healthCheck: async () => [],
       slowQueryInsights: () => [],
@@ -542,12 +543,12 @@ function createManagedPool(
           await withManagedClient(wrapper, 1000, async (client) => {
             await client.query('SELECT 1');
           });
-           const client = await wrapper.pool.connect();
-           try {
-               await client.query('SELECT 1');
-           } finally {
-               client.release();
-           }
+          const client = await wrapper.pool.connect();
+          try {
+            await client.query('SELECT 1');
+          } finally {
+            client.release();
+          }
         } catch (error: any) {
           snapshot.healthy = false;
           snapshot.lastError = (error as Error).message;
@@ -615,23 +616,39 @@ async function executeManagedQuery({
   readPools: PoolWrapper[];
 }): Promise<QueryResult<any>> {
   // Data Residency Check
-  // We infer tenantId from a custom option or thread-local storage if available.
-  // Since we don't have AsyncLocalStorage for tenant everywhere yet, we might check params/options?
-  // The 'residency-guard' uses getPostgresPool internally, so we must avoid infinite recursion.
-  // We skip residency check if this is an internal query (e.g. from residency-guard).
-
-  // Implementation note: The proper place for this is higher up in the repository layer
-  // where tenantId is known. However, to satisfy "Enforcement at Data storage",
-  // we can add a check here if 'tenantId' is passed in options.
-
-  // For this implementation, we assume repositories pass tenantId in options when strict enforcement is needed.
   if ((options as any).tenantId) {
-      const guard = ResidencyGuard.getInstance();
-      await guard.enforce((options as any).tenantId, {
-          operation: 'storage',
-          targetRegion: process.env.SUMMIT_REGION || process.env.REGION || 'us-east-1',
-          dataClassification: (options as any).classification || 'internal'
-      });
+    const guard = ResidencyGuard.getInstance();
+    await guard.enforce((options as any).tenantId, {
+      operation: 'storage',
+      targetRegion: process.env.SUMMIT_REGION || 'us-east-1',
+      dataClassification: (options as any).classification || 'internal'
+    });
+  }
+
+  let activeWritePool = writePool;
+  let activeReadPools = readPools;
+
+  // Regional Sharding: If tenantId is provided, resolve the localized pool
+  if ((options as any).tenantId) {
+    const region = process.env.SUMMIT_REGION || 'us-east-1';
+    const route = await tenantRouter.resolveRegionalRoute((options as any).tenantId, region);
+
+    if (route) {
+      // Wrap regional pools in PoolWrapper for execution loop
+      // Circuit breakers for regional pools are ad-hoc for this request
+      activeWritePool = {
+        name: route.partitionKey,
+        type: 'write',
+        pool: route.writePool,
+        circuitBreaker: new (CircuitBreaker as any)(route.partitionKey, CIRCUIT_BREAKER_FAILURE_THRESHOLD, CIRCUIT_BREAKER_COOLDOWN_MS)
+      };
+      activeReadPools = [{
+        name: route.partitionKey,
+        type: 'read',
+        pool: route.readPool,
+        circuitBreaker: new (CircuitBreaker as any)(route.partitionKey, CIRCUIT_BREAKER_FAILURE_THRESHOLD, CIRCUIT_BREAKER_COOLDOWN_MS)
+      }];
+    }
   }
 
   const normalized = normalizeQuery(queryInput, params);
@@ -639,8 +656,8 @@ async function executeManagedQuery({
     desiredType === 'auto' ? inferQueryType(normalized.text) : desiredType;
   const poolCandidates =
     queryType === 'write'
-      ? [writePool]
-      : [...pickReadPoolSequence(readPools), writePool];
+      ? [activeWritePool]
+      : [...pickReadPoolSequence(activeReadPools), activeWritePool];
   const timeoutMs = options.timeoutMs ?? dbConfig.statementTimeoutMs;
   const label = options.label ?? inferOperation(normalized.text);
 
@@ -677,12 +694,12 @@ async function executeWithRetry(
 
   while (attempt <= 3) {
     try {
-        const client = await wrapper.pool.connect();
-        try {
-            return await executeQueryOnClient(client, normalizedQuery, wrapper, label, timeoutMs);
-        } finally {
-            client.release();
-        }
+      const client = await wrapper.pool.connect();
+      try {
+        return await executeQueryOnClient(client, normalizedQuery, wrapper, label, timeoutMs);
+      } finally {
+        client.release();
+      }
     } catch (error: any) {
       const err = error as Error;
       wrapper.circuitBreaker.recordFailure(err);
