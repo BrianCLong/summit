@@ -1,0 +1,20 @@
+{
+  "item_slug": "ENTRE-502318",
+  "evidence": [
+    {
+      "evidence_id": "EVD-ENTRE-502318-EVID-001",
+      "files": [
+        "solo_os/evidence/index.schema.json",
+        "solo_os/evidence/report.schema.json",
+        "solo_os/evidence/metrics.schema.json",
+        "solo_os/evidence/stamp.schema.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ENTRE-502318-EVID-002",
+      "files": [
+        "solo_os/evidence/index.json"
+      ]
+    }
+  ]
+}

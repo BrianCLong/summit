@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/community",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "In-memory community engagement services powering forums, activity feeds, and analytics for Summit",
   "license": "MIT",
   "type": "module",

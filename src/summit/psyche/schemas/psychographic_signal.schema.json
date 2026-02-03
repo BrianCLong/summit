@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["subject_scope", "signal_type", "value", "uncertainty", "provenance", "policy"],
+  "properties": {
+    "subject_scope": {
+      "type": "string",
+      "enum": ["document", "cohort", "community"]
+    },
+    "signal_type": {
+      "type": "string",
+      "enum": ["moral_foundations", "emotional_climate", "personality_proxy"]
+    },
+    "value": { "type": "object" },
+    "uncertainty": {
+      "type": "object",
+      "required": ["method"],
+      "properties": {
+        "method": { "type": "string" },
+        "ci95": { "type": "array" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["collection_basis", "pii_status"],
+      "properties": {
+        "collection_basis": { "type": "string" },
+        "consent_assertion": { "type": "string" },
+        "pii_status": { "type": "string" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["allowed_purposes"],
+      "properties": {
+        "allowed_purposes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "additionalProperties": false
+}

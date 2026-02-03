@@ -1,6 +1,6 @@
-import { promptRegistry } from '../prompts/registry';
-import { logger } from '../utils/logger';
-import { safetyBoundary } from './SafetyBoundary';
+import { promptRegistry } from '../prompts/registry.js';
+import { logger } from '../utils/logger.js';
+import { safetyBoundary } from './SafetyBoundary.js';
 
 export interface GeopoliticalAnalysisResult {
   promptId: string;

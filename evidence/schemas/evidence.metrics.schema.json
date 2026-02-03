@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": {
+    "type": "number"
+  },
+  "properties": {
+    "evidence_id": {
+      "pattern": "^EVD-[a-zA-Z0-9-]+$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "evidence_id"
+  ],
+  "type": "object"
+}

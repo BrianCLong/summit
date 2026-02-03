@@ -1,0 +1,71 @@
+groups:
+  - name: maestro.orchestration
+    rules:
+      - alert: MaestroOrchestrationErrorRateHigh
+        expr: |
+          sum(rate(maestro_orchestration_errors_total[5m]))
+          /
+          sum(rate(maestro_orchestration_requests_total[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: maestro
+          component: orchestration
+        annotations:
+          summary: "High Orchestration Error Rate (> 5%)"
+          description: "Maestro orchestration is failing at a high rate ({{ $value | humanizePercentage }})."
+          runbook_url: "https://docs.intelgraph.com/runbooks/maestro-orchestration-errors"
+
+      - alert: MaestroActiveSessionsHigh
+        expr: sum(maestro_active_sessions_total) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: maestro
+          component: sessions
+        annotations:
+          summary: "High Active Sessions (> 1000)"
+          description: "Number of active Maestro sessions is high ({{ $value }})."
+
+  - name: maestro.ai
+    rules:
+      - alert: MaestroAIModelCostHigh
+        expr: sum(rate(maestro_ai_model_cost_usd_sum[1h])) * 24 > 100
+        for: 1h
+        labels:
+          severity: warning
+          service: maestro
+          component: ai
+        annotations:
+          summary: "High Projected Daily AI Cost (> $100)"
+          description: "AI model usage is projecting a daily cost of ${{ $value | humanize }}."
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-ai-cost"
+
+      - alert: MaestroAIModelErrorRateHigh
+        expr: |
+          sum(rate(maestro_ai_model_errors_total[5m]))
+          /
+          sum(rate(maestro_ai_model_requests_total[5m]))
+          > 0.10
+        for: 5m
+        labels:
+          severity: critical
+          service: maestro
+          component: ai
+        annotations:
+          summary: "High AI Model Error Rate (> 10%)"
+          description: "AI model invocations are failing frequently ({{ $value | humanizePercentage }})."
+
+  - name: maestro.graph
+    rules:
+      - alert: MaestroGraphQueryLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(maestro_graph_query_duration_seconds_bucket[5m])) by (le)) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          service: maestro
+          component: graph
+        annotations:
+          summary: "High Graph Query Latency (> 2s)"
+          description: "95th percentile of graph query latency is {{ $value }}s."

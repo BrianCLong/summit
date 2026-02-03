@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["event_id", "ts", "source", "tenant_id", "site_host", "agent_class", "request", "labels", "privacy"],
+  "properties": {
+    "event_id": {"type": "string"},
+    "ts": {"type": "string", "format": "date-time"},
+    "source": {"type": "string"},
+    "tenant_id": {"type": "string"},
+    "site_host": {"type": "string"},
+    "agent_class": {"type": "string", "enum": ["known_ai_agent", "known_bot", "unknown_automation", "human_or_unknown"]},
+    "request": {
+      "type": "object",
+      "required": ["method", "path", "scrubbed_query", "status", "bytes", "latency_ms"],
+      "properties": {
+        "method": {"type": "string"},
+        "path": {"type": "string"},
+        "scrubbed_query": {"type": "string"},
+        "status": {"type": "integer"},
+        "bytes": {"type": "integer"},
+        "latency_ms": {"type": "integer"}
+      }
+    },
+    "labels": {
+      "type": "object",
+      "properties": {
+        "is_login": {"type": "boolean"},
+        "is_checkout": {"type": "boolean"},
+        "content_type": {"type": "string"},
+        "allowlist_hit": {"type": "boolean"}
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "required": ["tier", "dropped_fields"],
+      "properties": {
+        "tier": {"type": "string"},
+        "dropped_fields": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

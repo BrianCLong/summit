@@ -6,6 +6,7 @@ import {
   ExecutionMetrics,
   IsolationLevel,
   SandboxQuota,
+  SensitiveDataType,
 } from '../types/index.js';
 import { SensitiveDataDetector } from '../detector/SensitiveDataDetector.js';
 import { TestCaseGenerator } from '../generator/TestCaseGenerator.js';
@@ -100,6 +101,9 @@ export class SecureSandbox {
         : undefined;
 
       const allFlags = [...inputFlags, ...codeFlags, ...outputFlags];
+      const boundaryFlags = allFlags.filter(
+        flag => flag.type === SensitiveDataType.SECURITY && flag.confidence >= 0.8
+      );
 
       // Block execution if mission-critical data in non-mission sandbox
       if (
@@ -112,6 +116,19 @@ export class SecureSandbox {
           status: 'blocked',
           output: null,
           logs: [...logs, 'Execution blocked: High-confidence sensitive data detected'],
+          metrics: this.createMetrics(startTime, 0),
+          sensitiveDataFlags: allFlags,
+          timestamp: new Date(),
+        };
+      }
+
+      if (boundaryFlags.length > 0) {
+        return {
+          sandboxId: this.config.id,
+          executionId,
+          status: 'blocked',
+          output: null,
+          logs: [...logs, 'Execution blocked: Sandbox boundary violation detected'],
           metrics: this.createMetrics(startTime, 0),
           sensitiveDataFlags: allFlags,
           timestamp: new Date(),

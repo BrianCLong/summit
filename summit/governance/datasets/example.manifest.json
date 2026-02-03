@@ -1,0 +1,13 @@
+{
+  "datasets": [
+    {
+      "name": "typhoon_s_sft_mixture_stub",
+      "source": "paper:arXiv:2601.18129 (SFT mixture references Tulu3 SFT, Toucan Tool, Typhoon AutoIF)",
+      "license": "UNKNOWN_TODO",
+      "sha256": "TODO",
+      "classification": "restricted",
+      "retention_days": 30,
+      "never_log_fields": ["raw_prompt", "raw_response"]
+    }
+  ]
+}

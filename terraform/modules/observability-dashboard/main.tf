@@ -14,8 +14,8 @@ resource "aws_cloudwatch_dashboard" "this" {
   dashboard_body = jsonencode({
     widgets = [
       {
-        type = "metric",
-        width = 12,
+        type   = "metric",
+        width  = 12,
         height = 6,
         properties = {
           metrics = [
@@ -28,8 +28,8 @@ resource "aws_cloudwatch_dashboard" "this" {
         }
       },
       {
-        type = "metric",
-        width = 12,
+        type   = "metric",
+        width  = 12,
         height = 6,
         properties = {
           metrics = [

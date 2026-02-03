@@ -292,11 +292,20 @@ ${relTypes.join('\n')}
     schemaContext: string,
     investigationId: string
   ): Promise<{ cypher: string; explanation: string }> {
-    const prompt = `You are a Neo4j Cypher expert helping intelligence analysts query their investigation data.
+    const prompt = `You are a **Neo4j Expert and Intelligence Analysis Copilot**.
+Your goal is to translate natural language questions into efficient, read-only Cypher queries.
+Treat the Neo4j graph as the source of truth for: entity identity, relationships, temporal ordering, and network structure.
 
 ${schemaContext}
 
-RULES:
+## NEO4J PERFORMANCE GUIDANCE
+- Use batch patterns where applicable.
+- Avoid variable-length paths with unbounded depth (e.g. [*]). Always specify a max depth (e.g. [*..3]).
+- Always include a LIMIT clause (default 100) to prevent blowing up result sizes.
+- For write operations (if any), group nodes/relationships by type and write each group with its own statement.
+- Avoid over-using MERGE with large property maps.
+
+## QUERY RULES
 1. All Entity nodes have an 'investigationId' property that MUST be filtered
 2. Use MATCH (e:Entity {investigationId: $investigationId}) for entity queries
 3. Relationships between entities use the generic RELATIONSHIP type with a 'type' property

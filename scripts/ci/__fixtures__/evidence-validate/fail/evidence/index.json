@@ -1,0 +1,20 @@
+{
+  "bundle_id": "pp-socialreasoning-fixture-fail-001",
+  "evidence": [
+    {
+      "description": "Report with timestamp leak",
+      "evidence_id": "EVD-PP-SOCIALREASONING-SCHEMA-002",
+      "path": "evidence/report.json",
+      "schema_path": "evidence.report.schema.json"
+    },
+    {
+      "description": "Stamp",
+      "evidence_id": "EVD-PP-SOCIALREASONING-EVAL-003",
+      "path": "evidence/stamp.json",
+      "schema_path": "evidence.stamp.schema.json"
+    }
+  ],
+  "item": {
+    "arxiv_id": "2601.20757"
+  }
+}

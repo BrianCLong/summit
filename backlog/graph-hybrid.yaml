@@ -1,0 +1,18 @@
+version: 1
+items:
+  - title: "Implement real Neo4j hybrid retrieval adapter"
+    owner: "TBD"
+    estimate: "L"
+    dependency: "HybridRetrievalContract + conformance tests"
+    reason_deferred: "Innovation lane; keep GA blast radius minimal"
+    related_claims: ["ITEM:CLAIM-04"]
+    required_gates_later:
+      ["adapter-conformance", "policy-graphrag-verify", "eval-hybrid-budgets"]
+  - title: "Implement real Neptune GraphRAG integration"
+    owner: "TBD"
+    estimate: "L"
+    dependency: "Contract + AWS credentials/runtime boundaries"
+    reason_deferred: "Avoid cloud coupling during GA hardening"
+    related_claims: ["ITEM:CLAIM-05"]
+    required_gates_later:
+      ["adapter-conformance", "data-residency-check"]
