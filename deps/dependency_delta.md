@@ -4,10 +4,10 @@
 
 - Added: none
 - Removed: none
-- Updated: none
+- Updated: none (Lockfile reconciled to match existing package.json specs)
 
 ## Notes
 
-- Rationale: Evidence schema test hardening and governance metadata updates only.
+- Rationale: NVIDIA NIM integration and lockfile reconciliation for CI stability.
 - Risk: None (no dependency changes).
 - Rollback: Revert this change.
