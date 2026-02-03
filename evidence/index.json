@@ -84,8 +84,8 @@
     {
       "evidence_id": "EVD-COGWAR-2026-EVENT-002",
       "files": {
-        "report": "evidence/reports/event_report.json",
-        "metrics": "evidence/reports/event_metrics.json",
+        "report": "evidence/EVD-COGWAR-2026-EVENT-002/report.json",
+        "metrics": "evidence/EVD-COGWAR-2026-EVENT-002/metrics.json",
         "stamp": "evidence/EVD-COGWAR-2026-EVENT-002/stamp.json"
       }
     },
