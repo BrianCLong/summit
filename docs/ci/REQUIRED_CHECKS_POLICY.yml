@@ -134,6 +134,13 @@ conditional_required:
     when_paths_match:
       - "^policy/"
 
+  - name: "Extortion Pressure Gates"
+    workflow: "extortion-gates.yml"
+    rationale: "Ensures extortion artifacts are deterministic and follow never-log policy"
+    when_paths_match:
+      - "^packages/extortion/"
+      - "^scripts/ci/.*extortion"
+
 # Informational Checks
 # --------------------
 # These checks are NOT blocking for promotion.
