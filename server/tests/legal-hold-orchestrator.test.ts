@@ -18,7 +18,7 @@ jest.mock('../src/config/database', () => ({
 import {
   LegalHoldOrchestrator,
   InMemoryLegalHoldRepository,
-} from '../src/cases/legal-hold/orchestrator';
+} from '../src/cases/legal-hold/orchestrator.js';
 import { describe, it, test, expect, beforeEach, jest } from '@jest/globals';
 import {
   ChainOfCustodyAdapter,
@@ -31,7 +31,7 @@ import {
   PreservationHoldInput,
   PreservationHoldResult,
   PreservationVerificationResult,
-} from '../src/cases/legal-hold/types';
+} from '../src/cases/legal-hold/types.js';
 
 describe('LegalHoldOrchestrator', () => {
   const baseScope: PreservationDataScope = {

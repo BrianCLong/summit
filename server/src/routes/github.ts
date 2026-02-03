@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import express from 'express';
-import { hmacHex, safeEqual } from '../utils/signature';
+import { hmacHex, safeEqual } from '../utils/signature.js';
 
 const router = Router();
 

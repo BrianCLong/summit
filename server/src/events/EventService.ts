@@ -1,9 +1,9 @@
 import { randomUUID } from 'crypto';
-import logger from '../utils/logger';
-import { pg } from '../db/pg';
-import { EventEnvelope, EventSinkConfig, ReplayQuery, SinkType } from './types';
-import { webhookRepository } from '../webhooks/repository';
-import { WebhookService } from '../webhooks/service';
+import logger from '../utils/logger.js';
+import { pg } from '../db/pg.js';
+import { EventEnvelope, EventSinkConfig, ReplayQuery, SinkType } from './types.js';
+import { webhookRepository } from '../webhooks/repository.js';
+import { WebhookService } from '../webhooks/service.js';
 
 // Reusing WebhookService logic for now as it implements the core "sink" logic (queuing, retries, etc)
 // In a full implementation, we would abstract SinkService generic interface.
@@ -41,7 +41,7 @@ export class EventService {
     // V1: Check for generic SIEM sink (simplified)
     try {
         // We import dynamically to avoid circular deps if any, or just use the manager
-        const { siemManager } = await import('../integrations/siem/manager');
+        const { siemManager } = await import('../integrations/siem/manager.js');
         // Simple mapping to SIEMEvent
         const siemEvent = {
             id: event.event_id,

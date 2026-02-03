@@ -5,12 +5,16 @@ import { validateArtifactId } from '../utils/security.js';
 import { WatermarkVerificationService } from '../exports/WatermarkVerificationService.js';
 import { sensitiveContextMiddleware } from '../middleware/sensitive-context.js';
 import { highRiskApprovalMiddleware } from '../middleware/high-risk-approval.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 const watermarkVerificationService = new WatermarkVerificationService();
 
-router.post('/sign-manifest', ensureAuthenticated, async (req, res) => {
+router.post(
+  '/sign-manifest',
+  ensureAuthenticated,
+  requirePermission('export:investigations'),
+  async (req, res) => {
   try {
     const { tenant, filters, timestamp } = req.body;
 
@@ -45,12 +49,18 @@ router.post('/sign-manifest', ensureAuthenticated, async (req, res) => {
 
 router.post(
   '/analytics/export',
+  ensureAuthenticated,
+  requirePermission('export:investigations'),
   sensitiveContextMiddleware,
   highRiskApprovalMiddleware,
   exportData,
 );
 
-router.post('/exports/:id/verify-watermark', async (req, res) => {
+router.post(
+  '/exports/:id/verify-watermark',
+  ensureAuthenticated,
+  requirePermission('export:investigations'),
+  async (req, res) => {
   if (process.env.WATERMARK_VERIFY !== 'true') {
     return res.status(404).json({ error: 'Watermark verification not enabled' });
   }

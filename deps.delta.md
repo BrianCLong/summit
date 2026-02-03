@@ -5,3 +5,6 @@
 
 ## Removed
 - None
+
+## Notes
+- No dependency changes in this update.

@@ -1,5 +1,5 @@
 
-import { CacheManager, CacheEntry, RedisClientInterface } from '../AdvancedCachingStrategy.ts';
+import { CacheManager, CacheEntry, RedisClientInterface } from '../AdvancedCachingStrategy.js';
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 
 // Mock Redis Client

@@ -1,4 +1,4 @@
-import { MediaType } from '../services/MediaUploadService.ts';
+import { MediaType } from '../services/MediaUploadService.js';
 
 export interface ExtractionEngineConfig {
   pythonPath: string;
