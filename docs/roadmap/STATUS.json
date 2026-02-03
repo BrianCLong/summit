@@ -1,6 +1,12 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-08T00:00:00Z",
   "initiatives": [
+    {
+      "id": "adenhq-hive-subsumption-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
     {
       "id": "sera-cli-proxy",
       "status": "in_progress",
@@ -32,10 +38,16 @@
       "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
     },
     {
-      "id": "narrative-intel-defense-docs",
+      "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Defense-only narrative intelligence documentation, data handling, runbook, and monitoring baseline."
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+    },
+    {
+      "id": "ru-ua-cogwar-lab",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
