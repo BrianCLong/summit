@@ -27,9 +27,7 @@ class AgentGuard:
                 raise PermissionError(f"Agent {agent_id} with risk tier {agent.risk_tier.value} requires 'approval_token' in context.")
 
         # Data Domain Check
-        # Example: If agent touches 'financial' domain, context must specify 'finance' tenant or scope
-        if "financial" in agent.data_domains:
-             # Simplified check for demonstration
-             # For now, let's say we check if 'financial_access' is granted in context
-             if not context.get("financial_access"):
-                 raise PermissionError(f"Agent {agent_id} requires financial access.")
+        for domain in agent.data_domains:
+             access_key = f"{domain}_access"
+             if not context.get(access_key):
+                 raise PermissionError(f"Agent {agent_id} requires {domain} access.")
