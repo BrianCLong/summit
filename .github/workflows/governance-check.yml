@@ -19,10 +19,21 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
-            const labels = context.payload.pull_request.labels.map(l => l.name);
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+            const title = pr.title;
+
+            // Auto-infer from title if no labels
+            if (labels.length === 0) {
+              if (title.startsWith('feat:')) labels.push('minor');
+              else if (title.startsWith('fix:')) labels.push('patch');
+              else if (title.startsWith('docs:')) labels.push('patch');
+              else if (title.includes('BREAKING CHANGE')) labels.push('major');
+            }
+
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
             if (!valid) {
-              core.setFailed("PR must have a classification label: patch, minor, or major.");
+              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
             }
 
   check-approvals:
