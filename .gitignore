@@ -364,3 +364,12 @@ evidence-staging/
 !services/er-service/requirements.txt
 tmp-test/
 _worktrees/
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+coverage/
+node_modules/
+test-results/
+playwright-report/
+artifacts/

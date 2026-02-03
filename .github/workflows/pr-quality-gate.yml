@@ -23,11 +23,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Install Dependencies
+        uses: pnpm/action-setup@v4      - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Validate Release Policy
@@ -47,11 +43,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Install Dependencies
+        uses: pnpm/action-setup@v4      - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint Reason Codes
