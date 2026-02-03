@@ -1,0 +1,12 @@
+{
+  "benchmark_id": "spatialgeneval",
+  "run_id": "default_run",
+  "metrics": {
+    "overall_accuracy": 1.0,
+    "correct_count": 2,
+    "total_count": 2,
+    "accuracy_by_subdomain": {
+      "relative_position": 1.0
+    }
+  }
+}

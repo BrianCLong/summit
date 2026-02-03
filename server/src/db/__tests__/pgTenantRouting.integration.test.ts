@@ -15,7 +15,7 @@ jest.mock('../../config/logger', () => ({
   },
 }));
 
-import { tenantRouter } from '../tenantRouter';
+import { tenantRouter } from '../tenantRouter.js';
 
 describe('pg router integration', () => {
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('pg router integration', () => {
         return { Pool };
     });
 
-    const { pg } = await import('../pg');
+    const { pg } = await import('../pg.js');
     expect(mockPools.length).toBeGreaterThan(0);
     expect(mockClients.length).toBeGreaterThan(0);
 

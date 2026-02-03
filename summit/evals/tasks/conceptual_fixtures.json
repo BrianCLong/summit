@@ -1,0 +1,7 @@
+[
+  {
+    "id": "concept-001",
+    "question": "What is the difference between concurrency and parallelism?",
+    "expected_concepts": ["interleaving", "simultaneous execution"]
+  }
+]

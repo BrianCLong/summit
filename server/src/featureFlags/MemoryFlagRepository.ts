@@ -1,5 +1,5 @@
 // server/src/featureFlags/MemoryFlagRepository.ts
-import { FeatureFlagRepository, FeatureFlag } from './types';
+import { FeatureFlagRepository, FeatureFlag } from './types.js';
 
 export class MemoryFlagRepository implements FeatureFlagRepository {
   private flags: Map<string, FeatureFlag>;

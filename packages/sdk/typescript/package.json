@@ -1,6 +1,6 @@
 {
   "name": "@summit/sdk",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Official TypeScript SDK for the Summit platform",
   "keywords": [
     "summit",
