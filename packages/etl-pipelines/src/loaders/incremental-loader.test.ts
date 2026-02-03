@@ -1,11 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { IncrementalLoader } from "./incremental-loader";
-import { Pool } from "pg";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { IncrementalLoader } from './incremental-loader';
+import { Pool } from 'pg';
 
 const queryMock = vi.fn();
 
 // Mock pg
-vi.mock("pg", () => {
+vi.mock('pg', () => {
   return {
     Pool: class {
       query = queryMock;
@@ -13,7 +13,7 @@ vi.mock("pg", () => {
   };
 });
 
-describe("IncrementalLoader Security", () => {
+describe('IncrementalLoader Security', () => {
   let loader: IncrementalLoader;
   let pool: Pool;
 
@@ -26,12 +26,12 @@ describe("IncrementalLoader Security", () => {
     loader = new IncrementalLoader(pool);
   });
 
-  it("should use parameterized queries for rowExists to prevent SQL injection", async () => {
+  it('should use parameterized queries for rowExists to prevent SQL injection', async () => {
     const maliciousValue = "1'; DROP TABLE users; --";
 
     // 1. fetch changes
     queryMock.mockResolvedValueOnce({
-      rows: [{ id: maliciousValue, name: "Test" }],
+      rows: [{ id: maliciousValue, name: 'Test' }],
     });
 
     // 2. rowExists
@@ -44,8 +44,8 @@ describe("IncrementalLoader Security", () => {
       rows: [],
     });
 
-    await loader.loadIncremental("target_table", "source_table", ["id"], {
-      timestampColumn: "updated_at",
+    await loader.loadIncremental('target_table', 'source_table', ['id'], {
+      timestampColumn: 'updated_at',
     });
 
     // The second call is rowExists
@@ -55,16 +55,16 @@ describe("IncrementalLoader Security", () => {
 
     // Expectation: SQL should NOT contain the value, but use placeholder
     expect(sql).not.toContain(maliciousValue);
-    expect(sql).toContain("$1");
+    expect(sql).toContain('$1');
     expect(params).toEqual([maliciousValue]);
   });
 
-  it("should use parameterized queries for updateRow", async () => {
+  it('should use parameterized queries for updateRow', async () => {
     const maliciousValue = "1'; DROP TABLE users; --";
 
     // 1. fetch changes
     queryMock.mockResolvedValueOnce({
-      rows: [{ id: "1", name: maliciousValue }],
+      rows: [{ id: '1', name: maliciousValue }],
     });
 
     // 2. rowExists returns true (so we update)
@@ -77,8 +77,8 @@ describe("IncrementalLoader Security", () => {
       rows: [],
     });
 
-    await loader.loadIncremental("target_table", "source_table", ["id"], {
-      timestampColumn: "updated_at",
+    await loader.loadIncremental('target_table', 'source_table', ['id'], {
+      timestampColumn: 'updated_at',
     });
 
     // The third call is updateRow

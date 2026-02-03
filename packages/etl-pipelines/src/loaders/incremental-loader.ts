@@ -2,7 +2,7 @@
  * Incremental Data Loader with CDC support
  */
 
-import { Pool } from "pg";
+import { Pool } from 'pg';
 
 export interface CDCConfig {
   timestampColumn: string;
@@ -56,17 +56,17 @@ export class IncrementalLoader {
   }
 
   private async rowExists(table: string, keyColumns: string[], row: any): Promise<boolean> {
-    const whereClause = keyColumns.map((k, i) => `${k} = $${i + 1}`).join(" AND ");
+    const whereClause = keyColumns.map((k, i) => `${k} = $${i + 1}`).join(' AND ');
     const values = keyColumns.map((k) => row[k]);
     const result = await this.pool.query(`SELECT 1 FROM ${table} WHERE ${whereClause}`, values);
     return result.rows.length > 0;
   }
 
   private async insertRow(table: string, row: any): Promise<void> {
-    const columns = Object.keys(row).join(", ");
+    const columns = Object.keys(row).join(', ');
     const values = Object.values(row)
       .map((_, i) => `$${i + 1}`)
-      .join(", ");
+      .join(', ');
     await this.pool.query(
       `INSERT INTO ${table} (${columns}) VALUES (${values})`,
       Object.values(row)
@@ -77,8 +77,8 @@ export class IncrementalLoader {
     const updateColumns = Object.keys(row).filter((k) => !keyColumns.includes(k));
     let paramIndex = 1;
 
-    const setClauses = updateColumns.map((k) => `${k} = $${paramIndex++}`).join(", ");
-    const whereClause = keyColumns.map((k) => `${k} = $${paramIndex++}`).join(" AND ");
+    const setClauses = updateColumns.map((k) => `${k} = $${paramIndex++}`).join(', ');
+    const whereClause = keyColumns.map((k) => `${k} = $${paramIndex++}`).join(' AND ');
 
     const values = [...updateColumns.map((k) => row[k]), ...keyColumns.map((k) => row[k])];
 
@@ -86,7 +86,7 @@ export class IncrementalLoader {
   }
 
   private async deleteRow(table: string, keyColumns: string[], row: any): Promise<void> {
-    const whereClause = keyColumns.map((k, i) => `${k} = $${i + 1}`).join(" AND ");
+    const whereClause = keyColumns.map((k, i) => `${k} = $${i + 1}`).join(' AND ');
     const values = keyColumns.map((k) => row[k]);
     await this.pool.query(`DELETE FROM ${table} WHERE ${whereClause}`, values);
   }
