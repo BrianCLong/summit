@@ -1,35 +1,30 @@
+import re
 from typing import List, Dict, Any
 
-class AuthenticityLint:
-    """
-    Lints content for authenticity markers (emotion, vulnerability, lesson).
-    """
+class AuthenticityLinter:
+    def __init__(self, truthfulness_mode: bool = True):
+        self.truthfulness_mode = truthfulness_mode
+        self.markers = ["felt", "realized", "learned", "risk", "moment"]
 
-    MARKERS = {
-        "emotion": ["felt", "remember", "struggled", "realized", "excited", "scared"],
-        "vulnerability": ["failed", "mistake", "wrong", "learned", "difficult"],
-        "lesson": ["mission", "why", "tip", "step", "guide"]
-    }
+    def lint(self, text: str) -> Dict[str, Any]:
+        found_markers = [m for m in self.markers if m in text.lower()]
+        score = len(found_markers) / len(self.markers)
 
-    def lint(self, content: str) -> Dict[str, Any]:
-        results = {}
-        for category, keywords in self.MARKERS.items():
-            found = [w for w in keywords if w in content.lower()]
-            results[category] = {
-                "score": len(found) / len(keywords),
-                "found": found
-            }
+        issues = []
+        if self.truthfulness_mode:
+            # Simple heuristic for dramatization markers
+            if "literally" in text.lower() or "never before seen" in text.lower():
+                issues.append("Potential hyperbole in truthfulness mode")
 
-        overall_score = sum(r["score"] for r in results.values()) / len(results)
         return {
-            "overall_authenticity_score": overall_score,
-            "details": results
+            "authenticity_score": score,
+            "found_markers": found_markers,
+            "issues": issues,
+            "passed": score > 0.4
         }
 
-def enforce_truthfulness(content: str, mode: bool = True) -> str:
-    """
-    Appends a disclaimer if truthfulness mode is on.
-    """
-    if mode:
-        return content + "\n\n(Note: This story is based on true events but may be dramatized for educational purposes.)"
-    return content
+def redact_pii(text: str) -> str:
+    # Very simple redaction for demo
+    text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', "[EMAIL]", text)
+    text = re.sub(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', "[PHONE]", text)
+    return text

@@ -1,14 +1,12 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Brand Story Evidence Report",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["evidence_id","item_slug","claims","decisions","findings"],
+  "required": ["evidence_id", "title"],
   "properties": {
-    "evidence_id": {"type":"string"},
-    "item_slug": {"type":"string"},
-    "claims": {"type":"array","items":{"type":"string"}},
-    "decisions": {"type":"array","items":{"type":"object"}},
-    "findings": {"type":"array","items":{"type":"object"}}
-  },
-  "additionalProperties": true
+    "evidence_id": { "type": "string" },
+    "title": { "type": "string" },
+    "category": { "type": "string" },
+    "status": { "type": "string" },
+    "summary": { "type": "string" }
+  }
 }

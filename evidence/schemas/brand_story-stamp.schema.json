@@ -1,12 +1,10 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Brand Story Evidence Stamp",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["evidence_id","tool_versions","generated_at"],
+  "required": ["evidence_id", "timestamp"],
   "properties": {
-    "evidence_id": {"type":"string"},
-    "tool_versions": {"type":"object","additionalProperties":{"type":"string"}},
-    "generated_at": {"type":"string"}
-  },
-  "additionalProperties": false
+    "evidence_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "job": { "type": "string" }
+  }
 }

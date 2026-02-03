@@ -1,8 +1,5 @@
 import os
 
 def enabled() -> bool:
-    """
-    Check if the Brand Story module is enabled.
-    Default to False for safety.
-    """
+    """Check if brand story features are enabled."""
     return os.getenv("BRAND_STORY_ENABLED", "false").lower() == "true"

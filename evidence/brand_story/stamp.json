@@ -1,7 +1,5 @@
 {
-  "evidence_id": "EVD-SPB-PLAN-001",
-  "tool_versions": {
-    "summit-brand-story": "0.1.0"
-  },
-  "generated_at": "2026-01-29T12:00:00Z"
+  "evidence_id": "EVD-SPB500250-STAMP-001",
+  "timestamp": "2026-02-03T02:00:00Z",
+  "job": "smoke-test"
 }

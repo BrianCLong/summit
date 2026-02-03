@@ -1,19 +1,12 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Brand Story Evidence Metrics",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["evidence_id","metrics"],
+  "required": ["evidence_id", "coherence"],
   "properties": {
-    "evidence_id": {"type":"string"},
-    "metrics": {
-      "type": "object",
-      "properties": {
-        "coherence": {"type": "number"},
-        "authenticity": {"type": "number"},
-        "interactivity": {"type": "number"}
-      },
-      "additionalProperties": {"type": "number"}
-    }
-  },
-  "additionalProperties": false
+    "evidence_id": { "type": "string" },
+    "coherence": { "type": "number" },
+    "distinctiveness": { "type": "number" },
+    "authenticity": { "type": "number" },
+    "interactivity": { "type": "number" }
+  }
 }

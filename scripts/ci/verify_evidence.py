@@ -130,14 +130,8 @@ def main():
     index = load_json(index_path)
 
     items = []
-    if "items" in index:
-        if isinstance(index["items"], list):
-            items = index["items"]
-        elif isinstance(index["items"], dict):
-            for evd_id, data in index["items"].items():
-                item = data.copy() if isinstance(data, dict) else {"files": data}
-                item["evidence_id"] = evd_id
-                items.append(item)
+    if "items" in index and isinstance(index["items"], list):
+        items = index["items"]
     elif "evidence" in index and isinstance(index["evidence"], dict):
         for evd_id, data in index["evidence"].items():
             item = data.copy()
@@ -155,8 +149,8 @@ def main():
     print(f"Found {len(items)} items in index.")
 
     for item in items:
-        # Support both 'files', 'paths' (existing), and 'artifacts'
-        files = item.get("files", item.get("paths", item.get("artifacts", [])))
+        # Support both 'files' (plan) and 'paths' (existing)
+        files = item.get("files", item.get("paths", []))
         evd_id = item.get("evidence_id")
 
         if not evd_id:

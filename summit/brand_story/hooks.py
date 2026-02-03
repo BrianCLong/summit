@@ -1,27 +1,14 @@
-from typing import List, Dict, Any
-from .flags import enabled
+from typing import Dict, List
 
-def generate_hooks(theme: str, platform: str = "LinkedIn") -> List[Dict[str, str]]:
-    """
-    Generate platform-specific hooks.
-    """
-    if not enabled():
-        return []
-
-    hooks = []
-    if platform.lower() == "linkedin":
-        hooks.append({
-            "type": "authority",
-            "text": f"Why {theme} is the most underrated asset in your personal brand."
-        })
-        hooks.append({
-            "type": "vulnerability",
-            "text": f"I almost failed at {theme}. Here's what I learned."
-        })
-    elif platform.lower() == "instagram":
-        hooks.append({
-            "type": "visual",
-            "text": f"The secret behind {theme} (swipe for the full story)."
-        })
-
+def generate_hooks(episode_theme: str, platforms: List[str]) -> Dict[str, str]:
+    """Generate platform-specific interactive hooks."""
+    hooks = {}
+    for platform in platforms:
+        p = platform.lower()
+        if p == "instagram":
+            hooks[platform] = f"Poll: Have you ever felt {episode_theme}? Yes/No"
+        elif p == "linkedin":
+            hooks[platform] = f"Question: How does {episode_theme} impact your leadership style?"
+        else:
+            hooks[platform] = f"What do you think about {episode_theme}?"
     return hooks

@@ -1,28 +1,11 @@
 # Brand Story Quickstart
 
-How to use the Summit Brand Story module.
+## Enabling Features
+Set `BRAND_STORY_ENABLED=true` in your environment.
 
-## 1. Supply Input
-
-Provide defining moments, your mission, and audience archetype.
-
-## 2. Generate Plan
-
+## Generating a Plan
 ```python
-from summit.brand_story.planner import plan_series
-from summit.brand_story.schemas import BrandStoryInput
-
-input_data = BrandStoryInput(
-    defining_moments=["Starting my first company", "Facing a major setback"],
-    mission="Empowering solo entrepreneurs",
-    audience_archetype="Aspiring founders",
-    goal="Build authority"
-)
-
+from summit.brand_story import plan_series, BrandStoryInput
+input_data = BrandStoryInput(...)
 plan = plan_series(input_data)
 ```
-
-## 3. Verify Evidence
-
-Run the validation tool:
-`python3 tools/evidence_validate.py`

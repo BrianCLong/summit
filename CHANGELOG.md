@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Brand Storytelling narrative planning module and governance gates.
+
+### Added
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 

@@ -72,30 +72,9 @@ def main():
     success = True
 
     # Validate Items
-    items_raw = index_data.get("items", [])
-    items = []
-    if isinstance(items_raw, list):
-        items = items_raw
-    elif isinstance(items_raw, dict):
-        for k, v in items_raw.items():
-            if isinstance(v, dict):
-                item = v.copy()
-                item["id"] = k
-                if "path" not in item:
-                    files = item.get("artifacts", item.get("files", item.get("paths", [])))
-                    if files:
-                        item["path"] = os.path.dirname(files[0])
-                items.append(item)
-            else:
-                # v might be a list of files
-                items.append({"id": k, "path": os.path.dirname(v[0]) if v else ""})
-
-    for item in items:
+    for item in index_data.get("items", []):
         evidence_id = item.get("id")
         path = item.get("path")
-
-        if not evidence_id or not path:
-            continue
 
         # If path is relative, make it absolute relative to repo root (or args.evidence parent)
         # Assuming args.evidence points to 'evidence/' dir.
@@ -123,8 +102,8 @@ def main():
             # Existing entries point to 'evidence/report.json'.
             # We can skip validation for legacy or try to guess.
             # For this plan, we care about the new IDs which are directories.
-            if "LIMY-AGENTICWEB" in evidence_id or "SPB" in evidence_id:
-                 print(f"Error: Evidence {evidence_id} points to a file, expected directory.")
+            if "LIMY-AGENTICWEB" in evidence_id:
+                 print(f"Error: Agentic Web evidence {evidence_id} points to a file, expected directory.")
                  success = False
             continue
 

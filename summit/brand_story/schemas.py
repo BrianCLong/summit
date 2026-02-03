@@ -1,15 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
-
-@dataclass(frozen=True)
-class BrandStoryInput:
-    defining_moments: List[str]
-    mission: str
-    audience_archetype: str
-    goal: str
-    tone: str = "authentic"
-    quirks: List[str] = field(default_factory=list)
-    constraints: List[str] = field(default_factory=list)
 
 @dataclass(frozen=True)
 class Episode:
@@ -23,7 +13,11 @@ class Episode:
     interactive_prompt: str
 
 @dataclass(frozen=True)
-class SeriesPlan:
+class BrandStoryInput:
+    defining_moments: List[str]
     mission: str
-    episodes: List[Episode]
-    platform: str = "LinkedIn"
+    platforms: List[str]
+    audience: str
+    quirks: List[str] = None
+    tone: str = "authentic"
+    truthfulness_mode: bool = True
