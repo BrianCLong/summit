@@ -1,0 +1,16 @@
+{
+  "claims": [
+    {
+      "backing": "ITEM:CLAIM-01",
+      "claim_id": "ITEM:CLAIM-01"
+    }
+  ],
+  "decisions": [
+    "Gateway API scaffold remains feature-flagged and deferred.",
+    "Innovation lane is intentionally constrained pending governance review."
+  ],
+  "evidence_id": "EVD-INGNGX-INNO-001",
+  "generated_by": "manual",
+  "item_slug": "ingress-nginx-retirement",
+  "notes": ["innovation_deferred"]
+}

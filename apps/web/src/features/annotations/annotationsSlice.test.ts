@@ -54,6 +54,7 @@ describe('annotationsSlice', () => {
     let state = reducer(baseState, startDraft({ type: 'note' }))
     state = reducer(state, setDraftType('pin'))
     expect(state.activeDraft?.type).toBe('pin')
+    state = reducer(state, updateDraft({ body: 'Test annotation' }))
     state = reducer(state, saveDraft())
     const selected = reducer(state, selectAnnotation(state.annotations[0].id))
     expect(selected.selectedId).toBe(state.annotations[0].id)

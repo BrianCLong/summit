@@ -1,0 +1,12 @@
+{
+  "claims": ["SUMMIT_ORIGINAL"],
+  "decisions": ["allow"],
+  "details": {
+    "docs_count": 5,
+    "errors": [],
+    "evidence_ids_count": 4,
+    "manifest_path": "subsumption/branch-protection-as-code/manifest.yaml"
+  },
+  "evidence_id": "EVD-BPAC-GOV-003",
+  "summary": "Subsumption bundle verified."
+}

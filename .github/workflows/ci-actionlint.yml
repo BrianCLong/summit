@@ -1,0 +1,27 @@
+name: Workflow Lint (actionlint)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - '.github/workflows/**'
+  pull_request:
+    branches: ["main"]
+    paths:
+      - '.github/workflows/**'
+
+jobs:
+  ci-actionlint:
+    name: ci-actionlint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run actionlint
+        uses: reviewdog/action-actionlint@v1
+        with:
+          fail_on_error: true
+          # actionlint will automatically find .github/actionlint.yaml

@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 1 — Board Narrative Architecture (make governance a weapon)
 
 1.  **Define the 3 board narratives**: growth, risk, and execution (one page each).

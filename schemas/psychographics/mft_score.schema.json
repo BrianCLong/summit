@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Moral Foundations Score",
+  "type": "object",
+  "required": ["care_harm", "fairness_cheating", "loyalty_betrayal", "authority_subversion", "sanctity_degradation"],
+  "properties": {
+    "care_harm": { "type": "number", "minimum": 0, "maximum": 1 },
+    "fairness_cheating": { "type": "number", "minimum": 0, "maximum": 1 },
+    "loyalty_betrayal": { "type": "number", "minimum": 0, "maximum": 1 },
+    "authority_subversion": { "type": "number", "minimum": 0, "maximum": 1 },
+    "sanctity_degradation": { "type": "number", "minimum": 0, "maximum": 1 },
+    "liberty_oppression": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "additionalProperties": false
+}

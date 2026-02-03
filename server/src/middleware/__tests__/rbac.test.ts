@@ -21,7 +21,7 @@ const {
   requireAnyPermission,
   requireAllPermissions,
   requireRole,
-} = await import('../rbac');
+} = await import('../rbac.js');
 
 describe('RBAC Middleware', () => {
   const requestFactory = (overrides: Record<string, unknown> = {}) => ({

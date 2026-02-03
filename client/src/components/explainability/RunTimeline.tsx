@@ -5,7 +5,7 @@
  * Provides filtering and quick access to run details.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -17,7 +17,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Button,
   LinearProgress,
   Alert,
   Stack,
@@ -78,12 +77,13 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
     capability: '',
   });
 
-  const fetchRuns = async () => {
+  const fetchRuns = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
       const params = new URLSearchParams();
+      params.append('tenant_id', tenantId);
       if (filter.run_type) params.append('run_type', filter.run_type);
       if (filter.min_confidence) params.append('min_confidence', filter.min_confidence);
       if (filter.capability) params.append('capability', filter.capability);
@@ -101,18 +101,18 @@ const RunTimeline: React.FC<RunTimelineProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, tenantId]);
 
   useEffect(() => {
-    fetchRuns();
-  }, [filter]);
+    void fetchRuns();
+  }, [fetchRuns]);
 
   useEffect(() => {
     if (autoRefresh) {
       const interval = setInterval(fetchRuns, refreshIntervalMs);
       return () => clearInterval(interval);
     }
-  }, [autoRefresh, refreshIntervalMs, filter]);
+  }, [autoRefresh, refreshIntervalMs, fetchRuns]);
 
   const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'error' => {
     if (confidence >= 0.8) return 'success';

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/er-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Entity Resolution & Identity Graph Service for IntelGraph Platform",
   "type": "module",
   "main": "dist/index.js",
