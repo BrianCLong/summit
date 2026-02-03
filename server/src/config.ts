@@ -35,12 +35,21 @@ export const EnvSchema = z
     GA_CLOUD: z.coerce.boolean().default(false),
     AWS_REGION: z.string().optional(),
     AI_ENABLED: z.coerce.boolean().default(false),
+    FACTFLOW_ENABLED: z.coerce.boolean().default(false),
     KAFKA_ENABLED: z.coerce.boolean().default(false),
     OPENAI_API_KEY: z.string().optional(),
     ANTHROPIC_API_KEY: z.string().optional(),
     SKIP_AI_ROUTES: z.coerce.boolean().default(false),
     SKIP_WEBHOOKS: z.coerce.boolean().default(false),
     SKIP_GRAPHQL: z.coerce.boolean().default(false),
+    FACTFLOW_ENABLED: z.coerce.boolean().default(false),
+    // Email Configuration
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().optional().default(587),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASS: z.string().optional(),
+    EMAIL_FROM_ADDRESS: z.string().email().optional().default('noreply@intelgraph.com'),
+    EMAIL_FROM_NAME: z.string().optional().default('IntelGraph'),
   });
 
 const TestEnvSchema = EnvSchema.extend({
@@ -81,18 +90,25 @@ const ENV_VAR_HELP: Record<string, string> = {
   GA_CLOUD: 'Enable strict GA cloud readiness checks (default: false)',
   AWS_REGION: 'AWS Region (required if GA_CLOUD is true)',
   AI_ENABLED: 'Enable AI-augmented features (default: false)',
+  FACTFLOW_ENABLED: 'Enable FactFlow product module (default: false)',
   OPENAI_API_KEY: 'OpenAI API Key (required if AI_ENABLED=true)',
   ANTHROPIC_API_KEY: 'Anthropic API Key (required if AI_ENABLED=true)',
+  SMTP_HOST: 'SMTP host for emails (e.g., smtp.gmail.com)',
+  SMTP_PORT: 'SMTP port (default: 587)',
+  SMTP_USER: 'SMTP username',
+  SMTP_PASS: 'SMTP password',
+  EMAIL_FROM_ADDRESS: 'Verified sender email address',
+  EMAIL_FROM_NAME: 'Sender name displayed in emails',
 };
 
 export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnError: true }) => {
   const isTest = process.env.NODE_ENV === 'test';
   const schema = isTest ? TestEnv : Env;
-  
+
   // Cross-field validation for AI
   const rawData = { ...process.env };
   const parsed = schema.safeParse(rawData);
-  
+
   if (parsed.success) {
     const data = parsed.data;
     if (data.AI_ENABLED && !data.OPENAI_API_KEY && !data.ANTHROPIC_API_KEY) {
@@ -198,12 +214,12 @@ export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnEr
     // Ensure strictly no localhost in critical URLs for GA
     const criticalUrls = [env.DATABASE_URL, env.NEO4J_URI];
     criticalUrls.forEach(url => {
-        if (url && (url.includes('localhost') || url.includes('127.0.0.1'))) {
-             const msg = `\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`;
-             console.error(msg);
-             if (options.exitOnError) process.exit(1);
-             throw new Error(msg);
-        }
+      if (url && (url.includes('localhost') || url.includes('127.0.0.1'))) {
+        const msg = `\n❌ GA Cloud Error: Critical service URL contains localhost: ${url}\n`;
+        console.error(msg);
+        if (options.exitOnError) process.exit(1);
+        throw new Error(msg);
+      }
     });
   }
 
