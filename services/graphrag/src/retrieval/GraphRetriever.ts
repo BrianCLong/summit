@@ -143,6 +143,16 @@ export class GraphRetriever {
     session: Session,
     query: RetrievalQuery,
   ): Promise<string[]> {
+    // TODO: Migrate to Cypher 25 Native Vector search for Neo4j 2025.01+
+    // Use the native `vector.similarity.cosine` function if embeddings are stored as VECTOR type.
+    // Example:
+    // MATCH (n:Entity)
+    // WHERE n.embedding IS NOT NULL
+    // WITH n, vector.similarity.cosine(n.embedding, $queryVector) as score
+    // WHERE score >= $minScore
+    // RETURN n.id as id, score
+    // ORDER BY score DESC LIMIT $limit
+
     // Use full-text search to find matching entities
     const result = await session.run(
       `

@@ -8,11 +8,11 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import { Express } from 'express';
-import { setupTestApp } from '../__helpers__/test-app';
+import { setupTestApp } from '../__helpers__/test-app.js';
 import {
   createTestInvestigation,
   createTestEntities,
-} from '../__helpers__/test-data';
+} from '../__helpers__/test-data.js';
 
 const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
 const describeIf = runAcceptance ? describe : describe.skip;

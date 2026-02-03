@@ -23,7 +23,7 @@ import type {
   NarrativeStatus,
   Actor,
   Channel,
-  Audience,
+  AudienceSegment,
   ContentCredential,
 } from './types.js';
 import { createClaim, createEvidence, createNarrative } from './types.js';
@@ -291,6 +291,69 @@ export class ClaimsService {
   }
 
   /**
+   * Get actor by ID
+   */
+  async getActor(actorId: string): Promise<Actor | null> {
+    const session = this.getSession();
+    try {
+      const result = await session.run(
+        'MATCH (a:CogSecActor {id: $actorId}) RETURN a',
+        { actorId },
+      );
+
+      if (result.records.length === 0) {
+        return null;
+      }
+
+      return this.recordToActor(result.records[0].get('a'));
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * Get narrative by ID
+   */
+  async getNarrative(narrativeId: string): Promise<Narrative | null> {
+    const session = this.getSession();
+    try {
+      const result = await session.run(
+        'MATCH (n:CogSecNarrative {id: $narrativeId}) RETURN n',
+        { narrativeId },
+      );
+
+      if (result.records.length === 0) {
+        return null;
+      }
+
+      return this.recordToNarrative(result.records[0].get('n'));
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * Get channel by ID
+   */
+  async getChannel(channelId: string): Promise<Channel | null> {
+    const session = this.getSession();
+    try {
+      const result = await session.run(
+        'MATCH (ch:CogSecChannel {id: $channelId}) RETURN ch',
+        { channelId },
+      );
+
+      if (result.records.length === 0) {
+        return null;
+      }
+
+      return this.recordToChannel(result.records[0].get('ch'));
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
    * Search claims by text
    */
   async searchClaims(
@@ -520,6 +583,41 @@ export class ClaimsService {
       }
 
       return this.recordToNarrative(result.records[0].get('n'));
+    } finally {
+      await session.close();
+    }
+  }
+
+  /**
+   * Detect conflicting narratives based on contradicting claims
+   */
+  async detectNarrativeConflicts(narrativeId: string): Promise<Array<{
+    competingNarrativeId: string;
+    conflictScore: number;
+    contradictingClaimPairs: Array<[string, string]>;
+  }>> {
+    const session = this.getSession();
+    try {
+      const result = await session.run(
+        `
+        MATCH (n:CogSecNarrative {id: $narrativeId})<-[:PART_OF]-(c1:CogSecClaim)
+        MATCH (c1)-[:RELATED_TO {type: 'CONTRADICTS'}]->(c2:CogSecClaim)
+        MATCH (c2)-[:PART_OF]->(n2:CogSecNarrative)
+        WHERE n2.id <> n.id
+        RETURN n2.id AS competingNarrativeId,
+               count(DISTINCT c1) AS conflictCount,
+               collect([c1.id, c2.id]) AS pairs
+        ORDER BY conflictCount DESC
+        LIMIT 5
+        `,
+        { narrativeId },
+      );
+
+      return result.records.map((r: any) => ({
+        competingNarrativeId: r.get('competingNarrativeId'),
+        conflictScore: r.get('conflictCount').toNumber() / 10.0,
+        contradictingClaimPairs: r.get('pairs'),
+      }));
     } finally {
       await session.close();
     }

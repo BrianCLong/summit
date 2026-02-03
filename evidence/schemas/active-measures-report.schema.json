@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["summary", "artifacts"],
+  "properties": {
+    "summary": {"type": "string"},
+    "artifacts": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": false
+}

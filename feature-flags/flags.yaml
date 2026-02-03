@@ -46,3 +46,6 @@ features:
   media_gate: { default: true, owners: [security] }
   dossier_export: { default: true, owners: [graph] }
   "connectors.osint.location_enrichment": { default: false, owners: [security, osint] }
+  # Memory Bridge
+  memory_bridge_enabled: { default: false, owners: [security, platform] }
+  memory_bridge_lane2_enabled: { default: false, owners: [security, platform] }
