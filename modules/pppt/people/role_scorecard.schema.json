@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RoleScorecard",
+  "type": "object",
+  "required": ["role", "type", "responsibilities", "outcomes", "timeline_days"],
+  "properties": {
+    "role": {"type": "string"},
+    "type": {"enum": ["fractional", "full_time", "contract"]},
+    "responsibilities": {"type": "array", "items": {"type": "string"}, "minItems": 3},
+    "outcomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["metric", "target", "due_day"],
+        "properties": {
+          "metric": {"type": "string"},
+          "target": {"type": "string"},
+          "due_day": {"type": "integer", "minimum": 1}
+        },
+        "additionalProperties": false
+      },
+      "minItems": 2
+    },
+    "timeline_days": {"type": "integer", "minimum": 7}
+  },
+  "additionalProperties": false
+}
