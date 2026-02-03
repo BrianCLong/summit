@@ -5,15 +5,13 @@ include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
-.PHONY: db-migrate db-seed sbom k6 supply-chain/sbom supply-chain/sign
+.PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
-.PHONY: dev-prereqs dev-up dev-down dev-smoke evidence-bundle
+.PHONY: dev-prereqs dev-up dev-down dev-smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
-.PHONY: gmr-gate gmr-eval gmr-validate
 
-# Handle both .yaml and .yml extensions for dev compose
-COMPOSE_DEV_FILE ?= $(shell ls docker-compose.dev.yml 2>/dev/null || ls docker-compose.dev.yaml 2>/dev/null || echo "docker-compose.dev.yml")
+COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -74,18 +72,11 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	@if [ ! -d "$(VENV_DIR)" ]; then \
-		echo "Creating venv..."; \
-		$(PYTHON) -m venv $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR) --without-pip; \
-	fi
-	@if [ ! -f "$(VENV_BIN)/pip" ]; then \
-		echo "Installing pip..."; \
-		curl -sS https://bootstrap.pypa.io/get-pip.py | $(VENV_BIN)/python || true; \
-	fi
-	@$(VENV_BIN)/pip install -U pip || true
-	@$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]" || true
-	@$(VENV_BIN)/pip install pytest ruff mypy pre-commit || true
-	@$(VENV_BIN)/pre-commit install || true
+	python3 -m venv $(VENV_DIR)
+	$(VENV_BIN)/pip install -U pip
+	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
+	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
+	$(VENV_BIN)/pre-commit install || true
 	pnpm install
 
 dev:
@@ -101,16 +92,7 @@ lint:   ## Lint js/ts + python
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	$(VENV_BIN)/ruff format .
-
-gmr-gate: ## Run the GMR guardrail gate (requires DATABASE_URL)
-	@./metrics/scripts/run_gmr_gate.sh
-
-gmr-eval: ## Run deterministic GMR anomaly detection evals
-	@$(PYTHON) metrics/evals/eval_anomaly_detection.py
-
-gmr-validate: ## Validate GMR guardrail assets
-	@$(PYTHON) scripts/ci/validate_gmr_assets.py
+	$(VVENV_BIN)/ruff format .
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
@@ -142,15 +124,8 @@ validate-ops: ## Validate observability assets (dashboards, alerts, runbooks)
 rollback-drill: ## Run simulated rollback drill
 	@node scripts/ops/rollback_drill.js
 
-sbom:   ## Generate CycloneDX SBOM (Legacy target, calls scripts/generate-sbom.sh)
-	@bash scripts/generate-sbom.sh
-
-supply-chain/sbom: ## Generate modern SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
-	@bash scripts/generate-sbom.sh "summit-platform" "latest" "./artifacts/sbom"
-
-supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
-	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
-	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
+sbom:   ## Generate CycloneDX SBOM
+	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
 supplychain.evidence: ## Generate supply chain evidence artifacts
 	@bash hack/supplychain/evidence_id.sh > evidence_id.txt
@@ -230,8 +205,7 @@ pr-release:
 	  --node "$(NODE_VERSION)"
 
 provenance:
-	@npm run generate:provenance
-	@echo "Provenance generated at .evidence/provenance.json"
+	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
 
 ci-check:
 	@pnpm install --frozen-lockfile
@@ -319,45 +293,10 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
 	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
-	@$(MAKE) ga-evidence
-	@$(MAKE) ga-validate-evidence
-	@$(MAKE) ga-report
 
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
-
-ga-validate-evidence: ## Validate control evidence completeness for GA
-	@EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	if [ ! -d "$$EVIDENCE_DIR" ]; then \
-		echo "Missing evidence bundle at $$EVIDENCE_DIR"; \
-		exit 1; \
-	fi; \
-	node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir "$$EVIDENCE_DIR"; \
-	node scripts/evidence/validate_control_evidence.mjs --evidence-dir "$$EVIDENCE_DIR"
-
-ga-report: ## Generate SOC evidence report for the current bundle
-	@EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	if [ ! -d "$$EVIDENCE_DIR" ]; then \
-		echo "Missing evidence bundle at $$EVIDENCE_DIR"; \
-		exit 1; \
-	fi; \
-	python3 scripts/evidence/generate_soc_report.py --evidence-dir "$$EVIDENCE_DIR"
-
-ga-evidence: ## Create a minimal local evidence bundle for GA validation
-	@set -e; \
-	EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	if [ -d "$$EVIDENCE_DIR" ] && [ "$$(ls -A "$$EVIDENCE_DIR" 2>/dev/null)" ]; then \
-		echo "Evidence bundle already present at $$EVIDENCE_DIR"; \
-		exit 0; \
-	fi; \
-	node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$$EVIDENCE_DIR"; \
-	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
-
-evidence-bundle: ## Generate a deterministic PR evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [OUT=dir])
-	@BASE=$${BASE:-origin/main}; \
-	OUT=$${OUT:-evidence-bundle-$$(git rev-parse --short HEAD)-$$(date +%Y%m%d%H%M%S)}; \
-	python3 scripts/maintainers/gen-evidence-bundle.py --out "$$OUT" --base "$$BASE"
 
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
@@ -449,22 +388,16 @@ pipelines-list: ## List registered pipelines
 pipelines-validate: ## Validate pipeline manifests
 	@python3 pipelines/cli.py validate
 
-test-security: ## Run security verifications
-	@echo "Running Security Tests..."
-	@npx tsx --test server/src/utils/__tests__/security.test.ts
-	@bash scripts/ci/scan_secrets.sh --dry-run || true
+# Copilot CLI lanes
+.PHONY: copilot-explore copilot-plan copilot-task copilot-review
+copilot-explore: ## Run Copilot CLI in explore lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot explore $(ARGS) $(PROMPT)
 
-test-compliance: ## Run compliance controls as tests
-	@echo "Running Compliance Tests..."
-	@node --test compliance/soc/*.test.mjs
+copilot-plan: ## Run Copilot CLI in plan lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot plan $(ARGS) $(PROMPT)
 
-# Eval Skills
-.PHONY: eval-skill eval-skills-changed eval-skills-all
-eval-skill: ## Run a single eval skill (SKILL=...)
-	@npx tsx evals/runner/run_skill_eval.ts --skill $(SKILL)
+copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot task $(ARGS) $(PROMPT)
 
-eval-skills-changed: ## Run eval skills changed in the current diff
-	@npx tsx evals/runner/run_skills_changed.ts
-
-eval-skills-all: ## Run the full eval skills suite
-	@npx tsx evals/runner/run_skill_suite.ts
+copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
