@@ -37,6 +37,11 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
@@ -50,13 +55,6 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -76,13 +74,6 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -103,13 +94,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Start Test Infrastructure
         run: |
@@ -167,13 +151,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -199,13 +176,6 @@ jobs:
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -248,13 +218,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -276,13 +239,6 @@ jobs:
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Bootstrap and smoke test
         run: |
@@ -316,13 +272,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -370,10 +319,6 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -398,13 +343,6 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
