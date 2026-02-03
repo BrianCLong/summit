@@ -6,8 +6,8 @@
  */
 
 import { gql } from 'apollo-server-express';
-import { getAIInsightsClient } from '../services/ai-insights-client';
-import { traceResolver } from './resolvers-tracing';
+import { getAIInsightsClient } from '../services/ai-insights-client.js';
+import { traceResolver } from './resolvers-tracing.js';
 
 // Type definitions
 export const aiInsightsTypeDefs = gql`

@@ -8,9 +8,9 @@ import { PubSub } from 'graphql-subscriptions';
 import {
   quantumCryptoService,
   PQCKeyStore,
-} from '../services/QuantumResistantCryptoService';
+} from '../services/QuantumResistantCryptoService.js';
 import { PQCAlgorithm as PQCAlgorithmEnum } from '@intelgraph/post-quantum-crypto';
-import { wrapResolversWithPolicy } from './policyWrapper';
+import { wrapResolversWithPolicy } from './policyWrapper.js';
 
 // PubSub for subscriptions
 const pubsub = new PubSub();

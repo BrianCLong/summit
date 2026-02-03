@@ -1,4 +1,4 @@
-import { DoclingBuildPipeline } from '../docling-build-pipeline';
+import { DoclingBuildPipeline } from '../docling-build-pipeline.js';
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('DoclingBuildPipeline', () => {

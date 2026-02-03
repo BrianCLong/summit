@@ -2,9 +2,9 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { TenantIsolationGuard, TenantIsolationConfig, RateLimiterLike } from '../tenancy/TenantIsolationGuard.ts';
-import { TenantKillSwitch } from '../tenancy/killSwitch.ts';
-import { TenantContext } from '../tenancy/types.ts';
+import { TenantIsolationGuard, TenantIsolationConfig, RateLimiterLike } from '../tenancy/TenantIsolationGuard.js';
+import { TenantKillSwitch } from '../tenancy/killSwitch.js';
+import { TenantContext } from '../tenancy/types.js';
 
 class InMemoryLimiter implements RateLimiterLike {
   private buckets: Map<string, { count: number; reset: number }> = new Map();

@@ -1,9 +1,8 @@
-# Supply-chain delta gate (spec)
+# Supply Chain Delta (spec)
 
-Each PR must include:
+Must fail if:
+- package.json, requirements.in, or lockfiles are modified without a corresponding update to DEPENDENCY_DELTA.md.
 
-- deps/dependency_delta.md describing added, removed, or updated dependencies
-
-Gate fails if:
-
-- lockfiles changed but dependency_delta.md not updated
+Must pass if:
+- No dependency changes occur, OR
+- Dependency changes are documented in DEPENDENCY_DELTA.md.

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
-import { CohortEvaluator } from '../CohortEvaluator.ts';
-import { Cohort } from '../types.ts';
+import { CohortEvaluator } from '../CohortEvaluator.js';
+import { Cohort } from '../types.js';
 
 const TEST_LOG_DIR = path.join(__dirname, 'test_logs_cohorts_' + Date.now());
 
@@ -32,7 +32,7 @@ describe('CohortEvaluator', () => {
             { eventType: 'search', tenantIdHash: 't1', scopeHash: 'u1', ts: new Date().toISOString() },
         ];
 
-        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry-test.tsonl'), events.map(e => JSON.stringify(e)).join('\n'));
+        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry-test.jsonl'), events.map(e => JSON.stringify(e)).join('\n'));
 
         const cohort: Cohort = {
             id: 'heavy-users',

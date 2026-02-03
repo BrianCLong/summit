@@ -1,56 +1,33 @@
 import json
 import os
 
+import jsonschema
 import pytest
-from jsonschema import validate
 
-SCHEMAS_DIR = "schemas/evidence"
+EVIDENCE_DIR = os.path.join(os.path.dirname(__file__), "../summit/evidence")
+SCHEMAS_DIR = os.path.join(EVIDENCE_DIR, "schemas")
+EXAMPLES_DIR = os.path.join(EVIDENCE_DIR, "examples")
 
-def load_json(filepath):
-    with open(filepath) as f:
+def load_json(path):
+    with open(path) as f:
         return json.load(f)
 
 def test_report_schema():
     schema = load_json(os.path.join(SCHEMAS_DIR, "report.schema.json"))
-    valid_data = {
-        "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
-        "summary": "Test summary",
-        "artifacts": [
-            {"path": "some/path", "description": "desc"}
-        ]
-    }
-    validate(instance=valid_data, schema=schema)
+    example = load_json(os.path.join(EXAMPLES_DIR, "report.json"))
+    jsonschema.validate(instance=example, schema=schema)
 
 def test_metrics_schema():
     schema = load_json(os.path.join(SCHEMAS_DIR, "metrics.schema.json"))
-    valid_data = {
-        "metrics": {
-            "score": 0.9,
-            "latency": 100
-        }
-    }
-    validate(instance=valid_data, schema=schema)
+    example = load_json(os.path.join(EXAMPLES_DIR, "metrics.json"))
+    jsonschema.validate(instance=example, schema=schema)
 
 def test_stamp_schema():
     schema = load_json(os.path.join(SCHEMAS_DIR, "stamp.schema.json"))
-    valid_data = {
-        "created_at": "2023-10-27T10:00:00Z",
-        "version": "1.0.0",
-        "git_commit": "abcdef"
-    }
-    validate(instance=valid_data, schema=schema)
+    example = load_json(os.path.join(EXAMPLES_DIR, "stamp.json"))
+    jsonschema.validate(instance=example, schema=schema)
 
 def test_index_schema():
     schema = load_json(os.path.join(SCHEMAS_DIR, "index.schema.json"))
-    valid_data = {
-        "version": 1,
-        "items": [
-            {
-                "evidence_id": "EVD-PSYCH_ABM_LLM-ARCH-001",
-                "report": "evidence/report.json",
-                "metrics": "evidence/metrics.json",
-                "stamp": "evidence/stamp.json"
-            }
-        ]
-    }
-    validate(instance=valid_data, schema=schema)
+    index = load_json(os.path.join(EVIDENCE_DIR, "index.json"))
+    jsonschema.validate(instance=index, schema=schema)

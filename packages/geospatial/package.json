@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
     "benchmark": "jest --testPathPattern=benchmark"
@@ -34,7 +34,7 @@
     "shpjs": "^6.0.0",
     "xml2js": "^0.6.2",
     "proj4": "^2.12.1",
-    "fast-xml-parser": "^4.5.0",
+    "fast-xml-parser": "^5.3.4",
     "neo4j-driver": "^5.27.0"
   },
   "devDependencies": {

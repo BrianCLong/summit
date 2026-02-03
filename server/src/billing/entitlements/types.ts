@@ -1,4 +1,4 @@
-import { Entitlement as ContractEntitlement } from '../../contracts/types.ts';
+import { Entitlement as ContractEntitlement } from '../../contracts/types.js';
 
 export type Entitlement = ContractEntitlement;
 

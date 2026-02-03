@@ -64,7 +64,7 @@ describe('Webhooks Security', () => {
     delete process.env.LIFECYCLE_WEBHOOK_SECRET;
 
     // Dynamic import to apply mocks and env vars
-    const webhooksRouter = (await import('../webhooks.ts')).default;
+    const webhooksRouter = (await import('../webhooks.js')).default;
 
     app = express();
     app.use(express.json());
