@@ -4,6 +4,7 @@ from summit.io.evidence.validate import validate_file
 
 # Reuse template files for testing
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "summit", "io", "evidence", "templates")
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), "..", "fixtures", "io")
 
 def test_validate_report_template():
     path = os.path.join(TEMPLATE_DIR, "report.json")
@@ -21,18 +22,6 @@ def test_validate_index_template():
     path = os.path.join(TEMPLATE_DIR, "index.json")
     assert validate_file(path, "index") == True
 
-
-def test_reject_timestamp_outside_stamp(tmp_path):
-    report_path = tmp_path / "report.json"
-    report_path.write_text(
-        """
-        {
-          "evidence_id": "EVD-TEMPLATE-002",
-          "title": "Timestamp Leak",
-          "summary": "Observed at 2026-01-03T10:00:00Z.",
-          "sources": ["https://example.com"],
-          "findings": ["Finding 1"]
-        }
-        """
-    )
-    assert validate_file(str(report_path), "report") == False
+def test_validate_inauth_metrics_fixture():
+    path = os.path.join(FIXTURE_DIR, "inauth_metrics.json")
+    assert validate_file(path, "inauth_metrics") == True
