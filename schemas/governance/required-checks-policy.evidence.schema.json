@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Required Checks Policy Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "policy_path",
+    "policy_sha256",
+    "allowlist_path",
+    "allowlisted_checks_used",
+    "known_checks_count",
+    "known_checks_sha256",
+    "missing_required_checks",
+    "unparsable_workflows",
+    "verdict"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "enum": [1] },
+    "kind": { "type": "string", "const": "required_checks_policy_validation" },
+    "policy_path": { "type": "string", "minLength": 1 },
+    "policy_sha256": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        { "type": "null" }
+      ]
+    },
+    "allowlist_path": { "oneOf": [{ "type": "string" }, { "type": "null" }] },
+    "allowlisted_checks_used": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "known_checks_count": { "type": "integer", "minimum": 0 },
+    "known_checks_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "missing_required_checks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "unparsable_workflows": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "verdict": { "type": "string", "enum": ["PASS", "FAIL"] },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

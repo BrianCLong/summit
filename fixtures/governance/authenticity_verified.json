@@ -1,0 +1,13 @@
+{
+  "eventId": "auth-pos-001",
+  "type": "Decision",
+  "subType": "AuthenticityEvaluation",
+  "result": "ALLOW",
+  "confidence": 0.98,
+  "metadata": {
+    "artifactId": "artifact-002",
+    "watermarkStatus": "present",
+    "provenanceChainCompleteness": 1.0,
+    "explanation": "Authenticity verified via valid watermark and complete provenance chain."
+  }
+}

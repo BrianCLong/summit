@@ -12,23 +12,23 @@ jobs:
   build:
     runs-on: [self-hosted, linux, x64, summit-build]
     timeout-minutes: 30
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Build project
         run: npm run build
-        
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -41,34 +41,34 @@ jobs:
     needs: build
     runs-on: [self-hosted, linux, x64, summit-test]
     timeout-minutes: 45
-    
+
     strategy:
       matrix:
         test-suite: [unit, integration, e2e]
       fail-fast: false
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-output
           path: dist/
-          
+
       - name: Run ${{ matrix.test-suite }} tests
         run: npm run test:${{ matrix.test-suite }}
-        
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -82,32 +82,32 @@ jobs:
     runs-on: [self-hosted, linux, x64, summit-deploy]
     timeout-minutes: 20
     if: github.ref == 'refs/heads/main'
-    
+
     environment:
       name: production
       url: https://summit.example.com
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-output
           path: dist/
-          
+
       - name: Deploy to production
         run: |
           echo "Deploying to production..."
           # Add your deployment commands here
           # ./deploy.sh production
-          
+
       - name: Health check
         run: |
           echo "Running health check..."
           # curl -f https://summit.example.com/health || exit 1
-          
+
       - name: Notify deployment
         run: echo "Deployment completed successfully!"
 
@@ -115,11 +115,11 @@ jobs:
   analyze:
     runs-on: self-hosted
     timeout-minutes: 15
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Run code analysis
         run: |
           echo "Running code analysis..."
