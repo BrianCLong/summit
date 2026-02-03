@@ -19,50 +19,44 @@ RUN apk add --no-cache \
     curl
 
 # Install nodemon globally
-RUN npm install -g nodemon
+RUN npm install -g pnpm nodemon
 
 # Create a non-root user
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Set npm resilience and skip browser downloads
+# Set npm/pnpm resilience
 ENV PUPPETEER_SKIP_DOWNLOAD=1 \
     NPM_CONFIG_AUDIT=false \
     NPM_CONFIG_FUND=false \
     NPM_CONFIG_ENGINE_STRICT=false
 
-RUN npm config set fetch-retries 5 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 600000
+# Copy workspace configuration
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY server/package.json ./server/
+COPY packages/maestro-core/package.json ./packages/maestro-core/
+COPY packages/telemetry-config/package.json ./packages/telemetry-config/
+COPY packages/feature-flags/package.json ./packages/feature-flags/
+COPY services/osint-collector/package.json ./services/osint-collector/
 
-# Copy package files and internal tarballs
-COPY package*.json intelgraph-feature-flags-4.2.3.tgz intelgraph-telemetry-config-4.2.3.tgz maestro-core-4.2.3.tgz ./
+# Install dependencies for the server workspace
+RUN pnpm install --filter intelgraph-server... --frozen-lockfile || pnpm install --filter intelgraph-server...
 
-# Update package.json to use local file: dependencies instead of workspace:
-RUN node -e 'const fs = require("fs"); \
-    const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); \
-    pkg.dependencies["@intelgraph/feature-flags"] = "file:./intelgraph-feature-flags-4.2.3.tgz"; \
-    pkg.dependencies["@intelgraph/telemetry-config"] = "file:./intelgraph-telemetry-config-4.2.3.tgz"; \
-    pkg.dependencies["@intelgraph/maestro-core"] = "file:./maestro-core-4.2.3.tgz"; \
-    fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));'
-
-# Remove lockfile to avoid workspace protocol issues
-RUN rm -f package-lock.json
-
-# Install dependencies
-RUN npm install --legacy-peer-deps
-
-# Copy source code and set permissions
+# Copy the rest of the code
 COPY . .
-RUN mkdir -p uploads logs && chown -R appuser:appgroup /app
+
+# Set permissions
+RUN mkdir -p server/uploads server/logs && chown -R appuser:appgroup /app
+
+# Switch to the server directory for execution
+WORKDIR /app/server
 
 # Switch to non-root user
 USER appuser
 
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/graphql || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/health/ready || exit 1
 
 # Expose ports
 EXPOSE 4000 9229
 
 # Start development server
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]
