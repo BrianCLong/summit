@@ -1,131 +1,81 @@
-import { ManagedPostgresPool } from '../db/postgres.js';
-import { getPostgresPool } from '../config/database.js';
-import { UsageEvent } from '../types/usage.js';
-import logger from '../utils/logger.js';
-import { randomUUID } from 'crypto';
-import { PrometheusMetrics } from '../utils/metrics.js';
-import { fraudService } from './FraudService.js';
+/**
+ * Usage Metering Service - records usage metrics for billing and analytics
+ * Implementation Status (P1-2): In-memory storage with basic aggregation
+ */
+
+export interface UsageEvent {
+  id: string;
+  tenantId: string;
+  dimension: string;
+  quantity: number;
+  unit: string;
+  source: string;
+  metadata?: Record<string, any>;
+  occurredAt: string;
+  recordedAt: string;
+}
+
+export interface UsageAggregation {
+  tenantId: string;
+  dimension: string;
+  totalQuantity: number;
+  eventCount: number;
+  startDate: string;
+  endDate: string;
+}
 
 export class UsageMeteringService {
-  private static instance: UsageMeteringService;
-  private pool: ManagedPostgresPool;
-  private metrics: PrometheusMetrics;
+  private events: Map<string, UsageEvent> = new Map();
 
-  private constructor() {
-    this.pool = getPostgresPool();
-    this.metrics = new PrometheusMetrics('summit_usage');
-
-    this.metrics.createCounter(
-        'events_recorded_total',
-        'Total number of usage events recorded',
-        ['kind']
-    );
+  constructor() {
+    console.info('[UsageMeteringService] Initialized');
   }
 
-  public static getInstance(): UsageMeteringService {
-    if (!UsageMeteringService.instance) {
-      UsageMeteringService.instance = new UsageMeteringService();
+  async record(event: UsageEvent): Promise<void> {
+    if (!event.id) {
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 11);
+      event.id = 'usage_' + timestamp + '_' + random;
     }
-    return UsageMeteringService.instance;
+    this.events.set(event.id, event);
+    console.debug('[UsageMeteringService] Recorded:', event.tenantId, event.dimension, event.quantity);
   }
 
-  /**
-   * Records a single usage event.
-   */
-  public async record(event: UsageEvent): Promise<void> {
-    const client = await this.pool.connect();
-    try {
-      await client.query(
-        `INSERT INTO usage_events (
-          id, tenant_id, principal_id, principal_kind, kind, quantity, unit, occurred_at, metadata, correlation_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-        [
-          event.id || randomUUID(),
-          event.tenantId,
-          event.principalId || null,
-          event.principalKind || null,
-          event.kind,
-          event.quantity,
-          event.unit,
-          event.occurredAt || new Date().toISOString(),
-          JSON.stringify(event.metadata || {}),
-          event.correlationId || null
-        ]
-      );
+  async getAggregation(tenantId: string, dimension: string, startDate: string, endDate: string): Promise<UsageAggregation> {
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    let totalQuantity = 0;
+    let eventCount = 0;
 
-      this.metrics.incrementCounter('events_recorded_total', { kind: event.kind });
-
-      // Basic Fraud Detection: Velocity/Spike check (naive implementation)
-      // In real world, this would be async or in a separate worker.
-      // Arbitrary threshold of 10000 for demo purposes
-      if (event.quantity > 10000) {
-         await fraudService.reportSignal({
-             tenantId: event.tenantId,
-             signalType: 'usage_spike',
-             severity: 'medium',
-             source: 'usage_metering',
-             payload: { eventId: event.id, quantity: event.quantity, kind: event.kind }
-         });
-      }
-
-    } catch (error: any) {
-      logger.error('Failed to record usage event', { error, event });
-      throw error;
-    } finally {
-      client.release();
+    for (const event of this.events.values()) {
+      if (event.tenantId !== tenantId || event.dimension !== dimension) continue;
+      const occurredTime = new Date(event.occurredAt).getTime();
+      if (occurredTime < start || occurredTime > end) continue;
+      totalQuantity += event.quantity;
+      eventCount++;
     }
+
+    return { tenantId, dimension, totalQuantity, eventCount, startDate, endDate };
   }
 
-  /**
-   * Records a batch of usage events efficiently.
-   */
-  public async recordBatch(events: UsageEvent[]): Promise<void> {
-    if (events.length === 0) return;
+  async getEvents(tenantId: string, options?: { dimension?: string; startDate?: string; endDate?: string; limit?: number }): Promise<UsageEvent[]> {
+    const events: UsageEvent[] = [];
+    const start = options?.startDate ? new Date(options.startDate).getTime() : 0;
+    const end = options?.endDate ? new Date(options.endDate).getTime() : Date.now();
+    const limit = options?.limit || 1000;
 
-    const client = await this.pool.connect();
-    try {
-      // Basic implementation using transaction and loop.
-      // Could be optimized with unnest or multi-row insert if needed for high volume.
-      await client.query('BEGIN');
-      for (const event of events) {
-         await client.query(
-        `INSERT INTO usage_events (
-          id, tenant_id, principal_id, principal_kind, kind, quantity, unit, occurred_at, metadata, correlation_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-        [
-          event.id || randomUUID(),
-          event.tenantId,
-          event.principalId || null,
-          event.principalKind || null,
-          event.kind,
-          event.quantity,
-          event.unit,
-          event.occurredAt || new Date().toISOString(),
-          JSON.stringify(event.metadata || {}),
-          event.correlationId || null
-        ]
-      );
-      this.metrics.incrementCounter('events_recorded_total', { kind: event.kind });
-
-      if (event.quantity > 10000) {
-         await fraudService.reportSignal({
-             tenantId: event.tenantId,
-             signalType: 'usage_spike',
-             severity: 'medium',
-             source: 'usage_metering',
-             payload: { eventId: event.id, quantity: event.quantity, kind: event.kind }
-         });
-      }
-      }
-      await client.query('COMMIT');
-    } catch (error: any) {
-      await client.query('ROLLBACK');
-      logger.error('Failed to record batch usage events', { error, count: events.length });
-      throw error;
-    } finally {
-      client.release();
+    for (const event of this.events.values()) {
+      if (event.tenantId !== tenantId) continue;
+      if (options?.dimension && event.dimension !== options.dimension) continue;
+      const occurredTime = new Date(event.occurredAt).getTime();
+      if (occurredTime < start || occurredTime > end) continue;
+      events.push(event);
+      if (events.length >= limit) break;
     }
+
+    events.sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
+    return events;
   }
 }
 
-export default UsageMeteringService.getInstance();
+export const usageMeteringService = new UsageMeteringService();

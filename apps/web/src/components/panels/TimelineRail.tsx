@@ -16,6 +16,11 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Slider } from '@/components/ui/slider'
 import { Skeleton } from '@/components/ui/Skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { formatRelativeTime } from '@/lib/utils'
 import type { TimelineEvent, PanelProps } from '@/types'
 
@@ -261,30 +266,48 @@ export function TimelineRail({
             </Badge>
           </div>
           <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigateTime('prev')}
-              className="h-8 w-8"
-            >
-              <ChevronLeft className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowFilters(!showFilters)}
-              className="h-8 w-8"
-            >
-              <Filter className="h-3 w-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigateTime('next')}
-              className="h-8 w-8"
-            >
-              <ChevronRight className="h-3 w-3" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigateTime('prev')}
+                  className="h-8 w-8"
+                  aria-label="Previous time period"
+                >
+                  <ChevronLeft className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Previous time period</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="h-8 w-8"
+                  aria-label="Toggle filters"
+                >
+                  <Filter className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Toggle filters</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigateTime('next')}
+                  className="h-8 w-8"
+                  aria-label="Next time period"
+                >
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Next time period</TooltipContent>
+            </Tooltip>
           </div>
         </CardTitle>
       </CardHeader>
@@ -295,29 +318,45 @@ export function TimelineRail({
           <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={() => {
-                    setIsPlaying(false)
-                    onCurrentTimeChange?.(totalTimeRange.start)
-                  }}
-                >
-                  <RotateCcw className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant={isPlaying ? 'default' : 'outline'}
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={togglePlayback}
-                >
-                  {isPlaying ? (
-                    <Pause className="h-3 w-3" />
-                  ) : (
-                    <Play className="h-3 w-3" />
-                  )}
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => {
+                        setIsPlaying(false)
+                        onCurrentTimeChange?.(totalTimeRange.start)
+                      }}
+                      aria-label="Restart playback"
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Restart playback</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={isPlaying ? 'default' : 'outline'}
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={togglePlayback}
+                      aria-label={
+                        isPlaying ? 'Pause playback' : 'Start playback'
+                      }
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-3 w-3" />
+                      ) : (
+                        <Play className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isPlaying ? 'Pause' : 'Play'}
+                  </TooltipContent>
+                </Tooltip>
               </div>
 
               <div className="flex-1 px-2">
@@ -343,19 +382,24 @@ export function TimelineRail({
                 />
               </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-xs"
-                onClick={() =>
-                  setPlaybackSpeed(s =>
-                    s >= 10 ? 1 : s === 1 ? 2 : s === 2 ? 5 : 10
-                  )
-                }
-              >
-                {playbackSpeed}x
-                <FastForward className="ml-1 h-3 w-3" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-xs"
+                    onClick={() =>
+                      setPlaybackSpeed(s =>
+                        s >= 10 ? 1 : s === 1 ? 2 : s === 2 ? 5 : 10
+                      )
+                    }
+                  >
+                    {playbackSpeed}x
+                    <FastForward className="ml-1 h-3 w-3" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Playback speed</TooltipContent>
+              </Tooltip>
             </div>
           </div>
         )}
@@ -376,6 +420,7 @@ export function TimelineRail({
                   onTimeRangeChange?.(newRange)
                 }}
                 className="px-2 py-1 text-xs border rounded"
+                aria-label="Start time"
               />
               <input
                 type="datetime-local"
@@ -386,6 +431,7 @@ export function TimelineRail({
                   onTimeRangeChange?.(newRange)
                 }}
                 className="px-2 py-1 text-xs border rounded"
+                aria-label="End time"
               />
             </div>
           </div>
@@ -426,46 +472,46 @@ export function TimelineRail({
                     } ${isFuture ? 'opacity-40 grayscale' : ''}`}
                     onClick={() => onEventSelect?.(event)}
                   >
-                  <div
-                    className={`relative z-10 w-2 h-2 rounded-full border-2 bg-background mt-2 ${getEventColor(event.type)}`}
-                  >
-                    {event.type === 'alert_triggered' && (
-                      <Zap className="absolute -top-1 -left-1 h-4 w-4 text-red-500 animate-pulse" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm">
-                        {getEventIcon(event.type)}
-                      </span>
-                      <div className="font-medium text-sm truncate">
-                        {event.title}
-                      </div>
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatRelativeTime(event.timestamp)}
-                      </div>
-                    </div>
-
-                    {event.description && (
-                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                        {event.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-1">
-                      <Badge variant="outline" className="text-xs">
-                        {event.type.replace('_', ' ')}
-                      </Badge>
-
-                      {event.entityId && (
-                        <Badge variant="secondary" className="text-xs">
-                          Entity: {event.entityId.slice(0, 8)}
-                        </Badge>
+                    <div
+                      className={`relative z-10 w-2 h-2 rounded-full border-2 bg-background mt-2 ${getEventColor(event.type)}`}
+                    >
+                      {event.type === 'alert_triggered' && (
+                        <Zap className="absolute -top-1 -left-1 h-4 w-4 text-red-500 animate-pulse" />
                       )}
                     </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm">
+                          {getEventIcon(event.type)}
+                        </span>
+                        <div className="font-medium text-sm truncate">
+                          {event.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                          {formatRelativeTime(event.timestamp)}
+                        </div>
+                      </div>
+
+                      {event.description && (
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-1">
+                        <Badge variant="outline" className="text-xs">
+                          {event.type.replace('_', ' ')}
+                        </Badge>
+
+                        {event.entityId && (
+                          <Badge variant="secondary" className="text-xs">
+                            Entity: {event.entityId.slice(0, 8)}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
                 )
               })}
             </div>

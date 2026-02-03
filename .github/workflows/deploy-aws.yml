@@ -1,0 +1,168 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches: ["main"]
+  release:
+    types: [published]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+  EKS_CLUSTER: summit-prod-eks
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  pre-deploy-gate:
+    uses: ./.github/workflows/gate.yml
+    with:
+      region: us-east-1
+
+  build-and-push:
+    needs: pre-deploy-gate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [maestro, prov-ledger, policy-lac]
+        include:
+          - service: maestro
+            dockerfile: docker/Dockerfile.maestro
+            context: .
+            path: .
+          - service: prov-ledger
+            dockerfile: docker/Dockerfile.node
+            context: .
+            path: services/prov-ledger
+          - service: policy-lac
+            dockerfile: docker/Dockerfile.node
+            context: .
+            path: gateway/policy-lac
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Dependency Audit
+        run: |
+          if [ "${{ matrix.service }}" == "maestro" ]; then
+            pip install safety && safety check
+          else
+            pnpm audit --audit-level=high
+          fi
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Security Scan (Trivy)
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          trivy-config: trivy.yaml
+          exit-code: "0" # Don't fail build yet, just report
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+
+      - name: Build and Push Docker Image
+        env:
+          ECR_REPOSITORY: summit/${{ matrix.service }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -f ${{ matrix.dockerfile }} \
+            --build-arg SERVICE_PATH=${{ matrix.path }} \
+            ${{ matrix.context }}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+  deploy-infra:
+    needs: [build-and-push, pre-deploy-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Apply
+        working-directory: terraform/environments/prod
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+  deploy-k8s:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Capture Governance Evidence
+        run: |
+          mkdir -p evidence-artifacts
+          aws sts get-caller-identity > evidence-artifacts/caller-identity.json
+          # Attempt to capture role policy, ignore failure if permission denied
+          aws iam get-role --role-name github-actions-deploy-role --query 'Role.AssumeRolePolicyDocument' --output json > evidence-artifacts/trust-policy.json || echo "Could not fetch trust policy" > evidence-artifacts/trust-policy-error.txt
+
+      - name: Upload Governance Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-evidence-deploy-k8s
+          path: evidence-artifacts/
+
+      - name: Update Kubeconfig
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }}
+
+      - name: Deploy Manifests
+        run: |
+          # Deploy Maestro
+          helm upgrade --install maestro charts/universal-app \
+            --set image.repository=$ECR_REGISTRY/summit/maestro \
+            --set image.tag=${{ github.sha }} \
+            --set service.targetPort=8001 \
+            --set ingress.enabled=true \
+            --set ingress.hosts[0].host=api.summit.internal \
+            --set ingress.hosts[0].paths[0].path=/maestro \
+            --set ingress.hosts[0].paths[0].pathType=Prefix \
+            --namespace default
+
+          # Deploy Prov Ledger
+          helm upgrade --install prov-ledger charts/universal-app \
+            --set image.repository=$ECR_REGISTRY/summit/prov-ledger \
+            --set image.tag=${{ github.sha }} \
+            --set service.targetPort=4010 \
+            --namespace default
+
+          # Deploy Policy LAC
+          helm upgrade --install policy-lac charts/universal-app \
+            --set image.repository=$ECR_REGISTRY/summit/policy-lac \
+            --set image.tag=${{ github.sha }} \
+            --set service.targetPort=4000 \
+            --namespace default
+
+      - name: Post-Deployment Smoke Test
+        run: |
+          # Wait for rollout
+          kubectl rollout status deployment/maestro --timeout=120s
+
+          # Run the project's internal smoke test script
+          # We use kubectl exec to run it from inside a pod or curl the ingress
+          echo "Running Health Check..."
+          ./scripts/verify-deployment.sh
+
+          # Optional: Run app-level functional smoke tests
+          # pnpm run test:smoke

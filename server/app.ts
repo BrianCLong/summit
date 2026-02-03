@@ -1,8 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { requireStepUp } from './middleware/stepup';
-import { loadTenant } from './middleware/tenant';
-import { authenticatedRateLimit, publicRateLimit } from './middleware/rateLimiter';
-import publicRoutes from './routes/public';
+import { requireStepUp } from './middleware/stepup.js';
+import { loadTenant } from './middleware/tenant.js';
+import { authenticatedRateLimit, publicRateLimit } from './middleware/rateLimiter.js';
+import publicRoutes from './routes/public.js';
 
 const app = express();
 

@@ -1,7 +1,7 @@
 // server/src/api/anomalyDetectionController.ts
 import { Request, Response } from 'express';
-import { AnomalyDetectionService } from '../ai/anomalyDetectionService';
-import { logger } from '../utils/logger';
+import { AnomalyDetectionService } from '../ai/anomalyDetectionService.js';
+import { logger } from '../utils/logger.js';
 
 export class AnomalyDetectionController {
   constructor(private anomalyService: AnomalyDetectionService) {}

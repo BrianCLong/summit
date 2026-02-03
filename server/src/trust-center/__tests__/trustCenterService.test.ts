@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { TrustCenterService, ControlCheck } from '../service';
+import { TrustCenterService, ControlCheck } from '../service.js';
 
 describe('TrustCenterService', () => {
   const baselineEvidence = {

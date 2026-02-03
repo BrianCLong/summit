@@ -3,7 +3,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@as-integrations/express4';
 import { typeDefs, resolvers } from './schema.js';
 import { makeContext } from './lib/context.js';
 import { expressjwt, type GetVerificationKey } from 'express-jwt';
@@ -60,17 +61,26 @@ app.use((err: any, req: any, res: any, next: any) => {
 });
 
 async function main() {
-  const server = new ApolloServer({
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  const server = new ApolloServer<any>({
     typeDefs,
     resolvers,
-    context: ({ req }) => makeContext(req, logger),
-    formatError: (error) => {
+    formatError: (formattedError, error) => {
       logger.error(error, 'GraphQL Error');
-      return error;
+      return formattedError;
     },
   });
   await server.start();
-  server.applyMiddleware({ app: app as any, path: '/graphql' });
+
+  app.use(
+    '/graphql',
+    cors<cors.CorsRequest>(),
+    express.json(),
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    expressMiddleware(server, {
+      context: async ({ req }) => makeContext(req as any, logger),
+    }) as unknown as express.RequestHandler
+  );
   registerInternalStatusRoutes(app);
   app.listen(PORT, () => logger.info({ PORT }, 'IntelGraph API listening'));
 }

@@ -1,6 +1,100 @@
 {
   "$schema": "https://claude.ai/schemas/mcp-config.json",
   "mcpServers": {
+    "notion": {
+      "description": "Notion workspace integration for documentation and knowledge base",
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer ${NOTION_API_KEY}\", \"Notion-Version\": \"2022-06-28\"}"
+      },
+      "enabled": true
+    },
+    "linear": {
+      "description": "Linear project management for issue tracking and sprints",
+      "command": "npx",
+      "args": ["-y", "@linear/mcp-server"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      },
+      "enabled": true
+    },
+    "jira": {
+      "description": "Jira integration for issue tracking and project management",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-atlassian"],
+      "env": {
+        "ATLASSIAN_EMAIL": "${ATLASSIAN_EMAIL}",
+        "ATLASSIAN_API_TOKEN": "${ATLASSIAN_API_TOKEN}",
+        "ATLASSIAN_BASE_URL": "${ATLASSIAN_BASE_URL}"
+      },
+      "enabled": true
+    },
+    "confluence": {
+      "description": "Confluence integration for documentation and knowledge management",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-atlassian", "--confluence"],
+      "env": {
+        "ATLASSIAN_EMAIL": "${ATLASSIAN_EMAIL}",
+        "ATLASSIAN_API_TOKEN": "${ATLASSIAN_API_TOKEN}",
+        "ATLASSIAN_BASE_URL": "${ATLASSIAN_BASE_URL}"
+      },
+      "enabled": true
+    },
+    "slack": {
+      "description": "Slack integration for team communication and notifications",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+      },
+      "enabled": false,
+      "note": "Add SLACK_BOT_TOKEN from https://api.slack.com/apps to enable"
+    },
+    "sentry": {
+      "description": "Sentry error tracking and performance monitoring",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sentry"],
+      "env": {
+        "SENTRY_AUTH_TOKEN": "${SENTRY_AUTH_TOKEN}",
+        "SENTRY_ORG": "${SENTRY_ORG}"
+      },
+      "enabled": false,
+      "note": "Add SENTRY_AUTH_TOKEN from https://sentry.io/settings/account/api/auth-tokens/ to enable"
+    },
+    "google-drive": {
+      "description": "Google Drive integration for document management",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gdrive"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "${GOOGLE_APPLICATION_CREDENTIALS}"
+      },
+      "enabled": false,
+      "note": "Configure Google OAuth credentials to enable"
+    },
+    "figma": {
+      "description": "Figma integration for design collaboration and asset management",
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-figma"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": "${FIGMA_ACCESS_TOKEN}"
+      },
+      "enabled": false,
+      "note": "Add FIGMA_ACCESS_TOKEN from https://www.figma.com/developers/api#access-tokens to enable"
+    },
+    "aws": {
+      "description": "AWS cloud operations - S3, Lambda, EC2, and more",
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-aws"],
+      "env": {
+        "AWS_ACCESS_KEY_ID": "${AWS_ACCESS_KEY_ID}",
+        "AWS_SECRET_ACCESS_KEY": "${AWS_SECRET_ACCESS_KEY}",
+        "AWS_REGION": "${AWS_REGION:-us-east-1}"
+      },
+      "enabled": false,
+      "note": "Configure AWS credentials to enable"
+    },
     "github": {
       "description": "GitHub API integration for PR and issue management",
       "command": "npx",
@@ -10,10 +104,51 @@
       },
       "enabled": true
     },
+    "gitlab": {
+      "description": "GitLab integration for repositories and CI/CD",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-gitlab"],
+      "env": {
+        "GITLAB_TOKEN": "${GITLAB_TOKEN}",
+        "GITLAB_URL": "${GITLAB_URL:-https://gitlab.com}"
+      },
+      "enabled": false,
+      "note": "Add GITLAB_TOKEN to enable"
+    },
+    "puppeteer": {
+      "description": "Browser automation for web scraping and testing",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "enabled": true
+    },
+    "fetch": {
+      "description": "HTTP fetch for API calls and web content retrieval",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"],
+      "enabled": true
+    },
+    "sequential-thinking": {
+      "description": "Enhanced reasoning for complex multi-step problems",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "enabled": true
+    },
+    "time": {
+      "description": "Time and scheduling utilities",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-time"],
+      "enabled": true
+    },
+    "sqlite": {
+      "description": "SQLite database for local data storage and queries",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite", "${HOME}/.claude/data.db"],
+      "enabled": true
+    },
     "filesystem": {
       "description": "Enhanced filesystem operations with project-aware context",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/summit"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/brianlong/Developer/summit"],
       "enabled": true
     },
     "memory": {
@@ -32,6 +167,33 @@
       "enabled": false,
       "note": "Enable when working with database operations"
     },
+    "redis": {
+      "description": "Redis cache and pub/sub operations",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis"],
+      "env": {
+        "REDIS_URL": "${REDIS_URL:-redis://localhost:6379}"
+      },
+      "enabled": false,
+      "note": "Enable for Redis cache operations"
+    },
+    "docker": {
+      "description": "Docker container management and operations",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-docker"],
+      "enabled": false,
+      "note": "Enable for Docker operations"
+    },
+    "kubernetes": {
+      "description": "Kubernetes cluster management",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-kubernetes"],
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
+      },
+      "enabled": false,
+      "note": "Enable for K8s operations"
+    },
     "brave-search": {
       "description": "Web search for documentation and error lookup",
       "command": "npx",
@@ -41,10 +203,20 @@
       },
       "enabled": false,
       "note": "Enable for external documentation lookup"
+    },
+    "exa": {
+      "description": "Exa AI-powered semantic search",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-exa"],
+      "env": {
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      },
+      "enabled": false,
+      "note": "Add EXA_API_KEY from https://exa.ai to enable"
     }
   },
   "globalSettings": {
-    "timeout": 30000,
+    "timeout": 60000,
     "retryAttempts": 3,
     "logLevel": "info"
   }

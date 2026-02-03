@@ -4,8 +4,9 @@ RUN npm install -g pnpm
 COPY apps/gateway/package.json ./apps/gateway/
 COPY pnpm-lock.yaml pnpm-workspace.yaml* ./
 
-# Copy libs as they are needed dependencies
-COPY libs ./libs
+# Copy packages as they are needed dependencies
+COPY packages ./packages
+COPY ga-graphai/packages ./ga-graphai/packages
 
 WORKDIR /app/apps/gateway
 RUN pnpm install --no-frozen-lockfile

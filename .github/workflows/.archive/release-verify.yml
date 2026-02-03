@@ -12,6 +12,7 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
       - name: Verify manifest at tag (strict)
         run: |
