@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-openviking-retrieval-002",
+  "summary": "SketchDynamics evidence scaffold: PASS",
+  "artifacts": {
+    "metrics": "evidence/metrics.json",
+    "stamp": "evidence/stamp.json"
+  }
+}

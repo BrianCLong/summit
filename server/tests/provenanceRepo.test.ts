@@ -126,3 +126,27 @@ test('includes filters in WHERE (contains + reasonCodeIn)', async () => {
   expect(client.lastSql).toMatch(/ILIKE/);
   expect(client.lastSql).toMatch(/metadata->>'reasonCode'/);
 });
+
+test('getTenantStats returns count and max timestamp', async () => {
+  const client = new FakeClient();
+  const now = new Date();
+  // Match the first query structure in getTenantStats
+  client.addResponse(/SELECT COUNT\(\*\) as count/, {
+    rows: [
+      {
+        count: '42',
+        last_event_at: now,
+      },
+    ],
+  });
+  const pool = new FakePool(client) as any;
+  const repo = new ProvenanceRepo(pool);
+  const stats = await repo.getTenantStats('tenant-1', {
+    from: new Date(now.getTime() - 1000).toISOString(),
+  });
+  expect(stats.count).toBe(42);
+  expect(new Date(stats.lastEventAt!).toISOString()).toBe(now.toISOString());
+  expect(client.lastSql).toMatch(/COUNT\(\*\)/);
+  // The first query uses timestamp column
+  expect(client.lastSql).toMatch(/MAX\(timestamp\)/);
+});

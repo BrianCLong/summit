@@ -1,1 +1,1 @@
-export * from './GridComponent';
+export * from './GridComponent.js';

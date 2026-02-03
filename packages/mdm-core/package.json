@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/mdm-core",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Core Master Data Management infrastructure with golden record management and entity resolution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },

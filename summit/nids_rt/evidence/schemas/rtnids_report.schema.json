@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["config", "enabled_baselines", "breaker_thresholds", "failure_summary"],
+  "properties": {
+    "config": { "type": "object" },
+    "enabled_baselines": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "breaker_thresholds": {
+      "type": "object",
+      "properties": {
+          "p95_budget_ms": { "type": "number" },
+          "min_open_ms": { "type": "number" },
+          "max_error_rate": { "type": "number" }
+      }
+    },
+    "failure_summary": { "type": "object" }
+  },
+  "additionalProperties": false
+}

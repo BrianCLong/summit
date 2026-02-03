@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 9 — Deletion & Simplification Mandate (the only way “beyond” works)
 
 1. Set quarterly deletion targets: services, endpoints, flags, UI patterns, vendors.

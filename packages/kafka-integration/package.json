@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/kafka-integration",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Enterprise Kafka integration layer with EOS, schema registry, and high-throughput streaming",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

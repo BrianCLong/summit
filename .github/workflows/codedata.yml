@@ -1,0 +1,63 @@
+name: ci/codedata-gates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "codegen/**"
+      - "generated/**"
+      - "tools/codegen_check.py"
+      - "tools/determinism_smoke.py"
+      - "tools/check_dep_delta.py"
+      - ".github/workflows/codedata.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "codegen/**"
+      - "generated/**"
+      - "tools/codegen_check.py"
+      - "tools/determinism_smoke.py"
+      - "tools/check_dep_delta.py"
+      - ".github/workflows/codedata.yml"
+
+jobs:
+  codegen-drift:
+    name: Codegen Drift Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install dependencies
+        run: pip install jsonschema PyYAML
+      - name: Run drift check
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          export SUMMIT_EXPERIMENTAL_CODEDATA=1
+          python3 tools/codegen_check.py
+
+  determinism-smoke:
+    name: Determinism Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install dependencies
+        run: pip install jsonschema PyYAML
+      - name: Run determinism smoke
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          export SUMMIT_EXPERIMENTAL_CODEDATA=1
+          python3 tools/determinism_smoke.py
+
+  dependency-delta:
+    name: Dependency Delta Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Run delta check
+        run: python3 tools/check_dep_delta.py

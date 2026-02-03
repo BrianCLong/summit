@@ -13,8 +13,9 @@ from datetime import datetime
 from typing import Any
 
 import httpx
-from connectors.cisa_kev.schema_mapping import CISA_KEV_URL, map_cisa_kev_to_intelgraph
 from server.data_pipelines.connectors.base import BaseConnector, ConnectorStatus
+
+from connectors.cisa_kev.schema_mapping import CISA_KEV_URL, map_cisa_kev_to_intelgraph
 
 # Observability
 try:

@@ -460,6 +460,104 @@
             "legendFormat": "Hours"
           }
         ]
+      },
+      {
+        "id": 39,
+        "title": "AI & LLM Services",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 40,
+        "title": "LLM Request Rate (req/s)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(llm_requests_total[5m])",
+            "legendFormat": "{{provider}} - {{model}} - {{status}}"
+          }
+        ]
+      },
+      {
+        "id": 41,
+        "title": "LLM Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(llm_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{provider}} - {{model}}"
+          }
+        ],
+        "yaxes": [{"format": "s"}]
+      },
+      {
+        "id": 42,
+        "title": "LLM Token Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(llm_tokens_total[5m])",
+            "legendFormat": "{{provider}} - {{model}} - {{type}}"
+          }
+        ]
+      },
+      {
+        "id": 43,
+        "title": "GraphRAG & Knowledge Graph",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 44,
+        "title": "GraphRAG Query Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_graphrag_query_total[5m])",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      },
+      {
+        "id": 45,
+        "title": "GraphRAG Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(intelgraph_graphrag_query_duration_ms_bucket[5m]))",
+            "legendFormat": "P95"
+          }
+        ],
+        "yaxes": [{"format": "ms"}]
+      },
+      {
+        "id": 46,
+        "title": "Docling Document Processing",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 47,
+        "title": "Docling Inference Duration (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(docling_inference_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{operation}}"
+          }
+        ],
+        "yaxes": [{"format": "s"}]
+      },
+      {
+        "id": 48,
+        "title": "Docling Characters Processed",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(docling_characters_processed_total[1h]))",
+            "legendFormat": "Chars/Hr"
+          }
+        ]
       }
     ]
   }

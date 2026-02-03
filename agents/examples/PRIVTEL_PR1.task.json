@@ -1,0 +1,46 @@
+{
+  "task_id": "PRIVTEL_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "telemetry-privacy-scaffold",
+    "version": "v1",
+    "sha256": "bd78474081a55b1ae48724911c234951ea1712483b5fc91a8afdf2ac3ee45828",
+    "path": "prompts/privacy/telemetry-privacy-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "telemetry/privacy/",
+      "ci/check_telemetry_privacy.py",
+      "tests/privacy/",
+      "docs/privacy/",
+      "evidence/privtel/",
+      "evidence/index.json",
+      "required_checks.todo.md",
+      "docs/roadmap/STATUS.json",
+      "governance/decisions/ADR-AG-PRIVTEL-001.md",
+      "deps_delta/",
+      "agents/examples/",
+      "prompts/privacy/telemetry-privacy-scaffold@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["privacy", "governance", "ci", "evidence", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "evidence/privtel/report.json",
+      "evidence/privtel/metrics.json",
+      "evidence/privtel/stamp.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Telemetry privacy gate validates allowlist against event envelope schema.",
+    "Evidence bundle recorded in evidence index."
+  ],
+  "stop_conditions": ["Required files missing from scope or policy gate fails."]
+}

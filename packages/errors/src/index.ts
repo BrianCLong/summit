@@ -1,1 +1,1 @@
-export * from './errorFactory';
+export * from './errorFactory.js';

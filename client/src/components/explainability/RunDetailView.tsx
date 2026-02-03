@@ -5,7 +5,7 @@
  * Answers: What ran? Why? What did it produce? Can I trust it?
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -15,7 +15,6 @@ import {
   LinearProgress,
   Alert,
   Stack,
-  Divider,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -23,18 +22,13 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Link,
-  Tooltip,
-  IconButton,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
-  Info as InfoIcon,
   Verified as VerifiedIcon,
-  Link as LinkIcon,
 } from '@mui/icons-material';
 
 interface ExplainableRun {
@@ -52,13 +46,13 @@ interface ExplainableRun {
   completed_at: string | null;
   duration_ms: number | null;
   inputs: {
-    parameters: Record<string, any>;
+    parameters: Record<string, unknown>;
     input_hash: string;
     pii_fields_redacted: string[];
     secret_fields_redacted: string[];
   };
   outputs: {
-    results: Record<string, any>;
+    results: Record<string, unknown>;
     output_hash: string;
     pii_fields_redacted: string[];
     secret_fields_redacted: string[];
@@ -136,16 +130,12 @@ interface RunDetailViewProps {
   onClose?: () => void;
 }
 
-const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose }) => {
+const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose: _onClose }) => {
   const [run, setRun] = useState<ExplainableRun | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchRunDetails();
-  }, [runId]);
-
-  const fetchRunDetails = async () => {
+  const fetchRunDetails = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -163,7 +153,11 @@ const RunDetailView: React.FC<RunDetailViewProps> = ({ runId, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [runId]);
+
+  useEffect(() => {
+    void fetchRunDetails();
+  }, [fetchRunDetails]);
 
   const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'error' => {
     if (confidence >= 0.8) return 'success';

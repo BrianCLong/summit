@@ -1,0 +1,40 @@
+name: Graph Sync Verification
+
+on:
+  workflow_call:
+    outputs:
+      metrics_path:
+        description: "Path to the generated metrics.json"
+        value: "packages/graph-sync-validator/metrics.json"
+
+jobs:
+  validate-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm -w install --frozen-lockfile
+
+      - name: Build Validator
+        run: pnpm --filter @intelgraph/graph-sync-validator build
+
+      - name: Run Validator
+        env:
+          PG_DSN: ${{ secrets.PG_DSN }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASS: ${{ secrets.NEO4J_PASS }}
+        run: |
+          node packages/graph-sync-validator/dist/cli.js \
+            --config packages/graph-sync-validator/config/default.yaml \
+            --output packages/graph-sync-validator/metrics.json
+
+      - name: Upload Metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: graph-sync-metrics
+          path: packages/graph-sync-validator/metrics.json

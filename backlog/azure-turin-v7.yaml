@@ -1,0 +1,24 @@
+item:
+  slug: azure-turin-v7
+  status: backlog
+
+tasks:
+  - title: "Live pricing integration"
+    desc: "Fetch real-time spot/ondemand pricing for v7 VMs without breaking determinism (e.g. via nightly snapshot)."
+    status: todo
+    priority: medium
+
+  - title: "Region availability ingestion"
+    desc: "Ingest per-region availability zones for Da/Ea/Fa v7 series."
+    status: todo
+    priority: medium
+
+  - title: "Auto-recommender UX"
+    desc: "Expose VM recommendations in the deployment wizard."
+    status: todo
+    priority: low
+
+  - title: "Terraform export/import"
+    desc: "Generate TF module definitions for selected v7 profiles."
+    status: todo
+    priority: low

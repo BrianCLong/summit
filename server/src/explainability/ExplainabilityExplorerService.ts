@@ -25,7 +25,7 @@ import {
   EvidenceReference,
   SourceReference,
   TransformReference,
-} from './types';
+} from './types.js';
 
 const SCHEMA_VERSION = '1.0.0';
 
