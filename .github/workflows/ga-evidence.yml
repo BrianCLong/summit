@@ -24,7 +24,7 @@ jobs:
   ga-evidence:
     name: "📦 Collect GA Evidence"
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
