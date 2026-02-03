@@ -152,6 +152,17 @@ supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
 	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
 	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
 
+supplychain.evidence: ## Generate supply chain evidence artifacts
+	@bash hack/supplychain/evidence_id.sh > evidence_id.txt
+	@EVIDENCE_ID=$$(cat evidence_id.txt); \
+	python3 hack/supplychain/gen_evidence.py --evidence-id "$$EVIDENCE_ID" --output-dir "evidence/$$EVIDENCE_ID"
+
+supplychain.attest.local: ## Build image and export attestations locally (no push)
+	@mkdir -p out
+	@docker buildx build --attest type=sbom --attest type=provenance,mode=min --output type=local,dest=out/image .
+	@echo "Verifying attestations..."
+	@find out/image -name "*.json" -exec python3 hack/supplychain/verify_attestation_shape.py {} \;
+
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
 	@sleep 45

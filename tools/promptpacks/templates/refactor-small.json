@@ -1,0 +1,8 @@
+{
+  "goal": "Perform a small, safe refactor to improve code readability or maintainability.",
+  "inputs": ["Target file/module", "Refactoring goal (e.g., extract function, rename variable)"],
+  "outputs": ["Refactored source code"],
+  "constraints": ["Behavior must remain identical", "Must pass all existing tests"],
+  "non_goals": ["Do not add new functionality", "Do not change external APIs"],
+  "acceptance_tests": ["Run existing unit tests", "Manual verification of behavior parity"]
+}
