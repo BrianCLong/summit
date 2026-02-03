@@ -1,4 +1,12 @@
 {
   "evidence_id": "EVD-PHYSFM-20260127-EVAL-001",
-  "summary": "Eval harness setup complete"
+  "item": {
+    "slug": "PHYSFM-20260127",
+    "description": "Eval harness setup"
+  },
+  "summary": "Eval harness setup complete",
+  "artifacts": [
+    "metrics.json",
+    "stamp.json"
+  ]
 }
