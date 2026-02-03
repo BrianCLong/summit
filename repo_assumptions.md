@@ -357,3 +357,20 @@
 
 ### Disinfo Must-not-touch (until validated)
 - Global `pnpm-lock.yaml` integrity (regenerate after merge).
+---
+
+## Agentic Verification (80% Problem) Assumptions
+
+### Verified
+- `docs/standards/` directory exists for standards placement.
+- `docs/security/` and `docs/ops/` directories exist for policy and runbook placement.
+
+### Deferred Pending Confirmation
+- Primary CI workflow names and required check list for new guardrails jobs.
+- Existing security-sensitive path registry (if any) for reuse.
+- Preferred scripting runtime for guardrail tooling (Node/Python/Bash).
+
+### Must-not-touch
+- `docs/sprints/**` historical sprint plans.
+- `docs/reports/**` published roadmap artifacts.
+- Existing security workflows; only add new jobs once validated.

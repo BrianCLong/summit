@@ -1,20 +1,63 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "summit evidence report",
-  "type": "object",
-  "required": ["evidence_id", "summary", "artifacts"],
-  "properties": {
-    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$" },
-    "item": {
-      "type": "object"
+  "anyOf": [
+    {
+      "type": "object",
+      "required": [
+        "run_id",
+        "evidence_id",
+        "component",
+        "summary",
+        "content_safety",
+        "inputs",
+        "outputs"
+      ],
+      "properties": {
+        "run_id": { "type": "string" },
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^EVD-[A-Z0-9-]+$"
+        },
+        "component": { "type": "string" },
+        "summary": { "type": "object" },
+        "content_safety": {
+          "type": "object",
+          "required": ["redactions_applied", "blocked_patterns", "blocked"],
+          "properties": {
+            "redactions_applied": { "type": "integer", "minimum": 0 },
+            "blocked_patterns": { "type": "array", "items": { "type": "string" } },
+            "blocked": { "type": "boolean" }
+          }
+        },
+        "inputs": { "type": "array", "items": { "type": "string" } },
+        "outputs": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": true
     },
-    "summary": {
-      "type": "string"
-    },
-    "artifacts": {
-      "type": "array",
-      "items": { "type": "string" }
+    {
+      "type": "object",
+      "required": ["evidence_id", "summary", "artifacts"],
+      "properties": {
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$"
+        },
+        "item": {
+          "type": "object"
+        },
+        "summary": {
+          "anyOf": [
+            { "type": "string" },
+            { "type": "object" }
+          ]
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
     }
-  },
-  "additionalProperties": true
+  ]
 }
