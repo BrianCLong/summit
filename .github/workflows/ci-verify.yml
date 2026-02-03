@@ -30,7 +30,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: false # BLOCKING: secrets block merge
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -64,7 +68,7 @@ jobs:
           path: |
             gitleaks-report.json
             snyk-report.json
-          retention-days: 90
+          retention-days: 30
 
   policy-compliance:
     name: Policy Compliance
@@ -100,14 +104,18 @@ jobs:
           name: opa-test-results
           path: |
             policies/test-results.json
-          retention-days: 90
+          retention-days: 30
 
   governance-checks:
     name: Governance Checks
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -154,6 +162,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
@@ -173,7 +186,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -210,7 +227,7 @@ jobs:
         with:
           name: sbom
           path: sbom.json
-          retention-days: 90 # 2 years retention
+          retention-days: 30 # 30 days retention
 
       - name: Upload SLSA provenance
         uses: actions/upload-artifact@v4 # v4.1.0
@@ -218,7 +235,7 @@ jobs:
         with:
           name: slsa-provenance
           path: provenance.json
-          retention-days: 90 # 2 years retention
+          retention-days: 30 # 30 days retention
 
       - name: Prepare evidence directory
         run: |
@@ -255,7 +272,11 @@ jobs:
         with:
           fetch-depth: 0 # Needed for schema diff
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -287,7 +308,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -319,6 +344,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
