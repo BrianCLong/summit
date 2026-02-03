@@ -219,5 +219,22 @@
     },
     "reasoning": "Added PromptSpec schema, clean-room pack, eval rubric, policy gate, and evidence scaffolding with deterministic tests. Rollback: revert the commit adding promptspec/evidence/eval/policy scaffolds and registry/task spec updates.",
     "reverted": false
+  },
+  {
+    "id": "adenhq-hive-subsumption-001",
+    "timestamp": "2026-02-08T00:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJzY2FmZm9sZCBhZGVuaHEvaGl2ZSBzdWJzdW1wdGlvbiBtYW5pZmVzdCBhbmQgcmVxdWlyZWQgY2hlY2tzIG1hcHBpbmciLCJmaWxlcyI6WyJzdWJzdW1wdGlvbi9hZGVuaHEtaGl2ZS9tYW5pZmVzdC55YW1sIiwic3Vic3VtcHRpb24vYWRlbmhxLWhpdmUvY2xhaW1zLm1kIiwiZG9jcy9yZXF1aXJlZF9jaGVja3MudG9kby5tZCIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiJdfQ==",
+    "decision": {
+      "action": "scaffold_hive_subsumption_bundle",
+      "rule": {
+        "condition": "hive subsumption intake requires manifest and required-check mapping",
+        "action": "scaffold_hive_subsumption_bundle",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Captured adenhq/hive subsumption scope, lane-1 gates, and required-check discovery steps with rollback via revert.",
+    "reverted": false
   }
 ]
