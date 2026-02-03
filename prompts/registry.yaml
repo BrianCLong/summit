@@ -107,6 +107,49 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: promptspec-foundation-lane1
+    version: v1
+    path: prompts/promptspec/promptspec-foundation-lane1@v1.md
+    sha256: 50e7d7c4e80bd32ecf7a092f7450e018f295438cbd3bbc20be48eddb32a3a904
+    description: Scaffold PromptSpec, evidence index, eval rubric, and policy gate foundations.
+    scope:
+      paths:
+        - promptspec/
+        - schemas/promptspec.schema.json
+        - schemas/evidence.index.schema.json
+        - evidence/index.py
+        - evidence/write_evidence.py
+        - eval/runner.py
+        - eval/rubrics/
+        - eval/fixtures/
+        - policy/gate.py
+        - policy/rules.json
+        - docs/required_checks.todo.md
+        - dependency_delta.md
+        - tests/policy/test_denies_guarantees.py
+        - tests/evidence/test_index_determinism.py
+        - tests/promptspec/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/promptspec/promptspec-foundation-lane1@v1.md
+        - prompts/registry.yaml
+        - agents/examples/PROMPTSPEC_FOUNDATION_LANE1_20260207.json
+      domains:
+        - governance
+        - evidence
+        - eval
+        - policy
+        - promptspec
+        - docs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: integrations-backlog-sync
     version: v1
     path: prompts/integrations/backlog-sync.md
@@ -174,6 +217,36 @@ prompts:
         - .env.example
       domains:
         - integrations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: sera-cli-proxy
+    version: v1
+    path: prompts/integrations/sera-cli-proxy@v1.md
+    sha256: 274b54b3a12f321fa647087bc2cc529c994dee37802c570a14abf7d2a05d3504
+    description: Implement Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails.
+    scope:
+      paths:
+        - cli/src/commands/sera-proxy.ts
+        - cli/src/sera-proxy/
+        - cli/__tests__/sera-proxy.test.ts
+        - docs/standards/sera-cli.md
+        - docs/security/data-handling/sera-cli.md
+        - docs/ops/runbooks/sera-cli.md
+        - docs/roadmap/STATUS.json
+        - prompts/integrations/sera-cli-proxy@v1.md
+        - prompts/registry.yaml
+      domains:
+        - integrations
+        - cli
         - governance
         - documentation
     verification:
@@ -341,6 +414,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: pr-17714-update
+    version: v1
+    path: prompts/pr/pr-17714-update@v1.md
+    sha256: 197e7e05eb008021a4b9b25ea569189ac652b99b5deeda908b979aa678a1b328
+    description: Update PR 17714 scoped changes.
+    scope:
+      paths:
+        - docs/
+        - nds/
+        - prompts/pr/pr-17714-update@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: pr-17730-update
     version: v1
     path: prompts/pr/pr-17730-update@v1.md
@@ -355,33 +452,6 @@ prompts:
         - documentation
         - governance
         - ip
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: openclaw-skillpack-ingest
-    version: v1
-    path: prompts/skills/openclaw-skillpack-ingest@v1.md
-    sha256: 8e7bf24ee17be011126323058e3a9901707f2c260f6eadfa627f1ca32a8845d0
-    description: Index-only ingestion of OpenClaw skill repositories with deterministic artifacts and CLI commands.
-    scope:
-      paths:
-        - cli/src/skills/
-        - cli/src/summit.ts
-        - cli/__tests__/openclaw.test.ts
-        - docs/roadmap/STATUS.json
-        - prompts/skills/openclaw-skillpack-ingest@v1.md
-        - prompts/registry.yaml
-        - agents/examples/OPENCLAW_SKILLPACK_INGEST_V1.task.json
-      domains:
-        - skills
-        - cli
-        - governance
     verification:
       tiers_required:
         - C
