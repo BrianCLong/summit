@@ -16,7 +16,7 @@ jobs:
   security-regressions:
     name: "🛡️ Security Regressions"
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
