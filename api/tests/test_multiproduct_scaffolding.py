@@ -22,10 +22,6 @@ def test_product_routers_disabled_by_default():
 
 def test_product_routers_enabled():
     # Mock flags to enable products
-    # We need to re-include routers if we want to test them in the same process,
-    # but FastAPI's app.include_router is usually done at startup.
-    # For this test, we can manually include them for the test session.
-
     from ..factflow.router import router as factflow_router
     from ..factlaw.router import router as factlaw_router
     from ..factmarkets.router import router as factmarkets_router
