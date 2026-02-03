@@ -64,8 +64,12 @@ def main():
             continue
 
         found_ai_assist = True
-        # Support 'files', 'artifacts', or 'paths'
+        # Support 'files', 'artifacts', 'paths', or individual keys
         files = item.get("files") or item.get("artifacts") or item.get("paths")
+        if not files:
+            # Check for individual keys
+            files = [item.get(k) for k in ("report", "metrics", "stamp") if item.get(k)]
+
         if not files or not isinstance(files, list):
             print(f"{ev_id}: missing or invalid files list")
             sys.exit(1)

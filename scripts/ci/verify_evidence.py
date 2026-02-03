@@ -170,6 +170,15 @@ def main():
 
             # Validate schema based on filename
             fname = fpath.name
+            schema_name = fname.replace(".json", ".schema.json")
+
+            # Use specific schema for ai-assist if available
+            if evd_id.startswith("EVD-ai-coding-tools-senior"):
+                specific_schema = SCHEMAS / f"ai-assist-{schema_name}"
+                if specific_schema.exists():
+                    validate_schema(load_json(fpath), specific_schema, context=f"{evd_id} {fname}")
+                    continue
+
             if fname == "report.json":
                 validate_schema(load_json(fpath), SCHEMAS / "report.schema.json", context=f"{evd_id} report")
             elif fname == "metrics.json":
