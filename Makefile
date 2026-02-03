@@ -12,7 +12,8 @@ include Makefile.merge-train
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
 .PHONY: gmr-gate gmr-eval gmr-validate
 
-COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+# Handle both .yaml and .yml extensions for dev compose
+COMPOSE_DEV_FILE ?= $(shell ls docker-compose.dev.yml 2>/dev/null || ls docker-compose.dev.yaml 2>/dev/null || echo "docker-compose.dev.yml")
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -73,11 +74,18 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	python3 -m venv $(VENV_DIR)
-	$(VENV_BIN)/pip install -U pip
-	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
-	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
-	$(VENV_BIN)/pre-commit install || true
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "Creating venv..."; \
+		$(PYTHON) -m venv $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR) --without-pip; \
+	fi
+	@if [ ! -f "$(VENV_BIN)/pip" ]; then \
+		echo "Installing pip..."; \
+		curl -sS https://bootstrap.pypa.io/get-pip.py | $(VENV_BIN)/python || true; \
+	fi
+	@$(VENV_BIN)/pip install -U pip || true
+	@$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]" || true
+	@$(VENV_BIN)/pip install pytest ruff mypy pre-commit || true
+	@$(VENV_BIN)/pre-commit install || true
 	pnpm install
 
 dev:
@@ -143,6 +151,17 @@ supply-chain/sbom: ## Generate modern SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
 supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
 	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
 	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
+
+supplychain.evidence: ## Generate supply chain evidence artifacts
+	@bash hack/supplychain/evidence_id.sh > evidence_id.txt
+	@EVIDENCE_ID=$$(cat evidence_id.txt); \
+	python3 hack/supplychain/gen_evidence.py --evidence-id "$$EVIDENCE_ID" --output-dir "evidence/$$EVIDENCE_ID"
+
+supplychain.attest.local: ## Build image and export attestations locally (no push)
+	@mkdir -p out
+	@docker buildx build --attest type=sbom --attest type=provenance,mode=min --output type=local,dest=out/image .
+	@echo "Verifying attestations..."
+	@find out/image -name "*.json" -exec python3 hack/supplychain/verify_attestation_shape.py {} \;
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."

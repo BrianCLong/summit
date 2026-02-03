@@ -1,44 +1,57 @@
-## 2025-10-25 - [CRITICAL] Unauthenticated Ingestion & Search Endpoints
-**Vulnerability:** Several endpoints in `server/src/routes/ingestion.ts` were missing authentication middleware (`ensureAuthenticated`), allowing unauthenticated access to sensitive operations:
-  - `POST /pipelines/:key/run` (arbitrary ingestion pipeline execution)
-  - `POST /search/retrieve` (arbitrary RAG retrieval)
-  - `POST /search/context` (access to context)
-  - `GET /pipelines` (information disclosure)
-  - `GET /dlq` (sensitive data exposure)
+# Sentinel: Platform Security & Integrity Ledger
 
-**Learning:**
-1.  **Implicit Trust in Route Parameters:** The presence of a `:key` parameter in the pipeline route might have created a false sense of security, acting as a "bearer token" without proper validation or rotation mechanisms.
-2.  **Tenant Isolation Gaps:** Even if authenticated, endpoints that accept `tenantId` in the body without verifying it against the authenticated user's credentials allow for "Confused Deputy" attacks (accessing another tenant's data).
-3.  **Missing Defaults:** Defaulting to open access when middleware is missing is a dangerous pattern. Routers should ideally deny by default.
+Sentinel is the guardian of Summit's security posture. This ledger tracks identified vulnerabilities, lessons learned, and the implementation of hardened patterns to prevent regression.
 
-**Prevention:**
-1.  **Mandatory Middleware:** Apply `ensureAuthenticated` at the router level (`router.use(...)`) or use a linter rule to enforce it on all route definitions.
-2.  **Authoritative Binding:** Never trust client-provided `tenantId` for authorization. Always overwrite or validate it against the trusted `req.user` context.
-3.  **Strict Role Checks:** Use explicit role checks (e.g., `req.user.role === 'ADMIN'`) for sensitive administrative endpoints like DLQ.
+## Philosophy
+1.  **Deny-by-Default**: Access must be explicitly granted, never assumed.
+2.  **Fail-Closed**: If a security check cannot be completed, the operation must fail and block access.
+3.  **Deterministic Integrity**: Every critical action must leave a deterministic, immutable audit trail.
+4.  **Zero-Trust Subsystems**: No internal component is inherently "trusted"; cross-subsystem calls must be validated.
 
-## 2025-12-19 - [CRITICAL] Unauthenticated Export Manifest Signing
-**Vulnerability:** The `POST /sign-manifest` endpoint in `server/src/routes/exports.ts` was missing authentication middleware, allowing any unauthenticated user to generate valid export manifest signatures using the server's secret key. This could potentially allow forgery of export manifests or unauthorized access to export verification systems.
+## Hardened Patterns
 
-**Learning:**
-1.  **Utility Endpoints are Targets:** Endpoints that seem like "helpers" (e.g., signing a payload) often carry significant security weight (cryptographic operations with server secrets) and must be protected.
-2.  **Test Infrastructure Fragility:** Verifying the fix revealed significant issues with the test runner environment (specifically `jest-extended` + ESM compatibility), highlighting the importance of maintaining a healthy test suite to enable security verification.
+### Fail-Closed Secret Resolution
+When retrieving production secrets, never provide a hardcoded default.
+```typescript
+// BAD: Fallback to insecure string
+const secret = process.env.JWT_SECRET || 'dev-secret';
 
-**Prevention:**
-1.  **Strict Middleware Auditing:** Ensure all endpoints in route files have explicit authentication middleware unless publicly intended (e.g., login, health).
-2.  **Secret Usage Review:** Any endpoint using server-side secrets (like signing keys) should automatically trigger a security review for authentication requirements.
+// GOOD: Fail-Closed
+const secret = process.env.JWT_SECRET;
+if (!secret && isProduction) {
+  throw new SecurityError('JWT_SECRET missing in production');
+}
+```
 
-## 2025-12-25 - [CRITICAL] Fail-Open Webhook Verification
-**Vulnerability:** Jira and Lifecycle webhook endpoints (`/api/webhooks/jira`, `/api/webhooks/lifecycle`) were configured to skip secret verification if the secret environment variable was missing, even in production (logging a warning instead of blocking).
+### Deny-by-Default Routing
+Administrative routers must apply authentication middleware globally before defining any endpoints.
+```typescript
+const router = Router();
+router.use(ensureAuthenticated);
+router.use(ensureRole('admin'));
 
-**Learning:**
-1.  **Fail-Open Defaults:** Security checks that "warn and proceed" on configuration errors are dangerous in production.
-2.  **Environment Assumption:** Assuming that "production will always have secrets set" is unsafe; configuration drift or errors can leave endpoints exposed.
+// Endpoints are now protected by default
+router.post('/secrets/rotate', rotateHandler);
+```
 
-**Prevention:**
-1.  **Fail-Closed Logic:** If a required security configuration (like a secret) is missing, the system must block the request (fail closed), especially in production.
-2.  **Strict Configuration Checks:** Validate critical security configuration at startup, preventing the app from even starting if secrets are missing in production.
+## Vulnerability Log
 
-## 2025-10-26 - [CRITICAL] Fail-Open Export Signing Secret
-**Vulnerability:** The `/sign-manifest` endpoint in `server/src/routes/exports.ts` used a hardcoded fallback (`'dev-secret'`) when `EXPORT_SIGNING_SECRET` was missing, without checking the environment. This meant that a production deployment with a missing secret configuration would silently become vulnerable to signature forgery.
+## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
+**Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
 **Prevention:** Use a "Fail-Closed" pattern: Explicitly check for the existence of the secret. If missing in production, throw an error and halt the operation (or startup). Never allow a fallback to a hardcoded string in production code paths.
+
+## 2025-10-27 - [MEDIUM] Missing Timeout in Admin Secret Rotation
+**Vulnerability:** The `/admin/secrets/rotate` endpoint in `server/src/routes/admin.ts` performed `axios.get` calls to service health endpoints without a configured timeout. A malicious or hanging service could block the request indefinitely, leading to resource exhaustion (DoS).
+**Learning:** `axios` defaults to no timeout. Loops over external network calls must always strictly enforce timeouts to prevent cascading failures.
+**Prevention:** Enforce a default timeout on all `axios` instances or explicit timeouts on individual calls.
+
+## 2026-01-21 - [CRITICAL] Unauthenticated Operational & Administrative Endpoints
+**Vulnerability:** Several sensitive administrative and operational endpoints in `server/src/routes/ops.ts` were missing authentication and authorization middleware. This allowed unauthenticated users to trigger system maintenance, database backups, disaster recovery drills, and evidence integrity verification.
+**Learning:** Defaulting to open access in administrative routers is a high-risk pattern. Operational endpoints that interact with infrastructure or sensitive data must be explicitly protected by both authentication and role-based access control.
+**Prevention:** Apply `router.use(ensureAuthenticated)` at the top of all administrative route files to enforce a "deny-by-default" posture. Always verify that each endpoint has appropriate `ensureRole` checks.
+
+## 2026-02-03 - [CRITICAL] SQL Injection in Incremental Loader
+**Vulnerability:** The `IncrementalLoader` class in `packages/etl-pipelines/src/loaders/incremental-loader.ts` constructed SQL queries (`UPDATE`, `DELETE`, `SELECT` for existence check) by directly interpolating string values from input rows into the query string, enabling SQL injection.
+**Learning:** Even when some methods (like `insertRow`) use parameterized queries, inconsistencies can leave other methods vulnerable. Developers might assume internal data loading tools are safe, but they process untrusted data.
+**Prevention:** Always use parameterized queries (e.g., `$1`, `$2`) for all variable data in SQL statements, regardless of the source. Use `pg` driver's parameter substitution instead of template literals for values.
