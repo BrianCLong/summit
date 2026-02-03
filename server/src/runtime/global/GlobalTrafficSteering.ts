@@ -1,5 +1,6 @@
 import { ResidencyGuard } from '../../data-residency/residency-guard.js';
 import { RegionalFailoverService } from '../../services/RegionalFailoverService.js';
+import { REGIONAL_CONFIG, getCurrentRegion } from '../../config/regional-config.js';
 
 export interface RoutingDecision {
     targetRegion: string;
@@ -12,7 +13,7 @@ export class GlobalTrafficSteering {
     private currentRegion: string;
 
     private constructor() {
-        this.currentRegion = process.env.SUMMIT_REGION || process.env.REGION || 'us-east-1';
+        this.currentRegion = getCurrentRegion();
     }
 
     public static getInstance(): GlobalTrafficSteering {
@@ -20,6 +21,28 @@ export class GlobalTrafficSteering {
             GlobalTrafficSteering.instance = new GlobalTrafficSteering();
         }
         return GlobalTrafficSteering.instance;
+    }
+
+    /**
+     * Resolves the steering action based on the routing decision.
+     */
+    async resolveSteeringAction(tenantId: string): Promise<{ action: 'ALLOW' | 'REDIRECT'; targetUrl?: string; reason: string }> {
+        const decision = await this.resolveRegion(tenantId);
+
+        if (decision.targetRegion === this.currentRegion) {
+            return { action: 'ALLOW', reason: decision.reason };
+        }
+
+        const targetUrl = REGIONAL_CONFIG[decision.targetRegion]?.baseUrl;
+        if (!targetUrl) {
+            return { action: 'ALLOW', reason: `${decision.reason} (No URL mapping for ${decision.targetRegion})` };
+        }
+
+        return {
+            action: 'REDIRECT',
+            targetUrl,
+            reason: decision.reason
+        };
     }
 
     /**
