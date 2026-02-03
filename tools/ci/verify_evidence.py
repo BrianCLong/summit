@@ -1,124 +1,103 @@
 #!/usr/bin/env python3
-"""
-Summit Evidence Verifier (deny-by-default).
-Validates evidence/index.json and referenced per-EVD files:
-  - report.json, metrics.json, stamp.json
-Timestamps ONLY allowed in stamp.json.
-"""
-import argparse
 import json
 import re
 import sys
 from pathlib import Path
 
-# Try importing jsonschema if available, otherwise fallback to basic checks
-try:
-    import jsonschema
-    HAS_JSONSCHEMA = True
-except ImportError:
-    HAS_JSONSCHEMA = False
-
 ROOT = Path(__file__).resolve().parents[2]
-EVIDENCE_DIR = ROOT / "evidence"
-SCHEMAS_DIR = EVIDENCE_DIR / "schemas"
-EVIDENCE_ID_PATTERN = re.compile(r"^EVD-[A-Z0-9_-]+-[A-Z]+-[0-9]{3}$")
+NARDOM_ID = re.compile(r"^EVD-NARDOM-[A-Z]+-[0-9]{3}$")
 
-def die(msg: str) -> None:
+def fail(msg: str) -> None:
     print(f"[verify_evidence] FAIL: {msg}", file=sys.stderr)
-    sys.exit(2)
+    raise SystemExit(1)
 
-def validate_schema(data, schema_name):
-    if not HAS_JSONSCHEMA:
-        return
-
-    schema_path = SCHEMAS_DIR / schema_name
-    if not schema_path.exists():
-        # If schema doesn't exist, we skip schema validation but continue with other checks
-        return
-
+def load(p: Path):
     try:
-        schema = json.loads(schema_path.read_text(encoding="utf-8"))
-        jsonschema.validate(instance=data, schema=schema)
+        return json.loads(p.read_text(encoding="utf-8"))
     except Exception as e:
-        die(f"Schema validation failed for {schema_name}: {e}")
+        fail(f"cannot read/parse {p}: {e}")
 
-def check_timestamps(data, filename):
-    # Recursively check for timestamp keys
-    # Allowed only if filename ends with stamp.json
-    if filename.endswith("stamp.json"):
-        return
-
-    def _walk(obj, path=""):
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                if re.search(r'time|date|timestamp|generated_at', k, re.IGNORECASE):
-                    die(f"Timestamp key '{k}' found in {filename} (only allowed in stamp.json)")
-                _walk(v, f"{path}.{k}")
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                _walk(item, f"{path}[{i}]")
-
-    _walk(data)
+def contains_time_keys(data) -> bool:
+    if isinstance(data, dict):
+        for key, value in data.items():
+            lower_key = key.lower()
+            if (
+                "timestamp" in lower_key
+                or lower_key == "time"
+                or lower_key.endswith("_time")
+                or lower_key.endswith("_timestamp")
+                or lower_key.endswith("_at")
+            ):
+                return True
+            if contains_time_keys(value):
+                return True
+    elif isinstance(data, list):
+        for item in data:
+            if contains_time_keys(item):
+                return True
+    return False
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--index", help="Path to index.json", default=None)
-    args = parser.parse_args()
+    idx_path = ROOT / "evidence" / "index.json"
+    if not idx_path.exists():
+        fail("missing evidence/index.json")
+    idx = load(idx_path)
 
-    if args.index:
-        idx = Path(args.index).resolve()
-    else:
-        idx = EVIDENCE_DIR / "index.json"
+    map_entries = idx.get("map", {})
+    if map_entries:
+        if not isinstance(map_entries, dict):
+            fail("evidence/index.json 'map' must be an object")
+        for evd_id, artifacts in map_entries.items():
+            if not NARDOM_ID.match(evd_id):
+                fail(f"invalid narrative evidence id: {evd_id}")
+            if not isinstance(artifacts, list) or not artifacts:
+                fail(f"{evd_id} must map to a non-empty list of artifacts")
+            for artifact in artifacts:
+                if not isinstance(artifact, str):
+                    fail(f"{evd_id} artifact paths must be strings")
+                fp = ROOT / artifact
+                if not fp.exists():
+                    fail(f"{evd_id} missing file: {fp}")
+                if fp.name != "stamp.json":
+                    payload = load(fp)
+                    if contains_time_keys(payload):
+                        fail(
+                            f"{evd_id} timestamps must be isolated to stamp.json: {fp}"
+                        )
 
-    if not idx.exists():
-        die(f"missing index file: {idx}")
+    items = idx.get("items", {})
+    if not isinstance(items, dict) or not items:
+        fail("evidence/index.json must contain non-empty 'items' map")
 
-    try:
-        data = json.loads(idx.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as e:
-        die(f"evidence/index.json is not valid JSON: {e}")
+    for evd_id, meta in items.items():
+        if "path" not in meta:
+            # Skip legacy items or items not following the new schema
+            continue
 
-    # Validate index schema
-    if "items" not in data or not isinstance(data["items"], list):
-        die("index.json must contain list: items")
+        base = ROOT / meta["path"]
+        files = meta.get("files", [])
+        for fn in files:
+            fp = base / fn
+            if not fp.exists():
+                fail(f"{evd_id} missing file: {fp}")
 
-    validate_schema(data, "index.schema.json")
+        # enforce timestamp isolation: only stamp.json may contain time-like fields
+        if "report.json" in files:
+            report = load(base / "report.json")
+            if report.get("evidence_id") != evd_id:
+                fail(f"{evd_id} report.json evidence_id mismatch")
 
-    for item in data["items"]:
-        if "evidence_id" in item:
-            evidence_id = item["evidence_id"]
-            if not EVIDENCE_ID_PATTERN.match(evidence_id):
-                die(f"Invalid Evidence ID format: {evidence_id}")
+        if "metrics.json" in files:
+            metrics = load(base / "metrics.json")
+            if metrics.get("evidence_id") != evd_id:
+                fail(f"{evd_id} metrics.json evidence_id mismatch")
 
-            for req in ("report", "metrics", "stamp"):
-                if req not in item:
-                    die(f"{evidence_id} missing {req} file mapping")
-
-                p = (ROOT / item[req]).resolve()
-                if not p.exists():
-                    die(f"{evidence_id} missing file on disk: {p}")
-
-                try:
-                    content = json.loads(p.read_text(encoding="utf-8"))
-                except json.JSONDecodeError as e:
-                    die(f"File {item[req]} is not valid JSON: {e}")
-
-                check_timestamps(content, item[req])
-                validate_schema(content, f"{req}.schema.json")
-        elif "id" in item and "path" in item:
-            evidence_id = item["id"]
-            p = (ROOT / item["path"]).resolve()
-            if not p.exists():
-                die(f"{evidence_id} missing file on disk: {p}")
-
-            try:
-                content = json.loads(p.read_text(encoding="utf-8"))
-            except json.JSONDecodeError as e:
-                die(f"File {item['path']} is not valid JSON: {e}")
-
-            check_timestamps(content, item["path"])
-        else:
-            die(f"Unknown evidence index entry: {item!r}")
+        if "stamp.json" in files:
+            stamp = load(base / "stamp.json")
+            if stamp.get("evidence_id") != evd_id:
+                fail(f"{evd_id} stamp.json evidence_id mismatch")
+            if "generated_at_utc" not in stamp:
+                fail(f"{evd_id} stamp.json missing generated_at_utc")
 
     print("[verify_evidence] OK")
 

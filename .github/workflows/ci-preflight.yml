@@ -21,7 +21,6 @@ on:
 
 concurrency:
   group: ci-preflight-${{ github.ref }}
-  cancel-in-progress: false
 
 jobs:
   validate-compose:

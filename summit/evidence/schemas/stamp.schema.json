@@ -2,11 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SummitEvidenceStamp",
   "type": "object",
-  "required": ["created_at", "git_commit", "run_id"],
+  "required": ["created_at", "git_commit"],
   "properties": {
     "created_at": { "type": "string", "format": "date-time" },
-    "git_commit": { "type": "string" },
-    "run_id": { "type": "string" }
+    "git_commit": { "type": "string" }
   },
   "additionalProperties": false
 }

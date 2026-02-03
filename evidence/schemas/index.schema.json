@@ -1,22 +1,69 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["version", "items"],
-  "properties": {
-    "version": { "type": "number" },
-    "items": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "path"],
-        "properties": {
-          "id": { "type": "string" },
-          "path": { "type": "string" }
-        },
-        "additionalProperties": false
-      }
+  "title": "summit evidence index",
+  "anyOf": [
+    {
+      "type": "object",
+      "required": ["run_id", "entries"],
+      "properties": {
+        "run_id": { "type": "string" },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["evidence_id", "files"],
+            "properties": {
+              "evidence_id": {
+                "type": "string",
+                "pattern": "^EVD-[A-Z0-9-]+$"
+              },
+              "files": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "required": ["version", "items"],
+      "properties": {
+        "version": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["evidence_id", "files"],
+            "properties": {
+              "evidence_id": {
+                "type": "string",
+                "pattern": "^EVD-[A-Z0-9-]+$"
+              },
+              "files": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "required": ["mappings"],
+      "properties": {
+        "mappings": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["report", "metrics", "stamp"],
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
     }
-  },
-  "required": ["items"],
-  "additionalProperties": false
+  ]
 }

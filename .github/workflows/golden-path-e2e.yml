@@ -2,11 +2,11 @@ name: Golden Path E2E
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 2 * * *' # Nightly at 2 AM
+    - cron: "0 2 * * *" # Nightly at 2 AM
   workflow_dispatch:
 
 jobs:
@@ -15,12 +15,6 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'pnpm'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -31,13 +25,19 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "pnpm"
+
       - name: Install Dependencies
         run: pnpm install
 
       - name: Install Playwright Browsers
         run: |
           cd e2e/golden-path
-          npx playwright install --with-deps chromium
+          pnpm exec playwright install --with-deps chromium
 
       - name: Run Golden Path E2E
         env:

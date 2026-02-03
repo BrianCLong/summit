@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import Dict, Set, Any
+
+from typing import Any, Dict, Set
+
 from .scoring import compute_metrics
 
-def compute_stop_diagnostics(submitted: Set[str], ground_truth: Set[str]) -> Dict[str, Any]:
+
+def compute_stop_diagnostics(submitted: set[str], ground_truth: set[str]) -> dict[str, Any]:
     """
     Computes diagnostic metrics related to stopping criteria:
     - Over-retrieval rate (hedging): Proportion of submitted items that are not in ground truth.

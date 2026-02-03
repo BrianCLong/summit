@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import os
 from abc import ABC, abstractmethod
+
 
 class BaseJudge(ABC):
     @abstractmethod
@@ -41,7 +43,7 @@ def get_judge(mode: str = "off") -> BaseJudge:
         prompt_path = os.path.join(os.path.dirname(__file__), "prompts", "judge_prompt_v1.txt")
         if not os.path.exists(prompt_path):
             raise FileNotFoundError(f"Judge prompt not found at: {prompt_path}")
-        with open(prompt_path, "r", encoding="utf-8") as f:
+        with open(prompt_path, encoding="utf-8") as f:
             template = f.read()
         return LLMJudge(template)
     else:

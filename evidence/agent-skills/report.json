@@ -1,0 +1,5 @@
+{
+  "evidence_id": "EVD-AGENTSKILLS-SKILLSEC-001",
+  "summary": "Skill security lint report (deny-by-default).",
+  "artifacts": []
+}
