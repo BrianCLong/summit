@@ -1,75 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Report",
   "type": "object",
-  "required": ["evidence_id", "item_slug", "claims", "assessments"],
+  "required": ["evidence_id", "item", "provider", "summary", "artifacts"],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "item_slug": { "type": "string" },
-    "claims": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["claim_id", "text", "extractor", "confidence"],
-        "properties": {
-          "claim_id": { "type": "string" },
-          "text": { "type": "string" },
-          "language": { "type": "string" },
-          "source_item_id": { "type": "string" },
-          "spans": { "type": "array", "items": { "type": "object" } },
-          "extractor": { "type": "string" },
-          "confidence": { "type": "number" }
-        }
-      }
-    },
-    "evidence_items": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["evidence_id", "claim_id", "kind", "uri", "hash"],
-        "properties": {
-          "evidence_id": { "type": "string" },
-          "claim_id": { "type": "string" },
-          "kind": { "type": "string" },
-          "uri": { "type": "string" },
-          "snippet": { "type": "string" },
-          "hash": { "type": "string" }
-        }
-      }
-    },
-    "assessments": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["assessment_id", "claim_id", "label", "score", "assessor", "policy"],
-        "properties": {
-          "assessment_id": { "type": "string" },
-          "claim_id": { "type": "string" },
-          "label": { "type": "string" },
-          "score": { "type": "number" },
-          "rationale": { "type": "string" },
-          "evidence_ids": { "type": "array", "items": { "type": "string" } },
-          "assessor": { "type": "string" },
-          "policy": { "type": "string" }
-        }
-      }
-    },
-    "coordination_signals": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["signal_id", "cluster_id", "actors", "content_ids", "score", "rubric_refs"],
-        "properties": {
-          "signal_id": { "type": "string" },
-          "cluster_id": { "type": "string" },
-          "actors": { "type": "array", "items": { "type": "string" } },
-          "content_ids": { "type": "array", "items": { "type": "string" } },
-          "features": { "type": "object" },
-          "score": { "type": "number" },
-          "rubric_refs": { "type": "array", "items": { "type": "string" } }
-        }
-      }
-    }
-  },
-  "additionalProperties": false
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z]+-[0-9]{3}$" },
+    "item": { "type": "object", "required": ["url"], "properties": { "url": { "type": "string" } } },
+    "provider": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } },
+    "summary": { "type": "string" },
+    "artifacts": { "type": "array", "items": { "type": "string" } }
+  }
 }

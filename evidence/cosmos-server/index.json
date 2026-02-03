@@ -1,0 +1,6 @@
+{
+  "EVD-COSMOS-SERVER-GW-001": [
+    "evidence/cosmos-server/report.json",
+    "evidence/cosmos-server/metrics.json"
+  ]
+}

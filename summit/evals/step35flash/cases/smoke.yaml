@@ -1,0 +1,5 @@
+name: Smoke Test
+prompt: "Hello, confirm you are Step 3.5 Flash."
+max_tokens: 50
+assertions:
+  - contains: "Step"

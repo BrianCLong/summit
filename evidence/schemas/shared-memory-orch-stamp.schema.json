@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "shared memory orch evidence stamp",
+  "type": "object",
+  "required": ["evidence_id", "run_id", "created_at"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-shared-memory-orch-[0-9]{3}$"
+    },
+    "run_id": { "type": "string" },
+    "created_at": { "type": "string" }
+  },
+  "additionalProperties": true
+}
