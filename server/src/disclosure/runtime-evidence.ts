@@ -70,7 +70,7 @@ async function resolveDeployedVersion(): Promise<string | undefined> {
     const pkgPath = path.resolve('package.json');
     const pkg = JSON.parse(String(await fs.readFile(pkgPath, 'utf8')));
     return typeof pkg.version === 'string' ? pkg.version : undefined;
-  } catch (error: any) {
+  } catch (error: unknown) {
     return undefined;
   }
 }
@@ -84,27 +84,30 @@ function parseDate(input?: string): Date | undefined {
   return date;
 }
 
-function findTimestamp(value: any): number | undefined {
+function findTimestamp(value: unknown): number | undefined {
   if (!value || typeof value !== 'object') return undefined;
+  const record = value as Record<string, unknown>;
   const candidates = [
-    value.timestamp,
-    value.ts,
-    value.created_at,
-    value.createdAt,
-    value.occurred_at,
+    record.timestamp,
+    record.ts,
+    record.created_at,
+    record.createdAt,
+    record.occurred_at,
   ];
   for (const candidate of candidates) {
     if (!candidate) continue;
-    const date = new Date(candidate);
+    const date = new Date(candidate as string | number | Date);
     const ms = date.getTime();
     if (!Number.isNaN(ms)) return ms;
   }
   return undefined;
 }
 
-function matchesTenant(entry: any, tenantId?: string): boolean {
+function matchesTenant(entry: unknown, tenantId?: string): boolean {
   if (!tenantId) return true;
-  const candidates = [entry.tenantId, entry.tenant_id, entry.tenant];
+  if (!entry || typeof entry !== 'object') return false;
+  const record = entry as Record<string, unknown>;
+  const candidates = [record.tenantId, record.tenant_id, record.tenant];
   return candidates.some((value) => value && value === tenantId);
 }
 
@@ -156,7 +159,7 @@ async function collectJsonlSlice({
         if (!matchesTenant(parsed, tenantId)) continue;
         filtered.push(JSON.stringify(parsed));
         count += 1;
-      } catch (error: any) {
+      } catch (error: unknown) {
         warnings.push(`parse_error:${source}`);
       }
     }
@@ -373,8 +376,7 @@ class RuntimeEvidenceService {
       archive.on('error', reject);
       stream.on('close', () => resolve());
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      archive.pipe(stream as any);
+      archive.pipe(stream as unknown as NodeJS.WritableStream);
 
       for (const file of files) {
         archive.file(file, { name: path.relative(workingDir, file) });

@@ -11,8 +11,8 @@ import {
   SensorReading,
   AssetType,
   GeoJSONGeometry,
-} from '../types/digitalTwin';
-import { warnDeprecation } from '../utils/deprecation';
+} from '../types/digitalTwin.js';
+import { warnDeprecation } from '../utils/deprecation.js';
 
 /**
  * IoT sensor data format

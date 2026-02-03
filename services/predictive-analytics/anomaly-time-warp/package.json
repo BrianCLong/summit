@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/anomaly-time-warp",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Anomaly Time-Warp Engine - Predictive anomaly detection with precursor signal analysis",
   "type": "module",
   "main": "dist/index.js",

@@ -15,7 +15,7 @@ jest.mock('../emitter', () => {
     };
 });
 
-import { requestMeteringMiddleware } from '../middleware';
+import { requestMeteringMiddleware } from '../middleware.js';
 
 describe('Request Metering Middleware', () => {
     it('should emit meter event ON FINISH if tenantId is present', () => {

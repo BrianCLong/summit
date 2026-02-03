@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Observatory Export Bundle",
+  "type": "object",
+  "required": ["version", "findings_count", "aggregates"],
+  "properties": {
+    "version": { "type": "integer" },
+    "findings_count": { "type": "object", "additionalProperties": { "type": "integer" } },
+    "aggregates": { "type": "object" },
+    "privacy_notes": { "type": "string" },
+    "classification": { "type": "string", "enum": ["public", "internal", "restricted"] }
+  }
+}

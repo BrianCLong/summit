@@ -21,23 +21,23 @@ module "eks" {
 }
 
 module "rds" {
-  source            = "../../modules/rds-postgres"
-  region            = var.region
-  identifier        = "intelgraph-prod"
-  engine_version    = var.db_engine_version
-  instance_class    = var.db_instance_class
-  allocated_storage = 200
-  db_name           = var.db_name
-  username          = var.db_username
-  password          = var.db_password
+  source             = "../../modules/rds-postgres"
+  region             = var.region
+  identifier         = "intelgraph-prod"
+  engine_version     = var.db_engine_version
+  instance_class     = var.db_instance_class
+  allocated_storage  = 200
+  db_name            = var.db_name
+  username           = var.db_username
+  password           = var.db_password
   security_group_ids = var.db_security_group_ids
   subnet_ids         = var.db_subnet_ids
 }
 
 module "backups" {
-  source        = "../../modules/s3-backups"
-  region        = var.region
-  bucket_name   = var.backup_bucket_name
+  source          = "../../modules/s3-backups"
+  region          = var.region
+  bucket_name     = var.backup_bucket_name
   expiration_days = 90
 }
 

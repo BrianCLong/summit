@@ -1,0 +1,14 @@
+{
+  "bundle_id": "fixture-bundle-fail",
+  "evidence": [
+    {
+      "description": "Evaluation report with invalid timestamp",
+      "evidence_id": "EVD-PP-SOCIALREASONING-EVAL-001",
+      "path": "evidence/report.json",
+      "schema_path": "evidence.report.schema.json"
+    }
+  ],
+  "item": {
+    "arxiv_id": "2601.20757"
+  }
+}

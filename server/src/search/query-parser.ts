@@ -1,7 +1,7 @@
 
 export interface ParsedQuery {
   term: string;
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   entities: string[];
   relationships: {
     type: string;

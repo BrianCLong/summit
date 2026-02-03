@@ -1,0 +1,19 @@
+version: 1
+gates:
+  ingest:
+    require:
+      - schema_valid: true
+      - pii_classified: true
+    deny_if:
+      - pii_present_and_policy_disallows_embedding: true
+  execution:
+    require:
+      - tenancy_scope_ok: true
+      - budget_declared: true
+    deny_if:
+      - estimated_cost_usd_gt_budget: true
+  evidence:
+    require:
+      - evidence_bundle_emitted: true
+      - plan_hash_recorded: true
+      - sources_hashed: true

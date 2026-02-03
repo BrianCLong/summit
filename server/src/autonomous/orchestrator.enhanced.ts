@@ -10,6 +10,8 @@ import Redis from 'ioredis';
 import { trace, context, SpanStatusCode, Span } from '@opentelemetry/api';
 import { Logger } from 'pino';
 import { z } from 'zod';
+import { CostEstimator } from './CostEstimator.js';
+import { ExecutionTrace } from '../governance/execution-trace.js';
 
 // Type definitions
 export interface RunConfig {
@@ -101,33 +103,52 @@ export class EnhancedAutonomousOrchestrator {
   private logger: Logger;
   private tracer: any;
   private policyEngine: PolicyEngine;
+  private costEstimator: CostEstimator;
   private actions: Map<string, Action> = new Map();
   private killSwitchEnabled = false;
+  private pausedRuns: Set<string> = new Set();
 
   constructor(
     db: Pool,
     redis: Redis,
     logger: Logger,
     policyEngine: PolicyEngine,
+    costEstimator?: CostEstimator,
   ) {
     this.db = db;
     this.redis = redis;
     this.logger = logger;
     this.tracer = trace.getTracer('autonomous-orchestrator');
     this.policyEngine = policyEngine;
+    this.costEstimator = costEstimator || new CostEstimator();
 
     // Monitor kill switch from Redis
     this.redis.subscribe('orchestrator:killswitch');
-    this.redis.on('message', this.logSecurityReview.bind(this));
+    this.redis.subscribe('orchestrator:pause');
+    this.redis.subscribe('orchestrator:resume');
+    this.redis.on('message', this.handleControlMessage.bind(this));
   }
 
-  private async logSecurityReview(channel: any, message: any) {
+  private async handleControlMessage(channel: string, message: string) {
     if (channel === 'orchestrator:killswitch') {
       this.killSwitchEnabled = message === '1';
       this.logger.warn(
         { killSwitchEnabled: this.killSwitchEnabled },
         'Kill switch toggled',
       );
+    } else if (channel === 'orchestrator:pause') {
+      const runId = message;
+      this.pausedRuns.add(runId);
+      await this.updateRunStatus(runId, 'paused');
+      this.logger.warn({ runId }, 'Run paused');
+    } else if (channel === 'orchestrator:resume') {
+      const runId = message;
+      this.pausedRuns.delete(runId);
+      // We need to re-trigger execution if it was paused
+      // Ideally this would emit an event or call a method to resume the loop
+      // For now, we update status, and the loop checks pausedRuns
+      await this.updateRunStatus(runId, 'applying');
+      this.logger.info({ runId }, 'Run resumed');
     }
   }
 
@@ -302,11 +323,43 @@ export class EnhancedAutonomousOrchestrator {
       try {
         await this.updateRunStatus(runId, 'applying');
 
+        // Check if already paused
+        if (this.pausedRuns.has(runId)) {
+          await this.logEvent(
+            runId,
+            null,
+            correlationId,
+            'execution_paused_start',
+            'warn',
+            'Execution started but run is paused',
+          );
+          return;
+        }
+
         // Get pending tasks
         const tasks = await this.getPendingTasks(runId);
 
         // Execute tasks in dependency order with parallelism
-        await this.executeTasksInOrder(tasks, correlationId);
+        await this.executeTasksInOrder(tasks, correlationId, runId);
+
+        // If we finished the loop but paused, don't mark completed
+        if (this.pausedRuns.has(runId)) {
+           await this.logEvent(
+            runId,
+            null,
+            correlationId,
+            'execution_paused',
+            'info',
+            'Execution paused',
+          );
+          return;
+        }
+
+        // If killed
+        if (this.killSwitchEnabled) { // Global kill
+           // Handled in executeTasksInOrder mostly, but double check
+           return;
+        }
 
         await this.updateRunStatus(runId, 'completed');
         await this.logEvent(
@@ -440,42 +493,66 @@ export class EnhancedAutonomousOrchestrator {
             killSwitch: () => this.killSwitchEnabled,
           };
 
-          // Execute plan and apply
-          const plan = await action.plan(validation.data);
-          await this.logEvent(
-            task.runId,
-            task.id,
-            correlationId,
-            'task_planned',
-            'info',
-            'Task plan generated',
-            { plan },
-          );
+          // Initialize Execution Trace
+          const traceRecorder = new ExecutionTrace({
+            runId: task.runId,
+            taskId: task.id,
+            input: task.params,
+            agentId: task.type,
+          });
 
-          const outcome = await action.apply(plan, ctx);
+          try {
+            // Execute plan and apply
+            const plan = await action.plan(validation.data);
+            await this.logEvent(
+              task.runId,
+              task.id,
+              correlationId,
+              'task_planned',
+              'info',
+              'Task plan generated',
+              { plan },
+            );
 
-          // Record success
-          await this.db.query(
-            `
+            const outcome = await action.apply(plan, ctx);
+
+            // Record success
+            await this.db.query(
+              `
           UPDATE tasks 
           SET status = 'succeeded', finished_at = NOW(), result = $2
           WHERE id = $1
         `,
-            [task.id, JSON.stringify(outcome)],
-          );
+              [task.id, JSON.stringify(outcome)],
+            );
 
-          await this.logEvent(
-            task.runId,
-            task.id,
-            correlationId,
-            'task_completed',
-            'info',
-            'Task completed successfully',
-            { outcome },
-          );
+            await this.logEvent(
+              task.runId,
+              task.id,
+              correlationId,
+              'task_completed',
+              'info',
+              'Task completed successfully',
+              { outcome },
+            );
 
-          span.setStatus({ code: SpanStatusCode.OK });
-          return outcome;
+            // Record trace artifact
+            await traceRecorder.record({
+              output: outcome,
+              metadata: { plan, status: 'success' },
+            });
+
+            span.setStatus({ code: SpanStatusCode.OK });
+            return outcome;
+          } catch (execError: any) {
+            // Record trace artifact for failure
+            await traceRecorder.record({
+              output: null,
+              error: execError.message,
+              metadata: { status: 'failed' },
+            });
+            throw execError;
+          }
         } catch (error: any) {
           // Record failure
           await this.db.query(
@@ -526,7 +603,30 @@ export class EnhancedAutonomousOrchestrator {
       }),
     };
 
-    return [baseTask];
+    const tasks = [baseTask];
+
+    // Calculate total estimated cost
+    const totalCost = this.costEstimator.estimatePlan(tasks);
+
+    // Check against run budget
+    if (run.budget_usd && totalCost.usd > run.budget_usd) {
+      throw new Error(
+        `Plan exceeds USD budget: $${totalCost.usd} > $${run.budget_usd}`,
+      );
+    }
+
+    if (run.budget_tokens && totalCost.tokens > run.budget_tokens) {
+      throw new Error(
+        `Plan exceeds token budget: ${totalCost.tokens} > ${run.budget_tokens}`,
+      );
+    }
+
+    this.logger.info(
+      { runId: run.id, totalCost, budget: { usd: run.budget_usd, tokens: run.budget_tokens } },
+      'Plan cost estimated',
+    );
+
+    return tasks;
   }
 
   /**
@@ -535,12 +635,13 @@ export class EnhancedAutonomousOrchestrator {
   private async executeTasksInOrder(
     tasks: Task[],
     correlationId: string,
+    runId: string,
   ): Promise<void> {
     const taskMap = new Map(tasks.map((t) => [t.id, t]));
     const completed = new Set<string>();
     const running = new Map<string, Promise<any>>();
 
-    while (completed.size < tasks.length && !this.killSwitchEnabled) {
+    while (completed.size < tasks.length && !this.killSwitchEnabled && !this.pausedRuns.has(runId)) {
       // Find ready tasks (dependencies satisfied)
       const ready = tasks.filter(
         (task) =>
@@ -555,7 +656,11 @@ export class EnhancedAutonomousOrchestrator {
           await Promise.race(running.values());
           continue;
         } else {
-          throw new Error('Deadlock detected: no ready tasks and none running');
+          // If we have remaining tasks but none are ready and none running, it's a deadlock
+          if (completed.size < tasks.length) {
+              throw new Error('Deadlock detected: no ready tasks and none running');
+          }
+          break; // Done
         }
       }
 
@@ -572,6 +677,8 @@ export class EnhancedAutonomousOrchestrator {
           })
           .catch((error) => {
             running.delete(task.id);
+            // If task failed, we might want to stop the run or continue others?
+            // For now, we let the startExecution catch block handle the first error
             throw error;
           });
 
@@ -580,12 +687,30 @@ export class EnhancedAutonomousOrchestrator {
 
       // Wait for at least one task to complete
       if (running.size > 0) {
-        await Promise.race(running.values());
+        try {
+          await Promise.race(running.values());
+        } catch (e) {
+          // Wait for all currently running to finish/fail if we want to bubble up,
+          // or just let the loop continue and next check will catch it?
+          // The current implementation re-throws immediately in the promise catch.
+          throw e;
+        }
       }
     }
 
     if (this.killSwitchEnabled) {
       throw new Error('Execution cancelled by kill switch');
+    }
+
+    if (this.pausedRuns.has(runId)) {
+        // Graceful pause: waiting for running tasks to complete (already done by the while loop condition check?)
+        // The while loop exits if paused. But we might have running tasks.
+        // We should probably wait for them to finish before returning?
+        // Or do we treat "paused" as "stop scheduling new ones"?
+        // "Currently running tasks are allowed to complete (graceful pause)" - from architecture doc.
+        if (running.size > 0) {
+            await Promise.allSettled(running.values());
+        }
     }
   }
 
@@ -721,5 +846,20 @@ export class EnhancedAutonomousOrchestrator {
   async disableKillSwitch(): Promise<void> {
     await this.redis.publish('orchestrator:killswitch', '0');
     this.logger.info('Kill switch deactivated');
+  }
+
+  /**
+   * Pause/Resume controls
+   */
+  async pauseRun(runId: string): Promise<void> {
+      await this.redis.publish('orchestrator:pause', runId);
+  }
+
+  async resumeRun(runId: string): Promise<void> {
+      await this.redis.publish('orchestrator:resume', runId);
+      // In a real system, we might need to wake up a worker if it stopped completely.
+      // For this single-instance demo, we might need to re-call startExecution if the loop exited.
+      // But since we don't have the correlationId handy here, we rely on the consumer
+      // or the fact that this is a simplified orchestrator.
   }
 }

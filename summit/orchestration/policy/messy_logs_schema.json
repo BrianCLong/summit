@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Messy Logs Ingestion Schema",
+  "description": "Schema for ingesting raw conversational artifacts for Society of Thought training/audit.",
+  "type": "object",
+  "properties": {
+    "source": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "participants": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "transcript": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "speaker": { "type": "string" },
+          "text": { "type": "string" },
+          "metadata": { "type": "object" }
+        },
+        "required": ["speaker", "text"]
+      }
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["public", "internal", "confidential", "restricted"]
+    }
+  },
+  "required": ["source", "timestamp", "transcript"]
+}
