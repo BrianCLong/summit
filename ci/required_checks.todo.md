@@ -1,22 +1,50 @@
-# Required Checks Discovery
+# Required Checks Discovery (TODO)
 
-## Process to Identify Required Checks
+1. Open repo settings → Branch protection rules.
+2. Record required status check names for default branch.
+3. Paste them into `ci/required_checks.json`.
+4. If names differ from our local gates, add a rename map.
 
-1. Go to repository Settings in GitHub.
-2. Navigate to **Branches** -> **Branch protection rules**.
-3. Edit the rule for `main` (or default branch).
-4. Look for "Require status checks to pass before merging".
-5. Copy the exact names of the required checks listed there.
+## UI steps (GitHub)
 
-## Temporary Gate Names (Implemented in Plan)
+1. Repo → Settings → Branches → Branch protection rule → "Require status checks"
+2. Copy the exact check names into `ci/verifier_spec.md`.
 
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
+## Discovered Checks (Preliminary)
 
-- `gate:evidence_schema` - Validates evidence artifacts (schemas, determinism).
-- `gate:policy_deny_default` - Runs deny-by-default and redaction tests.
-- `gate:dependency_delta` - Ensures dependency changes are documented.
-- `gate:determinism` - Ensures no timestamps outside stamp.json.
+- validate-release-policy
+- lint-reason-codes
+- security-scan
+- sbom
+- summit-influence-evidence
+- summit-influence-evals
+- summit-neverlog
+- summit-supply-chain
 
-## Rename Plan
+## Temporary naming convention
 
-Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+Until discovered, gates are referenced as:
+
+- summit/evidence
+- summit/evals_smoke
+- summit/promptpack_schema
+- summit/tool_spec_quality
+- summit/influence-evidence
+- summit/influence-evals
+- summit/neverlog
+- summit/supply-chain
+
+## Rename plan
+
+Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
+
+## New Module Checks (pp_alerts)
+
+- pp_alerts/tests (pending discovery of real name)
+- pp_alerts/privacy-scan (pending discovery of real name)
+
+## Swarm Module Checks (Kimi K2.5)
+
+- swarm/budgets-check
+- swarm/evidence-verify
+- swarm/policy-gate
