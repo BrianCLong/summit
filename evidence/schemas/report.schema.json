@@ -4,22 +4,40 @@
   "type": "object",
   "anyOf": [
     {
-      "required": ["evidence_id", "item_slug", "summary", "sources", "claims", "limitations"],
+      "required": [
+        "evidence_id",
+        "item_slug",
+        "summary",
+        "sources",
+        "claims",
+        "limitations"
+      ],
       "properties": {
         "evidence_id": {
           "type": "string",
           "pattern": "^EVD-[a-z0-9-]+-[a-z0-9-]+-[0-9]{3}$"
         },
-        "item_slug": { "type": "string" },
-        "summary": { "type": "string" },
+        "item_slug": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
         "sources": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["title", "ref"],
+            "required": [
+              "title",
+              "ref"
+            ],
             "properties": {
-              "title": { "type": "string" },
-              "ref": { "type": "string" }
+              "title": {
+                "type": "string"
+              },
+              "ref": {
+                "type": "string"
+              }
             }
           }
         },
@@ -27,37 +45,66 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["claim", "supporting_refs", "confidence"],
+            "required": [
+              "claim",
+              "supporting_refs",
+              "confidence"
+            ],
             "properties": {
-              "claim": { "type": "string" },
+              "claim": {
+                "type": "string"
+              },
               "supporting_refs": {
                 "type": "array",
-                "items": { "type": "string" }
+                "items": {
+                  "type": "string"
+                }
               },
               "confidence": {
                 "type": "string",
-                "enum": ["low", "medium", "high"]
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
               }
             }
           }
         },
         "limitations": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
     {
-      "required": ["evidence_id", "summary"],
+      "required": [
+        "evidence_id",
+        "summary",
+        "artifacts"
+      ],
       "properties": {
         "evidence_id": {
           "type": "string",
-          "pattern": "^EVD-[A-Za-z0-9-]+$"
+          "pattern": "^EVD-[A-Za-z0-9-]+-[A-Za-z0-9-]+-[0-9]{3}$"
         },
-        "item": { "type": "object" },
-        "summary": { "type": "string" },
-        "artifacts": { "type": ["array", "object"] },
-        "item_slug": { "type": "string" }
+        "item": {
+          "type": "object"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "item_slug": {
+          "type": "string"
+        }
       }
     }
   ],

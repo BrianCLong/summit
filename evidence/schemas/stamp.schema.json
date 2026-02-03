@@ -4,22 +4,45 @@
   "type": "object",
   "anyOf": [
     {
-      "required": ["evidence_id", "created_at", "toolchain"],
+      "required": [
+        "evidence_id",
+        "created_at",
+        "toolchain"
+      ],
       "properties": {
-        "evidence_id": { "type": "string" },
-        "created_at": { "type": "string", "format": "date-time" },
+        "evidence_id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
         "toolchain": {
           "type": "object",
-          "additionalProperties": { "type": "string" }
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     },
     {
-      "required": ["evidence_id", "generated_at"],
+      "required": [
+        "run_id",
+        "created_at"
+      ],
       "properties": {
-        "evidence_id": { "type": "string" },
-        "created_at": { "type": "string" },
-        "generated_at": { "type": "string" }
+        "evidence_id": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        }
       }
     }
   ],

@@ -1,13 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Index",
+  "title": "summit evidence index",
   "type": "object",
-  "required": ["version"],
+  "required": [
+    "mappings"
+  ],
   "properties": {
     "version": {
       "anyOf": [
-        { "type": "integer", "enum": [1] },
-        { "type": "string" }
+        {
+          "type": "integer",
+          "enum": [
+            1
+          ]
+        },
+        {
+          "type": "string"
+        }
       ]
     },
     "items": {
@@ -16,10 +25,20 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["evidence_id", "files"],
+            "required": [
+              "evidence_id",
+              "files"
+            ],
             "properties": {
-              "evidence_id": { "type": "string" },
-              "files": { "type": "array", "items": { "type": "string" } }
+              "evidence_id": {
+                "type": "string"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
             }
           }
         },
@@ -27,18 +46,30 @@
           "type": "object",
           "additionalProperties": {
             "type": "object",
-            "required": ["files"],
+            "required": [
+              "files"
+            ],
             "properties": {
-              "evidence_id": { "type": "string" },
+              "evidence_id": {
+                "type": "string"
+              },
               "files": {
                 "type": "array",
-                "items": { "type": "string" }
+                "items": {
+                  "type": "string"
+                }
               },
-              "title": { "type": "string" },
-              "category": { "type": "string" },
+              "title": {
+                "type": "string"
+              },
+              "category": {
+                "type": "string"
+              },
               "artifacts": {
                 "type": "array",
-                "items": { "type": "string" }
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "additionalProperties": true
@@ -46,20 +77,28 @@
         }
       ]
     },
-    "map": {
+    "mappings": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["report", "metrics", "stamp"],
+        "required": [
+          "report",
+          "metrics",
+          "stamp"
+        ],
         "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
-        },
-        "additionalProperties": true
+          "report": {
+            "type": "string"
+          },
+          "metrics": {
+            "type": "string"
+          },
+          "stamp": {
+            "type": "string"
+          }
+        }
       }
     }
   },
-  "oneOf": [{ "required": ["items"] }, { "required": ["map"] }],
-  "additionalProperties": true
+  "additionalProperties": false
 }

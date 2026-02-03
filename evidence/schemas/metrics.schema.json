@@ -4,29 +4,59 @@
   "type": "object",
   "anyOf": [
     {
-      "required": ["evidence_id", "metrics"],
+      "required": [
+        "evidence_id",
+        "metrics"
+      ],
       "properties": {
-        "evidence_id": { "type": "string" },
+        "evidence_id": {
+          "type": "string"
+        },
         "metrics": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["name", "value", "unit"],
+            "required": [
+              "name",
+              "value",
+              "unit"
+            ],
             "properties": {
-              "name": { "type": "string" },
-              "value": { "type": "number" },
-              "unit": { "type": "string" },
-              "notes": { "type": "string" }
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              }
             }
           }
         }
       }
     },
     {
-      "required": ["evidence_id", "metrics"],
+      "required": [
+        "metrics"
+      ],
       "properties": {
-        "evidence_id": { "type": "string" },
-        "metrics": { "type": "object" }
+        "evidence_id": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string",
+              "boolean"
+            ]
+          }
+        }
       }
     }
   ],
