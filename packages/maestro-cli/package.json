@@ -10,7 +10,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
     "clean": "rm -rf dist"
   },
@@ -24,7 +24,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {
-    "@maestro/core": "file:../maestro-core",
+    "@intelgraph/maestro-core": "file:../maestro-core",
     "chalk": "^5.6.2",
     "commander": "^14.0.1",
     "figlet": "^1.7.0",

@@ -1,50 +1,110 @@
+# sync-branch-protection.yml
+# Automatically syncs REQUIRED_CHECKS_POLICY.yml to GitHub branch protection
+#
+# Runs on push to policy file or manual dispatch.
+# Uses reconcile_branch_protection.sh in apply mode.
+#
+# Authority: docs/ci/BRANCH_PROTECTION_RECONCILIATION.md
+
 name: Sync Branch Protection
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+      - "docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
   workflow_dispatch:
     inputs:
-      apply:
-        description: 'Apply changes to GitHub'
+      branch:
+        description: "Branch to sync"
+        default: "main"
+        type: string
+      dry_run:
+        description: "Dry run (generate plan only)"
         type: boolean
-        required: false
         default: false
-  schedule:
-    - cron: '0 8 * * *' # Daily at 8am UTC
+
+permissions:
+  contents: read
+  issues: write
+
+env:
+  OUT_DIR: artifacts/release-train
 
 jobs:
-  sync-protection:
+  sync:
     name: Sync Branch Protection
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      administration: write
+    environment: production-admin
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Validate Token
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}
+        run: |
+          if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+            echo "::error::BRANCH_PROTECTION_ADMIN_TOKEN is required for sync."
+            exit 1
+          fi
 
       - name: Sync Branch Protection
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}
         run: |
-          APPLY_FLAG=""
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.apply }}" == "true" ]]; then
-            APPLY_FLAG="--apply"
+          mkdir -p "${{ env.OUT_DIR }}"
+          chmod +x scripts/release/reconcile_branch_protection.sh
+          chmod +x scripts/release/extract_required_checks_from_policy.sh
+
+          BRANCH="main"
+          MODE="apply"
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            BRANCH="${{ github.event.inputs.branch }}"
+            if [[ "${{ github.event.inputs.dry_run }}" == "true" ]]; then
+              MODE="plan"
+            fi
           fi
 
-          echo "Running with flag: $APPLY_FLAG (Empty means Dry Run)"
-          node scripts/ci/sync-branch-protection.mjs $APPLY_FLAG
+          echo "Syncing branch: $BRANCH (Mode: $MODE)"
+
+          ARGS=""
+          if [[ "$MODE" == "apply" ]]; then
+            ARGS="--mode apply --i-understand-admin-required true"
+          else
+            ARGS="--mode plan"
+          fi
+
+          ./scripts/release/reconcile_branch_protection.sh \
+            --repo "${{ github.repository }}" \
+            --branch "$BRANCH" \
+            --out-dir "${{ env.OUT_DIR }}" \
+            --verbose \
+            $ARGS
+
+      - name: Upload Report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: sync-report
+          path: |
+            ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md
+            ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.json
+          retention-days: 30
+
+      - name: Summary
+        run: |
+          echo "## Sync Result" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md" ]]; then
+            cat "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md" >> $GITHUB_STEP_SUMMARY
+          fi

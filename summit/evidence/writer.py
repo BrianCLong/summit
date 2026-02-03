@@ -77,3 +77,29 @@ def init_evidence_bundle(root: Path, *, run_id: str) -> EvidencePaths:
     })
 
     return p
+
+def init_evidence(paths: EvidencePaths, run_id: str, item_slug: str, evidence_id: Optional[str] = None) -> None:
+    """
+    Initialize evidence files with deterministic structure.
+    No timestamps are allowed in these files (use stamp.json for that).
+    """
+    eid = evidence_id or f"EVD-AGENT-{run_id}"
+    write_json(paths.report, {
+        "run_id": run_id,
+        "item_slug": item_slug,
+        "events": [],
+        "evidence_id": eid,
+        "summary": f"Report for {item_slug}",
+        "item": {"id": item_slug},
+        "artifacts": []
+    })
+    write_json(paths.metrics, {
+        "run_id": run_id,
+        "item_slug": item_slug,
+        "metrics": {},
+        "evidence_id": eid
+    })
+    write_json(paths.index, {
+        "run_id": run_id,
+        "evidence": {}
+    })

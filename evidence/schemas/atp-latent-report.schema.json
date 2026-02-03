@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ATP-Latent Evidence Report",
+  "type": "object",
+  "required": ["item", "run", "summary"],
+  "properties": {
+    "item": {
+      "type": "object",
+      "required": ["id", "source"],
+      "properties": {
+        "id": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    },
+    "run": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "flags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail"] },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": true
+}
