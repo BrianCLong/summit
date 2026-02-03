@@ -1,0 +1,31 @@
+name: Hono Version Gate
+
+on:
+  pull_request:
+    paths:
+      - 'packages/hono-server/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  hono-version-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          dest: ~/setup-pnpm
+          run_install: |
+            - recursive: true
+              args: [--frozen-lockfile, --strict-peer-dependencies]
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Verify Hono Version
+        run: |
+          cd packages/hono-server
+          pnpm list hono
