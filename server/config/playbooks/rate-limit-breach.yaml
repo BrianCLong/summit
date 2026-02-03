@@ -1,0 +1,45 @@
+id: rate-limit-breach
+name: Rate Limit Breach Remediation
+description: Automatically mitigate rate limit breaches by enabling stricter limits and scaling capacity
+triggerPatterns:
+  - rate.?limit
+  - too.?many.?requests
+  - 429
+severity:
+  - high
+  - critical
+steps:
+  - name: Enable emergency rate limiting
+    actionType: enable_rate_limit
+    parameters:
+      limit: 100
+      window: 60
+      scope: global
+    onFailure: continue
+  
+  - name: Scale API pods
+    actionType: scale_pods
+    parameters:
+      deployment: api-server
+      replicas: 10
+    onFailure: continue
+  
+  - name: Clear API cache
+    actionType: clear_cache
+    parameters:
+      cache: api-response-cache
+    onFailure: continue
+
+rollbackSteps:
+  - name: Restore normal rate limits
+    actionType: enable_rate_limit
+    parameters:
+      limit: 1000
+      window: 60
+      scope: global
+  
+  - name: Scale down to normal capacity
+    actionType: scale_pods
+    parameters:
+      deployment: api-server
+      replicas: 3
