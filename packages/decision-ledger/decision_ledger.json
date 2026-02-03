@@ -170,20 +170,20 @@
     "reverted": false
   },
   {
-    "id": "portal-kombat-venezuela-io-001",
-    "timestamp": "2026-02-02T00:00:00Z",
+    "id": "io-cogwar-radar-brief-20260202",
+    "timestamp": "2026-02-02T09:29:45Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiAicG9ydGFsIGtvbWJhdCB2ZW5lenVlbGEgZXZpZGVuY2Ugc2NhZmZvbGQgKyB0aW1lc3RhbXAgZ3VhcmQiLCAiZmlsZXMiOiBbImV2aWRlbmNlL3BvcnRhbC1rb21iYXQtdmVuZXp1ZWxhLyIsICJldmlkZW5jZS9pbmRleC5qc29uIiwgInN1bW1pdC9pby9ldmlkZW5jZS92YWxpZGF0ZS5weSIsICJ0ZXN0cy9pby90ZXN0X2V2aWRlbmNlX3NjaGVtYXMucHkiXX0=",
+    "inputHash": "eyJjaGFuZ2UiOiJBZGQgSU8vQ29nV2FyIHJhZGFyIGJyaWVmLCBwcm9tcHQgcmVnaXN0cnkgZW50cnksIHRhc2sgc3BlYywgYW5kIHJvYWRtYXAgdXBkYXRlIiwiZmlsZXMiOlsiZG9jcy9icmllZnMvaW8tY29nd2FyLXJhZGFyLTIwMjcubWQiLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iLCJwcm9tcHRzL2RvY3MvaW8tY29nd2FyLXJhZGFyLWJyaWVmQHYxLm1kIiwicHJvbXB0cy9yZWdpc3RyeS55YW1sIiwiYWdlbnRzL2V4YW1wbGVzL0lPX0NPR1dBUl9SQURBUl9CUklFRl8yMDI2MDIwMi5qc29uIiwicGFja2FnZXMvZGVjaXNpb24tbGVkZ2VyL2RlY2lzaW9uX2xlZGdlci5qc29uIl19",
     "decision": {
-      "action": "scaffold_portal_kombat_venezuela_evidence",
+      "action": "document_cogwar_radar_brief",
       "rule": {
-        "condition": "portal kombat evidence bundle and validator guard required",
-        "action": "scaffold_portal_kombat_venezuela_evidence",
+        "condition": "defensive IO/CogWar brief required with governance artifacts",
+        "action": "document_cogwar_radar_brief",
         "max_cost": 0
       }
     },
-    "reasoning": "Created Portal Kombat Venezuela evidence bundle, index entries, timestamp guard, prompt/task registration, and roadmap status update. Rollback: revert commit adding evidence bundle, validator guard, registry entry, task spec, and status file.",
+    "reasoning": "Documented IO/CogWar radar brief with evidence-first structure, registered the prompt/task spec, updated roadmap status, and recorded rollback guidance.",
     "reverted": false
   }
 ]
