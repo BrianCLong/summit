@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-05T00:00:00Z",
   "initiatives": [
     {
       "id": "sera-cli-proxy",
@@ -54,6 +54,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
+    },
+    {
+      "id": "launchpad-schemas-validators",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Launchpad schema definitions, validators, and deny-by-default tests for agent discovery."
     }
   ]
 }
