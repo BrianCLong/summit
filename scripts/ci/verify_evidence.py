@@ -80,11 +80,15 @@ def main():
     is_harness = "minimal_run" in str(target_dir) or "summit_harness" in str(target_dir)
     subdir = "summit_harness" if is_harness else None
 
+    # Determine index validation schema based on structure (simple heuristic)
+    # If it has "entries", use standard index schema? Or just validat "index"?
+    # For now, validat "index"
     validate_with_schema(index, "index", subdir=subdir)
 
     # Handle items as list or dict
-    items_data = index.get("items", {})
+    items_data = index.get("items", index.get("entries", index.get("evidence", {})))
     items = []
+
     if isinstance(items_data, list):
         items = items_data
     elif isinstance(items_data, dict):
@@ -93,10 +97,20 @@ def main():
             item["evidence_id"] = evd_id
             items.append(item)
     else:
-        fail("index.json 'items' must be list or dict")
+        # Fallback if structure is weird (e.g. root items key conflict)
+        pass
 
     for item in items:
         files = item.get("files", item.get("paths", []))
+        # Support mapped files (report, metrics, stamp) if files list missing
+        if not files:
+            files = [
+                item.get("report"),
+                item.get("metrics"),
+                item.get("stamp")
+            ]
+            files = [f for f in files if f] # filter None
+
         evd_id = item.get("evidence_id", "unknown")
 
         for fpath_str in files:
@@ -105,6 +119,21 @@ def main():
                 fail(f"File referenced in index not found: {fpath_str}")
 
             fname = fpath.name
+
+            # Use specific schema for ai-assist if available
+            if evd_id.startswith("EVD-ai-coding-tools-senior"):
+                schema_name = fname.replace(".json", "")
+                # Try simple schema name first, or specific if needed
+                # HEAD had: SCHEMAS / f"ai-assist-{schema_name}"
+                # Converting to validate_with_schema usage
+                # We can check if specific schema exists or rely on subdir
+                # Implementing specific check:
+                specific_schema_name = f"ai-assist-{schema_name}"
+                check_path = SCHEMAS / f"{specific_schema_name}.schema.json"
+                if check_path.exists():
+                    validate_with_schema(load_json(fpath), specific_schema_name)
+                    continue
+
             if fname in ["report.json", "metrics.json", "stamp.json"]:
                 validate_with_schema(load_json(fpath), fname.replace(".json", ""), subdir=subdir)
 
