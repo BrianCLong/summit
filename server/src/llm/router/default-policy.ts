@@ -34,8 +34,13 @@ export class DefaultRoutingPolicy implements RoutingPolicy {
         }
     }
 
+    // 4. Trial Innovation Lane -> NVIDIA NIM Kimi K2.5
+    if (process.env.NVIDIA_NIM_API_KEY && (ctx.purpose === 'agent' || ctx.purpose === 'tool_call')) {
+        return { provider: 'nvidia-nim', model: 'moonshotai/kimi-k2.5', reason: 'innovation_lane_reasoning' };
+    }
+
     // Fallback to Mock if no keys
-    if (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY && !process.env.NVIDIA_NIM_API_KEY) {
         return { provider: 'mock', model: 'mock-model', reason: 'no_api_keys_configured' };
     }
 
