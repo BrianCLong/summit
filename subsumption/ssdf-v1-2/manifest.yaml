@@ -1,3 +1,4 @@
+version: "1.2.0"
 item:
   slug: ssdf-v1-2
   title: "NIST SSDF Version 1.2 (SP 800-218 Rev.1 IPD)"
