@@ -1,6 +1,7 @@
 import { LLMRouter } from './router.js';
 import { OpenAIProvider } from './providers/openai.js';
 import { MockProvider } from './providers/mock.js';
+import { NvidiaNimProvider } from './providers/nvidia-nim.js';
 import { CostControlPolicy, LatencyPolicy } from './policies/index.js';
 import { PIIGuardrail } from './safety.js';
 import { defaultConfig, LLMRouterConfig } from './config.js';
@@ -15,6 +16,16 @@ export function createLLMRouter(config: LLMRouterConfig = defaultConfig): LLMRou
 
     if (config.providers.openai.enabled && config.providers.openai.apiKey) {
         providers.push(new OpenAIProvider(config.providers.openai.apiKey));
+    }
+
+    if (config.providers.nvidiaNim.enabled && config.providers.nvidiaNim.apiKey) {
+        providers.push(new NvidiaNimProvider({
+            apiKey: config.providers.nvidiaNim.apiKey,
+            baseUrl: config.providers.nvidiaNim.baseUrl,
+            model: config.providers.nvidiaNim.model,
+            modeDefault: config.providers.nvidiaNim.modeDefault,
+            enableMultimodal: config.providers.nvidiaNim.enableMultimodal
+        }));
     }
 
     const policies: RoutingPolicy[] = [];
