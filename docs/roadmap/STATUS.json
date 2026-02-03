@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-04T00:00:00Z",
   "initiatives": [
     {
       "id": "sera-cli-proxy",
@@ -54,6 +54,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
+    },
+    {
+      "id": "observability-evidence-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence gate alignment, required checks mapping updates, and observability-ready evidence documentation."
     }
   ]
 }
