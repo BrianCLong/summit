@@ -1,4 +1,4 @@
-import type { ModelAdapter } from './model-adapter.ts';
+import type { ModelAdapter } from './model-adapter.js';
 import { randomUUID as uuidv4 } from 'crypto';
 // @ts-ignore
 import { default as pino } from 'pino';

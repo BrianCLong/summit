@@ -116,7 +116,7 @@ jest.unstable_mockModule('../../middleware/rbac.js', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { createApp } = await import('../../app');
+const { createApp } = await import('../../app.js');
 
 let app: express.Application;
 

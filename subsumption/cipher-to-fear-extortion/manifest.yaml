@@ -1,0 +1,28 @@
+version: 1.0.0
+item:
+  slug: item-unknown
+  title: "UNKNOWN (ITEM not provided)"
+  type: "unknown"
+  date: "unknown"
+  links: []
+claims:
+  registry: "subsumption/item-unknown/claims.yaml"
+required_checks:
+  discovery_status: "assumed"
+  checks:
+    - "subsumption-bundle-verify"
+prs:
+  - title: "feat(subsumption): add bundle manifest + evidence schemas"
+    lane: "foundation"
+    owner: "master"
+    risk: "green"
+gates:
+  - id: "subsumption-bundle-verify"
+    description: "Verify subsumption bundle completeness and determinism"
+evidence_ids:
+  - "EVD-ITEMUNKNOWN-FND-001"
+docs:
+  - "docs/standards/item-unknown.md"
+  - "docs/security/data-handling/item-unknown.md"
+  - "docs/ops/runbooks/item-unknown.md"
+feature_flags: []

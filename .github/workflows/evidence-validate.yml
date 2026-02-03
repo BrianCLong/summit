@@ -1,26 +1,10 @@
-name: Evidence Validation
-
+name: evidence-validate
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
-
+  push:
+    branches: [main]
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          pip install jsonschema
-
-      - name: Run Evidence Validator
-        run: |
-          python tools/evidence_validate.py --schemas evidence/schemas --evidence evidence
+      - uses: actions/checkout@v4

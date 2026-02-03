@@ -1,7 +1,5 @@
 {
-  "evidence_id": "EVD-260119895-keel-ARCH-001",
-  "item_slug": "260119895-keel",
-  "claims": ["Keel block implements LN_out(alpha * x + F(LN_in(x))) with explicit alpha."],
-  "decisions": [],
-  "findings": []
+  "evidence_id": "EVD-260119895-keel-BENCH-004",
+  "summary": "Template report summary",
+  "artifacts": []
 }

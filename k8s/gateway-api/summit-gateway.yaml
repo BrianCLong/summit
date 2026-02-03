@@ -1,0 +1,118 @@
+---
+# Primary Gateway for Summit platform external traffic
+# Replaces: ingress-nginx controller
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: summit-gateway
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: summit-gateway
+    app.kubernetes.io/part-of: summit-platform
+  annotations:
+    # cert-manager integration for automatic TLS
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  gatewayClassName: envoy
+
+  # Infrastructure configuration
+  infrastructure:
+    labels:
+      app.kubernetes.io/name: summit-gateway
+    annotations:
+      # Cloud provider annotations for LoadBalancer
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+
+  listeners:
+    # HTTPS listener for production traffic
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.intelgraph.io"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: intelgraph-wildcard-tls
+            namespace: envoy-gateway-system
+      allowedRoutes:
+        namespaces:
+          from: All
+        kinds:
+          - kind: HTTPRoute
+          - kind: GRPCRoute
+
+    # HTTP listener for redirect to HTTPS
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "*.intelgraph.io"
+      allowedRoutes:
+        namespaces:
+          from: All
+        kinds:
+          - kind: HTTPRoute
+
+    # Dedicated listener for API subdomain
+    - name: api-https
+      protocol: HTTPS
+      port: 443
+      hostname: "api.intelgraph.io"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: api-intelgraph-tls
+            namespace: envoy-gateway-system
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway-access: api
+        kinds:
+          - kind: HTTPRoute
+          - kind: GRPCRoute
+
+    # Sandbox API listener
+    - name: sandbox-https
+      protocol: HTTPS
+      port: 443
+      hostname: "sandbox-api.intelgraph.io"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: sandbox-api-tls
+            namespace: envoy-gateway-system
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway-access: sandbox
+        kinds:
+          - kind: HTTPRoute
+
+---
+# HTTP to HTTPS redirect route
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-to-https-redirect
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: http-redirect
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  parentRefs:
+    - name: summit-gateway
+      sectionName: http
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301

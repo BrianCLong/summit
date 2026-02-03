@@ -1,9 +1,9 @@
 
-import { MaestroTask } from './model';
-import { MaestroEngine } from './engine';
-import { MaestroAgentService } from './agent_service';
-import { logger } from '../utils/logger';
-import { DiffusionCoderAdapter } from './adapters/diffusion_coder';
+import { MaestroTask } from './model.js';
+import { MaestroEngine } from './engine.js';
+import { MaestroAgentService } from './agent_service.js';
+import { logger } from '../utils/logger.js';
+import { DiffusionCoderAdapter } from './adapters/diffusion_coder.js';
 
 // Mock Interfaces for Integrations
 interface LLMService {

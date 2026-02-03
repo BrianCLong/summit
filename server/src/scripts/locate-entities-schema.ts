@@ -1,5 +1,5 @@
-import { getPostgresPool, closePostgresPool } from '../db/postgres';
-import logger from '../config/logger';
+import { getPostgresPool, closePostgresPool } from '../db/postgres.js';
+import logger from '../config/logger.js';
 
 async function locateSchema() {
   const pool = getPostgresPool();

@@ -2,7 +2,7 @@
  * Threat hunting types
  */
 
-import { ThreatCategory, ThreatSeverity } from './events';
+import { ThreatCategory, ThreatSeverity } from './events.js';
 
 export enum HuntType {
   HYPOTHESIS_DRIVEN = 'HYPOTHESIS_DRIVEN',

@@ -1,0 +1,16 @@
+{
+  "claims": [
+    {
+      "backing": "ITEM:CLAIM-02",
+      "claim_id": "ITEM:CLAIM-02"
+    }
+  ],
+  "decisions": [
+    "Workflow wiring defined for verifier and deny gates.",
+    "Required check discovery remains assumed until verified."
+  ],
+  "evidence_id": "EVD-INGNGX-GOV-004",
+  "generated_by": "manual",
+  "item_slug": "ingress-nginx-retirement",
+  "notes": ["workflow_skeleton_ready"]
+}

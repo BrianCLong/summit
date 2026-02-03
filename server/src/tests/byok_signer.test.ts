@@ -1,4 +1,4 @@
-import { KmsSigner } from '../products/Signer';
+import { KmsSigner } from '../products/Signer.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('KmsSigner', () => {
