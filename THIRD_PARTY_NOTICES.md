@@ -1,7 +1,8 @@
 # Third Party Notices
 
-This project derives concepts from the following third-party sources:
+This project incorporates the following third-party materials:
 
+## Cosmos Server Ecosystem
 - **Cosmos Server**: Official documentation and website.
   - Source: [https://cosmos-cloud.io/](https://cosmos-cloud.io/)
   - Concepts: Reverse proxy integration with security settings, "sudo mode" for admin elevation.
@@ -14,3 +15,13 @@ This project derives concepts from the following third-party sources:
 - **Noted.lol**: "Introducing Cosmos" writeup.
   - Source: [https://noted.lol/cosmos-server/](https://noted.lol/cosmos-server/)
   - Concepts: Integrated experience tying proxy to security.
+
+## Qwen3-ASR-0.6B
+- **Model Card**: [Qwen/Qwen3-ASR-0.6B](https://huggingface.co/Qwen/Qwen3-ASR-0.6B)
+- **License**: Apache-2.0
+- **Technical Report**: [arXiv:2601.21337](https://arxiv.org/abs/2601.21337)
+
+## vLLM
+- **Project**: [vLLM](https://github.com/vllm-project/vllm)
+- **License**: Apache-2.0
+- **Usage**: Used as an optional high-throughput backend for ASR inference.

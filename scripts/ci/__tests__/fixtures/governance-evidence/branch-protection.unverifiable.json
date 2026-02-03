@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "permission",
+    "http_status": 403
+  },
+  "kind": "branch_protection_audit",
+  "schema_version": 1,
+  "state": "UNVERIFIABLE_PERMISSIONS",
+  "target_branch": "main"
+}
