@@ -1,6 +1,7 @@
+import time
 from dataclasses import dataclass
 from enum import Enum
-import time
+
 
 class State(str, Enum):
   CLOSED = "closed"

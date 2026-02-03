@@ -1,13 +1,13 @@
 # Dependency Delta
 
-**PR Number:** #
-**Date:** YYYY-MM-DD
+## Summary
 
-## Changes
-<!-- List added/removed/updated dependencies -->
+- Added: none
+- Removed: none
+- Updated: none
 
-## Rationale
-<!-- Why were these changes made? -->
+## Notes
 
-## Risk Assessment
-<!-- Any known risks? -->
+- Rationale: Evidence schema test hardening and governance metadata updates only.
+- Risk: None (no dependency changes).
+- Rollback: Revert this change.

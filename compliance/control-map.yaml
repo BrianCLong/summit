@@ -83,7 +83,7 @@ controls:
     summit_artifacts:
       - "docs/models/MODEL_CARD_TEMPLATE.md"
     evidence:
-      - "docs/models/"
+      - "repo/docs/models/"
     status: covered
     owner: "data-science-team"
 

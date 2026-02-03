@@ -2,26 +2,26 @@ name: Supply Chain Gates
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '**/package.json'
-      - 'packages/supplychain-guard/**'
-      - 'scripts/ci/ai_upgrade_grounding_gate.mjs'
-      - 'scripts/ci/dependency_intake_gate.mjs'
-      - 'scripts/ci/dev_threat_audit_gate.mjs'
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "**/package.json"
+      - "packages/supplychain-guard/**"
+      - "scripts/ci/ai_upgrade_grounding_gate.mjs"
+      - "scripts/ci/dependency_intake_gate.mjs"
+      - "scripts/ci/dev_threat_audit_gate.mjs"
 
 jobs:
   supply-chain-gates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -37,7 +37,7 @@ jobs:
 
       - name: Upload Evidence
         if: always()
-        uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: supplychain-evidence
           path: artifacts/supplychain/

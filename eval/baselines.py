@@ -3,11 +3,10 @@ from __future__ import annotations
 import os
 from typing import Any, Dict, List
 
-
 DEFAULT_BASELINE_PATH = os.path.join(os.path.dirname(__file__), "baselines.yaml")
 
 
-def load_baselines(path: str = DEFAULT_BASELINE_PATH) -> Dict[str, Any]:
+def load_baselines(path: str = DEFAULT_BASELINE_PATH) -> dict[str, Any]:
     if not os.path.exists(path):
         return {}
     import yaml
@@ -17,7 +16,7 @@ def load_baselines(path: str = DEFAULT_BASELINE_PATH) -> Dict[str, Any]:
     return data or {}
 
 
-def resolve_suite_id(suite: Dict[str, Any], suite_path: str) -> str:
+def resolve_suite_id(suite: dict[str, Any], suite_path: str) -> str:
     if suite and suite.get("id"):
         return str(suite["id"])
     filename = os.path.basename(suite_path)
@@ -25,8 +24,8 @@ def resolve_suite_id(suite: Dict[str, Any], suite_path: str) -> str:
 
 
 def evaluate_thresholds(
-    results: List[Dict[str, Any]], baselines: Dict[str, Any], suite_id: str
-) -> List[Dict[str, Any]]:
+    results: list[dict[str, Any]], baselines: dict[str, Any], suite_id: str
+) -> list[dict[str, Any]]:
     suites = baselines.get("suites", {})
     suite_cfg = suites.get(suite_id, {})
     if not suite_cfg:
@@ -34,7 +33,7 @@ def evaluate_thresholds(
 
     gates = suite_cfg.get("gates", {})
     tasks_cfg = suite_cfg.get("tasks", {})
-    failures: List[Dict[str, Any]] = []
+    failures: list[dict[str, Any]] = []
 
     for result in results:
         task_name = result.get("task")

@@ -1,6 +1,8 @@
-import unittest
 import os
-from summit.agents.sandbox import sandbox_enabled, run_tool, SandboxDeny
+import unittest
+
+from summit.agents.sandbox import SandboxDeny, run_tool, sandbox_enabled
+
 
 class TestSandbox(unittest.TestCase):
     def test_sandbox_default_off(self):

@@ -1,10 +1,11 @@
-import pytest
+import json
 import os
 import shutil
 import subprocess
 import sys
-import json
 from pathlib import Path
+
+import pytest
 
 # Locate the script relative to this test file
 REPO_ROOT = Path(__file__).resolve().parents[1]

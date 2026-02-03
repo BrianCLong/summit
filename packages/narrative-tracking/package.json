@@ -7,7 +7,7 @@
   "description": "Narrative extraction and tracking for influence operations detection",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

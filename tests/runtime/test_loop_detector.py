@@ -1,5 +1,6 @@
 from summit.runtime.loop_detector import LoopDetector
 
+
 def test_no_loop_initially():
     ld = LoopDetector()
     assert not ld.update("action1")

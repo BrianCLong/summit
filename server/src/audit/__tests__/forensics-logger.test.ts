@@ -8,7 +8,7 @@ import type {
   ForensicsEvent,
   ActorInfo,
   TargetInfo,
-} from '../forensics-logger.ts';
+} from '../forensics-logger.js';
 
 // Mock Redis with stream support
 jest.unstable_mockModule('ioredis', () => {
@@ -60,9 +60,9 @@ jest.unstable_mockModule('ioredis', () => {
 });
 
 describe('ForensicsLogger', () => {
-  let ForensicsLogger: typeof import('../forensics-logger.ts').ForensicsLogger;
-  let getForensicsLogger: typeof import('../forensics-logger.ts').getForensicsLogger;
-  let resetForensicsLogger: typeof import('../forensics-logger.ts').resetForensicsLogger;
+  let ForensicsLogger: typeof import('../forensics-logger.js').ForensicsLogger;
+  let getForensicsLogger: typeof import('../forensics-logger.js').getForensicsLogger;
+  let resetForensicsLogger: typeof import('../forensics-logger.js').resetForensicsLogger;
   let logger: ForensicsLogger;
 
   const testActor: ActorInfo = {
@@ -84,7 +84,7 @@ describe('ForensicsLogger', () => {
   };
 
   beforeAll(async () => {
-    const module = await import('../forensics-logger.ts');
+    const module = await import('../forensics-logger.js');
     ForensicsLogger = module.ForensicsLogger;
     getForensicsLogger = module.getForensicsLogger;
     resetForensicsLogger = module.resetForensicsLogger;

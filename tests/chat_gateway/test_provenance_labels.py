@@ -1,5 +1,6 @@
 from summit.chat_gateway.connectors.mock import MockConnector
 
+
 def test_mock_applies_untrusted_provenance_by_default():
     conn = MockConnector(incoming=[{"text": "hello"}])
     msg = conn.receive()

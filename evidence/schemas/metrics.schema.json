@@ -1,23 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Metrics",
+  "title": "summit evidence metrics",
   "type": "object",
+  "required": ["metrics"],
   "properties": {
-    "latency_ms_p95": { "type": "number" },
-    "ead": {
-      "type": "object",
-      "properties": {
-        "precision": { "type": "number" },
-        "recall": { "type": "number" }
-      }
-    },
-    "bias": {
-      "type": "object",
-      "properties": {
-        "by_language": { "type": "object" },
-        "by_region": { "type": "object" },
-        "by_demographic_proxy": { "type": "object" }
-      }
-    }
-  }
+    "evidence_id": { "type": "string" },
+    "metrics": { "type": "object", "additionalProperties": { "type": ["number","string","boolean"] } }
+  },
+  "additionalProperties": false
 }

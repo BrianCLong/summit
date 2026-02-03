@@ -1,11 +1,20 @@
-# Weekly GA Ops Snapshot
+# Weekly Ops Snapshot
 
-**Week:** 2026-01-26
-**Status:** ACTIVE
+**Date:** 2026-01-25
+**Status:** Closed
+**Release Captain:** Jules
 
-## Mid-Cycle FIX Status
+## Rollover Set
 
-| Signal | Owner | Progress Status | SLA Risk | Evidence | Escalation |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `apps/webapp` Testing (React 19) | `@acme/ops-team` (Orion) | `NO SIGNAL` | **AT RISK** | `PENDING` | Escalated to Orion (CI/Reliability) |
-| `pnpm lint` (Chalk) | `@acme/platform-core` | `IN PROGRESS` | **ON TRACK** | [Commit 049f21c](https://github.com/BrianCLong/summit/commit/049f21c) | None |
+*   **FIX (Escalated):** None
+*   **MONITOR (Continue):** None
+*   **ACCEPT (Future Expiry):** None
+
+## Weekly Closure Declaration
+
+*   Week closed as of 2026-01-25
+*   **Summary counts:**
+    *   Closed: 0
+    *   Rolled forward: 0
+    *   Escalated: 0
+*   No other risks, signals, or actions are carried forward.

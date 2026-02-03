@@ -10,18 +10,18 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-import { ProofCarryingPublisher } from '../proof-carrying-publisher';
-import { HashTreeBuilder } from '../hash-tree-builder';
-import { ModelCardGenerator } from '../model-card-generator';
-import { DisclosurePackager, AudienceScopes } from '../disclosure-packager';
-import { RevocationRegistry } from '../revocation-registry';
-import { CitationValidator, StandardLicenses } from '../citation-validator';
-import { BundleVerifier } from '../bundle-verifier';
+import { ProofCarryingPublisher } from '../proof-carrying-publisher.js';
+import { HashTreeBuilder } from '../hash-tree-builder.js';
+import { ModelCardGenerator } from '../model-card-generator.js';
+import { DisclosurePackager, AudienceScopes } from '../disclosure-packager.js';
+import { RevocationRegistry } from '../revocation-registry.js';
+import { CitationValidator, StandardLicenses } from '../citation-validator.js';
+import { BundleVerifier } from '../bundle-verifier.js';
 import type {
   Citation,
   LicenseInfo,
   AudienceScope,
-} from '../proof-carrying-types';
+} from '../proof-carrying-types.js';
 
 describe('Proof-Carrying Publishing', () => {
   let tempDir: string;

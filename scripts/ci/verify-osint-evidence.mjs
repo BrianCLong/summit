@@ -27,11 +27,18 @@ const targetDirs = ['docs/osint'];
 const specificFiles = ['docs/governance/OSINT_EVIDENCE_POLICY.md'];
 let hasError = false;
 
-targetDirs.forEach(dir => {
+function walkDir(dir, callback) {
   if (!fs.existsSync(dir)) return;
-  const files = fs.readdirSync(dir).filter(f => f.endsWith('.md'));
-  files.forEach(file => {
-    const filepath = path.join(dir, file);
+  fs.readdirSync(dir).forEach(f => {
+    const dirPath = path.join(dir, f);
+    const isDirectory = fs.statSync(dirPath).isDirectory();
+    isDirectory ? walkDir(dirPath, callback) : callback(dirPath);
+  });
+}
+
+targetDirs.forEach(dir => {
+  walkDir(dir, (filepath) => {
+    if (!filepath.endsWith('.md')) return;
     const missing = verifyFile(filepath);
     if (missing.length > 0) {
       console.error(`❌ [OSINT-GOV] ${filepath} is missing mandatory headers: ${missing.join(', ')}`);

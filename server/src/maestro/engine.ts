@@ -2,18 +2,18 @@
 import {
   MaestroTemplate, MaestroRun, MaestroTask,
   RunId, TaskId, TemplateId, TenantId
-} from './model';
-import { MaestroDSL } from './dsl';
+} from './model.js';
+import { MaestroDSL } from './dsl.js';
 import { Pool } from 'pg';
 import { Queue, Worker, QueueEvents } from 'bullmq';
-import { logger } from '../utils/logger';
-import { coordinationService } from './coordination/service';
+import { logger } from '../utils/logger.js';
+import { coordinationService } from './coordination/service.js';
 import * as crypto from 'node:crypto';
 import {
   TransitionReceiptInput,
   emitTransitionReceipt,
 } from './evidence/transition-receipts.js';
-import { ForkDetector } from '@maestro/core';
+import { ForkDetector } from '@intelgraph/maestro-core';
 
 // Interface for dependencies
 interface MaestroDependencies {
@@ -100,7 +100,22 @@ export class MaestroEngine {
       [templateId, tenantId]
     );
     if (res.rows.length === 0) throw new Error(`Template not found: ${templateId}`);
-    const template: MaestroTemplate = res.rows[0]; // TODO: Map snake_case to camelCase
+    
+    const row = res.rows[0];
+    const template: MaestroTemplate = {
+      id: row.id,
+      tenantId: row.tenant_id,
+      name: row.name,
+      version: row.version,
+      description: row.description,
+      kind: row.kind,
+      inputSchema: row.input_schema,
+      outputSchema: row.output_schema,
+      spec: row.spec,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      metadata: row.metadata
+    };
 
     // 2. Validate Input (stub)
     // TODO: Validate input against template.inputSchema

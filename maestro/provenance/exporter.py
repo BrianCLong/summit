@@ -1,12 +1,12 @@
-from typing import List, Optional
 import logging
+from typing import List, Optional
 
 try:
-    from prov.model import ProvDocument, PROV_ROLE, PROV_TYPE
+    from prov.model import PROV_ROLE, PROV_TYPE, ProvDocument
 except ImportError:
     ProvDocument = None
 
-from maestro.models import Run, Artifact, ArtifactKind
+from maestro.models import Artifact, ArtifactKind, Run
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ class ProvenanceExporter:
         if not ProvDocument:
             logger.warning("prov library not found. Provenance export will fail.")
 
-    def export_run(self, run: Run, artifacts: List[Artifact]) -> Optional[ProvDocument]:
+    def export_run(self, run: Run, artifacts: list[Artifact]) -> Optional[ProvDocument]:
         """
         Convert a Run and its Artifacts into a PROV document.
         """

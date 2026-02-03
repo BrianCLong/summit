@@ -1,12 +1,12 @@
-import os
 import logging
+import os
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 try:
     import psycopg2
-    from psycopg2.extras import RealDictCursor
     from neo4j import GraphDatabase
+    from psycopg2.extras import RealDictCursor
 except ImportError:
     psycopg2 = None
     GraphDatabase = None

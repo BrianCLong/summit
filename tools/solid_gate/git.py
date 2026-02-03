@@ -1,7 +1,8 @@
 import subprocess
 from typing import List, Tuple
 
-def get_changed_files(base_ref: str, head_ref: str = "HEAD") -> List[str]:
+
+def get_changed_files(base_ref: str, head_ref: str = "HEAD") -> list[str]:
     """Returns a list of changed files between base_ref and head_ref."""
     try:
         cmd = ["git", "diff", "--name-only", f"{base_ref}...{head_ref}"]
@@ -16,9 +17,9 @@ def get_changed_files(base_ref: str, head_ref: str = "HEAD") -> List[str]:
 def get_file_content(filepath: str) -> str:
     """Reads file content from disk."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             return f.read()
-    except (IOError, UnicodeDecodeError):
+    except (OSError, UnicodeDecodeError):
         return ""
 
 def get_diff_content(base_ref: str, filepath: str) -> str:

@@ -1,6 +1,7 @@
-import re
 import os
-from typing import List, Set, Callable, Optional
+import re
+from typing import Callable, List, Optional, Set
+
 from .schema import Finding
 
 # Configuration
@@ -25,7 +26,7 @@ def is_source_file(filepath: str) -> bool:
     _, ext = os.path.splitext(filepath)
     return ext in SRC_EXTENSIONS
 
-def check_tests_touched(changed_files: List[str]) -> List[Finding]:
+def check_tests_touched(changed_files: list[str]) -> list[Finding]:
     findings = []
     has_src_change = any(is_source_file(f) and not is_test_file(f) for f in changed_files)
     has_test_change = any(is_test_file(f) for f in changed_files)
@@ -38,7 +39,7 @@ def check_tests_touched(changed_files: List[str]) -> List[Finding]:
         ))
     return findings
 
-def check_proto_pollution(filepath: str, content: str) -> List[Finding]:
+def check_proto_pollution(filepath: str, content: str) -> list[Finding]:
     findings = []
     if not (filepath.endswith('.ts') or filepath.endswith('.js') or filepath.endswith('.tsx') or filepath.endswith('.jsx')):
         return findings
@@ -60,7 +61,7 @@ def check_proto_pollution(filepath: str, content: str) -> List[Finding]:
                 ))
     return findings
 
-def check_file_smells(filepath: str, content: str) -> List[Finding]:
+def check_file_smells(filepath: str, content: str) -> list[Finding]:
     findings = []
     lines = content.splitlines()
 
@@ -75,7 +76,7 @@ def check_file_smells(filepath: str, content: str) -> List[Finding]:
 
     return findings
 
-def check_rules(changed_files: List[str], file_reader: Callable[[str], str]) -> List[Finding]:
+def check_rules(changed_files: list[str], file_reader: Callable[[str], str]) -> list[Finding]:
     all_findings = []
 
     # 1. Global checks

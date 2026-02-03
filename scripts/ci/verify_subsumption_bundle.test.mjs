@@ -1,47 +1,66 @@
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
-import process from "node:process";
-import assert from "node:assert";
 
-const verifier = path.resolve("scripts/ci/verify_subsumption_bundle.mjs");
-const fixturesRoot = path.resolve("scripts/ci/__fixtures__/subsumption");
+const verifier = "scripts/ci/verify_subsumption_bundle.mjs";
+const manifest = "subsumption/item-unknown/manifest.yaml";
 
-function runVerifier(fixtureName, item) {
-  const fixturePath = path.join(fixturesRoot, fixtureName);
-  const result = spawnSync("node", [verifier, "--item", item], {
-    env: { ...process.env, TEST_ROOT: fixturePath },
-    encoding: "utf8"
-  });
-  return result;
+function run(args) {
+  return spawnSync("node", [verifier, ...args], { encoding: "utf8" });
 }
 
-console.log("Running Subsumption Verifier Tests...");
+console.log("Running Verifier Tests...");
 
-// Test 1: Valid Bundle
+// Test 1: Success case
 {
-  console.log("Test 1: Valid Bundle (item-test)");
-  const result = runVerifier("valid", "item-test");
+  const result = run([manifest]);
   if (result.status !== 0) {
-      console.error("STDOUT:", result.stdout);
-      console.error("STDERR:", result.stderr);
-      throw new Error(`Expected success (0), got ${result.status}`);
+    console.error("FAILED: Expected success, got:", result.status);
+    console.error(result.stderr);
+    process.exit(1);
   }
-  console.log("PASS");
+  console.log("PASS: Success case");
 }
 
-// Test 2: Invalid Bundle (Missing Index)
+// Test 2: Missing manifest
 {
-  console.log("Test 2: Invalid Bundle (Missing Index)");
-  const result = runVerifier("invalid-missing-index", "item-test");
+  const result = run(["non-existent.yaml"]);
   if (result.status === 0) {
-      console.error("STDOUT:", result.stdout);
-      console.error("STDERR:", result.stderr);
-      throw new Error(`Expected failure (!= 0), got ${result.status}`);
+    console.error("FAILED: Expected failure for missing manifest");
+    process.exit(1);
   }
-  if (!result.stderr.includes("Missing required target: evidence/index.json")) {
-      throw new Error(`Expected error message about missing index, got: ${result.stderr}`);
-  }
-  console.log("PASS");
+  console.log("PASS: Missing manifest case");
 }
 
-console.log("All tests passed.");
+// Test 3: Missing fixture (negative test)
+{
+  const denyPath = "subsumption/item-unknown/fixtures/deny/README.md";
+  const tempPath = denyPath + ".bak";
+
+  if (!fs.existsSync(denyPath)) {
+    console.error("FAILED: Deny fixture missing before test start");
+    process.exit(1);
+  }
+
+  fs.renameSync(denyPath, tempPath);
+
+  try {
+    const result = run([manifest]);
+
+    if (result.status === 0) {
+      console.error("FAILED: Expected failure for missing deny fixture");
+      process.exit(1);
+    }
+    if (!result.stderr.includes("Missing deny-by-default fixture")) {
+      console.error("FAILED: Wrong error message for missing fixture:", result.stderr);
+      process.exit(1);
+    }
+    console.log("PASS: Missing fixture case");
+  } finally {
+    if (fs.existsSync(tempPath)) {
+      fs.renameSync(tempPath, denyPath); // Restore
+    }
+  }
+}
+
+console.log("All tests passed!");

@@ -1,5 +1,5 @@
-# .github/workflows/subsumption-bundle-verify.yml
-name: subsumption-bundle-verify
+name: Subsumption Bundle Verify
+
 on:
   pull_request:
     paths:
@@ -7,13 +7,13 @@ on:
       - "scripts/ci/**"
       - "docs/**"
       - "evidence/**"
+
 jobs:
   subsumption-bundle-verify:
+    name: subsumption-bundle-verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Verify subsumption bundle
-        run: node scripts/ci/verify_subsumption_bundle.mjs --manifest subsumption/automation-turn-6/manifest.yaml
+      - name: Verify bundle
+        run: |
+          node scripts/ci/verify_subsumption_bundle.mjs subsumption/item-unknown/manifest.yaml

@@ -1,8 +1,9 @@
 import argparse
+import glob
 import hashlib
 import json
-import glob
 import os
+
 
 def hash_file(filepath):
     sha256 = hashlib.sha256()

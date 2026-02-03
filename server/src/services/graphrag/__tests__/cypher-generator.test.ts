@@ -1,6 +1,6 @@
 
 import { describe, expect, it, beforeEach } from '@jest/globals';
-import { CypherGenerator, CypherLlmInterface } from '../cypher-generator';
+import { CypherGenerator, CypherLlmInterface } from '../cypher-generator.js';
 
 // Mock LLM Adapter
 class MockCypherLlm implements CypherLlmInterface {

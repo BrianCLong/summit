@@ -1,9 +1,11 @@
 import json
 import os
 import shutil
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from tools.solid_gate import runner, rules, schema
+
+from tools.solid_gate import rules, runner, schema
 
 # Golden artifacts verification
 GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden")

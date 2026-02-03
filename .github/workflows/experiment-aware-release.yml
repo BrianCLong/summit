@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '18'
 
       # In a real scenario, this would install dependencies and run a script using the new package

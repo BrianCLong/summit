@@ -1,7 +1,9 @@
-import time
 import json
 import os
+import time
+
 from summit_emu3.backends.dummy import DummyBackend
+
 
 def benchmark_dummy():
     print("Benchmarking Dummy Backend...")

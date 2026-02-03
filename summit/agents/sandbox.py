@@ -1,5 +1,6 @@
 import os
 
+
 class SandboxDeny(Exception):
     """Exception raised when an agent tool execution is denied by the sandbox."""
     pass

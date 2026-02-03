@@ -1,6 +1,8 @@
 import pytest
+
 from summit.federation.protocol import PrivacyMechanism
 from summit.federation.validators import validate_update
+
 
 def test_federation_validation_valid():
     data = {

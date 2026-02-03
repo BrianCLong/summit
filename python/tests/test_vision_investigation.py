@@ -1,11 +1,13 @@
 import os
 import shutil
 import tempfile
+
 import pytest
-from PIL import Image
-from intelgraph_py.vision_investigation.tools import crop_image, rotate_image, measure_distance
-from intelgraph_py.vision_investigation.sandbox import SafeExecutor
 from intelgraph_py.vision_investigation.loop import VisionInvestigationLoop
+from intelgraph_py.vision_investigation.sandbox import SafeExecutor
+from intelgraph_py.vision_investigation.tools import crop_image, measure_distance, rotate_image
+from PIL import Image
+
 
 class MockLLM:
     def __init__(self, responses):
@@ -80,10 +82,10 @@ def test_sandbox_disallowed_builtins():
     res = executor.execute(code)
     # Should be caught by AST visitor checking for dunder calls or __import__
     if "error" in res:
-         assert "Security violation" in res["error"]
+        assert "Security violation" in res["error"]
     else:
-         # Should fail with NameError if not caught by AST (but we removed it from builtins)
-         assert False, "Should have failed"
+        # Should fail with NameError if not caught by AST (but we removed it from builtins)
+        raise AssertionError("Should have failed")
 
 def test_loop_pixel_budget(temp_image):
     # Set a small budget

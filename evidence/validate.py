@@ -1,8 +1,8 @@
-import json
-import sys
-import re
-from pathlib import Path
 import argparse
+import json
+import re
+import sys
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -64,32 +64,41 @@ def main():
     print(f"Index valid. {len(items)} items found.")
 
     for item in items:
-        # Validate item against item schema in index.schema.json (manually here)
-        if "id" not in item or "path" not in item:
-            fail(f"Item missing id or path: {item}")
+        if "id" in item and "path" in item:
+            # Check if path exists
+            item_path = ROOT / item["path"]
+            if not item_path.exists():
+                fail(f"Evidence file not found: {item_path}")
 
-        # Check if path exists
-        item_path = ROOT / item["path"]
-        if not item_path.exists():
-            fail(f"Evidence file not found: {item_path}")
-
-        # Load evidence report
-        report = load_json(item_path)
+            # Load evidence report
+            report = load_json(item_path)
+            item_id = item["id"]
+        elif "evidence_id" in item and "report" in item:
+            report_path = ROOT / item["report"]
+            if not report_path.exists():
+                fail(f"Evidence report not found: {report_path}")
+            report = load_json(report_path)
+            item_id = item["evidence_id"]
+        else:
+            fail(f"Item missing required fields: {item}")
 
         # Determine which schema to use.
-        if "summary" in report and "artifacts" in report:
+        if "summary" in report and "outputs" in report:
+             validate_schema(report, ROOT / "evidence" / "schemas" / "report.schema.json", context=item_id)
+             print(f"Validated {item_id} as Summit Report")
+        elif "summary" in report and "artifacts" in report:
             if "item_slug" in report and "area" in report:
-                validate_schema(report, ROOT / "evidence" / "schemas" / "agentic_report.schema.json", context=item['id'])
-                print(f"Validated {item['id']} as Agentic Report")
+                validate_schema(report, ROOT / "evidence" / "schemas" / "agentic_report.schema.json", context=item_id)
+                print(f"Validated {item_id} as Agentic Report")
             elif "evidence_id" in report:
-                validate_schema(report, ROOT / "evidence" / "schemas" / "ppgi_report.schema.json", context=item['id'])
-                print(f"Validated {item['id']} as PPGI Report")
+                validate_schema(report, ROOT / "evidence" / "schemas" / "ppgi_report.schema.json", context=item_id)
+                print(f"Validated {item_id} as PPGI Report")
             else:
-                print(f"WARN: Report {item['id']} has summary/artifacts but no known schema match.")
+                print(f"WARN: Report {item_id} has summary/artifacts but no known schema match.")
         elif "claims" in report:
-             print(f"Validated {item['id']} as Legacy Report")
+             print(f"Validated {item_id} as Legacy Report")
         else:
-             print(f"WARN: Unknown report format for {item['id']}")
+             print(f"WARN: Unknown report format for {item_id}")
 
     print("All evidence verified.")
 

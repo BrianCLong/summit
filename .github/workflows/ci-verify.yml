@@ -20,7 +20,7 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
+      - uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0 # Full history required for Gitleaks
 
@@ -30,10 +30,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: false # BLOCKING: secrets block merge
 
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: 9.12.0
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4.0.3
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -72,12 +70,12 @@ jobs:
     name: Policy Compliance
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
+      - uses: actions/checkout@v4 # v6
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.61.0
+          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
 
       - name: OPA policy check
         run: |
@@ -108,11 +106,9 @@ jobs:
     name: Governance Checks
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: 9.12.0
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4.0.3
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -149,9 +145,10 @@ jobs:
     name: MCP Tool UX Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Run MCP UX Linter
@@ -167,11 +164,9 @@ jobs:
     name: Provenance & SBOM
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: 9.12.0
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4.0.3
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -248,14 +243,12 @@ jobs:
     name: Schema Validation
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
+      - uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0 # Needed for schema diff
 
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: 9.12.0
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4.0.3
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -285,11 +278,9 @@ jobs:
     name: Compliance Evidence
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: 9.12.0
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4.0.3
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -319,9 +310,10 @@ jobs:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4.0.3
+      - uses: actions/checkout@v4 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
       - name: Ensure evidence bundle exists
         run: |

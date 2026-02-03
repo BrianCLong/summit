@@ -1,6 +1,8 @@
 import json
+
 import pytest
 from intelgraph_py.provenance.exporter import ProvenanceExporter
+
 
 def test_export_simple_graph():
     exporter = ProvenanceExporter()

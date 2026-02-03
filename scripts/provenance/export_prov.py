@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import json
-import uuid
 import sys
-from datetime import datetime, timezone
+import uuid
+from datetime import UTC, datetime, timezone
 
 """
 Summit Provenance Export Tool
@@ -112,7 +112,7 @@ def main():
         # Demonstration mode
         demo_event = {
             "eventType": "COMPLETE",
-            "eventTime": datetime.now(timezone.utc).isoformat(),
+            "eventTime": datetime.now(UTC).isoformat(),
             "run": {"runId": str(uuid.uuid4())},
             "job": {"namespace": "summit/airflow", "name": "osint_ingestion.validate_and_enrich"},
             "inputs": [{"namespace": "s3://raw-bucket", "name": "social_feeds/2024-01-20.jsonl"}],

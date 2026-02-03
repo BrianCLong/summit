@@ -1,7 +1,9 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Protocol, Optional
+
 import os
+from dataclasses import dataclass
+from typing import Optional, Protocol
+
 
 @dataclass
 class ProvenanceVerdict:

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+
 try:
     from jsonschema import Draft202012Validator
 except ImportError:

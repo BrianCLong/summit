@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Metrics",
+  "type": "object",
+  "required": ["evidence_id", "item", "metrics"],
+  "properties": {
+    "evidence_id": {"type": "string", "pattern": "^EVD-PP-SOCIALREASONING-[A-Z]+-\\d{3}$"},
+    "item": {"type": "object", "required": ["arxiv_id"], "properties": {"arxiv_id": {"const": "2601.20757"}}},
+    "metrics": {"type": "object"}
+  },
+  "additionalProperties": false
+}

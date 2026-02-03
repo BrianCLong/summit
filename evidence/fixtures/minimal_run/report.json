@@ -1,0 +1,8 @@
+{
+  "run_id": "minimal-run-001",
+  "item": "test-item",
+  "results": {
+    "status": "success"
+  },
+  "evidence_ids": ["EVD-CLAUDECODE-SUBAGENTS-TEST-001"]
+}

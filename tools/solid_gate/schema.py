@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional
 import hashlib
 import json
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+
 
 @dataclass
 class Finding:
@@ -29,7 +30,7 @@ class Finding:
 
 @dataclass
 class Report:
-    findings: List[Finding] = field(default_factory=list)
+    findings: list[Finding] = field(default_factory=list)
 
     def to_dict(self):
         return {
@@ -41,7 +42,7 @@ class Report:
 
 @dataclass
 class Metrics:
-    counts: Dict[str, int] = field(default_factory=dict)
+    counts: dict[str, int] = field(default_factory=dict)
 
     @classmethod
     def from_report(cls, report: Report):

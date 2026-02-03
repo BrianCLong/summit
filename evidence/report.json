@@ -1,11 +1,29 @@
 {
-  "run_id": "run-001",
-  "item_slug": "pipeline-resilience",
-  "evd_ids": ["EVD-PIPELINE-RESILIENCE-001"],
-  "summary": {
-    "what_ran": "Pipeline Scaffolding Check",
-    "result": "PASS"
-  },
+  "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
+  "summary": "SketchDynamics evidence scaffold: PASS",
+  "steps": [
+    {
+      "name": "schema-setup",
+      "status": "pass",
+      "details": {
+        "what_ran": "Dynamic intent evidence skeleton"
+      }
+    },
+    {
+      "name": "fixtures",
+      "status": "pass",
+      "details": {
+        "what_ran": "Fixture bundle registration"
+      }
+    }
+  ],
+  "run_id": "run-002",
+  "item_slug": "sketchdynamics-pipeline",
+  "evd_ids": [
+    "EVD-SKETCHDYNAMICS-PIPELINE-001",
+    "EVD-SKETCHDYNAMICS-CLARIFY-001",
+    "EVD-SKETCHDYNAMICS-REFINE-001"
+  ],
   "artifacts": {
     "metrics": "evidence/metrics.json",
     "stamp": "evidence/stamp.json"

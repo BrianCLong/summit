@@ -17,9 +17,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'events';
-import { PolicyEngine } from '../../governance/PolicyEngine.ts';
-import { PolicyContext, GovernanceVerdict } from '../../governance/types.ts';
-import logger from '../../utils/logger.ts';
+import { PolicyEngine } from '../../governance/PolicyEngine.js';
+import { PolicyContext, GovernanceVerdict } from '../../governance/types.js';
+import logger from '../../utils/logger.js';
 import {
   PredictionRequest,
   PredictionResponse,
@@ -38,7 +38,7 @@ import {
   Explanation,
   ConfidenceFactors,
   calculateConfidence,
-} from './types.ts';
+} from './types.js';
 
 // ============================================================================
 // Configuration

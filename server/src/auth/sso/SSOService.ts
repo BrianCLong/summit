@@ -1,12 +1,12 @@
-import { SSOProvider, SSOUserIdentity } from './types.ts';
-import { LocalStubProvider } from './providers/LocalStubProvider.ts';
+import { SSOProvider, SSOUserIdentity } from './types.js';
+import { LocalStubProvider } from './providers/LocalStubProvider.js';
 // Correct named import for AuthService based on review (although file has default export too, named import is safer if mixed)
 // Wait, checking AuthService.ts content: "export class AuthService ... export default AuthService;"
 // So strict named import `import { AuthService }` works, and default works too.
 // I will use named import to match my test expectation and best practice.
-import { AuthService } from '../../services/AuthService.ts';
-import logger from '../../utils/logger.ts';
-import { ProvenanceLedgerV2 } from '../../provenance/ledger.ts';
+import { AuthService } from '../../services/AuthService.js';
+import logger from '../../utils/logger.js';
+import { ProvenanceLedgerV2 } from '../../provenance/ledger.js';
 
 export class SSOService {
   private providers: Map<string, SSOProvider> = new Map();

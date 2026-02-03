@@ -1,11 +1,11 @@
-import random
 import json
 import os
-from typing import Dict, List, Any
+import random
+from typing import Any, Dict, List
 
 # Mock implementation of robustness perturbations for influence graphs
 
-def perturb_edge_injection(graph: Dict[str, Any], injection_rate: float = 0.05) -> Dict[str, Any]:
+def perturb_edge_injection(graph: dict[str, Any], injection_rate: float = 0.05) -> dict[str, Any]:
     """Injects random edges to simulate noise/attack."""
     # This is a stub/mock logic since we don't have a real graph library here yet.
     # Assuming graph is a dict with "edges" list.
@@ -18,7 +18,7 @@ def perturb_edge_injection(graph: Dict[str, Any], injection_rate: float = 0.05) 
     new_graph["edges"] = edges
     return new_graph
 
-def perturb_sybil_attack(graph: Dict[str, Any], sybil_count: int = 5) -> Dict[str, Any]:
+def perturb_sybil_attack(graph: dict[str, Any], sybil_count: int = 5) -> dict[str, Any]:
     """Adds a clique of sybil nodes."""
     new_graph = graph.copy()
     nodes = list(new_graph.get("nodes", []))
@@ -36,7 +36,7 @@ def perturb_sybil_attack(graph: Dict[str, Any], sybil_count: int = 5) -> Dict[st
     new_graph["edges"] = edges
     return new_graph
 
-def run_robustness_suite(graph: Dict[str, Any], evidence_path: str = "evidence/EVD-INFLUENCEGNN-CAMPAIGN-001") -> None:
+def run_robustness_suite(graph: dict[str, Any], evidence_path: str = "evidence/EVD-INFLUENCEGNN-CAMPAIGN-001") -> None:
     # Run perturbations
     g_injected = perturb_edge_injection(graph)
     g_sybil = perturb_sybil_attack(graph)

@@ -1,7 +1,8 @@
-from typing import Protocol, Dict, Any, Optional
+from typing import Any, Dict, Optional, Protocol
+
 
 class ChatConnector(Protocol):
-    def receive(self) -> Optional[Dict[str, Any]]:
+    def receive(self) -> Optional[dict[str, Any]]:
         """Receive message from channel."""
         ...
 

@@ -1,11 +1,12 @@
 import argparse
 import json
-import sys
 import os
+import sys
 from typing import Optional
 
-from .backends.dummy import DummyBackend
 from .adapter import Emu3BackendAdapter
+from .backends.dummy import DummyBackend
+
 
 def get_backend(backend_name: str) -> Emu3BackendAdapter:
     if backend_name == "dummy":
