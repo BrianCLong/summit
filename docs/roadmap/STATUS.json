@@ -26,6 +26,12 @@
       "notes": "Scaffold Narrative Dominance Suite standards, security handling, and module entrypoint."
     },
     {
+      "id": "cw-ruua-isrhamas-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
+    },
+    {
       "id": "io-cogwar-radar-2027-brief",
       "status": "in_progress",
       "owner": "codex",
