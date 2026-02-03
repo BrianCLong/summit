@@ -1,0 +1,15 @@
+labels:
+  User:
+    stable_key: entity_id
+    orientation: NATURAL
+    relationship_types: ["FOLLOWS", "FRIEND"]
+    thresholds:
+      skew_threshold: 0.5
+      top1p_threshold: 0.05
+  Organization:
+    stable_key: org_id
+    orientation: NATURAL
+    relationship_types: ["MEMBER_OF"]
+    thresholds:
+      skew_threshold: 0.5
+      top1p_threshold: 0.05
