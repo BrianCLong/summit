@@ -55,6 +55,38 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ru-ua-cogwar-lab
+    version: v1
+    path: prompts/cogwar/ru-ua-cogwar-lab@v1.md
+    sha256: 68b953ae92fc46eb75c9b2875842e05b12f01bfbc3a53866bf5f609014e33306
+    description: Deterministic cogwar campaign schema, examples, packs, and governance docs.
+    scope:
+      paths:
+        - schemas/cogwar/
+        - examples/cogwar/ru-ua/
+        - scripts/cogwar/
+        - scripts/monitoring/ru-ua-cogwar-lab-drift.mjs
+        - dist/cogwar/
+        - tests/cogwar/
+        - docs/standards/ru-ua-cogwar-lab.md
+        - docs/security/data-handling/ru-ua-cogwar-lab.md
+        - docs/ops/runbooks/ru-ua-cogwar-lab.md
+        - docs/roadmap/STATUS.json
+        - prompts/cogwar/ru-ua-cogwar-lab@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - cogwar
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
