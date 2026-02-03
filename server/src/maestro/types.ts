@@ -86,11 +86,43 @@ export interface ConsensusProposal<T = any> {
   createdAt: string;
 }
 
+export interface CostSample {
+  id: string;
+  runId: string;
+  taskId: string;
+  model: string;
+  vendor: string;
+  inputTokens: number;
+  outputTokens: number;
+  currency: string;
+  cost: number;
+  createdAt: string;
+  feature?: string;
+  tenantId?: string;
+  environment?: string;
+}
+
+export interface RunCostSummary {
+  runId: string;
+  totalCostUSD: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  byModel: Record<
+    string,
+    {
+      costUSD: number;
+      inputTokens: number;
+      outputTokens: number;
+    }
+  >;
+}
+
 export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval' | 'cancelled';
 
 export interface Task {
   id: string;
   runId: string;
+  tenantId?: string;
   parentTaskId?: string;
   status: TaskStatus;
   agent: {
@@ -122,6 +154,7 @@ export interface Artifact {
   id: string;
   runId: string;
   taskId: string;
+  tenantId?: string;
   kind: string;
   label: string;
   data: any;
