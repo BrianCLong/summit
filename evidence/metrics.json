@@ -1,5 +1,5 @@
 {
-  "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
+  "evidence_id": "EVD-openviking-retrieval-002",
   "metrics": {
     "clarification_turns_count": 0,
     "critical_ambiguities_unresolved_count": 0,
