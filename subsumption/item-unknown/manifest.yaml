@@ -1,4 +1,4 @@
-version: 1
+version: 1.0.0
 item:
   slug: item-unknown
   title: "UNKNOWN (ITEM not provided)"
