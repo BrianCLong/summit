@@ -109,7 +109,7 @@ restricted_admin_actions if {
 
 user_authorized_actions if {
     input.action in ["read", "create", "update"]
-    input.dataType not in ["system_config", "audit_logs", "user_management"]
+    not input.dataType in ["system_config", "audit_logs", "user_management"]
 }
 
 sensitive_data_type if {
@@ -122,7 +122,7 @@ time_restricted_data if {
 
 current_time_allowed if {
     time_restrictions := data.data_metadata[input.resource].accessRestrictions
-    current_hour := time.weekday(time.now_ns())[1]
+    current_hour := time.clock(time.now_ns())[0]
     current_hour >= time_restrictions.allowedHoursStart
     current_hour <= time_restrictions.allowedHoursEnd
 }

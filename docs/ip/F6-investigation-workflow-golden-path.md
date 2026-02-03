@@ -12,6 +12,7 @@
 This disclosure describes an **end-to-end intelligence investigation workflow** optimized for the "golden path" user journey: **Investigation → Entities → Relationships → AI Copilot → Results**. The system integrates graph visualization, collaborative editing, AI-driven recommendations, and cognitive targeting controls into a unified UX designed specifically for intelligence analysts.
 
 **Core Innovation**:
+
 1. **Investigation-First Data Model**: All entities/relationships belong to investigations (not global graph), enabling multi-tenant isolation and scoped analysis
 2. **AI Copilot Integration**: Context-aware recommendations powered by GraphRAG + Multi-LLM orchestration with explainable provenance
 3. **Tunable Cognitive Targeting**: Sliders for adjusting active measures aggressiveness directly in investigation UI
@@ -19,6 +20,7 @@ This disclosure describes an **end-to-end intelligence investigation workflow** 
 5. **Provenance-Linked Exports**: Generated reports (PDF, GraphML) include full audit trails
 
 **Differentiation from Existing Platforms**:
+
 - **Palantir Gotham**: General-purpose graph platform → We optimize for investigation workflows specifically
 - **Neo4j Bloom**: Visualization-focused → We provide end-to-end workflow with AI copilot
 - **IBM i2 Analyst's Notebook**: Desktop app, no cloud → We're cloud-native with real-time collab
@@ -33,6 +35,7 @@ This disclosure describes an **end-to-end intelligence investigation workflow** 
 Intelligence analysts waste 60-70% of their time on **tool-switching overhead**:
 
 **Typical analyst workflow (WITHOUT our system)**:
+
 1. Create investigation in Excel spreadsheet
 2. Collect entities from multiple sources (OSINT, databases, reports)
 3. Import entities into graph tool (Maltego, i2 Analyst's Notebook)
@@ -44,6 +47,7 @@ Intelligence analysts waste 60-70% of their time on **tool-switching overhead**:
 9. Share via email attachments (no version control)
 
 **Problems**:
+
 - **Context loss**: Data lives in 5+ disconnected tools
 - **No provenance**: Cannot trace insights back to source data
 - **Manual drudgery**: Copying/pasting entities between systems
@@ -53,12 +57,14 @@ Intelligence analysts waste 60-70% of their time on **tool-switching overhead**:
 ### 1.2 Technical Problem
 
 **Existing graph tools lack investigation-specific features**:
+
 - Neo4j Bloom: Great visualization, but no investigation management or AI copilot
 - Palantir Gotham: Powerful but requires 6-month training + enterprise licensing
 - Maltego: OSINT-focused, no support for internal data connectors
 - i2 Analyst's Notebook: Desktop app, no cloud deployment or real-time collab
 
 **What's needed**: A **purpose-built investigation platform** that integrates:
+
 - Investigation management (CRUD, sharing, permissions)
 - Entity/relationship modeling with graph DB backend
 - AI copilot with contextual awareness
@@ -221,12 +227,14 @@ Intelligence analysts waste 60-70% of their time on **tool-switching overhead**:
 **Key insight**: All entities/relationships belong to investigations (not global graph).
 
 **Benefits**:
+
 - **Multi-tenant isolation**: Investigation A cannot see Investigation B's data
 - **Scoped analysis**: AI copilot only considers entities within current investigation
 - **Permission control**: Investigation owner can grant/revoke access
 - **Audit trails**: All changes tracked per-investigation
 
 **Neo4j schema**:
+
 ```cypher
 // Investigations are top-level containers
 (:Investigation {
@@ -277,6 +285,7 @@ Intelligence analysts waste 60-70% of their time on **tool-switching overhead**:
 ```
 
 **API example**:
+
 ```graphql
 mutation CreateInvestigation {
   createInvestigation(
@@ -299,14 +308,11 @@ mutation AddEntity {
     investigation_id: "inv_123"
     entity_type: "Person"
     name: "John Smith"
-    properties: {
-      occupation: "CEO"
-      nationality: "US"
-    }
+    properties: { occupation: "CEO", nationality: "US" }
   ) {
     id
     name
-    risk_score  # Auto-computed by system
+    risk_score # Auto-computed by system
   }
 }
 
@@ -316,11 +322,7 @@ mutation AddRelationship {
     source_entity_id: "ent_456"
     target_entity_id: "ent_789"
     relationship_type: "TRANSFERRED_TO"
-    properties: {
-      amount: "2500000"
-      currency: "USD"
-      date: "2024-01-15"
-    }
+    properties: { amount: "2500000", currency: "USD", date: "2024-01-15" }
   ) {
     id
     source {
@@ -346,10 +348,11 @@ mutation AddRelationship {
 4. **Export control**: "Check for ITAR violations in this investigation"
 
 **Example implementation**:
+
 ```typescript
 // server/src/services/CopilotService.ts
-import { GraphRAGService } from './graphrag/GraphRAGService';
-import { MultiLLMOrchestrator } from './orchestrator/MultiLLMOrchestrator';
+import { GraphRAGService } from "./graphrag/GraphRAGService";
+import { MultiLLMOrchestrator } from "./orchestrator/MultiLLMOrchestrator";
 
 export class CopilotService {
   constructor(
@@ -366,10 +369,7 @@ export class CopilotService {
     await this.checkPermissions(investigation_id, user_id);
 
     // 2. Use GraphRAG to retrieve relevant subgraph
-    const subgraph = await this.graphrag.queryInvestigationGraph(
-      investigation_id,
-      user_question
-    );
+    const subgraph = await this.graphrag.queryInvestigationGraph(investigation_id, user_question);
 
     // 3. Serialize subgraph as LLM context
     const context = this.serializeGraphContext(subgraph);
@@ -392,19 +392,16 @@ Instructions:
     // 5. Route to appropriate LLM via orchestrator
     const llm_response = await this.orchestrator.execute({
       prompt,
-      model_preference: 'openai/gpt-4',  // High-stakes analysis
+      model_preference: "openai/gpt-4", // High-stakes analysis
       provenance: {
         investigation_id,
         user_id,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
 
     // 6. Link response to source entities (provenance)
-    const provenance = await this.linkToSourceEntities(
-      llm_response.content,
-      subgraph.entities
-    );
+    const provenance = await this.linkToSourceEntities(llm_response.content, subgraph.entities);
 
     // 7. Store interaction in database for audit
     await this.logCopilotInteraction({
@@ -413,18 +410,18 @@ Instructions:
       question: user_question,
       response: llm_response.content,
       provenance,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return {
       answer: llm_response.content,
       source_entities: provenance.source_entities,
-      retrieved_subgraph: subgraph
+      retrieved_subgraph: subgraph,
     };
   }
 
   private serializeGraphContext(subgraph: Subgraph): string {
-    let context = '';
+    let context = "";
 
     for (const entity of subgraph.entities) {
       context += `Entity: ${entity.name} (${entity.entity_type})\n`;
@@ -433,14 +430,14 @@ Instructions:
 
       // Include relationships
       const rels = subgraph.relationships.filter(
-        r => r.source_id === entity.id || r.target_id === entity.id
+        (r) => r.source_id === entity.id || r.target_id === entity.id
       );
       for (const rel of rels) {
         const other = rel.source_id === entity.id ? rel.target : rel.source;
         context += `  -[${rel.relationship_type}]-> ${other.name}\n`;
       }
 
-      context += '\n';
+      context += "\n";
     }
 
     return context;
@@ -449,6 +446,7 @@ Instructions:
 ```
 
 **UI integration**:
+
 ```typescript
 // client/src/components/CopilotPanel.tsx
 import React, { useState } from 'react';
@@ -548,10 +546,10 @@ export const CopilotPanel: React.FC<{ investigation_id: string }> = ({ investiga
 
 ```typescript
 // server/src/services/CollaborationService.ts
-import { WebSocket } from 'ws';
+import { WebSocket } from "ws";
 
 export class CollaborationService {
-  private connections: Map<string, WebSocket[]> = new Map();  // investigation_id -> sockets
+  private connections: Map<string, WebSocket[]> = new Map(); // investigation_id -> sockets
 
   onUserJoinInvestigation(investigation_id: string, user_id: string, ws: WebSocket) {
     if (!this.connections.has(investigation_id)) {
@@ -561,32 +559,37 @@ export class CollaborationService {
 
     // Notify other users
     this.broadcast(investigation_id, {
-      type: 'USER_JOINED',
+      type: "USER_JOINED",
       user_id,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   onEntityAdded(investigation_id: string, entity: Entity, user_id: string) {
     // Broadcast to all connected users
     this.broadcast(investigation_id, {
-      type: 'ENTITY_ADDED',
+      type: "ENTITY_ADDED",
       entity,
       added_by: user_id,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
-  onEntityUpdated(investigation_id: string, entity_id: string, changes: Partial<Entity>, user_id: string) {
+  onEntityUpdated(
+    investigation_id: string,
+    entity_id: string,
+    changes: Partial<Entity>,
+    user_id: string
+  ) {
     // Check for conflicts (optimistic locking)
     const existing = await this.db.getEntity(entity_id);
     if (existing.version !== changes.expected_version) {
       // Conflict! Send resolution to user
       return {
-        type: 'CONFLICT',
+        type: "CONFLICT",
         entity_id,
         server_version: existing,
-        user_changes: changes
+        user_changes: changes,
       };
     }
 
@@ -595,12 +598,12 @@ export class CollaborationService {
 
     // Broadcast to other users
     this.broadcast(investigation_id, {
-      type: 'ENTITY_UPDATED',
+      type: "ENTITY_UPDATED",
       entity_id,
       changes,
       updated_by: user_id,
       new_version: updated.version,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -614,10 +617,11 @@ export class CollaborationService {
 ```
 
 **Client-side handling**:
+
 ```typescript
 // client/src/hooks/useInvestigationSync.ts
-import { useEffect } from 'react';
-import { useWebSocket } from './useWebSocket';
+import { useEffect } from "react";
+import { useWebSocket } from "./useWebSocket";
 
 export function useInvestigationSync(investigation_id: string) {
   const { subscribe } = useWebSocket();
@@ -625,21 +629,21 @@ export function useInvestigationSync(investigation_id: string) {
   useEffect(() => {
     const unsubscribe = subscribe(investigation_id, (message) => {
       switch (message.type) {
-        case 'USER_JOINED':
+        case "USER_JOINED":
           showNotification(`${message.user_id} joined the investigation`);
           break;
 
-        case 'ENTITY_ADDED':
+        case "ENTITY_ADDED":
           // Update local graph state
           addEntityToLocalGraph(message.entity);
           break;
 
-        case 'ENTITY_UPDATED':
+        case "ENTITY_UPDATED":
           // Update local graph state
           updateEntityInLocalGraph(message.entity_id, message.changes);
           break;
 
-        case 'CONFLICT':
+        case "CONFLICT":
           // Show conflict resolution UI
           showConflictModal(message);
           break;
@@ -656,9 +660,10 @@ export function useInvestigationSync(investigation_id: string) {
 **Goal**: All exports include full audit trails (who added what, when, why).
 
 **PDF export example**:
+
 ```typescript
 // server/src/services/ExportService.ts
-import PDFDocument from 'pdfkit';
+import PDFDocument from "pdfkit";
 
 export class ExportService {
   async exportInvestigationToPDF(investigation_id: string): Promise<Buffer> {
@@ -670,54 +675,58 @@ export class ExportService {
 
     const doc = new PDFDocument();
     const chunks: Buffer[] = [];
-    doc.on('data', chunk => chunks.push(chunk));
+    doc.on("data", (chunk) => chunks.push(chunk));
 
     // Title page
-    doc.fontSize(24).text(investigation.name, { align: 'center' });
-    doc.fontSize(12).text(`Classification: ${investigation.classification}`, { align: 'center' });
-    doc.fontSize(10).text(`Generated: ${new Date().toISOString()}`, { align: 'center' });
+    doc.fontSize(24).text(investigation.name, { align: "center" });
+    doc.fontSize(12).text(`Classification: ${investigation.classification}`, { align: "center" });
+    doc.fontSize(10).text(`Generated: ${new Date().toISOString()}`, { align: "center" });
     doc.addPage();
 
     // Section 1: Executive Summary
-    doc.fontSize(18).text('Executive Summary');
+    doc.fontSize(18).text("Executive Summary");
     doc.fontSize(12).text(investigation.description);
     doc.moveDown();
 
     // Section 2: Entity List
-    doc.fontSize(18).text('Entities');
+    doc.fontSize(18).text("Entities");
     for (const entity of entities) {
       doc.fontSize(12).text(`• ${entity.name} (${entity.entity_type})`, { indent: 20 });
       doc.fontSize(10).text(`  Risk score: ${entity.risk_score}`, { indent: 40 });
-      doc.fontSize(10).text(`  Added by: ${entity.created_by} on ${entity.created_at}`, { indent: 40 });
+      doc
+        .fontSize(10)
+        .text(`  Added by: ${entity.created_by} on ${entity.created_at}`, { indent: 40 });
     }
     doc.addPage();
 
     // Section 3: Graph Visualization
-    doc.fontSize(18).text('Graph Visualization');
+    doc.fontSize(18).text("Graph Visualization");
     const graph_image = await this.renderGraphImage(investigation_id);
     doc.image(graph_image, { width: 500 });
     doc.addPage();
 
     // Section 4: AI Copilot Analysis
-    doc.fontSize(18).text('AI Copilot Analysis');
+    doc.fontSize(18).text("AI Copilot Analysis");
     for (const interaction of copilot_history) {
       doc.fontSize(12).text(`Q: ${interaction.question}`);
       doc.fontSize(11).text(`A: ${interaction.response}`, { indent: 20 });
-      doc.fontSize(9).text(`Sources: ${interaction.source_entities.join(', ')}`, { indent: 20 });
+      doc.fontSize(9).text(`Sources: ${interaction.source_entities.join(", ")}`, { indent: 20 });
       doc.moveDown();
     }
     doc.addPage();
 
     // Section 5: Provenance & Audit Trail
-    doc.fontSize(18).text('Provenance & Audit Trail');
+    doc.fontSize(18).text("Provenance & Audit Trail");
     for (const change of change_log) {
-      doc.fontSize(10).text(`[${change.timestamp}] ${change.user}: ${change.action}`, { indent: 20 });
+      doc
+        .fontSize(10)
+        .text(`[${change.timestamp}] ${change.user}: ${change.action}`, { indent: 20 });
     }
 
     doc.end();
 
-    return new Promise(resolve => {
-      doc.on('end', () => {
+    return new Promise((resolve) => {
+      doc.on("end", () => {
         resolve(Buffer.concat(chunks));
       });
     });
@@ -749,24 +758,24 @@ export class ExportService {
 
 **Metric**: Time to complete investigation from start to report export.
 
-| Task | Traditional Workflow | Our System | Improvement |
-|------|----------------------|------------|-------------|
-| Create investigation + add 50 entities | 2.5 hours | 20 minutes | **87% faster** |
-| Identify high-risk connections | 1 hour | 5 minutes | **92% faster** |
-| Generate investigation report | 3 hours | 2 minutes | **99% faster** |
-| Share with team | 30 minutes | 1 minute | **97% faster** |
-| **Total** | **7 hours** | **28 minutes** | **93% reduction** |
+| Task                                   | Traditional Workflow | Our System     | Improvement       |
+| -------------------------------------- | -------------------- | -------------- | ----------------- |
+| Create investigation + add 50 entities | 2.5 hours            | 20 minutes     | **87% faster**    |
+| Identify high-risk connections         | 1 hour               | 5 minutes      | **92% faster**    |
+| Generate investigation report          | 3 hours              | 2 minutes      | **99% faster**    |
+| Share with team                        | 30 minutes           | 1 minute       | **97% faster**    |
+| **Total**                              | **7 hours**          | **28 minutes** | **93% reduction** |
 
 ### 4.2 System Performance
 
-| Metric | Target | Actual (p95) |
-|--------|--------|--------------|
-| Investigation page load time | <1s | 650ms |
-| Entity add latency | <200ms | 120ms |
-| Copilot response time | <5s | 3.2s |
-| Graph render (1000 nodes) | <2s | 1.8s |
-| Real-time collab sync | <100ms | 45ms |
-| PDF export generation | <10s | 6.5s |
+| Metric                       | Target | Actual (p95) |
+| ---------------------------- | ------ | ------------ |
+| Investigation page load time | <1s    | 650ms        |
+| Entity add latency           | <200ms | 120ms        |
+| Copilot response time        | <5s    | 3.2s         |
+| Graph render (1000 nodes)    | <2s    | 1.8s         |
+| Real-time collab sync        | <100ms | 45ms         |
+| PDF export generation        | <10s   | 6.5s         |
 
 ### 4.3 Collaboration Metrics
 
@@ -778,18 +787,19 @@ export class ExportService {
 
 ## 5. Prior Art Comparison
 
-| Feature | Palantir Gotham | Neo4j Bloom | IBM i2 | Maltego | **Our System** |
-|---------|-----------------|-------------|--------|---------|----------------|
-| Investigation management | ✅ | ❌ | ✅ | Partial | ✅ |
-| AI Copilot | Partial | ❌ | ❌ | ❌ | ✅ |
-| GraphRAG integration | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Real-time collaboration | ✅ | ❌ | ❌ | ❌ | ✅ |
-| Provenance-linked exports | ✅ | ❌ | Partial | ❌ | ✅ |
-| Cloud-native | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Open data connectors | Partial | ❌ | ❌ | ✅ | ✅ |
-| Cost | $$$$ | $ | $$$ | $$ | $ |
+| Feature                   | Palantir Gotham | Neo4j Bloom | IBM i2  | Maltego | **Our System** |
+| ------------------------- | --------------- | ----------- | ------- | ------- | -------------- |
+| Investigation management  | ✅              | ❌          | ✅      | Partial | ✅             |
+| AI Copilot                | Partial         | ❌          | ❌      | ❌      | ✅             |
+| GraphRAG integration      | ❌              | ❌          | ❌      | ❌      | ✅             |
+| Real-time collaboration   | ✅              | ❌          | ❌      | ❌      | ✅             |
+| Provenance-linked exports | ✅              | ❌          | Partial | ❌      | ✅             |
+| Cloud-native              | ✅              | ✅          | ❌      | ❌      | ✅             |
+| Open data connectors      | Partial         | ❌          | ❌      | ✅      | ✅             |
+| Cost                      | $$$$            | $           | $$$     | $$      | $              |
 
 **Key differentiators**:
+
 - **AI Copilot with GraphRAG**: We're the only system with investigation-scoped AI recommendations
 - **Real-time collaboration**: Unlike i2 Analyst's Notebook (desktop app) or Maltego (no collab)
 - **Provenance linking**: Full audit trails for compliance (stronger than Palantir)
@@ -842,7 +852,7 @@ type Relationship {
   relationship_type: String!
   properties: JSON
   confidence: Float
-  source_type: String!  # "MANUAL", "AI_INFERRED", "CONNECTOR"
+  source_type: String! # "MANUAL", "AI_INFERRED", "CONNECTOR"
   created_by: User!
   created_at: DateTime!
 }
@@ -860,7 +870,13 @@ type CopilotInteraction {
 type Mutation {
   createInvestigation(name: String!, description: String, classification: String!): Investigation!
   addEntity(investigation_id: ID!, entity_type: String!, name: String!, properties: JSON): Entity!
-  addRelationship(investigation_id: ID!, source_id: ID!, target_id: ID!, relationship_type: String!, properties: JSON): Relationship!
+  addRelationship(
+    investigation_id: ID!
+    source_id: ID!
+    target_id: ID!
+    relationship_type: String!
+    properties: JSON
+  ): Relationship!
   askCopilot(investigation_id: ID!, question: String!): CopilotResponse!
   exportInvestigation(id: ID!, format: ExportFormat!): ExportResult!
 }
@@ -875,11 +891,13 @@ type Subscription {
 ## 7. Future Enhancements (H2-H3)
 
 ### H2 (v1 Production Hardening)
+
 - **Advanced graph analytics**: Centrality, community detection, path finding
 - **Temporal investigation**: Time-travel queries ("show graph state on March 15")
 - **Multi-modal entity enrichment**: Attach images, documents, audio to entities
 
 ### H3 (Moonshot)
+
 - **Fully autonomous investigation agent**: AI generates hypotheses and explores graph automatically
 - **Cross-investigation pattern detection**: Find similar cases across all investigations
 - **Federated investigations**: Multi-org collaboration across air-gapped environments
@@ -899,11 +917,13 @@ type Subscription {
 ### 8.2 Patentability Assessment
 
 **Preliminary opinion**: Moderate patentability based on:
+
 - **Novel combination**: Investigation containers + AI Copilot + real-time collab in single system
 - **Technical improvement**: 93% reduction in investigation time (measurable productivity gain)
 - **Non-obvious**: Integration of GraphRAG with investigation-scoped context is non-obvious
 
 **Recommended patent strategy**:
+
 1. **Method claims**: "Method for collaborative investigation workflow with AI-assisted analysis"
 2. **System claims**: "System for investigation-scoped graph analytics with provenance tracking"
 3. **UI/UX claims**: "User interface for golden path intelligence investigation workflow"
