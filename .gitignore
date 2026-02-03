@@ -50,6 +50,8 @@ docs/site/
 # TypeScript incremental caches (avoid committing build traces)
 *.tsbuildinfo
 .turbo/
+server/dist-new/
+
 
 # Serverless directories
 .serverless/
@@ -228,6 +230,9 @@ junit.xml
 coverage/
 **/coverage/
 coverage-reports/
+.pytest_cache/
+.coverage
+playwright-report/
 
 # Neo4j & graph stores
 neo4j/data/
@@ -364,12 +369,9 @@ evidence-staging/
 !services/er-service/requirements.txt
 tmp-test/
 _worktrees/
-*.pyc
-__pycache__/
-.pytest_cache/
-.coverage
-coverage/
-node_modules/
-test-results/
-playwright-report/
-artifacts/
+
+# Local runs output (do not commit)
+subsumption/**/runs/
+
+# Governance evidence artifacts (generated locally/CI)
+artifacts/governance/
