@@ -9,6 +9,7 @@ import { dbConfig } from './config.js';
 import { logger as baseLogger, correlationStorage } from '../config/logger.js';
 import { ResidencyGuard } from '../data-residency/residency-guard.js';
 import { tenantRouter } from './tenantRouter.js';
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
 // Constants for pool monitoring and connection management
 const POOL_MONITOR_INTERVAL_MS = 30000; // 30 seconds
@@ -739,6 +740,10 @@ async function executeQueryOnClient(
   });
 
   const duration = performance.now() - start;
+
+  // Record telemetry
+  telemetry.subsystems.database.queries.add(1);
+  telemetry.subsystems.database.latency.record(duration / 1000);
 
   if (duration >= dbConfig.slowQueryThresholdMs) {
     recordSlowQuery(
