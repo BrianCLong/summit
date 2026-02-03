@@ -19,6 +19,15 @@
         "created_at": { "type": "string" }
       },
       "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "required": ["evidence_id", "created_at"],
+      "properties": {
+        "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9-]+$" },
+        "created_at": { "type": "string" }
+      },
+      "additionalProperties": true
     }
   ]
 }

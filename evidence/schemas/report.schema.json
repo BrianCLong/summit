@@ -47,7 +47,10 @@
           "type": "object"
         },
         "summary": {
-          "type": "string"
+          "anyOf": [
+            { "type": "string" },
+            { "type": "object" }
+          ]
         },
         "artifacts": {
           "type": "array",
