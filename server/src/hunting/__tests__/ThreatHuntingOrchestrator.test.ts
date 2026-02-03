@@ -4,9 +4,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator';
-import { HuntFinding } from '../types';
-import { HypothesisGenerationOutput, QueryGenerationOutput, ResultAnalysisOutput } from '../LLMChainExecutor';
+import { EventEmitter } from 'events';
+import { ThreatHuntingOrchestrator } from '../ThreatHuntingOrchestrator.js';
+import { HuntFinding } from '../types.js';
+import { HypothesisGenerationOutput, QueryGenerationOutput, ResultAnalysisOutput } from '../LLMChainExecutor.js';
+import { CypherTemplateEngine } from '../CypherTemplateEngine.js';
+import { LLMChainExecutor } from '../LLMChainExecutor.js';
+let AutoRemediationHooks: typeof import('../AutoRemediationHooks.js').AutoRemediationHooks;
 import type {
   GeneratedCypherQuery,
   HuntContext,
@@ -16,7 +20,7 @@ import type {
   LLMChainResult,
   QueryValidationStatus,
   RemediationPlan,
-} from '../types';
+} from '../types.js';
 
 function buildCypherTemplateEngineMockClass() {
   return class MockCypherTemplateEngine {
@@ -66,8 +70,6 @@ function buildCypherTemplateEngineMockClass() {
 }
 
 function buildLLMChainExecutorMockClass() {
-  const EventEmitter = require('events').EventEmitter;
-
   return class MockLLMChainExecutor extends EventEmitter {
     provider: any;
 
@@ -206,8 +208,6 @@ jest.mock('../../config/logger', () => ({
 
 // Mock AutoRemediationHooks to prevent singleton instantiation with unmocked logger
 jest.mock('../AutoRemediationHooks.js', () => {
-  const EventEmitter = require('events').EventEmitter;
-
   class MockAutoRemediationHooks extends EventEmitter {
     private plans: RemediationPlan[] = [];
 
@@ -345,6 +345,7 @@ describe('ThreatHuntingOrchestrator', () => {
   });
 
   afterEach(() => {
+    orchestrator.dispose();
     jest.clearAllMocks();
   });
 
@@ -514,7 +515,6 @@ describe('ThreatHuntingOrchestrator', () => {
 });
 
 describe('CypherTemplateEngine', () => {
-  const { CypherTemplateEngine } = require('../CypherTemplateEngine');
   let engine: InstanceType<typeof CypherTemplateEngine>;
 
   beforeEach(() => {
@@ -602,7 +602,6 @@ describe('CypherTemplateEngine', () => {
 });
 
 describe('LLMChainExecutor', () => {
-  const { LLMChainExecutor } = require('../LLMChainExecutor');
   let executor: InstanceType<typeof LLMChainExecutor>;
 
   beforeEach(() => {
@@ -708,8 +707,11 @@ describe('LLMChainExecutor', () => {
 });
 
 describe('AutoRemediationHooks', () => {
-  const { AutoRemediationHooks } = require('../AutoRemediationHooks');
   let hooks: InstanceType<typeof AutoRemediationHooks>;
+
+  beforeAll(async () => {
+    ({ AutoRemediationHooks } = await import('../AutoRemediationHooks.js'));
+  });
 
   beforeEach(() => {
     hooks = new AutoRemediationHooks();
@@ -898,6 +900,8 @@ describe('Integration Tests', () => {
         expect(results.metrics).toBeDefined();
         expect(results.findings).toBeDefined();
       }
+
+      orchestrator.dispose();
     }, 30000); // 30 second timeout
   });
 
@@ -929,6 +933,8 @@ describe('Integration Tests', () => {
         // Precision should be at or above target
         expect(results.metrics.precisionEstimate).toBeGreaterThanOrEqual(0.85); // Allow 6% margin
       }
+
+      orchestrator.dispose();
     }, 30000);
   });
 });

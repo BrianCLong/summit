@@ -1,7 +1,7 @@
 {
   "name": "apps-server",
   "private": true,
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "IntelGraph GraphQL Server",
   "main": "src/index.ts",
   "scripts": {
@@ -16,7 +16,7 @@
     "body-parser": "^2.2.0",
     "connect-redis": "^8.0.1",
     "cors": "^2.8.5",
-    "express": "^4.19.2",
+    "express": "^4.21.2",
     "express-rate-limit": "^7.4.0",
     "express-session": "^1.18.1",
     "graphql": "^16.12.0",

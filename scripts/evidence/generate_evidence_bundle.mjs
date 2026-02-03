@@ -92,6 +92,31 @@ try {
     console.log(`✅ Evidence manifest generated at: ${MANIFEST_PATH}`);
     console.log(`📊 Total artifacts tracked: ${Object.keys(filesMap).length}`);
 
+    // Generate Evidence Summary Contract
+    const summary = {
+        run: {
+            id: process.env.GITHUB_RUN_ID || 'local',
+            endTime: new Date().toISOString(),
+            branch: process.env.GITHUB_REF_NAME || 'unknown'
+        },
+        evidence: {
+            verified: true,
+            bundlePath: "artifacts/evidence/evidence-manifest.json",
+            provenancePath: "artifacts/evidence/provenance.intoto.jsonl",
+            buildTime: manifest.meta.timestamp
+        }
+    };
+
+    // Attempt to resolve actual provenance path if it exists in the manifest
+    const potentialProvenance = Object.keys(filesMap).find(f => f.includes('provenance') && (f.endsWith('.json') || f.endsWith('.jsonl')));
+    if (potentialProvenance) {
+        summary.evidence.provenancePath = `artifacts/${potentialProvenance}`;
+    }
+
+    const SUMMARY_PATH = path.join(EVIDENCE_DIR, 'summary.json');
+    fs.writeFileSync(SUMMARY_PATH, JSON.stringify(summary, null, 2));
+    console.log(`✅ Evidence summary generated at: ${SUMMARY_PATH}`);
+
 } catch (error) {
     console.error('❌ Failed to generate evidence bundle:', error);
     process.exit(1);

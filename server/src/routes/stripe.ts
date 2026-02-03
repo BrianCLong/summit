@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { Router } from 'express';
 import express from 'express';
-import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard';
+import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
 import Stripe from 'stripe';
-import { hmacHex, safeEqual } from '../utils/signature';
+import { hmacHex, safeEqual } from '../utils/signature.js';
 
 const router = Router();
 

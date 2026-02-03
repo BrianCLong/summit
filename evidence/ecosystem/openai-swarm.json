@@ -1,0 +1,40 @@
+{
+  "id": "78c49f72-636c-4f19-af5c-acf3e5dc2327",
+  "resource_id": "b76a5806-17b7-427b-9288-f8e4c70b0999",
+  "timestamp": "2026-01-28T17:50:51.127Z",
+  "primaryArtifact": {
+    "id": "b76a5806-17b7-427b-9288-f8e4c70b0999",
+    "name": "OpenAI Swarm",
+    "type": "Framework",
+    "url": "https://github.com/openai/swarm",
+    "description": "Educational framework exploring ergonomic, lightweight multi-agent orchestration.",
+    "tags": [],
+    "maturity": "Experimental",
+    "capabilities": {
+      "tool_use": false,
+      "memory": false,
+      "planning": false,
+      "orchestration": true,
+      "evals": false,
+      "safety": false,
+      "observability": false,
+      "multi_agent": true,
+      "sandboxing": false
+    },
+    "signals": {
+      "license": "MIT",
+      "active_community": true
+    }
+  },
+  "provenance": {
+    "source": "initial_ecosystem.yaml",
+    "method": "seed",
+    "actor": "summit-agent-indexer"
+  },
+  "verification": {
+    "status": "unverified",
+    "tests_run": [],
+    "results": {}
+  },
+  "claims": []
+}

@@ -48,10 +48,10 @@ interface TrustCenterReport {
   id: string;
   tenantId: string;
   reportType:
-    | 'audit_export'
-    | 'slsa_attestation'
-    | 'sbom_report'
-    | 'compliance_check';
+  | 'audit_export'
+  | 'slsa_attestation'
+  | 'sbom_report'
+  | 'compliance_check';
   status: 'generating' | 'completed' | 'failed';
   downloadUrl?: string;
   expiresAt: Date;
@@ -120,9 +120,9 @@ export class TrustCenterService {
     const policy = allowSensitive
       ? { rules: ['pii', 'financial', 'sensitive'] as const }
       : ({
-          rules: ['pii', 'financial', 'sensitive'] as const,
-          allowedFields,
-        } as const);
+        rules: ['pii', 'financial', 'sensitive'] as const,
+        allowedFields,
+      } as const);
 
     const sanitized: any[] = [];
     for (const row of filtered) {
@@ -710,54 +710,54 @@ export class TrustCenterService {
    * Aggregates Residency, Retention, and Export/Erase activity.
    */
   async generateTenantTrustPack(tenantId: string): Promise<any> {
-      const span = otelService.createSpan('trust-center.generate_trust_pack');
-      try {
-          const pool = getPostgresPool();
-          const { DataResidencyService } = await import('../data-residency/residency-service.js');
-          const residencyService = new DataResidencyService();
+    const span = otelService.createSpan('trust-center.generate_trust_pack');
+    try {
+      const pool = getPostgresPool();
+      const { DataResidencyService } = await import('../data-residency/residency-service.js');
+      const residencyService = new DataResidencyService();
 
-          // 1. Residency Report
-          const residencyReport = await residencyService.generateResidencyReport(tenantId);
+      // 1. Residency Report
+      const residencyReport = await residencyService.generateResidencyReport(tenantId);
 
-          // 2. Erase/Export Activity
-          // (Mocking this query for now or we need to import EraseService)
-          const eraseRequests = await pool.query(
-              'SELECT * FROM erase_requests WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 50',
-              [tenantId]
-          );
+      // 2. Erase/Export Activity
+      // (Mocking this query for now or we need to import EraseService)
+      const eraseRequests = await pool.query(
+        'SELECT * FROM erase_requests WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 50',
+        [tenantId]
+      );
 
-          // 3. Retention Policy Summary
-          const retentionConfig = await pool.query(
-              'SELECT retention_policy_days FROM data_residency_configs WHERE tenant_id = $1',
-              [tenantId]
-          );
+      // 3. Retention Policy Summary
+      const retentionConfig = await pool.query(
+        'SELECT retention_policy_days FROM data_residency_configs WHERE tenant_id = $1',
+        [tenantId]
+      );
 
-          const pack = {
-              generatedAt: new Date().toISOString(),
-              tenantId,
-              residency: residencyReport,
-              retention: {
-                  defaultDays: retentionConfig.rows[0]?.retention_policy_days || 'Default',
-                  policyLock: 'Strict (Simulated)'
-              },
-              dataRights: {
-                  eraseRequests: eraseRequests.rows.map(r => ({
-                      id: r.id,
-                      scope: r.scope,
-                      status: r.status,
-                      date: r.created_at
-                  }))
-              },
-              verification: {
-                  issuer: 'IntelGraph Trust Center',
-                  signature: 'SIMULATED_SIGNATURE_XYZ'
-              }
-          };
+      const pack = {
+        generatedAt: new Date().toISOString(),
+        tenantId,
+        residency: residencyReport,
+        retention: {
+          defaultDays: retentionConfig.rows[0]?.retention_policy_days || 'Default',
+          policyLock: 'Strict (Simulated)'
+        },
+        dataRights: {
+          eraseRequests: eraseRequests.rows.map(r => ({
+            id: r.id,
+            scope: r.scope,
+            status: r.status,
+            date: r.created_at
+          }))
+        },
+        verification: {
+          issuer: 'IntelGraph Trust Center',
+          signature: 'SIMULATED_SIGNATURE_XYZ'
+        }
+      };
 
-          return pack;
-      } finally {
-          span?.end();
-      }
+      return pack;
+    } finally {
+      span?.end();
+    }
   }
 
   async generateComprehensiveAuditReport(
@@ -799,10 +799,10 @@ export class TrustCenterService {
       // Multi-framework compliance check
       const complianceResults = includeCompliance
         ? await Promise.all(
-            frameworks.map((framework) =>
-              this.checkComplianceStatus(tenantId, framework),
-            ),
-          )
+          frameworks.map((framework) =>
+            this.checkComplianceStatus(tenantId, framework),
+          ),
+        )
         : [];
 
       // Generate SLSA attestation
@@ -833,10 +833,10 @@ export class TrustCenterService {
           complianceScore:
             complianceResults.length > 0
               ? (complianceResults.filter(
-                  (r: any) => r.overallStatus === 'compliant',
-                ).length /
-                  complianceResults.length) *
-                100
+                (r: any) => r.overallStatus === 'compliant',
+              ).length /
+                complianceResults.length) *
+              100
               : 100,
           riskLevel: this.calculateRiskLevel(auditSections, complianceResults),
           recommendations: this.generateRecommendations(
@@ -1167,55 +1167,50 @@ Frameworks: ${data.metadata.frameworks.join(', ')}
 
 POLICY DECISIONS
 ================
-${
-  data.sections?.policyDecisions
-    ?.map(
-      (row: any, idx: number) =>
-        `${idx + 1}. ${row.created_at} | ${row.decision.toUpperCase()} | ${row.policy} | User: ${row.user_id}`,
-    )
-    .join('\n') || 'No policy decisions in this period'
-}
+${data.sections?.policyDecisions
+        ?.map(
+          (row: any, idx: number) =>
+            `${idx + 1}. ${row.created_at} | ${row.decision.toUpperCase()} | ${row.policy} | User: ${row.user_id}`,
+        )
+        .join('\n') || 'No policy decisions in this period'
+      }
 
 ROUTER DECISIONS
 ================
-${
-  data.sections?.routerDecisions
-    ?.map(
-      (row: any, idx: number) =>
-        `${idx + 1}. ${row.created_at} | Run: ${row.run_id} | Model: ${row.selected_model}${row.override_reason ? ` (Override: ${row.override_reason})` : ''}`,
-    )
-    .join('\n') || 'No router decisions in this period'
-}
+${data.sections?.routerDecisions
+        ?.map(
+          (row: any, idx: number) =>
+            `${idx + 1}. ${row.created_at} | Run: ${row.run_id} | Model: ${row.selected_model}${row.override_reason ? ` (Override: ${row.override_reason})` : ''}`,
+        )
+        .join('\n') || 'No router decisions in this period'
+      }
 
 EVIDENCE ARTIFACTS
 ==================
-${
-  data.sections?.evidenceArtifacts
-    ?.map(
-      (row: any, idx: number) =>
-        `${idx + 1}. ${row.created_at} | ${row.type} | Hash: ${row.hash} | Size: ${row.size_bytes} bytes`,
-    )
-    .join('\n') || 'No evidence artifacts in this period'
-}
+${data.sections?.evidenceArtifacts
+        ?.map(
+          (row: any, idx: number) =>
+            `${idx + 1}. ${row.created_at} | ${row.type} | Hash: ${row.hash} | Size: ${row.size_bytes} bytes`,
+        )
+        .join('\n') || 'No evidence artifacts in this period'
+      }
 
 SERVING METRICS
 ===============
-${
-  data.sections?.servingMetrics
-    ?.slice(0, 20)
-    .map(
-      (row: any, idx: number) =>
-        `${idx + 1}. ${row.timestamp} | ${row.model} | ${row.latency_ms}ms | $${row.cost_usd} | ${row.tokens_in}→${row.tokens_out} tokens`,
-    )
-    .join('\n') || 'No serving metrics available'
-}
+${data.sections?.servingMetrics
+        ?.slice(0, 20)
+        .map(
+          (row: any, idx: number) =>
+            `${idx + 1}. ${row.timestamp} | ${row.model} | ${row.latency_ms}ms | $${row.cost_usd} | ${row.tokens_in}→${row.tokens_out} tokens`,
+        )
+        .join('\n') || 'No serving metrics available'
+      }
 
 COMPLIANCE STATUS
 =================
-${
-  data.complianceResults
-    ?.map(
-      (result: any) => `
+${data.complianceResults
+        ?.map(
+          (result: any) => `
 Framework: ${result.framework}
 Status: ${result.overallStatus.toUpperCase()}
 Last Assessment: ${result.lastAssessment}
@@ -1226,9 +1221,9 @@ ${result.controls?.map((control: any) => `  • ${control.id}: ${control.name} -
 Recommendations:
 ${result.recommendations?.map((rec: string) => `  • ${rec}`).join('\n')}
 `,
-    )
-    .join('\n') || 'No compliance data available'
-}
+        )
+        .join('\n') || 'No compliance data available'
+      }
 
 RISK ASSESSMENT
 ===============
@@ -1261,7 +1256,49 @@ Generated by IntelGraph Trust Center v${data.metadata.version}
 
     return Buffer.from(content, 'utf8');
   }
+
+  /**
+   * Collect evidence artifacts for a specific control
+   * Matches artifact_type against control.evidenceTypes
+   */
+  async collectEvidenceForControl(
+      tenantId: string,
+      evidenceTypes: string[],
+      lookbackDays: number = 30
+    ): Promise < Record < string, any >> {
+      const pool = getPostgresPool();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - lookbackDays);
+
+      const { rows } = await pool.query(
+        `SELECT id, sha256, artifact_type, metadata, created_at, storage_uri
+       FROM evidence_artifacts
+       WHERE tenant_id = $1 
+       AND artifact_type = ANY($2)
+       AND created_at >= $3
+       ORDER BY created_at DESC`,
+        [tenantId, evidenceTypes, startDate]
+      );
+
+      // Group by artifact type
+      const evidence: Record<string, any> = { };
+    for (const row of rows) {
+      if (!evidence[row.artifact_type]) {
+        evidence[row.artifact_type] = [];
+      }
+      evidence[row.artifact_type].push({
+        id: row.id,
+        hash: row.sha256,
+        metadata: row.metadata,
+        collectedAt: row.created_at,
+        uri: row.storage_uri
+      });
+    }
+
+    return evidence;
+  }
 }
+
 
 export const TRUST_CENTER_SCHEMA = `
 CREATE TABLE IF NOT EXISTS trust_center_reports (

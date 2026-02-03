@@ -1,0 +1,32 @@
+name: evidence-validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate Fixtures (Pass)
+        run: node tools/evidence/validate.mjs
+        env:
+          EVIDENCE_OUT_DIR: evidence/fixtures/pass
+      - name: Validate Fixtures (Fail)
+        run: |
+          if node tools/evidence/validate.mjs; then
+            echo "Expected failure but passed"
+            exit 1
+          else
+            echo "Failed as expected"
+          fi
+        env:
+          EVIDENCE_OUT_DIR: evidence/fixtures/fail

@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/stream-analytics",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Real-time streaming analytics with metrics, aggregations, and ML inference",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

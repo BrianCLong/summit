@@ -1,0 +1,77 @@
+name: CI • Workflow Drift Guard
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - "scripts/ci/workflows_diff/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  drift-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine upstream remote
+        id: upstream
+        run: |
+          # Set UPSTREAM in repo secrets if you want to override (e.g., BrianCLong/summit -> upstream: TopicalityLLC/summit)
+          echo "repo=${{ secrets.UPSTREAM_REPO || github.event.pull_request.base.repo.full_name }}" >> "$GITHUB_OUTPUT"
+          echo "ref=${{ github.base_ref || 'main' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch upstream default branch
+        run: |
+          git remote add upstream "https://github.com/${{ steps.upstream.outputs.repo }}.git" || true
+          git fetch upstream --depth=1 ${{ steps.upstream.outputs.ref }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Analyze workflow drift
+        run: |
+          node scripts/ci/workflows_diff/analyze_workflows.mjs \
+            --upstream "upstream/${{ steps.upstream.outputs.ref }}" \
+            --fork "HEAD" \
+            --root ".github/workflows" \
+            --out "artifact"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: workflow-drift-artifacts
+          path: artifact
+
+      - name: Comment on PR
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          header: "Workflow Drift Guard"
+          message: |
+            **Workflow Drift Guard** found results.
+            - Report: `artifact/report.json`
+            - Metrics: `artifact/metrics.json`
+            - Patch: `artifact/ci-workflow-diff.patch`
+            > Apply patch: `git apply artifact/ci-workflow-diff.patch`
+
+      - name: Fail on high severity
+        run: |
+          node -e "const fs=require('fs');const r=JSON.parse(fs.readFileSync('artifact/report.json','utf8'));process.exit(r.summary.high>0?1:0)"

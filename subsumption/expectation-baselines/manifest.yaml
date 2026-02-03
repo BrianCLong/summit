@@ -1,0 +1,58 @@
+version: 1
+item:
+  slug: expectation-baselines
+  title: "Expectation Baselines for OSINT Collection & Validation"
+  type: "methodology"
+  date: "2026-01-29"
+  links: []
+claims:
+  - id: "ITEM:CLAIM-01"
+    text: "Expectation-based collection triggers on deviations from expected behavior."
+  - id: "ITEM:CLAIM-11"
+    text: "Silent normalization risk requires drift detection and audit."
+prs:
+  - title: "chore(subsumption): add expectation-baselines bundle manifest + schemas"
+    lane: "foundation"
+    owner: "A"
+    risk: "green"
+  - title: "feat(ci): add subsumption bundle verifier (skeleton) + deny fixtures"
+    lane: "foundation"
+    owner: "B"
+    risk: "green"
+  - title: "feat(evals): add drift detector fixture + monitoring skeleton"
+    lane: "foundation"
+    owner: "C"
+    risk: "yellow"
+  - title: "feat(expectations): add feature-flagged anomaly scoring scaffold"
+    lane: "innovation"
+    owner: "C"
+    risk: "yellow"
+    flag: "EXPECTATION_BASELINES_V1"
+gates:
+  - name: "subsumption-bundle-verify"
+    status: "assumed"
+  - name: "expectation-baseline-evals"
+    status: "assumed"
+evidence_ids:
+  - "EVD-EXPB-CORE-001"
+  - "EVD-EXPB-CI-001"
+  - "EVD-EXPB-EVAL-001"
+  - "EVD-EXPB-EVAL-002"
+  - "EVD-EXPB-OPS-001"
+  - "EVD-EXPB-INNO-001"
+  - "EVD-EXPB-DOC-001"
+docs_targets:
+  - "docs/standards/expectation-baselines.md"
+  - "docs/security/data-handling/expectation-baselines.md"
+  - "docs/ops/runbooks/expectation-baselines.md"
+  - "docs/decisions/expectation-baselines.md"
+feature_flags:
+  - name: "EXPECTATION_BASELINES_V1"
+    default: false
+required_checks_discovery:
+  status: "todo"
+  doc: "docs/required_checks.todo.md"
+constraints:
+  pr_cap: 7
+  max_yellow: 2
+  max_red: 0

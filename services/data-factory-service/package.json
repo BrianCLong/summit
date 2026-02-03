@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-factory-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Data Factory service for dataset curation, labeling workflows, and training data management",
   "type": "module",
   "main": "dist/index.js",
@@ -44,7 +44,7 @@
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.2",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "tsx": "^4.7.1",

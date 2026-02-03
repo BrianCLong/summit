@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/intent/step-summary-factual.schema.json",
+  "title": "StepSummaryFactual",
+  "type": "object",
+  "required": ["schemaVersion", "screenContext", "actions", "locale", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "screenContext": {
+      "type": "array",
+      "items": { "$ref": "step-summary.schema.json#/$defs/summaryField" }
+    },
+    "actions": {
+      "type": "array",
+      "items": { "$ref": "step-summary.schema.json#/$defs/summaryField" }
+    },
+    "locale": { "type": "string" },
+    "provenance": { "$ref": "step-summary.schema.json#/properties/provenance" }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit.io.evidence.report",
+  "type": "object",
+  "required": ["evidence_id", "title", "summary", "sources", "findings"],
+  "properties": {
+    "evidence_id": {"type": "string", "pattern": "^EVD-[A-Z0-9-]+$"},
+    "title": {"type": "string"},
+    "summary": {"type": "string"},
+    "sources": {"type": "array", "items": {"type": "string"}},
+    "findings": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,178 @@
+name: Go-Live Gate
+
+# This workflow generates and verifies a go-live evidence bundle.
+# It proves production readiness by running all checks and creating
+# an auditable, machine-readable evidence artifact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      smoke_url:
+        description: 'URL for smoke test (optional)'
+        required: false
+        type: string
+
+  workflow_call:
+    inputs:
+      smoke_url:
+        description: 'URL for smoke test (optional)'
+        required: false
+        type: string
+    outputs:
+      passed:
+        description: 'True if all checks passed'
+        value: ${{ jobs.go-live-gate.outputs.passed }}
+      sha:
+        description: 'The commit SHA that was verified'
+        value: ${{ jobs.go-live-gate.outputs.sha }}
+      evidence_path:
+        description: 'Path to evidence bundle'
+        value: ${{ jobs.go-live-gate.outputs.evidence_path }}
+
+  # Optionally run on pushes to main for continuous verification
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+      - 'packages/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  go-live-gate:
+    name: Go-Live Evidence Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    outputs:
+      passed: ${{ steps.verify.outputs.passed }}
+      sha: ${{ steps.capture-sha.outputs.sha }}
+      evidence_path: ${{ steps.generate.outputs.evidence_path }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture SHA
+        id: capture-sha
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4 # v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Evidence Bundle
+        id: generate
+        env:
+          GA_VERIFY_MODE: 'true'
+          SMOKE_URL: ${{ inputs.smoke_url }}
+          CI: 'true'
+        run: |
+          # Run evidence generator (runs lint, build, test, smoke)
+          pnpm evidence:go-live:gen || true
+
+          # Capture evidence path
+          SHA=$(git rev-parse HEAD)
+          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
+          echo "evidence_path=${EVIDENCE_PATH}" >> $GITHUB_OUTPUT
+
+          # Check if evidence was generated
+          if [ -f "${EVIDENCE_PATH}/evidence.json" ]; then
+            echo "Evidence bundle generated at ${EVIDENCE_PATH}"
+          else
+            echo "::error::Evidence bundle was not generated"
+            exit 1
+          fi
+
+      - name: Generate SBOM
+        run: |
+          SHA=$(git rev-parse HEAD)
+          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
+          pnpm release:go-live:sbom "${EVIDENCE_PATH}" || echo "SBOM generation failed (non-fatal)"
+
+      - name: Generate Provenance
+        run: |
+          SHA=$(git rev-parse HEAD)
+          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
+          pnpm release:go-live:provenance "${EVIDENCE_PATH}" || echo "Provenance generation failed (non-fatal)"
+
+      - name: Generate Release Notes
+        run: |
+          SHA=$(git rev-parse HEAD)
+          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
+          pnpm release:go-live:notes "${EVIDENCE_PATH}" || echo "Release notes generation failed (non-fatal)"
+
+      - name: Verify Evidence Bundle
+        id: verify
+        run: |
+          SHA=$(git rev-parse HEAD)
+          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
+
+          if pnpm evidence:go-live:verify "${EVIDENCE_PATH}"; then
+            echo "passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "passed=false" >> $GITHUB_OUTPUT
+            # Don't exit 1 here - we want to upload artifacts first
+          fi
+
+      - name: Upload Evidence Artifact
+        if: always()
+        uses: actions/upload-artifact@v4 # v4
+        with:
+          name: go-live-evidence-${{ steps.capture-sha.outputs.sha }}
+          path: artifacts/evidence/go-live/${{ steps.capture-sha.outputs.sha }}/
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          SHA=$(git rev-parse HEAD)
+          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
+
+          echo "## Go-Live Evidence Gate" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "${EVIDENCE_PATH}/evidence.md" ]; then
+            cat "${EVIDENCE_PATH}/evidence.md" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Evidence bundle not found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifact" >> $GITHUB_STEP_SUMMARY
+          echo "Evidence bundle uploaded as \`go-live-evidence-${SHA}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if Checks Failed
+        if: steps.verify.outputs.passed != 'true'
+        run: |
+          echo "::error::Go-live gate failed. See evidence bundle for details."
+          exit 1

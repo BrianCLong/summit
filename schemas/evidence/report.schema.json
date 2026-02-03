@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "evidence report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "evidence", "summary"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence_id", "status", "artifacts"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-[a-z0-9-]+-[a-z0-9-]+-[0-9]{3}$"
+          },
+          "status": { "type": "string", "enum": ["pass", "fail"] },
+          "artifacts": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "summary": { "type": "string" }
+  }
+}
