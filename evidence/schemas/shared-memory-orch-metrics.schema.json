@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "shared memory orch evidence metrics",
+  "type": "object",
+  "required": ["evidence_id", "metrics"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-shared-memory-orch-[0-9]{3}$"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": ["number", "string", "boolean"] }
+    }
+  },
+  "additionalProperties": false
+}
