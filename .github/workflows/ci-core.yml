@@ -33,10 +33,15 @@ env:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
@@ -46,17 +51,10 @@ jobs:
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -72,17 +70,10 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -100,16 +91,9 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Start Test Infrastructure
         run: |
@@ -164,16 +148,9 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -195,17 +172,10 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -245,16 +215,9 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -272,17 +235,10 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Bootstrap and smoke test
         run: |
@@ -311,18 +267,11 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Playwright)
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -355,7 +304,7 @@ jobs:
 
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       checks: write
@@ -370,10 +319,6 @@ jobs:
           node-version-file: .nvmrc
           cache: "pnpm"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -392,19 +337,12 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       actions: read
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -433,7 +371,7 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     needs:
       - config-preflight
       - lint-typecheck
