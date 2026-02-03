@@ -146,11 +146,10 @@ describe('Configuration System', () => {
             }
           });
 
-          // Simulate a change with a shorter delay
-          setTimeout(() => {
+          setImmediate(() => {
             const updatedConfig = { version: 1, foo: 'baz' };
             fs.writeFileSync(CONFIG_FILE, yaml.dump(updatedConfig));
-          }, 50);
+          });
         });
       } finally {
         watcher?.stop();

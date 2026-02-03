@@ -63,7 +63,7 @@ jobs:
 
       - name: Install dependencies (monorepo workspaces)
         if: matrix.language == 'javascript-typescript'
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
         env:
           # Prevent installation failures from blocking analysis
           HUSKY: 0

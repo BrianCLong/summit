@@ -1,26 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "evidence_id": { "type": "string" },
-    "benchmark_id": { "type": "string" },
-    "run_id": { "type": "string" },
-    "item": { "type": "object" },
-    "item_slug": { "type": "string" },
-    "config": { "type": "object" },
     "summary": { "type": "string" },
+    "status": { "type": "string" },
     "artifacts": {
-      "oneOf": [
-        { "type": "array", "items": { "type": "string" } },
-        { "type": "object" }
-      ]
-    },
-    "steps": { "type": "array" },
-    "evd_ids": { "type": "array", "items": { "type": "string" } }
+      "type": "array",
+      "items": { "type": "string" }
+    }
   },
-  "anyOf": [
-    { "required": ["evidence_id", "summary"] },
-    { "required": ["benchmark_id", "run_id", "artifacts"] }
-  ],
-  "additionalProperties": true
+  "required": ["evidence_id", "summary"]
 }
