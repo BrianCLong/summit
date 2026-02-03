@@ -392,6 +392,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: proof-carrying-plans-evidence-replay
+    version: v1
+    path: prompts/maestro/proof-carrying-plans-evidence-replay.md
+    sha256: d9b0323e9782df87a0cef430e42eb60e3dd8e476e2b446a602528a9e67f17592
+    description: Proof-carrying plan IR, action contracts, evidence bundles, and deterministic replay harness.
+    scope:
+      paths:
+        - agents/orchestrator/
+        - prompts/maestro/
+        - agents/examples/
+        - docs/roadmap/STATUS.json
+        - prompts/registry.yaml
+      domains:
+        - orchestration
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
