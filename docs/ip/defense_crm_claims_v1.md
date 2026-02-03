@@ -390,3 +390,44 @@ C423. A non-transitory computer-readable medium storing instructions that, when 
 - **overlay conflict** → deny; log conflict resolution failure.
 - **overlay permission expansion** → block (overlays never increase permissions).
 - **valid overlay** → allow; log partner overlay hashes.
+
+## Dependent Claims (C481–C510)
+
+### Cluster 1: Evaluation governance + eval-only lanes + regression gates (C481–C490)
+
+C481. The medium of claim C1, wherein the instructions cause the system to operate an eval-only lane in which candidate defense actions and policy decisions are generated and recorded without enabling execution connectors.
+C482. The medium of claim C481, wherein the system restricts outputs in the eval-only lane to monitoring-only actions or internal advisories and denies external publishing execution.
+C483. The medium of claim C1, wherein the instructions cause the system to maintain regression suites comprising synthetic test corpora and expected policy outcomes for validating changes to at least one of policy bundles, models, or tools.
+C484. The medium of claim C483, wherein the system executes a regression gate that denies enabling a new bundle hash for production when regression suite results deviate from expected outcomes beyond a threshold.
+C485. The medium of claim C483, wherein the system records regression suite results as evidence artifacts linked to the bundle hash under test.
+C486. The medium of claim C481, wherein the system generates an eval report comparing outputs produced under a current bundle hash and a proposed bundle hash.
+C487. The medium of claim C486, wherein the eval report includes differences in allow, deny, and modify outcomes and differences in forecast or ranking metrics.
+C488. The medium of claim C481, wherein the system requires approvals to promote a proposed bundle hash from the eval-only lane to a production lane and records promotion approvals in the audit log.
+C489. The medium of claim C1, wherein the system records an eval-only lane identifier and promotion status identifier in the audit log for policy decisions and defense actions.
+C490. The medium of claim C481, wherein the system enters a safe mode that denies production external publishing when the eval-only lane detects a regression failure for a bundle hash proposed for production.
+
+### Cluster 2: Structured redaction policies + reversible pseudonymization (C491–C500)
+
+C491. The medium of claim C1, wherein the instructions cause the system to apply structured redaction policies that specify redaction rules for fields of lineage manifests, audit entries, and evidence artifacts.
+C492. The medium of claim C491, wherein the structured redaction policies are stored as versioned redaction policy bundles each having a redaction policy hash.
+C493. The medium of claim C491, wherein the system performs reversible pseudonymization of selected identifiers by replacing identifiers with pseudonymization tokens and storing a re-identification key in a protected key store.
+C494. The medium of claim C493, wherein the system restricts access to the re-identification key to a protected execution environment and denies direct access by agents.
+C495. The medium of claim C493, wherein the system requires dual-control approvals and step-up authentication prior to issuing a re-identification approval token for re-identification of a pseudonymization token.
+C496. The medium of claim C495, wherein the system records a re-identification event in the audit log linked to approver credential identifiers, a justification category, and the re-identification approval token.
+C497. The medium of claim C491, wherein the system generates a redaction proof artifact indicating which redaction rules were applied to a given export or audit view.
+C498. The medium of claim C497, wherein the redaction proof artifact is linked to a snapshot hash and stored in the audit log.
+C499. The medium of claim C491, wherein the system denies export of artifacts when a required redaction policy bundle is missing or not attested.
+C500. The medium of claim C491, wherein the system stores redaction policy identifiers and redaction policy hashes with eDiscovery exports and auditor exports.
+
+### Cluster 3: Operator training + competency gating (C501–C510)
+
+C501. The medium of claim C1, wherein the instructions cause the system to maintain operator competency credentials indicating completion of training requirements for approving external publishing defense actions.
+C502. The medium of claim C501, wherein the system denies generation of an approval token when an operator competency credential is missing, expired, or revoked.
+C503. The medium of claim C501, wherein training requirements include completion of modules corresponding to at least one of governance policies, jurisdiction constraints, authenticity evaluation, or incident response.
+C504. The medium of claim C501, wherein the system enforces recertification by requiring renewal of a competency credential within a time period stored only in a stamp artifact.
+C505. The medium of claim C501, wherein the system requires higher competency tiers for approving defense actions above a risk threshold.
+C506. The medium of claim C505, wherein the system requires dual-control approvals when a competency tier mismatch occurs for a proposed approver.
+C507. The medium of claim C501, wherein the system records competency credential identifiers and tier identifiers in the audit log linked to approval tokens.
+C508. The medium of claim C501, wherein the system generates aggregated training compliance reports comprising counts of approvals by competency tier and counts of denied approvals due to training status.
+C509. The medium of claim C501, wherein the system restricts external publishing to monitoring-only actions when staffing metrics indicate insufficient trained approvers are available.
+C510. The medium of claim C501, wherein the system records training policy changes as policy RFC artifacts linked to a policy bundle hash.
