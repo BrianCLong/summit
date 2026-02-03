@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/narrative-engine",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "private": true,
   "type": "module",
   "main": "src/index.ts",

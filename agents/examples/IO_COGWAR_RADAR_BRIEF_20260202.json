@@ -1,0 +1,43 @@
+{
+  "task_id": "IO_COGWAR_RADAR_BRIEF_20260202",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "io-cogwar-radar-brief",
+    "version": "v1",
+    "sha256": "29e1e846516778c390cf978558937aa16389e3e54a3d3d955d482f3796bdf70e",
+    "path": "prompts/docs/io-cogwar-radar-brief@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/briefs/io-cogwar-radar-2027.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/io-cogwar-radar-brief@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/IO_COGWAR_RADAR_BRIEF_20260202.json",
+      "packages/decision-ledger/decision_ledger.json"
+    ],
+    "domains": ["documentation", "governance", "info-ops", "cogwar"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/briefs/io-cogwar-radar-2027.md",
+      "packages/decision-ledger/decision_ledger.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "CogWar radar one-pager documented with evidence-first structure.",
+    "Roadmap status updated for the CogWar radar brief initiative.",
+    "Prompt registry and task spec recorded for governance compliance.",
+    "Decision ledger entry recorded with rollback path."
+  ],
+  "stop_conditions": [
+    "Prompt registry update cannot be recorded deterministically.",
+    "Decision ledger entry cannot be recorded with rollback path."
+  ]
+}

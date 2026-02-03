@@ -1,0 +1,26 @@
+agent_id: osint-copilot
+version: 1.0.0
+governance:
+  owner: "@intelgraph/osint-team"
+  classification: internal
+  policy_set: "policies/osint/analyst_assist.rego"
+  risk_level: low
+runtime:
+  model:
+    provider: anthropic
+    name: claude-3-5-sonnet-20241022
+    parameters:
+      temperature: 0.5
+      max_tokens: 4096
+  instructions:
+    source: agents/osint/instructions/copilot.txt
+    sha256: 8a825e64a048aa8873a7ecfcf9eef545d9ac77f0418f93aa570f57a4b649833c
+  tools:
+    - name: "graph:explorer"
+      permission: read-only
+    - name: "osint:case_manager"
+      permission: read-write
+evidence:
+  log_level: audit
+  required_artifacts: ["trace", "decision_log"]
+  replay_mode: best-effort

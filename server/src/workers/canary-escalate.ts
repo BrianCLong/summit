@@ -6,8 +6,8 @@
 // import { Queue, Worker, Job } from 'bullmq';
 import { Pool } from 'pg';
 import fetch from 'node-fetch';
-import logger from '../utils/logger';
-import { SafeMutationMetrics } from '../monitoring/safeMutationsMetrics';
+import logger from '../utils/logger.js';
+import { SafeMutationMetrics } from '../monitoring/safeMutationsMetrics.js';
 
 // Type declaration for BullMQ Job (when bullmq is not available)
 type Job<T = any> = { data: T; id?: string };

@@ -1,4 +1,4 @@
-import { AFLStore } from '../src';
+import { AFLStore } from '../src.js';
 import { randomUUID } from 'crypto';
 
 test('put and get fingerprint', async () => {

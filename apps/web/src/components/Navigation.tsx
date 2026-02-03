@@ -126,51 +126,60 @@ const supportItems: NavItem[] = [
   { name: 'Changelog', href: '/changelog', icon: History as React.ComponentType<{ className?: string }> },
 ]
 
-export function Navigation({ user }: NavigationProps) {
+// Optimization: Extracted component to avoid re-definition on every Navigation render.
+// This prevents unnecessary unmounting/remounting of nav items and improves performance.
+const NavItemComponent = ({ item, user }: { item: NavItem; user: User | null }) => {
   const location = useLocation()
-  const { logout } = useAuth()
-  const { openSearch } = useSearch()
+  const { hasPermission } = useRbac(item.resource || '', item.action || '', {
+    user,
+    fallback: !item.resource,
+  })
 
-  const NavItemComponent = ({ item }: { item: NavItem }) => {
-    const { hasPermission } = useRbac(item.resource || '', item.action || '', {
-      user,
-      fallback: !item.resource,
-    })
+  if (item.resource && !hasPermission) {
+    return null
+  }
 
-    if (item.resource && !hasPermission) {
-      return null
-    }
+  const isActive =
+    location.pathname === item.href ||
+    (item.href !== '/' && location.pathname.startsWith(item.href))
 
-    const isActive =
-      location.pathname === item.href ||
-      (item.href !== '/' && location.pathname.startsWith(item.href))
-
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <NavLink
-            to={item.href}
-            className={({ isActive: linkIsActive }) => cn(
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <NavLink
+          to={item.href}
+          className={({ isActive: linkIsActive }) =>
+            cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
               linkIsActive || isActive
                 ? 'bg-accent text-accent-foreground'
                 : 'text-muted-foreground'
-            )}
-            aria-current={(location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href))) ? 'page' : undefined}
-          >
-            <item.icon className="h-4 w-4" />
-            <span className="flex-1">{item.name}</span>
-            {item.badge && (
-              <Badge variant="secondary" className="text-xs">
-                {item.badge}
-              </Badge>
-            )}
-          </NavLink>
-        </TooltipTrigger>
-        <TooltipContent side="right">{item.name}</TooltipContent>
-      </Tooltip>
-    )
-  }
+            )
+          }
+          aria-current={
+            location.pathname === item.href ||
+            (item.href !== '/' && location.pathname.startsWith(item.href))
+              ? 'page'
+              : undefined
+          }
+        >
+          <item.icon className="h-4 w-4" />
+          <span className="flex-1">{item.name}</span>
+          {item.badge && (
+            <Badge variant="secondary" className="text-xs">
+              {item.badge}
+            </Badge>
+          )}
+        </NavLink>
+      </TooltipTrigger>
+      <TooltipContent side="right">{item.name}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+export function Navigation({ user }: NavigationProps) {
+  const { logout } = useAuth()
+  const { openSearch } = useSearch()
 
   return (
     <nav className="w-64 border-r bg-muted/50 flex flex-col">
@@ -196,7 +205,9 @@ export function Navigation({ user }: NavigationProps) {
         >
           <Command className="h-4 w-4 mr-2" />
           Search...
-          <kbd className="ml-auto text-xs">⌘K</kbd>
+          <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">⌘</span>K
+          </kbd>
         </Button>
       </div>
 
@@ -206,28 +217,28 @@ export function Navigation({ user }: NavigationProps) {
           Intelligence
         </div>
         {navItems.slice(0, 3).map(item => (
-          <NavItemComponent key={item.href} item={item} />
+          <NavItemComponent key={item.href} item={item} user={user} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
         {navItems.slice(3, 7).map(item => (
-          <NavItemComponent key={item.href} item={item} />
+          <NavItemComponent key={item.href} item={item} user={user} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
         {navItems.slice(7).map(item => (
-          <NavItemComponent key={item.href} item={item} />
+          <NavItemComponent key={item.href} item={item} user={user} />
         ))}
       </div>
 
       {/* Support & User */}
       <div className="p-4 border-t space-y-2">
         {supportItems.map(item => (
-          <NavItemComponent key={item.href} item={item} />
+          <NavItemComponent key={item.href} item={item} user={user} />
         ))}
 
         {/* User Profile & Logout */}

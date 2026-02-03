@@ -1,0 +1,11 @@
+regime: US_STATE_CO_SB24_205
+focus:
+  - algorithmic_discrimination
+roles:
+  - developer
+  - deployer
+required_evidence:
+  - id: CO-EVD-DISC-RISK
+    file: governance/discrimination_risk.json
+defaults:
+  deny_if_missing_required_evidence: true
