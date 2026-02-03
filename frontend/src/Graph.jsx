@@ -20,6 +20,27 @@ const Graph = ({ elements, neighborhoodMode }) => {
   const workerRef = useRef(null);
 
   useEffect(() => {
+    workerRef.current = new Worker(
+      new URL('./layoutWorker.ts', import.meta.url),
+    );
+    workerRef.current.onmessage = (e) => {
+      const cy = cyInstance.current;
+      if (!cy) return;
+
+      const { positions } = e.data;
+      cy.startBatch();
+      Object.keys(positions).forEach((id) => {
+        cy.getElementById(id).position(positions[id]);
+      });
+      cy.endBatch();
+    };
+
+    return () => {
+      workerRef.current && workerRef.current.terminate();
+    };
+  }, []);
+
+  useEffect(() => {
     if (!cyRef.current) return;
 
     cyInstance.current = cytoscape({
@@ -56,6 +77,10 @@ const Graph = ({ elements, neighborhoodMode }) => {
           },
         },
         { selector: '.hidden', style: { display: 'none' } },
+        {
+          selector: '.lod-hidden',
+          style: { label: '', 'target-arrow-shape': 'none' },
+        },
       ],
       layout: { name: 'grid', fit: true },
     });
@@ -66,11 +91,9 @@ const Graph = ({ elements, neighborhoodMode }) => {
       const zoom = cy.zoom();
       cy.startBatch();
       if (zoom < LOD_ZOOM) {
-        cy.nodes().style('label', '');
-        cy.edges().style('target-arrow-shape', 'none');
+        cy.elements().addClass('lod-hidden');
       } else {
-        cy.nodes().style('label', 'data(label)');
-        cy.edges().style('target-arrow-shape', 'triangle');
+        cy.elements().removeClass('lod-hidden');
       }
       cy.endBatch();
     };
@@ -79,19 +102,8 @@ const Graph = ({ elements, neighborhoodMode }) => {
     updateLod();
 
     const runAsyncLayout = () => {
-      workerRef.current = new Worker(
-        new URL('./layoutWorker.ts', import.meta.url),
-      );
-      workerRef.current.onmessage = (e) => {
-        const { positions } = e.data;
-        cy.startBatch();
-        Object.keys(positions).forEach((id) => {
-          cy.getElementById(id).position(positions[id]);
-        });
-        cy.endBatch();
-        workerRef.current.terminate();
-      };
-      workerRef.current.postMessage({ elements: cy.json().elements });
+      workerRef.current &&
+        workerRef.current.postMessage({ elements: cy.json().elements });
     };
 
     runAsyncLayout();
@@ -101,7 +113,6 @@ const Graph = ({ elements, neighborhoodMode }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      workerRef.current && workerRef.current.terminate();
       cy.destroy();
     };
   }, [elements]);

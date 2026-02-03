@@ -1,7 +1,29 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
-import { factFlowRouter } from '../index.js';
+
+// Mock engine dependencies
+jest.mock('../../factflow/engine.js', () => ({
+  FactFlowEngine: jest.fn().mockImplementation(() => ({
+    process: jest.fn().mockResolvedValue({ report: 'mock report' }),
+  })),
+}));
+
+jest.mock('../../factflow/adapters/transcription.js', () => ({
+  MockTranscriptionAdapter: jest.fn(),
+}));
+
+jest.mock('../../factflow/adapters/diarization.js', () => ({
+  MockDiarizationAdapter: jest.fn(),
+}));
+
+jest.mock('../../factflow/verification.js', () => ({
+  MockVerificationEngine: jest.fn(),
+}));
+
+jest.mock('../../factflow/gate.js', () => ({
+  PublishGate: jest.fn(),
+}));
 
 // Mock logger
 jest.unstable_mockModule('../../config/logger.js', () => ({
@@ -15,7 +37,7 @@ describe('FactFlow Module', () => {
   let app: any;
 
   beforeAll(async () => {
-    // Re-import to ensure mocks are applied if needed, though mostly for the router to pick up the mocked logger
+    // Re-import to ensure mocks are applied
     const { factFlowRouter } = await import('../index.js');
 
     app = express();
@@ -23,29 +45,28 @@ describe('FactFlow Module', () => {
     app.use('/api/factflow', factFlowRouter);
   });
 
-  it('GET /api/factflow/status should return active status', async () => {
-    const res = await request(app).get('/api/factflow/status');
+  it('POST /api/factflow/jobs should start a new job', async () => {
+    const res = await request(app)
+      .post('/api/factflow/jobs')
+      .send({ audioBase64: 'base64audio' });
+
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ status: 'active', version: '0.1.0' });
+    expect(res.body).toHaveProperty('job_id');
+    expect(res.body.status).toBe('processing');
   });
 
-  it('POST /api/factflow/transcribe should return simulated text', async () => {
-    const res = await request(app)
-      .post('/api/factflow/transcribe')
-      .send({ audioUrl: 'http://example.com/audio.mp3' });
+  it('GET /api/factflow/jobs/:id should return job status', async () => {
+    // First create a job
+    const createRes = await request(app)
+      .post('/api/factflow/jobs')
+      .send({ audioBase64: 'base64audio' });
+
+    const jobId = createRes.body.job_id;
+
+    // Then check status
+    const res = await request(app).get(`/api/factflow/jobs/${jobId}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('text');
-    expect(res.body.confidence).toBeGreaterThan(0);
-  });
-
-  it('POST /api/factflow/verify should return simulated verdict', async () => {
-    const res = await request(app)
-      .post('/api/factflow/verify')
-      .send({ claim: 'Sky is blue' });
-
-    expect(res.status).toBe(200);
-    expect(res.body.verdict).toBeDefined();
-    expect(res.body.evidence).toBeInstanceOf(Array);
+    expect(res.body.status).toBeDefined();
   });
 });
