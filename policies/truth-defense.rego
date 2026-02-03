@@ -3,8 +3,7 @@
 
 package summit.truth_defense
 
-import future.keywords.if
-import future.keywords.in
+import future.keywords
 
 # Configuration
 default integrity_threshold_high := 0.70
