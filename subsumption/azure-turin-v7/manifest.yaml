@@ -1,3 +1,4 @@
+version: 1.0.0
 item:
   slug: azure-turin-v7
   title: "Azure GA Da/Ea/Fa(s)v7 VMs based on AMD EPYC 'Turin'"
