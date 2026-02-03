@@ -5,6 +5,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { jest } from '@jest/globals';
 
 export interface MockRequest {
   [key: string]: any;
@@ -60,7 +61,7 @@ export function requestFactory(options: RequestFactoryOptions = {}): MockRequest
     method: options.method || 'GET',
     url: options.url || '/',
     path: options.path || '/',
-    get: function (name: string) {
+    get: function (this: any, name: string) {
       return this.headers[name.toLowerCase()];
     },
   } as unknown as MockRequest;

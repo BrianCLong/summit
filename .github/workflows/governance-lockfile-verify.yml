@@ -56,7 +56,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
@@ -176,7 +176,7 @@ jobs:
             || echo "::warning::Failed to update audit log"
 
       - name: Upload Verification Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         if: steps.check-exists.outputs.exists == 'true'
         with:
           name: governance-lockfile-verification-${{ github.run_number }}
@@ -185,7 +185,7 @@ jobs:
 
       - name: PR Comment on Failure
         if: failure() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');

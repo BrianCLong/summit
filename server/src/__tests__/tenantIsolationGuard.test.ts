@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -74,7 +75,11 @@ describe('TenantIsolationGuard', () => {
   it('honors kill switch config without redeploys', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tenant-kill-'));
     const killFile = path.join(tmpDir, 'switch.json');
+    const now = Date.now();
+
     fs.writeFileSync(killFile, JSON.stringify({ 'tenant-a': true }), 'utf-8');
+    // Ensure mtime is older so the next write is seen as new
+    fs.utimesSync(killFile, new Date(now - 10000), new Date(now - 10000));
 
     const killSwitch = new TenantKillSwitch(killFile);
     const guard = new TenantIsolationGuard(new InMemoryLimiter(), killSwitch, testConfig);
@@ -83,7 +88,10 @@ describe('TenantIsolationGuard', () => {
     expect(decision.allowed).toBe(false);
     expect(decision.status).toBe(423);
 
+    // Update file and ensure timestamp is newer
     fs.writeFileSync(killFile, JSON.stringify({ 'tenant-a': false }), 'utf-8');
+    fs.utimesSync(killFile, new Date(now + 1000), new Date(now + 1000));
+
     const reopened = guard.evaluatePolicy(baseContext, { action: 'read' });
     expect(reopened.allowed).toBe(true);
   });

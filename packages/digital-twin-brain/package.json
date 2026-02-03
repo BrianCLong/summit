@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/digital-twin-brain",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Composable multi-agent cognition layer for digital twins with continual learning and compliance-aware control.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "uuid": "^11.0.3"

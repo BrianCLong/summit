@@ -8,7 +8,7 @@ export interface WebhookPayload {
 }
 
 export class WebhookDispatcher {
-  async send(url: string, payload: WebhookPayload): Promise<number> {
+  send(url: string, payload: WebhookPayload): Promise<number> {
     const body = JSON.stringify(payload);
     return new Promise((resolve, reject) => {
       const req = request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } }, (res) => {

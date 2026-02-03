@@ -17,6 +17,7 @@ import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
 import { apolloClient } from './services/apollo';
 import { useSelector } from 'react-redux';
+import { getGraphqlHttpUrl } from './config/urls';
 
 // Connection Status Component
 function ConnectionStatus() {
@@ -25,7 +26,7 @@ function ConnectionStatus() {
   React.useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:4000/graphql', {
+        const response = await fetch(getGraphqlHttpUrl(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

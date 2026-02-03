@@ -13,7 +13,7 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+        uses: actions/checkout@v4
 
       - name: Login to GHCR
         uses: docker/login-action@184bdaa
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@c9ef52556095b32f140b0c7d74474f53696d9000
+        uses: actions/checkout@v4
 
       - name: Teardown preview environment
         run: |

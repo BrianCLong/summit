@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { MeteringPipeline } from '../pipeline.js';
 import { postgresMeterRepository } from '../postgres-repository.js';
 import { MeterEvent, MeterEventKind } from '../schema.js';

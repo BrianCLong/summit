@@ -1,4 +1,5 @@
-import { loadFeatureFlags, resetFeatureFlags } from '../feature-flags';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { loadFeatureFlags, resetFeatureFlags } from '../feature-flags.js';
 
 describe('feature flag configuration', () => {
   const originalEnv = { ...process.env };

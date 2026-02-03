@@ -1,34 +1,39 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, test } from '@jest/globals';
 
-import { AdvancedRateLimiter, RateLimitTier } from '../TieredRateLimitMiddleware';
-import Redis from 'ioredis';
+// Mock Redis - declared before mock
+const mockRedisInstance = {
+  defineCommand: jest.fn(),
+  on: jest.fn(),
+  consumeTokenBucket: jest.fn().mockImplementation((_key: string, _rate: number, _cap: number, _cost: number) => {
+    // Mock logic: always allow unless explicitly set to fail
+    if ((global as any).failNextTokenCheck) {
+      return [0, 0, 1000];
+    }
+    return [1, 100, 0];
+  }),
+  incr: jest.fn().mockResolvedValue(1),
+  decr: jest.fn().mockResolvedValue(0),
+  get: jest.fn().mockImplementation((key: string) => {
+    if (key.includes('cost')) return Promise.resolve((global as any).mockCost || '0');
+    return Promise.resolve('0');
+  }),
+  expire: jest.fn(),
+  incrbyfloat: jest.fn(),
+  hmget: jest.fn().mockResolvedValue(['100', '100000']),
+  disconnect: jest.fn(),
+};
 
-// Mock Redis
-jest.mock('ioredis', () => {
-  return jest.fn().mockImplementation(() => ({
-    defineCommand: jest.fn(),
-    on: jest.fn(),
-    consumeTokenBucket: jest.fn().mockImplementation((key, rate, cap, cost) => {
-      // Mock logic: always allow unless explicitly set to fail
-      if ((global as any).failNextTokenCheck) {
-        return [0, 0, 1000];
-      }
-      return [1, 100, 0];
-    }),
-    incr: jest.fn().mockResolvedValue(1),
-    decr: jest.fn().mockResolvedValue(0),
-    get: jest.fn().mockImplementation((key) => {
-      if (key.includes('cost')) return Promise.resolve((global as any).mockCost || '0');
-      return Promise.resolve('0');
-    }),
-    expire: jest.fn(),
-    incrbyfloat: jest.fn(),
-    hmget: jest.fn().mockResolvedValue(['100', '100000']),
-    disconnect: jest.fn(),
-  }));
-});
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('ioredis', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => mockRedisInstance),
+}));
+
+// Dynamic imports AFTER mocks are set up
+const { AdvancedRateLimiter, RateLimitTier } = await import('../TieredRateLimitMiddleware.js');
 
 describe('AdvancedRateLimiter', () => {
-  let limiter: AdvancedRateLimiter;
+  let limiter: InstanceType<typeof AdvancedRateLimiter>;
   let req: any;
   let res: any;
   let next: any;

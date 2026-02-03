@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { simulatePolicyDecision, TenantPolicyBundle } from '../tenantBundle.js';
 
 describe('tenant policy bundle guardrails', () => {

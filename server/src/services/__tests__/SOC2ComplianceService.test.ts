@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { SOC2ComplianceService } from '../SOC2ComplianceService.js';
 import { ComplianceMonitoringService } from '../ComplianceMonitoringService.js';
 import { EventSourcingService } from '../EventSourcingService.js';

@@ -1,7 +1,8 @@
-import { correctnessProgram } from '../correctness-program';
-import { buildBooleanStateMachine } from '../correctness-program/invariants';
-import { buildManifest } from '../correctness-program/migrationFactory';
-import { EventEnvelope, EventSchema } from '../correctness-program/types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { correctnessProgram } from '../correctness-program.js';
+import { buildBooleanStateMachine } from '../correctness-program/invariants.js';
+import { buildManifest } from '../correctness-program/migrationFactory.js';
+import { EventEnvelope, EventSchema } from '../correctness-program/types.js';
 
 describe('Correctness Program', () => {
   it('tracks truth map, identity, and debt', () => {

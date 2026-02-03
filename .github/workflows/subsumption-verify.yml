@@ -1,0 +1,27 @@
+name: subsumption-verify
+
+on:
+  pull_request:
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - "docs/**"
+      - "evidence/**"
+  push:
+    branches: ["main"]
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - "docs/**"
+      - "evidence/**"
+
+jobs:
+  subsumption-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify SSDF v1.2 subsumption bundle
+        run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/ssdf-v1-2/manifest.yaml

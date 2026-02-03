@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/graph-query",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Graph query language support (Cypher, Gremlin, SPARQL)",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {

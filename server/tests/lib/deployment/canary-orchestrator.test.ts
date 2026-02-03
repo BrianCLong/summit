@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { CanaryOrchestrator } from '../../../lib/deployment/canary-orchestrator';
 
 // Mock the external services

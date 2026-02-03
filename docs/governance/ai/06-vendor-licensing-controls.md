@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 6: Vendor & Licensing Controls for AI (don’t donate your crown jewels)
 
 1.  Review vendor AI terms: training on your data, retention, confidentiality, subprocessors.

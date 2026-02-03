@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import crypto from 'crypto';
 import request from 'supertest';
@@ -7,10 +8,6 @@ import { RateLimitConfig, setRateLimitConfig } from '../../config/rateLimit.js';
 
 jest.mock('../../realtime/pubsub.js', () => ({
   pubsub: { publish: jest.fn() },
-}));
-
-jest.mock('../../logger.js', () => ({
-  logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
 }));
 
 const SECRET = 'test-secret';

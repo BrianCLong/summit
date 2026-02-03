@@ -1,9 +1,10 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import type { QueryConfig } from 'pg';
 import {
   buildCandidateQuery,
   purgeTarget,
   type PurgeTarget,
-} from '../src/jobs/purgeStaleData';
+} from '../src/jobs/purgeStaleData.js';
 
 type QueryInput = string | QueryConfig;
 

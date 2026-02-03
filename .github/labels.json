@@ -1,5 +1,150 @@
 [
   {
+    "name": "type:bug",
+    "color": "d73a4a",
+    "description": "Bug or regression"
+  },
+  {
+    "name": "type:feature",
+    "color": "a2eeef",
+    "description": "New feature, enhancement, or request"
+  },
+  {
+    "name": "type:chore",
+    "color": "c2e0c6",
+    "description": "Maintenance or cleanup"
+  },
+  {
+    "name": "type:security",
+    "color": "b60205",
+    "description": "Security hardening or vulnerability"
+  },
+  {
+    "name": "type:docs",
+    "color": "0075ca",
+    "description": "Documentation changes"
+  },
+  {
+    "name": "type:ci",
+    "color": "5319e7",
+    "description": "CI or workflow work"
+  },
+  {
+    "name": "priority:P0",
+    "color": "b60205",
+    "description": "Ship blocker"
+  },
+  {
+    "name": "priority:P1",
+    "color": "d93f0b",
+    "description": "High priority"
+  },
+  {
+    "name": "priority:P2",
+    "color": "fbca04",
+    "description": "Medium priority"
+  },
+  {
+    "name": "priority:P3",
+    "color": "fef2c0",
+    "description": "Backlog / tidy item"
+  },
+  {
+    "name": "area:server",
+    "color": "1d76db",
+    "description": "Server/API"
+  },
+  {
+    "name": "area:client",
+    "color": "0e8a16",
+    "description": "Client application"
+  },
+  {
+    "name": "area:web",
+    "color": "7057ff",
+    "description": "Web application"
+  },
+  {
+    "name": "area:packages",
+    "color": "9a6700",
+    "description": "Shared packages"
+  },
+  {
+    "name": "area:cli",
+    "color": "bfd4f2",
+    "description": "CLI tooling"
+  },
+  {
+    "name": "area:ci",
+    "color": "5319e7",
+    "description": "CI/CD"
+  },
+  {
+    "name": "area:docs",
+    "color": "0075ca",
+    "description": "Documentation"
+  },
+  {
+    "name": "area:governance",
+    "color": "8c564b",
+    "description": "Governance/policy work"
+  },
+  {
+    "name": "area:security",
+    "color": "e11d21",
+    "description": "Security/compliance"
+  },
+  {
+    "name": "area:release",
+    "color": "f9d0c4",
+    "description": "Release management"
+  },
+  {
+    "name": "ga:blocker",
+    "color": "000000",
+    "description": "GA ship blocker"
+  },
+  {
+    "name": "ga:hard-gate",
+    "color": "4c1d95",
+    "description": "GA hard gate"
+  },
+  {
+    "name": "ga:polish",
+    "color": "c2e0c6",
+    "description": "GA polish"
+  },
+  {
+    "name": "post-ga",
+    "color": "6e7781",
+    "description": "Post-GA"
+  },
+  {
+    "name": "triage:needed",
+    "color": "cfd3d7",
+    "description": "Needs triage"
+  },
+  {
+    "name": "triage:ready",
+    "color": "0e8a16",
+    "description": "Triage complete"
+  },
+  {
+    "name": "triage:blocked",
+    "color": "000000",
+    "description": "Blocked"
+  },
+  {
+    "name": "triage:needs-info",
+    "color": "fef2c0",
+    "description": "Needs more information"
+  },
+  {
+    "name": "triage:duplicate",
+    "color": "6e7781",
+    "description": "Duplicate issue"
+  },
+  {
     "name": "area:graph",
     "color": "1f77b4"
   },

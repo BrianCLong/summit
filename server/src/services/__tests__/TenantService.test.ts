@@ -1,23 +1,49 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import type { TenantService as TenantServiceType } from '../TenantService.js';
-import GAEnrollmentService from '../GAEnrollmentService.js';
-import { getPostgresPool } from '../../config/database.js';
-import { provenanceLedger } from '../../provenance/ledger.js';
 import { randomUUID } from 'crypto';
 
-// Mock dependencies
-jest.mock('../../config/database.js');
-jest.mock('../../provenance/ledger.js');
-jest.mock('../../utils/logger.js');
-let TenantService: typeof import('../TenantService.js').TenantService;
+// Mock functions declared before mocks
+const mockGetPostgresPool = jest.fn();
+const mockAppendEntry = jest.fn();
+const mockLoggerInfo = jest.fn();
+const mockLoggerWarn = jest.fn();
+const mockLoggerError = jest.fn();
+const mockLoggerDebug = jest.fn();
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getPostgresPool: mockGetPostgresPool,
+}));
+
+jest.unstable_mockModule('../../provenance/ledger.js', () => ({
+  provenanceLedger: {
+    appendEntry: mockAppendEntry,
+  },
+}));
+
+jest.unstable_mockModule('../../utils/logger.js', () => {
+  const logger = {
+    info: mockLoggerInfo,
+    warn: mockLoggerWarn,
+    error: mockLoggerError,
+    debug: mockLoggerDebug,
+  };
+  return {
+    __esModule: true,
+    default: logger,
+    logger,
+  };
+});
+
+// Dynamic imports AFTER mocks are set up
+const { TenantService } = await import('../TenantService.js');
+const GAEnrollmentService = (await import('../GAEnrollmentService.js')).default;
+const { provenanceLedger } = await import('../../provenance/ledger.js');
 
 describe('TenantService', () => {
   let tenantService: TenantServiceType;
   let mockClient: any;
   let mockPool: any;
-
-  beforeAll(async () => {
-    ({ TenantService } = await import('../TenantService.js'));
-  });
 
   beforeEach(() => {
     // Reset mocks
@@ -36,7 +62,7 @@ describe('TenantService', () => {
         query: jest.fn()
     };
 
-    (getPostgresPool as jest.Mock).mockReturnValue(mockPool);
+    mockGetPostgresPool.mockReturnValue(mockPool);
 
     tenantService = TenantService.getInstance();
   });

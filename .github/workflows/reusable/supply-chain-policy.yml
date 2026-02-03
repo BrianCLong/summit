@@ -35,10 +35,10 @@ jobs:
       GRYPE_DB_CACHE_DIR: /tmp/grype/db
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: ${{ inputs.sbom_artifact_name }}
           path: artifacts
@@ -50,7 +50,7 @@ jobs:
           test -f artifacts/sbom.spdx.json
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
 
       - name: Verify container signature
         run: |
@@ -71,7 +71,7 @@ jobs:
           cosign verify-attestation "${{ inputs.image_uri }}" --type slsaprovenance --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
 
       - name: Install grype
-        uses: anchore/scan-action/download-grype@v3
+        uses: anchore/scan-action/download-grype@3343887d815d7b07465f6fdcd395bd66508d486a # v3
 
       - name: Scan SBOM for vulnerabilities
         run: |

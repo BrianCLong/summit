@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/influence-mining",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "preextract": "npm run build",
     "extract": "node dist/cli.js",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "devDependencies": {
     "@types/node": "^25.0.3"

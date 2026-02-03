@@ -3,7 +3,9 @@
 
 // Focus management utilities
 export const focusFirstElement = (container) => {
-  if (!container) return;
+  if (!container) {
+    return;
+  }
   
   const focusableElements = container.querySelectorAll(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -14,20 +16,26 @@ export const focusFirstElement = (container) => {
   }
 };
 
-export const trapFocus = (element, returnFocus = true) => {
-  if (!element) return;
+export const trapFocus = (element, _returnFocus = true) => {
+  if (!element) {
+    return;
+  }
   
   const focusableElements = element.querySelectorAll(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );
   
-  if (focusableElements.length === 0) return;
+  if (focusableElements.length === 0) {
+    return;
+  }
 
   const firstFocusable = focusableElements[0];
   const lastFocusable = focusableElements[focusableElements.length - 1];
 
   const handleKeyDown = (event) => {
-    if (event.key !== 'Tab') return;
+    if (event.key !== 'Tab') {
+      return;
+    }
 
     if (event.shiftKey) {
       if (document.activeElement === firstFocusable) {
@@ -61,7 +69,9 @@ export class LiveAnnouncer {
   }
 
   setup() {
-    if (this.container) return;
+    if (this.container) {
+      return;
+    }
 
     this.container = document.createElement('div');
     this.container.setAttribute('aria-live', 'polite');

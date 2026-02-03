@@ -1,0 +1,44 @@
+{
+  "task_id": "NARRATIVE_IOPS_20260129_FRAMES",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-analysis-update-20260129",
+    "version": "v1",
+    "sha256": "517e5b854f95ce39902e954672bdcfc23ba4adc21597221189c60d42af57d553",
+    "path": "prompts/research/narrative-analysis-update-20260129.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "narratives/",
+      "eval/narratives/",
+      "security/gates/",
+      "evidence/",
+      "docs/roadmap/STATUS.json",
+      "prompts/research/",
+      "agents/examples/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "research", "governance", "security"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "python eval/narratives/run_eval.py",
+      "evidence/EVD-NARRATIVE_IOPS_20260129-FRAMES-001/report.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Frames contract stub and validation utilities are present.",
+    "Fixtures and gate verifier run deterministically.",
+    "Evidence artifacts are generated and indexed."
+  ],
+  "stop_conditions": [
+    "Fixture-based gate fails or evidence output is missing.",
+    "Raw content is detected in evidence artifacts."
+  ]
+}

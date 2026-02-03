@@ -1,8 +1,9 @@
 
-import { SLOPolicyEngine } from '../slo-policy-engine';
-import { SignalsService } from '../../signals/signals-service';
-import { SignalType } from '../../signals/types';
-import { SLAContract, SLOAlertLevel } from '../types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { SLOPolicyEngine } from '../slo-policy-engine.js';
+import { SignalsService } from '../../signals/signals-service.js';
+import { SignalType } from '../../signals/types.js';
+import { SLAContract, SLOAlertLevel } from '../types.js';
 
 describe('SLOPolicyEngine', () => {
   let signalsService: SignalsService;

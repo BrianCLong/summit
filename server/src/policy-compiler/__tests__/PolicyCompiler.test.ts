@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { PolicyCompiler } from '../PolicyCompiler.js';
 import { EnforcementService } from '../EnforcementService.js';
 import { SimulationService } from '../SimulationService.js';

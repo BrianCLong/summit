@@ -27,7 +27,7 @@ export class DataStore {
     try {
       const raw = await readFile(dataPath, 'utf-8');
       this.state = JSON.parse(raw);
-    } catch (error) {
+    } catch (_error) {
       await this.save();
     }
 

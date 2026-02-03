@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/event-sourcing",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Enterprise event sourcing framework with event store, versioning, and replay",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"

@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/red-team",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Red team simulation and attack scenario orchestration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {

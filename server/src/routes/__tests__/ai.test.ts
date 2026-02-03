@@ -1,16 +1,20 @@
-import { Queue, Worker } from 'bullmq';
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { rateLimiter } from '../../services/RateLimiter';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 
-// Mock BullMQ
-const queueInstance = {
-  add: jest.fn(),
-  getJob: jest.fn(),
-};
-jest.mock('bullmq', () => ({
+// Mock functions declared before mocks
+const mockQueueAdd = jest.fn();
+const mockQueueGetJob = jest.fn();
+const mockRateLimiterConsume = jest.fn(async () => ({
+  allowed: true,
+  total: 1,
+  remaining: 1,
+  reset: Date.now(),
+}));
+
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('bullmq', () => ({
   Queue: jest.fn(() => ({
-    add: queueInstance.add,
-    getJob: queueInstance.getJob,
+    add: mockQueueAdd,
+    getJob: mockQueueGetJob,
   })),
   Worker: jest.fn(() => ({
     on: jest.fn(),
@@ -18,21 +22,20 @@ jest.mock('bullmq', () => ({
   QueueScheduler: jest.fn(),
 }));
 
-// Mock ExtractionEngine
-jest.mock('../../ai/ExtractionEngine', () => ({
+jest.unstable_mockModule('../../ai/ExtractionEngine', () => ({
   ExtractionEngine: jest.fn(() => ({
     processExtraction: jest.fn(),
   })),
 }));
 
-// Mock getRedisClient and getNeo4jDriver (used by ai.ts)
-jest.mock('../../db/redis', () => ({
+jest.unstable_mockModule('../../db/redis', () => ({
   getRedisClient: jest.fn(() => ({
     on: jest.fn(),
     ping: jest.fn(),
   })),
 }));
-jest.mock('../../db/neo4j', () => ({
+
+jest.unstable_mockModule('../../db/neo4j', () => ({
   getNeo4jDriver: jest.fn(() => ({
     session: jest.fn(() => ({
       run: jest.fn(),
@@ -41,17 +44,26 @@ jest.mock('../../db/neo4j', () => ({
   })),
 }));
 
-jest.mock('../../middleware/auth', () => ({
+jest.unstable_mockModule('../../middleware/auth', () => ({
   requirePermission: () => (_req: any, _res: any, next: any) => next(),
 }));
 
-jest.mock('../../middleware/rateLimit', () => ({
+jest.unstable_mockModule('../../middleware/rateLimit', () => ({
   createRateLimiter: () => (_req: any, _res: any, next: any) => next(),
   EndpointClass: { AI: 'AI' },
 }));
 
-// Import the router after mocks are set up
-import aiRouter from '../ai';
+jest.unstable_mockModule('../../services/RateLimiter', () => ({
+  rateLimiter: {
+    consume: mockRateLimiterConsume,
+  },
+}));
+
+// Dynamic imports AFTER mocks are set up
+const { Queue, Worker } = await import('bullmq');
+const aiRouter = (await import('../ai.js')).default;
+const { rateLimiter } = await import('../../services/RateLimiter.js');
+
 const getRouteHandlers = (path: string) => {
   const layer = (aiRouter as any).stack.find(
     (stack: any) => stack.route?.path === path,
@@ -105,20 +117,10 @@ const buildRes = () => {
 };
 
 describe('AI Routes - Video Analysis', () => {
-  let mockQueueAdd: any;
-  let mockQueueGetJob: any;
-
   beforeEach(() => {
-    mockQueueAdd = queueInstance.add;
-    mockQueueGetJob = queueInstance.getJob;
     mockQueueAdd.mockClear();
     mockQueueGetJob.mockClear();
-    (rateLimiter as any).consume = jest.fn(async () => ({
-      allowed: true,
-      total: 1,
-      remaining: 1,
-      reset: Date.now(),
-    }));
+    mockRateLimiterConsume.mockClear();
   });
 
   describe('POST /api/ai/extract-video', () => {

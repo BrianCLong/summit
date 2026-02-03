@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
+- Context manifest schema versioning and provenance validation for CEP core.
+
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
 ### Fixed

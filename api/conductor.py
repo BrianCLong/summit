@@ -1,10 +1,12 @@
 """Maestro Conductor API router for multi-agent orchestration."""
 
+import os
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from api.llm_provider import llm_provider
 from maestro.models import (
     Agent,
     AgentType,
@@ -13,6 +15,8 @@ from maestro.models import (
     WorkItem,
     WorkItemStatus,
 )
+from summit.orchestration.policy.sot_policy import SocietyOfThoughtPolicy
+from summit.orchestration.society_of_thought import SocietyOfThoughtEngine
 
 router = APIRouter(prefix="/conductor", tags=["conductor"])
 
@@ -230,3 +234,19 @@ def get_reviews_for_work_item(work_item_id: str):
     if work_item_id not in WORK_ITEMS:
         raise HTTPException(status_code=404, detail=f"Work item {work_item_id} not found")
     return [review for review in REVIEWS.values() if review.work_item_id == work_item_id]
+
+
+# Society of Thought Integration
+SOT_ENABLED = os.environ.get("SOT_ENABLED", "false").lower() == "true"
+
+@router.post("/reason")
+async def reason(user_input: str):
+    """Reason about a task using Society of Thought (if enabled)."""
+    policy = SocietyOfThoughtPolicy()
+    engine = SocietyOfThoughtEngine(llm_provider, policy=policy, enabled=SOT_ENABLED)
+
+    try:
+        result = await engine.run(user_input)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

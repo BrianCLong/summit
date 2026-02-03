@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { JobsRepo } from '../../src/db/repositories/jobs.js';
 
 describe('JobsRepo tenant partitioning', () => {

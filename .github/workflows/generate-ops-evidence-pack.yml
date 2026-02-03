@@ -13,13 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ github.event.inputs.ref }}
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install Dependencies
@@ -32,7 +33,7 @@ jobs:
 
       - name: Upload Evidence Pack
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: ops-evidence-pack
           path: artifacts/ops-evidence/*.tar.gz

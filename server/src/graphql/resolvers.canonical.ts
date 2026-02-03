@@ -1,5 +1,5 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
-import { filterByTemporal } from '../canonical/types';
+import { filterByTemporal } from '../canonical/types.js';
 
 // Mock data store for fallback
 const MOCK_ENTITIES: any[] = [
@@ -35,96 +35,96 @@ export const canonicalResolvers = {
       let entity = null;
 
       try {
-         const session = driver.session();
-         try {
-             const result = await session.executeRead(tx =>
-                 tx.run(`MATCH (n {id: $id}) RETURN n`, { id })
-             );
-             if (result.records.length > 0) {
-                 const node = result.records[0].get('n').properties;
-                 // Convert neo4j dates to JS dates if needed
-                 entity = { ...node };
-             }
-         } finally {
-             await session.close();
-         }
+        const session = driver.session();
+        try {
+          const result = await session.executeRead((tx: any) =>
+            tx.run(`MATCH (n {id: $id}) RETURN n`, { id })
+          );
+          if (result.records.length > 0) {
+            const node = result.records[0].get('n').properties;
+            // Convert neo4j dates to JS dates if needed
+            entity = { ...node };
+          }
+        } finally {
+          await session.close();
+        }
       } catch (e: any) {
-         console.warn("Neo4j unavailable, using mock", e);
+        console.warn("Neo4j unavailable, using mock", e);
       }
 
       // Fallback to mock
       if (!entity) {
-          entity = MOCK_ENTITIES.find(e => e.id === id);
+        entity = MOCK_ENTITIES.find(e => e.id === id);
       }
 
       if (!entity) return null;
 
       // Apply temporal filter
       if (temporal) {
-         const filtered = filterByTemporal([entity], temporal);
-         return filtered.length > 0 ? filtered[0] : null;
+        const filtered = filterByTemporal([entity], temporal);
+        return filtered.length > 0 ? filtered[0] : null;
       }
       return entity;
     },
 
     canonicalPerson: async (_: any, { id, temporal }: any, context: any) => {
       // Re-use logic or specific query
-       const driver = getNeo4jDriver();
+      const driver = getNeo4jDriver();
       let entity = null;
 
       try {
-         const session = driver.session();
-         try {
-             const result = await session.executeRead(tx =>
-                 tx.run(`MATCH (n:Person {id: $id}) RETURN n`, { id })
-             );
-             if (result.records.length > 0) {
-                 const node = result.records[0].get('n').properties;
-                 entity = { ...node };
-             }
-         } finally {
-             await session.close();
-         }
+        const session = driver.session();
+        try {
+          const result = await session.executeRead((tx: any) =>
+            tx.run(`MATCH (n:Person {id: $id}) RETURN n`, { id })
+          );
+          if (result.records.length > 0) {
+            const node = result.records[0].get('n').properties;
+            entity = { ...node };
+          }
+        } finally {
+          await session.close();
+        }
       } catch (e: any) {
-         console.warn("Neo4j unavailable, using mock", e);
+        console.warn("Neo4j unavailable, using mock", e);
       }
 
       if (!entity) {
-         entity = MOCK_ENTITIES.find(e => e.id === id && e.entityType === 'Person');
+        entity = MOCK_ENTITIES.find(e => e.id === id && e.entityType === 'Person');
       }
 
       if (!entity) return null;
-       if (temporal) {
-         const filtered = filterByTemporal([entity], temporal);
-         return filtered.length > 0 ? filtered[0] : null;
+      if (temporal) {
+        const filtered = filterByTemporal([entity], temporal);
+        return filtered.length > 0 ? filtered[0] : null;
       }
       return entity;
     },
 
     searchCanonicalEntities: async (_: any, { query, types, temporal, limit }: any, context: any) => {
       // Basic implementation
-       const driver = getNeo4jDriver();
-       let results: any[] = [];
+      const driver = getNeo4jDriver();
+      let results: any[] = [];
 
-       try {
-           const session = driver.session();
-           try {
-               // Safe query with parameters
-               const result = await session.executeRead(tx =>
-                   tx.run(`
+      try {
+        const session = driver.session();
+        try {
+          // Safe query with parameters
+          const result = await session.executeRead((tx: any) =>
+            tx.run(`
                        MATCH (n)
                        WHERE n.id CONTAINS $query OR n.name CONTAINS $query
                        RETURN n LIMIT $limit
                    `, { query, limit: parseInt(limit) || 50 })
-               );
-               results = result.records.map(r => r.get('n').properties);
-           } finally {
-               await session.close();
-           }
-       } catch (e: any) {
-           console.warn("Neo4j unavailable, using mock", e);
-           results = MOCK_ENTITIES;
-       }
+          );
+          results = result.records.map((r: any) => r.get('n').properties);
+        } finally {
+          await session.close();
+        }
+      } catch (e: any) {
+        console.warn("Neo4j unavailable, using mock", e);
+        results = MOCK_ENTITIES;
+      }
 
       if (types && types.length > 0) {
         results = results.filter(e => types.includes(e.entityType));

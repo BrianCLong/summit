@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Spec",
+  "type": "object",
+  "required": ["id", "role", "traits"],
+  "properties": {
+    "id": { "type": "string" },
+    "role": { "type": "string" },
+    "traits": { "type": "array", "items": { "type": "string" } },
+    "moral_foundations_target": { "type": "object" },
+    "emotional_climate": { "type": "object" },
+    "memory_policy": { "type": "object" },
+    "tool_policy": {
+      "type": "object",
+      "properties": {
+        "allow": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "state_machine": { "type": "string" }
+  },
+  "additionalProperties": false
+}

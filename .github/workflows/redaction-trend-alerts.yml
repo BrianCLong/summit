@@ -42,14 +42,15 @@ jobs:
       alert_triggers: ${{ steps.analyze.outputs.alert_triggers }}
       issue_action: ${{ steps.dedup.outputs.action }}
       issue_number: ${{ steps.dedup.outputs.issue_number }}
+      state_key: ${{ steps.dedup.outputs.state_key }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Download Site Artifact
         id: download
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
           name: release-ops-site
           path: ${{ env.SITE_DIR }}
@@ -105,7 +106,7 @@ jobs:
           echo "**Triggers:** ${ALERT_TRIGGERS:-none}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Alert Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: redaction-trend-alert-report
           path: artifacts/release-train/redaction_trend_alert*
@@ -165,10 +166,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Download Alert Report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
           name: redaction-trend-alert-report
           path: artifacts
@@ -260,7 +261,7 @@ jobs:
       - name: Create Issue
         if: needs.check-trends.outputs.issue_action == 'create'
         id: create
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');
@@ -279,7 +280,7 @@ jobs:
 
       - name: Update Issue
         if: needs.check-trends.outputs.issue_action == 'update'
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const fs = require('fs');
@@ -339,7 +340,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
 
       - name: Check for Open Alerts to Close
         id: check-close
@@ -366,7 +367,7 @@ jobs:
 
       - name: Close Resolved Issues
         if: steps.check-close.outputs.should_close == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
             const issueNumbers = '${{ steps.check-close.outputs.issue_numbers }}'.split('\n').filter(n => n);

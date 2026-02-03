@@ -1,4 +1,5 @@
 
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import assert from 'assert';
 import { BudgetTracker } from '../lib/resources/budget-tracker.js';
 import { CostDomain, BudgetConfig } from '../lib/resources/types.js';
@@ -14,6 +15,7 @@ async function verifyBudgetEnforcement() {
     period: 'daily',
     currency: 'USD',
     alertThresholds: [0.5, 0.8, 1.0],
+    hardStop: false,
   };
   tracker.setBudget(tenantId, config);
 

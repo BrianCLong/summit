@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import 'dotenv/config';
 import request from 'supertest';
 import type { Express, NextFunction, Request, Response } from 'express';
@@ -173,7 +174,7 @@ describeIf('S8 - Security Regression Replay Harness', () => {
   // Dynamic Test Generation
   // Check if directory exists
   if (!fs.existsSync(INCIDENTS_DIR)) {
-    test('No incidents found', () => {
+    test('No incidents directory found', () => {
       console.warn(`Incidents directory not found at ${INCIDENTS_DIR}`);
     });
     return;

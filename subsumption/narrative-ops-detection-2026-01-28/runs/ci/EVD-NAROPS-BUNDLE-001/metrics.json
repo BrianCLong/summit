@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-NAROPS-BUNDLE-001",
+  "item_slug": "narrative-ops-detection-2026-01-28",
+  "metrics": {
+    "docs_count": 3,
+    "evidence_ids_count": 1,
+    "pr_count": 0,
+    "yellow_risk_count": 0
+  }
+}

@@ -1,1 +1,63 @@
-storage: { exemplars: { max_age: 1h } }
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - "/etc/prometheus/alert-rules.yml"
+  - "/etc/prometheus/alert-rules-intelgraph.yml"
+  - "/etc/prometheus/summit-alerts.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'server'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['server:4000']
+
+  - job_name: 'gateway'
+    static_configs:
+      - targets: ['gateway:9464']
+    scrape_interval: 5s
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger-collector:14269']
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://gateway:8080/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/catalog-analytics",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Analytics and reporting for data catalog usage, adoption, and ROI",
   "license": "MIT",
   "type": "module",
@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

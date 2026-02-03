@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 
@@ -16,7 +17,7 @@ import { buildContentSecurityPolicy } from '../http-shield.js';
 describe('buildContentSecurityPolicy', () => {
   it('aligns connect-src with configured CORS origins', async () => {
     const app = express();
-    app.use(buildContentSecurityPolicy());
+    app.use(buildContentSecurityPolicy('https://allowed.test'));
     app.get('/csp', (_req, res) => res.send('ok'));
 
     const response = await request(app).get('/csp');

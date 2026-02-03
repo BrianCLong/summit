@@ -1,4 +1,4 @@
-import { depthLimit } from '../src/graphql/validation/depthLimit';
+import { depthLimit } from '../src/graphql/validation/depthLimit.js';
 import { validate, buildSchema, parse } from 'graphql';
 import { describe, test, expect } from '@jest/globals';
 

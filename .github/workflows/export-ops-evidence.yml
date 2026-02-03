@@ -38,17 +38,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # v6
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v5
+        uses: aws-actions/configure-aws-credentials@cabfdba3510de1431bac9dba27511d97497fc100 # v5
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-session-name: EvidenceExport
 
       - name: Download artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: ${{ github.event.inputs.artifact_name }}
           path: ./artifact
@@ -119,7 +119,8 @@ jobs:
           echo "receipt_path=EXPORT_RECEIPT.json" >> $GITHUB_OUTPUT
 
       - name: Upload Export Receipt
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
+          retention-days: 14
           name: EXPORT_RECEIPT
           path: ${{ steps.receipt.outputs.receipt_path }}

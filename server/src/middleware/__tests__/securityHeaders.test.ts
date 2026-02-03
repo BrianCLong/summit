@@ -1,8 +1,38 @@
-import express from 'express';
-import request from 'supertest';
+import { describe, it, expect, beforeEach, afterAll } from '@jest/globals';
 import { securityHeaders } from '../securityHeaders.js';
 
 const ORIGINAL_ENV = { ...process.env };
+
+const runMiddleware = async (envOverrides: Record<string, string | undefined> = {}) => {
+  process.env = { ...ORIGINAL_ENV, ...envOverrides };
+  const req = {
+    path: '/test',
+    method: 'GET',
+    headers: {},
+  } as any;
+  const headers: Record<string, string> = {};
+  const res = {
+    setHeader: (key: string, value: string) => {
+      headers[key.toLowerCase()] = value;
+    },
+    getHeader: (key: string) => headers[key.toLowerCase()],
+    removeHeader: (key: string) => {
+      delete headers[key.toLowerCase()];
+    },
+  } as any;
+  const handler = securityHeaders({
+    allowedOrigins: ['https://allowed.example'],
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    handler(req, res, (err?: unknown) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+
+  return headers;
+};
 
 describe('securityHeaders middleware', () => {
   beforeEach(() => {
@@ -13,41 +43,29 @@ describe('securityHeaders middleware', () => {
     process.env = ORIGINAL_ENV;
   });
 
-  const buildApp = () => {
-    const app = express();
-    app.use(
-      securityHeaders({
-        allowedOrigins: ['https://allowed.example'],
-      }),
-    );
-    app.get('/test', (_req, res) => res.send('ok'));
-    return app;
-  };
-
   it('applies baseline headers when enabled', async () => {
-    const res = await request(buildApp()).get('/test');
+    const headers = await runMiddleware();
 
-    expect(res.headers['x-content-type-options']).toBe('nosniff');
-    expect(res.headers['x-frame-options']).toBe('DENY');
-    expect(res.headers['referrer-policy']).toBe('no-referrer');
+    expect(headers['x-content-type-options']).toBe('nosniff');
+    expect(headers['x-frame-options']).toBe('DENY');
+    expect(headers['referrer-policy']).toBe('no-referrer');
   });
 
   it('can be disabled via SECURITY_HEADERS_ENABLED=false', async () => {
-    process.env.SECURITY_HEADERS_ENABLED = 'false';
-    const res = await request(buildApp()).get('/test');
+    const headers = await runMiddleware({ SECURITY_HEADERS_ENABLED: 'false' });
 
-    expect(res.headers['x-content-type-options']).toBeUndefined();
-    expect(res.headers['x-frame-options']).toBeUndefined();
-    expect(res.headers['referrer-policy']).toBeUndefined();
+    expect(headers['x-content-type-options']).toBeUndefined();
+    expect(headers['x-frame-options']).toBeUndefined();
+    expect(headers['referrer-policy']).toBeUndefined();
   });
 
   it('supports CSP report-only mode when enabled', async () => {
-    process.env.SECURITY_HEADERS_CSP_ENABLED = 'true';
-    process.env.SECURITY_HEADERS_CSP_REPORT_ONLY = 'true';
+    const headers = await runMiddleware({
+      SECURITY_HEADERS_CSP_ENABLED: 'true',
+      SECURITY_HEADERS_CSP_REPORT_ONLY: 'true',
+    });
 
-    const res = await request(buildApp()).get('/test');
-
-    expect(res.headers['content-security-policy']).toBeUndefined();
-    expect(res.headers['content-security-policy-report-only']).toBeDefined();
+    expect(headers['content-security-policy']).toBeUndefined();
+    expect(headers['content-security-policy-report-only']).toBeDefined();
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dlp-core",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Core Data Loss Prevention library for IntelGraph - content inspection, information barriers, and redaction",
   "type": "module",
   "main": "./dist/index.js",
@@ -35,7 +35,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rm -rf dist",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"

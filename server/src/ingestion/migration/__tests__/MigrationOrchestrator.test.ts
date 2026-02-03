@@ -1,5 +1,6 @@
-import { MigrationOrchestrator } from '../MigrationOrchestrator';
-import { MigrationConfig } from '../types';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { MigrationOrchestrator } from '../MigrationOrchestrator.js';
+import { MigrationConfig } from '../types.js';
 
 describe('MigrationOrchestrator', () => {
   let orchestrator: MigrationOrchestrator;

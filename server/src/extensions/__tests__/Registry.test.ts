@@ -1,5 +1,6 @@
-import { extensionRegistry } from '../registry';
-import { NoOpExtensionManifest } from '../examples/NoOpExtension';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { extensionRegistry } from '../registry.js';
+import { NoOpExtensionManifest } from '../examples/NoOpExtension.js';
 
 describe('ExtensionRegistry', () => {
   beforeEach(async () => {

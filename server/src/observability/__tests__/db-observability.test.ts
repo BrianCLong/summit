@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { DbObservabilityService } from '../db-observability.js';
 
 describe('DbObservabilityService', () => {

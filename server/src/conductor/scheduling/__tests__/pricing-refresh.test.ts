@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { refreshPricing } from '../pricing-refresh.js';
 import { PricingSignalProvider } from '../pricing-signal-provider.js';
 

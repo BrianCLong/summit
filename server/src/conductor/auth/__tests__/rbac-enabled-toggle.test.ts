@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 jest.mock('../jwt-rotation.js', () => ({
   jwtRotationManager: {
     verifyToken: jest.fn(),
@@ -15,7 +16,7 @@ const originalEnv = process.env.RBAC_ENABLED;
 
 const loadRbacModule = async () => {
   jest.resetModules();
-  return import('../rbac-middleware');
+  return import('../rbac-middleware.js');
 };
 
 const loadWithEnv = async (value: string | undefined) => {

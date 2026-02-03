@@ -1,0 +1,40 @@
+{
+  "id": "766c4bbe-f80b-446e-b5d8-995af62966fa",
+  "resource_id": "11b4238a-76b9-4bad-ab55-f201797a448b",
+  "timestamp": "2026-01-28T17:50:51.130Z",
+  "primaryArtifact": {
+    "id": "11b4238a-76b9-4bad-ab55-f201797a448b",
+    "name": "LlamaIndex",
+    "type": "Framework",
+    "url": "https://github.com/run-llama/llama_index",
+    "description": "Data framework for your LLM applications.",
+    "tags": [],
+    "maturity": "Production",
+    "capabilities": {
+      "tool_use": true,
+      "memory": true,
+      "planning": false,
+      "orchestration": false,
+      "evals": false,
+      "safety": false,
+      "observability": false,
+      "multi_agent": false,
+      "sandboxing": false
+    },
+    "signals": {
+      "license": "MIT",
+      "active_community": true
+    }
+  },
+  "provenance": {
+    "source": "initial_ecosystem.yaml",
+    "method": "seed",
+    "actor": "summit-agent-indexer"
+  },
+  "verification": {
+    "status": "unverified",
+    "tests_run": [],
+    "results": {}
+  },
+  "claims": []
+}

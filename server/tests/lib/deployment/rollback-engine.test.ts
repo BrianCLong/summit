@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { RollbackEngine } from '../../../lib/deployment/rollback-engine';
 
 // Mock the external services. This approach assumes the mocks are part of the module.

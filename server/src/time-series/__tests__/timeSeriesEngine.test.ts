@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { __private__ as influxPrivate } from '../connectors/influx-connector.js';
 import { TimeSeriesEngine } from '../engine.js';
 import { prophetForecast } from '../analysis/forecast.js';

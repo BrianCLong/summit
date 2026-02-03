@@ -1,0 +1,16 @@
+{
+  "report_id": "amb-report-critical",
+  "storyboard_id": "storyboard-intro-sweep",
+  "ambiguities": [
+    {
+      "ambiguity_id": "amb-1",
+      "severity": "critical",
+      "summary": "Motion direction for arrow head is unclear",
+      "scope": {
+        "frame_indices": [1],
+        "stroke_ids": ["stroke-1"]
+      },
+      "confidence": 0.42
+    }
+  ]
+}

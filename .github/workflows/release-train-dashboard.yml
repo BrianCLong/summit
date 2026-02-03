@@ -68,7 +68,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4
         with:
           fetch-depth: 0 # Full history for tag detection
 
@@ -102,7 +102,7 @@ jobs:
           ./scripts/release/generate_release_train_dashboard.sh ${ARGS}
 
       - name: Upload Dashboard JSON
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: release-train-dashboard
           path: |
@@ -156,7 +156,7 @@ jobs:
 
     steps:
       - name: Download Dashboard
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
           name: release-train-dashboard
 

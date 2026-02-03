@@ -9,26 +9,33 @@
  * - Edge cases and security scenarios
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { ensureAuthenticated, requirePermission, authMiddleware, auth } from '../../src/middleware/auth';
+import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import type { Request, Response, NextFunction } from 'express';
 
-var authServiceMock: any;
+// Mock variables (declared before mocks)
+const mockVerifyToken = jest.fn();
+const mockHasPermission = jest.fn();
 
-// Mock AuthService
-jest.mock('../../src/services/AuthService', () => ({
+// ESM-compatible mocking using unstable_mockModule
+jest.unstable_mockModule('../../src/services/AuthService', () => ({
   __esModule: true,
-  default: jest.fn(() => {
-    if (!authServiceMock) {
-      authServiceMock = {
-        verifyToken: jest.fn(),
-        hasPermission: jest.fn(),
-      };
-    }
-    return authServiceMock;
-  }),
+  default: jest.fn(() => ({
+    verifyToken: mockVerifyToken,
+    hasPermission: mockHasPermission,
+  })),
 }));
-jest.mock('argon2');
-jest.mock('../../src/config/database', () => ({
+
+jest.unstable_mockModule('argon2', () => ({
+  __esModule: true,
+  default: {
+    hash: jest.fn(),
+    verify: jest.fn(),
+  },
+  hash: jest.fn(),
+  verify: jest.fn(),
+}));
+
+jest.unstable_mockModule('../../src/config/database', () => ({
   getPostgresPool: jest.fn(() => ({
     connect: jest.fn(),
     query: jest.fn(),
@@ -43,6 +50,9 @@ jest.mock('../../src/config/database', () => ({
   })),
 }));
 
+// Dynamic imports AFTER mocks are set up
+const { ensureAuthenticated, requirePermission, authMiddleware, auth } = await import('../../src/middleware/auth');
+
 describe('Auth Middleware', () => {
   let mockRequest: any;
   let mockResponse: Partial<Response>;
@@ -56,20 +66,15 @@ describe('Auth Middleware', () => {
     };
 
     mockResponse = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis(),
+      status: jest.fn().mockReturnThis() as any,
+      json: jest.fn().mockReturnThis() as any,
     };
 
     nextFunction = jest.fn();
 
-    if (!authServiceMock) {
-      authServiceMock = {
-        verifyToken: jest.fn(),
-        hasPermission: jest.fn(),
-      };
-    }
-    authServiceMock.verifyToken.mockReset();
-    authServiceMock.hasPermission.mockReset();
+    // Reset mock implementations
+    mockVerifyToken.mockReset();
+    mockHasPermission.mockReset();
 
     // Clear all mocks
     jest.clearAllMocks();
@@ -87,7 +92,7 @@ describe('Auth Middleware', () => {
           scopes: [],
         };
         mockRequest.headers = { authorization: 'Bearer valid-token' };
-        authServiceMock.verifyToken.mockResolvedValue(mockUser);
+        mockVerifyToken.mockResolvedValue(mockUser);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -95,7 +100,7 @@ describe('Auth Middleware', () => {
           nextFunction,
         );
 
-        expect(authServiceMock.verifyToken).toHaveBeenCalledWith('valid-token');
+        expect(mockVerifyToken).toHaveBeenCalledWith('valid-token');
         expect(mockRequest.user).toEqual(mockUser);
         expect(nextFunction).toHaveBeenCalled();
         expect(mockResponse.status).not.toHaveBeenCalled();
@@ -111,7 +116,7 @@ describe('Auth Middleware', () => {
           scopes: [],
         };
         mockRequest.headers = { authorization: 'Bearer   valid-token-with-spaces' };
-        authServiceMock.verifyToken.mockResolvedValue(mockUser);
+        mockVerifyToken.mockResolvedValue(mockUser);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -119,14 +124,14 @@ describe('Auth Middleware', () => {
           nextFunction,
         );
 
-        expect(authServiceMock.verifyToken).toHaveBeenCalledWith('  valid-token-with-spaces');
+        expect(mockVerifyToken).toHaveBeenCalledWith('  valid-token-with-spaces');
         expect(mockRequest.user).toEqual(mockUser);
         expect(nextFunction).toHaveBeenCalled();
       });
 
       it('should reject invalid Bearer token', async () => {
         mockRequest.headers = { authorization: 'Bearer invalid-token' };
-        authServiceMock.verifyToken.mockResolvedValue(null);
+        mockVerifyToken.mockResolvedValue(null);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -165,7 +170,7 @@ describe('Auth Middleware', () => {
           scopes: [],
         };
         mockRequest.headers = { 'x-access-token': 'valid-token' };
-        authServiceMock.verifyToken.mockResolvedValue(mockUser);
+        mockVerifyToken.mockResolvedValue(mockUser);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -173,7 +178,7 @@ describe('Auth Middleware', () => {
           nextFunction,
         );
 
-        expect(authServiceMock.verifyToken).toHaveBeenCalledWith('valid-token');
+        expect(mockVerifyToken).toHaveBeenCalledWith('valid-token');
         expect(mockRequest.user).toEqual(mockUser);
         expect(nextFunction).toHaveBeenCalled();
       });
@@ -191,7 +196,7 @@ describe('Auth Middleware', () => {
           authorization: 'Bearer bearer-token',
           'x-access-token': 'header-token',
         };
-        authServiceMock.verifyToken.mockResolvedValue(mockUser);
+        mockVerifyToken.mockResolvedValue(mockUser);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -199,13 +204,13 @@ describe('Auth Middleware', () => {
           nextFunction,
         );
 
-        expect(authServiceMock.verifyToken).toHaveBeenCalledWith('bearer-token');
+        expect(mockVerifyToken).toHaveBeenCalledWith('bearer-token');
         expect(nextFunction).toHaveBeenCalled();
       });
 
       it('should reject invalid x-access-token', async () => {
         mockRequest.headers = { 'x-access-token': 'invalid-token' };
-        authServiceMock.verifyToken.mockResolvedValue(null);
+        mockVerifyToken.mockResolvedValue(null);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -232,7 +237,7 @@ describe('Auth Middleware', () => {
         expect(mockResponse.status).toHaveBeenCalledWith(401);
         expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Unauthorized' });
         expect(nextFunction).not.toHaveBeenCalled();
-        expect(authServiceMock.verifyToken).not.toHaveBeenCalled();
+        expect(mockVerifyToken).not.toHaveBeenCalled();
       });
 
       it('should reject request with empty authorization header', async () => {
@@ -267,7 +272,7 @@ describe('Auth Middleware', () => {
     describe('Error handling', () => {
       it('should handle token verification errors', async () => {
         mockRequest.headers = { authorization: 'Bearer error-token' };
-        authServiceMock.verifyToken.mockRejectedValue(new Error('Database error'));
+        mockVerifyToken.mockRejectedValue(new Error('Database error'));
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -282,7 +287,7 @@ describe('Auth Middleware', () => {
 
       it('should handle AuthService exceptions gracefully', async () => {
         mockRequest.headers = { authorization: 'Bearer exception-token' };
-        authServiceMock.verifyToken.mockRejectedValue(new Error('Unexpected error'));
+        mockVerifyToken.mockRejectedValue(new Error('Unexpected error'));
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -296,7 +301,7 @@ describe('Auth Middleware', () => {
 
       it('should handle undefined user from verifyToken', async () => {
         mockRequest.headers = { authorization: 'Bearer undefined-token' };
-        authServiceMock.verifyToken.mockResolvedValue(undefined as any);
+        mockVerifyToken.mockResolvedValue(undefined as any);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -313,7 +318,7 @@ describe('Auth Middleware', () => {
     describe('Security edge cases', () => {
       it('should reject tokens with SQL injection attempts', async () => {
         mockRequest.headers = { authorization: "Bearer '; DROP TABLE users; --" };
-        authServiceMock.verifyToken.mockResolvedValue(null);
+        mockVerifyToken.mockResolvedValue(null);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -328,7 +333,7 @@ describe('Auth Middleware', () => {
       it('should handle extremely long tokens', async () => {
         const longToken = 'a'.repeat(10000);
         mockRequest.headers = { authorization: `Bearer ${longToken}` };
-        authServiceMock.verifyToken.mockResolvedValue(null);
+        mockVerifyToken.mockResolvedValue(null);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -342,7 +347,7 @@ describe('Auth Middleware', () => {
       it('should handle special characters in tokens', async () => {
         const specialToken = 'token-with-!@#$%^&*()_+={}[]|\\:";\'<>?,./';
         mockRequest.headers = { authorization: `Bearer ${specialToken}` };
-        authServiceMock.verifyToken.mockResolvedValue(null);
+        mockVerifyToken.mockResolvedValue(null);
 
         await ensureAuthenticated(
           mockRequest as Request,
@@ -350,7 +355,7 @@ describe('Auth Middleware', () => {
           nextFunction,
         );
 
-        expect(authServiceMock.verifyToken).toHaveBeenCalledWith(specialToken);
+        expect(mockVerifyToken).toHaveBeenCalledWith(specialToken);
         expect(mockResponse.status).toHaveBeenCalledWith(401);
       });
     });
@@ -365,7 +370,7 @@ describe('Auth Middleware', () => {
           tenantId: 'tenant-test',
           role: 'ANALYST',
         };
-        authServiceMock.hasPermission.mockReturnValue(true);
+        mockHasPermission.mockReturnValue(true);
 
         middleware(
           mockRequest as Request,
@@ -373,7 +378,7 @@ describe('Auth Middleware', () => {
           nextFunction,
         );
 
-        expect(authServiceMock.hasPermission).toHaveBeenCalledWith(
+        expect(mockHasPermission).toHaveBeenCalledWith(
           mockRequest.user,
           'entity:create',
         );
@@ -384,7 +389,7 @@ describe('Auth Middleware', () => {
       it('should deny request without required permission', () => {
         const middleware = requirePermission('user:delete');
         mockRequest.user = { id: 'user123', tenantId: 'tenant-test', role: 'VIEWER' };
-        authServiceMock.hasPermission.mockReturnValue(false);
+        mockHasPermission.mockReturnValue(false);
 
         middleware(
           mockRequest as Request,
@@ -402,7 +407,7 @@ describe('Auth Middleware', () => {
         const middleware2 = requirePermission('entity:update');
 
         mockRequest.user = { id: 'user123', tenantId: 'tenant-test', role: 'ANALYST' };
-        authServiceMock.hasPermission.mockReturnValueOnce(true).mockReturnValueOnce(true);
+        mockHasPermission.mockReturnValueOnce(true).mockReturnValueOnce(true);
 
         middleware1(mockRequest as Request, mockResponse as Response, nextFunction);
         expect(nextFunction).toHaveBeenCalledTimes(1);
@@ -426,7 +431,7 @@ describe('Auth Middleware', () => {
         expect(mockResponse.status).toHaveBeenCalledWith(401);
         expect(mockResponse.json).toHaveBeenCalledWith({ error: 'Unauthorized' });
         expect(nextFunction).not.toHaveBeenCalled();
-        expect(authServiceMock.hasPermission).not.toHaveBeenCalled();
+        expect(mockHasPermission).not.toHaveBeenCalled();
       });
 
       it('should deny request when user is null', () => {
@@ -448,7 +453,7 @@ describe('Auth Middleware', () => {
       it('should allow admin access to any permission', () => {
         const middleware = requirePermission('anything:anywhere');
         mockRequest.user = { id: 'admin123', tenantId: 'tenant-test', role: 'ADMIN' };
-        authServiceMock.hasPermission.mockReturnValue(true);
+        mockHasPermission.mockReturnValue(true);
 
         middleware(
           mockRequest as Request,
@@ -465,7 +470,7 @@ describe('Auth Middleware', () => {
       it('should allow ANALYST to create entities', () => {
         const middleware = requirePermission('entity:create');
         mockRequest.user = { id: 'analyst123', tenantId: 'tenant-test', role: 'ANALYST' };
-        authServiceMock.hasPermission.mockReturnValue(true);
+        mockHasPermission.mockReturnValue(true);
 
         middleware(
           mockRequest as Request,
@@ -479,7 +484,7 @@ describe('Auth Middleware', () => {
       it('should deny VIEWER from creating entities', () => {
         const middleware = requirePermission('entity:create');
         mockRequest.user = { id: 'viewer123', tenantId: 'tenant-test', role: 'VIEWER' };
-        authServiceMock.hasPermission.mockReturnValue(false);
+        mockHasPermission.mockReturnValue(false);
 
         middleware(
           mockRequest as Request,
@@ -494,7 +499,7 @@ describe('Auth Middleware', () => {
       it('should allow VIEWER to read entities', () => {
         const middleware = requirePermission('entity:read');
         mockRequest.user = { id: 'viewer123', tenantId: 'tenant-test', role: 'VIEWER' };
-        authServiceMock.hasPermission.mockReturnValue(true);
+        mockHasPermission.mockReturnValue(true);
 
         middleware(
           mockRequest as Request,
@@ -510,11 +515,11 @@ describe('Auth Middleware', () => {
       it('should handle standard permission format (resource:action)', () => {
         const middleware = requirePermission('investigation:read');
         mockRequest.user = { id: 'user123', tenantId: 'tenant-test', role: 'ANALYST' };
-        authServiceMock.hasPermission.mockReturnValue(true);
+        mockHasPermission.mockReturnValue(true);
 
         middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
-        expect(authServiceMock.hasPermission).toHaveBeenCalledWith(
+        expect(mockHasPermission).toHaveBeenCalledWith(
           mockRequest.user,
           'investigation:read',
         );
@@ -523,11 +528,11 @@ describe('Auth Middleware', () => {
       it('should handle custom permission strings', () => {
         const middleware = requirePermission('custom-permission');
         mockRequest.user = { id: 'user123', tenantId: 'tenant-test', role: 'ADMIN' };
-        authServiceMock.hasPermission.mockReturnValue(true);
+        mockHasPermission.mockReturnValue(true);
 
         middleware(mockRequest as Request, mockResponse as Response, nextFunction);
 
-        expect(authServiceMock.hasPermission).toHaveBeenCalledWith(
+        expect(mockHasPermission).toHaveBeenCalledWith(
           mockRequest.user,
           'custom-permission',
         );
@@ -557,7 +562,7 @@ describe('Auth Middleware', () => {
         scopes: [],
       };
       mockRequest.headers = { authorization: 'Bearer valid-token' };
-      authServiceMock.verifyToken.mockResolvedValue(mockUser);
+      mockVerifyToken.mockResolvedValue(mockUser);
 
       await ensureAuthenticated(
         mockRequest as Request,
@@ -570,7 +575,7 @@ describe('Auth Middleware', () => {
 
       // Second: check permission
       const permissionMiddleware = requirePermission('entity:create');
-      authServiceMock.hasPermission.mockReturnValue(true);
+      mockHasPermission.mockReturnValue(true);
       (nextFunction as jest.Mock).mockClear();
 
       permissionMiddleware(
@@ -593,7 +598,7 @@ describe('Auth Middleware', () => {
         scopes: [],
       };
       mockRequest.headers = { authorization: 'Bearer valid-token' };
-      authServiceMock.verifyToken.mockResolvedValue(mockUser);
+      mockVerifyToken.mockResolvedValue(mockUser);
 
       await ensureAuthenticated(
         mockRequest as Request,
@@ -606,7 +611,7 @@ describe('Auth Middleware', () => {
 
       // Second: check permission (should fail)
       const permissionMiddleware = requirePermission('entity:delete');
-      authServiceMock.hasPermission.mockReturnValue(false);
+      mockHasPermission.mockReturnValue(false);
 
       permissionMiddleware(
         mockRequest as Request,
@@ -630,7 +635,7 @@ describe('Auth Middleware', () => {
         scopes: [],
       };
       mockRequest.headers = { authorization: 'Bearer valid-token' };
-      authServiceMock.verifyToken.mockResolvedValue(mockUser);
+      mockVerifyToken.mockResolvedValue(mockUser);
 
       await ensureAuthenticated(
         mockRequest as Request,
@@ -670,7 +675,7 @@ describe('Auth Middleware', () => {
       const next1 = jest.fn();
       const next2 = jest.fn();
 
-      authServiceMock.verifyToken
+      mockVerifyToken
         .mockResolvedValueOnce(mockUser1)
         .mockResolvedValueOnce(mockUser2);
 

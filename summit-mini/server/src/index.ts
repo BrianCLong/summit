@@ -96,4 +96,4 @@ app.get("/api/decisions", (_req, res) => {
 });
 
 const port = Number(process.env.PORT ?? 4317);
-app.listen(port, () => console.log(`summit-mini server on http://localhost:${port}`));
+app.listen(port, () => process.stdout.write(`summit-mini server on http://localhost:${port}\n`));
