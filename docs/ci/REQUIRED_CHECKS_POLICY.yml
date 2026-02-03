@@ -80,8 +80,8 @@ conditional_required:
     workflow: "workflow-lint.yml"
     rationale: "Validates GitHub Actions workflow syntax and safety"
     when_paths_match:
-      - "^\.github/workflows/"
-      - "^\.github/actions/"
+      - '^\.github/workflows/'
+      - '^\.github/actions/'
 
   - name: "CodeQL"
     workflow: "codeql.yml"
@@ -97,10 +97,10 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^package\.json$"
-      - "^pnpm-lock\.yaml$"
-      - "^server/package\.json$"
-      - "^\.github/workflows/supply-chain"
+      - '^package\.json$'
+      - '^pnpm-lock\.yaml$'
+      - '^server/package\.json$'
+      - '^\.github/workflows/supply-chain'
       - "^scripts/security/"
 
   - name: "Docker Build & Security Scan"
@@ -109,11 +109,10 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^\.dockerignore$"
+      - '^\.dockerignore$'
 
-  - name: "Schema compatibility guard"
+  - name: "Schema compatibility guard / schema-compat"
     workflow: "schema-compat.yml"
-
     rationale: "API schema backward compatibility checks"
     when_paths_match:
       - "^server/src/graphql/schema"
@@ -134,6 +133,13 @@ conditional_required:
     rationale: "Validates OPA/Rego policies with 90% coverage requirement"
     when_paths_match:
       - "^policy/"
+
+  - name: "Extortion Pressure Gates"
+    workflow: "extortion-gates.yml"
+    rationale: "Ensures extortion artifacts are deterministic and follow never-log policy"
+    when_paths_match:
+      - "^packages/extortion/"
+      - "^scripts/ci/.*extortion"
 
 # Informational Checks
 # --------------------
