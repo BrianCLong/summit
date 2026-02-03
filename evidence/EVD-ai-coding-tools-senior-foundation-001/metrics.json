@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-ai-coding-tools-senior-foundation-001",
+  "metrics": {
+    "diff_precision": 1.0,
+    "spec_adherence": 1.0,
+    "regression_rate": 0.0,
+    "review_load": 0.0
+  }
+}
