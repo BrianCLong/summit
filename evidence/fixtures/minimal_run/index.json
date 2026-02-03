@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "items": {
+  "evidence": {
     "EVD-CLAUDECODE-SUBAGENTS-FOUNDATION-001": {
       "files": [
         "evidence/fixtures/minimal_run/report.json",
