@@ -1,0 +1,69 @@
+# Summit Governed Agent Manifest
+# Type: Code Review Assistant
+# Governance Level: Critical (Can modify code)
+
+agent_id: "code-review-agent-v1"
+version: "1.2.0"
+
+governance:
+  owner: "platform-engineering"
+  classification: "confidential"
+  policy_set: "policy/compliance/soc2-code-review.rego"
+  risk_level: "medium"
+
+runtime:
+  model:
+    provider: "openai"
+    name: "gpt-4-turbo-preview"
+    parameters:
+      temperature: 0.1
+      top_p: 0.95
+      max_tokens: 4096
+
+  instructions:
+    source: "prompts/code-review/v1.2.md"
+    # SHA-256 of the prompt file content - enforced by CI
+    sha256: "924711e9b4c430c5dc5a78ac67b622d767e15749c6da2b78d1fcff3199c5913b"
+
+  tools:
+    - name: "git_diff_read"
+      permission: "read-only"
+      timeout_ms: 5000
+
+    - name: "linter_run"
+      permission: "sandbox-only"
+      timeout_ms: 15000
+
+    - name: "comment_on_pr"
+      permission: "read-write"
+      # Requires human approval in the loop if risk > medium
+      timeout_ms: 5000
+
+  output_schema:
+    type: "object"
+    required: ["summary", "issues", "verdict"]
+    properties:
+      summary:
+        type: "string"
+        description: "High-level summary of changes."
+      issues:
+        type: "array"
+        items:
+          type: "object"
+          required: ["file", "line", "severity", "suggestion"]
+          properties:
+            file: { type: "string" }
+            line: { type: "integer" }
+            severity: { type: "string", enum: ["info", "warning", "critical"] }
+            suggestion: { type: "string" }
+      verdict:
+        type: "string"
+        enum: ["approve", "request_changes", "comment"]
+
+evidence:
+  log_level: "audit"
+  required_artifacts:
+    - "trace"
+    - "decision_log"
+    - "policy_eval"
+  replay_mode: "deterministic"

@@ -1,0 +1,53 @@
+{
+  "v": {
+    "classification": "PUBLIC",
+    "transform": "ALLOW",
+    "linkability": "NONE"
+  },
+  "event_id": {
+    "classification": "INTERNAL",
+    "transform": "ALLOW",
+    "linkability": "NONE"
+  },
+  "ts": {
+    "classification": "SENSITIVE",
+    "transform": "NOISE_TIME",
+    "linkability": "NONE"
+  },
+  "tenant": {
+    "classification": "PSEUDONYMIZED",
+    "transform": "PSEUDONYMIZE",
+    "linkability": "INTRA_DOMAIN"
+  },
+  "type": {
+    "classification": "INTERNAL",
+    "transform": "ALLOW",
+    "linkability": "NONE"
+  },
+  "entity": {
+    "classification": "PSEUDONYMIZED",
+    "transform": "PSEUDONYMIZE",
+    "linkability": "INTRA_DOMAIN"
+  },
+  "revision": {
+    "classification": "INTERNAL",
+    "transform": "ALLOW",
+    "linkability": "NONE"
+  },
+  "payload": {
+    "classification": "RESTRICTED_PII",
+    "transform": "DROP",
+    "linkability": "NONE",
+    "never_log": true
+  },
+  "causality": {
+    "classification": "SENSITIVE",
+    "transform": "PSEUDONYMIZE",
+    "linkability": "INTRA_DOMAIN"
+  },
+  "trace": {
+    "classification": "INTERNAL",
+    "transform": "MASK",
+    "linkability": "NONE"
+  }
+}

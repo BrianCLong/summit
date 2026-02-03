@@ -6,11 +6,9 @@
   "k8s/**/*.{yml,yaml}": ["prettier --write"],
   "policy/**/*.{yml,yaml}": ["prettier --write"],
   "packages/**/src/**/*.{ts,tsx,js,jsx}": [
-    "eslint --fix --max-warnings=0 --cache"
+    "eslint --fix --max-warnings=0 --cache --no-warn-ignored"
   ],
-  "conductor-ui/**/src/**/*.{ts,tsx,js,jsx}": [
-    "eslint --fix --max-warnings=0 --cache"
-  ],
+  "conductor-ui/**/src/**/*.{ts,tsx,js,jsx}": ["eslint --fix --max-warnings=0 --cache"],
   "client/.lintstagedrc.json": ["prettier --write"],
   "package.json": ["prettier --write"]
 }

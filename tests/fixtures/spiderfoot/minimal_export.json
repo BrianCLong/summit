@@ -1,0 +1,10 @@
+{
+  "results": [
+    {
+      "type": "IP_ADDRESS",
+      "data": "1.2.3.4",
+      "module": "sfp_dns",
+      "confidence": 100
+    }
+  ]
+}

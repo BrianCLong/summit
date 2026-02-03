@@ -6,6 +6,8 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 // import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
+import compression from 'compression';
+import hpp from 'hpp';
 import pino from 'pino';
 import pinoHttpModule from 'pino-http';
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
@@ -30,6 +32,8 @@ import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mo
 import { residencyEnforcement } from './middleware/residency.js';
 import { requestProfilingMiddleware } from './middleware/request-profiling.js';
 import { securityHeaders } from './middleware/securityHeaders.js';
+import { securityHardening } from './middleware/security-hardening.js';
+import { abuseGuard } from './middleware/abuseGuard.js';
 import exceptionRouter from './data-residency/exceptions/routes.js';
 import monitoringRouter from './routes/monitoring.js';
 import billingRouter from './routes/billing.js';
@@ -39,6 +43,7 @@ import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import narrativeRouter from './routes/narrative-routes.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
@@ -72,6 +77,7 @@ import ssoRouter from './routes/sso.js';
 import qafRouter from './routes/qaf.js';
 import siemPlatformRouter from './routes/siem-platform.js';
 import maestroRouter from './routes/maestro.js';
+import mcpAppsRouter from './routes/mcp-apps.js';
 import caseRouter from './routes/cases.js';
 import entityCommentsRouter from './routes/entity-comments.js';
 import tenantsRouter from './routes/tenants.js';
@@ -128,7 +134,7 @@ import integrationAdminRouter from './routes/integrations/integration-admin.js';
 import securityAdminRouter from './routes/security/security-admin.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
-import adminTenantsRouter from './routes/admin/tenants.js';
+import adminGateway from './routes/admin/gateway.js';
 import onboardingRouter from './routes/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
 import i18nRouter from './routes/i18n.js';
@@ -137,6 +143,11 @@ import { v4Router } from './routes/v4/index.js';
 import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
+import intentRouter from './routes/intent.js';
+import factFlowRouter from './factflow/routes.js';
+import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
+import { buildApprovalsRouter } from './routes/approvals.js';
+import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -170,6 +181,9 @@ export const createApp = async () => {
 
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);
+  app.use(compression());
+
+  app.use(hpp());
 
   app.use(
     securityHeaders({
@@ -197,37 +211,44 @@ export const createApp = async () => {
   // Rate limiting - applied early to prevent abuse
   // Public rate limit applies to all routes as baseline protection
   app.use(publicRateLimit);
+  app.use(abuseGuard.middleware());
 
   // Enhanced Pino HTTP logger with correlation and trace context
   const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
-  app.use(
-    pinoHttpInstance({
-      logger: appLogger,
-      // Redaction is handled by the logger config itself, but we keep this consistent if needed
-      // logger config already has redact paths, so we can omit here or merge.
-      // We rely on logger's internal redaction, but pino-http might need specific config
-      // to redact req.headers if not using standard serializers.
-      // appLogger uses standard req/res serializers which respect redact.
-      customProps: (req: any) => ({
-        correlationId: req.correlationId,
-        traceId: req.traceId,
-        spanId: req.spanId,
-        userId: req.user?.sub || req.user?.id,
-        tenantId: req.user?.tenant_id || req.user?.tenantId,
+  if (process.env.NODE_ENV === 'test') {
+    console.log('DEBUG: appLogger type:', typeof appLogger);
+    console.log('DEBUG: appLogger has levels:', !!(appLogger as any).levels);
+    if ((appLogger as any).levels) {
+      console.log('DEBUG: appLogger.levels.values:', (appLogger as any).levels.values);
+    }
+  }
+  // Skip pino-http in test environment to avoid mock issues
+  if (cfg.NODE_ENV !== 'test') {
+    app.use(
+      pinoHttpInstance({
+        logger: appLogger,
+        customProps: (req: any) => ({
+          correlationId: req.correlationId,
+          traceId: req.traceId,
+          spanId: req.spanId,
+          userId: req.user?.sub || req.user?.id,
+          tenantId: req.user?.tenant_id || req.user?.tenantId,
+        }),
       }),
-    }),
-  );
+    );
+  }
   app.use(requestProfilingMiddleware);
 
   app.use(
     express.json({
       limit: '1mb',
-      verify: (req: any, _res, buf) => {
+      verify: (req: any, _res: any, buf: Buffer) => {
         req.rawBody = buf;
       },
     }),
   );
   app.use(sanitizeInput);
+  app.use(securityHardening);
   app.use(piiGuardMiddleware);
   app.use(safetyModeMiddleware);
 
@@ -296,15 +317,37 @@ export const createApp = async () => {
         res.status(401).json({ error: 'Unauthorized', message: 'No token provided' });
       };
 
-  // Resolve and enforce tenant context for API and GraphQL surfaces
-  app.use(['/api', '/graphql'], tenantContextMiddleware());
+  // Helper to bypass public webhooks from strict tenant/auth enforcement
+  const isPublicWebhook = (req: any) => {
+    // req.path is relative to the mount point (/api or /graphql)
+    return (
+      req.path.startsWith('/webhooks/github') ||
+      req.path.startsWith('/webhooks/jira') ||
+      req.path.startsWith('/webhooks/lifecycle')
+    );
+  };
+
+  app.use(['/api', '/graphql'], (req, res, next) => {
+    if (isPublicWebhook(req)) return next();
+    return tenantContextMiddleware()(req, res, next);
+  });
+
+  app.use(['/api', '/graphql'], shadowTrafficMiddleware);
+
   app.use(['/api', '/graphql'], admissionControl);
 
   // Authenticated rate limiting for API and GraphQL routes
-  app.use(['/api', '/graphql'], authenticatedRateLimit);
+  app.use(['/api', '/graphql'], (req, res, next) => {
+    if (isPublicWebhook(req)) return next();
+    return authenticatedRateLimit(req, res, next);
+  });
 
   // Enforce Data Residency
-  app.use(['/api', '/graphql'], residencyEnforcement);
+  app.use(['/api', '/graphql'], (req, res, next) => {
+    // Webhooks might process data, but residency checks typically require tenant context
+    if (isPublicWebhook(req)) return next();
+    return residencyEnforcement(req, res, next);
+  });
 
   // Residency Exception Routes
   app.use('/api/residency/exceptions', authenticateToken, exceptionRouter);
@@ -388,6 +431,7 @@ export const createApp = async () => {
   }
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
+  app.use('/api/narrative', narrativeRouter); // Visualization endpoints
   app.use('/api/predictive', predictiveRouter);
   app.use('/api/export', disclosuresRouter); // Mount export under /api/export as per spec
   app.use('/disclosures', disclosuresRouter); // Keep old mount for compat
@@ -414,6 +458,7 @@ export const createApp = async () => {
   app.use('/api/qaf', qafRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
   app.use('/api/maestro', maestroRouter);
+  app.use('/api/mcp-apps', mcpAppsRouter);
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
@@ -457,7 +502,7 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
-  app.use('/api/admin', adminTenantsRouter);
+  app.use('/api/admin', adminGateway);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
   app.use('/api/security', securityAdminRouter);
@@ -477,10 +522,17 @@ export const createApp = async () => {
 
   app.use('/api/intel-graph', intelGraphRouter);
   app.use('/api/graphrag', graphragRouter);
+  app.use('/api/intent', intentRouter);
+  if (cfg.FACTFLOW_ENABLED) {
+    app.use('/api/factflow', factFlowRouter);
+  }
   app.get('/metrics', metricsRoute);
+  // Re-added Approvals Router with Maestro context
+  app.use('/api/approvals', authenticateToken, buildApprovalsRouter());
 
   // Initialize SummitInvestigate Platform Routes
   SummitInvestigate.initialize(app);
+  process.stdout.write('[DEBUG] SummitInvestigate initialized\n');
   // Maestro
   const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
   const { Maestro } = await import('./maestro/core.js');
@@ -507,6 +559,54 @@ export const createApp = async () => {
   const maestroQueries = new MaestroQueries(igClient);
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
+  app.use('/api/approvals', authenticateToken, buildApprovalsRouter(maestro)); // Re-mount with maestro context
+  process.stdout.write('[DEBUG] Maestro router built\n');
+
+  // Initialize Maestro V2 Engine & Handlers (Stable-DiffCoder Integration)
+  try {
+    const { MaestroEngine } = await import('./maestro/engine.js');
+    const { MaestroHandlers } = await import('./maestro/handlers.js');
+    const { MaestroAgentService } = await import('./maestro/agent_service.js');
+    const { DiffusionCoderAdapter } = await import('./maestro/adapters/diffusion_coder.js');
+    const { getPostgresPool } = await import('./db/postgres.js');
+    const { getRedisClient } = await import('./db/redis.js');
+
+    const pool = getPostgresPool();
+    const redis = getRedisClient();
+
+    const engineV2 = new MaestroEngine({
+      db: pool as any,
+      redisConnection: redis
+    });
+
+    const agentService = new MaestroAgentService(pool as any);
+
+    // Adapt LLM for V2 Handlers
+    const llmServiceV2 = {
+      callCompletion: async (runId: string, taskId: string, payload: any) => {
+        const result = await llmClient.callCompletion(payload.messages[payload.messages.length - 1].content, payload.model);
+        return {
+          content: typeof result === 'string' ? result : (result as any).content || JSON.stringify(result),
+          usage: { total_tokens: 0 }
+        };
+      }
+    };
+
+    const diffusionCoder = new DiffusionCoderAdapter(llmServiceV2 as any);
+
+    const handlersV2 = new MaestroHandlers(
+      engineV2,
+      agentService,
+      llmServiceV2 as any,
+      { executeAlgorithm: async () => ({}) } as any,
+      diffusionCoder
+    );
+
+    handlersV2.registerAll();
+    process.stdout.write('[DEBUG] Maestro V2 Engine & Handlers initialized\n');
+  } catch (err) {
+    appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
+  }
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
@@ -570,6 +670,7 @@ export const createApp = async () => {
   if (process.env.SKIP_GRAPHQL !== 'true') {
     const { typeDefs } = await import('./graphql/schema.js');
     const { default: resolvers } = await import('./graphql/resolvers/index.js');
+    process.stdout.write('[DEBUG] GraphQL resolvers imported\n');
 
     const executableSchema = makeExecutableSchema({
       typeDefs: typeDefs as any,
@@ -591,11 +692,13 @@ export const createApp = async () => {
     );
     const { depthLimit } = await import('./graphql/validation/depthLimit.js');
     const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
+    const { httpStatusCodePlugin } = await import('./graphql/plugins/httpStatusCodePlugin.js');
 
     const apollo = new ApolloServer({
       schema,
       // Security plugins - Order matters for execution lifecycle
       plugins: [
+        httpStatusCodePlugin(), // Must be first to set HTTP status codes
         persistedQueriesPlugin as any,
         resolverMetricsPlugin as any,
         auditLoggerPlugin as any,
@@ -639,22 +742,24 @@ export const createApp = async () => {
         return formattedError;
       },
     });
+    process.stdout.write('[DEBUG] Apollo Server created, starting...\n');
     await apollo.start();
+    process.stdout.write('[DEBUG] Apollo Server started\n');
 
     app.use(
       '/graphql',
       express.json(),
       authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-      advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
-      expressMiddleware(apollo, {
+      ...(process.env.SKIP_RATE_LIMITS === 'true' ? [] : [advancedRateLimiter.middleware()]), // Applied AFTER authentication to enable per-user limits
+      expressMiddleware(apollo as any, {
         context: async ({ req }) => getContext({ req: req as any })
-      }),
+      }) as unknown as express.RequestHandler,
     );
   } else {
     appLogger.warn('GraphQL disabled via SKIP_GRAPHQL');
   }
 
-  if (!safetyState.killSwitch && !safetyState.safeMode) {
+  if (!safetyState.killSwitch && !safetyState.safeMode && process.env.NODE_ENV !== 'test') {
     // Start background trust worker if enabled
     startTrustWorker();
     // Start retention worker if enabled
@@ -665,8 +770,8 @@ export const createApp = async () => {
     });
   } else {
     appLogger.warn(
-      { safetyState },
-      'Skipping background workers because safety mode or kill switch is enabled',
+      { safetyState, env: process.env.NODE_ENV },
+      'Skipping background workers because safety mode, kill switch or test environment is enabled',
     );
   }
 
@@ -682,6 +787,11 @@ export const createApp = async () => {
   }
 
   appLogger.info('Anomaly detector activated.');
+
+  if (process.env.NODE_ENV !== 'test') {
+    // Start regional failover monitoring
+    failoverOrchestrator.start();
+  }
 
   // Global Error Handler - must be last
   app.use(centralizedErrorHandler);

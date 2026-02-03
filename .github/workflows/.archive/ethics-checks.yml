@@ -5,7 +5,7 @@ jobs:
   ethics-verification:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Verify Clean Hands Charter
         run: |
           if [ ! -f "governance/ethics/CLEAN_HANDS_CHARTER.md" ]; then

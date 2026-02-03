@@ -1,0 +1,83 @@
+item:
+  slug: graph-hybrid
+  title: "Graph+Vector Hybrid Retrieval + Sharding + GQL Signals"
+  type: "competitor-feature/standards"
+  dates:
+    tigervector_paper: "2025-01-20"
+    neo4j_property_sharding_ga: "2026-01-16"
+    aws_graphrag_docs: "latest"
+    gql_iso: "2024"
+  sources:
+    - name: "TigerVector arXiv"
+      ref: "https://arxiv.org/abs/2501.11216"
+      claims: ["ITEM:CLAIM-01", "ITEM:CLAIM-02", "ITEM:CLAIM-03"]
+    - name: "Neo4j release notes 2025.12.1"
+      ref: "https://neo4j.com/release-notes/"
+      claims: ["ITEM:CLAIM-04"]
+    - name: "AWS Bedrock KB GraphRAG with Neptune Analytics"
+      ref: "https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-build-graphs.html"
+      claims: ["ITEM:CLAIM-05"]
+    - name: "ISO GQL abstract"
+      ref: "https://www.iso.org/standard/76120.html"
+      claims: ["ITEM:CLAIM-06"]
+
+required_checks:
+  discovery: assumed
+  verified: []
+
+constraints:
+  pr_cap: 7
+  max_yellow: 2
+  max_red: 0
+  two_lane:
+    foundation_required: true
+    innovation_flagged: true
+
+feature_flags:
+  - name: "SUMMIT_GRAPHRAG_POLICY_ENFORCE"
+    default: "ci-on/runtime-off"
+  - name: "SUMMIT_HYBRID_RETRIEVAL_ADAPTERS"
+    default: "off"
+
+prs:
+  - title: "feat(subsumption): add graph-hybrid bundle manifest + evidence schemas"
+    lane: "foundation"
+    owner: "A/D"
+    risk: "green"
+    evidence_ids: ["EVD-GRAPH-HYBRID-GOV-001"]
+  - title: "feat(policy): add deny-by-default graphrag policy fixtures + verifier hooks"
+    lane: "foundation"
+    owner: "B"
+    risk: "green"
+    evidence_ids:
+      ["EVD-GRAPH-HYBRID-SEC-001", "EVD-GRAPH-HYBRID-SEC-002"]
+  - title: "feat(ci): add subsumption bundle verifier script + workflow job"
+    lane: "foundation"
+    owner: "D"
+    risk: "green"
+    evidence_ids: ["EVD-GRAPH-HYBRID-GOV-002"]
+  - title: "feat(evals): add hybrid retrieval benchmark harness + deterministic metrics"
+    lane: "foundation"
+    owner: "C"
+    risk: "yellow"
+    evidence_ids: ["EVD-GRAPH-HYBRID-PERF-001"]
+  - title: "feat(innovation): add hybrid retrieval contract + adapter stubs (flagged off)"
+    lane: "innovation"
+    owner: "A/E"
+    risk: "yellow"
+    evidence_ids: ["EVD-GRAPH-HYBRID-ARCH-001", "EVD-GRAPH-HYBRID-PROD-001"]
+
+docs_targets:
+  - "docs/standards/graph-hybrid-interop.md"
+  - "docs/security/data-handling/graph-hybrid.md"
+  - "docs/ops/runbooks/graph-hybrid.md"
+  - "docs/decisions/graph-hybrid.md"
+
+evidence_ids:
+  - "EVD-GRAPH-HYBRID-GOV-001"
+  - "EVD-GRAPH-HYBRID-GOV-002"
+  - "EVD-GRAPH-HYBRID-SEC-001"
+  - "EVD-GRAPH-HYBRID-SEC-002"
+  - "EVD-GRAPH-HYBRID-PERF-001"
+  - "EVD-GRAPH-HYBRID-ARCH-001"
+  - "EVD-GRAPH-HYBRID-PROD-001"
