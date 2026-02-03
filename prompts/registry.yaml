@@ -605,3 +605,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: lazy-mcp-skillpacks
+    version: v1
+    path: prompts/skillpacks/lazy-mcp-skillpacks@v1.md
+    sha256: a5127a0addcbc97f6f863d5a02ee286c0267f44abe5e39f24934f9e7d717eee8
+    description: Implement lazy-loaded MCP skillpacks with adaptive sharding and governance evidence.
+    scope:
+      paths:
+        - packages/agent-skillpacks/
+        - .summit/skillpacks/
+        - docs/skillpacks-lazy-mcp.md
+        - docs/roadmap/STATUS.json
+        - artifacts/tool-loading-report.json
+        - artifacts/tool-loading-report.md
+        - agents/examples/
+        - prompts/skillpacks/
+        - prompts/registry.yaml
+      domains:
+        - agent-tooling
+        - governance
+        - mcp
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
