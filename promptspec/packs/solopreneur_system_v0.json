@@ -1,0 +1,10 @@
+{
+  "pack_id": "solopreneur_system_v0",
+  "promptspec_ids": [
+    "opportunity_filter_v0",
+    "offer_productization_v0",
+    "mvf_funnel_v0",
+    "delivery_sop_v0",
+    "ops_dashboard_v0"
+  ]
+}
