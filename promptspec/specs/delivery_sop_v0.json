@@ -1,0 +1,37 @@
+{
+  "id": "delivery_sop_v0",
+  "version": "0.1.0",
+  "description": "Create a delivery SOP with checklists, QC rubric, templates, and automation candidates.",
+  "inputs_schema": {
+    "type": "object",
+    "properties": {
+      "offer_name": {"type": "string"},
+      "deliverables": {"type": "array", "items": {"type": "string"}},
+      "quality_bar": {"type": "string"},
+      "constraints": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["offer_name", "deliverables", "quality_bar"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "checklist": {"type": "array", "items": {"type": "string"}},
+      "qc_rubric": {"type": "array", "items": {"type": "string"}},
+      "templates": {"type": "array", "items": {"type": "string"}},
+      "automation_candidates": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": [
+      "checklist",
+      "qc_rubric",
+      "templates",
+      "automation_candidates"
+    ],
+    "additionalProperties": false
+  },
+  "prompt_template": "Draft a delivery SOP for {{offer_name}}.\nDeliverables: {{deliverables}}\nQuality bar: {{quality_bar}}\nConstraints: {{constraints}}\n\nReturn JSON matching the output schema with actionable steps.",
+  "policies": {
+    "tools_allowed": false,
+    "deny_guaranteed_earnings": true
+  }
+}
