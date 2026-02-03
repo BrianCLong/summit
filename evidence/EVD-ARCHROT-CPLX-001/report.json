@@ -1,5 +1,7 @@
 {
-  "artifacts": [],
+  "artifacts": [
+    "complexity_stats.json"
+  ],
   "evidence_id": "EVD-ARCHROT-CPLX-001",
-  "summary": "stub"
+  "summary": "Complexity analysis complete. 0 violations found in 614 files."
 }
