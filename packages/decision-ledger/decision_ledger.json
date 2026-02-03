@@ -185,5 +185,22 @@
     },
     "reasoning": "Documented IO/CogWar radar brief with evidence-first structure, registered the prompt/task spec, updated roadmap status, and recorded rollback guidance.",
     "reverted": false
+  },
+  {
+    "id": "promptspec-foundation-lane1-20260207",
+    "timestamp": "2026-02-07T00:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJwcm9tcHRzcGVjIGxhbmUxIGZvdW5kYXRpb24gc2NhZmZvbGRpbmcgKHNjaGVtYXMsIHBhY2ssIGV2YWwsIHBvbGljeSwgZXZpZGVuY2UsIHRlc3RzLCByZWdpc3RyeSkiLCJmaWxlcyI6WyJzY2hlbWFzL2V2aWRlbmNlLmluZGV4LnNjaGVtYS5qc29uIiwic2NoZW1hcy9wcm9tcHRzcGVjLnNjaGVtYS5qc29uIiwicHJvbXB0c3BlYy9wcm9tcHRzcGVjLnNjaGVtYS5qc29uIiwicHJvbXB0c3BlYy9zcGVjcy9vcHBvcnR1bml0eV9maWx0ZXJfdjAuanNvbiIsInByb21wdHNwZWMvc3BlY3Mvb2ZmZXJfcHJvZHVjdGl6YXRpb25fdjAuanNvbiIsInByb21wdHNwZWMvc3BlY3MvbXZmX2Z1bm5lbF92MC5qc29uIiwicHJvbXB0c3BlYy9zcGVjcy9kZWxpdmVyeV9zb3BfdjAuanNvbiIsInByb21wdHNwZWMvc3BlY3Mvb3BzX2Rhc2hib2FyZF92MC5qc29uIiwicHJvbXB0c3BlYy9wYWNrcy9zb2xvcHJlbmV1cl9zeXN0ZW1fdjAuanNvbiIsImV2YWwvcnVubmVyLnB5IiwiZXZhbC9ydWJyaWNzL3NvbG9wcmVuZXVyX3N5c3RlbV92MC5qc29uIiwiZXZhbC9maXh0dXJlcy9vcHBvcnR1bml0eV9maWx0ZXJfdjAuanNvbiIsInBvbGljeS9nYXRlLnB5IiwicG9saWN5L3J1bGVzLmpzb24iLCJldmlkZW5jZS9pbmRleC5weSIsImV2aWRlbmNlL3dyaXRlX2V2aWRlbmNlLnB5IiwiZG9jcy9yZXF1aXJlZF9jaGVja3MudG9kby5tZCIsImRlcGVuZGVuY3lfZGVsdGEubWQiLCJ0ZXN0cy9wb2xpY3kvdGVzdF9kZW5pZXNfZ3VhcmFudGVlcy5weSIsInRlc3RzL2V2aWRlbmNlL3Rlc3RfaW5kZXhfZGV0ZXJtaW5pc20ucHkiLCJ0ZXN0cy9wcm9tcHRzcGVjL3Rlc3Rfc2NoZW1hX3ZhbGlkYXRlcy5weSIsInByb21wdHMvcHJvbXB0c3BlYy9wcm9tcHRzcGVjLWZvdW5kYXRpb24tbGFuZTFAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvUFJPTVBUU1BFQ19GT1VOREFUSU9OX0xBTkUxXzIwMjYwMjA3Lmpzb24iLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iLCJwYWNrYWdlcy9kZWNpc2lvbi1sZWRnZXIvZGVjaXNpb25fbGVkZ2VyLmpzb24iXX0=",
+    "decision": {
+      "action": "scaffold_promptspec_lane1",
+      "rule": {
+        "condition": "promptspec foundation scaffolding required",
+        "action": "scaffold_promptspec_lane1",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added PromptSpec schema, clean-room pack, eval rubric, policy gate, and evidence scaffolding with deterministic tests. Rollback: revert the commit adding promptspec/evidence/eval/policy scaffolds and registry/task spec updates.",
+    "reverted": false
   }
 ]

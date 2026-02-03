@@ -1,0 +1,17 @@
+{
+  "scenario_id": "SCN-001",
+  "title": "Fake Data Leak on Social Media",
+  "trigger": "Twitter/X bot swarm posting screenshots of 'internal database'",
+  "artifact_type": "image",
+  "severity": "SEV-2",
+  "injects": [
+    {
+      "time": "T+0",
+      "event": "Bot network posts 500 tweets with hashtag #SummitLeak"
+    },
+    {
+      "time": "T+15",
+      "event": "Journalist inquires about data breach"
+    }
+  ]
+}
