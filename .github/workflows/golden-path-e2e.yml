@@ -16,19 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
           cache: "pnpm"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
       - name: Install Dependencies
-        run: pnpm install
+        run: for i in 1 2 3; do pnpm install && exit 0 || sleep 15; done; exit 1
 
       - name: Install Playwright Browsers
         run: |
