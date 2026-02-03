@@ -55,6 +55,38 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ru-ua-cogwar-lab
+    version: v1
+    path: prompts/cogwar/ru-ua-cogwar-lab@v1.md
+    sha256: 68b953ae92fc46eb75c9b2875842e05b12f01bfbc3a53866bf5f609014e33306
+    description: Deterministic cogwar campaign schema, examples, packs, and governance docs.
+    scope:
+      paths:
+        - schemas/cogwar/
+        - examples/cogwar/ru-ua/
+        - scripts/cogwar/
+        - scripts/monitoring/ru-ua-cogwar-lab-drift.mjs
+        - dist/cogwar/
+        - tests/cogwar/
+        - docs/standards/ru-ua-cogwar-lab.md
+        - docs/security/data-handling/ru-ua-cogwar-lab.md
+        - docs/ops/runbooks/ru-ua-cogwar-lab.md
+        - docs/roadmap/STATUS.json
+        - prompts/cogwar/ru-ua-cogwar-lab@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - cogwar
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
@@ -84,27 +116,20 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: shared-memory-evidence-pr1
+  - id: svc-repo-recon
     version: v1
-    path: prompts/evidence/shared-memory-evidence-pr1@v1.md
-    sha256: dd2e33f08fcf4743e414f6903bb0c5ce5adf9f16927953e3494e32979ab01193
-    description: Scaffold shared memory evidence schemas, bundle artifacts, and required checks mapping.
+    path: prompts/governance/svc-repo-recon@v1.md
+    sha256: 6e0e7b88347517f8de0e6d1ae29bb6511cbe4a985702e2dc6875cee47812b54a
+    description: Capture verified repo assumptions and guardrails for Summit Verified Change (SVC) recon.
     scope:
       paths:
-        - evidence/EVD-shared-memory-orch-001/
-        - evidence/index.json
-        - evidence/schemas/shared-memory-orch-metrics.schema.json
-        - evidence/schemas/shared-memory-orch-report.schema.json
-        - evidence/schemas/shared-memory-orch-stamp.schema.json
-        - required_checks.todo.md
-        - tests/evidence/test_shared_memory_orch_schema.py
+        - repo_assumptions.md
         - docs/roadmap/STATUS.json
-        - prompts/evidence/shared-memory-evidence-pr1@v1.md
+        - prompts/governance/svc-repo-recon@v1.md
         - prompts/registry.yaml
       domains:
-        - evidence
         - governance
-        - docs
+        - documentation
     verification:
       tiers_required:
         - C
@@ -343,6 +368,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: nog-governed-ops-docs
+    version: v1
+    path: prompts/docs/nog-governed-ops-docs@v1.md
+    sha256: 671b5dcfc2e1fe6ca3e0fb75a84a7e9cbbc661f8cb07ebdc1529699bd88c4646
+    description: Document governed narrative risk ops standards, security handling, and runbook updates.
+    scope:
+      paths:
+        - repo_assumptions.md
+        - docs/standards/nog-governed-agents.md
+        - docs/security/data-handling/nog-governed-agents.md
+        - docs/ops/runbooks/nog-governed-agents.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/NOG_GOVERNED_OPS_DOCS_TASK.json
+        - prompts/docs/nog-governed-ops-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
@@ -361,6 +415,44 @@ prompts:
     verification:
       tiers_required:
         - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: federated-campaign-radar-implementation
+    version: v1
+    path: prompts/federated-campaign-radar-implementation.md
+    sha256: f24cb004a3529f2735297dc5d579498b74aa5e6decee63dcb73fc0c5e2678b6f
+    description: Implement Federated Campaign Radar schemas, services, policies, routes, and documentation.
+    scope:
+      paths:
+        - docs/federated-campaign-radar*.md
+        - docs/runbooks/federated-campaign-radar*.md
+        - docs/roadmap/STATUS.json
+        - schemas/fcr/
+        - server/src/services/fcr/
+        - server/src/routes/federated-campaign-radar.ts
+        - server/src/app.ts
+        - server/policies/
+        - server/src/provenance/
+        - fixtures/fcr-sample.json
+        - openapi/spec.yaml
+        - agents/examples/
+        - artifacts/agent-runs/
+        - prompts/federated-campaign-radar-implementation.md
+        - prompts/registry.yaml
+      domains:
+        - federation
+        - privacy
+        - governance
+        - provenance
+        - observability
+        - api
+    verification:
+      tiers_required:
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
