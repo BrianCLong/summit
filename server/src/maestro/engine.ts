@@ -13,7 +13,7 @@ import {
   TransitionReceiptInput,
   emitTransitionReceipt,
 } from './evidence/transition-receipts.js';
-import { ForkDetector } from '@maestro/core';
+import { ForkDetector } from '@intelgraph/maestro-core';
 
 // Interface for dependencies
 interface MaestroDependencies {

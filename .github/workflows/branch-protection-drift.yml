@@ -1,238 +1,393 @@
+# branch-protection-drift.yml
+# Detects drift between REQUIRED_CHECKS_POLICY.yml and GitHub branch protection
+#
+# Compares policy-as-code with actual GitHub enforcement.
+# Opens/updates a deduped issue when drift is detected.
+#
+# Authority: docs/ci/BRANCH_PROTECTION_DRIFT.md
+
 name: Branch Protection Drift Detection
 
-# Governance workflow to detect drift between policy file and actual GitHub branch protection settings
-# Authority: Platform Engineering
-# Scope: Validates main branch protection matches REQUIRED_CHECKS_POLICY.yml
-
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/ci/REQUIRED_CHECKS_POLICY.yml'
-      - '.github/workflows/branch-protection-drift.yml'
-
+  # Daily check
   schedule:
-    # Run daily at 08:00 UTC to catch manual drift
-    - cron: '0 8 * * *'
+    - cron: "0 10 * * *" # 10:00 UTC daily
 
+  # On policy changes
+  pull_request:
+    paths:
+      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
+
+  # Manual trigger
   workflow_dispatch:
     inputs:
-      verbose:
-        description: 'Enable verbose output for debugging'
-        required: false
-        default: 'false'
+      branch:
+        description: "Branch to check"
+        type: string
+        default: "main"
+      dry_run:
+        description: "Dry run (no issue creation)"
         type: boolean
+        default: false
 
 permissions:
   contents: read
-  # Note: Reading branch protection requires admin:org or repo scope
-  # GITHUB_TOKEN may not have sufficient permissions in some configurations
+  issues: write
+  actions: read
+
+env:
+  OUT_DIR: artifacts/release-train
 
 jobs:
-  detect-drift:
-    name: Detect Branch Protection Drift
+  check-drift:
+    name: Check Branch Protection Drift
     runs-on: ubuntu-latest
 
+    outputs:
+      drift_detected: ${{ steps.check.outputs.drift_detected }}
+      missing_count: ${{ steps.check.outputs.missing_count }}
+      extra_count: ${{ steps.check.outputs.extra_count }}
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4 # v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Determine Branch
+        id: branch
+        run: |
+          if [[ -n "${{ github.event.inputs.branch }}" ]]; then
+            BRANCH="${{ github.event.inputs.branch }}"
+          else
+            BRANCH="main"
+          fi
+          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "Checking branch: ${BRANCH}"
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        continue-on-error: true
         with:
-          node-version: '20'
+          app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
+          private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
 
-      - name: Install yq (YAML processor)
+      - name: Select branch protection token
+        id: auth
         run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-
-      - name: Extract expected checks from policy
-        id: policy
-        run: |
-          set -euo pipefail
-
-          POLICY_FILE="docs/ci/REQUIRED_CHECKS_POLICY.yml"
-
-          # Validate policy file exists
-          if [[ ! -f "$POLICY_FILE" ]]; then
-            echo "::error::Policy file not found: $POLICY_FILE"
-            exit 1
+          if [[ -n "${{ steps.app-token.outputs.token }}" ]]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
+            echo "auth_source=github-app" >> $GITHUB_OUTPUT
+            echo "::notice::GitHub App token acquired."
+            echo "✅ GitHub App token acquired." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
+            echo "auth_source=github-token" >> $GITHUB_OUTPUT
+            echo "::warning::GitHub App token unavailable; falling back to GITHUB_TOKEN."
+            echo "⚠️ Fell back to GITHUB_TOKEN." >> $GITHUB_STEP_SUMMARY
           fi
 
-          # Extract branch protection settings
-          EXPECTED_BRANCH=$(yq eval '.branch_protection.branch' "$POLICY_FILE")
-          EXPECTED_STRICT=$(yq eval '.branch_protection.required_status_checks.strict' "$POLICY_FILE")
-
-          # Extract required check contexts as JSON array
-          EXPECTED_CONTEXTS=$(yq eval '.branch_protection.required_status_checks.contexts | @json' "$POLICY_FILE")
-
-          echo "branch=$EXPECTED_BRANCH" >> "$GITHUB_OUTPUT"
-          echo "strict=$EXPECTED_STRICT" >> "$GITHUB_OUTPUT"
-          echo "contexts=$EXPECTED_CONTEXTS" >> "$GITHUB_OUTPUT"
-
-          # Also save to temp file for later comparison
-          echo "$EXPECTED_CONTEXTS" | jq -S '.' > /tmp/expected-contexts.json
-
-          echo "### Policy File Analysis" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Policy file:** \`$POLICY_FILE\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Target branch:** \`$EXPECTED_BRANCH\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Strict mode:** \`$EXPECTED_STRICT\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Expected checks count:** $(echo "$EXPECTED_CONTEXTS" | jq 'length')" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "<details><summary>Expected Required Checks</summary>" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo '```json' >> "$GITHUB_STEP_SUMMARY"
-          echo "$EXPECTED_CONTEXTS" | jq -S '.' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "</details>" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Fetch actual branch protection settings
-        id: actual
+      - name: Verify GitHub App installation
+        if: steps.auth.outputs.auth_source == 'github-app'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
-          set -euo pipefail
+          gh api "/repos/${{ github.repository }}/installation" >/dev/null
+          echo "✅ GitHub App installation verified." >> $GITHUB_STEP_SUMMARY
 
-          BRANCH="${{ steps.policy.outputs.branch }}"
-
-          echo "Fetching branch protection for: $BRANCH"
-
-          # Fetch branch protection settings via GitHub REST API
-          # Note: This may fail if GITHUB_TOKEN lacks admin permissions
-          RESPONSE=$(gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "/repos/${{ github.repository }}/branches/$BRANCH/protection" \
-            2>&1) || {
-            echo "::error::Failed to fetch branch protection settings. GITHUB_TOKEN may lack required permissions (admin:org or repo scope)."
-            echo "::error::Response: $RESPONSE"
-            exit 1
-          }
-
-          # Extract required status checks
-          ACTUAL_STRICT=$(echo "$RESPONSE" | jq -r '.required_status_checks.strict // false')
-          ACTUAL_CONTEXTS=$(echo "$RESPONSE" | jq -c '.required_status_checks.contexts // []')
-
-          echo "strict=$ACTUAL_STRICT" >> "$GITHUB_OUTPUT"
-          echo "contexts=$ACTUAL_CONTEXTS" >> "$GITHUB_OUTPUT"
-
-          # Save to temp file for comparison
-          echo "$ACTUAL_CONTEXTS" | jq -S '.' > /tmp/actual-contexts.json
-
-          echo "### GitHub Branch Protection (Actual)" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Branch:** \`$BRANCH\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Strict mode:** \`$ACTUAL_STRICT\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- **Actual checks count:** $(echo "$ACTUAL_CONTEXTS" | jq 'length')" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "<details><summary>Actual Required Checks</summary>" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo '```json' >> "$GITHUB_STEP_SUMMARY"
-          echo "$ACTUAL_CONTEXTS" | jq -S '.' >> "$GITHUB_STEP_SUMMARY"
-          echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "</details>" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Compare and detect drift
+      - name: Run Drift Detection
+        id: check
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
-          set -euo pipefail
+          mkdir -p "${{ env.OUT_DIR }}"
 
-          EXPECTED_STRICT="${{ steps.policy.outputs.strict }}"
-          ACTUAL_STRICT="${{ steps.actual.outputs.strict }}"
+          chmod +x scripts/release/check_branch_protection_drift.sh
+          chmod +x scripts/release/extract_required_checks_from_policy.sh
 
-          DRIFT_DETECTED=false
+          scripts/release/check_branch_protection_drift.sh \
+            --repo "${{ github.repository }}" \
+            --branch "${{ steps.branch.outputs.branch }}" \
+            --out-dir "${{ env.OUT_DIR }}" \
+            --verbose
 
-          echo "### Drift Detection Results" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
+          # Extract results for outputs
+          DRIFT=$(jq -r '.drift_detected' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+          MISSING=$(jq -r '.summary.missing_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+          EXTRA=$(jq -r '.summary.extra_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
 
-          # Compare strict mode
-          if [[ "$EXPECTED_STRICT" != "$ACTUAL_STRICT" ]]; then
-            echo "::error::Drift detected in strict mode setting"
-            echo "- **Strict Mode Drift:** Expected \`$EXPECTED_STRICT\`, Got \`$ACTUAL_STRICT\`" >> "$GITHUB_STEP_SUMMARY"
-            DRIFT_DETECTED=true
-          else
-            echo "- **Strict Mode:** ✅ No drift (\`$EXPECTED_STRICT\`)" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          echo "drift_detected=${DRIFT}" >> $GITHUB_OUTPUT
+          echo "missing_count=${MISSING}" >> $GITHUB_OUTPUT
+          echo "extra_count=${EXTRA}" >> $GITHUB_OUTPUT
 
-          # Compare contexts (required checks)
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "#### Required Checks Comparison" >> "$GITHUB_STEP_SUMMARY"
+          echo "Drift detected: ${DRIFT}"
+          echo "Missing in GitHub: ${MISSING}"
+          echo "Extra in GitHub: ${EXTRA}"
 
-          # Find missing checks (in policy but not in GitHub)
-          MISSING_CHECKS=$(jq -n \
-            --slurpfile expected /tmp/expected-contexts.json \
-            --slurpfile actual /tmp/actual-contexts.json \
-            '$expected[0] - $actual[0]')
+      - name: Upload Drift Report
+        uses: actions/upload-artifact@v4 # v4
+        with:
+          name: branch-protection-drift-report
+          path: |
+            ${{ env.OUT_DIR }}/branch_protection_drift_report.md
+            ${{ env.OUT_DIR }}/branch_protection_drift_report.json
+          retention-days: 30
 
-          # Find extra checks (in GitHub but not in policy)
-          EXTRA_CHECKS=$(jq -n \
-            --slurpfile expected /tmp/expected-contexts.json \
-            --slurpfile actual /tmp/actual-contexts.json \
-            '$actual[0] - $expected[0]')
+      - name: Check Deduplication
+        id: dedup
+        if: steps.check.outputs.drift_detected == 'true'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
+          script: |
+            const branch = '${{ steps.branch.outputs.branch }}';
+            const missing = ${{ steps.check.outputs.missing_count }};
+            const extra = ${{ steps.check.outputs.extra_count }};
 
-          MISSING_COUNT=$(echo "$MISSING_CHECKS" | jq 'length')
-          EXTRA_COUNT=$(echo "$EXTRA_CHECKS" | jq 'length')
+            // Create a fingerprint of the drift state
+            const driftKey = `${branch}_${missing}_${extra}`;
+            core.info(`Drift key: ${driftKey}`);
 
-          if [[ "$MISSING_COUNT" -gt 0 ]]; then
-            echo "::error::Drift detected: $MISSING_COUNT required checks missing from GitHub branch protection"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "##### ❌ Missing Required Checks ($MISSING_COUNT)" >> "$GITHUB_STEP_SUMMARY"
-            echo "The following checks are defined in the policy but NOT enforced by GitHub:" >> "$GITHUB_STEP_SUMMARY"
-            echo '```json' >> "$GITHUB_STEP_SUMMARY"
-            echo "$MISSING_CHECKS" | jq '.' >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            DRIFT_DETECTED=true
-          else
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "##### ✅ No Missing Checks" >> "$GITHUB_STEP_SUMMARY"
-          fi
+            // Search for existing drift issues with matching title
+            const titlePattern = `[Governance Drift] Branch protection does not match REQUIRED_CHECKS_POLICY (${branch})`;
 
-          if [[ "$EXTRA_COUNT" -gt 0 ]]; then
-            echo "::warning::Drift detected: $EXTRA_COUNT checks enforced by GitHub but not in policy"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "##### ⚠️ Extra Checks ($EXTRA_COUNT)" >> "$GITHUB_STEP_SUMMARY"
-            echo "The following checks are enforced by GitHub but NOT in the policy:" >> "$GITHUB_STEP_SUMMARY"
-            echo '```json' >> "$GITHUB_STEP_SUMMARY"
-            echo "$EXTRA_CHECKS" | jq '.' >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            DRIFT_DETECTED=true
-          else
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "##### ✅ No Extra Checks" >> "$GITHUB_STEP_SUMMARY"
-          fi
+            // Use search API for deduplication (better for large repos)
+            const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open label:governance in:title "${titlePattern}"`;
 
-          # Final verdict
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          if [[ "$DRIFT_DETECTED" == "true" ]]; then
-            echo "### 🚨 DRIFT DETECTED" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "**Action Required:** Branch protection settings do not match the policy file." >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "**Remediation Steps:**" >> "$GITHUB_STEP_SUMMARY"
-            echo "1. Review the drift details above" >> "$GITHUB_STEP_SUMMARY"
-            echo "2. Either update \`docs/ci/REQUIRED_CHECKS_POLICY.yml\` to match GitHub settings" >> "$GITHUB_STEP_SUMMARY"
-            echo "3. OR update GitHub branch protection to match the policy file" >> "$GITHUB_STEP_SUMMARY"
-            echo "4. Ensure policy file is the authoritative source of truth" >> "$GITHUB_STEP_SUMMARY"
+            const searchResult = await github.rest.search.issuesAndPullRequests({
+              q: q,
+              per_page: 1
+            });
 
-            exit 1
-          else
-            echo "### ✅ NO DRIFT DETECTED" >> "$GITHUB_STEP_SUMMARY"
-            echo "" >> "$GITHUB_STEP_SUMMARY"
-            echo "Branch protection settings match the policy file exactly." >> "$GITHUB_STEP_SUMMARY"
+            const existingIssue = searchResult.data.items.length > 0 ? searchResult.data.items[0] : null;
 
-            echo "No drift detected - policy and GitHub branch protection are synchronized"
-          fi
+            if (existingIssue) {
+              core.info(`Found existing issue #${existingIssue.number}`);
 
-      - name: Verbose output (debug)
-        if: ${{ github.event.inputs.verbose == 'true' }}
+              // Check if updated within 24h by looking at comments
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number
+              });
+
+              const lastUpdate = comments.data.length > 0
+                ? new Date(comments.data[comments.data.length - 1].created_at)
+                : new Date(existingIssue.created_at);
+
+              const now = new Date();
+              const diffHours = (now - lastUpdate) / (1000 * 60 * 60);
+
+              if (diffHours < 24) {
+                core.notice(`Issue #${existingIssue.number} updated within 24h, skipping`);
+                core.setOutput('action', 'skip');
+              } else {
+                core.setOutput('action', 'update');
+                core.setOutput('issue_number', existingIssue.number);
+              }
+            } else {
+              core.info('No existing issue found, will create new one');
+              core.setOutput('action', 'create');
+            }
+
+            core.setOutput('drift_key', driftKey);
+
+      - name: Generate Issue Body
+        id: body
+        if: (steps.dedup.outputs.action == 'create' || steps.dedup.outputs.action == 'update') && github.event.inputs.dry_run != 'true'
         run: |
-          echo "=== Full Policy File ==="
-          cat docs/ci/REQUIRED_CHECKS_POLICY.yml
+          BRANCH="${{ steps.branch.outputs.branch }}"
+          REPORT_JSON="${{ env.OUT_DIR }}/branch_protection_drift_report.json"
 
-          echo ""
-          echo "=== Expected Contexts (parsed) ==="
-          cat /tmp/expected-contexts.json
+          MISSING_CHECKS=$(jq -r '.missing_in_github[]' "${REPORT_JSON}" | head -10)
+          EXTRA_CHECKS=$(jq -r '.extra_in_github[]' "${REPORT_JSON}" | head -10)
+          API_ERROR=$(jq -r '.api_error // ""' "${REPORT_JSON}")
 
-          echo ""
-          echo "=== Actual Contexts (from GitHub API) ==="
-          cat /tmp/actual-contexts.json
+          cat > issue_body.md << 'EOF'
+          ## Branch Protection Drift Detected
+
+          Policy-as-code (`REQUIRED_CHECKS_POLICY.yml`) does not match GitHub branch protection enforcement.
+
+          **Branch:** `${{ steps.branch.outputs.branch }}`
+          **Detected:** $(date -u +"%Y-%m-%d %H:%M UTC")
+
+          ---
+
+          ### Summary
+
+          | Category | Count |
+          |----------|-------|
+          | Missing in GitHub | ${{ steps.check.outputs.missing_count }} |
+          | Extra in GitHub | ${{ steps.check.outputs.extra_count }} |
+
+          EOF
+
+          if [[ -n "$API_ERROR" ]]; then
+            cat >> issue_body.md << EOF
+
+          ### API Access Issue
+
+          \`\`\`
+          ${API_ERROR}
+          \`\`\`
+
+          EOF
+          fi
+
+          if [[ ${{ steps.check.outputs.missing_count }} -gt 0 ]]; then
+            cat >> issue_body.md << 'MISSING_EOF'
+
+          ### Checks Missing from GitHub Branch Protection
+
+          These checks are required by policy but not enforced:
+
+          MISSING_EOF
+
+            jq -r '.missing_in_github[]' "${REPORT_JSON}" | while read -r check; do
+              echo "- \`${check}\`" >> issue_body.md
+            done
+          fi
+
+          if [[ ${{ steps.check.outputs.extra_count }} -gt 0 ]]; then
+            cat >> issue_body.md << 'EXTRA_EOF'
+
+          ### Extra Checks in GitHub Branch Protection
+
+          These checks are enforced but not in policy:
+
+          EXTRA_EOF
+
+            jq -r '.extra_in_github[]' "${REPORT_JSON}" | while read -r check; do
+              echo "- \`${check}\`" >> issue_body.md
+            done
+          fi
+
+          cat >> issue_body.md << 'REMEDIATION_EOF'
+
+          ---
+
+          ### Remediation
+
+          **Option A: Update GitHub branch protection to match policy**
+
+          1. Go to **Settings** → **Branches** → **Branch protection rules**
+          2. Edit the rule for the affected branch
+          3. Add missing checks / remove extra checks
+
+          **Option B: Update policy to match GitHub**
+
+          1. Edit `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+          2. Add/remove entries from `always_required` section
+          3. Create PR for review
+
+          **Option C: Sync via Workflow**
+
+          1. Run the [Sync Branch Protection](${{ github.server_url }}/${{ github.repository }}/actions/workflows/sync-branch-protection.yml) workflow manually.
+             - Branch: `${{ steps.branch.outputs.branch }}`
+             - Dry Run: `false`
+
+          ---
+
+          ### Links
+
+          - [REQUIRED_CHECKS_POLICY.yml](../../docs/ci/REQUIRED_CHECKS_POLICY.yml)
+          - [Branch Protection Settings](../../settings/branches)
+          - [Drift Detection Documentation](../../docs/ci/BRANCH_PROTECTION_DRIFT.md)
+          - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ---
+
+          *This issue is automatically created/updated by the Branch Protection Drift Detection workflow.*
+          REMEDIATION_EOF
+
+      - name: Create Issue
+        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
+        id: create
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('issue_body.md', 'utf8');
+            const branch = '${{ steps.branch.outputs.branch }}';
+
+            const title = `[Governance Drift] Branch protection does not match REQUIRED_CHECKS_POLICY (${branch})`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['governance', 'ci', 'release-ops', 'severity:P1']
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+            return issue.data.number;
+
+      - name: Update Issue
+        if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('issue_body.md', 'utf8');
+            const issueNumber = ${{ steps.dedup.outputs.issue_number || 0 }};
+
+            if (issueNumber > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `## Drift Update (${new Date().toISOString()})\n\n${body}`
+              });
+
+              console.log(`Updated issue #${issueNumber}`);
+            }
+
+      - name: Auto-Close on Resolution
+        if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
+          script: |
+            // Find open drift issues and close them
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'governance',
+              state: 'open'
+            });
+
+            for (const issue of issues.data) {
+              if (issue.title.includes('[Governance Drift]') && issue.title.includes('Branch protection')) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: '## Resolved\n\nBranch protection is now in sync with policy. Closing this issue.'
+                });
+
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+
+                console.log(`Closed issue #${issue.number}`);
+              }
+            }
+
+      - name: Generate Summary
+        run: |
+          echo "## Branch Protection Drift Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ steps.branch.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Auth Source:** ${{ steps.auth.outputs.auth_source }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Drift Detected:** ${{ steps.check.outputs.drift_detected }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ steps.check.outputs.drift_detected }}" == "true" ]]; then
+            echo "| Category | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Missing in GitHub | ${{ steps.check.outputs.missing_count }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Extra in GitHub | ${{ steps.check.outputs.extra_count }} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Policy and branch protection are in sync." >> $GITHUB_STEP_SUMMARY
+          fi

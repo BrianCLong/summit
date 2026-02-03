@@ -3,6 +3,7 @@ import re
 import sys
 from pathlib import Path
 
+
 def validate(instance, schema, context=""):
     # Simple manual validation based on schema
     for req in schema.get("required", []):

@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+import json
 import os
 import sys
-import json
+from datetime import UTC, datetime, timezone
 from pathlib import Path
-from datetime import datetime, timezone
 
 from .adapter_kaggle import load_dataset
-from .scoring import compute_metrics, classify_bucket
 from .entity_resolution import EntityResolver
+from .scoring import classify_bucket, compute_metrics
 from .stop_diagnostics import compute_stop_diagnostics
+
 
 def main() -> int:
     # Feature flag: off by default.
@@ -74,7 +75,7 @@ def main() -> int:
     }
 
     # Use UTC for timestamp in stamp.json
-    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     stamp = {
         "created_at": now,
         "git_commit": os.getenv("GIT_COMMIT", "unknown")

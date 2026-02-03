@@ -3,32 +3,35 @@ import express, { Response } from 'express';
 import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryService.js';
 import { WorkflowService } from '../governance/ontology/WorkflowService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
+import { createRouteRateLimitMiddleware } from '../middleware/rateLimit.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
+router.use(createRouteRateLimitMiddleware('governance'));
+
 const registry = SchemaRegistryService.getInstance();
 const workflow = WorkflowService.getInstance();
 
 // Schema Routes
 router.get('/schemas', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
-  res.json(registry.listSchemas());
+    res.json(registry.listSchemas());
 });
 
 router.get('/schemas/latest', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
-  const schema = registry.getLatestSchema();
-  if (!schema) return res.status(404).json({ error: 'No active schema' });
-  res.json(schema);
+    const schema = registry.getLatestSchema();
+    if (!schema) return res.status(404).json({ error: 'No active schema' });
+    res.json(schema);
 });
 
 router.get('/schemas/:id', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
-  const schema = registry.getSchemaById(req.params.id);
-  if (!schema) return res.status(404).json({ error: 'Schema not found' });
-  res.json(schema);
+    const schema = registry.getSchemaById(req.params.id);
+    if (!schema) return res.status(404).json({ error: 'Schema not found' });
+    res.json(schema);
 });
 
 // Vocabulary Routes
 router.get('/vocabularies', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
-  res.json(registry.listVocabularies());
+    res.json(registry.listVocabularies());
 });
 
 router.post('/vocabularies', ensureAuthenticated, (req: AuthenticatedRequest, res: Response) => {
@@ -36,8 +39,8 @@ router.post('/vocabularies', ensureAuthenticated, (req: AuthenticatedRequest, re
         // Permission check: Only schema.admin can create vocabularies
         const userRoles = req.user?.role?.split(',') || [];
         const hasSchemaAdminPermission = userRoles.includes('schema.admin') ||
-                                          userRoles.includes('admin') ||
-                                          req.user?.permissions?.includes('schema.admin');
+            userRoles.includes('admin') ||
+            req.user?.permissions?.includes('schema.admin');
 
         if (!hasSchemaAdminPermission) {
             return res.status(403).json({

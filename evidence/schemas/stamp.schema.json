@@ -1,19 +1,11 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://summit.local/schemas/stamp.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit evidence stamp (timestamps allowed here only)",
   "type": "object",
-  "required": ["generated_at", "git"],
+  "required": ["run_id", "created_at"],
   "properties": {
-    "generated_at": { "type": "string", "format": "date-time" },
-    "git": {
-      "type": "object",
-      "required": ["sha"],
-      "properties": {
-        "sha": { "type": "string", "minLength": 7 },
-        "ref": { "type": "string" }
-      },
-      "additionalProperties": false
-    }
+    "run_id": { "type": "string" },
+    "created_at": { "type": "string" }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

@@ -1,21 +1,19 @@
-# Repo Assumptions (Subsumption Bundle Scaffold)
+# Repo Reality Check — Distributed RL Subsumption
 
 ## Verified
+- MIT license.
+- Top-level dirs present: .ci, .github, ai, ai-ml-suite, agents, agentops,
+  artifacts/agent-runs, SECURITY, RUNBOOKS.
 
-- Repo state: Intentionally constrained to local verification; external branch protection state is deferred pending governance access.
+## Assumed (validate)
+- Python is acceptable under ai-ml-suite/ (tooling, lint, tests).
+- CI has a Python test lane we can extend.
+- Artifact conventions allow deterministic JSON outputs.
 
-## Assumed (must validate)
+## Must-not-touch (until verified)
+- Any production deployment workflows under .github/workflows/
+- Security policy enforcement under SECURITY/ and .security/
+- Branch protection / required checks policy files (if present)
 
-- CI uses GitHub Actions.
-- Node runtime is available for CI scripts.
-- Evidence artifacts are acceptable as JSON outputs under `evidence/`.
-
-## Must-not-touch
-
-- Existing workflows (modify only by adding new workflow or a single job if conventions require).
-- Public API surfaces and packages unless explicitly required by a gate.
-
-## Validation plan
-
-- Discover required checks (see `docs/required_checks.todo.md`).
-- Confirm Node version and package manager conventions.
+(Verification anchors: update this file with exact CI check names, lint rules,
+and artifact conventions once locally inspected.)

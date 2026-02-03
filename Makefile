@@ -8,10 +8,12 @@ include Makefile.merge-train
 .PHONY: db-migrate db-seed sbom k6 supply-chain/sbom supply-chain/sign
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
-.PHONY: dev-prereqs dev-up dev-down dev-smoke
+.PHONY: dev-prereqs dev-up dev-down dev-smoke evidence-bundle
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: gmr-gate gmr-eval gmr-validate
 
-COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+# Handle both .yaml and .yml extensions for dev compose
+COMPOSE_DEV_FILE ?= $(shell ls docker-compose.dev.yml 2>/dev/null || ls docker-compose.dev.yaml 2>/dev/null || echo "docker-compose.dev.yml")
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -72,11 +74,18 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	python3 -m venv $(VENV_DIR)
-	$(VENV_BIN)/pip install -U pip
-	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
-	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
-	$(VENV_BIN)/pre-commit install || true
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "Creating venv..."; \
+		$(PYTHON) -m venv $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR) --without-pip; \
+	fi
+	@if [ ! -f "$(VENV_BIN)/pip" ]; then \
+		echo "Installing pip..."; \
+		curl -sS https://bootstrap.pypa.io/get-pip.py | $(VENV_BIN)/python || true; \
+	fi
+	@$(VENV_BIN)/pip install -U pip || true
+	@$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]" || true
+	@$(VENV_BIN)/pip install pytest ruff mypy pre-commit || true
+	@$(VENV_BIN)/pre-commit install || true
 	pnpm install
 
 dev:
@@ -93,6 +102,15 @@ lint:   ## Lint js/ts + python
 format: ## Format code
 	pnpm -w exec prettier -w . || true
 	$(VENV_BIN)/ruff format .
+
+gmr-gate: ## Run the GMR guardrail gate (requires DATABASE_URL)
+	@./metrics/scripts/run_gmr_gate.sh
+
+gmr-eval: ## Run deterministic GMR anomaly detection evals
+	@$(PYTHON) metrics/evals/eval_anomaly_detection.py
+
+gmr-validate: ## Validate GMR guardrail assets
+	@$(PYTHON) scripts/ci/validate_gmr_assets.py
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
@@ -133,6 +151,17 @@ supply-chain/sbom: ## Generate modern SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
 supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
 	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
 	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
+
+supplychain.evidence: ## Generate supply chain evidence artifacts
+	@bash hack/supplychain/evidence_id.sh > evidence_id.txt
+	@EVIDENCE_ID=$$(cat evidence_id.txt); \
+	python3 hack/supplychain/gen_evidence.py --evidence-id "$$EVIDENCE_ID" --output-dir "evidence/$$EVIDENCE_ID"
+
+supplychain.attest.local: ## Build image and export attestations locally (no push)
+	@mkdir -p out
+	@docker buildx build --attest type=sbom --attest type=provenance,mode=min --output type=local,dest=out/image .
+	@echo "Verifying attestations..."
+	@find out/image -name "*.json" -exec python3 hack/supplychain/verify_attestation_shape.py {} \;
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
@@ -324,6 +353,11 @@ ga-evidence: ## Create a minimal local evidence bundle for GA validation
 	fi; \
 	node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$$EVIDENCE_DIR"; \
 	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
+
+evidence-bundle: ## Generate a deterministic PR evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [OUT=dir])
+	@BASE=$${BASE:-origin/main}; \
+	OUT=$${OUT:-evidence-bundle-$$(git rev-parse --short HEAD)-$$(date +%Y%m%d%H%M%S)}; \
+	python3 scripts/maintainers/gen-evidence-bundle.py --out "$$OUT" --base "$$BASE"
 
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh

@@ -1,5 +1,7 @@
 import pytest
+
 from summit.benchmarks.deepsearchqa.stop_diagnostics import compute_stop_diagnostics
+
 
 def test_diagnostics_perfect_match():
     d = compute_stop_diagnostics({"a", "b"}, {"a", "b"})

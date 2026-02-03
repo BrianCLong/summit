@@ -1,7 +1,9 @@
 # summit/cluster/drivers/vind/driver.py
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
+from summit.flags import SUMMIT_VIND_HYBRID_ENABLED, SUMMIT_VIND_SNAPSHOTS_ENABLED
 
 if TYPE_CHECKING:
     from .vcluster_cli import VClusterCLI
@@ -64,3 +66,33 @@ class VindDriver:
             "cold_pull_s": cold_pull_s,
             "warm_pull_s": warm_pull_s
         }
+
+    def hybrid_join(self, name: str, node_ip: str) -> None:
+        """
+        Lane 2: Join an external node via VPN.
+        """
+        if not SUMMIT_VIND_HYBRID_ENABLED:
+            raise NotImplementedError("Hybrid nodes feature is disabled. Enable with SUMMIT_VIND_HYBRID_ENABLED=1")
+
+        # Placeholder for actual vcluster join logic
+        self._cli.run(["connect", name, "--", "echo", f"Joining node {node_ip}"])
+
+    def snapshot_create(self, name: str, snapshot_id: str) -> None:
+        """
+        Lane 2: Create a cluster snapshot.
+        """
+        if not SUMMIT_VIND_SNAPSHOTS_ENABLED:
+            raise NotImplementedError("Snapshots feature is disabled. Enable with SUMMIT_VIND_SNAPSHOTS_ENABLED=1")
+
+        # Placeholder for 'coming soon' snapshot logic
+        self._cli.run(["connect", name, "--", "echo", f"Creating snapshot {snapshot_id}"])
+
+    def snapshot_restore(self, name: str, snapshot_id: str) -> None:
+        """
+        Lane 2: Restore a cluster from snapshot.
+        """
+        if not SUMMIT_VIND_SNAPSHOTS_ENABLED:
+            raise NotImplementedError("Snapshots feature is disabled. Enable with SUMMIT_VIND_SNAPSHOTS_ENABLED=1")
+
+        # Placeholder for 'coming soon' snapshot logic
+        self._cli.run(["connect", name, "--", "echo", f"Restoring snapshot {snapshot_id}"])

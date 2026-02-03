@@ -1,24 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Index",
   "type": "object",
+  "required": ["version", "items"],
   "properties": {
-    "version": {"type": "string"},
+    "version": { "type": "string" },
     "items": {
-      "type": "object",
-      "additionalProperties": {
+      "type": "array",
+      "items": {
         "type": "object",
+        "required": ["evidence_id", "report", "metrics", "stamp"],
         "properties": {
-          "title": {"type": "string"},
-          "category": {"type": "string"},
-          "artifacts": {"type": "array", "items": {"type": "string"}},
-          "report": {"type": "string"},
-          "metrics": {"type": "string"},
-          "stamp": {"type": "string"},
-          "files": {"type": "array", "items": {"type": "string"}},
-          "evidence_id": {"type": "string"}
+          "evidence_id": { "type": "string" },
+          "report": { "type": "string" },
+          "metrics": { "type": "string" },
+          "stamp": { "type": "string" }
         }
       }
     }
   },
-  "required": ["items"]
+  "additionalProperties": false
 }

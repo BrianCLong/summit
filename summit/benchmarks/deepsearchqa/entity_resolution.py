@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import re
 from typing import List, Set
+
 
 def canonicalize(item: str) -> str:
     """
@@ -30,7 +32,7 @@ class EntityResolver:
     def __init__(self, enabled: bool = True):
         self.enabled = enabled
 
-    def resolve(self, items: List[str]) -> List[str]:
+    def resolve(self, items: list[str]) -> list[str]:
         """
         Deduplicates a list of items based on their canonical form.
         Preserves original casing/formatting of the first occurrence.
@@ -38,8 +40,8 @@ class EntityResolver:
         if not self.enabled:
             return items
 
-        seen_canonical: Set[str] = set()
-        resolved_items: List[str] = []
+        seen_canonical: set[str] = set()
+        resolved_items: list[str] = []
 
         for item in items:
             canon = canonicalize(item)
