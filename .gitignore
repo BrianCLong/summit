@@ -50,8 +50,6 @@ docs/site/
 # TypeScript incremental caches (avoid committing build traces)
 *.tsbuildinfo
 .turbo/
-server/dist-new/
-
 
 # Serverless directories
 .serverless/
@@ -366,9 +364,3 @@ evidence-staging/
 !services/er-service/requirements.txt
 tmp-test/
 _worktrees/
-
-# Local runs output (do not commit)
-subsumption/**/runs/
-
-# Governance evidence artifacts (generated locally/CI)
-artifacts/governance/

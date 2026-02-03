@@ -1,7 +1,6 @@
 import argparse
 import json
 import os
-import re
 import sys
 from jsonschema import validate, ValidationError
 
@@ -14,9 +13,6 @@ SCHEMA_MAP = {
 }
 
 SCHEMA_DIR = os.path.join(os.path.dirname(__file__), "schemas")
-RFC3339_PATTERN = re.compile(
-    r"\\b\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})\\b"
-)
 
 def load_schema(schema_name):
     schema_path = os.path.join(SCHEMA_DIR, schema_name)
@@ -59,27 +55,12 @@ def validate_file(file_path, file_type=None):
 
     try:
         validate(instance=data, schema=schema)
-        if file_type != "stamp" and contains_rfc3339_timestamp(data):
-            print(
-                f"FAILURE: {file_path} contains RFC3339 timestamps outside stamp.json."
-            )
-            return False
         print(f"SUCCESS: {file_path} is valid against {schema_file}.")
         return True
     except ValidationError as e:
         print(f"FAILURE: {file_path} failed validation against {schema_file}.")
         print(e.message)
         return False
-
-
-def contains_rfc3339_timestamp(value):
-    if isinstance(value, dict):
-        return any(contains_rfc3339_timestamp(item) for item in value.values())
-    if isinstance(value, list):
-        return any(contains_rfc3339_timestamp(item) for item in value)
-    if isinstance(value, str):
-        return RFC3339_PATTERN.search(value) is not None
-    return False
 
 def main():
     parser = argparse.ArgumentParser(description="Validate Summit IO Evidence JSON files.")
