@@ -55,16 +55,17 @@ jobs:
         env:
           MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -91,16 +92,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -149,16 +151,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
