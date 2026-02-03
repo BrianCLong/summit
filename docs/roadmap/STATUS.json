@@ -1,6 +1,12 @@
 {
-  "last_updated": "2026-02-04T00:00:00Z",
+  "last_updated": "2026-02-08T00:00:00Z",
   "initiatives": [
+    {
+      "id": "adenhq-hive-subsumption-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
     {
       "id": "sera-cli-proxy",
       "status": "in_progress",
@@ -32,6 +38,18 @@
       "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
     },
     {
+      "id": "narrative-ops-governed-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+    },
+    {
+      "id": "ru-ua-cogwar-lab",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
+    },
+    {
       "id": "io-cogwar-radar-2027-brief",
       "status": "in_progress",
       "owner": "codex",
@@ -54,12 +72,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
-    },
-    {
-      "id": "observability-evidence-pr1",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence gate alignment, required checks mapping updates, and observability-ready evidence documentation."
     }
   ]
 }
