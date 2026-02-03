@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/plugin-cli",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "CLI tool for Summit plugin development",
   "type": "module",
   "bin": {

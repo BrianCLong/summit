@@ -1,0 +1,9 @@
+id: OMB-M-23-16
+issued: 2023-06-12
+status: rescinded
+rescinded_by: OMB-M-26-05
+summary:
+  title: Secure software attestations (rescinded)
+  intent: Prior standardized attestation requirements withdrawn in favor of agency-tailored assurance.
+notes:
+  - Status set to rescinded per OMB-M-26-05.

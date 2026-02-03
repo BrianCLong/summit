@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-youtu-vl-4b-instruct-LIC-001",
+  "metrics": {
+    "geo_restriction_present": true,
+    "restriction_region": "EU"
+  }
+}

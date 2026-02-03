@@ -1,25 +1,31 @@
 // @ts-nocheck
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { ScimService } from '../ScimService.js';
-import { userManagementService } from '../../UserManagementService.js';
-import { getPostgresPool } from '../../../config/database.js';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 
 // Mock dependencies
-jest.mock('../../../config/database.js', () => ({
-    getPostgresPool: jest.fn()
+jest.unstable_mockModule('../../../config/database.js', () => ({
+  getPostgresPool: jest.fn(),
 }));
 
-jest.mock('../../UserManagementService.js', () => ({
-    userManagementService: {
-        listUsers: jest.fn(),
-        getUser: jest.fn(),
-        createUser: jest.fn(),
-        updateUser: jest.fn(),
-        deleteUser: jest.fn()
-    }
+jest.unstable_mockModule('../../UserManagementService.js', () => ({
+  userManagementService: {
+    listUsers: jest.fn(),
+    getUser: jest.fn(),
+    createUser: jest.fn(),
+    updateUser: jest.fn(),
+    deleteUser: jest.fn(),
+  },
 }));
 
 describe('ScimService', () => {
+    let ScimService: typeof import('../ScimService.js').ScimService;
+    let userManagementService: {
+        listUsers: jest.Mock;
+        getUser: jest.Mock;
+        createUser: jest.Mock;
+        updateUser: jest.Mock;
+        deleteUser: jest.Mock;
+    };
+    let getPostgresPool: jest.Mock;
     let service: ScimService;
     let mockPool: any;
     let mockClient: any;
@@ -41,6 +47,12 @@ describe('ScimService', () => {
         updatedAt: new Date(),
         createdBy: 'admin'
     };
+
+    beforeAll(async () => {
+        ({ ScimService } = await import('../ScimService.js'));
+        ({ userManagementService } = await import('../../UserManagementService.js'));
+        ({ getPostgresPool } = await import('../../../config/database.js'));
+    });
 
     beforeEach(() => {
         mockClient = {

@@ -224,3 +224,8 @@
   font-size: 0.95rem;
   color: #243b53;
 }
+
+.iw-required-indicator {
+  color: #f05252;
+  margin-left: 4px;
+}

@@ -1,8 +1,8 @@
 // @ts-nocheck
 import cron, { ScheduledTask } from 'node-cron';
-import { AccessContext, ScheduledReportJob } from './types';
-import { ReportingService } from './service';
-import { validateReportRequest } from './validation';
+import { AccessContext, ScheduledReportJob } from './types.js';
+import { ReportingService } from './service.js';
+import { validateReportRequest } from './validation.js';
 
 export class ReportScheduler {
   private readonly tasks = new Map<string, ScheduledTask>();

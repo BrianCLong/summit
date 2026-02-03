@@ -1,0 +1,32 @@
+id: decision-critic
+name: Decision Critic
+version: 0.1.0
+description: Reviews proposals against decision rubrics and surfaces risks and alternatives.
+role: critic
+inputs:
+  - name: proposal
+    type: json
+    required: true
+    description: Structured proposal bundle to critique.
+  - name: constraints
+    type: json
+    required: false
+    description: Optional policy or operational constraints.
+outputs:
+  - name: critique
+    type: json
+    description: Scored rubric results and flagged risks.
+  - name: alternatives
+    type: json
+    description: Recommended alternatives and mitigations.
+allowed_tools:
+  - policy-engine
+data_access: restricted
+policies:
+  - docs/governance/META_GOVERNANCE.md
+evals:
+  - evals/decision-critic-regression
+tags:
+  - lens-pack
+  - decision-artifacts
+owner: governance-council

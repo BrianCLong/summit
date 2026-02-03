@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "items": [
+    {
+      "id": "invalid",
+      "path": "report.json",
+      "extra": true
+    }
+  ]
+}

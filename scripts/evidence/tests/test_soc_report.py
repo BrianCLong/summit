@@ -1,8 +1,8 @@
 import json
 import os
 import tempfile
-from pathlib import Path
 import unittest
+from pathlib import Path
 
 from scripts.evidence.generate_soc_report import build_report, resolve_baseline
 
@@ -35,7 +35,7 @@ class SocReportTests(unittest.TestCase):
             (evidence_dir / "meta.json").write_text(json.dumps(meta))
             (evidence_dir / "checksums.sha256").write_text("checksum")
 
-            report = build_report(evidence_dir, None, None, "none", os.environ)
+            report = build_report(evidence_dir, None, None, "none", os.environ, Path(tmp))
             self.assertEqual(report["summary"]["covered"], 1)
             self.assertEqual(report["summary"]["deferred"], 1)
             self.assertEqual(report["summary"]["exceptions_total"], 1)

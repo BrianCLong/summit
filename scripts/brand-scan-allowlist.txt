@@ -1,4 +1,0 @@
-^docs/
-^CHANGELOG.md$
-^config/brand/brand.yaml$
-^server/src/middleware/brandHeaders.ts$

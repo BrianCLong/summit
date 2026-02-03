@@ -5,6 +5,6 @@ jobs:
   check-standards:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Check for Proprietary Rules
         run: echo "Scanning for non-standard logic..."
