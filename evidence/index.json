@@ -1,10 +1,107 @@
 {
-  "version": "1.0",
-  "items": {
+  "version": "1.0.0",
+  "entries": {
+    "EVD-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-002": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-003": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-MITTR-AGENTIC-WORKFORCE-001": {
+      "files": ["evidence/MITTR-AGENTIC-WORKFORCE/report.json", "evidence/MITTR-AGENTIC-WORKFORCE/metrics.json", "evidence/MITTR-AGENTIC-WORKFORCE/stamp.json"],
+      "title": "MIT Technology Review: The Agentic Workforce",
+      "category": "market-intel"
+    },
+    "EVD-FORBES-AGENTIC-AI-2026-001": {
+      "files": ["evidence/FORBES-AGENTIC-AI-2026/report.json", "evidence/FORBES-AGENTIC-AI-2026/metrics.json", "evidence/FORBES-AGENTIC-AI-2026/stamp.json"],
+      "title": "Forbes: The Year of Agentic AI (2026)",
+      "category": "market-intel"
+    },
+    "EVD-DISINFO-NEWS-ECOSYSTEM-2026-001": {
+      "files": ["evidence/DISINFO-NEWS-ECOSYSTEM-2026/report.json", "evidence/DISINFO-NEWS-ECOSYSTEM-2026/metrics.json", "evidence/DISINFO-NEWS-ECOSYSTEM-2026/stamp.json"],
+      "title": "Disinformation in the News Ecosystem 2026",
+      "category": "capability-evidence"
+    },
+    "EVD-openviking-trace-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-openviking-trace-002": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-openviking-trace-003": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-COGWAR-2026-EVENT-001": {
+      "title": "Event Schema Validation",
+      "category": "cogwar-event",
+      "files": ["schema/event.yaml"]
+    },
+    "EVD-COGWAR-2026-EVENT-002": {
+      "title": "Event Playbook Run Output",
+      "category": "cogwar-event",
+      "files": ["evidence/reports/event_report.json", "evidence/reports/event_metrics.json"]
+    },
+    "EVD-COGWAR-2026-EVENT-003": {
+      "title": "Event Fusion Correlator Results",
+      "category": "cogwar-event",
+      "files": []
+    },
+    "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
+      "title": "Structured memory schema & examples",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-POLICY-002": {
+      "title": "Deny-by-default policy proofs",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-LEAK-003": {
+      "title": "Context leak eval results",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-DSAR-004": {
+      "title": "User control API contract tests",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-EGRESS-005": {
+      "title": "Tool egress redaction tests",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/stamp.json"
+      ]
+    },
+    "EVD-WSJ-AI-FUNDRAISING-FRENZY-MKT-001": {
+      "files": [
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/report.json",
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/metrics.json",
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/stamp.json"
+      ],
+      "title": "WSJ Technology Newsletter: AI Fundraising Frenzy",
+      "category": "market-intel"
+    },
     "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
-      "artifacts": [
+      "files": [
         "evidence/report.json",
         "evidence/metrics.json",
         "evidence/stamp.json"
@@ -13,7 +110,7 @@
     "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
-      "artifacts": [
+      "files": [
         "evidence/report.json",
         "evidence/metrics.json",
         "evidence/stamp.json"
@@ -22,7 +119,7 @@
     "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
-      "artifacts": [
+      "files": [
         "fixtures/ambiguities/critical.json"
       ]
     },
@@ -152,46 +249,11 @@
         "evidence/stamp.json"
       ]
     },
-    "EVD-openviking-trace-003": {
+    "EVD-AGENTSKILLS-SKILLSEC-001": {
       "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
-    },
-    "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
-      "artifacts": [
-        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/report.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/metrics.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/stamp.json"
-      ]
-    },
-    "EVD-MITTR-AIMEM-PRIV-POLICY-002": {
-      "artifacts": [
-        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/report.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/metrics.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/stamp.json"
-      ]
-    },
-    "EVD-MITTR-AIMEM-PRIV-LEAK-003": {
-      "artifacts": [
-        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/report.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/metrics.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/stamp.json"
-      ]
-    },
-    "EVD-MITTR-AIMEM-PRIV-DSAR-004": {
-      "artifacts": [
-        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/report.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/metrics.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/stamp.json"
-      ]
-    },
-    "EVD-MITTR-AIMEM-PRIV-EGRESS-005": {
-      "artifacts": [
-        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/report.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/metrics.json",
-        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/stamp.json"
+        "evidence/agent-skills/report.json",
+        "evidence/agent-skills/metrics.json",
+        "evidence/agent-skills/stamp.json"
       ]
     }
   }
