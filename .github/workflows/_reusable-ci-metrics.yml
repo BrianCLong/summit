@@ -131,7 +131,7 @@ jobs:
 
           # Create metrics JSON
           mkdir -p artifacts/ci-metrics
-          cat > artifacts/ci-metrics/run-metrics.json << EOF
+          cat > artifacts/ci-metrics/run-metrics.json << EOF_JSON
           {
             "run_id": "${{ github.run_id }}",
             "run_number": ${{ github.run_number }},
@@ -157,7 +157,7 @@ jobs:
             },
             "job_timings": ${JOB_TIMINGS}
           }
-          EOF
+EOF_JSON
 
           echo "::notice::CI Metrics: ${SUCCESS_RATE}% success rate, ${DURATION_MINUTES}m duration, ${QUEUE_SECONDS}s queue time"
 
