@@ -117,6 +117,7 @@ export class LLMChainExecutor extends EventEmitter {
 
   constructor() {
     super();
+    this.setMaxListeners(100);
     this.metricsCollector = new MetricsCollector();
   }
 

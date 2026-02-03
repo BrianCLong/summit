@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-AZURETURINV7-DOC-001",
+  "item_slug": "azure-turin-v7",
+  "metrics": {
+    "docs_count": 4,
+    "fixtures_checked": 2,
+    "schemas_checked": 3
+  }
+}

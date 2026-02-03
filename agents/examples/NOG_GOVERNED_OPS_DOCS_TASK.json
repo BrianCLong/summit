@@ -1,0 +1,49 @@
+{
+  "task_id": "NOG_GOVERNED_OPS_DOCS_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "nog-governed-ops-docs",
+    "version": "v1",
+    "sha256": "671b5dcfc2e1fe6ca3e0fb75a84a7e9cbbc661f8cb07ebdc1529699bd88c4646",
+    "path": "prompts/docs/nog-governed-ops-docs@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "repo_assumptions.md",
+      "docs/standards/nog-governed-agents.md",
+      "docs/security/data-handling/nog-governed-agents.md",
+      "docs/ops/runbooks/nog-governed-agents.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/NOG_GOVERNED_OPS_DOCS_TASK.json",
+      "prompts/docs/nog-governed-ops-docs@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "security", "operations"],
+    "exclusions": [
+      "docs/ci/REQUIRED_CHECKS_POLICY.yml",
+      "SECURITY/*",
+      "secrets/*",
+      ".env"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs_update", "roadmap_status_update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Governed narrative ops standards, security, and runbook docs are present.",
+    "Repo assumptions include narrative ops verified vs assumed with validation commands.",
+    "Roadmap status updated for narrative ops documentation."
+  ],
+  "stop_conditions": [
+    "Policy engine or security controls require modification.",
+    "Evidence artifacts cannot be produced deterministically."
+  ],
+  "dependencies": ["docs/SUMMIT_READINESS_ASSERTION.md"],
+  "approvals": []
+}
