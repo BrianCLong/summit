@@ -10,3 +10,7 @@
 ## 2026-02-12 - [Batching Neo4j Writes with UNWIND]
 **Learning:** Performing multiple individual `neo.run` calls in a loop is a significant bottleneck due to round-trip latency. Batching these operations using Cypher's `UNWIND` clause can reduce the number of round-trips from N to 1, providing a major performance boost for write-heavy repository methods.
 **Action:** Always prefer `UNWIND` for batching insertions or updates in Neo4j repositories. Ensure per-item context (like `tenantId`) is preserved by including it in the batch parameters.
+
+## 2026-03-24 - [Persistent Imperative Instances in React]
+**Learning:** Initializing imperative libraries like Cytoscape or Socket.IO inside a `useEffect` with dependencies that change frequently (like graph data) causes expensive destroy/recreate cycles and redundant network connections.
+**Action:** Use `useRef` to persist the library instance across renders. Split the `useEffect` into a one-time initialization hook and separate update hooks that perform incremental changes (e.g., using `cy.json()` or `cy.add()`).
