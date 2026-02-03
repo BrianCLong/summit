@@ -1,0 +1,24 @@
+retention_tiers:
+  warm:
+    name: "Primary Database"
+    threshold_days: 30
+    storage_type: "PostgreSQL"
+    cost_per_gb_month: 0.15
+  cold:
+    name: "Compressed Object Storage"
+    threshold_days: 90
+    storage_type: "S3-Standard-IA"
+    compression: "gzip"
+    cost_per_gb_month: 0.0125
+  deep:
+    name: "Deep Archive"
+    threshold_days: 180
+    storage_type: "S3-Glacier-Deep-Archive"
+    compression: "gzip"
+    cost_per_gb_month: 0.00099
+    retrieval_time_hours: 12
+
+archival_engine:
+  batch_size: 1000
+  encryption_enabled: true
+  checksum_verification: true

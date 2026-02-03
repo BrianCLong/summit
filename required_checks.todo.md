@@ -1,49 +1,35 @@
-# Required checks discovery
-1. In GitHub: Settings → Branches → Branch protection rules → required status checks.
-2. List exact check names (case-sensitive).
-3. Map to local scripts:
-   - ci:decks_evidence → ci/check_decks_evidence.py
-   - ci:deck_lint → ci/deck_lint.py
-   - ci:deck_build → ci/deck_build.sh
-4. If names differ, add an alias job in CI rather than renaming scripts.
+# Required Checks Discovery & Mapping
 
-# Secure Indexing Required Checks Discovery
-- no-index-leak: (EVD-CURSOR-SECURE-INDEXING-SEC-001)
-- evidence-schema-validate
-- dep-delta
-- reuse-flow-e2e
-- perf-evidence: (EVD-CURSOR-SECURE-INDEXING-PERF-001)
+This document outlines the steps to map CI jobs to GitHub required status checks for the Summit repository.
 
-## Goal
-List the repository's *required* CI checks for the default branch, then map them to verifier names
-in `ci/verifiers/`.
+## UI Steps
+1. Navigate to **Settings** > **Branches** in the GitHub repository.
+2. Under **Branch protection rules**, select the rule for `main` (or create one).
+3. Enable **Require status checks to pass before merging**.
+4. Search for and select the following job names:
+   - `verify` (from `evidence.yml`)
+   - `gate/evidence` (temporary name)
+   - `gate/supplychain` (temporary name)
+   - `gate/fimi` (temporary name)
 
-## GitHub UI steps
-1. Repo → Settings → Branches → Branch protection rules.
-2. Open the rule for the default branch.
-3. Under "Require status checks to pass", copy the exact check names.
+## API Steps
+To list current branch protection and required checks via the GitHub CLI:
+```bash
+gh api repos/:owner/:repo/branches/main/protection/required_status_checks
+```
 
-## GitHub API steps (alternative)
-Use the Branch Protection API to fetch required status checks for the branch:
-`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+To update required checks:
+```bash
+gh api -X PATCH repos/:owner/:repo/branches/main/protection/required_status_checks \
+  -f "contexts[]=verify" \
+  -f "contexts[]=gate/evidence"
+```
 
-## Temporary convention
-Until discovered, we use temporary verifier names:
-- `ci:unit`
-- `ci:schema`
-- `ci:lint`
-- `ci:deps-delta`
-- `ci:deepsearchqa-fixtures`
-- `ci:codegen-drift`
-- `ci:determinism-smoke`
-- `ci:supply-chain-delta`
+## Temporary Gate Naming
+Until actual required check names are confirmed in the repo settings, the following convention is used:
+- `gate/evidence`
+- `gate/supplychain`
+- `gate/fimi`
 
-## Rename plan
-Once real check names are known:
-1. Update CI config to emit the official check names.
-2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.
-
-## Archimyst (archsim) checks
-- schema-validate
-- archsim-foundation
-- evidence-gate
+## Rename Plan
+Once the CI jobs are finalized, this document will be updated to reflect the canonical job names as they appear in the GitHub Actions UI.

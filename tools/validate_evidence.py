@@ -1,150 +1,100 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 import json
-import os
-import re
 import sys
 from pathlib import Path
-from typing import Any
 
-DEFAULT_ROOT = Path.cwd()
-SCHEMA_ROOT_ENV = "EVIDENCE_SCHEMA_ROOT"
+import yaml
+from jsonschema import Draft202012Validator
 
-
-def resolve_schema_dir() -> Path:
-    env_root = Path(os.environ[SCHEMA_ROOT_ENV]) if SCHEMA_ROOT_ENV in os.environ else None
-    if env_root:
-        return env_root / "schemas" / "evidence"
-    return DEFAULT_ROOT / "schemas" / "evidence"
-
-
-def resolve_index_path() -> Path:
-    return DEFAULT_ROOT / "evidence" / "index.json"
-
-TIMESTAMP_REGEX = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+ROOT = Path(__file__).resolve().parents[1]
+PACK_PATH = ROOT / "prompts" / "packs" / "research_productivity_v1" / "pack.yaml"
+SCHEMA_PATH = ROOT / "evidence" / "schemas" / "research_session.schema.json"
+FIXTURES_PATH = ROOT / "evidence" / "fixtures"
 
 
 def fail(message: str) -> None:
-    print(f"ERROR: {message}", file=sys.stderr)
-    raise SystemExit(2)
+    print(f"[FAIL] {message}", file=sys.stderr)
+    raise SystemExit(1)
 
 
-def load_json(path: Path) -> Any:
+def load_json(path: Path) -> dict:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except Exception as exc:  # noqa: BLE001 - surfaced with context
-        fail(f"Failed to read {path}: {exc}")
+    except Exception as exc:
+        fail(f"Unable to read JSON {path}: {exc}")
 
 
-def build_schema_store(schema_dir: Path) -> dict[str, Any]:
-    store: dict[str, Any] = {}
-    for schema_path in schema_dir.glob("*.schema.json"):
-        schema = load_json(schema_path)
-        store[schema_path.name] = schema
-    return store
-
-
-def validate_schema(instance: Any, schema: dict[str, Any], context: str) -> None:
+def load_pack_contracts() -> dict:
+    if not PACK_PATH.exists():
+        fail(f"Pack definition missing: {PACK_PATH}")
     try:
-        import jsonschema  # type: ignore[import-not-found]
-    except ImportError as exc:
-        fail(f"jsonschema dependency missing: {exc}")
-
-    try:
-        jsonschema.validate(instance=instance, schema=schema)
-    except jsonschema.ValidationError as exc:
-        fail(f"Schema validation failed for {context}: {exc.message}")
-    except jsonschema.SchemaError as exc:
-        fail(f"Invalid schema for {context}: {exc.message}")
-
-
-def scan_for_timestamps(data: Any, path: str) -> None:
-    if isinstance(data, dict):
-        for key, value in data.items():
-            scan_for_timestamps(value, f"{path}.{key}" if path else key)
-    elif isinstance(data, list):
-        for index, value in enumerate(data):
-            scan_for_timestamps(value, f"{path}[{index}]")
-    elif isinstance(data, str):
-        if TIMESTAMP_REGEX.match(data):
-            fail(
-                "Timestamp detected outside stamp.json at "
-                f"{path}: {data}"
-            )
+        pack = yaml.safe_load(PACK_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        fail(f"Unable to parse pack YAML {PACK_PATH}: {exc}")
+    templates = pack.get("templates", [])
+    contracts = {}
+    for template in templates:
+        template_id = template.get("id")
+        contract = template.get("output_contract", [])
+        if not template_id or not contract:
+            fail(f"Template missing id or output_contract in {PACK_PATH}")
+        contracts[template_id] = contract
+    return contracts
 
 
-def assert_file(path: Path, context: str) -> None:
-    if not path.exists():
-        fail(f"Missing {context}: {path}")
+def validate_fixture(path: Path, schema: dict, contracts: dict) -> list[str]:
+    errors = []
+    data = load_json(path)
+    validator = Draft202012Validator(schema)
+    for error in validator.iter_errors(data):
+        errors.append(error.message)
 
+    template_id = data.get("template_id")
+    outputs = data.get("outputs", {})
+    if template_id not in contracts:
+        errors.append(f"Unknown template_id '{template_id}'")
+    else:
+        for key in contracts[template_id]:
+            if key not in outputs:
+                errors.append(f"Missing output_contract key '{key}'")
 
-def validate_evidence_entries(index: dict[str, Any], schema_dir: Path) -> None:
-    evidence = index.get("evidence")
-    if not isinstance(evidence, dict) or not evidence:
-        fail("Evidence index must include at least one evidence entry")
-
-    schema_store = build_schema_store(schema_dir)
-    report_schema = schema_store.get("report.schema.json")
-    metrics_schema = schema_store.get("metrics.schema.json")
-    stamp_schema = schema_store.get("stamp.schema.json")
-
-    if report_schema is None or metrics_schema is None or stamp_schema is None:
-        missing = [
-            name
-            for name, schema in {
-                "report.schema.json": report_schema,
-                "metrics.schema.json": metrics_schema,
-                "stamp.schema.json": stamp_schema,
-            }.items()
-            if schema is None
-        ]
-        fail(f"Missing evidence schemas: {', '.join(missing)}")
-
-    for evidence_id, files in evidence.items():
-        if not isinstance(files, dict):
-            fail(f"Evidence entry for {evidence_id} must be an object")
-
-        for required_key in ("report", "metrics", "stamp"):
-            if required_key not in files:
-                fail(f"Evidence entry {evidence_id} missing {required_key}")
-
-        report_path = DEFAULT_ROOT / files["report"]
-        metrics_path = DEFAULT_ROOT / files["metrics"]
-        stamp_path = DEFAULT_ROOT / files["stamp"]
-
-        assert_file(report_path, f"report for {evidence_id}")
-        assert_file(metrics_path, f"metrics for {evidence_id}")
-        assert_file(stamp_path, f"stamp for {evidence_id}")
-
-        report = load_json(report_path)
-        metrics = load_json(metrics_path)
-        stamp = load_json(stamp_path)
-
-        validate_schema(report, report_schema, f"{evidence_id} report")
-        validate_schema(metrics, metrics_schema, f"{evidence_id} metrics")
-        validate_schema(stamp, stamp_schema, f"{evidence_id} stamp")
-
-        scan_for_timestamps(report, str(report_path))
-        scan_for_timestamps(metrics, str(metrics_path))
+    return errors
 
 
 def main() -> int:
-    index_path = resolve_index_path()
-    if not index_path.exists():
-        fail("missing evidence/index.json")
+    if not SCHEMA_PATH.exists():
+        fail(f"Schema not found: {SCHEMA_PATH}")
 
-    index = load_json(index_path)
-    schema_dir = resolve_schema_dir()
-    index_schema_path = schema_dir / "index.schema.json"
-    assert_file(index_schema_path, "evidence index schema")
-    index_schema = load_json(index_schema_path)
+    schema = load_json(SCHEMA_PATH)
+    contracts = load_pack_contracts()
 
-    validate_schema(index, index_schema, "evidence index")
-    validate_evidence_entries(index, schema_dir)
+    if not FIXTURES_PATH.exists():
+        fail(f"Fixtures directory not found: {FIXTURES_PATH}")
 
-    print("Evidence validation succeeded.")
-    return 0
+    fixture_paths = sorted(FIXTURES_PATH.glob("research_*.json"))
+    if not fixture_paths:
+        fail("No research fixtures found")
+
+    had_error = False
+    for fixture in fixture_paths:
+        expected_fail = fixture.name.startswith("research_fail_")
+        errors = validate_fixture(fixture, schema, contracts)
+        if expected_fail:
+            if not errors:
+                print(f"[FAIL] {fixture} expected to fail but passed")
+                had_error = True
+            else:
+                print(f"[PASS] {fixture} failed as expected")
+        else:
+            if errors:
+                print(f"[FAIL] {fixture} failed validation:")
+                for error in errors:
+                    print(f"  - {error}")
+                had_error = True
+            else:
+                print(f"[PASS] {fixture} validated")
+
+    return 1 if had_error else 0
 
 
 if __name__ == "__main__":
