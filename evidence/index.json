@@ -1,31 +1,168 @@
 {
-  "items": {
-    "EVD-260119895-keel-ARCH-001": {
+  "version": "1.0.0",
+  "entries": {
+    "EVD-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-002": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-003": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-MITTR-AGENTIC-WORKFORCE-001": {
+      "files": ["evidence/MITTR-AGENTIC-WORKFORCE/report.json", "evidence/MITTR-AGENTIC-WORKFORCE/metrics.json", "evidence/MITTR-AGENTIC-WORKFORCE/stamp.json"],
+      "title": "MIT Technology Review: The Agentic Workforce",
+      "category": "market-intel"
+    },
+    "EVD-FORBES-AGENTIC-AI-2026-001": {
+      "files": ["evidence/FORBES-AGENTIC-AI-2026/report.json", "evidence/FORBES-AGENTIC-AI-2026/metrics.json", "evidence/FORBES-AGENTIC-AI-2026/stamp.json"],
+      "title": "Forbes: The Year of Agentic AI (2026)",
+      "category": "market-intel"
+    },
+    "EVD-DISINFO-NEWS-ECOSYSTEM-2026-001": {
+      "files": ["evidence/DISINFO-NEWS-ECOSYSTEM-2026/report.json", "evidence/DISINFO-NEWS-ECOSYSTEM-2026/metrics.json", "evidence/DISINFO-NEWS-ECOSYSTEM-2026/stamp.json"],
+      "title": "Disinformation in the News Ecosystem 2026",
+      "category": "capability-evidence"
+    },
+    "EVD-openviking-trace-001": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-openviking-trace-002": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-openviking-trace-003": {
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-COGWAR-2026-EVENT-001": {
+      "title": "Event Schema Validation",
+      "category": "cogwar-event",
+      "files": ["schema/event.yaml"]
+    },
+    "EVD-COGWAR-2026-EVENT-002": {
+      "title": "Event Playbook Run Output",
+      "category": "cogwar-event",
+      "files": ["evidence/reports/event_report.json", "evidence/reports/event_metrics.json"]
+    },
+    "EVD-COGWAR-2026-EVENT-003": {
+      "title": "Event Fusion Correlator Results",
+      "category": "cogwar-event",
+      "files": []
+    },
+    "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
+      "title": "Structured memory schema & examples",
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/stamp.json"
       ]
     },
-    "EVD-260119895-keel-BENCH-004": {
+    "EVD-MITTR-AIMEM-PRIV-POLICY-002": {
+      "title": "Deny-by-default policy proofs",
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/stamp.json"
       ]
     },
-    "EVD-260119895-keel-DSCL-003": {
+    "EVD-MITTR-AIMEM-PRIV-LEAK-003": {
+      "title": "Context leak eval results",
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/stamp.json"
       ]
     },
-    "EVD-260119895-keel-STAB-002": {
+    "EVD-MITTR-AIMEM-PRIV-DSAR-004": {
+      "title": "User control API contract tests",
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-EGRESS-005": {
+      "title": "Tool egress redaction tests",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/stamp.json"
+      ]
+    },
+    "EVD-WSJ-AI-FUNDRAISING-FRENZY-MKT-001": {
+      "files": [
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/report.json",
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/metrics.json",
+        "evidence/WSJ-AI-FUNDRAISING-FRENZY/stamp.json"
+      ],
+      "title": "WSJ Technology Newsletter: AI Fundraising Frenzy",
+      "category": "market-intel"
+    },
+    "EVD-PIPELINE-RESILIENCE-001": {
+      "title": "Pipeline Scaffolding Check",
+      "category": "pipeline",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-SKETCHDYNAMICS-PIPELINE-001": {
+      "title": "SketchDynamics End-to-End Run",
+      "category": "dynamic-intent",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-SKETCHDYNAMICS-CLARIFY-001": {
+      "title": "SketchDynamics Clarification Trigger",
+      "category": "dynamic-intent",
+      "files": [
+        "fixtures/ambiguities/critical.json"
+      ]
+    },
+    "EVD-vfgnn-ATT-001": {
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-vfgnn-NEG-001": {
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-ATLAS-SCHEMA-001": {
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-ATLAS-PLNR-001": {
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    "EVD-ATLAS-XFER-001": {
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
       ]
     },
     "EVD-ATLAS-ATLS-001": {
@@ -49,25 +186,39 @@
         "evidence/stamp.json"
       ]
     },
-    "EVD-ATLAS-PLNR-001": {
+    "EVD-260119895-keel-ARCH-001": {
       "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
       ]
     },
-    "EVD-ATLAS-SCHEMA-001": {
+    "EVD-260119895-keel-STAB-002": {
       "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
       ]
     },
-    "EVD-ATLAS-XFER-001": {
+    "EVD-260119895-keel-DSCL-003": {
       "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    "EVD-260119895-keel-BENCH-004": {
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    "EVD-SSDF12-BNDL-001": {
+      "files": [
+        "evidence/ssdf-v1-2/pr-01/report.json",
+        "evidence/ssdf-v1-2/pr-01/metrics.json",
+        "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
     },
     "EVD-EXPB-CORE-001": {
@@ -77,95 +228,11 @@
         "evidence/runs/expectation-baselines/stamp.json"
       ]
     },
-    "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
-    },
-    "EVD-KIMI-K25-CHAINTRUST-001": {
-      "category": "kimi-k2.5",
-      "files": [
-        "evidence/EVD-KIMI-K25-CHAINTRUST-001/report.json",
-        "evidence/EVD-KIMI-K25-CHAINTRUST-001/metrics.json",
-        "evidence/EVD-KIMI-K25-CHAINTRUST-001/stamp.json"
-      ],
-      "title": "Kimi K2.5 Placeholder EVD-KIMI-K25-CHAINTRUST-001"
-    },
-    "EVD-KIMI-K25-MM-004": {
-      "category": "kimi-k2.5",
-      "files": [
-        "evidence/EVD-KIMI-K25-MM-004/report.json",
-        "evidence/EVD-KIMI-K25-MM-004/metrics.json",
-        "evidence/EVD-KIMI-K25-MM-004/stamp.json"
-      ],
-      "title": "Kimi K2.5 Placeholder EVD-KIMI-K25-MM-004"
-    },
-    "EVD-KIMI-K25-REPRO-005": {
-      "category": "kimi-k2.5",
-      "files": [
-        "evidence/EVD-KIMI-K25-REPRO-005/report.json",
-        "evidence/EVD-KIMI-K25-REPRO-005/metrics.json",
-        "evidence/EVD-KIMI-K25-REPRO-005/stamp.json"
-      ],
-      "title": "Kimi K2.5 Placeholder EVD-KIMI-K25-REPRO-005"
-    },
-    "EVD-KIMI-K25-SWARM-003": {
-      "category": "kimi-k2.5",
-      "files": [
-        "evidence/EVD-KIMI-K25-SWARM-003/report.json",
-        "evidence/EVD-KIMI-K25-SWARM-003/metrics.json",
-        "evidence/EVD-KIMI-K25-SWARM-003/stamp.json"
-      ],
-      "title": "Kimi K2.5 Placeholder EVD-KIMI-K25-SWARM-003"
-    },
-    "EVD-KIMI-K25-TOOLCALL-002": {
-      "category": "kimi-k2.5",
-      "files": [
-        "evidence/EVD-KIMI-K25-TOOLCALL-002/report.json",
-        "evidence/EVD-KIMI-K25-TOOLCALL-002/metrics.json",
-        "evidence/EVD-KIMI-K25-TOOLCALL-002/stamp.json"
-      ],
-      "title": "Kimi K2.5 Placeholder EVD-KIMI-K25-TOOLCALL-002"
-    },
-    "EVD-PIPELINE-RESILIENCE-001": {
-      "artifacts": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ],
-      "category": "pipeline",
-      "title": "Pipeline Scaffolding Check"
-    },
     "EVD-PRIVTEL-SCHEMA-001": {
       "files": [
         "evidence/privtel/report.json",
         "evidence/privtel/metrics.json",
         "evidence/privtel/stamp.json"
-      ]
-    },
-    "EVD-SKETCHDYNAMICS-CLARIFY-001": {
-      "artifacts": [
-        "fixtures/ambiguities/critical.json"
-      ],
-      "category": "dynamic-intent",
-      "title": "SketchDynamics Clarification Trigger"
-    },
-    "EVD-SKETCHDYNAMICS-PIPELINE-001": {
-      "artifacts": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ],
-      "category": "dynamic-intent",
-      "title": "SketchDynamics End-to-End Run"
-    },
-    "EVD-SSDF12-BNDL-001": {
-      "files": [
-        "evidence/ssdf-v1-2/pr-01/report.json",
-        "evidence/ssdf-v1-2/pr-01/metrics.json",
-        "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
     },
     "EVD-openviking-contextfs-001": {
@@ -182,27 +249,12 @@
         "evidence/stamp.json"
       ]
     },
-    "EVD-openviking-trace-003": {
+    "EVD-AGENTSKILLS-SKILLSEC-001": {
       "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
-    },
-    "EVD-vfgnn-ATT-001": {
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
-      ]
-    },
-    "EVD-vfgnn-NEG-001": {
-      "files": [
-        "evidence/report.json",
-        "evidence/metrics.json",
-        "evidence/stamp.json"
+        "evidence/agent-skills/report.json",
+        "evidence/agent-skills/metrics.json",
+        "evidence/agent-skills/stamp.json"
       ]
     }
-  },
-  "version": "1.0"
+  }
 }
