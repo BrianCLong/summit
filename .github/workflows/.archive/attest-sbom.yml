@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout @v4/**
       - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
-      - run: pnpm -r sbom:gen
+      - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
       - name: Cosign attest
         if: ${{ inputs.image != '' }}
         env:
