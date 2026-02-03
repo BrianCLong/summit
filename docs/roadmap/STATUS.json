@@ -8,6 +8,12 @@
       "notes": "Governance evidence JSON artifacts, schemas, and deterministic gate runner."
     },
     {
+      "id": "promptspec-foundation-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+    },
+    {
       "id": "io-cogwar-radar-2027-brief",
       "status": "in_progress",
       "owner": "codex",
