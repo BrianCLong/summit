@@ -2,6 +2,12 @@
   "last_updated": "2026-02-03T00:00:00Z",
   "initiatives": [
     {
+      "id": "openclaw-skillpack-ingest-v1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Index-only ingestion of OpenClaw skill repositories with deterministic artifacts and risk labeling."
+    },
+    {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
