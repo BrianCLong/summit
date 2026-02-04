@@ -1,87 +1,94 @@
 import sys
 from unittest.mock import MagicMock
 
-# Mock heavy dependencies
+# Mock missing modules
+sys.modules["spacy"] = MagicMock()
 sys.modules["neo4j"] = MagicMock()
 sys.modules["neo4j.exceptions"] = MagicMock()
-sys.modules["spacy"] = MagicMock()
 sys.modules["opentelemetry"] = MagicMock()
+sys.modules["opentelemetry.exporter"] = MagicMock()
+sys.modules["opentelemetry.exporter.otlp"] = MagicMock()
+sys.modules["opentelemetry.exporter.otlp.proto"] = MagicMock()
+sys.modules["opentelemetry.exporter.otlp.proto.grpc"] = MagicMock()
 sys.modules["opentelemetry.exporter.otlp.proto.grpc.trace_exporter"] = MagicMock()
+sys.modules["opentelemetry.instrumentation"] = MagicMock()
 sys.modules["opentelemetry.instrumentation.fastapi"] = MagicMock()
+sys.modules["opentelemetry.sdk"] = MagicMock()
 sys.modules["opentelemetry.sdk.resources"] = MagicMock()
 sys.modules["opentelemetry.sdk.trace"] = MagicMock()
 sys.modules["opentelemetry.sdk.trace.export"] = MagicMock()
 sys.modules["sentence_transformers"] = MagicMock()
+sys.modules["intelgraph_ai_ml"] = MagicMock()
 sys.modules["intelgraph_ai_ml.graph_forecaster"] = MagicMock()
 
-# Mock internal modules if they are problematic
-# sys.modules["api.llm_provider"] = MagicMock() # We need this one actually, or mock it carefully
-
+import pytest
 from fastapi.testclient import TestClient
-from uuid import uuid4
 
-# Import app AFTER mocking
 from api.main import app
 
 client = TestClient(app)
 
-def test_factgov_flow():
-    # 1. Register Vendor
-    vendor_payload = {
-        "company_name": "Test AI Vendor",
+def test_factgov_workflow():
+    # 1. Create Vendor
+    vendor_data = {
+        "company_name": "Test Vendor",
         "products": [
             {
-                "product_id": "prod-1",
-                "name": "Deepfake Detector 9000",
-                "category": "deepfake_detection",
-                "description": "Best deepfake detection in the world.",
-                "use_cases": ["fraud"],
-                "integrations": ["API"]
+                "product_id": "prod_123",
+                "name": "FactFlow",
+                "category": "verification",
+                "description": "Verifies news",
+                "use_cases": ["news"],
+                "integrations": ["slack"]
             }
         ],
         "certifications": [],
-        "cooperative_memberships": ["TXShare"],
-        "compliance_docs": {"SOC2": "http://example.com/soc2"}
+        "cooperative_memberships": [],
+        "compliance_docs": {},
+        "pricing": {
+            "model_type": "subscription",
+            "base_price": 100.0,
+            "currency": "USD"
+        }
     }
 
-    response = client.post("/api/factgov/vendors", json=vendor_payload)
-    if response.status_code != 200:
-        print(response.json())
+    response = client.post("/api/factgov/vendors", json=vendor_data)
     assert response.status_code == 200
-    vendor_data = response.json()
-    vendor_id = vendor_data["vendor_id"]
-    assert vendor_data["company_name"] == "Test AI Vendor"
+    vendor = response.json()
+    assert vendor["company_name"] == "Test Vendor"
+    assert "vendor_id" in vendor
+    vendor_id = vendor["vendor_id"]
 
     # 2. Search Vendors
-    response = client.get("/api/factgov/vendors/search?query=Deepfake")
+    response = client.get(f"/api/factgov/vendors/search?query=factflow")
     assert response.status_code == 200
     results = response.json()
-    assert len(results) > 0
+    assert len(results) >= 1
     assert results[0]["vendor_id"] == vendor_id
 
     # 3. Match RFP
-    rfp_payload = {
-        "rfp_description": "We need deepfake detection for fraud prevention.",
-        "budget": 500000.0,
-        "agency_id": str(uuid4())
+    rfp_data = {
+        "rfp_text": "Need news verification tool",
+        "agency_id": "agency_123"
     }
-    response = client.post("/api/factgov/rfps/match", json=rfp_payload)
+    response = client.post("/api/factgov/rfps/match", json=rfp_data)
     assert response.status_code == 200
     matches = response.json()
-    assert len(matches) > 0
+    assert len(matches) >= 1
     assert matches[0]["vendor"]["vendor_id"] == vendor_id
+    assert "fit_score" in matches[0]
 
     # 4. Initiate Contract
-    contract_payload = {
-        "agency_id": rfp_payload["agency_id"],
+    contract_req = {
+        "agency_id": "agency_123",
         "vendor_id": vendor_id,
-        "product_id": "prod-1",
-        "contract_value": 100000.0
+        "product_id": "prod_123",
+        "contract_value": 10000.0
     }
-    response = client.post("/api/factgov/contracts/initiate", json=contract_payload)
-    if response.status_code != 200:
-        print(response.json())
+    response = client.post("/api/factgov/contracts/initiate", json=contract_req)
     assert response.status_code == 200
-    contract_data = response.json()
-    assert contract_data["contract_value"] == 100000.0
-    assert contract_data["platform_fee"] == 12000.0
+    contract = response.json()
+    assert contract["agency_id"] == "agency_123"
+    assert contract["status"] == "active"
+    assert contract["contract_value"] == 10000.0
+    assert contract["platform_fee"] == 1200.0
