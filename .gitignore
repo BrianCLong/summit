@@ -50,8 +50,6 @@ docs/site/
 # TypeScript incremental caches (avoid committing build traces)
 *.tsbuildinfo
 .turbo/
-server/dist-new/
-
 
 # Serverless directories
 .serverless/
@@ -283,9 +281,6 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
-!artifacts/
-!artifacts/tool-loading-report.json
-!artifacts/tool-loading-report.md
 /dist
 .env
 sbom.json
@@ -296,13 +291,12 @@ data/automl/
 tmp-audit/
 **/digest-sandbox/
 **/tmp-security/
-**/v8-compile-cache-0/
+.maestro-workboard/
 
 # Test reports
 reports/
 bug-bash-results/
 *-report.json
-!artifacts/tool-loading-report.json
 lint_output.txt
 
 # Security Scan Results & Audit Artifacts
@@ -332,8 +326,6 @@ validation-report-*.txt
 stale_refs_files.txt
 cosign-verify.txt
 dns.txt
-soc-compliance-reports/
-packages/policy-audit/src/*.js.map
 
 # Data Dumps (Root Only)
 # Note: Specific CSVs in subdirectories are allowed, but root CSVs should be ignored
@@ -368,16 +360,4 @@ bin/
 release-assets/
 evidence-staging/
 *.txt
-!services/er-service/requirements.txt
 tmp-test/
-_worktrees/
-
-# Local runs output (do not commit)
-subsumption/**/runs/
-
-# Governance evidence artifacts (generated locally/CI)
-artifacts/governance/
-# Cogwar deterministic artifacts
-!dist/
-!dist/cogwar/
-!dist/cogwar/**
