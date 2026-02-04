@@ -1,0 +1,11 @@
+{
+  "role": "SDR",
+  "trainer_model": "hybrid",
+  "stages": [
+    {
+      "name": "Product Knowledge",
+      "duration_days": 5,
+      "mode": "classroom"
+    }
+  ]
+}
