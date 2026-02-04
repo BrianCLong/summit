@@ -1,6 +1,5 @@
 name: Release Cut
 
-# Governance: This workflow must only be triggered manually.
 # Release Cut Workflow
 # Creates an immutable go-live tag with release notes generated from evidence.
 #

@@ -1,35 +1,28 @@
-# Required Checks Discovery & Mapping
+# Required Checks Discovery
 
-This document outlines the steps to map CI jobs to GitHub required status checks for the Summit repository.
+## Process to Identify Required Checks
 
-## UI Steps
-1. Navigate to **Settings** > **Branches** in the GitHub repository.
-2. Under **Branch protection rules**, select the rule for `main` (or create one).
-3. Enable **Require status checks to pass before merging**.
-4. Search for and select the following job names:
-   - `verify` (from `evidence.yml`)
-   - `gate/evidence` (temporary name)
-   - `gate/supplychain` (temporary name)
-   - `gate/fimi` (temporary name)
+### UI Steps
+1. Go to repository Settings in GitHub.
+2. Navigate to **Branches** -> **Branch protection rules**.
+3. Edit the rule for `main` (or default branch).
+4. Look for "Require status checks to pass before merging".
+5. Copy the exact names of the required checks listed there.
 
-## API Steps
-To list current branch protection and required checks via the GitHub CLI:
+### API Steps
+Run the following to list checks for the current branch:
 ```bash
-gh api repos/:owner/:repo/branches/main/protection/required_status_checks
+gh api repos/:owner/:repo/commits/$(git rev-parse HEAD)/check-runs --jq '.check_runs[].name'
 ```
 
-To update required checks:
-```bash
-gh api -X PATCH repos/:owner/:repo/branches/main/protection/required_status_checks \
-  -f "contexts[]=verify" \
-  -f "contexts[]=gate/evidence"
-```
+## Temporary Gate Names (Implemented in Plan)
 
-## Temporary Gate Naming
-Until actual required check names are confirmed in the repo settings, the following convention is used:
-- `gate/evidence`
-- `gate/supplychain`
-- `gate/fimi`
+We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
+
+- `ci/summit-gates` (Consolidated validation job)
+  - Replaces/consolidates: `ci:evidence`, `ci:security-gates`
+- `verify:dependency-delta` - Ensures dependency changes are documented.
 
 ## Rename Plan
-Once the CI jobs are finalized, this document will be updated to reflect the canonical job names as they appear in the GitHub Actions UI.
+
+Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.

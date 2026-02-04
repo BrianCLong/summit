@@ -19,7 +19,6 @@ const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS
 
 export class MCPClient {
   private connections: Map<string, WebSocket> = new Map();
-  private localHandlers: Map<string, (request: MCPRequest) => Promise<MCPResponse>> = new Map();
   private pendingRequests: Map<
     string,
     {
@@ -42,31 +41,12 @@ export class MCPClient {
   }
 
   /**
-   * Register a local (in-process) MCP server handler
-   */
-  public registerLocalServer(
-    serverName: string,
-    handler: (request: MCPRequest) => Promise<MCPResponse>,
-  ): void {
-    this.localHandlers.set(serverName, handler);
-    logger.info(`Registered local MCP server: ${serverName}`);
-  }
-
-  /**
    * Connect to an MCP server
    */
   public async connect(serverName: string): Promise<void> {
     const config = this.servers[serverName];
     if (!config) {
       throw new Error(`MCP server '${serverName}' not configured`);
-    }
-
-    if (config.transport === 'local') {
-      if (!this.localHandlers.has(serverName)) {
-        throw new Error(`Local handler for server '${serverName}' not registered`);
-      }
-      logger.info(`Using local transport for MCP server: ${serverName}`);
-      return;
     }
 
     // Enforce allowlist
@@ -292,19 +272,6 @@ export class MCPClient {
     serverName: string,
     request: MCPRequest,
   ): Promise<any> {
-    const config = this.servers[serverName];
-    if (config?.transport === 'local') {
-      const handler = this.localHandlers.get(serverName);
-      if (!handler) {
-        throw new Error(`No local handler registered for server '${serverName}'`);
-      }
-      const response = await handler(request);
-      if (response.error) {
-        throw new Error(`MCP Error: ${response.error.message}`);
-      }
-      return response.result;
-    }
-
     const ws = this.connections.get(serverName);
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       throw new Error(`No active connection to server '${serverName}'`);

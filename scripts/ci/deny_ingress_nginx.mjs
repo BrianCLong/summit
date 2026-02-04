@@ -65,6 +65,10 @@ for (const filePath of files) {
   const content = fs.readFileSync(filePath, "utf8");
   const lines = content.split(/\r?\n/);
   lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
+    // Ignore comments
+    if (trimmedLine.startsWith("#")) return;
+
     denyPatterns.forEach((pattern) => {
       if (pattern.test(line)) {
         hits.push(`${filePath}:${index + 1}: ${line.trim()}`);

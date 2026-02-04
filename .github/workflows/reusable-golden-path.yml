@@ -78,7 +78,7 @@ jobs:
           provenance: true
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
+        uses: anchore/syft-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
         with:
           image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
           format: spdx-json
