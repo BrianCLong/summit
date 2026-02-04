@@ -1,0 +1,37 @@
+{
+  "task_id": "CPG_MOAT_EXPANSION",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "cpg-moat-expansion",
+    "version": "v1",
+    "sha256": "0cc890a2623dbf54a2eceb65b21305e744001ee0ab111e4465adcab99c0e43b3",
+    "path": "prompts/docs/cpg-moat-expansion@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "CPG_INNOVATION_SUMMARY.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/cpg-moat-expansion@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/CPG_MOAT_EXPANSION_TASK.json"
+    ],
+    "domains": ["documentation", "governance", "moat"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/roadmap/STATUS.json update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "CPG innovation summary includes moat-grade memory and MCP orchestration expansions.",
+    "Roadmap status timestamp and revision note updated to reflect documentation changes."
+  ],
+  "stop_conditions": [
+    "Policy conflict detected with governance or readiness assertions.",
+    "Requested change exceeds declared documentation scope."
+  ]
+}

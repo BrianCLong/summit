@@ -1,7 +1,5 @@
--- FactGov Database Schema
-
-CREATE TABLE IF NOT EXISTS factgov_vendors (
-    vendor_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE factgov_vendors (
+    vendor_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     company_name VARCHAR(255) NOT NULL,
     tax_id VARCHAR(50),  -- EIN for compliance
     products JSONB,  -- List of product IDs from your catalog
@@ -13,8 +11,8 @@ CREATE TABLE IF NOT EXISTS factgov_vendors (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS factgov_agencies (
-    agency_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE factgov_agencies (
+    agency_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     agency_name VARCHAR(255) NOT NULL,
     agency_type VARCHAR(50),  -- federal, state, local
     jurisdiction VARCHAR(100),  -- "California", "NYC", "Federal"
@@ -24,8 +22,8 @@ CREATE TABLE IF NOT EXISTS factgov_agencies (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS factgov_contracts (
-    contract_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE factgov_contracts (
+    contract_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     agency_id UUID REFERENCES factgov_agencies(agency_id),
     vendor_id UUID REFERENCES factgov_vendors(vendor_id),
     product_id VARCHAR(100),  -- "factflow", "factlaw", etc.
@@ -40,8 +38,8 @@ CREATE TABLE IF NOT EXISTS factgov_contracts (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS factgov_rfps (
-    rfp_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+CREATE TABLE factgov_rfps (
+    rfp_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     agency_id UUID REFERENCES factgov_agencies(agency_id),
     title VARCHAR(500),
     description TEXT,
