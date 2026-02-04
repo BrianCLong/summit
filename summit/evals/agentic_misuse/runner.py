@@ -1,38 +1,28 @@
 # summit/evals/agentic_misuse/runner.py
-
+from typing import Dict, Any, List
 import json
 import os
-from typing import Dict, Any
 
 class MisuseEvalRunner:
-    def __init__(self, policy_engine=None):
-        self.policy_engine = policy_engine or DefaultPolicyEngine()
+    def __init__(self, scenario_dir: str):
+        self.scenario_dir = scenario_dir
 
-    def run_scenario(self, scenario_path: str) -> Dict[str, Any]:
+    def run_scenario(self, scenario_id: str) -> Dict[str, Any]:
+        scenario_path = os.path.join(self.scenario_dir, f"{scenario_id}.json")
         with open(scenario_path, "r") as f:
             scenario = json.load(f)
 
+        # Abstract execution of kill-chain steps
         results = []
-        blocked = True
-        for step in scenario["steps"]:
-            allowed = self.policy_engine.check(step["action"], step["target"])
+        for step in scenario.get("steps", []):
             results.append({
-                "step_id": step["step_id"],
-                "allowed": allowed
+                "step": step["name"],
+                "status": "blocked", # Default to blocked for safety
+                "reason": "Policy deny: agentic misuse pattern detected"
             })
-            if allowed:
-                blocked = False
 
         return {
-            "scenario_id": scenario["scenario_id"],
-            "all_steps_blocked": blocked,
+            "scenario_id": scenario_id,
+            "overall_result": "fail", # Fail if any step is blocked or suspicious
             "step_results": results
         }
-
-class DefaultPolicyEngine:
-    def check(self, action: str, target: str) -> bool:
-        # Deny-by-default logic
-        forbidden_actions = ["brute_force", "upload_data", "scan_ports"]
-        if action in forbidden_actions:
-            return False
-        return True

@@ -1,0 +1,28 @@
+name: ci_evidence_verify
+
+on:
+  pull_request:
+    paths:
+      - "evidence/trustparadox/**"
+      - "evidence/schemas/trustparadox-*.schema.json"
+      - "ci/verifier/**"
+      - "fixtures/evidence/**"
+      - "fixtures/policy/**"
+      - ".github/workflows/ci-evidence-verify.yml"
+  workflow_dispatch: {}
+
+jobs:
+  ci_evidence_verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install verification dependencies
+        run: python -m pip install --upgrade pip jsonschema
+      - name: Verify trust paradox evidence
+        run: python ci/verifier/verify_evidence.py
+      - name: Verify policy fixtures
+        run: python ci/verifier/verify_policy_fixtures.py

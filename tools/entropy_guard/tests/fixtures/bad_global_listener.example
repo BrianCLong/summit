@@ -1,2 +1,4 @@
-// violation
-window.addEventListener('resize', () => {});
+// This is a bad example with a global listener
+window.addEventListener('resize', () => {
+  console.log('resized');
+});
