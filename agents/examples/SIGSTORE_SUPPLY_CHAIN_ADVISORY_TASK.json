@@ -1,0 +1,36 @@
+{
+  "task_id": "SIGSTORE_SUPPLY_CHAIN_ADVISORY_20260209",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sigstore-supply-chain-advisory",
+    "version": "v1",
+    "sha256": "9111a524045b0de6e03683afa40500172eec4b1e1b7f8eab924ef3a7324326b4",
+    "path": "prompts/docs/sigstore-supply-chain-advisory@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/security/SUPPLY_CHAIN.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/sigstore-supply-chain-advisory@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SIGSTORE_SUPPLY_CHAIN_ADVISORY_TASK.json"
+    ],
+    "domains": ["documentation", "security", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/security/SUPPLY_CHAIN.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Supply-chain documentation reflects Sigstore advisory mitigations and verification steps.",
+    "Roadmap status updated in the same change set."
+  ],
+  "stop_conditions": [
+    "If changes require policy modifications or security control reductions, halt and escalate to governance."
+  ]
+}

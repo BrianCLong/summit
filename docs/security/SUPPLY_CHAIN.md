@@ -46,6 +46,38 @@ cosign verify-attestation ghcr.io/brianlong/intelgraph/server:latest \
   --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
 ```
 
+## Sigstore Advisory Guardrails
+
+Summit enforces Sigstore hardening actions in the supply-chain pipeline to address known integrity
+and authentication flaws:
+
+1. **Sigstore Golang (legacy TUF client) path traversal**
+   - **Risk**: crafted TUF metadata can write outside the cache directory.
+   - **Mitigation**: require `sigstore` **v1.10.4+** everywhere or disable the disk cache
+     (`SIGSTORE_NO_CACHE=true`) in constrained environments.
+2. **sigstore-python CSRF/OIDC state validation**
+   - **Risk**: missing `state` validation in the OAuth flow allows cross-site request forgery.
+   - **Mitigation**: require `sigstore-python` **v4.2.0+** across automation and developer tooling.
+
+## Hardened Attestation Verification
+
+Every CI/CD build produces a digest + attestation pair and verifies both before promotion:
+
+```bash
+cosign verify --key /trusted/roots/cosign.pub "$IMAGE_DIGEST"
+cosign verify-attestation --type in-toto --key /trusted/roots/cosign.pub "$IMAGE_DIGEST"
+```
+
+If verification fails or the digest does not match, the pipeline blocks promotion and publishes the
+attestation JSON as an artifact for audit review.
+
+## Kubernetes Admission Enforcement
+
+Cluster admission control uses the Sigstore Policy Controller with ClusterImagePolicy rules to
+require signatures and attestations. Governed Exceptions are stored in a signed
+`sigstore-exceptions` ConfigMap and validated by policy checks. Rollback is performed by switching
+the admission controller to monitor mode or disabling the webhook while the exception expires.
+
 ## Local SBOM Generation
 
 You can generate SBOMs locally using the helper script:
