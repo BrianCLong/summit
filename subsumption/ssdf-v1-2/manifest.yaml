@@ -16,3 +16,4 @@ checks:
     - "subsumption/verify-bundle"
 evidence_ids:
   - "EVD-SSDF12-BNDL-001"
+version: "1.0.0"
