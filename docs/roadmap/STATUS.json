@@ -50,6 +50,12 @@
       "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
     },
     {
+      "id": "ip-claims-continuation-pack-c451-s480",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+    },
+    {
       "id": "io-cogwar-radar-2027-brief",
       "status": "in_progress",
       "owner": "codex",

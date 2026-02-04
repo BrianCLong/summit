@@ -5,6 +5,10 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '../engine';
+import { HeuristicDifficultyScorer } from '../daao/difficulty/heuristicDifficultyScorer';
+import { CostAwareLLMRouter } from '../daao/routing/llmRouter';
+import { DefaultModelCatalog } from '../daao/routing/modelCatalog';
+import { DebateValidator, LLMRunner } from '../daao/collaboration/debateValidation';
 
 export interface LiteLLMConfig {
   baseUrl: string;
@@ -131,12 +135,49 @@ export class LiteLLMPlugin implements StepPlugin {
       // Prepare the request payload
       const payload = await this.preparePayload(stepConfig, context, execution);
 
+      // DAAO Integration
+      const daaoEnabled = process.env.SUMMIT_DAAO_LITE === '1';
+      let difficultySignal;
+      let routingDecision;
+      let validationResult;
+
+      if (daaoEnabled) {
+        try {
+          const userPrompt = payload.messages?.find((m: any) => m.role === 'user')?.content || '';
+          if (userPrompt) {
+            // 1. Difficulty Estimation
+            const scorer = new HeuristicDifficultyScorer();
+            difficultySignal = await scorer.estimate(userPrompt);
+
+            // 2. Routing
+            const catalog = new DefaultModelCatalog();
+            const router = new CostAwareLLMRouter(catalog);
+            // Estimate input tokens (rough)
+            const estimatedTokens = Math.ceil(userPrompt.length / 4);
+            // Budget from context or default high
+            const budget = context.budget?.max_cost_usd || 1.0;
+
+            routingDecision = router.route(difficultySignal, estimatedTokens, budget);
+
+            // Apply routing decision
+            if (routingDecision.modelId) {
+              payload.model = routingDecision.modelId;
+              stepConfig.model = routingDecision.modelId;
+            }
+          }
+        } catch (e) {
+          console.warn('DAAO execution failed, falling back to default', e);
+        }
+      }
+
       // Add request metadata
       payload.metadata = {
         run_id: context.run_id,
         step_id: step.id,
         tenant_id: context.tenant_id,
         environment: context.environment,
+        daao_difficulty: difficultySignal,
+        daao_routing: routingDecision,
       };
 
       // Make the request with retry logic
@@ -144,6 +185,46 @@ export class LiteLLMPlugin implements StepPlugin {
 
       // Extract response data
       const result = this.extractResponse(response.data);
+
+      // 3. Validation Loop (DAAO)
+      if (
+        daaoEnabled &&
+        difficultySignal &&
+        (difficultySignal.band === 'medium' || difficultySignal.band === 'hard')
+      ) {
+        try {
+          if (result.type === 'text' && result.content) {
+            const runner: LLMRunner = {
+              run: async (prompt: string, systemPrompt?: string) => {
+                const valPayload = { ...payload };
+                valPayload.messages = [
+                  {
+                    role: 'system',
+                    content: systemPrompt || 'You are a helpful assistant.',
+                  },
+                  { role: 'user', content: prompt },
+                ];
+                // Use the same model for validation
+                const valResp = await this.makeRequestWithRetry(valPayload);
+                const valRes = this.extractResponse(valResp.data);
+                if (valRes.type === 'text') {
+                  return valRes.content || '';
+                }
+                return '';
+              },
+            };
+
+            const validator = new DebateValidator(runner);
+            validationResult = await validator.validateAndRefine(result.content);
+
+            if (validationResult.wasRefined) {
+              result.content = validationResult.refined;
+            }
+          }
+        } catch (e) {
+          console.warn('DAAO validation failed', e);
+        }
+      }
 
       // Calculate cost if enabled
       let cost_usd;
@@ -161,6 +242,7 @@ export class LiteLLMPlugin implements StepPlugin {
           created: response.data.created,
           finish_reason: response.data.choices?.[0]?.finish_reason,
           litellm_model_info: response.data.model_info,
+          daao_validation: validationResult,
         },
       };
     } catch (error) {

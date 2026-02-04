@@ -1,0 +1,40 @@
+{
+  "task_id": "NDS_CI_GATES_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "nds-ci-gates",
+    "version": "v1",
+    "sha256": "f5f7eeef03ac9c5b217b1ce87341708aadf0d3898692f09515c66eb9501ee550",
+    "path": "prompts/nds/nds-ci-gates@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/workflows/nds-ci.yml",
+      "docs/roadmap/STATUS.json",
+      "evidence/index.json",
+      "required_checks.todo.md",
+      "prompts/nds/nds-ci-gates@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NDS_CI_GATES_20260206.json"
+    ],
+    "domains": ["governance", "ci", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["EVD-NDS-CI-001", "EVD-NDS-CI-002", "EVD-NDS-CI-003", "EVD-NDS-CI-004"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "NDS CI workflow runs evidence and dependency delta gates",
+    "Evidence index records EVD-NDS-CI-001..004",
+    "Required checks documentation lists nds-ci/nds_gates"
+  ],
+  "stop_conditions": [
+    "Scope expansion beyond declared paths",
+    "Evidence gate regressions"
+  ]
+}

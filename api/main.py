@@ -21,7 +21,15 @@ from redis.exceptions import ConnectionError
 from sentence_transformers import SentenceTransformer
 
 from intelgraph_ai_ml.graph_forecaster import GraphForecaster
+
 from .llm_provider import llm_provider
+
+# --- Configuration & Constants ---
+NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "password")
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
+API_KEY = os.environ.get("API_KEY", "supersecretapikey")
 
 # --- Pydantic Models for AI/ML Endpoints ---
 class TelemetryAnalysisRequest(BaseModel):
@@ -66,10 +74,14 @@ class EdgePrediction(BaseModel):
 class ForecastResponse(BaseModel):
     edges: list[EdgePrediction]
 
+# --- Dependencies ---
+async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
+    """Dependency to verify API key."""
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    return x_api_key
 
-app = FastAPI()
-
-# OpenTelemetry Setup
+# --- App Initialization ---
 resource = Resource(attributes={SERVICE_NAME: "wargame-api-service"})
 provider = TracerProvider(resource=resource)
 processor = BatchSpanProcessor(
@@ -78,57 +90,7 @@ processor = BatchSpanProcessor(
 provider.add_span_processor(processor)
 trace.set_tracer_provider(provider)
 
-NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "password")
-REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379")
-
-neo4j_driver = None
-redis_client = None
-max_attempts = 10
-delay = 5
-
-# Initialize Neo4j Driver with retry
-for attempt in range(max_attempts):
-    try:
-        print(f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})...")
-        neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-        neo4j_driver.verify_connectivity()
-        print("API service: Successfully connected to Neo4j.")
-        break
-    except ServiceUnavailable as e:
-        print(f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds...")
-        time.sleep(delay)
-    except Exception as e:
-        print(f"API service: An unexpected error occurred during Neo4j connection: {e}")
-        time.sleep(delay)
-else:
-    # raise Exception("API service: Failed to connect to Neo4j after multiple attempts.")
-    print("API service: Failed to connect to Neo4j after multiple attempts. Running in detached mode.")
-
-# Initialize Redis Client with retry
-for attempt in range(max_attempts):
-    try:
-        print(f"API service: Attempting to connect to Redis (Attempt {attempt + 1}/{max_attempts})...")
-        redis_client = redis.from_url(REDIS_URL)
-        redis_client.ping()
-        print("API service: Successfully connected to Redis.")
-        break
-    except ConnectionError as e:
-        print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
-        time.sleep(delay)
-    except Exception as e:
-        print(f"API service: An unexpected error occurred during Redis connection: {e}")
-        time.sleep(delay)
-else:
-    # raise Exception("API service: Failed to connect to Redis after multiple attempts.")
-    print("API service: Failed to connect to Redis after multiple attempts. Running in detached mode.")
-
-# Initialize graph forecaster
-try:
-    graph_forecaster = GraphForecaster(neo4j_uri=NEO4J_URI, user=NEO4J_USER, password=NEO4J_PASSWORD)
-except Exception:
-    graph_forecaster = None
+app = FastAPI()
 
 # --- AI/ML Model Loading ---
 nlp = None
@@ -161,12 +123,9 @@ def shutdown_event():
         neo4j_driver.close()
     print("API service: Neo4j driver closed.")
 
-API_KEY = os.environ.get("API_KEY", "supersecretapikey")
-
-async def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")):
-    if x_api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API Key")
-    return x_api_key
+# --- DB Globals ---
+neo4j_driver = None
+redis_client = None
 
 # --- API Endpoints ---
 @app.get("/health")
@@ -176,8 +135,7 @@ def health_check():
 @app.get("/graph")
 def get_graph_data():
     if not neo4j_driver:
-         return {"nodes": [], "edges": []}
-
+        return {"nodes": [], "edges": []}
     query = "MATCH (n)-[r]->(m) RETURN n, r, m LIMIT 100"
     with neo4j_driver.session() as session:
         result = session.run(query)
@@ -212,57 +170,95 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest, api_key: str = De
 
 @app.post("/estimate-intent", response_model=IntentEstimationResponse)
 async def estimate_intent(request: IntentEstimationRequest, api_key: str = Depends(verify_api_key)):
-    prompt = f"Estimate intent: {request.telemetry_summary}. Graph: {request.graph_data_summary}. Adversary: {request.adversary_profile}."
+    prompt = f"Estimate intent based on telemetry: {request.telemetry_summary}..."
     llm_response_str = await llm_provider._cached_generate_text(prompt)
     llm_response = json.loads(llm_response_str)
     return {
         "estimated_intent": llm_response.get("estimated_intent", "Unknown"),
         "likelihood": llm_response.get("likelihood", 0.5),
-        "reasoning": llm_response.get("reasoning", "No reasoning provided.")
+        "reasoning": llm_response.get("reasoning", "No reasoning provided by LLM."),
     }
 
 @app.post("/generate-playbook", response_model=PlaybookGenerationResponse)
 async def generate_playbook(request: PlaybookGenerationRequest, api_key: str = Depends(verify_api_key)):
-    prompt = f"Playbook for {request.crisis_type}. Audiences: {request.target_audiences}. Narratives: {request.key_narratives}."
+    prompt = f"Generate a strategic playbook for a {request.crisis_type} crisis..."
     llm_response_str = await llm_provider._cached_generate_text(prompt)
     llm_response = json.loads(llm_response_str)
     return {
-        "name": llm_response.get("name", "Playbook"),
+        "name": llm_response.get("name", "Generated Playbook"),
         "doctrine_reference": llm_response.get("doctrine_reference", "N/A"),
-        "description": llm_response.get("description", ""),
+        "description": llm_response.get("description", "No description."),
         "steps": llm_response.get("steps", []),
         "metrics_of_effectiveness": llm_response.get("metrics_of_effectiveness", []),
-        "metrics_of_performance": llm_response.get("metrics_of_performance", [])
+        "metrics_of_performance": llm_response.get("metrics_of_performance", []),
     }
 
 @app.get("/forecast/graph", response_model=ForecastResponse)
 async def forecast_graph(entity_id: str, past_days: int = 14, future_days: int = 30):
-    if not graph_forecaster:
-        return ForecastResponse(edges=[])
-
     cache_key = GraphForecaster.cache_key(entity_id, past_days, future_days)
     if redis_client:
         cached = redis_client.get(cache_key)
         if cached:
             return ForecastResponse.parse_raw(cached)
-
+    if 'graph_forecaster' not in globals():
+         raise HTTPException(503, "GraphForecaster not ready")
     predictions = graph_forecaster.predict(entity_id, past_days, future_days)
     response = ForecastResponse(edges=[EdgePrediction(**p.to_dict()) for p in predictions])
-
     if redis_client:
         redis_client.setex(cache_key, 3600, response.json())
     return response
 
-# Include GNN router for link prediction endpoint
+# --- Router Includes ---
 try:
     from .gnn import router as gnn_router
     app.include_router(gnn_router)
 except Exception:
     pass
 
-# Include FactGov router
 try:
     from .factgov.router import router as factgov_router
     app.include_router(factgov_router)
 except Exception as e:
     print(f"Failed to include FactGov router: {e}")
+    pass
+
+# --- DB Connections ---
+# Initialize graph forecaster
+graph_forecaster = GraphForecaster(neo4j_uri=NEO4J_URI, user=NEO4J_USER, password=NEO4J_PASSWORD)
+
+# Initialize Neo4j Driver with retry
+max_attempts = 10
+delay = 5
+for attempt in range(max_attempts):
+    try:
+        print(f"API service: Attempting to connect to Neo4j (Attempt {attempt + 1}/{max_attempts})...")
+        neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+        neo4j_driver.verify_connectivity()
+        print("API service: Successfully connected to Neo4j.")
+        break
+    except ServiceUnavailable as e:
+        print(f"API service: Neo4j connection failed: {e}. Retrying in {delay} seconds...")
+        time.sleep(delay)
+    except Exception as e:
+        print(f"API service: An unexpected error occurred during Neo4j connection: {e}")
+        time.sleep(delay)
+else:
+    # We continue without Neo4j for now, but in prod this might be fatal
+    print("API service: Failed to connect to Neo4j after multiple attempts. Graph features disabled.")
+
+# Initialize Redis Client with retry
+for attempt in range(max_attempts):
+    try:
+        print(f"API service: Attempting to connect to Redis (Attempt {attempt + 1}/{max_attempts})...")
+        redis_client = redis.from_url(REDIS_URL)
+        redis_client.ping()
+        print("API service: Successfully connected to Redis.")
+        break
+    except ConnectionError as e:
+        print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
+        time.sleep(delay)
+    except Exception as e:
+        print(f"API service: An unexpected error occurred during Redis connection: {e}")
+        time.sleep(delay)
+else:
+    print("API service: Failed to connect to Redis after multiple attempts. Caching disabled.")
