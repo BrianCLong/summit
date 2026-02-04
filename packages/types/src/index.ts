@@ -8,7 +8,3 @@ export interface BaseModel {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
-
-export * from './zk.js';
-export * from './ufar.js';
-export * from './hypothesis_ledger.js';

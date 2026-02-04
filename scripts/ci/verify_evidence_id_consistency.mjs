@@ -15,10 +15,6 @@ import {
   sortEvidenceEntries,
   writeJsonFile,
 } from './lib/evidence_id_consistency.mjs';
-import {
-  hashStringList,
-  writeDeterministicJson,
-} from './lib/governance_evidence.mjs';
 
 const args = new Map();
 for (const raw of process.argv.slice(2)) {
@@ -32,9 +28,6 @@ const repoRoot = process.cwd();
 const sha = args.get('sha') ?? 'UNKNOWN_SHA';
 const runId = args.get('run-id') ?? 'UNKNOWN_RUN_ID';
 const outDir = args.get('out-dir') ?? 'artifacts/evidence-id-consistency';
-const determinismEvidenceOut =
-  args.get('determinism-evidence-out') ??
-  'artifacts/governance/determinism-scan.evidence.json';
 const evidenceRootInput = args.get('evidence-root') ?? 'evidence';
 const evidenceRoot = path.isAbsolute(evidenceRootInput)
   ? evidenceRootInput
@@ -109,36 +102,10 @@ const stampPath = path.join(outDir, 'stamp.json');
 await writeJsonFile(stampPath, stamp);
 
 const deterministicScan = [];
-const findings = [];
-const scannedFiles = [reportPath, metricsPath, aiLedgerPath];
 for (const filePath of [reportPath, metricsPath, aiLedgerPath]) {
   const payload = JSON.parse(await fs.readFile(filePath, 'utf8'));
-  const matches = scanTimestampKeys(payload);
-  deterministicScan.push(...matches);
-  const relativePath = normalizeRelativePath(repoRoot, filePath);
-  for (const match of matches) {
-    findings.push({ file: relativePath, pointer: match });
-  }
+  deterministicScan.push(...scanTimestampKeys(payload));
 }
-findings.sort((left, right) => {
-  const fileCompare = compareByCodeUnit(left.file, right.file);
-  if (fileCompare !== 0) return fileCompare;
-  return compareByCodeUnit(left.pointer, right.pointer);
-});
-const { sorted: scannedFilesSorted, sha256: scannedFilesSha } = hashStringList(
-  scannedFiles.map((filePath) => normalizeRelativePath(repoRoot, filePath)),
-);
-const determinismEvidence = {
-  schema_version: 1,
-  kind: 'determinism_scan',
-  scanned_root: normalizeRelativePath(repoRoot, path.resolve(repoRoot, outDir)),
-  scanned_files_count: scannedFilesSorted.length,
-  scanned_files_sha256: scannedFilesSha,
-  findings,
-  verdict: findings.length === 0 ? 'PASS' : 'FAIL',
-};
-writeDeterministicJson(determinismEvidenceOut, determinismEvidence);
-
 if (deterministicScan.length > 0) {
   console.error(
     `Deterministic artifacts contain timestamp keys: ${deterministicScan.join(', ')}`,
