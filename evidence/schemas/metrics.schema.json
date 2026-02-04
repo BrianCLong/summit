@@ -1,21 +1,64 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Metrics",
+  "title": "summit.evidence.metrics",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
-  "properties": {
-    "evidence_id": { "type": "string" },
-    "metrics": {
-      "type": "object",
+  "anyOf": [
+    {
+      "required": [
+        "evidence_id",
+        "metrics"
+      ],
       "properties": {
-        "tokens_in": { "type": "integer" },
-        "tokens_out": { "type": "integer" },
-        "tool_call_counts": { "type": "object", "additionalProperties": { "type": "integer" } },
-        "cache_hit_ratio": { "type": "number" },
-        "compactions": { "type": "integer" }
-      },
-      "required": ["tokens_in", "tokens_out", "tool_call_counts", "cache_hit_ratio", "compactions"]
+        "evidence_id": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "value",
+              "unit"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "metrics"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string"
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "string",
+              "boolean"
+            ]
+          }
+        }
+      }
     }
-  },
-  "additionalProperties": false
+  ],
+  "additionalProperties": true
 }

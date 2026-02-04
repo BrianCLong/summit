@@ -12,6 +12,16 @@
 *   **Modules**: `server/src/modules/` is the location for domain modules.
 *   **Testing**: Jest is used for testing (`server/__tests__`).
 
+## CogSec Radar (PR-17708)
+### CogSec Verified
+1.  **Required Checks Source**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` is authoritative for required checks. (Verified.)
+2.  **Audit & RBAC Surfaces**: `audit/` and `rbac/` directories exist for audit artifacts and RBAC utilities. (Verified.)
+3.  **Docs Baselines**: `docs/security/CIS_CONTROLS_CHECKLIST.md` exists for security baseline references. (Verified.)
+
+### CogSec Deferred Pending
+1.  **GA Plan Location**: `docs/reports/GA-Plan.md` is not present; the current GA plan artifact is under `docs/archive/root-history/GA-Plan.md`. (Intentionally constrained pending governance direction.)
+2.  **RBAC Middleware Location**: Specific API RBAC middleware entrypoints remain to be pinpointed. (Deferred pending targeted search within `server/` and `apps/`.)
+
 ## NATO Cognitive Alerts (PR-17709)
 ### Verified
 - MIT license present at repo root.
