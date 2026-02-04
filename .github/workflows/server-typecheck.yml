@@ -43,10 +43,7 @@ jobs:
         uses: actions/checkout@v4 # v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-
-      - name: Setup Node.js
+        uses: pnpm/action-setup@v4 # v4.1.0      - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -95,7 +92,7 @@ jobs:
 
       - name: Upload TypeScript Report
         if: always()
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: server-typecheck-report-${{ github.run_id }}
           path: |

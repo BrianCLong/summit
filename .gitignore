@@ -228,6 +228,9 @@ junit.xml
 coverage/
 **/coverage/
 coverage-reports/
+.pytest_cache/
+.coverage
+playwright-report/
 
 # Neo4j & graph stores
 neo4j/data/
