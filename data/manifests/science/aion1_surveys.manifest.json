@@ -1,0 +1,11 @@
+{
+  "name": "aion1_surveys",
+  "version_pin": "ASSUMPTION-ADD-EXACT-DATA-RELEASES",
+  "modalities": ["imaging","spectra","scalar"],
+  "surveys": ["SDSS","Gaia","DESI","HSC","Legacy Survey"],
+  "provenance": {
+    "license": "ASSUMPTION-VERIFY-PER-SURVEY",
+    "contains_pii": false,
+    "restrictions": ["attribute-sources","no-raw-export-without-approval"]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "the_well",
+  "version_pin": "ASSUMPTION-ADD-EXACT-VERSION",
+  "description": "15TB physics simulation collection across diverse spatiotemporal systems",
+  "source": "polymathic-ai.org/the_well",
+  "provenance": {
+    "license": "ASSUMPTION-VERIFY-PER-DATASET",
+    "contains_pii": false,
+    "restrictions": ["no-redistribution-by-default"]
+  }
+}

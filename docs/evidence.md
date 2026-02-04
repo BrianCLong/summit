@@ -1,38 +1,21 @@
 # Summit Evidence System
 
-## Overview
-This system enforces evidence schemas for all artifacts (Report, Metrics, Stamp).
+This directory contains the evidence artifacts for the Summit platform.
+The evidence system ensures that all critical capabilities, compliance requirements, and governance gates are verified deterministically.
 
-## Usage
+## Structure
 
-### 1. Register Evidence ID
-Add your evidence ID (e.g., `EVD-PROJECT-TYPE-001`) to `evidence/index.json`.
-The structure is:
-```json
-{
-  "items": {
-    "EVD-ID": {
-      "report": "path/to/report.json",
-      "metrics": "path/to/metrics.json",
-      "stamp": "path/to/stamp.json"
-    }
-  }
-}
-```
+- `index.json`: The master index of all evidence items.
+- `schemas/`: JSON schemas for validation.
+- `items/`: (Optional) Directory for storing evidence artifacts if not stored alongside code.
 
-### 2. Create Artifacts
-Ensure your artifacts match the schemas in `evidence/schemas/`.
+## Artifacts
 
-*   **Report**: `evidence_id`, `item` (source/ref), `summary`, `artifacts` list.
-*   **Metrics**: `evidence_id`, `metrics` dictionary.
-*   **Stamp**: `evidence_id`, `created_at`.
+Each evidence item typically consists of:
+- `report.json`: High-level summary and status.
+- `metrics.json`: Quantitative measurements.
+- `stamp.json`: Timestamp and provenance.
 
-### 3. Validate
-Run the validator locally:
-```bash
-python -m summit.evidence.validate
-```
+## Determinism
 
-## CI Enforcement
-The CI script `ci/check_evidence.sh` runs the validator.
-It is disabled by default. Enable it by setting `SUMMIT_EVIDENCE_ENFORCE=1`.
+Timestamps are allowed **only** in `stamp.json`. All other artifacts must be deterministic (content-addressable).

@@ -1,0 +1,6 @@
+{
+  "continuum_forecast": {
+    "enabled": true,
+    "horizon": 10
+  }
+}
