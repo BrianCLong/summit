@@ -13,6 +13,7 @@ packages:
   - 'devtools/*'
   - 'prov-ledger-service'
   - 'agents/*'
+  - 'platform/*'
 exclude:
   - 'archive/**'
   - 'apps/desktop-electron'
