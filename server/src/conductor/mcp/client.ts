@@ -1,15 +1,28 @@
 // MCP (Model Context Protocol) Client for JSON-RPC 2.0 communication
 // Handles persistent connections to MCP servers with auth and error handling
 
-import WebSocket from 'ws';
 import { randomUUID as uuid } from 'crypto';
 import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types/index.js';
 import logger from '../../config/logger.js';
+import {
+  type ClientTransportSession,
+  type MCPTransportName,
+  type MCPTransportNegotiationPolicy,
+  type TransportEnvelope,
+  type TransportConnectOptions,
+} from './transport/types.js';
+import {
+  createDefaultTransportRegistry,
+  selectTransportName,
+} from './transport/registry.js';
+import { prometheusConductorMetrics } from '../observability/prometheus.js';
 
 export interface MCPClientOptions {
   timeout?: number;
   retryAttempts?: number;
   retryDelay?: number;
+  transport?: MCPTransportName;
+  negotiationPolicy?: MCPTransportNegotiationPolicy;
 }
 
 // Load allowed executor URLs from environment variable
@@ -18,7 +31,7 @@ const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS
   : [];
 
 export class MCPClient {
-  private connections: Map<string, WebSocket> = new Map();
+  private sessions: Map<string, ClientTransportSession> = new Map();
   private pendingRequests: Map<
     string,
     {
@@ -31,11 +44,14 @@ export class MCPClient {
   constructor(
     private servers: Record<string, MCPServerConfig>,
     private options: MCPClientOptions = {},
+    private registry = createDefaultTransportRegistry(),
   ) {
     this.options = {
       timeout: 30000,
       retryAttempts: 3,
       retryDelay: 1000,
+      transport: 'jsonrpc',
+      negotiationPolicy: 'strict',
       ...options,
     };
   }
@@ -43,7 +59,10 @@ export class MCPClient {
   /**
    * Connect to an MCP server
    */
-  public async connect(serverName: string): Promise<void> {
+  public async connect(
+    serverName: string,
+    options?: TransportConnectOptions,
+  ): Promise<void> {
     const config = this.servers[serverName];
     if (!config) {
       throw new Error(`MCP server '${serverName}' not configured`);
@@ -62,96 +81,76 @@ export class MCPClient {
       );
     }
 
-    if (this.connections.has(serverName)) {
-      // Close existing connection
-      this.connections.get(serverName)?.close();
+    if (this.sessions.has(serverName)) {
+      await this.sessions.get(serverName)?.close();
     }
 
-    return new Promise((resolve, reject) => {
-      const headers: Record<string, string> = {};
-      if (config.authToken) {
-        headers.Authorization = `Bearer ${config.authToken}`;
-      }
+    const selection = selectTransportName(
+      this.options.transport ?? 'jsonrpc',
+      this.options.negotiationPolicy ?? 'strict',
+      this.registry,
+    );
 
-      // P2-3: Certificate pinning implementation
-      // Load trusted certificates if configured (production should use cert pinning)
-      const wsOptions: any = { headers };
+    if (selection.warning) {
+      logger.warn(selection.warning);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'mcp_transport_fallback',
+        {
+          success: true,
+          transport: selection.name,
+          fallback_from: selection.fallbackFrom,
+        },
+      );
+    }
 
-      if (process.env.MCP_CA_CERT_PATH) {
-        try {
-          const fs = require('fs');
-          const trustedCA = fs.readFileSync(process.env.MCP_CA_CERT_PATH, 'utf8');
-          wsOptions.ca = [trustedCA];
-          wsOptions.rejectUnauthorized = true;
-          logger.info(`Using certificate pinning for ${serverName} with CA from ${process.env.MCP_CA_CERT_PATH}`);
-        } catch (err) {
-          logger.warn(`Failed to load MCP CA certificate: ${err}. Proceeding without cert pinning.`);
-        }
-      }
+    const session = this.registry.createClientSession(selection.name, config);
+    this.sessions.set(serverName, session);
 
-      if (process.env.MCP_CLIENT_CERT_PATH && process.env.MCP_CLIENT_KEY_PATH) {
-        try {
-          const fs = require('fs');
-          wsOptions.cert = fs.readFileSync(process.env.MCP_CLIENT_CERT_PATH, 'utf8');
-          wsOptions.key = fs.readFileSync(process.env.MCP_CLIENT_KEY_PATH, 'utf8');
-          logger.info(`Using mTLS client certificate for ${serverName}`);
-        } catch (err) {
-          logger.warn(`Failed to load MCP client certificate: ${err}`);
-        }
-      }
-
-      // NOTE: For production, configure:
-      // - MCP_CA_CERT_PATH=/path/to/ca.crt
-      // - MCP_CLIENT_CERT_PATH=/path/to/client.crt (optional mTLS)
-      // - MCP_CLIENT_KEY_PATH=/path/to/client.key (optional mTLS)
-
-      const ws = new WebSocket(config.url, wsOptions);
-
-      ws.once('open', () => {
-        logger.info(`Connected to MCP server: ${serverName} (${config.url})`);
-        // Audit pin state (placeholder for now)
-        // writeAudit({ action: 'mcp_connect', resourceType: 'mcp_server', resourceId: serverName, details: { url: config.url, pinned: false, pin_status: 'not_implemented' } });
-        this.connections.set(serverName, ws);
-        resolve();
-      });
-
-      ws.once('error', (error) => {
-        logger.error(
-          `Failed to connect to MCP server ${serverName} (${config.url}):`,
-          error,
-        );
-        reject(error);
-      });
-
-      ws.on('message', (data) => {
-        this.handleMessage(data);
-      });
-
-      ws.on('close', () => {
-        logger.info(
-          `Disconnected from MCP server: ${serverName} (${config.url})`,
-        );
-        this.connections.delete(serverName);
-        let attempt = 0;
-        const retry = () => {
-          const delay = Math.min(30000, 1000 * 2 ** attempt++);
-          setTimeout(() => {
-            this.connect(serverName).catch(() => retry()); // Re-attempt connection
-          }, delay);
-        };
-        retry();
-      });
+    session.recv((message: TransportEnvelope<MCPResponse>) => {
+      this.handleMessage(message.payload);
     });
+
+    session.onError?.((error) => {
+      logger.error(
+        `MCP transport error for ${serverName} (${config.url}):`,
+        error,
+      );
+    });
+
+    session.onClose?.(() => {
+      logger.info(
+        `Disconnected from MCP server: ${serverName} (${config.url})`,
+      );
+      this.sessions.delete(serverName);
+      let attempt = 0;
+      const retry = () => {
+        const delay = Math.min(30000, 1000 * 2 ** attempt++);
+        setTimeout(() => {
+          this.connect(serverName).catch(() => retry());
+        }, delay);
+      };
+      retry();
+    });
+
+    try {
+      await session.connect(options);
+    } catch (error) {
+      this.sessions.delete(serverName);
+      throw error;
+    }
+    logger.info(`Connected to MCP server: ${serverName} (${config.url})`);
+    // Audit pin state (placeholder for now)
+    // writeAudit({ action: 'mcp_connect', resourceType: 'mcp_server', resourceId: serverName, details: { url: config.url, pinned: false, pin_status: 'not_implemented' } });
   }
 
   /**
    * Disconnect from an MCP server
    */
   public async disconnect(serverName: string): Promise<void> {
-    const ws = this.connections.get(serverName);
-    if (ws) {
-      ws.close();
-      this.connections.delete(serverName);
+    const session = this.sessions.get(serverName);
+    if (session) {
+      await session.close();
+      this.sessions.delete(serverName);
     }
   }
 
@@ -159,7 +158,7 @@ export class MCPClient {
    * Disconnect from all servers
    */
   public async disconnectAll(): Promise<void> {
-    const promises = Array.from(this.connections.keys()).map((serverName) =>
+    const promises = Array.from(this.sessions.keys()).map((serverName) =>
       this.disconnect(serverName),
     );
     await Promise.all(promises);
@@ -197,7 +196,7 @@ export class MCPClient {
     }
 
     // Ensure connection exists
-    if (!this.connections.has(serverName)) {
+    if (!this.sessions.has(serverName)) {
       await this.connect(serverName);
     }
 
@@ -208,26 +207,6 @@ export class MCPClient {
       params: {
         name: toolName,
         arguments: args,
-      },
-    };
-
-    return this.sendRequest(serverName, request);
-  }
-
-  /**
-   * Get a resource from a specific MCP server
-   */
-  public async getResource(serverName: string, uri: string): Promise<any> {
-    if (!this.connections.has(serverName)) {
-      await this.connect(serverName);
-    }
-
-    const request: MCPRequest = {
-      jsonrpc: '2.0',
-      id: uuid(),
-      method: 'resources/read',
-      params: {
-        uri,
       },
     };
 
@@ -252,7 +231,7 @@ export class MCPClient {
    * Get server capabilities and info
    */
   public async getServerInfo(serverName: string): Promise<any> {
-    if (!this.connections.has(serverName)) {
+    if (!this.sessions.has(serverName)) {
       await this.connect(serverName);
     }
 
@@ -272,8 +251,8 @@ export class MCPClient {
     serverName: string,
     request: MCPRequest,
   ): Promise<any> {
-    const ws = this.connections.get(serverName);
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
+    const session = this.sessions.get(serverName);
+    if (!session) {
       throw new Error(`No active connection to server '${serverName}'`);
     }
 
@@ -289,22 +268,21 @@ export class MCPClient {
         timeout,
       });
 
-      ws.send(JSON.stringify(request), (error) => {
-        if (error) {
+      session
+        .send(request)
+        .catch((error) => {
           clearTimeout(timeout);
           this.pendingRequests.delete(request.id);
           reject(error);
-        }
-      });
+        });
     });
   }
 
   /**
-   * Handle incoming WebSocket messages
+   * Handle incoming transport messages
    */
-  private handleMessage(data: WebSocket.Data): void {
+  private handleMessage(message: MCPResponse): void {
     try {
-      const message: MCPResponse = JSON.parse(data.toString());
 
       const pending = this.pendingRequests.get(message.id);
       if (!pending) {
@@ -321,7 +299,7 @@ export class MCPClient {
         pending.resolve(message.result);
       }
     } catch (error: any) {
-      logger.error('Failed to parse MCP message:', error);
+      logger.error('Failed to handle MCP message:', error);
     }
   }
 
@@ -329,8 +307,7 @@ export class MCPClient {
    * Check if connected to a server
    */
   public isConnected(serverName: string): boolean {
-    const ws = this.connections.get(serverName);
-    return ws?.readyState === WebSocket.OPEN;
+    return this.sessions.has(serverName);
   }
 
   /**

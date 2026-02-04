@@ -24,13 +24,13 @@ import type {
   PublishValidationResult,
   VerificationResult,
   ModelCard,
-} from './proof-carrying-types';
-import { HashTreeBuilder } from './hash-tree-builder';
-import { ModelCardGenerator, createModelCardFromExport } from './model-card-generator';
-import { DisclosurePackager } from './disclosure-packager';
-import { RevocationRegistry, PersistentRevocationRegistry } from './revocation-registry';
-import { CitationValidator, PublishingPipeline, StandardLicenses } from './citation-validator';
-import { BundleVerifier } from './bundle-verifier';
+} from './proof-carrying-types.js';
+import { HashTreeBuilder } from './hash-tree-builder.js';
+import { ModelCardGenerator, createModelCardFromExport } from './model-card-generator.js';
+import { DisclosurePackager } from './disclosure-packager.js';
+import { RevocationRegistry, PersistentRevocationRegistry } from './revocation-registry.js';
+import { CitationValidator, PublishingPipeline, StandardLicenses } from './citation-validator.js';
+import { BundleVerifier } from './bundle-verifier.js';
 import { createSign } from 'crypto';
 
 export interface PublisherConfig {

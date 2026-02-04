@@ -1,5 +1,5 @@
-import type { AdapterDescriptor, AdapterRequest } from './adapter';
-import type { LifecycleGuardDecision } from './guard';
+import type { AdapterDescriptor, AdapterRequest } from './adapter.js';
+import type { LifecycleGuardDecision } from './guard.js';
 
 export interface RetryMetadata {
   attempt: number;

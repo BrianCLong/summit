@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import AdaptiveRouter from '../adaptive-router';
-import { Backend } from '../types';
+import AdaptiveRouter from '../adaptive-router.js';
+import { Backend } from '../types.js';
 
 describe('AdaptiveRouter (Write-Aware Sharding Pilot)', () => {
   const backends: Backend[] = [

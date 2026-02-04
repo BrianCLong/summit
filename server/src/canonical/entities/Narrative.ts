@@ -5,7 +5,7 @@
  * Represents a narrative or storyline with bitemporal tracking
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface NarrativeElement {
   /** Element type */

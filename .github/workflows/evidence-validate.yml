@@ -1,26 +1,29 @@
-name: Evidence Validation
-
+name: evidence-validate
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
-
+  push:
+    branches: [main]
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4                - uses: actions/setup-node@v4
         with:
-          python-version: '3.x'
-
-      - name: Install dependencies
+          node-version: 18
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Validate Fixtures (Pass)
+        run: node tools/evidence/validate.mjs
+        env:
+          EVIDENCE_OUT_DIR: evidence/fixtures/pass
+      - name: Validate Fixtures (Fail)
         run: |
-          pip install jsonschema
-
-      - name: Run Evidence Validator
-        run: |
-          python tools/evidence_validate.py --schemas evidence/schemas --evidence evidence
+          if node tools/evidence/validate.mjs; then
+            echo "Expected failure but passed"
+            exit 1
+          else
+            echo "Failed as expected"
+          fi
+        env:
+          EVIDENCE_OUT_DIR: evidence/fixtures/fail

@@ -40,8 +40,14 @@ function Navigation() {
         gap: '16px',
       }}
     >
-      <div
+      <button
+        aria-label="Home"
         style={{
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          font: 'inherit',
+          textAlign: 'left',
           fontSize: '1.2rem',
           fontWeight: '600',
           color: '#1a73e8',
@@ -50,7 +56,7 @@ function Navigation() {
         onClick={() => navigate('/')}
       >
         IntelGraph
-      </div>
+      </button>
 
       <div style={{ flex: 1 }}></div>
 
@@ -58,6 +64,7 @@ function Navigation() {
         <NotificationSystem position="top-right" maxNotifications={5} />
         <button
           title="Watchlists & Alerts"
+          aria-label="Watchlists and Alerts"
           onClick={() => {
             setAlertCount(0);
             navigate('/osint/watchlists');
@@ -91,6 +98,7 @@ function Navigation() {
         </button>
         <button
           title="Watchlists"
+          aria-label="Watchlists"
           onClick={() => navigate('/osint/watchlists')}
           style={{
             padding: '6px 10px',
@@ -104,19 +112,7 @@ function Navigation() {
         </button>
         <button
           title="OSINT Studio"
-          onClick={() => navigate('/osint')}
-          style={{
-            padding: '6px 10px',
-            border: '1px solid var(--hairline)',
-            borderRadius: 6,
-            background: '#f6f7f9',
-            cursor: 'pointer',
-          }}
-        >
-          🛰️ OSINT
-        </button>
-        <button
-          title="OSINT Studio"
+          aria-label="OSINT Studio"
           onClick={() => navigate('/osint')}
           style={{
             padding: '6px 10px',
@@ -131,6 +127,7 @@ function Navigation() {
 
         {!isHome && (
           <button
+            aria-label="Go back to Home"
             onClick={() => navigate('/')}
             style={{
               padding: '6px 12px',

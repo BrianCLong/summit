@@ -50,6 +50,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4
+        # version is read from package.json packageManager field
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -60,10 +64,6 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.11"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        # version is read from package.json packageManager field
 
       - name: Install Dependencies
         run: |

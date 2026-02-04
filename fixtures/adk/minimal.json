@@ -1,0 +1,7 @@
+{
+  "name": "minimal",
+  "inputs": {
+    "prompt": "Hello Summit ADK"
+  },
+  "tool_calls": []
+}

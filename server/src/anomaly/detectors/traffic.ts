@@ -4,9 +4,9 @@ import {
   Detector,
   AnomalyResult,
   Severity,
-} from '../types.ts';
-import { TrafficEngine } from '../traffic-engine.ts';
-import { TrafficFlow } from '../traffic-types.ts';
+} from '../types.js';
+import { TrafficEngine } from '../traffic-engine.js';
+import { TrafficFlow } from '../traffic-types.js';
 
 interface TrafficData {
   flows: TrafficFlow[];

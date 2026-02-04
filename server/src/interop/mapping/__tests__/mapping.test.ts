@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { SpecValidator } from '../validator';
-import { MappingEngine } from '../engine';
-import { MappingSpec } from '../schema';
+import { SpecValidator } from '../validator.js';
+import { MappingEngine } from '../engine.js';
+import { MappingSpec } from '../schema.js';
 
 describe('Interop Mapping DSL', () => {
   const validSpec: MappingSpec = {
