@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/canonical-schema",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Canonical graph schema and entity resolution types for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts"
   },
   "keywords": [

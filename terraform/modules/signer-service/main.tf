@@ -12,9 +12,9 @@ resource "aws_s3_bucket" "policy_bundles" {
 }
 
 resource "aws_s3_object" "bundle_manifest" {
-  bucket       = aws_s3_bucket.policy_bundles.id
-  key          = "${var.signer_name}/bundle-manifest.json"
-  content      = jsonencode({
+  bucket = aws_s3_bucket.policy_bundles.id
+  key    = "${var.signer_name}/bundle-manifest.json"
+  content = jsonencode({
     bundle   = var.signer_name,
     source   = var.policy_bundle_source,
     signer   = var.signer_name,

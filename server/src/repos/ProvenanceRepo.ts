@@ -264,6 +264,85 @@ export class ProvenanceRepo {
     }
   }
 
+  async getTenantStats(
+    tenantId: string,
+    filter?: ProvenanceFilter,
+  ): Promise<{ count: number; lastEventAt: string | null }> {
+    const client = await this.pg.connect();
+    try {
+      const statsQueries: Array<{
+        sql: string;
+        params: any[];
+        timeColumn: string;
+        searchColumns: string[];
+      }> = [
+        {
+          sql: `SELECT COUNT(*) as count, MAX(timestamp) as last_event_at
+            FROM audit_events`,
+          params: [],
+          timeColumn: 'timestamp',
+          searchColumns: ['details'],
+        },
+        {
+          sql: `SELECT COUNT(*) as count, MAX(created_at) as last_event_at
+            FROM audit_events`,
+          params: [],
+          timeColumn: 'created_at',
+          searchColumns: ['metadata'],
+        },
+        {
+          sql: `SELECT COUNT(*) as count, MAX(timestamp) as last_event_at
+            FROM audit_events`,
+          params: [],
+          timeColumn: 'timestamp',
+          searchColumns: ['resource_data', 'old_values', 'new_values'],
+        },
+        {
+          sql: `SELECT COUNT(*) as count, MAX(created_at) as last_event_at
+            FROM provenance`,
+          params: [],
+          timeColumn: 'created_at',
+          searchColumns: ['note'],
+        },
+      ];
+
+      for (const query of statsQueries) {
+        const { where, params } = this.buildTenantWhere(filter, {
+          timeColumn: query.timeColumn,
+          searchColumns: query.searchColumns,
+        });
+        const scopedWhere = this.appendTenantScope(where, params, tenantId);
+
+        try {
+          const res = await client.query(
+            `${query.sql} ${scopedWhere.where}`,
+            scopedWhere.params,
+          );
+          if (res.rows.length > 0) {
+            const count = parseInt(res.rows[0].count, 10);
+            if (count > 0) {
+              const lastEventAt = res.rows[0].last_event_at
+                ? (res.rows[0].last_event_at instanceof Date
+                  ? res.rows[0].last_event_at.toISOString()
+                  : new Date(res.rows[0].last_event_at).toISOString())
+                : null;
+              return { count, lastEventAt };
+            }
+          }
+        } catch (e: any) {
+          // Only catch schema mismatch errors (undefined table/column)
+          if (e.code === '42P01' || e.code === '42703') {
+            continue;
+          }
+          throw e;
+        }
+      }
+      return { count: 0, lastEventAt: null };
+    } finally {
+      client.release();
+    }
+  }
+
   async byTenant(
     tenantId: string,
     filter?: ProvenanceFilter,

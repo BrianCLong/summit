@@ -30,16 +30,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
+
+      - name: Install Git 2.47.1+ and disable bundle URIs
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo add-apt-repository ppa:git-core/ppa -y
+          sudo apt-get update
+          sudo apt-get install -y git
+          git --version
+          git config --global transfer.bundleURI false
+          required_version="2.47.1"
+          current_version="$(git --version | awk '{print $3}')"
+          if [[ "$(printf '%s\n' "$required_version" "$current_version" | sort -V | head -n1)" != "$required_version" ]]; then
+            echo "::error::Git version $current_version is below required $required_version."
+            exit 1
+          fi
+          if [[ "$(git config --global --get transfer.bundleURI)" != "false" ]]; then
+            echo "::error::transfer.bundleURI must be disabled."
+            exit 1
+          fi
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4 # v4
         with:
-          version: ${{ inputs.pnpm-version }}
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
@@ -51,7 +70,7 @@ jobs:
         run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Cache pnpm store
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5
+        uses: actions/cache@v4 # v5
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-${{ inputs.cache-key-prefix }}-${{ hashFiles('pnpm-lock.yaml') }}

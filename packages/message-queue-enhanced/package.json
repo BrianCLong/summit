@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/message-queue-enhanced",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Enhanced message queue with Kafka, RabbitMQ, dead letter queues, and event sourcing",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

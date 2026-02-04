@@ -241,6 +241,26 @@ describe('DLP Service', () => {
       expect(blocked).toBe(true);
     });
   });
+
+  describe('DLP Performance', () => {
+    test('should handle large content efficiently', async () => {
+      const largeContent =
+        'a'.repeat(10000) + ' email@example.com ' + 'b'.repeat(10000);
+
+      const startTime = Date.now();
+      const results = await dlpService.scanContent(largeContent, testContext);
+      const endTime = Date.now();
+
+      expect(endTime - startTime).toBeLessThan(1000); // Should complete within 1 second
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    test('should use circuit breaker for resilience', async () => {
+      // This would test the circuit breaker functionality
+      // by simulating failures and verifying it opens/closes appropriately
+      expect(true).toBe(true); // Placeholder
+    });
+  });
 });
 
 describe('DLP Middleware', () => {
@@ -383,26 +403,6 @@ describe('DLP GraphQL Plugin', () => {
   test.todo('should respect operation exemptions');
 });
 
-describe('DLP Performance', () => {
-  test('should handle large content efficiently', async () => {
-    const largeContent =
-      'a'.repeat(10000) + ' email@example.com ' + 'b'.repeat(10000);
-
-    const startTime = Date.now();
-    const results = await dlpService.scanContent(largeContent, testContext);
-    const endTime = Date.now();
-
-    expect(endTime - startTime).toBeLessThan(1000); // Should complete within 1 second
-    expect(results.length).toBeGreaterThan(0);
-  });
-
-  test('should use circuit breaker for resilience', async () => {
-    // This would test the circuit breaker functionality
-    // by simulating failures and verifying it opens/closes appropriately
-    expect(true).toBe(true); // Placeholder
-  });
-});
-
 describe('DLP Configuration', () => {
   test('should validate policy configurations', () => {
     expect(() => {
@@ -411,7 +411,7 @@ describe('DLP Configuration', () => {
         description: 'Test',
         enabled: true,
         priority: 1,
-        conditions: [], // Invalid - no conditions
+        conditions: [] as any, // Invalid - no conditions
         actions: [
           {
             type: 'alert' as const,
@@ -419,7 +419,7 @@ describe('DLP Configuration', () => {
           },
         ],
         exemptions: [],
-      });
+      } as any);
     }).not.toThrow(); // Service should handle gracefully
   });
 

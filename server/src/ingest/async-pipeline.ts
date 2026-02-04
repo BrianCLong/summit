@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
 import { createHash, randomUUID } from 'crypto';
 import { IngestService, IngestInput } from '../services/IngestService.js';
+import { ResidencyGuard } from '../data-residency/residency-guard.js';
+import { getCurrentRegion } from '../config/regional-config.js';
 import logger from '../utils/logger.js';
 
 export type AsyncIngestStatus =
@@ -90,7 +92,7 @@ class CircuitBreaker {
   constructor(
     private threshold = 3,
     private cooldownMs = 10_000,
-  ) {}
+  ) { }
 
   canPass(key: string, now: number): boolean {
     const openUntil = this.openUntil.get(key) || 0;
@@ -114,7 +116,7 @@ class CircuitBreaker {
 }
 
 export class PgAsyncIngestRepository implements AsyncIngestRepository {
-  constructor(private pool: Pool, private workerId = 'pg-worker') {}
+  constructor(private pool: Pool, private workerId = 'pg-worker') { }
 
   async insertJobWithOutbox(
     payload: IngestInput,
@@ -451,7 +453,7 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
 }
 
 export class AsyncIngestDispatcher {
-  constructor(private repo: AsyncIngestRepository) {}
+  constructor(private repo: AsyncIngestRepository) { }
 
   async enqueue(
     payload: IngestInput,
@@ -565,6 +567,18 @@ export class AsyncIngestWorker {
 
       this.inFlight.set(tenantId, (this.inFlight.get(tenantId) || 0) + 1);
       await this.repo.markJobProcessing(event.jobId);
+
+      const guard = ResidencyGuard.getInstance();
+      const isAllowed = await guard.isRegionAllowed(tenantId, getCurrentRegion(), 'storage');
+
+      if (!isAllowed) {
+        const delayMs = calculateBackoffDelay(event.attempts, this.options.baseBackoffMs, this.options.maxBackoffMs);
+        await this.repo.markOutboxProcessed(event.id); // Or keep it in outbox for retry in correct region?
+        // For now, fail it as it's a residency violation to process here.
+        await this.repo.markJobFailed(event.jobId, `Residency violation: Current region ${getCurrentRegion()} is not allowed for tenant.`);
+        this.inFlight.set(tenantId, Math.max(0, (this.inFlight.get(tenantId) || 1) - 1));
+        continue;
+      }
 
       try {
         await this.ingestService.ingest(event.job.payload);

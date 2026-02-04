@@ -86,6 +86,10 @@ logs/
 # Temporary files
 tmp/
 temp/
+tmp-test/
+
+# Test-generated typo directory (tests write to server/server/ by accident)
+server/server/
 
 # Python artifacts
 __pycache__/
@@ -224,6 +228,9 @@ junit.xml
 coverage/
 **/coverage/
 coverage-reports/
+.pytest_cache/
+.coverage
+playwright-report/
 
 # Neo4j & graph stores
 neo4j/data/
@@ -287,6 +294,7 @@ data/automl/
 tmp-audit/
 **/digest-sandbox/
 **/tmp-security/
+.maestro-workboard/
 
 # Test reports
 reports/
@@ -354,3 +362,5 @@ bin/
 .evidence/
 release-assets/
 evidence-staging/
+*.txt
+tmp-test/

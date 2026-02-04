@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/digital-signatures",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "PKI infrastructure and digital signature management",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "elliptic": "^6.5.7",

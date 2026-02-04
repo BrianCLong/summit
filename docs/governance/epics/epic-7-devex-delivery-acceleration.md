@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 7 — DevEx & Delivery Acceleration (ship more, break less)
 
 1. Reduce CI time by killing flake and parallelizing critical suites.

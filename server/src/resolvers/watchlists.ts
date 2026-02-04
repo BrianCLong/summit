@@ -1,5 +1,5 @@
-import { WatchlistService } from '../watchlists/WatchlistService';
-import { wrapResolversWithPolicy } from './policyWrapper';
+import { WatchlistService } from '../watchlists/WatchlistService.js';
+import { wrapResolversWithPolicy } from './policyWrapper.js';
 
 const service = new WatchlistService();
 

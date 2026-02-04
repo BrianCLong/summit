@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/liquid-nano",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "private": true,
   "type": "module",
   "description": "Liquid Nano pilot runtime with sample applications and deployment tooling.",

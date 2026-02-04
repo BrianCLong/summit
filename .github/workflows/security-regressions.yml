@@ -1,0 +1,43 @@
+name: Security Regression Harness
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "server/src/security/**"
+      - "src/agents/archetypes/**"
+      - "server/src/config.ts"
+      - "tests/security/regressions/**"
+  schedule:
+    - cron: '0 0 * * *' # Nightly run
+  workflow_dispatch:
+
+jobs:
+  security-regressions:
+    name: "🛡️ Security Regressions"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4      - name: Install Dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run Regression Pack
+        run: pnpm test:security:regressions
+        env:
+          NODE_ENV: test
+
+      - name: Regression Summary
+        if: always()
+        run: |
+          echo "### 🛡️ Security Regression Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "Verified: Prompt Injection, Config Invariants, Audit Integrity, OPA Gate" >> $GITHUB_STEP_SUMMARY

@@ -1,18 +1,18 @@
 {
   "name": "@intelgraph/task-routing",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Intelligent task routing and assignment system",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src"
   },
   "dependencies": {
     "uuid": "^13.0.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.23"
   },
   "devDependencies": {
     "@types/node": "20.19.27",

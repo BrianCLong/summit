@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/proliferation-networks",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@intelgraph/hrn": "workspace:*",

@@ -118,7 +118,7 @@ export class ConflictUIController {
       }
 
       // Extract field conflicts and resolve
-      const allFieldConflicts = [];
+      const allFieldConflicts: any[] = [];
       for (const conflict of activeConflicts) {
         const conflictData = JSON.parse(conflict.conflicts);
         allFieldConflicts.push(...conflictData);

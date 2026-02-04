@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/intent/ui-frame.schema.json",
+  "title": "UIFrame",
+  "type": "object",
+  "required": ["id", "timestamp", "locale", "app"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "locale": { "type": "string" },
+    "app": { "type": "string" },
+    "url": { "type": "string" },
+    "screenshotRef": { "type": "string" },
+    "screenshotEmbeddingRef": { "type": "string" },
+    "accessibilityTree": {
+      "type": "object",
+      "required": ["rootId", "nodes"],
+      "additionalProperties": false,
+      "properties": {
+        "rootId": { "type": "string" },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "role": { "type": "string" },
+              "name": { "type": "string" },
+              "value": { "type": "string" },
+              "bounds": {
+                "type": "object",
+                "required": ["x", "y", "width", "height"],
+                "additionalProperties": false,
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "width": { "type": "number" },
+                  "height": { "type": "number" }
+                }
+              },
+              "children": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  }
+}

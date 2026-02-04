@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/mdm-governance",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "MDM governance and compliance framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },

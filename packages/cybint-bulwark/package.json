@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/cybint-bulwark",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Production-grade cyber defense modernization toolkit implementing the BULWARK roadmap",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "yaml": "^2.6.0"

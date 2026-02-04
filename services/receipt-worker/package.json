@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/receipt-worker",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Background worker for processing provenance receipts with DLQ and metrics.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

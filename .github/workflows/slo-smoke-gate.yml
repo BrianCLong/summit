@@ -1,0 +1,134 @@
+name: SLO Smoke Gate
+
+# CI Quality Gate: Validates Service Level Objectives before merge
+# Addresses: Issue #1236 - CI: SLO Smoke (k6) as Quality Gate
+# Authority: Platform Engineering
+#
+# SLO Thresholds:
+# - p95 Latency < 1.5s
+# - Error Rate < 1%
+# - 95% of checks must pass
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - ".github/ISSUE_TEMPLATE/**"
+
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target URL for SLO tests (default: localhost)"
+        required: false
+        default: ""
+
+  schedule:
+    - cron: "0 3 * * *"
+
+permissions:
+  contents: read
+  checks: write
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  slo-smoke-gate:
+    name: SLO Smoke Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4.0.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1
+
+      - name: Start application stack
+        run: |
+          if [ -f ops/docker-compose.ci.yml ]; then
+            docker compose -f ops/docker-compose.ci.yml up -d --wait --wait-timeout 120
+          elif [ -f ops/docker-compose.yml ]; then
+            docker compose -f ops/docker-compose.yml up -d --wait --wait-timeout 120
+          else
+            echo "::warning::No docker-compose found, attempting make up"
+            make up || true
+          fi
+
+      - name: Wait for health endpoint
+        run: |
+          echo "Waiting for application to be healthy..."
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+          until curl -sf http://localhost:4000/health > /dev/null 2>&1; do
+            ATTEMPT=$((ATTEMPT + 1))
+            if [ $ATTEMPT -ge $MAX_ATTEMPTS ]; then
+              echo "::error::Health endpoint not responding after $MAX_ATTEMPTS attempts"
+              docker compose logs --tail=50 || true
+              exit 1
+            fi
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS - waiting 5s..."
+            sleep 5
+          done
+          echo "Health endpoint responding"
+
+      - name: Run k6 SLO Gate
+        id: k6
+        run: |
+          TARGET_URL="${{ github.event.inputs.target_url }}"
+          if [ -z "$TARGET_URL" ]; then
+            TARGET_URL="http://localhost:4000"
+          fi
+          echo "Running SLO gate against: $TARGET_URL"
+          k6 run k6/slo-gate.js \
+            --env TARGET="$TARGET_URL" \
+            --env OUTPUT_JSON=true \
+            --summary-export=slo-summary.json \
+            --out json=slo-metrics.json
+
+      - name: Parse SLO Results
+        if: always()
+        run: |
+          if [ -f slo-results.json ]; then
+            echo "### SLO Gate Results" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            cat slo-results.json | jq '.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload SLO artifacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: slo-gate-results-${{ github.run_id }}
+          path: |
+            slo-results.json
+            slo-summary.json
+            slo-metrics.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Teardown stack
+        if: always()
+        run: |
+          docker compose down -v --remove-orphans 2>/dev/null || make down || true

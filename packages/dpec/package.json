@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dpec",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Deterministic Prompt Execution Cache with attestable artifacts and client adapters",
   "license": "Apache-2.0",
   "type": "module",
@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
-    "eslint": "^9.36.0",
+    "eslint": "^9.39.2",
     "rimraf": "^5.0.5",
     "typescript": "^5.9.2",
     "vitest": "^2.1.4"

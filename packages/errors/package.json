@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/errors",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Shared Summit error taxonomy and factory utilities",
   "type": "module",
   "main": "./dist/index.js",

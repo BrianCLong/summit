@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { modelRegistry } from './registry';
-import { featureStore } from './feature_store';
-import { logger } from '../config/logger';
+import { modelRegistry } from './registry.js';
+import { featureStore } from './feature_store.js';
+import { logger } from '../config/logger.js';
 
 // Mock Maestro interface for integration
 interface MaestroJob {
@@ -46,7 +46,7 @@ export class TrainingPipelineManager {
 
     // We could append an entry to the provenance ledger to track this job initiation
     try {
-        const { provenanceLedger } = await import('../provenance/ledger');
+        const { provenanceLedger } = await import('../provenance/ledger.js');
         await provenanceLedger.appendEntry({
             tenantId,
             actionType: 'TRIGGER_TRAINING',

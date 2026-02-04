@@ -1,7 +1,7 @@
 // server/src/routes/phantom_limb.ts
 import { Router } from 'express';
-import { phantomLimbService } from '../phantom_limb/PhantomLimbService';
-import { AnalystArtifacts } from '../phantom_limb/phantom_limb.types';
+import { phantomLimbService } from '../phantom_limb/PhantomLimbService.js';
+import { AnalystArtifacts } from '../phantom_limb/phantom_limb.types.js';
 
 const router = Router();
 

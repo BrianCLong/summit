@@ -15,10 +15,10 @@ jobs:
     name: "Build & Lint (Strict)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
       - name: Setup Node
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -34,10 +34,10 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
       - name: Setup Node
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
@@ -51,11 +51,17 @@ jobs:
     name: "Security Gate (Gitleaks + Snyk)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v4 # v4
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
       - name: Gitleaks
-        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Dependency Check
@@ -63,17 +69,16 @@ jobs:
           echo "Scanning for Critical CVEs..."
           pnpm audit --audit-level critical
 
-  # 3. Policy Compliance (non-blocking until Rego syntax modernized)
+  # 3. Policy Compliance
   policy-check:
     name: "Governance Policy Check"
     runs-on: ubuntu-latest
-    continue-on-error: true # Allow to fail until policies are updated to modern Rego syntax
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - name: Setup OPA
-        uses: open-policy-agent/setup-opa@34a30e8a924d1b03ce2cf7abe97250bbb1f332b5 # v2
+        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.45.0 # Pin to version supporting legacy Rego syntax
+          version: v0.61.0
       - name: Verify Policies
         run: |
           opa check policies/
@@ -85,7 +90,7 @@ jobs:
     needs: [build-lint-strict]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
       - name: Bootstrap & Smoke
         run: |
           echo "Executing Golden Path Smoke Test..."

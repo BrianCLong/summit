@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-AI-MISO-PSYOP-2025-EVAL-001",
+  "summary": "AI MISO PSYOP 2025 Evaluation - analysis only.",
+  "findings": {
+    "prohibited_field_blocks": 1,
+    "prohibited_intent_blocks": 2
+  },
+  "module": "info_integrity",
+  "safety_note": "No targeting, persuasion, or counter-messaging content is generated.",
+  "scope": "analysis_only"
+}

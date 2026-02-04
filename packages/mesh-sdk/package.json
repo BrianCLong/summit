@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mesh-sdk",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Agentic Mesh SDK - Core types, agents, and tools for the multi-agent fabric",
   "type": "module",
   "main": "dist/index.js",
@@ -19,7 +19,9 @@
       "import": "./dist/agents/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "vitest run",

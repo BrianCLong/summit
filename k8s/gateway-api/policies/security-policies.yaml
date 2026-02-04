@@ -1,0 +1,202 @@
+---
+# CORS policy for web application
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: web-cors-policy
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: security-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/type: cors
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: summit-gateway
+  cors:
+    allowOrigins:
+      - type: Exact
+        value: "https://app.intelgraph.io"
+      - type: Exact
+        value: "https://www.intelgraph.io"
+      - type: Regex
+        value: "https://.*\\.intelgraph\\.io"
+    allowMethods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowHeaders:
+      - Content-Type
+      - Authorization
+      - X-Requested-With
+      - X-Request-ID
+      - X-Trace-ID
+      - Accept
+      - Accept-Language
+      - Origin
+    exposeHeaders:
+      - X-Request-ID
+      - X-Trace-ID
+      - X-RateLimit-Limit
+      - X-RateLimit-Remaining
+    maxAge: 86400s
+    allowCredentials: true
+---
+# CORS policy for sandbox environment (more permissive for development)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: sandbox-cors-policy
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: security-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/type: cors
+    policy.summit.io/env: sandbox
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: summit-gateway
+    sectionName: sandbox-https
+  cors:
+    allowOrigins:
+      - type: Regex
+        value: "https://.*"  # More permissive for sandbox
+    allowMethods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+      - HEAD
+    allowHeaders:
+      - "*"
+    exposeHeaders:
+      - "*"
+    maxAge: 3600s
+    allowCredentials: true
+---
+# IP allowlist policy for internal services
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: internal-ip-allowlist
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: security-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/type: authorization
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: internal-routes
+  authorization:
+    defaultAction: Deny
+    rules:
+      - name: allow-internal-networks
+        action: Allow
+        principal:
+          clientCIDRs:
+            - cidr: "10.0.0.0/8"      # Internal VPC
+            - cidr: "172.16.0.0/12"   # Private network
+            - cidr: "192.168.0.0/16"  # Private network
+      - name: allow-corporate-vpn
+        action: Allow
+        principal:
+          clientCIDRs:
+            - cidr: "203.0.113.0/24"  # Replace with actual corporate VPN CIDR
+---
+# Admin panel IP restriction
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: admin-ip-restriction
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: security-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/type: authorization
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: admin-routes
+  authorization:
+    defaultAction: Deny
+    rules:
+      - name: allow-admin-ips
+        action: Allow
+        principal:
+          clientCIDRs:
+            - cidr: "10.0.0.0/8"  # Internal only
+---
+# JWT authentication policy (for API routes)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: api-jwt-auth
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: security-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/type: authn
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: api-routes
+  jwt:
+    providers:
+      - name: summit-auth
+        issuer: "https://auth.intelgraph.io"
+        audiences:
+          - "api.intelgraph.io"
+        remoteJWKS:
+          uri: "https://auth.intelgraph.io/.well-known/jwks.json"
+          cacheDuration: 300s
+        claimToHeaders:
+          - claim: sub
+            header: X-User-ID
+          - claim: email
+            header: X-User-Email
+          - claim: roles
+            header: X-User-Roles
+    # Routes that don't require auth
+    optional: false
+---
+# External auth policy (for complex auth flows)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: external-auth-policy
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: security-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/type: extauth
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: protected-routes
+  extAuth:
+    http:
+      backendRef:
+        name: auth-service
+        namespace: auth-system
+        port: 8080
+      headersToBackend:
+        - Authorization
+        - Cookie
+        - X-Forwarded-For
+        - X-Real-IP
+      headersToExtAuth:
+        - Authorization
+        - Cookie

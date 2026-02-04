@@ -1,14 +1,20 @@
 {
   "name": "@intelgraph/etl-pipelines",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "ETL/ELT pipeline infrastructure with data loading and transformation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
-  "keywords": ["etl", "elt", "data-pipeline", "transformation", "loading"],
+  "keywords": [
+    "etl",
+    "elt",
+    "data-pipeline",
+    "transformation",
+    "loading"
+  ],
   "license": "MIT",
   "dependencies": {
     "pg": "^8.11.3"

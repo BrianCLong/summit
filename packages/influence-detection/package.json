@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/influence-detection",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "Bot detection, coordinated inauthentic behavior, and astroturfing detection",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

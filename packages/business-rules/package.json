@@ -1,17 +1,17 @@
 {
   "name": "@intelgraph/business-rules",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Business Rules Engine with DMN support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

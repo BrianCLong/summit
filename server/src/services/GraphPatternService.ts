@@ -2,9 +2,9 @@ import {
   GraphPatternQuery,
   GraphPatternNode,
   GraphPatternEdge,
-} from '../graph/patternQuery';
-import { runCypher } from '../graph/neo4j';
-import { Entity, Edge } from '../graph/types';
+} from '../graph/patternQuery.js';
+import { runCypher } from '../graph/neo4j.js';
+import { Entity, Edge } from '../graph/types.js';
 import { enforceTenantScopeForCypher } from './graphTenantScope.js';
 
 // Helper to sanitize attribute keys to prevent injection
@@ -125,7 +125,8 @@ export class GraphPatternService {
     const results = await runCypher(scoped.cypher, scoped.params, { tenantId });
 
     // Map results
-    return results.map(record => {
+    return results.map((rec) => {
+        const record = rec as Record<string, any>;
         const nodes: Entity[] = [];
         const edges: Edge[] = [];
 

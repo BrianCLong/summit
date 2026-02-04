@@ -1,0 +1,210 @@
+name: Go-Live Release
+
+# This workflow creates a full go-live release with all artifacts.
+# It runs the go-live gate, generates SBOM/provenance, and creates a GitHub release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (leave empty for auto from package.json)"
+        required: false
+        type: string
+      draft:
+        description: "Create as draft release"
+        required: false
+        type: boolean
+        default: true
+      smoke_url:
+        description: "URL for smoke test (optional)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+  id-token: write
+
+jobs:
+  go-live-gate:
+    name: Go-Live Evidence Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      passed: ${{ steps.verify.outputs.passed }}
+      sha: ${{ steps.capture-sha.outputs.sha }}
+      evidence_path: ${{ steps.generate.outputs.evidence_path }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture SHA
+        id: capture-sha
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@7f84b8d26f5a22fbf8a47afefabd3a8bb8c6fb4a # v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Evidence Bundle
+        id: generate
+        env:
+          GA_VERIFY_MODE: "true"
+          SMOKE_URL: ${{ inputs.smoke_url }}
+          CI: "true"
+        run: |
+          pnpm evidence:go-live:gen || true
+          SHA=$(git rev-parse HEAD)
+          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
+          echo "evidence_path=${EVIDENCE_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM
+        run: |
+          SHA=$(git rev-parse HEAD)
+          pnpm release:go-live:sbom "artifacts/evidence/go-live/${SHA}"
+
+      - name: Generate Provenance
+        run: |
+          SHA=$(git rev-parse HEAD)
+          pnpm release:go-live:provenance "artifacts/evidence/go-live/${SHA}"
+
+      - name: Generate Release Notes
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          SHA=$(git rev-parse HEAD)
+          pnpm release:go-live:notes "artifacts/evidence/go-live/${SHA}"
+
+      - name: Sign Evidence Bundle
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          SHA=$(git rev-parse HEAD)
+          pnpm release:go-live:sign "artifacts/evidence/go-live/${SHA}" || echo "Signing failed (non-fatal for dry-run)"
+
+      - name: Verify Evidence Bundle
+        id: verify
+        run: |
+          SHA=$(git rev-parse HEAD)
+          if pnpm evidence:go-live:verify "artifacts/evidence/go-live/${SHA}"; then
+            echo "passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Evidence Artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: go-live-evidence-${{ steps.capture-sha.outputs.sha }}
+          path: artifacts/evidence/go-live/${{ steps.capture-sha.outputs.sha }}/
+          retention-days: 90
+
+  create-release:
+    name: Create GitHub Release
+    needs: go-live-gate
+    runs-on: ubuntu-latest
+    if: needs.go-live-gate.outputs.passed == 'true'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Download Evidence Artifact
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        with:
+          name: go-live-evidence-${{ needs.go-live-gate.outputs.sha }}
+          path: evidence
+
+      - name: Get Version
+        id: version
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            VERSION=$(jq -r '.version' package.json)
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG_NAME="v${VERSION}"
+          TITLE="Go-Live Release ${VERSION}"
+
+          # Build release command
+          RELEASE_ARGS="--title \"${TITLE}\""
+          RELEASE_ARGS="${RELEASE_ARGS} --notes-file evidence/RELEASE_NOTES.md"
+          RELEASE_ARGS="${RELEASE_ARGS} --target ${{ needs.go-live-gate.outputs.sha }}"
+
+          if [ "${{ inputs.draft }}" = "true" ]; then
+            RELEASE_ARGS="${RELEASE_ARGS} --draft"
+          fi
+
+          # Create release with artifacts
+          gh release create "${TAG_NAME}" \
+            --title "${TITLE}" \
+            --notes-file evidence/RELEASE_NOTES.md \
+            --target ${{ needs.go-live-gate.outputs.sha }} \
+            ${{ inputs.draft && '--draft' || '' }} \
+            evidence/evidence.json \
+            evidence/evidence.md \
+            evidence/checksums.txt \
+            evidence/sbom.cdx.json \
+            evidence/provenance.json
+
+      - name: Release Summary
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "## Go-Live Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** v${VERSION}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ needs.go-live-gate.outputs.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Artifacts Attached" >> $GITHUB_STEP_SUMMARY
+          echo "- evidence.json" >> $GITHUB_STEP_SUMMARY
+          echo "- evidence.md" >> $GITHUB_STEP_SUMMARY
+          echo "- checksums.txt" >> $GITHUB_STEP_SUMMARY
+          echo "- sbom.cdx.json" >> $GITHUB_STEP_SUMMARY
+          echo "- provenance.json" >> $GITHUB_STEP_SUMMARY
+
+  notify-failure:
+    name: Notify on Failure
+    needs: go-live-gate
+    runs-on: ubuntu-latest
+    if: needs.go-live-gate.outputs.passed != 'true'
+
+    steps:
+      - name: Failure Summary
+        run: |
+          echo "## ❌ Go-Live Gate Failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The go-live evidence checks did not pass." >> $GITHUB_STEP_SUMMARY
+          echo "Review the evidence artifact for details." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ needs.go-live-gate.outputs.sha }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Exit with Failure
+        run: exit 1

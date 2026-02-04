@@ -383,6 +383,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ needs.setup.outputs.node }}
 
       - name: OTEL Trace Validation

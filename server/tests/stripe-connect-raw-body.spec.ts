@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import stripeConnectRouter from '../src/routes/stripe-connect';
+import stripeConnectRouter from '../src/routes/stripe-connect.js';
 
 describe('Stripe Connect raw-body route', () => {
   const app = express();

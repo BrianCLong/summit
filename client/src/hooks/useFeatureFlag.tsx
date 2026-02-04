@@ -1,21 +1,22 @@
 // client/src/hooks/useFeatureFlag.ts
-import { useState, useEffect, useContext, createContext } from 'react';
+import { useState, useEffect, useContext, createContext, useCallback } from 'react';
 
 // Define types for feature flags
 export interface FeatureFlag {
   key: string;
   enabled: boolean;
-  value?: any;
-  variants?: Record<string, any>;
+  value?: unknown;
+  variants?: Record<string, unknown>;
   lastUpdated?: Date;
 }
 
 export interface FeatureFlagContextType {
   flags: Record<string, FeatureFlag>;
   isLoading: boolean;
+  error: Error | null;
   refreshFlags: () => Promise<void>;
   getFlag: (key: string) => FeatureFlag | null;
-  getFlagValue: <T = any>(key: string, defaultValue?: T) => T | boolean | undefined;
+  getFlagValue: <T = unknown>(key: string, defaultValue?: T) => T | boolean | undefined;
 }
 
 // Create the context with default values
@@ -23,7 +24,7 @@ const FeatureFlagContext = createContext<FeatureFlagContextType | undefined>(und
 
 // Provider component
 interface FeatureFlagProviderProps {
-  children: React.ReactNode;
+  children: JSX.Element | JSX.Element[];
   apiUrl?: string;
   userId?: string;
   autoRefresh?: boolean;
@@ -33,19 +34,19 @@ interface FeatureFlagProviderProps {
 const DEFAULT_API_URL = '/api/feature-flags';
 const DEFAULT_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
+export function FeatureFlagProvider({
   children,
   apiUrl = DEFAULT_API_URL,
   userId,
   autoRefresh = true,
   refreshInterval = DEFAULT_REFRESH_INTERVAL
-}) => {
+}: FeatureFlagProviderProps): JSX.Element {
   const [flags, setFlags] = useState<Record<string, FeatureFlag>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch flags from the server
-  const fetchFlags = async (): Promise<void> => {
+  const fetchFlags = useCallback(async (): Promise<void> => {
     try {
       setIsLoading(true);
       setError(null);
@@ -68,7 +69,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       }
 
       const data: FeatureFlag[] = await response.json();
-      
+
       // Transform array to record for easier access
       const flagsRecord: Record<string, FeatureFlag> = {};
       data.forEach(flag => {
@@ -80,29 +81,29 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
 
       setFlags(flagsRecord);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error('Unknown error');
-      setError(error);
-      console.error('Error fetching feature flags:', error);
+      const fetchError = err instanceof Error ? err : new Error('Unknown error');
+      setError(fetchError);
+      console.error('Error fetching feature flags:', fetchError);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [apiUrl, userId]);
 
   // Effect to fetch flags on mount
   useEffect(() => {
     fetchFlags();
-  }, []);
+  }, [fetchFlags]);
 
   // Effect to set up auto-refresh if enabled
   useEffect(() => {
     if (!autoRefresh) return;
 
     const intervalId = setInterval(fetchFlags, refreshInterval);
-    
+
     return () => {
       clearInterval(intervalId);
     };
-  }, [autoRefresh, refreshInterval]);
+  }, [autoRefresh, refreshInterval, fetchFlags]);
 
   // Function to refresh flags manually
   const refreshFlags = async (): Promise<void> => {
@@ -115,7 +116,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
   };
 
   // Function to get a specific flag's value with type safety
-  const getFlagValue = <T = any>(key: string, defaultValue?: T): T | boolean | undefined => {
+  const getFlagValue = <T = unknown>(key: string, defaultValue?: T): T | boolean | undefined => {
     const flag = getFlag(key);
     if (!flag) {
       return defaultValue;
@@ -145,24 +146,24 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
       {children}
     </FeatureFlagContext.Provider>
   );
-};
+}
 
 // Hook to use the feature flag context
-export const useFeatureFlag = (flagKey: string): { 
-  enabled: boolean; 
-  value?: any; 
-  isLoading: boolean; 
+// eslint-disable-next-line react-refresh/only-export-components
+export const useFeatureFlag = (flagKey: string): {
+  enabled: boolean;
+  value?: unknown;
+  isLoading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
 } => {
   const context = useContext(FeatureFlagContext);
-  
+
   if (!context) {
     throw new Error('useFeatureFlag must be used within a FeatureFlagProvider');
   }
 
   const flag = context.getFlag(flagKey);
-  const value = context.getFlagValue(flagKey);
 
   return {
     enabled: flag ? (flag.value !== undefined ? !!flag.value : flag.enabled) : false,
@@ -174,9 +175,10 @@ export const useFeatureFlag = (flagKey: string): {
 };
 
 // Hook to get multiple flags
+// eslint-disable-next-line react-refresh/only-export-components
 export const useMultipleFeatureFlags = (flagKeys: string[]): {
   flags: Record<string, boolean>;
-  values: Record<string, any>;
+  values: Record<string, unknown>;
   isLoading: boolean;
   error: Error | null;
 } => {
@@ -187,7 +189,7 @@ export const useMultipleFeatureFlags = (flagKeys: string[]): {
   }
 
   const flags: Record<string, boolean> = {};
-  const values: Record<string, any> = {};
+  const values: Record<string, unknown> = {};
 
   flagKeys.forEach(key => {
     const flag = context.getFlag(key);
@@ -204,6 +206,7 @@ export const useMultipleFeatureFlags = (flagKeys: string[]): {
 };
 
 // Hook to check if all flags are enabled
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFeatureFlagAll = (flagKeys: string[]): {
   allEnabled: boolean;
   isLoading: boolean;
@@ -222,6 +225,7 @@ export const useFeatureFlagAll = (flagKeys: string[]): {
 };
 
 // Hook to check if any flag is enabled
+// eslint-disable-next-line react-refresh/only-export-components
 export const useFeatureFlagAny = (flagKeys: string[]): {
   anyEnabled: boolean;
   isLoading: boolean;

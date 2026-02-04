@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "summit.evidence.stamp",
+  "type": "object",
+  "anyOf": [
+    {
+      "required": [
+        "evidence_id",
+        "created_at",
+        "toolchain"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "toolchain": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "required": [
+        "run_id",
+        "created_at"
+      ],
+      "properties": {
+        "evidence_id": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        }
+      }
+    }
+  ],
+  "additionalProperties": true
+}
