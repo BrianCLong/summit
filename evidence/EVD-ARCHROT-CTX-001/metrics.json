@@ -1,4 +1,6 @@
 {
   "evidence_id": "EVD-ARCHROT-CTX-001",
-  "metrics": {}
+  "metrics": {
+    "adr_count": 21
+  }
 }

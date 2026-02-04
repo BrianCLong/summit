@@ -1,13 +1,18 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Metrics Schema",
   "type": "object",
-  "additionalProperties": false,
   "properties": {
-    "evidence_id": { "type": "string" },
+    "evidence_id": {
+      "type": "string"
+    },
     "metrics": {
       "type": "object",
-      "additionalProperties": { "type": "number" }
+      "additionalProperties": {
+        "type": "number"
+      }
     }
   },
-  "required": ["evidence_id", "metrics"]
+  "required": ["metrics"],
+  "additionalProperties": false
 }

@@ -78,14 +78,14 @@ jobs:
           provenance: true
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
+        uses: anchore/sbom-action@v0
         with:
           image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
           format: spdx-json
           output-file: "sbom.json"
 
       - name: Upload SBOM as artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           retention-days: 14
           name: sbom-${{ inputs.image_name }}-${{ github.sha }}
