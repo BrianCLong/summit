@@ -43,7 +43,6 @@ import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
-import narrativeRouter from './routes/narrative-routes.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
@@ -128,7 +127,6 @@ import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
 import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
-import federatedCampaignRadarRouter from './routes/federated-campaign-radar.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
@@ -145,10 +143,6 @@ import vectorStoreRouter from './routes/vector-store.js';
 import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
-import factFlowRouter from './factflow/routes.js';
-import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
-import { buildApprovalsRouter } from './routes/approvals.js';
-import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -328,12 +322,11 @@ export const createApp = async () => {
     );
   };
 
+  // Resolve and enforce tenant context for API and GraphQL surfaces
   app.use(['/api', '/graphql'], (req, res, next) => {
     if (isPublicWebhook(req)) return next();
     return tenantContextMiddleware()(req, res, next);
   });
-
-  app.use(['/api', '/graphql'], shadowTrafficMiddleware);
 
   app.use(['/api', '/graphql'], admissionControl);
 
@@ -432,7 +425,6 @@ export const createApp = async () => {
   }
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
-  app.use('/api/narrative', narrativeRouter); // Visualization endpoints
   app.use('/api/predictive', predictiveRouter);
   app.use('/api/export', disclosuresRouter); // Mount export under /api/export as per spec
   app.use('/disclosures', disclosuresRouter); // Keep old mount for compat
@@ -503,7 +495,6 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
-  app.use('/api', federatedCampaignRadarRouter);
   app.use('/api/admin', adminGateway);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
@@ -525,12 +516,7 @@ export const createApp = async () => {
   app.use('/api/intel-graph', intelGraphRouter);
   app.use('/api/graphrag', graphragRouter);
   app.use('/api/intent', intentRouter);
-  if (cfg.FACTFLOW_ENABLED) {
-    app.use('/api/factflow', factFlowRouter);
-  }
   app.get('/metrics', metricsRoute);
-  // Re-added Approvals Router with Maestro context
-  app.use('/api/approvals', authenticateToken, buildApprovalsRouter());
 
   // Initialize SummitInvestigate Platform Routes
   SummitInvestigate.initialize(app);
@@ -561,7 +547,6 @@ export const createApp = async () => {
   const maestroQueries = new MaestroQueries(igClient);
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
-  app.use('/api/approvals', authenticateToken, buildApprovalsRouter(maestro)); // Re-mount with maestro context
   process.stdout.write('[DEBUG] Maestro router built\n');
 
   // Initialize Maestro V2 Engine & Handlers (Stable-DiffCoder Integration)
@@ -752,7 +737,8 @@ export const createApp = async () => {
       '/graphql',
       express.json(),
       authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-      ...(process.env.SKIP_RATE_LIMITS === 'true' ? [] : [advancedRateLimiter.middleware()]), // Applied AFTER authentication to enable per-user limits
+      advancedRateLimiter.middleware(), // Applied AFTER authentication to enable per-user limits
+      // Note: Type assertion needed due to duplicate @apollo/server in monorepo node_modules
       expressMiddleware(apollo as any, {
         context: async ({ req }) => getContext({ req: req as any })
       }) as unknown as express.RequestHandler,
@@ -761,7 +747,7 @@ export const createApp = async () => {
     appLogger.warn('GraphQL disabled via SKIP_GRAPHQL');
   }
 
-  if (!safetyState.killSwitch && !safetyState.safeMode && process.env.NODE_ENV !== 'test') {
+  if (!safetyState.killSwitch && !safetyState.safeMode) {
     // Start background trust worker if enabled
     startTrustWorker();
     // Start retention worker if enabled
@@ -772,8 +758,8 @@ export const createApp = async () => {
     });
   } else {
     appLogger.warn(
-      { safetyState, env: process.env.NODE_ENV },
-      'Skipping background workers because safety mode, kill switch or test environment is enabled',
+      { safetyState },
+      'Skipping background workers because safety mode or kill switch is enabled',
     );
   }
 
@@ -789,11 +775,6 @@ export const createApp = async () => {
   }
 
   appLogger.info('Anomaly detector activated.');
-
-  if (process.env.NODE_ENV !== 'test') {
-    // Start regional failover monitoring
-    failoverOrchestrator.start();
-  }
 
   // Global Error Handler - must be last
   app.use(centralizedErrorHandler);

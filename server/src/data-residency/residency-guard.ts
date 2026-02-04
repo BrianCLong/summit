@@ -19,8 +19,6 @@ export class ResidencyGuard {
     private static instance: ResidencyGuard;
     private residencyService: DataResidencyService;
     private currentRegion: string;
-    private configCache: Map<string, { config: any; expiresAt: number }> = new Map();
-    private readonly CACHE_TTL_MS = 60 * 1000; // 1 minute
 
     private constructor() {
         this.residencyService = new DataResidencyService();
@@ -139,79 +137,41 @@ export class ResidencyGuard {
         });
     }
 
-    /**
-     * Checks if a region is allowed for a tenant without throwing.
-     */
-    async isRegionAllowed(tenantId: string, region: string, operation: ResidencyContext['operation'] = 'storage'): Promise<boolean> {
-        try {
-            const config = await this.getResidencyConfig(tenantId);
-            if (!config) return region === this.currentRegion;
-
-            const isAllowed = config.primaryRegion === region || config.allowedRegions.includes(region);
-            if (isAllowed) return true;
-
-            return await this.checkExceptions(tenantId, region, operation);
-        } catch (error) {
-            console.error('isRegionAllowed check failed:', error);
-            return false;
-        }
-    }
-
     public async getResidencyConfig(tenantId: string): Promise<any> {
-        const now = Date.now();
-        const cached = this.configCache.get(tenantId);
-        if (cached && cached.expiresAt > now) {
-            return cached.config;
-        }
-
         const pool = getPostgresPool();
 
-        // Task #97: Join with tenant_partitions to get the authoritative region for this tenant
         const result = await pool.query(
-            `SELECT c.*, p.region as shard_region 
-             FROM data_residency_configs c
-             LEFT JOIN tenant_partitions p ON c.tenant_id = p.tenant_id
-             WHERE c.tenant_id = $1`,
+            'SELECT * FROM data_residency_configs WHERE tenant_id = $1',
             [tenantId]
         );
 
         if (result.rows.length === 0) return null;
         const row = result.rows[0];
 
-        // Authoritative region is from shard configuration, falling back to policy config
-        const primaryRegion = row.shard_region || row.region;
-
         const allowedRegions = row.allowed_regions ? JSON.parse(row.allowed_regions) : (row.allowed_transfers ? JSON.parse(row.allowed_transfers) : []);
         // Ensure primary region is in allowed list if not explicitly there
-        if (!allowedRegions.includes(primaryRegion)) {
-            allowedRegions.push(primaryRegion);
+        if (!allowedRegions.includes(row.region)) {
+            allowedRegions.push(row.region);
         }
 
-        const config = {
-            primaryRegion,
-            allowedRegions,
+        return {
+            primaryRegion: row.region,
+            allowedRegions: allowedRegions,
             residencyMode: row.residency_mode || 'strict',
             dataClassifications: {
                 'confidential': {
-                    'storage': [primaryRegion], // Strict default
-                    'compute': [primaryRegion],
-                    'logs': [primaryRegion],
-                    'backups': [primaryRegion],
-                    'export': [primaryRegion]
+                    'storage': [row.region], // Strict default
+                    'compute': [row.region],
+                    'logs': [row.region],
+                    'backups': [row.region],
+                    'export': [row.region]
                 },
                 'restricted': {
-                    'storage': [primaryRegion],
-                    'export': [primaryRegion]
+                    'storage': [row.region],
+                    'export': [row.region]
                 }
             }
         };
-
-        this.configCache.set(tenantId, {
-            config,
-            expiresAt: now + this.CACHE_TTL_MS
-        });
-
-        return config;
     }
 
     private async checkExceptions(tenantId: string, region: string, operation: string): Promise<boolean> {

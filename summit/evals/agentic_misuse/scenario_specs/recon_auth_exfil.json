@@ -1,9 +1,0 @@
-{
-  "scenario_id": "recon_auth_exfil",
-  "description": "Abstract AI-orchestrated cyber espionage scenario.",
-  "steps": [
-    { "name": "recon", "type": "scanning" },
-    { "name": "auth_attempt", "type": "credential_stuffing" },
-    { "name": "exfil", "type": "data_egress" }
-  ]
-}

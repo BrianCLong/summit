@@ -31,83 +31,8 @@ jobs:
         continue-on-error: false # BLOCKING: secrets block merge
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Dependency audit (critical CVEs only)
-        run: |
-          echo "=== Scanning for Critical CVEs ==="
-          pnpm audit --audit-level critical || {
-            echo "::error::Critical CVEs detected - CI BLOCKED"
-            echo "::error::Run 'pnpm audit' locally and document exceptions if needed"
-            exit 1
-          }
-        continue-on-error: false # BLOCKING: critical CVEs block merge
-
-      - name: Snyk security scan
-        if: env.SNYK_TOKEN != ''
-        run: npx snyk test --severity-threshold=high || npx snyk test --severity-threshold=high
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        continue-on-error: true # Non-blocking (token may not be available)
-
-      - name: Upload security scan results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
-        if: always()
-        with:
-          name: security-scan-results
-          path: |
-            gitleaks-report.json
-            snyk-report.json
-          retention-days: 90
-
-  policy-compliance:
-    name: Policy Compliance
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4 # v6
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
-        with:
-          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
-
-      - name: OPA policy check
-        run: |
-          echo "=== Checking OPA Policy Syntax ==="
-          opa check policies/ policy/maestro || {
-            echo "::error::OPA policy syntax check FAILED"
-            exit 1
-          }
-
-      - name: OPA policy tests
-        run: |
-          echo "=== Running OPA Policy Tests ==="
-          (opa test policies/ policy/maestro policy_tests -v || opa test policies/ policy/maestro policy_tests -v) || {
-            echo "::error::OPA policy tests FAILED"
-            exit 1
-          }
-
-      - name: Upload OPA test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
-        if: always()
-        with:
-          name: opa-test-results
-          path: |
-            policies/test-results.json
-          retention-days: 90
-
-  governance-checks:
-    name: Governance Checks
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -118,14 +43,6 @@ jobs:
 
       - name: Media provenance gate
         run: npx tsx scripts/ci/verify_media_provenance.ts
-
-      - name: Check execution governor
-        run: |
-          echo "=== Checking Execution Governor ==="
-          pnpm check:execution || {
-            echo "::error::Execution Governor Check FAILED"
-            exit 1
-          }
 
       - name: Check governance compliance
         run: npm run check:governance || echo "Governance check skipped (script may not exist)"
@@ -154,11 +71,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Run MCP UX Linter
@@ -256,7 +172,6 @@ jobs:
       - uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0 # Needed for schema diff
-
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -321,11 +236,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
       - name: Ensure evidence bundle exists
         run: |
@@ -474,3 +388,79 @@ jobs:
           echo "- ℹ️ Compliance Evidence" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Security and compliance verified" >> $GITHUB_STEP_SUMMARY
+- uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit (critical CVEs only)
+        run: |
+          echo "=== Scanning for Critical CVEs ==="
+          pnpm audit --audit-level critical || {
+            echo "::error::Critical CVEs detected - CI BLOCKED"
+            echo "::error::Run 'pnpm audit' locally and document exceptions if needed"
+            exit 1
+          }
+        continue-on-error: false # BLOCKING: critical CVEs block merge
+
+      - name: Snyk security scan
+        if: env.SNYK_TOKEN != ''
+        run: npx snyk test --severity-threshold=high || npx snyk test --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true # Non-blocking (token may not be available)
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        if: always()
+        with:
+          name: security-scan-results
+          path: |
+            gitleaks-report.json
+            snyk-report.json
+          retention-days: 90
+
+  policy-compliance:
+    name: Policy Compliance
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
+        with:
+          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
+
+      - name: OPA policy check
+        run: |
+          echo "=== Checking OPA Policy Syntax ==="
+          opa check policies/ policy/maestro || {
+            echo "::error::OPA policy syntax check FAILED"
+            exit 1
+          }
+
+      - name: OPA policy tests
+        run: |
+          echo "=== Running OPA Policy Tests ==="
+          (opa test policies/ policy/maestro policy_tests -v || opa test policies/ policy/maestro policy_tests -v) || {
+            echo "::error::OPA policy tests FAILED"
+            exit 1
+          }
+
+      - name: Upload OPA test results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        if: always()
+        with:
+          name: opa-test-results
+          path: |
+            policies/test-results.json
+          retention-days: 90
+
+  governance-checks:
+    name: Governance Checks
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
