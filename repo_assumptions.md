@@ -1,35 +1,38 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Reality Check
 
-## Structure Validation
+## 1. Paths & Structure
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| Path | Status | Notes |
+| :--- | :--- | :--- |
+| `summit/` | ✅ Verified | Root Python package. |
+| `summit/tests/` | ✅ Verified | Test root. |
+| `summit/evidence/schemas/` | ✅ Verified | Existing schema location. |
+| `summit/narrative/` | ⚠️ Assumed | New package to be created. |
+| `scripts/` | ✅ Verified | Location for Python scripts/tools. |
+| `artifacts/` | ⚠️ Assumed | Output directory (repo has `release-artifacts/` and `evidence/`). Will use `artifacts/` for local/CI outputs. |
+| `tools/summitctl` | ✅ Verified | TypeScript CLI. Will use Python script for this task to align with MWS. |
 
-## Component Mapping
+## 2. CI & Gates
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+| Check Name | Status | Notes |
+| :--- | :--- | :--- |
+| `summit-ci.yml` | ✅ Verified | Likely the main CI loop. |
+| `ci-evidence-verify.yml` | ✅ Verified | Likely validates evidence artifacts. |
+| `lint` | ⚠️ Assumed | Standard python linting (ruff/flake8) expected. |
+| `test` | ⚠️ Assumed | Pytest expected. |
 
-## Constraints & Checks
+## 3. Evidence Conventions
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+| Convention | Status | Notes |
+| :--- | :--- | :--- |
+| `*.report.schema.json` | ✅ Verified | Standard schema naming. |
+| `*.metrics.schema.json` | ✅ Verified | Standard schema naming. |
+| `*.stamp.schema.json` | ✅ Verified | Standard schema naming. |
+| Deterministic Outputs | ✅ Verified | `tools/determinism_smoke.py` exists. |
 
-## Next Steps
+## 4. Must-Not-Touch
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+* `summit/evidence/schemas/index.schema.json` (Core schema, unless necessary)
+* `tools/summitctl/` (Avoid TS changes unless needed for integration)
+* `summit/main.py` (Avoid modifying core app routing for this isolated pipeline)
+

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Narrative Analysis Stamp",
+  "type": "object",
+  "required": ["evidence_id", "versions", "hashes"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-NARRATIVE-[A-Z0-9\\-]+$"
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "hashes": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
