@@ -1,6 +1,7 @@
 {
   "revision_note": "Added LongHorizon orchestration MVP scope and evidence references",
   "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added Maestro Long-Run Job Engine governance scaffolding and CI gates",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",

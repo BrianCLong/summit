@@ -521,6 +521,25 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: maestro-longrun-job-engine
+    version: v1
+    path: prompts/engineering/maestro-longrun-job-engine.md
+    sha256: 32faf8eb39eea30e6bcaa8645727a9a5f2665bcd335b68e50e87eeb2d5f1e1e3
+    description: Implement Maestro Long-Run Job Engine with governed checkpoints, budgets, and CI gates.
+    scope:
+      paths:
+        - libs/maestro/longrun/
+        - scripts/ci/
+        - docs/maestro/
+        - .github/workflows/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/engineering/maestro-longrun-job-engine.md
+        - prompts/registry.yaml
+      domains:
+        - maestro
+        - governance
+        - ci
   - id: federated-campaign-radar-implementation
     version: v1
     path: prompts/federated-campaign-radar-implementation.md
