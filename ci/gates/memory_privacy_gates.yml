@@ -1,0 +1,8 @@
+name: Memory Privacy Gates
+checks:
+  - name: ci/memory-privacy-foundation
+    description: "Lint/unit tests for core/memory + core/privacy"
+  - name: ci/memory-privacy-eval
+    description: "Run eval/privacy_memory tests"
+  - name: ci/memory-privacy-evidence
+    description: "Validate memory privacy evidence"

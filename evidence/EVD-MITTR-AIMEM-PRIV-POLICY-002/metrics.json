@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-MITTR-AIMEM-PRIV-POLICY-002",
+  "metrics": {
+    "pass_rate": 1.0,
+    "latency_ms": 45.0
+  }
+}

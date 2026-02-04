@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-MITTR-AIMEM-PRIV-LEAK-003",
+  "item_slug": "MITTR-AIMEM-PRIV",
+  "summary": "Context leak eval results",
+  "artifacts": []
+}

@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-MITTR-AIMEM-PRIV-EGRESS-005",
+  "item_slug": "MITTR-AIMEM-PRIV",
+  "summary": "Tool egress redaction tests",
+  "artifacts": []
+}

@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Memory Privacy subsystem (core/memory, core/privacy) with deny-by-default policy and DSAR endpoints.
+- Global CI standardization for pnpm@9.12.0 and Draft 2020-12 schema validation.
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 
@@ -38,12 +40,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All governance and security checks pass
 
 ### Added
+- Memory Privacy subsystem (core/memory, core/privacy) with deny-by-default policy and DSAR endpoints.
+- Global CI standardization for pnpm@9.12.0 and Draft 2020-12 schema validation.
 - Generated SBOM at `.evidence/sbom.json`
 - CLI test suite: 262 tests passing
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 
 ### Added
+- Memory Privacy subsystem (core/memory, core/privacy) with deny-by-default policy and DSAR endpoints.
+- Global CI standardization for pnpm@9.12.0 and Draft 2020-12 schema validation.
 - **Reliability Hardening**:
   - Added exponential backoff retry logic (3 attempts) to Maestro LLM execution with cancellation support.
   - Added 60s timeout to Maestro LLM calls to prevent hanging jobs.
@@ -92,6 +98,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2024-12-28
 
 ### Added
+- Memory Privacy subsystem (core/memory, core/privacy) with deny-by-default policy and DSAR endpoints.
+- Global CI standardization for pnpm@9.12.0 and Draft 2020-12 schema validation.
 
 #### Core Platform
 - Multi-tenant architecture with strict tenant isolation

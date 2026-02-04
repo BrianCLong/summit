@@ -4,17 +4,17 @@
     "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
-      "artifacts": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+      "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
     },
     "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
-      "artifacts": ["fixtures/ambiguities/critical.json"]
+      "files": ["fixtures/ambiguities/critical.json"]
     },
     "EVD-vfgnn-ATT-001": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
@@ -100,6 +100,51 @@
     },
     "EVD-openviking-trace-003": {
       "files": ["evidence/report.json", "evidence/metrics.json", "evidence/stamp.json"]
+    },
+    "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
+      "title": "Structured Memory Model",
+      "category": "privacy",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-POLICY-002": {
+      "title": "Deny-by-default Policy Proofs",
+      "category": "privacy",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-LEAK-003": {
+      "title": "Context Leak Eval Results",
+      "category": "privacy",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-DSAR-004": {
+      "title": "User Control API Contract Tests",
+      "category": "privacy",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/stamp.json"
+      ]
+    },
+    "EVD-MITTR-AIMEM-PRIV-EGRESS-005": {
+      "title": "Tool Egress Redaction Tests",
+      "category": "privacy",
+      "files": [
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/report.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/metrics.json",
+        "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/stamp.json"
+      ]
     }
   }
 }

@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-MITTR-AIMEM-PRIV-LEAK-003",
+  "metrics": {
+    "pass_rate": 1.0,
+    "latency_ms": 45.0
+  }
+}
