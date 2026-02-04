@@ -21,7 +21,7 @@
     "jose": "^5.2.0",
     "openid-client": "^5.6.1",
     "pino": "^8.17.0",
-    "pino-http": "^8.6.0",
+    "pino-http": "^11.0.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

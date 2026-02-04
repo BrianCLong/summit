@@ -3446,8 +3446,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -14307,8 +14307,8 @@ importers:
         specifier: 9.9.0
         version: 9.9.0
       pino-http:
-        specifier: 10.5.0
-        version: 10.5.0
+        specifier: 11.0.0
+        version: 11.0.0
       prom-client:
         specifier: 15.1.3
         version: 15.1.3
@@ -15256,8 +15256,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
     devDependencies:
       '@types/express':
         specifier: ^5.0.0
@@ -15397,8 +15397,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.4.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       prom-client:
         specifier: ^15.1.3
         version: 15.1.3
@@ -15525,8 +15525,8 @@ importers:
         specifier: ^9.6.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.4.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -15592,8 +15592,8 @@ importers:
         specifier: ^8.17.0
         version: 8.21.0
       pino-http:
-        specifier: ^8.6.0
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -16497,8 +16497,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       undici:
         specifier: ^6.23.0
         version: 6.23.0
@@ -17705,8 +17705,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -17766,8 +17766,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -17862,8 +17862,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       pino-pretty:
         specifier: ^13.1.2
         version: 13.1.3
@@ -18221,8 +18221,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -18377,8 +18377,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -18878,8 +18878,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       prom-client:
         specifier: ^15.1.0
         version: 15.1.3
@@ -19347,8 +19347,8 @@ importers:
         specifier: ^8.17.0
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -19562,8 +19562,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.6.0
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       ssh2-sftp-client:
         specifier: ^9.1.0
         version: 9.1.0
@@ -19801,8 +19801,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -20076,8 +20076,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.5.1
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -21990,8 +21990,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.3.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -22125,8 +22125,8 @@ importers:
         specifier: ^8.16.0
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       prom-client:
         specifier: ^15.1.0
         version: 15.1.3
@@ -22254,8 +22254,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -22566,8 +22566,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
@@ -22606,8 +22606,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.5.1
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -22990,8 +22990,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.3.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -23236,8 +23236,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.6.0
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -48833,17 +48833,8 @@ packages:
   pino-abstract-transport@3.0.0:
     resolution: {integrity: sha512-wlfUczU+n7Hy/Ha5j9a/gZNy7We5+cXp8YL+X+PG8S0KXxw7n/JXA3c46Y0zQznIJ83URJiwy7Lh56WLokNuxg==}
 
-  pino-http@10.5.0:
-    resolution: {integrity: sha512-hD91XjgaKkSsdn8P7LaebrNzhGTdB086W3pyPihX0EzGPjq5uBJBXo4N5guqNaK6mUjg9aubMF7wDViYek9dRA==}
-
   pino-http@11.0.0:
     resolution: {integrity: sha512-wqg5XIAGRRIWtTk8qPGxkbrfiwEWz1lgedVLvhLALudKXvg1/L2lTFgTGPJ4Z2e3qcRmxoFxDuSdMdMGNM6I1g==}
-
-  pino-http@8.6.1:
-    resolution: {integrity: sha512-J0hiJgUExtBXP2BjrK4VB305tHXS31sCmWJ9XJo2wPkLHa1NFPuW4V9wjG27PAc2fmBCigiNhQKpvrx+kntBPA==}
-
-  pino-http@9.0.0:
-    resolution: {integrity: sha512-Q9QDNEz0vQmbJtMFjOVr2c9yL92vHudjmr3s3m6J1hbw3DBGFZJm3TIj9TWyynZ4GEsEA9SOtni4heRUr6lNOg==}
 
   pino-pretty@10.3.1:
     resolution: {integrity: sha512-az8JbIYeN/1iLj2t0jR9DV48/LQ3RC6hZPpapKPkb84Q+yTidMCpgWxIT3N0flnBDilyBQ1luWNpOeJptjdp/g==}
@@ -48868,6 +48859,10 @@ packages:
 
   pino@10.1.0:
     resolution: {integrity: sha512-0zZC2ygfdqvqK8zJIr1e+wT1T/L+LF6qvqvbzEQ6tiMAoTqEVK9a1K3YRu8HEUvGEvNqZyPJTtb2sNIoTkB83w==}
+    hasBin: true
+
+  pino@10.3.0:
+    resolution: {integrity: sha512-0GNPNzHXBKw6U/InGe79A3Crzyk9bcSyObF9/Gfo9DLEf5qj5RF50RSjsu0W1rZ6ZqRGdzDFCRBQvi9/rSGPtA==}
     hasBin: true
 
   pino@8.21.0:
@@ -52215,6 +52210,10 @@ packages:
 
   thread-stream@3.1.0:
     resolution: {integrity: sha512-OqyPZ9u96VohAyMfJykzmivOrY2wfMSf3C5TtFJVgN+Hm6aj+voFhlK+kZEIv2FBh1X6Xp3DlnCOfEQ3B2J86A==}
+
+  thread-stream@4.0.0:
+    resolution: {integrity: sha512-4iMVL6HAINXWf1ZKZjIPcz5wYaOdPhtO8ATvZ+Xqp3BTdaqtAwQkNmKORqcIo5YkQqGXq5cwfswDwMqqQNrpJA==}
+    engines: {node: '>=20'}
 
   three-conic-polygon-geometry@2.1.2:
     resolution: {integrity: sha512-NaP3RWLJIyPGI+zyaZwd0Yj6rkoxm4FJHqAX1Enb4L64oNYLCn4bz1ESgOEYavgcUwCNYINu1AgEoUBJr1wZcA==}
@@ -95413,33 +95412,12 @@ snapshots:
     dependencies:
       split2: 4.2.0
 
-  pino-http@10.5.0:
-    dependencies:
-      get-caller-file: 2.0.5
-      pino: 9.9.0
-      pino-std-serializers: 7.0.0
-      process-warning: 5.0.0
-
   pino-http@11.0.0:
     dependencies:
       get-caller-file: 2.0.5
-      pino: 10.1.0
-      pino-std-serializers: 7.0.0
+      pino: 10.3.0
+      pino-std-serializers: 7.1.0
       process-warning: 5.0.0
-
-  pino-http@8.6.1:
-    dependencies:
-      get-caller-file: 2.0.5
-      pino: 8.21.0
-      pino-std-serializers: 6.2.2
-      process-warning: 3.0.0
-
-  pino-http@9.0.0:
-    dependencies:
-      get-caller-file: 2.0.5
-      pino: 8.21.0
-      pino-std-serializers: 6.2.2
-      process-warning: 3.0.0
 
   pino-pretty@10.3.1:
     dependencies:
@@ -95510,6 +95488,20 @@ snapshots:
       safe-stable-stringify: 2.5.0
       sonic-boom: 4.2.0
       thread-stream: 3.1.0
+
+  pino@10.3.0:
+    dependencies:
+      '@pinojs/redact': 0.4.0
+      atomic-sleep: 1.0.0
+      on-exit-leak-free: 2.1.2
+      pino-abstract-transport: 3.0.0
+      pino-std-serializers: 7.1.0
+      process-warning: 5.0.0
+      quick-format-unescaped: 4.0.4
+      real-require: 0.2.0
+      safe-stable-stringify: 2.5.0
+      sonic-boom: 4.2.0
+      thread-stream: 4.0.0
 
   pino@8.21.0:
     dependencies:
@@ -99803,6 +99795,10 @@ snapshots:
       real-require: 0.2.0
 
   thread-stream@3.1.0:
+    dependencies:
+      real-require: 0.2.0
+
+  thread-stream@4.0.0:
     dependencies:
       real-require: 0.2.0
 
