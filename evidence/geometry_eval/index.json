@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "items": {
+    "EVD-GEOM-EVAL-001": {
+      "files": [
+        "evidence/geometry_eval/report.json",
+        "evidence/geometry_eval/metrics.json",
+        "evidence/geometry_eval/stamp.json"
+      ]
+    }
+  }
+}

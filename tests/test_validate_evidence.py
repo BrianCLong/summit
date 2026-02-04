@@ -12,10 +12,12 @@ SCRIPT = ROOT / "tools" / "validate_evidence.py"
 def run_validator(fixture_dir: Path) -> subprocess.CompletedProcess[str]:
     env = {
         "PYTHONPATH": str(ROOT),
-        "EVIDENCE_SCHEMA_ROOT": str(ROOT),
+        "EVIDENCE_ROOT": str(fixture_dir),
+        "SCHEMAS_DIR": str(ROOT / "schemas" / "evidence"),
     }
+    index_file = fixture_dir / "evidence" / "index.json"
     return subprocess.run(
-        [sys.executable, str(SCRIPT)],
+        [sys.executable, str(SCRIPT), str(index_file), "--strict"],
         cwd=fixture_dir,
         capture_output=True,
         text=True,
@@ -31,4 +33,4 @@ def test_validate_evidence_success() -> None:
 def test_validate_evidence_missing_stamp() -> None:
     result = run_validator(FIXTURES / "evidence_bad_missing_stamp")
     assert result.returncode != 0
-    assert "Missing stamp" in result.stderr
+    assert "Artifact not found" in result.stderr

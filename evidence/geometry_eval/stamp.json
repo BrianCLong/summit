@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-GEOM-EVAL-001",
+  "created_at": "2026-02-01T23:29:07Z",
+  "git_sha": "HEAD",
+  "runner": "eval-harness"
+}
