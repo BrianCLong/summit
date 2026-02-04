@@ -1,0 +1,6 @@
+{
+  "product_id": "prod-001",
+  "type": "engagement",
+  "payload": "engagement_event",
+  "signature": "too-short"
+}

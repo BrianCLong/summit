@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claim.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["text", "source_ref"],
+  "properties": {
+    "text": {"type": "string"},
+    "source_ref": {"type": "string"},
+    "confidence": {"type": "number"}
+  }
+}

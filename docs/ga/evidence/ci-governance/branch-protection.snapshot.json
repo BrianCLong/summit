@@ -1,0 +1,12 @@
+{
+  "artifact": "branch-protection",
+  "scope": "github",
+  "verified_by": "scripts/ci/verify_branch_protection.mjs",
+  "branches": ["main"],
+  "controls": [
+    "enforce_admins",
+    "linear_history",
+    "2-reviewers",
+    "strict_checks"
+  ]
+}
