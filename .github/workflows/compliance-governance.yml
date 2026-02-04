@@ -26,12 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -39,7 +35,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Verify Governance Rules
         run: pnpm verify:governance
@@ -49,12 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -62,7 +54,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Verify Compliance Drift
         run: pnpm verify:compliance

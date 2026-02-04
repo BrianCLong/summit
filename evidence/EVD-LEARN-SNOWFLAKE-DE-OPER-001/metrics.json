@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-LEARN-SNOWFLAKE-DE-OPER-001",
+  "metrics": {
+    "late_data_detected_count": 0,
+    "schema_drift_detected_count": 0,
+    "file_format_violation_count": 0,
+    "cost_budget_violation_count": 0,
+    "reconcile_mismatch_count": 0
+  }
+}
