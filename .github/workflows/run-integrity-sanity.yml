@@ -1,0 +1,42 @@
+name: Run integrity sanity check
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "OpenLineage runId (UUIDv7)"
+        required: true
+        type: string
+
+jobs:
+  run-integrity-sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Run sanity check
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+          EVIDENCE_DELTA_PATH: evidence_delta.json
+        run: node scripts/ci/run-integrity-sanity.mjs
+
+      - name: Upload evidence delta (if any)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-delta
+          path: evidence_delta.json
