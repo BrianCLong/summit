@@ -15,6 +15,16 @@ allow if {
 }
 
 allow if {
+  input.action == "allocate"
+  tenant := input.tenant
+  tool := input.tool
+  scopes := input.capability_scopes
+  purpose := input.purpose
+  allowed_tool(tenant, tool)
+  scope_allows(scopes, purpose) or count(scopes) == 0
+}
+
+allow if {
   input.action == "stream"
   net_allowed(input.tenant, input.destination)
 }

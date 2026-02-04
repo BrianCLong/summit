@@ -12,16 +12,26 @@ import { createRecording } from './replay-client';
 export type Session = {
   id: string;
   vm: VmHandle;
-  transport: 'http+sse' | 'stdio';
+  transport: 'http+sse' | 'stdio' | 'grpc';
   createdAt: string;
   recordingId?: string;
 };
 
-export class Scheduler {
+export interface SchedulerLike {
+  allocate(toolClass: string, transport?: Session['transport']): Promise<Session>;
+  invoke(sessionId: string, fn: string, args: unknown): Promise<unknown>;
+  release(sessionId: string): Promise<void>;
+  get(sessionId: string): Session | undefined;
+}
+
+export class Scheduler implements SchedulerLike {
   private active = new Map<string, Session>();
   private limit = pLimit(Number(process.env.MAX_CONCURRENCY || 128));
 
-  async allocate(toolClass: string): Promise<Session> {
+  async allocate(
+    toolClass: string,
+    transport: Session['transport'] = 'http+sse',
+  ): Promise<Session> {
     await ensurePrewarmedSnapshot(toolClass);
     const vm = await checkoutVm(toolClass);
     const id = `sess_${randomUUID()}`;
@@ -29,7 +39,7 @@ export class Scheduler {
     const session: Session = {
       id,
       vm,
-      transport: 'http+sse',
+      transport,
       createdAt: new Date().toISOString(),
       recordingId,
     };

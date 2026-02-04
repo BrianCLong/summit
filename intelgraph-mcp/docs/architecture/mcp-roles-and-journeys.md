@@ -5,7 +5,7 @@ This note aligns IntelGraph Maestro Conductor with the industry-standard MCP men
 ## Roles
 
 - **Host App (CompanyOS / Switchboard):** Orchestrates agent workflows, enforces policy, and brokers sessions.
-- **MCP Client (Runtime Pooler):** Maintains 1:1 connections to MCP servers, manages transport selection (STDIO vs HTTP+SSE), and issues capability-scoped tokens.
+- **MCP Client (Runtime Pooler):** Maintains 1:1 connections to MCP servers, manages transport selection (STDIO vs HTTP+SSE vs gRPC), and issues capability-scoped tokens.
 - **MCP Server (Partner / Internal Integration):** Implements tools, resources, and prompts surfaced to Host Apps.
 
 ## Transport Stack
@@ -13,6 +13,7 @@ This note aligns IntelGraph Maestro Conductor with the industry-standard MCP men
 1. **Transport Layer**
    - `stdio://` for local/edge servers — sandboxed with seccomp & cgroups, default no-network.
    - `https://` for remote servers — HTTP requests with SSE streaming responses, mTLS + heartbeat.
+   - `grpc://` for high-throughput integrations — Protobuf streaming, deadlines, and backpressure.
 2. **Protocol Layer**
    - JSON-RPC 2.0 framing, strict error codes (`-32600`, `-32601`, `-32602`, `-32603`).
    - Batches disabled unless explicitly whitelisted per server manifest.
