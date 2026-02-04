@@ -1,18 +1,16 @@
 # NVIDIA NIM provider (trial)
+
+Integration with NVIDIA NIM trial endpoints for Moonshot AI's Kimi K2.5.
+
+## Endpoint Details
+- **Base URL**: `https://integrate.api.nvidia.com/v1`
+- **Model ID**: `moonshotai/kimi-k2.5`
+- **Compatibility**: OpenAI-compatible `POST /chat/completions`
+
 ## Safety defaults
-- Multimodal disabled by default.
-- Do not persist reasoning traces by default.
-- Use only in dev/staging unless policy allows production.
+- **Multimodal**: Disabled by default. Must be explicitly enabled via config.
+- **Reasoning Traces**: Do not persist `reasoning_content` in long-term logs by default.
+- **Environment**: Use only in `dev` or `staging` environments. Production use requires explicit approval and policy override due to trial terms.
 
 ## Configuration
-- `NVIDIA_NIM_API_KEY`: Your NVIDIA API key from build.nvidia.com
-- `NVIDIA_NIM_BASE_URL`: Defaults to `https://integrate.api.nvidia.com/v1`
-- `NVIDIA_NIM_MODEL`: Defaults to `moonshotai/kimi-k2.5`
-- `NVIDIA_NIM_MULTIMODAL`: Set to `true` to enable multimodal support (default: false)
-
-## Mode Selection
-The provider supports two modes:
-- `instant`: High-speed response with thinking disabled.
-- `thinking`: Reasoning-enabled mode for complex tasks.
-
-The orchestrator automatically selects `thinking` for agentic tasks or long prompts, and `instant` otherwise.
+See `config/providers/nvidia_nim.schema.json` for configuration options.
