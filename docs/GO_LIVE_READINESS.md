@@ -49,11 +49,11 @@
 
 ### B) Config & Secrets Management
 
-| Item                         | Status  | Evidence                                                          |
-| ---------------------------- | ------- | ----------------------------------------------------------------- |
-| `.env.example` exists        | DONE    | `/home/user/summit/.env.example`                                  |
-| Secrets not committed        | DONE    | `.gitignore` excludes `.env*`, `*.key`, `*.pem`, secrets patterns |
-| Config validation at startup | MUST DO | Add fail-fast validation                                          |
+| Item                         | Status | Evidence                                                          |
+| ---------------------------- | ------ | ----------------------------------------------------------------- |
+| `.env.example` exists        | DONE   | `/home/user/summit/.env.example`                                  |
+| Secrets not committed        | DONE   | `.gitignore` excludes `.env*`, `*.key`, `*.pem`, secrets patterns |
+| Config validation at startup | DONE   | `server/src/config.ts` - Zod validation with `process.exit(1)`    |
 
 **Required Environment Variables:**
 
@@ -76,11 +76,11 @@
 
 ### D) Reliability & Correctness
 
-| Item                | Status  | Evidence                                             |
-| ------------------- | ------- | ---------------------------------------------------- |
-| Health endpoint     | DONE    | `/health` in appFactory.ts, `/healthz` in Dockerfile |
-| Graceful shutdown   | MUST DO | Add SIGTERM handler                                  |
-| Database migrations | DONE    | `server/scripts/run-migrations.ts`                   |
+| Item                | Status | Evidence                                                   |
+| ------------------- | ------ | ---------------------------------------------------------- |
+| Health endpoint     | DONE   | `/health` in appFactory.ts, `/healthz` in Dockerfile       |
+| Graceful shutdown   | DONE   | `server/src/index.ts` - SIGINT/SIGTERM handlers (L202-235) |
+| Database migrations | DONE   | `server/scripts/run-migrations.ts`                         |
 
 ### E) Observability
 
@@ -109,11 +109,11 @@
 
 ### H) Runbooks
 
-| Item             | Status  | Evidence                        |
-| ---------------- | ------- | ------------------------------- |
-| Deploy runbook   | DONE    | See below                       |
-| Rollback runbook | DONE    | See below                       |
-| Incident runbook | MUST DO | Create minimal incident runbook |
+| Item             | Status | Evidence  |
+| ---------------- | ------ | --------- |
+| Deploy runbook   | DONE   | See below |
+| Rollback runbook | DONE   | See below |
+| Incident runbook | DONE   | See below |
 
 ## Deploy Runbook
 
@@ -161,6 +161,10 @@ curl http://localhost:3000/healthz
 ### Post-Deploy Verification
 
 ```bash
+# Run automated smoke tests
+./scripts/smoke-test.sh localhost:3000
+
+# Or manual checks:
 # Check health endpoint
 curl -f http://localhost:3000/healthz
 
@@ -195,6 +199,88 @@ docker run -d \
 # 3. Rollback migrations if needed
 cd server && npx knex migrate:rollback --knexfile packages/db/knex/knexfile.cjs
 ```
+
+## Incident Runbook
+
+### Severity Classification
+
+| Severity | Description                          | Response Time | Examples                       |
+| -------- | ------------------------------------ | ------------- | ------------------------------ |
+| P1       | Service down, data loss risk         | Immediate     | DB unreachable, auth broken    |
+| P2       | Degraded performance, partial outage | < 1 hour      | Slow queries, one service down |
+| P3       | Non-critical issue                   | < 4 hours     | UI glitch, non-blocking errors |
+
+### Initial Triage Steps
+
+```bash
+# 1. Check service health
+curl -f http://localhost:3000/healthz
+
+# 2. Check container status
+docker ps -a | grep intelgraph
+
+# 3. View recent logs (last 500 lines)
+docker logs intelgraph --tail 500 --timestamps
+
+# 4. Check resource usage
+docker stats intelgraph --no-stream
+
+# 5. Check database connectivity
+docker exec intelgraph curl -s http://localhost:3000/health
+```
+
+### Common Issues & Resolutions
+
+#### Database Connection Failed
+
+```bash
+# Check Neo4j status
+docker logs neo4j --tail 100
+
+# Verify connection string
+docker exec intelgraph env | grep NEO4J
+
+# Restart with fresh connection
+docker restart intelgraph
+```
+
+#### High Memory Usage
+
+```bash
+# Check memory stats
+docker stats intelgraph --no-stream
+
+# If OOM, restart with increased limits
+docker stop intelgraph
+docker run -d --name intelgraph -m 4g --memory-swap 4g ...
+```
+
+#### Authentication Failures
+
+```bash
+# Check OIDC provider connectivity
+curl -s https://$OIDC_ISSUER/.well-known/openid-configuration
+
+# Verify JWT secrets are set
+docker exec intelgraph env | grep JWT
+
+# Check auth logs
+docker logs intelgraph 2>&1 | grep -i "auth\|jwt\|oidc"
+```
+
+### Escalation Path
+
+1. **On-call Engineer** - Initial triage, restart services
+2. **Platform Team Lead** - Database issues, infrastructure
+3. **Security Team** - Auth failures, suspected breaches
+4. **Executive** - P1 lasting > 30 minutes
+
+### Post-Incident
+
+1. Document timeline in incident ticket
+2. Collect logs: `docker logs intelgraph > incident-$(date +%Y%m%d).log`
+3. Schedule blameless post-mortem within 48 hours
+4. Create follow-up tickets for preventive measures
 
 ## Known Risks & Guardrails
 
