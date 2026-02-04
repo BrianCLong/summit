@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "task_type": { "type": "string" },
+    "output_determinism_required": { "type": "boolean" },
+    "regulatory_exposure": { "type": "string", "enum": ["low", "medium", "high"] },
+    "chosen_modality": { "type": "string", "enum": ["genai", "predictive", "optimization", "symbolic"] }
+  },
+  "required": ["task_type", "output_determinism_required", "regulatory_exposure", "chosen_modality"],
+  "additionalProperties": false
+}

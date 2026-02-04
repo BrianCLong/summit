@@ -57,13 +57,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: "pnpm"
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.11"
+
       - name: Install Dependencies
         run: |
           pnpm install --frozen-lockfile
@@ -192,7 +193,7 @@ jobs:
 
       - name: Upload Release Readiness Artifact
         if: always()
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: release-readiness-report
           path: artifacts/release-readiness/

@@ -1,64 +1,22 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit.evidence.metrics",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "anyOf": [
-    {
-      "required": [
-        "evidence_id",
-        "metrics"
-      ],
-      "properties": {
-        "evidence_id": {
-          "type": "string"
-        },
-        "metrics": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "name",
-              "value",
-              "unit"
-            ],
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string"
-              },
-              "notes": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "required": [
-        "metrics"
-      ],
-      "properties": {
-        "evidence_id": {
-          "type": "string"
-        },
-        "metrics": {
-          "type": "object",
-          "additionalProperties": {
-            "type": [
-              "number",
-              "string",
-              "boolean"
-            ]
-          }
-        }
-      }
-    }
-  ],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "avg_latency_ms": { "type": "number" },
+    "avg_fanout": { "type": "number" }
+  },
+  "required": [],
   "additionalProperties": true
+  "$id": "https://summit.local/schemas/metrics.schema.json",
+  "type": "object",
+  "required": ["version", "counters"],
+  "properties": {
+    "version": { "type": "integer" },
+    "counters": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
+  },
+  "additionalProperties": false
 }

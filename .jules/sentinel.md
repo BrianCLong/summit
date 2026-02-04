@@ -55,3 +55,13 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `IncrementalLoader` class in `packages/etl-pipelines/src/loaders/incremental-loader.ts` constructed SQL queries (`UPDATE`, `DELETE`, `SELECT` for existence check) by directly interpolating string values from input rows into the query string, enabling SQL injection.
 **Learning:** Even when some methods (like `insertRow`) use parameterized queries, inconsistencies can leave other methods vulnerable. Developers might assume internal data loading tools are safe, but they process untrusted data.
 **Prevention:** Always use parameterized queries (e.g., `$1`, `$2`) for all variable data in SQL statements, regardless of the source. Use `pg` driver's parameter substitution instead of template literals for values.
+
+## 2026-02-17 - [HIGH] Missing RBAC on Internal Status Endpoints
+**Vulnerability:** The `apps/intelgraph-api/src/routes/internalStatus.ts` endpoints relied solely on authentication presence (`req.auth`) without verifying user roles. This allowed any authenticated user (regardless of privilege) to access sensitive system health, governance status, and infrastructure details.
+**Learning:** Checking for "is authenticated" is insufficient for internal or administrative endpoints. All internal endpoints must strictly enforce Role-Based Access Control (RBAC).
+**Prevention:** Enhance authentication middleware to also validate specific roles (e.g., `admin`, `platform_admin`) for sensitive routes. Adopt a "verify-role" pattern immediately after authentication checks.
+
+## 2026-02-18 - [HIGH] Broken Access Control on Administrative and Evidence Endpoints
+**Vulnerability:** Several sensitive endpoints defined directly in `server/src/app.ts` (e.g., `/search/evidence`, `/monitoring`, and various `/api/admin` routers) were missing authentication or relied on manual, inconsistent role checks.
+**Learning:** Inline routes in main application files are easily overlooked during security audits. Additionally, inconsistent casing in role names (e.g., 'admin' vs 'ADMIN') can lead to manual check bypasses or availability issues.
+**Prevention:** Enforce a "deny-by-default" posture by applying `authenticateToken` and `ensureRole(['ADMIN', 'admin'])` middleware to all administrative and sensitive data endpoints. Always use standardized middleware rather than manual property checks for role validation.

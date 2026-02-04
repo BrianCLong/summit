@@ -1,0 +1,73 @@
+name: parity-check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  parity:
+    name: Parity (${{ matrix.cloud }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        cloud: [aws, gcp, azure]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup tools
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install jq
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y jq
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Setup AWS CLI
+        if: matrix.cloud == 'aws'
+        uses: aws-actions/setup-cli@v2
+      - name: Setup gcloud
+        if: matrix.cloud == 'gcp'
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      - name: Setup Azure CLI
+        if: matrix.cloud == 'azure'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run parity check
+        env:
+          CLOUD: ${{ matrix.cloud }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref }}
+          AWS_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          AWS_OIDC_AUDIENCE: ${{ secrets.AWS_OIDC_AUDIENCE }}
+          GCP_WORKLOAD_POOL: ${{ secrets.GCP_WORKLOAD_POOL }}
+          GCP_PROVIDER: ${{ secrets.GCP_PROVIDER }}
+          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          AZURE_FEDERATED_ID: ${{ secrets.AZURE_FEDERATED_ID }}
+          PARITY_ENV1: prodlike
+          PARITY_ENV2: canary
+        run: bash scripts/ci/parity_check.sh
+
+      - name: Upload parity artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity_result_${{ matrix.cloud }}
+          path: parity_result.json
