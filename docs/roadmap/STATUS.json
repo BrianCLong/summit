@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-13T19:58:08Z",
-  "revision_note": "GA verify now uses governed test scope to keep server unit checks deterministic in CI",
+  "last_updated": "2026-01-13T20:30:00Z",
+  "revision_note": "Added Summit MCP server vertical slice with policy gating, skills modules, and evidence bundle fixture",
   "initiatives": [
     {
       "id": "A",
