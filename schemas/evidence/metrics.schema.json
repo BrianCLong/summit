@@ -1,10 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
+  "anyOf": [
+    { "required": ["evidence_id", "metrics"] },
+    {
+      "required": ["eid", "metrics"],
+      "properties": {
+        "metrics": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        }
+      }
+    }
+  ],
   "properties": {
     "evidence_id": { "type": "string" },
+    "eid": { "type": "string" },
     "metrics": { "type": "object" }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

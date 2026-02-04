@@ -1,9 +1,6 @@
 {
-  "evidence_id": "EVD-openviking-retrieval-002",
+  "evidence_id": "EVD-VERA-TEXT-001",
   "metrics": {
-    "clarification_turns_count": 0,
-    "critical_ambiguities_unresolved_count": 0,
-    "locality_pass_rate": 1.0,
-    "determinism_hash_match": 1.0
+    "scaffold_completeness": 1.0
   }
 }

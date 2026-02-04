@@ -9,6 +9,7 @@ from jsonschema import validate, ValidationError
 SCHEMA_MAP = {
     "report": "report.schema.json",
     "metrics": "metrics.schema.json",
+    "inauth_metrics": "inauth_metrics.schema.json",
     "stamp": "stamp.schema.json",
     "index": "index.schema.json",
 }
@@ -29,6 +30,8 @@ def validate_file(file_path, file_type=None):
         filename = os.path.basename(file_path)
         if "report" in filename:
             file_type = "report"
+        elif "inauth" in filename and "metrics" in filename:
+            file_type = "inauth_metrics"
         elif "metrics" in filename:
             file_type = "metrics"
         elif "stamp" in filename:

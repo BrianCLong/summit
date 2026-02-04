@@ -163,7 +163,7 @@ export class MaestroEngine extends EventEmitter {
       } else {
         const steps = this.topologicalSort(context.workflow.steps);
         for (const step of steps) {
-          const ready = await this.areDepenciesSatisfied(context.run_id, step);
+          const ready = await this.areDependenciesSatisfied(context.run_id, step);
           if (!ready) continue;
           await this.executeStepWithRetry(context, step);
           const runStatus = await this.stateStore.getRunStatus(context.run_id);
@@ -184,7 +184,7 @@ export class MaestroEngine extends EventEmitter {
       for (const stepId of remainingSteps) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const step = stepMap.get(stepId)!;
-        if (await this.areDepenciesSatisfied(context.run_id, step)) readySteps.push(step);
+        if (await this.areDependenciesSatisfied(context.run_id, step)) readySteps.push(step);
       }
       if (readySteps.length === 0) throw new Error("Deadlock detected: steps remaining but none ready.");
       const prioritized = ForkDetector.prioritize(readySteps);
@@ -296,13 +296,13 @@ export class MaestroEngine extends EventEmitter {
     }
   }
 
-  private async areDepenciesSatisfied(runId: string, step: WorkflowStep): Promise<boolean> {
+  private async areDependenciesSatisfied(runId: string, step: WorkflowStep): Promise<boolean> {
     if (!step.depends_on || step.depends_on.length === 0) return true;
-    for (const depId of step.depends_on) {
-      const execution = await this.stateStore.getStepExecution(runId, depId);
-      if (!execution || execution.status !== "succeeded") return false;
-    }
-    return true;
+    // Optimize: Check dependencies in parallel to avoid N+1 queries
+    const executions = await Promise.all(
+      step.depends_on.map((depId) => this.stateStore.getStepExecution(runId, depId)),
+    );
+    return executions.every((execution) => execution && execution.status === "succeeded");
   }
 
   private async completeRun(context: RunContext): Promise<void> {
