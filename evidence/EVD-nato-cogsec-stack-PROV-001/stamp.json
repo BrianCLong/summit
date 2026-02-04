@@ -1,6 +1,0 @@
-{
-  "evidence_id": "EVD-nato-cogsec-stack-PROV-001",
-  "created_at": "2026-02-02T00:00:00Z",
-  "git_sha": "UNCOMMITTED",
-  "runner": "cogsec-evidence-scaffold"
-}

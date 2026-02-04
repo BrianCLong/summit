@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-NARRDOM-GOV-001",
-  "tool_versions": {
-    "agent": "codex",
-    "policy_engine": "local"
-  },
-  "generated_at": "2026-02-03T00:00:00Z"
-}
