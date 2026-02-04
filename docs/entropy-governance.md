@@ -1,18 +1,12 @@
-# Entropy Governance Model
+# Entropy Governance
+Architecture drift is a systems problem, not a people problem.
 
-## Overview
-This document outlines the governance model for fighting architecture drift in Summit.
+## Core Pillars
+1. **Continuous Enforcement**: Rules must run in CI.
+2. **Decision-Time Context**: Surface ADRs and owners when files change.
+3. **Cognitive Load Budgets**: Enforce limits on complexity.
 
-## Principles
-1. **Entropy is inevitable**: We must actively counter it.
-2. **Context is key**: Decisions fail when context is missing.
-3. **Continuous Enforcement**: Rules must be enforced at build time.
-
-## Roles
-- **Platform Architecture**: Owners of `policies/entropy_guard/`.
-- **Engineering Teams**: Consumers of context and subject to rules.
-
-## Process
-1. New rules start as `warn`.
-2. After baseline, rules move to `fail`.
-3. Violations require remediation or explicit exception.
+## Rule Governance
+Policies are versioned and owned by specific teams.
+- Rules start as `warn` to collect baselines.
+- Rules promote to `fail` once stable.
