@@ -58,24 +58,12 @@ def main():
     validate_schema(index, ROOT / "evidence" / "schemas" / "index.schema.json", context="index.json")
 
     items = index.get("items", [])
-    if isinstance(items, dict):
-        items_list = []
-        for eid, details in items.items():
-            item = details.copy()
-            if "evidence_id" not in item:
-                item["evidence_id"] = eid
-            items_list.append(item)
-        items = items_list
-
     if not isinstance(items, list):
-        fail("index.json 'items' must be a list or object")
+        fail("index.json 'items' must be a list")
 
     print(f"Index valid. {len(items)} items found.")
 
     for item in items:
-        item_id = item.get("evidence_id") or item.get("id")
-        report = None
-
         if "id" in item and "path" in item:
             # Check if path exists
             item_path = ROOT / item["path"]
@@ -84,33 +72,15 @@ def main():
 
             # Load evidence report
             report = load_json(item_path)
-        elif "evidence_id" in item:
-            report_path = None
-            if "report" in item:
-                report_path = ROOT / item["report"]
-            elif "artifacts" in item:
-                for art in item["artifacts"]:
-                    if isinstance(art, str) and art.endswith("report.json"):
-                        report_path = ROOT / art
-                        break
-            elif "files" in item:
-                for f in item["files"]:
-                    if isinstance(f, str) and f.endswith("report.json"):
-                        report_path = ROOT / f
-                        break
-
-            if report_path:
-                if not report_path.exists():
-                    print(f"WARN: Evidence report not found: {report_path}")
-                else:
-                    report = load_json(report_path)
-
-        if report is None:
-            if item_id:
-                print(f"WARN: Could not find report for {item_id}, skipping content validation.")
-                continue
-            else:
-                fail(f"Item missing required fields: {item}")
+            item_id = item["id"]
+        elif "evidence_id" in item and "report" in item:
+            report_path = ROOT / item["report"]
+            if not report_path.exists():
+                fail(f"Evidence report not found: {report_path}")
+            report = load_json(report_path)
+            item_id = item["evidence_id"]
+        else:
+            fail(f"Item missing required fields: {item}")
 
         # Determine which schema to use.
         if "summary" in report and "outputs" in report:
