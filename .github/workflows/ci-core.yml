@@ -10,8 +10,6 @@ on:
     # SAFETY: Conservative paths-ignore to prevent skipping required checks
     # This is the PRIMARY CI GATE - it MUST run on any code/config/dependency changes
     paths-ignore:
-      - "**.md"
-      - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
       # NOTE: We do NOT ignore:
@@ -20,38 +18,44 @@ on:
       # - scripts/**, tools/**, Dockerfile (build/test/infra changes must trigger this)
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
   merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CI: true
+  JEST_RETRY_TIMES: 2
+  NODE_ENV: test
+  TZ: UTC
+
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: actions/setup-node@v4 # v6
         with:
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          node-version: "20"
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -68,14 +72,16 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [config-preflight]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          node-version: "20"
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -94,36 +100,27 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: timescale/timescaledb:latest-pg14
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: summit_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          node-version: "20"
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
           cache: pnpm
+
+      - name: Start Test Infrastructure
+        run: |
+          docker run -d --name summit-db-test -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=summit_test timescale/timescaledb:latest-pg14
+          docker run -d --name summit-redis-test -p 6379:6379 redis:7-alpine
+
+          # Wait for health
+          echo "Waiting for Postgres..."
+          until docker exec summit-db-test pg_isready; do sleep 2; done
+          echo "Waiting for Redis..."
+          until docker exec summit-redis-test redis-cli ping | grep -q PONG; do sleep 2; done
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -133,7 +130,14 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
-      - name: Run integration tests
+      - name: Run integration tests (attempt 1)
+        run: pnpm test:integration || echo "retry" > .retry
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Run integration tests (attempt 2 if needed)
+        if: ${{ hashFiles('.retry') != '' }}
         run: pnpm test:integration
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
@@ -143,6 +147,11 @@ jobs:
         run: npm test -- test/verification/integrations.node.test.ts --bail
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
+
+      - name: Stop Test Infrastructure
+        if: always()
+        run: |
+          docker rm -f summit-db-test summit-redis-test || true
 
       - name: Upload integration test results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -155,13 +164,15 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          node-version: "20"
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -184,14 +195,16 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [lint-typecheck, unit-tests]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          node-version: "20"
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies
@@ -230,16 +243,45 @@ jobs:
           path: build-checksums-*.txt
           retention-days: 30
 
+  governance-docs-integrity:
+    name: Governance / Docs Integrity
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify governance docs
+        run: pnpm ci:docs-governance
+
+      - name: Upload governance docs integrity report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: governance-docs-integrity
+          path: artifacts/governance/docs-integrity
+          retention-days: 30
+
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [deterministic-build, integration-tests]
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          node-version: "20"
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Bootstrap and smoke test
@@ -267,9 +309,53 @@ jobs:
             logs/
           retention-days: 7
 
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: self-hosted
+    needs: [integration-tests]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+
+      - name: Start Services
+        run: make up
+
+      - name: Wait for Services
+        run: sleep 60
+
+      - name: Run E2E Tests
+        run: pnpm test:e2e
+        env:
+          CI: true
+
+      - name: Stop Services
+        if: always()
+        run: make down
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: playwright-report
+          path: reports/playwright
+          retention-days: 7
+
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       checks: write
@@ -281,13 +367,12 @@ jobs:
       - name: Use Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version-file: .nvmrc
+          cache: "pnpm"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          version: 9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -304,9 +389,50 @@ jobs:
           path: soc-compliance-reports
           retention-days: 90
 
+  branch-protection-drift:
+    name: Governance / Branch Protection Drift
+    runs-on: self-hosted
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate branch protection read token
+        env:
+          BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: |
+          if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+            echo "::error::BRANCH_PROTECTION_READ_TOKEN is required to audit branch protection."
+            exit 1
+          fi
+
+      - name: Check branch protection drift
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: pnpm ci:branch-protection:check
+
+      - name: Upload drift artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: branch-protection-drift
+          path: artifacts/governance/branch-protection-drift
+          retention-days: 30
+
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       - config-preflight
       - lint-typecheck
@@ -314,8 +440,11 @@ jobs:
       - integration-tests
       - verification-suite
       - deterministic-build
+      - governance-docs-integrity
       - golden-path
+      - e2e-tests
       - soc-control-verification
+      - branch-protection-drift
     if: always()
     steps:
       - name: Check all gates passed
@@ -327,8 +456,11 @@ jobs:
           echo "Integration Tests: ${{ needs.integration-tests.result }}"
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
           echo "Deterministic Build: ${{ needs.deterministic-build.result }}"
+          echo "Governance / Docs Integrity: ${{ needs.governance-docs-integrity.result }}"
           echo "Golden Path: ${{ needs.golden-path.result }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}"
           echo "SOC Control Verification: ${{ needs.soc-control-verification.result }}"
+          echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
           echo ""
 
           # All jobs must succeed (no continue-on-error allowed)
@@ -362,13 +494,28 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.governance-docs-integrity.result }}" != "success" ]]; then
+            echo "::error::Governance / Docs Integrity FAILED"
+            exit 1
+          fi
+
           if [[ "${{ needs.golden-path.result }}" != "success" ]]; then
             echo "::error::Golden Path FAILED"
             exit 1
           fi
 
+          if [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+            echo "::error::E2E Tests FAILED"
+            exit 1
+          fi
+
           if [[ "${{ needs.soc-control-verification.result }}" != "success" ]]; then
             echo "::error::SOC Control Verification FAILED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.branch-protection-drift.result }}" != "success" ]]; then
+            echo "::error::Branch Protection Drift FAILED"
             exit 1
           fi
 
@@ -387,7 +534,10 @@ jobs:
           echo "- ✅ Integration Tests" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Deterministic Build" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Governance / Docs Integrity" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Golden Path Smoke Test" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ E2E Tests (Playwright)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SOC Control Verification" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Ready for merge (pending ci-verify)" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,21 @@
+{
+  "job_id": "job_123",
+  "timestamp": "2023-10-27T10:00:00Z",
+  "claims": [
+    {
+      "id": "claim_1",
+      "text": "The economy grew by 5% last quarter.",
+      "speaker": "Speaker A",
+      "time_range": { "start": 0, "end": 5 },
+      "verdict": "verified",
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "source": "Bureau of Economic Analysis",
+          "url": "https://example.com/bea",
+          "snippet": "GDP increased at an annual rate of 4.9 percent in the third quarter of 2023."
+        }
+      ]
+    }
+  ]
+}

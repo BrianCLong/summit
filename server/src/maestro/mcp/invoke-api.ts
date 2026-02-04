@@ -68,7 +68,18 @@ router.post(
         span.setAttribute('mcp.server', server);
         span.setAttribute('mcp.tool', tool);
         span.end();
-        res.json({ server, tool, result, audit: { argsHash, resultHash } });
+        const uiMetadata = result?._meta?.['ui/resourceUri'] ? {
+          resourceUri: result._meta['ui/resourceUri'],
+          serverId: result._meta['ui/serverId'] || server
+        } : null;
+
+        res.json({
+          server,
+          tool,
+          result,
+          ui: uiMetadata,
+          audit: { argsHash, resultHash }
+        });
       } catch (err: any) {
         if (err?.message?.includes('Insufficient scopes')) {
           try {

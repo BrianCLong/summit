@@ -11,13 +11,25 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import crypto from 'crypto';
 import type {
   JWTSecurityManager as JWTSecurityManagerClass,
   createJWTSecurityManager as createJWTSecurityManagerFn,
 } from '../jwt-security.js';
-import { createClient, mockRedisClient } from '../../../tests/mocks/redis';
+import { createClient, mockRedisClient } from '../../../tests/mocks/redis.js';
 
-const unstableMockModule = (jest as any).unstable_mockModule as any;
+const staticKeyPair = {
+  publicKey: '-----BEGIN PUBLIC KEY-----\nMOCK\n-----END PUBLIC KEY-----',
+  privateKey: '-----BEGIN PRIVATE KEY-----\nMOCK\n-----END PRIVATE KEY-----',
+};
+const generateKeyPairSpy = jest
+  .spyOn(crypto, 'generateKeyPairSync')
+  .mockReturnValue(staticKeyPair as any);
+
+jest.unstable_mockModule('redis', () => ({
+  __esModule: true,
+  createClient,
+}));
 
 let createJWTSecurityManager: typeof createJWTSecurityManagerFn;
 let JWTSecurityManager: typeof JWTSecurityManagerClass;
@@ -27,6 +39,10 @@ describe('JWTSecurityManager', () => {
   beforeAll(async () => {
     ({ createJWTSecurityManager, JWTSecurityManager } =
       await import('../jwt-security.js'));
+  });
+
+  afterAll(() => {
+    generateKeyPairSpy.mockRestore();
   });
 
   beforeEach(() => {

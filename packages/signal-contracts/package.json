@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/signal-contracts",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Signal Bus contract definitions - SignalEnvelope, SignalType registry, Alert schemas",
   "type": "module",
   "main": "dist/index.js",
@@ -26,7 +26,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"

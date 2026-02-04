@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-PPGI-MAG-PRIV-001",
+  "metrics": {
+    "privacy_budget_remaining": 100
+  }
+}

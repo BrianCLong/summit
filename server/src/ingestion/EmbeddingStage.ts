@@ -1,5 +1,5 @@
-import { Document, Chunk, ConnectorContext } from '../data-model/types';
-import EmbeddingService from '../services/EmbeddingService';
+import { Document, Chunk, ConnectorContext } from '../data-model/types.js';
+import EmbeddingService from '../services/EmbeddingService.js';
 
 export class EmbeddingStage {
   private embeddingService: EmbeddingService;

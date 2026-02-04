@@ -1,7 +1,7 @@
 // server/src/graphql/persistedQueryPlugin.ts
 import { ApolloServerPlugin, GraphQLRequestContext, GraphQLResponse } from '@apollo/server';
-import { PersistedQueryManager, PersistedQueryRepository } from './persistedQueries';
-import { Logger } from '../utils/logger';
+import { PersistedQueryManager, PersistedQueryRepository } from './persistedQueries.js';
+import { Logger } from '../utils/logger.js';
 
 export interface PersistedQueryPluginConfig {
   manager: PersistedQueryManager;

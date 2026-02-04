@@ -1,0 +1,52 @@
+name: eval-skills
+
+on:
+  pull_request:
+    paths:
+      - 'evals/**'
+      - 'scripts/**'
+      - 'Makefile'
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  eval-skills-changed:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run changed skill evals
+        run: make eval-skills-changed
+      - name: Upload eval artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-skills-changed
+          path: evals/skills/**/artifacts/**
+
+  eval-skills-suite:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run full skill eval suite
+        run: make eval-skills-all
+      - name: Upload eval artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-skills-suite
+          path: evals/skills/**/artifacts/**

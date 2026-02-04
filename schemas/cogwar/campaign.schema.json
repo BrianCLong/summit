@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "cognitive campaign",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "theater",
+    "timebox",
+    "actors",
+    "channels",
+    "narratives",
+    "timing",
+    "indicators",
+    "provenance"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "theater": { "type": "string" },
+    "timebox": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "string" },
+        "end": { "type": "string" }
+      }
+    },
+    "actors": { "type": "array", "items": { "type": "string" } },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "handle"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["telegram", "web", "x", "facebook", "youtube", "other"]
+          },
+          "handle": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "narratives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "frame",
+          "claim_family",
+          "target_audience",
+          "intended_effect"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "frame": { "type": "string" },
+          "claim_family": { "type": "string" },
+          "target_audience": { "type": "string" },
+          "intended_effect": { "type": "string" }
+        }
+      }
+    },
+    "timing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event_name", "window"],
+        "properties": {
+          "event_name": { "type": "string" },
+          "window": { "type": "string", "enum": ["pre", "during", "post"] },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "indicators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "value", "confidence"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "keyword",
+              "phrase",
+              "domain",
+              "url_pattern",
+              "html_fingerprint",
+              "account_pattern"
+            ]
+          },
+          "value": { "type": "string" },
+          "confidence": { "type": "string", "enum": ["low", "medium", "high"] }
+        }
+      }
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "retrieved_via"],
+        "properties": {
+          "source": { "type": "string" },
+          "retrieved_via": { "type": "string", "enum": ["manual", "crawler", "api"] },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

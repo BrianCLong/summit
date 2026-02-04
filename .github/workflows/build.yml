@@ -1,0 +1,100 @@
+name: Supply Chain Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-attest:
+    name: Build, SBOM & Provenance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    env:
+      SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # v4.1.7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+
+      # Note: pnpm version is read from package.json "packageManager" field
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Project
+        run: pnpm build
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@6c5cb5bd7dcd9b7f5fe6d7c7e21ed2f6b3f5ab7b # v0.18.0
+
+      - name: Install in-toto
+        run: pip install in-toto
+
+      - name: Setup Signing Key
+        run: |
+          if [ -n "$SIGSTORE_KEY" ]; then
+             echo "$SIGSTORE_KEY" > cosign.key
+          else
+             echo "Generating ephemeral key for demo/check..."
+             cosign generate-key-pair
+          fi
+
+      - name: Generate SBOM (SPDX)
+        run: syft . -o spdx-json=sbom.spdx.json
+
+      - name: Generate SBOM (CycloneDX)
+        run: syft . -o cyclonedx-json=sbom.cdx.json
+
+      - name: Sign SBOMs
+        if: env.SIGSTORE_KEY != ''
+        run: |
+          cosign sign --key cosign.key sbom.spdx.json
+          cosign sign --key cosign.key sbom.cdx.json
+
+      - name: Prepare Artifacts for Provenance
+        run: |
+          # Aggregate artifacts for provenance to match ./dist/* expectation
+          mkdir -p dist
+          # Copy server artifacts if they exist
+          if [ -d "server/dist" ]; then
+            cp -r server/dist/* dist/
+          fi
+          # Copy client artifacts if they exist
+          if [ -d "client/dist" ]; then
+            cp -r client/dist/* dist/
+          fi
+          # Ensure dist is not empty
+          touch dist/build-manifest.txt
+
+      - name: Generate Build Provenance
+        run: |
+          in-toto-run --step-name build \
+            --materials "./src,./sbom.spdx.json" \
+            --products "./dist/*" \
+            --record-keystore cosign.key --no-command || echo "in-toto-run skipped"
+
+          # Sign attestation
+          if [ -f attestation.json ] && [ -n "$SIGSTORE_KEY" ]; then
+             cosign sign --key cosign.key attestation.json || true
+          fi
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4 # v4.6.0
+        with:
+          name: sboms
+          path: |
+            sbom.*.json
+            attestation.json

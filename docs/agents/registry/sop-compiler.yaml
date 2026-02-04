@@ -1,0 +1,27 @@
+id: sop-compiler
+name: SOP Compiler
+version: 0.1.0
+description: Converts runbooks and SOPs into structured procedures with checks.
+role: specialist
+inputs:
+  - name: sop_markdown
+    type: markdown
+    required: true
+    description: SOP or runbook document to compile.
+outputs:
+  - name: procedure
+    type: json
+    description: Structured procedure representation for execution engines.
+  - name: validation_report
+    type: json
+    description: Schema validation results and missing requirements.
+sop_refs:
+  - SOP-COMPILER-001
+allowed_tools:
+  - markdown-parser
+  - policy-engine
+policies:
+  - docs/governance/CONSTITUTION.md
+evals:
+  - evals/sop-compiler-smoke
+owner: docops

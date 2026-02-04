@@ -179,7 +179,7 @@ jobs:
       - name: Verify RTO/RPO
         run: ./ci/dr/verify_rto_rpo.sh --rto 900 --rpo 300
       - name: Collect evidence
-        run: ./ci/dr/collect_evidence.sh
+        run: ./ci/dr/generate_evidence_bundle.sh
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with: { name: dr-evidence, path: out/evidence/** }

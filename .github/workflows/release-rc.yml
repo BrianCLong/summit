@@ -80,7 +80,7 @@ jobs:
           echo "✅ Valid RC tag format: ${TAG}"
 
       - name: Checkout at tagged commit
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ steps.params.outputs.tag }}
           fetch-depth: 0
@@ -97,14 +97,15 @@ jobs:
           echo "Resolved commit: ${COMMIT}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 10
+          version: 9
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -134,7 +135,7 @@ jobs:
 
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
@@ -195,7 +196,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: verification-output
           path: artifacts/verification/
@@ -229,7 +230,7 @@ jobs:
 
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
@@ -389,14 +390,14 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload RC Pipeline Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
           path: ${{ steps.assemble.outputs.bundle_dir }}
           retention-days: 90
 
       - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@b54d29a59e55046d1f7fc8226cdda507e6b9cf62 # v5
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
         with:
           name: verification-output
           failOnError: false

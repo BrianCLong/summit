@@ -7,9 +7,9 @@ variable "environment" {
 }
 
 variable "description" {
-  type      = string
-  default   = null
-  nullable  = true
+  type     = string
+  default  = null
+  nullable = true
 }
 
 variable "enable_key_rotation" {
@@ -38,9 +38,9 @@ variable "aliases" {
 }
 
 variable "policy" {
-  type      = string
-  default   = null
-  nullable  = true
+  type     = string
+  default  = null
+  nullable = true
 }
 
 variable "tags" {

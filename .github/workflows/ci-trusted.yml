@@ -1,0 +1,29 @@
+name: CI (Trusted)
+
+on:
+  # TRUSTED Workflow Trigger
+  # Runs on pushes to main (post-merge) or PRs from internal branches if configured via pull_request_target (careful!)
+  push:
+    branches: [main]
+
+  # Allow manual trigger for authorized users
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for OIDC
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate to Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+      - name: Deploy
+        run: |
+          echo "Deploying to staging..."

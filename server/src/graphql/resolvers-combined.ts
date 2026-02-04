@@ -4,13 +4,14 @@ import { copilotResolvers as copilotResolversRaw } from './resolvers.copilot.js'
 import { graphResolvers as graphResolversRaw } from './resolvers.graphops.js';
 import { aiResolvers as aiResolversRaw } from './resolvers.ai.js';
 import { annotationsResolvers as annotationsResolversRaw } from './resolvers.annotations.js';
-import { v040Resolvers } from './resolvers/v040/index';
+import { v040Resolvers } from './resolvers/v040/index.js';
 import { activityResolvers } from './resolvers/activity.js';
 import { geoIntResolvers } from './resolvers/geoint.js';
 import { documentResolvers as documentResolversRaw } from './resolvers.document.js';
 import { ingestionResolvers } from './resolvers/ingestionResolvers.js';
 import { randomUUID } from 'node:crypto';
 import { erResolvers } from './resolvers.er.js';
+import { provenanceResolvers } from './resolvers/provenance.js';
 
 interface User {
   id: string;
@@ -74,6 +75,7 @@ export const resolvers = {
     ...(geoIntResolvers.Query || {}),
     ...(documentResolvers.Query || {}),
     ...(erResolvers.Query || {}),
+    ...(provenanceResolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -93,6 +95,7 @@ export const resolvers = {
     ...(v040Resolvers.Mutation || {}),
     ...(documentResolvers.Mutation || {}),
     ...(erResolvers.Mutation || {}),
+    ...(provenanceResolvers.Mutation || {}),
     login: async (
       _: any,
       { input }: { input: LoginInput },

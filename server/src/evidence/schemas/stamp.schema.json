@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["generated_at_utc","git_sha"],
+  "properties": {
+    "generated_at_utc": {"type":"string"},
+    "git_sha": {"type":"string"}
+  }
+}

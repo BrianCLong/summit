@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Agent Mandates
 
 **Authority:** Derived from Article II of the [Constitution](CONSTITUTION.md).

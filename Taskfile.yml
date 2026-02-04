@@ -27,3 +27,29 @@ tasks:
     desc: 'Deploy or update OTel Collector config'
     cmds:
       - kubectl create configmap otel-collector-config --from-file=observability/otel/collector-config.yaml -n observability --dry-run=client -o yaml | kubectl apply -f -
+
+  # --- Deployment & Infra Tasks ---
+
+  infra:init:
+    desc: 'Initialize Terraform for Production'
+    dir: terraform/environments/prod
+    cmds:
+      - terraform init
+
+  infra:apply:
+    desc: 'Provision Production Infrastructure (AWS)'
+    dir: terraform/environments/prod
+    cmds:
+      - terraform apply
+
+  secrets:init:
+    desc: 'Bootstrap production secrets (DB, API Keys)'
+    cmds:
+      - ./scripts/aws-init-secrets.sh
+
+  deploy:aws:
+    desc: 'Manual deployment of all services to AWS EKS'
+    cmds:
+      - helm upgrade --install maestro charts/universal-app --namespace default --values charts/universal-app/values.yaml --set image.repository=$ECR_REGISTRY/summit/maestro --set image.tag=latest
+      - helm upgrade --install prov-ledger charts/universal-app --namespace default --values charts/universal-app/values.yaml --set image.repository=$ECR_REGISTRY/summit/prov-ledger --set image.tag=latest
+
