@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "container": {
+    "seccompProfile": "policies/seccomp/default.json",
+    "apparmorProfile": "summit-model-runner-default",
+    "capabilities": {
+      "drop": ["ALL"],
+      "add": []
+    },
+    "noNewPrivileges": true,
+    "readOnlyRootFs": true
+  }
+}

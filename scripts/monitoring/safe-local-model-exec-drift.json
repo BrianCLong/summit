@@ -1,0 +1,5 @@
+{
+  "deny_all_present": true,
+  "policy_check_hooked": true,
+  "deterministic_receipts": true
+}

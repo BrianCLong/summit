@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "name": "example-model",
+      "source": "local",
+      "sha256": "54413165f3355f832bf74955742352787f1825412653869e5847d2f3587c5e37",
+      "signature": {
+        "required": false,
+        "method": "sigstore"
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+name: Safe Local Model Execution
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'runtime/**'
+      - 'policies/**'
+      - '.github/workflows/safe-local-model-exec.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'runtime/**'
+      - 'policies/**'
+      - 'scripts/monitoring/safe-local-model-exec-drift.sh'
+
+jobs:
+  policy-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate Policy JSON
+        run: |
+          jq . policies/model-allowlist.json
+          jq . policies/egress-allowlist.json
+          jq . policies/security-profile.json
+          jq . policies/seccomp/default.json
+
+  runner-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Validator Unit Tests
+        run: node --test tests/runtime/run_policy_check.test.mjs
+
+  drift-detector:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Drift Detector
+        run: ./scripts/monitoring/safe-local-model-exec-drift.sh

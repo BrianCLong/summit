@@ -365,3 +365,10 @@ evidence-staging/
 *.txt
 tmp-test/
 \n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
+
+# Safe Local Model Execution runtime artifacts
+runtime/receipts/*.json
+runtime/receipts/*.stamp.json
+runtime/audit/*.jsonl
+!runtime/receipts/README.md
+!runtime/audit/README.md
