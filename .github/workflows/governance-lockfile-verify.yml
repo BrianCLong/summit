@@ -48,6 +48,8 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  issues: write
 
 jobs:
   verify-lockfile:
@@ -91,12 +93,13 @@ jobs:
           fi
 
           # Run verification
-          RESULT=$(./scripts/release/verify_governance_lockfile.sh ${ARGS} 2>&1) || EXIT_CODE=$?
+          ./scripts/release/verify_governance_lockfile.sh ${ARGS} > verification_report.json 2> verification_error.log || EXIT_CODE=$?
 
-          echo "${RESULT}" > verification_report.json
+          # Capture results
+          RESULT=$(cat verification_report.json)
 
           # Parse results
-          STATUS=$(echo "${RESULT}" | jq -r '.status // "unknown"')
+          STATUS=$(cat verification_report.json | jq -r '.status // "unknown"')
           PASSED=$(echo "${RESULT}" | jq -r '.summary.checks_passed // 0')
           FAILED=$(echo "${RESULT}" | jq -r '.summary.checks_failed // 0')
           WARNED=$(echo "${RESULT}" | jq -r '.summary.checks_warned // 0')
