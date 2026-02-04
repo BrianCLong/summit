@@ -1,23 +1,50 @@
-# Repo Assumptions
+# repo_assumptions.md
 
-*   **Verified**
-    *   Repo exists and is MIT licensed.
-    *   Root contains `.ci/` and `__tests__/` and agent-related dirs (`agentic/`, `agents/`, `agent-bundle/`).
-    *   **Orchestrator**: `packages/maestro-core` is the real orchestrator package, using `LiteLLMPlugin` for model calls.
-    *   **Test Runner**: `jest` is used in `packages/maestro-core`.
-    *   **Module System**: `packages/maestro-core` is an ESM package (`"type": "module"` in `package.json`).
-    *   **Target Directory**: `packages/maestro-core/src/daao/` is the chosen location for DAAO modules.
+## Verified
 
-*   **Assumed**
-    *   The `litellm-plugin.ts` handles the actual execution of LLM steps, and DAAO will interface with it or be used by the engine to configure steps before execution.
-    *   Existing "budget" concept is limited or non-existent in the core, so DAAO will introduce explicit budget checks.
+- Repository contents inspected locally; subsumption bundles and verifier script exist.
+- CI uses GitHub Actions workflows under `.github/workflows/`.
+- Evidence schemas and index live under `evidence/`.
+- Top-level directories consistent with multi-surface platform (`api/`, `packages/`, `scripts/`, `docs/`).
+- Testing frameworks: `vitest` and `jest` are present in `package.json`.
+- `docs/ops/runbooks/` and `docs/security/data-handling/` directories exist.
 
-*   **Validation checklist (completed)**
-    1.  Identify the real orchestrator package: `packages/maestro-core`.
-    2.  Confirm test runner + command: `jest` / `npm test`.
-    3.  Confirm TS path aliases + module system: ESM.
-    4.  Confirm logging/telemetry conventions: `metadata` object in `StepExecution` result.
-    5.  Confirm any existing "budget" concept: `LiteLLMPlugin` has basic cost calculation but no enforcement.
+## Assumed (validate ASAP)
 
-*   **Must-not-touch**
-    *   Existing security/CI policy directories without explicit need: `.security/`, `.ci/`, `SECURITY/` (unless adding additive docs only).
+- Required status check names remain to be confirmed against branch protection.
+- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
+- `scripts/execution/` directory needs to be created.
+
+## Must-not-touch (until validated)
+
+- `.github/workflows/*` (avoid CI breakage).
+- `docs/ci/REQUIRED_CHECKS_POLICY.yml` (if governance-controlled).
+- `SECURITY/*` (extend-only).
+- Public API surfaces in `packages/**` (no breaking changes).
+- Existing GA gates / branch protection requirements.
+- Deployment configs / secrets / infra definitions.
+
+## Validation plan
+
+- Enumerate required checks via GitHub branch protection UI/API.
+- Confirm test runner (jest/vitest) and lint tooling. (Verified: `jest` and `vitest` are dependencies).
+
+## Ingress NGINX Retirement Bundle (Assumptions)
+
+### Verified
+
+- Bundle manifest and docs are now present under `subsumption/ingress-nginx-retirement` and `docs/**`.
+
+### Assumed (validate)
+
+- GitHub Actions required checks can be updated to include bundle-specific gates.
+- CI runners have Node.js 20+ available for the bundle verifier and deny gate scripts.
+
+### Must-not-touch (blast radius)
+
+- Runtime API surfaces and production deployment logic outside CI gating.
+
+### Validation plan
+
+- Confirm required check names in branch protection.
+- Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.
