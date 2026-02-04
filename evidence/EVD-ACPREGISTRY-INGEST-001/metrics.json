@@ -1,4 +1,7 @@
 {
-  "agents_count": 1,
-  "validation_passed": true
+  "evidence_id": "EVD-ACPREGISTRY-INGEST-001",
+  "metrics": {
+    "agents_count": 1,
+    "validation_passed": true
+  }
 }
