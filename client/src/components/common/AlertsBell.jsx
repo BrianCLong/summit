@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import {
   IconButton,
@@ -42,10 +42,13 @@ export default function AlertsBell() {
 
   const alerts = data?.alerts || [];
   const count = alerts.length;
+  const prevCountRef = useRef(0);
 
   // Show toast on newest alert
   useEffect(() => {
-    if (alerts.length > 0) {
+    // Only show toast if the number of alerts increased (new alert arrived)
+    // or if we have alerts on initial load (optional, but alerts > 0 handles it if prev is 0)
+    if (alerts.length > 0 && alerts.length > prevCountRef.current) {
       const latest = alerts[0];
       setSnack({
         severity: latest.severity || 'info',
@@ -53,6 +56,7 @@ export default function AlertsBell() {
         message: latest.message,
       });
     }
+    prevCountRef.current = alerts.length;
   }, [alerts.length]);
 
   const handleOpen = (e) => setAnchorEl(e.currentTarget);
@@ -65,7 +69,11 @@ export default function AlertsBell() {
 
   return (
     <>
-      <IconButton color="inherit" onClick={handleOpen} aria-label="alerts">
+      <IconButton
+        color="inherit"
+        onClick={handleOpen}
+        aria-label={count > 0 ? `${count} unread alerts` : 'No new alerts'}
+      >
         <Badge badgeContent={count} color="error">
           <NotificationsIcon />
         </Badge>

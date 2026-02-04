@@ -32,6 +32,7 @@ function main() {
   const fixturePath = process.argv[2];
 
   let prLabels: string[] = [];
+  let prTitle: string = '';
 
   if (fixturePath) {
     // Read from fixture file (expected format: JSON array of strings or object mimicking PR event)
@@ -40,8 +41,9 @@ function main() {
       const json = JSON.parse(content);
       if (Array.isArray(json)) {
         prLabels = json;
-      } else if (json.pull_request && json.pull_request.labels) {
-        prLabels = json.pull_request.labels.map((l: any) => l.name);
+      } else if (json.pull_request) {
+        prLabels = (json.pull_request.labels || []).map((l: any) => l.name);
+        prTitle = json.pull_request.title || '';
       } else {
         console.error('Invalid fixture format.');
         process.exit(1);
@@ -55,23 +57,29 @@ function main() {
     try {
       const content = fs.readFileSync(eventPath, 'utf8');
       const event: PREvent = JSON.parse(content);
-      if (event.pull_request && event.pull_request.labels) {
-        prLabels = event.pull_request.labels.map(l => l.name);
+      if (event.pull_request) {
+        prLabels = (event.pull_request.labels || []).map(l => l.name);
+        prTitle = event.pull_request.title || '';
       } else {
         console.log('No pull_request found in event payload (not a PR event?). Exiting.');
         process.exit(0);
       }
     } catch (e) {
       console.error(`Error reading GITHUB_EVENT_PATH: ${e.message}`);
-      // In warn-only mode, we shouldn't fail the build even if we can't read the event?
-      // But this is a script error, so maybe we should.
-      // Requirement says "warn-only mode" regarding the label check failing.
       process.exit(1);
     }
   } else {
     console.log('No GITHUB_EVENT_PATH or fixture argument provided.');
     console.log('Usage: check-semver-label.ts [fixture.json]');
     process.exit(1);
+  }
+
+  // Auto-infer from title if no labels found
+  if (prLabels.length === 0 && prTitle) {
+    if (prTitle.startsWith('feat:')) prLabels.push('minor');
+    else if (prTitle.startsWith('fix:')) prLabels.push('patch');
+    else if (prTitle.startsWith('docs:')) prLabels.push('documentation');
+    else if (prTitle.includes('BREAKING CHANGE')) prLabels.push('major');
   }
 
   const foundLabels = prLabels.filter(label => Object.keys(VALID_LABELS).includes(label));

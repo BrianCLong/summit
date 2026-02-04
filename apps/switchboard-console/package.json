@@ -1,0 +1,22 @@
+{
+  "name": "@intelgraph/switchboard-console",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "switchboard-console": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.5"
+  }
+}

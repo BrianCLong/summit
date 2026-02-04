@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`evidence writer writes stable evidence outputs 1`] = `
+{
+  "context": {
+    "governanceMode": "pr",
+    "taskType": "review",
+  },
+  "generatedAt": "2026-01-14T00:00:00Z",
+  "policy": {
+    "breakGlassUsed": false,
+    "environment": "pr",
+  },
+  "shard": {
+    "reasons": [
+      "Default shard selected.",
+    ],
+    "shard": "default",
+  },
+  "skillpack": {
+    "name": "ui-preview",
+    "path": ".summit/skillpacks/ui-preview",
+  },
+  "tools": [
+    {
+      "decision": {
+        "allowed": true,
+        "reason": "Explicitly allowlisted by policy.",
+        "toolName": "screenshot",
+      },
+      "justification": {
+        "alternatives": [
+          "Manual review",
+        ],
+        "expectedUtility": "UI verification",
+        "planStepRef": "skillpack:ui-preview:default",
+        "tokenCost": 12,
+      },
+      "mode": "distilled",
+      "serverName": "playwright",
+      "tokenEstimate": 12,
+      "toolName": "screenshot",
+    },
+  ],
+  "totals": {
+    "estimatedTokens": 12,
+    "toolsConsidered": 1,
+    "toolsInjected": 1,
+  },
+}
+`;
+
+exports[`evidence writer writes stable evidence outputs 2`] = `
+"# Tool Loading Report
+
+**Skillpack:** ui-preview
+**Shard:** default
+**Environment:** pr
+**Generated:** 2026-01-14T00:00:00Z
+
+## Reasons
+- Default shard selected.
+
+## Tools
+- playwright:screenshot → allowed · 12 tokens
+
+## Totals
+- Tools considered: 1
+- Tools injected: 1
+- Estimated tokens: 12
+
+## Policy
+- Break-glass used: no
+"
+`;
