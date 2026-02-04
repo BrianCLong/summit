@@ -269,9 +269,9 @@ jobs:
           path: staging/ga-bundle
 
       - name: Download Verification Output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        uses: actions/download-artifact@v4
         with:
-          name: verification-output
+          name: ga-readiness-evidence
           path: staging/verification
 
       - name: Install Cosign
@@ -373,14 +373,9 @@ jobs:
             cp -r staging/ga-bundle-staging/* "${BUNDLE_DIR}/" 2>/dev/null || true
           fi
 
-          # Copy verification output
-          if [[ -f "staging/verification-output/REQUIRED_CHECKS.txt" ]]; then
-            cp staging/verification-output/REQUIRED_CHECKS.txt "${BUNDLE_DIR}/"
-          fi
-
-          # Copy publish guard report
-          if [[ -f "staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt" ]]; then
-            cp staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt "${BUNDLE_DIR}/"
+          # Copy readiness evidence (including SBOM)
+          if [[ -d "staging/ga-readiness-evidence" ]]; then
+            cp -r staging/ga-readiness-evidence/* "${BUNDLE_DIR}/"
           fi
 
           # Create pipeline_metadata.json using jq

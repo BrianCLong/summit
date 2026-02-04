@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
 import { Pool, PoolClient } from 'pg';
-import { OrchestratorPostgresStore } from './OrchestratorPostgresStore';
-import { MaestroAgent } from './types';
+import { OrchestratorPostgresStore } from '../OrchestratorPostgresStore.js';
+import { MaestroAgent } from '../types.js';
 
 // Mock the logger
-vi.mock('../../src/config/logger', () => ({
+vi.mock('../utils/logger', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),

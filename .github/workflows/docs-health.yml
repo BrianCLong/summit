@@ -1,0 +1,70 @@
+name: Documentation Health Check
+
+# Weekly audit of documentation freshness and link integrity
+# Helps address DOC-001 (Documentation Freshness and Link Validation Missing)
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6 AM
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "**.md"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  docs-health:
+    name: Docs Health Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Markdown Links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'yes'
+          config-file: '.markdown-link-check.json'
+          folder-path: 'docs/'
+
+      - name: Check for Stale Documentation
+        id: stale-check
+        run: |
+          echo "### 🕰️ Stale Documentation Report (180+ days)" >> stale-report.md
+          echo "" >> stale-report.md
+          echo "| File | Last Modified |" >> stale-report.md
+          echo "|------|---------------|" >> stale-report.md
+          
+          STALE_COUNT=0
+          # Find .md files not modified in 180 days
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              LAST_MOD=$(git log -1 --format="%ai" -- "$file")
+              echo "| $file | $LAST_MOD |" >> stale-report.md
+              STALE_COUNT=$((STALE_COUNT + 1))
+            fi
+          done < <(find docs -name '*.md' -mtime +180 -type f)
+
+          if [ $STALE_COUNT -eq 0 ]; then
+            echo "No stale documentation found." >> stale-report.md
+          fi
+          
+          echo "stale_count=$STALE_COUNT" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Job Summary
+        if: always()
+        run: |
+          cat stale-report.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Audit Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-health-report
+          path: stale-report.md

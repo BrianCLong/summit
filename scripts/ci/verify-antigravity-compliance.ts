@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { program } from 'commander';
 import yaml from 'js-yaml';
 
 // Paths
@@ -30,15 +29,6 @@ interface TradeoffEntry {
   confidence: number;
 }
 
-// Helpers
-const loadYaml = (filepath: string) => {
-  try {
-    return yaml.load(fs.readFileSync(filepath, 'utf8'));
-  } catch (e) {
-    console.error(`Error loading YAML file: ${filepath}`, e);
-    process.exit(1);
-  }
-};
 
 const checkTradeoffLedger = () => {
   console.log('Verifying Tradeoff Ledger integrity...');
@@ -102,20 +92,20 @@ const checkPoliciesExist = () => {
 };
 
 const validateDecisionRecord = (prId: string) => {
-    console.log(`Checking for Decision Record for PR ${prId}...
+  console.log(`Checking for Decision Record for PR ${prId}...
 `);
-    // In a real scenario, we might look for a file named ADR-AG-{PR_ID}.md or similar
-    // For now, we'll just scan the directory for a matching pattern or generic check
-    
-    // This is a placeholder for actual PR-to-file logic
-    console.log(`ℹ️  Skipping specific file check for ${prId} (logic placeholder).`);
-    return true; 
+  // In a real scenario, we might look for a file named ADR-AG-{PR_ID}.md or similar
+  // For now, we'll just scan the directory for a matching pattern or generic check
+
+  // This is a placeholder for actual PR-to-file logic
+  console.log(`ℹ️  Skipping specific file check for ${prId} (logic placeholder).`);
+  return true;
 }
 
 // Main execution
 const main = () => {
   console.log("=== Antigravity Compliance Verifier ===");
-  
+
   const policiesValid = checkPoliciesExist();
   const ledgerValid = checkTradeoffLedger();
 

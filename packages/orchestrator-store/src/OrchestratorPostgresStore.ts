@@ -1,8 +1,8 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
-import { 
+import {
   MaestroLoop,
-  MaestroAgent, 
+  MaestroAgent,
   MaestroExperiment,
   MaestroPlaybook,
   CoordinationTask,
@@ -11,6 +11,7 @@ import {
   AuditEvent,
   OrchestratorStoreConfig
 } from './types.js';
+import { logger } from './utils/logger.js';
 
 export class OrchestratorPostgresStore {
   private pool: Pool;
@@ -234,6 +235,18 @@ export class OrchestratorPostgresStore {
     try {
       await client.query('BEGIN');
 
+      // First, check if the agent exists
+      const checkResult = await client.query(
+        'SELECT id FROM maestro_agents WHERE id = $1',
+        [id]
+      );
+
+      if (checkResult.rows.length === 0) {
+        await client.query('COMMIT');
+        client.release();
+        return null;
+      }
+
       // Update agent
       const updateResult = await client.query(
         `UPDATE maestro_agents SET
@@ -245,7 +258,7 @@ export class OrchestratorPostgresStore {
           metrics = COALESCE($6, metrics),
           updated_at = CURRENT_TIMESTAMP
          WHERE id = $7
-         RETURNING *`,
+         RETURNING id, name, role, model, status, routing_weight, metrics`,
         [
           updates.name,
           updates.role,
@@ -257,10 +270,6 @@ export class OrchestratorPostgresStore {
         ]
       );
 
-      if (updateResult.rows.length === 0) {
-        return null;
-      }
-
       // Log audit event
       await client.query(
         'INSERT INTO maestro_audit_log (actor, action, resource, details) VALUES ($1, $2, $3, $4)',
@@ -268,6 +277,11 @@ export class OrchestratorPostgresStore {
       );
 
       await client.query('COMMIT');
+
+      if (updateResult.rowCount === 0) {
+        client.release();
+        return null;
+      }
 
       const row = updateResult.rows[0];
       return {
@@ -281,6 +295,7 @@ export class OrchestratorPostgresStore {
       };
     } catch (error) {
       await client.query('ROLLBACK');
+      logger.error('Error updating agent:', error);
       throw error;
     } finally {
       client.release();

@@ -1,0 +1,76 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    curl
+
+RUN npm install -g nodemon
+
+# Set npm resilience
+ENV PUPPETEER_SKIP_DOWNLOAD=1 \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_ENGINE_STRICT=false
+
+RUN npm config set fetch-retries 5 \
+ && npm config set fetch-retry-mintimeout 20000 \
+ && npm config set fetch-retry-maxtimeout 120000 \
+ && npm config set fetch-timeout 600000
+
+# Copy internal packages
+COPY packages_tmp /packages
+
+# Copy package files
+COPY package*.json ./
+
+# Update package.json to use local file: dependencies for ALL workspace: protocols
+RUN node -e 'const fs = require("fs"); \
+    const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); \
+    const replaceDeps = (deps) => { \
+      if (!deps) return; \
+      for (const [name, version] of Object.entries(deps)) { \
+        if (version === "workspace:*") { \
+          const shortName = name.split("/").pop(); \
+          deps[name] = "file:/packages/" + shortName; \
+          console.log("Replacing " + name + " with file:/packages/" + shortName); \
+        } \
+      } \
+    }; \
+    replaceDeps(pkg.dependencies); \
+    replaceDeps(pkg.devDependencies); \
+    fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));'
+
+# Remove lockfile to avoid workspace protocol issues
+RUN rm -f package-lock.json
+
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy source code
+COPY . .
+
+# Set permissions
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+RUN mkdir -p uploads logs && chown -R appuser:appgroup /app
+
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/healthz || exit 1
+
+EXPOSE 4000 9229
+
+CMD ["npm", "run", "dev"]
