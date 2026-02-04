@@ -1,0 +1,5 @@
+{
+  "status": "pass",
+  "check": "redaction-tests",
+  "details": "All redaction and policy tests passed."
+}

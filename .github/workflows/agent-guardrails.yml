@@ -84,7 +84,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          cache: "pnpm"
           node-version: "18"
 
       - name: Check PR Metadata
@@ -107,7 +106,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          cache: "pnpm"
           node-version: "20"
 
       - name: Verify S-AOS Compliance

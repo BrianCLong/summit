@@ -1,6 +1,5 @@
 ---
 # CORS policy for web application
-# Replaces: nginx.ingress.kubernetes.io/enable-cors annotations
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -84,7 +83,6 @@ spec:
     allowCredentials: true
 ---
 # IP allowlist policy for internal services
-# Replaces: nginx.ingress.kubernetes.io/whitelist-source-range
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -174,7 +172,6 @@ spec:
     optional: false
 ---
 # External auth policy (for complex auth flows)
-# Replaces: nginx.ingress.kubernetes.io/auth-url
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

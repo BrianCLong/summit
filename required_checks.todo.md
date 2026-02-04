@@ -1,63 +1,40 @@
-# Required checks discovery
-1. In GitHub: Settings → Branches → Branch protection rules → required status checks.
-2. List exact check names (case-sensitive).
-3. Map to local scripts:
-   - ci:decks_evidence → ci/check_decks_evidence.py
-   - ci:deck_lint → ci/deck_lint.py
-   - ci:deck_build → ci/deck_build.sh
-4. If names differ, add an alias job in CI rather than renaming scripts.
+# Required Checks Todo List
 
-# Secure Indexing Required Checks Discovery
-- no-index-leak: (EVD-CURSOR-SECURE-INDEXING-SEC-001)
-- evidence-schema-validate
-- dep-delta
-- reuse-flow-e2e
-- perf-evidence: (EVD-CURSOR-SECURE-INDEXING-PERF-001)
+This file tracks the status of CI check discovery and alignment with branch protection rules.
 
-## Goal
-List the repository's *required* CI checks for the default branch, then map them to verifier names
-in `ci/verifiers/`.
+## Current status
+GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
 
-## GitHub UI steps
-1. Repo → Settings → Branches → Branch protection rules.
-2. Open the rule for the default branch.
-3. Under "Require status checks to pass", copy the exact check names.
+## Known check names (Verify these)
+- CI Core (Primary Gate) / CI Core Gate ✅
+- CI / Unit Tests
+- GA Gate
+- Release Readiness Gate
+- SOC Controls
+- Unit Tests & Coverage
 
-## GitHub API steps (alternative)
-Use the Branch Protection API to fetch required status checks for the branch:
-`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+## Temporary names (Mapping needed)
+We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
+- `lint`
+- `typecheck`
+- `build`
+- `test`
 
-## Temporary convention
-Until discovered, we use temporary verifier names:
-- `ci:unit`
-- `ci:schema`
-- `ci:lint`
-- `ci:deps-delta`
-- `ci:deepsearchqa-fixtures`
-- `ci:codegen-drift`
-- `ci:determinism-smoke`
-- `ci:supply-chain-delta`
-- `ci:acp-policy`
-- `ci:acp-auth`
-- `ci:acp-install-dry-run`
+Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 
-## Rename plan
-Once real check names are known:
-1. Update CI config to emit the official check names.
-2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.
+## Temporary gates (Summit Harness & Skills)
+- ci/summit-harness-evidence
+- ci/summit-tool-policy
+- Use `skills/*` jobs with stable names (If actual required checks differ, add a rename PR that preserves history).
+- summit-skillsec
+- summit-evidence
+- summit-harness-mock
 
-## Archimyst (archsim) checks
-- schema-validate
-- archsim-foundation
-- evidence-gate
-
-## Vind (vCluster in Docker) checks
-- summit/vind/smoke
-- summit/vind/lifecycle
-- summit/vind/bench
-- summit/vind/security
-
-## Context management checks (Deep Agents roadmap)
-- ci/context-evals
-- ci/evidence-schemas
-- ci/deps-delta
+## Required checks discovery (one-time for Memory Privacy)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
+2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
+4) Add PR to rename temporary checks to required names once known
