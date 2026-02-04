@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Context Management Evidence Report",
+  "type": "object",
+  "required": ["evidence_id", "scenario", "config_hash", "events", "assertions"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "scenario": { "type": "string" },
+    "config_hash": { "type": "string" },
+    "events": { "type": "array", "items": { "type": "object" } },
+    "assertions": { "type": "array", "items": { "type": "object" } }
+  },
+  "additionalProperties": false
+}
