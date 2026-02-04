@@ -60,3 +60,4 @@
 - `docs/ci/REQUIRED_CHECKS_POLICY.yml` and any governance sync automation.
 - CodeQL workflow configs unless required for the added job.
 - Security scanning configurations (secret scanning/push protection assumptions).
+- GitHub Actions using 'cache: pnpm' in setup-node must have pnpm/action-setup run BEFORE setup-node.

@@ -1,2 +1,0 @@
-class VectorSearch:
-    pass
