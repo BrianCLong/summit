@@ -1,0 +1,38 @@
+{
+  "task_id": "CROSS_LINGUAL_NARRATIVE_TRACKING_20260115",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "cross-lingual-narrative-tracking",
+    "version": "v1",
+    "sha256": "fe52a3b65676f5f72bf1791a37099b067d8406f0f555f98b97a79f4375ce9ca6",
+    "path": "prompts/docs/cross-lingual-narrative-tracking@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/narrative-tracking.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/TASK_CROSS_LINGUAL_NARRATIVE_TRACKING_20260115.json",
+      "prompts/docs/cross-lingual-narrative-tracking@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "narrative-intelligence", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/narrative-tracking.md", "docs/roadmap/STATUS.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Document cross-lingual narrative tracking architecture with semantic and platform-shift layers.",
+    "Update roadmap status metadata to reflect the documentation change.",
+    "Register prompt and task spec for provenance compliance."
+  ],
+  "stop_conditions": [
+    "Scope drift beyond declared paths.",
+    "Conflict with governance requirements in docs/governance/CONSTITUTION.md."
+  ]
+}

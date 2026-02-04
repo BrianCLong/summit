@@ -1,0 +1,19 @@
+# Vantage Framework: Differential Access Profiles
+profiles:
+  - id: anonymous-mobile
+    name: Anonymous Mobile (Global)
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+    proxy: null
+    labels: [anonymous, mobile]
+
+  - id: desktop-eu-west
+    name: Desktop EU (Germany)
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+    proxy: "socks5://de-proxy.example.com:1080"
+    labels: [desktop, eu, gdpr-zone]
+
+  - id: authenticated-investigator
+    name: Authenticated (Investigator Tier)
+    userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+    authRequired: true
+    labels: [authenticated, high-trust]
