@@ -5,5 +5,7 @@
   "feature_flags": {
     "advanced_cluster_detection": false,
     "dataset_pollution_firewall": false
-  }
+  },
+  "never_log_fields": ["auth", "token", "password", "secret"],
+  "enforcing": true
 }
