@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-CLAUDECODE-SUBAGENTS-FOUNDATION-001",
-  "metrics": {
-    "steps": 1,
-    "tool_calls": 0
-  }
-}

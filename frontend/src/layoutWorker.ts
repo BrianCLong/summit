@@ -11,7 +11,7 @@ self.onmessage = (e: MessageEvent<{ elements: ElementDefinition[] }>): void => {
     style: [],
     headless: true,
   });
-  const layout = cy.layout({ name: 'cose-bilkent', randomize: false });
+  const layout = cy.layout({ name: 'cose-bilkent', randomize: true });
   layout.run();
   const positions: Record<string, Position> = {};
   cy.nodes().forEach((n) => {
