@@ -1,5 +1,0 @@
-{
-  "evidence_id": "EVD-GRAPH-HYBRID-PERF-001",
-  "summary": "Hybrid eval harness stub emits deterministic metrics.",
-  "artifacts": ["metrics.json", "stamp.json"]
-}

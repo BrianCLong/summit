@@ -1,8 +1,0 @@
-[
-  {
-    "approved": false,
-    "worstCaseScenario": "Region Failure",
-    "survivalProbability": 0.2,
-    "decision": "REJECTED (Vulnerable to Region Failure)"
-  }
-]

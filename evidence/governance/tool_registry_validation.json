@@ -1,6 +1,0 @@
-{
-  "registry": "governance/tool_registry.yaml",
-  "status": "valid",
-  "policy": "deny-by-default",
-  "tools_count": 3
-}

@@ -1,5 +1,0 @@
-{
-  "evidence_id": "EVD-GRAPH-HYBRID-GOV-001",
-  "summary": "Graph-hybrid subsumption manifest and evidence scaffolding added.",
-  "artifacts": ["manifest.yaml", "evidence/index.json", "repo_assumptions.md"]
-}

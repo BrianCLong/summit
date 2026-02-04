@@ -1,9 +1,0 @@
-{
-  "version": "1.0",
-  "item": "moltworker",
-  "summary": {
-    "what": "Summit subsumption scaffold for Moltworker patterns",
-    "verified_sources": ["https://blog.cloudflare.com/moltworker-self-hosted-ai-agent/"]
-  },
-  "results": []
-}

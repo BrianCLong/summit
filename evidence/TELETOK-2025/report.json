@@ -1,8 +1,0 @@
-{
-  "version": 1,
-  "evidence_id": "EVD-TELETOK-2025-EVIDENCE-001",
-  "item_slug": "TELETOK-2025",
-  "summary": "Evidence scaffolding established for TELETOK-2025.",
-  "claims": [{"id": "EVD-TELETOK-2025-EVIDENCE-001", "source": "master-plan"}],
-  "decisions": ["Evidence scaffolding established for TELETOK-2025."]
-}

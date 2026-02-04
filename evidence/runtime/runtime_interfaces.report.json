@@ -1,9 +1,0 @@
-{
-  "package": "@intelgraph/agent-runtime",
-  "interfaces": [
-    "AgentLifecycle",
-    "AgentStream",
-    "ToolGraph"
-  ],
-  "status": "interfaces_defined"
-}

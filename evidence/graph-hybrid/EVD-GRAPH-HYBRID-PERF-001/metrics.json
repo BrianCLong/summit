@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-GRAPH-HYBRID-PERF-001",
-  "metrics": {
-    "hybrid_eval_p95_ms": 123,
-    "ci_runtime_seconds": 42,
-    "peak_rss_mb": 256
-  }
-}

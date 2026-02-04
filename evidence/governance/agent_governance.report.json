@@ -1,8 +1,0 @@
-{
-  "governance_artifacts": [
-    "docs/governance/AGENTS.md",
-    "governance/tool_registry.yaml"
-  ],
-  "validation": "passed",
-  "timestamp": "2025-05-15T12:05:00Z"
-}

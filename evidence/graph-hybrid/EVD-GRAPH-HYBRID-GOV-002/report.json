@@ -1,5 +1,0 @@
-{
-  "evidence_id": "EVD-GRAPH-HYBRID-GOV-002",
-  "summary": "Subsumption bundle verifier emitted deterministic evidence output.",
-  "artifacts": ["metrics.json", "stamp.json"]
-}
