@@ -1,6 +1,5 @@
 name: Release Cut
 
-# Governance: This workflow must only be triggered manually.
 # Release Cut Workflow
 # Creates an immutable go-live tag with release notes generated from evidence.
 #
@@ -119,7 +118,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
@@ -132,7 +131,7 @@ jobs:
           echo "Commit SHA: ${SHA}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
         with:
           node-version-file: .nvmrc
 
@@ -191,12 +190,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           ref: ${{ inputs.ref }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
         with:
           node-version-file: .nvmrc
 
@@ -221,7 +220,7 @@ jobs:
           fi
 
       - name: Upload Release Artifacts
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: release-bundle-${{ inputs.release_tag }}
           path: |
@@ -257,7 +256,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
           ref: ${{ inputs.ref }}
 

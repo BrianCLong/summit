@@ -19,7 +19,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-        with:
 
       - name: Install dependencies
         run: pnpm install
@@ -39,7 +38,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-        with:
 
       - name: Install dependencies
         run: pnpm install
