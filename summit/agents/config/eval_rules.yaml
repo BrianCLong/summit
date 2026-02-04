@@ -1,0 +1,8 @@
+# summit/agents/config/eval_rules.yaml
+rules:
+  - name: "hallucination_check"
+    type: "factuality"
+    threshold: 0.8
+  - name: "policy_compliance"
+    type: "governance"
+    threshold: 1.0
