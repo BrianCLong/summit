@@ -1,0 +1,28 @@
+active_product: factflow
+frozen_products:
+  - factlaw
+  - factmarkets
+  - factapi
+  - factcert
+  - factdatasets
+  - factgov
+allowed_paths_always:
+  - docs/
+  - scripts/
+  - config/
+  - .github/
+  - package.json
+  - pnpm-lock.yaml
+  - repo_assumptions.md
+override_file: .exec-override
+thresholds:
+  month_1:
+    lois_signed: 2
+  month_3:
+    mrr: 5000
+  month_6:
+    mrr: 20000
+  month_9:
+    mrr: 50000
+  month_12:
+    arr_run_rate: 1000000
