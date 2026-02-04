@@ -1,32 +1,35 @@
-import { RedactionClass } from './classification';
+import { RedactionClass, DEFAULT_REDACTION_RULES } from "./classification";
 
 /**
- * Redacts content based on requested redaction classes.
- * Simple regex-based implementation for demonstration.
+ * Redacts sensitive content based on allowed classes.
+ * If a class is NOT in the allowed list, its patterns are applied to the text.
  */
-export function redact(content: string, classes: RedactionClass[]): string {
-  let redacted = content;
+export function redact(
+  text: string,
+  allowedClasses: RedactionClass[]
+): string {
+  let redactedText = text;
 
-  if (classes.includes(RedactionClass.PII)) {
-    // Redact emails
-    redacted = redacted.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[EMAIL_REDACTED]");
-    // Redact phone numbers (simple)
-    redacted = redacted.replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, "[PHONE_REDACTED]");
-  }
-
-  if (classes.includes(RedactionClass.FINANCIAL)) {
-    // Redact dollar amounts
-    redacted = redacted.replace(/\$\d+(?:\.\d{2})?/g, "[AMOUNT_REDACTED]");
-  }
-
-  if (classes.includes(RedactionClass.PHI)) {
-    // PHI redaction is complex; placeholder for specific terms
-    const medicalTerms = ["lisinopril", "blood pressure", "diagnosis"];
-    for (const term of medicalTerms) {
-      const regex = new RegExp(term, "gi");
-      redacted = redacted.replace(regex, "[HEALTH_INFO_REDACTED]");
+  for (const rule of DEFAULT_REDACTION_RULES) {
+    if (!allowedClasses.includes(rule.class)) {
+      redactedText = redactedText.replace(rule.pattern, rule.replacement);
     }
   }
 
-  return redacted;
+  return redactedText;
+}
+
+/**
+ * Validates a tool egress request against the tool's manifest.
+ * Deny-by-default if the tool is not in the manifest.
+ */
+export function validateEgress(
+  toolId: string,
+  contextSpace: string,
+  manifest: any
+): boolean {
+  const toolEntry = manifest.tools?.[toolId];
+  if (!toolEntry) return false;
+
+  return toolEntry.allowedContextSpaces.includes(contextSpace);
 }
