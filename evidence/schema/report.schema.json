@@ -1,29 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Evidence Report Schema",
+  "title": "summit_evidence_report",
   "type": "object",
+  "required": ["evidence_id", "title", "summary", "artifacts"],
   "properties": {
-    "status": {
-      "type": "string",
-      "enum": ["pass", "fail", "error", "skipped"]
-    },
-    "run_id": {
-      "type": "string"
-    },
-    "config": {
-      "type": "object",
-      "additionalProperties": true
-    },
-    "summary": {
-      "type": "string"
-    },
-    "adapter": {
-      "type": "string"
-    },
-    "verdict": {
-      "type": "string"
+    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-\\d{3}$" },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "status": { "type": "string" },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" }
     }
   },
-  "required": ["status"],
   "additionalProperties": false
 }
