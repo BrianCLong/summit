@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-GRAPH-HYBRID-PROD-001",
-  "metrics": {
-    "docs_targets": 4,
-    "backlog_items": 2
-  }
-}

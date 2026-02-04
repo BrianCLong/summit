@@ -1,9 +1,0 @@
-
-make preflight || true
-pnpm -r test || true
-pnpm ci:parity && pnpm ci:verify || true
-make ga || true
-make ga-verify
- HEAD
-make ga-verify || true
- origin/main

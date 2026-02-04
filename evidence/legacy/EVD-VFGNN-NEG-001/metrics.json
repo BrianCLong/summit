@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-VFGNN-NEG-001",
-  "metrics": {
-    "coverage": 0.0,
-    "update_anomaly_score_p95": 0.0,
-    "quarantine_count": 0
-  }
-}

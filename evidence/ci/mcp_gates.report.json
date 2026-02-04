@@ -1,8 +1,0 @@
-{
-  "gates": [
-    "verify_mcp_only_tools",
-    "verify_tool_registry_enforcement"
-  ],
-  "ci_job": "agent-governance",
-  "status": "integrated"
-}

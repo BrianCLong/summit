@@ -44,3 +44,11 @@ ai_patch_max_context_lines: 20  # Limit context to prevent large patch outputs
 ai_patch_safety_filters:
   - "no_secrets_in_output"  # Ensure no sensitive content in patches
   - "evidence_id_format_validation"  # Verify suggested IDs follow format rules
+# Artifact Evidence Policy
+allowed_ids:
+  - ATT-001   # Build attestation
+  - SBOM-001  # SBOM (runtime)
+  - PROV-001  # In-toto/SLSA provenance
+  - TEST-001  # Test summary
+require_signature: true
+sig_algos: [ed25519, ecdsa-p256]

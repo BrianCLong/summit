@@ -1,5 +1,0 @@
-{
-  "evidence_id": "EVD-GRAPH-HYBRID-ARCH-001",
-  "summary": "Hybrid retrieval contract and adapter stubs added behind feature flag.",
-  "artifacts": ["src/hybrid/contract.ts", "src/hybrid/adapters"]
-}
