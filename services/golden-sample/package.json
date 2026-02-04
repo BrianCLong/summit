@@ -20,7 +20,7 @@
     "prom-client": "^15.1.0",
     "helmet": "^7.1.0",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5"
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
