@@ -29,8 +29,6 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
-      - name: Enable Corepack
-        run: corepack enable
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 

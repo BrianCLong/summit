@@ -1,112 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit.evidence.report",
+  "$id": "summit://evidence/report.schema.json",
   "type": "object",
-  "anyOf": [
-    {
-      "required": [
-        "evidence_id",
-        "item_slug",
-        "summary",
-        "sources",
-        "claims",
-        "limitations"
-      ],
-      "properties": {
-        "evidence_id": {
-          "type": "string",
-          "pattern": "^EVD-[a-z0-9-]+-[a-z0-9-]+-[0-9]{3}$"
-        },
-        "item_slug": {
-          "type": "string"
-        },
-        "summary": {
-          "type": "string"
-        },
-        "sources": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "title",
-              "ref"
-            ],
-            "properties": {
-              "title": {
-                "type": "string"
-              },
-              "ref": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "claims": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "claim",
-              "supporting_refs",
-              "confidence"
-            ],
-            "properties": {
-              "claim": {
-                "type": "string"
-              },
-              "supporting_refs": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "confidence": {
-                "type": "string",
-                "enum": [
-                  "low",
-                  "medium",
-                  "high"
-                ]
-              }
-            }
-          }
-        },
-        "limitations": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    {
-      "required": [
-        "evidence_id",
-        "summary",
-        "artifacts"
-      ],
-      "properties": {
-        "evidence_id": {
-          "type": "string",
-          "pattern": "^EVD-[A-Za-z0-9-]+-[A-Za-z0-9-]+-[0-9]{3}$"
-        },
-        "item": {
-          "type": "object"
-        },
-        "summary": {
-          "type": "string"
-        },
-        "artifacts": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "item_slug": {
-          "type": "string"
-        }
-      }
-    }
-  ],
-  "additionalProperties": true
+  "required": ["evidence_id", "run_id", "summary", "policies_applied"],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "run_id": {"type": "string"},
+    "summary": {"type": "string"},
+    "policies_applied": {"type": "array", "items": {"type": "string"}},
+    "artifacts": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
 }
