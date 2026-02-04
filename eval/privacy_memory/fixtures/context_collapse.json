@@ -1,42 +1,49 @@
-{
-  "scenario": "Context switching risk (work + medical + budgeting)",
-  "userId": "user-leak-test",
-  "records": [
-    {
-      "id": "mem-work-1",
-      "content": "Meeting with Acme corp about project X",
-      "purpose": "assist",
-      "contextSpace": "work:acme"
-    },
-    {
-      "id": "mem-health-1",
-      "content": "Patient has high blood pressure, prescribe lisinopril",
-      "purpose": "assist",
-      "contextSpace": "health"
-    },
-    {
-      "id": "mem-budget-1",
-      "content": "Monthly budget exceeded by $500",
-      "purpose": "assist",
-      "contextSpace": "finance"
-    }
-  ],
-  "leakage_tests": [
-    {
-      "name": "Work query should not see health memory",
-      "request": {
+[
+  {
+    "name": "Context Collapse Scenario: Work vs Personal vs Health",
+    "description": "Agent has memories from multiple contexts. Tests that querying one context does not leak others.",
+    "records": [
+      {
+        "userId": "user_123",
+        "content": "Project Phoenix budget is $2M",
         "purpose": "assist",
-        "contextSpace": "work:acme"
+        "contextSpace": "work:acme",
+        "facets": [{ "key": "project", "value": "Phoenix" }]
       },
-      "forbidden_ids": ["mem-health-1", "mem-budget-1"]
-    },
-    {
-      "name": "Health query should not see work memory",
-      "request": {
+      {
+        "userId": "user_123",
+        "content": "User prefers vegan meals for personal dinner",
         "purpose": "assist",
-        "contextSpace": "health"
+        "contextSpace": "personal",
+        "facets": [{ "key": "preference", "value": "vegan" }]
       },
-      "forbidden_ids": ["mem-work-1", "mem-budget-1"]
-    }
-  ]
-}
+      {
+        "userId": "user_123",
+        "content": "User has a prescription for Metformin",
+        "purpose": "assist",
+        "contextSpace": "health",
+        "facets": [{ "key": "medical", "value": "medication" }]
+      }
+    ],
+    "tests": [
+      {
+        "description": "Recall 'work:acme' context",
+        "scope": { "userId": "user_123", "purpose": "assist", "contextSpace": "work:acme" },
+        "expectedIds": 1,
+        "forbiddenContent": ["vegan", "Metformin"]
+      },
+      {
+        "description": "Recall 'personal' context",
+        "scope": { "userId": "user_123", "purpose": "assist", "contextSpace": "personal" },
+        "expectedIds": 1,
+        "forbiddenContent": ["Phoenix", "Metformin"]
+      },
+      {
+        "description": "Recall 'health' context",
+        "scope": { "userId": "user_123", "purpose": "assist", "contextSpace": "health" },
+        "expectedIds": 1,
+        "forbiddenContent": ["Phoenix", "vegan"]
+      }
+    ]
+  }
+]
