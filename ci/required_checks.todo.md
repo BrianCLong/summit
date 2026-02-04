@@ -42,9 +42,3 @@ Once the real names are known, update `ci/verifier_spec.md` and add a PR to map 
 
 - pp_alerts/tests (pending discovery of real name)
 - pp_alerts/privacy-scan (pending discovery of real name)
-
-## Swarm Module Checks (Kimi K2.5)
-
-- swarm/budgets-check
-- swarm/evidence-verify
-- swarm/policy-gate

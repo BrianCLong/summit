@@ -1,9 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": [],
+  "additionalProperties": false,
   "properties": {
-    "metrics": { "type": "object" }
+    "evidence_id": { "type": "string" },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
   },
-  "additionalProperties": true
+  "required": ["evidence_id", "metrics"]
 }

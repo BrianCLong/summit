@@ -15,9 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Infrastructure**: Enhanced Redis capabilities with functional data partitioning and cluster support.
-- **Disaster Recovery**: Added comprehensive backup and restore scripts for PostgreSQL and Redis, including S3 integration and integrity verification.
-- **Documentation**: Added documentation for Redis partitioning and Disaster Recovery procedures.
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 

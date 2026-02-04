@@ -1,9 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["timestamp"],
+  "additionalProperties": false,
   "properties": {
-    "timestamp": { "type": "string", "format": "date-time" }
+    "started_at": {"type": "string"},
+    "finished_at": {"type": "string"},
+    "runner": {"type": "string"}
   },
-  "additionalProperties": true
+  "required": ["started_at", "finished_at"]
 }
