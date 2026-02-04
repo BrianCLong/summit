@@ -1,31 +1,22 @@
-# Required checks discovery (TODO)
+# Required Checks Discovery (TODO)
 
-## UI steps
-1. GitHub UI → **Settings** → **Branches** → **Branch protection rules**.
-2. Select the rule for `main` (or create one).
-3. Enable **Require status checks to pass before merging**.
-4. Record the exact check names as they appear in the UI.
+## UI Steps
 
-## API steps
-Use the GitHub API to list required checks:
+1. GitHub UI → Settings → Branches → Branch protection rules.
+2. Record required status checks.
 
-```bash
-gh api repos/:owner/:repo/branches/main/protection/required_status_checks
-```
+## API Steps
 
-## Mapping table (temporary → actual)
+- `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
 
-| Temporary gate name | Actual required check name | Status |
-| --- | --- | --- |
-| gate:evidence_schemas_validate | TBD | assumed |
-| gate:policy_deny_by_default | TBD | assumed |
-| gate:budget_enforcement | TBD | assumed |
-| gate:replay_harness_smoke | TBD | assumed |
-| gate:evolve_requires_approval | TBD | assumed |
+## Current Checks (Temporary Convention)
 
-## Rename plan
+- `summit-evidence-validate`
+- `summit-policy-tests`
+- `summit-sim-determinism`
+- `summit-dependency-delta`
 
-Once the actual check names are discovered:
-1. Update this mapping table with the exact names from GitHub.
-2. Rename the gate names in workflows and docs to match the required checks.
-3. Ship the rename as a tiny PR with no behavior changes.
+## Plan
+
+1. Record official check names in `ci/required_checks.json` once discovered.
+2. Add a mapping file to preserve existing names for two releases.
