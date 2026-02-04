@@ -121,4 +121,13 @@ log "Cleaning up local backups older than $RETENTION_DAYS days..."
 find "$BACKUP_ROOT" -name "backup-*.tar.gz" -mtime +$RETENTION_DAYS -delete
 find "$BACKUP_ROOT" -name "backup-*.sha256" -mtime +$RETENTION_DAYS -delete
 
+# Verify Backup
+log "Running backup verification..."
+if /scripts/verify_backup.sh; then
+    log "Backup verification passed."
+else
+    log "ERROR: Backup verification FAILED."
+    exit 1
+fi
+
 log "Backup completed successfully."

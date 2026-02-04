@@ -1,11 +1,6 @@
 {
-<<<<<<< HEAD
-  "last_updated": "2026-02-02T00:00:00Z",
-  "revision_note": "Normalized evidence/index.json to match evidence schema.",
-=======
   "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Merged Summit Labs incubation track and cleaned up roadmap structure",
->>>>>>> main
+  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -14,7 +9,6 @@
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
     {
-<<<<<<< HEAD
       "id": "B",
       "name": "Federation + Ingestion Mesh",
       "epics": [
@@ -53,12 +47,12 @@
           "target_completion": "Sprint N+3"
         }
       ]
-=======
+    },
+    {
       "id": "sera-cli-proxy",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
->>>>>>> main
     },
     {
       "id": "governance-evidence-contracts",

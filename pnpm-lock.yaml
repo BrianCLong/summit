@@ -73,7 +73,7 @@ importers:
         specifier: ^9.5.1
         version: 9.5.1
       dotenv:
-        specifier: ^17.2.1
+        specifier: ^17.2.3
         version: 17.2.3
       ioredis:
         specifier: ^5.8.2
@@ -2303,8 +2303,8 @@ importers:
         specifier: ^5.0.0
         version: 5.66.1
       dotenv:
-        specifier: ^16.0.0
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       glob:
         specifier: '>=11.1.0'
         version: 13.0.0
@@ -2910,8 +2910,8 @@ importers:
         specifier: ^13.0.1
         version: 13.1.0
       dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       ink:
         specifier: ^5.0.1
         version: 5.2.1(@types/react@18.3.11)(react@18.3.1)
@@ -3446,8 +3446,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -10295,8 +10295,8 @@ importers:
         specifier: ^3.1.7
         version: 3.5.0
       ip-address:
-        specifier: ^9.0.5
-        version: 9.0.5
+        specifier: ^10.1.0
+        version: 10.1.0
       node-fetch:
         specifier: '>=2.6.7'
         version: 3.3.2
@@ -10549,8 +10549,8 @@ importers:
         specifier: ^0.37.0
         version: 0.37.2(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-redis-4':
-        specifier: ^0.35.0
-        version: 0.35.6(@opentelemetry/api@1.9.0)
+        specifier: ^0.49.0
+        version: 0.49.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources':
         specifier: ^1.19.0
         version: 1.30.1(@opentelemetry/api@1.9.0)
@@ -14088,8 +14088,8 @@ importers:
         specifier: 8.3.0
         version: 8.3.0(socket.io-adapter@2.5.6)
       '@turf/area':
-        specifier: 7.3.1
-        version: 7.3.1
+        specifier: 7.3.3
+        version: 7.3.3
       '@turf/bbox':
         specifier: 7.3.1
         version: 7.3.1
@@ -14307,8 +14307,8 @@ importers:
         specifier: 9.9.0
         version: 9.9.0
       pino-http:
-        specifier: 10.5.0
-        version: 10.5.0
+        specifier: 11.0.0
+        version: 11.0.0
       prom-client:
         specifier: 15.1.3
         version: 15.1.3
@@ -15256,8 +15256,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
     devDependencies:
       '@types/express':
         specifier: ^5.0.0
@@ -15397,8 +15397,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.4.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       prom-client:
         specifier: ^15.1.3
         version: 15.1.3
@@ -15525,8 +15525,8 @@ importers:
         specifier: ^9.6.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.4.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -15592,8 +15592,8 @@ importers:
         specifier: ^8.17.0
         version: 8.21.0
       pino-http:
-        specifier: ^8.6.0
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -16497,8 +16497,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       undici:
         specifier: ^6.23.0
         version: 6.23.0
@@ -17705,8 +17705,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -17766,8 +17766,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -17862,8 +17862,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       pino-pretty:
         specifier: ^13.1.2
         version: 13.1.3
@@ -18221,8 +18221,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
     devDependencies:
       '@types/cors':
         specifier: ^2.8.17
@@ -18377,8 +18377,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -18866,8 +18866,8 @@ importers:
         specifier: ^2.8.5
         version: 2.8.6
       dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -18878,8 +18878,8 @@ importers:
         specifier: ^9.0.0
         version: 9.9.0
       pino-http:
-        specifier: ^10.0.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       prom-client:
         specifier: ^15.1.0
         version: 15.1.3
@@ -19347,8 +19347,8 @@ importers:
         specifier: ^8.17.0
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -19562,8 +19562,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.6.0
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       ssh2-sftp-client:
         specifier: ^9.1.0
         version: 9.1.0
@@ -19801,8 +19801,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -20076,8 +20076,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.5.1
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -20738,8 +20738,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.6
       dotenv:
-        specifier: ^16.3.1
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       handlebars:
         specifier: ^4.7.8
         version: 4.7.8
@@ -21990,8 +21990,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.3.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -22125,8 +22125,8 @@ importers:
         specifier: ^8.16.0
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       prom-client:
         specifier: ^15.1.0
         version: 15.1.3
@@ -22254,8 +22254,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -22566,8 +22566,8 @@ importers:
         specifier: ^8.17.2
         version: 8.21.0
       pino-http:
-        specifier: ^9.0.0
-        version: 9.0.0
+        specifier: ^11.0.0
+        version: 11.0.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
@@ -22606,8 +22606,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.5.1
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -22990,8 +22990,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       pino-http:
-        specifier: ^10.3.0
-        version: 10.5.0
+        specifier: ^11.0.0
+        version: 11.0.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -23236,8 +23236,8 @@ importers:
         specifier: ^8.16.2
         version: 8.21.0
       pino-http:
-        specifier: ^8.6.0
-        version: 8.6.1
+        specifier: ^11.0.0
+        version: 11.0.0
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -23511,8 +23511,8 @@ importers:
         specifier: ^2.8.5
         version: 2.8.6
       dotenv:
-        specifier: ^16.4.7
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -30048,6 +30048,10 @@ packages:
     peerDependencies:
       '@openfeature/core': ^1.9.0
 
+  '@opentelemetry/api-logs@0.202.0':
+    resolution: {integrity: sha512-fTBjMqKCfotFWfLzaKyhjLvyEyq5vDKTTFfBmx21btv3gvy8Lq6N5Dh2OzqeuN4DjtpSvNT1uNVfg08eD2Rfxw==}
+    engines: {node: '>=8.0.0'}
+
   '@opentelemetry/api-logs@0.208.0':
     resolution: {integrity: sha512-CjruKY9V6NMssL/T1kAFgzosF1v9o6oeN+aX5JB/C/xPNtmgIJqcXHG7fA82Ou1zCpWGl4lROQUKwUNE1pMCyg==}
     engines: {node: '>=8.0.0'}
@@ -31432,6 +31436,13 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
+  '@opentelemetry/instrumentation-redis-4@0.49.0':
+    resolution: {integrity: sha512-i+Wsl7M2LXEDA2yXouNJ3fttSzzb5AhlehvSBVRIFuinY51XrrKSH66biO0eox+pYQMwAlPxJ778XcMQffN78A==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use "@opentelemetry/instrumentation-redis", which (as of v0.50.0) includes support for instrumenting redis v4.
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+
   '@opentelemetry/instrumentation-redis@0.35.5':
     resolution: {integrity: sha512-UPYUncDlLqDPtyU11UhyZOUxAyPQS6yQGT0b96KjpqMhmuRb3b0WxzZh3SoIaAyprL5f9fxyeV2HfSulR0aWFQ==}
     engines: {node: '>=14'}
@@ -31627,6 +31638,12 @@ packages:
 
   '@opentelemetry/instrumentation-winston@0.55.0':
     resolution: {integrity: sha512-RKW/PYJrvIbRYss0uKe0eU+FgIRScnQTJXIWAZK17ViHf7EALaRDXOu3tFW5JDRg6fkccj5q90YZUCzh6s0v5A==}
+    engines: {node: ^18.19.0 || >=20.6.0}
+    peerDependencies:
+      '@opentelemetry/api': ^1.3.0
+
+  '@opentelemetry/instrumentation@0.202.0':
+    resolution: {integrity: sha512-Uz3BxZWPgDwgHM2+vCKEQRh0R8WKrd/q6Tus1vThRClhlPO39Dyz7mDrOr6KuqGXAlBQ1e5Tnymzri4RMZNaWA==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
@@ -31962,6 +31979,10 @@ packages:
   '@opentelemetry/redis-common@0.36.2':
     resolution: {integrity: sha512-faYX1N0gpLhej/6nyp6bgRjzAKXn5GOEMYY7YhciSfCoITAktLUtQ36d24QEWNA1/WA1y6qQunCe0OhHRkVl9g==}
     engines: {node: '>=14'}
+
+  '@opentelemetry/redis-common@0.37.0':
+    resolution: {integrity: sha512-tJwgE6jt32bLs/9J6jhQRKU2EZnsD8qaO13aoFyXwF6s4LhpT7YFHf3Z03MqdILk6BA2BFUhoyh7k9fj9i032A==}
+    engines: {node: ^18.19.0 || >=20.6.0}
 
   '@opentelemetry/redis-common@0.38.2':
     resolution: {integrity: sha512-1BCcU93iwSRZvDAgwUxC/DV4T/406SkMfxGqu5ojc3AvNI+I9GhV7v0J1HljsczuuhcnFLYqD5VmwVXfCGHzxA==}
@@ -35682,6 +35703,9 @@ packages:
   '@turf/area@7.3.1':
     resolution: {integrity: sha512-9nSiwt4zB5QDMcSoTxF28WpK1f741MNKcpUJDiHVRX08CZ4qfGWGV9ZIPQ8TVEn5RE4LyYkFuQ47Z9pdEUZE9Q==}
 
+  '@turf/area@7.3.3':
+    resolution: {integrity: sha512-FT66TCxUec+3RsCCyO1kWP57/tiEWEqYfpIs5n44dup401Cne/E+xunahEWxMfP/HSUxfcRQqrjH5vEulLrNoA==}
+
   '@turf/bbox-clip@6.5.0':
     resolution: {integrity: sha512-F6PaIRF8WMp8EmgU/Ke5B1Y6/pia14UAYB5TiBC668w5rVVjy5L8rTm/m2lEkkDMHlzoP9vNY4pxpNthE7rLcQ==}
 
@@ -35967,6 +35991,9 @@ packages:
   '@turf/helpers@7.3.1':
     resolution: {integrity: sha512-zkL34JVhi5XhsuMEO0MUTIIFEJ8yiW1InMu4hu/oRqamlY4mMoZql0viEmH6Dafh/p+zOl8OYvMJ3Vm3rFshgg==}
 
+  '@turf/helpers@7.3.3':
+    resolution: {integrity: sha512-9Ias0L1GuZPIzO6sk8jraTEuLJye6n9LYNEdw69ZGOQ6C1IigjxkPW49zmn21aTv1z27vxdVLSS3r+78DB2QnQ==}
+
   '@turf/hex-grid@6.5.0':
     resolution: {integrity: sha512-Ln3tc2tgZT8etDOldgc6e741Smg1CsMKAz1/Mlel+MEL5Ynv2mhx3m0q4J9IB1F3a4MNjDeVvm8drAaf9SF33g==}
 
@@ -36095,6 +36122,9 @@ packages:
 
   '@turf/meta@7.3.1':
     resolution: {integrity: sha512-NWsfOE5RVtWpLQNkfOF/RrYvLRPwwruxhZUV0UFIzHqfiRJ50aO9Y6uLY4bwCUe2TumLJQSR4yaoA72Rmr2mnQ==}
+
+  '@turf/meta@7.3.3':
+    resolution: {integrity: sha512-Tz1j4h70iFB5SebWWoVv/uL59x4aOngXU+d1xQDXzOCn/O6txnreGVGMcYU362c5F06yqZx38H9UFTQ553lK0w==}
 
   '@turf/midpoint@6.5.0':
     resolution: {integrity: sha512-MyTzV44IwmVI6ec9fB2OgZ53JGNlgOpaYl9ArKoF49rXpL84F9rNATndbe0+MQIhdkw8IlzA6xVP4lZzfMNVCw==}
@@ -48240,17 +48270,8 @@ packages:
   pino-abstract-transport@3.0.0:
     resolution: {integrity: sha512-wlfUczU+n7Hy/Ha5j9a/gZNy7We5+cXp8YL+X+PG8S0KXxw7n/JXA3c46Y0zQznIJ83URJiwy7Lh56WLokNuxg==}
 
-  pino-http@10.5.0:
-    resolution: {integrity: sha512-hD91XjgaKkSsdn8P7LaebrNzhGTdB086W3pyPihX0EzGPjq5uBJBXo4N5guqNaK6mUjg9aubMF7wDViYek9dRA==}
-
   pino-http@11.0.0:
     resolution: {integrity: sha512-wqg5XIAGRRIWtTk8qPGxkbrfiwEWz1lgedVLvhLALudKXvg1/L2lTFgTGPJ4Z2e3qcRmxoFxDuSdMdMGNM6I1g==}
-
-  pino-http@8.6.1:
-    resolution: {integrity: sha512-J0hiJgUExtBXP2BjrK4VB305tHXS31sCmWJ9XJo2wPkLHa1NFPuW4V9wjG27PAc2fmBCigiNhQKpvrx+kntBPA==}
-
-  pino-http@9.0.0:
-    resolution: {integrity: sha512-Q9QDNEz0vQmbJtMFjOVr2c9yL92vHudjmr3s3m6J1hbw3DBGFZJm3TIj9TWyynZ4GEsEA9SOtni4heRUr6lNOg==}
 
   pino-pretty@10.3.1:
     resolution: {integrity: sha512-az8JbIYeN/1iLj2t0jR9DV48/LQ3RC6hZPpapKPkb84Q+yTidMCpgWxIT3N0flnBDilyBQ1luWNpOeJptjdp/g==}
@@ -65037,6 +65058,10 @@ snapshots:
     dependencies:
       '@openfeature/core': 1.9.1
 
+  '@opentelemetry/api-logs@0.202.0':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+
   '@opentelemetry/api-logs@0.208.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -67180,6 +67205,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@opentelemetry/instrumentation-redis-4@0.49.0(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/instrumentation': 0.202.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/redis-common': 0.37.0
+      '@opentelemetry/semantic-conventions': 1.39.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@opentelemetry/instrumentation-redis@0.35.5(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -67452,6 +67486,15 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.211.0
       '@opentelemetry/instrumentation': 0.211.0(@opentelemetry/api@1.9.0)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@opentelemetry/instrumentation@0.202.0(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/api-logs': 0.202.0
+      import-in-the-middle: 1.15.0
+      require-in-the-middle: 7.5.2
     transitivePeerDependencies:
       - supports-color
 
@@ -67859,6 +67902,8 @@ snapshots:
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
 
   '@opentelemetry/redis-common@0.36.2': {}
+
+  '@opentelemetry/redis-common@0.37.0': {}
 
   '@opentelemetry/redis-common@0.38.2': {}
 
@@ -70567,9 +70612,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
@@ -73519,6 +73562,13 @@ snapshots:
       '@types/geojson': 7946.0.16
       tslib: 2.8.1
 
+  '@turf/area@7.3.3':
+    dependencies:
+      '@turf/helpers': 7.3.3
+      '@turf/meta': 7.3.3
+      '@types/geojson': 7946.0.16
+      tslib: 2.8.1
+
   '@turf/bbox-clip@6.5.0':
     dependencies:
       '@turf/helpers': 6.5.0
@@ -74204,6 +74254,11 @@ snapshots:
       '@types/geojson': 7946.0.16
       tslib: 2.8.1
 
+  '@turf/helpers@7.3.3':
+    dependencies:
+      '@types/geojson': 7946.0.16
+      tslib: 2.8.1
+
   '@turf/hex-grid@6.5.0':
     dependencies:
       '@turf/distance': 6.5.0
@@ -74535,6 +74590,12 @@ snapshots:
     dependencies:
       '@turf/helpers': 7.3.1
       '@types/geojson': 7946.0.16
+
+  '@turf/meta@7.3.3':
+    dependencies:
+      '@turf/helpers': 7.3.3
+      '@types/geojson': 7946.0.16
+      tslib: 2.8.1
 
   '@turf/midpoint@6.5.0':
     dependencies:
@@ -92494,33 +92555,12 @@ snapshots:
     dependencies:
       split2: 4.2.0
 
-  pino-http@10.5.0:
-    dependencies:
-      get-caller-file: 2.0.5
-      pino: 9.9.0
-      pino-std-serializers: 7.1.0
-      process-warning: 5.0.0
-
   pino-http@11.0.0:
     dependencies:
       get-caller-file: 2.0.5
       pino: 10.1.0
       pino-std-serializers: 7.1.0
       process-warning: 5.0.0
-
-  pino-http@8.6.1:
-    dependencies:
-      get-caller-file: 2.0.5
-      pino: 8.21.0
-      pino-std-serializers: 6.2.2
-      process-warning: 3.0.0
-
-  pino-http@9.0.0:
-    dependencies:
-      get-caller-file: 2.0.5
-      pino: 8.21.0
-      pino-std-serializers: 6.2.2
-      process-warning: 3.0.0
 
   pino-pretty@10.3.1:
     dependencies:
