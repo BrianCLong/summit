@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'platform/*'
   - 'packages/maestro-skills/*'
   - 'sdk/*'
   - 'services/*'
