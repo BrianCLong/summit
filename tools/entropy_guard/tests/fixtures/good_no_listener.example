@@ -1,2 +1,4 @@
-// ok
-const x = 1;
+// This is a good example without global listeners
+function handleResize() {
+  console.log('resized');
+}
