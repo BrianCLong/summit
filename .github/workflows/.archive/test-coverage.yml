@@ -79,7 +79,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -246,7 +245,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

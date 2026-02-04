@@ -1,0 +1,34 @@
+groups:
+  - name: FactAPIPro
+    rules:
+      - alert: FactAPIProHighErrorRate
+        expr: rate(http_requests_total{job="factapi-pro", status=~"5.."}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High 5xx error rate on FactAPI Pro"
+
+      - alert: FactAPIProAuthFailures
+        expr: rate(http_requests_total{job="factapi-pro", status="401"}[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Spike in Auth Failures"
+
+      - alert: FactAPIProQueueSaturation
+        expr: factapi_pro_concurrency_queue_depth > 800
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Concurrency queue near capacity (>800)"
+
+      - alert: FactAPIProWebhookFailures
+        expr: rate(http_requests_total{job="factapi-pro", handler="webhook_inbound", status!~"2.."}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Webhook ingress failures detected"
