@@ -8,7 +8,10 @@ import {
   requestContextMiddleware,
 } from '../request-context.js';
 
-describe('requestContextMiddleware', () => {
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('requestContextMiddleware', () => {
   test('propagates correlation ID and exposes context to log mixins', async () => {
     const app = express();
     app.use(correlationIdMiddleware);
@@ -24,13 +27,17 @@ describe('requestContextMiddleware', () => {
       });
     });
 
-    const response = await request(app)
-      .get('/health')
-      .set('x-correlation-id', 'corr-test-123');
+    const server = app.listen(0, '127.0.0.1');
+    try {
+      const response = await request(server)
+        .get('/health')
+        .set('x-correlation-id', 'corr-test-123');
 
-    expect(response.status).toBe(200);
-    expect(response.body.correlationId).toBe('corr-test-123');
-    expect(response.headers['x-correlation-id']).toBe('corr-test-123');
+      expect(response.status).toBe(200);
+      expect(response.body.correlationId).toBe('corr-test-123');
+      expect(response.headers['x-correlation-id']).toBe('corr-test-123');
+    } finally {
+      server.close();
+    }
   });
 });
-

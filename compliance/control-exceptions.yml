@@ -1,0 +1,10 @@
+# control-exceptions.yml
+# Exceptions for deferred SOC controls.
+#
+# Example:
+#   CC1.2:
+#     - id: "EX-2026-001"
+#       owner: "security-team"
+#       reason: "Automated evidence pending"
+#       expiry_date_utc: "2026-03-01"
+#       approved_by: "Platform Engineering"

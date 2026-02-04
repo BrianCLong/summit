@@ -1,0 +1,77 @@
+name: Post-Deploy Monitoring Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL of the deployment (e.g., https://api.summit.example.com)'
+        required: true
+        type: string
+      prom_url:
+        description: 'Prometheus Base URL (optional)'
+        required: false
+        type: string
+      require_prom:
+        description: 'Fail if Prometheus queries fail?'
+        required: false
+        type: boolean
+        default: false
+      ref:
+        description: 'Git ref to checkout (default: main)'
+        required: false
+        default: 'main'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Post-Deploy Canary
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+        run: |
+          chmod +x scripts/go-live/post-deploy-canary.sh
+          scripts/go-live/post-deploy-canary.sh
+
+      - name: Run SLO Snapshot
+        if: ${{ inputs.prom_url != '' }}
+        env:
+          PROM_URL: ${{ inputs.prom_url }}
+          REQUIRE_PROM: ${{ inputs.require_prom }}
+          PROM_TOKEN: ${{ secrets.PROM_TOKEN }}
+        run: |
+          npx tsx scripts/go-live/prom-slo-snapshot.ts
+
+      - name: Generate Evidence Bundle
+        run: pnpm evidence:post-deploy:gen
+
+      - name: Verify Evidence Bundle
+        run: pnpm evidence:post-deploy:verify
+
+      - name: Upload Evidence Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-deploy-evidence-${{ github.sha }}
+          path: artifacts/evidence/post-deploy/${{ github.sha }}/
+          retention-days: 90

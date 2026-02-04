@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { searchAll } from '../src/search/search';
+import { searchAll } from '../src/search/search.js';
 
 // Mock dependencies
 jest.mock('pg', () => {

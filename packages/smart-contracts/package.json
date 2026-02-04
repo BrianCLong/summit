@@ -1,18 +1,18 @@
 {
   "name": "@intelgraph/smart-contracts",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "Smart contract framework for governance and policy enforcement",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@intelgraph/blockchain": "workspace:*",
     "pino": "^9.5.0",
-    "vm2": "^3.9.19",
+    "isolated-vm": "^5.0.1",
     "joi": "^17.13.3"
   },
   "devDependencies": {

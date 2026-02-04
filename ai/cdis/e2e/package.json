@@ -1,6 +1,6 @@
 {
   "name": "cdis-e2e",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "private": true,
   "scripts": {
     "test": "playwright test"

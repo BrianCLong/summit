@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit://evidence/report.schema.json",
+  "type": "object",
+  "required": ["evidence_id", "run_id", "summary", "policies_applied"],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "run_id": {"type": "string"},
+    "summary": {"type": "string"},
+    "policies_applied": {"type": "array", "items": {"type": "string"}},
+    "artifacts": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

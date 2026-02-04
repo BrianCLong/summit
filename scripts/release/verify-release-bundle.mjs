@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { resolve, join, relative } from 'node:path';
 import { parseArgs } from 'node:util';
 import { execSync } from 'node:child_process';
 import { getSha256, verifyChecksums, enforcePolicy, checkAttestationBinding, getFiles } from './lib/verifier_core.mjs';
@@ -39,6 +39,12 @@ const RESULTS = {
     ok: false,
     checked: [],
     errors: [],
+    fileCounts: {
+        dirCount: 0,
+        sumsCount: 0,
+        indexCount: 0,
+        subjectCount: 0
+    }
 };
 
 function addError(code, message) {
@@ -52,6 +58,39 @@ function addCheck(message) {
 function mergeResults(res) {
     res.checked.forEach(m => addCheck(m));
     res.errors.forEach(e => addError(e.code, e.message));
+}
+
+const SUPPORTED_MAJOR_VERSION = 1;
+
+function checkCompatibility(bundleIndex) {
+    if (!bundleIndex || typeof bundleIndex.schemaVersion !== 'string') {
+        return {
+            compatible: false,
+            message: 'schemaVersion field is missing or not a string in bundle-index.json',
+            code: 'MISSING_FIELD',
+            details: { field: 'schemaVersion' }
+        };
+    }
+
+    const bundleMajor = parseInt(bundleIndex.schemaVersion.split('.')[0], 10);
+    if (Number.isNaN(bundleMajor)) {
+        return {
+            compatible: false,
+            message: `Could not parse major version from schemaVersion: "${bundleIndex.schemaVersion}"`,
+            code: 'INVALID_ENUM'
+        };
+    }
+
+    if (bundleMajor > SUPPORTED_MAJOR_VERSION) {
+        return {
+            compatible: false,
+            message: `Unsupported schema major version. Bundle has ${bundleMajor}, script supports ${SUPPORTED_MAJOR_VERSION}.`,
+            code: 'SCHEMA_MAJOR_UNSUPPORTED',
+            details: { bundleVersion: bundleIndex.schemaVersion, supportedVersion: `${SUPPORTED_MAJOR_VERSION}.x.x` }
+        };
+    }
+
+    return { compatible: true, message: 'Schema version is compatible.' };
 }
 
 // Global state for signature requirement (determined by policy)
@@ -214,8 +253,155 @@ if (values['verify-attestations'] || values.strict) {
 const checksumRes = verifyChecksums(BUNDLE_DIR);
 mergeResults(checksumRes);
 
+// 6. Bundle Index + Provenance Cross-Checks (stricter than SHA256SUMS)
+const sumsPath = join(BUNDLE_DIR, 'SHA256SUMS');
+if (existsSync(sumsPath)) {
+    const sumsContent = readFileSync(sumsPath, 'utf-8');
+    const canonicalHashes = new Map(); // filename -> hash
 
-// 6. Trust Metadata Emission
+    const invalidLines = [];
+    sumsContent.split('\n').forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        const match = trimmed.match(/^([a-fA-F0-9]{64})\s+(.+)$/);
+        if (match) {
+            let filename = match[2].trim();
+            if (filename.startsWith('./')) filename = filename.substring(2);
+            canonicalHashes.set(filename, match[1]);
+        } else {
+            invalidLines.push(trimmed);
+        }
+    });
+
+    RESULTS.fileCounts.sumsCount = canonicalHashes.size;
+    if (invalidLines.length > 0) {
+        const sample = invalidLines.slice(0, 3).join(' | ');
+        addError('SHA256SUMS_INVALID_FORMAT', `Invalid SHA256SUMS line(s): ${sample}`);
+    }
+    addCheck(`Loaded SHA256SUMS with ${canonicalHashes.size} entries`);
+
+    const allFiles = getFiles(BUNDLE_DIR);
+    const filesOnDisk = new Set();
+
+    for (const fullPath of allFiles) {
+        const relPath = relative(BUNDLE_DIR, fullPath).split('\\').join('/');
+        if (relPath === 'SHA256SUMS' || relPath === 'verify.json') continue;
+        filesOnDisk.add(relPath);
+        if (!canonicalHashes.has(relPath)) {
+            addError('DIR_EXTRA_FILE', `File found on disk but missing from SHA256SUMS: ${relPath}`);
+            continue;
+        }
+        const computedHash = getSha256(fullPath);
+        const expectedHash = canonicalHashes.get(relPath);
+        if (computedHash !== expectedHash) {
+            addError('HASH_MISMATCH', `Hash mismatch for ${relPath}. Expected ${expectedHash}, got ${computedHash}`);
+        }
+    }
+
+    RESULTS.fileCounts.dirCount = filesOnDisk.size;
+
+    for (const filename of canonicalHashes.keys()) {
+        if (!filesOnDisk.has(filename)) {
+            addError('DIR_MISSING_FILE', `File listed in SHA256SUMS but missing from disk: ${filename}`);
+        }
+    }
+
+    if (RESULTS.errors.length === 0) {
+        addCheck('Directory contents match SHA256SUMS exactly');
+    }
+
+    const indexPath = join(BUNDLE_DIR, 'bundle-index.json');
+    if (existsSync(indexPath)) {
+        try {
+            const indexJson = JSON.parse(readFileSync(indexPath, 'utf-8'));
+            const compat = checkCompatibility(indexJson);
+            if (!compat.compatible) {
+                addError(compat.code, compat.message);
+            }
+
+            if (indexJson.files && Array.isArray(indexJson.files)) {
+                RESULTS.fileCounts.indexCount = indexJson.files.length;
+                indexJson.files.forEach(f => {
+                    if (!canonicalHashes.has(f.path)) {
+                        addError('INDEX_EXTRA_FILE', `bundle-index.json lists file not in SHA256SUMS: ${f.path}`);
+                    } else if (f.path !== 'bundle-index.json' && canonicalHashes.get(f.path) !== f.sha256) {
+                        addError('INDEX_HASH_MISMATCH', `bundle-index.json hash mismatch for ${f.path}`);
+                    }
+                });
+
+                const indexPaths = new Set(indexJson.files.map(f => f.path));
+                for (const file of canonicalHashes.keys()) {
+                    if (!indexPaths.has(file)) {
+                        addError('INDEX_MISSING_FILE', `SHA256SUMS lists file not in bundle-index.json: ${file}`);
+                    }
+                }
+
+                if (RESULTS.errors.length === 0) {
+                    addCheck('bundle-index.json validated against SHA256SUMS');
+                }
+            }
+
+            if (indexJson.pointers) {
+                for (const [ptrName, ptrTarget] of Object.entries(indexJson.pointers)) {
+                    if (!canonicalHashes.has(ptrTarget)) {
+                        addError('POINTER_INVALID', `Pointer ${ptrName} -> ${ptrTarget} targets file not in SHA256SUMS`);
+                    }
+                }
+                addCheck('bundle-index.json pointers validated');
+            }
+        } catch (e) {
+            if (e instanceof ReleaseBundleError) {
+                addError(e.code, e.message);
+            } else {
+                addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);
+            }
+        }
+    }
+
+    const provPath = join(BUNDLE_DIR, 'provenance.json');
+    if (existsSync(provPath)) {
+        try {
+            const provJson = JSON.parse(readFileSync(provPath, 'utf-8'));
+            if (provJson.subject && Array.isArray(provJson.subject)) {
+                RESULTS.fileCounts.subjectCount = provJson.subject.length;
+                const subjectPaths = new Set();
+                provJson.subject.forEach(sub => {
+                    subjectPaths.add(sub.name);
+                    if (!canonicalHashes.has(sub.name)) {
+                        addError('PROV_EXTRA_SUBJECT', `Provenance subject not in SHA256SUMS: ${sub.name}`);
+                    } else if (sub.digest && sub.digest.sha256 && sub.name !== 'provenance.json') {
+                        if (sub.digest.sha256 !== canonicalHashes.get(sub.name)) {
+                            addError('PROV_HASH_MISMATCH', `Provenance hash mismatch for ${sub.name}`);
+                        }
+                    }
+                });
+
+                for (const file of canonicalHashes.keys()) {
+                    if (!subjectPaths.has(file) && file !== 'provenance.json' && file !== 'bundle-index.json') {
+                        addError('PROV_MISSING_SUBJECT', `SHA256SUMS file missing from Provenance subjects: ${file}`);
+                    }
+                }
+
+                if (RESULTS.errors.length === 0) {
+                    addCheck('provenance.json subjects match SHA256SUMS');
+                }
+            }
+        } catch (e) {
+            addError('INVALID_JSON', `Failed to parse provenance.json: ${e.message}`);
+        }
+    }
+
+    const notesSourcePath = join(BUNDLE_DIR, 'notes-source.json');
+    if (existsSync(notesSourcePath)) {
+        if (!existsSync(join(BUNDLE_DIR, 'release-notes.md'))) {
+            addError('NOTES_MISSING', 'notes-source.json exists but release-notes.md is missing');
+        } else {
+            addCheck('notes-source.json consistency verified');
+        }
+    }
+}
+
+// 7. Trust Metadata Emission
 const trustMetadata = {
     commitSha: values.sha || 'unknown', // Best effort if not passed?
     ref: values.tag || 'unknown',

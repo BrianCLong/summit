@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
 
 const logger = baseLogger.child({ module: 'KeyRiskMLExplainer' });
 
@@ -290,7 +290,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       }
 
       // Extract trend data for each feature
-      const trends: FeatureTrends['trends'] = {} as any;
+      const trends: Record<string, TrendData> = {};
 
       for (const feature of this.riskFeatures) {
         const values: number[] = [];
@@ -320,7 +320,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       const featureTrends: FeatureTrends = {
         keyId,
         timeRange,
-        trends,
+        trends: trends as FeatureTrends['trends'],
         correlations,
         anomalies,
       };
@@ -859,7 +859,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
     };
 
     return (
-      mitigations[featureName] ||
+      (mitigations as Record<string, string>)[featureName] ||
       'Monitor feature closely and investigate patterns'
     );
   }
@@ -880,7 +880,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       provider_reliability: 'Provider Reliability',
     };
 
-    return humanNames[featureName] || featureName;
+    return (humanNames as Record<string, string>)[featureName] || featureName;
   }
 
   private explainContribution(shapValue: SHAPValue): string {
@@ -910,7 +910,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       provider_reliability: 'Historical reliability score of the key provider',
     };
 
-    return descriptions[featureName] || 'Feature description not available';
+    return (descriptions as Record<string, string>)[featureName] || 'Feature description not available';
   }
 
   private calculateTrend(

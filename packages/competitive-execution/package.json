@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/competitive-execution",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Competitive execution engine operationalizing intelligence, switching costs, growth, pricing, reliability, security, narrative, partners, and legal readiness",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

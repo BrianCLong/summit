@@ -15,6 +15,7 @@
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -51,13 +52,10 @@
   "exclude": [
     "node_modules",
     "dist",
-    "build",
-    "src/__tests__/**",
-    "src/components/**/__tests__/**",
-    "src/components/ai-enhanced/tests/**",
-    "src/components/ai-enhanced/__tests__/**"
+    "build"
   ],
   "files": [
+    "types/global.d.ts",
     "types/custom.d.ts",
     "types/mui.d.ts",
     "types/grid2.d.ts"

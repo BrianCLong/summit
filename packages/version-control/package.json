@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/version-control",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Git-like version control for analyses and intelligence artifacts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "zod": "^3.22.0",

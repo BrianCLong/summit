@@ -47,6 +47,13 @@ class LLMProvider(ABC):
         """Generates text based on the given prompt."""
         pass
 
+    async def complete(self, prompt: str, system_prompt: str | None = None, **kwargs) -> str:
+        """Compatibility method for Society of Thought engine."""
+        full_prompt = prompt
+        if system_prompt:
+            full_prompt = f"SYSTEM: {system_prompt}\n\nUSER: {prompt}"
+        return await self._cached_generate_text(full_prompt, **kwargs)
+
     async def _cached_generate_text(self, prompt: str, **kwargs) -> str:
         """Generates text with caching."""
         if not self.cache_enabled or not self.redis_client:

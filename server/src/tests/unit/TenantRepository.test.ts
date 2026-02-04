@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { TenantRepository } from '../../db/tenant_repository.js';
 
@@ -19,7 +20,7 @@ describe('TenantRepository', () => {
   });
 
   test('findById adds tenant_id clause', async () => {
-    mockPool.query.mockResolvedValue({ rows: [{ id: '1', tenant_id: 't1' }] });
+    (mockPool.query as any).mockResolvedValue({ rows: [{ id: '1', tenant_id: 't1' }] });
 
     await repo.findById('t1', '1');
 
@@ -30,7 +31,7 @@ describe('TenantRepository', () => {
   });
 
   test('findAll adds tenant_id clause', async () => {
-    mockPool.query.mockResolvedValue({ rows: [] });
+    (mockPool.query as any).mockResolvedValue({ rows: [] });
 
     await repo.findAll('t1');
 
@@ -41,39 +42,39 @@ describe('TenantRepository', () => {
   });
 
   test('create adds tenant_id', async () => {
-      mockPool.query.mockResolvedValue({ rows: [{ id: '1', tenant_id: 't1' }] });
+    (mockPool.query as any).mockResolvedValue({ rows: [{ id: '1', tenant_id: 't1' }] });
 
-      await repo.create('t1', { name: 'test' });
+    await repo.create('t1', { name: 'test' });
 
-      expect(mockPool.query).toHaveBeenCalledWith(
-          expect.stringContaining('INSERT INTO test_table (tenant_id, name)'),
-          ['t1', 'test']
-      );
+    expect(mockPool.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO test_table (tenant_id, name)'),
+      ['t1', 'test']
+    );
   });
 
   test('update adds tenant_id clause', async () => {
-      mockPool.query.mockResolvedValue({ rows: [{ id: '1', tenant_id: 't1' }] });
+    (mockPool.query as any).mockResolvedValue({ rows: [{ id: '1', tenant_id: 't1' }] });
 
-      await repo.update('t1', '1', { name: 'updated' });
+    await repo.update('t1', '1', { name: 'updated' });
 
-      expect(mockPool.query).toHaveBeenCalledWith(
-          expect.stringContaining('UPDATE test_table'),
-          ['1', 't1', 'updated']
-      );
-      expect(mockPool.query).toHaveBeenCalledWith(
-          expect.stringContaining('WHERE id = $1 AND tenant_id = $2'),
-          expect.anything()
-      );
+    expect(mockPool.query).toHaveBeenCalledWith(
+      expect.stringContaining('UPDATE test_table'),
+      ['1', 't1', 'updated']
+    );
+    expect(mockPool.query).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE id = $1 AND tenant_id = $2'),
+      expect.anything()
+    );
   });
 
   test('delete adds tenant_id clause', async () => {
-      mockPool.query.mockResolvedValue({ rowCount: 1 });
+    (mockPool.query as any).mockResolvedValue({ rowCount: 1 });
 
-      await repo.delete('t1', '1');
+    await repo.delete('t1', '1');
 
-      expect(mockPool.query).toHaveBeenCalledWith(
-          expect.stringContaining('DELETE FROM test_table WHERE id = $1 AND tenant_id = $2'),
-          ['1', 't1']
-      );
+    expect(mockPool.query).toHaveBeenCalledWith(
+      expect.stringContaining('DELETE FROM test_table WHERE id = $1 AND tenant_id = $2'),
+      ['1', 't1']
+    );
   });
 });

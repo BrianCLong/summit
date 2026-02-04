@@ -1,0 +1,10 @@
+{
+  "name": "designos:extract",
+  "version": "1.0.0",
+  "description": "Extracts semantic design system definition from sources (code, Figma) into DESIGN.md and graph.",
+  "permissions": {
+    "filesystem": ["read", "write"],
+    "network": []
+  },
+  "signature": "sha256:mock-signature-designos-extract"
+}

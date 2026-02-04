@@ -4,8 +4,8 @@
  * resolving 'import.meta' syntax errors that ts-jest (in CommonJS mode) cannot handle.
  */
 
-export const VITE_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-export const VITE_WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:4000';
+export const VITE_API_URL = import.meta.env.VITE_API_URL || '';
+export const VITE_WS_URL = import.meta.env.VITE_WS_URL || '';
 export const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 export const VITE_GRAFANA_URL = import.meta.env.VITE_GRAFANA_URL || '';
 export const VITE_GRAFANA_MAESTRO_DASH_UID = import.meta.env.VITE_GRAFANA_MAESTRO_DASH_UID || '';

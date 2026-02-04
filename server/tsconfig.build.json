@@ -3,6 +3,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
     "useUnknownInCatchVariables": false,
@@ -12,11 +14,13 @@
   },
   "exclude": [
     "node_modules",
+    "../node_modules",
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/__tests__/**",
     "tests/**",
+    "../tests/**",
     "src/tests/**",
     "src/routes/geoint.js"
   ]

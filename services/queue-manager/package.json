@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/queue-manager",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Comprehensive queue management system with BullMQ, distributed queue with Redis failover, agent fleet notifications, and Codex task orchestration",
   "type": "module",
   "main": "dist/index.js",

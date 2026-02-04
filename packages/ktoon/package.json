@@ -1,6 +1,6 @@
 {
   "name": "@summit/ktoon",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Tokenizer-aware TOON v3 superset encoder/decoder with dictionaries, patches, and references.",
   "type": "module",
   "license": "MIT",

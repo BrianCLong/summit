@@ -1,5 +1,5 @@
 // server/src/services/ModelService.ts
-import { AppError } from '../lib/errors';
+import { AppError } from '../lib/errors.js';
 
 /**
  * @interface ModelProvider

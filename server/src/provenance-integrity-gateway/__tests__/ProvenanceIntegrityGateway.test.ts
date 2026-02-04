@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- jest mocks require type assertions */
 /**
  * Tests for Provenance & Integrity Gateway (PIG)
  *
@@ -12,6 +13,9 @@
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import * as crypto from 'crypto';
+import { mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
+import path from 'path';
 import {
   ProvenanceIntegrityGateway,
   C2PAValidationService,
@@ -29,6 +33,17 @@ import type {
 
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+const createTempDir = (prefix: string) =>
+  mkdtempSync(path.join(tmpdir(), prefix));
+
+const ensureMockPool = async () => {
+  const { pool } = await import('../../db/pg.js');
+  if (typeof (pool.query as any).mockResolvedValueOnce !== 'function') {
+    (pool as any).query = jest.fn(() => Promise.resolve({ rows: [] }));
+  }
+  return pool as any;
+};
 
 // Mock the database pool
 jest.mock('../../db/pg.js', () => ({
@@ -61,8 +76,17 @@ describeIf('ProvenanceIntegrityGateway', () => {
   let pig: ProvenanceIntegrityGateway;
 
   beforeEach(async () => {
+    const storageRoot = createTempDir('pig-test-');
     pig = new ProvenanceIntegrityGateway({
       enableAll: true,
+      signing: {
+        storagePath: path.join(storageRoot, 'signed-assets'),
+        generateC2PA: false,
+        requireApproval: false,
+      },
+      truthBundle: {
+        storagePath: path.join(storageRoot, 'truth-bundles'),
+      },
     });
   });
 
@@ -223,8 +247,8 @@ describeIf('ContentSigningService', () => {
 
   describeIf('signAsset', () => {
     it('should create signed asset with correct properties', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const content = Buffer.from('test official content');
       const request: SignAssetRequest = {
@@ -247,8 +271,8 @@ describeIf('ContentSigningService', () => {
     });
 
     it('should calculate content hash correctly', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const content = Buffer.from('test content for hashing');
       const expectedHash = crypto.createHash('sha256').update(content).digest('hex');
@@ -269,8 +293,8 @@ describeIf('ContentSigningService', () => {
 
   describeIf('revokeAsset', () => {
     it('should reject revocation of non-existent asset', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(
         service.revokeAsset(
@@ -371,9 +395,9 @@ describeIf('DeepfakeDetectionService', () => {
 
   describeIf('matchOfficialAsset', () => {
     it('should check for matching official assets', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const content = Buffer.alloc(1000);
       const result = await service.matchOfficialAsset(
@@ -429,7 +453,7 @@ describeIf('NarrativeConflictService', () => {
 
   describeIf('cluster management', () => {
     it('should create new narrative cluster', async () => {
-      const { pool } = await import('../../db/pg.js');
+      const pool = await ensureMockPool();
       // Mock findSimilarCluster
       (pool.query as any).mockResolvedValueOnce({ rows: [] });
       // Mock storeCluster
@@ -556,9 +580,9 @@ describeIf('PIGGovernanceService', () => {
 
   describeIf('configuration', () => {
     it('should return default config for new tenant', async () => {
-      const { pool } = await import('../../db/pg.js');
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      const pool = await ensureMockPool();
+      pool.query.mockResolvedValueOnce({ rows: [] });
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const config = await service.getConfig('new-tenant');
 
@@ -570,25 +594,25 @@ describeIf('PIGGovernanceService', () => {
 
   describeIf('risk assessment', () => {
     it('should calculate overall risk assessment', async () => {
-      const { pool } = await import('../../db/pg.js');
+      const pool = await ensureMockPool();
 
       // Mock asset risk query
-      (pool.query as any).mockResolvedValueOnce({
+      pool.query.mockResolvedValueOnce({
         rows: [{ revoked_count: 2, published_count: 100, expired_count: 5 }],
       });
 
       // Mock narrative risk query
-      (pool.query as any).mockResolvedValueOnce({
+      pool.query.mockResolvedValueOnce({
         rows: [{ high_risk_count: 3, active_count: 10, max_risk: 75 }],
       });
 
       // Mock incident risk query
-      (pool.query as any).mockResolvedValueOnce({
+      pool.query.mockResolvedValueOnce({
         rows: [{ critical_count: 1, high_count: 2, total_count: 10 }],
       });
 
       // Mock compliance config query
-      (pool.query as any).mockResolvedValueOnce({ rows: [] });
+      pool.query.mockResolvedValueOnce({ rows: [] });
 
       const assessment = await service.getRiskAssessment('tenant-1');
 
@@ -605,8 +629,17 @@ describeIf('Integration: Full Verification Flow', () => {
   let pig: ProvenanceIntegrityGateway;
 
   beforeEach(async () => {
+    const storageRoot = createTempDir('pig-test-integration-');
     pig = new ProvenanceIntegrityGateway({
       enableAll: true,
+      signing: {
+        storagePath: path.join(storageRoot, 'signed-assets'),
+        generateC2PA: false,
+        requireApproval: false,
+      },
+      truthBundle: {
+        storagePath: path.join(storageRoot, 'truth-bundles'),
+      },
     });
   });
 
