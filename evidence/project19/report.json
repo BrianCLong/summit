@@ -2,7 +2,6 @@
   "contractId": "ev-project19-resilience",
   "manifest": {
     "queryId": "project19-completion",
-    "timestamp": "2025-10-27T12:00:00Z",
     "strategy": "HYBRID",
     "parameters": {
       "project": "Project 19",
@@ -15,7 +14,6 @@
     {
       "id": "cit-enforcement",
       "source": "scripts/project19-enforcement.ts",
-      "timestamp": "2025-10-27T12:00:00Z",
       "confidence": 1.0,
       "snippet": "Project 19 Enforcement Passed"
     }
