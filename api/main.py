@@ -23,7 +23,7 @@ from sentence_transformers import SentenceTransformer
 
 from intelgraph_ai_ml.graph_forecaster import GraphForecaster
 
-from .llm_provider import llm_provider  # Import the LLM provider
+from .llm_provider import llm_provider
 from .platform_spine import flags
 
 # --- App Initialization ---

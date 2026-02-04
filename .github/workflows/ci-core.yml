@@ -37,10 +37,23 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
-            - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@v4 # v6
+        with:
+          cache: "pnpm"
+          node-version-file: .nvmrc
+      - name: Validate Jest & pnpm Configuration
+        run: node scripts/ci/validate-jest-config.cjs
 
-              - uses: actions/setup-node@v4 # v6
+  lint-typecheck:
+    name: Lint & Typecheck
+    runs-on: self-hosted
+    needs: [config-preflight]
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -63,8 +76,10 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-              - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -88,8 +103,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-              - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -150,8 +167,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-              - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -180,8 +199,10 @@ jobs:
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-              - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -227,8 +248,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-              - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -253,8 +276,10 @@ jobs:
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-              - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -291,8 +316,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-              - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-              - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -345,6 +372,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -370,9 +399,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-              - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-
-              - uses: actions/setup-node@v4 # v6
+        with:
+          version: "10.0.0"
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -513,16 +542,3 @@ jobs:
           echo "- ✅ Governance / Branch Protection Drift" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Status**: Ready for merge (pending ci-verify)" >> $GITHUB_STEP_SUMMARY
-- uses: actions/setup-node@v4 # v6
-        with:
-          cache: "pnpm"
-          node-version-file: .nvmrc
-      - name: Validate Jest & pnpm Configuration
-        run: node scripts/ci/validate-jest-config.cjs
-
-  lint-typecheck:
-    name: Lint & Typecheck
-    runs-on: self-hosted
-    needs: [config-preflight]
-    steps:
-      - uses: actions/checkout@v4 # v6
