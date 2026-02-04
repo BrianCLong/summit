@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Context Management Evidence Stamp",
+  "type": "object",
+  "required": ["created_at", "git_sha", "runner"],
+  "properties": {
+    "created_at": { "type": "string", "format": "date-time" },
+    "git_sha": { "type": "string" },
+    "runner": { "type": "string" }
+  },
+  "additionalProperties": false
+}
