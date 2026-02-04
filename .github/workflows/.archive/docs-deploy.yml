@@ -36,9 +36,7 @@ jobs:
       
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-      
-      - name: Install dependencies
+              - name: Install dependencies
         run: |
           cd website
           pnpm install --frozen-lockfile
@@ -98,9 +96,7 @@ jobs:
       
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-      
-      - name: Install dependencies
+              - name: Install dependencies
         run: |
           cd website
           pnpm install --frozen-lockfile

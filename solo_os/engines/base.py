@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import Dict, Any, Protocol
+from typing import Dict, Any, Protocol, Optional
 
 @dataclass(frozen=True)
 class RunRequest:
     engine: str
     mode: str  # "dry_run" | "execute"
     payload: Dict[str, Any]
+    idempotency_key: Optional[str] = None
 
 @dataclass(frozen=True)
 class RunResult:

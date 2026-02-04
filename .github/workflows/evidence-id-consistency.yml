@@ -16,10 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
+          cache: "pnpm"
 
       - name: Run Evidence ID Consistency Gate (3x)
         run: |

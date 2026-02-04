@@ -17,7 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
-      - uses: actions/setup-node@v4
+            - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+- uses: actions/setup-node@v4
         with: { node-version: '18' , cache: 'pnpm' }
       - name: Install (top-level only)
         run: |
@@ -34,7 +36,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
-      - uses: actions/setup-node@v4
+            - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+- uses: actions/setup-node@v4
         with: { node-version: '18' , cache: 'pnpm' }
       - name: Unit tests (non-flaky subset)
         run: |
