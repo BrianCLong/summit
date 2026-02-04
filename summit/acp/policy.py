@@ -1,7 +1,3 @@
-"""
-ACP Policy Enforcement.
-Implements allowlists and deny-by-default installation gates.
-"""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable
