@@ -55,6 +55,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: longhorizon-ai-native-engineering-team
+    version: v1
+    path: prompts/longhorizon/longhorizon-ai-native-engineering-team.md
+    sha256: 2fc49a1292583add618fc867a3a3fd70962222b7ae78d82cfcf238cdb1dadf43
+    description: LongHorizon orchestration with MAP-Elites, island model, and stateful memory.
+    scope:
+      paths:
+        - src/longhorizon/
+        - src/cli/maestro-longhorizon.ts
+        - tests/longhorizon/
+        - docs/longhorizon.md
+        - examples/longhorizon/
+        - prompts/longhorizon/
+        - prompts/registry.yaml
+        - agents/examples/longhorizon-task.json
+        - docs/roadmap/STATUS.json
+      domains:
+        - orchestration
+        - governance
+        - evidence
+        - memory
+        - evaluation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

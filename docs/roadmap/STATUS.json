@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-10T08:27:49Z",
-  "revision_note": "Documented the new triage form + stale guard policy in sync with automation",
+  "last_updated": "2026-01-14T16:00:00Z",
+  "revision_note": "Added LongHorizon orchestration MVP scope and evidence references",
   "initiatives": [
     {
       "id": "A",
@@ -136,14 +136,27 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "LongHorizon Orchestration",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Evolutionary Orchestration MVP",
+          "status": "partial",
+          "owner": "Codex",
+          "evidence": "src/longhorizon/*, src/cli/maestro-longhorizon.ts, docs/longhorizon.md"
+        }
+      ]
     }
   ],
   "summary": {
     "rc_ready": 5,
-    "partial": 1,
+    "partial": 2,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": []
   }
 }
