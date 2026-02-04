@@ -11,7 +11,7 @@ class GraphPerfRunner:
         self.uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
         self.user = os.environ.get("NEO4J_USER", "neo4j")
         self.password = os.environ.get("NEO4J_PASSWORD", "password")
-        self.output_dir = "artifacts/evidence"
+        self.output_dir = "evidence"
         os.makedirs(self.output_dir, exist_ok=True)
 
     def get_driver(self):
@@ -59,7 +59,7 @@ class GraphPerfRunner:
                 "params": sorted(params.items()),
                 "neo4j_version": "5.x" # Mocked for now
             }
-            config_hash = hashlib.sha256(json.dumps(config_payload).encode()).hexdigest()[:12].upper()
+            config_hash = hashlib.sha256(json.dumps(config_payload, sort_keys=True).encode()).hexdigest()[:12].upper()
             evidence_id = f"EVD-GPQ-{config_hash}-001"
 
             self.emit_evidence(evidence_id, {
@@ -128,10 +128,14 @@ class GraphPerfRunner:
                 except:
                     index = {"version": "1.0", "items": {}}
 
-            if "items" not in index:
-                index["items"] = {}
+            if "entries" not in index:
+                index["entries"] = []
 
-            index["items"][evidence_id] = {
+            # Avoid duplicates
+            index["entries"] = [e for e in index["entries"] if e.get("id") != evidence_id]
+
+            index["entries"].append({
+                "id": evidence_id,
                 "title": f"GraphPerf benchmark: {query_id}",
                 "category": "performance",
                 "files": [
@@ -139,7 +143,7 @@ class GraphPerfRunner:
                     f"evidence/{evidence_id}/metrics.json",
                     f"evidence/{evidence_id}/stamp.json"
                 ]
-            }
+            })
 
             with open(index_path, "w") as f:
                 json.dump(index, f, indent=2)
@@ -147,6 +151,22 @@ class GraphPerfRunner:
         print(f"Evidence emitted to {evid_path}")
 
 if __name__ == "__main__":
-    runner = GraphPerfRunner()
-    # Example run (would fail without Neo4j)
-    # runner.run_benchmark("test_query", "MATCH (n) RETURN count(n)", {})
+    # In CI, we only run if a flag is set to avoid connection errors when Neo4j is not available.
+    if os.environ.get("RUN_GRAPHPERF_BENCHMARK") == "1":
+        runner = GraphPerfRunner()
+        # Representative anchored shortestPath query
+        query = """
+        MATCH (s:Evidence {id: $src_id}), (t:Evidence {id: $tgt_id})
+        MATCH p = shortestPath((s)-[*1..4]-(t))
+        RETURN p
+        """
+        params = {
+            "src_id": "EVD-GPQ-ANCHOR-001",
+            "tgt_id": "EVD-GPQ-ANCHOR-002"
+        }
+        try:
+            runner.run_benchmark("anchored_shortest_path", query, params)
+        except Exception as e:
+            print(f"Benchmark failed: {e}")
+            # We don't exit(1) here to avoid blocking CI if Neo4j is flakey,
+            # but check_budgets.py will fail if evidence is missing.

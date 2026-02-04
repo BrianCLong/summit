@@ -20,8 +20,6 @@ neo4j
 pytest-mock
 urllib3>=2.6.0
 openlineage-dbt
-jsonschema>=4.0.0
+jsonschema
 beautifulsoup4
 deepdiff
-neo4j
-psycopg2-binary

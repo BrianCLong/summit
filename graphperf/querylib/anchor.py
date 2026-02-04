@@ -6,16 +6,29 @@ class QueryShaper:
     injected with planner hints.
     """
 
-    def __init__(self, use_hints=True):
+    def __init__(self, use_hints=True, available_indexes=None):
         self.use_hints = use_hints
+        self.available_indexes = available_indexes or []
+
+    def _should_use_hint(self, label, property_name):
+        if not self.use_hints:
+            return False
+        if not self.available_indexes:
+            return True # Assume hints are safe if no explicit allowlist provided
+
+        # Check if an index on Label(property) is in the allowlist
+        index_key = f"{label}({property_name})"
+        return any(index_key in idx for idx in self.available_indexes)
 
     def anchored_evidence_shortest_path(self, body_query, target_id, depth_max=4):
         """
         Generates a Cypher query for shortest path between an Evidence node
         (searched by body text) and a target Entity.
         """
-        # Note: We use the TEXT index hint if enabled
-        hint = "USING TEXT INDEX s:Evidence(body) " if self.use_hints else ""
+        # Note: We use the TEXT index hint if enabled and index exists
+        hint = ""
+        if self._should_use_hint("Evidence", "body"):
+            hint = "USING TEXT INDEX s:Evidence(body) "
 
         cypher = (
             "MATCH (s:Evidence) "
@@ -46,7 +59,9 @@ class QueryShaper:
         on relationships.
         """
         # Hint for relationship range index
-        hint = "USING INDEX r:EVIDENCE_OF(confidence) " if self.use_hints else ""
+        hint = ""
+        if self._should_use_hint("EVIDENCE_OF", "confidence"):
+            hint = "USING INDEX r:EVIDENCE_OF(confidence) "
 
         cypher = (
             "MATCH (s:Evidence {id: $evidence_id}) "

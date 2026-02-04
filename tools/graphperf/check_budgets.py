@@ -6,10 +6,12 @@ def check_budgets():
     """
     Enforces performance budgets by inspecting generated evidence artifacts.
     """
-    evidence_dir = "artifacts/evidence"
+    evidence_dir = "evidence"
     if not os.path.exists(evidence_dir):
-        print("No evidence found in artifacts/evidence")
-        # In CI, this might be a failure if we expected benchmarks to run
+        print("No evidence found in evidence/")
+        if os.environ.get("RUN_GRAPHPERF_BENCHMARK") == "1":
+            print("ERROR: Benchmarks were supposed to run but no evidence was found.")
+            sys.exit(1)
         return
 
     # Budgets (could be moved to a config file)
@@ -47,6 +49,9 @@ def check_budgets():
 
     if not found_evidence:
         print("Warning: No metrics.json files found to verify.")
+        if os.environ.get("RUN_GRAPHPERF_BENCHMARK") == "1":
+            print("ERROR: Benchmarks were supposed to run but no metrics were found.")
+            sys.exit(1)
     else:
         print("OK: All performance budgets met.")
 
