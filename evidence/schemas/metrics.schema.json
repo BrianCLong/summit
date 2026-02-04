@@ -1,64 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit.evidence.metrics",
+  "title": "summit evidence metrics",
   "type": "object",
-  "anyOf": [
-    {
-      "required": [
-        "evidence_id",
-        "metrics"
-      ],
-      "properties": {
-        "evidence_id": {
-          "type": "string"
-        },
-        "metrics": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": [
-              "name",
-              "value",
-              "unit"
-            ],
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "type": "number"
-              },
-              "unit": {
-                "type": "string"
-              },
-              "notes": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "required": [
-        "metrics"
-      ],
-      "properties": {
-        "evidence_id": {
-          "type": "string"
-        },
-        "metrics": {
-          "type": "object",
-          "additionalProperties": {
-            "type": [
-              "number",
-              "string",
-              "boolean"
-            ]
-          }
-        }
-      }
-    }
-  ],
-  "additionalProperties": true
+  "required": ["evidence_id", "metrics"],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "metrics": {"type": "object"}
+  },
+  "additionalProperties": false
 }
