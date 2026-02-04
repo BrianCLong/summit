@@ -1,0 +1,7 @@
+{
+  "metrics": {
+    "episodes_generated": 5,
+    "hooks_generated": 4,
+    "determinism_check": "passed"
+  }
+}
