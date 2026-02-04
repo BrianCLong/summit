@@ -50,7 +50,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
 
   if (lightweight) return app;
 
-  // In full mode, server.js wires DB + GraphQL + websockets.
+  // In full mode, server.ts wires DB + GraphQL + websockets.
   return app;
 }
 

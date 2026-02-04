@@ -1,23 +1,25 @@
-// Logger mock - CommonJS version for dual ESM/CJS compatibility
-const loggerImpl = {
+const logger = {
+  info: () => { },
+  error: () => { },
+  warn: () => { },
+  debug: () => { },
   child: function () { return this; },
-  debug: () => {},
-  info: () => {},
-  warn: () => {},
-  error: () => {},
-  trace: () => {},
-  fatal: () => {},
-  silent: () => {},
-  level: 'silent',
+  trace: () => { },
+  fatal: () => { },
+  silent: () => { },
+  level: 'info',
+  bindings: () => ({}),
+  flush: () => { },
+  stdSerializers: {
+    err: (e) => e,
+    req: (r) => r,
+    res: (r) => r,
+  }
 };
 
-const correlationStorageImpl = {
-  getStore: () => undefined,
-  run: (_store, fn) => fn(),
-  enterWith: () => undefined,
-};
+const pino = (opts) => logger;
 
-module.exports = loggerImpl;
-module.exports.logger = loggerImpl;
-module.exports.correlationStorage = correlationStorageImpl;
-module.exports.default = loggerImpl;
+module.exports = pino;
+module.exports.default = pino;
+module.exports.pino = pino;
+module.exports.stdSerializers = logger.stdSerializers;

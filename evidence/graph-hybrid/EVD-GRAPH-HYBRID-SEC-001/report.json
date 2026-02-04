@@ -1,0 +1,5 @@
+{
+  "evidence_id": "EVD-GRAPH-HYBRID-SEC-001",
+  "summary": "GraphRAG policy fixtures enforce tenant scope and hop limits.",
+  "artifacts": ["policy/graphrag/policy.yaml", "policy/graphrag/fixtures/deny"]
+}

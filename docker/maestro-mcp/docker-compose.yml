@@ -1,0 +1,20 @@
+services:
+  ig:
+    image: summit/maestro-mcp:ig
+    stdin_open: true
+
+  mc:
+    image: summit/maestro-mcp:mc
+    stdin_open: true
+
+  sb:
+    image: summit/maestro-mcp:sb
+    stdin_open: true
+
+  co:
+    image: summit/maestro-mcp:co
+    stdin_open: true
+
+  platform:
+    image: summit/maestro-mcp:platform
+    stdin_open: true

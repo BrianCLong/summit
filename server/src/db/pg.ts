@@ -2,8 +2,19 @@
 import { Pool, QueryResult } from 'pg';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, register } from 'prom-client';
+import { RedisService } from '../cache/redis.js';
+import { validateAndScopeQuery } from './query-scope.js';
 
 const tracer = trace.getTracer('maestro-postgres', '24.3.0');
+
+// Reviver to restore Date objects from JSON cache
+const jsonDateReviver = (key: string, value: any) => {
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/.test(value)) {
+        const date = new Date(value);
+        if (!isNaN(date.getTime())) return date;
+    }
+    return value;
+};
 
 const toInt = (value: string | undefined, fallback: number): number => {
   const parsed = Number.parseInt(value || '', 10);
@@ -229,15 +240,38 @@ export const pg = {
   read: async (
     query: string,
     params: any[] = [],
-    options?: { region?: string; tenantId?: string },
+    options?: { region?: string; tenantId?: string; cache?: { ttl: number; key: string } },
   ) => {
-    return _executeQuery(
+    if (options?.cache) {
+        try {
+            const redis = RedisService.getInstance();
+            const cached = await redis.get(options.cache.key);
+            if (cached) {
+                return JSON.parse(cached, jsonDateReviver);
+            }
+        } catch (e) {
+            console.warn('Cache retrieval failed:', e);
+        }
+    }
+
+    const result = await _executeQuery(
       'postgres.read',
       query,
       params,
       { ...options, poolType: 'read' },
       false,
     );
+
+    if (options?.cache && result) {
+        try {
+            const redis = RedisService.getInstance();
+            await redis.set(options.cache.key, JSON.stringify(result), options.cache.ttl);
+        } catch (e) {
+            console.warn('Cache set failed:', e);
+        }
+    }
+
+    return result;
   },
 
   // Explicit write method
@@ -259,15 +293,38 @@ export const pg = {
   readMany: async (
     query: string,
     params: any[] = [],
-    options?: { region?: string; tenantId?: string },
+    options?: { region?: string; tenantId?: string; cache?: { ttl: number; key: string } },
   ) => {
-    return _executeQuery(
+    if (options?.cache) {
+        try {
+            const redis = RedisService.getInstance();
+            const cached = await redis.get(options.cache.key);
+            if (cached) {
+                return JSON.parse(cached);
+            }
+        } catch (e) {
+             console.warn('Cache retrieval failed:', e);
+        }
+    }
+
+    const result = await _executeQuery(
       'postgres.read_many',
       query,
       params,
       { ...options, poolType: 'read' },
       true,
     );
+
+    if (options?.cache && result) {
+        try {
+            const redis = RedisService.getInstance();
+            await redis.set(options.cache.key, JSON.stringify(result), options.cache.ttl);
+        } catch (e) {
+            console.warn('Cache set failed:', e);
+        }
+    }
+
+    return result;
   },
 
   many: async (
@@ -380,157 +437,3 @@ export const pg = {
   },
 };
 
-interface ScopedQuery {
-  query: string;
-  params: any[];
-  wasScoped: boolean;
-}
-
-// Tenant scoping validation and enforcement
-function validateAndScopeQuery(
-  query: string,
-  params: any[],
-  tenantId?: string,
-): ScopedQuery {
-  const lowerQuery = query.toLowerCase().trim();
-
-  // Tables that require tenant scoping
-  const tenantScopedTables = [
-    'coherence_scores',
-    'audit_logs',
-    'user_sessions',
-    'api_keys',
-  ];
-
-  // Check if query affects tenant-scoped tables
-  const affectedTable = tenantScopedTables.find((table) =>
-    lowerQuery.includes(table),
-  );
-
-  if (!affectedTable) {
-    // Query doesn't affect tenant-scoped tables
-    return { query, params, wasScoped: false };
-  }
-
-  // For tenant-scoped tables, tenantId is required
-  if (!tenantId) {
-    throw new Error(`Tenant ID required for queries on ${affectedTable}`);
-  }
-
-  // Check if query already has tenant scoping
-  if (lowerQuery.includes('tenant_id') && lowerQuery.includes('$')) {
-    // Assume query is already properly scoped
-    return { query, params, wasScoped: true };
-  }
-
-  // Auto-scope the query based on operation type
-  if (lowerQuery.startsWith('select')) {
-    return scopeSelectQuery(query, params, tenantId, affectedTable);
-  } else if (lowerQuery.startsWith('insert')) {
-    return scopeInsertQuery(query, params, tenantId, affectedTable);
-  } else if (lowerQuery.startsWith('update')) {
-    return scopeUpdateQuery(query, params, tenantId, affectedTable);
-  } else if (lowerQuery.startsWith('delete')) {
-    return scopeDeleteQuery(query, params, tenantId, affectedTable);
-  }
-
-  // Fallback for unrecognized query patterns
-  console.warn(
-    `Unable to auto-scope query for table ${affectedTable}: ${query}`,
-  );
-  return { query, params, wasScoped: false };
-}
-
-function scopeSelectQuery(
-  query: string,
-  params: any[],
-  tenantId: string,
-  table: string,
-): ScopedQuery {
-  const lowerQuery = query.toLowerCase();
-
-  // Add WHERE clause or AND condition for tenant_id
-  if (lowerQuery.includes('where')) {
-    // Add AND tenant_id = $n condition
-    const scopedQuery = query + ` AND tenant_id = $${params.length + 1}`;
-    return {
-      query: scopedQuery,
-      params: [...params, tenantId],
-      wasScoped: true,
-    };
-  } else {
-    // Add WHERE tenant_id = $n condition
-    const scopedQuery = query + ` WHERE tenant_id = $${params.length + 1}`;
-    return {
-      query: scopedQuery,
-      params: [...params, tenantId],
-      wasScoped: true,
-    };
-  }
-}
-
-function scopeInsertQuery(
-  query: string,
-  params: any[],
-  tenantId: string,
-  table: string,
-): ScopedQuery {
-  // For INSERT queries, ensure tenant_id is included in VALUES
-  // This is a simplified implementation - in production would need more sophisticated parsing
-  console.warn(
-    `INSERT query tenant scoping needs manual verification: ${query}`,
-  );
-  return { query, params, wasScoped: false };
-}
-
-function scopeUpdateQuery(
-  query: string,
-  params: any[],
-  tenantId: string,
-  table: string,
-): ScopedQuery {
-  const lowerQuery = query.toLowerCase();
-
-  // Add WHERE tenant_id condition to UPDATE
-  if (lowerQuery.includes('where')) {
-    const scopedQuery = query + ` AND tenant_id = $${params.length + 1}`;
-    return {
-      query: scopedQuery,
-      params: [...params, tenantId],
-      wasScoped: true,
-    };
-  } else {
-    const scopedQuery = query + ` WHERE tenant_id = $${params.length + 1}`;
-    return {
-      query: scopedQuery,
-      params: [...params, tenantId],
-      wasScoped: true,
-    };
-  }
-}
-
-function scopeDeleteQuery(
-  query: string,
-  params: any[],
-  tenantId: string,
-  table: string,
-): ScopedQuery {
-  const lowerQuery = query.toLowerCase();
-
-  // Add WHERE tenant_id condition to DELETE
-  if (lowerQuery.includes('where')) {
-    const scopedQuery = query + ` AND tenant_id = $${params.length + 1}`;
-    return {
-      query: scopedQuery,
-      params: [...params, tenantId],
-      wasScoped: true,
-    };
-  } else {
-    const scopedQuery = query + ` WHERE tenant_id = $${params.length + 1}`;
-    return {
-      query: scopedQuery,
-      params: [...params, tenantId],
-      wasScoped: true,
-    };
-  }
-}

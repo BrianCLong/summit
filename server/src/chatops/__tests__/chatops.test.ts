@@ -1,6 +1,5 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { test, describe, it } from 'node:test';
-import assert from 'node:assert';
+import { describe, it } from '@jest/globals';
+import assert from 'node:assert/strict';
 import { ChatOpsOrchestrator } from '../orchestrator.js';
 
 describe('ChatOps Phase 1 Verification', () => {

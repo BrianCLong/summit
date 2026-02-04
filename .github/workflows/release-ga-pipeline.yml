@@ -184,6 +184,41 @@ jobs:
           echo "| Source RC | \`${RC_TAG:-N/A}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Status | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
 
+  skills-vet:
+    name: "Skills Vet"
+    runs-on: ubuntu-latest
+    needs: [gate, freeze-gate]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@b0eb0c1eb5f79b7ec602946f1fa93f3fc06f6e70 # v2
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Vet Skills (strict)
+        run: pnpm skill vet --all
+
+      - name: Upload Skills Evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: skills-evidence
+          path: evidence/skills
+          retention-days: 14
+
   # ═══════════════════════════════════════════════════════════════════════════
   # Stage 2: Verification
   # Run release readiness checks
@@ -227,6 +262,9 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: LongRunJob Contract Gate (strict)
+        run: node scripts/ci/verify-longrun-contract.mjs
 
       - name: Security Guardrails
         run: |

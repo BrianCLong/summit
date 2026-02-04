@@ -1,5 +1,5 @@
 
-import { MaestroSpec, MaestroNode, MaestroTask, RunId, TenantId } from './model';
+import { MaestroSpec, MaestroNode, MaestroTask, RunId, TenantId } from './model.js';
 
 export class MaestroDSL {
   /**

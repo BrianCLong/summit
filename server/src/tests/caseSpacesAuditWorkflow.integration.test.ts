@@ -5,9 +5,9 @@
  */
 
 import { Pool } from 'pg';
-import { CaseRepo } from '../repos/CaseRepo';
-import { AuditAccessLogRepo } from '../repos/AuditAccessLogRepo';
-import { CaseService } from '../cases/CaseService';
+import { CaseRepo } from '../repos/CaseRepo.js';
+import { AuditAccessLogRepo } from '../repos/AuditAccessLogRepo.js';
+import { CaseService } from '../cases/CaseService.js';
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock Pool for integration testing

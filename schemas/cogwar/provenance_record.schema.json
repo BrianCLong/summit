@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "artifact_id", "hash", "hash_alg", "source"],
+  "properties": {
+    "id": {"type": "string"},
+    "artifact_id": {"type": "string"},
+    "hash": {"type": "string"},
+    "hash_alg": {"type": "string", "enum": ["sha256"]},
+    "source": {"type": "string"},
+    "chain": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

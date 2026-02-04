@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-AUTOMATION-TURN-3-SEC-001",
+  "item_slug": "automation-turn-3",
+  "decisions": [{ "id": "DEC-X", "when": "2026-01-01T00:00:00Z" }],
+  "checks": [],
+  "claim_registry": []
+}

@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-260119895-keel-STAB-002",
+  "item_slug": "260119895-keel",
+  "claims": ["Stability gates cover NaN/inf checks and gradient propagation across depth."],
+  "decisions": [],
+  "findings": []
+}

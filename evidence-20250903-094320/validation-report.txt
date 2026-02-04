@@ -1,9 +1,0 @@
-🚀 Maestro Conductor Production Readiness Check
-=================================================
-Environment: Production
-Namespace: intelgraph-prod
-Timestamp: 2025-09-03 15:43:24 UTC
-
-[0;34m[READINESS][0m 🏗️  Infrastructure Readiness
-----------------------------
-[0;32m✅ Kubernetes cluster accessible[0m

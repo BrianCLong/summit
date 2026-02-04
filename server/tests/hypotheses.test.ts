@@ -5,7 +5,7 @@ import {
   addDissent,
   Hypothesis,
   Evidence,
-} from '../src/hypotheses';
+} from '../src/hypotheses.js';
 
 describe('hypothesis updates', () => {
   const base: Hypothesis = {

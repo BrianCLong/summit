@@ -127,6 +127,17 @@ rollback-drill: ## Run simulated rollback drill
 sbom:   ## Generate CycloneDX SBOM
 	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
+supplychain.evidence: ## Generate supply chain evidence artifacts
+	@bash hack/supplychain/evidence_id.sh > evidence_id.txt
+	@EVIDENCE_ID=$$(cat evidence_id.txt); \
+	python3 hack/supplychain/gen_evidence.py --evidence-id "$$EVIDENCE_ID" --output-dir "evidence/$$EVIDENCE_ID"
+
+supplychain.attest.local: ## Build image and export attestations locally (no push)
+	@mkdir -p out
+	@docker buildx build --attest type=sbom --attest type=provenance,mode=min --output type=local,dest=out/image .
+	@echo "Verifying attestations..."
+	@find out/image -name "*.json" -exec python3 hack/supplychain/verify_attestation_shape.py {} \;
+
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
 	@sleep 45
@@ -376,3 +387,17 @@ pipelines-list: ## List registered pipelines
 
 pipelines-validate: ## Validate pipeline manifests
 	@python3 pipelines/cli.py validate
+
+# Copilot CLI lanes
+.PHONY: copilot-explore copilot-plan copilot-task copilot-review
+copilot-explore: ## Run Copilot CLI in explore lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot explore $(ARGS) $(PROMPT)
+
+copilot-plan: ## Run Copilot CLI in plan lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot plan $(ARGS) $(PROMPT)
+
+copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot task $(ARGS) $(PROMPT)
+
+copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)

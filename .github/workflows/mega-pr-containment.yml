@@ -22,18 +22,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0 # Needed for patch generation if used
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4 # v4
         # version is read from package.json packageManager field
 
       - name: Install dependencies
@@ -57,7 +57,7 @@ jobs:
             $FLAGS
 
       - name: Upload Analysis Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: mega-pr-${{ inputs.pr_number }}-plan
           path: artifacts/pr-containment/${{ inputs.pr_number }}
