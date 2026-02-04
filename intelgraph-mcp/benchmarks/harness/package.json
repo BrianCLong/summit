@@ -2,7 +2,8 @@
   "name": "mcp-bench-harness",
   "version": "4.2.3",
   "scripts": {
-    "start": "tsx src/run.ts"
+    "start": "tsx src/run.ts",
+    "transport:compare": "tsx src/transport-compare.ts"
   },
   "dependencies": {
     "k6": "file:./k6"

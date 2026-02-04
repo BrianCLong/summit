@@ -2,12 +2,13 @@
 
 ## Overview
 
-IntelGraph's marketplace requires MCP servers to satisfy protocol, security, and performance guarantees across transports (STDIO, HTTP+SSE) and capabilities (tools, resources, prompts).
+IntelGraph's marketplace requires MCP servers to satisfy protocol, security, and performance guarantees across transports (STDIO, HTTP+SSE, gRPC) and capabilities (tools, resources, prompts).
 
 ## Transport Requirements
 
 - **HTTP + SSE:** Servers must stream responses over Server-Sent Events with heartbeat support and resume tokens. Connections secured via mTLS or JWT as issued by the runtime pooler.
 - **STDIO:** Local transports execute inside sandbox wrappers (seccomp, cgroups, no-network by default). Servers must gracefully handle stdin/stdout JSON messages separated by `\n`.
+- **gRPC:** Remote transports use Protobuf envelopes with bidirectional streaming and strict deadline enforcement.
 
 Test coverage: `CONF-TPT-01`, `CONF-SEC-04`, `BENCH-SSE-01`, `BENCH-STDIO-02`.
 
