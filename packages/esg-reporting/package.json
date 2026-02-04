@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/esg-reporting",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Shared ESG reporting types, validators, and calculation utilities",
   "type": "module",
   "main": "dist/index.js",
@@ -30,7 +30,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
   },

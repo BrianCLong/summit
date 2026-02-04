@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/approvals",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Policy-Gated Approvals Service for high-risk operations with OPA/ABAC enforcement and provenance tracking",
   "type": "module",
   "main": "dist/index.js",
@@ -30,7 +30,7 @@
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/auto-instrumentations-node": "^0.67.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.211.0",
     "@opentelemetry/exporter-metrics-otlp-http": "^0.208.0",
     "@opentelemetry/resources": "^1.30.0",
     "@opentelemetry/semantic-conventions": "^1.28.0"

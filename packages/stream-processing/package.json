@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/stream-processing",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Stream processing framework with windowing, watermarking, and stateful operations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

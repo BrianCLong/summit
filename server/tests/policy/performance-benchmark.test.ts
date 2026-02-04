@@ -1,4 +1,7 @@
 import { describe, test, expect } from '@jest/globals';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 describe('performance benchmark', () => {
   test('all operations complete within the configured budgets', () => {
     const {

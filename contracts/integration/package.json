@@ -1,0 +1,44 @@
+{
+  "name": "@summit/integration-contracts",
+  "version": "1.0.0",
+  "description": "Unified integration contracts for Summit critical path (IG-101, MC-205, CO-58, SB-33)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./v1": {
+      "types": "./dist/v1/index.d.ts",
+      "import": "./dist/v1/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "summit",
+    "contracts",
+    "integration",
+    "intelgraph",
+    "maestro",
+    "companyos",
+    "switchboard"
+  ],
+  "author": "Summit Team",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

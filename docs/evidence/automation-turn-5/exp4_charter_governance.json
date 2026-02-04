@@ -1,0 +1,13 @@
+{
+  "allowed": {
+    "allowed": true
+  },
+  "blocked": {
+    "allowed": false,
+    "reason": "Tool nuke_database not in allowlist"
+  },
+  "approval": {
+    "allowed": false,
+    "reason": "Tool deploy not in allowlist"
+  }
+}

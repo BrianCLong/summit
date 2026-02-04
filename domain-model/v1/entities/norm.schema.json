@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./norm.schema.json",
+  "title": "Norm (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Norm" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "legitimacyScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Perceived legitimacy of the norm in the target society."
+    },
+    "adherence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Observed adherence to the norm."
+    },
+    "societalContext": { "type": "string" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}

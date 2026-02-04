@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "capabilities": [
+    {
+      "capability_id": "moonshotai/Kimi-K2.5",
+      "version": "1.0",
+      "description": "Moonshot AI Kimi K2.5: 256K context, native multimodal agentic model.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {"type": "string"},
+                "content": {
+                  "anyOf": [
+                    {"type": "string"},
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {"type": "string"},
+                          "text": {"type": "string"},
+                          "image_url": {"type": "object"}
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "tools": {"type": "array"}
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "choices": {"type": "array"}
+        }
+      },
+      "constraints": {
+        "context_window": 262144,
+        "multimodal": true
+      },
+      "trust": {
+        "provider": "Moonshot AI",
+        "compliance": ["ISO-27001"]
+      }
+    }
+  ],
+  "signature": null
+}

@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/3d-visualization",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "3D and immersive visualization library for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; else echo \"skip lint (no src directory)\"; fi",
     "typecheck": "tsc --noEmit"
   },

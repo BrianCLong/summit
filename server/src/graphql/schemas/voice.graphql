@@ -1,0 +1,97 @@
+type VoiceSample {
+  id: ID! @id
+  name: String!
+  description: String
+  s3Path: String!
+  transcript: String
+  language: String
+  durationSeconds: Float
+  qualityScore: Float
+  speakerProfile: SpeakerProfile @relationship(type: "HAS_SAMPLE", direction: IN)
+  createdAt: DateTime! @timestamp
+}
+
+type SpeakerProfile {
+  id: ID! @id
+  name: String!
+  description: String
+  samples: [VoiceSample!]! @relationship(type: "HAS_SAMPLE", direction: OUT)
+  allowedUsePolicy: String
+  consentEvidence: String
+  createdAt: DateTime! @timestamp
+  updatedAt: DateTime! @timestamp
+}
+
+type GenerationRun {
+  id: ID! @id
+  voiceSample: VoiceSample @relationship(type: "USED_SAMPLE", direction: OUT)
+  speakerProfile: SpeakerProfile @relationship(type: "MIMICS_SPEAKER", direction: OUT)
+  engine: String!
+  modelSize: String
+  seed: Int
+  prompt: String
+  transcript: String
+  outputS3Path: String
+  metadataHash: String
+  createdAt: DateTime! @timestamp
+  completedAt: DateTime
+}
+
+extend type Mutation {
+  createSpeakerProfile(
+    name: String!
+    description: String
+    allowedUsePolicy: String
+    consentEvidence: String
+  ): SpeakerProfile
+
+  addVoiceSample(
+    speakerProfileId: ID!
+    name: String!
+    s3Path: String!
+    transcript: String
+    language: String
+  ): VoiceSample
+}
+
+input VoiceSpecInput {
+  persona_embedding: String
+  vocal_range: String
+  accent: String
+  timbre: String
+  age_proxy: String
+  style_presets: [String]
+  description: String
+  reference_audio_url: String
+}
+
+input PerformanceSpecInput {
+  pace_curve: [Float]
+  emphasis_targets: [EmphasisTargetInput]
+  sentiment_arc: [String]
+  breath_budget: Float
+  whisper_shout_bounds: [Float]
+}
+
+input EmphasisTargetInput {
+  word_index: Int!
+  strength: Float!
+}
+
+type VoiceProvenance {
+  manifest_id: String!
+  model_id: String!
+  model_hash: String!
+  prompt_hash: String!
+  reference_audio_hash: String
+  timestamp: String!
+  policy_decisions: [PolicyDecision!]!
+  watermark_detected: Boolean
+  signature: String!
+}
+
+type PolicyDecision {
+  allowed: Boolean!
+  policy_id: String!
+  reason: String
+}

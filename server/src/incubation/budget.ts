@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { BudgetManager } from './types.ts';
+import { BudgetManager } from './types.js';
 
 export class SimpleBudgetManager implements BudgetManager {
   private limits: { tokens: number; steps: number };

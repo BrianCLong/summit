@@ -1,0 +1,26 @@
+agent_id: osint-enricher
+version: 1.0.0
+governance:
+  owner: "@intelgraph/osint-team"
+  classification: restricted
+  policy_set: "policies/osint/enrichment.rego"
+  risk_level: medium
+runtime:
+  model:
+    provider: anthropic
+    name: claude-3-5-sonnet-20241022
+    parameters:
+      temperature: 0
+      max_tokens: 4096
+  instructions:
+    source: agents/osint/instructions/enrichment.txt
+    sha256: 307849cbd438995b7efdcb6ebfe0ac168ab5a9c64adf3e10378209c0141150cc
+  tools:
+    - name: "graph:mutate"
+      permission: read-write
+    - name: "osint:entity_resolver"
+      permission: sandbox-only
+evidence:
+  log_level: audit
+  required_artifacts: ["trace", "decision_log", "tool_output"]
+  replay_mode: deterministic

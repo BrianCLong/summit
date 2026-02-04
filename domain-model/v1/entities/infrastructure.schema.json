@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./infrastructure.schema.json",
+  "title": "Infrastructure (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Infrastructure" },
+    "name": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["electoral", "public_health", "military_command", "financial", "energy", "cyber", "transport", "other"]
+    },
+    "capacity": {
+      "type": "number",
+      "description": "Operational capacity metric."
+    },
+    "integrity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Integrity score reflecting trust or reliability."
+    },
+    "locationId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}

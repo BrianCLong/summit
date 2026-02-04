@@ -1,0 +1,43 @@
+name: Security Playbook Automation
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Run every Monday at 8am
+  workflow_dispatch:
+    inputs:
+      create_issue:
+        description: 'Create a GitHub Issue with the report'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+  security-events: read
+
+jobs:
+  triage:
+    name: Security Batch Triage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Triage Script
+        env:
+          # Use SECURITY_TRIAGE_PAT if available for Dependabot/Secret Scanning access.
+          # Otherwise fall back to GITHUB_TOKEN (limited access).
+          GITHUB_TOKEN: ${{ secrets.SECURITY_TRIAGE_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          ARGS=""
+          if [[ "${{ github.event.inputs.create_issue }}" == "true" || "${{ github.event_name }}" == "schedule" ]]; then
+            ARGS="--create-issue"
+          fi
+
+          python3 scripts/security/triage_alerts.py $ARGS

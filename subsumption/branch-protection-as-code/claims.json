@@ -1,0 +1,8 @@
+{
+  "claims": [
+    {
+      "id": "SUMMIT_ORIGINAL",
+      "description": "Branch protection drift detection and evidence emission are implemented as policy-as-code."
+    }
+  ]
+}

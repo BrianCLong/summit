@@ -23,7 +23,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: maestro-redis
-    command: redis-server --requirepass redis-dev-secret
+    command: redis-server --requirepass redis-dev-secret --appendonly yes
     ports:
       - '6379:6379'
     volumes:

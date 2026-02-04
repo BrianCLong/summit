@@ -1,0 +1,63 @@
+version: "1.0"
+description: "Minimal DISARM Taxonomy Subset for IntelGraph Platform"
+techniques:
+  - tactic_id: "TA01"
+    tactic_name: "Plan and Prepare"
+    technique_id: "T0081"
+    technique_name: "Create Inauthentic Accounts"
+    description: "Creation of fake accounts to be used in operations, often in bulk or with specific personas."
+    observables:
+      - type: "account_age"
+        description: "Account created shortly before activity spike"
+      - type: "profile_pic"
+        description: "GAN-generated or stolen image"
+      - type: "bio_entropy"
+        description: "Low entropy or template-based biography"
+    mitigations:
+      - "Detect account creation anomalies"
+      - "Verify identity at registration"
+      - "Analyze profile image sources"
+
+  - tactic_id: "TA01"
+    tactic_name: "Plan and Prepare"
+    technique_id: "T0087"
+    technique_name: "Use Automated Accounts"
+    description: "Using bots or scripts to amplify content or simulate engagement."
+    observables:
+      - type: "post_timing"
+        description: "Inhuman posting frequency or regularity"
+      - type: "client_signature"
+        description: "Use of API-based posting tools"
+    mitigations:
+      - "Rate limiting"
+      - "Bot detection heuristics"
+      - "Challenge-response (CAPTCHA)"
+
+  - tactic_id: "TA03"
+    tactic_name: "Pump and Prime"
+    technique_id: "T0105"
+    technique_name: "Flood Information Space"
+    description: "Overwhelming the information environment with volume to drown out opposing narratives."
+    observables:
+      - type: "post_velocity"
+        description: "Unnaturally high aggregate posting rate across network"
+      - type: "hashtag_density"
+        description: "Extreme use of specific hashtags"
+    mitigations:
+      - "Algorithmic downranking of spam"
+      - "Content diversity analysis"
+
+  - tactic_id: "TA05"
+    tactic_name: "Persuade and Distort"
+    technique_id: "T0123"
+    technique_name: "Distort Facts"
+    description: "Selectively presenting or altering facts to mislead."
+    observables:
+      - type: "semantic_divergence"
+        description: "Content diverges significantly from source material"
+      - type: "quote_truncation"
+        description: "Quotes used out of context"
+    mitigations:
+      - "Fact-checking integration"
+      - "Source verification"
+      - "Contextual overlays"

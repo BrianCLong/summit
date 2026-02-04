@@ -10,8 +10,11 @@ from intelgraph_py.analytics.explainability_engine import generate_explanation
 from intelgraph_py.celery_app import celery_app
 from intelgraph_py.connectors.osint_agent import ThreatActorProfilingAgent
 from intelgraph_py.database import get_db
+from intelgraph_py.lineage.openlineage_producer import OpenLineageProducer
 from intelgraph_py.models import AlertLog, ExplanationTaskResult, Schedule, Subscription
 from intelgraph_py.storage.neo4j_store import Neo4jStore
+
+lineage_producer = OpenLineageProducer()
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -83,11 +86,20 @@ def analyze_sentiment(self, node_id: str, text: str, node_label: str = "Report")
 
 @celery_app.task(bind=True)
 def run_ai_analytics_task(self, schedule_id: int):
+    # Emit Start Event
+    run_id = str(self.request.id)
+    lineage_producer.emit_start(
+        job_name="run_ai_analytics_task",
+        run_id=run_id,
+        inputs=[{"name": f"schedule_{schedule_id}"}]
+    )
+
     db: Session = next(get_db())
     schedule = db.query(Schedule).filter(Schedule.id == schedule_id).first()
 
     if not schedule or not schedule.is_active:
         print(f"Schedule {schedule_id} not found or not active. Skipping.")
+        lineage_producer.emit_fail(job_name="run_ai_analytics_task", run_id=run_id, error_message="Schedule not found or inactive")
         return
 
     print(
@@ -144,6 +156,9 @@ def run_ai_analytics_task(self, schedule_id: int):
     db.commit()
     db.refresh(schedule)
     db.close()
+
+    # Emit Complete Event
+    lineage_producer.emit_complete(job_name="run_ai_analytics_task", run_id=run_id)
 
 
 @celery_app.task(bind=True)

@@ -1,0 +1,39 @@
+{
+  "task_id": "CROSSPLATFORM_GRAPH_SCAFFOLD_001",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "cross-platform-graph-scaffold",
+    "version": "v1",
+    "sha256": "370887e5e8117fca7efade5cc69fee38a3a11329d7d2e6c9b59befa059a5d618",
+    "path": "prompts/summit/cross-platform-graph-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "summit/graph/",
+      "docs/cross_platform_graph.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/summit/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["graph", "analytics", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["pytest summit/graph/tests/test_coshare_builder.py"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Cross-platform graph primitives and co-share builder are implemented deterministically.",
+    "Unit tests pass for the co-share builder.",
+    "Roadmap status metadata reflects the update."
+  ],
+  "stop_conditions": [
+    "Scope drift beyond summit/graph or declared docs paths.",
+    "Verification tier requirements cannot be met."
+  ]
+}

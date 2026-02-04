@@ -1,8 +1,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { EntityResolver } from '../../engine/EntityResolver';
+import { EntityResolver } from '../../engine/EntityResolver.js';
 
 // Mock dependencies BEFORE import of EntityResolver
-jest.mock('../../../services/IntelGraphService', () => ({
+jest.mock('../../../services/IntelGraphService.js.js', () => ({
   IntelGraphService: {
     getInstance: jest.fn()
   }

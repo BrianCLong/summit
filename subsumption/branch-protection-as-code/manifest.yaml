@@ -1,0 +1,44 @@
+version: 1
+item:
+  slug: branch-protection-as-code
+  title: "Branch Protection as Code (BPAC)"
+  type: "spec/pattern"
+  date: "2026-01-29"
+  links:
+    - "https://docs.github.com/en/rest/branches/branch-protection"
+policy:
+  path: ".github/governance/branch_protection_rules.json"
+claims:
+  registry: "subsumption/branch-protection-as-code/claims.json"
+required_checks:
+  discovery_status: "assumed"
+  checks:
+    - "ci: governance-bundle"
+    - "ci: branch-protection-drift"
+prs:
+  - title: "feat(governance): branch protection drift verifier + fixtures"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+  - title: "feat(subsumption): add BPAC bundle manifest + bundle verifier"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+gates:
+  - id: "ci: branch-protection-drift"
+    description: "Blocks PRs when branch protection drifts from policy."
+  - id: "ci: governance-bundle"
+    description: "Verifies subsumption bundle completeness."
+evidence_ids:
+  - "EVD-BPAC-GOV-001"
+  - "EVD-BPAC-GOV-003"
+  - "EVD-BPAC-GOV-006"
+  - "EVD-BPAC-GOV-007"
+docs:
+  - "docs/standards/branch-protection-as-code.md"
+  - "docs/required_checks.todo.md"
+  - "docs/ops/runbooks/branch-protection-as-code.md"
+  - "docs/security/data-handling/branch-protection-as-code.md"
+  - "docs/decisions/branch-protection-as-code.md"
+feature_flags:
+  - "FEATURE_AUTO_APPLY_PROTECTION=false"

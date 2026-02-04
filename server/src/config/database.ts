@@ -10,7 +10,7 @@ import {
   getPostgresPool as getManagedPostgresPool,
   closePostgresPool as closeManagedPostgresPool,
   ManagedPostgresPool,
-} from '../db/postgres';
+} from '../db/postgres.js';
 import {
   getNeo4jDriver as getSharedNeo4jDriver,
   initializeNeo4jDriver,
@@ -268,7 +268,9 @@ function getNeo4jDriver(): Neo4jDriver {
 }
 
 function getPostgresPool(): ManagedPostgresPool {
-  if (!postgresPool) throw new Error('PostgreSQL pool not initialized');
+  if (!postgresPool) {
+    postgresPool = getManagedPostgresPool();
+  }
   return postgresPool;
 }
 

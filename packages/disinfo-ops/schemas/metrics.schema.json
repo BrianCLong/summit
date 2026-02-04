@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Disinfo Ops Metrics",
+  "type": "object",
+  "required": ["processing_ms", "cache_hit"],
+  "properties": {
+    "processing_ms": { "type": "number", "minimum": 0 },
+    "cache_hit": { "type": "boolean" },
+    "drift_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "evidence_count": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

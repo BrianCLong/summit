@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OSINT Evidence Schema",
+  "description": "Schema for OSINT-specific evidence artifacts, ensuring source attribution and ILSA compliance.",
+  "type": "object",
+  "required": [
+    "evidenceId",
+    "timestamp",
+    "source",
+    "ilsaLevel",
+    "ibomVerified",
+    "content"
+  ],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the evidence artifact."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Time of collection or observation."
+    },
+    "source": {
+      "type": "object",
+      "required": ["id", "type", "uri"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["social", "darkweb", "media", "financial", "geospatial", "cyber"] },
+        "uri": { "type": "string", "format": "uri" },
+        "collector_agent": { "type": "string" }
+      }
+    },
+    "ilsaLevel": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Intelligence Level for Source Attribution (1=Low, 5=High)."
+    },
+    "ibomVerified": {
+      "type": "boolean",
+      "description": "Whether the Intelligence Bill of Materials (IBOM) has been verified."
+    },
+    "content": {
+      "type": "object",
+      "description": "The raw or normalized OSINT payload.",
+      "properties": {
+        "raw_payload_hash": { "type": "string" },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": { "type": "string" },
+              "target": { "type": "string" },
+              "type": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "modality": {
+      "type": "string",
+      "enum": ["text", "image", "video", "audio", "structured"],
+      "default": "text"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

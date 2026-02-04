@@ -46,14 +46,14 @@ export function prophetForecast(
   options: ProphetOptions = {},
 ): ForecastPoint[] {
   if (!rows.length || horizon <= 0) return [];
-  const series = rows.map((row: any) => row.values[field]).filter((value): value is number => typeof value === 'number');
+  const series = rows.map((row) => row.values[field]).filter((value): value is number => typeof value === 'number');
   if (!series.length) return [];
 
   const seasonality = options.seasonality ?? Math.max(4, Math.floor(series.length / 4));
   const confidence = options.confidence ?? 0.2;
   const growthCap = options.growthCap ?? Number.POSITIVE_INFINITY;
 
-  const timestamps = rows.map((row: any) => row.timestamp.getTime());
+  const timestamps = rows.map((row) => row.timestamp.getTime());
   const { slope, intercept } = linearRegression(timestamps, series);
   const seasonalComponents = computeSeasonality(series, seasonality);
   const lastTimestamp = rows[rows.length - 1].timestamp.getTime();

@@ -1,0 +1,17 @@
+{
+  "name": "@intelgraph/agent-negotiation",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Multi-agent negotiation control plane.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo 'No tests specified' && exit 0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^20.17.5"
+  }
+}

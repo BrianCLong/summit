@@ -1,0 +1,22 @@
+id: SHINY-001
+title: MFA Enrollment followed by OAuth Consent and SaaS Exfiltration
+description: Detects a sequence of events where a new MFA device is enrolled, followed by an OAuth application consent, and then high-volume data access or download.
+severity: high
+required_sources:
+  - okta
+  - entra
+  - m365
+  - salesforce
+  - workspace
+query: |
+  sequence by user_id
+    [action == "mfa_device_enroll"]
+    [action == "oauth_app_consent"]
+    [action == "bulk_data_export" or bytes > 100000000]
+  within 4h
+explain_fields:
+  - user_id
+  - auth.mfa_method
+  - auth.oauth_client_id
+  - target.app
+  - bytes

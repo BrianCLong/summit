@@ -1,0 +1,39 @@
+{
+  "task_id": "STRUCTURED_CONTENT_PRIMITIVES_20260131",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "structured-content-primitives",
+    "version": "v1",
+    "sha256": "258e133b40b69ec695a0a9bd1992da5eca9aa092af5471789c43563f512b706e",
+    "path": "prompts/content/structured-content-primitives@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/content/",
+      "schemas/content/",
+      "docs/roadmap/STATUS.json",
+      "prompts/content/structured-content-primitives@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/STRUCTURED_CONTENT_PRIMITIVES_20260131.json"
+    ],
+    "domains": ["content", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/content/structured-content-model.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Schemas for Brief, Claim, and Block are present and enforce required fields.",
+    "Structured content model documentation includes governance drift example.",
+    "Roadmap status updated with revision note."
+  ],
+  "stop_conditions": [
+    "Required schema fields cannot be expressed without violating governance constraints.",
+    "Prompt registry update fails integrity verification."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "items": [
+    {
+      "item_slug": "POSTIZ-OSS-SAAS-VIDEO",
+      "title": "How I Grew My Open Source SaaS to $17K/month",
+      "source": { "kind": "video", "ref": "https://www.youtube.com/watch?v=RPM4ImzcIFc" },
+      "claims": [
+        { "name": "mrr_usd", "value": 17000, "provenance": "claimed" },
+        { "name": "github_stars", "value": 25000, "provenance": "claimed" }
+      ],
+      "notes": "YouTube fetch throttled in CI environment; claims must be re-verified via public sources."
+    }
+  ]
+}

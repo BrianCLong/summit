@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "decisions": [
+    "Policy fixtures behavior verified."
+  ],
+  "evidence_id": "EVD-NAROPS-POLICY-001",
+  "generated_by": "scripts/ci/verify_narrative_ops_policy.mjs",
+  "item_slug": "narrative-ops-detection-2026-01-28",
+  "notes": [
+    "neg_caught=1",
+    "pos_failures=0"
+  ]
+}

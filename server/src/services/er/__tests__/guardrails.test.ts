@@ -1,8 +1,6 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { EntityResolutionV2Service } from '../EntityResolutionV2Service';
-import { provenanceLedger } from '../../../provenance/ledger.js';
+import { jest, describe, it, expect, beforeEach, afterAll, beforeAll } from '@jest/globals';
 
-jest.mock('../../../provenance/ledger.js', () => ({
+jest.unstable_mockModule('../../../provenance/ledger.js', () => ({
   provenanceLedger: {
     appendEntry: jest.fn(),
   },
@@ -12,12 +10,19 @@ const mockDlq = {
   enqueue: jest.fn(),
 };
 
-jest.mock('../../../lib/dlq/index.js', () => ({
+jest.unstable_mockModule('../../../lib/dlq/index.js', () => ({
   dlqFactory: jest.fn(() => mockDlq),
 }));
 
 describe('EntityResolutionV2Service guardrails', () => {
+  let EntityResolutionV2Service: typeof import('../EntityResolutionV2Service.js').EntityResolutionV2Service;
+  let provenanceLedger: { appendEntry: jest.Mock };
   const originalEnv = { ...process.env };
+
+  beforeAll(async () => {
+    ({ EntityResolutionV2Service } = await import('../EntityResolutionV2Service.js'));
+    ({ provenanceLedger } = await import('../../../provenance/ledger.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

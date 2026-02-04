@@ -1,0 +1,39 @@
+{
+  "task_id": "EVAL_BASELINE_GATES_20260128",
+  "agent_id": "codex-builder",
+  "prompt_ref": {
+    "id": "eval-baseline-ratchet",
+    "version": "v1",
+    "sha256": "83812cd2cffecec04a8e3205951fe85a553f43e16ecde45aa23f7c8950ee8d63",
+    "path": "prompts/eval/establish-eval-baselines@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "eval/",
+      "tests/eval/",
+      "packages/decision-ledger/decision_ledger.json",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/"
+    ],
+    "domains": ["eval", "ci", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["pytest tests/eval/test_baselines.py"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Eval runner enforces baseline gates and regression deltas.",
+    "Baseline configuration is defined per suite and can be ratcheted per release.",
+    "Evidence includes baseline gate outputs and tests."
+  ],
+  "stop_conditions": [
+    "Baseline gates fail without documented thresholds.",
+    "Prompt registry hash mismatch."
+  ],
+  "dependencies": ["prompts/registry.yaml"]
+}

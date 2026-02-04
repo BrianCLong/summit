@@ -1,4 +1,4 @@
-import { RepairAction, newIdentifier } from './types';
+import { RepairAction, newIdentifier } from './types.js';
 
 export class AdminRepairService {
   private actions: RepairAction[] = [];

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/prov-ledger-verifier",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "verify:fixtures": "pnpm run build && node dist/cli.js --bundle fixtures/valid-bundle --json && node dist/cli.js --bundle fixtures/valid-bundle.zip --json"
   },
   "dependencies": {

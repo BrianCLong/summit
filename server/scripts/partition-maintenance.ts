@@ -55,18 +55,37 @@ async function run() {
     }
 
     if (options.tenantId) {
+      // Event Store Partitions
       await client.query(
         'SELECT ensure_event_store_partition($1, $2, $3)',
         [options.tenantId, options.monthsAhead, options.retentionMonths],
       );
+      // HIPAA Log Partitions
+      await client.query(
+        'SELECT ensure_hipaa_log_partition($1)',
+        [options.tenantId],
+      );
       console.log(`✅ ensured partitions for tenant ${options.tenantId}`);
     } else {
-      const { rows } = await client.query(
+      // Event Store Partitions
+      const { rows: eventRows } = await client.query(
         'SELECT ensure_event_store_partitions_for_all($1, $2) AS tenants_touched',
         [options.monthsAhead, options.retentionMonths],
       );
+
+      // HIPAA Log Partitions
+      const { rows: hipaaRows } = await client.query(
+        'SELECT ensure_hipaa_log_partitions_for_all() AS tenants_touched'
+      );
+
+      // Outbox Partitions
+      await client.query(
+        'SELECT ensure_outbox_partition($1, $2)',
+        [options.monthsAhead, options.retentionMonths],
+      );
+
       console.log(
-        `✅ ensured partitions for ${rows[0]?.tenants_touched ?? 0} tenants (or existing event_store tenants)`,
+        `✅ ensured partitions for ${eventRows[0]?.tenants_touched ?? 0} tenants (event_store), ${hipaaRows[0]?.tenants_touched ?? 0} tenants (hipaa_log), and outbox_events`,
       );
     }
 

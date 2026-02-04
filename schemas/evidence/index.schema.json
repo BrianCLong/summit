@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "evidence index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "entries"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence_id", "files"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-[a-z0-9-]+-[a-z0-9-]+-[0-9]{3}$"
+          },
+          "files": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

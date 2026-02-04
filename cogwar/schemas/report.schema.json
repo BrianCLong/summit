@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CogWar Report",
+  "type": "object",
+  "properties": {
+    "indicators": {
+      "type": "array",
+      "items": { "$ref": "indicator.schema.json" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "warning.schema.json" }
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "$ref": "review_decision.schema.json" }
+    },
+    "drill_results": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

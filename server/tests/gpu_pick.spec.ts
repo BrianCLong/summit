@@ -1,4 +1,4 @@
-import { pickGpuPool } from '../src/conductor/scheduler/selectGpuPool';
+import { pickGpuPool } from '../src/conductor/scheduler/selectGpuPool.js';
 
 test('selects compatible gpu pool', () => {
   const pool = pickGpuPool({ gpus: 1, gpuClass: 'A10+', vram: '16' });

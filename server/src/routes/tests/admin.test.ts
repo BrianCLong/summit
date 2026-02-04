@@ -1,9 +1,9 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
-import adminRouter from '../admin';
-import { SecretManager } from '../../services/secretManager';
-import { MockServiceRegistry } from '../../services/serviceRegistry';
+import adminRouter from '../admin.js';
+import { SecretManager } from '../../services/secretManager.js';
+import { MockServiceRegistry } from '../../services/serviceRegistry.js';
 import axios from 'axios';
 
 jest.mock('axios');

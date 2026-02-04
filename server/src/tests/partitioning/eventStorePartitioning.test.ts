@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { Pool } from 'pg';
 import { GenericContainer, StartedTestContainer } from 'testcontainers';
-import { EventSourcingService } from '../../services/EventSourcingService';
+import { EventSourcingService } from '../../services/EventSourcingService.js';
 
 jest.setTimeout(120000);
 

@@ -1,0 +1,60 @@
+apiVersion: governance.summit.io/v1
+kind: ControlGapAnalysis
+metadata:
+  name: summit-control-gap-analysis
+  updated: 2025-05-21
+control_domains:
+  - id: AI_LIFECYCLE
+    controls:
+      - name: "Model Card Generation"
+        status: PARTIAL
+        mechanism: "Manual documentation in docs/models/"
+        gap: "No automated extraction of model metadata from training pipelines."
+      - name: "Performance Monitoring"
+        status: YES
+        mechanism: "server/src/governance/execution-trace.ts"
+        gap: "None."
+
+  - id: DATA_GOVERNANCE
+    controls:
+      - name: "Data Lineage Tracking"
+        status: YES
+        mechanism: "scripts/compliance/generate_provenance.ts"
+        gap: "None."
+      - name: "Data Asset Inventory"
+        status: NO
+        mechanism: "None"
+        gap: "Missing centralized machine-readable registry of all governed data assets."
+
+  - id: CONTINUOUS_GOVERNANCE
+    controls:
+      - name: "Policy Enforcement"
+        status: YES
+        mechanism: "OPA/Rego policies in policy/"
+        gap: "None."
+      - name: "Runtime Drift Detection"
+        status: PARTIAL
+        mechanism: "scripts/compliance/check_drift.ts"
+        gap: "Checks lockfiles and config, but not model data distribution drift."
+
+  - id: ACCOUNTABILITY
+    controls:
+      - name: "Code Ownership"
+        status: YES
+        mechanism: "CODEOWNERS file"
+        gap: "None."
+      - name: "Governance Role Assignment"
+        status: NO
+        mechanism: "None"
+        gap: "No explicit mapping of governance roles (Data Steward, AI Risk Officer) to GitHub users/teams."
+
+  - id: ZERO_TRUST_DATA
+    controls:
+      - name: "Provenance Verification"
+        status: YES
+        mechanism: "scripts/ci/provenance_quality_gate.mjs"
+        gap: "Validates structure but does not enforce that *all* critical assets have provenance."
+      - name: "Trust Scoring"
+        status: NO
+        mechanism: "None"
+        gap: "No mechanism to score data sources based on origin trust."

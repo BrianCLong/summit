@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-01-28T00:00:00Z",
+  "evidence_id": "EVD-PP-SOCIALREASONING-EVAL-001",
+  "item": {
+    "arxiv_id": "2601.20757"
+  },
+  "summary": {
+    "accuracy": 0.9
+  }
+}

@@ -1,5 +1,6 @@
 # n8n Networking and Egress Controls
 
+- **Version Enforcement:** Use version **1.121.0** or later to prevent unauthenticated RCE (CVE-2026-21858).
 - Run n8n in an isolated namespace.
 - Apply a tight egress allow-list (Kubernetes NetworkPolicy or CNI-level) to only approved destinations (Slack API, Jira API, GitHub API, PagerDuty, ServiceNow, Confluence, etc.).
 - Prefer DNS names pinned to IP ranges where possible; avoid wildcard outbound.

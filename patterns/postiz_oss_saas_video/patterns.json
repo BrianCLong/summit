@@ -1,0 +1,21 @@
+{
+  "item_slug": "POSTIZ-OSS-SAAS-VIDEO",
+  "product_patterns": [
+    "Dual-track distribution: self-hosted OSS plus hosted service",
+    "Multi-platform publishing connectors",
+    "Per-post analytics surface"
+  ],
+  "compliance_patterns": [
+    "Prefer official OAuth flows for hosted integrations",
+    "Avoid scraping or automation that violates platform terms",
+    "Do not require users to paste API keys into hosted UI"
+  ],
+  "growth_patterns": [
+    "OSS credibility flywheel (stars to adoption to hosted conversions)",
+    "Narrative marketing cadence with milestone updates"
+  ],
+  "sources": [
+    { "ref": "https://github.com/gitroomhq/postiz-app", "kind": "repo" },
+    { "ref": "https://docs.postiz.com/developer-guide", "kind": "doc" }
+  ]
+}

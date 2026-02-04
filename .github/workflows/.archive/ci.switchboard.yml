@@ -18,6 +18,7 @@ jobs:
               - 'server/**'
       - uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: 20
       - name: Install, Lint, Typecheck, and Build
         if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}

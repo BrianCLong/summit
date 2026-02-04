@@ -1,0 +1,43 @@
+{
+  "task_id": "TB-07",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "ga-verification-map-ordering",
+    "version": "v1",
+    "sha256": "699a606efb9eb3c6748999373879901cd7720ef3949c097171d882e6316c952e",
+    "path": "prompts/ga/verification-map-ordering@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/ga/verify-ga-surface.mjs",
+      "docs/ga/verification-map.json",
+      "agent-contract.json",
+      "docs/roadmap/STATUS.json",
+      "AGENT_ACTIVITY.md",
+      "TASK_BACKLOG.md",
+      "prompts/ga/verification-map-ordering@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/ga-verification-map-ordering-task.json"
+    ],
+    "domains": ["governance", "verification", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["make ga-verify"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "GA verification map entries are sorted deterministically by feature name.",
+    "GA verification script enforces ordering guardrail without side effects.",
+    "Roadmap and activity logs reflect the guardrail update."
+  ],
+  "stop_conditions": [
+    "Tooling instability that blocks deterministic verification",
+    "Requests to bypass Legacy Mode guardrails",
+    "Detection of PII in PR diffs"
+  ]
+}

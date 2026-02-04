@@ -1,0 +1,43 @@
+version: 1
+item:
+  slug: angular-skills
+  title: "Angular Skills: Agent Skills for AI-Assisted Development"
+  type: external/skill-pack
+  date: "2025-01-29"
+  links:
+    - "https://dev.to/brandontroberts/angular-skills-agent-skills-for-ai-assisted-development-3jgg"
+    - "https://github.com/analogjs/angular-skills"
+
+claims:
+  - id: "ITEM:CLAIM-01"
+    ref: "Angular Skills teaches agents modern Angular v20+ patterns"
+  - id: "ITEM:CLAIM-02"
+    ref: "Includes signals, standalone, native control flow"
+
+prs:
+  - id: pr-01
+    title: "feat(subsumption): add Angular Skills bundle and governance"
+    lane: foundation
+    owner: Jules
+    risk: green
+
+gates:
+  - name: "skills-governance-policy"
+    status: planned
+
+evals:
+  - name: "eval:angular-modernity"
+
+evidence_ids:
+  - "EVD-angular-skills-REG-001"
+  - "EVD-angular-skills-GOV-001"
+  - "EVD-angular-skills-EVAL-001"
+  - "EVD-angular-skills-INT-001"
+  - "EVD-angular-skills-NEG-001"
+
+docs_targets:
+  - "subsumption/angular-skills/README.md"
+
+required_checks_discovery:
+  status: planned
+  todo: "subsumption/angular-skills/required_checks.todo.md"

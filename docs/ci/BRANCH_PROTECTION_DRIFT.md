@@ -2,7 +2,7 @@
 
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
-**Last Updated:** 2026-01-08
+**Last Updated:** 2026-02-01
 
 ---
 
@@ -33,7 +33,7 @@ Automated daily comparison that:
 
 ### Policy Extraction
 
-The `extract_required_checks_from_policy.sh` script reads `REQUIRED_CHECKS_POLICY.yml` and extracts the `always_required` check names.
+The `extract_required_checks_from_policy.sh` script reads `REQUIRED_CHECKS_POLICY.yml` and extracts check names from the `branch_protection.required_status_checks.contexts` section (the canonical list of checks that should be enforced in GitHub branch protection).
 
 ```bash
 # Extract policy requirements
@@ -41,9 +41,18 @@ The `extract_required_checks_from_policy.sh` script reads `REQUIRED_CHECKS_POLIC
 
 # Output:
 {
-  "always_required": ["Release Readiness Gate", "GA Gate", "Unit Tests & Coverage", "CI Core (Primary Gate)"],
+  "always_required": [
+    "CI Core (Primary Gate)",
+    "CI / config-guard",
+    "CI / unit-tests",
+    "GA Gate",
+    "Release Readiness Gate",
+    "SOC Controls",
+    "Unit Tests & Coverage",
+    "ga / gate"
+  ],
   "policy_version": "2.0.0",
-  "count": 4
+  "count": 8
 }
 ```
 
@@ -139,9 +148,8 @@ The script always exits 0 (advisory mode). Check the JSON output for `drift_dete
 1. Runs drift detection script
 2. Uploads report artifact
 3. If drift detected:
-   - Checks dedup state (24h cooldown)
-   - Creates or updates issue
-   - Commits state update
+   - Searches for existing drift issues (24h cooldown via issue comment timestamps)
+   - Creates or updates issue as appropriate
 4. If no drift:
    - Auto-closes existing drift issues
 
@@ -171,7 +179,16 @@ When drift is resolved, existing drift issues are automatically closed with a re
 
 ## Required Permissions
 
-### GitHub Token
+### GitHub App Authentication (Required)
+
+Branch protection APIs require elevated read permissions that the default `GITHUB_TOKEN` does not provide. Configure a GitHub App and store its credentials as repository secrets:
+
+- **BRANCH_PROTECTION_APP_ID** (GitHub App ID)
+- **BRANCH_PROTECTION_APP_PRIVATE_KEY** (PEM private key)
+
+The workflow generates an installation token via `actions/create-github-app-token@v1`. If token generation fails, the workflow falls back to `GITHUB_TOKEN` and records a warning in the workflow summary.
+
+### GitHub Token (Workflow Runtime)
 
 The workflow needs:
 
@@ -183,10 +200,15 @@ The workflow needs:
 
 Reading branch protection requires one of:
 
+- GitHub App with **Administration: Read-only** (recommended)
 - Admin access to the repository
 - `read:org` scope (for organization repos)
 
 If permissions are insufficient, the script reports the limitation and creates an issue explaining the access requirement.
+
+### Governance Reference
+
+- [Summit Readiness Assertion](../SUMMIT_READINESS_ASSERTION.md)
 
 ---
 
@@ -271,24 +293,19 @@ gh api repos/OWNER/REPO/branches/main/protection/required_status_checks
 
 ---
 
-## State Files
+## State Management
 
-### Drift State
+### Issue-Based State Discovery
 
-Location: `docs/releases/_state/branch_protection_drift_state.json`
+Instead of maintaining a state file (which would require pushing to the main branch), the workflow uses **issue-based state discovery**:
 
-```json
-{
-  "version": "1.0",
-  "issues": {
-    "main_1_0": {
-      "issue_number": 123,
-      "last_updated": "2026-01-08T10:00:00Z",
-      "drift_key": "main_1_0"
-    }
-  }
-}
-```
+1. When drift is detected, the workflow searches for existing open issues with the governance label and matching title
+2. If an existing issue is found, it checks when it was last updated (by examining comments)
+3. If updated within 24 hours, the workflow skips to avoid spam
+4. Otherwise, it adds a new comment to the existing issue
+5. If no matching issue exists, a new issue is created
+
+This approach is more robust and doesn't require state persistence to the repository
 
 ---
 
@@ -325,16 +342,16 @@ The GitHub token lacks access to read branch protection.
 - **Extraction Script**: `scripts/release/extract_required_checks_from_policy.sh`
 - **Drift Script**: `scripts/release/check_branch_protection_drift.sh`
 - **Workflow**: `.github/workflows/branch-protection-drift.yml`
-- **State File**: `docs/releases/_state/branch_protection_drift_state.json`
-- **Policy File**: `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+- **Policy File**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` (specifically `branch_protection.required_status_checks.contexts`)
 
 ---
 
 ## Change History
 
-| Version | Date       | Changes                                   |
-| ------- | ---------- | ----------------------------------------- |
-| 1.0.0   | 2026-01-08 | Initial branch protection drift detection |
+| Version | Date       | Changes                                                                                                                                                                                                             |
+| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1.0   | 2026-01-23 | Fix extraction to use `branch_protection.required_status_checks.contexts` instead of `always_required`; migrate from file-based state to issue-based state discovery; resolve "Could not push state update" warning |
+| 1.0.0   | 2026-01-08 | Initial branch protection drift detection                                                                                                                                                                           |
 
 ---
 

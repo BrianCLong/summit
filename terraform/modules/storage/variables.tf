@@ -40,7 +40,7 @@ variable "enable_worm" {
 variable "worm_retention_days" {
   description = "Retention period in days for WORM"
   type        = number
-  default     = 2555  # 7 years
+  default     = 2555 # 7 years
 }
 
 variable "create_backup_bucket" {
@@ -67,11 +67,11 @@ variable "resource_group_name" {
 variable "lifecycle_rules" {
   description = "Lifecycle rules for object management"
   type = list(object({
-    id               = string
-    enabled          = bool
-    transition_days  = number
-    storage_class    = string
-    expiration_days  = number
+    id              = string
+    enabled         = bool
+    transition_days = number
+    storage_class   = string
+    expiration_days = number
   }))
   default = [
     {

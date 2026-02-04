@@ -1,4 +1,4 @@
-import { getFlag } from '../flags/store';
+import { getFlag } from '../flags/store.js';
 export function gate(key: string) {
   return (req: any, res: any, next: any) => {
     const allowed = getFlag(key, {

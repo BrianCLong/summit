@@ -78,3 +78,20 @@ export function pickCheapestEligible(
   }
   return best;
 }
+
+export function estimatePoolPrice(
+  cost: PoolCost | undefined,
+  est: { cpuSec?: number; gbSec?: number; egressGb?: number },
+  discount = 1,
+) {
+  if (!cost) return 0;
+  const cpuSec = safeEst(est.cpuSec);
+  const gbSec = safeEst(est.gbSec);
+  const egressGb = safeEst(est.egressGb);
+
+  const cpuUsd = safeNum(cost.cpu_sec_usd);
+  const gbUsd = safeNum(cost.gb_sec_usd);
+  const egressUsd = safeNum(cost.egress_gb_usd);
+
+  return (cpuSec * cpuUsd + gbSec * gbUsd + egressGb * egressUsd) * discount;
+}

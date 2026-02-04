@@ -17,6 +17,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ============================================================================
 // Types
@@ -635,8 +639,9 @@ async function main() {
 }
 
 // Run if called directly
-if (require.main === module) {
+if (process.argv[1] === __filename) {
   main();
 }
 
-export { SchemaDiffEngine, GraphQLDiffer, OpenAPIDiffer, DiffResult };
+export { SchemaDiffEngine, GraphQLDiffer, OpenAPIDiffer };
+export type { DiffResult };

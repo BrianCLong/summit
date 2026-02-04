@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: summit-critical-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: summit.rules
+    rules:
+    - alert: Neo4jDown
+      expr: up{job="neo4j"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Neo4j is down"
+        description: "The Neo4j graph database has been unreachable for more than 5 minutes."
+    
+    - alert: HighApiLatency
+      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High API Latency"
+        description: "95th percentile of API latency is above 1 second."
+
+    - alert: DiskFillingUp
+      expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 10
+      for: 10m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Disk Space Low"
+        description: "Less than 10% disk space remaining on EKS node."

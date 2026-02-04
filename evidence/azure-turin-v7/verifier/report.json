@@ -1,0 +1,18 @@
+{
+  "claims": [
+    "ITEM:CLAIM-01",
+    "ITEM:API-02",
+    "ITEM:API-03",
+    "ITEM:API-04"
+  ],
+  "decisions": [],
+  "errors": [],
+  "evidence_id": "EVD-AZURETURINV7-GATE-001",
+  "findings": [
+    {
+      "kind": "manifest_sha256",
+      "value": "e8e0bac20eb0470a3a231267b9544e583927917dd02c6a0f34357618ff3f9c99"
+    }
+  ],
+  "item_slug": "azure-turin-v7"
+}

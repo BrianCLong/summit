@@ -24,11 +24,11 @@ variable "secrets" {
   description = "Map of secrets to create"
   type = map(object({
     description      = string
-    data            = map(string)
+    data             = map(string)
     rotation_enabled = bool
-    rotation_days   = number
+    rotation_days    = number
   }))
-  default = {}
+  default   = {}
   sensitive = true
 }
 

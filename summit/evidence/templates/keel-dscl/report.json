@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-260119895-keel-DSCL-003",
+  "item_slug": "260119895-keel",
+  "claims": ["Depth scaling sweep emits deterministic metrics for Keel depth runs."],
+  "decisions": [],
+  "findings": []
+}

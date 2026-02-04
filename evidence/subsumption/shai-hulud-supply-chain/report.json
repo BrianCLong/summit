@@ -1,0 +1,14 @@
+{
+  "evidence_id": "EVD-SUPPLYCHAIN-GOV-001",
+  "summary": "Subsumption bundle scaffolded for supply-chain incident gating and documentation alignment.",
+  "artifacts": [
+    "subsumption/shai-hulud-supply-chain/manifest.yaml",
+    "docs/standards/shai-hulud-supply-chain.md",
+    "docs/security/data-handling/shai-hulud-supply-chain.md",
+    "docs/ops/runbooks/shai-hulud-supply-chain.md",
+    "docs/decisions/shai-hulud-supply-chain.md",
+    "evidence/index.json",
+    "prompts/subsumption/shai-hulud-supply-chain@v1.md",
+    "agents/examples/SHAI_HULUD_SUPPLY_CHAIN_V1.json"
+  ]
+}

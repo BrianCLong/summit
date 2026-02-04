@@ -2,8 +2,8 @@
 import { trace } from '@opentelemetry/api';
 import pino from 'pino';
 import { CronJob } from 'cron';
-import { MultiTierCache } from './MultiTierCache';
-import { WarmingStrategy, CacheOptions } from './types';
+import { MultiTierCache } from './MultiTierCache.js';
+import { WarmingStrategy, CacheOptions } from './types.js';
 
 const logger = pino({ name: 'CacheWarmer' });
 const tracer = trace.getTracer('advanced-caching');

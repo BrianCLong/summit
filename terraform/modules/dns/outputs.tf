@@ -2,7 +2,7 @@
 
 output "zone_id" {
   description = "DNS zone ID"
-  value       = var.create_zone ? (
+  value = var.create_zone ? (
     var.provider == "aws" ? aws_route53_zone.main[0].zone_id : (
       var.provider == "gcp" ? google_dns_managed_zone.main[0].id :
       azurerm_dns_zone.main[0].id
@@ -12,7 +12,7 @@ output "zone_id" {
 
 output "zone_name_servers" {
   description = "Name servers for the DNS zone"
-  value       = var.create_zone ? (
+  value = var.create_zone ? (
     var.provider == "aws" ? aws_route53_zone.main[0].name_servers : (
       var.provider == "gcp" ? google_dns_managed_zone.main[0].name_servers :
       azurerm_dns_zone.main[0].name_servers
@@ -27,7 +27,7 @@ output "certificate_arn" {
 
 output "certificate_id" {
   description = "ID of the certificate"
-  value       = var.create_certificate ? (
+  value = var.create_certificate ? (
     var.provider == "aws" ? aws_acm_certificate.main[0].id : (
       var.provider == "gcp" ? google_compute_managed_ssl_certificate.main[0].id :
       null

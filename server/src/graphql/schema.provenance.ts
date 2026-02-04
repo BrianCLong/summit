@@ -10,8 +10,16 @@ export const provenanceTypeDefs = gql`
     offset: Int = 0
   }
 
+  type ProvenanceExport {
+    format: String!
+    content: JSON!
+    exportedAt: DateTime!
+    tenantId: String!
+  }
+
   extend type Query {
     evidenceBundles(filter: EvidenceFilterInput!): [EvidenceBundle!]!
+    exportProvenance(tenantId: String!, format: String): ProvenanceExport!
   }
 
   extend type Mutation {

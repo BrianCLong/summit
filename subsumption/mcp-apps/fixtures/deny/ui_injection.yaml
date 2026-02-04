@@ -1,0 +1,4 @@
+name: ui_injection_denied
+ui_html: "<script>alert('x')</script>"
+expected: deny
+reason: "inline script disallowed"

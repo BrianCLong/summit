@@ -1,5 +1,8 @@
 n8n Integration (Perimeter Bus)
 
+> [!CAUTION]
+> **CRITICAL SECURITY ADVISORY:** Ensure self-hosted n8n instances are updated to version **1.121.0** or later to mitigate **CVE-2026-21858 (Ni8mare)**.
+
 - Purpose: optional integration layer for notifications, ETL, ticket sync, and back-office glue — not for agent planning/execution or secured runbooks.
 - Security: signed triggers and callbacks (HMAC-SHA256), optional IP allow-list, RBAC (OPERATOR/ADMIN), feature-flag gate, and provenance logging for every round-trip.
 

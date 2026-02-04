@@ -1,0 +1,48 @@
+{
+  "task_id": "MAESTRO_LONGRUN_JOB_ENGINE",
+  "agent_id": "Codex",
+  "prompt_ref": {
+    "id": "maestro-longrun-job-engine",
+    "version": "v1",
+    "sha256": "32faf8eb39eea30e6bcaa8645727a9a5f2665bcd335b68e50e87eeb2d5f1e1e3",
+    "path": "prompts/engineering/maestro-longrun-job-engine.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "libs/maestro/longrun/",
+      "scripts/ci/",
+      "docs/maestro/",
+      ".github/workflows/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["maestro", "governance", "ci", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "libs/maestro/longrun/job.schema.json",
+      "scripts/ci/validate-longrun-job.mjs",
+      "scripts/ci/verify-longrun-contract.mjs",
+      "docs/maestro/longrun.md",
+      "docs/maestro/longrun.sample.yaml"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "LongRunJob schema and runner scaffolding are present with deterministic stop conditions.",
+    "Checkpointing and evidence manifest/bundle outputs are documented.",
+    "CI validates job specs in PRs and enforces strict evidence verification in release workflows.",
+    "Unit tests cover stop-condition evaluation and evidence manifest snapshot format."
+  ],
+  "stop_conditions": [
+    "Schema cannot be validated without introducing new dependencies.",
+    "Strict gate cannot verify evidence bundles or completion contract.",
+    "Scope expands beyond declared paths."
+  ]
+}

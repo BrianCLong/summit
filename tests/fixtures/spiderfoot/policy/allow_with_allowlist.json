@@ -1,0 +1,6 @@
+{
+  "target": "1.2.3.4",
+  "target_type": "IP_ADDRESS",
+  "allowlist": ["1.2.3.4"],
+  "authorization_attestation": "ticket-123"
+}

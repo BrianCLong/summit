@@ -2,7 +2,7 @@
 import { EventEmitter } from 'events';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
-import { cacheService } from './CacheService';
+import { cacheService } from './CacheService.js';
 
 export interface User {
   id: string;
@@ -925,7 +925,7 @@ export class SecurityService extends EventEmitter {
     return Buffer.from(userAgent).toString('base64').substr(0, 16);
   }
 
-  private cleanupExpiredSessions(): void {
+  private async cleanupExpiredSessions(): Promise<void> {
     const now = new Date();
     let cleanedUp = 0;
 

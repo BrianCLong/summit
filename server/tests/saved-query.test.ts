@@ -18,7 +18,7 @@ beforeAll(async () => {
   }));
 
   ({ SavedQueryService } = await import('../src/services/SavedQueryService.js'));
-  await import('../src/config/database');
+  await import('../src/config/database.js');
 });
 
 describe('SavedQueryService', () => {

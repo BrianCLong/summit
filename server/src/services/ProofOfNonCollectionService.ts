@@ -161,12 +161,24 @@ export class ProofOfNonCollectionService {
   private readonly REPORTS_DIR = process.env.PNC_REPORTS_DIR || '/var/lib/summit/pnc-reports';
   private readonly DEFAULT_SAMPLE_RATE = 0.05; // 5% sample
   private readonly MIN_SAMPLE_SIZE = 1000;
+  private readonly signingSecret: string;
 
   constructor() {
     this.circuitBreaker = new CircuitBreaker('ProofOfNonCollectionService', {
       failureThreshold: 5,
       resetTimeout: 60000,
     });
+
+    const secret = process.env.PNC_SIGNING_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('PNC_SIGNING_SECRET environment variable is required in production');
+      }
+      logger.warn('PNC_SIGNING_SECRET not set - using insecure default for development only');
+      this.signingSecret = 'default-signing-secret';
+    } else {
+      this.signingSecret = secret;
+    }
 
     this.initializeConnections();
     this.ensureReportsDirectory();
@@ -800,8 +812,7 @@ export class ProofOfNonCollectionService {
    */
   private signReport(hash: string): string {
     // In production, would use proper digital signature with private key
-    const secret = process.env.PNC_SIGNING_SECRET || 'default-signing-secret';
-    return crypto.createHmac('sha256', secret).update(hash).digest('hex');
+    return crypto.createHmac('sha256', this.signingSecret).update(hash).digest('hex');
   }
 
   // ==========================================================================

@@ -17,6 +17,16 @@ export const StartRunSchema = z.object({
   workflowId: z.string(),
   input: z.string(), // JSON string
   env: z.string().optional(),
+  reasoningBudget: z
+    .object({
+      thinkMode: z.enum(['off', 'normal', 'heavy']).optional(),
+      thinkingBudget: z.number().int().nonnegative().optional(),
+      maxTokens: z.number().int().nonnegative().optional(),
+      toolBudget: z.number().int().nonnegative().optional(),
+      timeBudgetMs: z.number().int().nonnegative().optional(),
+      redactionPolicy: z.enum(['none', 'summary_only']).optional(),
+    })
+    .optional(),
 });
 
 export const ApprovalSchema = z.object({

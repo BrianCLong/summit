@@ -1,0 +1,377 @@
+{
+  "name": "GitHub to Airtable Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "github-webhook",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "{{GITHUB_WEBHOOK_ID}}",
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"action\"]}}",
+              "operation": "regex",
+              "value2": "^(opened|edited|closed|reopened|labeled|assigned)$"
+            }
+          ]
+        }
+      },
+      "name": "Filter Valid Events",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "issue",
+        "operation": "get",
+        "owner": "={{$json[\"repository\"][\"owner\"][\"login\"]}}",
+        "repository": "={{$json[\"repository\"][\"name\"]}}",
+        "issueNumber": "={{$json[\"issue\"] ? $json[\"issue\"][\"number\"] : $json[\"pull_request\"][\"number\"]}}"
+      },
+      "name": "Get Issue/PR Details",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "githubApi": {
+          "id": "{{GITHUB_API_CREDENTIAL_ID}}",
+          "name": "GitHub Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "platform",
+              "value": "GitHub"
+            },
+            {
+              "name": "platform_id",
+              "value": "={{$json[\"number\"]}}"
+            },
+            {
+              "name": "title",
+              "value": "={{$json[\"title\"]}}"
+            },
+            {
+              "name": "description",
+              "value": "={{$json[\"body\"]}}"
+            },
+            {
+              "name": "status",
+              "value": "={{$json[\"state\"]}}"
+            },
+            {
+              "name": "assignee",
+              "value": "={{$json[\"assignee\"] ? $json[\"assignee\"][\"login\"] : null}}"
+            },
+            {
+              "name": "labels",
+              "value": "={{$json[\"labels\"] ? $json[\"labels\"].map(l => l.name).join(', ') : null}}"
+            },
+            {
+              "name": "milestone",
+              "value": "={{$json[\"milestone\"] ? $json[\"milestone\"][\"title\"] : null}}"
+            },
+            {
+              "name": "url",
+              "value": "={{$json[\"html_url\"]}}"
+            },
+            {
+              "name": "is_pr",
+              "value": "={{$json[\"pull_request\"] ? 'true' : 'false'}}"
+            },
+            {
+              "name": "created_at",
+              "value": "={{$json[\"created_at\"]}}"
+            },
+            {
+              "name": "updated_at",
+              "value": "={{$json[\"updated_at\"]}}"
+            },
+            {
+              "name": "repository",
+              "value": "={{$json[\"repository_url\"].split('/').slice(-1)[0]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Transform Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Issues",
+        "filterByFormula": "=AND({platform}='GitHub', {platform_id}='{{$json[\"platform_id\"]}}', {repository}='{{$json[\"repository\"]}}')",
+        "options": {
+          "maxRecords": 1
+        }
+      },
+      "name": "Check If Exists",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1050, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"records\"] ? $json[\"records\"].length : 0}}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Is New Record",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Issues",
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "platform",
+            "platform_id",
+            "repository"
+          ],
+          "schema": [
+            {
+              "id": "platform",
+              "displayName": "platform",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "name": "Create in Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1450, 200],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Issues",
+        "id": "={{$json[\"records\"][0][\"id\"]}}",
+        "columns": {
+          "mappingMode": "autoMapInputData"
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "name": "Update in Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1450, 400],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": "={{$env.AIRTABLE_BASE_ID}}",
+        "table": "Sync_Log",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "platform": "GitHub",
+            "entity_type": "={{$json[\"is_pr\"] === 'true' ? 'Pull Request' : 'Issue'}}",
+            "entity_id": "={{$json[\"platform_id\"]}}",
+            "action": "={{$json[\"action\"]}}",
+            "status": "success",
+            "timestamp": "={{$now}}",
+            "workflow_run_id": "={{$execution.id}}",
+            "repository": "={{$json[\"repository\"]}}"
+          }
+        }
+      },
+      "name": "Log Sync Activity",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2,
+      "position": [1650, 300],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "{{AIRTABLE_CREDENTIAL_ID}}",
+          "name": "Airtable Personal Access Token"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GitHub Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filter Valid Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Valid Events": {
+      "main": [
+        [
+          {
+            "node": "Get Issue/PR Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Issue/PR Details": {
+      "main": [
+        [
+          {
+            "node": "Transform Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Data": {
+      "main": [
+        [
+          {
+            "node": "Check If Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Exists": {
+      "main": [
+        [
+          {
+            "node": "Is New Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Record": {
+      "main": [
+        [
+          {
+            "node": "Create in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update in Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create in Airtable": {
+      "main": [
+        [
+          {
+            "node": "Log Sync Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update in Airtable": {
+      "main": [
+        [
+          {
+            "node": "Log Sync Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "{{ERROR_WORKFLOW_ID}}",
+    "timezone": "America/Los_Angeles"
+  },
+  "staticData": null,
+  "meta": {
+    "instanceId": "summit-integration-platform",
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [
+    {
+      "name": "integration",
+      "id": "1"
+    },
+    {
+      "name": "github",
+      "id": "5"
+    },
+    {
+      "name": "sync",
+      "id": "3"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-18T00:00:00.000Z",
+  "versionId": "1"
+}

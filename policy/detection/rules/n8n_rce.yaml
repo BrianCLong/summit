@@ -1,0 +1,29 @@
+name: n8n Webhook RCE Attempt
+id: DET-RCE-001
+version: 1.0.0
+severity: CRITICAL
+description: Detects attempts to exploit CVE-2026-21858 in n8n instances via malformed webhook payloads.
+type: signature
+tags:
+  - cve:CVE-2026-21858
+  - target:n8n
+  - technique:T1190
+
+inputs:
+  - source: http_requests
+    filter: path STARTS_WITH '/webhook/' OR path STARTS_WITH '/webhook-test/'
+
+logic:
+  conditions:
+    - field: body
+      operator: matches_regex
+      pattern: "(?i)(executeCommand|exec|spawn|child_process)" # Heuristic for command injection in JS context
+    - field: headers['content-type']
+      operator: equals
+      value: "application/json"
+
+response:
+  - action: block
+  - action: alert
+    severity: CRITICAL
+    target: security_operations

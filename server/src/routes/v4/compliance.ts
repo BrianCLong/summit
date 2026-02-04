@@ -333,58 +333,59 @@ router.post(
   requirePermission('compliance:assess'),
   async (req: Request, res: Response) => {
     const tenantId = getTenantId(req);
-    const categories = req.body.categories as string[] | undefined;
+    const { categories } = req.body;
+    const assessment = await hipaaService!.performAssessment(tenantId, { categories });
 
-    // Filter controls by category if specified
-    let controlsToAssess = [...ALL_HIPAA_CONTROLS];
-    if (categories?.length) {
-      controlsToAssess = controlsToAssess.filter(c =>
-        categories.includes(c.category)
-      );
-    }
-
-    // Simulate assessment (in production, would run actual checks)
-    const compliant = Math.floor(controlsToAssess.length * 0.7);
-    const partial = Math.floor(controlsToAssess.length * 0.15);
-    const nonCompliant = controlsToAssess.length - compliant - partial;
-
-    const assessment: ComplianceAssessment = {
-      id: `hipaa-assessment-${randomUUID()}`,
-      framework: 'HIPAA',
-      tenantId,
-      assessmentDate: new Date().toISOString(),
-      overallScore: Math.round((compliant + partial * 0.5) / controlsToAssess.length * 100),
-      controlsTotal: controlsToAssess.length,
-      controlsCompliant: compliant,
-      controlsPartial: partial,
-      controlsNonCompliant: nonCompliant,
-      gaps: controlsToAssess.slice(0, nonCompliant).map(c => ({
-        controlId: c.id,
-        controlName: c.name,
-        category: c.category,
-        severity: 'medium' as const,
-        description: `Gap in ${c.name}`,
-        remediation: c.implementationGuidance,
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      })),
-      recommendations: [
-        'Implement encryption for all PHI at rest',
-        'Review access control policies quarterly',
-        'Conduct workforce training on HIPAA requirements',
-      ],
-      nextReviewDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-
-    logger.info({
-      tenantId,
-      framework: 'HIPAA',
-      score: assessment.overallScore,
-      assessedBy: getUserId(req),
-    }, 'HIPAA assessment completed');
+    logger.info(
+      {
+        tenantId,
+        framework: 'HIPAA',
+        score: (assessment.summary.compliant / assessment.summary.totalControls) * 100,
+        assessedBy: getUserId(req),
+      },
+      'HIPAA assessment completed'
+    );
 
     res.json(wrapResponse(assessment, req));
   }
 );
+
+/**
+ * @swagger
+ * /api/v4/compliance/hipaa/history:
+ *   get:
+ *     summary: Get HIPAA assessment history
+ *     tags: [Compliance - HIPAA]
+ */
+router.get(
+  '/hipaa/history',
+  requirePermission('compliance:read'),
+  async (req: Request, res: Response) => {
+    const tenantId = getTenantId(req);
+    const history = await hipaaService!.getAssessmentHistory(tenantId);
+    res.json(wrapResponse(history, req));
+  }
+);
+
+/**
+ * @swagger
+ * /api/v4/compliance/hipaa/assessments/{id}:
+ *   get:
+ *     summary: Get specific HIPAA assessment
+ *     tags: [Compliance - HIPAA]
+ */
+router.get(
+  '/hipaa/assessments/:id',
+  requirePermission('compliance:read'),
+  async (req: Request, res: Response) => {
+    const assessment = await hipaaService!.getAssessment(req.params.id);
+    if (!assessment) {
+      return res.status(404).json({ error: 'Assessment not found' });
+    }
+    res.json(wrapResponse(assessment, req));
+  }
+);
+
 
 /**
  * @swagger
@@ -600,58 +601,60 @@ router.post(
   requirePermission('compliance:assess'),
   async (req: Request, res: Response) => {
     const tenantId = getTenantId(req);
-    const sections = req.body.sections as string[] | undefined;
+    const assessment = await soxService!.performAssessment(tenantId, {
+      sections: req.body.sections as any[],
+    });
 
-    // Filter controls by section
-    let controlsToAssess = [...ALL_SOX_CONTROLS];
-    if (sections?.length) {
-      controlsToAssess = controlsToAssess.filter(c =>
-        sections.some(s => c.category.includes(s))
-      );
-    }
-
-    // Simulate assessment
-    const compliant = Math.floor(controlsToAssess.length * 0.75);
-    const partial = Math.floor(controlsToAssess.length * 0.15);
-    const nonCompliant = controlsToAssess.length - compliant - partial;
-
-    const assessment: ComplianceAssessment = {
-      id: `sox-assessment-${randomUUID()}`,
-      framework: 'SOX',
-      tenantId,
-      assessmentDate: new Date().toISOString(),
-      overallScore: Math.round((compliant + partial * 0.5) / controlsToAssess.length * 100),
-      controlsTotal: controlsToAssess.length,
-      controlsCompliant: compliant,
-      controlsPartial: partial,
-      controlsNonCompliant: nonCompliant,
-      gaps: controlsToAssess.slice(0, nonCompliant).map(c => ({
-        controlId: c.id,
-        controlName: c.name,
-        category: c.category,
-        severity: 'high' as const,
-        description: `Gap in ${c.name}`,
-        remediation: c.implementationGuidance,
-        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      })),
-      recommendations: [
-        'Implement automated change management tracking',
-        'Strengthen segregation of duties in financial systems',
-        'Document and test all IT general controls quarterly',
-      ],
-      nextReviewDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    };
-
-    logger.info({
-      tenantId,
-      framework: 'SOX',
-      score: assessment.overallScore,
-      assessedBy: getUserId(req),
-    }, 'SOX assessment completed');
+    logger.info(
+      {
+        tenantId,
+        framework: 'SOX',
+        score: (assessment.summary.effective / assessment.summary.totalControls) * 100,
+        assessedBy: getUserId(req),
+      },
+      'SOX assessment completed'
+    );
 
     res.json(wrapResponse(assessment, req));
   }
 );
+
+/**
+ * @swagger
+ * /api/v4/compliance/sox/history:
+ *   get:
+ *     summary: Get SOX assessment history
+ *     tags: [Compliance - SOX]
+ */
+router.get(
+  '/sox/history',
+  requirePermission('compliance:read'),
+  async (req: Request, res: Response) => {
+    const tenantId = getTenantId(req);
+    const history = await soxService!.getAssessmentHistory(tenantId);
+    res.json(wrapResponse(history, req));
+  }
+);
+
+/**
+ * @swagger
+ * /api/v4/compliance/sox/assessments/{id}:
+ *   get:
+ *     summary: Get specific SOX assessment
+ *     tags: [Compliance - SOX]
+ */
+router.get(
+  '/sox/assessments/:id',
+  requirePermission('compliance:read'),
+  async (req: Request, res: Response) => {
+    const assessment = await soxService!.getAssessment(req.params.id);
+    if (!assessment) {
+      return res.status(404).json({ error: 'Assessment not found' });
+    }
+    res.json(wrapResponse(assessment, req));
+  }
+);
+
 
 /**
  * @swagger
@@ -810,6 +813,11 @@ router.get(
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
     const tenantId = getTenantId(req);
+    const hipaaLatest = await hipaaService!.getAssessmentHistory(tenantId);
+    const soxLatest = await soxService!.getAssessmentHistory(tenantId);
+
+    const hipaa = hipaaLatest[0];
+    const sox = soxLatest[0];
 
     const dashboard = {
       tenantId,
@@ -819,19 +827,19 @@ router.get(
           id: 'HIPAA',
           name: 'HIPAA',
           enabled: true,
-          score: 78,
-          trend: 'improving',
-          lastAssessment: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          criticalGaps: 2,
+          score: hipaa ? (hipaa.summary.compliant / hipaa.summary.totalControls) * 100 : 0,
+          trend: 'stable',
+          lastAssessment: hipaa?.assessedAt || null,
+          criticalGaps: hipaa?.summary.nonCompliant || 0,
         },
         {
           id: 'SOX',
           name: 'SOX',
           enabled: true,
-          score: 85,
+          score: sox ? (sox.summary.effective / sox.summary.totalControls) * 100 : 0,
           trend: 'stable',
-          lastAssessment: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-          criticalGaps: 1,
+          lastAssessment: sox?.assessedAt || null,
+          criticalGaps: sox?.summary.ineffective || 0,
         },
       ],
       upcomingDeadlines: [
@@ -847,24 +855,27 @@ router.get(
         },
       ],
       recentActivity: [
-        {
-          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          action: 'Evidence submitted',
+        ...hipaaLatest.slice(0, 3).map((h) => ({
+          timestamp: h.assessedAt,
+          action: 'Assessment completed',
           framework: 'HIPAA',
-          control: 'HIPAA-AS-005',
-        },
-        {
-          timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          control: null,
+        })),
+        ...soxLatest.slice(0, 3).map((s) => ({
+          timestamp: s.assessedAt,
           action: 'Assessment completed',
           framework: 'SOX',
           control: null,
-        },
-      ],
+        })),
+      ]
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 5),
     };
 
     res.json(wrapResponse(dashboard, req));
   }
 );
+
 
 /**
  * @swagger

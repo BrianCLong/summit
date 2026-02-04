@@ -21,10 +21,11 @@ This document serves as the single source of truth for all enforced controls wit
 
 ## 3. Provenance & Audit Controls
 
-| Control ID | Description                | Enforcement Mechanism                                                                                                               | Evidence | Owner                                                              |
-| :--------- | :------------------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------- | -------------------- |
-| AUD-001    | **Provenance Requirement** | All system outputs must be attributable, explainable, replayable, and contestable. Unattributed intelligence is considered invalid. | Policy   | [docs/governance/CONSTITUTION.md](docs/governance/CONSTITUTION.md) | Governance           |
-| AUD-002    | **Immutable Audit Trail**  | All significant events, including data access, decisions, and policy changes, are logged to an immutable provenance ledger.         | Code     | [prov-ledger/docs/README.md](prov-ledger/docs/README.md)           | Security Directorate |
+| Control ID | Description                         | Enforcement Mechanism                                                                                                                 | Evidence         | Owner                                                                      |
+| :--------- | :---------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :--------------- | :------------------------------------------------------------------------- | --------------------- |
+| AUD-001    | **Provenance Requirement**          | All system outputs must be attributable, explainable, replayable, and contestable. Unattributed intelligence is considered invalid.   | Policy           | [docs/governance/CONSTITUTION.md](docs/governance/CONSTITUTION.md)         | Governance            |
+| AUD-002    | **Immutable Audit Trail**           | All significant events, including data access, decisions, and policy changes, are logged to an immutable provenance ledger.           | Code             | [prov-ledger/docs/README.md](prov-ledger/docs/README.md)                   | Security Directorate  |
+| AUD-003    | **Media Authenticity & Provenance** | Marketing/public media assets must ship with deterministic provenance evidence bundles; detector-only claims are governed exceptions. | Policy + CI Gate | [docs/governance/media_provenance.md](docs/governance/media_provenance.md) | Governance + Security |
 
 ## 4. CI/CD & Release Controls
 

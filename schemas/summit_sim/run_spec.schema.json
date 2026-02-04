@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Run Spec",
+  "type": "object",
+  "required": ["id", "agent_spec_id", "scenario_id", "seed"],
+  "properties": {
+    "id": { "type": "string" },
+    "agent_spec_id": { "type": "string" },
+    "scenario_id": { "type": "string" },
+    "seed": { "type": "integer" },
+    "max_steps": { "type": "integer" }
+  },
+  "additionalProperties": false
+}

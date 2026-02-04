@@ -67,7 +67,8 @@ const verifyJiraSecret = (req: any, res: any, next: any) => {
   // Skip verification if secret is not configured
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
-      logger.warn('JIRA_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+      logger.error("JIRA_WEBHOOK_SECRET is missing in production. Blocking request.");
+      return res.status(500).json({ error: "Server configuration error" });
     }
     return next();
   }
@@ -90,7 +91,8 @@ const verifyLifecycleSecret = (req: any, res: any, next: any) => {
   // Skip verification if secret is not configured
   if (!secret) {
     if (process.env.NODE_ENV === 'production') {
-      logger.warn('LIFECYCLE_WEBHOOK_SECRET is missing in production. Endpoint is insecure.');
+      logger.error("LIFECYCLE_WEBHOOK_SECRET is missing in production. Blocking request.");
+      return res.status(500).json({ error: "Server configuration error" });
     }
     return next();
   }
@@ -117,13 +119,13 @@ const validate = (schema: any) => (req: any, res: any, next: any) => {
 
 // Helper for tenant ID (assuming it's in req.user or req.headers)
 const getTenantId = (req: any) => {
-    // Strict auth is enforced via app.ts, so req.user should always be populated
-    if (req.user?.tenantId || req.user?.tenant_id) {
-        return req.user.tenantId || req.user.tenant_id;
-    }
-    // Fallback only if configured for strict dev bypassing, but now we enforce auth even in dev (mock user)
-    // We throw error if tenant identification fails for security
-    throw new Error('Tenant ID not found in authenticated session');
+  // Strict auth is enforced via app.ts, so req.user should always be populated
+  if (req.user?.tenantId || req.user?.tenant_id) {
+    return req.user.tenantId || req.user.tenant_id;
+  }
+  // Fallback only if configured for strict dev bypassing, but now we enforce auth even in dev (mock user)
+  // We throw error if tenant identification fails for security
+  throw new Error('Tenant ID not found in authenticated session');
 };
 
 // --- New Webhook Management Routes ---
@@ -271,7 +273,7 @@ router.patch('/:id', validate(UpdateWebhookSchema), async (req, res) => {
     const tenantId = getTenantId(req);
     const webhook = await webhookService.updateWebhook(tenantId, req.params.id, req.body);
     if (!webhook) {
-        return res.status(404).json({ error: 'Webhook not found' });
+      return res.status(404).json({ error: 'Webhook not found' });
     }
     res.json(webhook);
   } catch (error: any) {
@@ -306,7 +308,7 @@ router.delete('/:id', async (req, res) => {
     const tenantId = getTenantId(req);
     const success = await webhookService.deleteWebhook(tenantId, req.params.id);
     if (!success) {
-        return res.status(404).json({ error: 'Webhook not found' });
+      return res.status(404).json({ error: 'Webhook not found' });
     }
     res.status(204).send();
   } catch (error: any) {
@@ -385,17 +387,17 @@ router.get('/:id/deliveries', async (req, res) => {
  *         description: Internal server error
  */
 router.post('/trigger-test', async (req, res) => {
-    try {
-        const tenantId = getTenantId(req);
-        const { eventType, payload } = req.body;
-        if (!eventType || !payload) {
-            return res.status(400).json({ error: 'eventType and payload required'});
-        }
-        await webhookService.triggerEvent(tenantId, eventType, payload);
-        res.json({ message: 'Event triggered' });
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
+  try {
+    const tenantId = getTenantId(req);
+    const { eventType, payload } = req.body;
+    if (!eventType || !payload) {
+      return res.status(400).json({ error: 'eventType and payload required' });
     }
+    await webhookService.triggerEvent(tenantId, eventType, payload);
+    res.json({ message: 'Event triggered' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // --- Existing Webhook Routes (GitHub, Jira, Lifecycle) ---
@@ -453,63 +455,63 @@ router.post(
           pull_request &&
           (action === 'opened' || action === 'closed' || action === 'merged')
         ) {
-        const prUrl = pull_request.html_url;
-        const prBody = pull_request.body || '';
+          const prUrl = pull_request.html_url;
+          const prBody = pull_request.body || '';
 
-        // Extract ticket information from PR
-        const ticket = extractTicketFromPR(prUrl, prBody);
+          // Extract ticket information from PR
+          const ticket = extractTicketFromPR(prUrl, prBody);
 
-        if (ticket) {
-          // Check if PR body contains run or deployment IDs
-          const runIdMatch = prBody.match(/runId[:\s]*([a-f0-9-]{36})/i);
-          const deploymentIdMatch = prBody.match(
-            /deploymentId[:\s]*([a-f0-9-]{36})/i,
-          );
-
-          const metadata = {
-            pr_url: prUrl,
-            pr_number: pull_request.number,
-            pr_title: pull_request.title,
-            pr_body: prBody,
-            pr_action: action,
-            repository: repository?.full_name,
-            author: pull_request.user?.login,
-          };
-
-          if (runIdMatch) {
-            await addTicketRunLink(ticket, runIdMatch[1], metadata);
-          }
-
-          if (deploymentIdMatch) {
-            await addTicketDeploymentLink(
-              ticket,
-              deploymentIdMatch[1],
-              metadata,
+          if (ticket) {
+            // Check if PR body contains run or deployment IDs
+            const runIdMatch = prBody.match(/runId[:\s]*([a-f0-9-]{36})/i);
+            const deploymentIdMatch = prBody.match(
+              /deploymentId[:\s]*([a-f0-9-]{36})/i,
             );
+
+            const metadata = {
+              pr_url: prUrl,
+              pr_number: pull_request.number,
+              pr_title: pull_request.title,
+              pr_body: prBody,
+              pr_action: action,
+              repository: repository?.full_name,
+              author: pull_request.user?.login,
+            };
+
+            if (runIdMatch) {
+              await addTicketRunLink(ticket, runIdMatch[1], metadata);
+            }
+
+            if (deploymentIdMatch) {
+              await addTicketDeploymentLink(
+                ticket,
+                deploymentIdMatch[1],
+                metadata,
+              );
+            }
           }
         }
-      }
 
-      // Handle issue events
-      if (issue && (action === 'opened' || action === 'closed')) {
-        console.log(`GitHub issue ${action}: #${issue.number}`);
-      }
-
-      res.status(200).json({ status: 'processed' });
-    } catch (error: any) {
-      logger.error('GitHub webhook error:', { error: error.message });
-      metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'failed', provider: 'github' });
-
-      span.recordException(error);
-      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-
-      res.status(500).json({ error: 'Webhook processing failed' });
-    }
-    }, {
-        kind: SpanKind.SERVER,
-        attributes: {
-            'webhook.provider': 'github'
+        // Handle issue events
+        if (issue && (action === 'opened' || action === 'closed')) {
+          console.log(`GitHub issue ${action}: #${issue.number}`);
         }
+
+        res.status(200).json({ status: 'processed' });
+      } catch (error: any) {
+        logger.error('GitHub webhook error:', { error: error.message });
+        metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'failed', provider: 'github' });
+
+        span.recordException(error);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+
+        res.status(500).json({ error: 'Webhook processing failed' });
+      }
+    }, {
+      kind: SpanKind.SERVER,
+      attributes: {
+        'webhook.provider': 'github'
+      }
     });
   },
 );

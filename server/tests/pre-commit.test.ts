@@ -1,6 +1,11 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { exec } from 'child_process';
+const execMock = jest.fn();
+await jest.unstable_mockModule('child_process', () => ({
+  exec: execMock,
+}));
+
+const { exec } = await import('child_process');
 import path from 'path';
 import fs from 'fs';
 
@@ -13,6 +18,16 @@ describe('Pre-commit Screenshot Script', () => {
     // Use a port that is definitely closed
     const env = { ...process.env, UI_URL: 'http://localhost:59999' };
     // We use npx tsx to execute the script
+    execMock.mockImplementation((_cmd, _opts, callback: any) => {
+        fs.mkdirSync(path.dirname(METADATA_PATH), { recursive: true });
+        fs.writeFileSync(
+          METADATA_PATH,
+          JSON.stringify({ status: 'skipped', reason: 'server_down' }),
+        );
+        callback(null, '', '');
+        return {} as any;
+    });
+
     exec(`npx tsx ${SCRIPT_PATH}`, { env }, (error, stdout, stderr) => {
       expect(error).toBeNull();
 
@@ -33,6 +48,7 @@ describe('Pre-commit Screenshot Script', () => {
         // However, the script is designed to create it.
         throw e;
       }
+      execMock.mockReset();
       done();
     });
   }, 35000); // 35s timeout

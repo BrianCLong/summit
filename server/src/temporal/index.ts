@@ -1,4 +1,4 @@
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
 
 const logger = baseLogger.child({ name: 'temporal' });
 

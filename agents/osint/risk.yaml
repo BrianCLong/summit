@@ -1,0 +1,26 @@
+agent_id: osint-risk-monitor
+version: 1.0.0
+governance:
+  owner: "@intelgraph/osint-team"
+  classification: internal
+  policy_set: "policies/osint/monitoring.rego"
+  risk_level: medium
+runtime:
+  model:
+    provider: anthropic
+    name: claude-3-5-sonnet-20241022
+    parameters:
+      temperature: 0.1
+      max_tokens: 4096
+  instructions:
+    source: agents/osint/instructions/risk.txt
+    sha256: 1e725683851ea357a8dd886c347e9360b42b397375b975576109c650268f1bd8
+  tools:
+    - name: "osint:event_detector"
+      permission: read-only
+    - name: "notification:send"
+      permission: read-write
+evidence:
+  log_level: info
+  required_artifacts: ["trace", "tool_output"]
+  replay_mode: best-effort

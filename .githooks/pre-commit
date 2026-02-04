@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+required_version="2.47.1"
+current_version="$(git --version | awk '{print $3}')"
+
+if [[ "$(printf '%s\n' "$required_version" "$current_version" | sort -V | head -n1)" != "$required_version" ]]; then
+  echo "Error: Git version $current_version is vulnerable. Upgrade to >= $required_version."
+  exit 1
+fi
+
+bundle_uri="$(git config --global --get transfer.bundleURI 2>/dev/null || printf '')"
+if [[ "$bundle_uri" != "false" ]]; then
+  echo "Error: transfer.bundleURI must be disabled. Run: git config --global transfer.bundleURI false"
+  exit 1
+fi

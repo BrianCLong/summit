@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OS Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string" },
+    "display_name": { "type": "string" },
+    "qemu_profile": { "type": "string" },
+    "default_args": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "provenance": { "type": "string" }
+  },
+  "required": ["name"]
+}

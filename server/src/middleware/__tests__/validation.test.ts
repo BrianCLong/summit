@@ -2,13 +2,13 @@
  * Tests for validation middleware
  */
 
-import { validateRequestLegacy as validateRequest } from '../validation';
+import { validateRequestLegacy as validateRequest } from '../validation.js';
 import { describe, it, test, expect } from '@jest/globals';
 import {
   requestFactory,
   responseFactory,
   nextFactory,
-} from '../../../../tests/factories/requestFactory';
+} from '../../../../tests/factories/requestFactory.js';
 
 describe('Validation Middleware', () => {
   describe('validateRequest', () => {

@@ -1,0 +1,3 @@
+{"id": "evt-001", "text": "Message A propagating rapidly", "timestamp": "2026-01-28T10:00:00Z", "domain": "example.com"}
+{"id": "evt-002", "text": "Message A reposted", "timestamp": "2026-01-28T10:00:05Z", "domain": "imitative-news.net"}
+{"id": "evt-003", "text": "Message A amplified", "timestamp": "2026-01-28T10:00:10Z", "domain": "example.org"}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Telemetry Field Policy",
+  "type": "object",
+  "required": ["classification", "transform", "linkability"],
+  "additionalProperties": false,
+  "properties": {
+    "classification": {
+      "type": "string",
+      "enum": ["PUBLIC", "INTERNAL", "PSEUDONYMIZED", "SENSITIVE", "RESTRICTED_PII"]
+    },
+    "transform": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "DROP",
+        "MASK",
+        "PSEUDONYMIZE",
+        "HASH_STRUCTURED",
+        "NOISE_TIME",
+        "DP_AGG_ONLY"
+      ]
+    },
+    "linkability": {
+      "type": "string",
+      "enum": ["NONE", "INTRA_DOMAIN", "CROSS_DOMAIN"]
+    },
+    "never_log": {
+      "type": "boolean"
+    }
+  }
+}

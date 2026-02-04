@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 3 — GA Procurement Blockers Killer List (ship what closes enterprise deals)
 
 1.  Build a ranked list of procurement blockers from real deals (security, legal, IT).

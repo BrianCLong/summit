@@ -1,0 +1,95 @@
+# MCP Tool Registry
+# Authoritative source of approved tools for Agentic workflows
+# Governed by: Security Engineering
+# Last Updated: 2026-01-25
+
+metadata:
+  version: "1.0.0"
+  schema_version: "1.0"
+  last_updated: "2026-01-25"
+
+tools:
+  - name: "git"
+    description: "Version control system command line tool"
+    risk_level: "medium"
+    owner: "platform-engineering"
+    mcp_server: "git-mcp-server"
+    allowed_args:
+      - "^checkout.*"
+      - "^branch.*"
+      - "^commit.*"
+      - "^push.*"
+      - "^pull.*"
+      - "^status.*"
+      - "^diff.*"
+      - "^log.*"
+
+  - name: "grep"
+    description: "Command-line utility for searching plain-text data sets for lines that match a regular expression"
+    risk_level: "low"
+    owner: "platform-engineering"
+    allowed_args:
+      - ".*"
+
+  - name: "ast-parser"
+    description: "Tool for parsing Abstract Syntax Trees of code"
+    risk_level: "low"
+    owner: "dev-tools"
+    allowed_args:
+      - ".*"
+
+  - name: "eslint"
+    description: "Pluggable JavaScript linter"
+    risk_level: "low"
+    owner: "dev-tools"
+    allowed_args:
+      - ".*"
+
+  - name: "prettier"
+    description: "Opinionated code formatter"
+    risk_level: "low"
+    owner: "dev-tools"
+    allowed_args:
+      - ".*"
+
+  - name: "typescript-compiler"
+    description: "TypeScript compiler (tsc)"
+    risk_level: "low"
+    owner: "dev-tools"
+    allowed_args:
+      - ".*"
+
+  - name: "promql"
+    description: "Prometheus Query Language tool"
+    risk_level: "low"
+    owner: "observability"
+    allowed_args:
+      - ".*"
+
+  - name: "log-analyzer"
+    description: "Tool for analyzing application logs"
+    risk_level: "low"
+    owner: "observability"
+    allowed_args:
+      - ".*"
+
+  - name: "trivy"
+    description: "Comprehensive security scanner"
+    risk_level: "medium"
+    owner: "security-team"
+    allowed_args:
+      - ".*"
+
+  - name: "semgrep"
+    description: "Static analysis tool for finding bugs and enforcing code standards"
+    risk_level: "medium"
+    owner: "security-team"
+    allowed_args:
+      - ".*"
+
+  - name: "gitleaks"
+    description: "Tool for detecting hardcoded secrets like passwords, api keys, and tokens in git repos"
+    risk_level: "medium"
+    owner: "security-team"
+    allowed_args:
+      - ".*"

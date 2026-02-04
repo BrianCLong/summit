@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       # ============================================================================
       # MONOREPO SETUP: This monorepo uses pnpm workspaces with client/, server/,
@@ -52,20 +52,18 @@ jobs:
       # ============================================================================
       - name: Setup pnpm
         if: matrix.language == 'javascript-typescript'
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 10
+        uses: pnpm/action-setup@v4 # v4
 
       - name: Setup Node.js
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
 
       - name: Install dependencies (monorepo workspaces)
         if: matrix.language == 'javascript-typescript'
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
         env:
           # Prevent installation failures from blocking analysis
           HUSKY: 0
@@ -75,7 +73,7 @@ jobs:
       # JavaScript/TypeScript to ensure proper module resolution and analysis.
       # ============================================================================
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/init@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4
         with:
           languages: ${{ matrix.language }}
           # For JavaScript/TypeScript, ensure we capture all workspace packages
@@ -101,10 +99,10 @@ jobs:
 
       - name: Autobuild (Python/Go)
         if: matrix.language != 'javascript-typescript'
-        uses: github/codeql-action/autobuild@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/autobuild@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@5d4e8d1aca955e8d8589aabd499c5cae939e33c7 # v4
+        uses: github/codeql-action/analyze@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4
         with:
           category: "/language:${{matrix.language}}"
           # Upload results even if there are compilation errors

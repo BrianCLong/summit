@@ -1,7 +1,7 @@
 import { trace } from '@opentelemetry/api';
 import pino from 'pino';
 import { Redis } from 'ioredis';
-import { MultiTierCache } from './MultiTierCache';
+import { MultiTierCache } from './MultiTierCache.js';
 
 const logger = pino({ name: 'CacheVersionManager' });
 const tracer = trace.getTracer('advanced-caching');

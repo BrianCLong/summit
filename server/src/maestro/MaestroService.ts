@@ -1,20 +1,21 @@
 // @ts-nocheck
 import fs from 'fs/promises';
 import path from 'path';
+import { Pool } from 'pg';
 import { metrics } from '../observability/metrics.js';
 import { runsRepo } from './runs/runs-repo.js';
 import { SubagentCoordinator, agentGovernance } from './subagent-coordinator.js';
 import { killSwitchService } from '../services/KillSwitchService.js';
 import { telemetryService } from '../services/TelemetryService.js';
 import { driftDetectionService } from '../services/DriftDetectionService.js';
-// Import from the same file where the types are defined
+import { OrchestratorPostgresStore } from './store/orchestrator-store.js';
 import type {
   CoordinationTask,
   CoordinationChannel,
   ConsensusProposal,
   AgentCoordinationMetrics,
   MaestroAgent
-} from './model.js';
+} from './types.js';
 import { AgentGovernanceService } from './governance-service.js';
 import {
   HealthSnapshot,
@@ -27,139 +28,267 @@ import {
   AuditEvent,
 } from './types.js';
 
-const repoRoot = process.cwd().endsWith(`${path.sep}server`)
-  ? path.resolve(process.cwd(), '..')
-  : process.cwd();
-const DB_PATH = path.resolve(repoRoot, 'server', 'data', 'maestro_db.json');
-
-interface MaestroDB {
-  loops: AutonomicLoop[];
-  experiments: Experiment[];
-  playbooks: Playbook[];
-  auditLog: AuditEvent[];
-  agents: AgentProfile[];
+// Interface representing the orchestrator store
+interface OrchestratorStore {
+  initialize(): Promise<void>;
+  getLoops(): Promise<AutonomicLoop[]>;
+  getLoopById(id: string): Promise<AutonomicLoop | null>;
+  updateLoopStatus(id: string, status: 'active' | 'paused' | 'inactive'): Promise<boolean>;
+  getAgents(): Promise<MaestroAgent[]>;
+  getAgentById(id: string): Promise<MaestroAgent | null>;
+  updateAgent(id: string, updates: Partial<MaestroAgent>, actor: string): Promise<MaestroAgent | null>;
+  getExperiments(): Promise<Experiment[]>;
+  createExperiment(experiment: Experiment, actor: string): Promise<Experiment>;
+  getPlaybooks(): Promise<Playbook[]>;
+  createCoordinationTask(task: Omit<CoordinationTask, 'id' | 'createdAt' | 'updatedAt' | 'result' | 'error'>, actor: string): Promise<CoordinationTask>;
+  getCoordinationTaskById(id: string): Promise<CoordinationTask | null>;
+  updateCoordinationTaskStatus(id: string, status: string): Promise<boolean>;
+  createCoordinationChannel(topic: string, participantAgentIds: string[], actor: string): Promise<CoordinationChannel>;
+  getCoordinationChannelById(id: string): Promise<CoordinationChannel | null>;
+  initiateConsensus<T>(coordinatorId: string, topic: string, proposal: T, voterAgentIds: string[], deadlineHours: number, actor: string): Promise<ConsensusProposal<T>>;
+  getConsensusProposalById<T>(id: string): Promise<ConsensusProposal<T> | null>;
+  recordVote<T>(proposalId: string, agentId: string, vote: { decision: 'approve' | 'reject' | 'abstain'; reason?: string; weight?: number }): Promise<boolean>;
+  getAuditLog(limit: number): Promise<AuditEvent[]>;
+  logAudit(actor: string, action: string, resource: string, details: string, status?: string): Promise<void>;
 }
-
-const DEFAULT_DB: MaestroDB = {
-  loops: [
-    {
-      id: 'cost-optimization',
-      name: 'Cost Optimization Loop',
-      type: 'cost',
-      status: 'active',
-      lastDecision: 'Shifted 20% traffic to Haiku for non-critical tasks',
-      lastRun: new Date().toISOString(),
-      config: { threshold: 0.8, interval: '15m' },
-    },
-    {
-      id: 'reliability-guardian',
-      name: 'Reliability Guardian',
-      type: 'reliability',
-      status: 'active',
-      lastDecision: 'Quarantined node agent-worker-3 due to high error rate',
-      lastRun: new Date().toISOString(),
-      config: { maxRetries: 3 },
-    },
-    {
-      id: 'safety-sentinel',
-      name: 'Safety Sentinel',
-      type: 'safety',
-      status: 'active',
-      lastDecision: 'Blocked 2 prompts for PII violation',
-      lastRun: new Date().toISOString(),
-      config: { strictMode: true },
-    },
-  ],
-  experiments: [
-    {
-      id: 'exp-001',
-      name: 'Planner Agent V2',
-      hypothesis: 'New prompt structure reduces planning latency by 15%',
-      status: 'running',
-      variants: ['control', 'v2-prompt'],
-      metrics: { latency: -12, successRate: +2 },
-      startDate: new Date(Date.now() - 86400000 * 2).toISOString(),
-    },
-  ],
-  playbooks: [
-    {
-      id: 'pb-restart-pods',
-      name: 'Restart Stuck Pods',
-      description: 'Automatically restarts pods that are in CrashLoopBackOff for > 10m',
-      triggers: ['pod_crash_loop'],
-      actions: ['k8s.delete_pod'],
-      isEnabled: true,
-    },
-  ],
-  auditLog: [],
-  agents: [
-    {
-      id: 'planner',
-      name: 'Planner',
-      role: 'Orchestration',
-      model: 'gpt-4-turbo',
-      status: 'healthy',
-      metrics: { successRate: 98.5, latencyP95: 1200, costPerTask: 0.03 },
-      routingWeight: 100,
-    },
-    {
-      id: 'coder',
-      name: 'Coder',
-      role: 'Implementation',
-      model: 'claude-3-opus',
-      status: 'healthy',
-      metrics: { successRate: 95.2, latencyP95: 4500, costPerTask: 0.15 },
-      routingWeight: 80,
-    },
-    {
-      id: 'reviewer',
-      name: 'Reviewer',
-      role: 'Quality Assurance',
-      model: 'gpt-4o',
-      status: 'healthy',
-      metrics: { successRate: 99.1, latencyP95: 2100, costPerTask: 0.05 },
-      routingWeight: 100,
-    },
-  ],
-};
 
 export class MaestroService {
   private static instance: MaestroService;
-  private dbCache: MaestroDB | null = null;
+  private orchestratorStore: OrchestratorStore;
   private subagentCoordinator: SubagentCoordinator;
 
-  private constructor() {
+  private constructor(dbPool?: Pool) {
     this.subagentCoordinator = SubagentCoordinator.getInstance();
-    // Initialize Drift Detection
+    // Initialize with PostgreSQL store if pool is provided, otherwise use in-memory
+    this.orchestratorStore = dbPool ? new OrchestratorPostgresStore(dbPool) : this.createInMemoryStore();
     driftDetectionService.startMonitoring();
   }
 
-  static getInstance(): MaestroService {
+  static getInstance(dbPool?: Pool): MaestroService {
     if (!MaestroService.instance) {
-      MaestroService.instance = new MaestroService();
+      MaestroService.instance = new MaestroService(dbPool);
     }
     return MaestroService.instance;
   }
 
-  private async getDB(): Promise<MaestroDB> {
-    if (this.dbCache) return this.dbCache;
-    try {
-      const data = await fs.readFile(DB_PATH, 'utf-8');
-      this.dbCache = JSON.parse(data);
-    } catch (err: any) {
-      this.dbCache = { ...DEFAULT_DB }; // Clone defaults
-      await this.saveDB();
-    }
-    return this.dbCache!;
+  private createInMemoryStore(): OrchestratorStore {
+    // Return a simplified in-memory implementation for backward compatibility
+    const inMemoryData = {
+      loops: [
+        {
+          id: 'cost-optimization',
+          name: 'Cost Optimization Loop',
+          type: 'cost',
+          status: 'active',
+          lastDecision: 'Shifted 20% traffic to Haiku for non-critical tasks',
+          lastRun: new Date().toISOString(),
+          config: { threshold: 0.8, interval: '15m' },
+        },
+        {
+          id: 'reliability-guardian',
+          name: 'Reliability Guardian',
+          type: 'reliability',
+          status: 'active',
+          lastDecision: 'Quarantined node agent-worker-3 due to high error rate',
+          lastRun: new Date().toISOString(),
+          config: { maxRetries: 3 },
+        },
+        {
+          id: 'safety-sentinel',
+          name: 'Safety Sentinel',
+          type: 'safety',
+          status: 'active',
+          lastDecision: 'Blocked 2 prompts for PII violation',
+          lastRun: new Date().toISOString(),
+          config: { strictMode: true },
+        },
+      ],
+      experiments: [
+        {
+          id: 'exp-001',
+          name: 'Planner Agent V2',
+          hypothesis: 'New prompt structure reduces planning latency by 15%',
+          status: 'running',
+          variants: ['control', 'v2-prompt'],
+          metrics: { latency: -12, successRate: +2 },
+          startDate: new Date(Date.now() - 86400000 * 2).toISOString(),
+        },
+      ],
+      playbooks: [
+        {
+          id: 'pb-restart-pods',
+          name: 'Restart Stuck Pods',
+          description: 'Automatically restarts pods that are in CrashLoopBackOff for > 10m',
+          triggers: ['pod_crash_loop'],
+          actions: ['k8s.delete_pod'],
+          isEnabled: true,
+        },
+      ],
+      auditLog: [],
+      agents: [
+        {
+          id: 'planner',
+          name: 'Planner',
+          role: 'Orchestration',
+          model: 'gpt-4-turbo',
+          status: 'healthy',
+          metrics: { successRate: 98.5, latencyP95: 1200, costPerTask: 0.03 },
+          routingWeight: 100,
+        },
+        {
+          id: 'coder',
+          name: 'Coder',
+          role: 'Implementation',
+          model: 'claude-3-opus',
+          status: 'healthy',
+          metrics: { successRate: 95.2, latencyP95: 4500, costPerTask: 0.15 },
+          routingWeight: 80,
+        },
+        {
+          id: 'reviewer',
+          name: 'Reviewer',
+          role: 'Quality Assurance',
+          model: 'gpt-4o',
+          status: 'healthy',
+          metrics: { successRate: 99.1, latencyP95: 2100, costPerTask: 0.05 },
+          routingWeight: 100,
+        },
+      ],
+    };
+
+    return {
+      initialize: async () => Promise.resolve(),
+      getLoops: async () => inMemoryData.loops,
+      getLoopById: async (id: string) => inMemoryData.loops.find(loop => loop.id === id) || null,
+      updateLoopStatus: async (id: string, status: 'active' | 'paused' | 'inactive') => {
+        const loop = inMemoryData.loops.find(l => l.id === id);
+        if (loop) {
+          loop.status = status;
+          return true;
+        }
+        return false;
+      },
+      getAgents: async () => {
+        // Convert AgentProfile to MaestroAgent format
+        return inMemoryData.agents.map(agent => ({
+          id: agent.id,
+          name: agent.name,
+          role: agent.role,
+          model: agent.model,
+          status: agent.status,
+          routingWeight: agent.routingWeight,
+          metrics: agent.metrics,
+        }));
+      },
+      getAgentById: async (id: string) => {
+        const agent = inMemoryData.agents.find(a => a.id === id);
+        if (agent) {
+          return {
+            id: agent.id,
+            name: agent.name,
+            role: agent.role,
+            model: agent.model,
+            status: agent.status,
+            routingWeight: agent.routingWeight,
+            metrics: agent.metrics,
+          };
+        }
+        return null;
+      },
+      updateAgent: async (id: string, updates: Partial<MaestroAgent>, actor: string) => {
+        const idx = inMemoryData.agents.findIndex(a => a.id === id);
+        if (idx !== -1) {
+          inMemoryData.agents[idx] = { ...inMemoryData.agents[idx], ...updates };
+          await this.logAudit(actor, 'update_agent', id, `Updated agent ${id}`);
+          return {
+            id: inMemoryData.agents[idx].id,
+            name: inMemoryData.agents[idx].name,
+            role: inMemoryData.agents[idx].role,
+            model: inMemoryData.agents[idx].model,
+            status: inMemoryData.agents[idx].status,
+            routingWeight: inMemoryData.agents[idx].routingWeight,
+            metrics: inMemoryData.agents[idx].metrics,
+          };
+        }
+        return null;
+      },
+      getExperiments: async () => inMemoryData.experiments,
+      createExperiment: async (experiment: Experiment, actor: string) => {
+        inMemoryData.experiments.push(experiment);
+        await this.logAudit(actor, 'create_experiment', experiment.id, `Created experiment ${experiment.name}`);
+        return experiment;
+      },
+      getPlaybooks: async () => inMemoryData.playbooks,
+      createCoordinationTask: async (task, actor) => {
+        const id = `task_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const coordinationTask: CoordinationTask = {
+          id,
+          title: task.title,
+          description: task.description,
+          status: 'pending',
+          ownerId: task.ownerId,
+          participants: task.participants,
+          priority: task.priority,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await this.logAudit(actor, 'create_coordination_task', `coordination_task:${id}`, `Created coordination task ${task.title}`);
+        return coordinationTask;
+      },
+      getCoordinationTaskById: async (id: string) => null, // Implement as needed
+      updateCoordinationTaskStatus: async (id: string, status: string) => false, // Implement as needed
+      createCoordinationChannel: async (topic, participantAgentIds, actor) => {
+        const id = `channel_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const channel: CoordinationChannel = {
+          id,
+          topic,
+          participants: participantAgentIds,
+          status: 'active',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await this.logAudit(actor, 'create_coordination_channel', `coordination_channel:${id}`, `Created coordination channel for topic: ${topic}`);
+        return channel;
+      },
+      getCoordinationChannelById: async (id: string) => null, // Implement as needed
+      initiateConsensus: async <T>(coordinatorId, topic, proposal, voterAgentIds, deadlineHours, actor) => {
+        const id = `consensus_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
+        const consensusProposal: ConsensusProposal<T> = {
+          id,
+          topic,
+          proposal,
+          coordinatorId,
+          voters: voterAgentIds,
+          votes: {},
+          status: 'voting',
+          deadline: deadline.toISOString(),
+          createdAt: new Date().toISOString(),
+        };
+        await this.logAudit(actor, 'initiate_consensus', `consensus_proposal:${id}`, `Initiated consensus for topic: ${topic}`);
+        return consensusProposal;
+      },
+      getConsensusProposalById: async <T>(id: string) => null, // Implement as needed
+      recordVote: async <T>(proposalId, agentId, vote) => false, // Implement as needed
+      getAuditLog: async (limit: number = 100) => inMemoryData.auditLog.slice(0, limit),
+      logAudit: async (actor: string, action: string, resource: string, details: string, status: string = 'allowed') => {
+        inMemoryData.auditLog.unshift({
+          id: Math.random().toString(36).substr(2, 9),
+          timestamp: new Date().toISOString(),
+          actor,
+          action,
+          resource,
+          details,
+          status,
+        });
+        // Keep log size manageable
+        if (inMemoryData.auditLog.length > 1000) inMemoryData.auditLog = inMemoryData.auditLog.slice(0, 1000);
+      },
+    };
   }
 
-  private async saveDB(): Promise<void> {
-    if (!this.dbCache) return;
-    try {
-      await fs.writeFile(DB_PATH, JSON.stringify(this.dbCache, null, 2));
-    } catch (err: any) {
-      console.error('Failed to save Maestro DB:', err);
-    }
+  async initialize(): Promise<void> {
+    await this.orchestratorStore.initialize();
   }
 
   // --- Dashboard ---
@@ -216,94 +345,43 @@ export class MaestroService {
   // Proxied to runsRepo
 
   // --- Agents ---
-  async getAgents(): Promise<AgentProfile[]> {
-    const db = await this.getDB();
-    return db.agents;
+  async getAgents(): Promise<MaestroAgent[]> {
+    return await this.orchestratorStore.getAgents();
   }
 
-  async updateAgent(id: string, updates: Partial<AgentProfile>, actor: string): Promise<AgentProfile | null> {
-    const db = await this.getDB();
-    const index = db.agents.findIndex((a) => a.id === id);
-    if (index === -1) return null;
-
-    db.agents[index] = { ...db.agents[index], ...updates };
-    await this.logAudit(actor, 'update_agent', id, `Updated agent ${id}`);
-    await this.saveDB();
-    return db.agents[index];
+  async updateAgent(id: string, updates: Partial<MaestroAgent>, actor: string): Promise<MaestroAgent | null> {
+    return await this.orchestratorStore.updateAgent(id, updates, actor);
   }
 
   // --- Autonomic ---
   async getControlLoops(): Promise<AutonomicLoop[]> {
-    const db = await this.getDB();
-    return db.loops;
+    return await this.orchestratorStore.getLoops();
   }
 
   async toggleLoop(id: string, status: 'active' | 'paused', actor: string): Promise<boolean> {
-    const db = await this.getDB();
-    const loop = db.loops.find((l) => l.id === id);
-    if (!loop) return false;
-    loop.status = status;
-    await this.logAudit(actor, 'toggle_loop', id, `Set loop ${id} to ${status}`);
-    await this.saveDB();
-    return true;
-  }
-
-  // --- Merge Trains ---
-  async getMergeTrainStatus(): Promise<MergeTrain> {
-    // In a real system, this would query the Merge Train service or DB
-    // Simulating active state
-    return {
-      id: 'mt-main',
-      status: 'active',
-      queueLength: 3,
-      throughput: 12,
-      activePRs: [
-        { number: 1234, title: 'feat: New auth flow', author: 'alice', status: 'running', url: '#' },
-        { number: 1235, title: 'fix: Typo in docs', author: 'bob', status: 'queued', url: '#' },
-        { number: 1236, title: 'chore: Bump deps', author: 'charlie', status: 'queued', url: '#' },
-      ],
-    };
+    return await this.orchestratorStore.updateLoopStatus(id, status);
   }
 
   // --- Experiments & Playbooks ---
   async getExperiments(): Promise<Experiment[]> {
-    const db = await this.getDB();
-    return db.experiments;
+    return await this.orchestratorStore.getExperiments();
   }
 
-  async createExperiment(exp: Experiment, actor: string): Promise<Experiment> {
-    const db = await this.getDB();
-    db.experiments.push(exp);
-    await this.logAudit(actor, 'create_experiment', exp.id, `Created experiment ${exp.name}`);
-    await this.saveDB();
-    return exp;
+  async createExperiment(experiment: Experiment, actor: string): Promise<Experiment> {
+    return await this.orchestratorStore.createExperiment(experiment, actor);
   }
 
   async getPlaybooks(): Promise<Playbook[]> {
-    const db = await this.getDB();
-    return db.playbooks;
+    return await this.orchestratorStore.getPlaybooks();
   }
 
   // --- Audit ---
-  async getAuditLog(): Promise<AuditEvent[]> {
-    const db = await this.getDB();
-    return db.auditLog.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  async getAuditLog(limit: number = 100): Promise<AuditEvent[]> {
+    return await this.orchestratorStore.getAuditLog(limit);
   }
 
-  async logAudit(actor: string, action: string, resource: string, details: string) {
-    const db = await this.getDB();
-    db.auditLog.push({
-      id: Math.random().toString(36).substring(7),
-      timestamp: new Date().toISOString(),
-      actor,
-      action,
-      resource,
-      details,
-      status: 'allowed',
-    });
-    // Keep log size manageable
-    if (db.auditLog.length > 1000) db.auditLog.shift();
-    await this.saveDB();
+  async logAudit(actor: string, action: string, resource: string, details: string, status: string = 'allowed') {
+    await this.orchestratorStore.logAudit(actor, action, resource, details, status);
   }
 
   // --- Subagent Coordination Methods ---
@@ -353,7 +431,8 @@ export class MaestroService {
       throw new Error(`Agent coordination prohibited: ${governanceCheck.reason}`);
     }
 
-    const coordinationTask = await this.subagentCoordinator.assignTask(task, participantAgentIds);
+    // Create coordination task in store
+    const coordinationTask = await this.orchestratorStore.createCoordinationTask(task, actor);
 
     await this.logAudit(
       actor,
@@ -421,7 +500,8 @@ export class MaestroService {
       throw new Error(`Coordination channel creation prohibited: ${governanceCheck.reason}`);
     }
 
-    const channel = await this.subagentCoordinator.createChannel(topic, participantAgentIds);
+    // Create coordination channel in store
+    const channel = await this.orchestratorStore.createCoordinationChannel(topic, participantAgentIds, actor);
 
     await this.logAudit(
       actor,
@@ -430,7 +510,7 @@ export class MaestroService {
       `Created coordination channel for topic: ${topic}`
     );
 
-    // Estimate duration or track start time if possible. Here we assume near-instant for channel creation
+    // Telemetry for Agent Action
     telemetryService.logEvent('agent_action', {
         id: `act-${Date.now()}`,
         agentId: actor,
@@ -474,12 +554,14 @@ export class MaestroService {
       throw new Error(`Consensus initiation prohibited: ${governanceCheck.reason}`);
     }
 
-    const consensusProposal = await this.subagentCoordinator.submitConsensusProposal(
+    // Create consensus proposal in store
+    const consensusProposal = await this.orchestratorStore.initiateConsensus(
       coordinatorId,
       topic,
       proposal,
       voterAgentIds,
-      deadlineHours
+      deadlineHours,
+      actor
     );
 
     await this.logAudit(
@@ -493,9 +575,21 @@ export class MaestroService {
   }
 
   /**
+   * Record vote for a consensus proposal
+   */
+  async recordVote<T>(
+    proposalId: string,
+    agentId: string,
+    vote: { decision: 'approve' | 'reject' | 'abstain'; reason?: string; weight?: number }
+  ): Promise<boolean> {
+    return await this.orchestratorStore.recordVote(proposalId, agentId, vote);
+  }
+
+  /**
    * Get coordination metrics for an agent
    */
   async getCoordinationMetrics(agentId: string): Promise<any | null> {
+    // This could aggregate data from the store about an agent's coordination activities
     return this.subagentCoordinator.getAgentMetrics(agentId);
   }
 }

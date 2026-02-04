@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { NlqModal } from './NlqModal.js';
+import { NlqModal } from './NlqModal.tsx';
 
 describe('NlqModal', () => {
   it('shows generated cypher after preview', async () => {

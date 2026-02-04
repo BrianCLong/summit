@@ -1,0 +1,8 @@
+{
+  "Jules-Release-Bot": {
+    "role": "release_captain",
+    "assignee": "Jules-Release-Bot",
+    "level": "autonomous",
+    "expires": "2026-01-27T22:01:15.883Z"
+  }
+}

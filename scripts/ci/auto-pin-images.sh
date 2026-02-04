@@ -65,7 +65,7 @@ process_file() {
     val=$(echo "$line" | sed -E 's/^\s*image:\s*//; s/#.*$//')
     [[ -z "$val" ]] && continue
     # Skip templated values
-    if [[ "$val" =~ \{\{ ]]; then continue; fi
+    if [[ "$val" == *"{{"* ]]; then continue; fi
     pin_line "$f" "$lineno" "$val"
   done < <(rg -n "^\s*image:\s*" "$f" | rg -v "^\s*#")
 }

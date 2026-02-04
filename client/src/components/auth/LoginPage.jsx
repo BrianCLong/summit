@@ -99,6 +99,8 @@ function LoginPage() {
 
         <Box component="form" onSubmit={handleLogin}>
           <TextField
+            required
+            autoFocus
             fullWidth
             label={t('auth.email')}
             type="email"
@@ -111,6 +113,7 @@ function LoginPage() {
             sx={{ mb: 2 }}
           />
           <TextField
+            required
             fullWidth
             label={t('auth.password')}
             type="password"

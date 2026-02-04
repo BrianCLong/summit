@@ -1,0 +1,12 @@
+{
+  "packages": [
+    "colors.js",
+    "faker",
+    "node-ipc",
+    "peacenotwar"
+  ],
+  "patterns": [
+    "malicious-",
+    "hacked-"
+  ]
+}

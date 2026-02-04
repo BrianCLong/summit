@@ -1,0 +1,20 @@
+version: "1.2.0"
+item:
+  slug: ssdf-v1-2
+  title: "NIST SSDF Version 1.2 (SP 800-218 Rev.1 IPD)"
+  links:
+    - "https://csrc.nist.gov/pubs/sp/800/218/r1/ipd"
+  date_published: "2025-12-17"
+  comments_due: "2026-01-30"
+version: "1.0.0"
+bundle:
+  pr_cap: 7
+  lanes:
+    foundation: true
+    innovation: true
+checks:
+  discovery: "assumed"
+  jobs:
+    - "subsumption/verify-bundle"
+evidence_ids:
+  - "EVD-SSDF12-BNDL-001"

@@ -1,0 +1,13 @@
+version: "2.0.0"
+name: "Aggressive Growth"
+risk_tolerance: "high"
+rules:
+  - condition: "cpu_usage > 95%"
+    action: "scale_up"
+    max_cost: 100.0
+  - condition: "error_rate > 5%"
+    action: "rollback"
+    max_cost: 50.0
+  - condition: "latency > 500ms"
+    action: "deploy_cache"
+    max_cost: 200.0

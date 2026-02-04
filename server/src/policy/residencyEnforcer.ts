@@ -1,7 +1,7 @@
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram } from 'prom-client';
-import { TenantContext } from '../context/tenant';
-import { redis } from '../subscriptions/pubsub';
+import { TenantContext } from '../context/tenant.js';
+import { redis } from '../subscriptions/pubsub.js';
 
 const tracer = trace.getTracer('residency-enforcer', '24.3.0');
 

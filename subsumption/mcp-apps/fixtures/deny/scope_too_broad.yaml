@@ -1,0 +1,4 @@
+name: scope_too_broad
+requested_scope: ["chat:write", "files:write"]
+expected: deny
+reason: "files:write not allowed"

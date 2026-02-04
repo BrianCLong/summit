@@ -1,0 +1,53 @@
+name: CI Governance
+
+on:
+  pull_request:
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - ".github/governance/**"
+      - "docs/**"
+      - "evidence/**"
+      - "backlog/**"
+
+jobs:
+  governance-bundle:
+    name: governance-bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/branch-protection-as-code/manifest.yaml
+
+  branch-protection-drift:
+    name: branch-protection-drift
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if token is available
+        id: check-token
+        run: |
+          if [ -n "${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}" ]; then
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_token=false" >> $GITHUB_OUTPUT
+            echo "::warning::BRANCH_PROTECTION_READ_TOKEN not set, skipping drift check"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.check-token.outputs.has_token == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.check-token.outputs.has_token == 'true'
+        with:
+          node-version: 20
+      - name: Fetch branch protection rules
+        if: steps.check-token.outputs.has_token == 'true'
+        run: mkdir -p .tmp
+      - name: Get live branch protection
+        if: steps.check-token.outputs.has_token == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
+        run: gh api /repos/${{ github.repository }}/branches/main/protection > .tmp/branch_protection_live.json
+      - name: Verify branch protection
+        if: steps.check-token.outputs.has_token == 'true'
+        run: node scripts/ci/verify_branch_protection.mjs

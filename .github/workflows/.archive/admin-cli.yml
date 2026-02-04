@@ -32,6 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
@@ -78,6 +79,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
@@ -111,6 +113,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
@@ -155,6 +158,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
@@ -192,6 +196,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
@@ -226,6 +231,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
           registry-url: 'https://registry.npmjs.org'
 

@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "AI Request Audit Ledger (Deterministic)",
+  "description": "Audit trail of AI interactions with hash-only content to prevent data leakage",
+  "required": ["version", "generator", "entry_count", "entries"],
+  "properties": {
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "generator": {"type": "string", "const": "ai-request-auditor"},
+    "entry_count": {"type": "integer", "minimum": 0},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["cache_key", "model", "prompt_version", "schema_version", "cache_result", "input_hash"],
+        "properties": {
+          "cache_key": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "model": {"type": "string"},
+          "prompt_version": {"type": "string"},
+          "schema_version": {"type": "string"},
+          "cache_result": {"type": "string", "enum": ["hit", "miss"]},
+          "input_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "redaction_findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["kind", "count"],
+              "properties": {
+                "kind": {"type": "string"},
+                "count": {"type": "integer", "minimum": 0}
+              },
+              "additionalProperties": false
+            }
+          },
+          "elapsed_ms": {"type": "integer", "minimum": 0}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

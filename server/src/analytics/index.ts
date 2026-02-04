@@ -27,7 +27,7 @@ export {
 export * from './policy/index.js';
 
 // Compliance Analytics
-// Note: RiskFactor is already exported from policy/index.js, so we exclude it from compliance
+// Note: RiskFactor is already exported from policy/index.ts, so we exclude it from compliance
 export {
   CompliancePredictionEngine,
   getCompliancePredictionEngine,

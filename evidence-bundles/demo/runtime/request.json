@@ -1,9 +1,0 @@
-{
-  "requestId": "POLICY-REQ-DEMO-001",
-  "action": "enable-dual-control",
-  "target": "graph/ingestion",
-  "initiator": "analyst.alfa@example.com",
-  "businessReason": "Pair-review enforcement for ingestion controls",
-  "riskTier": "moderate",
-  "requestedAt": "2026-01-11T00:00:00Z"
-}

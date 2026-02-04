@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 8 — Crisis Governance (when it burns, governance must still work)
 
 1.  **Define crisis triggers that activate board notification protocol.**

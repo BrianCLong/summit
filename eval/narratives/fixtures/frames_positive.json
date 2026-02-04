@@ -1,0 +1,31 @@
+{
+  "cases": [
+    {
+      "id": "polarized-anti-war-support",
+      "event": {
+        "synthetic_frame": "anti-war",
+        "synthetic_stance": "support",
+        "content_hash": "hash_antiwar_001"
+      },
+      "expect_valid": true
+    },
+    {
+      "id": "polarized-pro-war-oppose",
+      "event": {
+        "synthetic_frame": "pro-war",
+        "synthetic_stance": "oppose",
+        "content_hash": "hash_prowar_002"
+      },
+      "expect_valid": true
+    },
+    {
+      "id": "economic-conspiracy-neutral",
+      "event": {
+        "synthetic_frame": "economic_conspiracy",
+        "synthetic_stance": null,
+        "content_hash": "hash_econ_003"
+      },
+      "expect_valid": true
+    }
+  ]
+}

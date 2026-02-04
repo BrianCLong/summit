@@ -1,0 +1,12 @@
+{
+  "claims": [],
+  "decisions": [
+    "Drift check completed"
+  ],
+  "evidence_id": "EVD-NAROPS-DRIFT-001",
+  "generated_by": "scripts/monitoring/narrative-ops-detection-2026-01-28-drift.mjs",
+  "item_slug": "narrative-ops-detection-2026-01-28",
+  "notes": [
+    "manifest_exists=1"
+  ]
+}

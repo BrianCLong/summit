@@ -6,10 +6,12 @@ import { describe, expect, it } from 'vitest'
 import { designTokenRestrictions } from '../../tools/eslint/design-token-restrictions'
 
 const baseConfig = {
-  parserOptions: {
+  languageOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
-    ecmaFeatures: { jsx: true },
+    parserOptions: {
+      ecmaFeatures: { jsx: true },
+    },
   },
   rules: {
     'no-restricted-syntax': ['error', ...designTokenRestrictions],
@@ -17,7 +19,7 @@ const baseConfig = {
 } as const
 
 const lint = (source: string) => {
-  const linter = new Linter()
+  const linter = new Linter({ configType: 'flat' })
   return linter.verify(source, baseConfig)
 }
 

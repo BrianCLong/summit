@@ -1,5 +1,5 @@
 // server/tests/echelon2.service.spec.ts
-import { Echelon2Service } from '../src/echelon2/Echelon2Service';
+import { Echelon2Service } from '../src/echelon2/Echelon2Service.js';
 import { eDNAReading } from '../src/echelon2/echelon2.types';
 import { randomUUID } from 'crypto';
 

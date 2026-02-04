@@ -1,0 +1,191 @@
+# Prometheus Alert Rules for Summit Platform
+# Focuses on the core API, Database, and Platform health
+
+groups:
+  # Summit API Availability and Performance
+  - name: summit.api
+    rules:
+      - alert: SummitApiHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m]))
+          > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          service: summit-api
+          component: api
+        annotations:
+          summary: 'Summit API Error Rate > 1%'
+          description: 'The API is experiencing a high error rate ({{ $value | humanizePercentage }}).'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-errors'
+
+      - alert: SummitApiLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          service: summit-api
+          component: api
+        annotations:
+          summary: 'Summit API P95 Latency > 1s'
+          description: '95th percentile latency is {{ $value }}s, exceeding the 1s threshold.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-latency'
+
+  # GraphQL Specific
+  - name: summit.graphql
+    rules:
+      - alert: GoldenPathBroken
+        expr: |
+          sum(rate(golden_path_success_total[10m]))
+          /
+          (sum(rate(golden_path_success_total[10m])) + sum(rate(golden_path_errors_total[10m])))
+          < 0.95
+        for: 10m
+        labels:
+          severity: critical
+          service: summit-api
+          component: golden-path
+        annotations:
+          summary: 'Golden Path Success < 95%'
+          description: 'Golden Path operations success rate is {{ $value | humanizePercentage }}.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/golden-path-failure'
+
+      - alert: GoldenPathDegraded
+        expr: |
+          sum(rate(golden_path_success_total[15m]))
+          /
+          (sum(rate(golden_path_success_total[15m])) + sum(rate(golden_path_errors_total[15m])))
+          < 0.98
+        for: 15m
+        labels:
+          severity: warning
+          service: summit-api
+          component: golden-path
+        annotations:
+          summary: 'Golden Path Success < 98%'
+          description: 'Golden Path operations success rate is {{ $value | humanizePercentage }}.'
+
+      - alert: GraphQLHighLatency
+        expr: histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le)) > 2000
+        for: 5m
+        labels:
+          severity: critical
+          service: summit-api
+          component: graphql
+        annotations:
+          summary: 'GraphQL P95 Latency > 2s'
+          description: '95th percentile GraphQL latency is {{ $value }}ms.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/graphql-high-latency'
+
+      - alert: GraphQLModerateLatency
+        expr: histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[10m])) by (le)) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: summit-api
+          component: graphql
+        annotations:
+          summary: 'GraphQL P95 Latency > 1s'
+          description: '95th percentile GraphQL latency is {{ $value }}ms.'
+
+      - alert: GraphQLHighErrorRate
+        expr: |
+          sum(rate(graphql_errors_total[5m]))
+          /
+          sum(rate(graphql_requests_total[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: summit-api
+          component: graphql
+        annotations:
+          summary: 'GraphQL Error Rate > 5%'
+          description: 'GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/graphql-high-error-rate'
+
+      - alert: GraphQLModerateErrorRate
+        expr: |
+          sum(rate(graphql_errors_total[10m]))
+          /
+          sum(rate(graphql_requests_total[10m]))
+          > 0.02
+        for: 10m
+        labels:
+          severity: warning
+          service: summit-api
+          component: graphql
+        annotations:
+          summary: 'GraphQL Error Rate > 2%'
+          description: 'GraphQL operations are failing at a rate of {{ $value | humanizePercentage }}.'
+
+      - alert: GraphQLGatewayDown
+        expr: up{job="gateway"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: summit-api
+          component: graphql
+        annotations:
+          summary: 'GraphQL Gateway Down'
+          description: 'GraphQL Gateway service is unreachable.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/service-down'
+
+  # Database Health
+  - name: summit.database
+    rules:
+      - alert: PostgresConnectionPoolSaturation
+        expr: db_connections_active{database="postgres"} > 90
+        for: 1m
+        labels:
+          severity: critical
+          service: summit-api
+          component: database
+        annotations:
+          summary: 'Postgres Connection Pool Saturated'
+          description: 'Active Postgres connections are at {{ $value }}, nearing the limit.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/db-pool-saturation'
+
+      - alert: Neo4jQueryLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket{database="neo4j"}[5m])) by (le)) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: summit-api
+          component: database
+        annotations:
+          summary: 'Neo4j Query P95 Latency > 500ms'
+          description: 'Graph database queries are slow ({{ $value }}s).'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/neo4j-latency'
+
+  # Redis / Cache
+  - name: summit.cache
+    rules:
+      - alert: RedisConnectionFailure
+        expr: up{job="redis"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: summit-api
+          component: redis
+        annotations:
+          summary: 'Redis is down'
+          description: 'Redis instance is unreachable.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/redis-down'
+
+  # System Resources
+  - name: summit.resources
+    rules:
+      - alert: SummitMemoryHigh
+        expr: process_resident_memory_bytes{service="summit-api"} / 1024 / 1024 > 1500
+        for: 5m
+        labels:
+          severity: warning
+          service: summit-api
+          component: system
+        annotations:
+          summary: 'Summit API High Memory Usage'
+          description: 'Memory usage is {{ $value }}MB, exceeding 1.5GB.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/high-memory'

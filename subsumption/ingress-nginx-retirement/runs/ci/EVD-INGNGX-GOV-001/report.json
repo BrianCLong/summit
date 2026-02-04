@@ -1,0 +1,24 @@
+{
+  "claims": [
+    {
+      "backing": "ITEM:CLAIM-01",
+      "claim_id": "ITEM:CLAIM-01"
+    },
+    {
+      "backing": "ITEM:CLAIM-02",
+      "claim_id": "ITEM:CLAIM-02"
+    },
+    {
+      "backing": "ITEM:CLAIM-03",
+      "claim_id": "ITEM:CLAIM-03"
+    }
+  ],
+  "decisions": [
+    "Foundation bundle created with manifest, docs, and fixtures.",
+    "Controller-neutral guidance maintained for Lane 1."
+  ],
+  "evidence_id": "EVD-INGNGX-GOV-001",
+  "generated_by": "manual",
+  "item_slug": "ingress-nginx-retirement",
+  "notes": ["bundle_initialized"]
+}

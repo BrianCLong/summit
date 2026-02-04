@@ -1,4 +1,4 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 
 type LlmSecurityContext = {
   tenantId: string;
@@ -15,20 +15,20 @@ const mockPolicyEvaluate = jest.fn() as jest.Mock<any>;
 const mockDlpScanContent = jest.fn() as jest.Mock<any>;
 const mockDlpApplyActions = jest.fn() as jest.Mock<any>;
 
-jest.mock('../PolicyService.js', () => ({
+jest.unstable_mockModule('../PolicyService.js', () => ({
   policyService: {
     evaluate: mockPolicyEvaluate,
   },
 }));
 
-jest.mock('../DLPService.js', () => ({
+jest.unstable_mockModule('../DLPService.js', () => ({
   dlpService: {
     scanContent: mockDlpScanContent,
     applyActions: mockDlpApplyActions,
   },
 }));
 
-jest.mock('../../utils/logger.js', () => ({
+jest.unstable_mockModule('../../utils/logger.js', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
@@ -38,9 +38,8 @@ jest.mock('../../utils/logger.js', () => ({
   },
 }));
 
-import { LlmSecurityService } from '../LlmSecurityService.js';
-
 describe('LlmSecurityService', () => {
+  let LlmSecurityService: typeof import('../LlmSecurityService.js').LlmSecurityService;
   let service: ReturnType<typeof LlmSecurityService.getInstance>;
 
   const defaultContext: LlmSecurityContext = {
@@ -54,8 +53,13 @@ describe('LlmSecurityService', () => {
     dataSensitivity: 'internal',
   };
 
+  beforeAll(async () => {
+    ({ LlmSecurityService } = await import('../LlmSecurityService.js'));
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (LlmSecurityService as any).instance = null;
     service = LlmSecurityService.getInstance();
   });
 

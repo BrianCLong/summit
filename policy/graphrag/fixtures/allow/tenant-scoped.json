@@ -1,0 +1,5 @@
+{
+  "tenant": "tenant-001",
+  "query": "find related entities",
+  "maxHops": 2
+}

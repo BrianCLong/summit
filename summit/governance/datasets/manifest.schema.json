@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "dataset-manifest",
+  "type": "object",
+  "required": ["datasets"],
+  "properties": {
+    "datasets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name","source","license","sha256","classification","retention_days"],
+        "properties": {
+          "name": {"type":"string"},
+          "source": {"type":"string"},
+          "license": {"type":"string"},
+          "sha256": {"type":"string"},
+          "classification": {"enum":["public","internal","restricted","regulated"]},
+          "retention_days": {"type":"integer","minimum":0},
+          "never_log_fields": {"type":"array","items":{"type":"string"}, "default":[]}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

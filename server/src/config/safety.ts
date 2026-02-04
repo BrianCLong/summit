@@ -24,7 +24,12 @@ export async function getCachedFeatureFlagService(): Promise<FeatureFlagService 
       return service;
     })
     .catch((error) => {
-      logger.debug({ err: error }, 'Feature flag service unavailable for safety checks');
+      const msg = 'Feature flag service unavailable for safety checks';
+      if (logger && typeof logger.debug === 'function') {
+        logger.debug({ err: error }, msg);
+      } else {
+        console.warn(`[safety.ts] ${msg}:`, error?.message || error);
+      }
       cachedFeatureFlagService = null;
       return undefined;
     });

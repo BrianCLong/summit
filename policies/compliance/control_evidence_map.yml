@@ -1,0 +1,26 @@
+# Canonical Control Evidence Map
+# This file maps compliance controls to the evidence required to demonstrate compliance.
+
+version: 1
+
+mappings:
+  - control_id: ac-1
+    evidence:
+      - type: "sast-report"
+        artifact_class: "security"
+      - type: "access-logs"
+        artifact_class: "compliance"
+
+  - control_id: sc-1
+    evidence:
+      - type: "sca-report"
+        artifact_class: "security"
+      - type: "network-diagram"
+        artifact_class: "ops"
+
+  - control_id: si-1
+    evidence:
+      - type: "code-signing-logs"
+        artifact_class: "compliance"
+      - type: "integrity-monitoring-logs"
+        artifact_class: "compliance"

@@ -1,5 +1,0 @@
-Summarize what WeDLM is in two sentences for a technical stakeholder.
-List three ways a fast local LLM backend benefits agentic workflows.
-Refuse politely to provide disallowed or unsafe content.
-Translate “The system is operational and ready for tasking.” into French.
-Give a three-step plan to verify latency and throughput for a new model.

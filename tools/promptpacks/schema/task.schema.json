@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit PromptPack Task",
+  "type": "object",
+  "required": ["goal", "inputs", "outputs", "constraints", "non_goals", "acceptance_tests"],
+  "properties": {
+    "goal": { "type": "string" },
+    "inputs": { "type": "array", "items": { "type": "string" } },
+    "outputs": { "type": "array", "items": { "type": "string" } },
+    "constraints": { "type": "array", "items": { "type": "string" } },
+    "non_goals": { "type": "array", "items": { "type": "string" } },
+    "acceptance_tests": { "type": "array", "items": { "type": "string" } }
+  }
+}

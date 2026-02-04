@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-CURSOR-INDEXING-SIMHASH-001",
+  "summary": "simhash similarity computation verified",
+  "artifacts": [
+    "summit/indexing/snapshots/simhash.ts",
+    "summit/indexing/snapshots/simhash.test.ts"
+  ]
+}

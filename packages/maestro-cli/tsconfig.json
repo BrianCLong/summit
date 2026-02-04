@@ -8,7 +8,7 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "baseUrl": ".",
     "paths": {
-      "@maestro/core/*": ["../maestro-core/dist/*"]
+      "@intelgraph/maestro-core/*": ["../maestro-core/dist/*"]
     },
     "types": ["jest", "node"]
   },

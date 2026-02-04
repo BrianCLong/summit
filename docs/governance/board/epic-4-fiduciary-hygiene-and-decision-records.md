@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 4 — Fiduciary Hygiene & Decision Records (protect directors and officers)
 
 1.  **Maintain a decision log for major strategic moves** (pricing, M&A, layoffs, pivots).

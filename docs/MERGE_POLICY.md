@@ -14,7 +14,20 @@ To maintain high throughput and minimize conflicts, **Summit** enforces the foll
     *   Code Owners review boundary-crossing changes.
     *   Agents verify scope compliance.
 4.  **Merge:**
-    *   Use **Squash and Merge** to maintain a linear history.
+    *   Use the **Merge Queue**.
+
+## Merge Policy
+
+> **Merge Policy:** All changes to `main` land via the merge queue. Required checks: `CI Core Gate ✅`, `CI Verify Gate ✅`. PRs join the queue only after approval, green CI, and zero conflicts. Flaky tests must be quarantined or retried in‑job; do not bypass the queue.
+
+## Day‑to‑day usage (team ritual)
+
+1. Devs open PRs as usual.
+2. When approved + CI green, they **click "Merge when ready" (Add to merge queue)**.
+3. Train runs; if a failure occurs:
+   * The failing PR is auto‑removed.
+   * The queue continues with the next PR.
+4. Main only advances on train‑green merges.
 
 ## Merge Ordering Rules
 
@@ -34,7 +47,6 @@ When multiple PRs are open, prioritize:
     # Resolve conflicts
     git push --force-with-lease
     ```
-*   **Merge Queue:** The repository uses a Merge Queue (configured in `.github/workflows/merge-queue-config.yml`). Use it to serialize merges during high traffic.
 
 ## Anti-Patterns
 

@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-subsumption-verify-GOV-001",
+  "item_slug": "item-unknown",
+  "claims": [],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "summary": "Verification passed"
+    }
+  ]
+}

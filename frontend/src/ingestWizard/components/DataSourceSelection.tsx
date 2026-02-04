@@ -50,7 +50,12 @@ export const DataSourceSelection = ({ value, onChange, onNext, disabled }: DataS
 
       <div className="iw-grid two-column">
         <label className="iw-field">
-          <span className="iw-label">Name</span>
+          <span className="iw-label">
+            Name
+            <span aria-hidden="true" className="iw-required-indicator">
+              *
+            </span>
+          </span>
           <input
             type="text"
             className="iw-text-input"
@@ -63,7 +68,12 @@ export const DataSourceSelection = ({ value, onChange, onNext, disabled }: DataS
         </label>
 
         <label className="iw-field">
-          <span className="iw-label">Source type</span>
+          <span className="iw-label">
+            Source type
+            <span aria-hidden="true" className="iw-required-indicator">
+              *
+            </span>
+          </span>
           <select
             className="iw-select"
             value={value.source_type ?? ''}
@@ -94,12 +104,18 @@ export const DataSourceSelection = ({ value, onChange, onNext, disabled }: DataS
         </label>
 
         <label className="iw-field">
-          <span className="iw-label">License template</span>
+          <span className="iw-label">
+            License template
+            <span aria-hidden="true" className="iw-required-indicator">
+              *
+            </span>
+          </span>
           <select
             className="iw-select"
             value={value.license_template ?? ''}
             onChange={(event) => onChange({ ...value, license_template: event.target.value })}
             disabled={disabled}
+            required
           >
             <option value="" disabled>
               Choose a template

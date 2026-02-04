@@ -1,0 +1,37 @@
+{
+  "task_id": "SECURE_MCP_EVIDENCE_SCAFFOLD",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "secure-mcp-evidence-scaffold",
+    "version": "v1",
+    "sha256": "36696b2c92abadd559bafff4f93a4573b764f4475c56f28ef46e0ad828ad7645",
+    "path": "prompts/security/secure-mcp-evidence-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "evidence/",
+      "ci/verify_evidence.sh",
+      "required_checks.todo.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/"
+    ],
+    "domains": ["security", "governance", "ci", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["ci/verify_evidence.sh output"]
+  },
+  "debt_budget": { "permitted": 0, "retirement_target": 0 },
+  "success_criteria": [
+    "Evidence schemas aligned with Secure MCP scaffolding",
+    "Evidence verification script present",
+    "Required checks discovery steps captured",
+    "Roadmap status updated"
+  ],
+  "stop_conditions": [
+    "Required schema files missing",
+    "jsonschema validator unavailable",
+    "Scope mismatch with prompt registry"
+  ]
+}

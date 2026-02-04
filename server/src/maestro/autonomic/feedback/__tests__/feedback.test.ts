@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { FeedbackService } from '../feedback-service';
+import { FeedbackService } from '../feedback-service.js';
 
 describe('FeedbackService', () => {
   let service: FeedbackService;

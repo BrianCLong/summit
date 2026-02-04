@@ -1,0 +1,7 @@
+version: "0.1"
+EventPlaybookRun:
+  required: [event_id, detectors, outputs]
+  properties:
+    event_id: {type: string}
+    detectors: {type: array, items: {type: string}}
+    outputs: {type: object}

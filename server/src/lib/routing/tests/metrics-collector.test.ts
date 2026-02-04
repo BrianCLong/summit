@@ -1,6 +1,6 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import MetricsCollector from '../metrics-collector';
+import MetricsCollector from '../metrics-collector.js';
 
 describe('MetricsCollector', () => {
   let metricsCollector: typeof MetricsCollector;

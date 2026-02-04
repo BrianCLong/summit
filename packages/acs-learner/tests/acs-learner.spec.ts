@@ -1,4 +1,4 @@
-import { ACSLearner, CounterintelAction } from '../src';
+import { ACSLearner, CounterintelAction } from '../src.js';
 import { trainATL } from '@intelgraph/atl/src/index';
 import { ADC } from '@intelgraph/adc/src/index';
 import { AFLStore } from '@intelgraph/afl-store';

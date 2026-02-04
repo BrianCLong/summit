@@ -1,0 +1,10 @@
+{
+  "name": "ui:components",
+  "version": "1.0.0",
+  "description": "Generates, modifies, and validates UI components.",
+  "permissions": {
+    "filesystem": ["read", "write"],
+    "network": []
+  },
+  "signature": "sha256:mock-signature-ui-components"
+}

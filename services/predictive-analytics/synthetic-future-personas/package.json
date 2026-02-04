@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/synthetic-future-personas",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Synthetic Future Persona Models - Digital twins that evolve over time based on predicted futures",
   "type": "module",
   "main": "dist/index.js",

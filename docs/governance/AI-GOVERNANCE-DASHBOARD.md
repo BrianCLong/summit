@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # AI Governance Metrics Dashboard
 
 > **Version**: 1.0.0
@@ -15,6 +20,7 @@ The AI Governance Metrics Dashboard provides real-time visibility into AI system
 The dashboard prominently displays AI decision validation rates against the ODNI-mandated 85% minimum threshold.
 
 **Key Metrics:**
+
 - Current validation rate (percentage)
 - Target rate (85%)
 - Trend indicator (up/down/stable)
@@ -22,6 +28,7 @@ The dashboard prominently displays AI decision validation rates against the ODNI
 - Compliance status (Met/Not Met)
 
 **Alerts:**
+
 - Critical: Validation rate below 85%
 - Warning: Validation rate between 85-88% (approaching threshold)
 - Info: Declining trend detected
@@ -31,6 +38,7 @@ The dashboard prominently displays AI decision validation rates against the ODNI
 Real-time incident tracking with comprehensive trend analysis.
 
 **Features:**
+
 - Current period vs. previous period comparison
 - Incidents by severity (Critical, High, Medium, Low)
 - Incidents by category
@@ -43,6 +51,7 @@ Real-time incident tracking with comprehensive trend analysis.
 Explicit display of all open compliance gaps requiring attention.
 
 **Information Displayed:**
+
 - Framework (SOC2, GDPR, etc.)
 - Requirement ID
 - Category
@@ -58,6 +67,7 @@ Explicit display of all open compliance gaps requiring attention.
 Overall governance risk score with component breakdown.
 
 **Components:**
+
 - Data Security
 - Access Control
 - Compliance
@@ -65,6 +75,7 @@ Overall governance risk score with component breakdown.
 - Audit Trail
 
 **Risk Levels:**
+
 - Low (80-100): Green
 - Medium (60-79): Yellow
 - High (40-59): Orange
@@ -75,6 +86,7 @@ Overall governance risk score with component breakdown.
 AI/ML model lifecycle governance metrics.
 
 **Tracked:**
+
 - Total registered models
 - Approved/Pending/Rejected counts
 - Deployment success rate
@@ -86,6 +98,7 @@ AI/ML model lifecycle governance metrics.
 Complete audit logging of all governance-related events.
 
 **Event Types:**
+
 - Model deployments
 - Policy changes
 - Access grants/revokes
@@ -101,12 +114,14 @@ Complete audit logging of all governance-related events.
 The dashboard is optimized for sub-2-second response times at the 95th percentile.
 
 **Optimization Strategies:**
+
 1. Redis caching with 30-second TTL
 2. Parallel Prometheus queries
 3. Efficient data aggregation
 4. Incremental updates via subscriptions
 
 **Monitoring:**
+
 - `governance_dashboard_request_duration_seconds` histogram
 - `governance_metrics_refresh_duration_seconds` histogram
 - Prometheus alerting on SLO breach
@@ -167,19 +182,19 @@ query GetGovernanceMetrics($input: GovernanceMetricsInput!) {
 
 ### REST Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/governance/metrics` | All governance metrics |
-| GET | `/api/governance/validation` | ODNI validation metrics |
-| GET | `/api/governance/incidents` | Incident trends |
-| GET | `/api/governance/compliance-gaps` | Compliance gaps |
-| POST | `/api/governance/compliance-gaps` | Create compliance gap |
-| GET | `/api/governance/risk-score` | Risk score data |
-| GET | `/api/governance/audit-trail` | Audit events |
-| POST | `/api/governance/audit-trail` | Record audit event |
-| GET | `/api/governance/models` | Model governance metrics |
-| GET | `/api/governance/config` | Dashboard configuration |
-| GET | `/api/governance/export` | Export data (CSV/JSON) |
+| Method | Endpoint                          | Description              |
+| ------ | --------------------------------- | ------------------------ |
+| GET    | `/api/governance/metrics`         | All governance metrics   |
+| GET    | `/api/governance/validation`      | ODNI validation metrics  |
+| GET    | `/api/governance/incidents`       | Incident trends          |
+| GET    | `/api/governance/compliance-gaps` | Compliance gaps          |
+| POST   | `/api/governance/compliance-gaps` | Create compliance gap    |
+| GET    | `/api/governance/risk-score`      | Risk score data          |
+| GET    | `/api/governance/audit-trail`     | Audit events             |
+| POST   | `/api/governance/audit-trail`     | Record audit event       |
+| GET    | `/api/governance/models`          | Model governance metrics |
+| GET    | `/api/governance/config`          | Dashboard configuration  |
+| GET    | `/api/governance/export`          | Export data (CSV/JSON)   |
 
 ## Configuration
 
@@ -212,35 +227,35 @@ query GetGovernanceMetrics($input: GovernanceMetricsInput!) {
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PROMETHEUS_URL` | `http://localhost:9090` | Prometheus server URL |
-| `REDIS_URL` | `redis://localhost:6379` | Redis cache URL |
-| `GOVERNANCE_REFRESH_MS` | `30000` | Metrics refresh interval |
-| `GOVERNANCE_REALTIME` | `true` | Enable real-time updates |
+| Variable                | Default                  | Description              |
+| ----------------------- | ------------------------ | ------------------------ |
+| `PROMETHEUS_URL`        | `http://localhost:9090`  | Prometheus server URL    |
+| `REDIS_URL`             | `redis://localhost:6379` | Redis cache URL          |
+| `GOVERNANCE_REFRESH_MS` | `30000`                  | Metrics refresh interval |
+| `GOVERNANCE_REALTIME`   | `true`                   | Enable real-time updates |
 
 ## Prometheus Metrics
 
 ### Exported Metrics
 
-| Metric | Type | Description |
-|--------|------|-------------|
+| Metric                                          | Type      | Description               |
+| ----------------------------------------------- | --------- | ------------------------- |
 | `governance_dashboard_request_duration_seconds` | Histogram | Dashboard request latency |
-| `governance_metrics_refresh_duration_seconds` | Histogram | Metrics refresh latency |
-| `governance_validation_rate_percent` | Gauge | Current validation rate |
-| `governance_compliance_gaps_open` | Gauge | Open compliance gaps |
-| `governance_risk_score_current` | Gauge | Current risk score |
+| `governance_metrics_refresh_duration_seconds`   | Histogram | Metrics refresh latency   |
+| `governance_validation_rate_percent`            | Gauge     | Current validation rate   |
+| `governance_compliance_gaps_open`               | Gauge     | Open compliance gaps      |
+| `governance_risk_score_current`                 | Gauge     | Current risk score        |
 
 ### Queried Metrics
 
-| Metric | Description |
-|--------|-------------|
-| `ai_decisions_validated_total` | Validated AI decisions |
-| `ai_decisions_total` | Total AI decisions |
-| `governance_incidents_total` | Total governance incidents |
-| `governance_incident_resolution_seconds` | Incident resolution time |
-| `compliance_gaps_open_total` | Open compliance gaps |
-| `governance_risk_score_percent` | Risk score by component |
+| Metric                                   | Description                |
+| ---------------------------------------- | -------------------------- |
+| `ai_decisions_validated_total`           | Validated AI decisions     |
+| `ai_decisions_total`                     | Total AI decisions         |
+| `governance_incidents_total`             | Total governance incidents |
+| `governance_incident_resolution_seconds` | Incident resolution time   |
+| `compliance_gaps_open_total`             | Open compliance gaps       |
+| `governance_risk_score_percent`          | Risk score by component    |
 
 ## Alerting Rules
 
@@ -263,7 +278,7 @@ query GetGovernanceMetrics($input: GovernanceMetricsInput!) {
 ### Basic Usage
 
 ```tsx
-import { GovernanceMetricsDashboard } from '@/components/governance/GovernanceMetricsDashboard';
+import { GovernanceMetricsDashboard } from "@/components/governance/GovernanceMetricsDashboard";
 
 function App() {
   return (
@@ -279,11 +294,11 @@ function App() {
 ### API Integration
 
 ```typescript
-import { createGovernanceMetricsService } from '@/governance/analytics';
+import { createGovernanceMetricsService } from "@/governance/analytics";
 
 const service = createGovernanceMetricsService({
-  prometheusUrl: 'http://prometheus:9090',
-  redisUrl: 'redis://redis:6379',
+  prometheusUrl: "http://prometheus:9090",
+  redisUrl: "redis://redis:6379",
   refreshIntervalMs: 30000,
   enableRealTime: true,
 });
@@ -291,7 +306,7 @@ const service = createGovernanceMetricsService({
 const metrics = await service.getGovernanceMetrics(tenantId, {
   start: Date.now() - 86400000,
   end: Date.now(),
-  label: 'Last 24 hours',
+  label: "Last 24 hours",
 });
 ```
 
@@ -332,16 +347,19 @@ pnpm e2e -- governance-dashboard
 ### Common Issues
 
 **1. Metrics Not Loading**
+
 - Check Prometheus connectivity
 - Verify metrics are being scraped
 - Check Redis cache status
 
 **2. High Latency**
+
 - Review Prometheus query complexity
 - Check Redis cache hit rate
 - Scale service replicas
 
 **3. Validation Rate Incorrect**
+
 - Verify `ai_decisions_*` metrics are being emitted
 - Check time range alignment
 - Review Prometheus query aggregation
@@ -349,6 +367,7 @@ pnpm e2e -- governance-dashboard
 ### Debug Mode
 
 Enable debug logging:
+
 ```bash
 DEBUG=governance:* pnpm start
 ```
@@ -373,6 +392,7 @@ DEBUG=governance:* pnpm start
 ## Changelog
 
 ### v1.0.0 (2025-12-02)
+
 - Initial release
 - ODNI 85% validation tracking
 - Incident trend visualization

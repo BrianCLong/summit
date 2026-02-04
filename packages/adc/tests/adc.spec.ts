@@ -1,4 +1,4 @@
-import { ADC } from '../src';
+import { ADC } from '../src.js';
 import { AFLStore } from '@intelgraph/afl-store';
 import { randomUUID } from 'crypto';
 

@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-BPAC-GOV-001",
+  "metrics": {
+    "missing_contexts_count": 0,
+    "extra_contexts_count": 0,
+    "strict_mismatch": 0,
+    "enforce_admins_mismatch": 0,
+    "review_mismatches_count": 0,
+    "drift_detected": 0
+  }
+}

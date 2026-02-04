@@ -2,7 +2,7 @@
  * Alert and response types
  */
 
-import { ThreatSeverity, ThreatCategory } from './events';
+import { ThreatSeverity, ThreatCategory } from './events.js';
 
 export enum AlertStatus {
   NEW = 'NEW',

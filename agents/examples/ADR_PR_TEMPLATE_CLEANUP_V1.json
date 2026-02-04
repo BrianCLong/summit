@@ -1,0 +1,40 @@
+{
+  "task_id": "ADR_PR_TEMPLATE_CLEANUP_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "adr-pr-template-cleanup",
+    "version": "v1",
+    "sha256": "429dc47c69fb43ee25eff48a54868fc88e2faf48f8de6a213d702794d2cb3d07",
+    "path": "prompts/docs/adr-pr-template-cleanup@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/PULL_REQUEST_TEMPLATE.md",
+      "docs/ADR/template.md",
+      "agents/examples/ADR_PR_TEMPLATE_CLEANUP_V1.json",
+      "prompts/docs/adr-pr-template-cleanup@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "quality"],
+    "exclusions": []
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["manual-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "PR template reflects current checklist sections",
+    "ADR template uses consistent list formatting",
+    "Prompt registry updated with the cleanup prompt"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Sandbox violation alert",
+    "Generated documentation contradicts code"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "report_id": "amb-report-noncritical",
+  "storyboard_id": "storyboard-intro-sweep",
+  "ambiguities": [
+    {
+      "ambiguity_id": "amb-2",
+      "severity": "low",
+      "summary": "Background grid style preference",
+      "scope": {
+        "frame_indices": [0, 1]
+      },
+      "confidence": 0.18
+    }
+  ]
+}

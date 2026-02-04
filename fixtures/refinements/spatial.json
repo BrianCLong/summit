@@ -1,0 +1,15 @@
+{
+  "refinement_id": "refine-spatial-001",
+  "anchor": {
+    "frame_index": 1,
+    "frame_hash": "frame-1"
+  },
+  "overlay": {
+    "type": "sketch",
+    "strokes": ["overlay-stroke-1"]
+  },
+  "scope": {
+    "target": "local",
+    "region": "arrow-head"
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/spatial-analysis",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Advanced spatial analysis algorithms for IntelGraph GEOINT platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

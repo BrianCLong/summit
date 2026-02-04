@@ -7,7 +7,7 @@
  */
 
 import fetch from 'node-fetch';
-import { getTracer } from '../otel';
+import { getTracer } from '../otel.js';
 import type { Span } from '@opentelemetry/api';
 
 interface Entity {

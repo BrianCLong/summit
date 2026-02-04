@@ -4,7 +4,7 @@
  */
 
 import Redis from 'ioredis';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 interface TokenBucketConfig {
   capacity: number; // Maximum tokens in bucket

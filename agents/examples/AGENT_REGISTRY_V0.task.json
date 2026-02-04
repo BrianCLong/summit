@@ -1,0 +1,38 @@
+{
+  "task_id": "AGENT_REGISTRY_V0",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-registry-v0",
+    "version": "v1",
+    "sha256": "87bba436d33f7b69ea50e655f0b2f4c008a8edb9d6f213d1e7853cceaf4a8ff7",
+    "path": "prompts/agents/agent-registry-v0.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/agent-registry/",
+      "packages/cli/",
+      "docs/agents/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/"
+    ],
+    "domains": ["agents", "tooling", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["packages/agent-registry/src/__tests__/registry.test.ts"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Agent registry schema and loader validate YAML definitions.",
+    "CLI can list and validate registry entries.",
+    "Documentation and fixtures exist for Agent Registry v0."
+  ],
+  "stop_conditions": [
+    "Schema validation fails for registry fixtures.",
+    "Registry load introduces non-deterministic ordering."
+  ]
+}

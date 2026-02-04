@@ -1,0 +1,100 @@
+{
+  "name": "@summit/work-graph",
+  "version": "4.2.3",
+  "description": "Summit Work Graph - Graph-native engineering management with AI-powered planning",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "work-graph": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./schema": {
+      "import": "./dist/schema/index.js",
+      "types": "./dist/schema/index.d.ts"
+    },
+    "./planner": {
+      "import": "./dist/planner/index.js",
+      "types": "./dist/planner/index.d.ts"
+    },
+    "./agents": {
+      "import": "./dist/agents/index.js",
+      "types": "./dist/agents/index.d.ts"
+    },
+    "./policy": {
+      "import": "./dist/policy/index.js",
+      "types": "./dist/policy/index.d.ts"
+    },
+    "./portfolio": {
+      "import": "./dist/portfolio/index.js",
+      "types": "./dist/portfolio/index.d.ts"
+    },
+    "./projections": {
+      "import": "./dist/projections/index.js",
+      "types": "./dist/projections/index.d.ts"
+    },
+    "./store": {
+      "import": "./dist/store/index.js",
+      "types": "./dist/store/index.d.ts"
+    },
+    "./events": {
+      "import": "./dist/events/index.js",
+      "types": "./dist/events/index.d.ts"
+    },
+    "./metrics": {
+      "import": "./dist/metrics/index.js",
+      "types": "./dist/metrics/index.d.ts"
+    },
+    "./integrations": {
+      "import": "./dist/integrations/index.js",
+      "types": "./dist/integrations/index.d.ts"
+    },
+    "./triage": {
+      "import": "./dist/triage/index.js",
+      "types": "./dist/triage/index.d.ts"
+    },
+    "./api": {
+      "import": "./dist/api/index.js",
+      "types": "./dist/api/index.d.ts"
+    },
+    "./visualizations": {
+      "import": "./dist/visualizations/index.js",
+      "types": "./dist/visualizations/index.d.ts"
+    },
+    "./import": {
+      "import": "./dist/import/index.js",
+      "types": "./dist/import/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepare": "pnpm run build",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "demo": "tsx src/demo.ts",
+    "server": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "cli": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@linear/sdk": "^22.0.0",
+    "neo4j-driver": "^5.14.0",
+    "zod": "^3.22.4",
+    "graphql": "^16.8.1",
+    "graphql-yoga": "^5.1.1",
+    "@graphql-tools/schema": "^10.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "tsx": "^4.6.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

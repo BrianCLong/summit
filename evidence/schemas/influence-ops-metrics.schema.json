@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Influence Ops Metrics",
+  "type": "object",
+  "required": ["gate", "microtargeting", "profiling", "campaign_mode", "eval", "data"],
+  "properties": {
+    "gate": {
+      "type": "object",
+      "required": ["block_rate_sensitive"],
+      "properties": {
+        "block_rate_sensitive": { "type": "number" }
+      }
+    },
+    "microtargeting": {
+      "type": "object",
+      "required": ["hit_rate"],
+      "properties": {
+        "hit_rate": { "type": "number" }
+      }
+    },
+    "profiling": {
+      "type": "object",
+      "required": ["hit_rate"],
+      "properties": {
+        "hit_rate": { "type": "number" }
+      }
+    },
+    "campaign_mode": {
+      "type": "object",
+      "required": ["hit_rate"],
+      "properties": {
+        "hit_rate": { "type": "number" }
+      }
+    },
+    "eval": {
+      "type": "object",
+      "required": ["block_precision", "block_recall"],
+      "properties": {
+        "block_precision": { "type": "number" },
+        "block_recall": { "type": "number" }
+      }
+    },
+    "data": {
+      "type": "object",
+      "required": ["neverlog_violations", "retention_violations"],
+      "properties": {
+        "neverlog_violations": { "type": "integer" },
+        "retention_violations": { "type": "integer" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

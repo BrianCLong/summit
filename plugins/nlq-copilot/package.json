@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/nlq-copilot",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Natural Language to Cypher Query Copilot with RAG mode and evidence-first citations",
   "main": "dist/index.js",
   "scripts": {

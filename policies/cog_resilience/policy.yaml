@@ -1,0 +1,28 @@
+version: "1.0"
+module: cog_resilience
+defaults:
+  allow: false
+
+allowed_intents:
+  - analysis_only
+  - monitoring_only
+
+prohibited_intents:
+  - persuasion
+  - microtargeting
+  - psychographic_segmentation
+  - counter_messaging_automation
+  - narrative_shaping_playbook
+  - flooding_or_amplification_tactics
+
+data_handling:
+  classification: "restricted"
+  retention_days: 30
+  never_log_fields:
+    - individual_id
+    - device_id
+    - raw_handle
+    - psychographic_segment
+    - persona_target
+    - message_variant
+    - call_to_action

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/evidence/evidence-id-consistency-metrics.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["gate_version", "sha", "evidence_total", "duplicate_ids_total", "status"],
+  "propertyNames": {
+    "not": {
+      "pattern": "(?i)(timestamp|time|created_at|updated_at|last_update|started_at|finished_at|ended_at|duration_ms)"
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "gate_version": {
+      "const": "1.3.1"
+    },
+    "sha": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "duplicate_ids_total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": ["pass", "fail"]
+    }
+  }
+}

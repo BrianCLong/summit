@@ -13,23 +13,23 @@ variable "environment" {
 variable "tags" {
   description = "Common tags applied to provisioned resources"
   type        = map(string)
-  default     = {
-    Tenant = "acme-corp"
+  default = {
+    Tenant    = "acme-corp"
     ManagedBy = "Terraform"
-    Project = "IntelGraph"
+    Project   = "IntelGraph"
   }
 }
 
 variable "kms_keys" {
   description = "Map of KMS key configurations keyed by a friendly name"
   type = map(object({
-    description              = optional(string)
-    enable_key_rotation      = optional(bool, true)
-    deletion_window_in_days  = optional(number, 30)
-    key_admin_arns           = optional(list(string), [])
-    key_user_arns            = optional(list(string), [])
-    aliases                  = optional(list(string), [])
-    policy                   = optional(string)
+    description             = optional(string)
+    enable_key_rotation     = optional(bool, true)
+    deletion_window_in_days = optional(number, 30)
+    key_admin_arns          = optional(list(string), [])
+    key_user_arns           = optional(list(string), [])
+    aliases                 = optional(list(string), [])
+    policy                  = optional(string)
   }))
   default = {}
 }

@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Unified Assurance Graph",
+  "description": "A schema for a unified assurance graph, linking together all the different pieces of the governance puzzle.",
+  "type": "object",
+  "properties": {
+    "entities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/entity"
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/relationship"
+      }
+    }
+  },
+  "required": ["entities", "relationships"],
+  "definitions": {
+    "entity": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Repo",
+            "Release",
+            "Artifact",
+            "Control",
+            "Exception",
+            "Incident",
+            "SLO",
+            "Customer",
+            "Deployment"
+          ]
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "required": ["id", "type", "data"]
+    },
+    "relationship": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "PRODUCES",
+            "EVIDENCED_BY",
+            "WAIVES",
+            "IMPACTS",
+            "RUNS"
+          ]
+        }
+      },
+      "required": ["source", "target", "type"]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/model-serving-service",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Model serving service with batching and caching",
   "main": "dist/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "typescript": "^5.9.3",
     "tsx": "^4.7.1",
     "jest": "^30.2.0",
-    "eslint": "^9.39.1"
+    "eslint": "^9.39.2"
   },
   "type": "module"
 }

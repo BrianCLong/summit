@@ -52,7 +52,8 @@ import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 import RouteAnnouncer from './components/a11y/RouteAnnouncer';
-import { useFeatureFlag } from './hooks/useFeatureFlag';
+import { useFeatureFlag, FeatureFlagProvider } from './hooks/useFeatureFlag';
+import { getGraphqlHttpUrl } from './config/urls';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -115,6 +116,14 @@ const SandboxDashboard = React.lazy(() =>
 const ReleaseReadinessRoute = React.lazy(() =>
   import('./routes/ReleaseReadinessRoute')
 );
+const IOCList = React.lazy(() => import('./pages/IOC/IOCList'));
+const IOCDetail = React.lazy(() => import('./pages/IOC/IOCDetail'));
+const HuntList = React.lazy(() => import('./pages/Hunting/HuntList'));
+const HuntDetail = React.lazy(() => import('./pages/Hunting/HuntDetail'));
+const SearchHome = React.lazy(() => import('./pages/Search/SearchHome'));
+const SearchResultDetail = React.lazy(() =>
+  import('./pages/Search/SearchResultDetail')
+);
 
 import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -129,6 +138,9 @@ const ADMIN = 'ADMIN';
 const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/search', label: 'Search', icon: <Search /> },
+  { path: '/hunts', label: 'Hunts', icon: <Security /> },
+  { path: '/ioc', label: 'IOCs', icon: <Timeline /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
@@ -182,7 +194,7 @@ function ConnectionStatus() {
   React.useEffect(() => {
     const checkBackend = async () => {
       try {
-        const response = await fetch('http://localhost:4000/graphql', {
+        const response = await fetch(getGraphqlHttpUrl(), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ query: '{ __typename }' }),
@@ -268,7 +280,9 @@ function AppHeader({ onMenuClick }) {
   );
 
   // Show demo walkthrough link only in demo mode
-  const showDemoWalkthrough = import.meta.env.VITE_DEMO_MODE === '1' || import.meta.env.VITE_DEMO_MODE === 'true';
+  const showDemoWalkthrough =
+    import.meta.env.VITE_DEMO_MODE === '1' ||
+    import.meta.env.VITE_DEMO_MODE === 'true';
 
   return (
     <AppBar position="fixed">
@@ -276,6 +290,7 @@ function AppHeader({ onMenuClick }) {
         <IconButton
           edge="start"
           color="inherit"
+          aria-label="Open navigation menu"
           onClick={onMenuClick}
           sx={{ mr: 2 }}
         >
@@ -735,6 +750,13 @@ function MainLayout() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[10001] focus:bg-white focus:text-blue-600 focus:px-4 focus:py-2 focus:border focus:border-blue-600 focus:rounded shadow-md"
+        style={{ textDecoration: 'none' }}
+      >
+        Skip to main content
+      </a>
       <AppHeader onMenuClick={() => setDrawerOpen(true)} />
       <NavigationDrawer
         open={drawerOpen}
@@ -743,6 +765,7 @@ function MainLayout() {
 
       <Box
         component="main"
+        id="main-content"
         role="main"
         tabIndex={a11yGuardrailsEnabled ? -1 : undefined}
         ref={mainRef}
@@ -770,6 +793,15 @@ function MainLayout() {
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/search" element={<SearchHome />} />
+              <Route
+                path="/search/results/:id"
+                element={<SearchResultDetail />}
+              />
+              <Route path="/hunts" element={<HuntList />} />
+              <Route path="/hunts/:id" element={<HuntDetail />} />
+              <Route path="/ioc" element={<IOCList />} />
+              <Route path="/ioc/:id" element={<IOCDetail />} />
               <Route path="/investigations" element={<InvestigationsPage />} />
               <Route path="/graph" element={<GraphExplorerPage />} />
               <Route path="/copilot" element={<CopilotPage />} />
@@ -862,12 +894,14 @@ function App() {
     <Provider store={store}>
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
-          <DemoIndicator />
-          <ThemedAppShell>
-            <Router>
-              <MainLayout />
-            </Router>
-          </ThemedAppShell>
+          <FeatureFlagProvider>
+            <DemoIndicator />
+            <ThemedAppShell>
+              <Router>
+                <MainLayout />
+              </Router>
+            </ThemedAppShell>
+          </FeatureFlagProvider>
         </AuthProvider>
       </ApolloProvider>
     </Provider>

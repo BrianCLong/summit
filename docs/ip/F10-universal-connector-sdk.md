@@ -12,6 +12,7 @@
 This disclosure describes a **pluggable connector framework** for ingesting data from any source (STIX/TAXII, Splunk, Sentinel, Elasticsearch, CSV, APIs, etc.) with support for both **streaming and batch modes, declarative schema mappings, provenance tracking, and error handling**. The system is designed to be the "data onramp" for all intelligence sources.
 
 **Core Innovation**:
+
 1. **Pluggable Architecture**: Add new connector with <100 lines of code
 2. **Declarative Schema Mapping**: No code required to map source fields to graph entities
 3. **Streaming + Batch Support**: Real-time Kafka streams + bulk CSV imports
@@ -19,6 +20,7 @@ This disclosure describes a **pluggable connector framework** for ingesting data
 5. **Error Recovery**: Retry logic, dead letter queue, manual resolution workflow
 
 **Differentiation**:
+
 - **Airbyte**: General ETL → We're optimized for investigation graphs
 - **Logstash**: Logs-focused → We handle structured threat intel (STIX, etc.)
 - **Fivetran**: SaaS databases → We support OSINT, dark web, custom APIs
@@ -33,25 +35,30 @@ This disclosure describes a **pluggable connector framework** for ingesting data
 Intelligence analysts need data from **dozens of sources**:
 
 **Threat Intelligence**:
+
 - STIX/TAXII feeds (MISP, Anomali, ThreatConnect)
 - Commercial feeds (Recorded Future, Flashpoint)
 
 **SIEM/Security**:
+
 - Splunk
 - Microsoft Sentinel
 - Elasticsearch
 
 **OSINT**:
+
 - Social media APIs (Twitter, Telegram, Reddit)
 - Dark web scraping
 - Public records databases
 
 **Internal**:
+
 - CSV uploads
 - Excel spreadsheets
 - Custom REST APIs
 
 **Challenges**:
+
 - Each source has different API, auth, data format
 - Manual integration takes 2-4 weeks per source
 - No consistent error handling
@@ -60,6 +67,7 @@ Intelligence analysts need data from **dozens of sources**:
 ### 1.2 User Experience Problem
 
 **Current state**: For each new data source, engineers must:
+
 1. Write custom API client code
 2. Handle authentication (API keys, OAuth, etc.)
 3. Parse response format (JSON, XML, CSV)
@@ -79,6 +87,7 @@ Intelligence analysts need data from **dozens of sources**:
 ### 2.1 Pluggable Connector Architecture
 
 **Connector interface**:
+
 ```typescript
 // connectors/base/Connector.ts
 export interface Connector {
@@ -99,10 +108,10 @@ export interface Connector {
 }
 
 export interface ConnectorDefinition {
-  id: string;               // e.g., "stix_taxii_connector"
-  name: string;             // "STIX/TAXII Feed Connector"
+  id: string; // e.g., "stix_taxii_connector"
+  name: string; // "STIX/TAXII Feed Connector"
   version: string;
-  auth_methods: string[];   // ["api_key", "basic", "oauth2"]
+  auth_methods: string[]; // ["api_key", "basic", "oauth2"]
   config_schema: JSONSchema;
   supports_streaming: boolean;
   supports_batch: boolean;
@@ -110,29 +119,30 @@ export interface ConnectorDefinition {
 ```
 
 **Example implementation (STIX connector)**:
+
 ```typescript
 // connectors/stix_taxii_connector/index.ts
-import { Connector, ConnectorDefinition } from '../base/Connector';
-import { TaxiiClient } from 'taxii2-client';
+import { Connector, ConnectorDefinition } from "../base/Connector";
+import { TaxiiClient } from "taxii2-client";
 
 export class STIXTaxiiConnector implements Connector {
   definition: ConnectorDefinition = {
-    id: 'stix_taxii_connector',
-    name: 'STIX/TAXII Feed Connector',
-    version: '1.0.0',
-    auth_methods: ['basic', 'api_key'],
+    id: "stix_taxii_connector",
+    name: "STIX/TAXII Feed Connector",
+    version: "1.0.0",
+    auth_methods: ["basic", "api_key"],
     config_schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        taxii_url: { type: 'string' },
-        collection_id: { type: 'string' },
-        api_key: { type: 'string' },
-        poll_interval_seconds: { type: 'number', default: 300 }
+        taxii_url: { type: "string" },
+        collection_id: { type: "string" },
+        api_key: { type: "string" },
+        poll_interval_seconds: { type: "number", default: 300 },
       },
-      required: ['taxii_url', 'collection_id']
+      required: ["taxii_url", "collection_id"],
     },
     supports_streaming: true,
-    supports_batch: true
+    supports_batch: true,
   };
 
   private client: TaxiiClient;
@@ -140,7 +150,7 @@ export class STIXTaxiiConnector implements Connector {
   async init(config: ConnectorConfig): Promise<void> {
     this.client = new TaxiiClient({
       url: config.taxii_url,
-      apiKey: config.api_key
+      apiKey: config.api_key,
     });
   }
 
@@ -148,7 +158,7 @@ export class STIXTaxiiConnector implements Connector {
     // Fetch STIX objects from TAXII collection
     const objects = await this.client.getObjects({
       collection_id: options.collection_id,
-      added_after: options.since
+      added_after: options.since,
     });
 
     // Yield in batches of 100
@@ -164,11 +174,11 @@ export class STIXTaxiiConnector implements Connector {
     setInterval(async () => {
       const new_objects = await this.client.getObjects({
         collection_id: options.collection_id,
-        added_after: this.last_poll_time
+        added_after: this.last_poll_time,
       });
 
       for (const obj of new_objects) {
-        emitter.emit('record', obj);
+        emitter.emit("record", obj);
       }
 
       this.last_poll_time = new Date();
@@ -179,46 +189,46 @@ export class STIXTaxiiConnector implements Connector {
 
   mapToEntity(stix_object: any): Entity | null {
     // Map STIX object to investigation entity
-    if (stix_object.type === 'threat-actor') {
+    if (stix_object.type === "threat-actor") {
       return {
-        entity_type: 'Person',
+        entity_type: "Person",
         name: stix_object.name,
         properties: {
           stix_id: stix_object.id,
           aliases: stix_object.aliases,
           sophistication: stix_object.sophistication,
-          motivation: stix_object.primary_motivation
-        }
+          motivation: stix_object.primary_motivation,
+        },
       };
     }
 
-    if (stix_object.type === 'indicator') {
+    if (stix_object.type === "indicator") {
       return {
-        entity_type: 'Indicator',
+        entity_type: "Indicator",
         name: stix_object.name,
         properties: {
           stix_id: stix_object.id,
           pattern: stix_object.pattern,
           indicator_types: stix_object.indicator_types,
           valid_from: stix_object.valid_from,
-          valid_until: stix_object.valid_until
-        }
+          valid_until: stix_object.valid_until,
+        },
       };
     }
 
-    return null;  // Unsupported STIX type
+    return null; // Unsupported STIX type
   }
 
   mapToRelationship(stix_object: any): Relationship | null {
-    if (stix_object.type === 'relationship') {
+    if (stix_object.type === "relationship") {
       return {
         relationship_type: stix_object.relationship_type.toUpperCase(),
         source_id: stix_object.source_ref,
         target_id: stix_object.target_ref,
         properties: {
           stix_id: stix_object.id,
-          description: stix_object.description
-        }
+          description: stix_object.description,
+        },
       };
     }
 
@@ -228,6 +238,7 @@ export class STIXTaxiiConnector implements Connector {
 ```
 
 **Registering connectors**:
+
 ```typescript
 // server/src/services/connectors/ConnectorRegistry.ts
 export class ConnectorRegistry {
@@ -242,7 +253,7 @@ export class ConnectorRegistry {
   }
 
   listAll(): ConnectorDefinition[] {
-    return Array.from(this.connectors.values()).map(c => c.definition);
+    return Array.from(this.connectors.values()).map((c) => c.definition);
   }
 }
 
@@ -264,17 +275,17 @@ connector_id: splunk_connector
 version: 1.0.0
 
 entity_mappings:
-  - source_type: "access:combined"  # Splunk sourcetype
+  - source_type: "access:combined" # Splunk sourcetype
     target_entity_type: "Person"
     field_mappings:
-      name: "user"                   # Splunk field -> Entity field
+      name: "user" # Splunk field -> Entity field
       properties.ip_address: "clientip"
       properties.user_agent: "useragent"
       properties.last_seen: "_time"
     filters:
       - field: "status"
         operator: "="
-        value: "200"                 # Only successful requests
+        value: "200" # Only successful requests
 
   - source_type: "firewall:allow"
     target_entity_type: "NetworkConnection"
@@ -288,27 +299,28 @@ entity_mappings:
 relationship_mappings:
   - source_type: "access:combined"
     relationship_type: "ACCESSED"
-    source_entity: "Person"          # Derived from user field
-    target_entity: "Webpage"         # Derived from uri field
+    source_entity: "Person" # Derived from user field
+    target_entity: "Webpage" # Derived from uri field
     field_mappings:
       properties.timestamp: "_time"
       properties.http_method: "method"
 ```
 
 **Schema mapper implementation**:
+
 ```typescript
 // server/src/services/connectors/SchemaMapper.ts
 export class SchemaMapper {
   private mapping: SchemaMapping;
 
   constructor(mapping_file: string) {
-    this.mapping = yaml.load(readFileSync(mapping_file, 'utf-8'));
+    this.mapping = yaml.load(readFileSync(mapping_file, "utf-8"));
   }
 
   mapToEntity(record: any): Entity | null {
     // Find matching entity mapping
     const entity_mapping = this.mapping.entity_mappings.find(
-      m => m.source_type === record._sourcetype
+      (m) => m.source_type === record._sourcetype
     );
 
     if (!entity_mapping) return null;
@@ -316,7 +328,7 @@ export class SchemaMapper {
     // Apply filters
     for (const filter of entity_mapping.filters || []) {
       if (!this.evaluateFilter(record, filter)) {
-        return null;  // Record doesn't match filter
+        return null; // Record doesn't match filter
       }
     }
 
@@ -324,12 +336,12 @@ export class SchemaMapper {
     const entity: Entity = {
       entity_type: entity_mapping.target_entity_type,
       name: this.getFieldValue(record, entity_mapping.field_mappings.name),
-      properties: {}
+      properties: {},
     };
 
     for (const [target_field, source_field] of Object.entries(entity_mapping.field_mappings)) {
-      if (target_field.startsWith('properties.')) {
-        const prop_name = target_field.substring('properties.'.length);
+      if (target_field.startsWith("properties.")) {
+        const prop_name = target_field.substring("properties.".length);
         entity.properties[prop_name] = this.getFieldValue(record, source_field);
       }
     }
@@ -339,7 +351,7 @@ export class SchemaMapper {
 
   private getFieldValue(record: any, field_path: string): any {
     // Support nested fields: "user.email" -> record.user.email
-    const parts = field_path.split('.');
+    const parts = field_path.split(".");
     let value = record;
     for (const part of parts) {
       value = value?.[part];
@@ -350,13 +362,13 @@ export class SchemaMapper {
   private evaluateFilter(record: any, filter: Filter): boolean {
     const field_value = this.getFieldValue(record, filter.field);
     switch (filter.operator) {
-      case '=':
+      case "=":
         return field_value === filter.value;
-      case '!=':
+      case "!=":
         return field_value !== filter.value;
-      case '>':
+      case ">":
         return field_value > filter.value;
-      case '<':
+      case "<":
         return field_value < filter.value;
       default:
         return true;
@@ -393,10 +405,10 @@ export class IngestService {
           if (entity) {
             // Add to investigation with provenance
             await this.investigationService.addEntity(investigation_id, entity, {
-              source: 'CONNECTOR',
+              source: "CONNECTOR",
               connector_id,
               source_record: record,
-              ingestion_timestamp: new Date()
+              ingestion_timestamp: new Date(),
             });
             entities_added++;
           }
@@ -405,10 +417,10 @@ export class IngestService {
           const relationship = mapper.mapToRelationship(record);
           if (relationship) {
             await this.investigationService.addRelationship(investigation_id, relationship, {
-              source: 'CONNECTOR',
+              source: "CONNECTOR",
               connector_id,
               source_record: record,
-              ingestion_timestamp: new Date()
+              ingestion_timestamp: new Date(),
             });
             relationships_added++;
           }
@@ -419,7 +431,7 @@ export class IngestService {
             connector_id,
             record,
             error: error.message,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         }
       }
@@ -429,7 +441,7 @@ export class IngestService {
       entities_added,
       relationships_added,
       errors,
-      duration_ms: Date.now() - start_time
+      duration_ms: Date.now() - start_time,
     };
   }
 }
@@ -449,7 +461,7 @@ export class DeadLetterQueue {
         failed_record.connector_id,
         JSON.stringify(failed_record.record),
         failed_record.error,
-        failed_record.timestamp
+        failed_record.timestamp,
       ]
     );
 
@@ -457,26 +469,21 @@ export class DeadLetterQueue {
     const dlq_count = await this.getCount();
     if (dlq_count > 100) {
       await this.alerting.send({
-        severity: 'warning',
+        severity: "warning",
         message: `Connector DLQ has ${dlq_count} failed records`,
-        runbook_url: 'https://docs/runbooks/connector-dlq'
+        runbook_url: "https://docs/runbooks/connector-dlq",
       });
     }
   }
 
   async retry(dlq_id: string): Promise<void> {
     // Fetch failed record
-    const failed_record = await db.query(
-      `SELECT * FROM connector_dlq WHERE id = $1`,
-      [dlq_id]
-    );
+    const failed_record = await db.query(`SELECT * FROM connector_dlq WHERE id = $1`, [dlq_id]);
 
     // Retry ingestion
-    await this.ingestService.ingest(
-      failed_record.connector_id,
-      failed_record.investigation_id,
-      { records: [failed_record.record] }
-    );
+    await this.ingestService.ingest(failed_record.connector_id, failed_record.investigation_id, {
+      records: [failed_record.record],
+    });
 
     // Remove from DLQ
     await db.query(`DELETE FROM connector_dlq WHERE id = $1`, [dlq_id]);
@@ -502,14 +509,15 @@ export class DeadLetterQueue {
 
 ## 4. Performance Benchmarks
 
-| Connector | Mode | Throughput | Latency (p95) |
-|-----------|------|-----------|---------------|
-| STIX/TAXII | Batch | 1,000 objects/sec | 120ms |
-| Splunk | Stream | 5,000 events/sec | 45ms |
-| CSV | Batch | 10,000 rows/sec | N/A |
-| Sentinel | Batch | 2,000 alerts/sec | 85ms |
+| Connector  | Mode   | Throughput        | Latency (p95) |
+| ---------- | ------ | ----------------- | ------------- |
+| STIX/TAXII | Batch  | 1,000 objects/sec | 120ms         |
+| Splunk     | Stream | 5,000 events/sec  | 45ms          |
+| CSV        | Batch  | 10,000 rows/sec   | N/A           |
+| Sentinel   | Batch  | 2,000 alerts/sec  | 85ms          |
 
 **Reliability**:
+
 - Uptime: 99.95%
 - Error rate: 0.08% (80 failed records per 100,000)
 - DLQ resolution time: <2 hours (median)
@@ -519,16 +527,19 @@ export class DeadLetterQueue {
 ## 5. Competitive Advantages
 
 **vs. Airbyte**:
+
 - We're optimized for threat intel (STIX, TAXII, SIEM)
 - We have provenance tracking built-in
 - We integrate directly with investigation graphs
 
 **vs. Logstash**:
+
 - We support structured threat intel (not just logs)
 - We have declarative schema mapping
 - We have dead letter queue + retry
 
 **vs. Fivetran**:
+
 - We support OSINT, dark web, custom APIs
 - We're open-source friendly
 - We have streaming + batch modes
@@ -548,6 +559,7 @@ export class DeadLetterQueue {
 ### Patentability Assessment
 
 **Preliminary opinion**: Moderate patentability
+
 - **Novel combination**: Pluggable SDK + declarative mapping + provenance
 - **Technical improvement**: 10-20x faster connector development
 - **Non-obvious**: Unified streaming + batch API is non-obvious

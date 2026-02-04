@@ -5,8 +5,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
-import logger from '../utils/logger';
-import { getBudgetLedgerManager } from '../db/budgetLedger';
+import logger from '../utils/logger.js';
+import { getBudgetLedgerManager } from '../db/budgetLedger.js';
 
 interface OPAInput {
   tenant_id: string;

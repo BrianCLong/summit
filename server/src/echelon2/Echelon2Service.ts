@@ -1,7 +1,7 @@
 // server/src/echelon2/Echelon2Service.ts
 
 import { randomUUID } from 'crypto';
-import { eDNAReading, GenomeSignature, PhysicalPresenceConfirmation } from './echelon2.types';
+import { eDNAReading, GenomeSignature, PhysicalPresenceConfirmation } from './echelon2.types.js';
 
 /**
  * Service for managing the (simulated) Global Passive DNA Sniffing Grid.

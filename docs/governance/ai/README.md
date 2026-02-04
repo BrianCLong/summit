@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # AI Governance Framework
 
 This section outlines the comprehensive AI governance framework for the Summit project. The framework is designed to ensure that all AI systems are developed and operated in a safe, ethical, and compliant manner. It is divided into nine core epics, each addressing a critical area of AI governance.

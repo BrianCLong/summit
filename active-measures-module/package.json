@@ -1,6 +1,6 @@
 {
   "name": "active-measures-module",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "dependencies": {
     "apollo-server": "^3.0.0",
     "graphql": "^16.0.0",

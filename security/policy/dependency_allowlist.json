@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "npm": ["@types/*", "express", "zod", "joi", "helmet", "cors", "pino", "apollo-server-express", "graphql", "neo4j-driver", "pg", "redis", "ioredis"],
+  "pypi": ["requests", "pydantic", "fastapi", "uvicorn", "pytest", "boto3", "google-cloud-storage", "azure-storage-blob"],
+  "notes": "Base allowlist for Summit RDP. New dependencies require security review and update to this file."
+}

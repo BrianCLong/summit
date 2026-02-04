@@ -1,0 +1,37 @@
+name: Nightly (Long-Tail Matrix)
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  test-packages:
+    name: Test Package
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [graph-sync-validator, intelgraph-server, summit-api, summit-web, connector-sdk]
+    steps:
+      - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v4.0.3
+        with:
+          node-version: "20"
+          cache: 'pnpm'
+
+      - name: Use pinned pnpm
+        uses: pnpm/action-setup@v4 # v4.1.0
+        with:
+          run_install: false
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm --filter ${{ matrix.package }} build
+
+      - name: Test
+        run: pnpm --filter ${{ matrix.package }} test

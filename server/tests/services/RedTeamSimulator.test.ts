@@ -1,7 +1,7 @@
 import { RedTeamSimulator } from '../../src/services/RedTeamSimulator';
 import { EventEmitter } from 'events';
 import { describe, it, expect, jest, afterEach } from '@jest/globals';
-import eventBus from '../../src/workers/eventBus';
+import { eventBus } from '../../src/lib/events/event-bus.js';
 
 describe('RedTeamSimulator', () => {
   afterEach(() => {
@@ -34,8 +34,8 @@ describe('RedTeamSimulator', () => {
 
     eventBus.once('red-team:campaign-update', (event: any) => {
       try {
-        expect(event.data.status).toBe('COMPLETED');
-        expect(event.data.simulationId).toBe('sim-2');
+        expect(event.status).toBe('COMPLETED');
+        expect(event.simulationId).toBe('sim-2');
         done();
       } catch (e) {
         done(e as Error);

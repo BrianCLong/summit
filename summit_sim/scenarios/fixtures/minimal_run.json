@@ -1,0 +1,11 @@
+{
+  "run_id": "RUN-001",
+  "agents": [
+    {
+      "id": "agent-1",
+      "role": "Supporter",
+      "traits": ["Loyal"]
+    }
+  ],
+  "steps": 1
+}

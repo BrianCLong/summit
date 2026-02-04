@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AggregateSignals",
+  "type": "object",
+  "required": ["region_bucket", "time_bucket", "topic", "sentiment_bucket", "volume_estimate"],
+  "properties": {
+    "region_bucket": { "type": "string" },
+    "time_bucket": { "type": "string" },
+    "topic": { "type": "string" },
+    "sentiment_bucket": { "type": "string", "enum": ["neg", "neu", "pos", "mixed", "unknown"] },
+    "volume_estimate": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

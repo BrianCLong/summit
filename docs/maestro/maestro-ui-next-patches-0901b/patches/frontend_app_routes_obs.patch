@@ -1,9 +1,0 @@
-*** a/conductor-ui/frontend/src/maestro/App.tsx
---- b/conductor-ui/frontend/src/maestro/App.tsx
-@@
--import { Route, Routes } from 'react-router-dom';
-+import { Route, Routes } from 'react-router-dom';
-+import ObservabilityPage from './pages/Observability';
-@@
-         <Route path="/maestro/runs/:id" element={<RunDetail />} />
-+        <Route path="/maestro/obs" element={<ObservabilityPage />} />

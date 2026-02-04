@@ -1,6 +1,6 @@
 // server/src/routes/zero_day.ts
 import { Router, Response, NextFunction } from 'express';
-import { zeroDayService } from '../zero_day/ZeroDayService';
+import { zeroDayService } from '../zero_day/ZeroDayService.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
 import pino from 'pino';
-import { CorrelationCriteria } from './types';
+import { CorrelationCriteria } from './types.js';
 
 const logger = pino({ name: 'event-correlator' });
 

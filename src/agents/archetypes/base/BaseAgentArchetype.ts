@@ -20,11 +20,14 @@ import {
   AuditRecord,
   GraphEntity,
 } from './types';
+import { auditSink } from '../../../../server/src/audit/sink.js';
+import { PromptInjectionDetector } from '../../../../server/src/security/llm-guardrails.js';
 
 export abstract class BaseAgentArchetype {
   protected instanceId: string;
   protected metrics: AgentMetrics;
   protected lastActivity: Date;
+  protected injectionDetector: PromptInjectionDetector;
 
   constructor(
     public readonly name: string,
@@ -34,6 +37,7 @@ export abstract class BaseAgentArchetype {
     this.instanceId = `${role}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     this.metrics = this.initializeMetrics();
     this.lastActivity = new Date();
+    this.injectionDetector = new PromptInjectionDetector();
   }
 
   /**
@@ -65,6 +69,29 @@ export abstract class BaseAgentArchetype {
    * Shutdown the agent gracefully
    */
   abstract shutdown(): Promise<void>;
+
+  /**
+   * Validate agent input for prompt injections
+   */
+  protected async validateInput(input: string, context: AgentContext): Promise<boolean> {
+    const result = this.injectionDetector.detect(input);
+    
+    if (result.injectionDetected) {
+      await auditSink.securityAlert('Prompt injection detected in agent input', {
+        agentRole: this.role,
+        agentInstanceId: this.instanceId,
+        requestId: context.requestId,
+        userId: context.user.id,
+        tenantId: context.organization.id,
+        threatLevel: result.confidence,
+        matchedPatterns: result.patterns,
+      });
+      
+      return false;
+    }
+    
+    return true;
+  }
 
   /**
    * Get graph entities relevant to this agent
@@ -219,9 +246,25 @@ export abstract class BaseAgentArchetype {
     };
 
     try {
-      // TODO: Integrate with actual audit log service
-      // For now, just log to console
-      console.log(`[AUDIT] ${JSON.stringify(auditRecord, null, 2)}`);
+      await auditSink.recordEvent({
+        eventType: 'user_action',
+        level: 'info',
+        correlationId: requestId,
+        userId: user.id,
+        tenantId: organization.id,
+        action: action.actionType,
+        message: `Agent ${this.role} executed action: ${action.actionType}`,
+        details: {
+          agentInstanceId: this.instanceId,
+          input: action.parameters,
+          output: action.result,
+          policyResult: action.policyResult,
+          approvalRequired: action.approvalRequired,
+          approvalStatus: action.approvalStatus,
+        },
+        complianceRelevant: classification !== 'public',
+        dataClassification: classification,
+      });
 
       return auditRecord;
     } catch (error) {

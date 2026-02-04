@@ -1,6 +1,0 @@
-boto3
-pyyaml
-redis
-neo4j
-pandas
-prometheus_client

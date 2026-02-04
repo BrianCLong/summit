@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "acceptance": {
+      "type": "object",
+      "properties": {
+        "idParity": { "type": "string" },
+        "refInt": { "type": "string" },
+        "maxLag": { "type": "string" }
+      }
+    },
+    "result": { "$ref": "metrics.schema.json" }
+  },
+  "required": ["acceptance", "result"]
+}

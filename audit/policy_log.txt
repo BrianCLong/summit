@@ -1,2 +1,0 @@
-Thu Dec 25 05:03:59 UTC 2025 PACKAGE v2.0.0 dist/policy-bundles/policy-v2.0.0.tar.gz
-Thu Dec 25 05:03:59 UTC 2025 PROMOTE v2.0.0

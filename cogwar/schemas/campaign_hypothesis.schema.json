@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CampaignHypothesis",
+  "type": "object",
+  "required": ["hyp_id", "confidence", "caveats"],
+  "properties": {
+    "hyp_id": { "type": "string" },
+    "narrative_clusters": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "amplification_channels": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "suspected_sync_events": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "caveats": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
