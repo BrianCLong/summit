@@ -50,9 +50,9 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -76,9 +76,9 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -103,9 +103,9 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -167,9 +167,9 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -199,9 +199,9 @@ jobs:
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -248,9 +248,9 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -276,9 +276,9 @@ jobs:
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -316,9 +316,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
@@ -371,8 +371,9 @@ jobs:
           cache: "pnpm"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4 # v4.1.0
         with:
+          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -397,9 +398,9 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: pnpm/action-setup@v4 # v4.1.0
         with:
-
+          version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc

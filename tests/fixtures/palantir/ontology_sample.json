@@ -1,0 +1,30 @@
+{
+  "objectTypes": [
+    {
+      "apiName": "Person",
+      "display_name": "Person",
+      "properties": {
+        "name": "string",
+        "ssn": "string",
+        "auth_token": "string"
+      }
+    },
+    {
+      "apiName": "Event",
+      "display_name": "Event",
+      "properties": {
+        "date": "datetime",
+        "description": "string"
+      }
+    }
+  ],
+  "linkTypes": [
+    {
+      "apiName": "Person_attended_Event",
+      "display_name": "Attended",
+      "sourceObjectType": "Person",
+      "targetObjectType": "Event",
+      "cardinality": "MANY_TO_MANY"
+    }
+  ]
+}

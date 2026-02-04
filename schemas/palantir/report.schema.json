@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Palantir Competitive Teardown Report",
+  "type": "object",
+  "required": ["evidence_id", "summary", "artifacts", "findings"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVID:palantir:[0-9]{8}:[a-f0-9]{7,40}:[a-zA-Z0-9_-]+$"
+    },
+    "summary": { "type": "string" },
+    "artifacts": { "type": "array", "items": { "type": "string" } },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["workflow", "status", "gap_analysis"],
+        "properties": {
+          "workflow": { "type": "string" },
+          "status": { "type": "string", "enum": ["parity", "advantage", "gap"] },
+          "gap_analysis": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

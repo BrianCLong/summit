@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Palantir Benchmark Metrics",
+  "type": "object",
+  "required": ["evidence_id", "metrics"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVID:palantir:.*"
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["runtime_ms", "memory_mb", "cost_usd_est"],
+      "properties": {
+        "runtime_ms": { "type": "number" },
+        "memory_mb": { "type": "number" },
+        "cost_usd_est": { "type": "number" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
