@@ -86,6 +86,14 @@ Summit follows a modular microservices architecture:
 └─────────────────────────────────┘
 ```
 
+## 🧩 Core Components
+
+- **IntelGraph**: Central graph data model for entities, relationships, evidence, and provenance to enable link analysis and multi-hop queries.
+- **Maestro Conductor**: Workflow orchestration for job DAGs, retries, policy enforcement, observability, and SLO tracking, driven by IntelGraph state.
+- **CompanyOS**: Knowledge, runbooks, and business logic APIs integrated with graph data and orchestrated workflows.
+- **Switchboard**: Ingestion, normalization, deduplication, enrichment, and routing of events into the platform’s core services.
+- **Provenance Ledger**: Evidence-first audit trail for explainable outputs, lineage, and compliance-ready reporting across the platform.
+
 **Deep Dive Docs:**
 
 - [📈 Executive Briefing (2026-01-31)](docs/executive/2026-01-31-summit-platform-briefing.md)
