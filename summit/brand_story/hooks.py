@@ -1,24 +1,14 @@
-from typing import List
-from .flags import enabled
+from typing import Dict, List
 
-def generate_hooks(topic: str, platform: str) -> List[str]:
-    if not enabled():
-        return []
-
-    # Clean-room derived patterns
-    # 1. The "What if" hook
-    # 2. The "Stop doing this" hook
-    # 3. The "I learned this the hard way" hook
-
-    hooks = [
-        f"What if {topic} isn't what you think?",
-        f"Stop ignoring {topic} if you want results.",
-        f"I learned the truth about {topic} the hard way.",
-    ]
-
-    if platform.lower() == "linkedin":
-        hooks.append(f"Unpopular opinion: {topic} matters more than ROI.")
-    elif platform.lower() == "instagram":
-        hooks.append(f"POV: You just discovered {topic}.")
-
+def generate_hooks(episode_theme: str, platforms: List[str]) -> Dict[str, str]:
+    """Generate platform-specific interactive hooks."""
+    hooks = {}
+    for platform in platforms:
+        p = platform.lower()
+        if p == "instagram":
+            hooks[platform] = f"Poll: Have you ever felt {episode_theme}? Yes/No"
+        elif p == "linkedin":
+            hooks[platform] = f"Question: How does {episode_theme} impact your leadership style?"
+        else:
+            hooks[platform] = f"What do you think about {episode_theme}?"
     return hooks

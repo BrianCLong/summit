@@ -1,7 +1,7 @@
 {
-  "metrics": {
-    "episodes_generated": 5,
-    "hooks_generated": 4,
-    "determinism_check": "passed"
-  }
+  "evidence_id": "EVD-SPB500250-EVAL-001",
+  "coherence": 0.95,
+  "distinctiveness": 0.88,
+  "authenticity": 0.92,
+  "interactivity": 0.90
 }

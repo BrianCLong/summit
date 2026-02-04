@@ -1,22 +1,19 @@
 # Brand Story Primitives
 
-## Core Concepts
-Based on clean-room analysis of successful episodic personal branding.
+Derived from Entrepreneur (Jan 2026): "5 Easy Ways to Build a Magnetic Personal Brand".
 
-### 1. The Episode
-A single content unit part of a larger arc.
-- **Hook**: Immediate attention grabber.
-- **Tension**: The conflict or problem.
-- **Twist**: Recontextualization.
-- **Lesson**: The value payoff.
-- **CTA**: Call to Action.
-- **Cliffhanger**: Bridge to next episode.
+## Episode Beat Schema
+- **Hook**: Immediate engagement.
+- **Tension**: The challenge.
+- **Twist**: Unexpected turn.
+- **Lesson**: Alignment to mission.
+- **CTA**: Audience participation.
+- **Cliffhanger**: Next episode anticipation.
 
-### 2. The Series Plan
-A coherent sequence of 3-5 episodes.
-- **Mission**: The "Why".
-- **Arc**: From problem to solution/insight.
+## Authenticity Markers
+- Felt-experience language.
+- Vulnerability and risk disclosure.
+- Lessons learned.
 
-### 3. Authenticity Markers
-- **Vulnerability**: Sharing failure.
-- **Quirks**: Unique personal details.
+## Source
+Ryan, T. (2026). 5 Easy Ways to Build a Magnetic Personal Brand People Can’t Ignore. Entrepreneur.

@@ -1,16 +1,7 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
 
-@dataclass
-class BrandStoryInput:
-    platform: str
-    audience_archetype: str
-    goal: str
-    defining_moments: List[str]
-    mission: str
-    quirks: List[str] = field(default_factory=list)
-
-@dataclass
+@dataclass(frozen=True)
 class Episode:
     title: str
     hook: str
@@ -21,9 +12,12 @@ class Episode:
     cliffhanger: str
     interactive_prompt: str
 
-@dataclass
-class SeriesPlan:
+@dataclass(frozen=True)
+class BrandStoryInput:
+    defining_moments: List[str]
     mission: str
-    episodes: List[Episode]
-    enabled: bool = True
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    platforms: List[str]
+    audience: str
+    quirks: List[str] = None
+    tone: str = "authentic"
+    truthfulness_mode: bool = True

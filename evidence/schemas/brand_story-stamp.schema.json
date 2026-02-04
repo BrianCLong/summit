@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["evidence_id", "timestamp"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "job": { "type": "string" }
+  }
+}
