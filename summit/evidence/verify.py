@@ -1,111 +1,57 @@
-import argparse
 import json
 import os
+import hashlib
 import sys
+import re
 from pathlib import Path
-import jsonschema
 
-def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+def _sha256_file(p: str) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
-def validate_artifact(path, schema_path):
-    if not os.path.exists(path):
-        print(f"FAIL: Artifact missing: {path}")
-        return False
+def verify_bundle(bundle_dir: str) -> None:
+    bundle_path = Path(bundle_dir)
+    idx_path = bundle_path / "evidence" / "index.json"
 
-    # Heuristic: map filename to schema
-    fname = Path(path).name
-    schema_name = None
-    if "report" in fname:
-        schema_name = "report.schema.json"
-    elif "metrics" in fname:
-        schema_name = "metrics.schema.json"
-    elif "stamp" in fname:
-        schema_name = "stamp.schema.json"
-
-    if not schema_name:
-        print(f"WARN: Could not determine schema for {fname}")
-        return True
-
-    # Check if schema exists in the provided schema directory
-    # Note: schema_path passed to this function is the directory
-    full_schema_path = os.path.join(schema_path, schema_name)
-    if not os.path.exists(full_schema_path):
-        # Fallback to evidence/schemas if not found in provided dir?
-        # User explicitly passed schemas dir.
-        # Check if maybe it's named differently?
-        print(f"WARN: Schema {schema_name} not found in {schema_path}")
-        return True
+    if not idx_path.exists():
+        raise RuntimeError(f"Index file missing: {idx_path}")
 
     try:
-        data = load_json(path)
-        schema = load_json(full_schema_path)
-        jsonschema.validate(instance=data, schema=schema)
-        print(f"PASS: {path} matches {schema_name}")
-        return True
-    except jsonschema.ValidationError as e:
-        print(f"FAIL: {path} validation error: {e.message}")
-        return False
-    except Exception as e:
-        print(f"FAIL: {path} error: {e}")
-        return False
+        idx = json.loads(idx_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Index JSON decode failed: {e}")
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--index", required=True, help="Path to index.json")
-    parser.add_argument("--schemas", required=True, help="Path to schemas directory")
-    args = parser.parse_args()
+    # Check files listed in index
+    for rel, expected in idx.get("files", {}).items():
+        # Handle relative paths: keys in index are like "report.json"
+        # files are at bundle root
 
-    if not os.path.exists(args.index):
-        print(f"FAIL: Index not found: {args.index}")
-        sys.exit(1)
+        file_path = bundle_path / rel
+        if not file_path.exists():
+            raise RuntimeError(f"Required file missing: {rel}")
 
-    index = load_json(args.index)
-    items = index.get("items", {})
+        actual = _sha256_file(str(file_path))
+        if actual != expected:
+            raise RuntimeError(f"Hash mismatch for {rel}: expected {expected}, got {actual}")
 
-    # Normalize items to list of values if it's a dict
-    if isinstance(items, dict):
-        items_list = []
-        for key, val in items.items():
-            # Inject key as evidence_id if missing?
-            if isinstance(val, dict):
-                if "evidence_id" not in val:
-                     val["evidence_id"] = key
-                items_list.append(val)
-        items = items_list
+        # Check for timestamps (except stamp.json)
+        if rel != "stamp.json" and "stamp" not in rel:
+             content = file_path.read_text(encoding="utf-8")
+             # Simple ISO8601 regex
+             if re.search(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}', content):
+                 raise RuntimeError(f"Forbidden timestamp found in {rel}")
 
-    success = True
-    for item in items:
-        evidence_id = item.get("evidence_id", "UNKNOWN")
-        print(f"Verifying {evidence_id}...")
-
-        files = item.get("files", [])
-        # Also check for artifact keys
-        if "artifacts" in item and isinstance(item["artifacts"], list):
-             files.extend(item["artifacts"])
-        elif "artifacts" in item and isinstance(item["artifacts"], dict):
-             files.extend(item["artifacts"].values())
-
-        # Check explicit report/metrics/stamp keys
-        for key in ["report", "metrics", "stamp"]:
-            if key in item and isinstance(item[key], str):
-                files.append(item[key])
-
-        if not files:
-            print(f"WARN: No files found for {evidence_id}")
-            continue
-
-        for fpath in files:
-            if not validate_artifact(fpath, args.schemas):
-                success = False
-
-    if success:
-        print("ALL EVIDENCE VERIFIED.")
-        sys.exit(0)
-    else:
-        print("EVIDENCE VERIFICATION FAILED.")
-        sys.exit(1)
+    print(f"evidence_verified: {idx.get('evidence_id', 'unknown')}")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("Usage: verify.py <bundle_dir>")
+        sys.exit(1)
+    try:
+        verify_bundle(sys.argv[1])
+    except Exception as e:
+        print(f"Verification failed: {e}")
+        sys.exit(1)

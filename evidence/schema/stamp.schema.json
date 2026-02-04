@@ -1,16 +1,14 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Stamp",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "summit_evidence_stamp",
   "type": "object",
-  "required": ["evidence_id", "generated_at", "git_commit"],
+  "required": ["evidence_id", "generated_at"],
   "properties": {
     "evidence_id": { "type": "string" },
     "generated_at": { "type": "string", "format": "date-time" },
-    "git_commit": { "type": "string" },
-    "tool_versions": {
-      "type": "object",
-      "additionalProperties": { "type": "string" }
-    }
+    "started_at": { "type": "string" },
+    "finished_at": { "type": "string" },
+    "runner": { "type": "string" }
   },
   "additionalProperties": false
 }

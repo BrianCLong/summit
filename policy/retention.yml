@@ -1,0 +1,8 @@
+version: 1
+defaults:
+  retention_days: 30
+  classification: public
+never_log:
+  - raw_content
+  - biometric_data
+  - unique_identifiers

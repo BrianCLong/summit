@@ -42,11 +42,7 @@ jobs:
           node-version: 18
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install Dependencies
+        uses: pnpm/action-setup@v4      - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Verify Server Build

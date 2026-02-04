@@ -32,8 +32,8 @@ jobs:
           git remote add upstream "https://github.com/${{ steps.upstream.outputs.repo }}.git" || true
           git fetch upstream --depth=1 ${{ steps.upstream.outputs.ref }}
 
-
-      - name: Setup Node
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'

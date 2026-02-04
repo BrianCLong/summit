@@ -45,12 +45,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
-        with: {
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Run ${{ matrix.task }}
@@ -71,11 +70,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-      - uses: pnpm/action-setup@v4
-        with: {
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Validate Jest & pnpm Configuration
@@ -87,12 +85,11 @@ jobs:
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
-        with: {
 
       - name: Start Test Infrastructure
         run: |
@@ -130,12 +127,11 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
-        with: {
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Verify runtime configuration
@@ -149,12 +145,11 @@ jobs:
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
-        with: {
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build twice and compare checksums
@@ -186,12 +181,11 @@ jobs:
     needs: [integration-tests, build-test]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
-        with: {
 
       - name: Bootstrap and smoke test
         run: |
@@ -215,12 +209,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
-        with: {
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
@@ -250,6 +243,7 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -268,12 +262,11 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-      - uses: pnpm/action-setup@v4
-        with: {
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run SOC control tests
