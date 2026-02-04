@@ -1,0 +1,14 @@
+version: v1
+patterns:
+  - pattern_id: PTN-0001
+    category: architecture
+    problem: "<problem>"
+    approach: "<approach>"
+    implementation_signals:
+      - "<evidence signal>"
+    tradeoffs:
+      - "<tradeoff>"
+    summit_fit: direct
+    summit_delta: "<delta required in Summit>"
+    evidence:
+      - CLM-0001
