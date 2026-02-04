@@ -119,6 +119,14 @@ jobs:
       - name: Media provenance gate
         run: npx tsx scripts/ci/verify_media_provenance.ts
 
+      - name: Check execution governor
+        run: |
+          echo "=== Checking Execution Governor ==="
+          pnpm check:execution || {
+            echo "::error::Execution Governor Check FAILED"
+            exit 1
+          }
+
       - name: Check governance compliance
         run: npm run check:governance || echo "Governance check skipped (script may not exist)"
         continue-on-error: true # Non-blocking until governance engine is stable
