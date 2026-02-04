@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict
 
+from ..nog.model import NarrativeOperatingGraph
 from ..nog.snapshot import canonical_hash
 from .transition import apply_intervention
 
@@ -14,7 +15,7 @@ class SimResult:
     metrics: Dict[str, Any]
 
 
-def simulate(nog, intervention: Dict[str, Any]) -> SimResult:
+def simulate(nog: NarrativeOperatingGraph, intervention: Dict[str, Any]) -> SimResult:
     base_hash = canonical_hash(nog)
     hypothetical = apply_intervention(nog, intervention)
     hypothetical_hash = canonical_hash(hypothetical)
