@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Disinfo Production Stamp",
+  "type": "object",
+  "required": ["evidence_id", "content_hash", "tool_version"],
+  "properties": {
+    "evidence_id": {"type": "string"},
+    "content_hash": {"type": "string"},
+    "tool_version": {"type": "string"},
+    "engine": {"type": "string", "const": "disinfo-prod"}
+  }
+}
