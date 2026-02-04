@@ -1,5 +1,33 @@
 version: 1
 prompts:
+  - id: automation-evidence-schemas
+    version: v1
+    path: prompts/automation/automation-evidence-schemas@v1.md
+    sha256: e25b200f9beea1f4f0b01241359c1bf12022643ddeeabbe7e6609088cc5dfe92
+    description: Establish automation evidence schemas, verifier CLI, and baseline evidence bundle.
+    scope:
+      paths:
+        - summit/automation/evidence/
+        - summit/cli/automation_verify.py
+        - evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/
+        - evidence/index.json
+        - docs/roadmap/STATUS.json
+        - prompts/automation/automation-evidence-schemas@v1.md
+        - prompts/registry.yaml
+        - agents/examples/AUTOMATION_EVIDENCE_SCHEMAS_20260203.json
+      domains:
+        - automation
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md

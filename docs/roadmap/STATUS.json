@@ -1,11 +1,17 @@
 {
-  "last_updated": "2026-02-03T00:00:00Z",
+  "last_updated": "2026-02-03T19:00:03Z",
   "initiatives": [
     {
       "id": "sera-cli-proxy",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
+    },
+    {
+      "id": "automation-evidence-schemas",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Automation evidence schemas, verifier CLI, and baseline evidence bundle."
     },
     {
       "id": "governance-evidence-contracts",

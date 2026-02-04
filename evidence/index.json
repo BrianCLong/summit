@@ -384,6 +384,14 @@
         "metrics": "evidence/EVD-IOB20260202-ALLYRISK-001/metrics.json",
         "stamp": "evidence/EVD-IOB20260202-ALLYRISK-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-CODEX-AUTOMATIONS-SCHEMA-001",
+      "files": {
+        "report": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/report.json",
+        "metrics": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/metrics.json",
+        "stamp": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/stamp.json"
+      }
     }
   ]
 }
