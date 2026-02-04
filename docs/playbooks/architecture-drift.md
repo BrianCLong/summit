@@ -1,12 +1,12 @@
-# Operational Playbook: Architecture Drift
+# Playbook: Handling Architecture Drift
 
-## Symptom
-`entropy_guard` CI check failed.
+## Symptom: `entropy_guard` failure
+1. Identify the rule ID that failed.
+2. Review the documentation for that rule in `docs/entropy-guard.md`.
+3. If the violation is valid, remediate (e.g., move global listener to a lifecycle hook).
+4. If the violation is a false positive, report to the owner listed in `policies/entropy_guard/OWNERS`.
 
-## Remediation
-1. Check the rule ID in the failure log.
-2. Read the rule description in `policies/entropy_guard/rules.v1.yaml`.
-3. Fix the code to avoid the pattern.
-4. If the pattern is necessary/safe:
-   - Add an exception (future).
-   - Or modify the rule (requires OWNER approval).
+## Symptom: Complexity budget exceeded
+1. Check `evidence/EVD-ARCHROT-CPLX-001/metrics.json` for details.
+2. Consider refactoring large files or reducing excessive imports.
+3. Architecture review may be required for structural changes.
