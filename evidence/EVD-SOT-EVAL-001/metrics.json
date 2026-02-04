@@ -1,4 +1,7 @@
 {
-  "accuracy": 1.0,
-  "cases_run": 2
+  "evidence_id": "EVD-SOT-EVAL-001",
+  "metrics": {
+    "accuracy": 1.0,
+    "cases_run": 2
+  }
 }

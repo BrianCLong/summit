@@ -534,6 +534,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: implement-context-shell
+    version: v1
+    path: prompts/implement/context-shell@v1.md
+    sha256: 5144cf0c5d9e3e0a7f382e5e319914b1dd234d3cc1115718e0fadc914a496985
+    description: Implement Context Shell with policy gating, evidence logging, and Maestro integration.
+    scope:
+      paths:
+        - libs/context-shell/
+        - server/src/maestro/
+        - docs/runbooks/
+        - docs/roadmap/STATUS.json
+        - jest.config.cjs
+        - jest.projects.cjs
+        - agents/examples/
+        - prompts/implement/context-shell@v1.md
+        - prompts/registry.yaml
+      domains:
+        - tooling
+        - governance
+        - maestro
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
@@ -572,6 +601,34 @@ prompts:
         - prompts/registry.yaml
         - agents/examples/
       domains:
+ HEAD
+        - competitive-intel
+        - product-strategy
+        - governance
+  - id: competitive-subsumption-protocol-v4-1
+    version: v1
+    path: prompts/competitive/competitive-subsumption-protocol-v4.1.md
+    sha256: a86aa6168b2b2af54a996d0bb7c00a0cdbe8b56bb2af629b84685640ca314e5e
+    description: Summit competitive subsumption protocol (evidence-first, deterministic, patch-first).
+    scope:
+      paths:
+        - docs/ci/competitive-intel/
+        - docs/ci/targets/
+        - docs/ci/evidence/
+        - docs/roadmap/STATUS.json
+        - prompts/competitive/competitive-subsumption-protocol-v4.1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - documentation
+  - id: sar-agentic-app-runtime
+    path: prompts/architecture/sar-agentic-app-runtime@v1.md
+    sha256: 0c2ea2abded4bee786ab44a93066948cac8bff1dc60d94cb3cd56faa15c367d8
+    description: Summit App Runtime architecture, governance, and compatibility plan with SAR deliverables.
+        - docs/architecture/sar-agentic-app-runtime.md
+        - prompts/architecture/sar-agentic-app-runtime@v1.md
+
+ origin/main
         - architecture
         - governance
         - documentation
