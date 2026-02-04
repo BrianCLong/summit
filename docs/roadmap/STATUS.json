@@ -1,13 +1,45 @@
 {
-  "revision_note": "Added LongHorizon orchestration MVP scope and evidence references",
   "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Added Maestro Long-Run Job Engine governance scaffolding and CI gates",
+  "revision_note": "Added MCP Things3 TaskStore connector with policy gating, evidence logging, and idempotent task creation.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "B",
+      "name": "Federation + Ingestion Mesh",
+      "epics": [
+        {
+          "id": "B1",
+          "name": "Connector SDK & Registry",
+          "status": "partial",
+          "owner": "Jules",
+          "evidence": "Connector SDK still partial; added MCP Things3 TaskStore connector in packages/mcp-connectors/things3 with policy gating and evidence logs.",
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "target_completion": "Sprint N+2"
+        },
+        {
+          "id": "B2",
+          "name": "RSS/Atom Connector",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "No RSS/Atom connector implementation found",
+          "blockers": ["No implementation exists"],
+          "target_completion": "Sprint N+3"
+        },
+        {
+          "id": "B3",
+          "name": "STIX/TAXII Connector",
+          "status": "not-started",
+          "owner": "Jules",
+          "evidence": "No STIX/TAXII connector implementation found",
+          "blockers": ["No implementation exists"],
+          "target_completion": "Sprint N+3"
+        }
+      ]
     },
     {
       "id": "sera-cli-proxy",

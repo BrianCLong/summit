@@ -1,0 +1,28 @@
+{
+  "requestHash": "sample-hash",
+  "operation": "search",
+  "toolName": "things_search",
+  "args": {
+    "query": "summit"
+  },
+  "responseSummary": {
+    "kind": "array",
+    "count": 1,
+    "sample": [
+      {
+        "kind": "object",
+        "keys": ["id", "title", "status"]
+      }
+    ]
+  },
+  "policy": {
+    "allowed": true,
+    "dryRun": true,
+    "reason": "sample"
+  },
+  "timestamps": {
+    "startedAt": "2026-01-14T00:00:00Z",
+    "finishedAt": "2026-01-14T00:00:01Z",
+    "durationMs": 1000
+  }
+}
