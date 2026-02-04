@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-NARRDOM-NOG-001",
+  "metrics": {
+    "fixtures_validated": 2,
+    "fixtures_rejected": 1
+  }
+}
