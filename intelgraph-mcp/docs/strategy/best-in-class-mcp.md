@@ -26,6 +26,10 @@
 
 - CI (mock & live) green; conformance 100% pass; SBOM + cosign; policies enforced; evidence pack published with each release tag.
 
+## Agent-Age Alignment
+
+- See `agent-age-mcp-alignment.md` for Summit MCP guidance that maps agent-era architecture practices to existing governance, replay, and conformance assets.
+
 ## Evidence Pack
 
 - `benchmarks/shootout/results.json` (signed)
