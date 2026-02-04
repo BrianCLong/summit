@@ -1,0 +1,177 @@
+version: 1
+system: linear
+owner: summit-release
+readiness_anchor:
+  assertion: docs/SUMMIT_READINESS_ASSERTION.md
+  governance_required: true
+  pr_link_required: true
+  notes:
+    - "Readiness is absolute; deviations are governed exceptions, not defects."
+
+custom_fields:
+  - name: RoadmapLink
+    type: url
+    required: true
+    description: "Link to certified roadmap item or evidence entry."
+  - name: EvidenceLinks
+    type: list
+    required: false
+    description: "PRs, test reports, or evidence artifacts."
+  - name: AgentSession
+    type: text
+    required: false
+    description: "Agent session identifier for traceability."
+
+statuses:
+  - name: Backlog
+    type: backlog
+    order: 10
+  - name: Todo
+    type: unstarted
+    order: 20
+  - name: Agent Assigned
+    type: unstarted
+    order: 30
+    requirements:
+      - issue.assignee_type in [agent, human]
+  - name: In Progress
+    type: started
+    order: 40
+  - name: In Review
+    type: started
+    order: 50
+  - name: Blocked
+    type: started
+    order: 60
+    requirements:
+      - issue.labels includes governance-link-missing
+      - issue.blockers.count > 0
+  - name: Done
+    type: completed
+    order: 70
+  - name: Canceled
+    type: canceled
+    order: 80
+  - name: Duplicate
+    type: canceled
+    order: 90
+
+labels:
+  priority:
+    - prio:P0
+    - prio:P1
+    - priority:ga
+    - priority:normal
+    - post-ga:migration
+  area:
+    - area:graph
+    - area:governance
+    - area:ops
+    - area:resilience
+    - area:companyos
+    - area:prov-ledger
+    - area:gtm
+  lane:
+    - lane:platform
+    - lane:frontend
+    - lane:gov-ops
+    - lane:bizdev
+  track:
+    - track:A
+    - track:B
+    - track:E
+  type:
+    - type:doc
+    - type:doc-action
+    - type:test
+  process:
+    - automated
+    - from-docs
+    - triage-needed
+    - release-train
+    - cadence:weekly
+  quality:
+    - vulnerability
+    - e2e-failure
+    - gate
+    - perf:strict
+  governance:
+    - governed-exception
+    - governance-link-missing
+
+rules:
+  pr_linkage_gate:
+    required: true
+    description: "Every PR must link to a Linear issue and a certified roadmap item."
+    failure_label: governance-link-missing
+    blocked_status: Blocked
+  governed_exception_policy:
+    required_label: governed-exception
+    description: "Legacy bypasses are tracked as governed exceptions."
+  triage_policy:
+    initial_label: triage-needed
+    required_labels:
+      - area:*
+      - prio:*
+      - epic:*
+    required_fields:
+      - RoadmapLink
+  evidence_policy:
+    required_on_merge:
+      - EvidenceLinks
+    description: "Evidence links are required for merge-ready issues."
+
+views:
+  - name: Release Train
+    filter: "label:release-train OR project:current-release"
+    columns: [Todo, In Progress, In Review, Done]
+  - name: Track Kanban
+    filter: "label:track:A OR label:track:B OR label:track:E"
+    columns: [Todo, Agent Assigned, In Progress, In Review, Done]
+    swimlanes: [track:A, track:B, track:E]
+  - name: Epic Roadmap
+    filter: "label:epic-*"
+    display: timeline
+  - name: Area Ownership
+    filter: "label:area:*"
+  - name: Priority Triage
+    filter: "label:triage-needed OR label:prio:P0 OR label:prio:P1"
+    sort: [priority desc, created desc]
+
+automations:
+  - name: Auto-tag intake
+    trigger: issue.created
+    actions:
+      - add_label: triage-needed
+      - add_label_if: "source == automated"  # adds "automated" when created by agent
+  - name: Block when governance link missing
+    trigger: pr.opened
+    condition: "!issue.linked_to_roadmap"
+    actions:
+      - add_label: governance-link-missing
+      - set_status: Blocked
+  - name: Promote on review
+    trigger: pr.opened
+    condition: "issue.linked_to_roadmap"
+    actions:
+      - set_status: In Review
+  - name: Require evidence before Done
+    trigger: pr.merged
+    condition: "!issue.has_field('EvidenceLinks')"
+    actions:
+      - add_label: gate
+      - set_status: Blocked
+
+metrics:
+  - name: velocity
+    measure: points_completed_per_week
+  - name: lead_time
+    measure: time_todo_to_done
+  - name: wip
+    measure: count_in_progress_review
+  - name: blocked
+    measure: count_blocked
+  - name: p0_p1_age
+    measure: age_p0_p1_in_backlog
+  - name: automated_ratio
+    measure: ratio_automated_to_manual

@@ -32,12 +32,18 @@ import {
   MissionControlResolution,
 } from './mission-control/conflict-resolution.js';
 import { PolicyEngine } from '../services/PolicyEngine.js'; // Integration of Policy Engine
+import type {
+  MCPTransportName,
+  MCPTransportNegotiationPolicy,
+} from './mcp/transport/types.js';
 
 export interface ConductorConfig {
   enabledExperts: ExpertType[];
   defaultTimeoutMs: number;
   maxConcurrentTasks: number;
   auditEnabled: boolean;
+  mcpTransport?: MCPTransportName;
+  mcpTransportPolicy?: MCPTransportNegotiationPolicy;
   llmProviders: {
     light?: {
       endpoint: string;
@@ -70,6 +76,8 @@ export class Conductor {
       timeout: config.defaultTimeoutMs,
       retryAttempts: 3,
       retryDelay: 1000,
+      transport: config.mcpTransport,
+      negotiationPolicy: config.mcpTransportPolicy,
     });
     // Initialize budget controller
     // In a real application, Redis client should be injected or managed globally

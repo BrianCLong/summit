@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/fcr/v1/fcr-alert.schema.json",
+  "title": "FCR Alert",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["alert_id", "cluster_id", "severity", "summary", "generated_at"],
+  "properties": {
+    "alert_id": { "type": "string", "format": "uuid" },
+    "cluster_id": { "type": "string", "format": "uuid" },
+    "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "summary": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "response_pack": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "playbook_id": { "type": "string" },
+        "recommended_actions": { "type": "array", "items": { "type": "string" } },
+        "diffusion_summary": { "type": "string" }
+      }
+    }
+  }
+}

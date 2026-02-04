@@ -128,6 +128,7 @@ import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
 import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
+import federatedCampaignRadarRouter from './routes/federated-campaign-radar.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
@@ -502,6 +503,7 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
+  app.use('/api', federatedCampaignRadarRouter);
   app.use('/api/admin', adminGateway);
   app.use('/api/plugins', pluginAdminRouter);
   app.use('/api/integrations', integrationAdminRouter);
