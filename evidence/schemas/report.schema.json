@@ -1,14 +1,23 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "summit://evidence/report.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["evidence_id", "run_id", "summary", "policies_applied"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "run_id": {"type": "string"},
-    "summary": {"type": "string"},
-    "policies_applied": {"type": "array", "items": {"type": "string"}},
-    "artifacts": {"type": "array", "items": {"type": "string"}}
+    "evidence_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "scenarios": { "type": "integer" },
+    "status": { "type": "string" },
+    "item": { "type": "string" }
+  },
+  "required": [],
+  "additionalProperties": true
+  "$id": "https://summit.local/schemas/report.schema.json",
+  "type": "object",
+  "required": ["version", "classification", "summary"],
+  "properties": {
+    "version": { "type": "integer" },
+    "classification": { "type": "string", "enum": ["public", "internal", "restricted"] },
+    "summary": { "type": "string" },
+    "notes": { "type": "array", "items": { "type": "string" } }
   },
   "additionalProperties": false
 }
