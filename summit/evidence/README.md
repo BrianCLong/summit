@@ -1,10 +1,6 @@
-# Summit Evidence System
+# Summit Evidence Bundles
 
-Outputs:
-- report.json
-- metrics.json
-- stamp.json (timestamps allowed ONLY here)
-- evidence/index.json maps Evidence IDs -> files
+Deterministic evidence artifacts for CI + audit.
 
 ## Schemas
 

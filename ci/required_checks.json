@@ -16,8 +16,7 @@
     "ci:unit": "Unit Tests",
     "ci:schema": "Schema Validation",
     "ci:lint": "Lint",
-    "ci:deps-delta": "Dependency Delta",
-    "ci:security": "Security Gate"
+    "ci:deps-delta": "Dependency Delta"
   },
   "last_updated": "2026-01-30",
   "notes": "Populate with exact required status check names from branch protection rules."

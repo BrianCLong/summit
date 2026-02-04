@@ -28,4 +28,4 @@ jobs:
 
       - name: Run actionlint
         run: |
-          actionlint -color
+          actionlint -color $(find .github/workflows -name '*.yml' -not -path '*/.archive/*')
