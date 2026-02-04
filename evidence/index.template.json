@@ -1,3 +1,7 @@
 {
-  "evidence": {}
+  "evidence": {
+    "EVD-QODANA_ANDROID_KOTLIN-CI-001": "evidence/report.json",
+    "EVD-QODANA_ANDROID_KOTLIN-POLICY-001": "evidence/metrics.json",
+    "EVD-QODANA_ANDROID_KOTLIN-CI-002": "evidence/stamp.json"
+  }
 }
