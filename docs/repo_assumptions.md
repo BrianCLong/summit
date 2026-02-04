@@ -12,54 +12,79 @@
 *   **Modules**: `server/src/modules/` is the location for domain modules.
 *   **Testing**: Jest is used for testing (`server/__tests__`).
 
+## CogOps Intake (PR-17701)
+### Verified vs Assumed
+| Item | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| Monorepo uses pnpm workspaces | Verified | `pnpm-workspace.yaml` | Package manager scope confirmed. |
+| Makefile as task runner | Verified | `Makefile` | Golden path target exists. |
+| Docs CI policies exist | Verified | `docs/ci/REQUIRED_CHECKS_POLICY.yml` | Required checks policy file present. |
+| Schema directory for JSON artifacts | Verified | `schemas/` | Existing schema registry directory. |
+| Governance sources of truth | Verified | `docs/governance/CONSTITUTION.md` + `docs/governance/META_GOVERNANCE.md` | Must align changes to these authorities. |
+| Evidence bundle conventions | Verified | `docs/evidence/evidence-map.yml` + `docs/governance/evidence-required.json` | Evidence catalog present. |
+| Summit Readiness Assertion | Verified | `docs/SUMMIT_READINESS_ASSERTION.md` | Required escalation reference. |
+| CI standard reference | Verified | `docs/CI_STANDARDS.md` | PR validation source of truth. |
+| Runtime language mix | Deferred pending verification | N/A | Confirm which modules own new `cogops` code paths. |
+| Evidence bundle hashing rules | Deferred pending verification | N/A | Confirm deterministic hash/ID practices in existing evidence tooling. |
+| Required checks enforcement mechanism | Deferred pending verification | N/A | Confirm if policy is enforced via workflow or branch protection sync. |
+
+## CogOps Subsumption (PR-17704)
+### Verified vs Assumed
+| Item | Status | Evidence |
+| --- | --- | --- |
+| Workspace uses pnpm with Node 18+ | Verified | `package.json` lists `packageManager: pnpm@9.12.0` and Node engine `>=18.18`. |
+| Primary schema registry lives under `schemas/` | Verified | `schemas/` contains evidence and governance schemas. |
+| Evidence bundle artifacts use `report/metrics/stamp` JSON naming | Verified | `evidence/report.json`, `evidence/metrics.json`, `evidence/stamp.json`. |
+| Required checks policy is governed under `docs/ci/REQUIRED_CHECKS_POLICY.yml` | Verified | File present under `docs/ci/`. |
+| Roadmap status is tracked in `docs/roadmap/STATUS.json` | Verified | File is present and validated by `scripts/validate-roadmap-status.cjs`. |
+| CogOps implementation module location | Deferred pending repo alignment | No in-repo `cogops` module currently defined. |
+
+## Cognitive Ops (CogOps) (PR-17706)
+### Verified
+- Repository is a pnpm workspace (`pnpm-workspace.yaml` present).
+- Schemas live in `schemas/` directory.
+- Required checks policy file exists (`docs/ci/REQUIRED_CHECKS_POLICY.yml`).
+- Evidence schemas exist (report/metrics/stamp).
+- Primary docs tree is `docs/`.
+
 ## CogSec Radar (PR-17708)
 ### CogSec Verified
-1.  **Required Checks Source**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` is authoritative for required checks. (Verified.)
-2.  **Audit & RBAC Surfaces**: `audit/` and `rbac/` directories exist for audit artifacts and RBAC utilities. (Verified.)
-3.  **Docs Baselines**: `docs/security/CIS_CONTROLS_CHECKLIST.md` exists for security baseline references. (Verified.)
-
-### CogSec Deferred Pending
-1.  **GA Plan Location**: `docs/reports/GA-Plan.md` is not present; the current GA plan artifact is under `docs/archive/root-history/GA-Plan.md`. (Intentionally constrained pending governance direction.)
-2.  **RBAC Middleware Location**: Specific API RBAC middleware entrypoints remain to be pinpointed. (Deferred pending targeted search within `server/` and `apps/`.)
+1.  **Required Checks Source**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` is authoritative for required checks.
+2.  **Audit & RBAC Surfaces**: `audit/` and `rbac/` directories exist.
+3.  **Docs Baselines**: `docs/security/CIS_CONTROLS_CHECKLIST.md` exists.
 
 ## NATO Cognitive Alerts (PR-17709)
 ### Verified
 - MIT license present at repo root.
-- Key top-level directories present: `alerting/`, `active-measures-module/`,
-  `adversarial-misinfo-defense-platform/`, `api/`, `api-schemas/`, `apps/`,
-  `RUNBOOKS/`, `SECURITY/`.
-
-### Assumed
-- JS/TS monorepo using `pnpm`, Jest, and linting.
-- Alert ingestion and UI surfaces can consume new alert types.
+- Key top-level directories present: `alerting/`, `active-measures-module/`, `adversarial-misinfo-defense-platform/`, `api/`, `api-schemas/`, `apps/`, `RUNBOOKS/`, `SECURITY/`.
 
 ## Narrative Intelligence Subsumption (PR-17713)
 ### Verified (Local Inspection)
-- `docs/security/` and `docs/ops/runbooks/` exist and are active documentation surfaces.
-- Feature flags are documented under `docs/FEATURE_FLAGS.md` and related docs.
+- `docs/security/` and `docs/ops/runbooks/` exist.
+- Feature flags are documented under `docs/FEATURE_FLAGS.md`.
 - Playwright configuration exists in the repo root (`playwright.config.ts`).
 
-### Deferred Pending Verification
-- Exact service runtime locations for narrative analytics modules.
-- CI check names and required gates for narrative intelligence changes.
-- Existing evidence schema naming and signing conventions used by runtime services.
-
 ## Assumptions
-*   The `server/db/managed-migrations` path is correctly configured in the environment where `npm run migrate` runs.
-*   The `MigrationManager` is robust enough to handle new tables without manual intervention in the database structure (other than running the migration).
-*   The `@scope` directive is fully functional and wired up in the schema transformer.
+*   The `server/db/managed-migrations` path is correctly configured.
+*   The `MigrationManager` is robust enough to handle new tables.
+*   The `@scope` directive is fully functional.
 
 ## "Do Not Touch" List
-*   `.pnpm-store/`
-*   `.qwen-cache/`
-*   `.archive/`
-*   `GOLDEN/datasets/`
-*   Existing migration files in `server/db/managed-migrations/` (unless fixing a bug, which is out of scope).
-*   `THIRD_PARTY_NOTICES/` and existing license headers.
-*   Existing security policy configs under `.security/` or `SECURITY/` without review.
+*   `.pnpm-store/`, `.qwen-cache/`, `.archive/`, `GOLDEN/datasets/`.
+*   Existing migration files in `server/db/managed-migrations/`.
+*   `docs/SUMMIT_READINESS_ASSERTION.md`, `docs/governance/*`, `docs/ga/*`.
+*   `agent-contract.json`, `CODEOWNERS`, `THIRD_PARTY_NOTICES/`.
+*   `.github/workflows/`: Do not edit existing workflows.
+*   `docs/ci/REQUIRED_CHECKS_POLICY.*`: Update only with explicit gate requirements.
+*   `schemas/evidence*`: Do not change shared evidence schemas without governance.
+*   `scripts/ci/*`: Avoid modifying CI gate scripts.
+*   `docs/governance/CONSTITUTION.md`: Governance authority.
+*   `docs/governance/META_GOVERNANCE.md`: Governance authority.
+*   `.github/branch-protection-rules.md`: Branch protection contract.
 
-## Validation Plan (Narrative Intelligence PR-1)
-- Locate feature flag evaluation path and tenant allowlist controls.
-- Confirm centralized logging/audit pathways for evidence packs.
-- Identify artifact naming conventions and hash signing flows.
-- Confirm API patterns (REST/GraphQL/WebSocket) and endpoint ownership.
+## Validation Plan
+1. Confirm `cogops` target module location and ownership boundaries.
+2. Confirm evidence ID format in existing schema/tooling to avoid conflict.
+3. Map evidence ID conventions against `scripts/ci/verify_evidence_id_consistency.mjs`.
+4. Align CogOps schema naming with `schemas/index_catalog.yaml`.
+5. Confirm required checks enforcement path for new CI jobs.

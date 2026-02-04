@@ -1,0 +1,49 @@
+{
+  "$id": "https://summit.dev/schemas/cogops/metrics",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CogOps Metrics",
+  "type": "object",
+  "required": ["schema_version", "resilience_scorecard", "indicator_summary"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "resilience_scorecard": {
+      "type": "object",
+      "required": ["overall", "trust", "identity", "institution"],
+      "properties": {
+        "overall": { "type": "number", "minimum": 0, "maximum": 1 },
+        "trust": { "type": "number", "minimum": 0, "maximum": 1 },
+        "identity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "institution": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "indicator_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "score"],
+        "properties": {
+          "name": { "type": "string" },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "effect_proxy_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "delta"],
+        "properties": {
+          "name": { "type": "string" },
+          "delta": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
