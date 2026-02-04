@@ -1,7 +1,7 @@
 {
-  "run_id": "minimal-run-001",
-  "counters": {
-    "steps": 5,
-    "tool_calls": 2
+  "evidence_id": "EVD-CLAUDECODE-SUBAGENTS-FOUNDATION-001",
+  "metrics": {
+    "steps": 1,
+    "tool_calls": 0
   }
 }
