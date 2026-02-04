@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-TRUSTABLEAI-PERSONA-001",
+  "summary": "Persona registry and guard implementation.",
+  "artifacts": [],
+  "notes": ["Initial setup."]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RouterPolicy",
+  "type": "object",
+  "required": ["version", "tiers", "routes"],
+  "properties": {
+    "version": {"type": "string"},
+    "tiers": {
+      "type": "object",
+      "required": ["REFLEX", "STRATEGY"],
+      "properties": {
+        "REFLEX": {"type": "object", "required": ["latency_budget_ms"], "properties": {"latency_budget_ms": {"type": "integer", "minimum": 1}}},
+        "STRATEGY": {"type": "object", "properties": {"notes": {"type": "string"}}}
+      }
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "tier", "risk", "requires_verification"],
+        "properties": {
+          "name": {"type": "string"},
+          "tier": {"enum": ["REFLEX", "STRATEGY"]},
+          "risk": {"enum": ["low", "medium", "high"]},
+          "requires_verification": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}
