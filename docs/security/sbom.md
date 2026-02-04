@@ -4,57 +4,44 @@ This document describes how we generate SBOMs, the policies we evaluate against 
 
 ## What we generate in CI
 
-Pull requests targeting `main` now produce a CycloneDX SBOM and upload it as a build artifact. The pipeline:
+Pull requests and pushes to `main` produce a CycloneDX and SPDX SBOM, signed using **Cosign Keyless OIDC**.
 
-1. Installs [Syft](https://github.com/anchore/syft) on the runner.
-2. Runs [`scripts/generate-sbom.sh`](../../scripts/generate-sbom.sh) to emit `artifacts/sbom/sbom.json` in CycloneDX JSON format.
-3. Executes a warn-only policy evaluation via [`scripts/sbom-policy-check.mjs`](../../scripts/sbom-policy-check.mjs). Any findings are emitted as GitHub Action warnings but do not fail the build while the check is in adoption mode.
-4. Uploads `artifacts/sbom/sbom.json` as the `sbom-cyclonedx` artifact for downstream analysis and compliance evidence.
+The pipeline:
+1. Installs [Syft](https://github.com/anchore/syft) and [Cosign](https://github.com/sigstore/cosign) on the runner.
+2. Builds the artifacts via `scripts/release/build-artifacts.ts`.
+3. Generates SBOMs:
+   - `sbom.spdx.json` (SPDX)
+   - `sbom.cdx.json` (CycloneDX)
+4. **Signs the SBOMs** using Cosign's keyless OIDC mode (using the GitHub Actions workload identity). This produces `.sig` (signature) and `.pem` (certificate) files.
+5. Uploads all artifacts.
+6. Attests the build provenance using `actions/attest-build-provenance`.
+
+**Gate:** The build **fails** if signing cannot be completed (e.g., OIDC failure).
 
 ## Generating locally
 
 ### Prerequisites
 
-- Node.js 18+ (for the policy script)
+- Node.js 18+
 - [Syft](https://github.com/anchore/syft) installed on your PATH
-
-macOS (Homebrew):
-
-```bash
-brew tap anchore/syft
-brew install syft
-```
-
-Linux (curl):
-
-```bash
-curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-```
+- [Cosign](https://github.com/sigstore/cosign) installed on your PATH
 
 ### Commands
 
-Generate the SBOM in the standard artifact location:
+Generate the SBOM:
 
 ```bash
-bash scripts/generate-sbom.sh .
+syft . -o spdx-json=sbom.spdx.json
 ```
 
-Run the non-blocking policy evaluation against the generated SBOM:
+Sign (requires interactive OIDC login or a key):
 
 ```bash
-node scripts/sbom-policy-check.mjs
-```
-
-To scan a different path or change the artifact location:
-
-```bash
-ARTIFACTS_DIR=my-artifacts bash scripts/generate-sbom.sh ./services/api
-SBOM_FILE=my-artifacts/sbom.json node scripts/sbom-policy-check.mjs
+cosign sign-blob --yes sbom.spdx.json --output-signature sbom.spdx.json.sig --output-certificate sbom.spdx.json.pem
 ```
 
 ## How the SBOM is used
 
-- **Supply chain visibility:** The CycloneDX document inventories application and OS dependencies, enabling rapid impact analysis for advisories.
-- **License hygiene:** The policy check flags GPL/AGPL/LGPL usage and missing identifiers as warnings to guide remediation.
-- **Future gating:** The policy step currently runs in warn-only mode to avoid breaking builds; once coverage stabilizes we can flip it to blocking by removing `continue-on-error` in the workflow.
-- **Artifact retention:** SBOM artifacts uploaded from PR workflows provide auditable evidence for compliance reviews and downstream security automation.
+- **Supply chain visibility:** Inventories application and OS dependencies.
+- **Provenance:** The signature and attestation prove that the artifact was built in a trusted CI environment.
+- **Gate Enforcement:** Downstream deployment pipelines verify the Cosign signature and GitHub Attestation before allowing deployment.

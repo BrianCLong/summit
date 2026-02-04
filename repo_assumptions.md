@@ -1,27 +1,22 @@
 # Repo Assumptions & Reality Check
 
-## Verified
-- **Repo exists**: `BrianCLong/summit` (MIT licensed).
-- **Target Package**: `agents/orchestrator` (`@intelgraph/multi-llm-orchestrator`) is the real orchestrator.
-  - Confirmed via `grep` for "OpenAI" and "Anthropic" providers.
-  - Contains `src/providers/` with `OpenAIProvider.ts` and `ClaudeProvider.ts`.
-- **Test Runner**: `vitest` (v1.6.1).
-  - Configured in `agents/orchestrator/package.json`.
-  - Tests located in `agents/orchestrator/__tests__/`.
-- **Module System**: ESM (`type: "module"` in `package.json`).
+## Path Mappings
+| Plan Path | Repo Path | Status | Action |
+|-----------|-----------|--------|--------|
+| `packages/agents/{jules,codex,observer}/` | `packages/agents/` (Does not exist) | Missing | **CREATE** directory and TS agents. |
+| `packages/graphrag/` | `packages/graph-rag/` | Exists (hyphenated) | **USE** existing path. |
+| `packages/companyos-sdk/` | `packages/maestro-sdk/` | Ambiguous | **ASSUME** Maestro SDK is the technical artifact; position via docs. |
+| `.github/workflows/` | `.github/workflows/` | Exists | **MODIFY** `slsa-provenance.yml`. |
+| `docs/product/companyos.md` | `docs/product/companyos.md` (Does not exist) | Missing | **CREATE** file. |
 
-## Assumed
-- **Feature Flags**: Likely environment variable based or a simple config object. No dedicated `launchdarkly` or similar service observed yet.
-- **Budget**: Enforced via caller-supplied `budget` parameter in the new DAAO router (as per plan).
-- **Telemetry**: Logging via `console` or custom logger (observed `Omniscience` logging in `agentic`, but `agents/orchestrator` uses standard logging or potentially `pino` based on dependencies). `agents/orchestrator` has no explicit logger import in the snippets seen, but likely uses `console` or injected logger.
+## CI Check Validation
+* `slsa-provenance.yml`: Exists. Currently uses `SIGSTORE_KEY`. Needs update to keyless OIDC.
 
-## Target Directory Structure for DAAO
-All DAAO components will be placed in `agents/orchestrator/src/daao/`:
-- `agents/orchestrator/src/daao/difficulty/`
-- `agents/orchestrator/src/daao/routing/`
-- `agents/orchestrator/src/daao/collaboration/`
+## Evidence Schema
+* Evidence artifacts located in `evidence/`.
+* `packages/graph-rag` contains `retrieval.cypher` and `context_assembly.ts`.
 
-## Test Placement
-- `agents/orchestrator/__tests__/daao/difficulty/*.test.ts`
-- `agents/orchestrator/__tests__/daao/routing/*.test.ts`
-- `agents/orchestrator/__tests__/daao/collaboration/*.test.ts`
+## Constraints
+* `AGENTS.md`: Enforces "Strangler pattern: prefer new logic in `packages/` over `server/src/services/`".
+* `AGENTS.md`: "Agent tasks must conform to `agents/task-spec.schema.json`".
+* `AGENTS.md`: "Agents Cannot Self-Approve".

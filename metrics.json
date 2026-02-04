@@ -1,3 +1,7 @@
 {
-  "bundle_size_bytes": -1
+  "benchmark": "ingest_webhook_latency",
+  "iterations": 100,
+  "p95_ms": 136.51,
+  "avg_ms": 82.78,
+  "timestamp": "2026-02-04T04:37:31.753Z"
 }

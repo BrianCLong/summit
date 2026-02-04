@@ -17,7 +17,8 @@ jobs:
         with:
           cache: 'pnpm'
           node-version: 18.x
-      - uses: pnpm/action-setup@v4 # v4      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install dependencies
@@ -41,22 +42,15 @@ jobs:
 
       - name: Sign SBOMs
         run: |
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.spdx.json.sig sbom.spdx.json
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.cdx.json.sig sbom.cdx.json
-        env:
-          SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
+          cosign sign-blob --yes --output-signature sbom.spdx.json.sig --output-certificate sbom.spdx.json.pem sbom.spdx.json
+          cosign sign-blob --yes --output-signature sbom.cdx.json.sig --output-certificate sbom.cdx.json.pem sbom.cdx.json
 
       - name: Record Provenance
-        run: |
-          python scripts/compliance/in-toto-record.py --step-name build \
-            --materials "./src,./sbom.spdx.json,./sbom.cdx.json" \
-            --products "./dist/*"
+        run: python scripts/compliance/in-toto-record.py --step-name build --materials "./src,./sbom.spdx.json,./sbom.cdx.json" --products "./dist/*"
 
       - name: Sign Provenance
         run: |
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature attestation.json.sig attestation.json
-        env:
-          SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
+          cosign sign-blob --yes --output-signature attestation.json.sig --output-certificate attestation.json.pem attestation.json
 
       - name: Prepare subjects for SLSA
         id: slsa-subjects
@@ -70,10 +64,13 @@ jobs:
             dist/
             sbom.spdx.json
             sbom.spdx.json.sig
+            sbom.spdx.json.pem
             sbom.cdx.json
             sbom.cdx.json.sig
+            sbom.cdx.json.pem
             attestation.json
             attestation.json.sig
+            attestation.json.pem
 
   provenance:
     needs: [build]
