@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-01-20T12:00:00.000Z",
+  "skillpack": "ui-preview",
+  "shard": "default",
+  "planStepId": "step-1",
+  "planStepSummary": "Preview UI changes",
+  "expectedUtility": "Validate UI preview output",
+  "alternativesConsidered": ["manual inspection"],
+  "taskContext": {
+    "taskType": "implement",
+    "governanceMode": "pr",
+    "repoFocus": "frontend",
+    "contextBudget": 4000,
+    "remainingBudget": 2400
+  },
+  "shardReasoning": ["Context budget low; default shard enforced."],
+  "tools": [
+    {
+      "toolName": "mcp.playwright.screenshot",
+      "mode": "distilled",
+      "tokenEstimate": 128,
+      "policyReason": "Tool allowlisted by policy."
+    }
+  ],
+  "totals": {
+    "toolsConsidered": 1,
+    "toolsInjected": 1,
+    "toolsDenied": 0,
+    "tokensEstimated": 128
+  },
+  "autoPruneSuggestions": [],
+  "governedExceptions": []
+}

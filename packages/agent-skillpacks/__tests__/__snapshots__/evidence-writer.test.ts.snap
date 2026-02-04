@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderMarkdown creates stable output 1`] = `
+"# Tool Loading Report
+
+- Generated: 2026-01-20T00:00:00.000Z
+- Skillpack: ui-preview
+- Shard: default
+- Plan Step: step-1
+- Plan Summary: Preview UI
+- Expected Utility: Validate UI
+- Alternatives: manual
+
+## Shard Reasoning
+- default shard selected
+
+## Tools
+| Tool | Mode | Tokens | Policy |
+| --- | --- | --- | --- |
+| mcp.playwright.screenshot | distilled | 120 | allowlisted |
+
+## Totals
+- Tools considered: 1
+- Tools injected: 1
+- Tools denied: 0
+- Estimated tokens: 120
+
+## Governed Exceptions
+- None
+
+## Auto-prune Suggestions
+- Deferred pending runtime telemetry.
+"
+`;
