@@ -41,6 +41,10 @@ const dedupTypeDefs = fs.readFileSync(dedupSchemaPath, 'utf8');
 const voiceSchemaPath = path.join(__dirname, '../schemas/voice.graphql');
 const voiceTypeDefs = fs.readFileSync(voiceSchemaPath, 'utf8');
 
+// Load OSINT schema
+const osintSchemaPath = path.join(__dirname, '../schemas/osint.graphql');
+const osintTypeDefs = fs.readFileSync(osintSchemaPath, 'utf8');
+
 const base = gql`
   scalar JSON
   scalar DateTime
@@ -80,6 +84,7 @@ export const typeDefs = [
   cogSecTypeDefs,
   dedupTypeDefs,
   voiceTypeDefs,
+  osintTypeDefs,
 ];
 
 export default typeDefs;

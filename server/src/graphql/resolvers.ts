@@ -10,6 +10,7 @@ import { makePubSub } from '../subscriptions/pubsub.js';
 import Redis from 'ioredis';
 import { CausalGraphService } from '../services/CausalGraphService.js';
 import type { GraphQLContext } from './apollo-v5-server.js';
+import { runSynintSweep } from './resolvers/osint.js';
 import { createRequire } from 'node:module';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
@@ -173,6 +174,7 @@ export const resolvers = {
         end();
       }
     },
+    runSynintSweep,
   },
   Subscription: {
     coherenceEvents: {

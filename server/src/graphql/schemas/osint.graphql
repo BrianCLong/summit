@@ -5,11 +5,30 @@ type OsintScan {
   status: String!
 }
 
-type Query {
+type SynintAgentFinding {
+  agentName: String!
+  success: Boolean!
+  findings: JSON!
+  errors: [String!]
+  warnings: [String!]
+  startedAt: DateTime
+  completedAt: DateTime
+}
+
+type SynintSweep {
+  target: String!
+  startedAt: DateTime!
+  completedAt: DateTime!
+  agents: [SynintAgentFinding!]!
+  meta: JSON
+}
+
+extend type Query {
   osintScans: [OsintScan]
   osintScan(id: ID!): OsintScan
 }
 
-type Mutation {
+extend type Mutation {
   startOsintScan(target: String!): OsintScan
+  runSynintSweep(target: String!): SynintSweep!
 }
