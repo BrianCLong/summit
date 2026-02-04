@@ -5,8 +5,6 @@ import { initializeConductor, ConductorConfig } from './index.js';
 import { mcpRegistry } from './mcp/client.js';
 import GraphOpsServer, { GraphOpsConfig } from './mcp/servers/graphops-server.js';
 import FilesServer, { FilesServerConfig } from './mcp/servers/files-server.js';
-import { NarrativeMCPServer } from './mcp/servers/narrative-server.js';
-import { mcpClient } from './mcp/client.js';
 
 const u1 = process.env.NEO4J_USER;
 const u2 = process.env.NEO4J_USERNAME;
@@ -272,22 +270,8 @@ export async function initializeConductorSystem(): Promise<{
       console.log(`Files MCP Server started on port ${filesConfig.port}`);
     }
 
-    // Register Narrative MCP server (Story 5.1)
-    const narrativeServer = new NarrativeMCPServer();
-    mcpRegistry.register('narrative', {
-      url: 'local://narrative',
-      transport: 'local',
-      name: 'narrative',
-      authToken: authTokens[0],
-      tools: NarrativeMCPServer.tools
-    });
-
     // Initialize the main Conductor
     initializeConductor(config);
-
-    // Wire up local handler to mcpClient (must be after initializeMCPClient inside Conductor)
-    mcpClient.registerLocalServer('narrative', (req) => narrativeServer.handleRequest(req));
-
     console.log('Conductor system initialized successfully');
 
     return { graphOpsServer, filesServer };

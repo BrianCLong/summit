@@ -1,2 +1,0 @@
-// violation
-window.addEventListener('resize', () => {});

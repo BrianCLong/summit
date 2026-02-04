@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["version", "items"],
+  "required": ["items"],
   "properties": {
-    "version": { "type": "number" },
+    "version": { "type": ["string", "number"] },
     "items": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["evidence_id", "files"],
+        "required": ["evidence_id"],
         "properties": {
           "evidence_id": { "type": "string" },
           "files": {
@@ -20,8 +20,12 @@
               "stamp": { "type": "string" }
             },
             "additionalProperties": false
-          }
+          },
+          "report": { "type": "string" },
+          "metrics": { "type": "string" },
+          "stamp": { "type": "string" }
         },
+        "anyOf": [{ "required": ["files"] }, { "required": ["report", "metrics", "stamp"] }],
         "additionalProperties": false
       }
     }
