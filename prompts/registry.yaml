@@ -425,7 +425,6 @@ prompts:
     scope:
       paths:
         - docs/runbooks/
-        - docs/roadmap/
         - docs/roadmap/STATUS.json
         - agents/examples/
         - prompts/docs/runbooks-update@v1.md
@@ -834,6 +833,35 @@ prompts:
         - documentation
         - roadmap
         - labs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: kimik25-evidence-scaffold
+    version: v1
+    path: prompts/evidence/kimik25-evidence-scaffold@v1.md
+    sha256: bf7fa8fb88d42633c7d7fe399403da277b52606ac82d2279ecad840437972059
+    description: Scaffold KIMIK25 evidence bundles, fixtures, and verification checks.
+    scope:
+      paths:
+        - evidence/
+        - ci/check_evidence.py
+        - tools/emit_evidence.py
+        - tests/test_evidence_schemas.py
+        - .gitignore
+        - docs/roadmap/STATUS.json
+        - prompts/evidence/kimik25-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+        - ci
+        - testing
     verification:
       tiers_required:
         - C
