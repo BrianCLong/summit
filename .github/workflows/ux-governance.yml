@@ -16,13 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
-        # Version read from package.json packageManager field
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
+        # Version read from package.json packageManager field
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
