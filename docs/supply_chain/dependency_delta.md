@@ -1,5 +1,10 @@
-# Dependency Delta Log
+# Dependency Delta for PR
 
-| Date | PR | Dependency | Reason | Risk |
-|---|---|---|---|---|
-| 2026-01-27 | PR-Science | None | Initial Setup | Low |
+## Added Dependencies
+- None
+
+## Removed Dependencies
+- None
+
+## Rationale
+- No dependency changes. PyYAML is used from existing requirements.

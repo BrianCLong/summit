@@ -1,48 +1,87 @@
 import re
-from typing import Dict, List, Any
+import math
+from typing import Dict, Any, List
 
-def score_artifact(text: str) -> Dict[str, Any]:
-    """
-    Computes a slop score based on v0 heuristics.
-    Returns: {"score": float, "reasons": List[str]}
-    """
-    score = 0.0
+# Common boilerplate phrases and "AI-isms" found in low-quality AI content
+BOILERPLATE_PHRASES = [
+    "as an ai language model",
+    "it is important to note that",
+    "in conclusion",
+    "this highlights the importance of",
+    "furthermore",
+    "moreover",
+    "lastly",
+    "a testament to",
+    "delve into",
+    "the intricate tapestry",
+    "shiver down the spine",
+    "not just a... but a...",
+    "in today's digital landscape",
+    "unlocked new possibilities",
+    "a beacon of hope",
+]
+
+def calculate_shannon_entropy(text: str) -> float:
+    """Calculates the Shannon entropy of the character distribution."""
+    if not text:
+        return 0.0
+    prob = [float(text.count(c)) / len(text) for c in set(text)]
+    entropy = - sum([p * math.log2(p) for p in prob])
+    return entropy
+
+def calculate_repetition_score(text: str) -> float:
+    """Simple heuristic for word/phrase repetition."""
+    words = re.findall(r'\w+', text.lower())
+    if not words:
+        return 0.0
+    unique_words = set(words)
+    return 1.0 - (len(unique_words) / len(words))
+
+def calculate_boilerplate_score(text: str) -> float:
+    """Scores based on frequency of known boilerplate phrases."""
+    text_lower = text.lower()
+    matches = 0
+    for phrase in BOILERPLATE_PHRASES:
+        matches += len(re.findall(re.escape(phrase), text_lower))
+
+    words_count = len(text_lower.split())
+    if words_count == 0:
+        return 0.0
+    # Weighted matches to detect dense slop
+    return min(1.0, (matches * 15) / words_count)
+
+def get_slop_score(text: str) -> Dict[str, Any]:
+    """Combines heuristics into a sophisticated slop score."""
+    if not text:
+        return {"score": 0.0, "reasons": ["EMPTY_CONTENT"], "metrics": {}}
+
+    rep_score = calculate_repetition_score(text)
+    bp_score = calculate_boilerplate_score(text)
+    entropy = calculate_shannon_entropy(text)
+
+    # Entropy normalization (English typically 4.0-5.0)
+    # Very low entropy often means repetitive/automated text
+    entropy_score = max(0.0, (4.0 - entropy) / 4.0) if entropy < 4.0 else 0.0
+
+    # Combined weighted score
+    # Higher weights on boilerplate and entropy for "AI-ness"
+    total_score = (rep_score * 0.3) + (bp_score * 0.5) + (entropy_score * 0.2)
+
     reasons = []
+    if rep_score > 0.5:
+        reasons.append(f"HIGH_REPETITION: {rep_score:.2f}")
+    if bp_score > 0.2:
+        reasons.append(f"HIGH_BOILERPLATE: {bp_score:.2f}")
+    if entropy < 3.5:
+        reasons.append(f"LOW_ENTROPY: {entropy:.2f}")
 
-    # 1. Repetition detection
-    sentences = re.split(r'[.!?]+', text)
-    sentences = [s.strip() for s in sentences if len(s.strip()) > 10]
-    if len(sentences) > 0:
-        unique_sentences = set(sentences)
-        repetition_ratio = 1.0 - (len(unique_sentences) / len(sentences))
-        if repetition_ratio > 0.2:
-            score += 0.4
-            reasons.append(f"high_repetition_ratio:{repetition_ratio:.2f}")
-
-    # 2. Boilerplate / Template markers
-    boilerplate_patterns = [
-        r"as an AI language model",
-        r"in conclusion,",
-        r"it is important to note",
-        r"delve into",
-        r"tapestry of",
-        r"testament to",
-        r"comprehensive review"
-    ]
-    matches = []
-    for pattern in boilerplate_patterns:
-        if re.search(pattern, text, re.IGNORECASE):
-            matches.append(pattern)
-
-    if matches:
-        score += 0.1 * len(matches)
-        reasons.append(f"boilerplate_detected:{','.join(matches)}")
-
-    # 3. Structural anomalies
-    if len(text) < 50:
-        score += 0.5
-        reasons.append("artifact_too_short")
-
-    # Cap score at 1.0
-    final_score = min(1.0, score)
-    return {"score": final_score, "reasons": reasons}
+    return {
+        "score": total_score,
+        "reasons": reasons,
+        "metrics": {
+            "repetition": round(rep_score, 4),
+            "boilerplate": round(bp_score, 4),
+            "entropy": round(entropy, 4),
+            "entropy_score": round(entropy_score, 4)
+        }
+    }
