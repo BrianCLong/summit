@@ -151,35 +151,6 @@ export class AgentGovernanceService {
     context: any,
     metadata?: Record<string, any>
   ): Promise<GovernanceDecision> {
-    // === HITL OVERRIDE (Task #104) ===
-    // Check if there is an existing human approval for this task/action
-    if (context.taskId) {
-      try {
-        const { getPostgresPool } = await import('../db/postgres.js');
-        const pool = getPostgresPool();
-        // Check for approved record in the approvals table
-        const result = await pool.query(
-          `SELECT status FROM approvals 
-           WHERE (payload->>'taskId' = $1 OR run_id = $2)
-           AND status = 'approved' 
-           ORDER BY created_at DESC LIMIT 1`,
-          [context.taskId, context.runId]
-        );
-
-        if (result.rows && result.rows.length > 0) {
-          logger.info({ taskId: context.taskId }, 'Governance: Human approval detected, allowing action');
-          return {
-            allowed: true,
-            reason: 'Action manually authorized by human operator',
-            riskScore: 0,
-            violations: []
-          };
-        }
-      } catch (err) {
-        logger.warn({ taskId: context.taskId, error: (err as Error).message }, 'Governance: Approval check failed, falling back to policy');
-      }
-    }
-
     const config = this.getAgentConfig(agent);
     const violations: SafetyViolation[] = [];
 

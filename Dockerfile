@@ -4,7 +4,7 @@
 # ==============================================================================
 # Stage 1: Base dependencies
 # ==============================================================================
-FROM node:22-alpine@sha256:e4bf2a82ad0a4037d28035ae71529873c069b13eb0455466ae0bc13363826e34 AS base
+FROM node:22-alpine AS base
 WORKDIR /app
 
 # Security: Add labels for image metadata
@@ -21,7 +21,7 @@ RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 # ==============================================================================
 # Stage 2: Build
 # ==============================================================================
-FROM node:22-alpine@sha256:e4bf2a82ad0a4037d28035ae71529873c069b13eb0455466ae0bc13363826e34 AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 RUN npm install -g pnpm@10.0.0
 
@@ -44,23 +44,22 @@ ENV GIT_COMMIT=$BUILD_COMMIT
 
 RUN pnpm run build
 
-# Create healthcheck script
-RUN echo "const http = require('http'); \
-const options = { host: 'localhost', port: 3000, path: '/healthz', timeout: 2000 }; \
-const request = http.request(options, (res) => { \
-  if (res.statusCode == 200) process.exit(0); \
-  else process.exit(1); \
-}); \
-request.on('error', (err) => process.exit(1)); \
-request.end();" > healthcheck.js
-
 # ==============================================================================
 # Stage 3: Production Runtime
 # ==============================================================================
-# Use Chainguard Node image (minimal, no shell, no apk)
-FROM cgr.dev/chainguard/node@sha256:dc6e1253d18433294d67c76bc3eafa41177f3eed1272d0b89d2ca6154693aadc AS runtime
+FROM node:22-alpine AS runtime
+
+# Security: Install only runtime dependencies
+# - dumb-init: Proper PID 1 signal handling
+# - curl: For healthcheck
+# - ca-certificates: For HTTPS connections
+RUN apk add --no-cache dumb-init curl ca-certificates \
+    && rm -rf /var/cache/apk/*
 
 WORKDIR /app
+
+# Security: Create dedicated app user (already exists as node:1000, but explicit)
+# The node user already exists in node:alpine with UID 1000
 
 # Copy production node_modules
 COPY --from=base --chown=node:node /app/node_modules ./node_modules
@@ -77,9 +76,6 @@ COPY --from=build --chown=node:node /app/package.json ./
 COPY --from=build --chown=node:node /app/turbo.json ./
 COPY --from=build --chown=node:node /app/pnpm-workspace.yaml ./
 
-# Copy healthcheck script
-COPY --from=build --chown=node:node /app/healthcheck.js ./
-
 # Security: Environment defaults for production
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -88,13 +84,13 @@ ENV HEALTH_ENDPOINTS_ENABLED=true
 # Expose application port
 EXPOSE 3000
 
-# Health check using node script (curl is not available)
+# Health check for container orchestration (K8s liveness/readiness)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD ["node", "healthcheck.js"]
+  CMD curl -f http://localhost:3000/healthz || exit 1
 
-# Security: Run as non-root user (node user exists in Chainguard image)
+# Security: Run as non-root user
 USER node
 
-# Entrypoint: Chainguard node image has node as entrypoint by default
-# We can use CMD to specify the script
-CMD ["server/dist/src/index.js"]
+# Use dumb-init for proper signal handling (SIGTERM, SIGINT)
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server/dist/src/index.js"]

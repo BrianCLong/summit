@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-moltbook-relay-SURFACE-001",
-  "metrics": {
-    "exposed_ports_found": 1,
-    "unauthenticated_ports": 1
-  }
-}
