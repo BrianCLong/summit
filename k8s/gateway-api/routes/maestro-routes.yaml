@@ -131,7 +131,7 @@ spec:
     maxAge: 86400s
     allowCredentials: true
 ---
-# Maestro security headers
+# Maestro security headers (replaces nginx configuration-snippet)
 # Note: Security headers in Gateway API are typically handled via EnvoyPatchPolicy
 # or implementation-specific extensions
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -178,6 +178,12 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: envoy-gateway-system
+      ports:
+        - port: 8080
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
       ports:
         - port: 8080
           protocol: TCP

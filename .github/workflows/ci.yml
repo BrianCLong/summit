@@ -24,10 +24,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -46,11 +42,10 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: '18'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
@@ -65,7 +60,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -86,7 +80,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -119,10 +112,6 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -174,7 +163,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

@@ -23,6 +23,8 @@ jobs:
           cache: 'pnpm'
           node-version: "20"
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4
         # version is read from package.json packageManager field
 
       - name: Install dependencies (script only)

@@ -1,4 +1,3 @@
-version: 1
 item:
   slug: expectation-baselines
   title: "Expectation Baselines for OSINT Collection & Validation"
