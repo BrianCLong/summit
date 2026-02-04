@@ -1,0 +1,11 @@
+{
+  "item_slug": "forbes-2026-trends",
+  "evidence": [
+    { "id": "EVD-FORBES-2026-TRENDS-ACCESS-001", "files": ["../report.json", "../metrics.json", "../stamp.json"] },
+    { "id": "EVD-FORBES-2026-TRENDS-TRUST-010", "files": ["../report.json", "../metrics.json"] },
+    { "id": "EVD-FORBES-2026-TRENDS-TOUCHPOINTS-020", "files": ["../report.json", "../metrics.json"] },
+    { "id": "EVD-FORBES-2026-TRENDS-SIMPLEAI-030", "files": ["../report.json", "../metrics.json"] },
+    { "id": "EVD-FORBES-2026-TRENDS-UNKNOWN-040", "files": ["../report.json"] },
+    { "id": "EVD-FORBES-2026-TRENDS-UNKNOWN-050", "files": ["../report.json"] }
+  ]
+}
