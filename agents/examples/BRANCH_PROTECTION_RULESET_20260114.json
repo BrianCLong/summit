@@ -1,0 +1,47 @@
+{
+  "task_id": "BRANCH_PROTECTION_RULESET_20260114",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "branch-protection-enforcement",
+    "version": "v1",
+    "sha256": "b7c6e142e27f32dfaca8ac77e6e9af7b5093670e90534094e14b0687974e9b6a",
+    "path": "prompts/ci/branch-protection-enforcement.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/protection-rules.yml",
+      "docs/ci/BRANCH_PROTECTION_POLICY.md",
+      "docs/roadmap/STATUS.json",
+      "scripts/ci/generate_branch_protection_payload.mjs",
+      "scripts/ci/__tests__/generate_branch_protection_payload.test.mjs",
+      "scripts/ci/generate_ruleset_payload.mjs",
+      "scripts/ci/__tests__/generate_ruleset_payload.test.mjs",
+      "package.json",
+      "prompts/ci/branch-protection-enforcement.md",
+      "prompts/registry.yaml",
+      "agents/examples/BRANCH_PROTECTION_RULESET_20260114.json"
+    ],
+    "domains": ["governance", "ci", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "Ruleset payload stdout or artifacts/governance/main-ruleset.json",
+      "lint-staged output from commit"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Branch protection documentation aligns with required check contexts.",
+    "Ruleset payload generator outputs policy-derived contexts.",
+    "Roadmap status reflects governance update."
+  ],
+  "stop_conditions": [
+    "Required checks policy or branch protection scope cannot be reconciled.",
+    "Scope exceeds registry-allowed paths."
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-NARRDOM-SIM-001",
+  "metrics": {
+    "determinism_runs": 2,
+    "mismatches": 0
+  }
+}
