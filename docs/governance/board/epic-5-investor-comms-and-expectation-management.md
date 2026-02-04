@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Epic 5 — Investor Comms & Expectation Management (control the external story)
 
 1.  **Define investor update cadence**: monthly email, quarterly memo, ad hoc triggers.

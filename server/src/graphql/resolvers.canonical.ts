@@ -1,5 +1,5 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
-import { filterByTemporal } from '../canonical/types';
+import { filterByTemporal } from '../canonical/types.js';
 
 // Mock data store for fallback
 const MOCK_ENTITIES: any[] = [

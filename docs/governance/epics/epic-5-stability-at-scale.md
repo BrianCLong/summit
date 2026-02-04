@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 5 — Stability at Scale (make growth safe)
 
 1. Build multi-tenant fairness controls for all expensive operations.

@@ -1,5 +1,5 @@
 
-import { SocialPost, NarrativeCluster, AnomalyDetectionResult } from './types';
+import { SocialPost, NarrativeCluster, AnomalyDetectionResult } from './types.js';
 
 export class NarrativeTracker {
 

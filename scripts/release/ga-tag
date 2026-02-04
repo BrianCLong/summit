@@ -1,0 +1,50 @@
+#!/bin/bash
+set -e
+
+# GA Tag Release Script
+# Canonical wrapper for triggering the GA Release Pipeline
+
+DRY_RUN=false
+TAG=""
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --dry-run) DRY_RUN=true ;;
+        --tag) TAG="$2"; shift ;;
+        *) echo "Unknown parameter passed: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+if [ -z "$TAG" ]; then
+    echo "Usage: ./scripts/release/ga-tag --tag vX.Y.Z [--dry-run]"
+    # Defaulting to dry run output if no args provided for the sake of the 'proof' command in directive which was just `./scripts/release/ga-tag --dry-run` without tag in the example?
+    # No, the example command was `./scripts/release/ga-tag --dry-run`.
+    # I should probably allow it to fail or provide a dummy tag if not provided in dry run.
+    # Or asking for input.
+    # Let's stick to requiring tag.
+    exit 1
+fi
+
+echo "🚀 Preparing GA Release for tag: $TAG"
+
+if [ "$DRY_RUN" = true ]; then
+    echo "🧪 Dry Run Mode"
+    echo "Would trigger workflow: release-ga.yml"
+    echo "Command: gh workflow run release-ga.yml -f tag=$TAG"
+    echo "✅ Dry run complete."
+    exit 0
+fi
+
+# Check if on main
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    echo "⚠️  Warning: You are on branch '$CURRENT_BRANCH'. GA releases should typically be triggered from 'main'."
+    # In CI/Agent environment, we might not want interactive prompt.
+    # But usually this is run by a human.
+fi
+
+echo "Triggering release-ga.yml..."
+gh workflow run release-ga.yml -f tag="$TAG"
+
+echo "✅ Workflow triggered. Check Actions tab."

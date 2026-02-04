@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -37,6 +37,7 @@ import {
   Assessment,
 } from '@mui/icons-material';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
+import { useNavigate } from 'react-router-dom';
 
 interface Hunt {
   id: string;
@@ -101,12 +102,13 @@ const getSeverityColor = (severity: Hunt['severity']): ChipProps['color'] => {
 };
 
 export default function HuntList() {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
   const [filterType, setFilterType] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  const { data: hunts, loading } = useSafeQuery<Hunt[]>({
+  const { data: fetchedHunts, loading } = useSafeQuery<Hunt[]>({
     queryKey: `hunt_list_${filterType}_${filterStatus}`,
     mock: [
       {
@@ -186,6 +188,53 @@ export default function HuntList() {
     ],
     deps: [filterType, filterStatus],
   });
+
+  const [localHunts, setLocalHunts] = useState<Hunt[]>([]);
+  const [newHunt, setNewHunt] = useState({
+    name: '',
+    type: 'IOC' as Hunt['type'],
+    tactic: 'Initial Access',
+    description: '',
+  });
+
+  useEffect(() => {
+    if (fetchedHunts) setLocalHunts(fetchedHunts);
+  }, [fetchedHunts]);
+
+  const resetNewHunt = () =>
+    setNewHunt({
+      name: '',
+      type: 'IOC',
+      tactic: 'Initial Access',
+      description: '',
+    });
+
+  const closeCreateDialog = () => {
+    setCreateDialogOpen(false);
+    resetNewHunt();
+  };
+
+  const handleCreateHunt = () => {
+    const id =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `hunt-${Date.now()}`;
+    const now = new Date().toISOString();
+    const next: Hunt = {
+      id,
+      name: newHunt.name,
+      status: 'SCHEDULED',
+      type: newHunt.type,
+      tactic: newHunt.tactic,
+      lastRun: now,
+      findings: 0,
+      severity: 'MEDIUM',
+      description: newHunt.description || 'New hunt created',
+    };
+
+    setLocalHunts((prev) => [next, ...prev]);
+    closeCreateDialog();
+  };
 
   const columns: GridColDef<Hunt>[] = [
     {
@@ -302,19 +351,21 @@ export default function HuntList() {
   ];
 
   const filteredHunts =
-    hunts?.filter((hunt) => {
+    localHunts?.filter((hunt) => {
       if (selectedTab === 1 && hunt.status !== 'RUNNING') return false;
       if (selectedTab === 2 && hunt.status !== 'SCHEDULED') return false;
       if (selectedTab === 3 && hunt.findings === 0) return false;
       return true;
     }) || [];
 
-  const runningHunts = hunts?.filter((h) => h.status === 'RUNNING').length || 0;
+  const runningHunts =
+    localHunts?.filter((h) => h.status === 'RUNNING').length || 0;
   const totalFindings =
-    hunts?.reduce((sum, hunt) => sum + hunt.findings, 0) || 0;
+    localHunts?.reduce((sum, hunt) => sum + hunt.findings, 0) || 0;
   const criticalHunts =
-    hunts?.filter((h) => h.severity === 'CRITICAL').length || 0;
-  const failedHunts = hunts?.filter((h) => h.status === 'FAILED').length || 0;
+    localHunts?.filter((h) => h.severity === 'CRITICAL').length || 0;
+  const failedHunts =
+    localHunts?.filter((h) => h.status === 'FAILED').length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -439,13 +490,13 @@ export default function HuntList() {
 
           <Box sx={{ width: '100%' }}>
             <Tabs value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
-              <Tab label={`All Hunts (${hunts?.length || 0})`} />
+              <Tab label={`All Hunts (${localHunts?.length || 0})`} />
               <Tab label={`Running (${runningHunts})`} />
               <Tab
-                label={`Scheduled (${hunts?.filter((h) => h.status === 'SCHEDULED').length || 0})`}
+                label={`Scheduled (${localHunts?.filter((h) => h.status === 'SCHEDULED').length || 0})`}
               />
               <Tab
-                label={`With Findings (${hunts?.filter((h) => h.findings > 0).length || 0})`}
+                label={`With Findings (${localHunts?.filter((h) => h.findings > 0).length || 0})`}
               />
             </Tabs>
           </Box>
@@ -457,8 +508,8 @@ export default function HuntList() {
               disableRowSelectionOnClick
               density="compact"
               loading={loading}
-              onRowDoubleClick={(_params) => {
-                // TODO: Navigate to hunt detail page
+              onRowDoubleClick={(params) => {
+                navigate(`/hunts/${params.row.id}`);
               }}
               sx={{
                 '& .MuiDataGrid-row:hover': {
@@ -473,7 +524,7 @@ export default function HuntList() {
       {/* Create Hunt Dialog */}
       <Dialog
         open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
+        onClose={closeCreateDialog}
         maxWidth="md"
         fullWidth
       >
@@ -484,10 +535,23 @@ export default function HuntList() {
               fullWidth
               label="Hunt Name"
               placeholder="e.g., APT28 IOC Hunt - Fancy Bear Campaign"
+              value={newHunt.name}
+              onChange={(e) =>
+                setNewHunt((prev) => ({ ...prev, name: e.target.value }))
+              }
             />
             <FormControl fullWidth>
               <InputLabel>Hunt Type</InputLabel>
-              <Select label="Hunt Type">
+              <Select
+                label="Hunt Type"
+                value={newHunt.type}
+                onChange={(e) =>
+                  setNewHunt((prev) => ({
+                    ...prev,
+                    type: e.target.value as Hunt['type'],
+                  }))
+                }
+              >
                 <MenuItem value="IOC">IOC-based Hunt</MenuItem>
                 <MenuItem value="BEHAVIORAL">Behavioral Analysis</MenuItem>
                 <MenuItem value="NETWORK">Network Traffic Analysis</MenuItem>
@@ -499,7 +563,13 @@ export default function HuntList() {
             </FormControl>
             <FormControl fullWidth>
               <InputLabel>MITRE ATT&CK Tactic</InputLabel>
-              <Select label="MITRE ATT&CK Tactic">
+              <Select
+                label="MITRE ATT&CK Tactic"
+                value={newHunt.tactic}
+                onChange={(e) =>
+                  setNewHunt((prev) => ({ ...prev, tactic: e.target.value }))
+                }
+              >
                 <MenuItem value="Initial Access">Initial Access</MenuItem>
                 <MenuItem value="Execution">Execution</MenuItem>
                 <MenuItem value="Persistence">Persistence</MenuItem>
@@ -524,17 +594,22 @@ export default function HuntList() {
               rows={3}
               label="Description"
               placeholder="Describe the hunt objectives and methodology..."
+              value={newHunt.description}
+              onChange={(e) =>
+                setNewHunt((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
             />
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+          <Button onClick={closeCreateDialog}>Cancel</Button>
           <Button
             variant="contained"
-            onClick={() => {
-              setCreateDialogOpen(false);
-              // TODO: Create hunt logic here
-            }}
+            onClick={handleCreateHunt}
+            disabled={!newHunt.name.trim()}
           >
             Create Hunt
           </Button>

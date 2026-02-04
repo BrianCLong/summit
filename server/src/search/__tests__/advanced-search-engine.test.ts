@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { AdvancedSearchEngine, SearchDocument } from '../advanced-search-engine';
+import { AdvancedSearchEngine, SearchDocument } from '../advanced-search-engine.js';
 
 describe('AdvancedSearchEngine', () => {
   const docs: SearchDocument[] = [

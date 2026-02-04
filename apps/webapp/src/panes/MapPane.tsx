@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { fetchGraph, GraphData } from '../data/mockGraph';
 import type { RootState } from '../store';
 import type { MapboxTestStub } from '../types/testing';
+import { trackGoldenPathStep } from '../telemetry';
 
 mapboxgl.accessToken = 'no-token';
 
@@ -36,11 +37,12 @@ export function MapPane() {
       stub?.createMarker || (() => new mapboxgl.Marker());
     fetchGraph().then((data) => {
       setGraphData(data);
+      trackGoldenPathStep('map_pane_loaded', 'success');
     });
 
     return () => {
       (map as any).__marker?.remove?.();
-      map.remove?.();
+      (map as any).remove?.();
     };
   }, []);
 

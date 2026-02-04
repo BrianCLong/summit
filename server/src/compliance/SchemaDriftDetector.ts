@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
 import { getPostgresPool } from '../config/database.js';
 import { createHash } from 'crypto';
-import { SchemaSnapshot } from './types';
+import { SchemaSnapshot } from './types.js';
 
 export interface SchemaDiff {
   added: string[];

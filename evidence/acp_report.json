@@ -1,0 +1,11 @@
+{
+  "item": {
+    "slug": "acp-client",
+    "source_url": "https://github.com/github/copilot-cli"
+  },
+  "evidence": [
+    { "id": "EVD-copilotcliacp-PROTO-001", "files": ["evidence/acp_report.json"] },
+    { "id": "EVD-copilotcliacp-SEC-001", "files": ["evidence/acp_metrics.json"] },
+    { "id": "EVD-copilotcliacp-E2E-001", "files": ["evidence/acp_stamp.json"] }
+  ]
+}
