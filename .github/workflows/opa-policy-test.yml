@@ -45,9 +45,9 @@ jobs:
 
       - name: Setup OPA
         run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
-          chmod 755 opa
-          sudo mv opa /usr/local/bin/opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
+          chmod 755 opa-bin
+          sudo mv opa-bin /usr/local/bin/opa
           opa version
 
       - name: Validate Rego syntax
@@ -147,7 +147,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: opa-test-results-${{ github.run_id }}
           path: |
