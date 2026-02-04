@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Automation Metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dur_ms",
+    "files_touched",
+    "commands_run",
+    "network_used",
+    "sandbox_mode"
+  ],
+  "properties": {
+    "dur_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files_touched": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "commands_run": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "network_used": {
+      "type": "boolean"
+    },
+    "sandbox_mode": {
+      "type": "string",
+      "enum": ["read_only", "workspace_write", "full_access"]
+    },
+    "policy_decisions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
