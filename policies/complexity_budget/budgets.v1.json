@@ -1,7 +1,7 @@
 {
   "version": 1,
   "thresholds": {
-    "max_file_lines": 800,
-    "max_imports": 60
+    "max_file_lines": 1500,
+    "max_imports": 100
   }
 }

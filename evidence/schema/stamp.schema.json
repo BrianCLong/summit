@@ -1,11 +1,10 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "additionalProperties": false,
+  "required": ["evidence_id", "generated_at"],
   "properties": {
-    "started_at": {"type": "string"},
-    "finished_at": {"type": "string"},
-    "runner": {"type": "string"}
+    "evidence_id": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"}
   },
-  "required": ["started_at", "finished_at"]
+  "additionalProperties": false
 }

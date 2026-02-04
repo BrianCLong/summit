@@ -283,6 +283,9 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
+!artifacts/
+!artifacts/tool-loading-report.json
+!artifacts/tool-loading-report.md
 /dist
 .env
 sbom.json
@@ -293,11 +296,13 @@ data/automl/
 tmp-audit/
 **/digest-sandbox/
 **/tmp-security/
+**/v8-compile-cache-0/
 
 # Test reports
 reports/
 bug-bash-results/
 *-report.json
+!artifacts/tool-loading-report.json
 lint_output.txt
 
 # Security Scan Results & Audit Artifacts
@@ -372,3 +377,7 @@ subsumption/**/runs/
 
 # Governance evidence artifacts (generated locally/CI)
 artifacts/governance/
+# Cogwar deterministic artifacts
+!dist/
+!dist/cogwar/
+!dist/cogwar/**

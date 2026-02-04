@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
 
@@ -68,7 +68,7 @@ jobs:
           sha256sum "$OUT_BASE/$BUNDLE_NAME" > "$OUT_BASE/$BUNDLE_NAME.sha256"
 
       - name: Upload Evidence Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: evidence-id-consistency-${{ github.run_id }}
           path: artifacts/evidence-id-consistency/
