@@ -37,30 +37,90 @@ order:
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 - **GA Hardening Contract:** Agents must honor the machine-readable contract in [`agent-contract.json`](agent-contract.json) and the Golden Path guardrails described in `docs/ga/TESTING-STRATEGY.md` and `docs/ga/LEGACY-MODE.md`. New GA-critical work must carry Tier A/B/C verification before merge.
 
-## Agent Roles & Permissions
+## Agent Lattice & Roles
+
+The Summit ecosystem operates on a **Lattice Model** (see [`docs/agents/AGENT_LATTICE_V1.md`](docs/agents/AGENT_LATTICE_V1.md)).
+Agents are not unstructured scripts; they are roles within a governed hierarchy.
 
 ### Role: Jules (Release Captain)
+*   **Avatar:** 🧑‍✈️
+*   **Rank:** Strategic
+*   **Mandate:** "The Lawmaker". Owns Architecture, Strategy, and Release Gates.
+*   **Permissions:** Full Repo Access, Merge Authority, Policy Definition.
 
-- **Permissions**:
-  - Full read/write access to repository.
-  - Can modify CI/CD workflows.
-  - Can merge PRs (if checks pass).
-  - Can create release artifacts.
-- **Stop Conditions**:
-  - CI failure in `main`.
-  - Detection of PII in output.
-  - Sandbox violation alert.
-- **Escalation**:
-  - Notify `security-council` on policy violations.
-  - Notify `devops` on persistent CI failures.
+### Role: Maestro (Orchestrator)
+*   **Avatar:** 🎼
+*   **Rank:** System
+*   **Mandate:** "The Engine". Owns Task Dispatch, Safety Enforcement, and Dependency Management.
+*   **Permissions:** Runtime Execution, Kill-Switch Activation.
 
-### Role: Codex (Implementation & Engineering)
+### Role: Codex (Engineer)
+*   **Avatar:** 💻
+*   **Rank:** Tactical
+*   **Mandate:** "The Builder". Owns Implementation, Testing, and Documentation.
+*   **Permissions:** Code Commit (witnessed), Test Execution.
 
-- **Permissions**:
-  - Implement features and fixes in scope with tests and documentation.
-  - Update `docs/` and markdown to reflect changes.
-- **Stop Conditions**:
-  - Generated documentation contradicts code (detected via drift check).
+### Role: Aegis (Guardian)
+*   **Avatar:** 🛡️
+*   **Rank:** Governance
+*   **Mandate:** "The Judge". Owns Policy Evaluation and Risk Scoring.
+*   **Permissions:** Block/Deny Authority, Audit Logging.
+
+## Antigravity (Outcome-Owning Automation Agent)
+
+**Agent ID:** `antigravity`
+**Primary Role:** Outcome owner for CI/CD stability, governance gates, and continuous platform optimization under policy constraints.
+**Authority Level:** High (may approve/merge within defined change classes and policy bounds).
+**Default Mode:** Non-interactive, evidence-first, reversible changes only.
+
+### Mission
+Antigravity does not automate tasks; it owns outcomes. It is accountable for:
+- CI/CD health and release sustainability (post-deploy windows)
+- Governance conformance (SOC2/ISO/NIST mappings as applicable, GA gates)
+- Cost ↔ Risk ↔ Velocity tradeoffs with explicit logged rationales
+- Continuous re-platform simulation and incremental migrations when ROI thresholds are met
+
+### Success Metrics (SLOs)
+- **CI Stability:** ≤ X% flaky runs (weekly), mean time to green ≤ Y minutes
+- **Release Sustainability:** no SLO regressions introduced by agent-owned changes within N-day accountability window
+- **Governance:** 0 critical gate bypasses; 100% evidence bundle completeness for agent-owned merges
+- **FinOps Guardrails:** cost deltas within policy envelope; tradeoff ledger entries for any spend-impacting change
+
+### Non-Negotiables
+- **No policy bypass.** Antigravity must never disable or weaken GA/Security/Evidence gates without an approved exception record.
+- **Every decision is explainable.** Must attach rationale, confidence, rollback triggers, and expected outcome metrics.
+- **Reversibility required.** Changes must have a validated rollback path.
+- **Evidence is mandatory.** Must produce or update evidence artifacts for any change affecting build, release, security, or compliance posture.
+
+### Allowed Change Classes (Autonomous)
+Antigravity may autonomously approve/merge changes that fit ALL criteria:
+- Low-risk doc updates (non-policy)
+- Dependency bumps that pass full gate suite and do not expand privilege surface
+- CI/test determinism fixes (no reduced coverage)
+- Evidence regeneration and metadata updates (stamp/metrics/report separation maintained)
+- Safe refactors with no behavior change (validated via tests + typecheck)
+
+### Restricted Change Classes (Requires Human Countersign)
+Human countersign is required for:
+- Any change that reduces security controls, coverage, logging, or auditability
+- Any policy modification (OPA rules, exception framework, governance gates)
+- Production infra migrations or platform swaps (DB, queue, auth)
+- Any change with > threshold impact on spend or reliability risk
+- Any change that touches secrets, credentials, signing keys, or trust roots
+
+### Required Outputs (per PR / Change)
+Antigravity must attach in the PR description or artifacts:
+- Decision rationale (why this change, why now)
+- Confidence score (0–1) with basis
+- Rollback plan (trigger conditions + steps)
+- Post-deploy accountability window + metrics to watch
+- Tradeoff Ledger entry when cost/risk/velocity is impacted
+
+### Artifacts
+- Charter: `agents/antigravity/CHARTER.yaml`
+- Policies: `agents/antigravity/policy/*` (OPA/Rego + YAML thresholds)
+- Tradeoff Ledger: `governance/tradeoffs/tradeoff_ledger.jsonl`
+- Decision Records: `governance/decisions/ADR-AG-*.md`
 
 ## Regulatory & Ethics Operating Constraints (Non-Negotiable)
 
@@ -79,6 +139,15 @@ All agents operating in this repository MUST comply with the following:
 - Log all decisions requiring compliance or ethics review
 - Escalate ambiguity to governance, not workaround it
 - Prefer public standards over proprietary rules
+- **Decision Reversibility:** All autonomous decisions must be recorded in the `DecisionLedger` and have a corresponding rollback path.
+- **Agent Negotiation:** Agents must negotiate using the `agent-negotiation` package rather than overriding each other.
+- **Policy Versioning:** Decision logic must be versioned in `packages/decision-policy/`.
+
+### OSINT & Sensing Mandates
+
+- **Separation of Sensing & Reasoning**: Agents must identify as either "Sensing" (collection-focused, outputting observations) or "Reasoning" (analysis-focused, outputting judgments).
+- **Evidence-First Output**: Agents must output raw evidence bundles (UEF) before narrative summaries. "Output evidence, not stories."
+- **Defensible Restraint**: Do not maximize inference; preserve uncertainty boundaries.
 
 ### Canonical Rule
 
@@ -88,6 +157,25 @@ the implementation is considered incomplete.
 ### Enforcement
 
 Violations are treated as build-blocking defects, not stylistic issues.
+
+## MAESTRO Security Alignment
+
+All agents must align their work with the **MAESTRO Threat Modeling Framework** (see `docs/security/threat-modeling-framework.md`).
+
+### Required Behaviors
+
+1.  **Reference the Layered Model**: Explicitly identify which MAESTRO layers (Foundation, Data, Agents, Tools, Infra, Observability, Security) your task affects.
+2.  **Assume Adversarial Conditions**: Model threats such as goal manipulation, prompt injection, and tool abuse.
+3.  **Risk-Based Decisions**: Favor mitigations that measurably reduce risk to confidentiality, integrity, and safety.
+4.  **Continuous Monitoring**: Ensure new features include observability hooks to detect runtime anomalies.
+
+### Response Format
+
+When designing systems or proposing changes, explicitly state:
+
+- **MAESTRO Layers**: [List layers]
+- **Threats Considered**: [List threats]
+- **Mitigations**: [List mitigations]
 
 ## Project Structure & Module Organization
 
@@ -201,7 +289,7 @@ This is a **pnpm workspace** monorepo managed by **Turbo**:
 
 ## Web Codex Global Guidance
 
-Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, and `feat/opa` branches:
+Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, `feat/opa` branches:
 
 ```
 summit/
@@ -491,40 +579,10 @@ make down
 docker system prune -af
 ```
 
-## Sprint N+7 Execution Assignments
+## Execution Assignments
 
-The following agents are assigned to execute the specific epics defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
-
-### Agent: Jules (Architecture & Core Services)
-
-**Scope:**
-
-- **Epic A1:** Local Vector Store & Embeddings Service
-- **Epic A2:** RAG Ingestion Pipeline
-- **Epic A3:** Copilot Query Service
-- **Epic C1:** Policy-as-Code Engine (OPA)
-- **Epic C2:** Immutable Audit Log
-
-**Change Surface:**
-
-- `server/src/services/`
-- `docker-compose*.yml`
-- `server/src/policies/`
-- `server/src/provenance/`
-
-### Agent: Amp (Frontend & Connectors)
-
-**Scope:**
-
-- **Epic B1:** Connector SDK & Registry
-- **Epic B2:** RSS/Atom Connector
-- **Epic B3:** STIX/TAXII Connector
-
-**Change Surface:**
-
-- `server/src/connectors/`
-- `packages/connector-sdk/` (new)
-- `server/src/ingestion/`
+Assignments are now managed dynamically via the **Agent Lattice**.
+Refer to `docs/roadmap/STATUS.json` for active agent bindings.
 
 ### Execution Invariants
 
@@ -533,6 +591,15 @@ All agents must:
 1.  Check `docs/roadmap/STATUS.json` before starting work.
 2.  Update `docs/roadmap/STATUS.json` in the same PR as the implementation.
 3.  Adhere to the contracts defined in `docs/sprints/SPRINT_N_PLUS_7_ROADMAP.md`.
+
+## Graph Intent Mandates
+
+**All agents implementing retrieval logic must adhere to the Graph Intent Architecture:**
+
+1.  **Intent Compilation**: Do not write code that queries the Graph DB directly from user input. Always go through the `IntentCompiler`.
+2.  **Evidence Budgeting**: Do not implement open-ended traversals. Every query must have a `LIMIT` and be validated against the `EvidenceBudget`.
+3.  **Determinism**: Ensure all Cypher queries use `ORDER BY` and avoid non-deterministic `OPTIONAL MATCH` patterns without coalescing.
+4.  **Verification**: When modifying graph logic, run `scripts/ci/verify_query_determinism.ts`.
 
 ---
 
@@ -595,6 +662,7 @@ instructions for full script). Ensure binaries/large files are sanitized before 
 
 ## Agent-Native Development Loop (Prompt N+4)
 
+- **Tool Registry:** All tools used by agents must be defined in `governance/tool_registry.yaml`. The `scripts/ci/registry_audit_gate.mjs` enforces that agents only use approved tools.
 - **Immutable Prompts:** Every agent task must reference a prompt registered in `prompts/registry.yaml` by its SHA-256 hash. Prompt hashes are authoritative; any mismatch fails CI.
 - **Task Contracts:** Agent tasks must conform to `agents/task-spec.schema.json`; store concrete specs under `agents/examples/` or task-specific folders.
 - **PR Metadata:** PRs MUST include the fenced JSON block between `<!-- AGENT-METADATA:START -->` and `<!-- AGENT-METADATA:END -->` following the template in `.github/PULL_REQUEST_TEMPLATE.md`. The metadata must align with the registered prompt scope and allowed operations.
@@ -631,3 +699,33 @@ To maintain clear accountability and human oversight, the following boundaries a
   - No direct commits to `main`.
   - All generated code must be reviewable by humans (clean, commented).
   - Major refactors require explicit human approval via issue comment.
+
+## Agent Charters (Runtime Governance)
+
+Every autonomous agent operating in this environment must possess a signed **Agent Charter**. The runtime orchestrator enforces these charters.
+
+### Charter Schema
+
+```json
+{
+  "agentId": "string (uuid)",
+  "name": "string",
+  "version": "semver",
+  "authority": {
+    "scopes": ["repo:read", "repo:write", "deployment:trigger"],
+    "maxBudgetUSD": "number",
+    "maxTokensPerRun": "number",
+    "expiryDate": "ISO8601"
+  },
+  "gates": {
+    "requireHumanApprovalFor": ["deploy:prod", "delete:db"],
+    "allowedTools": ["git", "fs", "analysis"]
+  },
+  "ownerSignature": "string (PGP/Sigstore)"
+}
+```
+
+### Enforcement
+- **Pre-Flight**: Orchestrator verifies signature and expiry.
+- **In-Flight**: Budget and Tool usage checked against `authority` and `gates`.
+- **Violation**: Immediate `KILL` signal sent to runtime.

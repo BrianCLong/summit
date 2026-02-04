@@ -47,6 +47,33 @@ const DETECTION_PATTERNS: Record<SensitiveDataType, DetectionRule[]> = {
   [SensitiveDataType.BIOMETRIC]: [
     { name: 'FINGERPRINT', pattern: /\b(?:fingerprint|biometric)[-:\s]*[A-Fa-f0-9]{32,}\b/gi, confidence: 0.8 },
   ],
+  [SensitiveDataType.SECURITY]: [
+    {
+      name: 'SSRF_LOCALHOST',
+      pattern: /https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|::1)\b/gi,
+      confidence: 0.92,
+    },
+    {
+      name: 'SSRF_METADATA',
+      pattern: /https?:\/\/169\.254\.169\.254\b/gi,
+      confidence: 0.96,
+    },
+    {
+      name: 'PATH_TRAVERSAL',
+      pattern: /(?:\.\.\/|\.\.\\)/g,
+      confidence: 0.9,
+    },
+    {
+      name: 'SQL_INJECTION',
+      pattern: /(\bor\s+1=1\b|;\s*drop\s+table\b|\bunion\s+select\b)/gi,
+      confidence: 0.88,
+    },
+    {
+      name: 'COMMAND_INJECTION',
+      pattern: /(\$\(|`[^`]*`|;\s*(?:rm|cat|curl|wget)\b|\|\|\s*(?:rm|cat|curl|wget)\b)/gi,
+      confidence: 0.9,
+    },
+  ],
 };
 
 interface DetectionRule {
@@ -100,7 +127,7 @@ export class SensitiveDataDetector {
       const matches = code.matchAll(pattern);
       for (const match of matches) {
         flags.push({
-          type: SensitiveDataType.CREDENTIALS,
+          type: SensitiveDataType.SECURITY,
           location: `code:${this.getLineNumber(code, match.index!)}`,
           confidence: 0.7,
           redacted: match[0],
@@ -257,9 +284,22 @@ export class SensitiveDataDetector {
       [SensitiveDataType.CLASSIFIED]: 'Classified information requires appropriate security controls',
       [SensitiveDataType.LOCATION]: 'Location data may require anonymization or aggregation',
       [SensitiveDataType.BIOMETRIC]: 'Biometric data requires special handling and consent',
+      [SensitiveDataType.SECURITY]: this.getSecurityRecommendation(ruleName),
     };
 
     return recommendations[type] || 'Review and sanitize sensitive data';
+  }
+
+  private getSecurityRecommendation(ruleName: string): string {
+    const securityRecommendations: Record<string, string> = {
+      SSRF_LOCALHOST: 'Block loopback access and enforce allowlisted outbound destinations',
+      SSRF_METADATA: 'Block cloud metadata endpoints and enforce egress allowlists',
+      PATH_TRAVERSAL: 'Normalize and validate paths; reject traversal sequences',
+      SQL_INJECTION: 'Parameterize queries and reject injection signatures',
+      COMMAND_INJECTION: 'Avoid shell execution and sanitize command inputs',
+    };
+
+    return securityRecommendations[ruleName] || 'Enforce sandbox boundary controls and sanitize inputs';
   }
 
   /**

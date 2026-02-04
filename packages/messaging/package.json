@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/messaging",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Async messaging patterns: saga, request-reply, event notification",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"

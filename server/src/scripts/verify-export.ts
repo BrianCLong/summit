@@ -1,5 +1,5 @@
 
-import { ProvenanceLedgerV2 } from '../provenance/ledger'; // Adjust path if needed, but we'll use local mock if needed for script
+import { ProvenanceLedgerV2 } from '../provenance/ledger.js'; // Adjust path if needed, but we'll use local mock if needed for script
 import fs from 'fs';
 import crypto from 'crypto';
 

@@ -1,0 +1,42 @@
+apiVersion: summit.io/v1
+kind: AgentTemplate
+metadata:
+  name: governance-agent
+  description: "Audits Pull Requests for compliance with governance standards."
+spec:
+  role: "Governance Auditor"
+  capabilities:
+    - read_codebase
+    - read_pr_metadata
+    - post_comment
+  mcp_servers:
+    - name: "github-mcp"
+      required: true
+    - name: "policy-store"
+      required: true
+
+  context:
+    inputs:
+      - name: "pr_number"
+        type: "string"
+        description: "The PR number to audit."
+      - name: "repo_path"
+        type: "string"
+        description: "Path to the repository root."
+    outputs:
+      - name: "audit_report"
+        type: "object"
+        schema_ref: "schemas/audit-report.json"
+      - name: "verdict"
+        type: "string"
+        enum: ["pass", "fail", "warn"]
+
+  determinism:
+    require_stable_order: true
+    exclude_timestamps: true
+
+  failure_modes:
+    - condition: "Policy service unavailable"
+      action: "Fail open (warn only) if non-critical, else block."
+    - condition: "Rate limit exceeded"
+      action: "Retry with exponential backoff."

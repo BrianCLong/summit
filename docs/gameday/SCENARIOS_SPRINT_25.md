@@ -1,3 +1,7 @@
+> **ARCHIVED: GA PROGRAM v1**
+> This document is part of the GA Program v1 archive. It is read-only and no longer active.
+> **Date:** 2026-01-25
+
 # GameDay Scenarios: Sprint 25
 
 This document outlines the live-fire scenarios designed to validate Summit's incident response capabilities.

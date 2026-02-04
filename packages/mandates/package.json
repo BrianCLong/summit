@@ -1,0 +1,16 @@
+{
+  "name": "@intelgraph/mandates",
+  "version": "0.0.1",
+  "description": "Mandate management for agentic integration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^20.17.5"
+  }
+}

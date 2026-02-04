@@ -2,8 +2,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
-import ingestionRouter from '../../routes/ingestion';
-import { BackpressureGuard } from '../guard';
+import ingestionRouter from '../../routes/ingestion.js';
+import { BackpressureGuard } from '../guard.js';
 
 // Mock dependencies
 jest.mock('../../middleware/auth', () => ({

@@ -1,0 +1,17 @@
+# actionlint configuration
+# https://github.com/rhysd/actionlint/blob/main/usage.md#config-file
+
+rules:
+  # Enforce action pinning by SHA
+  # This requires custom check or using a plugin if actionlint supports it directly.
+  # For now, we'll use actionlint's default checks and add a policy document.
+  # Actionlint itself doesn't have a "SHA-only" rule yet, but we can use 'shellcheck' and other tools.
+
+  # We will use the 'actionlint' tool to find issues.
+  # To enforce SHA pinning, we might need a separate script or a specific actionlint rule if available.
+
+  # Actually, actionlint has 'pinning' check in newer versions.
+  # See: https://github.com/rhysd/actionlint/issues/192
+
+  # For this task, I'll provide the config that enables relevant checks.
+  "action-version": true

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/alsp-client",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "TypeScript client and verifier for the ALSP audit log proofs",
   "type": "module",
   "main": "dist/index.js",

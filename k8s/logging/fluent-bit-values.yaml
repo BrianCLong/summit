@@ -1,0 +1,23 @@
+# Fluent Bit Configuration for AWS CloudWatch
+serviceAccount:
+  create: true
+  name: fluent-bit
+
+config:
+  outputs: |
+    [OUTPUT]
+        Name cloudwatch_logs
+        Match *
+        region us-east-1
+        log_group_name /aws/eks/summit-prod-eks/workloads
+        log_stream_prefix fluent-bit-
+        auto_create_group true
+
+  filters: |
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        Keep_Log Off
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude Off

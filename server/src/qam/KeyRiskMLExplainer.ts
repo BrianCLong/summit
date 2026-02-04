@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import baseLogger from '../config/logger';
+import baseLogger from '../config/logger.js';
 
 const logger = baseLogger.child({ module: 'KeyRiskMLExplainer' });
 

@@ -735,8 +735,154 @@ type RiskAssessmentReport {
 }
 
 # ----------------------------------------------------------------------------
+# Cognitive & Audience Layer
+# ----------------------------------------------------------------------------
+
+type AudienceSegment {
+  id: ID!
+  name: String!
+  description: String!
+  size: Int!
+  demographics: JSON
+
+  # Cognitive Attributes
+  trustInInstitutions: Float! # 0.0 - 1.0
+  polarizationIndex: Float!   # 0.0 - 1.0
+  fearSensitivity: Float!     # 0.0 - 1.0
+  identityClusters: [String!]!
+
+  # Dynamics
+  cognitiveStates(limit: Int): [CognitiveState!]!
+  targetedByCampaigns(limit: Int): [CogSecCampaign!]!
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type CognitiveState {
+  id: ID!
+  segmentId: ID!
+  timestamp: DateTime!
+
+  # State Vectors
+  beliefVector: JSON!       # Map of topic -> sentiment/belief strength
+  resilienceScore: Float!   # Resistance to manipulation
+  emotionalValence: Float!  # -1.0 (Negative) to 1.0 (Positive)
+  arousalLevel: Float!      # 0.0 (Calm) to 1.0 (Agitated)
+
+  # Links
+  segment: AudienceSegment!
+}
+
+enum CognitiveAttackType {
+  OVERLOAD
+  CONFUSION
+  MISTRUST
+  IDENTITY_THREAT
+  DESENSITIZATION
+  POLARIZATION_WEDGE
+}
+
+type CognitiveAttack {
+  id: ID!
+  type: CognitiveAttackType!
+  name: String!
+  description: String!
+
+  # Targets & Tactics
+  targetSegmentIds: [ID!]!
+  narrativeTacticId: ID
+  campaignPhaseId: ID
+  campaignId: ID
+
+  # Impact
+  predictedImpact: Float!
+  observedImpact: Float
+
+  createdAt: DateTime!
+
+  # Resolved relations
+  targetSegments: [AudienceSegment!]!
+  campaign: CogSecCampaign
+}
+
+# ----------------------------------------------------------------------------
+# Influence Pathways & Early Warning
+# ----------------------------------------------------------------------------
+
+type NarrativeCascade {
+  id: ID!
+  narrativeId: ID!
+  startTime: DateTime!
+  endTime: DateTime
+
+  # Structural
+  originNodeId: ID!
+  totalHops: Int!
+  maxDepth: Int!
+  uniqueActors: Int!
+
+  # Dynamics
+  velocity: Float!
+  viralityScore: Float!
+
+  # Links
+  narrative: CogSecNarrative!
+  originActor: CogSecActor
+  hops: [CascadeHop!]!
+}
+
+type NarrativeConflict {
+  competingNarrativeId: ID!
+  competingNarrative: CogSecNarrative!
+  conflictScore: Float!
+  contradictingClaims: [ContradictingPair!]!
+}
+
+type ContradictingPair {
+  claim1: CogSecClaim!
+  claim2: CogSecClaim!
+}
+
+type CascadeHop {
+  id: ID!
+  cascadeId: ID!
+  sourceActorId: ID!
+  targetActorId: ID!
+  platform: String!
+  timestamp: DateTime!
+  delaySeconds: Float
+
+  # Content
+  contentId: ID
+  actionType: String! # SHARE, QUOTE, REPLY
+}
+
+type TippingPointIndicator {
+  id: ID!
+  narrativeId: ID!
+  metricName: String!
+  currentValue: Float!
+  threshold: Float!
+  isBreached: Boolean!
+  breachedAt: DateTime
+
+  # Context
+  segmentId: ID
+  platform: String
+}
+
+# ----------------------------------------------------------------------------
 # Input Types
 # ----------------------------------------------------------------------------
+
+input ExposureInput {
+  segmentId: ID!
+  narrativeId: ID!
+  timestamp: DateTime!
+  reactionType: String
+  sentimentShift: Float
+}
 
 input ClaimInput {
   text: String!
@@ -867,6 +1013,15 @@ extend type Query {
   # Content Credentials
   contentCredential(id: ID!): ContentCredential
   verifyC2PAManifest(assetId: ID!): C2PAVerificationStatus!
+
+  # Cognitive Operations
+  audienceCognitiveProfile(id: ID!): AudienceSegment
+  cognitiveRiskDashboard(filters: JSON): JSON
+
+  # Influence Pathways
+  influencePathways(narrativeId: ID!): [NarrativeCascade!]!
+  narrativeEarlyWarnings(watchlistId: ID): [TippingPointIndicator!]!
+  narrativeConflicts(narrativeId: ID!): [NarrativeConflict!]!
 }
 
 type NarrativeGraph {
@@ -924,6 +1079,9 @@ extend type Mutation {
   # Content Credentials
   createContentCredential(assetId: ID!, mimeType: String!, sourceUrl: String): ContentCredential!
   addProvenanceLink(credentialId: ID!, source: String!, platform: String): ProvenanceLink!
+
+  # Cognitive Operations
+  recordCognitiveEffect(exposure: ExposureInput!): CognitiveState!
 }
 
 # ----------------------------------------------------------------------------

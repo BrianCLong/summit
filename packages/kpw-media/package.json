@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/kpw-media",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepare": "pnpm run build",
     "dev": "node --env-file=.env dist/server.js",
     "start": "node dist/server.js",
     "verify": "node dist/cli.js"

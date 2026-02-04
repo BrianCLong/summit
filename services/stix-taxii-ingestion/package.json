@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/stix-taxii-ingestion",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "STIX 2.1/TAXII 2.1 feed ingestion service with pgvector and Neo4j storage",
   "type": "module",
   "main": "dist/index.js",

@@ -2,10 +2,10 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
-import { MeteringEmitter } from '../emitter';
-import { meteringPipeline } from '../pipeline';
-import { FileMeterStore, meterStore } from '../persistence';
-import { MeterEventKind } from '../schema';
+import { MeteringEmitter } from '../emitter.js';
+import { meteringPipeline } from '../pipeline.js';
+import { FileMeterStore, meterStore } from '../persistence.js';
+import { MeterEventKind } from '../schema.js';
 import stringify from 'fast-json-stable-stringify';
 
 // Mock dependencies
@@ -45,7 +45,7 @@ jest.mock('../persistence', () => {
 });
 
 // Re-import after mock
-import { meterStore as mockMeterStore } from '../persistence';
+import { meterStore as mockMeterStore } from '../persistence.js';
 
 const TEST_DATA_DIR = path.join(process.cwd(), 'data', 'metering_test');
 

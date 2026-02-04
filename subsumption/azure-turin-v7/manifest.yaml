@@ -1,0 +1,77 @@
+version: 1
+item:
+  slug: azure-turin-v7
+  title: "Azure GA Da/Ea/Fa(s)v7 VMs based on AMD EPYC 'Turin'"
+  type: news/blog+docs
+  date: "2026-01-27"
+  links:
+    - "https://techcommunity.microsoft.com/blog/azurecompute/announcing-general-availability-of-azure-daeafasv7-series-vms-based-on-amd-%E2%80%98turi/4488627"
+    - "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/general-purpose/dasv7-series"
+    - "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/memory-optimized/eadsv7-series"
+    - "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/compute-optimized/fadsv7-series"
+
+claims:
+  - id: "ITEM:CLAIM-01"
+    ref: "Azure Compute Blog GA announcement"
+  - id: "ITEM:API-02"
+    ref: "Dasv7 specs (EPYC 9005, up to 4.5GHz, up to 160 vCPU/640GiB)"
+  - id: "ITEM:API-03"
+    ref: "Eadsv7 specs (EPYC 9005, up to 4.5GHz, up to 160 vCPU/1280GiB)"
+  - id: "ITEM:API-04"
+    ref: "Fadsv7 full-core mapping (no SMT), up to 80 cores/320GiB"
+
+prs:
+  - id: pr-01
+    title: "docs(standards): add Azure Turin v7 compute profile bundle scaffold"
+    lane: foundation
+    owner: A
+    risk: green
+  - id: pr-02
+    title: "ci(gates): add subsumption bundle verifier + deny-by-default fixtures"
+    lane: foundation
+    owner: B
+    risk: green
+  - id: pr-03
+    title: "test(evals): add deterministic bench scaffold + metrics emitter"
+    lane: foundation
+    owner: C
+    risk: green
+  - id: pr-04
+    title: "ops(monitoring): add drift detector skeleton + scheduled workflow"
+    lane: foundation
+    owner: D
+    risk: green
+  - id: pr-05
+    title: "feat(infra): add feature-flagged Azure v7 recommender stub"
+    lane: innovation
+    owner: E
+    risk: yellow
+    feature_flag: "SUMMIT_AZURE_TURIN_V7_RECOMMENDER"
+
+gates:
+  - name: "subsumption-bundle-verifier"
+    status: assumed
+
+evals:
+  - name: "test:subsumption:azure-turin-v7"
+  - name: "bench:subsumption:azure-turin-v7"
+
+evidence_ids:
+  - "EVD-AZURETURINV7-DOC-001"
+  - "EVD-AZURETURINV7-GATE-001"
+  - "EVD-AZURETURINV7-GATE-002"
+  - "EVD-AZURETURINV7-GATE-003"
+  - "EVD-AZURETURINV7-BENCH-001"
+  - "EVD-AZURETURINV7-MET-001"
+  - "EVD-AZURETURINV7-DRIFT-001"
+  - "EVD-AZURETURINV7-FEAT-001"
+
+docs_targets:
+  - "docs/standards/azure-turin-v7.md"
+  - "docs/security/data-handling/azure-turin-v7.md"
+  - "docs/ops/runbooks/azure-turin-v7.md"
+  - "docs/decisions/azure-turin-v7.md"
+
+required_checks_discovery:
+  status: assumed
+  todo: "subsumption/azure-turin-v7/required_checks.todo.md"

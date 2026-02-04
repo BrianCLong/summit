@@ -1,0 +1,32 @@
+version: 1
+item:
+  slug: narrative-ops-detection-2026-01-28
+  title: "Narrative analysis + information operations detection blueprint"
+  type: "summary"
+  date: "2026-01-28"
+  links: []
+claims:
+  registry:
+    - id: ITEM:CLAIM-01
+      text: "coordinated influence campaigns propagate rapidly"
+    - id: ITEM:METHOD-04
+      text: "hybrid semantic+graph detection"
+    - id: ITEM:METHOD-05
+      text: "integrate semantic analysis, sentiment detection, and narrative mapping"
+prs: []
+gates:
+  - name: subsumption-bundle-verify
+    required_checks_status: assumed
+evidence:
+  ids:
+    - EVD-NAROPS-BUNDLE-001
+docs:
+  - docs/standards/narrative-ops-detection-2026-01-28.md
+  - docs/security/data-handling/narrative-ops-detection-2026-01-28.md
+  - docs/ops/runbooks/narrative-ops-detection-2026-01-28.md
+feature_flags:
+  - name: NARRATIVE_OPS_ANALYZER
+    default: 0
+required_checks:
+  discovery: "required_checks.todo.md"
+  verified_file: "subsumption/narrative-ops-detection-2026-01-28/required_checks.verified.json"

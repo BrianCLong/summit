@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/intent/bifact-eval.schema.json",
+  "title": "BiFactEval",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "referenceFacts",
+    "predictedFacts",
+    "referenceEntailedByPrediction",
+    "predictionEntailedByReference",
+    "precision",
+    "recall",
+    "f1",
+    "errorPropagation",
+    "evaluatedAt",
+    "judge"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "referenceFacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "predictedFacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "referenceEntailedByPrediction": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entailment" }
+    },
+    "predictionEntailedByReference": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entailment" }
+    },
+    "precision": { "type": "number", "minimum": 0, "maximum": 1 },
+    "recall": { "type": "number", "minimum": 0, "maximum": 1 },
+    "f1": { "type": "number", "minimum": 0, "maximum": 1 },
+    "errorPropagation": {
+      "type": "object",
+      "required": ["missedFacts", "hallucinatedFacts"],
+      "additionalProperties": false,
+      "properties": {
+        "missedFacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "hallucinatedFacts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "evaluatedAt": { "type": "string", "format": "date-time" },
+    "judge": {
+      "type": "object",
+      "required": ["modelId", "promptHash", "promptId", "promptVersion"],
+      "additionalProperties": false,
+      "properties": {
+        "modelId": { "type": "string" },
+        "promptHash": { "type": "string" },
+        "promptId": { "type": "string" },
+        "promptVersion": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "entailment": {
+      "type": "object",
+      "required": ["fact", "entails", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "fact": { "type": "string" },
+        "entails": { "type": "boolean" },
+        "rationale": { "type": "string" }
+      }
+    }
+  }
+}

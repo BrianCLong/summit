@@ -146,6 +146,7 @@ redact_forbidden_patterns() {
         # Count matches before redaction
         local matches
         matches=$(echo "${result}" | grep -cE "${pattern}" 2>/dev/null || echo "0")
+        matches=$(echo "${matches}" | tr -d '[:space:]')
 
         if [[ "${matches}" -gt 0 ]]; then
             [[ "${verbose}" == "true" ]] && log_info "Redacting pattern '${pattern}': ${matches} match(es)"

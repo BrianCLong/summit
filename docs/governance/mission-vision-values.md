@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # Topicality Mission, Vision & Values
 
 **Last updated:** 2025-09-28  

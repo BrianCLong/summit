@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cloud-platform",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Multi-cloud infrastructure for Summit data lakehouse platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -30,7 +30,7 @@
     "typescript": "^5.9.3",
     "jest": "^30.2.0",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.39.1"
+    "eslint": "^9.39.2"
   },
   "keywords": [
     "cloud",

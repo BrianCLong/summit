@@ -1,0 +1,1 @@
+"""Emitters for reports."""

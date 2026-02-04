@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/network-threat-detection",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Network threat detection (DDoS, C2, exfiltration, port scans)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

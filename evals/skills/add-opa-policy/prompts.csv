@@ -1,0 +1,11 @@
+id,prompt,expected_trigger,tags
+opa-01,"Add an OPA policy rule for export controls with tests",true,explicit|policy
+opa-02,"Create a rego rule for access control and log decisions",true,explicit
+opa-03,"Draft a policy-as-code check for data retention",true,explicit
+opa-04,"Implement an authorization rule for admin actions",true,explicit
+opa-05,"Write OPA policy tests for case deletion",true,explicit
+opa-06,"Do not write any policy rules just summarize existing policies",false,negative
+opa-07,"Skip rego changes and focus on UI copy",false,negative
+opa-08,"Avoid policy edits and instead discuss documentation",false,negative
+opa-09,"No policy work needed only create a status report",false,negative
+opa-10,"Provide governance guidance without adding any rules",false,negative

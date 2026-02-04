@@ -1,6 +1,6 @@
 import http from 'http';
 import ioClient from 'socket.io-client';
-import { initSocket } from '../src/realtime/socket';
+import { initSocket } from '../src/realtime/socket.js';
 import { jest, describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
 jest.mock('../src/lib/auth.js', () => ({

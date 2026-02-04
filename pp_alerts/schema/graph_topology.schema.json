@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["node_id_pseudo", "type"],
+        "properties": {
+          "node_id_pseudo": { "type": "string" },
+          "type": { "type": "string" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["src", "dst", "kind", "time_bucket"],
+        "properties": {
+          "src": { "type": "string" },
+          "dst": { "type": "string" },
+          "kind": { "type": "string" },
+          "time_bucket": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

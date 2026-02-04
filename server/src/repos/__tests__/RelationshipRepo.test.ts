@@ -49,7 +49,7 @@ import {
   RelationshipRepo,
   type Relationship,
   type RelationshipInput,
-} from '../RelationshipRepo';
+} from '../RelationshipRepo.js';
 import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
 

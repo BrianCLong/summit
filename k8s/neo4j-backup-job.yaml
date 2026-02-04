@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: neo4j-backup
+  namespace: default
+spec:
+  schedule: "0 3 * * *" # Daily at 3 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: neo4j:5.25
+            env:
+            - name: BUCKET_NAME
+              value: "summit-prod-neo4j-backups" # This should be injected via Helm/Terraform
+            command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Starting Neo4j Backup..."
+              DATE=$(date +%Y%m%d-%H%M)
+              # Run backup command
+              neo4j-admin database backup --to-path=/tmp/backups neo4j
+              # Compress
+              tar -czf /tmp/neo4j-backup-${DATE}.tar.gz -C /tmp/backups .
+              # Upload to S3 (requires aws-cli in image or separate sidecar)
+              # For this demo, we assume the image has minimal tools or we use a sidecar.
+              # Simplified:
+              echo "Backup created: /tmp/neo4j-backup-${DATE}.tar.gz"
+              # aws s3 cp /tmp/neo4j-backup-${DATE}.tar.gz s3://${BUCKET_NAME}/
+          restartPolicy: OnFailure

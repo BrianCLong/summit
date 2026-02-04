@@ -1,0 +1,8 @@
+{
+  "mode": "warn",
+  "plan_file": "PLAN.md",
+  "required_sections": ["Goal", "Constraints", "Verification"],
+  "check_todos": true,
+  "todo_patterns": ["TODO:", "FIXME:"],
+  "agent_labels": ["agentic", "ai-generated"]
+}

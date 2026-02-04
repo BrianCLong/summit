@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "updated": "2025-05-21",
+    "version": "1.0.0",
+    "description": "Authoritative registry of governed data assets for Zero-Trust Data Governance."
+  },
+  "assets": [
+    {
+      "id": "urn:summit:data:taxonomy:v1",
+      "path": "governance/taxonomy.v1.json",
+      "owner": "@summit/governance",
+      "classification": "PUBLIC",
+      "sensitivity": "LOW",
+      "provenance_required": true
+    },
+    {
+      "id": "urn:summit:data:control-map",
+      "path": "docs/governance/control_domain_map.yaml",
+      "owner": "@summit/compliance",
+      "classification": "INTERNAL",
+      "sensitivity": "MEDIUM",
+      "provenance_required": true
+    },
+    {
+      "id": "urn:summit:data:control-gap-analysis",
+      "path": "docs/governance/control_gap_analysis.yaml",
+      "owner": "@summit/compliance",
+      "classification": "INTERNAL",
+      "sensitivity": "MEDIUM",
+      "provenance_required": false
+    },
+    {
+      "id": "urn:summit:policy:provenance",
+      "path": "policy/provenance.rego",
+      "owner": "@summit/security",
+      "classification": "INTERNAL",
+      "sensitivity": "HIGH",
+      "provenance_required": true
+    }
+  ]
+}

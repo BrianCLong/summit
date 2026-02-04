@@ -1,0 +1,10 @@
+{
+  "artifacts": [
+    "evidence/subsumption/ssdf-v1-2/verifier"
+  ],
+  "claims": [],
+  "decisions": [],
+  "evidence_id": "EVD-SSDF12-GATE-001",
+  "item_slug": "ssdf-v1-2",
+  "summary": "PASS: verify_subsumption_bundle"
+}

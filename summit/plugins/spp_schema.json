@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Plugin Pack",
+  "type": "object",
+  "required": ["pack_id", "version", "tools", "commands", "sub_agents", "policies"],
+  "properties": {
+    "pack_id": {"type": "string", "pattern": "^[a-z0-9_-]+$"},
+    "version": {"type": "string"},
+    "compat": {"type": "object"},
+    "tools": {"type": "array", "items": {"type": "object", "required": ["name", "scope"]}},
+    "commands": {"type": "array", "items": {"type": "object", "required": ["name", "template"]}},
+    "sub_agents": {"type": "array", "items": {"type": "object", "required": ["name", "prompt", "tool_scope"]}},
+    "policies": {"type": "object", "required": ["deny_by_default"]}
+  }
+}

@@ -1,1 +1,0 @@
-{"source":"salesforce","records":[{"id":"123","payload":"hello"}]}

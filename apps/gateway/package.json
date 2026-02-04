@@ -12,13 +12,13 @@
     "@opentelemetry/auto-instrumentations-node": "^0.67.3",
     "@opentelemetry/exporter-metrics-otlp-http": "latest",
     "@opentelemetry/exporter-prometheus": "^0.208.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.211.0",
     "@opentelemetry/resources": "latest",
     "@opentelemetry/sdk-metrics": "^2.2.0",
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "bullmq": "^5.8.2",
-    "express": "^4.19.2",
+    "express": "^4.21.2",
     "graphql-subscriptions": "^2.0.0",
     "helmet": "^7.1.0",
     "ioredis": "^5.4.1",
@@ -33,5 +33,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "vitest": "^4.0.16"
-  }
+  },
+  "version": "4.2.3"
 }

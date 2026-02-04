@@ -1,7 +1,7 @@
 
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { ActionSandbox, SandboxConfig } from '../../src/autonomous/sandbox';
-import { Logger } from 'pino';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { ActionSandbox, SandboxConfig } from '../../src/autonomous/sandbox';
+import type { Logger } from 'pino';
 import { EventEmitter } from 'events';
 
 // Mock pino logger
@@ -13,14 +13,16 @@ const mockLogger = {
 } as unknown as Logger;
 
 // Mock child_process
-jest.mock('child_process', () => ({
-  spawn: jest.fn(),
+const spawnMock = jest.fn();
+
+jest.unstable_mockModule('child_process', () => ({
+  spawn: spawnMock,
 }));
 
-import { spawn } from 'child_process';
-
 describe('ActionSandbox', () => {
-  let sandbox: ActionSandbox;
+  let ActionSandbox: typeof import('../../src/autonomous/sandbox').ActionSandbox;
+  let sandbox: InstanceType<typeof ActionSandbox>;
+  let spawn: typeof spawnMock;
   const defaultConfig: SandboxConfig = {
     timeoutMs: 1000,
     maxMemoryMB: 128,
@@ -32,6 +34,11 @@ describe('ActionSandbox', () => {
     readOnlyPaths: [],
     environment: {},
   };
+
+  beforeAll(async () => {
+    ({ ActionSandbox } = await import('../../src/autonomous/sandbox'));
+    ({ spawn } = await import('child_process'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

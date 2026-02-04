@@ -7,7 +7,7 @@ controls:
       - "AGENTS.md"
       - "docs/governance/README.md"
     evidence:
-      - "repo/files/AGENTS.md"
+      - "repo/AGENTS.md"
     status: covered
     owner: "governance-team"
 
@@ -49,3 +49,50 @@ controls:
       - "ci/test-reports"
     status: covered
     owner: "qa-team"
+
+  AI1.1:
+    description: "AI Risk Classification & Assessment (EU AI Act Art 9)"
+    summit_artifacts:
+      - "docs/governance/AI_REGULATORY_MAP.md"
+      - "compliance/assessments/SUMMIT_RISK_ASSESSMENT_v1.md"
+    evidence:
+      - "compliance/assessments/SUMMIT_RISK_ASSESSMENT_v1.md"
+    status: covered
+    owner: "governance-team"
+
+  AI1.2:
+    description: "AI System Inventory & Mapping (NIST MAP)"
+    summit_artifacts:
+      - "scripts/governance/generate_ai_inventory.ts"
+    evidence:
+      - "artifacts/evidence/governance/ai-inventory.json"
+    status: covered
+    owner: "ai-safety-team"
+
+  AI2.1:
+    description: "Human Oversight & Intervention (EU AI Act Art 14)"
+    summit_artifacts:
+      - "apps/web/src/components/ReviewQueue.tsx"
+    evidence:
+      - "ci/human-review-logs"
+    status: covered
+    owner: "product-team"
+
+  AI3.1:
+    description: "Transparency & Model Cards (EU AI Act Art 13)"
+    summit_artifacts:
+      - "docs/models/MODEL_CARD_TEMPLATE.md"
+    evidence:
+      - "repo/docs/models/"
+    status: covered
+    owner: "data-science-team"
+
+  SC1.1:
+    description: "Software Supply Chain Provenance (SLSA)"
+    summit_artifacts:
+      - ".summit/provenance-policy.json"
+      - ".github/workflows/provenance-verify.yml"
+    evidence:
+      - "ci/gsv-attest-verify"
+    status: covered
+    owner: "security-team"

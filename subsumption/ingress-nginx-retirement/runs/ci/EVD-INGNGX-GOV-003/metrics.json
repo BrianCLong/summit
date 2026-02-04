@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-INGNGX-GOV-003",
+  "item_slug": "ingress-nginx-retirement",
+  "metrics": {
+    "data_handling_docs": 1,
+    "decision_logs": 1
+  }
+}

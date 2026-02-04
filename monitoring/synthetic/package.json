@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/synthetic-monitoring",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Synthetic monitoring for IntelGraph platform using Playwright and API checks",
   "type": "module",
   "main": "synthetic-monitor.js",

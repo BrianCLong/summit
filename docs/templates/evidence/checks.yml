@@ -1,0 +1,6 @@
+# Checks: Commands to verify the claims
+checks:
+  - command: "npm test path/to/test"
+    output_contains: "PASS"
+  - command: "curl localhost:3000/health"
+    output_contains: "ok"

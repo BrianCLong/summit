@@ -23,12 +23,16 @@ Curated open-source intelligence feeds prioritized for IntelGraph ingestion.
 17. **AbuseIPDB** – malicious IP reputation reports.
 18. **GreyNoise API** – internet background noise and benign scanner context.
 19. **Recorded Future API** – threat intelligence and risk scores.
-20. **FBI IC3 Reports** – cybercrime complaints and trends.
-21. **Eurostat** – European economic and demographic statistics.
-22. **Common Crawl** – web-scale content snapshots for NLP analysis.
-23. **GitHub Security Advisories** – vulnerability advisories for open-source projects.
-24. **CVE Program JSON Feeds** – authoritative CVE data from MITRE.
-25. **PeeringDB API** – internet infrastructure ownership and interconnection data.
+20. **Maltego One / Maltego Monitor** – Browser-native graph analysis and social signal monitoring (API/Cloud).
+21. **i2 TextChart** – NLP-driven entity extraction and relationship scoring from unstructured text (API/Partner).
+22. **1 TRACE** – Full-stack browser-based OSINT platform (SOCMINT/FININT/GEOINT) (API/Cloud).
+23. **SL Crimewall** – Large-scale source coverage and collaborative case management platform (API).
+24. **FBI IC3 Reports** – cybercrime complaints and trends.
+25. **Eurostat** – European economic and demographic statistics.
+26. **Common Crawl** – web-scale content snapshots for NLP analysis.
+27. **GitHub Security Advisories** – vulnerability advisories for open-source projects.
+28. **CVE Program JSON Feeds** – authoritative CVE data from MITRE.
+29. **PeeringDB API** – internet infrastructure ownership and interconnection data.
 
 ## Additional Sources
 

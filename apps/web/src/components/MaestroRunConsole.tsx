@@ -1,7 +1,7 @@
 // src/components/MaestroRunConsole.tsx
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useMaestroRun } from '@/hooks/useMaestroRun';
 import type { MaestroRunResponse, TaskResult } from '@/types/maestro';
 
@@ -33,6 +33,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
   userId,
 }) => {
   const [input, setInput] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { state, run, reset } = useMaestroRun(userId);
 
   const QUICK_PROMPTS = [
@@ -121,6 +122,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
               <div className="grid w-full gap-1.5">
                 <Label htmlFor="maestro-prompt">Prompt</Label>
                 <Textarea
+                  ref={textareaRef}
                   id="maestro-prompt"
                   value={input}
                   onChange={e => setInput(e.target.value)}
@@ -138,7 +140,10 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                       <button
                         key={prompt}
                         type="button"
-                        onClick={() => setInput(prompt)}
+                        onClick={() => {
+                          setInput(prompt);
+                          textareaRef.current?.focus();
+                        }}
                         aria-label={`Use prompt: ${prompt}`}
                         className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300 transition-colors hover:bg-slate-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
                       >

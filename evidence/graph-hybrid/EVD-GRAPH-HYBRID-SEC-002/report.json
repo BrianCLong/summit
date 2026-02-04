@@ -1,0 +1,5 @@
+{
+  "evidence_id": "EVD-GRAPH-HYBRID-SEC-002",
+  "summary": "Policy allowlist fixtures verified deterministic allow behavior.",
+  "artifacts": ["policy/graphrag/fixtures/allow"]
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Context Envelope",
+  "description": "Standardized container for agent interactions to ensure determinism and auditability.",
+  "type": "object",
+  "required": ["version", "actor", "run_id", "inputs"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version (e.g., '1.0.0')",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Identity of the agent or user (e.g., 'agent:governance', 'user:jules')"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Unique trace ID for the execution session"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation. Exclude from content hash if possible."
+    },
+    "inputs": {
+      "type": "object",
+      "description": "The arguments, prompt, or parameters provided.",
+      "additionalProperties": true
+    },
+    "outputs": {
+      "type": "object",
+      "description": "The results or artifacts produced.",
+      "additionalProperties": true
+    },
+    "refs": {
+      "type": "array",
+      "description": "References to external artifacts, policies, or evidence IDs.",
+      "items": {
+        "type": "object",
+        "required": ["type", "id"],
+        "properties": {
+          "type": { "type": "string", "enum": ["evidence", "policy", "ticket", "commit"] },
+          "id": { "type": "string" },
+          "uri": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

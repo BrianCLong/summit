@@ -1,11 +1,12 @@
 import AuthService from '../../services/AuthService.js';
 import { PubSub } from 'graphql-subscriptions';
+import { GraphQLError } from 'graphql';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../utils/logger.js';
 import crypto from 'crypto';
-import relationshipResolvers from './resolvers/relationship.js';
+import relationshipResolvers from './relationship.js';
 
 interface User {
   id: string;
@@ -307,6 +308,27 @@ export const legacyResolvers = {
     ) => {
       const { user } = context;
       if (!user) throw new Error('Not authenticated');
+
+      // Validate text input
+      if (!text || text.trim() === '') {
+        throw new GraphQLError('Text input is required and cannot be empty', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            http: { status: 400 },
+          },
+        });
+      }
+
+      // Limit text size to prevent server overload (50KB limit)
+      const MAX_TEXT_SIZE = 50 * 1024; // 50KB
+      if (text.length > MAX_TEXT_SIZE) {
+        throw new GraphQLError(`Text input exceeds maximum size of ${MAX_TEXT_SIZE} characters`, {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+            http: { status: 413 },
+          },
+        });
+      }
 
       const namePattern = /\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)*\b/g;
       const names = Array.from(new Set(text.match(namePattern) || []));

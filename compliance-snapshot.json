@@ -1,0 +1,14 @@
+{
+  "source": "docs/security/SECURITY-ISSUE-LEDGER.md",
+  "timestamp": "2026-01-26T23:30:42.426348Z",
+  "summary": {
+    "total_issues": 188,
+    "critical": 19,
+    "high": 42,
+    "medium": 85,
+    "low": 42
+  },
+  "status": "FAIL",
+  "blocking_reason": "Critical security issues present",
+  "ledger_status": "REMEDIATION IN PROGRESS"
+}

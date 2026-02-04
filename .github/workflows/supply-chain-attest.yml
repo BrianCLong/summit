@@ -1,0 +1,89 @@
+name: Supply Chain (SBOM + Provenance Attest)
+
+on:
+  merge_group: {}
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+concurrency:
+  group: supply-chain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+
+      - name: Setup Node (if needed)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install (optional)
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "No lockfile; skipping install."
+          fi
+
+      - name: Build (optional)
+        run: |
+          if pnpm run -s build >/dev/null 2>&1; then
+            pnpm run -s build
+          elif npm run -s build >/dev/null 2>&1; then
+            npm run -s build
+          else
+            echo "No build script; skipping."
+          fi
+
+      - name: Create deterministic build artifact
+        run: bash scripts/ci/build_deterministic_artifact.sh
+
+      - name: Generate standardized SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
+        run: make supply-chain/sbom
+
+      # Use Cosign for modern signing and attestation
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign and Attest build artifact (Keyless)
+        run: |
+          make supply-chain/sign \
+            ARTIFACT=artifacts/build.tar.gz \
+            SBOM=artifacts/sbom/summit-platform-main-latest.spdx.json \
+            TYPE=blob
+        env:
+          USE_KEYLESS: "true"
+
+      # Attest build provenance for the build artifact (GitHub native)
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: artifacts/build.tar.gz
+
+      - name: Upload artifacts (for audit)
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain
+          path: |
+            artifacts/build.tar.gz
+            artifacts/sbom.spdx.json

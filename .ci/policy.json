@@ -1,0 +1,5 @@
+{
+  "max_queue_p50_s": 180,
+  "min_success_rate_pct": 90.0,
+  "material_drop_pct": 5.0
+}

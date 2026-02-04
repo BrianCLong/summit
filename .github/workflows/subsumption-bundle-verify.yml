@@ -1,0 +1,19 @@
+name: Subsumption Bundle Verify
+
+on:
+  pull_request:
+    paths:
+      - "subsumption/**"
+      - "scripts/ci/**"
+      - "docs/**"
+      - "evidence/**"
+
+jobs:
+  subsumption-bundle-verify:
+    name: subsumption-bundle-verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify bundle
+        run: |
+          node scripts/ci/verify_subsumption_bundle.mjs subsumption/item-unknown/manifest.yaml

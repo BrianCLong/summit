@@ -8,7 +8,9 @@ import { auditTrailService } from '../services/audit/AuditTrailService.js';
 
 const router = Router();
 
-const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'false').toLowerCase() === 'true';
+// Health endpoints are enabled by default for production K8s probes
+// Set HEALTH_ENDPOINTS_ENABLED=false only if you want to explicitly disable them
+const healthEndpointsEnabled = () => (process.env.HEALTH_ENDPOINTS_ENABLED ?? 'true').toLowerCase() === 'true';
 
 const baseStatus = () => ({
   timestamp: new Date().toISOString(),
@@ -163,20 +165,24 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
   };
 
   // Check Neo4j connection
-  try {
-    const neo4j = (await import('../db/neo4jConnection.js')).default;
-    await neo4j.getDriver().verifyConnectivity();
-    health.services.neo4j = 'healthy';
-  } catch (error: any) {
-    const errorMsg = error instanceof Error ? error.message : 'Connection failed';
-    health.services.neo4j = 'unhealthy';
-    health.status = 'degraded';
-    errors.push({
-      service: 'neo4j',
-      error: errorMsg,
-      timestamp: new Date().toISOString(),
-    });
-    logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
+  if (process.env.DISABLE_NEO4J === 'true' || process.env.SKIP_DB_CHECKS === 'true') {
+    health.services.neo4j = 'skipped';
+  } else {
+    try {
+      const { getNeo4jDriver } = await import('../db/neo4j.js');
+      await getNeo4jDriver().verifyConnectivity();
+      health.services.neo4j = 'healthy';
+    } catch (error: any) {
+      const errorMsg = error instanceof Error ? error.message : 'Connection failed';
+      health.services.neo4j = 'unhealthy';
+      health.status = 'degraded';
+      errors.push({
+        service: 'neo4j',
+        error: errorMsg,
+        timestamp: new Date().toISOString(),
+      });
+      logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
+    }
   }
 
   // Check PostgreSQL connection
@@ -285,10 +291,6 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: ready
- *     description: Kubernetes readiness probe
- *     responses:
- *       200:
- *         description: Service is ready
  *       503:
  *         description: Service is not ready
  */
@@ -296,13 +298,15 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
   const failures: string[] = [];
 
   // Check if critical services are available
-  try {
-    const neo4j = (await import('../db/neo4jConnection.js')).default;
-    await neo4j.getDriver().verifyConnectivity();
-  } catch (error: any) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    failures.push(`Neo4j: ${msg}`);
-    logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
+  if (process.env.DISABLE_NEO4J !== 'true' && process.env.SKIP_DB_CHECKS !== 'true') {
+    try {
+      const { getNeo4jDriver } = await import('../db/neo4j.js');
+      await getNeo4jDriver().verifyConnectivity();
+    } catch (error: any) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      failures.push(`Neo4j: ${msg}`);
+      logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
+    }
   }
 
   try {
@@ -355,10 +359,6 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
  *                 status:
  *                   type: string
  *                   example: alive
- *     description: Kubernetes liveness probe
- *     responses:
- *       200:
- *         description: Service is alive
  */
 router.get('/health/live', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'alive' });

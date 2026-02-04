@@ -24,9 +24,9 @@ import archiver from 'archiver';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-import logger from '../config/logger';
-import { getPostgresPool } from '../config/database';
-import { redactData } from '../utils/dataRedaction';
+import logger from '../config/logger.js';
+import { getPostgresPool } from '../config/database.js';
+import { redactData } from '../utils/dataRedaction.js';
 
 const log = logger.child({ name: 'DeterministicExportService' });
 

@@ -4,9 +4,12 @@ import { z } from 'zod';
 import { disclosureExportService } from '../disclosure/export-service.js';
 import { disclosureMetrics } from '../metrics/disclosureMetrics.js';
 import { runtimeEvidenceService } from '../disclosure/runtime-evidence.js';
+import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 router.use(express.json());
+router.use(ensureAuthenticated);
+router.use(requirePermission('export:investigations'));
 
 const analyticsSchema = z.object({
   event: z.enum(['view', 'start']),

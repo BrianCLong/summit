@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { Kafka } from 'kafkajs';
 import pino from 'pino';
-import type { DlqEvent } from '../runtime/types';
+import type { DlqEvent } from '../runtime/types.js';
 
 const logger = pino({ name: 'adapter-sdk-cli' });
 

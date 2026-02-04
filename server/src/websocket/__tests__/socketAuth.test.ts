@@ -1,4 +1,3 @@
-import { WebSocketCore } from '../core.js';
 import { describe, it, expect, jest, beforeAll, afterAll, beforeEach } from '@jest/globals';
 
 const mockQuery: jest.MockedFunction<
@@ -6,7 +5,7 @@ const mockQuery: jest.MockedFunction<
 > = jest.fn();
 
 // Mocks
-jest.mock('../connectionManager.js', () => ({
+jest.unstable_mockModule('../connectionManager.js', () => ({
   WebSocketConnectionPool: jest.fn().mockImplementation(() => ({
     registerConnection: jest.fn(),
     removeConnection: jest.fn(),
@@ -17,21 +16,13 @@ jest.mock('../connectionManager.js', () => ({
   ManagedConnection: jest.fn()
 }));
 
-jest.mock('../../db/postgres.js', () => ({
+jest.unstable_mockModule('../../db/postgres.js', () => ({
   getPostgresPool: jest.fn(() => ({
     query: mockQuery
   }))
 }));
 
-jest.mock('uWebSockets.js', () => ({
-    App: jest.fn(() => ({
-        ws: jest.fn(),
-        listen: jest.fn()
-    })),
-    SHARED_COMPRESSOR: 1
-}), { virtual: true });
-
-jest.mock('../../middleware/observability/otel-tracing.js', () => ({
+jest.unstable_mockModule('../../middleware/observability/otel-tracing.js', () => ({
     otelService: {
         createSpan: jest.fn().mockReturnValue({
             addSpanAttributes: jest.fn(),
@@ -40,23 +31,25 @@ jest.mock('../../middleware/observability/otel-tracing.js', () => ({
     }
 }));
 
-jest.mock('../../observability/metrics.js', () => ({
+jest.unstable_mockModule('../../observability/metrics.js', () => ({
     activeConnections: {
         inc: jest.fn(),
         dec: jest.fn()
     }
 }));
 
-jest.mock('../../yjs/YjsHandler.js', () => ({
+jest.unstable_mockModule('../../yjs/YjsHandler.js', () => ({
     YjsHandler: jest.fn()
 }));
 
 describe('WebSocket Authorization', () => {
-    let core: WebSocketCore;
+    let WebSocketCore: typeof import('../core.js').WebSocketCore;
+    let core: InstanceType<typeof WebSocketCore>;
     const ORIGINAL_ENV = process.env.NODE_ENV;
 
-    beforeAll(() => {
+    beforeAll(async () => {
         process.env.NODE_ENV = 'test';
+        ({ WebSocketCore } = await import('../core.js'));
     });
 
     afterAll(() => {

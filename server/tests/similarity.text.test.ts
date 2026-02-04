@@ -1,6 +1,10 @@
 import request from 'supertest';
 import { test, expect } from '@jest/globals';
-test('similarEntities by text', async () => {
+
+const run = process.env.NO_NETWORK_LISTEN !== 'true' && process.env.API_URL;
+const testIf = run ? test : test.skip;
+
+testIf('similarEntities by text', async () => {
   const q = `{ similarEntities(text:"banking fraud", topK:5){ id score } }`;
   const r = await request(process.env.API_URL)
     .post('/graphql')

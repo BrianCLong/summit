@@ -114,10 +114,22 @@ export class BackupService {
 
       const cmd = `PGPASSWORD='${pgPassword}' pg_dump -h ${pgHost} -U ${pgUser} ${pgDb}`;
 
-      if (options.compress) {
-        await execAsync(`${cmd} | gzip > "${finalPath}"`);
-      } else {
-        await execAsync(`${cmd} > "${finalPath}"`);
+      let attempt = 0;
+      const maxRetries = 3;
+      while (attempt < maxRetries) {
+          try {
+              if (options.compress) {
+                await execAsync(`${cmd} | gzip > "${finalPath}"`);
+              } else {
+                await execAsync(`${cmd} > "${finalPath}"`);
+              }
+              break;
+          } catch (e) {
+              attempt++;
+              if (attempt >= maxRetries) throw e;
+              logger.warn({ error: e }, `Postgres backup attempt ${attempt} failed, retrying in 2s...`);
+              await new Promise(r => setTimeout(r, 2000));
+          }
       }
 
       const stats = await fs.stat(finalPath);
@@ -176,10 +188,18 @@ export class BackupService {
               writeTarget.write(line);
           }
 
-          const relResult = await session.run('MATCH ()-[r]->() RETURN r');
+          const relResult = await session.run('MATCH (a)-[r]->(b) RETURN r, a.id as startId, b.id as endId');
           for (const record of relResult.records) {
               const rel = record.get('r');
-              const line = JSON.stringify({ type: 'rel', typeName: rel.type, props: rel.properties }) + '\n';
+              const startId = record.get('startId');
+              const endId = record.get('endId');
+              const line = JSON.stringify({
+                  type: 'rel',
+                  typeName: rel.type,
+                  props: rel.properties,
+                  startId,
+                  endId
+              }) + '\n';
               writeTarget.write(line);
           }
 
@@ -226,7 +246,16 @@ export class BackupService {
        const isCluster = (client as any).constructor.name === 'Cluster';
 
        if (isCluster) {
-          throw new Error('Redis Cluster backup not supported in this version. Use manual persistence management or snapshots.');
+          // @ts-ignore
+          const nodes = client.nodes ? client.nodes('master') : [];
+          if (nodes.length > 0) {
+              logger.info(`Triggering BGSAVE on ${nodes.length} master nodes...`);
+              await Promise.all(nodes.map((node: any) => node.bgsave().catch((e: any) =>
+                  logger.warn(`Failed to trigger BGSAVE on node ${node.options.host}: ${e.message}`)
+              )));
+          } else {
+              logger.warn('No master nodes found in cluster for backup.');
+          }
        } else {
            // @ts-ignore
            await client.bgsave();

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Task",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "subject": { "type": "string" },
+    "description": { "type": "string" },
+    "status": { "type": "string", "enum": ["pending", "in_progress", "completed", "failed", "blocked"] },
+    "owner": { "type": "string" },
+    "blockedBy": { "type": "array", "items": { "type": "string" } },
+    "blocks": { "type": "array", "items": { "type": "string" } },
+    "timestamps": {
+      "type": "object",
+      "properties": {
+        "created": { "type": "string", "format": "date-time" },
+        "started": { "type": "string", "format": "date-time" },
+        "completed": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "required": ["id", "subject", "status"]
+}

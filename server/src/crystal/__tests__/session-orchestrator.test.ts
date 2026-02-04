@@ -1,10 +1,10 @@
 import { mkdtemp, rm, stat } from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
-import { CrystalSessionOrchestrator } from '../session-orchestrator';
-import { WorktreeEngine } from '../worktree-engine';
-import { SLOMetrics } from '../slo-metrics';
-import { PanelType, AttachmentType } from '../types';
+import { CrystalSessionOrchestrator } from '../session-orchestrator.js';
+import { WorktreeEngine } from '../worktree-engine.js';
+import { SLOMetrics } from '../slo-metrics.js';
+import { PanelType, AttachmentType } from '../types.js';
 import { describe, it, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 describe('CrystalSessionOrchestrator', () => {

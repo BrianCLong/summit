@@ -24,9 +24,13 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -43,7 +47,7 @@ jobs:
           fi
 
       - name: Upload quarantine results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: quarantine-test-results
@@ -56,9 +60,13 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -73,7 +81,7 @@ jobs:
           npm test || echo "⚠️ Jest suite failed (known issues, non-blocking)"
 
       - name: Upload Jest results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: jest-test-results
@@ -87,9 +95,13 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -126,12 +138,16 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4 # v6
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -164,9 +180,13 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -183,7 +203,7 @@ jobs:
           fi
 
       - name: Upload performance results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: performance-results
@@ -196,9 +216,13 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
@@ -215,7 +239,7 @@ jobs:
           fi
 
       - name: Upload a11y results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         if: always()
         with:
           name: accessibility-results

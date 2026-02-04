@@ -1,56 +1,54 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { PostgresUsageMeteringService } from '../service.js';
-import type { UsageEvent } from '../events';
+import type { UsageEvent } from '../events.js';
 
 const mockWrite = jest.fn(async (..._args: any[]) => undefined);
 const mockWithTransaction = jest.fn(async (..._args: any[]) => undefined);
 
-jest.mock('../../db/postgres.js', () => ({
+const loggerMock = {
+  child: jest.fn(),
+  debug: jest.fn(),
+  error: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+};
+
+jest.unstable_mockModule('../../db/postgres.js', () => ({
   getPostgresPool: jest.fn(() => ({
     write: mockWrite,
     withTransaction: mockWithTransaction,
   })),
 }));
 
-jest.mock('../../utils/logger.js', () => {
-  const loggerMock = {
-    child: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  };
-
-  (loggerMock.child as jest.Mock).mockReturnValue(loggerMock);
-
-  return {
-    logger: loggerMock,
-    default: loggerMock,
-  };
-});
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  logger: loggerMock,
+  default: loggerMock,
+}));
 
 describe('PostgresUsageMeteringService', () => {
   let ServiceClass: typeof PostgresUsageMeteringService;
   let service: PostgresUsageMeteringService;
   let baseEvent: UsageEvent;
+  let getPostgresPool: jest.Mock;
+
+  beforeAll(async () => {
+    ({ PostgresUsageMeteringService: ServiceClass } = await import('../service.js'));
+    ({ getPostgresPool } = await import('../../db/postgres.js'));
+  });
 
   beforeEach(async () => {
     mockWrite.mockClear();
     mockWithTransaction.mockClear();
-    const dbModule = await import('../../db/postgres.js');
-    (dbModule.getPostgresPool as jest.Mock).mockReturnValue({
+    getPostgresPool.mockReturnValue({
       write: mockWrite,
       withTransaction: mockWithTransaction,
     });
-    const loggerModule = await import('../../utils/logger.js');
-    const loggerMock = loggerModule.logger as any;
     loggerMock.debug.mockClear();
     loggerMock.error.mockClear();
     loggerMock.info.mockClear();
     loggerMock.warn.mockClear();
     loggerMock.child.mockClear();
     (loggerMock.child as jest.Mock).mockReturnValue(loggerMock);
-    ({ PostgresUsageMeteringService: ServiceClass } = await import('../service.js'));
     service = new ServiceClass();
     baseEvent = {
       id: 'event-1',

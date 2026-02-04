@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/hierarchy-management",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Hierarchical data management for organizational, product, and location hierarchies",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },

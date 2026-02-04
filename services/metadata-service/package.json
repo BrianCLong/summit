@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/metadata-service",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Background service for automated metadata discovery and data profiling",
   "license": "MIT",
   "type": "module",

@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ## Epic 2 — MVP4 Platform Primitives (make the next wave cheap to build)
 
 1. Finalize canonical object model for MVP4 (users, orgs, entitlements, artifacts, events).

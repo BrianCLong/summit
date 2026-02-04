@@ -1,7 +1,7 @@
 import { Logger } from 'pino';
-import { GuardrailService } from './GuardrailService';
-import { ApprovalService } from './ApprovalService';
-import { Action } from './ApprovalService';
+import { GuardrailService } from './GuardrailService.js';
+import { ApprovalService } from './ApprovalService.js';
+import { Action } from './ApprovalService.js';
 
 export interface AutomationResult {
   success: boolean;

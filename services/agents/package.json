@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agents",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Agent services including anomaly detection for OSINT/CTI",
   "type": "module",
   "main": "dist/index.js",

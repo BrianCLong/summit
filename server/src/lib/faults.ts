@@ -3,7 +3,7 @@
  * Injectable failures for Neo4j, Redis, and LLM providers
  */
 
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 interface FaultFlags {
   neo4jFailRate: number;

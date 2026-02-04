@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/gates/graph-postgres-drift-report.schema.json",
+  "title": "Graph/Postgres Drift Report",
+  "type": "object",
+  "required": ["metadata", "summary", "entities"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["generated_at", "generator", "status"],
+      "properties": {
+        "generated_at": { "type": "string", "format": "date-time" },
+        "generator": { "type": "string" },
+        "status": { "type": "string", "enum": ["passed", "failed"] },
+        "sha": { "type": "string" },
+        "config_path": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "required": ["entities_checked", "violations"],
+      "properties": {
+        "entities_checked": { "type": "integer", "minimum": 0 },
+        "violations": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status", "counts", "digest_summary", "thresholds", "violations"],
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["passed", "failed"] },
+          "counts": {
+            "type": "object",
+            "required": ["postgres", "neo4j", "delta", "delta_pct"],
+            "properties": {
+              "postgres": { "type": "integer", "minimum": 0 },
+              "neo4j": { "type": "integer", "minimum": 0 },
+              "delta": { "type": "integer", "minimum": 0 },
+              "delta_pct": { "type": "number", "minimum": 0 }
+            },
+            "additionalProperties": false
+          },
+          "digest_summary": {
+            "type": "object",
+            "required": ["missing_in_graph", "extra_in_graph", "mismatched"],
+            "properties": {
+              "missing_in_graph": { "type": "integer", "minimum": 0 },
+              "extra_in_graph": { "type": "integer", "minimum": 0 },
+              "mismatched": { "type": "integer", "minimum": 0 }
+            },
+            "additionalProperties": false
+          },
+          "thresholds": {
+            "type": "object",
+            "required": ["max_count_delta_pct", "max_digest_mismatches"],
+            "properties": {
+              "max_count_delta_pct": { "type": "number", "minimum": 0 },
+              "max_digest_mismatches": { "type": "integer", "minimum": 0 }
+            },
+            "additionalProperties": false
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "missing_in_graph": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "extra_in_graph": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "mismatched": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["id", "postgres", "neo4j"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "postgres": { "type": "string" },
+                    "neo4j": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "violations": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

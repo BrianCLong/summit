@@ -456,7 +456,7 @@ $(generate_recommendations)
 
 3. **Collect evidence:**
    \`\`\`bash
-   ./scripts/release/collect_evidence.sh --category all
+   ./scripts/release/generate_evidence_bundle.sh --category all
    \`\`\`
 
 4. **Review release blockers:**

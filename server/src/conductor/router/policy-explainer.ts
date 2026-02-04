@@ -329,8 +329,8 @@ export class PolicyExplainer {
     }>,
   ): PolicyRule[] {
     return evaluations
-      .filter((eval) => eval.matched && eval.result !== 'allow')
-      .map((eval) => eval.rule)
+      .filter((e) => e.matched && e.result !== 'allow')
+      .map((e) => e.rule)
       .sort((a, b) => b.priority - a.priority);
   }
 
@@ -367,7 +367,7 @@ export class PolicyExplainer {
 
     // Policy violations
     const violations = trace.policyEvaluations.filter(
-      (eval) => eval.result === 'deny',
+      (e) => e.result === 'deny',
     ).length;
     risk += violations * 0.1;
 
@@ -398,11 +398,11 @@ export class PolicyExplainer {
         action: rule.action,
         priority: rule.priority,
       })),
-      policyEvaluations: trace.policyEvaluations.map((eval) => ({
-        ruleName: eval.rule.name,
-        matched: eval.matched,
-        result: eval.result,
-        description: eval.rule.description,
+      policyEvaluations: trace.policyEvaluations.map((e) => ({
+        ruleName: e.rule.name,
+        matched: e.matched,
+        result: e.result,
+        description: e.rule.description,
       })),
       costBreakdown: trace.costAnalysis,
       performanceMetrics: trace.performanceMetrics,

@@ -1,0 +1,17 @@
+{
+  "dependency_files": [
+    "pnpm-lock.yaml",
+    "package.json",
+    "requirements.txt",
+    "requirements.in",
+    "poetry.lock",
+    "Cargo.lock",
+    "Cargo.toml"
+  ],
+  "deps_delta_files": [
+    "deps_delta.md",
+    "DEPENDENCY_DELTA.md",
+    "dependency-delta.md"
+  ],
+  "ignore_paths": []
+}

@@ -1,0 +1,17 @@
+identities:
+  - id: "ci-builder"
+    type: "service"
+    description: "Main CI builder identity"
+    roles: ["builder", "scanner"]
+  - id: "deploy-bot"
+    type: "service"
+    description: "Deployment automation bot"
+    roles: ["deployer"]
+  - id: "local-user"
+    type: "user"
+    description: "Local development user"
+    roles: ["developer"]
+  - id: "jules"
+    type: "agent"
+    description: "AI Software Engineer"
+    roles: ["developer", "reviewer"]

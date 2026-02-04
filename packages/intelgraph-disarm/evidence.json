@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DISARM Evidence Artifact",
+  "type": "object",
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "description": "Unique deterministic ID for this evidence"
+    },
+    "tactic": {
+      "type": "string",
+      "description": "DISARM Tactic ID (e.g., T0001)"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "generator": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["generator", "timestamp"]
+    }
+  },
+  "required": ["evidenceId", "tactic", "confidence", "provenance"]
+}

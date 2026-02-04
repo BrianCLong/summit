@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/logger",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Shared structured logging package for Summit with OpenTelemetry correlation",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,0 +1,107 @@
+{
+  "name": "@intelgraph/maestro-core",
+  "version": "5.3.2",
+  "description": "Maestro orchestration engine core",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "orchestration",
+    "workflow",
+    "ai",
+    "automation"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.450.0",
+    "@aws-sdk/lib-storage": "^3.450.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/api-metrics": "^0.33.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.67.0",
+    "@opentelemetry/exporter-jaeger": "^2.2.0",
+    "@opentelemetry/exporter-prometheus": "^0.208.0",
+    "@opentelemetry/resources": "^2.1.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
+    "@opentelemetry/semantic-conventions": "^1.38.0",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "crypto": "^1.0.1",
+    "events": "^3.3.0",
+    "jsdom": "^27.0.1",
+    "pg": "^8.11.0",
+    "robots-txt-parser": "^2.0.3",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/jsdom": "^21.1.7",
+    "@types/js-yaml": "^4.0.0",
+    "@types/node": "20.19.27",
+    "@types/pg": "^8.15.6",
+    "@types/uuid": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "pg": "^8.0.0"
+  },
+  "files": [
+    "dist",
+    "migrations",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./fork-detector": {
+      "types": "./dist/fork_detector/index.d.ts",
+      "import": "./dist/fork_detector/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "import": "./dist/engine.js"
+    },
+    "./stores/postgres-state-store": {
+      "types": "./dist/stores/postgres-state-store.d.ts",
+      "import": "./dist/stores/postgres-state-store.js"
+    },
+    "./stores/s3-artifact-store": {
+      "types": "./dist/stores/s3-artifact-store.d.ts",
+      "import": "./dist/stores/s3-artifact-store.js"
+    },
+    "./policy/opa-policy-engine": {
+      "types": "./dist/policy/opa-policy-engine.d.ts",
+      "import": "./dist/policy/opa-policy-engine.js"
+    },
+    "./plugins/litellm-plugin": {
+      "types": "./dist/plugins/litellm-plugin.d.ts",
+      "import": "./dist/plugins/litellm-plugin.js"
+    },
+    "./plugins/ollama-plugin": {
+      "types": "./dist/plugins/ollama-plugin.d.ts",
+      "import": "./dist/plugins/ollama-plugin.js"
+    },
+    "./plugins/web-scraper-plugin": {
+      "types": "./dist/plugins/web-scraper-plugin.d.ts",
+      "import": "./dist/plugins/web-scraper-plugin.js"
+    }
+  }
+}

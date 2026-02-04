@@ -62,7 +62,7 @@ SBOMs are generated using [Syft](https://github.com/anchore/syft) and optionally
 
 ### Supported Formats
 
-- **CycloneDX JSON** (default) - Industry standard, recommended
+- **CycloneDX JSON v1.7** (default) - Industry standard, recommended. Includes CBOM and IP metadata.
 - **SPDX JSON** - Linux Foundation standard
 - **Syft JSON** - Native Syft format
 
@@ -187,7 +187,7 @@ SLSA (Supply-chain Levels for Software Artifacts) Level 3 attestations provide c
 | ✅ Build from version-controlled source | GitHub repository |
 | ✅ Scripted build | GitHub Actions workflow |
 | ✅ Build service integrity | GitHub-hosted runners |
-| ✅ Non-falsifiable provenance | Cosign keyless signing |
+| ✅ Non-falsifiable provenance | GitHub Artifact Attestations (Sigstore) |
 | ✅ Isolated build environment | Ephemeral runners |
 
 ### Provenance Format

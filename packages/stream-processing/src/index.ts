@@ -10,13 +10,13 @@
  * - Fault tolerance with checkpointing
  */
 
-export * from './stream';
-export * from './window';
-export * from './watermark';
-export * from './state';
-export * from './aggregations';
-export * from './joins';
-export * from './operators';
-export * from './checkpoint';
-export * from './types';
-export * from './intelgraphPipeline';
+export * from './stream.js';
+export * from './window.js';
+export * from './watermark.js';
+export * from './state.js';
+export * from './aggregations.js';
+export * from './joins.js';
+export * from './operators.js';
+export * from './checkpoint.js';
+export * from './types.js';
+export * from './intelgraphPipeline.js';

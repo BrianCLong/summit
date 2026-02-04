@@ -1,0 +1,350 @@
+name: Release Cut
+
+# Governance: This workflow must only be triggered manually.
+# Release Cut Workflow
+# Creates an immutable go-live tag with release notes generated from evidence.
+#
+# Usage:
+#   1. Generate go-live evidence: pnpm evidence:go-live:generate
+#   2. Commit evidence bundle
+#   3. Trigger this workflow via workflow_dispatch
+#
+# Inputs:
+#   - ref: The git ref to release from (default: main)
+#   - release_tag: The tag to create (e.g., v0.3.0 or prod-2026-01-28)
+#   - environment: Target environment (prod or staging)
+#
+# Tag patterns allowed:
+#   - Semver: ^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$
+#   - Prod date: ^prod-\d{4}-\d{2}-\d{2}$
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to release from"
+        required: false
+        default: "main"
+        type: string
+      release_tag:
+        description: "Release tag (e.g., v0.3.0 or prod-2026-01-28)"
+        required: true
+        type: string
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - prod
+          - staging
+        default: staging
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-cut-${{ inputs.release_tag }}
+  cancel-in-progress: false
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Validate: Check tag pattern before proceeding
+  # ═══════════════════════════════════════════════════════════════════════════
+  validate:
+    name: "Validate Tag"
+    runs-on: ubuntu-latest
+
+    outputs:
+      tag_valid: ${{ steps.validate.outputs.tag_valid }}
+      tag_type: ${{ steps.validate.outputs.tag_type }}
+
+    steps:
+      - name: Validate Tag Pattern
+        id: validate
+        run: |
+          TAG="${{ inputs.release_tag }}"
+
+          echo "Validating tag: ${TAG}"
+
+          # Check semver pattern: v1.2.3 or v1.2.3-beta.1
+          SEMVER_PATTERN="^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$"
+
+          # Check prod date pattern: prod-2026-01-28
+          PROD_DATE_PATTERN="^prod-[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+
+          if [[ "${TAG}" =~ ${SEMVER_PATTERN} ]]; then
+            echo "tag_valid=true" >> $GITHUB_OUTPUT
+            echo "tag_type=semver" >> $GITHUB_OUTPUT
+            echo "Tag matches semver pattern"
+          elif [[ "${TAG}" =~ ${PROD_DATE_PATTERN} ]]; then
+            echo "tag_valid=true" >> $GITHUB_OUTPUT
+            echo "tag_type=prod-date" >> $GITHUB_OUTPUT
+            echo "Tag matches prod-date pattern"
+          else
+            echo "tag_valid=false" >> $GITHUB_OUTPUT
+            echo "tag_type=invalid" >> $GITHUB_OUTPUT
+            echo "ERROR: Tag '${TAG}' does not match allowed patterns"
+            echo ""
+            echo "Allowed patterns:"
+            echo "  - Semver: v1.2.3, v1.2.3-beta.1, v1.2.3-rc.1"
+            echo "  - Prod date: prod-2026-01-28"
+            exit 1
+          fi
+
+      - name: Tag Validation Summary
+        run: |
+          TAG="${{ inputs.release_tag }}"
+          TAG_TYPE="${{ steps.validate.outputs.tag_type }}"
+
+          echo "### Tag Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Type | ${TAG_TYPE} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | Validated |" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Verify Evidence: Ensure go-live evidence exists and is valid
+  # ═══════════════════════════════════════════════════════════════════════════
+  verify-evidence:
+    name: "Verify Evidence"
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.tag_valid == 'true'
+
+    outputs:
+      sha: ${{ steps.sha.outputs.sha }}
+      evidence_valid: ${{ steps.verify.outputs.evidence_valid }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Get SHA
+        id: sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
+          echo "Commit SHA: ${SHA}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Go-Live Evidence
+        id: verify
+        run: |
+          echo "Verifying go-live evidence..."
+
+          if pnpm evidence:go-live:verify; then
+            echo "evidence_valid=true" >> $GITHUB_OUTPUT
+            echo "Evidence verification passed"
+          else
+            echo "evidence_valid=false" >> $GITHUB_OUTPUT
+            echo "ERROR: Evidence verification failed"
+            echo ""
+            echo "To generate evidence, run:"
+            echo "  pnpm evidence:go-live:generate"
+            exit 1
+          fi
+
+      - name: Evidence Verification Summary
+        if: always()
+        run: |
+          SHA="${{ steps.sha.outputs.sha }}"
+          VALID="${{ steps.verify.outputs.evidence_valid }}"
+
+          if [[ "${VALID}" == "true" ]]; then
+            echo "### Evidence Verified" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Evidence Verification Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| SHA | \`${SHA:0:8}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Ref | \`${{ inputs.ref }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Valid | ${VALID} |" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Generate Release Notes: Create release notes from evidence
+  # ═══════════════════════════════════════════════════════════════════════════
+  generate-notes:
+    name: "Generate Release Notes"
+    runs-on: ubuntu-latest
+    needs: [validate, verify-evidence]
+    if: needs.verify-evidence.outputs.evidence_valid == 'true'
+
+    outputs:
+      notes_generated: ${{ steps.generate.outputs.notes_generated }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Release Notes
+        id: generate
+        run: |
+          echo "Generating release notes from evidence..."
+
+          if pnpm release:notes; then
+            echo "notes_generated=true" >> $GITHUB_OUTPUT
+            echo "Release notes generated successfully"
+          else
+            echo "notes_generated=false" >> $GITHUB_OUTPUT
+            echo "ERROR: Failed to generate release notes"
+            exit 1
+          fi
+
+      - name: Upload Release Artifacts
+        uses: actions/upload-artifact@v4 # v4
+        with:
+          name: release-bundle-${{ inputs.release_tag }}
+          path: |
+            artifacts/release/${{ needs.verify-evidence.outputs.sha }}/
+            artifacts/evidence/go-live/${{ needs.verify-evidence.outputs.sha }}/
+          retention-days: 90
+
+      - name: Release Notes Summary
+        run: |
+          SHA="${{ needs.verify-evidence.outputs.sha }}"
+          TAG="${{ inputs.release_tag }}"
+
+          echo "### Release Notes Generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| SHA | \`${SHA:0:8}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | \`release-bundle-${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Create Release: Tag and publish GitHub Release
+  # ═══════════════════════════════════════════════════════════════════════════
+  create-release:
+    name: "Create GitHub Release"
+    runs-on: ubuntu-latest
+    needs: [validate, verify-evidence, generate-notes]
+    if: needs.generate-notes.outputs.notes_generated == 'true'
+
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.release_tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Download Release Bundle
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+        with:
+          name: release-bundle-${{ inputs.release_tag }}
+          path: release-bundle
+
+      - name: Create Git Tag
+        run: |
+          TAG="${{ inputs.release_tag }}"
+          SHA="${{ needs.verify-evidence.outputs.sha }}"
+
+          echo "Creating tag ${TAG} at ${SHA}..."
+
+          # Check if tag already exists
+          if git rev-parse "${TAG}" >/dev/null 2>&1; then
+            echo "ERROR: Tag ${TAG} already exists"
+            echo "Use a different tag or delete the existing tag first"
+            exit 1
+          fi
+
+          # Create annotated tag with escaped newlines
+          git tag -a "${TAG}" "${SHA}" -m "Release ${TAG}\nEnvironment: ${{ inputs.environment }}\nRef: ${{ inputs.ref }}\nSHA: ${SHA}\nGenerated by Release Cut workflow"
+
+          # Push tag
+          git push origin "${TAG}"
+
+          echo "Tag ${TAG} created and pushed"
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ inputs.release_tag }}"
+          SHA="${{ needs.verify-evidence.outputs.sha }}"
+          ENV="${{ inputs.environment }}"
+
+          echo "Creating GitHub Release: ${TAG}"
+
+          # Find release notes file
+          NOTES_FILE="release-bundle/release/${SHA}/RELEASE_NOTES.md"
+          if [[ ! -f "${NOTES_FILE}" ]]; then
+            NOTES_FILE="release-bundle/RELEASE_NOTES.md"
+          fi
+
+          # Check if release already exists
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "Release ${TAG} exists, updating..."
+            gh release upload "${TAG}" release-bundle/* --clobber 2>/dev/null || true
+          else
+            echo "Creating new release ${TAG}..."
+
+            PRERELEASE_FLAG=""
+            if [[ "${ENV}" == "staging" ]]; then
+              PRERELEASE_FLAG="--prerelease"
+            fi
+
+            if [[ -f "${NOTES_FILE}" ]]; then
+              gh release create "${TAG}" \
+                --title "${TAG}" \
+                --notes-file "${NOTES_FILE}" \
+                ${PRERELEASE_FLAG} \
+                release-bundle/* 2>/dev/null || echo "Release created (some uploads may have been skipped)"
+            else
+              gh release create "${TAG}" \
+                --title "${TAG}" \
+                --notes "Release ${TAG} from ${SHA:0:8}" \
+                ${PRERELEASE_FLAG} \
+                release-bundle/* 2>/dev/null || echo "Release created (some uploads may have been skipped)"
+            fi
+          fi
+
+      - name: Release Summary
+        run: |
+          TAG="${{ inputs.release_tag }}"
+          SHA="${{ needs.verify-evidence.outputs.sha }}"
+          ENV="${{ inputs.environment }}"
+
+          echo "### Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| SHA | \`${SHA:0:8}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${ENV} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release URL | ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release was created from verified go-live evidence.**" >> $GITHUB_STEP_SUMMARY

@@ -1,6 +1,6 @@
 {
   "name": "amd-web-ui",
-  "version": "2.0.0",
+  "version": "4.2.3",
   "description": "Web UI for Adversarial Misinformation Defense Platform",
   "main": "index.js",
   "scripts": {

@@ -1,0 +1,7 @@
+{
+  "artifacts": [
+    "fixtures/tiny_public_sample.json"
+  ],
+  "evidence_id": "EVD-DEEPSEARCHQA-FIXTURES-001",
+  "summary": "DeepSearchQA Fixtures Run"
+}

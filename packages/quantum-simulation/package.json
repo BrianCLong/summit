@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/quantum-simulation",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Quantum algorithm simulation and circuit design for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

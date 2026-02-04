@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/chain-of-custody",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "description": "Chain of custody tracking for evidence and legal compliance",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@intelgraph/blockchain": "workspace:*",

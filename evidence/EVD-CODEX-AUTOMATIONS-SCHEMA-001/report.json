@@ -1,0 +1,13 @@
+{
+  "run_id": "run-0001",
+  "automation_id": "automation-schemas",
+  "project_root": "/workspace/summit",
+  "status": "no_findings",
+  "pii_present": false,
+  "findings": [],
+  "diff_summary": {
+    "files_changed": 0,
+    "insertions": 0,
+    "deletions": 0
+  }
+}

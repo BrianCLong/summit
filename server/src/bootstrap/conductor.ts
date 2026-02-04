@@ -7,7 +7,7 @@ import express, { Express } from 'express';
 // import { expressMiddleware } from '@as-integrations/express4';
 import cors from 'cors';
 import { typeDefs as schema } from '../graphql/schema/index.js';
-import logger from '../config/logger';
+import logger from '../config/logger.js';
 import {
   initializeConductorSystem,
   shutdownConductorSystem,
@@ -86,7 +86,7 @@ export async function wireConductor(options: {
     if (options.app) {
       options.app.get('/health/conductor', async (req, res) => {
         try {
-          const { getConductorHealth } = await import('../conductor/metrics');
+          const { getConductorHealth } = await import('../conductor/metrics.js');
           const health = await getConductorHealth();
 
           const statusCode =

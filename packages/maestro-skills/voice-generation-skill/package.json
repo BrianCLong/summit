@@ -1,0 +1,19 @@
+{
+  "name": "@maestro/skill-voice-generation",
+  "version": "0.1.0",
+  "description": "Voice Generation Skill for Maestro",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@intelgraph/maestro-core": "workspace:*",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.7.3"
+  }
+}

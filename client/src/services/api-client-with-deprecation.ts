@@ -5,6 +5,8 @@
  * headers, logging warnings and notifying developers about upcoming changes.
  */
 
+import { getApiBaseUrl } from '../config/urls';
+
 export interface ApiClientConfig {
   baseUrl: string;
   apiVersion?: string;
@@ -156,7 +158,7 @@ export class ApiClient {
 // Example usage
 export function createApiClient(): ApiClient {
   return new ApiClient({
-    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:4000',
+    baseUrl: getApiBaseUrl(),
     apiVersion: 'v2.0.0',
     onDeprecationWarning: (warning) => {
       // Send to error tracking service (e.g., Sentry)

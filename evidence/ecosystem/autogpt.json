@@ -1,0 +1,41 @@
+{
+  "id": "7c2510a1-7190-44f3-8347-f171d5a7c425",
+  "resource_id": "3efd3460-bb8d-4944-a95c-522f6e3ab4c2",
+  "timestamp": "2026-01-28T17:50:51.126Z",
+  "primaryArtifact": {
+    "id": "3efd3460-bb8d-4944-a95c-522f6e3ab4c2",
+    "name": "AutoGPT",
+    "type": "Framework",
+    "url": "https://github.com/Significant-Gravitas/AutoGPT",
+    "description": "An experimental open-source attempt to make GPT-4 fully autonomous.",
+    "tags": [],
+    "maturity": "Beta",
+    "capabilities": {
+      "tool_use": true,
+      "memory": true,
+      "planning": true,
+      "orchestration": false,
+      "evals": false,
+      "safety": false,
+      "observability": false,
+      "multi_agent": false,
+      "sandboxing": false
+    },
+    "signals": {
+      "github_stars": 160000,
+      "license": "MIT",
+      "active_community": true
+    }
+  },
+  "provenance": {
+    "source": "initial_ecosystem.yaml",
+    "method": "seed",
+    "actor": "summit-agent-indexer"
+  },
+  "verification": {
+    "status": "unverified",
+    "tests_run": [],
+    "results": {}
+  },
+  "claims": []
+}

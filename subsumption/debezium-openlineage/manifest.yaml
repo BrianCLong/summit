@@ -1,0 +1,27 @@
+version: 1
+item:
+  slug: debezium-openlineage
+  title: "Debezium 3.4 OpenLineage integration (CDC lineage)"
+  type: "integration"
+  date: "2026-01-30"
+  links:
+    - "https://debezium.io/documentation/reference/stable/integrations/openlineage.html"
+    - "https://debezium.io/blog/2025/12/16/debezium-3-4-final-released/"
+    - "https://openlineage.io/docs/spec/naming/"
+required_checks:
+  discovery_status: "assumed"
+  checks:
+    - "verify-subsumption-bundle (debezium-openlineage)"
+prs:
+  - title: "feat(subsumption): add debezium-openlineage bundle scaffold"
+    lane: "foundation"
+    owner: "master"
+    risk: "green"
+gates:
+  - id: "subsumption-bundle-verify"
+    description: "Verify Debezium OpenLineage subsumption bundle completeness"
+evidence_ids:
+  - "EVD-DEBEZIUM-OPENLINEAGE-FND-001"
+docs:
+  - "docs/standards/debezium-openlineage.md"
+feature_flags: []

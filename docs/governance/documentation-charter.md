@@ -1,4 +1,10 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 ---
+
 title: Documentation Governance Charter
 summary: Comprehensive governance framework for enterprise documentation ecosystem
 version: 1.0.0
@@ -6,6 +12,7 @@ lastUpdated: 2025-09-09
 owner: docs
 status: approved
 reviewers: [docs-team, platform-team, leadership]
+
 ---
 
 # Documentation Governance Charter

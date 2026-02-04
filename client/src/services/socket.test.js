@@ -22,6 +22,7 @@ jest.mock('socket.io-client', () => {
   };
 });
 
+
 const buildLocalStorage = () => ({
   store: { token: 'test-token' },
   getItem(key) {
@@ -53,6 +54,9 @@ describe('socket service reconnection', () => {
 
   test('uses exponential backoff calculation without jitter when disabled', async () => {
     jest.isolateModules(() => {
+      jest.doMock('../config/urls', () => ({
+        getSocketBaseUrl: () => 'ws://test',
+      }));
       const { calculateBackoffDelay } = require('./socket');
       const delay = calculateBackoffDelay(3, {
         baseMs: 100,
@@ -73,8 +77,16 @@ describe('socket service reconnection', () => {
 
   test('schedules reconnect with exponential backoff after disconnect', async () => {
     jest.isolateModules(() => {
+      jest.doMock('../config/urls', () => ({
+        getSocketBaseUrl: () => 'ws://test',
+      }));
+      global.localStorage = buildLocalStorage();
       const socketClient = require('./socket');
       const { __mockState } = require('socket.io-client');
+      const { getSocketBaseUrl } = require('../config/urls');
+
+      expect(getSocketBaseUrl()).toBe('ws://test');
+      expect(global.localStorage.getItem('token')).toBe('test-token');
 
       const s = socketClient.getSocket();
       expect(s).toBe(__mockState.socket);
@@ -90,8 +102,16 @@ describe('socket service reconnection', () => {
 
   test('manual disconnect clears reconnection attempts', async () => {
     jest.isolateModules(() => {
+      jest.doMock('../config/urls', () => ({
+        getSocketBaseUrl: () => 'ws://test',
+      }));
+      global.localStorage = buildLocalStorage();
       const socketClient = require('./socket');
       const { __mockState } = require('socket.io-client');
+      const { getSocketBaseUrl } = require('../config/urls');
+
+      expect(getSocketBaseUrl()).toBe('ws://test');
+      expect(global.localStorage.getItem('token')).toBe('test-token');
 
       socketClient.getSocket();
       const initialConnects = __mockState.socket.connect.mock.calls.length;

@@ -1,0 +1,36 @@
+{
+  "name": "@summit/ark",
+  "version": "0.0.1",
+  "description": "Agentic Reasoning Kernel (ARK) for Summit - Runtime, Governance, and Orchestration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/",
+    "test": "vitest run"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "dependencies": {
+    "zod": "^3.22.4",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.0"
+  },
+  "author": "Summit Platform",
+  "license": "MIT"
+}

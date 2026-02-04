@@ -220,19 +220,13 @@ router.get(
       );
 
       const repo = new ProvenanceRepo(getPostgresPool());
-      const events = await repo.byTenant(
-        tenantId,
-        { from: windowStart.toISOString(), to: windowEnd.toISOString() },
-        1000,
-        0,
-      );
-
-      const lastEventAt = events.length
-        ? events[0].createdAt || events[0].created_at
-        : null;
+      const stats = await repo.getTenantStats(tenantId, {
+        from: windowStart.toISOString(),
+        to: windowEnd.toISOString(),
+      });
 
       const policyBundleReady = Boolean(tenant.settings?.policy_bundle);
-      const ready = policyBundleReady && events.length > 0;
+      const ready = policyBundleReady && stats.count > 0;
 
       return res.json({
         success: true,
@@ -241,8 +235,8 @@ router.get(
           actorId,
           windowStart: windowStart.toISOString(),
           windowEnd: windowEnd.toISOString(),
-          eventCount: events.length,
-          lastEventAt,
+          eventCount: stats.count,
+          lastEventAt: stats.lastEventAt,
           policyBundleReady,
           ready,
         },

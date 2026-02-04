@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
-import { logger } from '../logging';
-import { CacheService } from './CacheService';
+import { logger } from '../logging.js';
+import { CacheService } from './CacheService.js';
 
 /**
  * Advanced ML Service Integration

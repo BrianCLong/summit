@@ -2,6 +2,8 @@
 
 > **Purpose**: A curated collection of production-ready prompts for building IntelGraph's intelligence analysis platform with Claude Code.
 
+> 💡 **New to Claude Code or not sure where to start?** Check out the [Claude Code UI Guide](./CLAUDE_CODE_UI_GUIDE.md) for general-purpose prompt patterns that work across any project!
+
 ## Overview
 
 This directory contains **12 stand-alone, self-contained prompts** designed to drive IntelGraph's highest priorities:
@@ -368,6 +370,10 @@ When using multiple prompts in a session:
 
 ## Related Documentation
 
+### General Claude Code Usage
+- [CLAUDE_CODE_UI_GUIDE.md](./CLAUDE_CODE_UI_GUIDE.md) - **NEW!** Best practices and prompt patterns for Claude Code UI across any project
+
+### Project-Specific Documentation
 - [CLAUDE.md](../../CLAUDE.md) - Project conventions and standards
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - System architecture
 - [REPOSITORY_STRUCTURE.md](../REPOSITORY_STRUCTURE.md) - Codebase organization
@@ -392,6 +398,12 @@ Found a better way to phrase a prompt? Have additional examples? Submit a PR!
 ---
 
 ## Changelog
+
+### 2026-01-18
+- **Added**: [Claude Code UI Guide](./CLAUDE_CODE_UI_GUIDE.md) - General-purpose prompt patterns and best practices
+- 6 situational prompts: repo intake, feature implementation, debugging, refactoring, testing, and quick PRs
+- Includes prompt selection guide, best practices, and quick reference card
+- Complements IntelGraph-specific prompts with universal Claude Code UI patterns
 
 ### 2025-12-19
 - **Added**: Prompt 12 - Multi-Agent Release Orchestration (MVP-3 → GA)

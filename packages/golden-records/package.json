@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/golden-records",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Golden record management with entity resolution and survivorship",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },

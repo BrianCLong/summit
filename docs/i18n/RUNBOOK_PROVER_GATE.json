@@ -1,0 +1,17 @@
+{
+  "gate": {
+    "runbook_prover": {
+      "title": "Runbook Prover Gate",
+      "description": "Ensures that all runbooks are up-to-date and executable.",
+      "status": {
+        "pending": "Verifying runbooks...",
+        "success": "All runbooks verified.",
+        "failure": "Runbook verification failed."
+      },
+      "errors": {
+        "missing_runbook": "Runbook not found for service: {{serviceName}}",
+        "execution_failed": "Runbook execution failed: {{error}}"
+      }
+    }
+  }
+}

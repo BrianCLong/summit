@@ -1,8 +1,8 @@
 
-import { telemetry } from './comprehensive-telemetry';
-import { snapshotter } from './diagnostic-snapshotter';
-import { anomalyDetector } from './anomaly-detector';
-import { alertingService } from './alerting-service';
+import { telemetry } from './comprehensive-telemetry.js';
+import { snapshotter } from './diagnostic-snapshotter.js';
+import { anomalyDetector } from './anomaly-detector.js';
+import { alertingService } from './alerting-service.js';
 import { jest } from '@jest/globals';
 import v8 from 'v8';
 import fs from 'fs';

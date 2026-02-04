@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-POSTIZ-COMPLY-002",
+  "title": "Postiz compliance posture patterns",
+  "summary": "Encoded OAuth-first, no-scrape, and no-API-key-paste posture as Summit connector policy defaults.",
+  "classification": "public",
+  "artifacts": [],
+  "item_slug": "POSTIZ-OSS-SAAS-VIDEO",
+  "area": "compliance",
+  "sources": [{ "ref": "https://github.com/gitroomhq/postiz-app", "kind": "repo" }],
+  "created": "2026-01-29"
+}

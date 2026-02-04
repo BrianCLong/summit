@@ -1,10 +1,10 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { LLMRouter } from '../LLMRouter';
-import { LLMRouterConfig } from '../interfaces';
-import { MockProvider } from '../providers/MockProvider';
-import { CostControlPolicy } from '../policies/CostControlPolicy';
-import { LatencyPolicy } from '../policies/LatencyPolicy';
+import { LLMRouter } from '../LLMRouter.js';
+import { LLMRouterConfig } from '../interfaces.js';
+import { MockProvider } from '../providers/MockProvider.js';
+import { CostControlPolicy } from '../policies/CostControlPolicy.js';
+import { LatencyPolicy } from '../policies/LatencyPolicy.js';
 
 const mockConfig: LLMRouterConfig = {
     providers: [

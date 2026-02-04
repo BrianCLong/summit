@@ -1,0 +1,31 @@
+{
+  "cases": [
+    {
+      "id": "missing-frame",
+      "event": {
+        "synthetic_stance": "support",
+        "content_hash": "hash_missing_001"
+      },
+      "expect_valid": false
+    },
+    {
+      "id": "invalid-stance",
+      "event": {
+        "synthetic_frame": "anti-war",
+        "synthetic_stance": "ambivalent",
+        "content_hash": "hash_invalid_002"
+      },
+      "expect_valid": false
+    },
+    {
+      "id": "invalid-confidence",
+      "event": {
+        "synthetic_frame": "anti-war",
+        "synthetic_stance": "support",
+        "synthetic_confidence": 1.5,
+        "content_hash": "hash_invalid_003"
+      },
+      "expect_valid": false
+    }
+  ]
+}

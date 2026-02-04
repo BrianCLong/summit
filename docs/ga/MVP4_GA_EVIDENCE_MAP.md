@@ -16,6 +16,7 @@ This map enumerates GA claims and their deterministic verification commands unde
 | Data classification & governance evidence is present | VERIFIED | `node --test testing/ga-verification/ga-features.ga.test.mjs`                                      | 0    | `@ga-critical evidence files exist and are keyword-scoped` | `docs/DATA_GOVERNANCE.md`                                                                           |
 | Policy preflight & receipts verification succeeds    | VERIFIED | `node scripts/ga/verify-ga-surface.mjs`                                                            | 0    | `GA hardening verification succeeded.`                     | `scripts/ga/verify-ga-surface.mjs`, `docs/ga/verification-map.json`, `PROVENANCE_SCHEMA.md`         |
 | Ingestion security hardening evidence is present     | VERIFIED | `node --test testing/ga-verification/ga-features.ga.test.mjs`                                      | 0    | `@ga-critical evidence files exist and are keyword-scoped` | `docs/security/security-architecture-and-policies.md`                                               |
+| Media authenticity & provenance gate is enforced     | VERIFIED | `node --test testing/ga-verification/ga-features.ga.test.mjs`                                      | 0    | `@ga-critical evidence files exist and are keyword-scoped` | `docs/governance/media_provenance.md`, `scripts/ci/verify_media_provenance.ts`                      |
 
 ## Deferred Pending Verification (Optional Full Proof)
 

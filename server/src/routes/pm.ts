@@ -1,6 +1,6 @@
 import express from 'express';
 import crypto from 'crypto';
-import logger from '../config/logger';
+import logger from '../config/logger.js';
 import {
   upsertTickets,
   mapGitHubIssue,

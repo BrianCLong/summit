@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-PRIVTEL-SCHEMA-001",
+  "metrics": {
+    "allowlist_fields": 10,
+    "event_schema_fields": 10,
+    "restricted_fields": 1
+  }
+}

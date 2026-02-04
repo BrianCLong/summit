@@ -1,0 +1,15 @@
+{
+  "name": "neo4j-sink",
+  "config": {
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "topics": "appdb.public.users,appdb.public.orders",
+    "neo4j.server.uri": "bolt+s://neo4j.prod.svc.cluster.local:7687",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "${file:/secrets/neo4j-pass:password}",
+    "neo4j.batch-size": "1000",
+
+    "neo4j.topic.cypher.appdb.public.users": "MERGE (u:User {id: COALESCE(value.id, key.id)}) SET u += value",
+
+    "neo4j.topic.cypher.appdb.public.orders": "MERGE (o:Order {id: COALESCE(value.id, key.id)}) SET o += value WITH o, value MATCH (u:User {id: value.user_id}) MERGE (u)-[:PLACED]->(o)"
+  }
+}

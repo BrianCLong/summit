@@ -1,0 +1,16 @@
+{
+  "version": "0.1",
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2026-01-25T10:00:00Z",
+  "files": [
+    {
+      "path": "src/app.ts",
+      "conversations": [
+        {
+          "contributor": { "type": "ai" },
+          "ranges": [{ "start_line": 1, "end_line": 50 }]
+        }
+      ]
+    }
+  ]
+}

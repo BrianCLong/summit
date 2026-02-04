@@ -1,0 +1,105 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+type: object
+title: Blackboard State Schema
+properties:
+  sprint:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier for the sprint
+      goal:
+        type: string
+        description: The main goal of the sprint
+      mode:
+        type: string
+        enum: ["normal", "safe_mode", "pause", "freeze_merge"]
+        description: Operational mode
+    required: ["id", "goal", "mode"]
+
+  tasks:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        state:
+          type: string
+          enum:
+            ["ANALYSIS", "APPROVAL_PENDING", "EXECUTION", "VALIDATION", "DONE", "RESCOPE_REQUIRED"]
+        depends_on:
+          type: array
+          items:
+            type: string
+        assignee:
+          type: [string, "null"]
+        attempts:
+          type: object
+          properties:
+            coder_failures:
+              type: integer
+            total:
+              type: integer
+          required: ["coder_failures", "total"]
+        done_when:
+          type: array
+          items:
+            type: string
+            description: Falsifiable criteria
+        artifacts:
+          type: object
+          properties:
+            spec_refs:
+              type: array
+              items:
+                type: string
+            branch:
+              type: [string, "null"]
+            evidence_bundle:
+              type: [string, "null"]
+        reviewer_feedback:
+          type: array
+          items:
+            type: string
+      required: ["id", "title", "state", "attempts", "done_when"]
+
+  leases:
+    type: array
+    items:
+      type: object
+      properties:
+        task_id:
+          type: string
+        role:
+          type: string
+          enum: ["coder", "reviewer", "planner"]
+        holder:
+          type: string
+          description: Identity of the agent holding the lease
+        expires_at:
+          type: string
+          format: date-time
+      required: ["task_id", "role", "holder", "expires_at"]
+
+  circuit_breakers:
+    type: object
+    properties:
+      pause_file:
+        type: boolean
+      freeze_merge:
+        type: boolean
+      degraded_mode:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+          enforce_tiers:
+            type: array
+            items:
+              type: integer
+    required: ["pause_file", "freeze_merge"]
+
+required: ["sprint", "tasks", "leases", "circuit_breakers"]

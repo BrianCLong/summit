@@ -1,43 +1,50 @@
 # Summit Platform Infrastructure
 
-This directory contains the Infrastructure-as-Code (IaC) and Environment definitions for the Summit Platform.
+Welcome to the infrastructure repository for the Summit Platform. This directory contains all the code, scripts, and documentation required to deploy and operate the platform on AWS.
 
-## Structure
+## 🗺️ Map
 
-*   `terraform/`: Terraform configurations for provisioning cloud resources.
-    *   `modules/`: Reusable Terraform modules (EKS, RDS, S3, etc.).
-    *   `envs/`: Environment-specific configurations (Staging, Prod).
-        *   `staging/`: Staging environment (pre-prod).
-        *   `prod/`: Production environment.
-        *   `federal/`: Federal WORM compliance environment.
-        *   `billing/`: Billing data stack.
-        *   `aurora/`: Aurora DB stack.
-
-## Environments
-
-| Environment | Description | Managed By |
+| Component | Path | Description |
 | :--- | :--- | :--- |
-| **Local** | Developer laptop, Docker Compose. | `make dev` |
-| **Staging** | Stable integration environment. | Terraform + Helm (CI/CD) |
-| **Prod** | Production environment. | Terraform + Helm (CI/CD) |
+| **Infrastructure as Code** | [`terraform/environments/prod`](../terraform/environments/prod) | Production AWS resources (EKS, RDS, VPC) |
+| **Kubernetes Charts** | [`charts/universal-app`](../charts/universal-app) | Standard Helm chart for microservices |
+| **Operational Scripts** | [`scripts/`](../scripts) | CLI tools for secrets, bootstrap, and verification |
+| **Documentation** | [`docs/`](../docs) | Runbooks and Deployment Guides |
 
-## Usage
+## 🚀 Quick Start (Day 0)
 
-### Local Development
+1.  **Provision AWS:**
+    ```bash
+    task infra:init
+    task infra:apply
+    ```
 
-Use the root `Makefile` to start the local environment:
+2.  **Bootstrap Cluster (Day 1):**
+    ```bash
+    ./scripts/cluster-bootstrap.sh
+    ```
 
-```bash
-make dev
-```
+3.  **Inject Secrets:**
+    ```bash
+    task secrets:init
+    ```
 
-### Provisioning Infrastructure
+## 🛠️ Operations (Day 2+)
 
-Navigate to the environment directory and apply Terraform:
+*   **Deploy:** `task deploy:aws` (Manual) or `git push` (CI/CD)
+*   **Verify Health:** `./scripts/verify-deployment.sh`
+*   **Emergency Rollback:** `./scripts/emergency-rollback.sh <app-name>`
 
-```bash
-cd infra/terraform/envs/staging
-terraform init
-terraform plan
-terraform apply
-```
+## 🆘 Runbooks
+
+*   [Deployment Guide](../docs/AWS_DEPLOYMENT.md)
+*   [Database Recovery](../docs/runbooks/DB_RECOVERY.md)
+*   [Governance & Branch Protection](../docs/GOVERNANCE.md)
+
+## 🏗️ Architecture
+
+*   **Compute:** AWS EKS (Spot Instances)
+*   **Database:** Aurora Serverless v2 (PostgreSQL)
+*   **Graph:** Neo4j (Self-Hosted on EKS Memory Nodes)
+*   **Cache:** ElastiCache (Redis)
+*   **Security:** Trivy Scanning, OIDC, Private Subnets

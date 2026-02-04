@@ -1,0 +1,5 @@
+{
+  "tenant": "tenant-001",
+  "query": "expand network",
+  "maxHops": 4
+}

@@ -4,6 +4,8 @@
  */
 
 import { createHash } from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import axios from 'axios';
 import { Pool } from 'pg';
 import { Logger } from 'pino';
@@ -97,6 +99,7 @@ export class PolicyEngine {
   private policyVersion: string;
   private cache: Map<string, { decision: PolicyDecision; expires: number }> =
     new Map();
+  private policyCards: any[] = [];
 
   constructor(
     opaUrl: string,
@@ -109,8 +112,78 @@ export class PolicyEngine {
     this.logger = logger;
     this.policyVersion = policyVersion;
 
+    // Load Policy Cards
+    this.loadPolicyCards();
+
     // Clean cache periodically
     setInterval(() => this.cleanCache(), 60000);
+  }
+
+  private loadPolicyCards() {
+    try {
+      const cardsDir = path.join(process.cwd(), 'policy/cards');
+      if (fs.existsSync(cardsDir)) {
+        const files = fs.readdirSync(cardsDir);
+        for (const file of files) {
+          if (file.endsWith('.json')) {
+            const content = fs.readFileSync(path.join(cardsDir, file), 'utf-8');
+            this.policyCards.push(JSON.parse(content));
+          }
+        }
+        this.logger.info(
+          { count: this.policyCards.length },
+          'Loaded policy cards',
+        );
+      }
+    } catch (e: any) {
+      this.logger.warn({ error: e.message }, 'Failed to load policy cards');
+    }
+  }
+
+  private checkPolicyCards(context: PolicyContext): PolicyDecision | null {
+    for (const card of this.policyCards) {
+      if (card.effect === 'deny') {
+        // Check conditions
+        const match =
+          card.conditions.all &&
+          card.conditions.all.every((cond: any) => {
+            const factValue = this.resolveFact(context, cond.fact);
+            return this.evaluateCondition(
+              factValue,
+              cond.operator,
+              cond.value,
+            );
+          });
+        if (match) {
+          return {
+            allowed: false,
+            reason: card.reason,
+            requiresApproval: true,
+            riskScore: 90,
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  private resolveFact(context: any, factPath: string): any {
+    return factPath.split('.').reduce((obj: any, key: string) => obj && obj[key], context);
+  }
+
+  private evaluateCondition(
+    actual: any,
+    operator: string,
+    expected: any,
+  ): boolean {
+    switch (operator) {
+      case 'equal':
+        return actual === expected;
+      case 'greaterThan':
+        return actual > expected;
+      default:
+        return false;
+    }
   }
 
   /**
@@ -336,6 +409,10 @@ export class PolicyEngine {
    * Fallback local policy evaluation
    */
   private evaluateLocalPolicy(context: PolicyContext): PolicyDecision {
+    // Check Policy Cards first
+    const cardDecision = this.checkPolicyCards(context);
+    if (cardDecision) return cardDecision;
+
     const { user, resource, action, environment } = context;
 
     // Production protection

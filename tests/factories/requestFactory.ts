@@ -5,6 +5,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { jest } from '@jest/globals';
 
 export interface MockRequest {
   [key: string]: any;

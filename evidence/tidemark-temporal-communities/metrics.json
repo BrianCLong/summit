@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-TIDEMARK-TGRAPH-001",
+  "metrics": {
+    "bundle_status": "scaffolded",
+    "schema_count": 3,
+    "fixture_count": 1
+  }
+}

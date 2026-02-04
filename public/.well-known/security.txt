@@ -1,4 +1,0 @@
-Contact: mailto:security@intelgraph.example
-Policy: https://docs.intelgraph.example/trust/vdp
-Preferred-Languages: en
-Hiring: https://intelgraph.example/careers

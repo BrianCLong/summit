@@ -22,6 +22,7 @@ import {
   securityHeaders,
 } from './middleware/security.js';
 import { RBACManager } from '../../../packages/authentication/src/rbac/rbac-manager.js';
+import { auditSink, IAuditSink } from '../../server/src/audit/sink.js';
 
 export interface ApiDependencies extends Partial<GetReceiptDependencies> {
   decisionStore?: PolicyDecisionStore;
@@ -31,6 +32,7 @@ export interface ApiDependencies extends Partial<GetReceiptDependencies> {
   policyService?: PolicySimulationService;
   reviewQueue?: ReviewQueueService;
   rbacManager?: RBACManager;
+  auditSink?: IAuditSink;
 }
 
 export function buildApp(dependencies: ApiDependencies = {}) {
@@ -38,6 +40,7 @@ export function buildApp(dependencies: ApiDependencies = {}) {
   app.app = app;
 
   const rbacManager = dependencies.rbacManager ?? new RBACManager();
+  const sink = dependencies.auditSink ?? auditSink;
   rbacManager.initializeDefaultRoles();
   rbacManager.defineRole({
     name: 'api_user',
@@ -123,7 +126,7 @@ export function buildApp(dependencies: ApiDependencies = {}) {
     '/actions',
     privilegedRateLimiter,
     requireTenantIsolation(),
-    createExecuteRouter(preflightStore, events, policyService, rbacManager),
+    createExecuteRouter(preflightStore, events, policyService, rbacManager, sink),
   );
 
   return app;

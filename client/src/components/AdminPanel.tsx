@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { getApiBaseUrl } from '../config/urls';
 
 export default function AdminPanel() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+  const api = getApiBaseUrl();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [tenants, setTenants] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

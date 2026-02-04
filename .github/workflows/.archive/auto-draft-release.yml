@@ -24,6 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20.11.x'
 
       - name: Download artifacts

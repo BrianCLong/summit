@@ -1,0 +1,29 @@
+{
+  "contract": {
+    "determinism": [
+      "No timestamps in outputs",
+      "Codepoint sorting for all lists",
+      "Stable JSON rendering with sorted keys"
+    ],
+    "evidenceIdRules": {
+      "subject": "EV-SUBJECT-<NAME>-<SHA256_12>",
+      "verify": "EV-VERIFY-<LANE>-<BASENAME>-<SHA256_12>"
+    }
+  },
+  "evidence": [],
+  "schemaVersion": "1.0",
+  "subjects": [
+    {
+      "evidenceId": "EV-SUBJECT-PROVENANCE-6da1292aa90b",
+      "kind": "subject",
+      "name": "provenance",
+      "path": "provenance.json",
+      "sha256": "6da1292aa90b09df13f0c6bb36eff593540d974c4b9b4030fb147fa129e1b234"
+    }
+  ],
+  "totals": {
+    "all": 1,
+    "subjects": 1,
+    "verifyArtifacts": 0
+  }
+}

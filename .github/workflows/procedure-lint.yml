@@ -1,0 +1,35 @@
+name: procedure-lint
+
+on:
+  pull_request:
+    paths:
+      - agentic/procedures/**
+      - procedures/examples/**
+      - scripts/procedures/**
+      - scripts/monitoring/ctech-spring-active-software-drift.ts
+      - docs/standards/ctech-spring-active-software.md
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Procedure lint
+        run: pnpm exec tsx scripts/procedures/lint.ts
+
+      - name: Procedure compile benchmark
+        run: pnpm exec tsx bench/procedure_compile.bench.ts

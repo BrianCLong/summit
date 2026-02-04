@@ -2,8 +2,8 @@ import { randomUUID } from 'crypto';
 type Driver = any;
 import type { Pool } from 'pg';
 
-import { getPostgresPool } from '../db/postgres';
-import { getNeo4jDriver } from '../db/neo4j';
+import { getPostgresPool } from '../db/postgres.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
 
 export interface RealEntity {
   id: string;

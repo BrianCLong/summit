@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SketchStoryboard",
+  "type": "object",
+  "required": ["storyboard_id", "frames"],
+  "properties": {
+    "storyboard_id": { "type": "string" },
+    "version": { "type": "string" },
+    "frames": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["frame_index", "strokes"],
+        "properties": {
+          "frame_index": { "type": "integer", "minimum": 0 },
+          "frame_hash": { "type": "string" },
+          "notes": { "type": "string" },
+          "strokes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["stroke_id", "points"],
+              "properties": {
+                "stroke_id": { "type": "string" },
+                "label": { "type": "string" },
+                "points": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "type": "object",
+                    "required": ["x", "y"],
+                    "properties": {
+                      "x": { "type": "number" },
+                      "y": { "type": "number" },
+                      "t": { "type": "number" }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "imports": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

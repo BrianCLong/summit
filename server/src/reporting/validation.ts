@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DeliveryInstruction, DeliveryChannel, ReportRequest, ReportTemplate, ReportFormat } from './types';
+import { DeliveryInstruction, DeliveryChannel, ReportRequest, ReportTemplate, ReportFormat } from './types.js';
 
 const deliveryChannelEnum = z.enum(['email', 'slack', 'webhook']);
 

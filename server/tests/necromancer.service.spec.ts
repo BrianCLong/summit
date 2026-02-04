@@ -1,5 +1,5 @@
 // server/tests/necromancer.service.spec.ts
-import { NecromancerService } from '../src/necromancer/NecromancerService';
+import { NecromancerService } from '../src/necromancer/NecromancerService.js';
 import { BehavioralCloneParameters } from '../src/necromancer/necromancer.types';
 
 jest.useFakeTimers();

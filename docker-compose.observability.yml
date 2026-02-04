@@ -112,7 +112,7 @@ services:
     ports:
       - '9090:9090'
     volumes:
-      - ./monitoring/prometheus:/etc/prometheus
+      - ./observability/prometheus:/etc/prometheus
       - prometheus_data:/prometheus
     networks:
       - observability
@@ -136,8 +136,8 @@ services:
       - '3001:3000'
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - observability
     depends_on:
@@ -195,6 +195,24 @@ services:
       - REDIS_ADDR=redis://redis:6379
     ports:
       - '9121:9121'
+    networks:
+      - observability
+      - intelgraph
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+        reservations:
+          memory: 16M
+
+  # Postgres Exporter - Postgres Metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/postgres?sslmode=disable
+    ports:
+      - '9187:9187'
     networks:
       - observability
       - intelgraph
@@ -268,7 +286,7 @@ services:
     command:
       - '--config=/etc/otel-collector-config.yml'
     volumes:
-      - ./monitoring/otel/collector-config.yml:/etc/otel-collector-config.yml
+      - ./observability/otel/collector-config.yaml:/etc/otel-collector-config.yml
     ports:
       - '4317:4317' # OTLP gRPC receiver
       - '4318:4318' # OTLP HTTP receiver
@@ -293,13 +311,13 @@ services:
     image: prom/alertmanager:v0.25.0
     container_name: alertmanager
     command:
-      - '--config.file=/etc/alertmanager/config.yml'
+      - '--config.file=/etc/alertmanager/alertmanager.yaml'
       - '--storage.path=/alertmanager'
       - '--web.external-url=http://localhost:9093'
     ports:
       - '9093:9093'
     volumes:
-      - ./monitoring/alertmanager:/etc/alertmanager
+      - ./observability/alertmanager:/etc/alertmanager
     networks:
       - observability
     deploy:
@@ -314,11 +332,11 @@ services:
     image: grafana/loki:2.9.0
     container_name: loki
     command:
-      - '-config.file=/etc/loki/local-config.yaml'
+      - '-config.file=/etc/loki/loki-config.yaml'
     ports:
       - '3100:3100'
     volumes:
-      - ./monitoring/loki:/etc/loki
+      - ./observability/loki:/etc/loki
     networks:
       - observability
     deploy:
@@ -333,11 +351,12 @@ services:
     image: grafana/promtail:2.9.0
     container_name: promtail
     command:
-      - '-config.file=/etc/promtail/config.yml'
+      - '-config.file=/etc/promtail/promtail-config.yaml'
     volumes:
-      - ./monitoring/promtail:/etc/promtail
+      - ./observability/promtail:/etc/promtail
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - observability
     depends_on:
@@ -348,9 +367,9 @@ services:
     image: grafana/tempo:2.2.0
     container_name: tempo
     command:
-      - '-config.file=/etc/tempo.yaml'
+      - '-config.file=/etc/tempo/tempo.yaml'
     volumes:
-      - ./monitoring/tempo:/etc/tempo
+      - ./observability/tempo:/etc/tempo
     ports:
       - '3200:3200' # Tempo HTTP
       - '4317:4317' # OTLP gRPC
@@ -363,7 +382,7 @@ services:
     image: timberio/vector:0.33.0-alpine
     container_name: vector
     volumes:
-      - ./monitoring/vector/vector.toml:/etc/vector/vector.toml:ro
+      - ./observability/vector/vector.toml:/etc/vector/vector.toml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - '8686:8686' # Vector API
@@ -383,7 +402,7 @@ services:
     command:
       - '--config.file=/etc/blackbox_exporter/config.yml'
     volumes:
-      - ./monitoring/blackbox:/etc/blackbox_exporter
+      - ./observability/blackbox:/etc/blackbox_exporter
     ports:
       - '9115:9115'
     networks:

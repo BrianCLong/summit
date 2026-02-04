@@ -1,0 +1,16 @@
+version: 1
+item: missing
+status: deferred
+entries:
+  - id: backlog-001
+    description: "Add ITEM-specific claim registry once source excerpts and licensing are provided."
+    status: deferred
+    gate: "subsumption-bundle-verify"
+  - id: backlog-002
+    description: "Add ITEM-specific eval harness and negative fixtures." 
+    status: deferred
+    gate: "fixtures-pass-fail"
+  - id: backlog-003
+    description: "Wire drift detection monitor for bundle integrity." 
+    status: deferred
+    gate: "ops-runbook"

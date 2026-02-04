@@ -223,7 +223,7 @@ resource "azurerm_storage_account" "main" {
   account_kind             = "StorageV2"
 
   enable_https_traffic_only = true
-  min_tls_version          = "TLS1_2"
+  min_tls_version           = "TLS1_2"
 
   blob_properties {
     versioning_enabled = var.enable_versioning

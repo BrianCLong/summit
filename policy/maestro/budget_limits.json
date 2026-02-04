@@ -1,0 +1,40 @@
+{
+  "defaults": {
+    "thinking_budget": 2048,
+    "max_tokens": 4096,
+    "tool_budget": 24,
+    "time_budget_ms": 120000
+  },
+  "roles": {
+    "admin": {
+      "thinking_budget": 8192,
+      "max_tokens": 8192,
+      "tool_budget": 64,
+      "time_budget_ms": 300000
+    },
+    "operator": {
+      "thinking_budget": 4096,
+      "max_tokens": 4096,
+      "tool_budget": 32,
+      "time_budget_ms": 180000
+    },
+    "approver": {
+      "thinking_budget": 2048,
+      "max_tokens": 2048,
+      "tool_budget": 16,
+      "time_budget_ms": 120000
+    },
+    "sre": {
+      "thinking_budget": 4096,
+      "max_tokens": 4096,
+      "tool_budget": 32,
+      "time_budget_ms": 180000
+    },
+    "auditor": {
+      "thinking_budget": 1024,
+      "max_tokens": 1024,
+      "tool_budget": 8,
+      "time_budget_ms": 60000
+    }
+  }
+}

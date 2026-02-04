@@ -1,0 +1,22 @@
+version: "1.0"
+checklist:
+  - id: "tests_passed"
+    description: "All automated tests passed"
+    required: true
+    auto_verify: true
+  - id: "security_scan"
+    description: "Security scan completed with no high/critical findings"
+    required: true
+    auto_verify: true
+  - id: "parity_check"
+    description: "Environment parity confirmed"
+    required: true
+    auto_verify: true
+  - id: "perf_benchmark"
+    description: "Performance benchmarks within budget"
+    required: true
+    auto_verify: false
+  - id: "approval_ops"
+    description: "Operational readiness approval"
+    required: true
+    auto_verify: false

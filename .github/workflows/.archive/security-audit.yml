@@ -27,6 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.pkg.outputs.manifests == 'true'
         with:
+          cache: 'pnpm'
           node-version: 20
       - run: npm install --ignore-scripts || true
         if: steps.pkg.outputs.manifests == 'true'

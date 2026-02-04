@@ -1,0 +1,21 @@
+tactics:
+  T0001:
+    name: "Create Inauthentic Accounts"
+    stage: "Preparation"
+    signals:
+      - "high_creation_velocity"
+      - "batch_naming_pattern"
+  T0002:
+    name: "Coordinate Content Amplification"
+    stage: "Execution"
+    signals:
+      - "temporal_synchronization"
+      - "network_centrality_spike"
+  T0003:
+    name: "Pollute Information Space"
+    stage: "Execution"
+    signals:
+      - "keyword_stuffing"
+      - "narrative_flooding"
+version: "DISARM-Red-v4.0"
+mapped_to: "Summit-IntelGraph-Signals-v1"

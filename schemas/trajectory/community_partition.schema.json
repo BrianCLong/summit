@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CommunityPartition",
+  "type": "object",
+  "required": ["partition_id", "cascade_id", "snapshot_id", "communities"],
+  "properties": {
+    "partition_id": { "type": "string" },
+    "cascade_id": { "type": "string" },
+    "snapshot_id": { "type": "string" },
+    "communities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["community_uid", "size", "members"],
+        "properties": {
+          "community_uid": { "type": "string" },
+          "size": { "type": "integer", "minimum": 0 },
+          "members": { "type": "array", "items": { "type": "string" } },
+          "boundary_nodes": { "type": "array", "items": { "type": "string" } },
+          "metrics": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,25 @@
+version: 1
+reporting:
+  output_dir: artifacts/governance/graph-postgres-drift
+  evidence_dir: evidence/drift
+  generator: graph_postgres_drift_check
+thresholds:
+  max_count_delta_pct: 0.5
+  max_digest_mismatches: 50
+entities:
+  User:
+    postgres:
+      digest_view: gov_users_digests
+      count_query: "SELECT count(*)::int AS count FROM gov_users_digests"
+      digest_query: "SELECT id::text AS id, digest FROM gov_users_digests"
+    neo4j:
+      count_cypher: "MATCH (u:User) RETURN count(u) AS count"
+      digest_cypher: >-
+        MATCH (u:User)
+        WITH u,
+             toString(u.id) + '§' + coalesce(u.email,'') + '§' + coalesce(u.status,'') + '§' +
+             apoc.date.format(coalesce(u.updatedAt,0),'ms','yyyy-MM-dd\'T\'HH:mm:ss.SSSZ') AS canon
+        RETURN toString(u.id) AS id, apoc.text.hashMd5(canon) AS digest
+    thresholds:
+      max_count_delta_pct: 0.5
+      max_digest_mismatches: 50

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/maestro",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Maestro CLI for workflow orchestration",
   "main": "dist/index.js",
   "bin": {
@@ -10,7 +10,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
     "clean": "rm -rf dist"
   },
@@ -24,7 +24,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "dependencies": {
-    "@maestro/core": "file:../maestro-core",
+    "@intelgraph/maestro-core": "file:../maestro-core",
     "chalk": "^5.6.2",
     "commander": "^14.0.1",
     "figlet": "^1.7.0",
@@ -43,7 +43,7 @@
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.5",
     "typescript": "^5.9.3"

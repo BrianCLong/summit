@@ -1,5 +1,5 @@
-import { Operation, OperationalTransform } from './operationalTransform';
-import logger from '../../utils/logger';
+import { Operation, OperationalTransform } from './operationalTransform.js';
+import logger from '../../utils/logger.js';
 
 interface DocumentState {
   version: number;

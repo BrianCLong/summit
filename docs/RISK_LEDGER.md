@@ -9,40 +9,51 @@ This ledger tracks systemic risks, architectural anomalies, and potential threat
 ## 🔴 Critical Risks (Immediate Action Required)
 
 ### 1. Feature Flag Fragmentation & Security Vulnerability
-*   **Type:** Security / Architectural / Dependency
-*   **Status:** In Progress
-*   **Description:** The system currently contains **four** competing ways to handle feature flags, creating confusion and potential for bugs. More critically, one implementation contains a security vulnerability, and the "modern" implementation is missing dependencies.
-*   **Details:**
-    1.  `server/src/feature-flags/`: The intended modern standard (using `@intelgraph/feature-flags`). **CRITICAL:** The dependency `@intelgraph/feature-flags` is missing from `server/package.json`, causing this code to crash if executed.
-    2.  `server/src/flags/store.ts`: An ad-hoc in-memory store. **CRITICAL:** Uses `eval()` (via `new Function`) to evaluate rules. This is a Code Injection vulnerability. It appears to be effectively dead code (only used by unused middleware), but it is dangerous to keep.
-    3.  `server/src/featureFlags/flagsmith.ts`: A legacy Flagsmith implementation. Used in `server/src/routes/recipes.ts`.
-    4.  `server/src/services/FeatureFlagService.ts`: A legacy JSON-file based service. Mostly unused (only in its own tests).
-*   **Neutralization Strategy:**
-    *   **Secure:** Remove `eval()` from `flags/store.ts`.
-    *   **Fix:** Add `@intelgraph/feature-flags` to `server/package.json`.
-    *   **Deprecate:** Mark legacy modules (`flags/`, `featureFlags/`, `services/FeatureFlagService.ts`) as `@deprecated` with clear migration instructions.
-    *   **Consolidate:** Future work should migrate `recipes.ts` to the standard provider.
+
+* **Type:** Security / Architectural / Dependency
+* **Status:** In Progress
+* **Description:** The system currently contains **four** competing ways to handle feature flags, creating confusion and potential for bugs. More critically, one implementation contains a security vulnerability, and the "modern" implementation is missing dependencies.
+* **Details:**
+  1. `server/src/feature-flags/`: The intended modern standard (using `@intelgraph/feature-flags`). **CRITICAL:** The dependency `@intelgraph/feature-flags` is missing from `server/package.json`, causing this code to crash if executed.
+  2. `server/src/flags/store.ts`: An ad-hoc in-memory store. **CRITICAL:** Uses `eval()` (via `new Function`) to evaluate rules. This is a Code Injection vulnerability. It appears to be effectively dead code (only used by unused middleware), but it is dangerous to keep.
+  3. `server/src/featureFlags/flagsmith.ts`: A legacy Flagsmith implementation. Used in `server/src/routes/recipes.ts`.
+  4. `server/src/services/FeatureFlagService.ts`: A legacy JSON-file based service. Mostly unused (only in its own tests).
+* **Neutralization Strategy:**
+  * **Secure:** Remove `eval()` from `flags/store.ts`.
+  * **Fix:** Add `@intelgraph/feature-flags` to `server/package.json`.
+  * **Deprecate:** Mark legacy modules (`flags/`, `featureFlags/`, `services/FeatureFlagService.ts`) as `@deprecated` with clear migration instructions.
+  * **Consolidate:** Future work should migrate `recipes.ts` to the standard provider.
 
 ## 🟠 Moderate Risks (Monitoring)
 
 ### 1. `server/src` Structural Sprawl
-*   **Type:** Architectural
-*   **Status:** Detected
-*   **Description:** The `server/src` directory contains over 100 top-level items, mixing standard layers (`controllers`, `services`) with specific features (`abyss`, `aurora`) and utilities. This increases cognitive load and makes boundary enforcement difficult.
-*   **Neutralization Strategy:** Propose a `server/src/modules/` or `server/src/domains/` structure to encapsulate these feature-specific folders.
+
+* **Type:** Architectural
+* **Status:** Detected
+* **Description:** The `server/src` directory contains over 100 top-level items, mixing standard layers (`controllers`, `services`) with specific features (`abyss`, `aurora`) and utilities. This increases cognitive load and makes boundary enforcement difficult.
+* **Neutralization Strategy:** Propose a `server/src/modules/` or `server/src/domains/` structure to encapsulate these feature-specific folders.
 
 ### 2. Missing/Broken Dependencies in Monorepo
-*   **Type:** Dependency
-*   **Status:** Detected
-*   **Description:** `pnpm install` is known to fail (per system memory). `server` relies on workspace packages that may not be correctly linked in `package.json`.
-*   **Neutralization Strategy:** Audit `package.json` files against `packages/` directory and ensure workspace links are explicit.
+
+* **Type:** Dependency
+* **Status:** Detected
+* **Description:** `pnpm install` is known to fail (per system memory). `server` relies on workspace packages that may not be correctly linked in `package.json`.
+* **Neutralization Strategy:** Audit `package.json` files against `packages/` directory and ensure workspace links are explicit.
+
+### 3. React Ecosystem Volatility (React2Shell)
+
+* **Type:** Supply Chain / Security
+* **Status:** Monitoring
+* **Description:** Active exploitation of React Server Components (CVE-2025-55182). While Summit Client uses Client-Side Rendering (CSR), the ecosystem turbulence requires strict dependency vetting.
+* **Neutralization Strategy:** Enforce `pnpm audit` in CI; Verify no transitive dependencies introduce vulnerable RSC implementations.
 
 ## 🟡 Low Risks (Housekeeping)
 
 ### 1. Ambiguous Naming
-*   **Type:** Clarity
-*   **Description:** `FeatureFlagService` exists in both `server/src/services` and `@intelgraph/feature-flags`, leading to import confusion.
-*   **Neutralization Strategy:** Renaming the legacy service is part of the deprecation plan.
+
+* **Type:** Clarity
+* **Description:** `FeatureFlagService` exists in both `server/src/services` and `@intelgraph/feature-flags`, leading to import confusion.
+* **Neutralization Strategy:** Renaming the legacy service is part of the deprecation plan.
 
 ---
 

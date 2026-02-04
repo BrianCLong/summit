@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-PPGI-MAG-PRIV-001",
+  "summary": "Initial evidence pack for Privacy-preserving graph intelligence foundation.",
+  "artifacts": [
+    "evidence/packs/EVD-PPGI-MAG-PRIV-001/metrics.json",
+    "evidence/packs/EVD-PPGI-MAG-PRIV-001/stamp.json"
+  ]
+}

@@ -15,22 +15,13 @@ const mockQuery = jest.fn<any>();
 const mockConnect = jest.fn<any>();
 const mockRelease = jest.fn<any>();
 
-jest.mock('pg', () => ({
-  Pool: jest.fn().mockImplementation(() => ({
-    query: mockQuery,
-    connect: mockConnect,
-  })),
-}));
-
-// Mock provenance ledger
-jest.mock('../../provenance/ledger.js', () => ({
+await jest.unstable_mockModule('../../provenance/ledger.js', () => ({
   provenanceLedger: {
     appendEntry: jest.fn<any>().mockResolvedValue(undefined),
   },
 }));
 
-// Mock logger - must match the import path used by ProductIncrementRepo
-jest.mock('../../config/logger', () => ({
+await jest.unstable_mockModule('../../config/logger', () => ({
   __esModule: true,
   default: {
     child: jest.fn<any>().mockReturnValue({
@@ -46,33 +37,22 @@ jest.mock('../../config/logger', () => ({
   },
 }));
 
-import { Pool } from 'pg';
-import {
-  ProductIncrementRepo,
-  ProductIncrement,
-  IncrementGoal,
-  Deliverable,
-  TeamAssignment,
-} from '../ProductIncrementRepo.js';
-import { provenanceLedger } from '../../provenance/ledger.js';
+const { ProductIncrementRepo } = await import('../ProductIncrementRepo.js');
+const { provenanceLedger } = await import('../../provenance/ledger.js');
 
 describe('ProductIncrementRepo', () => {
-  let repo: ProductIncrementRepo;
-  let mockPool: any;
+  let repo: InstanceType<typeof ProductIncrementRepo>;
+  let mockPool: { query: typeof mockQuery; connect: typeof mockConnect };
   let mockClient: any;
 
   beforeEach(() => {
-    (Pool as unknown as jest.Mock).mockImplementation(() => ({
-      query: mockQuery,
-      connect: mockConnect,
-    }));
     mockClient = {
       query: jest.fn<any>(),
       release: mockRelease,
     };
     mockConnect.mockResolvedValue(mockClient);
 
-    mockPool = new Pool();
+    mockPool = { query: mockQuery, connect: mockConnect };
     repo = new ProductIncrementRepo(mockPool);
 
     jest.clearAllMocks();

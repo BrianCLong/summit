@@ -1,4 +1,4 @@
-import { DomainModel, SimulationState, ScenarioParameters } from '../types';
+import { DomainModel, SimulationState, ScenarioParameters } from '../types.js';
 
 export class CostModel implements DomainModel {
   name = 'cost' as const;

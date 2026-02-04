@@ -4,7 +4,7 @@ import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { verify, JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 import { trace } from '@opentelemetry/api';
-import { logger } from '../utils/logger.js';
+import baseLogger, { logger as namedLogger } from '../utils/logger.js';
 import type { User, OPAClient as IOPAClient } from '../graphql/intelgraph/types.js';
 
 const tracer = trace.getTracer('intelgraph-opa-abac');
@@ -52,7 +52,12 @@ interface OPADecision {
 export class OPAClient implements IOPAClient {
   private baseUrl: string;
   private timeout: number;
-  private logger = logger.child({ component: 'opa-client' });
+  private logger = (() => {
+    const resolved = namedLogger ?? baseLogger ?? console;
+    return typeof resolved.child === 'function'
+      ? resolved.child({ component: 'opa-client' })
+      : resolved;
+  })();
 
   constructor(baseUrl: string, timeout = 5000) {
     this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
@@ -67,6 +72,7 @@ export class OPAClient implements IOPAClient {
         'opa.input.action': input.action || 'unknown',
       },
     });
+    const log = this.logger ?? namedLogger ?? baseLogger ?? console;
 
     try {
       const response = await axios.post(
@@ -88,7 +94,7 @@ export class OPAClient implements IOPAClient {
         'opa.response.status': response.status,
       });
 
-      this.logger.debug('OPA policy evaluation result', {
+      log.debug('OPA policy evaluation result', {
         policy,
         input: {
           subject_tenant: input.subject?.tenantId,
@@ -102,7 +108,7 @@ export class OPAClient implements IOPAClient {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message });
 
-      this.logger.error('OPA policy evaluation failed', {
+      log.error('OPA policy evaluation failed', {
         policy,
         error: (error as Error).message,
       });

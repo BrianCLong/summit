@@ -1,6 +1,9 @@
 // @ts-nocheck
 import { pg } from '../db/pg.js';
 import { Logger } from 'pino';
+import { neo } from '../db/neo4j.js';
+import { CypherGuard } from './cypherInvariance.js';
+import { EvidenceBundle, EvidenceContract, RetrievalCitation, GraphEvidence } from './evidence.js';
 
 export interface RetrievalQuery {
   tenantId: string;
@@ -12,22 +15,15 @@ export interface RetrievalQuery {
   limit?: number;
 }
 
-export interface RetrievalCitation {
-  id: string;
-  source: string;
-  url?: string;
-  timestamp: string;
-  confidence: number;
-}
-
+// Keeping old interface for backward compatibility if needed
 export interface RetrievalResult {
   snippets: {
     text: string;
     docId: string;
     score: number;
     metadata: any;
-    citations: RetrievalCitation[]; // Added citations
-    path?: string[]; // Added path rationales
+    citations: RetrievalCitation[];
+    path?: string[];
   }[];
 }
 
@@ -40,80 +36,165 @@ async function generateEmbedding(text: string): Promise<number[]> {
 export class KnowledgeFabricRetrievalService {
   constructor(private logger: Logger) {}
 
-  async search(query: RetrievalQuery): Promise<RetrievalResult> {
+  async search(query: RetrievalQuery): Promise<EvidenceBundle> {
     const limit = query.limit || 5;
     const embedding = await generateEmbedding(query.queryText);
     const vectorStr = `[${embedding.join(',')}]`;
 
-    // Hybrid search: Vector similarity + Filters
-    // This SQL assumes pgvector is installed and configured
-    let sql = `
-      SELECT
-        text,
-        document_id,
-        metadata,
-        1 - (embedding <=> $1::vector) as score
-      FROM document_chunks
-      WHERE tenant_id = $2
-    `;
+    // 1. Vector Search (Postgres)
+    let vectorResults: any[] = [];
+    try {
+      let sql = `
+        SELECT
+          text,
+          document_id,
+          metadata,
+          1 - (embedding <=> $1::vector) as score
+        FROM document_chunks
+        WHERE tenant_id = $2
+      `;
 
-    const params: any[] = [vectorStr, query.tenantId];
-    let paramIdx = 3;
+      const params: any[] = [vectorStr, query.tenantId];
+      let paramIdx = 3;
 
-    if (query.filters?.entityIds && query.filters.entityIds.length > 0) {
-      sql += ` AND entity_ids && $${paramIdx}`;
-      params.push(query.filters.entityIds);
-      paramIdx++;
+      if (query.filters?.entityIds && query.filters.entityIds.length > 0) {
+        sql += ` AND entity_ids && $${paramIdx}`;
+        params.push(query.filters.entityIds);
+        paramIdx++;
+      }
+
+      sql += ` ORDER BY score DESC LIMIT $${paramIdx}`;
+      params.push(limit);
+
+      vectorResults = await pg.manyOrNone(sql, params);
+      if (!vectorResults) {
+        vectorResults = [];
+      }
+    } catch (err: any) {
+      this.logger.error({ err, query }, 'Vector retrieval failed or table missing');
+      // Fallback for dev/test
+      if (err.message.includes('relation "document_chunks" does not exist')) {
+        vectorResults = [{
+          text: "Mock result for testing GraphRAG retrieval.",
+          document_id: "mock-1",
+          score: 0.95,
+          metadata: { source: "Mock Source" }
+        }];
+      }
     }
 
-    sql += ` ORDER BY score DESC LIMIT $${paramIdx}`;
-    params.push(limit);
+    // 2. Graph Search (Neo4j) - Enforcing Invariants
+    const graphEvidence = await this.graphSearch(query);
+
+    // 3. Construct Evidence Bundle
+    const contract: EvidenceContract = {
+      contractId: `evt-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      schemaVersion: "1.0.0",
+      manifest: {
+        queryId: `qry-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        strategy: 'HYBRID',
+        parameters: { limit, hasFilters: !!query.filters },
+        sources: ['postgres:document_chunks', 'neo4j:knowledge_graph']
+      },
+      citations: vectorResults.map(r => ({
+        id: `cit-${r.document_id}`,
+        source: r.metadata?.source || 'Knowledge Base',
+        url: r.metadata?.url,
+        timestamp: new Date().toISOString(),
+        confidence: r.score,
+        snippet: r.text,
+        supportingGraphIds: [] // Todo: link to graph nodes if shared ID
+      })),
+      graphEvidence: graphEvidence,
+      provenance: null // In real flow, we would link to a provenance entry
+    };
+
+    return {
+      results: [contract],
+      metadata: {
+        totalTimeMs: 0,
+        totalTokens: 0
+      }
+    };
+  }
+
+  async graphSearch(query: RetrievalQuery): Promise<GraphEvidence | undefined> {
+    // Basic graph exploration based on filters
+    const entityIds = query.filters?.entityIds || [];
+
+    // If no entities to start from, return undefined for now (could do text search in graph later)
+    if (entityIds.length === 0) {
+      return undefined;
+    }
+
+    // Query: Find neighborhood of entities, enforcing invariants
+    // We explicitly include ORDER BY to satisfy CypherGuard strictness if enabled later
+    const cypher = `
+      MATCH (n)
+      WHERE n.id IN $entityIds
+      OPTIONAL MATCH (n)-[r]-(m)
+      RETURN n, r, m
+      ORDER BY n.id, type(r), m.id
+    `;
+
+    // Enforce Invariants (injects LIMIT if missing)
+    const safeCypher = CypherGuard.enforceInvariants(cypher, { strict: false, defaultLimit: 50 });
 
     try {
-      const rows = await pg.manyOrNone(sql, params);
+      const result = await neo.run(safeCypher, { entityIds });
+
+      const nodesMap = new Map<string, any>();
+      const relationships: any[] = [];
+
+      // Transform Neo4j result to GraphEvidence shape
+      result.records.forEach(record => {
+         const n = record.get('n');
+         if (n && n.properties) {
+             const id = n.properties.id || n.identity.toString();
+             if (!nodesMap.has(id)) {
+                 nodesMap.set(id, {
+                     id,
+                     labels: n.labels,
+                     properties: n.properties,
+                     importance: { pageRank: n.properties.pageRank }
+                 });
+             }
+         }
+
+         const m = record.get('m');
+         if (m && m.properties) {
+             const id = m.properties.id || m.identity.toString();
+             if (!nodesMap.has(id)) {
+                 nodesMap.set(id, {
+                     id,
+                     labels: m.labels,
+                     properties: m.properties,
+                     importance: { pageRank: m.properties.pageRank }
+                 });
+             }
+         }
+
+         const r = record.get('r');
+         if (r && r.properties) {
+             relationships.push({
+                 id: r.identity.toString(),
+                 start: r.start.toString(),
+                 end: r.end.toString(),
+                 type: r.type,
+                 properties: r.properties
+             });
+         }
+      });
 
       return {
-        snippets: rows.map(r => ({
-          text: r.text,
-          docId: r.document_id,
-          score: r.score,
-          metadata: r.metadata,
-          // Enrich with citations and path rationale
-          citations: [
-            {
-              id: `cit-${r.document_id}`,
-              source: r.metadata?.source || 'Knowledge Base',
-              url: r.metadata?.url,
-              timestamp: new Date().toISOString(),
-              confidence: r.score
-            }
-          ],
-          path: ['Query -> Vector Sim -> Document Match']
-        }))
+        nodes: Array.from(nodesMap.values()),
+        relationships,
+        stateHash: "hash-placeholder" // Compute hash of nodes+rels for strict verification
       };
-    } catch (err: any) {
-      this.logger.error({ err, query }, 'Retrieval failed');
-      // In development/test if table doesn't exist, return mocks
-      if (err.message.includes('relation "document_chunks" does not exist')) {
-          return {
-              snippets: [
-                  {
-                      text: "Mock result for testing GraphRAG retrieval.",
-                      docId: "mock-1",
-                      score: 0.95,
-                      metadata: { source: "Mock Source" },
-                      citations: [{
-                          id: "cit-mock-1",
-                          source: "Mock Evidence",
-                          timestamp: new Date().toISOString(),
-                          confidence: 0.95
-                      }],
-                      path: ["Query -> Mock -> Result"]
-                  }
-              ]
-          }
-      }
-      return { snippets: [] };
+    } catch (err) {
+      this.logger.error({ err }, 'Graph retrieval failed');
+      return undefined;
     }
   }
 }

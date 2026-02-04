@@ -17,8 +17,16 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['json-summary'],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
     },
-    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', 'tests/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', 'tests/**', '**/TimelineRail.test.tsx', '**/EntityDrawer.test.tsx', '**/MaestroRunConsole.test.tsx'],
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
   },
 })

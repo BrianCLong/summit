@@ -1,0 +1,45 @@
+version: 1.0.0
+last_updated: 2026-01-15
+
+policy:
+  merge_blocking:
+    # Critical severity issues definitively block merge
+    critical:
+      block: true
+      sla_days: 0
+      sources:
+        - codeql
+        - npm-audit
+        - pip-safety
+        - dependabot
+        - sonarcloud
+
+    # High severity issues block merge unless exception granted
+    high:
+      block: true
+      sla_days: 2
+      sources:
+        - codeql
+        - npm-audit
+        - pip-safety
+
+    # Medium/Low are informational, do not block merge but require tracking
+    medium:
+      block: false
+      sla_days: 14
+    low:
+      block: false
+      sla_days: 30
+
+exceptions:
+  process: "Review required by Security Engineer + Engineering Lead"
+  validity_days: 30
+  tracking_label: "security-exception"
+  required_evidence:
+    - "repro_steps"
+    - "mitigation_plan"
+    - "compensating_controls"
+
+enforcement:
+  ci_gate: "security-policy-check"
+  failure_mode: "fail-closed"

@@ -251,6 +251,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install dependencies
@@ -301,6 +302,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install Playwright
@@ -427,6 +429,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
       - name: Install k6

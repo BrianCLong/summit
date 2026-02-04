@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-ARCEE-TRINITY-LICENSE-001",
+  "summary": "Scaffolded evidence slot for Arcee Trinity license gate validation.",
+  "artifacts": ["summit/governance/licenses.yaml", "summit/governance/license_gate.py"],
+  "status": "stub"
+}

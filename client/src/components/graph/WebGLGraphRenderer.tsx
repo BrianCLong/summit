@@ -156,11 +156,11 @@ export const WebGLGraphRenderer = forwardRef<
     height = 600,
     onNodeClick,
     onNodeHover,
-    onEdgeClick,
+    onEdgeClick: _onEdgeClick,
     selectedNodeIds = [],
     highlightedNodeIds = [],
     enableProgressiveLoading = true,
-    batchSize = 100,
+    batchSize: _batchSize = 100,
     lodThresholds = DEFAULT_LOD_THRESHOLDS,
     performanceMode = 'balanced',
   },
@@ -512,13 +512,17 @@ export const WebGLGraphRenderer = forwardRef<
       frameTimesRef.current.reduce((a, b) => a + b, 0) /
       frameTimesRef.current.length;
 
+    const memory = (
+      performance as Performance & { memory?: { usedJSHeapSize: number } }
+    ).memory;
+
     setMetrics({
       fps: Math.round(1000 / avgFrameTime),
       visibleNodes: visibleNodes.length,
       totalNodes: nodes.length,
       renderTime: Math.round(renderTime * 100) / 100,
-      memoryUsage: (performance as any).memory?.usedJSHeapSize
-        ? Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)
+      memoryUsage: memory?.usedJSHeapSize
+        ? Math.round(memory.usedJSHeapSize / 1024 / 1024)
         : 0,
     });
   }, [

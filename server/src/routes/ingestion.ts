@@ -1,12 +1,12 @@
 import express from 'express';
-import { PipelineOrchestrator } from '../ingestion/PipelineOrchestrator';
-import { RetrievalService } from '../services/RetrievalService';
-import { getRagContext } from '../services/rag';
-import { PipelineConfig } from '../data-model/types';
+import { PipelineOrchestrator } from '../ingestion/PipelineOrchestrator.js';
+import { RetrievalService } from '../services/RetrievalService.js';
+import { getRagContext } from '../services/rag.js';
+import { PipelineConfig } from '../data-model/types.js';
 import { Pool } from 'pg';
-import { QueueService } from '../ingestion/QueueService';
-import { ensureAuthenticated } from '../middleware/auth';
-import { BackpressureGuard } from '../backpressure/guard';
+import { QueueService } from '../ingestion/QueueService.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
+import { BackpressureGuard } from '../backpressure/guard.js';
 
 const router = express.Router();
 const orchestrator = new PipelineOrchestrator();

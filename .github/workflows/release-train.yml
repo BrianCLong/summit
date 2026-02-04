@@ -1,47 +1,76 @@
-name: Release Train
+name: release-train
 
 on:
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-permissions:
-  contents: write
-  packages: write
-  actions: read
+    inputs:
+      target_env:
+        description: "stage|prod"
+        required: true
+        default: "stage"
 
 jobs:
-  build:
-    name: Build & Package
+  parity_audit:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          curl -fsSL https://get.helm.sh/helm-v3.15.2-linux-amd64.tar.gz | tar zx
+          sudo mv linux-amd64/helm /usr/local/bin/
+          curl -fsSL https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip -o tf.zip
+          unzip tf.zip
+          sudo mv terraform /usr/local/bin/
+      - name: IaC plan diff (stage vs prod)
+        run: |
+          mkdir -p artifacts
+          scripts/ci/iac_plan_diff.sh scripts/ci/envs/stage scripts/ci/envs/prod > artifacts/iac.diff
+          scripts/ci/deny_on_drift.sh artifacts/iac.diff
+      - name: Secret parity check
+        run: scripts/ci/secret_matrix_check.sh scripts/ci/configs/secrets.stage.json scripts/ci/configs/secrets.prod.json
 
+  third_party_status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check provider status
+        id: gate
+        run: scripts/ci/provider_status_gate.sh scripts/ci/configs/providers.yaml
     outputs:
-      build_success: ${{ steps.build.outcome == 'success' }}
+      ok: ${{ steps.gate.outputs.ok }}
 
+  build_and_sign:
+    needs: [parity_audit, third_party_status]
+    if: ${{ always() && needs.third_party_status.outputs.ok == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.DIGEST }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
+          cache: "pnpm"
           node-version: "20"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          version: 8
+          version: "9.12.0"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build Packages
         id: build
-        run: npm run build
+        run: pnpm run build
 
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: client-dist
           path: client/dist
@@ -50,7 +79,7 @@ jobs:
 
       - name: Upload Server Artifacts
         if: hashFiles('server/dist/**') != ''
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: server-dist
           path: server/dist
@@ -59,48 +88,44 @@ jobs:
 
   sbom:
     name: Generate SBOM
-    needs: build
+    needs: build_and_sign
     runs-on: ubuntu-latest
     if: success()
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
+        uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
 
       - name: Generate SBOMs
         run: |
-          if [ -f scripts/compliance/generate_sbom.sh ]; then
-            chmod +x scripts/compliance/generate_sbom.sh
-            ./scripts/compliance/generate_sbom.sh compliance/sbom
-          else
-            echo "SBOM generation script not found. Skipping."
-          fi
+          docker build -t registry/app:${{ github.sha }} .
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' registry/app:${{ github.sha }})
+          echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
+      - name: Generate provenance
+        run: scripts/ci/release-train/provenance_attest.sh ${{ steps.build.outputs.DIGEST }}
+      - name: Push + record artifact
+        run: scripts/ci/release-train/publish_and_record.sh ${{ steps.build.outputs.DIGEST }} scripts/ci/records/artifacts.json
 
-      - name: Upload SBOM Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: sbom-artifacts
-          path: compliance/sbom
-          retention-days: 90
-          if-no-files-found: warn
-
-  provenance:
-    name: Generate Provenance
-    needs: build
+  canary_rollout:
+    needs: build_and_sign
     runs-on: ubuntu-latest
-    if: success()
-
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup Node
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4 # v6
         with:
+          cache: "pnpm"
           node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "9.12.0"
 
       - name: Generate Evidence Bundle (Provenance)
         run: |
@@ -113,7 +138,7 @@ jobs:
           fi
 
       - name: Upload Evidence Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: evidence-bundle
           path: evidence
@@ -122,14 +147,20 @@ jobs:
 
   finalize:
     name: Finalize Release (Dry Run)
-    needs: [build, sbom, provenance]
+    needs: [build_and_sign, sbom]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Step up 25% → 50% → 100%
+        run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
+
+  post_deploy_verification:
+    needs: finalize
     runs-on: ubuntu-latest
 
     steps:
-      - name: Dry Run Summary
-        run: |
-          echo "Release Train Dry Run Complete."
-          echo "Build: Success"
-          echo "SBOM: Generated"
-          echo "Provenance: Generated"
-          echo "Note: No artifacts were published to external registries."
+      - uses: actions/checkout@v4
+      - name: Post-deploy probes (latency/error rates/log SLOs)
+        run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=20m
+      - name: Enforce rollback on SLO breach
+        run: scripts/ci/release-train/rollback_if_needed.sh --env=${{ inputs.target_env }}

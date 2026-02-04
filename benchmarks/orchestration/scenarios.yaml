@@ -1,0 +1,48 @@
+# Orchestration Benchmark Scenarios
+# These scenarios define the standard test cases for proving the "Moat".
+
+scenarios:
+  - id: "scenario:hierarchical_depth"
+    name: "Deep Hierarchy Plan Execution"
+    description: >
+      A complex task requiring 3 levels of decomposition:
+      Planner -> Manager -> Specialist.
+      Tests the efficiency of graph traversal and context passing.
+    input:
+      complexity: "high"
+      depth: 3
+    targets:
+      max_overhead_ms: 500
+      min_reproducibility: 1.0
+
+  - id: "scenario:context_contention"
+    name: "High-Contention Shared Memory"
+    description: >
+      5 Agents attempting to read/write from the same `MemoryScope` simultaneously.
+      Tests the locking and policy enforcement mechanisms.
+    input:
+      concurrent_agents: 5
+      shared_resources: ["evidence:2024:q1"]
+    targets:
+      success_rate: 1.0
+      deadlock_count: 0
+
+  - id: "scenario:policy_blockage"
+    name: "Adversarial Policy Check"
+    description: >
+      An agent explicitly attempts to access a resource denied by `MemoryScopeManifest`.
+      Tests the speed and correctness of the `PolicyEngine` interception.
+    input:
+      intent: "unauthorized_access"
+    targets:
+      outcome: "POLICY_BLOCKED"
+      max_decision_latency_ms: 50
+
+  - id: "scenario:flat_vs_graph"
+    name: "Comparative Efficiency"
+    description: >
+      Run the same multi-step task via "Standard Chat Loop" vs "HierarchicalPlanGraph".
+      Proves the token savings of the Summit approach.
+    comparison: true
+    targets:
+      token_reduction_pct: 30

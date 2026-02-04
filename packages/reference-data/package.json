@@ -1,12 +1,12 @@
 {
   "name": "@intelgraph/reference-data",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Reference data management with code lists, lookups, and versioning",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },

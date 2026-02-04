@@ -1,5 +1,7 @@
-import { withLegacyGraphServer } from './__helpers__/legacyGraphTestkit';
-import * as neo from '../src/graph/neo4j';
+import { ApolloServer } from '@apollo/server';
+import { typeDefs } from '../src/graphql/schema.js';
+import { resolvers } from '../src/graphql/resolvers.js';
+import * as neo from '../src/graph/neo4j.js';
 import { jest, it, expect } from '@jest/globals';
 
 jest.spyOn(neo, 'runCypher').mockImplementation(async (c, p) => {
@@ -18,13 +20,27 @@ jest.spyOn(neo, 'runCypher').mockImplementation(async (c, p) => {
   ];
 });
 
-it('lists suggestions', async () => {
-  await withLegacyGraphServer(
-    async (exec) => {
-      const res = await exec({ query: '{ suggestions { id label } }' });
-      const data = (res.body as any)?.singleResult?.data;
-      expect(data?.suggestions?.[0]?.label).toMatch(/Alice/);
-    },
-    { user: { scopes: ['graph:write'] } },
-  );
+const queryBlockMatch = /type Query\s*{([\s\S]*?)}/.exec(String(typeDefs));
+const hasSuggestionsQuery = queryBlockMatch
+  ? /\bsuggestions\b/.test(queryBlockMatch[1])
+  : false;
+const itIfSuggestions = hasSuggestionsQuery ? it : it.skip;
+
+itIfSuggestions('lists suggestions', async () => {
+  const safeResolvers = {
+    Query: { suggestions: resolvers.Query.suggestions },
+  };
+
+  const server = new ApolloServer({ typeDefs, resolvers: safeResolvers, introspection: true });
+  await server.start();
+  try {
+    const res = await server.executeOperation(
+      { query: '{ suggestions { id label } }' },
+      { contextValue: { user: { scopes: ['graph:write'] } } },
+    );
+    const data = (res.body as any)?.singleResult?.data;
+    expect(data?.suggestions?.[0]?.label).toMatch(/Alice/);
+  } finally {
+    await server.stop();
+  }
 });

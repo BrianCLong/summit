@@ -4,12 +4,34 @@
  */
 
 import React, { useState } from 'react';
-// @ts-ignore
-import * as ReactBootstrap from 'react-bootstrap';
-const { Alert, Button, Card, Form, Modal, Badge, Tooltip } = ReactBootstrap as any;
-// @ts-ignore
-import * as ReactBootstrapIcons from 'react-bootstrap-icons';
-const { InfoCircle, ExclamationTriangle, Clock, Shield, FileText } = ReactBootstrapIcons as any;
+import {
+  Alert,
+  AlertTitle,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
+import type { ChipProps } from '@mui/material';
+import {
+  AccessTime,
+  Description,
+  InfoOutlined,
+  Shield,
+  WarningAmber,
+} from '@mui/icons-material';
 import { useMutation, useQuery } from '@apollo/client';
 import { SUBMIT_POLICY_APPEAL, GET_APPEAL_STATUS } from '../graphql/appeals';
 
@@ -45,6 +67,47 @@ interface PolicyDenialBannerProps {
   className?: string;
 }
 
+const getRiskLevelColor = (level?: string): ChipProps['color'] => {
+  switch (level) {
+    case 'HIGH':
+      return 'error';
+    case 'MEDIUM':
+      return 'warning';
+    case 'LOW':
+      return 'info';
+    default:
+      return 'default';
+  }
+};
+
+const getUrgencyColor = (urgency: string): ChipProps['color'] => {
+  switch (urgency) {
+    case 'CRITICAL':
+      return 'error';
+    case 'HIGH':
+      return 'warning';
+    case 'MEDIUM':
+      return 'info';
+    case 'LOW':
+      return 'success';
+    default:
+      return 'default';
+  }
+};
+
+const formatSlaTime = (hours: number) => {
+  if (hours < 24) {
+    return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  }
+  const days = Math.floor(hours / 24);
+  const remainingHours = hours % 24;
+  return `${days} day${days !== 1 ? 's' : ''}${
+    remainingHours > 0
+      ? ` ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`
+      : ''
+  }`;
+};
+
 const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
   decision,
   onRetry,
@@ -58,9 +121,9 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
   // Appeal form state
   const [justification, setJustification] = useState('');
   const [businessNeed, setBusinessNeed] = useState('');
-  const [urgency, setUrgency] = useState<
-    'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
-  >('MEDIUM');
+  const [urgency, setUrgency] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'>(
+    'MEDIUM',
+  );
   const [requestedDuration, setRequestedDuration] = useState('24 hours');
 
   const [submitAppeal] = useMutation(SUBMIT_POLICY_APPEAL);
@@ -69,36 +132,8 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
   const { data: appealStatus } = useQuery(GET_APPEAL_STATUS, {
     variables: { decisionId: decision.decisionId },
     skip: !appealSubmitted,
-    pollInterval: appealSubmitted ? 30000 : 0, // Poll every 30 seconds if appeal submitted
+    pollInterval: appealSubmitted ? 30000 : 0,
   });
-
-  const getRiskLevelColor = (level?: string) => {
-    switch (level) {
-      case 'HIGH':
-        return 'danger';
-      case 'MEDIUM':
-        return 'warning';
-      case 'LOW':
-        return 'info';
-      default:
-        return 'secondary';
-    }
-  };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'CRITICAL':
-        return 'danger';
-      case 'HIGH':
-        return 'warning';
-      case 'MEDIUM':
-        return 'info';
-      case 'LOW':
-        return 'success';
-      default:
-        return 'secondary';
-    }
-  };
 
   const handleSubmitAppeal = async () => {
     try {
@@ -119,50 +154,37 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to submit appeal. Please try again.',
+        err instanceof Error
+          ? err.message
+          : 'Failed to submit appeal. Please try again.',
       );
     }
   };
 
-  const formatSlaTime = (hours: number) => {
-    if (hours < 24) {
-      return `${hours} hour${hours !== 1 ? 's' : ''}`;
-    }
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    return `${days} day${days !== 1 ? 's' : ''}${remainingHours > 0 ? ` ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}` : ''}`;
-  };
-
-  // If appeal has been approved, show success message
   if (appealStatus?.getAppealStatus?.status === 'APPROVED') {
     return (
       <Alert
-        variant="success"
+        severity="success"
+        icon={<Shield fontSize="small" />}
         className={`policy-denial-banner ${className || ''}`}
+        action={
+          onRetry ? (
+            <Button color="success" size="small" onClick={onRetry}>
+              Retry Action
+            </Button>
+          ) : undefined
+        }
       >
-        <div className="d-flex align-items-center">
-          <Shield className="me-2" size={20} />
-          <div className="flex-grow-1">
-            <strong>Appeal Approved!</strong>
-            <div className="mt-1">
-              Your access request has been approved by a Data Steward. You may
-              now retry your action.
-              {appealStatus.getAppealStatus.responseReason && (
-                <div className="text-muted small mt-1">
-                  Reason: {appealStatus.getAppealStatus.responseReason}
-                </div>
-              )}
-            </div>
-          </div>
-          <Button
-            variant="success"
-            size="sm"
-            onClick={onRetry}
-            className="ms-2"
-          >
-            Retry Action
-          </Button>
-        </div>
+        <AlertTitle>Appeal Approved</AlertTitle>
+        <Typography variant="body2">
+          Your access request has been approved by a Data Steward. You may now
+          retry your action.
+        </Typography>
+        {appealStatus.getAppealStatus.responseReason && (
+          <Typography variant="caption" color="text.secondary">
+            Reason: {appealStatus.getAppealStatus.responseReason}
+          </Typography>
+        )}
       </Alert>
     );
   }
@@ -170,266 +192,258 @@ const PolicyDenialBanner: React.FC<PolicyDenialBannerProps> = ({
   return (
     <>
       <Alert
-        variant="danger"
+        severity="error"
+        icon={<WarningAmber fontSize="small" />}
         className={`policy-denial-banner ${className || ''}`}
-        dismissible={!!onDismiss}
         onClose={onDismiss}
       >
-        <div className="d-flex align-items-start">
-          <ExclamationTriangle className="me-2 mt-1 flex-shrink-0" size={20} />
-          <div className="flex-grow-1">
-            <div className="d-flex align-items-center mb-2">
-              <strong className="me-2">Access Denied</strong>
-              {decision.metadata?.riskLevel && (
-                <Badge
-                  bg={getRiskLevelColor(decision.metadata.riskLevel)}
-                  className="me-2"
-                >
-                  {decision.metadata.riskLevel} Risk
-                </Badge>
-              )}
-              <small className="text-muted">Policy: {decision.policy}</small>
-            </div>
+        <AlertTitle>Access Denied</AlertTitle>
+        <Stack spacing={1.5}>
+          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+            {decision.metadata?.riskLevel && (
+              <Chip
+                label={`${decision.metadata.riskLevel} Risk`}
+                color={getRiskLevelColor(decision.metadata.riskLevel)}
+                size="small"
+              />
+            )}
+            <Typography variant="caption" color="text.secondary">
+              Policy: {decision.policy}
+            </Typography>
+          </Stack>
 
-            <div className="mb-2">{decision.reason}</div>
+          <Typography variant="body2">{decision.reason}</Typography>
 
-            {/* Alternatives if available */}
-            {decision.metadata?.alternatives &&
-              decision.metadata.alternatives.length > 0 && (
-                <div className="mb-2">
-                  <small className="text-muted">
-                    <strong>Suggested alternatives:</strong>
-                  </small>
-                  <ul className="small mb-0">
-                    {decision.metadata.alternatives.map((alt, index) => (
-                      <li key={index}>{alt}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-            {/* Appeal section */}
-            {decision.appeal?.available ? (
-              <Card className="mt-3 border-info">
-                <Card.Body className="py-2">
-                  <div className="d-flex align-items-center justify-content-between">
-                    <div className="d-flex align-items-center">
-                      <InfoCircle className="me-2 text-info" size={16} />
-                      <div>
-                        <strong className="text-info">Appeal Available</strong>
-                        <div className="small text-muted">
-                          Response SLA:{' '}
-                          {formatSlaTime(decision.appeal.slaHours)}
-                          {decision.appeal.requiredRole && (
-                            <span className="ms-2">
-                              • Reviewer: {decision.appeal.requiredRole}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {appealSubmitted ? (
-                      <div className="text-end">
-                        {appealStatus?.getAppealStatus ? (
-                          <div>
-                            <Badge
-                              bg={getUrgencyColor(
-                                appealStatus.getAppealStatus.urgency,
-                              )}
-                            >
-                              {appealStatus.getAppealStatus.status}
-                            </Badge>
-                            <div className="small text-muted mt-1">
-                              <Clock size={12} className="me-1" />
-                              Submitted{' '}
-                              {new Date(
-                                appealStatus.getAppealStatus.createdAt,
-                              ).toLocaleString()}
-                            </div>
-                          </div>
-                        ) : (
-                          <Badge bg="info">Appeal Submitted</Badge>
-                        )}
-                      </div>
-                    ) : (
-                      <Button
-                        variant="info"
-                        size="sm"
-                        onClick={() => setShowAppealForm(true)}
-                      >
-                        <FileText size={14} className="me-1" />
-                        Submit Appeal
-                      </Button>
-                    )}
-                  </div>
-
-                  {decision.appeal.instructions && (
-                    <div className="mt-2 small text-muted border-top pt-2">
-                      <strong>Appeal Instructions:</strong>{' '}
-                      {decision.appeal.instructions}
-                    </div>
-                  )}
-                </Card.Body>
-              </Card>
-            ) : (
-              decision.appeal && (
-                <div className="mt-2 text-muted small">
-                  <InfoCircle size={14} className="me-1" />
-                  {decision.appeal.instructions ||
-                    'This policy decision cannot be appealed.'}
-                </div>
-              )
+          {decision.metadata?.alternatives &&
+            decision.metadata.alternatives.length > 0 && (
+              <Box>
+                <Typography variant="caption" color="text.secondary">
+                  Suggested alternatives:
+                </Typography>
+                <Box component="ul" sx={{ mb: 0, mt: 0.5, pl: 2 }}>
+                  {decision.metadata.alternatives.map((alt, index) => (
+                    <li key={index}>
+                      <Typography variant="body2">{alt}</Typography>
+                    </li>
+                  ))}
+                </Box>
+              </Box>
             )}
 
-            {/* Technical details */}
-            <div className="mt-2 pt-2 border-top">
-              <details>
-                <summary
-                  className="small text-muted"
-                  style={{ cursor: 'pointer' }}
+          {decision.appeal?.available ? (
+            <Card
+              variant="outlined"
+              sx={{ borderColor: 'info.light', bgcolor: 'info.50' }}
+            >
+              <CardContent sx={{ py: 1.5 }}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  spacing={2}
                 >
-                  Technical Details
-                </summary>
-                <div className="small text-muted mt-1">
-                  <div>
-                    Decision ID: <code>{decision.decisionId}</code>
-                  </div>
-                  <div>
-                    Timestamp: {new Date(decision.timestamp).toLocaleString()}
-                  </div>
-                  <div>
-                    Policy: <code>{decision.policy}</code>
-                  </div>
-                  {decision.appeal?.appealId && (
-                    <div>
-                      Appeal ID: <code>{decision.appeal.appealId}</code>
-                    </div>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <InfoOutlined color="info" fontSize="small" />
+                    <Box>
+                      <Typography variant="subtitle2" color="info.main">
+                        Appeal Available
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Response SLA: {formatSlaTime(decision.appeal.slaHours)}
+                        {decision.appeal.requiredRole && (
+                          <span> • Reviewer: {decision.appeal.requiredRole}</span>
+                        )}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  {appealSubmitted ? (
+                    <Stack spacing={0.5} alignItems="flex-end">
+                      {appealStatus?.getAppealStatus ? (
+                        <>
+                          <Chip
+                            label={appealStatus.getAppealStatus.status}
+                            color={getUrgencyColor(
+                              appealStatus.getAppealStatus.urgency,
+                            )}
+                            size="small"
+                          />
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                          >
+                            <AccessTime fontSize="inherit" /> Submitted{' '}
+                            {new Date(
+                              appealStatus.getAppealStatus.createdAt,
+                            ).toLocaleString()}
+                          </Typography>
+                        </>
+                      ) : (
+                        <Chip label="Appeal Submitted" color="info" size="small" />
+                      )}
+                    </Stack>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => setShowAppealForm(true)}
+                      startIcon={<Description fontSize="small" />}
+                    >
+                      Submit Appeal
+                    </Button>
                   )}
-                </div>
-              </details>
-            </div>
-          </div>
-        </div>
+                </Stack>
+
+                {decision.appeal.instructions && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', mt: 1 }}
+                  >
+                    Appeal instructions: {decision.appeal.instructions}
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            decision.appeal && (
+              <Typography variant="caption" color="text.secondary">
+                <InfoOutlined fontSize="inherit" />{' '}
+                {decision.appeal.instructions ||
+                  'This policy decision cannot be appealed.'}
+              </Typography>
+            )
+          )}
+
+          <Box sx={{ pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
+            <details>
+              <summary style={{ cursor: 'pointer' }}>
+                <Typography variant="caption" color="text.secondary">
+                  Technical Details
+                </Typography>
+              </summary>
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Decision ID: <code>{decision.decisionId}</code>
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Timestamp: {new Date(decision.timestamp).toLocaleString()}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Policy: <code>{decision.policy}</code>
+                </Typography>
+                {decision.appeal?.appealId && (
+                  <Typography variant="caption" color="text.secondary">
+                    Appeal ID: <code>{decision.appeal.appealId}</code>
+                  </Typography>
+                )}
+              </Box>
+            </details>
+          </Box>
+        </Stack>
       </Alert>
 
-      {/* Appeal Form Modal */}
-      <Modal
-        show={showAppealForm}
-        onHide={() => setShowAppealForm(false)}
-        size="lg"
+      <Dialog
+        open={showAppealForm}
+        onClose={() => setShowAppealForm(false)}
+        fullWidth
+        maxWidth="md"
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Submit Policy Appeal</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            {error && (
-              <Alert variant="danger" className="mb-3" dismissible onClose={() => setError(null)}>
-                {error}
-              </Alert>
-            )}
-
-            <div className="mb-3">
-              <Alert variant="info" className="small">
-                <InfoCircle className="me-2" />
-                <strong>Response SLA:</strong>{' '}
-                {decision.appeal && formatSlaTime(decision.appeal.slaHours)}
-                <br />
-                <strong>Reviewer:</strong>{' '}
-                {decision.appeal?.requiredRole || 'Data Steward'}
-              </Alert>
-            </div>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Business Justification *</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Explain why this access is needed for business purposes..."
-                value={businessNeed}
-                onChange={(e: any) => setBusinessNeed(e.target.value)}
-                required
-              />
-              <Form.Text className="text-muted">
-                Describe the specific business requirement that necessitates
-                this access.
-              </Form.Text>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Technical Justification *</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Provide technical details about the access needed..."
-                value={justification}
-                onChange={(e: any) => setJustification(e.target.value)}
-                required
-              />
-              <Form.Text className="text-muted">
-                {decision.appeal?.instructions}
-              </Form.Text>
-            </Form.Group>
-
-            <div className="row">
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Urgency Level *</Form.Label>
-                  <Form.Select
-                    value={urgency}
-                    onChange={(e: any) => setUrgency(e.target.value as any)}
-                  >
-                    <option value="LOW">Low - Routine work</option>
-                    <option value="MEDIUM">
-                      Medium - Standard business need
-                    </option>
-                    <option value="HIGH">
-                      High - Time-sensitive requirement
-                    </option>
-                    <option value="CRITICAL">
-                      Critical - Security incident or emergency
-                    </option>
-                  </Form.Select>
-                </Form.Group>
-              </div>
-              <div className="col-md-6">
-                <Form.Group className="mb-3">
-                  <Form.Label>Requested Duration</Form.Label>
-                  <Form.Select
-                    value={requestedDuration}
-                    onChange={(e: any) => setRequestedDuration(e.target.value)}
-                  >
-                    <option value="4 hours">4 hours</option>
-                    <option value="12 hours">12 hours</option>
-                    <option value="24 hours">24 hours (default)</option>
-                    <option value="3 days">3 days</option>
-                    <option value="1 week">1 week</option>
-                  </Form.Select>
-                </Form.Group>
-              </div>
-            </div>
-
-            <Alert variant="warning" className="small">
-              <ExclamationTriangle className="me-2" />
-              <strong>Note:</strong> All appeals are logged and audited. Misuse
-              of the appeal process may result in access restrictions.
+        <DialogTitle>Submit Policy Appeal</DialogTitle>
+        <DialogContent dividers>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+              {error}
             </Alert>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAppealForm(false)}>
-            Cancel
-          </Button>
+          )}
+
+          <Alert severity="info" sx={{ mb: 2 }} icon={<InfoOutlined />}>
+            <Typography variant="body2">
+              <strong>Response SLA:</strong>{' '}
+              {decision.appeal && formatSlaTime(decision.appeal.slaHours)}
+              <br />
+              <strong>Reviewer:</strong>{' '}
+              {decision.appeal?.requiredRole || 'Data Steward'}
+            </Typography>
+          </Alert>
+
+          <Stack spacing={2}>
+            <TextField
+              label="Business Justification"
+              multiline
+              minRows={3}
+              placeholder="Explain why this access is needed for business purposes..."
+              value={businessNeed}
+              onChange={(e) => setBusinessNeed(e.target.value)}
+              required
+              helperText="Describe the specific business requirement that necessitates this access."
+            />
+
+            <TextField
+              label="Technical Justification"
+              multiline
+              minRows={3}
+              placeholder="Provide technical details about the access needed..."
+              value={justification}
+              onChange={(e) => setJustification(e.target.value)}
+              required
+              helperText={decision.appeal?.instructions}
+            />
+
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <FormControl fullWidth>
+                <InputLabel>Urgency Level</InputLabel>
+                <Select
+                  label="Urgency Level"
+                  value={urgency}
+                  onChange={(e) =>
+                    setUrgency(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL')
+                  }
+                >
+                  <MenuItem value="LOW">Low - Routine work</MenuItem>
+                  <MenuItem value="MEDIUM">Medium - Standard business need</MenuItem>
+                  <MenuItem value="HIGH">High - Time-sensitive requirement</MenuItem>
+                  <MenuItem value="CRITICAL">
+                    Critical - Security incident or emergency
+                  </MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel>Requested Duration</InputLabel>
+                <Select
+                  label="Requested Duration"
+                  value={requestedDuration}
+                  onChange={(e) => setRequestedDuration(e.target.value)}
+                >
+                  <MenuItem value="4 hours">4 hours</MenuItem>
+                  <MenuItem value="12 hours">12 hours</MenuItem>
+                  <MenuItem value="24 hours">24 hours (default)</MenuItem>
+                  <MenuItem value="3 days">3 days</MenuItem>
+                  <MenuItem value="1 week">1 week</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+
+            <Alert severity="warning" icon={<WarningAmber fontSize="small" />}>
+              <Typography variant="body2">
+                <strong>Note:</strong> All appeals are logged and audited. Misuse
+                of the appeal process may result in access restrictions.
+              </Typography>
+            </Alert>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowAppealForm(false)}>Cancel</Button>
           <Button
-            variant="primary"
+            variant="contained"
             onClick={handleSubmitAppeal}
             disabled={!businessNeed.trim() || !justification.trim()}
           >
             Submit Appeal
           </Button>
-        </Modal.Footer>
-      </Modal>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

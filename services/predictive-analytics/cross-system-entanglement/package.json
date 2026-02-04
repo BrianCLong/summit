@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cross-system-entanglement",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Cross-System Entanglement Detector - discovers hidden relationships and shared failure modes across domains",
   "type": "module",
   "main": "dist/index.js",

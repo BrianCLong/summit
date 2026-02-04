@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-01-28T12:00:00.000Z",
+  "git": {
+    "sha": "not-a-valid-sha",
+    "shortSha": "a1b2c3d",
+    "branch": "main",
+    "dirty": false
+  },
+  "toolchain": {
+    "node": "v20.10.0",
+    "pnpm": "10.26.0"
+  },
+  "checks": {
+    "lint": {
+      "status": "passed",
+      "startedAt": "2026-01-28T12:00:00.000Z",
+      "finishedAt": "2026-01-28T12:00:05.000Z"
+    },
+    "build": {
+      "status": "passed",
+      "startedAt": "2026-01-28T12:00:00.000Z",
+      "finishedAt": "2026-01-28T12:00:05.000Z"
+    },
+    "test": {
+      "status": "passed",
+      "startedAt": "2026-01-28T12:00:00.000Z",
+      "finishedAt": "2026-01-28T12:00:05.000Z"
+    },
+    "smoke": {
+      "status": "passed",
+      "startedAt": "2026-01-28T12:00:00.000Z",
+      "finishedAt": "2026-01-28T12:00:05.000Z"
+    }
+  },
+  "summary": {
+    "passed": true,
+    "totalChecks": 4,
+    "passedChecks": 4,
+    "failedChecks": 0
+  }
+}

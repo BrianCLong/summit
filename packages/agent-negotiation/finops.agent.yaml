@@ -1,0 +1,10 @@
+id: "finops-agent-01"
+role: "finops"
+objective: "Minimize cloud spend"
+constraints:
+  - "daily_spend < $1000"
+utility_function:
+  - metric: "cost_savings"
+    weight: 1.0
+  - metric: "performance_impact"
+    weight: -0.5

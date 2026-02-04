@@ -1,0 +1,20 @@
+{
+  "evidence_id": "EVD-DEBEZIUM-OPENLINEAGE-FND-001",
+  "title": "Debezium OpenLineage subsumption scaffold",
+  "summary": "Established initial subsumption bundle manifest, license gate, and fixtures for Debezium OpenLineage coverage.",
+  "classification": "internal",
+  "artifacts": [
+    {
+      "path": "subsumption/debezium-openlineage/manifest.yaml",
+      "content_type": "text/yaml"
+    },
+    {
+      "path": "subsumption/debezium-openlineage/license_gate.md",
+      "content_type": "text/markdown"
+    },
+    {
+      "path": "docs/standards/debezium-openlineage.md",
+      "content_type": "text/markdown"
+    }
+  ]
+}

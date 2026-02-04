@@ -1,8 +1,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { operationsRouter } from '../operations-routes';
-import { resetFeatureFlags } from '../../config/feature-flags';
+import { operationsRouter } from '../operations-routes.js';
+import { resetFeatureFlags } from '../../config/feature-flags.js';
 
 let allowAuth = true;
 

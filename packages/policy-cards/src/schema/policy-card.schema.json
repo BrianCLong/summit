@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Policy Card v0",
+  "type": "object",
+  "required": ["metadata", "spec"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["name", "version", "last_updated"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "description": { "type": "string" },
+        "last_updated": { "type": "string", "format": "date" },
+        "author": { "type": "string" }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "scope": {
+          "type": "object",
+          "properties": {
+            "agents": { "type": "array", "items": { "type": "string" } },
+            "services": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "rules": {
+          "type": "object",
+          "properties": {
+            "deny_tools": { "type": "array", "items": { "type": "string" } },
+            "allow_tools": { "type": "array", "items": { "type": "string" } },
+            "never_log": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "obligations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["trigger", "action"],
+            "properties": {
+              "trigger": { "type": "string" },
+              "action": { "type": "string" }
+            }
+          }
+        },
+        "mappings": {
+          "type": "object",
+          "description": "Mappings to external standards like NIST, EU AI Act"
+        }
+      }
+    }
+  }
+}

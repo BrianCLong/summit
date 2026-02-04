@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "summit_evidence_stamp",
+  "type": "object",
+  "required": ["evidence_id", "generated_at"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "started_at": { "type": "string" },
+    "finished_at": { "type": "string" },
+    "runner": { "type": "string" }
+  },
+  "additionalProperties": false
+}

@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Node & deps
         uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: { node-version: '20' , cache: 'pnpm' }
       - run: npm i -g graphql-cli graphql-schema-linter @redhat-developer/depcheck@latest @playwright/test
       - name: Validate SDL
         run: npx graphql-schema-linter graphql/schema/mc-admin.graphql

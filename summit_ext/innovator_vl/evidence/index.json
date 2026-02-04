@@ -1,0 +1,10 @@
+{
+  "item": "innovator-vl-2601.19325",
+  "evidence": {
+    "EVD-INNOVATORVL-HARNESS-001": {
+      "report": "summit_ext/innovator_vl/evidence/report.json",
+      "metrics": "summit_ext/innovator_vl/evidence/metrics.json",
+      "stamp": "summit_ext/innovator_vl/evidence/stamp.json"
+    }
+  }
+}

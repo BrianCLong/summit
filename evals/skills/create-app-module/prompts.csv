@@ -1,0 +1,11 @@
+id,prompt,expected_trigger,tags
+create-01,"Create a new Vite app module named Atlas with Summit defaults",true,explicit|scaffold
+create-02,"Scaffold a React app package for analytics dashboard",true,explicit|scaffold
+create-03,"Add a new module for data ingestion with minimal boilerplate",true,explicit
+create-04,"Set up a new app workspace for risk review",true,explicit
+create-05,"Spin up a new package for graph widgets",true,explicit
+create-06,"Document how to avoid creating any new modules",false,negative
+create-07,"Do not scaffold a new app just summarize existing ones",false,negative
+create-08,"We need a migration plan not a new module",false,negative
+create-09,"Skip creating a package and focus on bug triage",false,negative
+create-10,"Provide guidance for module naming without creating anything",false,negative

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cache-core",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Unified caching abstraction with L1/L2 tiers, metrics, and invalidation",
   "type": "module",
   "main": "dist/index.js",

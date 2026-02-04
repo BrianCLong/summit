@@ -1,0 +1,135 @@
+name: Test Self-Hosted Runners
+
+# Manual trigger for testing runners
+on:
+  workflow_dispatch:
+    inputs:
+      runner_count:
+        description: 'Expected number of runners'
+        required: false
+        default: '5'
+        type: string
+
+jobs:
+  test-macos-runners:
+    name: Test macOS Runners
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        test: [1, 2]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Runner Info
+        run: |
+          echo "========================================"
+          echo "Runner Information"
+          echo "========================================"
+          echo "Hostname: $(hostname)"
+          echo "OS: $(uname -s)"
+          echo "Architecture: $(uname -m)"
+          echo "Kernel: $(uname -r)"
+          echo "Runner: $RUNNER_NAME"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Runner Arch: $RUNNER_ARCH"
+          echo "========================================"
+
+      - name: Check Docker
+        run: |
+          if command -v docker &> /dev/null; then
+            echo "✅ Docker installed"
+            docker --version
+          else
+            echo "❌ Docker not found"
+            exit 1
+          fi
+
+      - name: Check Node.js
+        run: |
+          if command -v node &> /dev/null; then
+            echo "✅ Node.js installed"
+            node --version
+          else
+            echo "❌ Node.js not found"
+            exit 1
+          fi
+
+      - name: Check pnpm
+        run: |
+          if command -v pnpm &> /dev/null; then
+            echo "✅ pnpm installed"
+            pnpm --version
+          else
+            echo "❌ pnpm not found"
+            exit 1
+          fi
+
+      - name: CPU & Memory Info
+        run: |
+          echo "CPU Info:"
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            sysctl -n machdep.cpu.brand_string
+            sysctl -n hw.ncpu
+          else
+            lscpu | grep "Model name" || echo "CPU info unavailable"
+            nproc
+          fi
+          echo ""
+          echo "Memory Info:"
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "Total: $(sysctl -n hw.memsize | awk '{print $1/1024/1024/1024 " GB"}')"
+          else
+            free -h || echo "Memory info unavailable"
+          fi
+
+  test-ubuntu-runners:
+    name: Test Ubuntu Runners (when available)
+    runs-on: self-hosted
+    if: false  # Enable after Ubuntu runners are configured
+    strategy:
+      matrix:
+        test: [1, 2, 3]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Runner Info
+        run: |
+          echo "========================================"
+          echo "Ubuntu Runner Information"
+          echo "========================================"
+          echo "Hostname: $(hostname)"
+          echo "OS: $(lsb_release -d | cut -f2)"
+          echo "Architecture: $(uname -m)"
+          echo "Runner: $RUNNER_NAME"
+          echo "========================================"
+
+      - name: Verify Prerequisites
+        run: |
+          echo "Checking prerequisites..."
+          docker --version
+          node --version
+          pnpm --version
+          echo "✅ All prerequisites installed"
+
+  runner-health-summary:
+    name: Runner Health Summary
+    runs-on: self-hosted
+    needs: [test-macos-runners]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "========================================"
+          echo "🎯 Runner Test Summary"
+          echo "========================================"
+          echo "✅ macOS runners: TESTED"
+          echo "⏳ Ubuntu runners: PENDING SETUP"
+          echo ""
+          echo "Next steps:"
+          echo "1. Run setup scripts on 3 Ubuntu boxes"
+          echo "2. Verify runners at: https://github.com/BrianCLong/summit/actions/runners"
+          echo "3. Enable test-ubuntu-runners job in this workflow"
+          echo "4. Re-run this workflow to test all 5 runners"
+          echo "========================================"

@@ -5,8 +5,8 @@
  */
 
 import { CstParser, IToken } from 'chevrotain';
-import * as T from './lexer';
-import type { Query, FilterExpression, FieldSelection } from '../types';
+import * as T from './lexer.js';
+import type { Query, FilterExpression, FieldSelection } from '../types.js';
 
 export class SummitQLParser extends CstParser {
   constructor() {

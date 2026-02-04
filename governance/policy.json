@@ -1,0 +1,5 @@
+{
+  "policy_version": "1.0.0",
+  "approvals_required": ["human_in_the_loop"],
+  "tool_allowlist": ["git", "fs", "analysis"]
+}

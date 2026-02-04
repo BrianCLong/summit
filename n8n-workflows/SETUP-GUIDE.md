@@ -2,6 +2,9 @@
 
 ## ⚡ 5-Minute Setup Checklist
 
+> [!CAUTION]
+> **SECURITY MANDATE:** If you are self-hosting n8n, you **MUST** use version **1.121.0** or later to protect against the **CVE-2026-21858 (Ni8mare)** critical RCE vulnerability.
+
 This guide will get your n8n automation workflows operational in under 5 minutes.
 
 ### Step 1: Configure API Credentials (5 minutes)

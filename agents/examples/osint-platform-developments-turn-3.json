@@ -1,0 +1,39 @@
+{
+  "task_id": "OSINT_PLATFORM_TURN3",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "competitive-osint-platform-developments-turn-3",
+    "version": "v1",
+    "sha256": "0c35018c60506de46d105a5a21896c259766956c4ccf5887f57d7ee5092bbb48",
+    "path": "prompts/competitive/osint-platform-developments-turn-3.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "competitive/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/competitive/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "competitive-intel", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["pr-description", "status-update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Publish automation turn 3 OSINT platform developments report.",
+    "Update docs/roadmap/STATUS.json with the revision note for the report.",
+    "Register the prompt and task spec for governance compliance."
+  ],
+  "stop_conditions": [
+    "Prompt hash missing from registry.",
+    "Diff exceeds declared scope.",
+    "Required metadata block missing from PR body."
+  ]
+}

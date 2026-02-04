@@ -1,0 +1,13 @@
+id: abuse-smart-chain
+version: 1.0.0
+steps:
+  - type: enrich.http
+    name: Enrich then export
+    with:
+      domain: "enrich.summit.local"
+      path: "/whois"
+  - type: export.csv
+    name: Export immediately
+    with:
+      destination: "internal://reports"
+      reportId: exp-005

@@ -4,8 +4,8 @@
 # Both RC and GA pipelines derive required checks from this file.
 #
 # Authority: Platform Engineering
-# Last Updated: 2026-01-13
-# Version: 2.0.0
+# Last Updated: 2026-02-01
+# Version: 2.1.0
 #
 # How to add/remove checks safely:
 # 1. Create PR modifying this file
@@ -16,9 +16,9 @@
 # IMPORTANT: Do not add new always_required checks without
 # verifying they run on EVERY commit to main.
 
-version: "2.0.0"
+version: "2.1.0"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-01-13"
+last_updated: "2026-02-01"
 owner: "Platform Engineering"
 
 # Branch Protection Policy
@@ -29,19 +29,23 @@ branch_protection:
   required_status_checks:
     strict: true
     contexts:
-      - "CI Core (Primary Gate)"
-      - "CI / config-guard"
-      - "CI / unit-tests"
+      - "Governance Meta Gate / meta-gate"
+      - "CI Core (Primary Gate) / CI Core Gate ✅"
+      - "CI / Unit Tests"
       - "GA Gate"
       - "Release Readiness Gate"
+      - "SOC Controls"
       - "Unit Tests & Coverage"
-      - "ga / gate"
 
 # Always Required Checks
 # ----------------------
 # These checks MUST pass for every commit, regardless of what changed.
 # They are blocking for both RC and GA promotion.
 always_required:
+  - name: "Governance Meta Gate / meta-gate"
+    workflow: "governance-meta-gate.yml"
+    rationale: "Unified governance verification (drift, determinism, policy)"
+
   - name: "Release Readiness Gate"
     workflow: "release-readiness.yml"
     rationale: "Comprehensive release readiness verification - runs on every change"
@@ -54,7 +58,11 @@ always_required:
     workflow: "unit-test-coverage.yml"
     rationale: "Test suite and coverage gates must pass for all code changes"
 
-  - name: "CI Core (Primary Gate)"
+  - name: "SOC Controls"
+    workflow: "soc-controls.yml"
+    rationale: "SOC control verification is required for audit readiness"
+
+  - name: "CI Core (Primary Gate) / CI Core Gate ✅"
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
@@ -72,8 +80,8 @@ conditional_required:
     workflow: "workflow-lint.yml"
     rationale: "Validates GitHub Actions workflow syntax and safety"
     when_paths_match:
-      - "^\\.github/workflows/"
-      - "^\\.github/actions/"
+      - '^\.github/workflows/'
+      - '^\.github/actions/'
 
   - name: "CodeQL"
     workflow: "codeql.yml"
@@ -89,27 +97,49 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^package\\.json$"
-      - "^pnpm-lock\\.yaml$"
-      - "^server/package\\.json$"
-      - "^\\.github/workflows/supply-chain"
+      - '^package\.json$'
+      - '^pnpm-lock\.yaml$'
+      - '^server/package\.json$'
+      - '^\.github/workflows/supply-chain'
       - "^scripts/security/"
 
-  - name: "Docker Build"
+  - name: "Docker Build & Security Scan"
     workflow: "docker-build.yml"
     rationale: "Docker image build and security validation"
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^\\.dockerignore$"
+      - '^\.dockerignore$'
 
-  - name: "Schema Compatibility"
+  - name: "Schema compatibility guard / schema-compat"
     workflow: "schema-compat.yml"
     rationale: "API schema backward compatibility checks"
     when_paths_match:
       - "^server/src/graphql/schema"
       - "^server/src/maestro/api-types"
       - "^packages/.*/schema"
+
+  - name: "SLO Smoke Gate"
+    workflow: "slo-smoke-gate.yml"
+    rationale: "Validates SLOs (p95 < 1.5s, error rate < 1%) to block performance regressions"
+    when_paths_match:
+      - "^server/"
+      - "^packages/"
+      - "^k6/"
+      - "^ops/docker-compose"
+
+  - name: "OPA Policy Tests"
+    workflow: "opa-policy-test.yml"
+    rationale: "Validates OPA/Rego policies with 90% coverage requirement"
+    when_paths_match:
+      - "^policy/"
+
+  - name: "Extortion Pressure Gates"
+    workflow: "extortion-gates.yml"
+    rationale: "Ensures extortion artifacts are deterministic and follow never-log policy"
+    when_paths_match:
+      - "^packages/extortion/"
+      - "^scripts/ci/.*extortion"
 
 # Informational Checks
 # --------------------

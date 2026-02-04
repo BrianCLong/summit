@@ -1,1 +1,0 @@
-ghcr.io/brianclong/maestro-control-plane@sha256:85449070320e5e50ed50bfffa5f187f4a3a32a47f10bd9d9956af6d3aba21e11 (simulated)

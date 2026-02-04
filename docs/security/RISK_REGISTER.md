@@ -20,6 +20,8 @@ This register tracks the top security risks facing the IntelGraph platform, assi
 | 8 | **R-VENDOR-01** | **Third-Party Risk** | Medium | GRC | Inventory vendors. Enforce minimum security requirements. | 2026-Q3 | Planned |
 | 9 | **R-RESIL-01** | **Disaster Recovery Maturity** | Medium | Infra Lead | Formalize DR runbooks and run quarterly drills. | 2026-Q4 | Planned |
 | 10 | **R-CULT-01** | **Security Awareness Gaps** | Low | GRC | Launch quarterly security training and game days. | 2026-Q4 | Planned |
+| 11 | **R-SUPPLY-02** | **n8n RCE (Ni8mare)** | Critical | AppSec | CI Gate (`verify_n8n_safe.sh`) + WAF Rules. | 2026-Q1 | Mitigated |
+| 12 | **R-BRAND-01** | **AI-DaaS Saturation** | High | Intel | Synthetic Amplification Detector (DET-SYN-001). | 2026-Q1 | Monitoring |
 
 ## Mitigation Definitions
 

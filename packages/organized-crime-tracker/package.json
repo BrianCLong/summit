@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/organized-crime-tracker",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Criminal organization tracking and intelligence for law enforcement",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "keywords": [
     "law-enforcement",

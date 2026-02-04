@@ -1,4 +1,4 @@
-import { estimateCost, AstNode } from './costEstimator';
+import { estimateCost, AstNode } from './costEstimator.js';
 
 export interface TranslationResult {
   ast: AstNode;

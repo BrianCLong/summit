@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4 # v6
 
       - name: Setup k6
-        uses: grafana/setup-k6-action@98db1bcacc2d06234a3cade8629ebc97e0130ec2 # v1
+        uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1
 
       - name: Run k6 SLO Probe (Report Only)
         run: |
@@ -30,7 +30,7 @@ jobs:
         continue-on-error: true
 
       - name: Archive k6 results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           retention-days: 14
           name: k6-results

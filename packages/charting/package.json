@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/charting",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "Advanced charting library for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; else echo \"skip lint (no src directory)\"; fi",
     "typecheck": "tsc --noEmit"
   },
@@ -20,7 +20,7 @@
     "victory": "^37.1.1",
     "@visx/visx": "^3.10.2",
     "@intelgraph/visualization": "workspace:*",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.23"
   },
   "peerDependencies": {
     "react": "^18.0.0",

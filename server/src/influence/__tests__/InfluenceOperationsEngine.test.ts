@@ -1,9 +1,9 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { InfluenceOperationsEngine } from '../InfluenceOperationsEngine';
-import { BehavioralAnalyzer } from '../BehavioralAnalyzer';
+import { InfluenceOperationsEngine } from '../InfluenceOperationsEngine.js';
+import { BehavioralAnalyzer } from '../BehavioralAnalyzer.js';
 import { Driver } from 'neo4j-driver';
-import { SocialPost, Actor } from '../types';
+import { SocialPost, Actor } from '../types.js';
 
 // Mock types
 const mockRun = jest.fn();

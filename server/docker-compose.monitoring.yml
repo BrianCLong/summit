@@ -89,8 +89,6 @@ services:
       - REDIS_ADDR=redis://redis:6379
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     restart: unless-stopped
-    depends_on:
-      - redis
     networks:
       - monitoring-network
       - intelgraph-network
@@ -104,8 +102,6 @@ services:
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
     restart: unless-stopped
-    depends_on:
-      - postgres
     networks:
       - monitoring-network
       - intelgraph-network
@@ -132,6 +128,7 @@ services:
       - ./infrastructure/monitoring/promtail/promtail.yml:/etc/promtail/promtail.yml
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ./logs:/var/log/app:ro
     command: -config.file=/etc/promtail/promtail.yml
     restart: unless-stopped
     depends_on:
@@ -146,8 +143,11 @@ services:
     ports:
       - '16686:16686'
       - '14268:14268'
+      - '4317:4317'
+      - '4318:4318'
     environment:
       - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+      - COLLECTOR_OTLP_ENABLED=true
     restart: unless-stopped
     networks:
       - monitoring-network

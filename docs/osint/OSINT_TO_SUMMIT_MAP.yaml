@@ -1,0 +1,80 @@
+collection_mechanics:
+  stateful_session_tracking:
+    description: "Record full session state (headers, cookies) to prove access method."
+    components:
+      - type: schema
+        path: schemas/collection_state.schema.json
+        status: to_be_created
+      - type: code
+        path: server/src/provenance/ledger.ts
+        role: "Append session metadata to ledger entries"
+
+  friction_and_failure_logging:
+    description: "Treat failures (403, CAPTCHA) as first-class data."
+    components:
+      - type: schema
+        path: schemas/collection_state.schema.json
+        status: to_be_created
+      - type: code
+        path: server/src/provenance/ledger.ts
+        role: "Record failure events in provenance log"
+
+validation_mechanics:
+  claim_centric_assertions:
+    description: "Decouple claims from sources."
+    components:
+      - type: schema
+        path: schemas/claim_graph.schema.json
+        status: to_be_created
+      - type: code
+        path: server/src/provenance/lineage.ts
+        role: "Track claim nodes independent of source nodes"
+
+  evidence_pointers:
+    description: "Immutable pointers to raw evidence."
+    components:
+      - type: schema
+        path: schemas/claim_graph.schema.json
+        status: to_be_created
+      - type: code
+        path: server/src/provenance/manifest.ts
+        role: "Ensure evidence pointers are resolvable in exports"
+
+  contradiction_linking:
+    description: "Explicit links between opposing claims."
+    components:
+      - type: schema
+        path: schemas/claim_graph.schema.json
+        status: to_be_created
+      - type: ci_check
+        path: scripts/ci/verify_contradiction_exposure.mjs
+        role: "Enforce contradiction fields in schemas"
+
+automation_design:
+  contradiction_first_pipeline:
+    description: "Surface conflicts before synthesis."
+    components:
+      - type: ci_check
+        path: scripts/ci/verify_contradiction_exposure.mjs
+        role: "Fail build if contradictions are hidden"
+
+governance_and_ethics:
+  explainability_gate:
+    description: "No output without traceable path."
+    components:
+      - type: doc
+        path: docs/osint/EXPLAINABILITY_REQUIREMENTS.md
+        status: to_be_created
+      - type: governance
+        path: COMPLIANCE_EVIDENCE_INDEX.md
+        role: "Add explainability control AUD-003"
+
+  inference_creep_detection:
+    description: "Detect drift from primary evidence."
+    components:
+      - type: doc
+        path: docs/governance/OSINT_ETHICS_CONTROLS.md
+        status: to_be_created
+      - type: risk_ledger
+        path: docs/security/SECURITY-ISSUE-LEDGER.md
+        role: "Track inference creep as a risk"

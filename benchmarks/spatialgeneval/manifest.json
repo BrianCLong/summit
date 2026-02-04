@@ -1,0 +1,10 @@
+{
+  "benchmark_id": "spatialgeneval",
+  "version": "0.1.0",
+  "description": "Spatial intelligence benchmark adapter (clean-room). Data not included.",
+  "default_flags": {
+    "SPATIALGENEVAL_ENABLED": false,
+    "SPATIALGENEVAL_MULTI_JUDGE": false,
+    "SPATIALGENEVAL_STRESSORS": false
+  }
+}

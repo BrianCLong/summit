@@ -6,6 +6,16 @@ import { verifyArtifactPolicy } from './ci_artifact_policy_gate.mjs';
 import { main as runSecurityAudit } from './security_audit_gate.mjs';
 import { validateSbom } from './sbom_quality_gate.mjs';
 import { validateProvenance } from './provenance_quality_gate.mjs';
+import { execSync } from 'child_process';
+
+function runTsGate(scriptName) {
+    try {
+        execSync(`npx tsx scripts/ci/${scriptName}`, { stdio: 'inherit' });
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 async function main() {
     console.log('🛡️  GA Governance Gate Pack Enforcement');
@@ -24,6 +34,13 @@ async function main() {
     // Additional Evidence Gates (if present)
     if (!validateSbom('sbom.json')) hasFailures = true;
     if (!validateProvenance('provenance.json')) hasFailures = true;
+
+    // New GA Readiness Checks
+    if (!runTsGate('enforce_change_budget.ts')) hasFailures = true;
+    if (!runTsGate('verify_environment_contract.ts')) hasFailures = true;
+    if (!runTsGate('verify_release_checklist.ts')) hasFailures = true;
+    if (!runTsGate('verify_security_exceptions.ts')) hasFailures = true;
+    if (!runTsGate('verify_incident_drill.ts')) hasFailures = true;
 
     if (hasFailures) {
         console.error('\n❌ GA Governance Gates FAILED');

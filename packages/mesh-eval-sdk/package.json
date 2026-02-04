@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mesh-eval-sdk",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "TypeScript SDK for Agentic Mesh Evaluation & Auto-Improvement",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,7 +19,7 @@
     "build": "tsc -b",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
   },

@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
-import { pg } from '../db/pg';
-import { DeliveryStatus, WebhookDelivery, WebhookEventType, WebhookSubscription } from './types';
+import { pg } from '../db/pg.js';
+import { DeliveryStatus, WebhookDelivery, WebhookEventType, WebhookSubscription } from './types.js';
 
 interface DeliveryInput {
   tenantId: string;

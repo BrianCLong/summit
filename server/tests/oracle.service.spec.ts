@@ -1,5 +1,5 @@
 // server/tests/oracle.service.spec.ts
-import { OracleService } from '../src/oracle/OracleService';
+import { OracleService } from '../src/oracle/OracleService.js';
 import { SimulationParameters } from '../src/oracle/oracle.types';
 
 // Mock setTimeout to resolve immediately for testing async background tasks

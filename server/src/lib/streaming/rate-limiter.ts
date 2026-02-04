@@ -25,6 +25,7 @@ interface AdaptiveRateLimiterOptions {
 export class AdaptiveRateLimiter {
   private globalTokens: number;
   private readonly maxTokens: number;
+  private readonly initialTokens: number;
   private refillRate: number; // Can now be modified
   private readonly initialRefillRate: number;
   private globalLastRefill: number;
@@ -39,8 +40,9 @@ export class AdaptiveRateLimiter {
   private cleanupInterval: NodeJS.Timeout;
 
   constructor(options: AdaptiveRateLimiterOptions = {}) {
-    this.maxTokens = options.maxTokens ?? 100;
-    this.globalTokens = options.initialTokens ?? this.maxTokens;
+    this.maxTokens = options.maxTokens ?? options.initialTokens ?? 100;
+    this.initialTokens = options.initialTokens ?? this.maxTokens;
+    this.globalTokens = this.initialTokens;
     this.refillRate = options.refillRate ?? 10;
     this.initialRefillRate = this.refillRate;
     this.globalLastRefill = Date.now();
@@ -66,7 +68,8 @@ export class AdaptiveRateLimiter {
     const now = Date.now();
 
     if (this.clientScope && id) {
-      const bucket = this.clientTokens.get(id) ?? { tokens: this.maxTokens, lastRefill: now };
+      const bucket =
+        this.clientTokens.get(id) ?? { tokens: this.initialTokens, lastRefill: now };
       const elapsedTime = (now - bucket.lastRefill) / 1000;
       const tokensToAdd = elapsedTime * this.refillRate;
       bucket.tokens = Math.min(this.maxTokens, bucket.tokens + tokensToAdd);

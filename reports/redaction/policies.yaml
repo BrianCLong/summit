@@ -1,9 +1,0 @@
-policies:
-  - role: analyst
-    classification: restricted
-    fields:
-      - "pii.*"
-      - "source.name"
-  - role: admin
-    classification: secret
-    fields: []

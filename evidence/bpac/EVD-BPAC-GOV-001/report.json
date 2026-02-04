@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-BPAC-GOV-001",
+  "summary": "Branch protection drift verifier baseline output.",
+  "claims": ["SUMMIT_ORIGINAL"],
+  "decisions": ["deny-by-default"],
+  "details": {
+    "policy_path": ".github/governance/branch_protection_rules.json",
+    "live_snapshot_path": ".tmp/branch_protection_live.json"
+  }
+}

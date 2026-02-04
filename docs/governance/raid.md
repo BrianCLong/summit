@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: none
+Status: active
+
 # RAID Register - IntelGraph GA Core Integration Train
 
 _Last Updated: 2025-01-20 by AI Symphony Orchestra_

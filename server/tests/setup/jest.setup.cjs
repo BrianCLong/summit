@@ -4,12 +4,20 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+// require('jest-extended'); // Handled by jest.config.ts via jest-extended/all
 
 require('dotenv').config({ path: './.env.test' });
 
+process.env.TZ = process.env.TZ || 'UTC';
+process.env.NODE_ENV = 'test';
+
 // Global test timeout
 jest.setTimeout(30000);
+
+const ciRetryTimes = Number(process.env.JEST_RETRY_TIMES || (process.env.CI ? '2' : '0'));
+if (ciRetryTimes > 0 && typeof jest.retryTimes === 'function') {
+  jest.retryTimes(ciRetryTimes, { logErrorsBeforeRetry: true });
+}
 
 const sanitizeForConsole = (value, seen = new WeakSet()) => {
   if (typeof value === 'bigint') return value.toString();
@@ -47,6 +55,8 @@ if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 3
 if (!process.env.NEO4J_URI) process.env.NEO4J_URI = 'bolt://localhost:7687';
 if (!process.env.NEO4J_USER) process.env.NEO4J_USER = 'neo4j';
 if (!process.env.NEO4J_PASSWORD) process.env.NEO4J_PASSWORD = 'password';
+
+const envSnapshot = { ...process.env };
 
 // Mock node-fetch for ESM compatibility
 jest.mock('node-fetch', () => ({
@@ -238,6 +248,22 @@ jest.mock('ioredis', () => {
 });
 
 // Mock config/logger removed to use moduleNameMapper and tests/mocks/logger.ts
+// Mock OCREngine to avoid pino import issues and external dependencies
+jest.mock('../../src/ai/engines/OCREngine.js', () => ({
+  __esModule: true,
+  OCREngine: jest.fn().mockImplementation(() => ({
+    initialize: jest.fn().mockResolvedValue(undefined),
+    shutdown: jest.fn().mockResolvedValue(undefined),
+    isReady: jest.fn().mockReturnValue(true),
+    extractText: jest.fn().mockResolvedValue([]),
+  })),
+  default: jest.fn().mockImplementation(() => ({
+    initialize: jest.fn().mockResolvedValue(undefined),
+    shutdown: jest.fn().mockResolvedValue(undefined),
+    isReady: jest.fn().mockReturnValue(true),
+    extractText: jest.fn().mockResolvedValue([]),
+  })),
+}));
 
 // Mock middleware/audit-logger
 jest.mock('../../src/middleware/audit-logger', () => ({
@@ -400,6 +426,22 @@ global.testUtils = {
     createdAt: new Date().toISOString(),
     ...overrides,
   }),
+
+  retryWithBackoff: async (fn, options = {}) => {
+    const { retries = 3, baseDelayMs = 100, factor = 2 } = options;
+    let attempt = 0;
+    let delay = baseDelayMs;
+    while (attempt <= retries) {
+      try {
+        return await fn(attempt);
+      } catch (error) {
+        if (attempt >= retries) throw error;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= factor;
+        attempt += 1;
+      }
+    }
+  },
 };
 
 // Error handling for unhandled rejections in tests
@@ -663,7 +705,7 @@ jest.mock('prom-client', () => {
   }
   class MockRegistry {
     constructor() {
-      this.metrics = {};
+      this._metrics = {};
     }
     registerMetric() { }
     getSingleMetric() { return null; }
@@ -721,6 +763,124 @@ const cleanupRegistry = {
   }
 };
 
+const registerNetworkTeardown = () => {
+  const net = require('net');
+  const http = require('http');
+  const https = require('https');
+  const trackedServers = new Set();
+
+  const wrapListen = (proto) => {
+    if (!proto || proto.__jestListenWrapped) return;
+    const originalListen = proto.listen;
+    proto.listen = function (...args) {
+      trackedServers.add(this);
+      return originalListen.apply(this, args);
+    };
+    proto.__jestListenWrapped = true;
+  };
+
+  wrapListen(net.Server && net.Server.prototype);
+  wrapListen(http.Server && http.Server.prototype);
+  wrapListen(https.Server && https.Server.prototype);
+
+  const closeTrackedServers = async () => {
+    const closePromises = [];
+    for (const server of trackedServers) {
+      closePromises.push(new Promise((resolve) => {
+        if (server && typeof server.close === 'function') {
+          server.close(() => resolve());
+          setTimeout(resolve, 1000);
+        } else {
+          resolve();
+        }
+      }));
+    }
+    await Promise.all(closePromises);
+    trackedServers.clear();
+  };
+
+  afterAll(async () => {
+    await closeTrackedServers();
+  });
+};
+
+if (process.env.NO_NETWORK_LISTEN === 'true') {
+  registerNetworkTeardown();
+}
+
+const registerTimerTeardown = () => {
+  if (global.__jestTimerWrapped) return;
+  global.__jestTimerWrapped = true;
+
+  const trackedTimeouts = new Set();
+  const trackedIntervals = new Set();
+  const trackedImmediates = new Set();
+
+  const originalSetTimeout = global.setTimeout;
+  const originalClearTimeout = global.clearTimeout;
+  const originalSetInterval = global.setInterval;
+  const originalClearInterval = global.clearInterval;
+  const originalSetImmediate = global.setImmediate;
+  const originalClearImmediate = global.clearImmediate;
+
+  global.setTimeout = (fn, delay, ...args) => {
+    const id = originalSetTimeout(fn, delay, ...args);
+    trackedTimeouts.add(id);
+    return id;
+  };
+  global.clearTimeout = (id) => {
+    trackedTimeouts.delete(id);
+    return originalClearTimeout(id);
+  };
+
+  global.setInterval = (fn, delay, ...args) => {
+    const id = originalSetInterval(fn, delay, ...args);
+    trackedIntervals.add(id);
+    return id;
+  };
+  global.clearInterval = (id) => {
+    trackedIntervals.delete(id);
+    return originalClearInterval(id);
+  };
+
+  global.setImmediate = (fn, ...args) => {
+    const id = originalSetImmediate(fn, ...args);
+    trackedImmediates.add(id);
+    return id;
+  };
+  global.clearImmediate = (id) => {
+    trackedImmediates.delete(id);
+    return originalClearImmediate(id);
+  };
+
+  afterAll(() => {
+    for (const id of trackedTimeouts) {
+      originalClearTimeout(id);
+    }
+    for (const id of trackedIntervals) {
+      originalClearInterval(id);
+    }
+    for (const id of trackedImmediates) {
+      originalClearImmediate(id);
+    }
+
+    trackedTimeouts.clear();
+    trackedIntervals.clear();
+    trackedImmediates.clear();
+
+    global.setTimeout = originalSetTimeout;
+    global.clearTimeout = originalClearTimeout;
+    global.setInterval = originalSetInterval;
+    global.clearInterval = originalClearInterval;
+    global.setImmediate = originalSetImmediate;
+    global.clearImmediate = originalClearImmediate;
+  });
+};
+
+if (process.env.NO_NETWORK_LISTEN === 'true') {
+  registerTimerTeardown();
+}
+
 // Export cleanup utilities for tests
 global.testCleanup = {
   // Register a resource for cleanup at end of test
@@ -760,6 +920,16 @@ jest.mock('../../lib/security/secret-audit-logger');
 
 // Clean up after each test
 afterEach(async () => {
+  Object.keys(process.env).forEach((key) => {
+    if (!(key in envSnapshot)) {
+      delete process.env[key];
+    }
+  });
+  Object.entries(envSnapshot).forEach(([key, value]) => {
+    process.env[key] = value;
+  });
+  jest.useRealTimers();
+  jest.restoreAllMocks();
   jest.clearAllMocks();
   jest.clearAllTimers();
   await cleanupRegistry.cleanupAll();

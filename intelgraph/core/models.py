@@ -142,6 +142,10 @@ class SourceBase(SQLModel):
         default=PolicyLegalBasis.CONSENT.value,
         description="Legal basis for processing this source",
     )
+    corroboration_status: str = Field(
+        default="unverified",
+        description="Status of cross-validation (unverified, pending, corroborated, contradicted)",
+    )
 
 
 class Source(SourceBase, table=True):
@@ -151,6 +155,26 @@ class Source(SourceBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     ingested_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class RiskAssessmentBase(SQLModel):
+    """Risk assessment for an entity or IOC."""
+
+    risk_score: float = Field(description="Risk score (0.0 - 1.0)")
+    risk_summary: str = Field(description="LLM-generated risk summary")
+    model_version: str = Field(description="Model version used for assessment")
+    ioc_id: int | None = Field(default=None, description="Related IOC ID")
+    confidence_min: float = Field(default=0.0, description="Minimum confidence floor required")
+    uncertainty_range: float = Field(default=1.0, description="Width of uncertainty interval (0.0-1.0)")
+
+
+class RiskAssessment(RiskAssessmentBase, table=True):
+    """Risk assessment table model."""
+
+    __tablename__ = "risk_assessments"
+
+    id: int | None = Field(default=None, primary_key=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 # Response models for API

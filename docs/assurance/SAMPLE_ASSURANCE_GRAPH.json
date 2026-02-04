@@ -1,0 +1,48 @@
+{
+  "entities": [
+    {
+      "id": "https://github.com/BrianCLong/summit",
+      "type": "Repo",
+      "data": {
+        "url": "https://github.com/BrianCLong/summit"
+      }
+    },
+    {
+      "id": "https://github.com/BrianCLong/summit-v1.0.0",
+      "type": "Release",
+      "data": {
+        "tag": "v1.0.0",
+        "sha": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+      }
+    },
+    {
+      "id": "https://github.com/BrianCLong/summit-v1.0.0-artifacts/security/sast-report.json",
+      "type": "Artifact",
+      "data": {
+        "name": "SAST Report",
+        "path": "artifacts/security/sast-report.json",
+        "checksum": "sha256:..."
+      }
+    },
+    {
+      "id": "ac-1",
+      "type": "Control",
+      "data": {
+        "name": "Access Control",
+        "description": "Ensure that access to systems is limited to authorized users."
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "source": "https://github.com/BrianCLong/summit-v1.0.0",
+      "target": "https://github.com/BrianCLong/summit-v1.0.0-artifacts/security/sast-report.json",
+      "type": "PRODUCES"
+    },
+    {
+      "source": "ac-1",
+      "target": "https://github.com/BrianCLong/summit-v1.0.0-artifacts/security/sast-report.json",
+      "type": "EVIDENCED_BY"
+    }
+  ]
+}

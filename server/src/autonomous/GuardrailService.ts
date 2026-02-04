@@ -1,4 +1,4 @@
-import { PolicyEngine, PolicyDecision, PolicyContext } from './policy-engine';
+import { PolicyEngine, PolicyDecision, PolicyContext } from './policy-engine.js';
 import { Logger } from 'pino';
 import { Pool } from 'pg';
 

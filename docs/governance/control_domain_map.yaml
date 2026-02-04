@@ -1,0 +1,80 @@
+apiVersion: governance.summit.io/v1
+kind: ControlDomainMap
+metadata:
+  name: canonical-control-map
+  updated: 2025-05-21
+control_domains:
+  - id: AI_LIFECYCLE
+    description: "End-to-end governance of AI model lifecycle from design to decommissioning."
+    mappings:
+      nist_ai_rmf:
+        - "GOVERN 1.1 (Legal/Regulatory Compliance)"
+        - "MAP 1.2 (Context & Risk)"
+        - "MANAGE 2.4 (Model Monitoring)"
+      soc2_tscp:
+        - "CC3.2 (System Monitoring)"
+        - "CC5.1 (Software Quality)"
+        - "CC5.2 (Code Changes)"
+      iso_27001:
+        - "A.14.2.1 (Secure Development Policy)"
+        - "A.14.2.5 (Secure System Engineering)"
+      eu_ai_act:
+        - "Article 14 (Human Oversight)"
+        - "Article 15 (Accuracy, Robustness, Cybersecurity)"
+
+  - id: DATA_GOVERNANCE
+    description: "Governance of data lineage, provenance, quality, and licensing."
+    mappings:
+      nist_ai_rmf:
+        - "MAP 2.1 (Data Context)"
+        - "MEASURE 2.2 (Data Quality)"
+      soc2_tscp:
+        - "CC3.3 (Data Integrity)"
+        - "CC6.1 (Data Protection)"
+      iso_27001:
+        - "A.8.1.1 (Inventory of Assets)"
+        - "A.8.1.2 (Ownership of Assets)"
+        - "A.12.3.1 (Information Backup)"
+      eu_ai_act:
+        - "Article 10 (Data Governance)"
+
+  - id: CONTINUOUS_GOVERNANCE
+    description: "Runtime monitoring, drift detection, and adaptive control application."
+    mappings:
+      nist_ai_rmf:
+        - "MANAGE 3.2 (System Monitoring)"
+        - "MANAGE 3.3 (Incident Response)"
+      soc2_tscp:
+        - "CC7.1 (Detection of Anomalies)"
+        - "CC7.2 (Monitoring)"
+      iso_27001:
+        - "A.12.4.1 (Event Logging)"
+        - "A.16.1 (Incident Management)"
+      eu_ai_act:
+        - "Article 61 (Post-market Monitoring)"
+
+  - id: ACCOUNTABILITY
+    description: "Role definition, ownership assignment, and escalation protocols."
+    mappings:
+      nist_ai_rmf:
+        - "GOVERN 1.2 (Roles & Responsibilities)"
+        - "GOVERN 1.3 (Workforce Diversity)"
+      soc2_tscp:
+        - "CC1.2 (Board of Directors Oversight)"
+        - "CC1.3 (Management Direction)"
+      iso_27001:
+        - "A.6.1.1 (Information Security Roles)"
+      eu_ai_act:
+        - "Article 17 (Quality Management System)"
+
+  - id: ZERO_TRUST_DATA
+    description: "Strict metadata enforcement, source trust scoring, and provenance verification."
+    mappings:
+      nist_ai_rmf:
+        - "MAP 2.2 (Data Provenance)"
+      soc2_tscp:
+        - "CC6.6 (External Boundary Protection)"
+      iso_27001:
+        - "A.13.2.1 (Information Transfer Policies)"
+      eu_ai_act:
+        - "Article 10(2)(g) (Data Provenance)"

@@ -99,7 +99,27 @@ critical_vulnerabilities: 0
 
 ---
 
-### 4. k6 Synthetics Suite
+### 4. PR Metadata Integrity
+
+**Workflow**: PR metadata validation step in `pr-quality-gate.yml`
+
+**Purpose**: Ensure every PR includes the required agent metadata block and declared scope before merge.
+
+**Validation Command**:
+
+```bash
+ts-node scripts/ci/validate-pr-metadata.ts --body <path-to-pr-body>
+```
+
+**Requirements**:
+
+- PR body must include `<!-- AGENT-METADATA:START -->` and `<!-- AGENT-METADATA:END -->`.
+- The fenced block must be valid JSON and match the prompt registry scope.
+- Declared scope paths must cover all changed files.
+
+---
+
+### 5. k6 Synthetics Suite
 
 **Workflow**: `.github/workflows/k6-golden-flow.yml`
 

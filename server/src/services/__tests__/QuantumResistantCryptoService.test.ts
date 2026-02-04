@@ -4,7 +4,7 @@
  */
 
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { QuantumResistantCryptoService } from '../QuantumResistantCryptoService';
+import { QuantumResistantCryptoService } from '../QuantumResistantCryptoService.js';
 
 describe('QuantumResistantCryptoService', () => {
   let service: any;
