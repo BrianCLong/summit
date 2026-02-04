@@ -1,10 +1,22 @@
-# Required checks discovery (TODO)
+# Required Checks Discovery (TODO)
 
-1) GitHub UI: Repo Settings → Branches → Branch protection rules → Required status checks.
-2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
-3) Map required checks to CI job names:
-   - summit-evidence
-   - summit-eval
-   - summit-policy
+## UI Steps
 
-Rename plan: once actual names are known, update workflows and this doc in a tiny PR.
+1. GitHub UI → Settings → Branches → Branch protection rules.
+2. Record required status checks.
+
+## API Steps
+
+- `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+
+## Current Checks (Temporary Convention)
+
+- `summit-evidence-validate`
+- `summit-policy-tests`
+- `summit-sim-determinism`
+- `summit-dependency-delta`
+
+## Plan
+
+1. Record official check names in `ci/required_checks.json` once discovered.
+2. Add a mapping file to preserve existing names for two releases.

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-BAD-002",
+      "files": {
+        "report": "evidence/fixtures/deny_by_default_missing_file/EVD-BAD-002/report.json",
+        "metrics": "evidence/fixtures/deny_by_default_missing_file/EVD-BAD-002/metrics.json",
+        "stamp": "evidence/fixtures/deny_by_default_missing_file/EVD-BAD-002/stamp.json"
+      }
+    }
+  ]
+}
