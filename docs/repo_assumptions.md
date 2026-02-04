@@ -12,54 +12,56 @@
 *   **Modules**: `server/src/modules/` is the location for domain modules.
 *   **Testing**: Jest is used for testing (`server/__tests__`).
 
+## Cognitive Ops (CogOps) (PR-17706)
+### Verified
+- Repository is a pnpm workspace (`pnpm-workspace.yaml` present).
+- Schemas live in `schemas/` directory.
+- Required checks policy file exists (`docs/ci/REQUIRED_CHECKS_POLICY.yml`).
+- Evidence schemas exist (report/metrics/stamp).
+- Primary docs tree is `docs/`.
+
+### Deferred Pending Verification
+- CogOps demo script path (`scripts/cogops/run_demo_fixture.sh`).
+- Dedicated CogOps CI job naming (`cogops:tests`).
+- Evidence bundle conventions for CogOps.
+
 ## CogSec Radar (PR-17708)
 ### CogSec Verified
-1.  **Required Checks Source**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` is authoritative for required checks. (Verified.)
-2.  **Audit & RBAC Surfaces**: `audit/` and `rbac/` directories exist for audit artifacts and RBAC utilities. (Verified.)
-3.  **Docs Baselines**: `docs/security/CIS_CONTROLS_CHECKLIST.md` exists for security baseline references. (Verified.)
+1.  **Required Checks Source**: `docs/ci/REQUIRED_CHECKS_POLICY.yml` is authoritative for required checks.
+2.  **Audit & RBAC Surfaces**: `audit/` and `rbac/` directories exist for audit artifacts and RBAC utilities.
+3.  **Docs Baselines**: `docs/security/CIS_CONTROLS_CHECKLIST.md` exists for security baseline references.
 
 ### CogSec Deferred Pending
-1.  **GA Plan Location**: `docs/reports/GA-Plan.md` is not present; the current GA plan artifact is under `docs/archive/root-history/GA-Plan.md`. (Intentionally constrained pending governance direction.)
-2.  **RBAC Middleware Location**: Specific API RBAC middleware entrypoints remain to be pinpointed. (Deferred pending targeted search within `server/` and `apps/`.)
+1.  **GA Plan Location**: `docs/archive/root-history/GA-Plan.md` contains current GA plan.
+2.  **RBAC Middleware Location**: Specific API RBAC middleware entrypoints remain to be pinpointed.
 
 ## NATO Cognitive Alerts (PR-17709)
 ### Verified
 - MIT license present at repo root.
-- Key top-level directories present: `alerting/`, `active-measures-module/`,
-  `adversarial-misinfo-defense-platform/`, `api/`, `api-schemas/`, `apps/`,
-  `RUNBOOKS/`, `SECURITY/`.
+- Key top-level directories present: `alerting/`, `active-measures-module/`, `adversarial-misinfo-defense-platform/`, `api/`, `api-schemas/`, `apps/`, `RUNBOOKS/`, `SECURITY/`.
 
 ### Assumed
-- JS/TS monorepo using `pnpm`, Jest, and linting.
 - Alert ingestion and UI surfaces can consume new alert types.
 
 ## Narrative Intelligence Subsumption (PR-17713)
 ### Verified (Local Inspection)
 - `docs/security/` and `docs/ops/runbooks/` exist and are active documentation surfaces.
-- Feature flags are documented under `docs/FEATURE_FLAGS.md` and related docs.
+- Feature flags are documented under `docs/FEATURE_FLAGS.md`.
 - Playwright configuration exists in the repo root (`playwright.config.ts`).
-
-### Deferred Pending Verification
-- Exact service runtime locations for narrative analytics modules.
-- CI check names and required gates for narrative intelligence changes.
-- Existing evidence schema naming and signing conventions used by runtime services.
 
 ## Assumptions
 *   The `server/db/managed-migrations` path is correctly configured in the environment where `npm run migrate` runs.
-*   The `MigrationManager` is robust enough to handle new tables without manual intervention in the database structure (other than running the migration).
-*   The `@scope` directive is fully functional and wired up in the schema transformer.
+*   The `MigrationManager` is robust enough to handle new tables without manual intervention.
+*   The `@scope` directive is fully functional and wired up.
 
 ## "Do Not Touch" List
-*   `.pnpm-store/`
-*   `.qwen-cache/`
-*   `.archive/`
-*   `GOLDEN/datasets/`
-*   Existing migration files in `server/db/managed-migrations/` (unless fixing a bug, which is out of scope).
+*   `.pnpm-store/`, `.qwen-cache/`, `.archive/`, `GOLDEN/datasets/`.
+*   Existing migration files in `server/db/managed-migrations/`.
+*   `docs/SUMMIT_READINESS_ASSERTION.md`, `docs/governance/*`, `docs/ga/*`.
+*   `agent-contract.json`, `CODEOWNERS`.
 *   `THIRD_PARTY_NOTICES/` and existing license headers.
-*   Existing security policy configs under `.security/` or `SECURITY/` without review.
 
-## Validation Plan (Narrative Intelligence PR-1)
-- Locate feature flag evaluation path and tenant allowlist controls.
-- Confirm centralized logging/audit pathways for evidence packs.
-- Identify artifact naming conventions and hash signing flows.
-- Confirm API patterns (REST/GraphQL/WebSocket) and endpoint ownership.
+## Validation Plan
+1. Confirm existing evidence bundle generators and naming conventions.
+2. Identify current CI required checks and ensure cogops gating aligns.
+3. Locate any existing cognitive-ops or misinfo modules to reuse.
