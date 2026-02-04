@@ -1,22 +1,18 @@
 # DAAO Runbook
 
-## Feature Flag
+## Feature Flags
+- `SUMMIT_DAAO_LITE=1`: Enables the DAAO path (estimator -> router -> debate).
 
-Enable DAAO via `SUMMIT_DAAO_LITE=1`.
+## Common Issues
+### "No model met criteria/budget"
+- **Symptom**: Router falls back to `gpt-4o-mini` (or configured fallback) with reason code `fallback`.
+- **Fix**: Increase budget or check if provider API keys are valid/quota exceeded.
+
+### "Critique JSON Parse Failed"
+- **Symptom**: Validator logs "Failed to parse critique".
+- **Impact**: System proceeds to Refiner with raw critique text. Usually benign.
+- **Fix**: Tune `CRITIC_PROMPT` to be more strict about JSON output.
 
 ## Monitoring
-
-*   Check `scripts/monitoring/out/daao-drift.json` for drift in model selection and cost.
-*   Alert if "Budget exceeded" failures spike.
-
-## Troubleshooting
-
-### High latency
-
-If enabled, DAAO adds 2 additional LLM calls for medium/hard tasks.
-Disable flag to revert to single-shot execution.
-
-### Router always picking fallback
-
-Check if cost config in `modelCatalog.ts` matches real API pricing.
-Check if user budget is too low (default is Infinity, but if set low, it will fail).
+- Check `scripts/monitoring/out/daao-drift.json` for shifts in model selection distribution.
+- Alert if `fallback` rate > 10%.

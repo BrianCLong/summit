@@ -1,4 +1,5 @@
 {
-  "evidence_id": "INIT",
-  "content": {}
+  "summary": "Partitioning eval completed",
+  "scenarios": 3,
+  "status": "PASS"
 }
