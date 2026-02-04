@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IO Event",
+  "type": "object",
+  "required": ["narrative_frames", "channels"],
+  "properties": {
+    "narrative_frames": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "contradiction_pairs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["claim_a", "claim_b", "score"],
+        "properties": {
+          "claim_a": {"type": "string"},
+          "claim_b": {"type": "string"},
+          "score": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "channels": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "suspected_infra": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": false
+}
