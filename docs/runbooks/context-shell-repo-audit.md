@@ -1,50 +1,51 @@
-# Context Shell Runbook: Policy Gates for Release Workflows
+# Runbook: Repo Audit (Policy Gates for Release Workflows)
 
-## Purpose
+## Objective
 
-Locate policy gates that impact release workflows using the Context Shell tools,
-while producing evidence-grade logs for audit trails.
+Locate policy gates and enforcement points tied to release workflows using Context Shell.
 
 ## Preconditions
 
-- Maestro Context Shell tools registered (`ctx.bash`, `ctx.readFile`).
-- Repository checked out at the target commit.
-- Evidence logging enabled (default writes to `evidence/context-shell/`).
+- Repo is available locally.
+- Access to `ctx.bash` tool via Maestro.
 
-## Workflow
+## Steps
 
-1. **Identify release workflow definitions**
+1. **Search release documentation for policy gates**
 
-   ```bash
-   ctx.bash('rg "release" .github/workflows')
-   ```
+```yaml
+steps:
+  - id: release-policy-search
+    tool: ctx.bash
+    params:
+      root: "/workspace/summit"
+      fsMode: "readonly"
+      command: "rg 'policy|gate|approval' docs/release"
+```
 
-2. **Find policy enforcement points in release automation**
+2. **Scan CI and governance rules**
 
-   ```bash
-   ctx.bash('rg "policy|guard|gate" server/src/ scripts/ .github/')
-   ```
+```yaml
+steps:
+  - id: ci-policy-search
+    tool: ctx.bash
+    params:
+      root: "/workspace/summit"
+      fsMode: "readonly"
+      command: "rg 'policy|gate|approval' .github docs/governance"
+```
 
-3. **Inspect specific policy routes and controls**
+3. **Record evidence artifacts**
 
-   ```bash
-   ctx.bash('rg "policy" server/src/conductor/api')
-   ctx.readFile('server/src/conductor/api/policy-routes.ts')
-   ```
+The JSONL evidence log is written automatically:
 
-4. **Capture evidence output**
+```
+./evidence/context-shell/context-shell-events.jsonl
+```
 
-   Evidence logs are written automatically as JSONL events to
-   `evidence/context-shell/`. Attach the JSONL artifact to your evidence bundle.
+Archive the file with release evidence bundles to satisfy provenance requirements.
 
-## Expected Evidence
+## Expected Outputs
 
-- `tool_call_start` and `tool_call_end` entries for each command.
-- `policyDecisionId` fields showing allow/deny evaluations.
-- `filesRead` and `filesWritten` lists tied to each tool call.
-
-## Escalation
-
-If policy denial blocks required paths, log the denial and escalate to governance
-for a policy update. Use the existing policy-as-code workflow to change
-allowlists/denylists.
+- Structured stdout/stderr and file access lists from each call.
+- Evidence events with command hashes, policy decision IDs, and timestamps.
