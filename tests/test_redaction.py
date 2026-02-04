@@ -41,3 +41,25 @@ def test_dataset_card_markdown():
     md = card.to_markdown()
     assert "# Dataset Card: Test Data" in md
     assert "**License**: Proprietary" in md
+
+
+from summit_harness.redaction import redact_dict, redact_text as harness_redact_text
+
+def test_harness_redact_dict_secrets():
+    data = {"api_key": "secret123", "user": "alice", "nested": {"password": "p1"}}
+    redacted = redact_dict(data)
+    assert redacted["api_key"] == "[REDACTED]"
+    assert redacted["user"] == "alice"
+    assert redacted["nested"]["password"] == "[REDACTED]"
+
+def test_harness_redact_api_key_text():
+    text = "My key is sk-1234567890123456789012345"
+    redacted = harness_redact_text(text)
+    assert "sk-1234567890123456789012345" not in redacted
+    assert "[REDACTED_API_KEY]" in redacted
+
+def test_harness_redact_pii_text():
+    text = "Email me at alice@example.com"
+    redacted = harness_redact_text(text)
+    assert "alice@example.com" not in redacted
+    assert "[REDACTED_EMAIL]" in redacted

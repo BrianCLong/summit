@@ -1,7 +1,12 @@
 
 import type { PaletteCandidateSet, PaletteRequestOptions, PaletteUsageRecord } from './palette/types.js';
 
-export type ProviderId = "openai" | "anthropic" | "mock" | "groq" | "openrouter" | "nvidia-nim" | "other";
+export type ProviderId = "openai" | "anthropic" | "mock" | "groq" | "openrouter" | "nvidia_nim" | "other";
+
+export type MultiModalPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "video_url"; video_url: { url: string } };
 export type ModelId = string;
 export type Role = "system" | "user" | "assistant" | "tool";
 export type ModelClass = "smart" | "fast" | "balanced" | "vision" | "embedding";
@@ -13,11 +18,6 @@ export interface ToolCallInvocation {
   args: Record<string, unknown>;
   id: string;
 }
-
-export type MultiModalPart =
-  | { type: "text"; text: string }
-  | { type: "image_url"; image_url: { url: string } }
-  | { type: "video_url"; video_url: { url: string } };
 
 export interface ChatMessage {
   role: Role;
@@ -45,7 +45,6 @@ export interface ChatCompletionRequest {
   // Provider agnostic hints
   temperature?: number;
   jsonMode?: boolean;
-  mode?: "instant" | "thinking";
 }
 
 export interface ChatCompletionResult {
@@ -98,7 +97,7 @@ export type ProviderType = ProviderId;
 
 export interface Message {
   role: Role;
-  content: string;
+  content: string | MultiModalPart[];
 }
 
 export interface LLMRequest {
