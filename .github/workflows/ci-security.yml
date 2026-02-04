@@ -80,7 +80,7 @@ jobs:
       # Note: Gitleaks v2 action handles SARIF upload internally when GITHUB_TOKEN is provided
       - name: Persist report artifact
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -138,7 +138,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/semgrep.sarif
       - name: Persist Semgrep report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -178,7 +178,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
       - name: Persist Snyk report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -213,7 +213,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
       - name: Persist filesystem report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -262,7 +262,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
       - name: Persist container reports
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -289,7 +289,7 @@ jobs:
             .
       - name: Persist license report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -319,7 +319,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/results.sarif
       - name: Persist Checkov report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -351,7 +351,7 @@ jobs:
         run: conftest test rendered --policy policies/opa
       - name: Persist rendered manifests
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -390,7 +390,7 @@ jobs:
           fi
       - name: Persist CIS report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -408,7 +408,7 @@ jobs:
           REPORT_DIR="$REPORT_DIR" scripts/security/baseline-check.sh
       - name: Persist baseline report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -454,7 +454,7 @@ jobs:
         run: docker compose -f docker-compose.yml down
       - name: Persist ZAP reports
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -556,7 +556,7 @@ jobs:
               .write();
       - name: Upload aggregated summary
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports

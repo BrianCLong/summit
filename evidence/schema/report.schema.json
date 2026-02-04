@@ -1,12 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["evidence_id", "item", "provider", "summary", "artifacts"],
+  "additionalProperties": false,
   "properties": {
-    "evidence_id": { "type": "string", "pattern": "^EVD-[A-Z0-9]+-[A-Z]+-[0-9]{3}$" },
-    "item": { "type": "object", "required": ["url"], "properties": { "url": { "type": "string" } } },
-    "provider": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } },
+    "evidence_id": { "type": "string" },
     "summary": { "type": "string" },
-    "artifacts": { "type": "array", "items": { "type": "string" } }
-  }
+    "status": { "type": "string" },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["evidence_id", "summary"]
 }

@@ -39,14 +39,14 @@ jobs:
         run: npx tsx scripts/ops/pr_conflict_forecast.ts
 
       - name: Upload Forecast Report (JSON)
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: pr-conflict-forecast-json
           path: docs/ops/pr-forecast/PR_CONFLICT_FORECAST.json
           retention-days: 7
 
       - name: Upload Forecast Report (Markdown)
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: pr-conflict-forecast-md
           path: docs/ops/pr-forecast/PR_CONFLICT_FORECAST.md

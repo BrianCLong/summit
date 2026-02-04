@@ -1,24 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "evidence metrics",
   "type": "object",
-  "additionalProperties": false,
-  "required": ["run_id", "metrics"],
   "properties": {
-    "run_id": { "type": "string" },
-    "metrics": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["name", "value"],
-        "properties": {
-          "name": { "type": "string" },
-          "value": { "type": "number" },
-          "unit": { "type": "string" },
-          "notes": { "type": "string" }
-        }
-      }
-    }
-  }
+    "evidence_id": { "type": "string" },
+    "metrics": { "type": "object" }
+  },
+  "additionalProperties": true
 }

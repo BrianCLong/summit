@@ -28,32 +28,11 @@ def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics:
         "run_id": run_id
     }
 
-    # Files to write
-    files = {
-        "report.json": report,
-        "metrics.json": metrics_data,
-        "stamp.json": stamp
-    }
-
-    for filename, content in files.items():
-        with open(base_path / filename, "w") as f:
-            json.dump(content, f, indent=2, sort_keys=True)
-
-    # Local index.json
-    local_index = {
-        "item_slug": "ENTRE-502318",
-        "evidence": [
-            {
-                "evidence_id": evidence_id,
-                "files": [
-                    str(base_path / "report.json"),
-                    str(base_path / "metrics.json"),
-                    str(base_path / "stamp.json")
-                ]
-            }
-        ]
-    }
-    with open(base_path / "index.json", "w") as f:
-        json.dump(local_index, f, indent=2, sort_keys=True)
+    with open(base_path / "report.json", "w") as f:
+        json.dump(report, f, indent=2, sort_keys=True)
+    with open(base_path / "metrics.json", "w") as f:
+        json.dump(metrics_data, f, indent=2, sort_keys=True)
+    with open(base_path / "stamp.json", "w") as f:
+        json.dump(stamp, f, indent=2, sort_keys=True)
 
     return str(base_path)

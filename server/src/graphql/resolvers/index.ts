@@ -16,7 +16,6 @@ import { collaborationResolvers } from './collaboration.js';
 import { cognitiveSecurityResolvers } from './cognitive-security.js';
 import { deduplicationResolvers } from './deduplication.js';
 import ticketLinksResolvers from './ticket-links.js';
-import { factGovResolvers } from '../../modules/factgov/resolvers.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040.js';
@@ -44,7 +43,6 @@ const resolvers = {
     ...(cognitiveSecurityResolvers.Query || {}),
     ...(deduplicationResolvers.Query || {}),
     ...(ticketLinksResolvers.Query || {}),
-    ...(factGovResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -76,7 +74,6 @@ const resolvers = {
     ...(ewResolvers.Mutation || {}),
     ...(collaborationResolvers.Mutation || {}),
     ...(cognitiveSecurityResolvers.Mutation || {}),
-    ...(factGovResolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -100,9 +97,6 @@ const resolvers = {
   CogSecCampaign: cognitiveSecurityResolvers.CogSecCampaign,
   CogSecIncident: cognitiveSecurityResolvers.CogSecIncident,
   VerificationAppeal: cognitiveSecurityResolvers.VerificationAppeal,
-  AudienceSegment: (cognitiveSecurityResolvers as any).AudienceSegment,
-  NarrativeCascade: (cognitiveSecurityResolvers as any).NarrativeCascade,
-  NarrativeConflict: (cognitiveSecurityResolvers as any).NarrativeConflict,
   Ticket: ticketLinksResolvers.Ticket,
 };
 

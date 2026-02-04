@@ -1,9 +1,0 @@
-{
-  "kind": "review",
-  "text": "The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good.",
-  "meta": {
-    "llm_assisted": true,
-    "llm_tools": ["gpt-4"],
-    "human_verifier": "researcher"
-  }
-}

@@ -1,27 +1,38 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "evidence report",
   "type": "object",
-  "additionalProperties": false,
-  "required": ["run_id", "evidence", "summary"],
-  "properties": {
-    "run_id": { "type": "string" },
-    "evidence": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["evidence_id", "status", "artifacts"],
-        "properties": {
-          "evidence_id": {
-            "type": "string",
-            "pattern": "^EVD-[a-z0-9-]+-[a-z0-9-]+-[0-9]{3}$"
-          },
-          "status": { "type": "string", "enum": ["pass", "fail"] },
-          "artifacts": { "type": "array", "items": { "type": "string" } }
-        }
+  "anyOf": [
+    {
+      "required": ["evidence_id", "summary", "artifacts"],
+      "properties": {
+        "evidence_id": { "type": "string" },
+        "summary": { "type": "string" },
+        "artifacts": { "type": "array", "items": { "type": "string" } }
       }
     },
-    "summary": { "type": "string" }
-  }
+    {
+      "required": ["run_id", "item_slug", "evd_ids", "summary", "artifacts"],
+      "properties": {
+        "run_id": { "type": "string" },
+        "item_slug": { "type": "string" },
+        "evd_ids": { "type": "array", "items": { "type": "string" } },
+        "summary": {
+          "type": "object",
+          "required": ["what_ran", "result"],
+          "properties": {
+            "what_ran": { "type": "string" },
+            "result": { "type": "string" }
+          }
+        },
+        "artifacts": {
+          "type": "object",
+          "properties": {
+            "metrics": { "type": "string" },
+            "stamp": { "type": "string" }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": true
 }
