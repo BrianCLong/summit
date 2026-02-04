@@ -25,6 +25,8 @@
     "test:e2e": "npx playwright test",
     "test:a11y-gate": "pnpm exec playwright test -c playwright.a11y-keyboard.config.ts",
     "test:release-bundle-sdk": "cd packages/release-bundle && pnpm test",
+    "model:sandbox:check": "node .github/scripts/model-sandbox/fixtures_test.mjs",
+    "model:sandbox:run": "./tools/model-sandbox/run.sh",
     "test:release-scripts": "node --test scripts/release/__tests__/*.test.mjs",
     "test:docs-governance": "node --test scripts/ci/__tests__/governance_docs_verifier.test.mjs",
     "test:soc-report": "PYTHONPATH=. python3 -m unittest scripts.evidence.tests.test_soc_report",
