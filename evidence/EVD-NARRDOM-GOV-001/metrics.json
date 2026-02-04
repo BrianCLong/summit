@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-NARRDOM-GOV-001",
+  "metrics": {
+    "deny_fixtures": 1,
+    "allow_fixtures": 1
+  }
+}
