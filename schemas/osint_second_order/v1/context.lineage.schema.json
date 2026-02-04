@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Context Lineage",
+  "type": "object",
+  "properties": {
+    "source_id": { "type": "string" },
+    "adjacency": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["recommendation", "reply", "trending"] },
+          "content_hash": { "type": "string" },
+          "rank": { "type": "integer" }
+        },
+        "required": ["type", "content_hash"]
+      }
+    },
+    "redaction_report": {
+      "type": "object",
+      "properties": {
+        "pii_redacted_count": { "type": "integer" }
+      }
+    }
+  },
+  "required": ["source_id", "adjacency"]
+}

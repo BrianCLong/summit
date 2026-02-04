@@ -1,0 +1,15 @@
+{
+  "source_id": "item-123",
+  "adjacency": [
+    {
+      "type": "recommendation",
+      "content": { "title": "Related Item", "author": "user_abc" },
+      "rank": 1
+    },
+    {
+      "type": "reply",
+      "content": { "text": "Contact me at bob@example.com", "author": "@bob_jones" },
+      "rank": 2
+    }
+  ]
+}
