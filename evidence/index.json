@@ -386,11 +386,11 @@
       }
     },
     {
-      "evidence_id": "EVD-CODEX-AUTOMATIONS-SCHEMA-001",
+      "evidence_id": "EVD-shared-memory-orch-001",
       "files": {
-        "report": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/report.json",
-        "metrics": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/metrics.json",
-        "stamp": "evidence/EVD-CODEX-AUTOMATIONS-SCHEMA-001/stamp.json"
+        "report": "evidence/EVD-shared-memory-orch-001/report.json",
+        "metrics": "evidence/EVD-shared-memory-orch-001/metrics.json",
+        "stamp": "evidence/EVD-shared-memory-orch-001/stamp.json"
       }
     }
   ]

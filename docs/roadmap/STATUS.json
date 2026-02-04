@@ -1,17 +1,17 @@
 {
-  "last_updated": "2026-02-03T19:00:03Z",
+  "last_updated": "2026-02-08T00:00:00Z",
   "initiatives": [
+    {
+      "id": "adenhq-hive-subsumption-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
     {
       "id": "sera-cli-proxy",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
-    },
-    {
-      "id": "automation-evidence-schemas",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Automation evidence schemas, verifier CLI, and baseline evidence bundle."
     },
     {
       "id": "governance-evidence-contracts",
@@ -36,6 +36,24 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
+    },
+    {
+      "id": "narrative-ops-governed-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+    },
+    {
+      "id": "ru-ua-cogwar-lab",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
+    },
+    {
+      "id": "ip-claims-continuation-pack-c451-s480",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",

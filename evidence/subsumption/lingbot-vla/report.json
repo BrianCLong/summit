@@ -1,21 +1,8 @@
 {
   "evidence_id": "EVD-260118692-EVID-001",
   "item_slug": "lingbot-vla",
-  "claims": [
-    "MoT architecture uses shared attention between VLM and action expert.",
-    "Evaluation uses SR and PS with fixed trial counts."
-  ],
-  "decisions": [
-    {
-      "decision": "Install evidence scaffolding for VLA subsumption.",
-      "status": "approved",
-      "rationale": "Evidence-first workflow required for future benchmarks."
-    }
-  ],
-  "findings": [
-    {
-      "finding": "Evidence scaffold established; no benchmark results recorded yet.",
-      "status": "not_evaluated"
-    }
-  ]
+  "summary": "MoT architecture uses shared attention between VLM and action expert.",
+  "claims": ["MoT architecture uses shared attention between VLM and action expert.", "Evaluation uses SR and PS with fixed trial counts."],
+  "decisions": [{"decision": "Install evidence scaffolding for VLA subsumption.", "status": "approved", "rationale": "Evidence-first workflow required for future benchmarks."}],
+  "findings": [{"finding": "Evidence scaffold established; no benchmark results recorded yet.", "status": "not_evaluated"}]
 }
