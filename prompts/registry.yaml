@@ -1,26 +1,20 @@
 version: 1
 prompts:
-  - id: cognitive-iw-foundation
+  - id: io-cogwar-radar-brief
     version: v1
-    path: prompts/cognitive/cognitive-iw-foundation@v1.md
-    sha256: a3ce4cc1194d6d828e2dc3d3dc03bb80abab337a629162b0d5eda1424558b15b
-    description: Add initial Cognitive I&W schemas, fixtures, and standards documentation.
+    path: prompts/briefs/io-cogwar-radar-brief@v1.md
+    sha256: 178dc352c7c343c12cea0e88a595e088049a33f1ef53e4ef565a1294336934fb
+    description: Create the defensive-only IO/CogWar Radar 2027 brief and update roadmap status.
     scope:
       paths:
-        - api-schemas/cognitive-iw/
-        - GOLDEN/datasets/cognitive-iw/
-        - docs/standards/nato-cognitive-alerts.md
-        - docs/repo_assumptions.md
+        - docs/briefs/io-cogwar-radar-2027.md
         - docs/roadmap/STATUS.json
-        - agents/examples/COGNITIVE_IW_FOUNDATION_20260203.json
-        - prompts/cognitive/cognitive-iw-foundation@v1.md
+        - prompts/briefs/io-cogwar-radar-brief@v1.md
         - prompts/registry.yaml
       domains:
-        - cognitive
-        - governance
-        - schemas
         - documentation
-        - datasets
+        - governance
+        - io-cogwar
     verification:
       tiers_required:
         - C
@@ -47,6 +41,31 @@ prompts:
         - content
         - governance
         - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: semhl-required-checks
+    version: v1
+    path: prompts/ci/semhl-required-checks@v1.md
+    sha256: 09fb75e7c769abfdcb3eaab9322f2160e92cbf08b0f1fe62eaac022aca644147
+    description: Update semantic highlighting required check guidance and roadmap status notes.
+    scope:
+      paths:
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/ci/semhl-required-checks@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SEMHL_REQUIRED_CHECKS_PR1.json
+      domains:
+        - documentation
+        - governance
+        - ci
     verification:
       tiers_required:
         - C
@@ -373,6 +392,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: proof-carrying-plans-evidence-replay
+    version: v1
+    path: prompts/maestro/proof-carrying-plans-evidence-replay.md
+    sha256: d9b0323e9782df87a0cef430e42eb60e3dd8e476e2b446a602528a9e67f17592
+    description: Proof-carrying plan IR, action contracts, evidence bundles, and deterministic replay harness.
+    scope:
+      paths:
+        - agents/orchestrator/
+        - prompts/maestro/
+        - agents/examples/
+        - docs/roadmap/STATUS.json
+        - prompts/registry.yaml
+      domains:
+        - orchestration
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - A
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
@@ -381,6 +425,7 @@ prompts:
     scope:
       paths:
         - docs/runbooks/
+        - docs/roadmap/
         - docs/roadmap/STATUS.json
         - agents/examples/
         - prompts/docs/runbooks-update@v1.md
@@ -514,33 +559,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: io-cogwar-radar-brief
-    version: v1
-    path: prompts/docs/io-cogwar-radar-brief@v1.md
-    sha256: 29e1e846516778c390cf978558937aa16389e3e54a3d3d955d482f3796bdf70e
-    description: Draft a defensive IO/CogWar radar brief with roadmap status and governance artifacts.
-    scope:
-      paths:
-        - docs/briefs/
-        - docs/roadmap/STATUS.json
-        - prompts/docs/io-cogwar-radar-brief@v1.md
-        - prompts/registry.yaml
-        - agents/examples/IO_COGWAR_RADAR_BRIEF_20260202.json
-        - packages/decision-ledger/decision_ledger.json
-      domains:
-        - documentation
-        - governance
-        - info-ops
-        - cogwar
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: minimal-architecture-index
     version: v1
     path: prompts/architecture/minimal-architecture-index@v1.md
@@ -607,6 +625,36 @@ prompts:
     verification:
       tiers_required:
         - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: lazy-mcp-skillpacks
+    version: v1
+    path: prompts/skillpacks/lazy-mcp-skillpacks@v1.md
+    sha256: a5127a0addcbc97f6f863d5a02ee286c0267f44abe5e39f24934f9e7d717eee8
+    description: Implement lazy-loaded MCP skillpacks with adaptive sharding and governance evidence.
+    scope:
+      paths:
+        - packages/agent-skillpacks/
+        - .summit/skillpacks/
+        - docs/skillpacks-lazy-mcp.md
+        - docs/roadmap/STATUS.json
+        - artifacts/tool-loading-report.json
+        - artifacts/tool-loading-report.md
+        - agents/examples/
+        - prompts/skillpacks/
+        - prompts/registry.yaml
+      domains:
+        - agent-tooling
+        - governance
+        - mcp
+        - evidence
+    verification:
+      tiers_required:
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
