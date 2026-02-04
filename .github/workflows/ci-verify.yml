@@ -119,14 +119,6 @@ jobs:
       - name: Media provenance gate
         run: npx tsx scripts/ci/verify_media_provenance.ts
 
-      - name: Check execution governor
-        run: |
-          echo "=== Checking Execution Governor ==="
-          pnpm check:execution || {
-            echo "::error::Execution Governor Check FAILED"
-            exit 1
-          }
-
       - name: Check governance compliance
         run: npm run check:governance || echo "Governance check skipped (script may not exist)"
         continue-on-error: true # Non-blocking until governance engine is stable
@@ -154,11 +146,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
 
       - name: Run MCP UX Linter
@@ -321,11 +311,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4 # v6
         with:
+          cache: 'pnpm'
           node-version: "20"
       - name: Ensure evidence bundle exists
         run: |

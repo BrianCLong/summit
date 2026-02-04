@@ -86,27 +86,6 @@ Creates the comprehensive GA release bundle:
 - Generates release notes, operator script, checklist
 - Creates `ga_metadata.json` with release information
 - Generates `SHA256SUMS` for all artifacts
-- Builds the artifact inventory for the bundle and evidence outputs
-
-#### Artifact Inventory (Generation)
-
-The pipeline builds an artifact inventory that enumerates release outputs before publish. The
-inventory covers:
-
-- `dist/release/*` deliverables (server/client bundles and release summaries)
-- `release-bundle/compliance-bundle-v*.tgz`
-- `evidence-bundle.tar.gz`
-- `sbom.json` plus provenance outputs (for example `provenance.json`)
-- `ga_metadata.json`, `SHA256SUMS`, and release scripts/checklists
-
-To generate the inventory locally:
-
-```bash
-node scripts/release/generate_artifact_inventory.mjs --dir <output-dir>
-```
-
-The script emits `artifact-inventory.json` into `<output-dir>` and is intended to run after the
-bundle is assembled so the inventory reflects the final on-disk payload.
 
 ### Stage 5: Publish Guard
 
@@ -117,20 +96,6 @@ Final verification before publishing:
 - Validates checksums
 - Confirms lineage
 - Produces pass/fail report
-
-#### Artifact Inventory (Verification)
-
-Before publish, CI verifies the inventory against the bundle directory:
-
-```bash
-node scripts/release/verify_artifact_inventory.mjs --dir <output-dir>
-```
-
-Inventory files are bundled into release evidence under `release-artifacts/` to preserve a
-verifiable record of the release payload.
-
-If inventory verification fails, publishing is blocked until the bundle and inventory are
-consistent.
 
 ### Stage 6: Assemble & Publish
 
@@ -158,7 +123,6 @@ The pipeline produces a single artifact: `ga-release-bundle-{tag}`
 | `verify-rc-lineage.sh`    | Lineage verification script       |
 | `verify-green-for-tag.sh` | CI verification script            |
 | `pipeline_metadata.json`  | Pipeline execution metadata       |
-| `artifact-inventory.json` | Inventory of release artifacts    |
 
 ### Example ga_metadata.json
 
