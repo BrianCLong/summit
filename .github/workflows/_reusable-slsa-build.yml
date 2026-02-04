@@ -182,19 +182,22 @@ jobs:
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
-      - name: Generate SBOMs (SPDX + CycloneDX)
+      - name: Generate SPDX SBOM
         if: inputs.sbom
         id: sbom
         uses: anchore/sbom-action@v0
         with:
           image: ${{ steps.image-uri.outputs.uri }}
-          format: spdx-json, cyclonedx-json
+          format: spdx-json
+          output-file: sbom.spdx.json
 
-      - name: Rename SBOMs
+      - name: Generate CycloneDX SBOM
         if: inputs.sbom
-        run: |
-          mv syft.spdx.json sbom.spdx.json
-          mv syft.cyclonedx.json sbom.cyclonedx.json
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.image-uri.outputs.uri }}
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
 
       - name: Attest Build Provenance
         if: inputs.push && inputs.sign
@@ -231,7 +234,7 @@ jobs:
           echo "Achieved SLSA Level: $LEVEL"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |

@@ -1,0 +1,6 @@
+{
+  "required_checks": [],
+  "rename_plan": {
+    "when_known": "Replace temporary gate names with actual CI check names."
+  }
+}
