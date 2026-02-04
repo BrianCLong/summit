@@ -1,60 +1,45 @@
 import json
-import os
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 
 class EvidenceWriter:
-    """
-    Deterministic evidence writer. Ensures stable JSON key ordering
-    and enforces timestamp separation (only in stamp.json).
-    """
-    def __init__(self, root_dir: Path):
-        self.root_dir = root_dir
-        self.root_dir.mkdir(parents=True, exist_ok=True)
+    def __init__(self, output_dir: str):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def _write_json(self, filename: str, data: Dict[str, Any]):
-        p = self.root_dir / filename
-        content = json.dumps(data, sort_keys=True, indent=2)
-        p.write_text(content + "\n", encoding="utf-8")
+    def write(self, report: Dict[str, Any], metrics: Dict[str, Any]):
+        # Write report.json
+        with open(self.output_dir / "report.json", "w", encoding="utf-8") as f:
+            json.dump(report, f, sort_keys=True, indent=2)
 
-    def write(self, report: Dict[str, Any], metrics: Dict[str, Any], stamp: Optional[Dict[str, Any]] = None):
-        """
-        Writes report, metrics, and optionally stamp files.
-        Updates index.json with references.
-        """
-        self._write_json("report.json", report)
-        self._write_json("metrics.json", metrics)
-        if stamp:
-            self._write_json("stamp.json", stamp)
+        # Write metrics.json
+        with open(self.output_dir / "metrics.json", "w", encoding="utf-8") as f:
+            json.dump(metrics, f, sort_keys=True, indent=2)
 
-        # Update index
-        index_path = self.root_dir / "index.json"
-        index = {"items": {}}
-        if index_path.exists():
-            try:
-                index = json.loads(index_path.read_text(encoding="utf-8"))
-                if "items" not in index:
-                    index["items"] = {}
-            except:
-                pass
+        # Write index.json
+        # The key should be the evidence ID, and it should contain a "files" list.
+        primary_evd_id = report.get("evidence_id")
+        if not primary_evd_id and report.get("evidence_ids"):
+            primary_evd_id = report["evidence_ids"][0]
 
-        run_id = report.get("run_id", "unknown")
-        evidence_id = f"EVD-CLAUDECODE-SUBAGENTS-{run_id}"
+        if not primary_evd_id:
+            primary_evd_id = f"EVD-UNKNOWN-{report.get('run_id', 'unknown')}"
 
-        def get_rel_path(fname):
-            full_path = self.root_dir / fname
-            try:
-                return str(full_path.relative_to(Path.cwd()))
-            except ValueError:
-                # Fallback for tests or out-of-repo paths
-                return str(full_path)
+        index = {
+            "version": "1.0",
+            "items": {
+                primary_evd_id: {
+                    "files": [
+                        str(self.output_dir / "report.json"),
+                        str(self.output_dir / "metrics.json"),
+                        str(self.output_dir / "stamp.json")
+                    ]
+                }
+            }
+        }
+        with open(self.output_dir / "index.json", "w", encoding="utf-8") as f:
+            json.dump(index, f, sort_keys=True, indent=2)
 
-        files = [
-            get_rel_path("report.json"),
-            get_rel_path("metrics.json")
-        ]
-        if stamp:
-             files.append(get_rel_path("stamp.json"))
-
-        index["items"][evidence_id] = {"files": files}
-        self._write_json("index.json", index)
+    def write_stamp(self, stamp: Dict[str, Any]):
+        with open(self.output_dir / "stamp.json", "w", encoding="utf-8") as f:
+            json.dump(stamp, f, sort_keys=True, indent=2)

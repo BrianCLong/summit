@@ -1,13 +1,9 @@
 {
   "kind": "submission",
-  "text": "This paper claims many things.",
-  "citations": [
-    {"doi": "10.fake/123", "text": "Fake Source 1"},
-    {"url": "http://hallucinated-link.com", "text": "Fake Source 2"}
-  ],
+  "text": "This paper refers to several key works in the field. See [1] DOI: 10.1234/example-paper and [2] https://example.com/paper/your-link-here for more details.",
   "meta": {
     "llm_assisted": true,
-    "llm_tools": ["gpt-4"],
-    "human_verifier": "researcher"
+    "llm_tools": ["GPT-4"],
+    "human_verifier": "researcher_a"
   }
 }

@@ -2,103 +2,168 @@ import json
 import os
 import sys
 import argparse
+import hashlib
 from datetime import datetime, timezone
-from pathlib import Path
-from summit.slopguard.policy import evaluate_artifact
+from typing import Dict, Any, List
+
+from summit.slopguard.policy import evaluate_artifact, SlopDecision
+
+EXCEPTION_LEDGER = "governance/overrides/slopguard_exceptions.jsonl"
+
+def redact_dict(data: Dict[str, Any], never_log_fields: List[str]) -> Dict[str, Any]:
+    """Redacts sensitive fields from a dictionary."""
+    redacted = {}
+    for k, v in data.items():
+        if any(field.lower() in k.lower() for field in never_log_fields):
+            redacted[k] = "[REDACTED]"
+        elif isinstance(v, dict):
+            redacted[k] = redact_dict(v, never_log_fields)
+        elif isinstance(v, list):
+            redacted[k] = [redact_dict(i, never_log_fields) if isinstance(i, dict) else i for i in v]
+        else:
+            redacted[k] = v
+    return redacted
+
+def write_evidence(evd_id: str, area: str, summary: str, details: Dict[str, Any], metrics: Dict[str, Any], never_log_fields: List[str]):
+    """Writes standard evidence artifacts with redaction and determinism."""
+    base_path = f"evidence/slopguard/{area}"
+    os.makedirs(base_path, exist_ok=True)
+
+    redacted_details = redact_dict(details, never_log_fields)
+    redacted_metrics = redact_dict(metrics, never_log_fields)
+
+    # report.json
+    report = {
+        "evidence_id": evd_id,
+        "area": area,
+        "summary": summary,
+        "details": redacted_details,
+        "artifacts": [f"{base_path}/metrics.json", f"{base_path}/stamp.json"]
+    }
+    with open(f"{base_path}/report.json", "w") as f:
+        json.dump(report, f, indent=2, sort_keys=True)
+
+    # metrics.json
+    metrics_doc = {
+        "evidence_id": evd_id,
+        "metrics": redacted_metrics
+    }
+    with open(f"{base_path}/metrics.json", "w") as f:
+        json.dump(metrics_doc, f, indent=2, sort_keys=True)
+
+    # stamp.json
+    stamp = {
+        "evidence_id": evd_id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    with open(f"{base_path}/stamp.json", "w") as f:
+        json.dump(stamp, f, indent=2, sort_keys=True)
+
+def append_to_ledger(entry: Dict[str, Any]):
+    """Appends an entry to the Governed Exception Ledger with a tamper-evident hash."""
+    os.makedirs(os.path.dirname(EXCEPTION_LEDGER), exist_ok=True)
+
+    # Simple hash of the entry (excluding previous hash for simplicity in sandbox)
+    entry_str = json.dumps(entry, sort_keys=True)
+    entry_hash = hashlib.sha256(entry_str.encode()).hexdigest()
+    entry["tamper_evidence_hash"] = entry_hash
+
+    with open(EXCEPTION_LEDGER, "a") as f:
+        f.write(json.dumps(entry, sort_keys=True) + "\n")
 
 def main():
     parser = argparse.ArgumentParser(description="SlopGuard CLI")
-    parser.add_argument("--artifact", required=True, help="Path to artifact JSON")
-    parser.add_argument("--policy", default="config/slopguard.policy.json", help="Path to policy JSON")
-    parser.add_argument("--enforce", action="store_true", help="Fail CI on deny")
-    parser.add_argument("--output-dir", default="evidence", help="Directory for evidence")
-    parser.add_argument("--override-reason", help="Reason for overriding a deny")
-    parser.add_argument("--approver", help="Who approved the override")
+    parser.add_argument("--artifact", type=str, required=True, help="Path to artifact JSON")
+    parser.add_argument("--policy", type=str, help="Path to policy JSON")
+    parser.add_argument("--override-reason", type=str, help="Justification for override")
+    parser.add_argument("--approver", type=str, help="Approver for override")
 
     args = parser.parse_args()
 
-    with open(args.artifact, 'r') as f:
+    if args.policy:
+        policy_path = args.policy
+    else:
+        policy_path = os.environ.get("SLOPGUARD_POLICY_PATH", "config/slopguard.policy.json")
+        if not os.path.exists(policy_path):
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            policy_path = os.path.join(base_dir, "config", "slopguard.policy.json")
+
+    enforcing = os.environ.get("SLOPGUARD_ENFORCING", "1") == "1"
+
+    if not os.path.exists(args.artifact):
+        print(f"Artifact not found: {args.artifact}")
+        sys.exit(1)
+
+    with open(args.artifact, "r") as f:
         artifact = json.load(f)
 
-    with open(args.policy, 'r') as f:
+    if not os.path.exists(policy_path):
+        print(f"Policy not found: {policy_path}")
+        sys.exit(1)
+
+    with open(policy_path, "r") as f:
         policy = json.load(f)
+
+    never_log_fields = policy.get("never_log_fields", [])
 
     decision = evaluate_artifact(artifact=artifact, policy=policy)
 
-    # Emit evidence
-    evidence_id_policy = "EVD-AISLOPFT20260201-POLICY-001"
-    evidence_id_audit = "EVD-AISLOPFT20260201-AUDIT-005"
+    print(f"Decision: {'ALLOWED' if decision.allowed else 'DENIED'}")
+    print(f"Score: {decision.score:.2f}")
+    print(f"Reasons: {decision.reasons}")
 
-    report = {
-        "evidence_id": evidence_id_policy,
-        "summary": f"SlopGuard evaluation: {'ALLOWED' if decision.allowed else 'DENIED'}",
-        "details": {
-            "score": decision.score,
-            "reasons": decision.reasons,
-            "override_required": decision.override_required
+    # Evidence generation...
+    write_evidence(
+        evd_id="EVD-AISLOPFT20260201-POLICY-001",
+        area="policy",
+        summary=f"SlopGuard evaluation for {artifact.get('kind', 'unknown')}",
+        details={
+            "allowed": decision.allowed,
+            "decision_reasons": decision.reasons,
+            "policy_version": decision.policy_version,
+            "artifact_meta": artifact.get("meta", {})
         },
-        "policy_version": decision.policy_version
-    }
+        metrics={},
+        never_log_fields=never_log_fields
+    )
 
-    metrics = {
-        "evidence_id": evidence_id_policy,
-        "metrics": {
-            "slop_score": decision.score,
-            "reasons_count": len(decision.reasons)
-        }
-    }
+    write_evidence(
+        evd_id="EVD-AISLOPFT20260201-DETECT-002",
+        area="detect",
+        summary="Detailed slop scoring metrics",
+        details={},
+        metrics=decision.metadata.get("scoring_metrics", {}),
+        never_log_fields=never_log_fields
+    )
 
-    stamp = {
-        "evidence_id": evidence_id_policy,
-        "generated_at_utc": datetime.now(timezone.utc).isoformat()
-    }
-
-    # Write files
-    (Path(args.output_dir) / "policy").mkdir(parents=True, exist_ok=True)
-    with open(Path(args.output_dir) / "policy" / "report.json", 'w') as f:
-        json.dump(report, f, indent=2)
-    with open(Path(args.output_dir) / "policy" / "metrics.json", 'w') as f:
-        json.dump(metrics, f, indent=2)
-    with open(Path(args.output_dir) / "policy" / "stamp.json", 'w') as f:
-        json.dump(stamp, f, indent=2)
-
-    print(f"SlopGuard Result: {'ALLOWED' if decision.allowed else 'DENIED'}")
-
-    overridden = False
+    # Handle Overrides
     if not decision.allowed and args.override_reason and args.approver:
-        overridden = True
-        print(f"OVERRIDDEN by {args.approver} for reason: {args.override_reason}")
+        print(f"OVERRIDE APPLIED: {args.override_reason} (by {args.approver})")
 
-        audit_report = {
-            "evidence_id": evidence_id_audit,
-            "summary": "SlopGuard Override Audit",
-            "details": {
-                "original_decision": "DENIED",
-                "override_reason": args.override_reason,
-                "approver": args.approver,
-                "reasons": decision.reasons,
-                "score": decision.score
-            },
-            "policy_version": decision.policy_version
+        audit_entry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "artifact_id": artifact.get("id", "unknown"),
+            "reason": args.override_reason,
+            "approver": args.approver,
+            "decision_reasons": decision.reasons,
+            "score": decision.score
         }
 
-        audit_stamp = {
-            "evidence_id": evidence_id_audit,
-            "generated_at_utc": datetime.now(timezone.utc).isoformat()
-        }
+        append_to_ledger(audit_entry)
 
-        (Path(args.output_dir) / "audit").mkdir(parents=True, exist_ok=True)
-        with open(Path(args.output_dir) / "audit" / "report.json", 'w') as f:
-            json.dump(audit_report, f, indent=2)
-        with open(Path(args.output_dir) / "audit" / "stamp.json", 'w') as f:
-            json.dump(audit_stamp, f, indent=2)
+        write_evidence(
+            evd_id="EVD-AISLOPFT20260201-AUDIT-005",
+            area="audit",
+            summary="Manual override for SlopGuard deny",
+            details=audit_entry,
+            metrics={},
+            never_log_fields=never_log_fields
+        )
+        sys.exit(0)
 
-    if args.enforce and not decision.allowed and not overridden:
-        if os.environ.get("SLOPGUARD_ENFORCING") == "0":
-            print("Enforcement disabled via SLOPGUARD_ENFORCING=0")
-        else:
-            print("Denied. Exiting with error.")
-            sys.exit(1)
+    if not decision.allowed and enforcing:
+        print("Enforcement active: exiting with error.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

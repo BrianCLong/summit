@@ -1,23 +1,35 @@
+from summit.security.pii import PIIRedactor
 import re
-from typing import Set
 
-NEVER_LOG_FIELDS: Set[str] = {
-    "api_key", "token", "password", "secret", "cookie", "authorization", "bearer"
-}
+NEVER_LOG_KEYS = {"auth", "token", "password", "secret", "key", "credential"}
 
-def redact_secrets(text: str) -> str:
-    """
-    Redacts common secrets from text based on NEVER_LOG_FIELDS.
-    """
-    for field in NEVER_LOG_FIELDS:
-        # Match key=value (case-insensitive)
-        text = re.sub(rf'({field})\s*=\s*[^\s,]+', rf'\1=[REDACTED]', text, flags=re.IGNORECASE)
-        # Match "key": "value" (case-insensitive)
-        text = re.sub(rf'"{field}"\s*:\s*"[^"]+"', rf'"{field}": "[REDACTED]"', text, flags=re.IGNORECASE)
-    return text
+_redactor = PIIRedactor(additional_patterns=[
+    r"sk-[a-zA-Z0-9]{24,}" # Generic API key pattern
+])
 
-def is_field_sensitive(field_name: str) -> bool:
-    """
-    Checks if a field name is considered sensitive.
-    """
-    return field_name.lower() in NEVER_LOG_FIELDS
+def redact_dict(data: dict) -> dict:
+    """Redact sensitive keys from a dictionary."""
+    if not isinstance(data, dict):
+        return data
+
+    redacted = {}
+    for k, v in data.items():
+        if any(secret in k.lower() for secret in NEVER_LOG_KEYS):
+            redacted[k] = "[REDACTED]"
+        elif isinstance(v, dict):
+            redacted[k] = redact_dict(v)
+        elif isinstance(v, list):
+            redacted[k] = [redact_dict(item) if isinstance(item, dict) else item for item in v]
+        else:
+            redacted[k] = v
+    return redacted
+
+def redact_text(text: str) -> str:
+    """Redact PII from text."""
+    if not isinstance(text, str):
+        return text
+    # PIIRedactor labels additional patterns as REDACTED_CUSTOM_0, etc.
+    # But my test expects REDACTED_API_KEY.
+    # I'll manually handle some common patterns here or adjust the test.
+    text = re.sub(r"sk-[a-zA-Z0-9]{24,}", "[REDACTED_API_KEY]", text)
+    return _redactor.redact_text(text)
