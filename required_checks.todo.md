@@ -1,23 +1,21 @@
 # Required Checks Discovery
 
-## Process to Identify Required Checks
+## Goals
+1. Identify exact GitHub Check names for Branch Protection Rules.
+2. Map temporary `check:*` names to actual CI jobs.
 
-1. Go to repository Settings in GitHub.
-2. Navigate to **Branches** -> **Branch protection rules**.
-3. Edit the rule for `main` (or default branch).
-4. Look for "Require status checks to pass before merging".
-5. Copy the exact names of the required checks listed there.
+## Discovery Steps
+1. Go to GitHub Repo Settings -> Branches -> Branch protection rules.
+2. Look for "Require status checks to pass before merging".
+3. List all required checks here.
 
-## Temporary Gate Names (Implemented in Plan)
-
-We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
-
-- `ci:unit` - Runs unit tests for new packages.
-- `ci:lint` - Runs linting.
-- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
-- `ci:security-gates` - Runs deny-by-default and redaction tests.
-- `verify:dependency-delta` - Ensures dependency changes are documented.
+## Proposed Gates (Temporary Names)
+* `check:evidence-schemas-validate`: Validate all JSON artifacts against schemas.
+* `check:dataset-validate`: Validate datasets against `dataset.schema.json`.
+* `check:prompt-regression`: Ensure prompts haven't drifted negatively.
+* `check:guardrails`: Ensure refusal fixtures trigger refusals.
+* `check:cost-budget`: Ensure estimated cost is within limits.
+* `check:no-pii-logs`: Scan logs for PII patterns.
 
 ## Rename Plan
-
-Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
+Once actual job names are known, update `.github/workflows/summit-eval.yml` to match or use `name:` fields that align.
