@@ -1,5 +1,18 @@
 # Repo Assumptions & Verifications
 
+## S-ADK Reality Check (2026-02-05)
+### Verified
+- `cli/` provides the `summit` CLI entrypoint (commander-based).
+- `artifacts/agent-runs/` exists for evidence output.
+- `fixtures/` is available for deterministic test inputs.
+
+### Assumptions (Deferred pending confirmation)
+- `summit adk` subcommands are acceptable under the existing CLI contract.
+- CI gates for deterministic evidence will be added later.
+
+### Must-not-touch (S-ADK scope)
+- Governance-required checks and security baselines.
+
 ## Verified
 1.  **Repo Structure**: Top-level directories include `api/`, `apis/`, `api-schemas/`, `apps/`, `bindings/`, `alerting/`, `RUNBOOKS/`, `SECURITY/`.
 2.  **Package Location**: `packages/` is the standard location for modules.
@@ -24,33 +37,6 @@
 4.  **Deterministic Evidence**: Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
 5.  **Platform Spine**: New services will use Python/FastAPI to match `api/` spine.
 6.  **Queue**: `maestro` package likely handles orchestration; specific queue technology (Celery vs Redis Queues) needs confirmation.
-
----
-
-## Vulnerability Resilience - OSV Ingestion (Assumptions)
-
-### Vuln Verified
-- **Python**: 3.12.12 in sandbox; 3.9 in `api/Dockerfile`.
-- **Pydantic**: v2 present in `requirements.in`.
-- **Structure**: `summit/`, `scripts/`, `tests/` directories exist at root.
-- **Policies**: `tests/test_neverlog.py` and `tests/test_evidence_determinism.py` exist.
-- **Schemas**: `schemas/` exists for global JSON schemas.
-- **Flags**: `summit/flags.py` exists for feature flag management.
-
-### Vuln Assumed (validate)
-- `summit/vuln/` is the appropriate place for core vulnerability logic in Python.
-- `scripts/vuln/` is appropriate for ingestion entry points.
-- `tests/vuln/` is appropriate for module-specific tests.
-- `artifacts/vuln-intel/hand-cve-private-sector/` is the target for evidence.
-
-### Vuln Must-not-touch
-- Existing vulnerability scanning tools like `scripts/scan-vulnerabilities.sh` (interop only).
-- `api/main.py` existing endpoints.
-- Base evidence schemas in `schemas/`.
-
-### Vuln Validation plan
-- Verify OSV API response format matches assumptions.
-- Confirm deterministic output of `VulnRecord` normalization.
 
 ## Must-not-touch
 *   `docs/ci/REQUIRED_CHECKS_POLICY.yml` (Governance-controlled).
@@ -140,24 +126,6 @@
 
 ---
 
-## Extortion Pressure - Ransomware Risk (Assumptions)
-
-### Extortion Verified
-- **Docs location**: `docs/standards/`, `docs/security/data-handling/`, `docs/ops/runbooks/`.
-- **Package location**: `packages/extortion`.
-- **Feature flag**: `FEATURE_EXTORTION_PRESSURE` in `feature_flags.json`.
-- **Evidence IDs**: `EVD-EXTORTION-<date>-<hash>` (matches repo pattern prefix `EVD-`).
-
-### Extortion Assumed
-- Artifacts under `artifacts/extortion/` are acceptable for this module.
-- `never_log_scan.sh` and `check_determinism_extortion.sh` are required gates.
-
-### Extortion Must-not-touch
-- Core governance logic in `server/src/middleware/ensureTenant.ts`.
-- Existing CI workflow files in `.github/workflows/` (except when adding new specific jobs).
-
----
-
 ## Disinfo News Ecosystem - Content Integrity (Assumptions)
 
 ### Disinfo Verified
@@ -185,10 +153,7 @@
 - Ed25519 is the approved signing algorithm for deterministic audit trails.
 
 ### FactCert Must-not-touch (until validated)
-- Existing `evidence/` schemas used by other subsystems.
-
----
-
+- Existing `evidence/` schemas used by other subsystems.\n---\n
 # Repo Assumptions & Reality Check
 
 ## FactCert Subsystem Status
@@ -222,15 +187,13 @@
 
 ## CI/CD
 *   No existing CI checks for `factcert`.
-*   New checks will need to be added to `required_checks.todo.md` or similar if we were editing workflows.
+*   New checks will need to be added to `required_checks.todo.md` or similar if we were editing workflows (out of scope for PR1 code changes, but noted).
 
 ## Constraints
 *   **Determinism:** Must use canonical JSON stringification.
 *   **No PII:** Strict separation of concerns.
 *   **Regulated Output:** No "admissible", "compliant", "fraud" claims in code strings/outputs.
-
----
-
+\n---\n
 # Repo Assumptions
 
 ## FactCert Location
@@ -252,9 +215,7 @@
 ## Must-Not-Touch
 - `docs/ci/REQUIRED_CHECKS_POLICY.yml` (if it exists)
 - Existing security scanning baselines.
-
----
-
+\n---\n
 # Repo Assumptions & Reality Check
 
 ## Verified Facts
@@ -280,9 +241,7 @@
 *   `.archive/`
 *   `GOLDEN/datasets/`
 *   Existing migration files in `server/db/managed-migrations/` (unless fixing a bug, which is out of scope).
-
----
-
+\n---\n
 # Repo Assumptions & Verifications
 
 ## Verified
@@ -323,3 +282,91 @@
 *   Enumerate required checks via GitHub branch protection UI/API.
 *   Confirm test runner (pytest for api, jest/vitest for server).
 *   Verify `maestro` queue mechanism.
+
+---
+
+## Ingress NGINX Retirement Bundle (Assumptions)
+
+### Ingress Verified
+- Bundle manifest and docs are now present under `subsumption/ingress-nginx-retirement` and `docs/**`.
+
+### Ingress Assumed (validate)
+- GitHub Actions required checks can be updated to include bundle-specific gates.
+- CI runners have Node.js 20+ available for the bundle verifier and deny gate scripts.
+
+### Ingress Must-not-touch (blast radius)
+- Runtime API surfaces and production deployment logic outside CI gating.
+
+### Ingress Validation plan
+- Confirm required check names in branch protection.
+- Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.
+
+---
+
+## FactMarkets - Financial Fraud Detection (Assumptions)
+
+### FactMarkets Verified
+- Existing `schemas/` directory contains Lane 1 evidence schemas.
+- `package.json` supports `tsx` for running TypeScript scripts.
+- `pnpm` workspace structure exists but `factmarkets` will be a root module initially.
+
+### FactMarkets Assumed (validate)
+- `factmarkets/` at root is acceptable placement for this module (mirroring `adversarial-misinfo-defense-platform` pattern).
+- `fixtures/factmarkets` is the correct place for test data.
+- Deterministic JSON output is required for all evidence artifacts.
+
+### FactMarkets Must-not-touch (until validated)
+- `packages/` public APIs.
+- Existing CI workflows (unless adding new specific jobs).
+
+### FactMarkets Validation plan
+- Verify schemas against JSON Schema draft 2020-12.
+- Verify deterministic output via `stableStringify`.
+
+---
+
+## FactFlow - Evidence Ingestion (Assumptions)
+
+### FactFlow Verified
+- `server/src/app.ts` exists.
+- `feature-flags/flags.yaml` exists.
+
+### FactFlow Assumed (validate)
+- `server/src/factflow/` is used to contain the new module, keeping it close to the server logic but distinct.
+- `server/src/factflow/schema/` is used for module-specific schemas to avoid polluting the root `schemas/` directory initially.
+- New `EVD-` IDs will be generated using a SHA256 deterministic hash.
+
+### FactFlow Must-not-touch (until validated)
+- Existing security workflows.
+- `server/src/middleware/auth.ts` (unless absolutely necessary, use existing auth).
+
+---
+
+## FactGov - Regulated Procurement (Assumptions)
+
+### FactGov Verified
+- `api/` service is intended to host the FactGov module.
+- `api/` currently uses simple API Key authentication (`X-API-Key`).
+
+### FactGov Assumed (validate)
+- `api/` service can be integrated into the broader system (e.g. via API Gateway or direct calls).
+- Python 3.11+ is the target version (based on `api/Dockerfile` check).
+
+### FactGov Must-not-touch (until validated)
+- Existing wargame simulation endpoints in `api/main.py`.
+
+---
+
+## Disinfo News Ecosystem - Content Integrity (Assumptions)
+
+### Disinfo Verified
+- `packages/` workspace structure is supported.
+- `scripts/monitoring/` is established for drift detection scripts.
+- `fixtures/` is the standard for test data.
+
+### Disinfo Assumed (validate)
+- New TypeScript module in `packages/disinfo-news-ecosystem` is preferred over expanding the existing Python platform for this capability.
+- CI/CD will automatically incorporate the new `disinfo.yml` workflow.
+
+### Disinfo Must-not-touch (until validated)
+- Global `pnpm-lock.yaml` integrity (regenerate after merge).

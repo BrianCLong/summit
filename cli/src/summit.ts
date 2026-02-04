@@ -2,8 +2,12 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { AUTOMATION_WORKFLOWS, runAutomationWorkflow } from './automation.js';
+import { registerOpenClawCommands } from './skills/cli.js';
 import { DoctorCheckResult, runDoctor } from './summit-doctor.js';
-import { registerSeraProxyCommands } from './commands/sera-proxy.js';
+import { initAgentScaffold } from './adk/init.js';
+import { validateManifestCommand } from './adk/validate.js';
+import { runAgent } from './adk/run.js';
+import { packAgent } from './adk/pack.js';
 
 function renderResult(result: DoctorCheckResult): void {
   const statusIcon =
@@ -44,7 +48,8 @@ async function main() {
   const program = new Command();
 
   program.name('summit').description('Summit developer toolbox CLI');
-  registerSeraProxyCommands(program);
+
+  registerOpenClawCommands(program);
 
   (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
     program
@@ -92,6 +97,52 @@ async function main() {
       if (report.summary.failed > 0) {
         process.exitCode = 1;
       }
+    });
+
+  const adk = program
+    .command('adk')
+    .description('Summit Agent Development Kit (S-ADK) workflows');
+
+  adk
+    .command('init')
+    .description('Create a new S-ADK agent scaffold')
+    .requiredOption('--name <name>', 'Agent name')
+    .action(async (options) => {
+      const { manifestPath } = await initAgentScaffold(options.name, process.cwd());
+      console.log(`Scaffold created: ${manifestPath}`);
+    });
+
+  adk
+    .command('validate')
+    .description('Validate an S-ADK agent manifest')
+    .argument('<manifestPath>', 'Path to agent.yaml or agent.json')
+    .action(async (manifestPath) => {
+      const { reportPath, ok } = await validateManifestCommand(manifestPath);
+      console.log(`Validation report: ${reportPath}`);
+      if (!ok) {
+        process.exitCode = 1;
+      }
+    });
+
+  adk
+    .command('run')
+    .description('Run an S-ADK agent locally against a fixture')
+    .argument('<agentPath>', 'Path to agent directory or manifest file')
+    .requiredOption('--fixture <path>', 'Fixture JSON file')
+    .action(async (agentPath, options) => {
+      const { evidenceId, outputDir } = await runAgent(agentPath, options.fixture);
+      console.log(`Evidence ID: ${evidenceId}`);
+      console.log(`Artifacts: ${outputDir}`);
+    });
+
+  adk
+    .command('pack')
+    .description('Package an S-ADK agent into a tarball')
+    .argument('<agentDir>', 'Agent directory to package')
+    .option('--output <path>', 'Output archive path')
+    .action(async (agentDir, options) => {
+      const archive = await packAgent(agentDir, options.output);
+      console.log(`Packed archive: ${archive}`);
     });
 
   await program.parseAsync(process.argv);

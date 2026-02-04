@@ -1,0 +1,10 @@
+{
+  "items": {
+    "EVD-TRUSTPARADOX-GOV-001": [
+      "fixtures/evidence/good/report.json",
+      "fixtures/evidence/good/metrics.json",
+      "fixtures/evidence/good/stamp.json",
+      "fixtures/evidence/good/index.json"
+    ]
+  }
+}
