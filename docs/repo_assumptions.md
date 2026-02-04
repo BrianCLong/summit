@@ -1,32 +1,42 @@
-# Repo Assumptions (SDD bootstrap)
+# Repo Assumptions & Reality Check
 
-## Verified (from repository root listing)
+## Verified Facts
+*   **Infrastructure**: Node.js 18+, pnpm, Docker Compose.
+*   **Backend**: `server/` directory contains a Node.js/TypeScript application.
+*   **Database**: Postgres (managed migrations) and Neo4j.
+*   **Migrations**: Located in `server/db/managed-migrations/`. System expects `.up.sql` and `.down.sql` files.
+*   **GraphQL**:
+    *   Main schema definition: `server/src/graphql/schema.ts` (exports `typeDefs`).
+    *   Resolvers aggregation: `server/src/graphql/resolvers/index.ts`.
+    *   Directives: `authDirective.ts` implements `@scope` and `@auth`.
+*   **Modules**: `server/src/modules/` is the location for domain modules.
+*   **Testing**: Jest is used for testing (`server/__tests__`).
 
-- `.claude/`
-- `.agentic-prompts/`
-- `.agent-guidance/`
-- `.husky/`
-- `.githooks/`
-- `.github/`
+## Narrative Intelligence Subsumption (PR-17713)
+### Verified (Local Inspection)
+- `docs/security/` and `docs/ops/runbooks/` exist and are active documentation surfaces.
+- Feature flags are documented under `docs/FEATURE_FLAGS.md` and related docs.
+- Playwright configuration exists in the repo root (`playwright.config.ts`).
 
-## Assumed (must validate in-repo)
+### Deferred Pending Verification
+- Exact service runtime locations for narrative analytics modules.
+- CI check names and required gates for narrative intelligence changes.
+- Existing evidence schema naming and signing conventions used by runtime services.
 
-- `.claude/` contains agent configuration and may already use tasks or memory files.
-- `.husky/` or `.githooks/` are active for local backpressure.
-- Standard docs taxonomy exists under `docs/` for security/ops/standards.
+## Assumptions
+*   The `server/db/managed-migrations` path is correctly configured in the environment where `npm run migrate` runs.
+*   The `MigrationManager` is robust enough to handle new tables without manual intervention in the database structure (other than running the migration).
+*   The `@scope` directive is fully functional and wired up in the schema transformer.
 
-## Must-not-touch (until confirmed)
+## "Do Not Touch" List
+*   `.pnpm-store/`
+*   `.qwen-cache/`
+*   `.archive/`
+*   `GOLDEN/datasets/`
+*   Existing migration files in `server/db/managed-migrations/` (unless fixing a bug, which is out of scope).
 
-- `GOLDEN/`
-- `THIRD_PARTY_NOTICES/`
-- `SECURITY/`
-- `.pnpm-store/`
-- `.venv_*`
-- Large generated directories (treat as immutable unless an issue explicitly targets them).
-
-## Validation checklist (before PR2+)
-
-- Locate existing agent workflow docs: search for “agentic”, “prompts”, “CLAUDE”, “tasks”.
-- Confirm whether `.husky/pre-commit` exists and how hooks are run in CI.
-- Confirm test runner + lint/typecheck commands used by Summit.
-- Identify current CI required checks (see `docs/CI_STANDARDS.md`).
+## Validation Plan (Narrative Intelligence PR-1)
+- Locate feature flag evaluation path and tenant allowlist controls.
+- Confirm centralized logging/audit pathways for evidence packs.
+- Identify artifact naming conventions and hash signing flows.
+- Confirm API patterns (REST/GraphQL/WebSocket) and endpoint ownership.

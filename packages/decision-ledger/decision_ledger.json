@@ -23,7 +23,7 @@
     "policyVersion": "1.0.0",
     "inputHash": "eyJjaGFuZ2UiOiAibWNwIGdpdCBzZXJ2ZXIgY2hhaW4gaGFyZGVuaW5nIGRvYyArIHJvYWRtYXAgc3RhdHVzIHVwZGF0ZSIsICJmaWxlcyI6IFsiZG9jcy9zZWN1cml0eS9tY3AtZ2l0LXNlcnZlci1jaGFpbi1oYXJkZW5pbmcubWQiLCAiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIl19",
     "decision": {
-      "action": "document_controls",
+      "action": "scale_up",
       "rule": {
         "condition": "security hardening extraction required",
         "action": "document_controls",
@@ -35,7 +35,7 @@
   },
   {
     "id": "6d86288744",
-    "timestamp": "2026-01-28T06:26:33Z",
+    "timestamp": "2026-01-31T06:26:33Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
     "inputHash": "eyJjaGFuZ2UiOiAicmVnaXN0ZXIgcHJvbXB0IGFuZCB0YXNrIHNwZWMgZm9yIG1jcCBnaXQgY2hhaW4gaGFyZGVuaW5nIiwgImZpbGVzIjogWyJwcm9tcHRzL3NlY3VyaXR5L21jcC1naXQtY2hhaW4taGFyZGVuaW5nQHYxLm1kIiwgInByb21wdHMvcmVnaXN0cnkueWFtbCIsICJhZ2VudHMvZXhhbXBsZXMvbWNwLWdpdC1jaGFpbi1oYXJkZW5pbmctdGFzay5qc29uIl19",
@@ -89,7 +89,7 @@
     "timestamp": "2026-01-30T01:35:06Z",
     "agentId": "codex-agent",
     "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiJkZWJleml1bS1vcGVubGluZWFnZSBzdWJzdW1wdGlvbiBzY2FmZm9sZCIsImZpbGVzIjpbInN1YnN1bXB0aW9uL2RlYmV6aXVtLW9wZW5saW5lYWdlL21hbmlmZXN0LnlhbWwiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9saWNlbnNlX2dhdGUubWQiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9maXh0dXJlcy9hbGxvdy9SRUFETUUubWQiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9maXh0dXJlcy9kZW55L1JFQURNRS5tZCIsInN1YnN1bXB0aW9uL2RlYmV6aXVtLW9wZW5saW5lYWdlL2V2aWRlbmNlL3JlcG9ydC5qc29uIiwic3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2UvZXZpZGVuY2UvbWV0cmljcy5qc29uIiwic3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2UvZXZpZGVuY2Uvc3RhbXAuanNvbiIsImRvY3Mvc3RhbmRhcmRzL2RlYmV6aXVtLW9wZW5saW5lYWdlLm1kIiwiZXZpZGVuY2UvaW5kZXguanNvbiIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsInByb21wdHMvc3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2VAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvZGViZXppdW0tb3BlbmxpbmVhZ2UtdGFzay5qc29uIl19",
+    "inputHash": "eyJjaGFuZ2UiOiJkZWJleml1bS1vcGVubGluZWFnZSBzdWJzdW1wdGlvbiBzY2FmZm9sZCIsImZpbGVzIjpbInN1YnN1bXB0aW9uL2RlYmV6aXVtLW9wZW5saW5lYWdlL21hbmlmZXN0LnlhbWwiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9saWNlbnNlX2dhdGUubWQiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9maXh0dXJlcy9hbGxvdy9SRUFETUUubWQiLCJzdWJzdW1wdGlvbi9kZWJleml1bS1vcGVubGluZWFnZS9maXh0dXJlcy9kZW55L1JFQURNRS5tZCIsInN1YnN1bXB0aW9uL2RlYmV6aXVtLW9wZW5saW5lYWdlL2V2aWRlbmNlL3JlcG9ydC5qc29uIiwic3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2UvbWV0cmljcy5qc29uIiwic3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2UvZXZpZGVuY2Uvc3RhbXAuanNvbiIsImRvY3Mvc3RhbmRhcmRzL2RlYmV6aXVtLW9wZW5saW5lYWdlLm1kIiwiZXZpZGVuY2UvaW5kZXguanNvbiIsImRvY3Ivcm9hZG1hcC9TVEFUVVMuanNvbiIsInByb21wdHMvc3Vic3VtcHRpb24vZGViZXppdW0tb3BlbmxpbmVhZ2VAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvZGViZXppdW0tb3BlbmxpbmVhZ2UtdGFzay5qc29uIl19",
     "decision": {
       "action": "scaffold_debezium_openlineage_bundle",
       "rule": {
@@ -170,6 +170,23 @@
     "reverted": false
   },
   {
+    "id": "nardom-evidence-20260202",
+    "timestamp": "2026-02-02T12:10:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJuYXJyYXRpdmUgaW50ZWwgZXZpZGVuY2Ugc2NhZmZvbGRpbmcgKG5hcmRvbSkiLCJmaWxlcyI6WyJkb2NzL25hcnJhdGl2ZV9pbnRlbC9SRUFETUUubWQiLCJldmlkZW5jZS9uYXJyYXRpdmVfaW50ZWwvaW5kZXguanNvbiIsImV2aWRlbmNlL25hcnJhdGl2ZV9pbnRlbC9tZXRyaWNzLmpzb24iLCJldmlkZW5jZS9uYXJyYXRpdmVfaW50ZWwvcmVwb3J0Lmpzb24iLCJldmlkZW5jZS9uYXJyYXRpdmVfaW50ZWwvc3RhbXAuanNvbiIsImV2aWRlbmNlL2luZGV4Lmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL25hcmRvbV9pbmRleC5zY2hlbWEuanNvbiIsImV2aWRlbmNlL3NjaGVtYXMvbmFyZG9tX21ldHJpY3Muc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL25hcmRvbV9yZXBvcnQuc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL25hcmRvbV9zdGFtcC5zY2hlbWEuanNvbiIsInJlcXVpcmVkX2NoZWNrcy50b2RvLm1kIiwidG9vbHMvY2kvdmVyaWZ5X2V2aWRlbmNlLnB5IiwiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIiwicGFja2FnZXMvZGVjaXNpb24tbGVkZ2VyL2RlY2lzaW9uX2xlZGdlci5qc29uIl19",
+    "decision": {
+      "action": "scaffold_nardom_evidence_bundle",
+      "rule": {
+        "condition": "narrative intel evidence scaffolding required",
+        "action": "scaffold_nardom_evidence_bundle",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added NARDOM evidence templates, schemas, verifier updates, and roadmap status update. Rollback: revert commit that adds narrative intel evidence scaffolding.",
+    "reverted": false
+  },
+  {
     "id": "io-cogwar-radar-brief-20260202",
     "timestamp": "2026-02-02T09:29:45Z",
     "agentId": "codex-agent",
@@ -201,6 +218,23 @@
       }
     },
     "reasoning": "Added PromptSpec schema, clean-room pack, eval rubric, policy gate, and evidence scaffolding with deterministic tests. Rollback: revert the commit adding promptspec/evidence/eval/policy scaffolds and registry/task spec updates.",
+    "reverted": false
+  },
+  {
+    "id": "adenhq-hive-subsumption-001",
+    "timestamp": "2026-02-08T00:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJzY2FmZm9sZCBhZGVuaHEvaGl2ZSBzdWJzdW1wdGlvbiBtYW5pZmVzdCBhbmQgcmVxdWlyZWQgY2hlY2tzIG1hcHBpbmciLCJmaWxlcyI6WyJzdWJzdW1wdGlvbi9hZGVuaHEtaGl2ZS9tYW5pZmVzdC55YW1sIiwic3Vic3VtcHRpb24vYWRlbmhxLWhpdmUvY2xhaW1zLm1kIiwiZG9jcy9yZXF1aXJlZF9jaGVja3MudG9kby5tZCIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiJdfQ==",
+    "decision": {
+      "action": "scaffold_hive_subsumption_bundle",
+      "rule": {
+        "condition": "hive subsumption intake requires manifest and required-check mapping",
+        "action": "scaffold_hive_subsumption_bundle",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Captured adenhq/hive subsumption scope, lane-1 gates, and required-check discovery steps with rollback via revert.",
     "reverted": false
   }
 ]

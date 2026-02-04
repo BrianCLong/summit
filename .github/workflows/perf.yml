@@ -30,7 +30,7 @@ jobs:
         continue-on-error: true
 
       - name: Archive k6 results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           retention-days: 14
           name: k6-results

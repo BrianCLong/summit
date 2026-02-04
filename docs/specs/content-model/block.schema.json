@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/content-model/block.schema.json",
+  "title": "Block",
+  "description": "Reusable content block with semantic type and policy tags.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "kind", "body", "language", "audience", "related_entities", "policy_tags"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable block identifier."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["narrative", "procedure", "context", "risk", "metric"],
+      "description": "Semantic block classification."
+    },
+    "body": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Block content, typically Markdown."
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Content language tag (e.g., en)."
+    },
+    "audience": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "description": "Intended audiences for this block."
+    },
+    "related_entities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Linked entities or systems referenced in the block."
+    },
+    "work_items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/WorkItemRef"
+      },
+      "description": "Work items that keep block content current."
+    },
+    "policy_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "description": "Policy labels for handling and release control."
+    }
+  },
+  "$defs": {
+    "WorkItemRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "repo", "number", "state"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["issue", "pr", "workflow"],
+          "description": "Work item class."
+        },
+        "repo": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository slug for the work item."
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Issue, PR, or workflow run number."
+        },
+        "state": {
+          "type": "string",
+          "enum": ["open", "closed", "merged", "blocked", "stale"],
+          "description": "Lifecycle state used in drift checks."
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Direct link for review."
+        }
+      }
+    }
+  }
+}

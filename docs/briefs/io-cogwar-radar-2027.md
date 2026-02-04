@@ -1,54 +1,55 @@
-# IO/CogWar Radar 2027 — Summit/IntelGraph One‑Pager
+# IO/CogWar Radar 2027 (Summit/IntelGraph Brief)
 
 **Status:** Draft for controlled review
 **Scope:** Defensive early‑warning and integrity analytics only (no influence automation).
 **Authority Anchors:** Summit Readiness Assertion and governance invariants remain binding.
 
-## Evidence Bundle (UEF)
+## Readiness Escalation (Summit Assertion)
 
-**ITEM:CLAIM-01 (CogWar is behavior‑centric / cognitive terrain).** “Contemporary conflict is increasingly behavior‑centric… decisive terrain… how individuals and groups perceive, interpret, decide, and act.” (Institute for National Strategic Studies)
+This brief is aligned with the Summit Readiness Assertion and the governance expectations codified in `docs/SUMMIT_READINESS_ASSERTION.md`. The intent is to keep the golden path green while introducing a defensive-only cognitive security layer. The work is intentionally constrained to documentation until code-level gates, policy wiring, and evidence bundles are in place.
 
-**ITEM:CLAIM-02 (Move to measurement: cognitive instability indicators).** Cognitive entropy index + superposition tension index; identify areas of cognitive instability before breakdown. (Polytechnique Insights)
+## Purpose (Why Now)
 
-**ITEM:CLAIM-03 (AI is double‑edged: offense + defense, online harms).** AI can aid detection/defense/response, but risks “data leaks, cyberattacks and online harms… if… misused.” (World Economic Forum)
+Summit already supports investigation workflows, analytics, provenance, and connectors. The IO/CogWar radar expands the defensive posture with early-warning indicators for narrative flows, synthetic credibility signals, and cross-domain correlation (cyber + information + space/C2 disruptions). This creates a forward radar for cognitive stability without enabling offensive influence automation.
 
-**ITEM:CLAIM-04 (AI accelerates micro‑targeting + cognitive isolation; also enables modeling).** “Accelerates… micro‑targeting and cognitive isolation… [and] model… detection of artificial flows, simulation of information propagation…” (Polytechnique Insights)
+## Scope (Defensive-Only)
 
-**ITEM:CLAIM-05 (Space backbone as contested “hack‑proof” info infra).** HSA aims at a “hack‑proof internet in space… to underpin… CJADC2.” (Breaking Defense)
+**In-scope:**
+- Narrative integrity indicators (entropy, tension, artificial flow score).
+- Defensive governance defaults (deny-by-default, feature-flagged).
+- Deterministic, reproducible evidence artifacts.
+- Correlation views across narrative + cyber + space/C2 incidents.
 
-**ITEM:CLAIM-06 (HSA pilot by 2026).** “Create an operational pilot communications architecture by 2026.” (DefenseScoop)
+**Out-of-scope:**
+- Audience segmentation export.
+- Counter-messaging or persuasion tooling.
+- Any offensive targeting automation.
 
-**ITEM:CLAIM-07 (Cognitive warfare targets perception/decision‑making, below armed violence threshold).** Adversaries target “perception, behaviour, and decision‑making… rather than territory alone… below the threshold of armed violence.” (sararussoresearch.substack.com)
+## Evidence Bundle (UEF / ITEM Ground Truth)
 
-**ITEM:CLAIM-08 (NATO STO framing: emerging tech + info ops + psych influence; S&T countermeasures).** Report examines how emerging tech/info ops/psych influence reshape warfare and how S&T can counter it. (LinkedIn)
-
-## Summit Fit: Present Capability Signals → Required Additions
-
-**Present capability signals (asserted):** Summit is certified for controlled deployments with governed ingestion, provenance, orchestration, and policy enforcement under the Readiness Assertion.
-
-**Required additions for CogWar Radar (defensive only):**
-- Narrative/claim/evidence ontology and deterministic evidence IDs.
-- Reproducible cognitive‑instability metrics (entropy + tension) and “artificial flow” detectors.
-- Governance guardrails: deny‑by‑default, defense‑only exports, rights‑preserving defaults.
-- Hybrid‑campaign correlation: narratives ↔ cyber incidents ↔ space/C2 disruptions.
+* **ITEM:CLAIM-01 (CogWar is behavior‑centric / cognitive terrain).** “Contemporary conflict is increasingly behavior‑centric… decisive terrain… how individuals and groups perceive, interpret, decide, and act.” (Institute for National Strategic Studies)
+* **ITEM:CLAIM-02 (Move to measurement: cognitive instability indicators).** Cognitive entropy index + superposition tension index; identify areas of cognitive instability before breakdown. (Polytechnique Insights)
+* **ITEM:CLAIM-03 (AI is double‑edged: offense + defense, online harms).** AI can aid detection/defense/response, but risks “data leaks, cyberattacks and online harms… if… misused.” (World Economic Forum)
+* **ITEM:CLAIM-04 (AI accelerates micro‑targeting + cognitive isolation; also enables modeling).** “Accelerates… micro‑targeting and cognitive isolation… [and] model… detection of artificial flows, simulation of information propagation…” (Polytechnique Insights)
+* **ITEM:CLAIM-05 (Space backbone as contested “hack‑proof” info infra).** HSA aims at a “hack‑proof internet in space… to underpin… CJADC2.” (Breaking Defense)
+* **ITEM:CLAIM-06 (HSA pilot by 2026).** “Create an operational pilot communications architecture by 2026.” (DefenseScoop)
+* **ITEM:CLAIM-07 (Cognitive warfare targets perception/decision‑making, below armed violence threshold).** Adversaries target “perception, behaviour, and decision‑making… rather than territory alone… below the threshold of armed violence.” (sararussoresearch.substack.com)
+* **ITEM:CLAIM-08 (NATO STO framing: emerging tech + info ops + psych influence; S&T countermeasures).** Report examines how emerging tech/info ops/psych influence reshape warfare and how S&T can counter it. (LinkedIn)
 
 ## Minimal Winning Slice (MWS)
 
-**MWS:** Add a defensive CogWar Radar module that ingests narrative signals + incidents, computes reproducible cognitive‑instability metrics, and renders a “trust / narrative integrity” panel—feature‑flagged OFF by default.
+**MWS statement:** Add a defensive CogWar Radar module that ingests narrative signals and incident data, computes reproducible cognitive-instability metrics, and renders a trust/narrative-integrity panel—feature-flagged OFF by default.
 
-**Acceptance Tests (deterministic):**
-1. `summit cogwar ingest --input fixtures/cogwar/sample_bundle.jsonl --out out/ingest_report.json` produces deterministic IDs + normalized entities.
-2. `summit cogwar metrics --in out/graph.json --out out/metrics.json` includes:
-   - `narrative_entropy_index`
-   - `superposition_tension_index`
-   - `artificial_flow_score`
-3. `summit cogwar report --in out/metrics.json --out out/report.json` is deterministic (no unstable timestamps).
-4. Policy tests prove **deny‑by‑default** for any “targeting segmentation export,” requiring `COGWAR_DEFENSE_MODE=on` and an allowlisted role.
+**Acceptance tests (deterministic):**
+1. `summit cogwar ingest --input fixtures/cogwar/sample_bundle.jsonl --out out/ingest_report.json` produces deterministic IDs and normalized entities.
+2. `summit cogwar metrics --in out/graph.json --out out/metrics.json` includes `narrative_entropy_index`, `superposition_tension_index`, and `artificial_flow_score`.
+3. `summit cogwar report --in out/metrics.json --out out/report.json` is byte-identical on repeat (no unstable timestamps).
+4. **Deny-by-default policy**: any “targeting segmentation export” route returns `403` unless `COGWAR_DEFENSE_MODE=on` and caller is in an allowlisted role.
 
 ## Standards & Determinism
 
-- **Evidence ID pattern:** `EVID:COGWAR:<kind>:<stable_hash>` (stable hash over canonical JSON).
-- **Deterministic artifacts:** `out/report.json`, `out/metrics.json`, `out/stamp.json` (git SHA + config hash; no wall‑clock time).
+- **Evidence ID pattern:** `EVID:COGWAR:<kind>:<stable_hash>` (hash over canonical JSON).
+- **Deterministic artifacts:** `out/report.json`, `out/metrics.json`, `out/stamp.json` (git SHA + config hash only; no wall-clock time).
 - **Governed Exception posture:** Legacy gaps are tracked as governed exceptions, not defects.
 
 ## Governance & Security Posture (Defensive‑Only)
@@ -61,7 +62,7 @@
 ## MAESTRO Threat Modeling (Required)
 
 - **MAESTRO Layers:** Foundation, Data, Agents, Tools, Observability, Security.
-- **Threats Considered:** prompt injection, poisoned narratives, PII leakage, misuse of analytics for offensive targeting.
+- **Threats Considered:** prompt injection, poisoned narratives, PII leakage, misuse of analytics for offensive targeting, metric gaming.
 - **Mitigations:** strict parsers; no tool execution on text; redaction; audit‑only exports; deny‑by‑default gating; deterministic outputs with reproducible fixtures.
 
 ## Rollout & Monitoring
@@ -70,10 +71,10 @@
 - **Monitoring:** alert on metric spikes, source outages, and determinism drift (fixture re‑runs against golden outputs).
 - **Accountability:** evidence artifacts and audit logs remain mandatory for any enablement.
 
-## Positioning Constraints
+## Positioning (Defensive)
 
-- **Allowed claims:** “Reproducible narrative‑integrity indicators and correlation views for investigations,” “defensive governance and auditability.”
-- **Deferred claims:** automated persuasion, counter‑messaging, or neuro‑modulation capabilities (intentionally constrained).
+- “We compute reproducible narrative integrity indicators (entropy/tension) and correlation views for investigations.”
+- “We ship defensive governance: deny-by-default exports + auditability.”
 
 ## Decisions & Next Actions
 
