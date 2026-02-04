@@ -1,0 +1,58 @@
+{
+  "task_id": "SIGSTORE_VERSION_GUARD_20260204",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sigstore-version-guard",
+    "version": "v1",
+    "sha256": "6d9eb25eb4cfd292b6f14341b2198529130e37a9cc3c24de829a0cb9adce77a4",
+    "path": "prompts/security/sigstore-version-guard@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/security/check_sigstore_versions.ts",
+      "scripts/security/__tests__/check_sigstore_versions.test.ts",
+      "package.json",
+      "docs/roadmap/STATUS.json",
+      "repo_assumptions.md",
+      "prompts/security/sigstore-version-guard@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SIGSTORE_VERSION_GUARD_20260204.json"
+    ],
+    "domains": [
+      "security",
+      "supply-chain",
+      "governance"
+    ],
+    "exclusions": [
+      ".github/workflows/**",
+      "deploy/**",
+      "k8s/**"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/supply-chain/sigstore/version_report.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Sigstore version guard fails on vulnerable versions and emits deterministic report output.",
+    "Unit tests cover pass and fail scenarios for the guard.",
+    "Roadmap status updated for sigstore hardening work."
+  ],
+  "stop_conditions": [
+    "Any change requires production workflow edits or secret handling."
+  ],
+  "dependencies": [
+    "prompts/security/sigstore-version-guard@v1.md"
+  ],
+  "approvals": []
+}

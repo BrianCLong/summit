@@ -1,8 +1,14 @@
 {
   "revision_note": "Added LongHorizon orchestration MVP scope and evidence references",
-  "last_updated": "2026-02-08T00:00:00Z",
+  "last_updated": "2026-02-04T05:27:50Z",
   "revision_note": "Added Maestro Long-Run Job Engine governance scaffolding and CI gates",
   "initiatives": [
+    {
+      "id": "sigstore-hardening-2026",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Add sigstore version guard and deterministic report for CVE-2026-24137/CVE-2026-24408 mitigation gates."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",

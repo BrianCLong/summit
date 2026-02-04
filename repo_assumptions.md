@@ -1,27 +1,18 @@
 # Repo Assumptions & Reality Check
 
-## Verified
-- **Repo exists**: `BrianCLong/summit` (MIT licensed).
-- **Target Package**: `agents/orchestrator` (`@intelgraph/multi-llm-orchestrator`) is the real orchestrator.
-  - Confirmed via `grep` for "OpenAI" and "Anthropic" providers.
-  - Contains `src/providers/` with `OpenAIProvider.ts` and `ClaudeProvider.ts`.
-- **Test Runner**: `vitest` (v1.6.1).
-  - Configured in `agents/orchestrator/package.json`.
-  - Tests located in `agents/orchestrator/__tests__/`.
-- **Module System**: ESM (`type: "module"` in `package.json`).
+## Verified (2026-02-04)
+- **Sigstore/Cosign usage**: GitHub Actions workflows and internal scripts install and use cosign.
+  - Workflows reference `sigstore/cosign-installer` in `.github/workflows/supply-chain-integrity.yml`, `.github/workflows/supply-chain-attest.yml`, `.github/workflows/supplychain-verify.yml`, `.github/workflows/release-ga.yml`, and others.
+  - Scripts include `scripts/supply-chain/sign-and-attest.sh`, `scripts/release/attest_ga_evidence.sh`, `scripts/release/sign_governance_lockfile.sh`, and `scripts/security/verify-slsa-l3.sh`.
+- **Go tooling presence**: `go.mod`/`go.sum` files exist in the repo (multiple Go utilities), indicating potential sigstore Go dependencies in Go modules.
+- **Python tooling presence**: Python lockfiles and requirements files exist (`requirements.in`, assorted `requirements*.txt`, `pyproject.toml`), indicating potential sigstore-python dependencies.
+- **CI gate candidates**: Supply chain verification workflows exist under `.github/workflows/` including `supply-chain-integrity.yml` and `supplychain-verify.yml`.
 
-## Assumed
-- **Feature Flags**: Likely environment variable based or a simple config object. No dedicated `launchdarkly` or similar service observed yet.
-- **Budget**: Enforced via caller-supplied `budget` parameter in the new DAAO router (as per plan).
-- **Telemetry**: Logging via `console` or custom logger (observed `Omniscience` logging in `agentic`, but `agents/orchestrator` uses standard logging or potentially `pino` based on dependencies). `agents/orchestrator` has no explicit logger import in the snippets seen, but likely uses `console` or injected logger.
+## Assumed (pending deeper audit)
+- **Image build/push flow**: Container build/push is orchestrated in GitHub Actions plus scripts under `scripts/` (e.g., `scripts/build-push.sh`), but exact image names/digests used for verification need a focused audit per workflow.
+- **Legacy TUF client usage**: No direct usage confirmed yet; if sigstore Go libraries are used in Go utilities, guardrails must ensure `SIGSTORE_NO_CACHE=true` when legacy TUF paths are present.
 
-## Target Directory Structure for DAAO
-All DAAO components will be placed in `agents/orchestrator/src/daao/`:
-- `agents/orchestrator/src/daao/difficulty/`
-- `agents/orchestrator/src/daao/routing/`
-- `agents/orchestrator/src/daao/collaboration/`
-
-## Test Placement
-- `agents/orchestrator/__tests__/daao/difficulty/*.test.ts`
-- `agents/orchestrator/__tests__/daao/routing/*.test.ts`
-- `agents/orchestrator/__tests__/daao/collaboration/*.test.ts`
+## Must-Not-Touch (until verified)
+- Production deploy workflows
+- Secret injection patterns
+- Cluster manifests applied to production
