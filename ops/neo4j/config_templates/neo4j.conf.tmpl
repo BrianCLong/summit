@@ -1,0 +1,19 @@
+# neo4j.conf.tmpl
+# Optimized memory configuration for GraphPerf path workloads
+
+# Page cache sizing - Primary defense against disk I/O.
+# Should be sized to fit the store + indexes in RAM for optimal performance.
+# Neo4j 5.x uses the 'server.' prefix.
+server.memory.pagecache.size=${NEO4J_PAGE_CACHE_SIZE:-2G}
+
+# JVM Heap sizing.
+server.memory.heap.initial_size=${NEO4J_HEAP_SIZE:-2G}
+server.memory.heap.max_size=${NEO4J_HEAP_SIZE:-2G}
+
+# Direct memory (for off-heap buffers)
+# server.memory.off_heap.max_size=1G
+
+# Metrics configuration
+server.metrics.enabled=true
+server.metrics.prometheus.enabled=true
+server.metrics.prometheus.endpoint=0.0.0.0:2004
