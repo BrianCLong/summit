@@ -1,0 +1,32 @@
+name: prov-context-drift-nightly
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Nightly at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ci/requirements-prov.txt
+
+      - name: Run drift detector
+        run: python scripts/monitoring/otel-openlineage-prov-jsonld-drift.py
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prov-context-drift-report
+          path: artifacts/prov_context_check.json

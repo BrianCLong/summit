@@ -28,6 +28,16 @@
 * **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
 * **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
 * **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+* **Provenance Standards**: Mapping from OpenLineage + OTel attributes to W3C PROV is defined in `mappings/otel_to_prov.yml`. `spec/prov_context.jsonld` is the generated context. Stability is proven via URDNA2015 canonicalization in CI.
+
+## Component Mapping (Provenance)
+
+| Planned Component | Proposed Location | Actual Location / Action |
+|-------------------|-------------------|--------------------------|
+| Provenance Mapping| `mappings/otel_to_prov.yml` | Created. |
+| PROV Context      | `spec/prov_context.jsonld` | Created. |
+| PROV Schemas      | `schemas/prov-context.schema.json` | Created. |
+| PROV Validator    | `ci/validate_prov_context.py` | Created. |
 
 ## Next Steps
 
