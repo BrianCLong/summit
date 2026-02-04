@@ -20,18 +20,21 @@ jobs:
     name: Check Documentation Links
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
 
-      - name: Install tsx
-        run: npm install -g tsx
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run link checker
-        run: npx tsx scripts/check-doc-links.ts
+        run: pnpm exec tsx scripts/check-doc-links.ts

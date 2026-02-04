@@ -1,15 +1,14 @@
 # Dependency Delta Log
 
-This document tracks changes to dependency lockfiles and explains the reason for each change.
+This document tracks changes to project dependencies.
+If you add, remove, or update dependencies, please add an entry below.
 
-## Format
-For every PR that modifies a lockfile (e.g., `package-lock.json`, `pnpm-lock.yaml`, `Cargo.lock`, `go.sum`), you must add an entry here.
-
-### [YYYY-MM-DD] PR #<PR_NUMBER> - <DESCRIPTION>
-
-**Reason:** <Why are we adding/updating/removing dependencies?>
-**Risk Assessment:** <Low/Medium/High - and why?>
-**Verification:** <How was this verified?>
+## Template
+### [YYYY-MM-DD] - [Author/PR]
+- **Component**: [e.g., frontend, backend, analysis]
+- **Changes**:
+  - `package-name`: `old-version` -> `new-version` (Reason: Security fix / Feature requirement)
 
 ---
-(Add new entries at the top)
+
+## Log
