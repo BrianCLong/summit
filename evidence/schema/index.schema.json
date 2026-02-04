@@ -1,22 +1,35 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Index Schema",
   "type": "object",
-  "required": ["version", "items"],
   "properties": {
-    "version": {"type": "string"},
+    "version": {
+      "type": "string"
+    },
     "items": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["files"],
         "properties": {
           "files": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": { "type": "string" }
+          },
+          "artifacts": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
           }
-        }
+        },
+        "additionalProperties": false
       }
     }
   },
+  "required": ["version", "items"],
   "additionalProperties": false
 }

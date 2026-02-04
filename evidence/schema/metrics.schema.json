@@ -1,13 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Metrics Schema",
   "type": "object",
-  "required": ["evidence_id", "metrics"],
   "properties": {
-    "evidence_id": {"type": "string"},
+    "evidence_id": {
+      "type": "string"
+    },
     "metrics": {
       "type": "object",
-      "additionalProperties": {"type": "number"}
+      "additionalProperties": {
+        "type": "number"
+      }
     }
   },
+  "required": ["metrics"],
   "additionalProperties": false
 }
