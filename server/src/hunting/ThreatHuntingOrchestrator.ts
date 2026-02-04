@@ -69,34 +69,35 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
   private llmExecutor: LLMChainExecutor;
   private remediationHooks: AutoRemediationHooks;
   private isInitialized: boolean = false;
+  private llmHandlers: {
+    hypothesesGenerated: (data: Record<string, unknown>) => void;
+    queriesGenerated: (data: Record<string, unknown>) => void;
+    resultsAnalyzed: (data: Record<string, unknown>) => void;
+  };
+  private remediationHandlers: {
+    findingsEnriched: (data: Record<string, unknown>) => void;
+    remediationCompleted: (data: Record<string, unknown>) => void;
+    iocConfirmed: (data: Record<string, unknown>) => void;
+  };
 
   constructor() {
     super();
     this.templateEngine = cypherTemplateEngine;
     this.llmExecutor = llmChainExecutor;
     this.remediationHooks = autoRemediationHooks;
+    this.llmHandlers = {
+      hypothesesGenerated: (data) => this.emit('hypotheses_generated', data),
+      queriesGenerated: (data) => this.emit('queries_generated', data),
+      resultsAnalyzed: (data) => this.emit('results_analyzed', data),
+    };
+    this.remediationHandlers = {
+      findingsEnriched: (data) => this.emit('findings_enriched', data),
+      remediationCompleted: (data) => this.emit('remediation_completed', data),
+      iocConfirmed: (data) => this.emit('ioc_confirmed', data),
+    };
 
     // Forward events from sub-components
     this.setupEventForwarding();
-  }
-
-  /**
-   * Dispose the orchestrator and cleanup listeners
-   */
-  dispose(): void {
-    if (this.llmExecutor) {
-      this.llmExecutor.off('hypotheses_generated', this.forwardHypothesesGenerated);
-      this.llmExecutor.off('queries_generated', this.forwardQueriesGenerated);
-      this.llmExecutor.off('results_analyzed', this.forwardResultsAnalyzed);
-    }
-
-    if (this.remediationHooks) {
-      this.remediationHooks.off('findings_enriched', this.forwardFindingsEnriched);
-      this.remediationHooks.off('remediation_completed', this.forwardRemediationCompleted);
-      this.remediationHooks.off('ioc_confirmed', this.forwardIocConfirmed);
-    }
-
-    this.removeAllListeners();
   }
 
   /**
@@ -930,26 +931,29 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
   }
 
   /**
-   * Event handlers for forwarding
-   */
-  private forwardHypothesesGenerated = (data: any) => this.emit('hypotheses_generated', data);
-  private forwardQueriesGenerated = (data: any) => this.emit('queries_generated', data);
-  private forwardResultsAnalyzed = (data: any) => this.emit('results_analyzed', data);
-  private forwardFindingsEnriched = (data: any) => this.emit('findings_enriched', data);
-  private forwardRemediationCompleted = (data: any) => this.emit('remediation_completed', data);
-  private forwardIocConfirmed = (data: any) => this.emit('ioc_confirmed', data);
-
-  /**
    * Setup event forwarding from sub-components
    */
   private setupEventForwarding(): void {
-    this.llmExecutor.on('hypotheses_generated', this.forwardHypothesesGenerated);
-    this.llmExecutor.on('queries_generated', this.forwardQueriesGenerated);
-    this.llmExecutor.on('results_analyzed', this.forwardResultsAnalyzed);
+    this.llmExecutor.on('hypotheses_generated', this.llmHandlers.hypothesesGenerated);
+    this.llmExecutor.on('queries_generated', this.llmHandlers.queriesGenerated);
+    this.llmExecutor.on('results_analyzed', this.llmHandlers.resultsAnalyzed);
 
-    this.remediationHooks.on('findings_enriched', this.forwardFindingsEnriched);
-    this.remediationHooks.on('remediation_completed', this.forwardRemediationCompleted);
-    this.remediationHooks.on('ioc_confirmed', this.forwardIocConfirmed);
+    this.remediationHooks.on('findings_enriched', this.remediationHandlers.findingsEnriched);
+    this.remediationHooks.on('remediation_completed', this.remediationHandlers.remediationCompleted);
+    this.remediationHooks.on('ioc_confirmed', this.remediationHandlers.iocConfirmed);
+  }
+
+  /**
+   * Dispose and detach forwarded listeners from shared singletons.
+   */
+  dispose(): void {
+    this.llmExecutor.off('hypotheses_generated', this.llmHandlers.hypothesesGenerated);
+    this.llmExecutor.off('queries_generated', this.llmHandlers.queriesGenerated);
+    this.llmExecutor.off('results_analyzed', this.llmHandlers.resultsAnalyzed);
+    this.remediationHooks.off('findings_enriched', this.remediationHandlers.findingsEnriched);
+    this.remediationHooks.off('remediation_completed', this.remediationHandlers.remediationCompleted);
+    this.remediationHooks.off('ioc_confirmed', this.remediationHandlers.iocConfirmed);
+    this.removeAllListeners();
   }
 
   /**

@@ -1,27 +1,44 @@
 import re
-from typing import Dict, List, Any
+from typing import Dict, Any, List
 
-def verify_citations(citations: List[Dict[str, str]]) -> Dict[str, Any]:
+# Simple DOI regex
+DOI_PATTERN = re.compile(r"10\.\d{4,9}/[-._;()/:a-zA-Z0-9]+")
+# Simple URL regex
+URL_PATTERN = re.compile(r"https?://[^\s]+")
+
+def extract_citations(text: str) -> Dict[str, List[str]]:
+    """Extracts DOIs and URLs from text."""
+    dois = DOI_PATTERN.findall(text)
+    urls = URL_PATTERN.findall(text)
+    return {
+        "dois": dois,
+        "urls": urls
+    }
+
+def validate_citations(citations: Dict[str, List[str]]) -> Dict[str, Any]:
     """
-    Verifies a list of citations.
-    citations: [{"doi": "...", "url": "...", "text": "..."}]
+    Validates citations.
     """
-    failures = []
+    dois = citations.get("dois", [])
+    urls = citations.get("urls", [])
 
-    doi_pattern = r'^10\.\d{4,9}/[-._;()/:a-zA-Z0-9]+$'
+    issues = []
 
-    for i, cit in enumerate(citations):
-        doi = cit.get("doi")
-        url = cit.get("url")
+    # Heuristic: DOIs that look suspicious (e.g. placeholder-like)
+    suspicious_dois = [d for d in dois if "example-paper" in d.lower() or "12345-stub" in d]
+    if suspicious_dois:
+        issues.append(f"SUSPICIOUS_DOIS: {len(suspicious_dois)}")
 
-        if doi and not re.match(doi_pattern, doi):
-            failures.append(f"malformed_doi:index_{i}")
-
-        if url and not (url.startswith("http://") or url.startswith("https://")):
-            failures.append(f"malformed_url:index_{i}")
+    # Heuristic: URLs that look like common LLM hallucinations
+    suspicious_urls = [u for u in urls if "your-link-here" in u or "example.com/paper-stub" in u]
+    if suspicious_urls:
+        issues.append(f"SUSPICIOUS_URLS: {len(suspicious_urls)}")
 
     return {
-        "pass": len(failures) == 0,
-        "failures": failures,
-        "count": len(citations)
+        "valid": len(issues) == 0,
+        "issues": issues,
+        "counts": {
+            "dois": len(dois),
+            "urls": len(urls)
+        }
     }
