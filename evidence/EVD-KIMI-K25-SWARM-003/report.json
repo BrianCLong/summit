@@ -1,0 +1,10 @@
+{
+  "adapter": "none",
+  "config": {
+    "note": "initial placeholder"
+  },
+  "run_id": "run-init",
+  "status": "pass",
+  "summary": "Placeholder report",
+  "verdict": "pass"
+}
