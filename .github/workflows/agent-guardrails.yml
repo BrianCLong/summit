@@ -13,38 +13,24 @@ permissions:
   contents: read
 
 jobs:
-  guardrails:
-    name: Agent Guardrails Enforcement
+  restricted-path-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
-
-      - name: Get PR details and changed files
-        id: pr_details
+      - name: Evaluate restricted path changes
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr.number,
-            });
-
-            // Output filenames for other steps
-            core.setOutput('files', JSON.stringify(files.map(f => f.filename)));
-
-            // Check for restricted path violations
             const fs = require('fs');
+            const path = require('path');
+
+            // Load contract
             let contract;
             try {
-              contract = JSON.parse(fs.readFileSync('agent-contract.json', 'utf8'));
+              const contractContent = fs.readFileSync('agent-contract.json', 'utf8');
+              contract = JSON.parse(contractContent);
             } catch (error) {
               core.setFailed('Failed to parse agent-contract.json: ' + error.message);
               return;
@@ -52,39 +38,103 @@ jobs:
 
             const restrictedAreas = contract.restrictedAreas || [];
             const restrictedPrefixes = restrictedAreas.flatMap(area => area.paths);
+
+            // Check for specific override labels from contract
             const overrideLabels = restrictedAreas.map(area => area.overrideLabel).filter(Boolean);
             const overrideToken = '"restricted_override": true';
+
+            const pr = context.payload.pull_request;
             const labels = (pr.labels || []).map(label => label.name);
             const hasOverride = labels.some(l => overrideLabels.includes(l)) || (pr.body || '').includes(overrideToken);
 
-            if (!hasOverride) {
-              const violations = files
-                .map(file => file.filename)
-                .filter(name => restrictedPrefixes.some(prefix => name.startsWith(prefix)));
-
-              if (violations.length > 0) {
-                core.error(`Restricted paths modified without override: ${violations.join(', ')}. ` +
-                  `Add a relevant override label or include ${overrideToken} in the AGENT-METADATA block with justification.`);
-                process.exitCode = 1;
-              }
-            } else {
-              core.info('Restricted path override detected.');
+            if (hasOverride) {
+              core.info('Override detected via label or metadata token; restricted path check skipped.');
+              return;
             }
 
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+
+            const violations = files
+              .map(file => file.filename)
+              .filter(name => restrictedPrefixes.some(prefix => name.startsWith(prefix)));
+
+            if (violations.length > 0) {
+              const message = `Restricted paths modified without override: ${violations.join(', ')}. ` +
+                `Add a relevant override label or include ${overrideToken} in the AGENT-METADATA block with justification.`;
+              core.setFailed(message);
+            } else {
+              core.info('No restricted path changes detected.');
+            }
+
+  pr-metadata-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "18"
+
       - name: Check PR Metadata
-        if: always()
         run: node scripts/ga/check-pr-metadata.mjs
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
 
+  saos-enforcement:
+    name: S-AOS Enforcement
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+
       - name: Verify S-AOS Compliance
-        if: always()
         run: node scripts/ga/verify-saos.mjs
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
 
+  pii-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # v6
+
+      - name: Get changed files
+        id: files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            // Return JSON string of filenames to handle spaces safely
+            return JSON.stringify(files.map(f => f.filename));
+          result-encoding: string
+
       - name: Scan for PII
-        if: always()
         run: |
-          files='${{ steps.pr_details.outputs.files }}'
+          # Parse the JSON array of files and pass each as an argument to the script
+          files='${{ steps.files.outputs.result }}'
           echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
