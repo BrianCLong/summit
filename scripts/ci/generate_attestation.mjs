@@ -66,11 +66,13 @@ try {
     // Improved relevance matching:
     // 1. Matches exact directory or subpath if positionals provided
     // 2. Always matches package.json and pnpm-lock.yaml anywhere
+    // 3. Narrowed lockfile matching to avoid false positives
     const isRelevant = normalizedPositionals.length === 0 ||
                        normalizedPositionals.some(dir => file === dir || file.startsWith(dir + '/')) ||
                        file.endsWith('pnpm-lock.yaml') ||
-                       file.endsWith('package.json') ||
-                       file.includes('lock');
+                       file.endsWith('package-lock.json') ||
+                       file.endsWith('yarn.lock') ||
+                       file.endsWith('package.json');
 
     if (isRelevant) {
       const digest = await hashFile(file);

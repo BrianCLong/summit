@@ -1,7 +1,0 @@
-{
-  "artifacts": [
-    "context_bundle.json"
-  ],
-  "evidence_id": "EVD-ARCHROT-CTX-001",
-  "summary": "Context bundle generated with 21 ADR references."
-}

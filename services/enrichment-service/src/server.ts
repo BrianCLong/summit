@@ -4,7 +4,6 @@
 
 import express from 'express';
 import { SentimentAnalyzer, ProfileAnalyzer } from '@intelgraph/social-media-intel';
-import { listTransforms } from './api/listTransforms.js';
 
 const app = express();
 const PORT = process.env.ENRICHMENT_SERVICE_PORT || 3011;
@@ -17,8 +16,6 @@ const profileAnalyzer = new ProfileAnalyzer();
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', service: 'enrichment-service' });
 });
-
-app.get('/api/transforms', listTransforms);
 
 app.post('/api/enrich/sentiment', (req, res) => {
   const { text } = req.body;
