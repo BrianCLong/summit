@@ -1,37 +1,22 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Check if lockfiles changed
-LOCKFILES=("package-lock.json" "yarn.lock" "pnpm-lock.yaml" "poetry.lock" "Gemfile.lock" "go.sum")
-CHANGED_LOCKFILES=()
+# Deny-by-default: if lockfiles changed, require docs/supply-chain/dependency-delta.md update.
 
-# Determine base commit
-if [ -n "$BASE_SHA" ]; then
-    BASE_REF="$BASE_SHA"
-elif git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-    BASE_REF="HEAD^"
-else
-    # Initial commit or shallow clone might fail, warn and skip
-    echo "Warning: Cannot determine base commit. Skipping dependency delta check."
-    exit 0
+LOCKFILES_REGEX='(package-lock\.json|pnpm-lock\.yaml|yarn\.lock|poetry\.lock|Pipfile\.lock|requirements\.txt|go\.sum|Cargo\.lock)'
+
+# Use origin/main as base if available, else HEAD^
+BASE_REF="origin/main"
+if ! git rev-parse "$BASE_REF" >/dev/null 2>&1; then
+  BASE_REF="HEAD^"
 fi
 
-echo "Using base commit: $BASE_REF"
-
-for lockfile in "${LOCKFILES[@]}"; do
-  if git diff --name-only "$BASE_REF" HEAD | grep -q "$lockfile"; then
-    CHANGED_LOCKFILES+=("$lockfile")
-  fi
-done
-
-if [ ${#CHANGED_LOCKFILES[@]} -gt 0 ]; then
-  echo "Dependency lockfiles changed: ${CHANGED_LOCKFILES[*]}"
-
-  if ! git diff --name-only "$BASE_REF" HEAD | grep -q "docs/supply-chain/dependency-delta.md"; then
-    echo "Error: Dependency changes detected but docs/supply-chain/dependency-delta.md was not updated."
-    echo "Please update docs/supply-chain/dependency-delta.md with details of the dependency changes."
+CHANGED="$(git diff --name-only "$BASE_REF"...HEAD || true)"
+if echo "$CHANGED" | grep -Eq "$LOCKFILES_REGEX"; then
+  if ! echo "$CHANGED" | grep -q '^docs/supply-chain/dependency-delta\.md$'; then
+    echo "Dependency lockfile changed but docs/supply-chain/dependency-delta.md not updated" >&2
     exit 1
   fi
 fi
 
-echo "Dependency delta check passed."
+echo "ok: deps delta gate"
