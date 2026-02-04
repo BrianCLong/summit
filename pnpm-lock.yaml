@@ -73,7 +73,7 @@ importers:
         specifier: ^9.5.1
         version: 9.5.1
       dotenv:
-        specifier: ^17.2.1
+        specifier: ^17.2.3
         version: 17.2.3
       ioredis:
         specifier: ^5.8.2
@@ -2303,8 +2303,8 @@ importers:
         specifier: ^5.0.0
         version: 5.66.1
       dotenv:
-        specifier: ^16.0.0
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       glob:
         specifier: '>=11.1.0'
         version: 13.0.0
@@ -2910,8 +2910,8 @@ importers:
         specifier: ^13.0.1
         version: 13.1.0
       dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       ink:
         specifier: ^5.0.1
         version: 5.2.1(@types/react@18.3.11)(react@18.3.1)
@@ -18866,8 +18866,8 @@ importers:
         specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -20738,8 +20738,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.6
       dotenv:
-        specifier: ^16.3.1
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       handlebars:
         specifier: ^4.7.8
         version: 4.7.8
@@ -23511,8 +23511,8 @@ importers:
         specifier: ^2.8.5
         version: 2.8.5
       dotenv:
-        specifier: ^16.4.7
-        version: 16.6.1
+        specifier: ^17.2.3
+        version: 17.2.3
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
