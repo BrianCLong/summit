@@ -1,9 +1,7 @@
 {
   "kind": "review",
-  "text": "The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good. The paper is good.",
+  "text": "As an AI language model, I find this paper very interesting. In conclusion, it is important to note that the findings are significant. Furthermore, the methodology is sound. Moreover, the results are promising. In conclusion, this highlights the importance of the study. This highlights the importance of the study. This highlights the importance of the study.",
   "meta": {
-    "llm_assisted": true,
-    "llm_tools": ["gpt-4"],
-    "human_verifier": "researcher"
+    "llm_assisted": true
   }
 }

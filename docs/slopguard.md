@@ -1,36 +1,66 @@
-# SlopGuard Governance
+# SlopGuard: AI Slop Governance
 
-SlopGuard is an anti-slop governance subsystem for the Summit platform. It detects, labels, and blocks low-quality AI-generated content ("slop") across multiple ingestion points.
+SlopGuard is a governance subsystem designed to detect and mitigate "AI slop" (low-quality AI-generated content) across Summit's pipelines.
+
+## Objectives
+- **Resist Slop Floods**: Prevent low-effort AI-generated content from overwhelming review processes.
+- **Maintain Credibility**: Ensure research artifacts and agent outputs meet quality standards.
+- **Dataset Hygiene**: Protect training data from pollution by low-quality AI outputs.
 
 ## Policy
+SlopGuard operates on a **deny-by-default** principle for high-risk artifacts.
 
-SlopGuard enforces a *deny-by-default* policy for high-risk artifacts.
+### Mandatory Disclosures
+Artifacts classified as "research-like" must include the following metadata:
+- `llm_assisted`: Boolean indicating if an LLM was used.
+- `llm_tools`: List of LLM tools used.
+- `human_verifier`: Role or identifier of the human who verified the content.
 
-### Deny Conditions
+### Scoring Heuristics
+- **Repetition**: Detects high frequency of repeated words or phrases.
+- **Boilerplate**: Identifies common "AI-isms" (e.g., "As an AI language model", "In conclusion").
+- **Citation Sanity**: Detects placeholder-like DOIs and URLs (e.g., `10.1234/example-paper`, `your-link-here`).
 
-An artifact is denied if:
-- It is missing required disclosure fields (`llm_assisted`, `llm_tools`, `human_verifier`).
-- Its risk score exceeds the configured `deny_threshold` (default: 0.70).
-- It contains hallucinated or unreachable citations (hard fail).
+## Usage
 
-## Overrides
+### CLI
+The SlopGuard CLI evaluates artifacts and generates evidence.
 
-Overrides are permitted only with:
-1. An explicit `override_reason`.
-2. A designated `approver`.
-3. An audit evidence artifact emitted to `EVD-AISLOPFT20260201-AUDIT-005`.
+```bash
+pnpm slopguard <path-to-artifact.json>
+```
 
-## Integration
+Alternatively, call the Python script directly:
+```bash
+python3 summit/slopguard/cli.py --artifact <path-to-artifact.json>
+```
 
-SlopGuard hooks into:
-- `summit/ingest/`: research artifacts (papers, reviews).
-- `summit/agents/`: agent outputs.
-- `summit/pipelines/datasets/`: training corpora.
+To apply a manual override:
+```bash
+python3 summit/slopguard/cli.py --artifact <path-to-artifact.json> --override-reason "Valid template" --approver "admin"
+```
 
-## Evidence IDs
+### CI Enforcement
+By default, the CLI exits with code 1 on a deny decision. This can be toggled via the `SLOPGUARD_ENFORCING` environment variable.
 
-- `EVD-AISLOPFT20260201-POLICY-001`: Policy evaluation output
-- `EVD-AISLOPFT20260201-DETECT-002`: Slop scoring metrics
-- `EVD-AISLOPFT20260201-CIT-003`: Citation verification report
-- `EVD-AISLOPFT20260201-DATA-004`: Dataset hygiene results
-- `EVD-AISLOPFT20260201-AUDIT-005`: Override/audit log snapshot
+## Configuration
+Policy thresholds and feature flags are managed in `config/slopguard.policy.json`.
+
+```json
+{
+  "deny_threshold": 0.70,
+  "require_disclosure_fields": ["llm_assisted", "llm_tools", "human_verifier"],
+  "feature_flags": {
+    "advanced_cluster_detection": false,
+    "dataset_pollution_firewall": false
+  }
+}
+```
+
+## Evidence
+SlopGuard produces deterministic evidence artifacts in `evidence/slopguard/`:
+- `policy/report.json`: Policy evaluation results.
+- `detect/metrics.json`: Detailed scoring metrics.
+- `citations/report.json`: Citation verification report.
+- `dataset/metrics.json`: Dataset hygiene results.
+- `audit/report.json`: Override audit logs.
