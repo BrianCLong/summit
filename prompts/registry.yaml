@@ -104,3 +104,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: things3-taskstore-connector
+    version: v1
+    path: prompts/integrations/things3-taskstore-connector.md
+    sha256: 91b7f0ed83df15eed85dcd801986c53aaf97f4b1ad41077ada8833b816d1fef2
+    description: Build a Summit MCP Things3 TaskStore connector with policy gating, evidence logging, and idempotent behavior.
+    scope:
+      paths:
+        - packages/mcp-connectors/things3/
+        - docs/integrations/things3-taskstore.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/integrations/things3-taskstore-connector.md
+        - artifacts/evidence/
+        - pnpm-workspace.yaml
+        - eslint.config.js
+        - .gitignore
+      domains:
+        - connectors
+        - mcp
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

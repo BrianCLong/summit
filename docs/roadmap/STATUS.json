@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-13T19:58:08Z",
-  "revision_note": "GA verify now uses governed test scope to keep server unit checks deterministic in CI",
+  "last_updated": "2026-01-14T04:36:35Z",
+  "revision_note": "Added MCP Things3 TaskStore connector with policy gating, evidence logging, and idempotent task creation.",
   "initiatives": [
     {
       "id": "A",
@@ -38,7 +38,7 @@
           "name": "Connector SDK & Registry",
           "status": "partial",
           "owner": "Jules",
-          "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
+          "evidence": "Connector SDK still partial; added MCP Things3 TaskStore connector in packages/mcp-connectors/things3 with policy gating and evidence logs.",
           "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
