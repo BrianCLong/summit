@@ -55,6 +55,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: summit-labs-scaffold
+    version: v1
+    path: prompts/labs/summit-labs-scaffold-v1.md
+    sha256: 4497084e918cf58c6e8e4394085706d5cf94484a7fcb53cc63853592839c952b
+    description: Scaffold Summit Labs documentation, preview spec, and promotion gates.
+    scope:
+      paths:
+        - labs/
+        - docs/roadmap/STATUS.json
+        - agents/examples/
+        - prompts/labs/
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - roadmap
+        - labs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-13T19:58:08Z",
-  "revision_note": "GA verify now uses governed test scope to keep server unit checks deterministic in CI",
+  "last_updated": "2026-01-31T00:06:52Z",
+  "revision_note": "Clarified Summit Labs governance note for imputed intention ordering",
   "initiatives": [
     {
       "id": "A",
@@ -136,6 +136,19 @@
           "target_completion": "Q4"
         }
       ]
+    },
+    {
+      "id": "F",
+      "name": "Summit Labs & Preview Conveyor",
+      "epics": [
+        {
+          "id": "F1",
+          "name": "Labs Track Scaffolding",
+          "status": "in-progress",
+          "owner": "Jules",
+          "evidence": "labs/README.md, labs/experiment-template.md, labs/research-preview-spec.md, labs/promotion-gates.md"
+        }
+      ]
     }
   ],
   "summary": {
@@ -143,7 +156,7 @@
     "partial": 1,
     "incomplete": 0,
     "not_started": 6,
-    "total": 12,
+    "total": 13,
     "ga_blockers": []
   }
 }
