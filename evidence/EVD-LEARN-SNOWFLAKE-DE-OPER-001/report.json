@@ -1,11 +1,5 @@
 {
   "evidence_id": "EVD-LEARN-SNOWFLAKE-DE-OPER-001",
-  "summary": "Evidence for Snowflake Operability Scaffolding",
-  "checks": [
-    {
-      "name": "scaffolding_check",
-      "ok": true,
-      "details": "Scaffolding initialized"
-    }
-  ]
+  "summary": "Snowflake Operability Evidence",
+  "checks": []
 }

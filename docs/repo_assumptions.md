@@ -12,6 +12,17 @@
 *   **Modules**: `server/src/modules/` is the location for domain modules.
 *   **Testing**: Jest is used for testing (`server/__tests__`).
 
+## NATO Cognitive Alerts (PR-17709)
+### Verified
+- MIT license present at repo root.
+- Key top-level directories present: `alerting/`, `active-measures-module/`,
+  `adversarial-misinfo-defense-platform/`, `api/`, `api-schemas/`, `apps/`,
+  `RUNBOOKS/`, `SECURITY/`.
+
+### Assumed
+- JS/TS monorepo using `pnpm`, Jest, and linting.
+- Alert ingestion and UI surfaces can consume new alert types.
+
 ## Narrative Intelligence Subsumption (PR-17713)
 ### Verified (Local Inspection)
 - `docs/security/` and `docs/ops/runbooks/` exist and are active documentation surfaces.
@@ -34,6 +45,8 @@
 *   `.archive/`
 *   `GOLDEN/datasets/`
 *   Existing migration files in `server/db/managed-migrations/` (unless fixing a bug, which is out of scope).
+*   `THIRD_PARTY_NOTICES/` and existing license headers.
+*   Existing security policy configs under `.security/` or `SECURITY/` without review.
 
 ## Validation Plan (Narrative Intelligence PR-1)
 - Locate feature flag evaluation path and tenant allowlist controls.
