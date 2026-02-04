@@ -1,0 +1,38 @@
+{
+  "task_id": "INTENT_DECOMP_20260201",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "intent-decomposition-lead",
+    "version": "v1",
+    "sha256": "1535919cc16d696de8de90170e65c330ab41bf995dd44132b2fa7ac1dec05094",
+    "path": "prompts/intent-decomposition/intent-decomposition-lead.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "packages/intent-decomposition/",
+      "prompts/intent-decomposition/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["intent-decomposition", "evaluation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["bifact-jsonl", "schema-validation"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Intent decomposition package includes schemas, prompts, and CLI.",
+    "Stage 1 and stage 2 prompts enforce factuality and speculation separation.",
+    "Bi-Fact evaluation harness emits precision/recall/F1 with error propagation."
+  ],
+  "stop_conditions": [
+    "PII detected in outputs",
+    "Prompt hash mismatch or unregistered prompt"
+  ]
+}

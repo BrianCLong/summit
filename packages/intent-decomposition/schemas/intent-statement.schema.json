@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/intent/intent-statement.schema.json",
+  "title": "IntentStatement",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "intent",
+    "atomicFacts",
+    "confidence",
+    "policy",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "intent": { "type": "string" },
+    "atomicFacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "policy": {
+      "type": "object",
+      "required": ["policyVersion", "redactions", "allowed", "decisionId"],
+      "additionalProperties": false,
+      "properties": {
+        "policyVersion": { "type": "string" },
+        "redactions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "allowed": { "type": "boolean" },
+        "decisionId": { "type": "string" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["modelId", "promptHash", "promptId", "promptVersion", "generatedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "modelId": { "type": "string" },
+        "promptHash": { "type": "string" },
+        "promptId": { "type": "string" },
+        "promptVersion": { "type": "string" },
+        "generatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

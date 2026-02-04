@@ -15,11 +15,14 @@
 
 import { jest } from '@jest/globals';
 import type { Pool } from 'pg';
-import { AuditEventCaptureMiddleware } from '../audit-event-capture-middleware';
-import { EventSourcingService, DomainEvent } from '../../services/EventSourcingService.js';
 
-// Mock EventSourcingService
-jest.mock('../../services/EventSourcingService.js');
+const EventSourcingServiceMock = jest.fn();
+jest.unstable_mockModule('../../services/EventSourcingService.js', () => ({
+  EventSourcingService: EventSourcingServiceMock,
+}));
+
+const { AuditEventCaptureMiddleware } = await import('../audit-event-capture-middleware.js');
+const { EventSourcingService } = await import('../../services/EventSourcingService.js');
 
 describe('AuditEventCaptureMiddleware', () => {
   let middleware: AuditEventCaptureMiddleware;

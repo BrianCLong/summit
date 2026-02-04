@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/uncertainty-field-mapping",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Spatial representation of predictive uncertainty across time, domains, and potential futures",
   "type": "module",
   "main": "dist/index.js",

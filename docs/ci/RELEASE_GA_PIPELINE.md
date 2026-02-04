@@ -59,10 +59,22 @@ Runs the policy-driven verification suite:
 
 - **Policy-driven**: Loads check requirements from `docs/ci/REQUIRED_CHECKS_POLICY.yml`
 - **Deterministic base**: Computes base reference using `compute_base_for_commit.sh`
+- **Strict Evidence Generation**:
+  - **No Mocks**: Evidence generation fails if tools (k6, syft, trivy) are missing.
+  - **Real Security Scans**: Validates against real vulnerability databases.
 - TypeScript compilation
 - Server build
 - Unit tests
 - Required conditional checks (based on changed files vs base)
+
+### Governance Integration
+
+The **Antigravity** agent enforces governance at the pipeline level:
+
+- **Artifact Verification**: Verifies presence and validity of `agents/antigravity/policy/*`.
+- **Ledger Integrity**: Checks `governance/tradeoffs/tradeoff_ledger.jsonl` for tampering.
+- **Strict Compliance**: Fails the build if governance artifacts are missing or invalid.
+- **Command**: `npm run compliance:antigravity`
 
 For GA tags, the base is computed to match the corresponding RC's base, ensuring that GA checks are identical to RC checks. This guarantees the "publish what was tested" principle.
 
@@ -74,6 +86,27 @@ Creates the comprehensive GA release bundle:
 - Generates release notes, operator script, checklist
 - Creates `ga_metadata.json` with release information
 - Generates `SHA256SUMS` for all artifacts
+- Builds the artifact inventory for the bundle and evidence outputs
+
+#### Artifact Inventory (Generation)
+
+The pipeline builds an artifact inventory that enumerates release outputs before publish. The
+inventory covers:
+
+- `dist/release/*` deliverables (server/client bundles and release summaries)
+- `release-bundle/compliance-bundle-v*.tgz`
+- `evidence-bundle.tar.gz`
+- `sbom.json` plus provenance outputs (for example `provenance.json`)
+- `ga_metadata.json`, `SHA256SUMS`, and release scripts/checklists
+
+To generate the inventory locally:
+
+```bash
+node scripts/release/generate_artifact_inventory.mjs --dir <output-dir>
+```
+
+The script emits `artifact-inventory.json` into `<output-dir>` and is intended to run after the
+bundle is assembled so the inventory reflects the final on-disk payload.
 
 ### Stage 5: Publish Guard
 
@@ -84,6 +117,20 @@ Final verification before publishing:
 - Validates checksums
 - Confirms lineage
 - Produces pass/fail report
+
+#### Artifact Inventory (Verification)
+
+Before publish, CI verifies the inventory against the bundle directory:
+
+```bash
+node scripts/release/verify_artifact_inventory.mjs --dir <output-dir>
+```
+
+Inventory files are bundled into release evidence under `release-artifacts/` to preserve a
+verifiable record of the release payload.
+
+If inventory verification fails, publishing is blocked until the bundle and inventory are
+consistent.
 
 ### Stage 6: Assemble & Publish
 
@@ -111,6 +158,7 @@ The pipeline produces a single artifact: `ga-release-bundle-{tag}`
 | `verify-rc-lineage.sh`    | Lineage verification script       |
 | `verify-green-for-tag.sh` | CI verification script            |
 | `pipeline_metadata.json`  | Pipeline execution metadata       |
+| `artifact-inventory.json` | Inventory of release artifacts    |
 
 ### Example ga_metadata.json
 

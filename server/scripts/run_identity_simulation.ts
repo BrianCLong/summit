@@ -1,5 +1,5 @@
 
-import { IdentityIntrusionSimulator } from '../src/services/simulations/IdentityIntrusionSimulator';
+import { IdentityIntrusionSimulator } from '../src/services/simulations/IdentityIntrusionSimulator.js';
 import * as fs from 'fs';
 import * as path from 'path';
 

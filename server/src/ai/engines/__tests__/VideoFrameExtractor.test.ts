@@ -1,18 +1,43 @@
-import { VideoFrameExtractor } from '../VideoFrameExtractor';
-import ffmpeg from 'fluent-ffmpeg';
-import fs from 'fs/promises';
-import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 
 // Mock ffmpeg and fs/promises
-jest.mock('fluent-ffmpeg');
-jest.mock('fs/promises');
+const ffmpegMock = Object.assign(jest.fn(), {
+  ffprobe: jest.fn(),
+  setFfmpegPath: jest.fn(),
+  setFfprobePath: jest.fn(),
+});
+
+jest.unstable_mockModule('fluent-ffmpeg', () => ({
+  __esModule: true,
+  default: ffmpegMock,
+}));
+
+const fsMock = {
+  mkdir: jest.fn(),
+  rm: jest.fn(),
+};
+
+jest.unstable_mockModule('fs/promises', () => ({
+  __esModule: true,
+  default: fsMock,
+  ...fsMock,
+}));
 
 describe('VideoFrameExtractor', () => {
-  let extractor: VideoFrameExtractor;
+  let VideoFrameExtractor: typeof import('../VideoFrameExtractor.js').VideoFrameExtractor;
+  let extractor: InstanceType<typeof VideoFrameExtractor>;
+  let ffmpeg: typeof ffmpegMock;
+  let fs: typeof fsMock;
   const mockFfmpegPath = '/usr/bin/ffmpeg';
   const mockFfprobePath = '/usr/bin/ffprobe';
   const mockTempDir = '/tmp/test-temp';
   const mockVideoPath = '/path/to/test-video.mp4';
+
+  beforeAll(async () => {
+    ({ VideoFrameExtractor } = await import('../VideoFrameExtractor.js'));
+    ffmpeg = (await import('fluent-ffmpeg')).default as typeof ffmpegMock;
+    fs = (await import('fs/promises')).default as typeof fsMock;
+  });
 
   beforeEach(() => {
     extractor = new VideoFrameExtractor(
@@ -21,12 +46,13 @@ describe('VideoFrameExtractor', () => {
       mockTempDir,
     );
     // Reset mocks
-    (ffmpeg as jest.Mocked<typeof ffmpeg>).mockClear();
+    ffmpeg.mockClear();
+    (ffmpeg.ffprobe as jest.Mock).mockClear();
     (fs.mkdir as jest.Mock).mockClear();
     (fs.rm as jest.Mock).mockClear();
 
     // Mock ffmpeg chainable methods
-    (ffmpeg as any).mockImplementation(() => {
+    ffmpeg.mockImplementation(() => {
       const command: any = {
         seekInput: jest.fn().mockReturnThis(),
         duration: jest.fn().mockReturnThis(),
@@ -64,11 +90,11 @@ describe('VideoFrameExtractor', () => {
       { recursive: true },
     );
     expect(ffmpeg).toHaveBeenCalledWith(mockVideoPath);
-    expect((ffmpeg as any).mock.results[0].value.fps).toHaveBeenCalledWith(1); // Default fps
-    expect((ffmpeg as any).mock.results[0].value.output).toHaveBeenCalledWith(
+    expect(ffmpeg.mock.results[0].value.fps).toHaveBeenCalledWith(1); // Default fps
+    expect(ffmpeg.mock.results[0].value.output).toHaveBeenCalledWith(
       expect.stringContaining('frame-%s.png'),
     );
-    expect((ffmpeg as any).mock.results[0].value.run).toHaveBeenCalled();
+    expect(ffmpeg.mock.results[0].value.run).toHaveBeenCalled();
     expect(frames.length).toBe(2);
     expect(frames[0].framePath).toContain('frame-0.000.png');
     expect(frames[1].framePath).toContain('frame-1.000.png');
@@ -95,9 +121,9 @@ describe('VideoFrameExtractor', () => {
     expect(audio?.audioPath).toContain('audio-');
     expect(audio?.audioPath).toContain('.mp3');
     expect(audio?.duration).toBe(10);
-    expect((ffmpeg as any).mock.results[1].value.noVideo).toHaveBeenCalled(); // Second ffmpeg call for audio
+    expect(ffmpeg.mock.results[1].value.noVideo).toHaveBeenCalled(); // Second ffmpeg call for audio
     expect(
-      (ffmpeg as any).mock.results[1].value.audioCodec,
+      ffmpeg.mock.results[1].value.audioCodec,
     ).toHaveBeenCalledWith('libmp3lame');
   });
 
@@ -111,7 +137,7 @@ describe('VideoFrameExtractor', () => {
   });
 
   it('should handle ffmpeg errors during frame extraction', async () => {
-    (ffmpeg as any).mockImplementationOnce(() => {
+    ffmpeg.mockImplementationOnce(() => {
       const command: any = {
         seekInput: jest.fn().mockReturnThis(),
         duration: jest.fn().mockReturnThis(),

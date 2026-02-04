@@ -1,0 +1,27 @@
+id: basic-investigation
+version: 1.0.0
+inputs:
+  analyst: "analyst-17"
+  caseId: "case-042"
+  region: "emea"
+steps:
+  - type: graph.query
+    name: Seed query
+    with:
+      fanout: 250
+      queryId: "seed-entities"
+  - type: enrich.http
+    name: Enrich indicators
+    with:
+      domain: "enrich.summit.local"
+      path: "/whois"
+  - type: score.model
+    name: Score risk
+    with:
+      modelId: "risk-v1"
+      threshold: 0.72
+  - type: notify.slack
+    name: Notify analysts
+    with:
+      channel: "#summit-ops"
+      messageTemplate: "Procedure {{procedure.id}} complete"

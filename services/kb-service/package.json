@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/kb-service",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Knowledge Base service for documentation, runbooks, SOPs, and contextual help",
   "license": "MIT",
   "type": "module",
