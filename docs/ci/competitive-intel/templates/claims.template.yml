@@ -1,0 +1,14 @@
+# docs/ci/evidence/<target_slug>/CLAIMS.yml
+# Claim → Citation map (evidence-first, deterministic ordering)
+
+claims:
+  - id: "claim-001"
+    statement: "<factual claim derived from public source>"
+    status: "verified"
+    sources:
+      - url: "<public-url>"
+        citation: "<doc-title-or-release-note>"
+    evidence:
+      - path: "docs/ci/evidence/<target_slug>/EVIDENCE.md"
+        excerpt: "<verbatim quote or summary with exact pointer>"
+
