@@ -364,3 +364,4 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
+\n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
