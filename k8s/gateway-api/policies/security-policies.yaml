@@ -1,5 +1,6 @@
 ---
 # CORS policy for web application
+# Replaces: legacy-ingress-annotation/enable-cors annotations
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -83,6 +84,7 @@ spec:
     allowCredentials: true
 ---
 # IP allowlist policy for internal services
+# Replaces: legacy-ingress-annotation/whitelist-source-range
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -172,6 +174,7 @@ spec:
     optional: false
 ---
 # External auth policy (for complex auth flows)
+# Replaces: legacy-ingress-annotation/auth-url
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:

@@ -8,15 +8,9 @@ export interface IntelGraphClient {
   updateTask(taskId: string, patch: Partial<Task>): Promise<void>;
 
   createArtifact(artifact: Artifact): Promise<void>;
-  getArtifactsForRun(runId: string): Promise<Artifact[]>;
-  getArtifactsForTask(taskId: string): Promise<Artifact[]>;
 
   recordCostSample(sample: CostSample): Promise<void>;
   getRunCostSummary(runId: string): Promise<RunCostSummary>;
-
-  getRun(runId: string): Promise<Run | null>;
-  getTask(taskId: string): Promise<Task | null>;
-  getTasksForRun(runId: string): Promise<Task[]>;
 }
 
 // a very thin, testable class
@@ -50,12 +44,6 @@ export class IntelGraphClientImpl implements IntelGraphClient {
   async createArtifact(artifact: Artifact): Promise<void> {
     this.artifacts.set(artifact.id, artifact);
   }
-  async getArtifactsForRun(runId: string): Promise<Artifact[]> {
-    return Array.from(this.artifacts.values()).filter(a => a.runId === runId);
-  }
-  async getArtifactsForTask(taskId: string): Promise<Artifact[]> {
-    return Array.from(this.artifacts.values()).filter(a => a.taskId === taskId);
-  }
 
   async recordCostSample(sample: CostSample): Promise<void> {
     this.costs.set(sample.id, sample);
@@ -85,15 +73,5 @@ export class IntelGraphClientImpl implements IntelGraphClient {
       }
     }
     return summary;
-  }
-
-  async getRun(runId: string): Promise<Run | null> {
-    return this.runs.get(runId) || null;
-  }
-  async getTask(taskId: string): Promise<Task | null> {
-    return this.tasks.get(taskId) || null;
-  }
-  async getTasksForRun(runId: string): Promise<Task[]> {
-    return Array.from(this.tasks.values()).filter(t => t.runId === runId);
   }
 }

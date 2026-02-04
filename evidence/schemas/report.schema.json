@@ -2,21 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Report",
   "type": "object",
-  "required": ["evidence_id", "run_config", "model_endpoint", "tool_hashes", "summary"],
+  "required": ["evidence_id", "summary"],
   "properties": {
     "evidence_id": {
       "type": "string",
-      "pattern": "^EVD-CODEXLOOP-[A-Z]+-[0-9]+$"
+      "pattern": "^EVD-[A-Za-z0-9-]+$"
     },
-    "run_config": {
+    "item": {
       "type": "object"
-    },
-    "model_endpoint": {
-      "type": "string"
-    },
-    "tool_hashes": {
-      "type": "object",
-      "additionalProperties": { "type": "string" }
     },
     "summary": {
       "type": ["string", "object"]
