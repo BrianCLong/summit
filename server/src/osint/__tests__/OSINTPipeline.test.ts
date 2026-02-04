@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { OSINTPipeline } from '../OSINTPipeline';
-import { OSINTProfile, Claim, Contradiction } from '../types';
+import { OSINTPipeline } from '../OSINTPipeline.js';
+import { OSINTProfile, Claim, Contradiction } from '../types.js';
 
 // Mock the enrichment service to control test data
 jest.mock('../OSINTEnrichmentService', () => ({

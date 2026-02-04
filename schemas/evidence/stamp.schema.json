@@ -1,13 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Summit Evidence Stamp",
   "type": "object",
-  "anyOf": [{ "required": ["created_at"] }, { "required": ["generated_at"] }],
+  "anyOf": [
+    { "required": ["created_at"] },
+    { "required": ["generated_at"] },
+    {
+      "required": ["eid", "git_sha", "pipeline", "inputs_manifest_sha256", "params_sha256"],
+      "description": "Deterministic stamp format"
+    }
+  ],
   "properties": {
+    "evidence_id": { "type": "string" },
+    "eid": { "type": "string" },
     "created_at": { "type": "string", "format": "date-time" },
     "generated_at": { "type": "string", "format": "date-time" },
-    "evidence_id": { "type": "string" },
-    "ci_run_id": { "type": "string" }
+    "git_sha": { "type": "string" },
+    "runner": { "type": "string" },
+    "pipeline": { "type": "string" },
+    "inputs_manifest_sha256": { "type": "string" },
+    "params_sha256": { "type": "string" },
+    "runtime": { "type": "string" }
   },
   "additionalProperties": true
 }

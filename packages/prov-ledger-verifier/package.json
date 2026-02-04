@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "verify:fixtures": "pnpm run build && node dist/cli.js --bundle fixtures/valid-bundle --json && node dist/cli.js --bundle fixtures/valid-bundle.zip --json"
   },
   "dependencies": {

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MCP Session Create Output",
+  "type": "object",
+  "required": ["sid", "token", "runId", "scopes"],
+  "properties": {
+    "sid": { "type": "string" },
+    "token": { "type": "string" },
+    "runId": { "type": "string" },
+    "scopes": { "type": "array", "items": { "type": "string" } },
+    "servers": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

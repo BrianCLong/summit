@@ -100,7 +100,7 @@ export class PRRiskClassifierService {
 
       // Check Logic (Backend code that isn't one of the above)
       if (!matched) {
-         if (file.endsWith('.ts') || file.endsWith('.js') || file.endsWith('.py') || file.endsWith('.go') || file.endsWith('.rs')) {
+         if (file.endsWith('.js') || file.endsWith('.js') || file.endsWith('.py') || file.endsWith('.go') || file.endsWith('.rs')) {
              categories.add('LOGIC');
              matched = true;
          } else {

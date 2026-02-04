@@ -1,6 +1,6 @@
-import { snapshotter } from './diagnostic-snapshotter.ts';
-import { alertingService } from './alerting-service.ts';
-import { correlationEngine } from './correlation-engine.ts';
+import { snapshotter } from './diagnostic-snapshotter.js';
+import { alertingService } from './alerting-service.js';
+import { correlationEngine } from './correlation-engine.js';
 
 class AnomalyDetector {
   private metricBaselines: Map<string, { mean: number; std: number }> =

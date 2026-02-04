@@ -2,10 +2,10 @@
 // server/src/services/IntelGraphService.ts
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import { randomUUID } from 'crypto';
-import { getNeo4jDriver } from '../config/database';
-import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema';
-import { AppError, NotFoundError, DatabaseError } from '../lib/errors';
-import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger';
+import { getNeo4jDriver } from '../config/database.js';
+import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema.js';
+import { AppError, NotFoundError, DatabaseError } from '../lib/errors.js';
+import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import { Counter, Histogram } from 'prom-client';
 import { z } from 'zod';
 

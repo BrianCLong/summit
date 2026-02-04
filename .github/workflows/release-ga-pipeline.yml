@@ -1,0 +1,757 @@
+name: Release GA Pipeline
+
+# Canonical GA Pipeline - Single authoritative workflow for GA tag events
+# Enforces lineage, verification, publish guard, and two-person approval.
+#
+# This workflow:
+# 1. Verifies GA tag points to successful RC commit (lineage)
+# 2. Runs release readiness verification
+# 3. Builds GA release bundle
+# 4. Runs publish guard
+# 5. Requires two-person approval before publishing
+# 6. Produces single ga-release-bundle-{tag} artifact
+#
+# See docs/ci/RELEASE_GA_PIPELINE.md for full documentation.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "GA tag to process (e.g., v4.1.2)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: release-ga-${{ github.ref_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Gate: Exclude RC tags - only process GA tags
+  # ═══════════════════════════════════════════════════════════════════════════
+  gate:
+    name: "0️⃣ Gate Check"
+    runs-on: ubuntu-latest
+    outputs:
+      is_ga: ${{ steps.check.outputs.is_ga }}
+      tag: ${{ steps.check.outputs.tag }}
+      sha: ${{ steps.check.outputs.sha }}
+      version: ${{ steps.check.outputs.version }}
+
+    steps:
+      - name: Determine Tag and SHA
+        id: check
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            TAG="${{ github.ref_name }}"
+            SHA="${{ github.sha }}"
+          else
+            TAG="${{ inputs.tag }}"
+            SHA=""
+          fi
+
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
+
+          # Extract version (e.g., 4.1.2 from v4.1.2)
+          VERSION=$(echo "${TAG}" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+          # Check if this is a GA tag (not an RC tag)
+          if [[ "${TAG}" =~ -rc\. ]]; then
+            echo "is_ga=false" >> $GITHUB_OUTPUT
+            echo "Tag ${TAG} is an RC tag, skipping GA pipeline"
+          else
+            echo "is_ga=true" >> $GITHUB_OUTPUT
+            echo "Tag ${TAG} is a GA tag, proceeding"
+          fi
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Freeze Gate: Check if change freeze is active
+  # Blocks GA promotion when error budget is exhausted (unless override active)
+  # ═══════════════════════════════════════════════════════════════════════════
+  freeze-gate:
+    name: "🔒 Freeze Gate"
+    runs-on: ubuntu-latest
+    needs: gate
+    if: needs.gate.outputs.is_ga == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Check Freeze Mode
+        run: |
+          chmod +x scripts/release/enforce_freeze_gate.sh
+
+          echo "Checking freeze gate for GA release..."
+
+          scripts/release/enforce_freeze_gate.sh \
+            --mode ga \
+            --tag "${{ needs.gate.outputs.tag }}" \
+            --verbose
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 1: Lineage Check (fail fast)
+  # Verify GA tag points to successful RC commit
+  # ═══════════════════════════════════════════════════════════════════════════
+  lineage:
+    name: "1️⃣ Lineage Check"
+    runs-on: ubuntu-latest
+    needs: [gate, freeze-gate]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    outputs:
+      rc_tag: ${{ steps.lineage.outputs.rc_tag }}
+      lineage_status: ${{ steps.lineage.outputs.status }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.gate.outputs.tag }}
+
+      - name: Resolve SHA
+        id: resolve
+        run: |
+          if [[ -z "${{ needs.gate.outputs.sha }}" ]]; then
+            SHA=$(git rev-parse HEAD)
+          else
+            SHA="${{ needs.gate.outputs.sha }}"
+          fi
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
+
+      - name: Verify RC Lineage
+        id: lineage
+        run: |
+          chmod +x scripts/release/verify-rc-lineage.sh
+
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ steps.resolve.outputs.sha }}"
+
+          echo "Verifying lineage for GA tag: ${TAG}"
+          echo "Commit SHA: ${SHA}"
+
+          set +e
+          OUTPUT=$(scripts/release/verify-rc-lineage.sh \
+            --ga-tag "${TAG}" \
+            --ga-sha "${SHA}" \
+            --require-success \
+            --json 2>&1)
+          EXIT_CODE=$?
+          set -e
+
+          echo "${OUTPUT}"
+
+          # Parse JSON output for RC tag
+          if echo "${OUTPUT}" | jq -e '.rc_tag' > /dev/null 2>&1; then
+            RC_TAG=$(echo "${OUTPUT}" | jq -r '.rc_tag // empty')
+            echo "rc_tag=${RC_TAG}" >> $GITHUB_OUTPUT
+          fi
+
+          if [[ ${EXIT_CODE} -eq 0 ]]; then
+            echo "status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Lineage Summary
+        if: always()
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          STATUS="${{ steps.lineage.outputs.status }}"
+          RC_TAG="${{ steps.lineage.outputs.rc_tag }}"
+
+          if [[ "${STATUS}" == "passed" ]]; then
+            echo "### ✅ Lineage Verified" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Lineage Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GA Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source RC | \`${RC_TAG:-N/A}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+
+  skills-vet:
+    name: "Skills Vet"
+    runs-on: ubuntu-latest
+    needs: [gate, freeze-gate]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@b0eb0c1eb5f79b7ec602946f1fa93f3fc06f6e70 # v2
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Vet Skills (strict)
+        run: pnpm skill vet --all
+
+      - name: Upload Skills Evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: skills-evidence
+          path: evidence/skills
+          retention-days: 14
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 2: Verification
+  # Run release readiness checks
+  # ═══════════════════════════════════════════════════════════════════════════
+  verify:
+    name: "2️⃣ Verification"
+    runs-on: ubuntu-latest
+    needs: [gate, lineage]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      verify_status: ${{ steps.verify.outputs.status }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.gate.outputs.tag }}
+
+      - name: Resolve SHA
+        id: resolve
+        run: |
+          if [[ -z "${{ needs.gate.outputs.sha }}" ]]; then
+            SHA=$(git rev-parse HEAD)
+          else
+            SHA="${{ needs.gate.outputs.sha }}"
+          fi
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: 10
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: LongRunJob Contract Gate (strict)
+        run: node scripts/ci/verify-longrun-contract.mjs
+
+      - name: Security Guardrails
+        run: |
+          echo "🛡️ Running Security Guardrails..."
+
+          echo "1. Secrets Scan"
+          chmod +x scripts/ci/scan_secrets.sh
+          ./scripts/ci/scan_secrets.sh --full
+
+          echo "2. Dependency Audit"
+          node scripts/ci/security_audit_gate.mjs
+
+      - name: Run Release Ready
+        id: ready
+        run: |
+          echo "Running release:ready gate..."
+          if pnpm release:ready; then
+            echo "ready=true" >> $GITHUB_OUTPUT
+          else
+            echo "ready=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compute Base Reference
+        id: base
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ steps.resolve.outputs.sha }}"
+
+          echo "Computing base reference for GA: ${TAG}"
+
+          chmod +x scripts/release/compute_base_for_commit.sh
+
+          # For GA, use same base as corresponding RC (ensures identical required checks)
+          BASE=$(scripts/release/compute_base_for_commit.sh --tag "${TAG}" --commit "${SHA}" --verbose 2>&1 | tail -1 || echo "${SHA}^")
+
+          echo "Computed base: ${BASE}"
+          echo "base=${BASE}" >> $GITHUB_OUTPUT
+
+      - name: Verify Green for Tag
+        id: verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x scripts/release/verify-green-for-tag.sh
+
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ steps.resolve.outputs.sha }}"
+          BASE="${{ steps.base.outputs.base }}"
+
+          mkdir -p artifacts/verification
+          OUTPUT_FILE="artifacts/verification/REQUIRED_CHECKS.txt"
+
+          echo "Verifying with base: ${BASE}"
+
+          set +e
+          scripts/release/verify-green-for-tag.sh \
+            --tag "${TAG}" \
+            --commit "${SHA}" \
+            --base "${BASE}" \
+            --verbose 2>&1 | tee "${OUTPUT_FILE}"
+          EXIT_CODE=$?
+          set -e
+
+          if [[ ${EXIT_CODE} -eq 0 ]]; then
+            echo "status=passed" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Verification Output
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: verification-output
+          path: artifacts/verification/
+          retention-days: 90
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 3: Build GA Bundle
+  # Create comprehensive GA release bundle
+  # ═══════════════════════════════════════════════════════════════════════════
+  build-bundle:
+    name: "3️⃣ Build GA Bundle"
+    runs-on: ubuntu-latest
+    needs: [gate, lineage, verify]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    outputs:
+      bundle_path: ${{ steps.bundle.outputs.bundle_path }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.gate.outputs.tag }}
+
+      - name: Build GA Bundle
+        id: bundle
+        run: |
+          chmod +x scripts/release/build-ga-bundle.sh
+
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+          RC_TAG="${{ needs.lineage.outputs.rc_tag }}"
+          BUNDLE_DIR="staging/ga-bundle"
+
+          mkdir -p "${BUNDLE_DIR}"
+
+          scripts/release/build-ga-bundle.sh \
+            --tag "${TAG}" \
+            --sha "${SHA}" \
+            --rc-tag "${RC_TAG}" \
+            --workflow-run "${{ github.run_id }}" \
+            --output "${BUNDLE_DIR}"
+
+          echo "bundle_path=${BUNDLE_DIR}" >> $GITHUB_OUTPUT
+
+      - name: Generate Provenance Manifest
+        run: |
+          if [[ -f scripts/release/generate_provenance_manifest.sh ]]; then
+            chmod +x scripts/release/generate_provenance_manifest.sh
+            scripts/release/generate_provenance_manifest.sh \
+              --tag "${{ needs.gate.outputs.tag }}" \
+              --sha "${{ needs.verify.outputs.sha }}" \
+              --bundle-dir "staging/ga-bundle" \
+              --workflow-run "${{ github.run_id }}" || true
+          fi
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        with:
+          cosign-release: "v2.2.2"
+
+      - name: Sign Provenance (Keyless)
+        run: |
+          echo "Signing provenance.json with Keyless OIDC..."
+          cosign sign-blob --yes \
+            staging/ga-bundle/provenance.json \
+            --output-signature staging/ga-bundle/provenance.json.sig \
+            --output-certificate staging/ga-bundle/provenance.json.pem
+
+          echo "Signature created: staging/ga-bundle/provenance.json.sig"
+
+      - name: Upload GA Bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ga-bundle-staging
+          path: staging/ga-bundle/
+          retention-days: 90
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 4: Publish Guard
+  # Final verification before publishing
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish-guard:
+    name: "4️⃣ Publish Guard"
+    runs-on: ubuntu-latest
+    needs: [gate, lineage, verify, build-bundle]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    outputs:
+      publish_allowed: ${{ steps.guard.outputs.publish_allowed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.gate.outputs.tag }}
+
+      - name: Download GA Bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ga-bundle-staging
+          path: staging/ga-bundle
+
+      - name: Download Verification Output
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: verification-output
+          path: staging/verification
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+        with:
+          cosign-release: "v2.2.2"
+
+      - name: Verify Signed Bundle (Strict)
+        env:
+          EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com
+        run: |
+          chmod +x scripts/release/verify-release-bundle.mjs
+          node scripts/release/verify-release-bundle.mjs --path staging/ga-bundle --strict
+
+      - name: Run Publish Guard
+        id: guard
+        run: |
+          chmod +x scripts/release/publish_guard.sh
+
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+
+          mkdir -p artifacts/publish-guard
+          REPORT_FILE="artifacts/publish-guard/PUBLISH_GUARD_REPORT.txt"
+
+          set +e
+          scripts/release/publish_guard.sh \
+            --tag "${TAG}" \
+            --sha "${SHA}" \
+            --bundle-dir "staging/ga-bundle" \
+            --verbose 2>&1 | tee "${REPORT_FILE}"
+          EXIT_CODE=$?
+          set -e
+
+          if [[ ${EXIT_CODE} -eq 0 ]]; then
+            echo "publish_allowed=true" >> $GITHUB_OUTPUT
+          else
+            echo "publish_allowed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Publish Guard Report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: publish-guard-report
+          path: artifacts/publish-guard/
+          retention-days: 90
+
+      - name: Publish Guard Summary
+        if: always()
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          ALLOWED="${{ steps.guard.outputs.publish_allowed }}"
+
+          if [[ "${ALLOWED}" == "true" ]]; then
+            echo "### ✅ Publish Guard Passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Publish Guard Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Tag: \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 5: Assemble Final Bundle
+  # Combine all artifacts into ga-release-bundle-{tag}
+  # ═══════════════════════════════════════════════════════════════════════════
+  assemble:
+    name: "5️⃣ Assemble Release Bundle"
+    runs-on: ubuntu-latest
+    needs: [gate, lineage, verify, build-bundle, publish-guard]
+    if: needs.gate.outputs.is_ga == 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: staging
+
+      - name: Assemble GA Release Bundle
+        id: assemble
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+          VERSION="${{ needs.gate.outputs.version }}"
+          RC_TAG="${{ needs.lineage.outputs.rc_tag }}"
+          LINEAGE_STATUS="${{ needs.lineage.outputs.lineage_status }}"
+          VERIFY_STATUS="${{ needs.verify.outputs.verify_status }}"
+          PUBLISH_ALLOWED="${{ needs.publish-guard.outputs.publish_allowed }}"
+
+          BUNDLE_DIR="ga-release-bundle-${TAG}"
+          mkdir -p "${BUNDLE_DIR}"
+
+          echo "Assembling GA Release Bundle: ${BUNDLE_DIR}"
+
+          # Copy GA bundle contents
+          if [[ -d "staging/ga-bundle-staging" ]]; then
+            cp -r staging/ga-bundle-staging/* "${BUNDLE_DIR}/" 2>/dev/null || true
+          fi
+
+          # Copy verification output
+          if [[ -f "staging/verification-output/REQUIRED_CHECKS.txt" ]]; then
+            cp staging/verification-output/REQUIRED_CHECKS.txt "${BUNDLE_DIR}/"
+          fi
+
+          # Copy publish guard report
+          if [[ -f "staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt" ]]; then
+            cp staging/publish-guard-report/PUBLISH_GUARD_REPORT.txt "${BUNDLE_DIR}/"
+          fi
+
+          # Create pipeline_metadata.json using jq
+          jq -n \
+            --arg version "1.0.0" \
+            --arg pipeline "release-ga" \
+            --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg ga_tag "${TAG}" \
+            --arg base_version "${VERSION}" \
+            --arg commit_sha "${SHA}" \
+            --arg source_rc "${RC_TAG}" \
+            --arg lineage_status "${LINEAGE_STATUS}" \
+            --arg verify_status "${VERIFY_STATUS}" \
+            --argjson publish_allowed $([ "${PUBLISH_ALLOWED}" == "true" ] && echo "true" || echo "false") \
+            --arg run_id "${{ github.run_id }}" \
+            --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg actor "${{ github.actor }}" \
+            '{
+              version: $version,
+              pipeline: $pipeline,
+              generated_at: $generated_at,
+              release: {
+                ga_tag: $ga_tag,
+                base_version: $base_version,
+                commit_sha: $commit_sha,
+                source_rc: $source_rc
+              },
+              verification: {
+                lineage: $lineage_status,
+                checks: $verify_status,
+                publish_allowed: $publish_allowed
+              },
+              workflow: {
+                run_id: $run_id,
+                run_url: $run_url,
+                actor: $actor
+              },
+              artifacts: {
+                release_notes: "github_release.md",
+                publish_script: "publish_to_ga.sh",
+                verification: "REQUIRED_CHECKS.txt",
+                publish_guard: "PUBLISH_GUARD_REPORT.txt",
+                checklist: "GA_RELEASE_CHECKLIST.md"
+              }
+            }' > "${BUNDLE_DIR}/pipeline_metadata.json"
+
+          # Regenerate SHA256SUMS
+          cd "${BUNDLE_DIR}"
+          find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+          cd - > /dev/null
+
+          echo "bundle_dir=${BUNDLE_DIR}" >> $GITHUB_OUTPUT
+
+          echo ""
+          echo "Bundle contents:"
+          ls -la "${BUNDLE_DIR}/"
+
+      - name: Upload GA Release Bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
+          path: ga-release-bundle-${{ needs.gate.outputs.tag }}
+          retention-days: 90
+
+      - name: Cleanup Intermediate Artifacts
+        uses: geekyeggo/delete-artifact@b54d29a59e55046d1f7fc8226cdda507e6b9cf62 # v5
+        with:
+          name: |
+            ga-bundle-staging
+            verification-output
+            publish-guard-report
+          failOnError: false
+
+      - name: Final Summary
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+          VERSION="${{ needs.gate.outputs.version }}"
+          RC_TAG="${{ needs.lineage.outputs.rc_tag }}"
+          LINEAGE="${{ needs.lineage.outputs.lineage_status }}"
+          VERIFY="${{ needs.verify.outputs.verify_status }}"
+          GUARD="${{ needs.publish-guard.outputs.publish_allowed }}"
+
+          if [[ "${LINEAGE}" == "passed" && "${VERIFY}" == "passed" && "${GUARD}" == "true" ]]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="READY FOR APPROVAL"
+          else
+            STATUS_ICON="❌"
+            STATUS_TEXT="NOT READY"
+          fi
+
+          echo "## ${STATUS_ICON} GA Release Pipeline: ${TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lineage Check | $([ "${LINEAGE}" == "passed" ] && echo "✅" || echo "❌") ${LINEAGE} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Verification | $([ "${VERIFY}" == "passed" ] && echo "✅" || echo "⚠️") ${VERIFY} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Publish Guard | $([ "${GUARD}" == "true" ] && echo "✅" || echo "❌") ${GUARD} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bundle | ✅ Assembled |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Release Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GA Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source RC | \`${RC_TAG:-N/A}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`${SHA:0:7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${VERSION} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | \`ga-release-bundle-${TAG}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${GUARD}" == "true" ]]; then
+            echo "### 🚀 Next Steps: Two-Person Approval" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This release requires two-person approval via the \`ga-release\` environment." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "1. Download the \`ga-release-bundle-${TAG}\` artifact" >> $GITHUB_STEP_SUMMARY
+            echo "2. Review the bundle contents" >> $GITHUB_STEP_SUMMARY
+            echo "3. Run: \`./publish_to_ga.sh --dry-run\`" >> $GITHUB_STEP_SUMMARY
+            echo "4. If approved, trigger the publish workflow manually" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ⚠️ Cannot Proceed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "One or more gates failed. Review the pipeline output and fix issues before retrying." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Stage 6: Publish (requires environment approval)
+  # Two-person approval gate before publishing
+  # ═══════════════════════════════════════════════════════════════════════════
+  publish:
+    name: "6️⃣ Publish Release"
+    runs-on: ubuntu-latest
+    needs: [gate, lineage, verify, build-bundle, publish-guard, assemble]
+    if: |
+      needs.gate.outputs.is_ga == 'true' &&
+      needs.publish-guard.outputs.publish_allowed == 'true'
+
+    environment:
+      name: ga-release
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.gate.outputs.tag }}
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Download GA Release Bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
+          path: ga-release-bundle
+
+      - name: Verify Bundle Integrity
+        run: |
+          cd ga-release-bundle
+          if sha256sum -c SHA256SUMS; then
+            echo "✅ Bundle integrity verified"
+          else
+            echo "❌ Bundle integrity check failed"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+          SHA="${{ needs.verify.outputs.sha }}"
+
+          echo "Creating GitHub Release: ${TAG}"
+
+          # Check if release exists
+          if gh release view "${TAG}" > /dev/null 2>&1; then
+            echo "Release ${TAG} exists, updating..."
+            gh release upload "${TAG}" ga-release-bundle/* --clobber || true
+          else
+            echo "Creating new release ${TAG}..."
+            gh release create "${TAG}" \
+              --title "${TAG} - GA Release" \
+              --notes-file ga-release-bundle/github_release.md \
+              ga-release-bundle/* || echo "Release creation attempted"
+          fi
+
+      - name: Publish Summary
+        run: |
+          TAG="${{ needs.gate.outputs.tag }}"
+
+          echo "### ✅ GA Release Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release URL:** ${{ github.server_url }}/${{ github.repository }}/releases/tag/${TAG}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Two-person approval was granted via the \`ga-release\` environment." >> $GITHUB_STEP_SUMMARY

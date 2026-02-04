@@ -54,7 +54,13 @@ import {
   // Standard metrics
   httpRequestsTotal as stdHttpRequestsTotal,
   httpRequestDuration as stdHttpRequestDuration,
-  websocketConnections
+  dbQueriesTotal,
+  dbQueryDuration,
+  websocketConnections,
+  narrativeSimulationActiveSimulations,
+  narrativeSimulationTicksTotal,
+  narrativeSimulationEventsTotal,
+  narrativeSimulationDurationSeconds
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -104,7 +110,13 @@ export {
   maestroMttrHours,
   stdHttpRequestsTotal,
   stdHttpRequestDuration,
-  websocketConnections
+  dbQueriesTotal,
+  dbQueryDuration,
+  websocketConnections,
+  narrativeSimulationActiveSimulations,
+  narrativeSimulationTicksTotal,
+  narrativeSimulationEventsTotal,
+  narrativeSimulationDurationSeconds
 };
 
 export const metrics = {
@@ -152,5 +164,11 @@ export const metrics = {
   maestroMttrHours,
   stdHttpRequestsTotal,
   stdHttpRequestDuration,
-  websocketConnections
+  dbQueriesTotal,
+  dbQueryDuration,
+  websocketConnections,
+  narrativeSimulationActiveSimulations,
+  narrativeSimulationTicksTotal,
+  narrativeSimulationEventsTotal,
+  narrativeSimulationDurationSeconds
 };

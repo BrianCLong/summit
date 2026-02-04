@@ -5,7 +5,7 @@
  * Represents documents, files, and records
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
 
 export interface DocumentIdentifiers {
   /** Document number */

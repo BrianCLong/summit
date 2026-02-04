@@ -106,11 +106,7 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 9.12.0
-
-      - name: Setup Node.js
+        uses: pnpm/action-setup@v4 # v4      - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: ${{ inputs.node-version }}
@@ -233,7 +229,7 @@ jobs:
 
       - name: Upload coverage reports
         if: always() && inputs.upload-coverage
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: coverage-${{ matrix.os }}-${{ matrix.node }}-${{ inputs.test-type }}
           path: |

@@ -7,7 +7,7 @@
 import { Worker, Job, Queue } from 'bullmq';
 import { z } from 'zod';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
-import logger from '../utils/logger';
+import logger from '../utils/logger.js';
 
 // Zod schema for type-safe payloads
 export const WorkerPayloadSchema = z.object({
