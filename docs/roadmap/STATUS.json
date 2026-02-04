@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-01-10T08:27:49Z",
-  "revision_note": "Documented the new triage form + stale guard policy in sync with automation",
+  "last_updated": "2026-01-10T12:30:00Z",
+  "revision_note": "Added Maestro Long-Run Job Engine governance scaffolding and CI gates",
   "initiatives": [
     {
       "id": "A",
