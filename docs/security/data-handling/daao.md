@@ -1,17 +1,18 @@
-# DAAO Data Handling
+# DAAO Data Handling & Security
 
-## Classification
+## Data Classification
+| Data Type | Classification | Handling |
+|-----------|----------------|----------|
+| User Query | Confidential | Do not log raw text in permanent artifacts. |
+| Difficulty Score | Public/Internal | Safe to log. |
+| Routing Decision | Public/Internal | Safe to log (model ID, cost). |
+| Critique | Confidential | Treated same as User Query (may contain derivatives). |
 
-*   **Query Text**: Confidential. Never logged in raw form in artifacts.
-*   **Difficulty Signal**: Internal metadata. OK to log.
-*   **Critique**: Confidential (may contain excerpts). Handled carefully.
+## Retention Policy
+- **Metrics**: Indefinite (anonymized).
+- **Debug Logs**: 7 days (if enabled).
+- **Critique Artifacts**: Transient only, unless explicit "trace mode" is enabled for debugging.
 
-## Retention
-
-*   Drift artifacts (`scripts/monitoring/out/daao-drift.json`) must contain only aggregated or hashed data, no PII or user content.
-*   Raw logs are subject to standard retention (30 days).
-
-## Forbidden Actions
-
-*   Do not log API keys or full prompt payloads to `stdout` in production.
-*   Do not store user queries in `evidence/` unless explicitly allowed for debugging.
+## Never Log
+- Raw user query in `daao-drift.json` or other permanent monitoring artifacts.
+- API Keys (obviously).

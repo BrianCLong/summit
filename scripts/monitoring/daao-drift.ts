@@ -1,17 +1,16 @@
-import fs from 'fs';
-import path from 'path';
-// Assuming running from root with tsx
-import { HeuristicDifficultyScorer } from '../../packages/maestro-core/src/daao/difficulty/heuristicDifficultyScorer';
-import { CostAwareLLMRouter } from '../../packages/maestro-core/src/daao/routing/llmRouter';
-import { DefaultModelCatalog } from '../../packages/maestro-core/src/daao/routing/modelCatalog';
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { HeuristicDifficultyScorer } from '../../agents/orchestrator/src/daao/difficulty/heuristicDifficultyScorer.js';
+import { CostAwareLLMRouter } from '../../agents/orchestrator/src/daao/routing/llmRouter.js';
+import { DefaultModelCatalog } from '../../agents/orchestrator/src/daao/routing/modelCatalog.js';
 
-// Adjust path based on execution context
-const FIXTURES_PATH = path.join(process.cwd(), 'scripts', 'monitoring', 'fixtures', 'daao-prompts.json');
-const OUT_PATH = path.join(process.cwd(), 'scripts', 'monitoring', 'out', 'daao-drift.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function main() {
-  console.log(`Reading fixtures from ${FIXTURES_PATH}`);
-  const fixtures = JSON.parse(fs.readFileSync(FIXTURES_PATH, 'utf-8'));
+  const fixturesPath = path.join(__dirname, 'fixtures', 'daao-prompts.json');
+  const fixtures = JSON.parse(fs.readFileSync(fixturesPath, 'utf-8'));
 
   const scorer = new HeuristicDifficultyScorer();
   const catalog = new DefaultModelCatalog();
@@ -21,22 +20,25 @@ async function main() {
 
   for (const fixture of fixtures) {
     const difficulty = await scorer.estimate(fixture.text);
-    // Estimate tokens: simplistic char / 4
-    const estimatedTokens = Math.ceil(fixture.text.length / 4);
-    const decision = router.route(difficulty, estimatedTokens, 1000); // High budget
+    const decision = await router.route(difficulty, { budget: 0.5 }); // Fixed budget for drift check
 
     results.push({
       fixtureId: fixture.id,
       difficultyBand: difficulty.band,
       modelId: decision.modelId,
-      reason: decision.reason
+      estimatedCost: decision.estimatedWorstCaseCost,
+      reasons: decision.reasons
     });
   }
 
-  // Ensure output dir exists
-  fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
-  fs.writeFileSync(OUT_PATH, JSON.stringify(results, null, 2));
-  console.log(`Drift report written to ${OUT_PATH}`);
+  const outDir = path.join(__dirname, 'out');
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir);
+  }
+
+  const outFile = path.join(outDir, 'daao-drift.json');
+  fs.writeFileSync(outFile, JSON.stringify(results, null, 2));
+  console.log(`Drift check complete. Results written to ${outFile}`);
 }
 
 main().catch(console.error);

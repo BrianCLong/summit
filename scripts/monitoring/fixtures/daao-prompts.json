@@ -1,4 +1,17 @@
 [
-  { "id": "p1", "text": "What is 2+2?", "expectedBand": "easy" },
-  { "id": "p2", "text": "Write a python script to scrape a website using asyncio. Analyze the performance difference compared to synchronous execution.", "expectedBand": "hard" }
+  {
+    "id": "easy-1",
+    "text": "What is the capital of France?",
+    "expectedBand": "easy"
+  },
+  {
+    "id": "medium-1",
+    "text": "Explain the difference between TCP and UDP protocols.",
+    "expectedBand": "medium"
+  },
+  {
+    "id": "hard-1",
+    "text": "Design a comprehensive microservices architecture for a high-frequency trading platform, evaluating trade-offs between latency and consistency, and provide a migration strategy from a monolith.",
+    "expectedBand": "hard"
+  }
 ]
