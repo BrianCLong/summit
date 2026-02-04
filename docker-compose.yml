@@ -106,7 +106,7 @@ services:
       - observability
 
   backup-service:
-    build: ./server/infrastructure/disaster-recovery
+    build: ./server/infrastructure/backup-scripts
     volumes:
       - ./backups:/backups
       - redis_data:/redis_data

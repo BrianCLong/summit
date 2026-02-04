@@ -32,13 +32,6 @@
           }
         }
       }
-    },
-    {
-      "required": ["eid", "summary"],
-      "properties": {
-        "eid": { "type": "string" },
-        "summary": { "type": "string" }
-      }
     }
   ],
   "additionalProperties": true

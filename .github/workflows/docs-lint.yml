@@ -20,6 +20,6 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run Markdown Lint
         run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules'
