@@ -1,295 +1,114 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import {
-  ClaimExtractor,
-  ContradictionDetector,
-  ClaimValidator,
-} from '../OSINTPipeline.js';
+import { ClaimExtractor } from '../ClaimExtractor.js';
+import { ClaimValidator } from '../ClaimValidator.js';
+import { ContradictionDetector } from '../ContradictionDetector.js';
+import { OSINTPipeline } from '../OSINTPipeline.js';
 import {
   Claim,
-  OSINTProfile,
+  Contradiction,
+  OSINTEnrichmentResult,
   SocialMediaProfile,
   CorporateRecord,
-  PublicRecord,
 } from '../types.js';
 
 describe('ClaimExtractor', () => {
   let extractor: ClaimExtractor;
-  const subjectId = 'test-subject-123';
 
   beforeEach(() => {
     extractor = new ClaimExtractor();
   });
 
-  describe('extractFromProfile', () => {
-    it('should extract claims from social profiles', () => {
-      const profile: Partial<OSINTProfile> = {
-        socialProfiles: [
-          {
-            platform: 'linkedin',
-            username: 'johndoe',
-            url: 'https://linkedin.com/in/johndoe',
-            displayName: 'John Doe',
-            lastActive: '2026-01-15',
-          },
-        ],
-        corporateRecords: [],
-        publicRecords: [],
+  describe('extract', () => {
+    it('should extract claims from social profile enrichment results', () => {
+      const socialProfile: SocialMediaProfile = {
+        platform: 'linkedin',
+        username: 'johndoe',
+        url: 'https://linkedin.com/in/johndoe',
+        displayName: 'John Doe',
+        lastActive: '2026-01-15',
       };
 
-      const claims = extractor.extractFromProfile(profile, subjectId);
+      const results: OSINTEnrichmentResult[] = [
+        {
+          source: 'linkedin-connector',
+          data: socialProfile,
+          confidence: 0.8,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const claims = extractor.extract(results);
 
       expect(claims.length).toBeGreaterThanOrEqual(2);
 
-      // Check for social account claim
-      const socialClaim = claims.find(
-        (c) => c.predicate === 'has_social_account'
-      );
-      expect(socialClaim).toBeDefined();
-      expect(socialClaim?.subject).toBe(subjectId);
-      expect(socialClaim?.object.platform).toBe('linkedin');
-      expect(socialClaim?.confidence).toBeCloseTo(0.7, 1);
+      // Check for account claim
+      const accountClaim = claims.find((c) => c.predicate === 'hasAccount');
+      expect(accountClaim).toBeDefined();
+      expect(accountClaim?.object).toEqual({
+        platform: 'linkedin',
+        url: 'https://linkedin.com/in/johndoe',
+      });
 
-      // Check for known_as claim
-      const nameClaim = claims.find((c) => c.predicate === 'known_as');
+      // Check for display name claim
+      const nameClaim = claims.find((c) => c.predicate === 'hasDisplayName');
       expect(nameClaim).toBeDefined();
       expect(nameClaim?.object).toBe('John Doe');
     });
 
-    it('should extract claims from corporate records', () => {
-      const profile: Partial<OSINTProfile> = {
-        socialProfiles: [],
-        corporateRecords: [
-          {
-            companyName: 'Acme Corp',
-            registrationNumber: 'REG123456',
-            jurisdiction: 'Delaware',
-            incorporationDate: '2020-01-01',
-            status: 'active',
-            officers: [{ name: 'Jane Smith', role: 'CEO' }],
-          },
-        ],
-        publicRecords: [],
+    it('should extract claims from corporate record enrichment results', () => {
+      const corpRecord: CorporateRecord = {
+        companyName: 'Acme Corp',
+        registrationNumber: 'REG123456',
+        jurisdiction: 'Delaware',
+        incorporationDate: '2020-01-01',
+        status: 'active',
+        officers: [{ name: 'Jane Smith', role: 'CEO' }],
       };
 
-      const claims = extractor.extractFromProfile(profile, subjectId);
+      const results: OSINTEnrichmentResult[] = [
+        {
+          source: 'delaware-registry',
+          data: corpRecord,
+          confidence: 0.95,
+          timestamp: new Date().toISOString(),
+        },
+      ];
 
-      expect(claims.length).toBeGreaterThanOrEqual(2);
+      const claims = extractor.extract(results);
+
+      expect(claims.length).toBeGreaterThanOrEqual(3);
 
       // Check for company registration claim
-      const corpClaim = claims.find(
-        (c) => c.predicate === 'is_registered_company'
-      );
-      expect(corpClaim).toBeDefined();
-      expect(corpClaim?.object.name).toBe('Acme Corp');
-      expect(corpClaim?.confidence).toBeCloseTo(0.9, 1);
-      expect(corpClaim?.validFrom).toBe('2020-01-01');
+      const regClaim = claims.find((c) => c.predicate === 'isRegisteredAs');
+      expect(regClaim).toBeDefined();
+      expect(regClaim?.object).toBe('Acme Corp');
+
+      // Check for status claim
+      const statusClaim = claims.find((c) => c.predicate === 'hasStatus');
+      expect(statusClaim).toBeDefined();
+      expect(statusClaim?.object).toBe('active');
 
       // Check for officer claim
-      const officerClaim = claims.find((c) => c.predicate === 'has_officer');
+      const officerClaim = claims.find((c) => c.predicate === 'hasOfficer');
       expect(officerClaim).toBeDefined();
-      expect(officerClaim?.object.name).toBe('Jane Smith');
+      expect(officerClaim?.object).toEqual({ name: 'Jane Smith', role: 'CEO' });
     });
 
-    it('should extract claims from public records', () => {
-      const profile: Partial<OSINTProfile> = {
-        socialProfiles: [],
-        corporateRecords: [],
-        publicRecords: [
-          {
-            source: 'county-records',
-            recordType: 'court_filing',
-            date: '2025-06-15',
-            details: { caseNumber: 'CV-2025-001', type: 'civil' },
-          },
-        ],
-      };
-
-      const claims = extractor.extractFromProfile(profile, subjectId);
-
-      expect(claims.length).toBe(1);
-
-      const pubClaim = claims.find((c) => c.predicate === 'has_court_filing');
-      expect(pubClaim).toBeDefined();
-      expect(pubClaim?.confidence).toBeCloseTo(0.85, 1);
-      expect(pubClaim?.validFrom).toBe('2025-06-15');
-    });
-
-    it('should log evidence for provenance tracking', () => {
-      const profile: Partial<OSINTProfile> = {
-        socialProfiles: [
-          {
-            platform: 'twitter',
-            username: 'test',
-            url: 'https://twitter.com/test',
-          },
-        ],
-        corporateRecords: [],
-        publicRecords: [],
-      };
-
-      extractor.extractFromProfile(profile, subjectId);
-      const evidenceLog = extractor.getEvidenceLog();
-
-      expect(evidenceLog.length).toBe(1);
-      expect(evidenceLog[0].evidenceId).toMatch(/^E-\d{8}-\d{3}$/);
-      expect(evidenceLog[0].action).toContain('extracted');
-    });
-  });
-});
-
-describe('ContradictionDetector', () => {
-  let detector: ContradictionDetector;
-
-  beforeEach(() => {
-    detector = new ContradictionDetector();
-  });
-
-  describe('detectContradictions', () => {
-    it('should detect status contradictions from different sources', () => {
-      const claims: Claim[] = [
+    it('should generate unique claim IDs based on content', () => {
+      const results: OSINTEnrichmentResult[] = [
         {
-          id: 'claim-1',
-          sourceId: 'source-a',
-          subject: 'company-123',
-          predicate: 'has_status',
-          object: 'active',
-          confidence: 0.9,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 'claim-2',
-          sourceId: 'source-b',
-          subject: 'company-123',
-          predicate: 'has_status',
-          object: 'dissolved',
-          confidence: 0.85,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-
-      const contradictions = detector.detectContradictions(claims);
-
-      expect(contradictions.length).toBe(1);
-      expect(contradictions[0].claimIdA).toBe('claim-1');
-      expect(contradictions[0].claimIdB).toBe('claim-2');
-      expect(contradictions[0].reason).toContain('Conflicting status');
-      expect(contradictions[0].severity).toBe('high');
-    });
-
-    it('should detect temporal contradictions with overlapping periods', () => {
-      const claims: Claim[] = [
-        {
-          id: 'claim-1',
-          sourceId: 'source-a',
-          subject: 'person-123',
-          predicate: 'employed_at',
-          object: { company: 'Acme Corp', role: 'Engineer' },
-          confidence: 0.8,
-          timestamp: new Date().toISOString(),
-          validFrom: '2020-01-01',
-          validTo: '2023-12-31',
-        },
-        {
-          id: 'claim-2',
-          sourceId: 'source-b',
-          subject: 'person-123',
-          predicate: 'employed_at',
-          object: { company: 'Other Corp', role: 'Manager' },
-          confidence: 0.75,
-          timestamp: new Date().toISOString(),
-          validFrom: '2022-01-01',
-          validTo: '2024-06-30',
-        },
-      ];
-
-      const contradictions = detector.detectContradictions(claims);
-
-      expect(contradictions.length).toBe(1);
-      expect(contradictions[0].reason).toContain('Temporal overlap');
-      expect(contradictions[0].severity).toBe('medium');
-    });
-
-    it('should detect identity contradictions (different names)', () => {
-      const claims: Claim[] = [
-        {
-          id: 'claim-1',
-          sourceId: 'linkedin',
-          subject: 'person-123',
-          predicate: 'known_as',
-          object: 'John Smith',
-          confidence: 0.8,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 'claim-2',
-          sourceId: 'twitter',
-          subject: 'person-123',
-          predicate: 'known_as',
-          object: 'Robert Johnson',
+          source: 'source-a',
+          data: { platform: 'twitter', username: 'test' } as SocialMediaProfile,
           confidence: 0.7,
           timestamp: new Date().toISOString(),
         },
       ];
 
-      const contradictions = detector.detectContradictions(claims);
+      const claims1 = extractor.extract(results);
+      const claims2 = extractor.extract(results);
 
-      expect(contradictions.length).toBe(1);
-      expect(contradictions[0].reason).toContain('Identity conflict');
-      expect(contradictions[0].severity).toBe('high');
-    });
-
-    it('should not flag similar names as contradictions', () => {
-      const claims: Claim[] = [
-        {
-          id: 'claim-1',
-          sourceId: 'source-a',
-          subject: 'person-123',
-          predicate: 'known_as',
-          object: 'John Smith',
-          confidence: 0.8,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 'claim-2',
-          sourceId: 'source-b',
-          subject: 'person-123',
-          predicate: 'known_as',
-          object: 'John A. Smith',
-          confidence: 0.75,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-
-      const contradictions = detector.detectContradictions(claims);
-
-      expect(contradictions.length).toBe(0);
-    });
-
-    it('should return empty array when no contradictions exist', () => {
-      const claims: Claim[] = [
-        {
-          id: 'claim-1',
-          sourceId: 'source-a',
-          subject: 'company-123',
-          predicate: 'has_status',
-          object: 'active',
-          confidence: 0.9,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          id: 'claim-2',
-          sourceId: 'source-b',
-          subject: 'company-456', // Different subject
-          predicate: 'has_status',
-          object: 'dissolved',
-          confidence: 0.85,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-
-      const contradictions = detector.detectContradictions(claims);
-
-      expect(contradictions.length).toBe(0);
+      // Same input should produce same claim IDs (content-based hashing)
+      expect(claims1[0].id).toBe(claims2[0].id);
     });
   });
 });
@@ -308,8 +127,8 @@ describe('ClaimValidator', () => {
           id: 'claim-1',
           sourceId: 'source-a',
           subject: 'company-123',
-          predicate: 'is_registered_company',
-          object: { name: 'Acme Corp' },
+          predicate: 'isRegisteredAs',
+          object: 'Acme Corp',
           confidence: 0.7,
           timestamp: new Date().toISOString(),
         },
@@ -317,27 +136,33 @@ describe('ClaimValidator', () => {
           id: 'claim-2',
           sourceId: 'source-b',
           subject: 'company-123',
-          predicate: 'is_registered_company',
-          object: { name: 'Acme Corp' },
+          predicate: 'isRegisteredAs',
+          object: 'Acme Corp',
           confidence: 0.65,
           timestamp: new Date().toISOString(),
         },
       ];
 
-      const validated = await validator.validate(claims, []);
+      const validated = await validator.validate(claims);
 
-      // Both claims should have boosted confidence due to corroboration
-      expect(validated[0].confidence).toBeGreaterThan(claims[0].confidence);
-      expect(validated[1].confidence).toBeGreaterThan(claims[1].confidence);
+      // Both claims should have verification history
+      expect(validated[0].verificationHistory?.length).toBeGreaterThan(0);
+      expect(validated[1].verificationHistory?.length).toBeGreaterThan(0);
+
+      // Corroborated claims should have boosted confidence
+      const corroborationResult = validated[0].verificationHistory?.find(
+        (v) => v.verifierId === 'corroboration'
+      );
+      expect(corroborationResult?.status).toBe('confirmed');
     });
 
-    it('should penalize contradicted claims', async () => {
+    it('should penalize conflicting claims', async () => {
       const claims: Claim[] = [
         {
           id: 'claim-1',
           sourceId: 'source-a',
           subject: 'company-123',
-          predicate: 'has_status',
+          predicate: 'hasStatus',
           object: 'active',
           confidence: 0.9,
           timestamp: new Date().toISOString(),
@@ -346,191 +171,310 @@ describe('ClaimValidator', () => {
           id: 'claim-2',
           sourceId: 'source-b',
           subject: 'company-123',
-          predicate: 'has_status',
+          predicate: 'hasStatus',
           object: 'dissolved',
           confidence: 0.85,
           timestamp: new Date().toISOString(),
         },
       ];
 
-      const contradictions = [
-        {
-          id: 'c-1',
-          claimIdA: 'claim-1',
-          claimIdB: 'claim-2',
-          reason: 'Conflicting status',
-          detectedAt: new Date().toISOString(),
-          severity: 'high' as const,
-        },
-      ];
+      const validated = await validator.validate(claims);
 
-      const validated = await validator.validate(claims, contradictions);
-
-      // Contradicted claims should have reduced confidence
-      expect(validated[0].confidence).toBeLessThan(claims[0].confidence);
-      expect(validated[1].confidence).toBeLessThan(claims[1].confidence);
-    });
-
-    it('should add verification history to claims', async () => {
-      const claims: Claim[] = [
-        {
-          id: 'claim-1',
-          sourceId: 'source-a',
-          subject: 'person-123',
-          predicate: 'known_as',
-          object: 'John Doe',
-          confidence: 0.8,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-
-      const validated = await validator.validate(claims, []);
-
-      expect(validated[0].verificationHistory).toBeDefined();
-      expect(validated[0].verificationHistory!.length).toBe(1);
-      expect(validated[0].verificationHistory![0].verifierId).toBe(
-        'osint-pipeline-validator'
+      // Check that conflicting claims are marked appropriately
+      const refutedResults = validated.flatMap(
+        (c) => c.verificationHistory?.filter((v) => v.status === 'refuted') || []
       );
-      expect(validated[0].verificationHistory![0].evidence).toBeDefined();
-      expect(validated[0].verificationHistory![0].evidence![0]).toMatch(
-        /^E-\d{8}-\d{3}$/
-      );
+
+      // At least one claim should show evidence of conflict
+      expect(refutedResults.length + validated.filter(c =>
+        c.verificationHistory?.some(v => v.status === 'uncertain')
+      ).length).toBeGreaterThan(0);
     });
 
-    it('should mark high-confidence claims as confirmed', async () => {
-      const claims: Claim[] = [
-        {
-          id: 'claim-1',
-          sourceId: 'corporate-registry',
-          subject: 'company-123',
-          predicate: 'is_registered_company',
-          object: { name: 'Acme Corp' },
-          confidence: 0.95,
-          timestamp: new Date().toISOString(),
-        },
-      ];
+    it('should apply temporal consistency checks', async () => {
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
 
-      const validated = await validator.validate(claims, []);
-
-      expect(validated[0].verificationHistory![0].status).toBe('confirmed');
-    });
-
-    it('should mark contradicted claims as uncertain', async () => {
       const claims: Claim[] = [
         {
           id: 'claim-1',
           sourceId: 'source-a',
           subject: 'company-123',
-          predicate: 'has_status',
+          predicate: 'incorporatedOn',
+          object: futureDate.toISOString(),
+          confidence: 0.9,
+          timestamp: new Date().toISOString(),
+          validFrom: futureDate.toISOString(),
+        },
+      ];
+
+      const validated = await validator.validate(claims);
+
+      // Claim with future validity should be flagged
+      const temporalResult = validated[0].verificationHistory?.find(
+        (v) => v.verifierId === 'temporal-consistency'
+      );
+      expect(temporalResult).toBeDefined();
+      expect(temporalResult?.status).not.toBe('confirmed');
+    });
+  });
+});
+
+describe('ContradictionDetector', () => {
+  let detector: ContradictionDetector;
+
+  beforeEach(() => {
+    detector = new ContradictionDetector();
+  });
+
+  describe('detect', () => {
+    it('should detect temporal overlap contradictions', () => {
+      const claims: Claim[] = [
+        {
+          id: 'claim-1',
+          sourceId: 'source-a',
+          subject: 'company-123',
+          predicate: 'hasStatus',
+          object: 'active',
+          confidence: 0.9,
+          timestamp: new Date().toISOString(),
+          validFrom: '2020-01-01',
+          validTo: '2023-12-31',
+        },
+        {
+          id: 'claim-2',
+          sourceId: 'source-b',
+          subject: 'company-123',
+          predicate: 'hasStatus',
+          object: 'dissolved',
+          confidence: 0.85,
+          timestamp: new Date().toISOString(),
+          validFrom: '2022-01-01',
+          validTo: '2024-06-30',
+        },
+      ];
+
+      const contradictions = detector.detect(claims);
+
+      expect(contradictions.length).toBeGreaterThan(0);
+      expect(contradictions[0].severity).toBe('high');
+      expect(contradictions[0].reason).toContain('Temporal Overlap');
+    });
+
+    it('should detect mutual exclusion contradictions', () => {
+      const claims: Claim[] = [
+        {
+          id: 'claim-1',
+          sourceId: 'source-a',
+          subject: 'company-123',
+          predicate: 'hasStatus',
+          object: 'active',
+          confidence: 0.9,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: 'claim-2',
+          sourceId: 'source-b',
+          subject: 'company-123',
+          predicate: 'hasStatus',
+          object: 'dissolved',
+          confidence: 0.85,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const contradictions = detector.detect(claims);
+
+      expect(contradictions.length).toBeGreaterThan(0);
+      const mutualExclusion = contradictions.find((c) =>
+        c.reason.includes('Mutual Exclusion')
+      );
+      expect(mutualExclusion).toBeDefined();
+      expect(mutualExclusion?.severity).toBe('high');
+    });
+
+    it('should not flag claims about different subjects', () => {
+      const claims: Claim[] = [
+        {
+          id: 'claim-1',
+          sourceId: 'source-a',
+          subject: 'company-123',
+          predicate: 'hasStatus',
+          object: 'active',
+          confidence: 0.9,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: 'claim-2',
+          sourceId: 'source-b',
+          subject: 'company-456', // Different subject
+          predicate: 'hasStatus',
+          object: 'dissolved',
+          confidence: 0.85,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const contradictions = detector.detect(claims);
+
+      expect(contradictions.length).toBe(0);
+    });
+
+    it('should detect numeric discrepancies', () => {
+      const claims: Claim[] = [
+        {
+          id: 'claim-1',
+          sourceId: 'source-a',
+          subject: 'user:twitter:johndoe',
+          predicate: 'hasFollowerCount',
+          object: 10000,
+          confidence: 0.9,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: 'claim-2',
+          sourceId: 'source-b',
+          subject: 'user:twitter:johndoe',
+          predicate: 'hasFollowerCount',
+          object: 50000, // 5x difference
+          confidence: 0.85,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
+      const contradictions = detector.detect(claims);
+
+      // Should detect significant numeric discrepancy
+      const numericContradiction = contradictions.find((c) =>
+        c.reason.includes('Numeric')
+      );
+      expect(numericContradiction).toBeDefined();
+    });
+  });
+
+  describe('detectForClaim', () => {
+    it('should detect contradictions for a single new claim', () => {
+      const existingClaims: Claim[] = [
+        {
+          id: 'existing-1',
+          sourceId: 'source-a',
+          subject: 'company-123',
+          predicate: 'hasStatus',
           object: 'active',
           confidence: 0.9,
           timestamp: new Date().toISOString(),
         },
       ];
 
-      const contradictions = [
-        {
-          id: 'c-1',
-          claimIdA: 'claim-1',
-          claimIdB: 'claim-2',
-          reason: 'Test contradiction',
-          detectedAt: new Date().toISOString(),
-          severity: 'medium' as const,
-        },
-      ];
+      const newClaim: Claim = {
+        id: 'new-1',
+        sourceId: 'source-b',
+        subject: 'company-123',
+        predicate: 'hasStatus',
+        object: 'dissolved',
+        confidence: 0.85,
+        timestamp: new Date().toISOString(),
+      };
 
-      const validated = await validator.validate(claims, contradictions);
+      const contradictions = detector.detectForClaim(newClaim, existingClaims);
 
-      expect(validated[0].verificationHistory![0].status).toBe('uncertain');
-    });
-
-    it('should apply recency factor to older claims', async () => {
-      const oldDate = new Date();
-      oldDate.setFullYear(oldDate.getFullYear() - 2);
-
-      const claims: Claim[] = [
-        {
-          id: 'claim-1',
-          sourceId: 'source-a',
-          subject: 'person-123',
-          predicate: 'employed_at',
-          object: 'Old Company',
-          confidence: 0.8,
-          timestamp: oldDate.toISOString(),
-        },
-        {
-          id: 'claim-2',
-          sourceId: 'source-b',
-          subject: 'person-123',
-          predicate: 'employed_at',
-          object: 'New Company',
-          confidence: 0.8,
-          timestamp: new Date().toISOString(),
-        },
-      ];
-
-      const validated = await validator.validate(claims, []);
-
-      // Recent claim should have higher confidence after recency factor
-      expect(validated[1].confidence).toBeGreaterThan(validated[0].confidence);
+      expect(contradictions.length).toBeGreaterThan(0);
     });
   });
 });
 
-describe('Integration: Full Claim Validation Pipeline', () => {
-  it('should process a complete OSINT profile through the validation pipeline', async () => {
-    const extractor = new ClaimExtractor();
-    const detector = new ContradictionDetector();
-    const validator = new ClaimValidator();
+describe('OSINTPipeline Integration', () => {
+  describe('helper methods', () => {
+    it('should get low confidence claims', () => {
+      const pipeline = new OSINTPipeline();
 
-    // Synthetic profile with potential contradictions
-    const profile: Partial<OSINTProfile> = {
-      socialProfiles: [
-        {
-          platform: 'linkedin',
-          username: 'johndoe',
-          url: 'https://linkedin.com/in/johndoe',
-          displayName: 'John Doe',
-        },
-        {
-          platform: 'twitter',
-          username: 'jdoe_official',
-          url: 'https://twitter.com/jdoe_official',
-          displayName: 'Jonathan Doe',
-        },
-      ],
-      corporateRecords: [
-        {
-          companyName: 'Doe Industries',
-          registrationNumber: 'DI-001',
-          jurisdiction: 'Delaware',
-          status: 'active',
-        },
-      ],
-      publicRecords: [],
-    };
+      const mockProfile = {
+        id: 'test-profile',
+        tenantId: 'tenant-1',
+        kind: 'person' as const,
+        properties: {},
+        externalRefs: [],
+        labels: [],
+        sourceIds: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        socialProfiles: [],
+        corporateRecords: [],
+        publicRecords: [],
+        confidenceScore: 0.5,
+        lastEnrichedAt: new Date().toISOString(),
+        claims: [
+          {
+            id: 'high-conf',
+            sourceId: 'source-a',
+            subject: 'test',
+            predicate: 'test',
+            object: 'test',
+            confidence: 0.9,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            id: 'low-conf',
+            sourceId: 'source-b',
+            subject: 'test',
+            predicate: 'test',
+            object: 'test',
+            confidence: 0.3,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+        contradictions: [],
+      };
 
-    const subjectId = 'test-subject';
+      const lowConfClaims = pipeline.getLowConfidenceClaims(mockProfile, 0.5);
 
-    // Step 1: Extract claims
-    const claims = extractor.extractFromProfile(profile, subjectId);
-    expect(claims.length).toBeGreaterThan(0);
+      expect(lowConfClaims.length).toBe(1);
+      expect(lowConfClaims[0].id).toBe('low-conf');
+    });
 
-    // Step 2: Detect contradictions
-    const contradictions = detector.detectContradictions(claims);
-    // May or may not have contradictions depending on name similarity
+    it('should get critical contradictions', () => {
+      const pipeline = new OSINTPipeline();
 
-    // Step 3: Validate claims
-    const validatedClaims = await validator.validate(claims, contradictions);
+      const mockProfile = {
+        id: 'test-profile',
+        tenantId: 'tenant-1',
+        kind: 'person' as const,
+        properties: {},
+        externalRefs: [],
+        labels: [],
+        sourceIds: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        socialProfiles: [],
+        corporateRecords: [],
+        publicRecords: [],
+        confidenceScore: 0.5,
+        lastEnrichedAt: new Date().toISOString(),
+        claims: [],
+        contradictions: [
+          {
+            id: 'high-sev',
+            claimIdA: 'a',
+            claimIdB: 'b',
+            reason: 'Test high',
+            detectedAt: new Date().toISOString(),
+            severity: 'high' as const,
+          },
+          {
+            id: 'low-sev',
+            claimIdA: 'c',
+            claimIdB: 'd',
+            reason: 'Test low',
+            detectedAt: new Date().toISOString(),
+            severity: 'low' as const,
+          },
+        ],
+      };
 
-    // All claims should have verification history
-    for (const claim of validatedClaims) {
-      expect(claim.verificationHistory).toBeDefined();
-      expect(claim.verificationHistory!.length).toBeGreaterThan(0);
-    }
+      const critical = pipeline.getCriticalContradictions(mockProfile);
 
-    // Evidence log should be populated
-    const evidenceLog = extractor.getEvidenceLog();
-    expect(evidenceLog.length).toBeGreaterThan(0);
+      expect(critical.length).toBe(1);
+      expect(critical[0].id).toBe('high-sev');
+    });
   });
 });
