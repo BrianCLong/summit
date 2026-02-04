@@ -1,0 +1,38 @@
+{
+  "task_id": "MCP_AGENT_AGE_ALIGNMENT_001",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "mcp-agent-age-alignment",
+    "version": "v1",
+    "sha256": "eec71973750c02eecb1ff676251d85afd7ea68e2b6ef0078cd2739d00867874b",
+    "path": "prompts/docs/mcp-agent-age-alignment@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "intelgraph-mcp/docs/strategy/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/MCP_AGENT_AGE_ALIGNMENT_001.json",
+      "prompts/docs/mcp-agent-age-alignment@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "mcp", "architecture", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "MCP strategy guidance captures agent-age architecture alignment.",
+    "MCP blueprint links to the new alignment note.",
+    "Roadmap status log updated with revision note and timestamp."
+  ],
+  "stop_conditions": [
+    "Requested scope exceeds documentation updates.",
+    "Prompt registry hash mismatch or missing prompt entry."
+  ]
+}

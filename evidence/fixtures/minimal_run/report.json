@@ -1,8 +1,6 @@
 {
-  "run_id": "minimal-run-001",
-  "item": "test-item",
-  "results": {
-    "status": "success"
-  },
-  "evidence_ids": ["EVD-CLAUDECODE-SUBAGENTS-TEST-001"]
+  "evidence_id": "EVD-CLAUDECODE-SUBAGENTS-FOUNDATION-001",
+  "summary": "PR1 test run",
+  "item_slug": "agent-harness",
+  "artifacts": ["report.json", "metrics.json", "stamp.json"]
 }

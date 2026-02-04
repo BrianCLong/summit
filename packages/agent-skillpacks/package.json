@@ -1,0 +1,33 @@
+{
+  "name": "@intelgraph/agent-skillpacks",
+  "version": "0.1.0",
+  "description": "Lazy-loaded MCP skillpacks with governance, sharding, and evidence reporting",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "minimatch": "^10.1.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/minimatch": "^6.0.0",
+    "@types/node": "20.19.27",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "skillpacks",
+    "mcp",
+    "governance",
+    "tool-routing",
+    "schema-distillation"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}

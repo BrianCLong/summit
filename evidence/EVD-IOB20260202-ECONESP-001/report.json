@@ -1,5 +1,23 @@
 {
   "evidence_id": "EVD-IOB20260202-ECONESP-001",
-  "summary": "Placeholder report for EVD-IOB20260202-ECONESP-001",
-  "artifacts": []
+  "item_slug": "iob-2026-02-02",
+  "patterns": ["insider"],
+  "claims": [
+    {
+      "text": "Former Google engineer Linwei Ding convicted of stealing AI trade secrets.",
+      "confidence": 0.99,
+      "supported_by": [
+        {
+          "url": "https://www.justice.gov/opa/pr/former-google-engineer-found-guilty-economic-espionage-and-theft-confidential-ai-technology",
+          "publisher": "U.S. Department of Justice"
+        }
+      ]
+    }
+  ],
+  "assessments": [
+    {
+      "pattern": "insider",
+      "recommended_controls": ["hardware-control bypass intent classifier", "sensitive-doc access telemetry"]
+    }
+  ]
 }
