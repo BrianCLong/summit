@@ -1,8 +1,8 @@
 # MVP-4-GA Deployment Guide
 
-> **Version**: 1.0
-> **Last Updated**: 2025-12-30
-> **Status**: Production-Ready
+> **Version**: 1.1
+> **Last Updated**: 2026-02-05
+> **Status**: Production-Ready (Intentionally constrained to current in-repo deployment tooling)
 > **Audience**: SRE, DevOps, Release Engineers
 
 ---
@@ -105,6 +105,9 @@ You may experience brief interruptions. No action required.
 ### 2.2 Verify Infrastructure
 
 ```bash
+# Summit production readiness preflight
+./scripts/ops/production-readiness-check-summit.sh
+
 # Check Kubernetes cluster health
 kubectl get nodes
 # Expected: All nodes Ready
@@ -223,20 +226,21 @@ kubectl logs -n governance deployment/opa --tail=100 | grep "bundle loaded"
 ### 4.2 Deploy Application (Rolling Update)
 
 ```bash
-# Update Helm values
-helm upgrade summit-prod ./helm/summit \
-  --namespace production \
+# Recommended: use the production deployment script
+./scripts/deploy-summit-production.sh deploy
+
+# Direct Helm command (if needed)
+helm upgrade summit ./charts/summit \
+  -f charts/summit/values.prod.yaml \
+  --namespace summit-prod \
   --set image.tag=v4.0.0-ga \
-  --set strategy.type=RollingUpdate \
-  --set strategy.maxUnavailable=0 \
-  --set strategy.maxSurge=1 \
   --wait \
   --timeout=10m
 
 # Monitor rollout
-kubectl rollout status deployment/summit-server -n production
+kubectl rollout status deployment/summit -n summit-prod
 
-# Expected: "deployment 'summit-server' successfully rolled out"
+# Expected: "deployment 'summit' successfully rolled out"
 ```
 
 **Deployment Strategy**:
@@ -249,12 +253,12 @@ kubectl rollout status deployment/summit-server -n production
 
 ```bash
 # Check pod status
-kubectl get pods -n production -l app=summit-server
+kubectl get pods -n summit-prod -l app.kubernetes.io/instance=summit
 
 # Expected: All pods Running, Ready 1/1
 
 # Check logs for errors
-kubectl logs -n production deployment/summit-server --tail=100 | grep -i error
+kubectl logs -n summit-prod deployment/summit --tail=100 | grep -i error
 # Expected: No errors
 ```
 
@@ -486,7 +490,15 @@ START
 ---
 
 **Document Control**:
-- **Version**: 1.0
+- **Version**: 1.1
 - **Owner**: SRE Team
 - **Approvers**: Release Captain, Infrastructure Lead
 - **Next Review**: Post-GA +30 days
+
+---
+
+## Evidence (In-Repo Sources)
+
+- **Production deploy script**: `scripts/deploy-summit-production.sh`
+- **Helm chart**: `charts/summit/Chart.yaml`
+- **Prod values**: `charts/summit/values.prod.yaml`

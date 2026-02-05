@@ -35,7 +35,7 @@ We deploy using **Kubernetes** (K8s) and **Helm**.
 ## Deployment via Helm
 
 1.  **Update Values**
-    Edit `kubernetes/charts/summit/values.yaml` or create a `values-prod.yaml`.
+    Edit `charts/summit/values.yaml` or create a `values-prod.yaml`.
 
     ```yaml
     image:
@@ -49,7 +49,15 @@ We deploy using **Kubernetes** (K8s) and **Helm**.
 
 2.  **Install/Upgrade**
     ```bash
-    helm upgrade --install summit ./kubernetes/charts/summit -f values-prod.yaml --namespace summit
+    helm upgrade --install summit ./charts/summit -f values-prod.yaml --namespace summit
+
+## Production Deployment Script
+
+Use the production deployment script for repeatable, validated deploys:
+
+```bash
+./scripts/deploy-summit-production.sh deploy
+```
     ```
 
 ## Manual Deployment (Docker Compose)

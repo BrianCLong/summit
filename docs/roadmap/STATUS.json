@@ -1,10 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
-  "revision_note": "Added LongHorizon orchestration MVP scope and evidence references",
-  "revision_note": "Added Platform Watch PR1 schema + evidence ID scaffolding.",
-  "revision_note": "Implemented Platform Watch pipeline, schemas, drift detection, and scheduled workflow.",
-  "last_updated": "2026-02-05T00:00:00Z",
+  "last_updated": "2026-02-05T23:06:42Z",
+  "revision_note": "Completed production environment preparation checks for Summit",
   "initiatives": [
     {
       "id": "graph-kg-platforms-ci-2026-02-05",
@@ -57,6 +53,8 @@
           "target_completion": "Sprint N+3"
         }
       ]
+    },
+    {
       "id": "platform-watch-pipeline",
       "status": "in_progress",
       "owner": "codex",
@@ -159,6 +157,8 @@
           "evidence": "labs/README.md, labs/experiment-template.md, labs/research-preview-spec.md, labs/promotion-gates.md"
         }
       ]
+    },
+    {
       "id": "F1",
       "name": "Evolutionary Orchestration MVP",
       "status": "partial",
@@ -267,6 +267,41 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
+    },
+    {
+      "id": "prod-deployment-scripts",
+      "name": "Production deployment scripts",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "GH#11680; added scripts/deploy-summit-production.sh and GA deployment doc alignment"
+    },
+    {
+      "id": "observability-stack",
+      "name": "Observability Stack: Prometheus, Loki, Grafana ready",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "GH#10687; evidence in docs/ga/OBSERVABILITY.md and observability/ stack configs"
+    },
+    {
+      "id": "alert-threshold-adjustment",
+      "name": "Alert Threshold Adjustment",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "GH#10548; thresholds aligned and documented in monitoring/README.md with references to alert rules"
+    },
+    {
+      "id": "status-page-conductor",
+      "name": "Status Page updated with conductor availability",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "GH#10676; added Conductor component mapping in monitoring/oncall-config.yml"
+    },
+    {
+      "id": "prod-env-prep",
+      "name": "Production Environment Preparation",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "GH#10764; added scripts/ops/production-readiness-check-summit.sh and GA deployment doc update"
     }
   ],
   "summary": {
@@ -275,7 +310,7 @@
     "incomplete": 0,
     "not_started": 5,
     "total": 15,
-    "ga_blockers": []
+    "ga_blockers": [],
     "id": "ip-defense-claims-c391-s420",
     "status": "completed",
     "owner": "codex",
