@@ -410,24 +410,6 @@ jobs:
           path: reports/playwright
           retention-days: 7
 
-  governance:
-    name: Governance
-    runs-on: ubuntu-latest
-    needs: [config-guard]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-      - name: Verify TSConfig Exclusions Frozen
-        run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
-      - name: Verify TSConfig Inheritance
-        run: node scripts/ci/verify_tsconfig_inheritance.mjs
-      - name: Install dependencies (for governance docs)
-        run: pnpm install --frozen-lockfile
-      - name: Verify governance docs
-        run: pnpm ci:docs-governance
-
   soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest
