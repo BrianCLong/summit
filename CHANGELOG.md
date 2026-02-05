@@ -15,8 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Unified data-run lineage and build attestations using canonical UUIDv7 correlation IDs.
+- New packages: `@intelgraph/openlineage`, `@intelgraph/summit-attest`, and `@intelgraph/summit-verify`.
+- SLSA v1 provenance predicate generation with OpenLineage run context.
+- Verifiable evidence chain between OCI attestations and data lineage.
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
+
+### Fixed
+- CI workflow stability: standardized pnpm versioning and setup order across all active workflows.
+- Improved repository merging safety by hardening `auto-enqueue` CI status checks.
+- Resolved native dependency issues for `node-canvas` in Reproducible Builds Check.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 

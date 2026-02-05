@@ -24,7 +24,8 @@ export function verifyAttestation(runId: string, attestationPath: string, manife
     const predicate = payload.predicate;
 
     const predicateRunId = predicate.buildDefinition.externalParameters.openlineage.runId;
-    const predicateManifestDigest = predicate.buildDefinition.internalParameters.runManifestDigest;
+    // Updated path to match summit-attest implementation
+    const predicateManifestDigest = predicate.buildDefinition.externalParameters.summit.runManifestDigest;
 
     const runIdMatch = predicateRunId === runId;
     result.checks.push({
@@ -72,9 +73,10 @@ export function writeEvidence(evidenceId: string, runId: string, result: Verific
 
   const report = result;
 
+  // Standardized evidence index format with 'items'
   const index = {
     version: "1.0",
-    evidence: {
+    items: {
       [evidenceId]: {
         stamp: "stamp.json",
         metrics: "metrics.json",

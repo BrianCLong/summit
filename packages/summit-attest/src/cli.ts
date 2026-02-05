@@ -14,6 +14,7 @@ if (outputDir !== '.') {
   mkdirSync(outputDir, { recursive: true });
 }
 
+// Ensure deterministic manifest
 const manifest = generateManifest(runId, [], []);
 const manifestContent = canonicalize(manifest);
 const manifestDigest = computeDigest(manifestContent);
@@ -21,7 +22,13 @@ const manifestDigest = computeDigest(manifestContent);
 writeFileSync(`${outputDir}/run-manifest.json`, manifestContent);
 
 const runUri = `openlineage://default/summit/jobs/run/${runId}`;
-const predicate = generateSLSAPredicate(runId, runUri, manifestDigest);
+const predicate = generateSLSAPredicate({
+  runId,
+  runUri,
+  manifestDigest,
+  builderId: 'https://github.com/actions/runner',
+  invocationId: process.env.GITHUB_RUN_ID
+});
 
 writeFileSync(`${outputDir}/slsa-predicate.json`, JSON.stringify(predicate, null, 2));
 

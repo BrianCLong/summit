@@ -1,44 +1,45 @@
-import crypto from 'node:crypto';
+import { createHash } from 'node:crypto';
 
-export interface RunManifest {
-  version: string;
+export interface ManifestData {
   runId: string;
-  timestamp: string;
-  inputs: Array<{
-    name: string;
-    uri: string;
-    digest?: Record<string, string>;
-  }>;
-  outputs: Array<{
-    name: string;
-    uri: string;
-    digest?: Record<string, string>;
-  }>;
-  metadata: Record<string, any>;
+  inputs: string[];
+  outputs: string[];
+  timestamp?: string; // Optional for determinism
 }
 
-export function generateManifest(runId: string, inputs: any[], outputs: any[]): RunManifest {
-  return {
-    version: '1.0.0',
+/**
+ * Generates a run-manifest object.
+ */
+export function generateManifest(runId: string, inputs: string[], outputs: string[], timestamp?: string) {
+  const manifest: any = {
+    version: "v1",
     runId,
-    timestamp: new Date().toISOString(),
-    inputs,
-    outputs,
-    metadata: {}
+    inputs: [...inputs].sort(),
+    outputs: [...outputs].sort(),
   };
+
+  if (timestamp) {
+    manifest.timestamp = timestamp;
+  }
+
+  return manifest;
 }
 
+/**
+ * Canonicalizes an object into a stable JSON string.
+ */
 export function canonicalize(obj: any): string {
-  if (obj === null || typeof obj !== 'object') {
+  if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
     return JSON.stringify(obj);
   }
-  if (Array.isArray(obj)) {
-    return '[' + obj.map(canonicalize).join(',') + ']';
-  }
   const keys = Object.keys(obj).sort();
-  return '{' + keys.map(k => JSON.stringify(k) + ':' + canonicalize(obj[k])).join(',') + '}';
+  const pairs = keys.map(key => `"${key}":${canonicalize(obj[key])}`);
+  return `{${pairs.join(',')}}`;
 }
 
+/**
+ * Computes the SHA256 digest of a string.
+ */
 export function computeDigest(content: string): string {
-  return crypto.createHash('sha256').update(content).digest('hex');
+  return createHash('sha256').update(content).digest('hex');
 }

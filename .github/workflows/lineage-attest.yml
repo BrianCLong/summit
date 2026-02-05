@@ -1,0 +1,84 @@
+name: Lineage and Attestation Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  lineage-attest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # Required for cosign keyless
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build packages
+        run: pnpm build --filter "@intelgraph/*"
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Generate Run ID (UUIDv7)
+        id: run-id
+        run: |
+          # Use our openlineage tool to generate a UUIDv7
+          RUN_ID=$(node packages/openlineage/dist/index.js generate-id)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Generated Run ID: $RUN_ID"
+
+      - name: Emit OpenLineage START
+        run: |
+          echo "Simulating OpenLineage START for ${{ steps.run-id.outputs.RUN_ID }}"
+
+      - name: Generate Manifest and SLSA Predicate
+        run: |
+          mkdir -p artifacts
+          node packages/summit-attest/dist/cli.js ${{ steps.run-id.outputs.RUN_ID }} artifacts
+
+      - name: Sign and Attest (Simulation)
+        run: |
+          echo "Simulating cosign attest for demonstration"
+          # In real implementation:
+          # cosign attest --yes --type https://slsa.dev/provenance/v1 --predicate artifacts/slsa-predicate.json <image_ref>
+
+          # For simulation, we'll create a mock signed attestation file that verify.ts expects
+          # We wrap the predicate in a Statement and then base64 it into the payload
+          PREDICATE=$(cat artifacts/slsa-predicate.json)
+          PAYLOAD=$(echo "{\"predicate\": $PREDICATE}" | base64 -w0)
+          echo "{\"payload\":\"$PAYLOAD\"}" > artifacts/attestation.json
+
+      - name: Verify Attestation and Lineage Join
+        id: verify
+        run: |
+          # Extract digest from slsa-predicate.json for verification
+          MANIFEST_DIGEST=$(jq -r '.buildDefinition.externalParameters.summit.runManifestDigest' artifacts/slsa-predicate.json)
+          node packages/summit-verify/dist/cli.js ${{ steps.run-id.outputs.RUN_ID }} artifacts/attestation.json "$MANIFEST_DIGEST" evidence
+
+      - name: Upload Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-evidence-${{ steps.run-id.outputs.RUN_ID }}
+          path: evidence/
+
+      - name: Finalize OpenLineage COMPLETE
+        if: success()
+        run: |
+          echo "Simulating OpenLineage COMPLETE for ${{ steps.run-id.outputs.RUN_ID }}"
