@@ -721,7 +721,7 @@ spec:
 
 ### 1. Deployment
 
-See [Service Mesh Deployment Runbook](../runbooks/service-mesh-deployment.md)
+See [Service Mesh Deployment Runbook](../../RUNBOOKS/service-mesh-deployment.md)
 
 **Deployment Steps**:
 
@@ -821,7 +821,7 @@ istioctl analyze -n summit
 ## Related Documentation
 
 - [Service Mesh Best Practices](./service-mesh-best-practices.md)
-- [Service Mesh Operations Runbook](../runbooks/service-mesh-operations.md)
+- [Service Mesh Operations Runbook](../../RUNBOOKS/service-mesh-operations.md)
 - [ADR-0006: mTLS via SPIFFE/SPIRE](../ADR/0006-mtls-mesh-layout.md)
 - [Multi-Cluster Setup](../../infrastructure/kubernetes/multi-cluster/README.md)
 

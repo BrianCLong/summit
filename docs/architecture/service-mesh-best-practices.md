@@ -897,7 +897,7 @@ async function fetchData(url: string) {
 ## Related Documentation
 
 - [Service Mesh Architecture](./service-mesh-architecture.md)
-- [Service Mesh Operations Runbook](../runbooks/service-mesh-operations.md)
+- [Service Mesh Operations Runbook](../../RUNBOOKS/service-mesh-operations.md)
 - [OpenTelemetry Integration Guide](../observability/opentelemetry-guide.md)
 
 ---

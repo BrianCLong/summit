@@ -307,7 +307,7 @@ type(scope): description
 
 ## Related Documentation
 
-- [Release Captain Runbook](../runbooks/release-captain.md)
+- [Release Captain Runbook](../../RUNBOOKS/release-captain.md)
 - [Release Train Workflow](../../.github/workflows/release-train.yml)
 - [Semver Calculator Script](../../.ci/scripts/release/semver_calc.py)
 - [Conventional Commits](https://www.conventionalcommits.org/)

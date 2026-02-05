@@ -272,7 +272,7 @@ This document provides a high-level summary of the service mesh implementation f
 
 ### For Operators
 
-1. **Read the Operations Runbook**: [`RUNBOOKS/service-mesh-operations.md`](../runbooks/service-mesh-operations.md)
+1. **Read the Operations Runbook**: [`RUNBOOKS/service-mesh-operations.md`](../../RUNBOOKS/service-mesh-operations.md)
 2. **Monitor Key Metrics**: Error rate, latency, circuit breaker trips
 3. **Set Up Alerts**: Prometheus alerts for critical conditions
 4. **Practice DR**: Regular disaster recovery drills
@@ -370,7 +370,7 @@ istioctl authn tls-check <pod>.summit -n summit
 
 - [Service Mesh Architecture](./service-mesh-architecture.md)
 - [Service Mesh Best Practices](./service-mesh-best-practices.md)
-- [Service Mesh Operations Runbook](../runbooks/service-mesh-operations.md)
+- [Service Mesh Operations Runbook](../../RUNBOOKS/service-mesh-operations.md)
 - [ADR-0006: mTLS via SPIFFE/SPIRE](../ADR/0006-mtls-mesh-layout.md)
 
 ### External Resources
@@ -399,7 +399,7 @@ istioctl authn tls-check <pod>.summit -n summit
 ### Incident Response
 
 - **PagerDuty**: Service mesh alerts route to SRE on-call
-- **Runbook**: [`RUNBOOKS/service-mesh-operations.md`](../runbooks/service-mesh-operations.md)
+- **Runbook**: [`RUNBOOKS/service-mesh-operations.md`](../../RUNBOOKS/service-mesh-operations.md)
 - **Emergency Contact**: See Operations Runbook
 
 ---

@@ -123,18 +123,14 @@ def main() -> int:
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
-        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json",
-        "governed_exceptions.json"
+        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
     }
-    IGNORE_DIRS = {
-        "EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti", "EVD-MITTR-AIMEM", "EVD-SKETCHDYNAMICS", "EVD-vfgnn", "EVD-INHOUSE", "EVD-ATLAS", "EVD-260119895", "EVD-SSDF12", "EVD-EXPB-CORE", "EVD-PRIVTEL", "EVD-openviking", "EVD-AGENTSKILLS", "EVD-IOB20260202", "EVD-shared-memory-orch", "EVD-INTSUM-2026-THREAT-HORIZON",
-        "DISINFO-NEWS-ECOSYSTEM-2026", "EVID-NARINT-SMOKE", "fixtures", "eval-repro", "moltbook-relay-surface-001", "forbes-2026-trends", "osintplatint_20260201_transform_search_ea8aba4", "pppt-501608", "FORBES-AGENTIC-AI-2026", "EVID-20260131-ufar-0001", "audit", "portal-kombat-venezuela", "policy"
-    }
+    IGNORE_DIRS = {"EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti"}
 
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
             continue
-        if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS) or "EVD-IOB20260202" in str(p) or "EVD-COGWAR-2026-EVENT" in str(p):
+        if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")

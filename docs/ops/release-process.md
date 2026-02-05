@@ -465,4 +465,4 @@ head -100 CHANGELOG.md
 
 - **Release Issues**: Open issue with `release` label
 - **Emergency**: Contact on-call via PagerDuty
-- **Documentation**: See [RUNBOOKS/release.md](../runbooks/release.md)
+- **Documentation**: See [RUNBOOKS/release.md](../../RUNBOOKS/release.md)
