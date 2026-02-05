@@ -1,8 +1,0 @@
-{
-  "required_invariants": [
-    "task_objective_preserved",
-    "constraints_preserved",
-    "changed_files_listed",
-    "test_outcomes_summarized"
-  ]
-}
