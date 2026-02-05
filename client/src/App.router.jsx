@@ -37,7 +37,6 @@ import {
   Timeline,
   Psychology,
   Menu as MenuIcon,
-  Map,
   Assessment,
   Settings,
   RocketLaunch,
@@ -74,9 +73,6 @@ const ThreatAssessmentEngine = React.lazy(() =>
 const OsintFeedConfig = React.lazy(() =>
   import('./components/admin/OSINTFeedConfig')
 );
-const ExecutiveDashboard = React.lazy(() =>
-  import('./features/wargame/ExecutiveDashboard')
-); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 const AccessIntelPage = React.lazy(() =>
   import('./features/rbac/AccessIntelPage.jsx')
 );
@@ -125,13 +121,11 @@ const SearchResultDetail = React.lazy(() =>
   import('./pages/Search/SearchResultDetail')
 );
 
-import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material';
 import { Security } from '@mui/icons-material';
 import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
 // Demo mode components
-import DemoIndicator from './components/common/DemoIndicator';
-const DemoWalkthrough = React.lazy(() => import('./pages/DemoWalkthrough'));
 
 // Navigation items
 const ADMIN = 'ADMIN';
@@ -154,22 +148,12 @@ const navigationItems = [
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/disclosures', label: 'Disclosures', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
-  { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
-  { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: [ADMIN] },
   { path: '/partner-console', label: 'Partner Console', icon: <Settings />, roles: [ADMIN] },
   {
     path: '/admin/osint-feeds',
     label: 'OSINT Feeds',
     icon: <Settings />,
-    roles: [ADMIN],
-  },
-  // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-  // Ethics Compliance: This dashboard is for hypothetical scenario simulation only.
-  {
-    path: '/wargame-dashboard',
-    label: 'WarGame Dashboard',
-    icon: <MilitaryTech />,
     roles: [ADMIN],
   },
   { path: '/alerting', label: 'Alerting', icon: <Notifications />, roles: [ADMIN] },
@@ -274,15 +258,9 @@ function NavigationDrawer({ open, onClose }) {
 // App Bar
 function AppHeader({ onMenuClick }) {
   const location = useLocation();
-  const navigate = useNavigate();
   const currentPage = navigationItems.find(
     (item) => item.path === location.pathname,
   );
-
-  // Show demo walkthrough link only in demo mode
-  const showDemoWalkthrough =
-    import.meta.env.VITE_DEMO_MODE === '1' ||
-    import.meta.env.VITE_DEMO_MODE === 'true';
 
   return (
     <AppBar position="fixed">
@@ -299,19 +277,6 @@ function AppHeader({ onMenuClick }) {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           IntelGraph Platform - {currentPage?.label || 'Unknown'}
         </Typography>
-        {showDemoWalkthrough && (
-          <Button
-            color="inherit"
-            onClick={() => navigate('/demo')}
-            sx={{
-              mr: 1,
-              textTransform: 'none',
-              fontSize: '0.875rem'
-            }}
-          >
-            Demo Walkthrough
-          </Button>
-        )}
       </Toolbar>
     </AppBar>
   );
@@ -809,9 +774,14 @@ function MainLayout() {
               <Route path="/threats" element={<ThreatsPage />} />
               <Route path="/disclosures" element={<DisclosurePackagerPage />} />
               <Route path="/access-intel" element={<AccessIntelPage />} />
-              <Route path="/geoint" element={<InvestigationsPage />} />
-              <Route path="/reports" element={<InvestigationsPage />} />
-              <Route path="/demo" element={<DemoWalkthrough />} />
+              <Route
+                path="/geoint"
+                element={<Navigate to="/investigations" replace />}
+              />
+              <Route
+                path="/reports"
+                element={<Navigate to="/investigations" replace />}
+              />
               <Route element={<ProtectedRoute roles={[ADMIN]} />}>
                 <Route path="/partner-console" element={<PartnerConsolePage />} />
               </Route>
@@ -821,10 +791,6 @@ function MainLayout() {
               <Route element={<ProtectedRoute roles={['ADMIN']} />}>
                 <Route path="/system" element={<AdminDashboard />} />
                 <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
-                <Route
-                  path="/wargame-dashboard"
-                  element={<ExecutiveDashboard />}
-                />
                 <Route path="/alerting" element={<AlertingPage />} />
                 <Route path="/plugins" element={<InstalledPlugins />} />
                 <Route path="/integrations" element={<IntegrationCatalog />} />
@@ -895,7 +861,6 @@ function App() {
       <ApolloProvider client={apolloClient}>
         <AuthProvider>
           <FeatureFlagProvider>
-            <DemoIndicator />
             <ThemedAppShell>
               <Router>
                 <MainLayout />

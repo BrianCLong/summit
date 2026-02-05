@@ -172,6 +172,16 @@ jobs:
       - name: Run verification scripts
         run: pnpm verify
 
+      - name: Enforce Kill List Freeze
+        run: |
+          chmod +x scripts/governance/enforce-kill-list-freeze.sh
+          ./scripts/governance/enforce-kill-list-freeze.sh
+
+      - name: Enforce Migration Guardrails
+        run: |
+          chmod +x scripts/governance/validate-migration-guardrails.sh
+          ./scripts/governance/validate-migration-guardrails.sh
+
       - name: Upload verification results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()

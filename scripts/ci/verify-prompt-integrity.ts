@@ -1,6 +1,21 @@
 import path from 'node:path';
 import { assertScopeCompliance, ensureHashMatches, getChangedFiles, getPromptByHash, loadPromptRegistry } from './lib/prompt-registry';
 
+const GATE_CATALOG = 'docs/ga/GATE_FAILURE_CATALOG.md';
+
+function gateError(summary: string, remediation: string[]): Error {
+  const lines = [
+    'GATE FAILURE: GATE-PROMPT-INTEGRITY',
+    summary,
+    '',
+    'Remediation:',
+    ...remediation.map((step) => `- ${step}`),
+    '',
+    `Reference: ${GATE_CATALOG}`,
+  ];
+  return new Error(lines.join('\n'));
+}
+
 function usage(): never {
   // eslint-disable-next-line no-console
   console.error('Usage: ts-node scripts/ci/verify-prompt-integrity.ts --prompt-hash <hash> [--registry <path>] [--diff-base <ref>]');
@@ -40,12 +55,30 @@ function main(): void {
   const prompt = getPromptByHash(registry, promptHash);
 
   if (!prompt) {
-    throw new Error(`Prompt hash ${promptHash} not found in registry.`);
+    throw gateError(`Prompt hash ${promptHash} not found in registry.`, [
+      'Confirm the prompt hash exists in prompts/registry.yaml.',
+      'Recompute the prompt hash if the prompt file changed.',
+    ]);
   }
 
-  ensureHashMatches(prompt);
+  try {
+    ensureHashMatches(prompt);
+  } catch (error) {
+    throw gateError((error as Error).message, [
+      `Update prompts/registry.yaml to match ${prompt.path}.`,
+      'Recompute sha256 and re-run the gate.',
+    ]);
+  }
+
   const changedFiles = getChangedFiles(diffBase);
-  assertScopeCompliance(prompt, changedFiles);
+  try {
+    assertScopeCompliance(prompt, changedFiles);
+  } catch (error) {
+    throw gateError((error as Error).message, [
+      'Reduce the diff to the prompt scope paths.',
+      'Or update the prompt scope in prompts/registry.yaml and re-run.',
+    ]);
+  }
 
   // eslint-disable-next-line no-console
   console.log(`Prompt integrity verified for ${prompt.id} with ${changedFiles.length} changed file(s).`);

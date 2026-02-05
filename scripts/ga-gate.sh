@@ -83,6 +83,8 @@ generate_report() {
         echo "" >> "$REPORT_MD"
         echo "## Remediation" >> "$REPORT_MD"
         echo "The following checks failed. Recommended actions:" >> "$REPORT_MD"
+        echo "" >> "$REPORT_MD"
+        echo "Reference: docs/ga/GATE_FAILURE_CATALOG.md" >> "$REPORT_MD"
         for fail in "${FAILURES[@]}"; do
             echo "### $fail" >> "$REPORT_MD"
             case "$fail" in
@@ -113,6 +115,7 @@ generate_report() {
                 "Security Check")
                     echo "- Vulnerabilities or secrets detected." >> "$REPORT_MD"
                     echo "- Review SBOM or Secret Scan output." >> "$REPORT_MD"
+                    echo "- If secrets scan is missing tooling, install gitleaks and re-run." >> "$REPORT_MD"
                     ;;
             esac
         done

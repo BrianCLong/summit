@@ -13,6 +13,22 @@ type AgentMetadata = {
   allowed_operations?: string[];
 };
 
+const GATE_CATALOG = 'docs/ga/GATE_FAILURE_CATALOG.md';
+const PR_TEMPLATE = '.github/PULL_REQUEST_TEMPLATE.md';
+
+function gateError(gateId: string, summary: string, remediation: string[]): Error {
+  const lines = [
+    `GATE FAILURE: ${gateId}`,
+    summary,
+    '',
+    'Remediation:',
+    ...remediation.map((step) => `- ${step}`),
+    '',
+    `Reference: ${GATE_CATALOG}`,
+  ];
+  return new Error(lines.join('\n'));
+}
+
 function usage(): never {
   // eslint-disable-next-line no-console
   console.error('Usage: ts-node scripts/ci/validate-pr-metadata.ts --body <path> [--registry <path>] [--output <artifact>]');
@@ -53,7 +69,10 @@ function extractMetadata(body: string): AgentMetadata {
   const endIndex = body.indexOf(endMarker);
 
   if (startIndex === -1 || endIndex === -1 || endIndex <= startIndex) {
-    throw new Error('Agent metadata markers not found in PR body.');
+    throw gateError('GATE-PR-METADATA', 'Agent metadata markers not found in PR body.', [
+      `Add the AGENT-METADATA block from ${PR_TEMPLATE}.`,
+      'Ensure the block is present between <!-- AGENT-METADATA:START --> and <!-- AGENT-METADATA:END -->.',
+    ]);
   }
 
   const snippet = body.substring(startIndex + startMarker.length, endIndex).trim();
@@ -61,7 +80,10 @@ function extractMetadata(body: string): AgentMetadata {
   const codeFenceEnd = snippet.lastIndexOf('```');
 
   if (codeFenceStart === -1 || codeFenceEnd === -1 || codeFenceEnd <= codeFenceStart) {
-    throw new Error('Agent metadata block must be wrapped in fenced JSON.');
+    throw gateError('GATE-PR-METADATA', 'Agent metadata block must be wrapped in fenced JSON.', [
+      'Wrap the metadata JSON in triple backticks.',
+      `Follow the JSON template in ${PR_TEMPLATE}.`,
+    ]);
   }
 
   const metadataBlock = snippet.substring(codeFenceStart + 3, codeFenceEnd).trim();
@@ -74,24 +96,39 @@ function validateMetadataShape(metadata: AgentMetadata): void {
   const requiredStringFields: (keyof AgentMetadata)[] = ['agent_id', 'task_id', 'prompt_hash'];
   requiredStringFields.forEach((field) => {
     if (!metadata[field] || typeof metadata[field] !== 'string') {
-      throw new Error(`Missing or invalid required field: ${field}`);
+      throw gateError('GATE-PR-METADATA', `Missing or invalid required field: ${field}`, [
+        `Populate ${field} in the metadata JSON.`,
+        `Validate the full template in ${PR_TEMPLATE}.`,
+      ]);
     }
   });
 
   if (!Array.isArray(metadata.domains) || metadata.domains.length === 0) {
-    throw new Error('domains must be a non-empty array');
+    throw gateError('GATE-PR-METADATA', 'domains must be a non-empty array.', [
+      'List all impacted domains for this change in metadata.domains.',
+      `Validate the template in ${PR_TEMPLATE}.`,
+    ]);
   }
 
   if (!Array.isArray(metadata.verification_tiers) || metadata.verification_tiers.length === 0) {
-    throw new Error('verification_tiers must be a non-empty array');
+    throw gateError('GATE-PR-METADATA', 'verification_tiers must be a non-empty array.', [
+      'Declare required verification tiers (A/B/C) for this change.',
+      `Validate the template in ${PR_TEMPLATE}.`,
+    ]);
   }
 
   if (typeof metadata.debt_delta !== 'number') {
-    throw new Error('debt_delta must be a number');
+    throw gateError('GATE-PR-METADATA', 'debt_delta must be a number.', [
+      'Provide a numeric debt_delta in metadata.',
+      `Validate the template in ${PR_TEMPLATE}.`,
+    ]);
   }
 
   if (!metadata.declared_scope || !Array.isArray(metadata.declared_scope.paths) || metadata.declared_scope.paths.length === 0) {
-    throw new Error('declared_scope.paths must list the touched areas');
+    throw gateError('GATE-PR-METADATA', 'declared_scope.paths must list the touched areas.', [
+      'List the allowed path prefixes touched by this change.',
+      `Validate the template in ${PR_TEMPLATE}.`,
+    ]);
   }
 }
 
@@ -121,11 +158,29 @@ function main(): void {
   const prompt = getPromptByHash(registry, metadata.prompt_hash);
 
   if (!prompt) {
-    throw new Error(`Prompt hash ${metadata.prompt_hash} not found in registry.`);
+    throw gateError('GATE-PROMPT-INTEGRITY', `Prompt hash ${metadata.prompt_hash} not found in registry.`, [
+      'Confirm the prompt hash exists in prompts/registry.yaml.',
+      'Recompute the prompt hash if the prompt file changed.',
+    ]);
   }
 
-  ensureHashMatches(prompt);
-  assertScopeCompliance(prompt, metadata.declared_scope.paths);
+  try {
+    ensureHashMatches(prompt);
+  } catch (error) {
+    throw gateError('GATE-PROMPT-INTEGRITY', (error as Error).message, [
+      `Update prompts/registry.yaml to match ${prompt.path}.`,
+      'Recompute sha256 and re-run the gate.',
+    ]);
+  }
+
+  try {
+    assertScopeCompliance(prompt, metadata.declared_scope.paths);
+  } catch (error) {
+    throw gateError('GATE-PROMPT-INTEGRITY', (error as Error).message, [
+      'Align declared_scope.paths with the prompt scope in prompts/registry.yaml.',
+      'Reduce PR changes or update the prompt scope and re-run.',
+    ]);
+  }
 
   const changedFiles = getChangedFiles(process.env.DIFF_BASE);
   const declaredPaths = metadata.declared_scope.paths;
@@ -133,11 +188,17 @@ function main(): void {
 
   if (diffViolations.length > 0) {
     const message = diffViolations.map((file) => `- ${file}`).join('\n');
-    throw new Error(`PR diff exceeds declared scope:\n${message}`);
+    throw gateError('GATE-PR-METADATA', `PR diff exceeds declared scope:\n${message}`, [
+      'Update declared_scope.paths to include the touched paths.',
+      'Or reduce the diff to match the declared scope.',
+    ]);
   }
 
   if (prompt.scope?.domains && metadata.domains.some((domain) => !prompt.scope.domains?.includes(domain))) {
-    throw new Error('Metadata domains must be contained within prompt scope domains.');
+    throw gateError('GATE-PROMPT-INTEGRITY', 'Metadata domains must be contained within prompt scope domains.', [
+      'Remove domains not covered by the prompt scope.',
+      'Or update the prompt scope in prompts/registry.yaml and re-run.',
+    ]);
   }
 
   writeExecutionRecord(metadata, prompt.id, outputPath);

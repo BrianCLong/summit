@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/context-shell",
+  "name": "@libs/context-shell",
   "version": "0.1.0",
   "description": "Summit Context Shell for policy-gated, auditable repo access",
   "type": "module",

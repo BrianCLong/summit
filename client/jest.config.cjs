@@ -30,6 +30,8 @@ const config = {
     '^react-redux$': '<rootDir>/../node_modules/react-redux',
     '^@emotion/react$': '<rootDir>/../node_modules/@emotion/react',
     '^@emotion/styled$': '<rootDir>/../node_modules/@emotion/styled',
+    '^entities/decode$': '<rootDir>/__mocks__/entities-decode.js',
+    '^entities/escape$': '<rootDir>/__mocks__/entities-escape.js',
   },
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {

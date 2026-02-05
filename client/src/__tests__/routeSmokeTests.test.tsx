@@ -18,6 +18,7 @@ import { apolloClient } from '../services/apollo';
 import { getIntelGraphTheme } from '../theme/intelgraphTheme';
 import { AuthProvider } from '../context/AuthContext';
 import ReleaseReadinessRoute from '../routes/ReleaseReadinessRoute';
+import App from '../App.router.jsx';
 
 // Mock apollo client to bypass import.meta check in js file
 jest.mock('../services/apollo', () => ({
@@ -27,6 +28,21 @@ jest.mock('../services/apollo', () => ({
     readQuery: jest.fn(),
     writeQuery: jest.fn(),
   },
+}));
+
+jest.mock('../context/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useAuth: () => ({
+    user: { role: 'ADMIN' },
+    loading: false,
+    hasRole: () => true,
+    hasPermission: () => true,
+  }),
+}));
+
+jest.mock('../hooks/useFeatureFlag', () => ({
+  FeatureFlagProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useFeatureFlag: () => false,
 }));
 
 // Mock fetch for API calls
@@ -126,6 +142,19 @@ const renderWithProviders = (ui: React.ReactElement, { route = '/' } = {}) => {
     </Provider>
   );
 };
+
+const renderAppAt = (route: string) => {
+  window.history.pushState({}, 'Test page', route);
+  return render(<App />);
+};
+
+const mockFetchOk = () => {
+  (global.fetch as any).mockResolvedValue({
+    ok: true,
+    json: async () => ({}),
+  });
+};
+
 
 describe('Route Smoke Tests - Console Error Detection', () => {
   describe('Release Readiness Route', () => {
@@ -335,6 +364,40 @@ describe('Route Smoke Tests - Console Error Detection', () => {
 
       // No new console errors
       expect(consoleErrors).toHaveLength(0);
+    });
+  });
+
+  describe('Route audit smoke', () => {
+    it('redirects /geoint to /investigations', async () => {
+      mockFetchOk();
+      renderAppAt('/geoint');
+
+      await waitFor(() => {
+        expect(window.location.pathname).toBe('/investigations');
+      });
+    });
+
+    it('redirects /reports to /investigations', async () => {
+      mockFetchOk();
+      renderAppAt('/reports');
+
+      await waitFor(() => {
+        expect(window.location.pathname).toBe('/investigations');
+      });
+    });
+
+    it('shows NotFound for removed demo routes', async () => {
+      mockFetchOk();
+      renderAppAt('/demo');
+
+      expect(await screen.findByText(/404 - Page Not Found/i)).toBeInTheDocument();
+    });
+
+    it('shows NotFound for removed wargame route', async () => {
+      mockFetchOk();
+      renderAppAt('/wargame-dashboard');
+
+      expect(await screen.findByText(/404 - Page Not Found/i)).toBeInTheDocument();
     });
   });
 
