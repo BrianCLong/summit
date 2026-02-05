@@ -565,7 +565,7 @@ redis-cli -h localhost -p 6379 INFO server
 
 ## Related Documentation
 
-- [RUNBOOKS/DR.md](../../RUNBOOKS/DR.md) - Quick DR reference
+- [runbooks/DR.md](../runbooks/DR.md) - Quick DR reference
 - [docs/runbooks/backup_runbook.md](./backup_runbook.md) - Legacy backup procedures
 - [docs/runbooks/restore_runbook.md](./restore_runbook.md) - Legacy restore procedures
 - [docs/runbooks/dr/pitr_restore_rds.md](./dr/pitr_restore_rds.md) - RDS PITR procedures

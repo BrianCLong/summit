@@ -127,7 +127,7 @@ def main() -> int:
         "governed_exceptions.json"
     }
     IGNORE_DIRS = {
-        "EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti",
+        "EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti", "EVD-MITTR-AIMEM", "EVD-SKETCHDYNAMICS", "EVD-vfgnn", "EVD-INHOUSE", "EVD-ATLAS", "EVD-260119895", "EVD-SSDF12", "EVD-EXPB-CORE", "EVD-PRIVTEL", "EVD-openviking", "EVD-AGENTSKILLS", "EVD-IOB20260202", "EVD-shared-memory-orch", "EVD-INTSUM-2026-THREAT-HORIZON",
         "DISINFO-NEWS-ECOSYSTEM-2026", "EVID-NARINT-SMOKE", "fixtures", "eval-repro", "moltbook-relay-surface-001", "forbes-2026-trends", "osintplatint_20260201_transform_search_ea8aba4", "pppt-501608", "FORBES-AGENTIC-AI-2026", "EVID-20260131-ufar-0001", "audit", "portal-kombat-venezuela", "policy"
     }
 

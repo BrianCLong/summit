@@ -361,7 +361,7 @@ If CI detects schema drift:
 
 - **Slack**: `#database-migrations` channel
 - **Documentation**: [docs/DATABASE_MIGRATION_STRATEGY.md](./DATABASE_MIGRATION_STRATEGY.md)
-- **Runbooks**: [RUNBOOKS/database/](../RUNBOOKS/database/)
+- **Runbooks**: [RUNBOOKS/database/](runbooks/database/)
 - **Team Lead**: Platform Engineering Team
 
 ---

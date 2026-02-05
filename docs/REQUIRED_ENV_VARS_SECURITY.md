@@ -320,7 +320,7 @@ sum(insecure_default_secrets_active{env="production"}) > 0
 - [SECURITY.md](../SECURITY.md) - Comprehensive security policy
 - [SECURITY_MITIGATIONS.md](../SECURITY_MITIGATIONS.md) - Known vulnerabilities and mitigations
 - [OPERATOR_GUIDE.md](../OPERATOR_GUIDE.md) - Deployment procedures
-- [RUNBOOKS/break-glass-access.md](../RUNBOOKS/break-glass-access.md) - Emergency access procedures
+- [RUNBOOKS/break-glass-access.md](runbooks/break-glass-access.md) - Emergency access procedures
 
 ---
 
