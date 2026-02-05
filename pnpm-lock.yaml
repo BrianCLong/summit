@@ -8898,7 +8898,7 @@ importers:
     dependencies:
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../../../platform/maestro-core
+        version: link:../../maestro-core
       '@maestro/recursive-context-runtime':
         specifier: workspace:*
         version: link:../../recursive-context-runtime
@@ -8917,7 +8917,7 @@ importers:
     dependencies:
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../../../platform/maestro-core
+        version: link:../../maestro-core
       uuid:
         specifier: ^11.0.0
         version: 11.1.0
@@ -8933,13 +8933,13 @@ importers:
     dependencies:
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../../../platform/maestro-core
+        version: link:../../maestro-core
 
   packages/maestro-skills/skill-ui-build-loop:
     dependencies:
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../../../platform/maestro-core
+        version: link:../../maestro-core
       uuid:
         specifier: ^11.0.0
         version: 11.1.0
@@ -8955,7 +8955,7 @@ importers:
     dependencies:
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../../../platform/maestro-core
+        version: link:../../maestro-core
       uuid:
         specifier: ^11.0.0
         version: 11.1.0
@@ -8971,7 +8971,7 @@ importers:
     dependencies:
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../../../platform/maestro-core
+        version: link:../../maestro-core
       uuid:
         specifier: ^9.0.0
         version: 9.0.1
@@ -13702,7 +13702,7 @@ importers:
         version: link:../governance-kernel
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../maestro-core
+        version: link:../../packages/maestro-core
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
@@ -13777,7 +13777,7 @@ importers:
         version: link:../governance-kernel
       '@intelgraph/maestro-core':
         specifier: workspace:*
-        version: link:../maestro-core
+        version: link:../../packages/maestro-core
       '@intelgraph/securiteyes':
         specifier: workspace:*
         version: link:../securiteyes

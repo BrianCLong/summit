@@ -7,6 +7,24 @@
 | 1.0.x   | :white_check_mark: |
 | < 1.0   | :x:                |
 
+## Supported Deployment Models
+
+Summit supports the following deployment models:
+
+- **Local/Dev**: Docker Compose-based stack for development and validation.
+- **Self-hosted**: Kubernetes or Docker-based production deployments using the repo manifests.
+
+Any deployment model not listed above is **unsupported** unless documented as a **Governed Exception**.
+
+## Secrets Handling
+
+Summit treats secret handling as a production safety requirement:
+
+- **No secrets in repo**: Never commit credentials, tokens, or private keys.
+- **Environment-first**: Inject secrets via environment variables or secret managers.
+- **External secret managers**: Prefer Vault, AWS Secrets Manager, GCP Secret Manager, or Azure Key Vault.
+- **Least-privilege**: Scope secrets to the minimum runtime needed.
+
 ## Reporting a Vulnerability
 
 Please report security vulnerabilities to **security@summit.ai**.
@@ -28,10 +46,28 @@ We will acknowledge receipt within 24 hours and provide a timeline for triage an
 
 - **Security Backlog**: We maintain a deterministic backlog of security and governance items at [SECURITY_BACKLOG.md](docs/governance/SECURITY_BACKLOG.md).
 - **Provenance Policy**: Requirements for supply-chain integrity are defined in [PROVENANCE.md](docs/ga/PROVENANCE.md).
+- **Readiness Assertion**: Governance gates are defined in [Summit Readiness Assertion](docs/SUMMIT_READINESS_ASSERTION.md).
 
 ### Evidence
 
 For compliance evidence regarding vulnerability management, see [Evidence Index](docs/compliance/EVIDENCE_INDEX.md).
+
+## Baseline Controls
+
+Summit enforces baseline controls across CI and production:
+
+- **CIS hardening**: Baseline expectations captured in security hardening guidance and GA gates.
+- **SAST/Dependency scanning**: CodeQL and Dependabot alerts are treated as blocking at critical severity.
+- **Secret scanning**: Gitleaks and platform secret scanners are required.
+- **Policy-as-code**: OPA/Conftest and governance lockfiles are mandatory for configuration integrity.
+
+## GitHub Security Settings (Minimum)
+
+- **Branch protection**: `main` requires PRs, no direct commits.
+- **Required reviews**: At least one human approval; agents cannot self-approve.
+- **Required checks**: CI gate workflows, evidence validation, and security scanners.
+- **Signed commits**: All commits must be verified.
+- **Dependency alerts**: Dependabot and CodeQL alerts are enabled and monitored.
 
 ## Threat Model (MAESTRO Aligned)
 

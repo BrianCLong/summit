@@ -40,6 +40,26 @@ For ready-to-use templates that keep issues and PRs crisp, copy the relevant pla
   - `fix/graph/node-expansion-crash`
   - `docs/api/update-schema`
 
+### 1.5 Lane Labels (Definition of Done)
+
+We use `lane:*` labels to enforce ownership, routing, and acceptance criteria. Every issue and PR must carry exactly one primary lane label.
+
+**Lane definitions:**
+
+- `lane:platform`: Core platform, orchestration, and shared runtime.
+- `lane:agents`: Agent behaviors, prompt packs, and agent workflow logic.
+- `lane:security`: Security, compliance, and governance controls.
+- `lane:infra`: Infrastructure, deployment, and SRE tooling.
+- `lane:bizdev`: Product narrative, GTM, and commercial enablement.
+- `lane:gtm`: Marketing, partnerships, and external collateral.
+
+**Definition of Done (all lanes):**
+
+- Acceptance criteria met and documented.
+- Evidence attached (tests, screenshots, or logs as applicable).
+- CI gates green and required checks satisfied.
+- Readiness Assertion respected and referenced when governance gates apply.
+
 ### 2. Making Changes
 
 - **Atomic PRs**: One feature or fix per PR. Avoid "kitchen sink" PRs.
@@ -58,6 +78,7 @@ For ready-to-use templates that keep issues and PRs crisp, copy the relevant pla
   - **Evidence Bundle**: Attach proofs (tests, screenshots) as required by [Evidence Specs](docs/evidence-bundle-spec.md).
   - **CI Rules**: Acknowledge the current CI state.
 - Ensure all CI checks pass (Lint, Unit, Golden Path).
+- Lane automation: issues and PRs are routed by `lane:*` labels; missing labels will be flagged.
 
 ## 🤖 Guidelines for External Contributors (Bots & Co-authors)
 

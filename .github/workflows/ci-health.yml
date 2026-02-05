@@ -1,0 +1,50 @@
+name: CI Health Gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: read
+  dependabot-alerts: read
+
+jobs:
+  core-ci:
+    uses: ./.github/workflows/_reusable-ci.yml
+
+  integration:
+    uses: ./.github/workflows/_reusable-test-suite.yml
+    with:
+      test-type: integration
+      timeout-minutes: 45
+
+  security-dashboard:
+    name: Security Dashboard Gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: read
+      dependabot-alerts: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Evaluate Security Alerts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ALERT_THRESHOLD_CRITICAL: "0"
+        run: node scripts/ci/collect_security_metrics.mjs
+
+      - name: Upload Security Metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-metrics
+          path: artifacts/security-metrics.json
+          retention-days: 30
