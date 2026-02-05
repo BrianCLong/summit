@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MARS Plan",
+  "type": "object",
+  "required": ["schema_version", "evidence_id", "tasks"],
+  "properties": {
+    "schema_version": { "type": "string", "enum": ["1.0"] },
+    "evidence_id": { "type": "string", "pattern": "^EVID-[A-Z0-9-]{8,16}$" },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["task_id", "type", "dependencies"],
+        "properties": {
+          "task_id": { "type": "string" },
+          "type": { "type": "string", "enum": ["design", "decompose", "implement", "evaluate", "reflect"] },
+          "dependencies": { "type": "array", "items": { "type": "string" } },
+          "metadata": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

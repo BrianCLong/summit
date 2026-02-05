@@ -1,0 +1,74 @@
+{
+  "evidence_id": "EVID-MARS-AUTO1",
+  "schema_version": "1.0",
+  "tasks": [
+    {
+      "dependencies": [],
+      "task_id": "task_0",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_0"
+      ],
+      "task_id": "task_1",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_1"
+      ],
+      "task_id": "task_2",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_2"
+      ],
+      "task_id": "task_3",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_3"
+      ],
+      "task_id": "task_4",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_4"
+      ],
+      "task_id": "task_5",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_5"
+      ],
+      "task_id": "task_6",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_6"
+      ],
+      "task_id": "task_7",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_7"
+      ],
+      "task_id": "task_8",
+      "type": "decompose"
+    },
+    {
+      "dependencies": [
+        "task_8"
+      ],
+      "task_id": "task_9",
+      "type": "decompose"
+    }
+  ]
+}

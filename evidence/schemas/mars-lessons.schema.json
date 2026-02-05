@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MARS Lessons",
+  "type": "object",
+  "required": ["schema_version", "evidence_id", "lessons"],
+  "properties": {
+    "schema_version": { "type": "string", "enum": ["1.0"] },
+    "evidence_id": { "type": "string", "pattern": "^EVID-[A-Z0-9-]{8,16}$" },
+    "lessons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["lesson_id", "source", "diff_summary", "effect"],
+        "properties": {
+          "lesson_id": { "type": "string" },
+          "source": { "type": "string", "enum": ["cross_branch", "same_branch"] },
+          "diff_summary": { "type": "string" },
+          "effect": { "type": "string", "enum": ["positive", "negative", "unknown"] },
+          "redactions_applied": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
