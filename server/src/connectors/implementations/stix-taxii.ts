@@ -1,6 +1,7 @@
 import { BaseConnector } from '../base.js';
 import { ConnectorConfig, ConnectorSchema } from '../types.js';
 import { Readable } from 'stream';
+import { randomUUID } from 'node:crypto';
 import axios from 'axios';
 
 // Similar to HTTP JSON but specifically for STIX 2.1 Bundles
@@ -84,5 +85,31 @@ export class STIXConnector extends BaseConnector {
         }
       });
       return stream;
+  }
+
+  async writeRecords(records: any[]): Promise<void> {
+      if (!this.collectionId) {
+          throw new Error('STIXConnector requires a collectionId for write operations');
+      }
+
+      try {
+          // Push STIX bundle to TAXII collection
+          const bundle = {
+              type: 'bundle',
+              id: `bundle--${randomUUID()}`,
+              spec_version: '2.1',
+              objects: records
+          };
+
+          await axios.post(`${this.url}/collections/${this.collectionId}/objects/`,
+            bundle,
+            { headers: { 'Content-Type': 'application/taxii+json;version=2.1' } }
+          );
+          this.metrics.recordsProcessed += records.length;
+      } catch (err: any) {
+          this.logger.error({ err }, 'Failed to write records to TAXII');
+          this.metrics.errors++;
+          throw err;
+      }
   }
 }

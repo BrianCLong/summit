@@ -700,7 +700,7 @@ export const createApp = async () => {
         persistedQueriesPlugin as any,
         resolverMetricsPlugin as any,
         auditLoggerPlugin as any,
-        rateLimitAndCachePlugin(schema) as any,
+        // rateLimitAndCachePlugin(schema) as any,
         // Enable PBAC in production
         ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
       ],
@@ -762,10 +762,14 @@ export const createApp = async () => {
     startTrustWorker();
     // Start retention worker if enabled
     startRetentionWorker();
-    // Start streaming ingestion (Epic B)
-    streamIngest.start(['ingest-events']).catch(err => {
-      appLogger.error({ err }, 'Failed to start streaming ingestion');
-    });
+    // Start streaming ingestion if enabled (Epic B)
+    if (cfg.KAFKA_ENABLED) {
+      streamIngest.start(['ingest-events']).catch(err => {
+        appLogger.error({ err }, 'Failed to start streaming ingestion');
+      });
+    } else {
+      appLogger.info('Streaming ingestion disabled (KAFKA_ENABLED=false)');
+    }
   } else {
     appLogger.warn(
       { safetyState, env: process.env.NODE_ENV },

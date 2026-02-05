@@ -592,6 +592,20 @@ export class AuthService {
     try {
       if (!token) return null;
 
+      // Development mode bypass
+      if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
+        return {
+          id: 'dev-user-1',
+          email: 'developer@intelgraph.com',
+          username: 'developer',
+          role: 'ADMIN',
+          isActive: true,
+          createdAt: new Date(),
+          scopes: ['*'],
+          tenantId: 'tenant_1',
+        };
+      }
+
       const jwtSecret = cfg.JWT_SECRET;
       const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
 
