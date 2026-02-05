@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-UNKNOWN-001",
+  "item_slug": "item-unknown",
+  "metrics": {
+    "docs_count": 4,
+    "fixtures_checked": 2,
+    "schemas_checked": 3
+  }
+}

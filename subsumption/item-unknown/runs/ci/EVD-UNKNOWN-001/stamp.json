@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-UNKNOWN-001",
+  "item_slug": "item-unknown",
+  "timestamp": "2026-02-05T04:51:23.344Z",
+  "tool_versions": {
+    "node": "v22.22.0"
+  }
+}

@@ -133,7 +133,7 @@ See: [Agent Development](docs/agents/README.md)
 
 - [GraphQL Schema](docs/api/graphql.md)
 - [REST Endpoints](docs/api/rest.md)
-- [CompanyOS SDK](docs/api/companyos.md)
+- [CompanyOS SDK](docs/product/companyos.md)
 
 ## 🧪 Testing
 
