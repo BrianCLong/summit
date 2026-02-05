@@ -58,7 +58,7 @@ jobs:
         if: matrix.language == 'javascript-typescript'
         uses: actions/setup-node@v4 # v6
         with:
-          node-
+          node-version: 20
           cache: "pnpm"
 
       - name: Install dependencies (monorepo workspaces)

@@ -16,9 +16,7 @@ jobs:
               - 'client/**'
             server:
               - 'server/**'
-            - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-- uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: 20

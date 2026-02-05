@@ -19,7 +19,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-
+        with:
+          version: 10
       - name: Install dependencies
         run: pnpm install
       - name: Run changed skill evals
@@ -38,7 +39,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-
+        with:
+          version: 10
       - name: Install dependencies
         run: pnpm install
       - name: Run full skill eval suite
