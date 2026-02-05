@@ -153,6 +153,12 @@
       "notes": "One-pager mapping IO/CogWar radar scope to Summit/IntelGraph defensive capabilities."
     },
     {
+      "id": "influence-defense-methods-brief",
+      "status": "complete",
+      "owner": "codex",
+      "notes": "Published Summit-native defensive influence method families brief with governance and MAESTRO alignment."
+    },
+    {
       "id": "runbook-cognitive-security-defense",
       "area": "docs/runbooks",
       "status": "complete",
@@ -172,11 +178,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 15,
+    "total": 16,
     "ga_blockers": []
   }
 }
