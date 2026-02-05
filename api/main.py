@@ -50,6 +50,8 @@ redis_client = None
 graph_forecaster = None
 
 # --- AI/ML Model Loading ---
+# WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+# Ethics Compliance: Models are for hypothetical scenario simulation only.
 nlp = None
 sentence_model = None
 
@@ -85,8 +87,11 @@ async def startup_event():
             redis_client.ping()
             print("API service: Successfully connected to Redis.")
             break
-        except Exception as e:
+        except ConnectionError as e:
             print(f"API service: Redis connection failed: {e}. Retrying in {delay} seconds...")
+            time.sleep(delay)
+        except Exception as e:
+            print(f"API service: An unexpected error occurred during Redis connection: {e}")
             time.sleep(delay)
     else:
         print("API service: Failed to connect to Redis after multiple attempts.")
