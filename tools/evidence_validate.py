@@ -72,9 +72,17 @@ def main():
     success = True
 
     # Validate Items
-    for item in index_data.get("items", []):
-        evidence_id = item.get("id")
-        path = item.get("path")
+    items_data = index_data.get("items", [])
+    if isinstance(items_data, dict):
+        items_list = []
+        for eid, meta in items_data.items():
+            meta["id"] = meta.get("id", eid)
+            items_list.append(meta)
+        items_data = items_list
+
+    for item in items_data:
+        evidence_id = item.get("id") or item.get("evidence_id")
+        path = item.get("path") or item.get("report")
 
         # If path is relative, make it absolute relative to repo root (or args.evidence parent)
         # Assuming args.evidence points to 'evidence/' dir.

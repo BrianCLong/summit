@@ -35,7 +35,6 @@ jobs:
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate SBOM
@@ -59,7 +58,6 @@ jobs:
           cache: 'pnpm'
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Provenance

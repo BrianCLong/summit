@@ -128,21 +128,25 @@ class GraphPerfRunner:
                 except:
                     index = {"version": "1.0", "items": {}}
 
-            if "entries" not in index:
-                index["entries"] = []
+            if "items" not in index:
+                index["items"] = []
+
+            if isinstance(index["items"], dict):
+                # Handle legacy dict format if encountered
+                items_list = []
+                for eid, details in index["items"].items():
+                    details["evidence_id"] = details.get("evidence_id", eid)
+                    items_list.append(details)
+                index["items"] = items_list
 
             # Avoid duplicates
-            index["entries"] = [e for e in index["entries"] if e.get("id") != evidence_id]
+            index["items"] = [e for e in index["items"] if e.get("evidence_id") != evidence_id]
 
-            index["entries"].append({
-                "id": evidence_id,
-                "title": f"GraphPerf benchmark: {query_id}",
-                "category": "performance",
-                "files": [
-                    f"evidence/{evidence_id}/report.json",
-                    f"evidence/{evidence_id}/metrics.json",
-                    f"evidence/{evidence_id}/stamp.json"
-                ]
+            index["items"].append({
+                "evidence_id": evidence_id,
+                "report": f"evidence/{evidence_id}/report.json",
+                "metrics": f"evidence/{evidence_id}/metrics.json",
+                "stamp": f"evidence/{evidence_id}/stamp.json"
             })
 
             with open(index_path, "w") as f:

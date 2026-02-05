@@ -42,7 +42,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build project
@@ -71,7 +70,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run ESLint SARIF
@@ -106,7 +104,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: latest
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate TypeScript SARIF

@@ -64,7 +64,6 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
 
       - name: OPA Test
         run: opa test policy/rego/ -v
