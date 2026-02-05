@@ -1,23 +1,19 @@
 {
   "name": "@intelgraph/openlineage",
   "version": "0.1.0",
-  "description": "OpenLineage SDK for Summit IntelGraph",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "vitest run",
-    "lint": "eslint src/**/*.ts"
+    "test": "node --test dist/test/*.js"
   },
   "dependencies": {
-    "uuid": "^11.0.0",
-    "zod": "^4.3.6"
+    "uuid": "^11.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.3",
-    "vitest": "^4.0.16",
-    "@types/node": "^25.0.3",
+    "typescript": "^5.5.4",
+    "@types/node": "^20.14.12",
     "@types/uuid": "^11.0.0"
   }
 }

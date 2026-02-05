@@ -1,47 +1,44 @@
-import { writeFileSync } from 'fs';
-import { generateRunId, generateRunUri } from '@intelgraph/openlineage';
+import crypto from 'node:crypto';
 
 export interface RunManifest {
-  schemaVersion: 'v1';
+  version: string;
   runId: string;
-  runUri: string;
-  nominalTime?: string;
-  inputs: Array<{ namespace: string; name: string; digest?: string }>;
-  outputs: Array<{ namespace: string; name: string; digest?: string }>;
+  timestamp: string;
+  inputs: Array<{
+    name: string;
+    uri: string;
+    digest?: Record<string, string>;
+  }>;
+  outputs: Array<{
+    name: string;
+    uri: string;
+    digest?: Record<string, string>;
+  }>;
   metadata: Record<string, any>;
 }
 
-export function createManifest(params: {
-  tenant: string;
-  namespace: string;
-  job: string;
-  runId?: string;
-  nominalTime?: string;
-  inputs?: Array<{ namespace: string; name: string; digest?: string }>;
-  outputs?: Array<{ namespace: string; name: string; digest?: string }>;
-  metadata?: Record<string, any>;
-}): RunManifest {
-  const runId = params.runId || generateRunId();
-  const runUri = generateRunUri({
-    tenant: params.tenant,
-    namespace: params.namespace,
-    job: params.job,
-    runId,
-  });
-
+export function generateManifest(runId: string, inputs: any[], outputs: any[]): RunManifest {
   return {
-    schemaVersion: 'v1',
+    version: '1.0.0',
     runId,
-    runUri,
-    nominalTime: params.nominalTime || new Date().toISOString(),
-    inputs: params.inputs || [],
-    outputs: params.outputs || [],
-    metadata: params.metadata || {},
+    timestamp: new Date().toISOString(),
+    inputs,
+    outputs,
+    metadata: {}
   };
 }
 
-export function saveManifest(manifest: RunManifest, path: string) {
-  // Canonicalize by sorting keys? For now just stable JSON stringify
-  const content = JSON.stringify(manifest, Object.keys(manifest).sort(), 2);
-  writeFileSync(path, content + '\n');
+export function canonicalize(obj: any): string {
+  if (obj === null || typeof obj !== 'object') {
+    return JSON.stringify(obj);
+  }
+  if (Array.isArray(obj)) {
+    return '[' + obj.map(canonicalize).join(',') + ']';
+  }
+  const keys = Object.keys(obj).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + canonicalize(obj[k])).join(',') + '}';
+}
+
+export function computeDigest(content: string): string {
+  return crypto.createHash('sha256').update(content).digest('hex');
 }

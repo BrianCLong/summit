@@ -1,6 +1,7 @@
 {
+  "version": 1,
   "evidence_id": "EVD-TELETOK-2025-EVIDENCE-001",
-  "metrics": {
+  "counters": {
     "evidence_files": 3,
     "evidence_items": 1
   }

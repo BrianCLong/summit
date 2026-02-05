@@ -1,32 +1,26 @@
-import { RunManifest } from './manifest.js';
-
-/**
- * Generates a SLSA v1 Provenance predicate content.
- * See: https://slsa.dev/provenance/v1
- * Note: Returns only the predicate object, as cosign attest wraps it into a Statement.
- */
-export function createSlsaPredicate(manifest: RunManifest, buildType: string) {
+export function generateSLSAPredicate(runId: string, runUri: string, manifestDigest: string) {
   return {
-    buildDefinition: {
-      buildType: buildType,
-      externalParameters: {
-        openlineage: {
-          runId: manifest.runId,
-          runUri: manifest.runUri,
+    _type: "https://in-toto.io/Statement/v1",
+    subject: [], // Filled by cosign
+    predicateType: "https://slsa.dev/provenance/v1",
+    predicate: {
+      buildDefinition: {
+        buildType: "https://summit.dev/buildtypes/summit-ci/v1",
+        externalParameters: {
+          openlineage: {
+            runId: runId,
+            runUri: runUri
+          }
         },
+        internalParameters: {
+          runManifestDigest: manifestDigest
+        }
       },
-      internalParameters: {
-        nominalTime: manifest.nominalTime,
-      },
-      resolvedDependencies: [
-        ...manifest.inputs.map((input) => ({
-          uri: `openlineage://${input.namespace}/datasets/${input.name}`,
-          digest: input.digest ? { sha256: input.digest } : undefined,
-        })),
-      ],
-    },
-    runDetails: {
-      // Additional run info can go here
-    },
+      runDetails: {
+        builder: {
+          id: "https://summit.dev/builders/summit-ci/v1"
+        }
+      }
+    }
   };
 }

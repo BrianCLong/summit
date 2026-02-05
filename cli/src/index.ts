@@ -130,40 +130,6 @@ export {
   type DiagnosticsSummary,
 } from './lib/replay.js';
 
-// Switchboard capsule modules
-export {
-  loadCapsuleManifest,
-  normalizeRelativePath,
-  type CapsuleManifest,
-  type CapsuleStep,
-  type CapsuleWaiver,
-} from './lib/switchboard-capsule.js';
-export {
-  CapsuleLedger,
-  verifyLedger,
-  readLedgerEntries,
-  type LedgerEntry,
-  type LedgerVerificationResult,
-} from './lib/switchboard-ledger.js';
-export {
-  CapsulePolicyGate,
-  type CapsulePolicyAction,
-  type CapsulePolicyDecision,
-} from './lib/switchboard-policy.js';
-export {
-  runCapsule,
-  type CapsuleRunOptions,
-  type CapsuleRunResult,
-} from './lib/switchboard-runner.js';
-export {
-  generateEvidenceBundle,
-  type EvidenceBundleResult,
-} from './lib/switchboard-evidence.js';
-export {
-  replayCapsule,
-  type CapsuleReplayReport,
-} from './lib/switchboard-replay.js';
-
 // Determinism harness module
 export {
   runDeterminismHarness,

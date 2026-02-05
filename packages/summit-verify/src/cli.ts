@@ -1,50 +1,23 @@
-import { Command } from 'commander';
-import { verifyRun, generateEvidenceArtifacts } from './verify.js';
-import { readFileSync } from 'fs';
+import { verifyAttestation, writeEvidence } from './verify.js';
 
-const program = new Command();
+const runId = process.argv[2];
+const attestationPath = process.argv[3];
+const manifestDigest = process.argv[4];
+const outputDir = process.argv[5] || './evidence';
 
-program
-  .name('summit-verify')
-  .description('Summit Verification CLI');
+if (!runId || !attestationPath || !manifestDigest) {
+  console.error('Usage: summit-verify <runId> <attestationPath> <manifestDigest> [outputDir]');
+  process.exit(1);
+}
 
-program
-  .command('verify')
-  .requiredOption('--run-id <id>', 'Canonical Run ID')
-  .requiredOption('--image <ref>', 'OCI image reference')
-  .option('--event <path>', 'Path to OpenLineage event JSON')
-  .option('--output-dir <path>', 'Evidence output directory', './evidence')
-  .option('--key <path>', 'Path to cosign public key')
-  .option('--cert-identity <identity>', 'Expected certificate identity')
-  .option('--cert-oidc-issuer <issuer>', 'Expected certificate OIDC issuer')
-  .action(async (options) => {
-    let openlineageEvent;
-    if (options.event) {
-      openlineageEvent = JSON.parse(readFileSync(options.event, 'utf-8'));
-    }
+const result = verifyAttestation(runId, attestationPath, manifestDigest);
+const evidenceId = `evid:summit:lineage-attest:v1:${runId}`;
 
-    const result = await verifyRun({
-      runId: options.runId,
-      imageRef: options.image,
-      openlineageEvent,
-      cosignOptions: {
-        key: options.key,
-        certificateIdentity: options.certIdentity,
-        certificateOidcIssuer: options.certOidcIssuer,
-      },
-    });
+writeEvidence(evidenceId, runId, result, outputDir);
 
-    console.log(`Verification status: ${result.status}`);
-    result.checks.forEach((check) => {
-      console.log(` - ${check.name}: ${check.status}${check.message ? ` (${check.message})` : ''}`);
-    });
+console.log(`Verification ${result.status}`);
+console.log(`Evidence written to ${outputDir}`);
 
-    generateEvidenceArtifacts(result, options.outputDir);
-    console.log(`Evidence artifacts generated in ${options.outputDir}`);
-
-    if (result.status !== 'PASS') {
-      process.exit(1);
-    }
-  });
-
-program.parse();
+if (result.status === 'FAIL') {
+  process.exit(1);
+}

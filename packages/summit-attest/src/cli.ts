@@ -1,57 +1,29 @@
-import { Command } from 'commander';
-import { createManifest, saveManifest } from './manifest.js';
-import { createSlsaPredicate } from './slsa.js';
-import { attestArtifact } from './cosign.js';
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { generateManifest, canonicalize, computeDigest } from './manifest.js';
+import { generateSLSAPredicate } from './slsa.js';
 
-const program = new Command();
+const runId = process.argv[2];
+const outputDir = process.argv[3] || '.';
 
-program
-  .name('summit-attest')
-  .description('Summit Attestation CLI');
+if (!runId) {
+  console.error('Usage: summit-attest <runId> [outputDir]');
+  process.exit(1);
+}
 
-program
-  .command('manifest')
-  .requiredOption('--tenant <tenant>', 'Tenant ID')
-  .requiredOption('--namespace <namespace>', 'Namespace')
-  .requiredOption('--job <job>', 'Job name')
-  .option('--run-id <id>', 'Existing Run ID')
-  .option('--output <path>', 'Output path', 'run-manifest.json')
-  .action((options) => {
-    const manifest = createManifest(options);
-    saveManifest(manifest, options.output);
-    console.log(`Manifest saved to ${options.output}`);
-  });
+if (outputDir !== '.') {
+  mkdirSync(outputDir, { recursive: true });
+}
 
-program
-  .command('slsa')
-  .requiredOption('--manifest <path>', 'Path to run-manifest.json')
-  .requiredOption('--build-type <uri>', 'SLSA buildType URI')
-  .option('--output <path>', 'Output path', 'slsa-predicate.json')
-  .action((options) => {
-    const manifest = JSON.parse(readFileSync(options.manifest, 'utf-8'));
-    const predicate = createSlsaPredicate(manifest, options.buildType);
-    writeFileSync(options.output, JSON.stringify(predicate, null, 2) + '\n');
-    console.log(`SLSA predicate saved to ${options.output}`);
-  });
+const manifest = generateManifest(runId, [], []);
+const manifestContent = canonicalize(manifest);
+const manifestDigest = computeDigest(manifestContent);
 
-program
-  .command('attest')
-  .requiredOption('--image <ref>', 'OCI image reference')
-  .requiredOption('--predicate <path>', 'Path to predicate file')
-  .requiredOption('--type <type>', 'Predicate type URI')
-  .option('--key <path>', 'Path to cosign private key')
-  .option('--keyless', 'Use keyless signing', false)
-  .action((options) => {
-    attestArtifact({
-      imageRef: options.image,
-      predicatePath: options.predicate,
-      predicateType: options.type,
-      options: {
-        key: options.key,
-        allowKeyless: options.keyless,
-      },
-    });
-  });
+writeFileSync(`${outputDir}/run-manifest.json`, manifestContent);
 
-program.parse();
+const runUri = `openlineage://default/summit/jobs/run/${runId}`;
+const predicate = generateSLSAPredicate(runId, runUri, manifestDigest);
+
+writeFileSync(`${outputDir}/slsa-predicate.json`, JSON.stringify(predicate, null, 2));
+
+console.log(`Generated run-manifest.json and slsa-predicate.json for run ${runId}`);
+console.log(`Manifest SHA256: ${manifestDigest}`);
