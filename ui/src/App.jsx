@@ -9,22 +9,11 @@ import Observability from './components/Observability.jsx';
 import CIChaos from './components/CIChaos.jsx';
 import DocsRunbooks from './components/DocsRunbooks.jsx';
 import { formatAbsoluteTime, formatRelativeTime } from '../utils/formatting.js';
+import { tabs } from './tabs.js';
 import './App.css';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-
-  const tabs = [
-    { id: 'dashboard', name: 'Dashboard', icon: '🏠' },
-    { id: 'routing', name: 'Routing Studio', icon: '🎯' },
-    { id: 'rag', name: 'RAG Console', icon: '🔍' },
-    { id: 'neo4j', name: 'Neo4j Guard', icon: '🛡️' },
-    { id: 'budgets', name: 'Budgets & Burndown', icon: '💰' },
-    { id: 'policies', name: 'Policies & LOA', icon: '📋' },
-    { id: 'observability', name: 'Observability', icon: '👁️' },
-    { id: 'ci-chaos', name: 'CI & Chaos', icon: '⚡' },
-    { id: 'docs', name: 'Docs & Runbooks', icon: '📚' },
-  ];
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -97,6 +86,15 @@ const App = () => {
               >
                 <span>{tab.icon}</span>
                 <span>{tab.name}</span>
+                {tab.status === 'simulated' && (
+                  <span className={`ml-1 px-1.5 py-0.5 text-xs rounded ${
+                    activeTab === tab.id
+                      ? 'bg-blue-400 text-white'
+                      : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    SIM
+                  </span>
+                )}
               </button>
             ))}
           </div>

@@ -1,6 +1,9 @@
 {
   "last_updated": "2026-02-08T00:00:00Z",
   "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "revision_note": "Added LongHorizon orchestration MVP scope and evidence references",
+  "last_updated": "2026-02-05T00:00:00Z",
+  "revision_note": "Added Maestro Long-Run Job Engine governance scaffolding and CI gates",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -47,6 +50,10 @@
           "target_completion": "Sprint N+3"
         }
       ]
+      "id": "ui-route-audit-remediation",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "SIM badge applied to simulated SYMPHONY tabs; mobile More screen implemented; MapFullScreen and AlertDetails routes registered with aligned types and GA verification."
     },
     {
       "id": "sera-cli-proxy",

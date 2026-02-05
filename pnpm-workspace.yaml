@@ -3,6 +3,7 @@ packages:
   - 'packages/*'
   - 'platform/*'
   - 'packages/maestro-skills/*'
+  - 'platform/*'
   - 'sdk/*'
   - 'services/*'
   - 'companyos/services/*'

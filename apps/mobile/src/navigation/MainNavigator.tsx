@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   LayoutDashboard,
@@ -14,16 +13,9 @@ import { DashboardScreen } from '@/screens/DashboardScreen';
 import { InvestigationsScreen } from '@/screens/InvestigationsScreen';
 import { MapScreen } from '@/screens/MapScreen';
 import { AlertsScreen } from '@/screens/AlertsScreen';
-import { Text } from '@/components/ui';
+import { MoreScreen } from '@/screens/MoreScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
-
-// Placeholder for More screen
-const MoreScreen = () => (
-  <View className="flex-1 bg-dark-bg items-center justify-center">
-    <Text>More Options</Text>
-  </View>
-);
 
 export const MainNavigator: React.FC = () => {
   return (

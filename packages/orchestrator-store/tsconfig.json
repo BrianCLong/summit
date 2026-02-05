@@ -15,8 +15,17 @@
     "removeComments": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "__tests__", "tests", "coverage"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "__tests__",
+    "tests",
+    "coverage",
+    "src/__tests__",
+    "src/**/__tests__"
+  ]
 }
