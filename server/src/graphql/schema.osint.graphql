@@ -1,0 +1,23 @@
+# server/src/graphql/schema.osint.graphql
+
+type SynintAgentFinding {
+  agentName: String!
+  success: Boolean!
+  findings: JSON!
+  errors: [String!]
+  warnings: [String!]
+  startedAt: DateTime
+  completedAt: DateTime
+}
+
+type SynintSweep {
+  target: String!
+  startedAt: DateTime!
+  completedAt: DateTime!
+  agents: [SynintAgentFinding!]!
+  meta: JSON
+}
+
+extend type Mutation {
+  runSynintSweep(target: String!): SynintSweep!
+}
