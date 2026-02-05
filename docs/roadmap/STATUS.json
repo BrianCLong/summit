@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:34:16Z",
-  "revision_note": "Recorded Maestro GA core requirements evidence mapping",
+  "last_updated": "2026-02-05T23:42:17Z",
+  "revision_note": "Linked post-GA v1.0 initiatives to docs/post-ga/V1_0_INITIATIVES.md",
   "initiatives": [
     {
       "id": "repo-narrative-security-ci-health-2026-02-05",
@@ -460,6 +460,111 @@
       "status": "completed",
       "owner": "codex",
       "notes": "GH#10027; evidence mapped in docs/ga/MAESTRO_GA_CORE.md"
+    },
+    {
+      "id": "post-ga-core-modules",
+      "name": "post-ga-core-modules",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "post-ga-plugin-architecture",
+      "name": "post-ga-plugin-architecture",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "post-ga-multitenancy-rbac",
+      "name": "post-ga-multitenancy-rbac",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "post-ga-test-coverage-80",
+      "name": "post-ga-test-coverage-80",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "post-ga-backup-dr",
+      "name": "post-ga-backup-dr",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "post-ga-audit-logging",
+      "name": "post-ga-audit-logging",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "post-ga-stabilization",
+      "name": "post-ga-stabilization",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "evidence-bundle-v1-5",
+      "name": "evidence-bundle-v1-5",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "analyst-assist-v0-2",
+      "name": "analyst-assist-v0-2",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "llm-ops-eval-harness",
+      "name": "llm-ops-eval-harness",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "airgap-offline-deploy-v1",
+      "name": "airgap-offline-deploy-v1",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "companyos-q0-foundation",
+      "name": "companyos-q0-foundation",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "interactive-3d-graph-viz",
+      "name": "interactive-3d-graph-viz",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "build-graph-os",
+      "name": "build-graph-os",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+    },
+    {
+      "id": "memory-graph-adapters",
+      "name": "memory-graph-adapters",
+      "status": "in_progress",
+      "owner": "unassigned",
+      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
     }
   ],
   "summary": {
