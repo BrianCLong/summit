@@ -175,6 +175,29 @@ jobs:
           fi
           echo "✅ Build is deterministic"
 
+  graphrag-bench:
+    name: GraphRAG Bench (Mock)
+    runs-on: ubuntu-latest
+    needs: [build-test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run GraphRAG bench profile (mws)
+        run: pnpm summit:bench graphrag --profile=mws
+      - name: Persist GraphRAG bench artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: graphrag-bench-mws
+          path: artifacts/bench/graphrag/mws
+          retention-days: 14
+
   golden-path:
     name: Golden Path Smoke Test
     runs-on: ubuntu-latest

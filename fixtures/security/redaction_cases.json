@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "id": "redact-ssn",
+      "input": "SSN 123-45-6789 should be hidden",
+      "expected": "SSN ***-**-**** should be hidden"
+    },
+    {
+      "id": "redact-card",
+      "input": "Card 4242424242424242 is present",
+      "expected": "Card **************** is present"
+    },
+    {
+      "id": "redact-aws-key",
+      "input": "Key AKIAIOSFODNN7EXAMPLE should not log",
+      "expected": "Key AKIA**************** should not log"
+    }
+  ]
+}

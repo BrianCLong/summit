@@ -1,0 +1,20 @@
+name: Branch Hygiene Gate
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  branch-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Branch hygiene gate
+        env:
+          BRANCH_HYGIENE_SCOPE: remote
+          BRANCH_HYGIENE_MAX_AGE_DAYS: 90
+          BRANCH_HYGIENE_PROTECTED: main,master,release/*,hotfix/*
+        run: npx tsx scripts/ci/branch_hygiene_gate.ts

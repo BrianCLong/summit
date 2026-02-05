@@ -1,0 +1,38 @@
+{
+  "profile": "mws",
+  "description": "Minimal Winning Slice benchmark profile for hybrid GraphRAG retrieval.",
+  "queries": [
+    {
+      "id": "mws-01",
+      "text": "Track TigerGraph hybrid search positioning and accuracy claims.",
+      "k": 3,
+      "graphHops": 2
+    },
+    {
+      "id": "mws-02",
+      "text": "Summarize Neptune Analytics expansion and managed GraphRAG framing.",
+      "k": 3,
+      "graphHops": 2
+    },
+    {
+      "id": "mws-03",
+      "text": "Map 2026 market convergence across graph + vector retrieval vendors.",
+      "k": 3,
+      "graphHops": 1
+    }
+  ],
+  "weights": {
+    "vector": 0.6,
+    "graph": 0.4
+  },
+  "budget": {
+    "maxNodes": 50,
+    "maxEdges": 100,
+    "maxPaths": 20
+  },
+  "caps": {
+    "latency_p95_ms": 2000,
+    "memory_mb": 512,
+    "max_cost_usd": 0
+  }
+}

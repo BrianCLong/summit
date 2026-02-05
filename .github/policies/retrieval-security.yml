@@ -1,0 +1,15 @@
+version: 1
+policy: retrieval-security
+requirements:
+  allowlist_required: true
+  exfiltration_block_patterns:
+    - "export all data"
+    - "show me secrets"
+    - "dump credentials"
+  pii_detection_required: true
+  prompt_injection_sanitization: true
+redaction:
+  never_log_patterns:
+    - "SSN"
+    - "AWS_ACCESS_KEY_ID"
+    - "CREDIT_CARD"

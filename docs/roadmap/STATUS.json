@@ -3,8 +3,15 @@
   "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
   "revision_note": "Added LongHorizon orchestration MVP scope and evidence references",
   "revision_note": "Added Platform Watch PR1 schema + evidence ID scaffolding.",
+  "revision_note": "Implemented Platform Watch pipeline, schemas, drift detection, and scheduled workflow.",
   "last_updated": "2026-02-05T00:00:00Z",
   "initiatives": [
+    {
+      "id": "graph-kg-platforms-ci-2026-02-05",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Hybrid GraphRAG contract, Neptune managed adapter, deterministic bench artifacts, and security regression fixtures for competitive intel pack."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -53,7 +60,7 @@
       "id": "platform-watch-pipeline",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "PR1: Platform Watch schemas and deterministic evidence ID helper."
+      "notes": "Platform Watch pipeline: schemas, allowlist, drift detection, artifacts, workflow, and KG mapping."
     },
     {
       "id": "ga-gate-failure-catalog",
