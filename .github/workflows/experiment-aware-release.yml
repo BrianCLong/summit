@@ -17,8 +17,8 @@ jobs:
           cache: 'pnpm'
           node-version: '18'
 
-      # In a real scenario, this would install dependencies and run a script using the new package
-      # Here we simulate the check
+          # In a real scenario, this would install dependencies and run a script using the new package
+          # Here we simulate the check
       - name: Calculate Learning Value
         run: |
           echo "Calculating Learning Value for Release Candidates..."

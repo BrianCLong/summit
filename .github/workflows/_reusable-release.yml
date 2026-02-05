@@ -22,18 +22,18 @@ jobs:
     name: Governance Gate
     if: inputs.skip_governance_gate != true
     uses: ./.github/workflows/_reusable-governance-gate.yml
-    with:
-      require_lockfile: true
-      strict_mode: ${{ inputs.governance_strict }}
-      fail_on_critical: true
-      fail_on_warning: false
+        with:
+          require_lockfile: true
+          strict_mode: ${{ inputs.governance_strict }}
+          fail_on_critical: true
+          fail_on_warning: false
 
-  build-server:
+          build-server:
     name: Build server image
     needs: governance-gate
     if: always() && (needs.governance-gate.result == 'success' || needs.governance-gate.result == 'skipped')
     uses: ./.github/workflows/_reusable-slsa-build.yml
-    with:
+
       image_name: ${{ github.repository }}/server
       dockerfile: ./server/Dockerfile.prod
       context: ./server
@@ -45,7 +45,7 @@ jobs:
     needs: governance-gate
     if: always() && (needs.governance-gate.result == 'success' || needs.governance-gate.result == 'skipped')
     uses: ./.github/workflows/_reusable-slsa-build.yml
-    with:
+
       image_name: ${{ github.repository }}/client
       dockerfile: ./client/Dockerfile.prod
       context: ./client
@@ -71,8 +71,8 @@ jobs:
           merge-multiple: true
       - name: Download governance reports
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        continue-on-error: true
         with:
+          continue-on-error: true
           name: governance-gate-reports-${{ github.run_number }}
           path: governance-reports
       - name: Prepare release directory

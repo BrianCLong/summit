@@ -64,7 +64,7 @@ jobs:
     name: Security Gate
     needs: build-and-verify
     uses: ./.github/workflows/ci-security.yml
-    with:
-      run_dast: false
-      run_snyk: false
-    secrets: inherit
+        with:
+          run_dast: false
+          run_snyk: false
+          secrets: inherit

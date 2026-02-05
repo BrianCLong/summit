@@ -134,8 +134,8 @@ jobs:
 
       - name: Upload Validation Report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        if: always()
         with:
+          if: always()
           name: governance-validation-report-${{ github.run_number }}
           path: validation_report.json
           retention-days: 30

@@ -74,8 +74,9 @@ jobs:
         id: app-token
         if: github.event.inputs.mode == 'plan'
         uses: actions/create-github-app-token@v1
-        continue-on-error: true
         with:
+          continue-on-error: true
+
           app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
           private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
 

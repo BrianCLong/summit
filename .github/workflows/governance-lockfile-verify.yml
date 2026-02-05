@@ -177,8 +177,8 @@ jobs:
 
       - name: Upload Verification Report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        if: steps.check-exists.outputs.exists == 'true'
         with:
+          if: steps.check-exists.outputs.exists == 'true'
           name: governance-lockfile-verification-${{ github.run_number }}
           path: verification_report.json
           retention-days: 30

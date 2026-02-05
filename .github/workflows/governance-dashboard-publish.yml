@@ -110,7 +110,7 @@ jobs:
         with:
           path: site/governance/
 
-  deploy-dashboard:
+          deploy-dashboard:
     name: Deploy to Pages
     needs: generate-dashboard
     runs-on: ubuntu-latest

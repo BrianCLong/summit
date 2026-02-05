@@ -31,7 +31,7 @@ jobs:
           role-to-assume: arn:aws:iam::<acct>:role/summit-preview-deployer
           aws-region: us-east-1
 
-      # Deployment
+          # Deployment
       - name: Deploy to preview
         run: ./scripts/deploy/preview.sh
 

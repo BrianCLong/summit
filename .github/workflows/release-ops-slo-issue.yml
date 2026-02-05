@@ -67,7 +67,7 @@ jobs:
         with:
           name: release-ops-site
           path: ${{ env.SITE_DIR }}
-        continue-on-error: true
+          continue-on-error: true
 
       - name: Fallback - Build Site
         if: steps.download.outcome == 'failure'

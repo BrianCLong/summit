@@ -75,7 +75,6 @@ jobs:
           EXPIRATION_TIMESTAMP=$(date -d "$EXPIRES_AT" +%s 2>/dev/null || echo 0)
           EFFECTIVE_EXPIRATION=$((EXPIRATION_TIMESTAMP + 86400))
 
-
           if [[ "$DECISION" != "GO" ]]; then
             FAILURE_REASON="EVIDENCE_NOT_GO: The decision was '$DECISION', not 'GO'."
           elif [[ "$EVIDENCE_TAG" != "$TAG" ]]; then

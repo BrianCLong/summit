@@ -47,7 +47,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ steps.previous_run.outputs.run_id }}
           path: previous-metrics
-        continue-on-error: true # It's okay if this is the first run or artifact expired
+          continue-on-error: true # It's okay if this is the first run or artifact expired
 
       - name: Collect Metrics
         env:

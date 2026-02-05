@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
+
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
@@ -94,4 +94,4 @@ jobs:
             artifacts/**
             evidence/**
             docs/releases/**
-        continue-on-error: true
+          continue-on-error: true

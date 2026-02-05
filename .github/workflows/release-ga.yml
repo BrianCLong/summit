@@ -194,15 +194,16 @@ jobs:
   verify:
     name: "2️⃣ Verification"
     uses: ./.github/workflows/_reusable-ga-readiness.yml
-    needs: [gate, lineage]
-    if: needs.gate.outputs.is_ga == 'true'
-    with:
-      ref: ${{ needs.gate.outputs.tag }}
+        with:
+          needs: [gate, lineage]
+          if: needs.gate.outputs.is_ga == 'true'
 
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 3: Build GA Bundle
-  # ═══════════════════════════════════════════════════════════════════════════
-  build-bundle:
+          ref: ${{ needs.gate.outputs.tag }}
+
+          # ═══════════════════════════════════════════════════════════════════════════
+          # Stage 3: Build GA Bundle
+          # ═══════════════════════════════════════════════════════════════════════════
+          build-bundle:
     name: "3️⃣ Build GA Bundle"
     runs-on: ubuntu-latest
     needs: [gate, lineage, verify]

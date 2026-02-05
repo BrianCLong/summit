@@ -33,7 +33,7 @@ jobs:
           allow-ghsas: true
           deny-licenses: AGPL-3.0, GPL-3.0, LGPL-3.0
 
-  snyk-scan:
+          snyk-scan:
     name: Snyk dependency vulnerability scan
     needs: dependency-review
     runs-on: ubuntu-latest
@@ -54,9 +54,10 @@ jobs:
       - name: Run Snyk test across all manifests
         if: env.SNYK_TOKEN != ''
         uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
-        env:
-          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
         with:
+          env:
+          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
+
           command: test
           args: >-
             --all-projects

@@ -70,9 +70,9 @@ jobs:
               core.info('No restricted path changes detected.');
             }
 
-  pr-metadata-check:
-    runs-on: ubuntu-latest
-    steps:
+          pr-metadata-check:
+          runs-on: ubuntu-latest
+          steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 

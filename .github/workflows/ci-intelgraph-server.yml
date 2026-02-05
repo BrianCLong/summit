@@ -20,14 +20,14 @@ concurrency:
 jobs:
   ci:
     uses: ./.github/workflows/_reusable-ci.yml
-    with:
-      node-version: "20"
-      package-manager: "pnpm"
-      workspace-filter: "intelgraph-server"
-      run-lint: true
-      run-typecheck: true
-      run-tests: true
-      run-evidence: true
-      evidence-artifact-name: "ci-evidence-intelgraph-server-${{ github.run_id }}"
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          node-version: "20"
+          package-manager: "pnpm"
+          workspace-filter: "intelgraph-server"
+          run-lint: true
+          run-typecheck: true
+          run-tests: true
+          run-evidence: true
+          evidence-artifact-name: "ci-evidence-intelgraph-server-${{ github.run_id }}"
+          secrets:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

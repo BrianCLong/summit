@@ -18,16 +18,16 @@ permissions:
 jobs:
   pre-deploy-gate:
     uses: ./.github/workflows/gate.yml
-    with:
-      region: us-east-1
+        with:
+          region: us-east-1
 
-  build-and-push:
-    needs: pre-deploy-gate
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [maestro, prov-ledger, policy-lac]
-        include:
+          build-and-push:
+          needs: pre-deploy-gate
+          runs-on: ubuntu-latest
+          strategy:
+          matrix:
+          service: [maestro, prov-ledger, policy-lac]
+          include:
           - service: maestro
             dockerfile: docker/Dockerfile.maestro
             context: .

@@ -24,10 +24,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Install Dependencies
+        - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Validate Release Policy
@@ -48,10 +45,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Install Dependencies
+        - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint Reason Codes
@@ -63,12 +57,12 @@ jobs:
   security-scan:
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
-    with:
-      run_dast: false # DAST is too slow for a PR check
-    secrets:
-      snyk_token: ${{ secrets.SNYK_TOKEN }}
+        with:
+          run_dast: false # DAST is too slow for a PR check
+          secrets:
+          snyk_token: ${{ secrets.SNYK_TOKEN }}
 
-  sbom:
+          sbom:
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:

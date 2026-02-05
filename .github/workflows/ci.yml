@@ -126,11 +126,12 @@ jobs:
   security-compliance:
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
-    needs: [config-guard]
-    with:
-      strict: true
+        with:
+          needs: [config-guard]
 
-  soc-controls:
+          strict: true
+
+          soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10

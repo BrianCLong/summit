@@ -128,19 +128,22 @@ def main() -> int:
     IGNORE_DIRS = {
         "schemas", "ecosystem", "jules", "project19", "governance",
         "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs",
-        "runtime", "subsumption", "out", "TELETOK-2025", "ga",
-        "EVD-POSTIZ-GROWTH-001", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GATE-004",
-        "EVD-2601-20245-SKILL-001", "HONO-ERRBOUNDARY-XSS",
-        "EVD-CTA-LEADERS-2026-01-INGEST-001", "ai-influence-ops",
-        "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
-        "EVD-POSTIZ-COMPLY-002", "bundles"
+        "runtime", "subsumption", "out", "TELETOK-2025", "ga", "bundles"
     }
 
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
             continue
-        if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
+        # Skip legacy files
+        if p.name in IGNORE:
             continue
+        # Skip known non-evidence directories
+        if any(d in p.parts for d in IGNORE_DIRS):
+            continue
+        # Skip directories that match Evidence ID pattern (those are evidence containers)
+        if any(EVIDENCE_ID_RE.match(d) for d in p.parts):
+            continue
+
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
             if "202" in txt and ("T" in txt or ":" in txt):

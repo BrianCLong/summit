@@ -1,4 +1,9 @@
 {
   "version": "1.0",
-  "items": []
+  "items": {
+    "EVD-SENTINEL-000": {
+      "path": "summit/evidence/sentinel",
+      "files": ["report.json"]
+    }
+  }
 }

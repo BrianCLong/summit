@@ -29,7 +29,7 @@ jobs:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
     steps:
       - uses: actions/checkout@v4 # v6
-        with:
+
           fetch-depth: 0 # Needed for git diff
       - name: Fetch main branch
         run: git fetch origin main
