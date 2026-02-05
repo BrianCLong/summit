@@ -15,7 +15,8 @@
     "removeComments": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "types": ["node", "pg", "uuid", "crypto-js"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "__tests__", "tests", "coverage"]
