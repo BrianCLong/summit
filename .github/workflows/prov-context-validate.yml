@@ -1,4 +1,4 @@
-name: prov-context-validate
+name: Provenance Context Validate
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   validate:
+    name: Provenance Context Validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

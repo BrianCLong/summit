@@ -141,6 +141,17 @@ conditional_required:
       - "^packages/extortion/"
       - "^scripts/ci/.*extortion"
 
+  - name: "Provenance Context Validate / Provenance Context Validate"
+    workflow: "prov-context-validate.yml"
+    rationale: "Ensures provenance mapping stability and schema conformance"
+    when_paths_match:
+      - '^mappings/otel_to_prov\.yml$'
+      - '^spec/prov_context\.jsonld$'
+      - '^schemas/prov-context\.schema\.json$'
+      - '^schemas/openlineage-run\.schema\.json$'
+      - '^ci/validate_prov_context\.py$'
+      - '^ci/generate_prov_context\.py$'
+
 # Informational Checks
 # --------------------
 # These checks are NOT blocking for promotion.
