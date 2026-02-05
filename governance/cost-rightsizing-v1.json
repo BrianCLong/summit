@@ -1,0 +1,54 @@
+{
+  "version": "1.0.0",
+  "authority": "90_DAY_WAR_ROOM_BACKLOG.md (Task 63)",
+  "timestamp": "2026-02-05T00:00:00Z",
+  "status": "DRAFT",
+  "recommendations": {
+    "compute": [
+      {
+        "service": "intelgraph-api",
+        "current": "4 vCPU, 16GB RAM",
+        "target": "2 vCPU, 8GB RAM",
+        "action": "Downsize",
+        "rationale": "P95 CPU utilization < 15% across all clusters."
+      },
+      {
+        "service": "apollo-gateway",
+        "current": "2 vCPU, 4GB RAM",
+        "target": "1 vCPU, 2GB RAM",
+        "action": "Downsize",
+        "rationale": "High idle time detected."
+      }
+    ],
+    "database": [
+      {
+        "service": "postgres",
+        "current": "db.m5.xlarge",
+        "target": "db.t3.large",
+        "action": "Switch to burstable",
+        "rationale": "Consistent low baseline load with rare spikes."
+      },
+      {
+        "service": "neo4j",
+        "current": "r5.xlarge",
+        "target": "r6g.large",
+        "action": "Switch to Graviton",
+        "rationale": "Improved price/performance for graph workloads."
+      }
+    ],
+    "observability": [
+      {
+        "metric": "http_request_duration_seconds",
+        "issue": "High cardinality on 'user_agent' label",
+        "action": "Drop label in Otel Collector",
+        "rationale": "Adds 5000+ series with no high-value analysis benefit."
+      },
+      {
+        "service": "logging",
+        "issue": "Verbose DEBUG logs in staging",
+        "action": "Change default level to INFO",
+        "rationale": "Reduce log volume by 60%."
+      }
+    ]
+  }
+}
