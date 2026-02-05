@@ -1100,6 +1100,29 @@ export const maestroSynthesisOperations = createCounter({
   help: 'Data synthesis operations',
 });
 
+// --- Agent Metrics ---
+export const agentExecutionsTotal = createCounter({
+  registers: [],
+  name: 'agent_executions_total',
+  help: 'Total number of agent executions',
+  labelNames: ['tenant', 'status'],
+});
+
+export const agentExecutionDuration = createHistogram({
+  registers: [],
+  name: 'agent_execution_duration_seconds',
+  help: 'Duration of agent execution in seconds',
+  labelNames: ['tenant', 'status'],
+  buckets: [1, 5, 10, 30, 60, 120, 300],
+});
+
+export const policyDecisionsTotal = createCounter({
+  registers: [],
+  name: 'policy_decisions_total',
+  help: 'Total number of policy decisions',
+  labelNames: ['policy', 'decision', 'signal_type'],
+});
+
 // Register new metrics
 try {
   register.registerMetric(maestroOrchestrationRequests);
@@ -1128,6 +1151,9 @@ try {
   register.registerMetric(maestroDataSourcesActive);
   register.registerMetric(maestroWebScrapingRequests);
   register.registerMetric(maestroSynthesisOperations);
+  register.registerMetric(agentExecutionsTotal);
+  register.registerMetric(agentExecutionDuration);
+  register.registerMetric(policyDecisionsTotal);
 } catch (e) { }
 
 export const metrics = {
@@ -1213,4 +1239,7 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
+  agentExecutionsTotal,
+  agentExecutionDuration,
+  policyDecisionsTotal,
 };
