@@ -32,6 +32,7 @@ import './monitoring/metrics.js'; // Initialize Prometheus metrics collection
 import { partitionMaintenanceService } from './services/PartitionMaintenanceService.js';
 import { zeroTouchOrchestrator } from './conductor/deployment/ZeroTouchOrchestrator.js';
 import { driftRemediationService } from './services/DriftRemediationService.js';
+import { projectSunsettingService } from './services/ProjectSunsettingService.js';
 
 const startServer = async () => {
   // Initialize OpenTelemetry tracing early in the startup sequence
@@ -197,6 +198,9 @@ const startServer = async () => {
 
     // Start Drift Remediation Service (Self-Healing)
     driftRemediationService.start();
+
+    // Start Project Sunsetting Service (Lifecycle Automation)
+    projectSunsettingService.start();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     if (typeof startKafkaConsumer === 'function') {
