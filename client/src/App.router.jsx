@@ -127,6 +127,7 @@ import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
 // Demo mode components
 
+
 // Navigation items
 const ADMIN = 'ADMIN';
 const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];

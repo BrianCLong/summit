@@ -12,6 +12,7 @@
     "verify:runtime": "tsx scripts/verification/verify_runtime.ts",
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
+    "postinstall": "node scripts/ensure-entities-decode.cjs",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "server:dev": "cd server && npm run dev",
     "client:dev": "cd client && npm run dev",

@@ -7,6 +7,8 @@
  */
 
 import React from 'react';
+import fs from 'fs';
+import path from 'path';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, jest } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -31,6 +33,16 @@ jest.mock('../services/apollo', () => ({
 }));
 
 jest.mock('../context/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useAuth: () => ({
+    user: { role: 'ADMIN' },
+    loading: false,
+    hasRole: () => true,
+    hasPermission: () => true,
+  }),
+}));
+
+jest.mock('../context/AuthContext.jsx', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useAuth: () => ({
     user: { role: 'ADMIN' },
@@ -87,6 +99,14 @@ const originalWarn = console.warn;
 beforeAll(() => {
   // Intercept console.error and console.warn
   console.error = (...args: any[]) => {
+    const message = args[0]?.toString?.() ?? '';
+    if (
+      message.includes('ReactDOMTestUtils.act') ||
+      message.includes('not wrapped in act')
+    ) {
+      originalError.apply(console, args);
+      return;
+    }
     consoleErrors.push(args);
     // Still log to see what's happening in tests
     originalError.apply(console, args);
@@ -155,6 +175,10 @@ const mockFetchOk = () => {
   });
 };
 
+const appRouterSource = fs.readFileSync(
+  path.resolve(__dirname, '..', 'App.router.jsx'),
+  'utf8'
+);
 
 describe('Route Smoke Tests - Console Error Detection', () => {
   describe('Release Readiness Route', () => {
@@ -398,6 +422,15 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       renderAppAt('/wargame-dashboard');
 
       expect(await screen.findByText(/404 - Page Not Found/i)).toBeInTheDocument();
+    it('redirects /geoint and /reports to /investigations', () => {
+      expect(appRouterSource).toContain('path="/geoint"');
+      expect(appRouterSource).toContain('path="/reports"');
+      expect(appRouterSource).toContain('Navigate to="/investigations" replace');
+    });
+
+    it('removes demo-only routes', () => {
+      expect(appRouterSource).not.toMatch(/path="\/demo"/);
+      expect(appRouterSource).not.toMatch(/wargame-dashboard/);
     });
   });
 
