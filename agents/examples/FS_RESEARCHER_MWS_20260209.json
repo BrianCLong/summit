@@ -1,0 +1,43 @@
+{
+  "task_id": "FS_RESEARCHER_MWS_20260209",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "fs-researcher-mws",
+    "version": "v1",
+    "sha256": "d739227c8cc7727bffeee88b33acd0d47b6998c952db3c52f87a131261424fd0",
+    "path": "prompts/agents/fs-researcher-mws@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "summit/agents/fs_researcher/",
+      "summit/cli/fs_research.py",
+      "docs/standards/fs-researcher-2602-01566.md",
+      "docs/security/data-handling/fs-researcher-2602-01566.md",
+      "docs/ops/runbooks/fs-researcher-2602-01566.md",
+      "scripts/monitoring/fs-researcher-2602-01566-drift.py",
+      "scripts/bench/fs_researcher_profile.py",
+      "tests/fs_researcher/",
+      "repo_assumptions.md",
+      "governance/decisions/ADR-AG-FSRESEARCHER-001.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/agents/fs-researcher-mws@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["agents", "docs", "security", "cli", "monitoring", "testing", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["artifacts/metrics.json", "artifacts/report.json", "artifacts/stamp.json"]
+  },
+  "debt_budget": {"permitted": 0, "retirement_target": 0},
+  "success_criteria": [
+    "Workspace creation emits control files, KB, sources, and artifacts.",
+    "Report writer runs KB-only and writes deterministic artifacts.",
+    "Security gates detect prompt injection and PII redaction warnings."
+  ],
+  "stop_conditions": [
+    "Validator fails on KB lines without citations.",
+    "Feature flag disabled in environment."
+  ]
+}

@@ -871,3 +871,41 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: fs-researcher-mws
+    version: v1
+    path: prompts/agents/fs-researcher-mws@v1.md
+    sha256: d739227c8cc7727bffeee88b33acd0d47b6998c952db3c52f87a131261424fd0
+    description: Implement the FS-Researcher MWS workspace, CLI, security gates, and evidence artifacts.
+    scope:
+      paths:
+        - summit/agents/fs_researcher/
+        - summit/cli/fs_research.py
+        - docs/standards/fs-researcher-2602-01566.md
+        - docs/security/data-handling/fs-researcher-2602-01566.md
+        - docs/ops/runbooks/fs-researcher-2602-01566.md
+        - scripts/monitoring/fs-researcher-2602-01566-drift.py
+        - scripts/bench/fs_researcher_profile.py
+        - tests/fs_researcher/
+        - repo_assumptions.md
+        - governance/decisions/ADR-AG-FSRESEARCHER-001.md
+        - agents/examples/FS_RESEARCHER_MWS_20260209.json
+        - docs/roadmap/STATUS.json
+        - prompts/agents/fs-researcher-mws@v1.md
+        - prompts/registry.yaml
+      domains:
+        - agents
+        - docs
+        - security
+        - cli
+        - monitoring
+        - testing
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,35 +1,29 @@
 # Repo Assumptions & Validation
 
-## Structure Validation
+## Verified vs Assumed
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| Area | Verified | Assumed | Notes |
+| --- | --- | --- | --- |
+| Python CLI layout | ✅ | ⛔ | `summit/cli/` exists with argparse entrypoints (e.g., `automation_verify.py`). |
+| Agents module | ✅ | ⛔ | `summit/agents/` exists with `cli.py` argparse pattern. |
+| Test runner | ✅ | ⛔ | `pytest.ini` defines `testpaths=tests`. |
+| Packaging scope | ✅ | ⛔ | `pyproject.toml` only packages `maestro*` and `api*`; new `summit/` modules are runtime-only. |
+| Docs structure | ✅ | ⛔ | `docs/standards/`, `docs/security/data-handling/`, and `docs/ops/runbooks/` exist. |
+| Monitoring scripts | ✅ | ⛔ | `scripts/monitoring/` has drift detectors; new drift script should live there. |
+| FS-Researcher module paths | ⛔ | ✅ | Targeting `summit/agents/fs_researcher/` and `summit/cli/fs_research.py` based on current layout. |
+| Evidence/artifacts schema | ⛔ | ✅ | No dedicated schema found; new `artifacts/*.json` will follow existing deterministic JSON pattern. |
 
-## Component Mapping
+## Must-Not-Touch List
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+- `pnpm-lock.yaml`
+- `package-lock.json` (if present)
+- `Cargo.lock`
+- `node_modules/`
+- `dist/`, `build/`, or generated artifacts
+- `secrets/`, `.env`, or credential material
+- `docs/governance/` policy files (unless explicitly scoped)
 
-## Constraints & Checks
+## Validation Notes
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
-
-## Next Steps
-
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+- FS-Researcher CLI should follow the argparse pattern used in `summit/agents/cli.py` and `summit/skillforge/cli.py`.
+- Deterministic JSON outputs align with `summit/cli/automation_verify.py` expectations for evidence artifacts.
