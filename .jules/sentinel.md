@@ -66,7 +66,7 @@ router.post('/secrets/rotate', rotateHandler);
 **Learning:** Inline routes in main application files are easily overlooked during security audits. Additionally, inconsistent casing in role names (e.g., 'admin' vs 'ADMIN') can lead to manual check bypasses or availability issues.
 **Prevention:** Enforce a "deny-by-default" posture by applying `authenticateToken` and `ensureRole(['ADMIN', 'admin'])` middleware to all administrative and sensitive data endpoints. Always use standardized middleware rather than manual property checks for role validation.
 
-## 2026-02-19 - [CRITICAL] Tenant Scoping Bypass via SQL Comments
-**Vulnerability:** The `validateAndScopeQuery` function in `server/src/db/query-scope.ts` naively appended `WHERE tenant_id = ...` to the end of SQL queries. This allowed attackers to use SQL comments (`--`) to neutralize the tenant scoping clause, effectively bypassing tenant isolation.
-**Learning:** Naive string concatenation for security controls is fragile. Security logic must be robust against input variations (like comments) or structural manipulation.
-**Prevention:** When auto-injecting security clauses into SQL, validate that the query structure is safe (e.g., no comments) and sanitize inputs (e.g., strip trailing semicolons). Use parser-based modification or strict validation instead of simple concatenation where possible.
+## 2026-05-22 - [HIGH] Missing Multi-tenant Isolation in Neo4j Search
+**Vulnerability:** The `/search/evidence` endpoint queried the Neo4j `evidenceContentSearch` fulltext index without filtering by `tenantId`, allowing any authenticated user to view OSINT evidence from any tenant.
+**Learning:** Fulltext indexes in Neo4j (and other search engines) often bypass standard node property filters unless explicitly included in the query (via `WHERE` or additional search terms). In multi-tenant environments, search queries must always include an explicit tenant isolation filter.
+**Prevention:** Always append `WHERE node.tenantId = $tenantId` (or equivalent) to Cypher queries that interact with shared indexes. Ensure the `tenantId` is sourced from a trusted security context (like `req.user`).
