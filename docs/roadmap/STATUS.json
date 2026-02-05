@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:42:17Z",
-  "revision_note": "Linked post-GA v1.0 initiatives to docs/post-ga/V1_0_INITIATIVES.md",
+  "last_updated": "2026-02-05T23:46:46Z",
+  "revision_note": "Completed CompanyOS Q0 foundation golden path",
   "initiatives": [
     {
       "id": "repo-narrative-security-ci-health-2026-02-05",
@@ -540,10 +540,10 @@
     },
     {
       "id": "companyos-q0-foundation",
-      "name": "companyos-q0-foundation",
-      "status": "in_progress",
-      "owner": "unassigned",
-      "notes": "Deferred pending implementation gates; tracked in docs/post-ga/V1_0_INITIATIVES.md"
+      "name": "CompanyOS Q0 Foundation",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "GH#10133; golden path implemented via Makefile targets and docs in companyos/FOUNDATION_Q0.md"
     },
     {
       "id": "interactive-3d-graph-viz",

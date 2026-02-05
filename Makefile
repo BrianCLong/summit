@@ -10,8 +10,10 @@ include Makefile.merge-train
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: companyos-bootstrap companyos-up companyos-down companyos-smoke
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+COMPOSE_COMPANYOS_FILE ?= docker-compose.companyos.dev.yml
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -78,6 +80,20 @@ bootstrap: ## Install dev dependencies
 	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
 	$(VENV_BIN)/pre-commit install || true
 	pnpm install
+
+# --- CompanyOS Golden Path ---
+
+companyos-bootstrap: ## Install deps for CompanyOS (pnpm)
+	pnpm install
+
+companyos-up: ## Start CompanyOS dev stack
+	docker compose -f $(COMPOSE_COMPANYOS_FILE) up --build -d
+
+companyos-down: ## Stop CompanyOS dev stack
+	docker compose -f $(COMPOSE_COMPANYOS_FILE) down -v
+
+companyos-smoke: ## Smoke checks for CompanyOS
+	BASE_URL=http://localhost:4100 ./scripts/companyos-smoke.sh
 
 dev:
 	pnpm run dev

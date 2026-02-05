@@ -10,13 +10,13 @@
 
    ```bash
    corepack enable
-   pnpm install --frozen-lockfile
+   make companyos-bootstrap
    ```
 
 3. Start CompanyOS stack
 
    ```bash
-   docker compose -f docker-compose.companyos.dev.yml up -d
+   make companyos-up
    ```
 
 4. Seed data
@@ -29,6 +29,12 @@
 
    ```bash
    pnpm --filter api-svc-template test
+   ```
+
+6. Smoke check
+
+   ```bash
+   make companyos-smoke
    ```
 
 You’re successful when:
