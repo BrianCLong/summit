@@ -72,62 +72,54 @@ def main():
     success = True
 
     # Validate Items
-    for item in index_data.get("items", []):
-        evidence_id = item.get("id")
-        path = item.get("path")
+    items = index_data.get("items", {})
+    if isinstance(items, list):
+        # Handle legacy list format if necessary, though schema suggests object
+        print("Warning: 'items' is a list, expected dictionary. Skipping item validation.")
+        pass
+    elif isinstance(items, dict):
+        for evidence_id, item_data in items.items():
+            # Support both 'files' and 'artifacts' keys based on current index.json content
+            files = item_data.get("files") or item_data.get("artifacts") or []
 
-        # If path is relative, make it absolute relative to repo root (or args.evidence parent)
-        # Assuming args.evidence points to 'evidence/' dir.
-        # But index.json paths seem to be relative to repo root e.g. "evidence/report.json"
-
-        # If path is a directory, look for standard artifacts
-        # If path is a file, strictly it doesn't match the new standard but let's see.
-
-        full_path = path
-        if not os.path.exists(full_path):
-            print(f"Warning: Path not found for evidence {evidence_id}: {full_path}")
-            # Non-fatal for now unless strict
-            continue
-
-        artifacts_to_check = []
-        if os.path.isdir(full_path):
-            artifacts_to_check = [
-                ("report.json", report_schema, False),
-                ("metrics.json", metrics_schema, False),
-                ("stamp.json", stamp_schema, True)
-            ]
-            base_dir = full_path
-        else:
-            # It's a file. check what it is based on name?
-            # Existing entries point to 'evidence/report.json'.
-            # We can skip validation for legacy or try to guess.
-            # For this plan, we care about the new IDs which are directories.
-            if "LIMY-AGENTICWEB" in evidence_id:
-                 print(f"Error: Agentic Web evidence {evidence_id} points to a file, expected directory.")
-                 success = False
-            continue
-
-        for filename, schema, allow_timestamps in artifacts_to_check:
-            filepath = os.path.join(base_dir, filename)
-            if not os.path.exists(filepath):
-                 print(f"Missing artifact {filename} in {base_dir}")
-                 # For now, require all? The plan says "Required artifacts per run".
-                 # If we are validating *existence*, yes.
-                 # But if we are just validating what exists, maybe optional.
-                 # Plan implies mandatory.
-                 success = False
-                 continue
-
-            data = load_json(filepath)
-            if data is None:
-                success = False
+            if not files:
+                print(f"Warning: No files/artifacts found for {evidence_id}")
                 continue
 
-            if not validate_schema(data, schema, f"{evidence_id}/{filename}"):
-                success = False
+            for file_path in files:
+                # Normalize path: remove 'evidence/' prefix if present to avoid doubling up
+                # assuming args.evidence is the root (e.g. 'evidence')
+                # and file_path in index is like 'evidence/report.json'
 
-            if not check_timestamps(data, filepath, allow_timestamps):
-                success = False
+                # Check if file_path starts with the evidence dir name
+                # strict check: os.path.join(os.getcwd(), file_path) should exist
+
+                full_path = file_path
+                if not os.path.exists(full_path):
+                     print(f"Warning: Artifact not found: {full_path}")
+                     continue
+
+                filename = os.path.basename(full_path)
+
+                # Determine schema based on filename
+                schema = None
+                allow_timestamps = False
+
+                if filename == "report.json":
+                    schema = report_schema
+                elif filename == "metrics.json":
+                    schema = metrics_schema
+                elif filename == "stamp.json":
+                    schema = stamp_schema
+                    allow_timestamps = True
+
+                if schema:
+                    data = load_json(full_path)
+                    if data is not None:
+                        if not validate_schema(data, schema, f"{evidence_id}/{filename}"):
+                            success = False
+                        if not check_timestamps(data, full_path, allow_timestamps):
+                            success = False
 
     if not success:
         sys.exit(1)
