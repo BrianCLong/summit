@@ -16,3 +16,12 @@ Use this file to document changes to project dependencies.
 - Action: Add
 - Package: @summit/sgf-schema, @summit/sgf-ledger, @summit/sgf-evidence, @summit/sgf-evals
 - Reason: Initial implementation of Summit Governance Fabric (SGF) components.
+
+## 2026-02-05
+- Action: Update
+- Package: pnpm (10.0.0)
+- Reason: Align with platform standard and resolve CI version mismatch errors.
+
+- Action: Update
+- Package: @intelgraph/golden-path
+- Reason: Convert template dependency to workspace reference.

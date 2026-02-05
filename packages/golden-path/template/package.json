@@ -9,7 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@intelgraph/golden-path": "0.1.0",
+    "@intelgraph/golden-path": "workspace:*",
     "express": "^4.19.2",
     "prom-client": "^15.1.3"
   },
