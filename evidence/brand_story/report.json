@@ -1,1 +1,7 @@
-{"evidence_id": "EVD-SPB500250-PLAN-001", "status": "verified"}
+{
+  "evidence_id": "EVD-SPB500250-PLAN-001",
+  "title": "Brand Story Series Plan",
+  "category": "brand_story",
+  "status": "draft",
+  "summary": "Example series plan for Catfish Santa theme."
+}

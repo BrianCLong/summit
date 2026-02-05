@@ -8,9 +8,7 @@ def plan_series(input_data: BrandStoryInput, episodes: int = 5) -> Dict[str, Any
     if not enabled():
         return {"enabled": False, "reason": "BRAND_STORY_ENABLED=false"}
 
-    linter = AuthenticityLinter(truthfulness_mode=input_data.truthfulness_mode)
     planned = []
-
     for i in range(episodes):
         moment = input_data.defining_moments[i % max(1, len(input_data.defining_moments))]
         ep = Episode(
@@ -30,8 +28,6 @@ def plan_series(input_data: BrandStoryInput, episodes: int = 5) -> Dict[str, Any
         "mission": input_data.mission,
         "episodes": planned,
     }
-
     policy_verdict = check_policy(result)
     result["policy_verdict"] = policy_verdict
-
     return result

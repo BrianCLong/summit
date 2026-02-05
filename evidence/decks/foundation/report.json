@@ -1,6 +1,5 @@
 {
-  "evidence_id": "EVD-CLAUDE-CODE-DECKS-FOUND-001",
-  "summary": "Evidence scaffold present; replace with real outputs in CI.",
+  "id": "EVD-CLAUDE-CODE-DECKS-FOUND-001",
   "status": "stub",
   "notes": "Evidence scaffold present; replace with real outputs in CI."
 }

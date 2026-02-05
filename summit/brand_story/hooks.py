@@ -1,7 +1,6 @@
 from typing import Dict, List
 
 def generate_hooks(episode_theme: str, platforms: List[str]) -> Dict[str, str]:
-    """Generate platform-specific interactive hooks."""
     hooks = {}
     for platform in platforms:
         p = platform.lower()

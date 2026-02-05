@@ -1,5 +1,5 @@
 {
-  "evidence_id": "EVD-SPB500250-STAMP-001",
-  "timestamp": "2026-02-03T02:00:00Z",
+  "evidence_id": "EVD-SPB500250-PLAN-001",
+  "generated_at_utc": "2026-02-05T02:00:00Z",
   "job": "smoke-test"
 }
