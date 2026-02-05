@@ -36,8 +36,6 @@ jobs:
       
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-      
       - name: Install dependencies
         run: |
           cd website
@@ -98,8 +96,6 @@ jobs:
       
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-      
       - name: Install dependencies
         run: |
           cd website

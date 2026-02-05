@@ -49,7 +49,6 @@ export class FusionService {
    * 5. Save Vectors to Postgres
    */
   async ingest(
-    tenantId: string,
     content: string,
     type: 'TEXT' | 'URL' | 'IMAGE' | 'SIGNAL' = 'TEXT',
     metadata: any = {}
@@ -59,11 +58,10 @@ export class FusionService {
 
     // 1. Save Media Source
     await this.db.query(
-      `INSERT INTO media_sources (id, tenant_id, uri, media_type, mime_type, processing_status, metadata, extraction_count)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 0)`,
+      `INSERT INTO media_sources (id, uri, media_type, mime_type, processing_status, metadata, extraction_count)
+       VALUES ($1, $2, $3, $4, $5, $6, 0)`,
       [
         mediaSourceId,
-        tenantId,
         type === 'URL' ? content : (type === 'TEXT' ? 'text-input' : 'raw-input'),
         type,
         type === 'TEXT' ? 'text/plain' : 'application/octet-stream',
@@ -108,12 +106,11 @@ export class FusionService {
 
         await this.db.query(
           `INSERT INTO multimodal_entities (
-            id, tenant_id, investigation_id, media_source_id, entity_type, extracted_text,
+            id, investigation_id, media_source_id, entity_type, extracted_text,
             confidence, text_embedding, metadata, extraction_method
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [
             entityId,
-            tenantId,
             investigationId,
             mediaSourceId,
             entity.type,
@@ -135,21 +132,20 @@ export class FusionService {
       try {
         await session.writeTransaction(async (tx) => {
           await tx.run(
-            `MERGE (m:MediaSource {id: $id, tenantId: $tenantId})
+            `MERGE (m:MediaSource {id: $id})
              SET m.uri = $uri, m.type = $type, m.metadata = $metadata`,
-            { id: mediaSourceId, tenantId, uri: type === 'URL' ? content : 'raw-input', type, metadata: JSON.stringify(metadata) }
+            { id: mediaSourceId, uri: type === 'URL' ? content : 'raw-input', type, metadata: JSON.stringify(metadata) }
           );
 
           for (const entity of processedEntities) {
             await tx.run(
-              `MERGE (e:Entity {name: $name, type: $type, tenantId: $tenantId})
+              `MERGE (e:Entity {name: $name, type: $type})
                ON CREATE SET e.id = $uuid, e.description = $desc
-               MERGE (m:MediaSource {id: $sourceId, tenantId: $tenantId})
+               MERGE (m:MediaSource {id: $sourceId})
                MERGE (m)-[:MENTIONS {confidence: $conf}]->(e)`,
               {
                 name: entity.label,
                 type: entity.type,
-                tenantId,
                 uuid: entity.uuid,
                 desc: entity.description || '',
                 sourceId: mediaSourceId,
@@ -164,13 +160,12 @@ export class FusionService {
 
             if (sourceEntity && targetEntity) {
               await tx.run(
-                `MATCH (a:Entity {id: $idA, tenantId: $tenantId}), (b:Entity {id: $idB, tenantId: $tenantId})
+                `MATCH (a:Entity {id: $idA}), (b:Entity {id: $idB})
                  MERGE (a)-[r:RELATED_TO {type: $relType}]->(b)
                  SET r.description = $desc, r.confidence = $conf`,
                 {
                   idA: sourceEntity.uuid,
                   idB: targetEntity.uuid,
-                  tenantId,
                   relType: rel.type,
                   desc: rel.description || '',
                   conf: rel.confidence
@@ -205,16 +200,15 @@ export class FusionService {
     }
   }
 
-  async search(tenantId: string, query: string, limit: number = 10): Promise<SearchResult[]> {
+  async search(query: string, limit: number = 10): Promise<SearchResult[]> {
     const queryEmbedding = await this.embeddingService.generateEmbedding({ text: query });
 
     const vectorRes = await this.db.query(
       `SELECT id, extracted_text, entity_type, confidence, 1 - (text_embedding <=> $1) as score, metadata
        FROM multimodal_entities
-       WHERE tenant_id = $3
        ORDER BY text_embedding <=> $1 ASC
        LIMIT $2`,
-      [JSON.stringify(queryEmbedding), limit, tenantId]
+      [JSON.stringify(queryEmbedding), limit]
     );
 
     const vectorHits: SearchResult[] = vectorRes.rows.map(row => ({
@@ -237,11 +231,9 @@ export class FusionService {
     try {
       const graphRes = await session.run(
         `CALL db.index.fulltext.queryNodes("entity_search", $query) YIELD node, score
-         WITH node, score
-         WHERE node.tenantId = $tenantId
          RETURN node.id as id, node.name as name, node.type as type, node.description as desc, score
          LIMIT $limit`,
-        { query, limit, tenantId }
+        { query, limit }
       );
 
       graphHits = graphRes.records.map(rec => ({

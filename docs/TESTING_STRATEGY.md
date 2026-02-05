@@ -645,12 +645,6 @@ All PRs must pass:
 - ✅ Golden path smoke test
 - ✅ Security scanning (Gitleaks, CodeQL)
 
-### Verifier Specs (IP Claims Extensions)
-
-- **Graph invariant tests**: malformed updates rejected; reconciliation proof artifacts logged.
-- **Appeals tests**: appealed decisions re-evaluated deterministically; overrides require approvals.
-- **Causal guardrail tests**: lift estimates require causal assumptions artifacts; stale estimates rejected.
-
 ### Test Caching
 
 We use Turbo for intelligent test caching:

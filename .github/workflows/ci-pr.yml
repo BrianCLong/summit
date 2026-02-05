@@ -90,7 +90,6 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-
       - name: Start Test Infrastructure
         run: |
           docker run -d --name summit-db-test -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=summit_test timescale/timescaledb:latest-pg14
@@ -186,7 +185,6 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-
       - name: Bootstrap and smoke test
         run: |
           echo "=== Bootstrap ==="

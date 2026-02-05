@@ -54,7 +54,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -78,7 +77,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -103,7 +101,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Start Test Infrastructure
         run: |
@@ -165,7 +162,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -195,7 +191,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -242,7 +237,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -268,7 +262,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Bootstrap and smoke test
         run: |
@@ -306,7 +299,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -383,7 +375,6 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
