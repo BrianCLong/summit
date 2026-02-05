@@ -55,16 +55,16 @@ jobs:
         env:
           MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -91,16 +91,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -152,16 +152,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "10.0.0"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -183,12 +183,7 @@ jobs:
             terraform workspace select $PREVIEW_NAME || terraform workspace new $PREVIEW_NAME
 
             echo "Applying Terraform Configuration..."
-            # Using -target or specific vars to limit scope to preview resources would be ideal
-            # Here we assume standard apply for the env
-            # We use '|| true' to allow the workflow to continue if cloud creds are missing in this demo environment,
-            # but we capture the status.
             if terraform apply -auto-approve; then
-               # Capture the output URL if deployment succeeds
                DEPLOYED_URL=$(terraform output -raw preview_url)
                echo "preview_url=$DEPLOYED_URL" >> $GITHUB_OUTPUT
                echo "DEPLOY_STATUS=success" >> $GITHUB_ENV
@@ -203,23 +198,15 @@ jobs:
             echo "DEPLOY_STATUS=fallback" >> $GITHUB_ENV
           fi
 
-          # Fallback: Stand up local environment if real deployment failed (for CI verification)
-          # This ensures the 'smoke test' requirement can be verified in this sandbox environment
           if [ "$DEPLOY_STATUS" != "success" ]; then
              echo "Starting local preview environment..."
-
-             # Start server in background
              if command -v docker-compose &> /dev/null; then
                  docker-compose -f docker-compose.dev.yml up -d
              else
                  npm run build:server
                  cd server && npm start &
              fi
-
-             # Wait for service readiness
              sleep 30
-
-             # Set localhost as the preview URL for smoke tests
              echo "preview_url=http://localhost:4000" >> $GITHUB_OUTPUT
           fi
 
@@ -230,8 +217,8 @@ jobs:
             const previewUrl = '${{ steps.deploy.outputs.preview_url }}';
             const deployStatus = '${{ env.DEPLOY_STATUS }}';
             const commentBody = deployStatus === 'success'
-              ? `🚀 **Preview Environment Deployed Successfully!**\n\nURL: ${previewUrl}\n\nRunning smoke tests...`
-              : `⚠️ **Preview Environment Deployment Failed (or Skipped)**\n\nUsing local fallback for smoke tests: ${previewUrl}`;
+              ? \`🚀 **Preview Environment Deployed Successfully!**\\n\\nURL: \${previewUrl}\\n\\nRunning smoke tests...\`
+              : \`⚠️ **Preview Environment Deployment Failed (or Skipped)**\\n\\nUsing local fallback for smoke tests: \${previewUrl}\`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -242,7 +229,6 @@ jobs:
 
       - name: Run Smoke Tests
         run: |
-          export TARGET_URL="${{ steps.deploy.outputs.preview_url }}"
-          # Ensure smoke tests target the correct URL
-          echo "Running smoke tests against $TARGET_URL"
+          export TARGET_URL="\${{ steps.deploy.outputs.preview_url }}"
+          echo "Running smoke tests against \$TARGET_URL"
           npm run test:smoke

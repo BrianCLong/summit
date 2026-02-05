@@ -59,57 +59,6 @@ Lint + Verify + Tests + Smoke + Security]
   GA --> MQ
   GA --> FE
 
-## Multi-Product Architecture (Planned)
-
-Summit is evolving from a single-purpose platform into a multi-product engine. The core verification and research engine will power seven distinct product surfaces:
-
-- **FactFlow**: Real-time verification for news and social media.
-- **FactLaw**: Legal intelligence and case-law verification.
-- **FactMarkets**: Financial market intelligence and sentiment analysis.
-- **FactGov**: Public policy and government transparency monitoring.
-- **FactAPI**: Headless intelligence for enterprise developers.
-- **FactCert**: Supply chain and certification verification.
-- **FactDatasets**: High-quality datasets for AI training and evaluation.
-
-### One Engine -> Seven Product APIs
-
-The architecture follows a "shared-core" model where product-specific logic lives in dedicated routers, all leveraging a shared **Platform Spine** and **Verification Façade**.
-
-```mermaid
-flowchart TB
-    subgraph Product Surfaces
-        FF[FactFlow]
-        FL[FactLaw]
-        FM[FactMarkets]
-        FG[FactGov]
-        FA[FactAPI]
-        FC[FactCert]
-        FD[FactDatasets]
-    end
-
-    FF & FL & FM & FG & FA & FC & FD -->|mounted by| Spine[Platform Spine / API Gateway]
-    Spine -->|calls| Facade[Shared Verification Façade]
-    Facade -->|orchestrates| Engine[Core Verification Engine]
-```
-
-### Core principle
-One verification engine → multiple product surfaces → shared auth/billing/metering.
-
-### Week 1 scope
-- Add product routers (health endpoints)
-- Add shared verification facade (stub)
-- Add schema/migration hooks (no breaking changes)
-- Feature flags OFF by default
-
-### Flags
-- `MULTIPRODUCT_ENABLED` (default false)
-- `FACTGOV_ENABLED` (default false)
-
-### Deterministic artifacts
-- `artifacts/platform/report.json`
-- `artifacts/platform/metrics.json`
-- `artifacts/platform/stamp.json` (sha + config hash, no timestamps)
-
   %% Notes
   classDef store fill:#f6f6f6,stroke:#999,stroke-width:1px;
   class PG,NEO,TS,REDIS store;
@@ -153,3 +102,25 @@ flowchart TB
   AI --> AM[active-measures-module/]
   AI --> OTHER[additional vertical modules (numerous)]
 ```
+
+## Multi-Product Architecture (Planned)
+
+Summit is evolving from a single-purpose platform into a multi-product engine. The core verification and research engine will power seven distinct product surfaces.
+
+### Core principle
+One verification engine -> multiple product surfaces -> shared auth/billing/metering.
+
+### Week 1 scope
+- Add product routers (health endpoints)
+- Add shared verification facade (stub)
+- Add schema/migration hooks (no breaking changes)
+- Feature flags OFF by default
+
+### Flags
+- MULTIPRODUCT_ENABLED (default false)
+- FACTGOV_ENABLED (default false)
+
+### Deterministic artifacts
+- artifacts/platform/report.json
+- artifacts/platform/metrics.json
+- artifacts/platform/stamp.json (sha + config hash, no timestamps)

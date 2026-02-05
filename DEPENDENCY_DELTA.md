@@ -18,10 +18,6 @@ Use this file to document changes to project dependencies.
 - Reason: Initial implementation of Summit Governance Fabric (SGF) components.
 
 ## 2026-02-05
-- Action: Update
-- Package: pnpm (10.0.0)
-- Reason: Align with platform standard and resolve CI version mismatch errors.
-
-- Action: Update
-- Package: @intelgraph/golden-path
-- Reason: Convert template dependency to workspace reference.
+- Action: Add
+- Package: alembic, psycopg2-binary
+- Reason: Required for multi-product platform schema and migrations (ITEM:W1-04).

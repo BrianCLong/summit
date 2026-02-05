@@ -1,11 +1,10 @@
-import os
+from pydantic_settings import BaseSettings
 
-class Settings:
-    PROJECT_NAME: str = "Summit Platform"
-    VERSION: str = "0.1.0"
-    API_V1_STR: str = "/api/v1"
+class Settings(BaseSettings):
+    platform_name: str = "Summit Platform Spine"
+    version: str = "0.1.0-week1"
 
-    # Database
-    DATABASE_URL: str = os.environ.get("DATABASE_URL", "postgresql+asyncpg://postgres:password@localhost:5432/summit")
+    class Config:
+        env_prefix = "SUMMIT_"
 
 settings = Settings()

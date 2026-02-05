@@ -123,12 +123,10 @@ def main() -> int:
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
-        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json",
-        "exec_brief_pack.json", "sources.json", "ATTESTATION_SUMMARY.md"
+        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
     }
-    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "EVID-NARINT-SMOKE", "vera"}
+    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out"}
 
-    TIMESTAMP_RE = re.compile(r"202\d-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}")
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
             continue
@@ -136,7 +134,7 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if TIMESTAMP_RE.search(txt):
+            if "202" in txt and ("T" in txt or ":" in txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue

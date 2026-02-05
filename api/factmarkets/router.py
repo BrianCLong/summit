@@ -1,10 +1,8 @@
-from fastapi import APIRouter, HTTPException
-from ..platform_spine import flags
+from fastapi import APIRouter
+from api.platform_spine import flags
 
-router = APIRouter(prefix="/factmarkets", tags=["FactMarkets"])
+router = APIRouter(prefix="/factmarkets", tags=["factmarkets"])
 
 @router.get("/health")
 async def health():
-    if not flags.FACTMARKETS_ENABLED:
-        raise HTTPException(status_code=404, detail="FactMarkets is disabled")
-    return {"status": "ok", "product": "FactMarkets"}
+    return {"product": "FactMarkets", "status": "ok"}
