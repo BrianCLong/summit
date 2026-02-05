@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-05T16:52:00Z",
+  "revision_note": "Logged SAGE self-hint GRPO repo reality check and assumptions audit.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "sage-self-hint-grpo-repo-scout",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Repo reality check for SAGE-style self-hint GRPO integration paths, config roots, and evidence conventions."
     },
     {
       "id": "B",
