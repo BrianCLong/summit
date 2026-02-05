@@ -1,0 +1,7 @@
+vibetensor:
+  enabled: false
+  feature_flag_env: "SUMMIT_EXPERIMENTAL_VIBETENSOR"
+  artifacts_dir: "artifacts/vibetensor"
+  determinism:
+    enforce_no_timestamps: true
+    stable_sorting: true
