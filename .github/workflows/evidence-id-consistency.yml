@@ -56,7 +56,8 @@ jobs:
       - name: Validate Stamp Schema
         run: |
           OUT_BASE="artifacts/evidence-id-consistency"
-          npx --yes ajv-cli validate \
+          npx --yes -p ajv-cli -p ajv-formats ajv validate \
+            -c ajv-formats \
             -s schemas/evidence/evidence-id-consistency-stamp.schema.json \
             -d "$OUT_BASE/run1/stamp.json"
 
