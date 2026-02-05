@@ -134,7 +134,7 @@ pnpm audit --audit-level=critical
 ./scripts/chaos/resilience-suite.sh
 ```
 
-**Verdict**: ✅ All failure modes handled gracefully
+**Verdict**: Deferred pending staged chaos execution with evidence bundle
 
 ### 4.2 Data Integrity
 

@@ -293,8 +293,8 @@ curl -X POST https://api.summit.internal/v1/policy/evaluate \
 ### 6.1 Smoke Tests
 
 ```bash
-# Run automated smoke test suite
-./scripts/smoke-test.sh --env=production
+# Run automated production smoke test suite
+API_URL="https://summit.example.com" ./scripts/smoke-test-production.sh
 
 # Expected: All tests passed
 ```

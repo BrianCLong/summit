@@ -62,6 +62,16 @@ Automated checks run after every traffic shift.
 -   **Endpoint**: `/api/v1/user/me` (Auth Check)
 -   **Synthetic**: Execute 1 "Golden Path" run (Ingest -> Search).
 
+## 3.1 GA Deployment Commands (Summit)
+
+```bash
+# Production deploy (Helm)
+./scripts/deploy-summit-production.sh deploy
+
+# Production smoke tests
+API_URL="https://summit.example.com" ./scripts/smoke-test-production.sh
+```
+
 ## 4. Feature Flags
 Use `LaunchDarkly` (or internal equiv) for feature-level rollouts independent of code deploys.
 -   Naming: `feat-<ticket-id>-<name>`

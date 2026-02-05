@@ -15,6 +15,14 @@ This document defines the initial reliability objectives for Summit's most visib
 
 ## SLOs
 
+### 0) Critical services availability (GA requirement)
+- **User capability:** Core services are available for authenticated requests.
+- **SLI:** `1 - (sum(rate(http_requests_total{status=~"5..",service=~"summit|intelgraph-api|conductor"}[30d])) / sum(rate(http_requests_total{service=~"summit|intelgraph-api|conductor"}[30d])))`
+- **SLO:** **≥ 99.5% success** over 30 days.
+- **Error budget:** 0.5% of 30 days ≈ **3.6 hours/month**.
+- **Ownership:** Platform SRE + service owners.
+- **Notes:** Service labels must include `service` and status codes; align dashboards in Grafana to this SLI.
+
 ### 1) Graph query availability
 - **User capability:** Users can successfully execute read queries via the primary API.
 - **SLI:** Ratio of `2xx/3xx` responses over all query requests (`http_request_total{route="/graph/query"}`) excluding client `4xx`.

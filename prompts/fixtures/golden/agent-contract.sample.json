@@ -1,0 +1,17 @@
+{
+  "version": "1.3",
+  "owner": "GA-hardening",
+  "allowedZones": [
+    {
+      "name": "Documentation",
+      "paths": ["docs/"],
+      "notes": "Example contract zone"
+    }
+  ],
+  "verificationRules": {
+    "gaCriticalWork": "Must reference Tier A/B/C artifact before merge.",
+    "ciCommands": ["make ga-verify"],
+    "verificationSurfaces": ["docs/ga/genui/UI_CONTRACT.md"]
+  },
+  "restrictedAreas": []
+}
