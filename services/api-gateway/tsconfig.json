@@ -13,8 +13,11 @@
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": false,
-    "composite": true
-    ,"tsBuildInfoFile": "dist/.tsbuildinfo"
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "baseUrl": ".",
+    "typeRoots": ["../../node_modules/@types"],
+    "types": ["node"]
   },
   "include": [
     "src"

@@ -264,7 +264,8 @@
   "workspaces": [
     "packages/*",
     "client",
-    "server"
+    "server",
+    "platform/*"
   ],
   "pnpm": {
     "auditConfig": {

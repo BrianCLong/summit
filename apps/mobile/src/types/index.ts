@@ -204,7 +204,9 @@ export type RootStackParamList = {
   EntityDetails: { entityId: string };
   InvestigationDetails: { investigationId: string };
   AlertDetails: { alertId: string };
-  MapFullScreen: { layerIds?: string[]; centerOn?: { lat: number; lng: number } };
+  MapFullScreen:
+    | { layerIds?: string[]; centerOn?: { lat: number; lng: number } }
+    | undefined;
   Settings: undefined;
   Profile: undefined;
   Search: { query?: string };
