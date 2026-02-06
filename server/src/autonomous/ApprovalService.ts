@@ -95,7 +95,7 @@ export class ApprovalService {
                 tenantId: row.tenant_id,
                 reason: row.reason
             },
-            status: row.status,
+            status: row.status as ApprovalRequest['status'],
             requestedAt: row.requested_at,
             expiresAt: row.expires_at
         }));

@@ -9,6 +9,8 @@ const POLICY_DIR = path.resolve(process.cwd(), '../policy'); // Assuming server 
 // In the sandbox, process.cwd() is likely the repo root.
 // However, the server code often assumes it's running from `server/`.
 // Let's use absolute paths based on `process.cwd()`.
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // Helper to find OPA binary
 const findOPA = async (): Promise<string> => {
@@ -63,7 +65,7 @@ export class OpaController {
 
   static async getPolicyContent(req: Request, res: Response) {
     try {
-      const { filename } = req.params;
+      const filename = singleParam(req.params.filename) ?? '';
       if (!filename || !filename.endsWith('.rego')) {
         return res.status(400).json({ error: 'Invalid filename' });
       }

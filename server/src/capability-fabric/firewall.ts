@@ -1,4 +1,4 @@
-import Ajv from 'ajv';
+import Ajv, { type ValidateFunction } from 'ajv';
 import crypto from 'crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +12,7 @@ import {
 import { evaluateCapabilityPolicy } from './policy-gate.js';
 
 const ajv = new Ajv({ allErrors: true, strict: false });
-const schemaCache = new Map<string, Ajv.ValidateFunction>();
+const schemaCache = new Map<string, ValidateFunction>();
 const rateLimitBuckets = new Map<string, number[]>();
 
 function hashPayload(payload: unknown): string {
@@ -52,7 +52,7 @@ function filterPayload(
   return { filtered, redactionActions };
 }
 
-function loadSchema(schemaPath: string): Ajv.ValidateFunction {
+function loadSchema(schemaPath: string): ValidateFunction {
   const existing = schemaCache.get(schemaPath);
   if (existing) {
     return existing;

@@ -6,6 +6,9 @@ import path from 'path';
 const LOG_DIR = process.env.TELEMETRY_LOG_DIR || path.join(process.cwd(), 'logs', 'telemetry');
 const service = new FunnelService(LOG_DIR);
 
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
+
 export const createFunnel = (req: Request, res: Response) => {
     const funnel: Funnel = req.body;
     if (!funnel.id || !funnel.steps || funnel.steps.length === 0) {
@@ -16,7 +19,7 @@ export const createFunnel = (req: Request, res: Response) => {
 };
 
 export const getFunnelReport = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = singleParam(req.params.id) ?? '';
     try {
         const report = service.generateReport(id);
         res.json(report);

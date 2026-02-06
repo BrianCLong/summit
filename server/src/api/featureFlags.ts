@@ -53,15 +53,20 @@ const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
 
 export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Router => {
   const router = express.Router();
+  const singleParam = (value: unknown): string | undefined =>
+    Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
   // Get all feature flags for the current user/context
   router.get('/', async (req: Request, res: Response) => {
     try {
+      const userId = singleParam(req.query.userId);
+      const groupsParam = singleParam(req.query.groups);
+      const attributesParam = singleParam(req.query.attributes);
       // Extract context from request
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: userId || req.user?.id,
+        groups: groupsParam ? groupsParam.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesParam ? JSON.parse(attributesParam) : (req.user as any)?.attributes || {}
       };
 
       // Get all flags with their evaluation status
@@ -92,13 +97,16 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Get a specific feature flag evaluation
   router.get('/:flagKey', async (req: Request, res: Response) => {
     try {
-      const { flagKey } = req.params;
+      const flagKey = singleParam(req.params.flagKey) ?? '';
 
       // Extract context from request
+      const userId = singleParam(req.query.userId);
+      const groupsParam = singleParam(req.query.groups);
+      const attributesParam = singleParam(req.query.attributes);
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: userId || req.user?.id,
+        groups: groupsParam ? groupsParam.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesParam ? JSON.parse(attributesParam) : (req.user as any)?.attributes || {}
       };
 
       // Get the flag evaluation
@@ -157,7 +165,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Admin API: Update a feature flag (requires admin privileges)
   router.put('/:flagKey', ensureAuthenticated, ensureRole(['admin', 'operator']), async (req: Request, res: Response) => {
     try {
-      const { flagKey } = req.params;
+      const flagKey = singleParam(req.params.flagKey) ?? '';
       const updateData = req.body;
 
 
@@ -179,7 +187,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Admin API: Delete a feature flag (requires admin privileges)
   router.delete('/:flagKey', ensureAuthenticated, ensureRole(['admin']), async (req: Request, res: Response) => {
     try {
-      const { flagKey } = req.params;
+      const flagKey = singleParam(req.params.flagKey) ?? '';
 
 
       // Delete the flag
@@ -199,8 +207,8 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Get configuration values
   router.get('/config/:key', async (req: Request, res: Response) => {
     try {
-      const { key } = req.params;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const key = singleParam(req.params.key) ?? '';
+      const environment = singleParam(req.query.env) || process.env.NODE_ENV || 'development';
 
       const value = await deps.configService.getConfig(key, environment);
 
@@ -220,7 +228,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   router.post('/config/batch', async (req: Request, res: Response) => {
     try {
       const { keys } = req.body;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const environment = singleParam(req.query.env) || process.env.NODE_ENV || 'development';
 
       if (!Array.isArray(keys)) {
         return res.status(400).json({ error: 'Keys must be an array' });

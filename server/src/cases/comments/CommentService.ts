@@ -39,7 +39,7 @@ export class CommentService {
    */
   async addComment(input: AddCommentInput): Promise<Comment> {
     const commentId = randomUUID();
-    let rootId = commentId;
+    let rootId: string = commentId;
 
     if (input.parentId) {
       const parent = await this.getComment(input.parentId);

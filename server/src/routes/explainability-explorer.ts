@@ -16,6 +16,8 @@ import { ListRunsFilter } from '../explainability/types.js';
 
 const router = Router();
 const service = ExplainabilityExplorerService.getInstance();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 /**
  * GET /api/explainability/runs
@@ -86,7 +88,7 @@ router.get('/runs', async (req: Request, res: Response) => {
  */
 router.get('/runs/:runId', async (req: Request, res: Response) => {
   try {
-    const { runId } = req.params;
+    const runId = singleParam(req.params.runId) ?? '';
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
     const requesterId = (req as any).user?.id || 'anonymous';
 
@@ -129,7 +131,7 @@ router.get('/runs/:runId', async (req: Request, res: Response) => {
  */
 router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
   try {
-    const { runId } = req.params;
+    const runId = singleParam(req.params.runId) ?? '';
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
     const depth = req.query.depth ? parseInt(req.query.depth as string, 10) : 3;
 
@@ -228,7 +230,7 @@ router.get('/compare', async (req: Request, res: Response) => {
  */
 router.get('/runs/:runId/verify', async (req: Request, res: Response) => {
   try {
-    const { runId } = req.params;
+    const runId = singleParam(req.params.runId) ?? '';
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
 
     if (!tenantId) {

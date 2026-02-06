@@ -1,10 +1,34 @@
 import path from 'path';
-import {
-  createContextShell,
-  type ContextShellOutput,
-  type CreateContextShellOptions,
-} from '../../../../libs/context-shell/node/index.js';
+import { createRequire } from 'node:module';
 import { ToolExecutor, WorkflowContext } from '../engine/WorkflowEngine.js';
+
+type ContextShellOutput = {
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+  filesRead: string[];
+  filesWritten: string[];
+  durationMs: number;
+  redactionsApplied: string[];
+};
+
+type CreateContextShellOptions = {
+  root: string;
+  fsMode?: 'readonly' | 'overlay';
+};
+
+const require = createRequire(import.meta.url);
+const { createContextShell } = require('@intelgraph/context-shell') as {
+  createContextShell: (options: CreateContextShellOptions) => {
+    bash: (command: string) => Promise<ContextShellOutput>;
+    readFile: (path: string) => Promise<ContextShellOutput>;
+    writeFile: (
+      path: string,
+      content: string,
+      options?: { justification?: string; format?: 'text' | 'patch' },
+    ) => Promise<ContextShellOutput>;
+  };
+};
 
 interface ContextShellParams {
   root?: string;

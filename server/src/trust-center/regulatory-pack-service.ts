@@ -365,7 +365,7 @@ export class RegulatoryPackService {
       name: row.name,
       framework: row.framework as ComplianceFramework,
       version: row.version,
-      status: row.status,
+      status: row.status as RegulatoryPackSummary['status'],
       controlCount: row.control_count || 0,
       lastUpdated: row.updated_at.toISOString(),
     }));
@@ -602,10 +602,14 @@ export class RegulatoryPackService {
       testId: row.test_id,
       controlId: row.control_id,
       executedAt: row.executed_at.toISOString(),
-      executedBy: row.executed_by,
-      status: row.status,
-      details: row.details,
-      evidence: row.evidence,
+      executedBy: { type: 'system', id: row.executed_by },
+      status: row.status as TestResult['status'],
+      details: typeof row.details === 'string' ? row.details : JSON.stringify(row.details ?? ''),
+      evidence: Array.isArray(row.evidence)
+        ? row.evidence.map((entry) => String(entry))
+        : row.evidence
+          ? [String(row.evidence)]
+          : undefined,
       duration: row.duration,
       failureReason: row.failure_reason,
     }));

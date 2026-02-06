@@ -1,8 +1,24 @@
 // Ambient type declarations to smooth over third-party typing mismatches
 
-// Pino: Provide a minimal Logger type alias for code importing { Logger } from 'pino'
+// Pino: Provide minimal Logger + callable default export
+declare namespace pino {
+  interface Logger {
+    [key: string]: any;
+  }
+  interface LoggerOptions {
+    [key: string]: any;
+  }
+  interface DestinationStream {
+    write: (msg: string) => void;
+    [key: string]: any;
+  }
+}
+
 declare module 'pino' {
-  export type Logger = ReturnType<typeof import('pino')>;
+  export type Logger = pino.Logger;
+  export type LoggerOptions = pino.LoggerOptions;
+  export type DestinationStream = pino.DestinationStream;
+  export default function pino(options?: LoggerOptions, destination?: DestinationStream): Logger;
 }
 
 // graphql-subscriptions: declare basic PubSub and withFilter types if missing
@@ -25,6 +41,9 @@ declare module 'graphql-subscriptions' {
 // zod: ensure `z` is available even if types are not picked up
 declare module 'zod' {
   export const z: any;
+  export namespace z {
+    type infer<T> = any;
+  }
 }
 
 // OpenTelemetry API: minimal shape for common symbols used in code

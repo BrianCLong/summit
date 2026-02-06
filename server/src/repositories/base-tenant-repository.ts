@@ -12,10 +12,10 @@ import { Pool } from 'pg';
 // Define types locally to work around ESM module resolution issues with @types/pg
 interface QueryResult<R = any> {
   rows: R[];
-  rowCount: number | null;
-  command: string;
-  oid: number;
-  fields: Array<{ name: string; dataTypeID: number }>;
+  rowCount?: number | null;
+  command?: string;
+  oid?: number;
+  fields?: Array<{ name: string; dataTypeID: number }>;
 }
 
 interface PoolClient {

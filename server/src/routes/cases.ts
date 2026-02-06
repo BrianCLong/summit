@@ -555,15 +555,14 @@ caseRouter.post('/:id/comments', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comment = await service.addComment(
-      {
-        caseId: id,
-        userId,
-        content,
-        metadata,
-      },
+    const comment = await service.addComment({
       tenantId,
-    );
+      targetType: 'CASE',
+      targetId: id,
+      content,
+      authorId: userId,
+      metadata,
+    });
 
     await emitAuditEvent(
       {
@@ -582,12 +581,12 @@ caseRouter.post('/:id/comments', async (req, res) => {
         tenantId,
         target: {
           type: 'case_comment',
-          id: comment.id,
+          id: comment.commentId,
           path: `cases/${id}`,
         },
         metadata: {
           caseId: id,
-          commentId: comment.id,
+          commentId: comment.commentId,
           messageLength: String(content).length,
           userAgent: req.headers['user-agent'],
         },
@@ -632,7 +631,13 @@ caseRouter.get('/:id/comments', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comments = await service.listComments(id, tenantId, limit, offset);
+    const comments = await service.listComments({
+      targetType: 'CASE',
+      targetId: id,
+      tenantId,
+      limit,
+      offset,
+    });
 
     res.json(comments);
   } catch (error: any) {

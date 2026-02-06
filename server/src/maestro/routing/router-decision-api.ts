@@ -9,6 +9,8 @@ import { policyActionGate } from '../../middleware/policy-action-gate.js';
 const router = express.Router();
 router.use(express.json());
 router.use(ensureAuthenticated);
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 const OverrideRequestSchema = z.object({
   model: z.string().min(1),
@@ -22,7 +24,8 @@ router.get(
   async (req, res) => {
     const span = otelService.createSpan('routing.get_decision');
     try {
-      const { runId, nodeId } = req.params;
+      const runId = singleParam(req.params.runId) ?? '';
+      const nodeId = singleParam(req.params.nodeId) ?? '';
       const pool = getPostgresPool();
 
       const { rows } = await pool.query(
@@ -81,17 +84,18 @@ router.post(
   policyActionGate({
     action: 'override',
     resource: 'maestro_run',
-    resolveResourceId: (req) => req.params.runId,
+    resolveResourceId: (req) => singleParam(req.params.runId),
     buildResourceAttributes: (req) => ({
-      runId: req.params.runId,
-      nodeId: req.params.nodeId,
+      runId: singleParam(req.params.runId),
+      nodeId: singleParam(req.params.nodeId),
     }),
   }),
   requirePermission('routing:override'),
   async (req, res) => {
     const span = otelService.createSpan('routing.override_decision');
     try {
-      const { runId, nodeId } = req.params;
+      const runId = singleParam(req.params.runId) ?? '';
+      const nodeId = singleParam(req.params.nodeId) ?? '';
       const validation = OverrideRequestSchema.safeParse(req.body);
 
       if (!validation.success) {

@@ -67,8 +67,10 @@ export default function sanitizeRequest(
       for (const [key, value] of Object.entries(req.params)) {
         if (typeof value === 'string') {
           sanitizedParams[key] = SanitizationUtils.sanitizeHTML(value);
+        } else if (Array.isArray(value)) {
+          sanitizedParams[key] = SanitizationUtils.sanitizeHTML(value[0] ?? '');
         } else {
-          sanitizedParams[key] = value;
+          sanitizedParams[key] = String(value ?? '');
         }
       }
       req.params = sanitizedParams;

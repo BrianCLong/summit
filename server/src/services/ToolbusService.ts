@@ -136,6 +136,7 @@ export class ToolbusService {
     while (attempt <= maxRetries) {
       try {
         const fullContext: ConnectorContext = {
+            tenantId: context.tenantId || 'default',
             logger: context.logger as any, // Cast or provide default
             metrics: context.metrics as any,
             rateLimiter: limiter || new SimpleRateLimiter(100, 10),

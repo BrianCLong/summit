@@ -1,4 +1,4 @@
-import { MCPRequest, MCPResponse, MCPTool } from '../../types.js';
+import { MCPRequest, MCPResponse, MCPTool } from '../../types/index.js';
 import { narrativeSimulationManager } from '../../../narrative/manager.js';
 import { Neo4jNarrativeLoader } from '../../../narrative/adapters/neo4j-loader.js';
 import { randomUUID } from 'node:crypto';

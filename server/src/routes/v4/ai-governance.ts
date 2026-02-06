@@ -172,6 +172,8 @@ const handleError = (error: unknown, res: Response, operation: string) => {
 // =============================================================================
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 // Initialize services middleware
 router.use(async (_req, _res, next) => {
@@ -332,13 +334,13 @@ router.get(
   requirePermission('ai:suggestions:read'),
   async (req: Request, res: Response) => {
     try {
-      const suggestion = await policySuggestionService!.getSuggestion(req.params.id);
+      const suggestion = await policySuggestionService!.getSuggestion(singleParam(req.params.id));
 
       if (!suggestion) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Suggestion not found: ${req.params.id}`,
+            message: `Suggestion not found: ${singleParam(req.params.id)}`,
           },
         });
       }
@@ -398,12 +400,12 @@ router.post(
       };
 
       const suggestion = await policySuggestionService!.reviewSuggestion(
-        req.params.id,
+        singleParam(req.params.id),
         feedback
       );
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId: singleParam(req.params.id),
         decision: feedback.decision,
         reviewedBy: feedback.reviewedBy,
       }, 'Suggestion reviewed');
@@ -438,10 +440,10 @@ router.post(
   requirePermission('ai:suggestions:implement'),
   async (req: Request, res: Response) => {
     try {
-      const result = await policySuggestionService!.implementSuggestion(req.params.id);
+      const result = await policySuggestionService!.implementSuggestion(singleParam(req.params.id));
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId: singleParam(req.params.id),
         policyId: result.policyId,
         implementedBy: getUserId(req),
       }, 'Suggestion implemented');
@@ -787,13 +789,13 @@ router.get(
   requirePermission('ai:anomalies:read'),
   async (req: Request, res: Response) => {
     try {
-      const anomaly = await anomalyService!.getAnomaly(req.params.id);
+      const anomaly = await anomalyService!.getAnomaly(singleParam(req.params.id));
 
       if (!anomaly) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Anomaly not found: ${req.params.id}`,
+            message: `Anomaly not found: ${singleParam(req.params.id)}`,
           },
         });
       }
@@ -846,13 +848,13 @@ router.patch(
       const notes: string = req.body.notes;
 
       const anomaly = await anomalyService!.updateAnomalyStatus(
-        req.params.id,
+        singleParam(req.params.id),
         status,
         notes
       );
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId: singleParam(req.params.id),
         newStatus: status,
         updatedBy: getUserId(req),
       }, 'Anomaly status updated');
@@ -913,10 +915,10 @@ router.post(
         actionsTaken: req.body.actionsTaken || [],
       };
 
-      const anomaly = await anomalyService!.resolveAnomaly(req.params.id, resolution);
+      const anomaly = await anomalyService!.resolveAnomaly(singleParam(req.params.id), resolution);
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId: singleParam(req.params.id),
         resolution: resolution.resolution,
         resolvedBy: resolution.resolvedBy,
       }, 'Anomaly resolved');

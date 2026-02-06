@@ -14,6 +14,8 @@ import DetectorService from '../services/xai/detectors.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 const xaiExplainer = GraphXAIExplainer.getInstance();
 const detectorService = DetectorService.getInstance();
 
@@ -117,7 +119,7 @@ router.get(
   requireAuthority('graph_xai_analysis', ['model_card']),
   async (req, res) => {
     try {
-      const { version } = req.params;
+      const version = singleParam(req.params.version);
 
       if (version) {
         const modelCard = xaiExplainer.getModelCard(version);

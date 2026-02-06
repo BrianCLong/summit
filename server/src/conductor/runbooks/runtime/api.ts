@@ -40,6 +40,8 @@ import {
 // ============================================================================
 
 export const runtimeApiRouter = express.Router();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // ============================================================================
 // Runtime Initialization
@@ -127,7 +129,7 @@ runtimeApiRouter.post('/runbooks/:runbookId/execute', async (req: Request, res: 
   const startTime = Date.now();
 
   try {
-    const { runbookId } = req.params;
+    const runbookId = singleParam(req.params.runbookId) ?? '';
     const body = req.body as StartExecutionRequest;
     const userId = (req as any).user?.sub || 'anonymous';
     const tenantId = req.headers['x-tenant-id'] as string || 'default';
@@ -186,7 +188,7 @@ runtimeApiRouter.post('/runbooks/:runbookId/execute', async (req: Request, res: 
  */
 runtimeApiRouter.get('/executions/:executionId', async (req: Request, res: Response) => {
   try {
-    const { executionId } = req.params;
+    const executionId = singleParam(req.params.executionId) ?? '';
     const tenantId = req.headers['x-tenant-id'] as string || 'default';
 
     const execution = await runtimeEngine!.getExecution(executionId);
@@ -227,7 +229,7 @@ runtimeApiRouter.post('/executions/:executionId/control', async (req: Request, r
   const startTime = Date.now();
 
   try {
-    const { executionId } = req.params;
+    const executionId = singleParam(req.params.executionId) ?? '';
     const { action } = req.body as ControlExecutionRequest;
     const userId = (req as any).user?.sub || 'anonymous';
     const tenantId = req.headers['x-tenant-id'] as string || 'default';
@@ -286,7 +288,7 @@ runtimeApiRouter.post('/executions/:executionId/control', async (req: Request, r
  */
 runtimeApiRouter.get('/executions/:executionId/logs', async (req: Request, res: Response) => {
   try {
-    const { executionId } = req.params;
+    const executionId = singleParam(req.params.executionId) ?? '';
     const tenantId = req.headers['x-tenant-id'] as string || 'default';
 
     // Get execution to verify tenant access
@@ -330,7 +332,7 @@ runtimeApiRouter.get('/executions/:executionId/logs', async (req: Request, res: 
  */
 runtimeApiRouter.get('/executions/:executionId/logs/verify', async (req: Request, res: Response) => {
   try {
-    const { executionId } = req.params;
+    const executionId = singleParam(req.params.executionId) ?? '';
     const tenantId = req.headers['x-tenant-id'] as string || 'default';
 
     // Get execution to verify tenant access

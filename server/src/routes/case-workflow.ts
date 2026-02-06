@@ -6,6 +6,10 @@ import { createRouteRateLimitMiddleware } from '../middleware/rateLimit.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const routeLogger = logger.child({ name: 'CaseWorkflowRoutes' });
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
+const singleQuery = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 /**
  * Helper to extract user ID and tenant ID from authenticated request
@@ -16,7 +20,7 @@ function extractAuthContext(req: AuthenticatedRequest): { userId: string; tenant
   }
 
   const userId = req.user!.id;
-  const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
+  const tenantId = req.user!.tenantId || (req.tenant as any)?.id || req.tenant?.tenantId;
 
   if (!tenantId) {
     return null;
@@ -38,7 +42,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.post('/cases/:id/transition', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
       const { toStage, reason, legalBasis, metadata } = req.body;
 
       // Extract userId and tenantId from authenticated request
@@ -47,7 +51,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
       }
 
       const userId = req.user!.id;
-      const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
+      const tenantId = req.user!.tenantId || (req.tenant as any)?.id || req.tenant?.tenantId;
 
       if (!tenantId) {
         return res.status(400).json({ error: 'Tenant ID is required' });
@@ -100,14 +104,14 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/cases/:id/available-transitions', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
 
       if (!req.user?.id) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       const userId = req.user!.id;
-      const tenantId = req.user!.tenantId || req.tenant?.id || req.tenant?.tenantId;
+      const tenantId = req.user!.tenantId || (req.tenant as any)?.id || req.tenant?.tenantId;
 
       if (!tenantId) {
         return res.status(400).json({ error: 'Tenant ID is required' });
@@ -135,7 +139,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.post('/cases/:id/tasks', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
       const {
         title,
         description,
@@ -190,8 +194,10 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/cases/:id/tasks', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
-      const { status, priority, assignedTo } = req.query;
+      const caseId = singleParam(req.params.id) ?? '';
+      const status = singleQuery(req.query.status);
+      const priority = singleQuery(req.query.priority);
+      const assignedTo = singleQuery(req.query.assignedTo);
 
       const tasks = await workflowService.listTasks({
         caseId,
@@ -214,7 +220,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.put('/tasks/:id/assign', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: taskId } = req.params;
+      const taskId = singleParam(req.params.id) ?? '';
       const { userId: assignedTo } = req.body;
 
       const authContext = extractAuthContext(req);
@@ -246,7 +252,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.put('/tasks/:id/complete', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: taskId } = req.params;
+      const taskId = singleParam(req.params.id) ?? '';
       const { resultData } = req.body;
 
       const authContext = extractAuthContext(req);
@@ -274,7 +280,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/cases/:id/tasks/overdue', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
 
       const overdueTasks = await workflowService.getOverdueTasks(caseId);
 
@@ -294,7 +300,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.post('/cases/:id/participants', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
       const { userId, roleId, metadata } = req.body;
 
       const authContext = extractAuthContext(req);
@@ -328,7 +334,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/cases/:id/participants', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
 
       const participants = await workflowService.getCaseParticipants(caseId);
 
@@ -346,7 +352,9 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.delete('/cases/:caseId/participants/:userId/:roleId', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { caseId, userId, roleId } = req.params;
+      const caseId = singleParam(req.params.caseId) ?? '';
+      const userId = singleParam(req.params.userId) ?? '';
+      const roleId = singleParam(req.params.roleId) ?? '';
 
       const authContext = extractAuthContext(req);
       if (!authContext) {
@@ -381,7 +389,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.post('/cases/:id/approvals', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
       const {
         taskId,
         approvalType,
@@ -427,7 +435,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.post('/approvals/:id/vote', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: approvalId } = req.params;
+      const approvalId = singleParam(req.params.id) ?? '';
       const { decision, reason, metadata } = req.body;
 
       const authContext = extractAuthContext(req);
@@ -484,7 +492,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/cases/:id/slas', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
 
       const slas = await workflowService.getCaseSLAs(caseId);
 
@@ -502,7 +510,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/cases/:id/slas/summary', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id: caseId } = req.params;
+      const caseId = singleParam(req.params.id) ?? '';
 
       const summary = await workflowService.getCaseSLASummary(caseId);
 
@@ -522,7 +530,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/roles', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { systemOnly } = req.query;
+      const systemOnly = singleQuery(req.query.systemOnly);
 
       const roles = await workflowService.listRoles(systemOnly === 'true');
 

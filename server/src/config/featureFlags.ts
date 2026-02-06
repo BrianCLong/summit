@@ -26,6 +26,7 @@ export type FeatureKey =
   | 'analytics.panel'
   | 'pdf.export'
   | 'narrative.simulation' // from mvp1-features
+  | 'graphrag.neptuneManaged'
 
   // Agent Features (Consolidated)
   | 'agent.memory'
@@ -185,6 +186,7 @@ export class FeatureFlags {
         'pdf.export': true,
         'opentelemetry.enabled': true,
         'narrative.simulation': true,
+        'graphrag.neptuneManaged': false,
 
         // Agent Features
         'agent.memory': true,

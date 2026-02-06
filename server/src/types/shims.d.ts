@@ -65,14 +65,26 @@ declare class TextDecoder {
 }
 
 declare module 'pg' {
-  export class Pool {
-    constructor(config?: any);
-    connect(): Promise<any>;
-    end(): Promise<void>;
-    query: any;
+  export interface QueryResult<T = any> {
+    rows: T[];
+    rowCount?: number;
+    command?: string;
+    oid?: number;
+    fields?: any[];
     [key: string]: any;
   }
-  export = Pool;
+  export interface PoolClient {
+    query: (...args: any[]) => Promise<QueryResult<any>>;
+    release: () => void;
+    [key: string]: any;
+  }
+  export class Pool {
+    constructor(config?: any);
+    connect(): Promise<PoolClient>;
+    end(): Promise<void>;
+    query: (...args: any[]) => Promise<QueryResult<any>>;
+    [key: string]: any;
+  }
 }
 declare module 'pgvector' {
   const anyExport: any;
@@ -346,8 +358,92 @@ declare module '@intelgraph/feature-flags' {
   export default anyExport;
 }
 
+declare module '@intelgraph/context-shell' {
+  export type ContextShellOutput = {
+    stdout: string;
+    stderr: string;
+    exitCode: number;
+    filesRead: string[];
+    filesWritten: string[];
+    durationMs: number;
+    redactionsApplied: string[];
+  };
+
+  export type CreateContextShellOptions = {
+    root: string;
+    fsMode?: 'readonly' | 'overlay';
+  };
+
+  export type ContextShell = {
+    bash(command: string): Promise<ContextShellOutput>;
+    readFile(path: string): Promise<ContextShellOutput>;
+    writeFile(
+      path: string,
+      content: string,
+      options?: { justification?: string; format?: 'text' | 'patch' },
+    ): Promise<ContextShellOutput>;
+  };
+
+  export function createContextShell(options: CreateContextShellOptions): ContextShell;
+}
+
+declare module '@intelgraph/osint-collector' {
+  export enum CollectionType {
+    SOCIAL_MEDIA = 'social_media',
+    WEB_SCRAPING = 'web_scraping',
+    RSS_FEED = 'rss_feed',
+    PUBLIC_RECORDS = 'public_records',
+    DOMAIN_INTEL = 'domain_intel',
+    DARK_WEB = 'dark_web',
+    FORUM = 'forum',
+    NEWS = 'news',
+    IMAGE_METADATA = 'image_metadata',
+    GEOLOCATION = 'geolocation',
+  }
+
+  export enum TaskStatus {
+    PENDING = 'pending',
+    IN_PROGRESS = 'in_progress',
+    COMPLETED = 'completed',
+    FAILED = 'failed',
+    CANCELLED = 'cancelled',
+  }
+
+  export type CollectionTask = {
+    id: string;
+    type: CollectionType;
+    source: string;
+    target: string;
+    priority: number;
+    scheduledAt: Date;
+    status: TaskStatus;
+    config?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  };
+
+  export type SimpleFeedConfig = {
+    name: string;
+    type: CollectionType;
+    enabled: boolean;
+    feedUrl?: string;
+  };
+
+  export class SimpleFeedCollector {
+    constructor(config: SimpleFeedConfig);
+    initialize(): Promise<void>;
+    collect(task: CollectionTask): Promise<{ data: unknown }>;
+  }
+}
+
+declare module '@intelgraph/maestro-core' {
+  export class ForkDetector {
+    constructor(...args: any[]);
+  }
+  const anyExport: any;
+  export default anyExport;
+}
+
 declare module 'compression' {
   const anyExport: any;
   export = anyExport;
 }
-

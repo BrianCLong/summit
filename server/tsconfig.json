@@ -7,6 +7,12 @@
     "noEmit": true,
     "rootDir": ".",
     "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@intelgraph/context-shell": ["src/types/context-shell.d.ts"],
+      "@intelgraph/osint-collector": ["src/types/osint-collector.d.ts"],
+      "@intelgraph/maestro-core": ["src/types/maestro-core.d.ts"]
+    },
     "esModuleInterop": true,
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
@@ -90,6 +96,7 @@
     "src/workers/behavioral*.ts",
     "src/graphql/apollo-v5-server.ts",
     "src/graphql/resolvers/legacy.ts",
+    "src/graphql/resolvers/multimodalResolvers.ts",
     "src/graphql/resolvers/v040/**",
     "src/graphql/tools/resolvers.ts",
     "src/jobs/selectorMinimizationJobs.ts",

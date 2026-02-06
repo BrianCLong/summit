@@ -4,6 +4,9 @@ import { Request, Response } from 'express';
 import { CRDTConflictResolver } from './crdt-conflict-resolver.js';
 import logger from '../../config/logger.js';
 
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
+
 export class ConflictUIController {
   private conflictResolver: CRDTConflictResolver;
 
@@ -21,7 +24,7 @@ export class ConflictUIController {
    */
   async getConflictDeltas(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = singleParam(req.params.entityId) ?? '';
       const tenantId = req.headers['x-tenant-id'] as string;
 
       if (!tenantId) {
@@ -87,7 +90,7 @@ export class ConflictUIController {
    */
   async resolveConflicts(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = singleParam(req.params.entityId) ?? '';
       const tenantId = req.headers['x-tenant-id'] as string;
       const { manualOverrides, approver, resolutionRationale } = req.body;
 
@@ -176,9 +179,10 @@ export class ConflictUIController {
    */
   async getConflictHistory(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = singleParam(req.params.entityId) ?? '';
       const tenantId = req.headers['x-tenant-id'] as string;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limitParam = singleParam(req.query.limit);
+      const limit = limitParam ? parseInt(limitParam, 10) : 50;
 
       if (!tenantId) {
         res.status(400).json({

@@ -142,6 +142,8 @@ const wrapResponse = <T>(data: T, req: Request): DataEnvelope<T> => {
 // =============================================================================
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 // Initialize services middleware
 router.use(async (_req, _res, next) => {
@@ -265,13 +267,13 @@ router.get(
   '/hipaa/controls/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const control = ALL_HIPAA_CONTROLS.find(c => c.id === req.params.id);
+    const control = ALL_HIPAA_CONTROLS.find(c => c.id === singleParam(req.params.id));
 
     if (!control) {
       return res.status(404).json({
         error: {
           code: 'NOT_FOUND',
-          message: `HIPAA control not found: ${req.params.id}`,
+          message: `HIPAA control not found: ${singleParam(req.params.id)}`,
         },
       });
     }
@@ -378,7 +380,7 @@ router.get(
   '/hipaa/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await hipaaService!.getAssessment(req.params.id);
+    const assessment = await hipaaService!.getAssessment(singleParam(req.params.id));
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
@@ -533,13 +535,13 @@ router.get(
   '/sox/controls/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const control = ALL_SOX_CONTROLS.find(c => c.id === req.params.id);
+    const control = ALL_SOX_CONTROLS.find(c => c.id === singleParam(req.params.id));
 
     if (!control) {
       return res.status(404).json({
         error: {
           code: 'NOT_FOUND',
-          message: `SOX control not found: ${req.params.id}`,
+          message: `SOX control not found: ${singleParam(req.params.id)}`,
         },
       });
     }
@@ -601,8 +603,10 @@ router.post(
   requirePermission('compliance:assess'),
   async (req: Request, res: Response) => {
     const tenantId = getTenantId(req);
+    const sections = Array.isArray(req.body.sections) ? req.body.sections : undefined;
+    const categories = Array.isArray(req.body.categories) ? req.body.categories : sections;
     const assessment = await soxService!.performAssessment(tenantId, {
-      sections: req.body.sections as any[],
+      categories: categories as any[],
     });
 
     logger.info(
@@ -647,7 +651,7 @@ router.get(
   '/sox/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await soxService!.getAssessment(req.params.id);
+    const assessment = await soxService!.getAssessment(singleParam(req.params.id));
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }

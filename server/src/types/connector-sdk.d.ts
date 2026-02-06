@@ -44,6 +44,9 @@ declare module '@intelgraph/connector-sdk' {
     signal: AbortSignal;
     stateStore: ConnectorStateStore;
     logger: ConnectorLogger;
+    metrics?: Record<string, unknown>;
+    emitter?: { emit: (event: string, payload?: unknown) => void };
+    rateLimiter?: RateLimiter;
   }
 
   export interface ConnectorResult {

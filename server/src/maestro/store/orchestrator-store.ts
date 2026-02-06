@@ -9,7 +9,7 @@ import {
   CoordinationTask,
   CoordinationChannel,
   ConsensusProposal,
-  AuditEvent
+  MaestroAuditEvent
 } from '../types.js';
 
 export class OrchestratorPostgresStore {
@@ -576,7 +576,7 @@ export class OrchestratorPostgresStore {
   }
 
   // Audit log methods
-  async getAuditLog(limit: number = 100): Promise<AuditEvent[]> {
+  async getAuditLog(limit: number = 100): Promise<MaestroAuditEvent[]> {
     const result = await this.pool.query(
       `SELECT id, actor, action, resource, details, status, created_at 
        FROM maestro_audit_log 

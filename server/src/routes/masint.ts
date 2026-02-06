@@ -7,6 +7,8 @@ import logger from '../utils/logger.js';
 
 const router = express.Router();
 const masintService = MasintService.getInstance();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 /**
  * @route POST /api/masint/ingest
@@ -38,7 +40,7 @@ router.post('/ingest', ensureAuthenticated, async (req, res) => {
  * @access Private
  */
 router.get('/analysis/:id', ensureAuthenticated, async (req, res) => {
-  const { id } = req.params;
+  const id = singleParam(req.params.id) ?? '';
   try {
     const result = await masintService.getAnalysis(id);
 

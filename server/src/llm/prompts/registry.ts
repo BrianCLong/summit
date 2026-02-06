@@ -98,7 +98,9 @@ export class InMemoryPromptRegistry implements PromptService {
 
         const messages: ChatMessage[] = template.messages.map(msg => ({
             role: msg.role,
-            content: this.interpolate(msg.content ?? '', params),
+            content: Array.isArray(msg.content)
+              ? msg.content
+              : this.interpolate(msg.content ?? '', params),
             name: msg.name
         }));
 

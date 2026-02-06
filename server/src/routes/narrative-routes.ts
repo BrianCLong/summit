@@ -7,6 +7,8 @@ const router = Router();
 const tracer = trace.getTracer('narrative-routes', '1.0.0');
 
 const redis = RedisService.getInstance();
+const singleParam = (value: unknown): string | undefined =>
+    Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 /**
  * GET /api/narrative/:simId/arcs
@@ -15,7 +17,7 @@ const redis = RedisService.getInstance();
 router.get('/:simId/arcs', async (req: Request, res: Response) => {
     return tracer.startActiveSpan('narrative.get_arcs', async (span: Span) => {
         try {
-            const { simId } = req.params;
+            const simId = singleParam(req.params.simId) ?? '';
             span.setAttribute('simulation_id', simId);
 
             // Check cache first
@@ -92,7 +94,7 @@ router.get('/:simId/arcs', async (req: Request, res: Response) => {
 router.get('/:simId/events', async (req: Request, res: Response) => {
     return tracer.startActiveSpan('narrative.get_events', async (span: Span) => {
         try {
-            const { simId } = req.params;
+            const simId = singleParam(req.params.simId) ?? '';
             span.setAttribute('simulation_id', simId);
 
             // Check cache
@@ -165,7 +167,7 @@ router.get('/:simId/events', async (req: Request, res: Response) => {
 router.get('/:simId/summary', async (req: Request, res: Response) => {
     return tracer.startActiveSpan('narrative.get_summary', async (span: Span) => {
         try {
-            const { simId } = req.params;
+            const simId = singleParam(req.params.simId) ?? '';
             span.setAttribute('simulation_id', simId);
 
             const summary = narrativeSimulationManager.getState(simId);

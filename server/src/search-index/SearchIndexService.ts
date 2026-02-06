@@ -23,7 +23,7 @@ export class SearchIndexService {
       },
       extractField: (document: SearchableItem, fieldName: string) => {
         // Access nested fields if necessary
-        const record = document as Record<string, unknown>;
+        const record = document as unknown as Record<string, unknown>;
         return record[fieldName];
       }
     });
@@ -106,8 +106,9 @@ export class SearchIndexService {
       throw new Error("caseId is required");
     }
 
+    type MiniSearchHit = SearchableItem & { score: number; match: Record<string, string[]> };
     const opts = {
-      filter: (result: SearchableItem) => {
+      filter: (result: MiniSearchHit) => {
         // Filter by caseId
         if (result.caseId !== query.caseId) return false;
 
@@ -132,7 +133,7 @@ export class SearchIndexService {
       queries: [query.q],
     };
 
-    const results = this.miniSearch.search(query.q, opts) as Array<SearchableItem & { score: number; match: Record<string, string[]> }>;
+    const results = this.miniSearch.search(query.q, opts as any) as unknown as MiniSearchHit[];
 
     // Pagination (manual slicing since minisearch returns all sorted by score)
     const limit = query.limit || 20;
@@ -238,7 +239,7 @@ export class SearchIndexService {
             prefix: true
           },
           extractField: (document: SearchableItem, fieldName: string) => {
-            const record = document as Record<string, unknown>;
+            const record = document as unknown as Record<string, unknown>;
             return record[fieldName];
           }
         });

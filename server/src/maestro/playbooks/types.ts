@@ -38,3 +38,15 @@ export interface PlaybookRunState {
   completedAt?: string;
   metadata?: Record<string, unknown>;
 }
+
+export interface PlaybookSignature {
+  algorithm: string;
+  signature: string;
+  publicKey: string;
+  signedAt: string;
+}
+
+export interface Playbook extends PlaybookDefinition {
+  version: string;
+  signature?: PlaybookSignature;
+}

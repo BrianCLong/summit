@@ -17,6 +17,8 @@ import logger from '../../utils/logger.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // ============================================================================
 // Middleware
@@ -165,7 +167,7 @@ router.get(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const envelope = sandboxManager.getSandbox(id);
 
       if (!envelope.data) {
@@ -192,7 +194,7 @@ router.put(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { name, policies, testData, limits } = req.body;
 
       const envelope = await sandboxManager.updateSandbox(id, {
@@ -226,7 +228,7 @@ router.delete(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const envelope = sandboxManager.deleteSandbox(id);
 
       if (!envelope.data.deleted) {
@@ -257,7 +259,7 @@ router.post(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { name, description, actor, action, resource, context, expectedVerdict } = req.body;
 
       if (!name || !actor || !action || !resource) {
@@ -300,7 +302,7 @@ router.post(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { scenarioId, policyId, contextOverrides } = req.body;
 
       const envelope = await sandboxManager.execute({
@@ -329,7 +331,7 @@ router.get(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { executionId } = req.params;
+      const executionId = singleParam(req.params.executionId) ?? '';
       const envelope = sandboxManager.getExecution(executionId);
 
       if (!envelope.data) {
@@ -360,7 +362,7 @@ router.post(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { policyId, policyData } = req.body;
 
       if (!policyData) {

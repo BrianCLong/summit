@@ -20,6 +20,8 @@ import type {
 
 const router = Router();
 const provenanceLedger = ProvenanceLedgerBetaService.getInstance();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // ============================================================================
 // LICENSE ENDPOINTS
@@ -57,7 +59,7 @@ router.post('/licenses', async (req: Request, res: Response) => {
  */
 router.get('/licenses/:id', async (req: Request, res: Response) => {
   try {
-    const license = await provenanceLedger.getLicense(req.params.id);
+    const license = await provenanceLedger.getLicense(singleParam(req.params.id) ?? '');
 
     if (!license) {
       return res.status(404).json({
@@ -119,7 +121,7 @@ router.post('/sources', async (req: Request, res: Response) => {
  */
 router.get('/sources/:id', async (req: Request, res: Response) => {
   try {
-    const source = await provenanceLedger.getSource(req.params.id);
+    const source = await provenanceLedger.getSource(singleParam(req.params.id) ?? '');
 
     if (!source) {
       return res.status(404).json({
@@ -182,7 +184,7 @@ router.post('/transforms', async (req: Request, res: Response) => {
  */
 router.get('/transforms/:id', async (req: Request, res: Response) => {
   try {
-    const transform = await provenanceLedger.getTransform(req.params.id);
+    const transform = await provenanceLedger.getTransform(singleParam(req.params.id) ?? '');
 
     if (!transform) {
       return res.status(404).json({
@@ -245,7 +247,7 @@ router.post('/evidence', async (req: Request, res: Response) => {
  */
 router.get('/evidence/:id', async (req: Request, res: Response) => {
   try {
-    const evidence = await provenanceLedger.getEvidence(req.params.id);
+    const evidence = await provenanceLedger.getEvidence(singleParam(req.params.id) ?? '');
 
     if (!evidence) {
       return res.status(404).json({
@@ -307,7 +309,7 @@ router.post('/claims', async (req: Request, res: Response) => {
  */
 router.get('/claims/:id', async (req: Request, res: Response) => {
   try {
-    const claim = await provenanceLedger.getClaim(req.params.id);
+    const claim = await provenanceLedger.getClaim(singleParam(req.params.id) ?? '');
 
     if (!claim) {
       return res.status(404).json({
@@ -319,7 +321,7 @@ router.get('/claims/:id', async (req: Request, res: Response) => {
     // Optionally include full provenance chain
     if (req.query.include_provenance === 'true') {
       const provenance = await provenanceLedger.getProvenanceChain(
-        req.params.id,
+        singleParam(req.params.id) ?? '',
       );
 
       return res.json({
@@ -396,7 +398,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const input: ClaimEvidenceLinkInput = {
-        claim_id: req.params.claimId,
+        claim_id: singleParam(req.params.claimId) ?? '',
         ...req.body,
       };
 
@@ -432,7 +434,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const links = await provenanceLedger.getClaimEvidenceLinks(
-        req.params.claimId,
+        singleParam(req.params.claimId) ?? '',
       );
 
       res.json({
@@ -466,7 +468,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const links = await provenanceLedger.getEvidenceClaimLinks(
-        req.params.evidenceId,
+        singleParam(req.params.evidenceId) ?? '',
       );
 
       res.json({
@@ -501,7 +503,7 @@ router.get(
  */
 router.get('/chain/:itemId', async (req: Request, res: Response) => {
   try {
-    const chain = await provenanceLedger.getProvenanceChain(req.params.itemId);
+    const chain = await provenanceLedger.getProvenanceChain(singleParam(req.params.itemId) ?? '');
 
     res.json({
       success: true,
@@ -561,7 +563,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const report = await provenanceLedger.verifyManifest(
-        req.params.manifestId,
+        singleParam(req.params.manifestId) ?? '',
       );
 
       res.json({

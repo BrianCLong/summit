@@ -22,9 +22,22 @@ const validateRequest = buildRequestValidator({
   allowUnknown: true,
 });
 
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
+
+const normalizeDimensions = (value: unknown): string | string[] | undefined => {
+  if (Array.isArray(value)) {
+    return value.filter((entry) => typeof entry === 'string') as string[];
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  return undefined;
+};
+
 const enforceTenant = (req: any, res: any, next: any) => {
   try {
-    const tenantId = req.params.tenantId;
+    const tenantId = singleParam(req.params.tenantId) ?? '';
     const context = TenantValidator.validateTenantAccess(
       { user: req.user },
       tenantId,
@@ -55,11 +68,14 @@ router.get('/', ensureAuthenticated, validateRequest, enforceTenant, async (req,
     });
   }
 
-  const { tenantId } = req.params;
-  const { from, to, dimension, dimensions, limit } = req.query as Record<
-    string,
-    any
-  >;
+  const tenantId = singleParam(req.params.tenantId) ?? '';
+  const { from, to, dimension, dimensions, limit } = {
+    from: singleParam(req.query.from),
+    to: singleParam(req.query.to),
+    dimension: singleParam(req.query.dimension),
+    dimensions: normalizeDimensions(req.query.dimensions),
+    limit: req.query.limit,
+  } as Record<string, any>;
 
   const windowEnd = to ?? new Date().toISOString();
   const windowStart =
@@ -175,11 +191,14 @@ router.get(
   enforceTenant,
   async (req, res) => {
     const pool = getPostgresPool();
-    const { tenantId } = req.params;
-    const { from, to, dimension, dimensions, limit } = req.query as Record<
-      string,
-      any
-    >;
+    const tenantId = singleParam(req.params.tenantId) ?? '';
+    const { from, to, dimension, dimensions, limit } = {
+      from: singleParam(req.query.from),
+      to: singleParam(req.query.to),
+      dimension: singleParam(req.query.dimension),
+      dimensions: normalizeDimensions(req.query.dimensions),
+      limit: req.query.limit,
+    } as Record<string, any>;
 
     const windowEnd = to ?? new Date().toISOString();
     const windowStart =
@@ -270,11 +289,14 @@ router.get(
   enforceTenant,
   async (req, res) => {
     const pool = getPostgresPool();
-    const { tenantId } = req.params;
-    const { from, to, dimension, dimensions, limit } = req.query as Record<
-      string,
-      any
-    >;
+    const tenantId = singleParam(req.params.tenantId) ?? '';
+    const { from, to, dimension, dimensions, limit } = {
+      from: singleParam(req.query.from),
+      to: singleParam(req.query.to),
+      dimension: singleParam(req.query.dimension),
+      dimensions: normalizeDimensions(req.query.dimensions),
+      limit: req.query.limit,
+    } as Record<string, any>;
 
     const windowEnd = to ?? new Date().toISOString();
     const windowStart =

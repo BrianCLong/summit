@@ -7,6 +7,8 @@ import { EventType } from '../../integrations/foundation/contracts.js';
 import { randomUUID } from 'crypto';
 
 const router = express.Router();
+const singleParam = (value: unknown): string | undefined =>
+    Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // Mock config retrieval - in real app would come from DB/Secrets
 const getJiraConfig = async (tenantId: string) => {
@@ -21,7 +23,7 @@ const getJiraConfig = async (tenantId: string) => {
 
 router.post('/incidents/:id/tickets', requireAuth, async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = singleParam(req.params.id) ?? '';
         const tenantId = req.user!.tenantId!;
 
         const incident = await IncidentService.get(tenantId, id);

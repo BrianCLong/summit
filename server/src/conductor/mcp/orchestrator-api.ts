@@ -4,6 +4,8 @@ import { orchestrator, WorkflowDefinition, WorkflowRecipes } from './orchestrato
 import logger from '../../config/logger.js';
 
 const router = Router();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // POST /orchestrator/workflows - Register a workflow
 router.post('/workflows', async (req: Request, res: Response) => {
@@ -31,7 +33,7 @@ router.get('/workflows', (_req: Request, res: Response) => {
 // POST /orchestrator/execute/:workflowId - Execute a workflow
 router.post('/execute/:workflowId', async (req: Request, res: Response) => {
   try {
-    const { workflowId } = req.params;
+    const workflowId = singleParam(req.params.workflowId) ?? '';
     const { initialState = {}, scopes = [] } = req.body;
 
     const execution = await orchestrator.executeWorkflow(
@@ -59,7 +61,7 @@ router.post('/execute/:workflowId', async (req: Request, res: Response) => {
 
 // GET /orchestrator/executions/:id - Get execution status
 router.get('/executions/:id', (req: Request, res: Response) => {
-  const execution = orchestrator.getExecution(req.params.id);
+  const execution = orchestrator.getExecution(singleParam(req.params.id) ?? '');
   if (!execution) {
     return res.status(404).json({ error: 'Execution not found' });
   }
@@ -80,7 +82,7 @@ router.get('/recipes', (_req: Request, res: Response) => {
 
 // POST /orchestrator/recipes/:name - Execute a pre-built recipe
 router.post('/recipes/:name', async (req: Request, res: Response) => {
-  const { name } = req.params;
+  const name = singleParam(req.params.name) ?? '';
   const recipeFactory = (WorkflowRecipes as any)[name];
 
   if (!recipeFactory) {

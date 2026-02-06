@@ -14,6 +14,8 @@ import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
 
 const router = Router();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // Feature flag check middleware
 const requireFeatureFlag = (flagName: string) => {
@@ -136,7 +138,7 @@ router.post(
         return;
       }
 
-      const { experimentId } = req.params;
+      const experimentId = singleParam(req.params.experimentId) ?? '';
 
       const result = await experimentationService.startExperiment(experimentId);
 
@@ -157,7 +159,7 @@ router.get(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { experimentId } = req.params;
+      const experimentId = singleParam(req.params.experimentId) ?? '';
       const { tenantId, id: userId } = req.user!;
 
       // Parse query parameters for additional attributes
@@ -192,7 +194,7 @@ router.post(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { experimentId } = req.params;
+      const experimentId = singleParam(req.params.experimentId) ?? '';
       const { tenantId, id: userId } = req.user!;
       const data = GetAssignmentSchema.parse(req.body);
 
@@ -220,7 +222,7 @@ router.post(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { experimentId } = req.params;
+      const experimentId = singleParam(req.params.experimentId) ?? '';
       const { id: userId } = req.user!;
       const { metricName, metricValue } = TrackMetricSchema.parse(req.body);
 
@@ -255,7 +257,7 @@ router.get(
         return;
       }
 
-      const { experimentId } = req.params;
+      const experimentId = singleParam(req.params.experimentId) ?? '';
 
       const result = await experimentationService.getResults(experimentId);
 
@@ -276,7 +278,7 @@ router.post(
   requireFeatureFlag('experimentation.abTesting'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { experimentId } = req.params;
+      const experimentId = singleParam(req.params.experimentId) ?? '';
       const { id: userId } = req.user!;
       const { role, approved, comment } = ApproveExperimentSchema.parse(req.body);
 
@@ -318,7 +320,7 @@ router.post(
         return;
       }
 
-      const { experimentId } = req.params;
+      const experimentId = singleParam(req.params.experimentId) ?? '';
       const { rolloutWinner } = CompleteExperimentSchema.parse(req.body);
 
       const result = await experimentationService.completeExperiment(

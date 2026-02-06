@@ -6,6 +6,9 @@ import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();
 
+const singleParam = (value: string | string[] | undefined): string | undefined =>
+  Array.isArray(value) ? value[0] : value;
+
 router.post('/start', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { query, params, config } = req.body;
@@ -19,7 +22,7 @@ router.post('/start', async (req: AuthenticatedRequest, res: Response) => {
 });
 
 router.get('/:streamId', async (req: AuthenticatedRequest, res: Response) => {
-  const { streamId } = req.params;
+  const streamId = singleParam(req.params.streamId) ?? '';
   const redis = getRedisClient();
   const channel = `stream:${streamId}`;
 

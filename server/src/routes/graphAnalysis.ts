@@ -4,6 +4,8 @@ import { GraphAlgorithmKey } from '../analysis/graphTypes.js';
 
 const router = express.Router();
 const service = GraphAnalysisService.getInstance();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // Helper to get tenantId (assuming request is authenticated and has user.tenantId)
 const getTenantId = (req: Request): string => {
@@ -40,7 +42,7 @@ router.post('/run', async (req: Request, res: Response, next: NextFunction) => {
     const job = await service.createJob(tenantId, algorithm as GraphAlgorithmKey, params || {});
 
     // For MVP synchronous execution if requested or short jobs
-    if (req.query.async === 'true') {
+    if (singleParam(req.query.async) === 'true') {
          // Fire and forget (or rather, run in background)
          service.runJob(job.id).catch(err => console.error(err));
          res.json({ jobId: job.id, status: 'pending' });
@@ -61,7 +63,7 @@ router.post('/run', async (req: Request, res: Response, next: NextFunction) => {
 router.get('/:jobId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
-    const { jobId } = req.params;
+    const jobId = singleParam(req.params.jobId) ?? '';
 
     const job = service.getJob(jobId, tenantId);
     if (!job) {

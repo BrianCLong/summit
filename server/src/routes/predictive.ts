@@ -3,6 +3,8 @@ import { predictiveThreatService } from '../services/PredictiveThreatService.js'
 import logger from '../utils/logger.js';
 
 const router = express.Router();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 /**
  * GET /forecast/:signal
@@ -12,8 +14,9 @@ const router = express.Router();
  */
 router.get('/forecast/:signal', async (req: Request, res: Response) => {
   try {
-    const signal = req.params.signal;
-    const horizon = parseInt(req.query.horizon as string) || 24;
+    const signal = singleParam(req.params.signal) ?? '';
+    const horizonRaw = singleParam(req.query.horizon);
+    const horizon = horizonRaw ? parseInt(horizonRaw, 10) : 24;
 
     const result = await predictiveThreatService.forecastSignal(signal, horizon);
     res.json(result);

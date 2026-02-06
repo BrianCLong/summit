@@ -119,6 +119,9 @@ export class ChangeReviewAgent {
         actorId: 'change-review-agent',
         actorType: 'system',
         payload: {
+          mutationType: 'CREATE',
+          entityId: request.id,
+          entityType: 'change_request',
           request: {
             id: request.id,
             type: request.type,

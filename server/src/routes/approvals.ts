@@ -37,7 +37,9 @@ const ensureApprover = (
 };
 
 export function buildApprovalsRouter(maestro?: Maestro): express.Router {
-  const router = express.Router();
+const router = express.Router();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
   router.use(express.json());
 
   router.post('/', async (req, res, next) => {
@@ -80,7 +82,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
 
   router.get('/:id', async (req, res, next) => {
     try {
-      const approval = await getApprovalById(req.params.id);
+      const approval = await getApprovalById(singleParam(req.params.id) ?? '');
       if (!approval) {
         return res.status(404).json({ error: 'Approval not found' });
       }
@@ -98,7 +100,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await approveApproval(
-        req.params.id,
+        singleParam(req.params.id) ?? '',
         approverId,
         req.body?.reason,
       );
@@ -156,7 +158,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await rejectApproval(
-        req.params.id,
+        singleParam(req.params.id) ?? '',
         approverId,
         req.body?.reason,
       );

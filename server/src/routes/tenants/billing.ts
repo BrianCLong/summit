@@ -13,13 +13,16 @@ const BillingExportQuery = z.object({
   format: z.enum(['json', 'csv']).default('json'),
 });
 
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
+
 function attachTenantToBody(req: any, _res: any, next: any) {
-  req.body = { ...req.body, tenantId: req.params.tenantId };
+  req.body = { ...req.body, tenantId: singleParam(req.params.tenantId) ?? '' };
   return next();
 }
 
 function ensureTenantScope(req: any, res: any, next: any) {
-  const tenantId = req.params.tenantId;
+  const tenantId = singleParam(req.params.tenantId) ?? '';
   const userTenant = req.user?.tenantId || req.user?.tenant_id;
   const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(req.user?.role);
   if (!isSuper && userTenant && userTenant !== tenantId) {
@@ -36,8 +39,12 @@ router.get(
   ensurePolicy('read', 'tenant'),
   async (req, res) => {
     try {
-      const { start, end, format } = BillingExportQuery.parse(req.query);
-      const tenantId = req.params.tenantId;
+      const { start, end, format } = BillingExportQuery.parse({
+        start: singleParam(req.query.start),
+        end: singleParam(req.query.end),
+        format: singleParam(req.query.format),
+      });
+      const tenantId = singleParam(req.params.tenantId) ?? '';
 
       const report = await finopsReportService.buildReport(tenantId, start, end);
 

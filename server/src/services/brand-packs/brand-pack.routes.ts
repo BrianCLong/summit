@@ -8,6 +8,10 @@ import { BrandPackService } from './brand-pack.service.js';
 
 const router = express.Router();
 const service = BrandPackService.getInstance();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
+const singleQuery = (value: string | string[] | undefined): string | undefined =>
+  Array.isArray(value) ? value[0] : value;
 
 const querySchema = z.object({
   partnerId: z.string().optional(),
@@ -23,8 +27,9 @@ const applySchema = z.object({
 
 router.get('/tenants/:tenantId', ensureAuthenticated, async (req, res) => {
   try {
-    const tenantId = req.params.tenantId;
-    const { partnerId } = querySchema.parse(req.query);
+    const tenantId = singleParam(req.params.tenantId);
+    const partnerId = singleQuery(req.query.partnerId as string | string[] | undefined);
+    querySchema.parse({ partnerId });
     const resolution = await service.getBrandPack(tenantId, partnerId);
 
     res.json({
@@ -40,7 +45,7 @@ router.get('/tenants/:tenantId', ensureAuthenticated, async (req, res) => {
 
 router.post('/tenants/:tenantId/apply', ensureAuthenticated, async (req, res) => {
   try {
-    const tenantId = req.params.tenantId;
+    const tenantId = singleParam(req.params.tenantId);
     const payload = applySchema.parse(req.body);
     const actorId =
       payload.actorId ?? (req as any).user?.id ?? 'system';

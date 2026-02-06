@@ -10,6 +10,9 @@ const evaluator = new CohortEvaluator(LOG_DIR);
 // In-memory store for definitions
 const cohorts: Map<string, Cohort> = new Map();
 
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
+
 export const createCohort = (req: Request, res: Response) => {
     const cohort: Cohort = req.body;
     if (!cohort.id || !cohort.criteria) {
@@ -20,14 +23,14 @@ export const createCohort = (req: Request, res: Response) => {
 };
 
 export const getCohort = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = singleParam(req.params.id) ?? '';
     const cohort = cohorts.get(id);
     if (!cohort) return res.status(404).json({ error: 'Not found' });
     res.json(cohort);
 };
 
 export const evaluateCohort = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = singleParam(req.params.id) ?? '';
     const cohort = cohorts.get(id);
     if (!cohort) return res.status(404).json({ error: 'Not found' });
 

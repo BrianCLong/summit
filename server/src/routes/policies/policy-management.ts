@@ -28,6 +28,8 @@ const router = express.Router();
 const authz = new AuthorizationServiceImpl();
 const policyService = new PolicyManagementService();
 const simulatorService = new PolicySimulatorService();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // ============================================================================
 // Middleware
@@ -99,16 +101,20 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { page, pageSize, status, category, search } = req.query;
+      const page = singleParam(req.query.page);
+      const pageSize = singleParam(req.query.pageSize);
+      const status = singleParam(req.query.status);
+      const category = singleParam(req.query.category);
+      const search = singleParam(req.query.search);
 
       const envelope = await policyService.listPolicies(
         principal.tenantId,
         {
-          page: page ? parseInt(page as string, 10) : undefined,
-          pageSize: pageSize ? parseInt(pageSize as string, 10) : undefined,
+          page: page ? parseInt(page, 10) : undefined,
+          pageSize: pageSize ? parseInt(pageSize, 10) : undefined,
           status: status as any,
           category: category as any,
-          search: search as string,
+          search: search,
         },
         principal.id
       );
@@ -133,7 +139,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
 
       const envelope = await policyService.getPolicy(principal.tenantId, id, principal.id);
 
@@ -203,7 +209,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { changelog, ...updates } = req.body;
 
       const parseResult = updatePolicySchema.safeParse(updates);
@@ -248,7 +254,7 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
 
       const envelope = await policyService.deletePolicy(principal.tenantId, id, principal.id);
 
@@ -281,7 +287,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
 
       const envelope = await policyService.listPolicyVersions(
         principal.tenantId,
@@ -309,7 +315,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { targetVersion } = req.body;
 
       if (!targetVersion || typeof targetVersion !== 'number') {
@@ -353,7 +359,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { reason } = req.body;
 
       const envelope = await policyService.submitForApproval(
@@ -388,7 +394,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { notes } = req.body;
 
       const envelope = await policyService.approvePolicy(
@@ -423,7 +429,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
 
       const envelope = await policyService.publishPolicy(
         principal.tenantId,

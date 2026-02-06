@@ -21,6 +21,8 @@ import { z } from 'zod';
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
 const userService = new UserManagementService();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // ============================================================================
 // Middleware
@@ -130,7 +132,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
 
       const envelope = await userService.getUser(
         principal.tenantId,
@@ -205,7 +207,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
 
       // Validate input
       const parseResult = updateUserSchema.safeParse(req.body);
@@ -249,7 +251,7 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const hardDelete = req.query.hard === 'true';
 
       const envelope = await userService.deleteUser(
@@ -284,7 +286,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { reason } = req.body;
 
       if (!reason) {
@@ -324,7 +326,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
 
       const envelope = await userService.unlockUser(
         principal.tenantId,
@@ -357,7 +359,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = singleParam(req.params.id) ?? '';
       const { tenantId, roles } = req.body;
 
       if (!tenantId || !roles || !Array.isArray(roles)) {
@@ -392,7 +394,8 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id, tenantId } = req.params;
+      const id = singleParam(req.params.id) ?? '';
+      const tenantId = singleParam(req.params.tenantId) ?? '';
 
       const envelope = await userService.removeUserFromTenant(
         id,

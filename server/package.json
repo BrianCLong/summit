@@ -48,7 +48,6 @@
     "@intelgraph/feature-flags": "workspace:*",
     "@intelgraph/maestro-core": "workspace:*",
     "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
-    "@intelgraph/context-shell": "workspace:*",
     "@node-saml/node-saml": "^5.1.0",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.39.0",

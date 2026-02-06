@@ -13,7 +13,9 @@ export class PIIGuardrail implements SafetyGuardrail {
         // Cloning to avoid mutation side-effects on original object if used elsewhere
         const cleanMessages = request.messages.map(msg => ({
             ...msg,
-            content: msg.content.replace(this.emailRegex, '[REDACTED_EMAIL]')
+            content: Array.isArray(msg.content)
+              ? msg.content
+              : msg.content.replace(this.emailRegex, '[REDACTED_EMAIL]')
         }));
 
         return {

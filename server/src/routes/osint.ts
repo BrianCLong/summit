@@ -1,13 +1,14 @@
 // @ts-nocheck
 import express, { type Request, type Response } from 'express';
+import { createRequire } from 'node:module';
 // import { OSINTPrioritizationService } from '../services/OSINTPrioritizationService.js';
 // import { VeracityScoringService } from '../services/VeracityScoringService.js';
 import { osintQueue } from '../services/OSINTQueueService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { osintRateLimiter } from '../middleware/osintRateLimiter.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { SimpleFeedCollector } from '../../../packages/osint-collector/src/collectors/SimpleFeedCollector.js';
-import { CollectionType, TaskStatus } from '../../../packages/osint-collector/src/types/index.js';
+const require = createRequire(import.meta.url);
+const { SimpleFeedCollector, CollectionType, TaskStatus } = require('@intelgraph/osint-collector');
 
 interface AuthenticatedRequest extends Request {
   user?: {

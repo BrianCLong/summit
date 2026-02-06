@@ -14,6 +14,8 @@ import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
 
 const router = Router();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // Feature flag check middleware
 const requireFeatureFlag = (flagName: string) => {
@@ -126,7 +128,7 @@ router.get(
   requireFeatureFlag('i18n.enabled'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { locale } = req.params;
+      const locale = singleParam(req.params.locale) ?? '';
       const config = i18nService.getLocaleConfig(locale as any);
 
       if (!config) {
@@ -320,7 +322,7 @@ router.get(
   requireFeatureFlag('i18n.regionalCompliance'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { region } = req.params;
+      const region = singleParam(req.params.region) ?? '';
       const result = i18nService.getRegionalCompliance(region);
 
       if (!result.data) {
@@ -345,7 +347,7 @@ router.get(
   requireFeatureFlag('i18n.regionalCompliance'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { locale } = req.params;
+      const locale = singleParam(req.params.locale) ?? '';
       const result = i18nService.getComplianceForLocale(locale as any);
 
       res.json({ data: result });
@@ -365,7 +367,7 @@ router.get(
   requireFeatureFlag('i18n.enabled'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { locale } = req.params;
+      const locale = singleParam(req.params.locale) ?? '';
       const result = await i18nService.getTranslationStatus(locale as any);
       res.json(result);
     } catch (error: any) {

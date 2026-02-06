@@ -80,7 +80,8 @@ export class BillingJobService {
       }
 
       const res = await activeClient.query('SELECT tenant_id FROM tenant_plans');
-      const tenantIds = res.rows.map((r: { tenant_id: string }) => r.tenant_id);
+      const rows = res.rows as Array<{ tenant_id: string }>;
+      const tenantIds = rows.map((r) => r.tenant_id);
 
       for (const tenantId of tenantIds) {
         try {
@@ -112,7 +113,8 @@ export class BillingJobService {
       const result = await client.query('SELECT pg_try_advisory_lock($1) AS acquired', [
         BillingJobService.BILLING_CLOSE_LOCK_KEY,
       ]);
-      if (result?.rows?.[0]?.acquired) {
+      const acquired = (result.rows as Array<{ acquired?: boolean }>)[0]?.acquired;
+      if (acquired) {
         this.logger.info('Billing close lock acquired via pg_try_advisory_lock');
         return true;
       }

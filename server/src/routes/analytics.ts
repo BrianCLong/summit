@@ -47,8 +47,8 @@ router.get(
     );
 
     // Apply Differential Privacy to community sizes if enabled
-    if (dp === 'true' && result.communities) {
-      result.communities = result.communities.map((c: any) => ({
+    if (dp === 'true' && 'communities' in result && (result as any).communities) {
+      (result as any).communities = (result as any).communities.map((c: any) => ({
         ...c,
         size: dpEngine.privatizeAggregate(c.size, { epsilon: 0.5 }),
         isPrivatized: true

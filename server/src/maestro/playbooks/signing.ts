@@ -1,4 +1,4 @@
-import type { Playbook, PlaybookSignature } from '../types.js';
+import type { Playbook, PlaybookSignature } from './types.js';
 import { createPrivateKey, createPublicKey, sign as cryptoSign, verify as cryptoVerify } from 'crypto';
 
 const SEMVER_REGEX = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;

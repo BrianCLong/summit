@@ -70,41 +70,6 @@ const ledgerIntegrityStatus = new Gauge({
 
 // Export the V2 type as the primary ProvenanceEntry
 export type ProvenanceEntry = ProvenanceEntryV2;
-export interface ProvenanceEntry {
-  id: string;
-  tenantId: string;
-  sequenceNumber: bigint;
-  previousHash: string;
-  currentHash: string;
-  timestamp: Date;
-  actionType: string;
-  resourceType: string;
-  resourceId: string;
-  actorId: string;
-  actorType: 'user' | 'system' | 'api' | 'job';
-  payload: Record<string, any>;
-  metadata: {
-    ipAddress?: string;
-    userAgent?: string;
-    sessionId?: string;
-    requestId?: string;
-    correlationId?: string;
-    purpose?: string;
-    classification?: string[];
-    privacy?: {
-      epsilon?: number;
-      delta?: number;
-      mechanism?: string;
-      noiseParams?: Record<string, any>;
-    };
-  };
-  signature?: string;
-  attestation?: {
-    policy: string;
-    evidence: Record<string, any>;
-    timestamp: Date;
-  };
-}
 
 export interface LedgerRoot {
   id: string;
@@ -213,8 +178,8 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         if (entry.id) {
           const existing = await this.getEntryById(entry.id);
           if (existing) {
-             span.setAttributes?.({ idempotent_skip: true });
-             return existing;
+            span.setAttributes?.({ idempotent_skip: true });
+            return existing;
           }
         }
 
@@ -325,12 +290,12 @@ export class ProvenanceLedgerV2 extends EventEmitter {
 
             // Handle race condition where ON CONFLICT ignored insert
             if (result.rows.length === 0) {
-               await client.query('ROLLBACK');
-               const existing = await client.query('SELECT * FROM provenance_ledger_v2 WHERE id = $1', [id]);
-               if (existing.rows.length > 0) {
-                 return this.mapRowToEntry(existing.rows[0]);
-               }
-               throw new Error(`Failed to insert provenance entry ${id} and it was not found`);
+              await client.query('ROLLBACK');
+              const existing = await client.query('SELECT * FROM provenance_ledger_v2 WHERE id = $1', [id]);
+              if (existing.rows.length > 0) {
+                return this.mapRowToEntry(existing.rows[0]);
+              }
+              throw new Error(`Failed to insert provenance entry ${id} and it was not found`);
             }
 
             await client.query('COMMIT');

@@ -1,9 +1,9 @@
-
-import { LlmProvider, ProviderId, ChatCompletionRequest, ChatCompletionResult } from '../types.js';
+import { BaseProvider } from './base.js';
+import type { LLMRequest, LLMResponse, ProviderType, ModelCapability, MultiModalPart } from '../types.js';
 import { redactSecrets } from '../safety/log_redaction.js';
 
-export class NvidiaNimProvider implements LlmProvider {
-  id: ProviderId = 'nvidia-nim';
+export class NvidiaNimProvider extends BaseProvider {
+  name: ProviderType = 'nvidia_nim';
   private apiKey: string;
   private baseUrl: string;
   private defaultModel: string;
@@ -17,66 +17,55 @@ export class NvidiaNimProvider implements LlmProvider {
     modeDefault?: 'instant' | 'thinking';
     enableMultimodal?: boolean;
   }) {
+    super();
     this.apiKey = config.apiKey || process.env.NVIDIA_NIM_API_KEY || '';
     this.baseUrl = config.baseUrl || 'https://integrate.api.nvidia.com/v1';
     this.defaultModel = config.model || 'moonshotai/kimi-k2.5';
     this.modeDefault = config.modeDefault || 'instant';
     this.enableMultimodal = config.enableMultimodal || false;
+    this.capabilities = [
+      {
+        name: this.defaultModel,
+        tags: ['chat'],
+        inputCostPer1k: 0,
+        outputCostPer1k: 0,
+      },
+    ];
   }
 
-  supports(model: string): boolean {
-    return model === this.defaultModel || model.startsWith('moonshotai/');
+  private serializeMessageContent(content: string | MultiModalPart[] | null): string | MultiModalPart[] | null {
+    if (Array.isArray(content)) {
+      if (!this.enableMultimodal) {
+        throw new Error('Multimodal content is disabled for NVIDIA NIM provider');
+      }
+      return content;
+    }
+    return content ?? '';
   }
 
-  async chat(request: ChatCompletionRequest & { model: string }): Promise<ChatCompletionResult> {
+  async generate(request: LLMRequest): Promise<LLMResponse> {
     if (!this.apiKey) {
       throw new Error('Missing NVIDIA_NIM_API_KEY');
     }
 
+    const startTime = Date.now();
+    const model = request.model || this.defaultModel;
     const url = `${this.baseUrl.replace(/\/$/, '')}/chat/completions`;
 
-    const messages = request.messages.map(m => {
-      if (Array.isArray(m.content)) {
-        if (!this.enableMultimodal) {
-          throw new Error('Multimodal content is disabled for NVIDIA NIM provider');
-        }
-        return {
-          role: m.role,
-          content: m.content
-        };
-      }
-      return {
-        role: m.role,
-        content: m.content
-      };
-    });
+    const messages = request.messages.map((m) => ({
+      role: m.role,
+      content: this.serializeMessageContent(m.content),
+    }));
 
-    const body: any = {
-      model: request.model || this.defaultModel,
+    const body: Record<string, any> = {
+      model,
       messages,
-      max_tokens: 1024,
+      max_tokens: request.maxTokens ?? 1024,
       temperature: request.temperature ?? 0.7,
     };
 
-    // Mode handling: default to config default unless requested
-    const mode = request.mode ?? this.modeDefault;
-    if (mode === 'instant') {
+    if (this.modeDefault === 'instant') {
       body.extra_body = { thinking: { type: 'disabled' } };
-    }
-
-    if (request.jsonMode) {
-      body.response_format = { type: 'json_object' };
-    }
-
-    if (request.tools && request.tools.length > 0) {
-      body.tools = request.tools.map(t => ({
-        type: 'function',
-        function: {
-          name: t.name,
-          description: t.description,
-          parameters: t.inputSchema
-        }
-      }));
     }
 
     let response: Response;
@@ -89,33 +78,31 @@ export class NvidiaNimProvider implements LlmProvider {
         response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
+            Authorization: `Bearer ${this.apiKey}`,
           },
-          body: JSON.stringify(body)
+          body: JSON.stringify(body),
         });
 
         if (response.ok) {
           const data = await response.json();
           const choice = data.choices?.[0];
+          const content = choice?.message?.content || '';
+          const usage = {
+            prompt: data.usage?.prompt_tokens || 0,
+            completion: data.usage?.completion_tokens || 0,
+          };
+
+          const baseResponse = this.createResponse(request, content, usage, model, startTime);
 
           return {
-            provider: 'nvidia-nim',
-            model: data.model || request.model,
-            content: choice?.message?.content || null,
-            toolCalls: choice?.message?.tool_calls?.map((tc: any) => ({
-              toolName: tc.function.name,
-              args: JSON.parse(tc.function.arguments),
-              id: tc.id
-            })),
+            ...baseResponse,
+            toolCalls: choice?.message?.tool_calls,
             usage: {
-              inputTokens: data.usage?.prompt_tokens || 0,
-              outputTokens: data.usage?.completion_tokens || 0,
-              totalTokens: data.usage?.total_tokens || 0,
-              costUsd: 0 // Free trial
+              ...baseResponse.usage,
+              cost: 0,
             },
-            raw: data
           };
         }
 
@@ -125,18 +112,17 @@ export class NvidiaNimProvider implements LlmProvider {
           throw new Error(redactSecrets(`NVIDIA NIM error ${response.status}: ${errorText}`));
         }
 
-        // Handle Retry-After header
         let delay = Math.pow(2, retries) * 1000;
         const retryAfter = response.headers.get('Retry-After');
         if (retryAfter) {
           const parsed = parseInt(retryAfter, 10);
-          if (!isNaN(parsed)) {
+          if (!Number.isNaN(parsed)) {
             delay = parsed * 1000;
           }
         }
 
         retries++;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       } catch (e: any) {
         lastError = e;
         if (retries === maxRetries || (e instanceof Error && !e.message.includes('NVIDIA NIM error'))) {
@@ -144,7 +130,7 @@ export class NvidiaNimProvider implements LlmProvider {
         }
         retries++;
         const delay = Math.pow(2, retries - 1) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
 

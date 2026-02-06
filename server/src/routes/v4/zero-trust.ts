@@ -117,6 +117,8 @@ const wrapResponse = <T>(data: T, req: Request): DataEnvelope<T> => {
 // =============================================================================
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 // Initialize services middleware
 router.use(async (_req, _res, next) => {
@@ -249,13 +251,13 @@ router.get(
   requirePermission('security:keys:read'),
   async (req: Request, res: Response) => {
     try {
-      const keyHandle = await zeroTrustService!.hsm.getKey(req.params.id);
+      const keyHandle = await zeroTrustService!.hsm.getKey(singleParam(req.params.id));
 
       if (!keyHandle) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Key not found: ${req.params.id}`,
+            message: `Key not found: ${singleParam(req.params.id)}`,
           },
         });
       }
@@ -311,7 +313,7 @@ router.post(
     try {
       const data = Buffer.from(req.body.data, 'base64');
       const signature = await zeroTrustService!.hsm.sign(
-        req.params.id,
+        singleParam(req.params.id),
         data,
         req.body.algorithm
       );
@@ -322,11 +324,11 @@ router.post(
         'user',
         getTenantId(req),
         'key:sign',
-        { keyId: req.params.id }
+        { keyId: singleParam(req.params.id) }
       );
 
       res.json(wrapResponse({
-        keyId: req.params.id,
+        keyId: singleParam(req.params.id),
         signature: signature.toString('base64'),
         algorithm: req.body.algorithm,
         timestamp: new Date().toISOString(),
@@ -381,10 +383,10 @@ router.post(
     try {
       const data = Buffer.from(req.body.data, 'base64');
       const signature = Buffer.from(req.body.signature, 'base64');
-      const valid = await zeroTrustService!.hsm.verify(req.params.id, data, signature);
+      const valid = await zeroTrustService!.hsm.verify(singleParam(req.params.id), data, signature);
 
       res.json(wrapResponse({
-        keyId: req.params.id,
+        keyId: singleParam(req.params.id),
         valid,
         timestamp: new Date().toISOString(),
       }, req));
@@ -422,10 +424,10 @@ router.post(
   requirePermission('security:keys:rotate'),
   async (req: Request, res: Response) => {
     try {
-      const newKeyHandle = await zeroTrustService!.hsm.rotateKey(req.params.id);
+      const newKeyHandle = await zeroTrustService!.hsm.rotateKey(singleParam(req.params.id));
 
       logger.info({
-        oldKeyId: req.params.id,
+        oldKeyId: singleParam(req.params.id),
         newKeyId: newKeyHandle.id,
         rotatedBy: getUserId(req),
       }, 'HSM key rotated');
@@ -436,7 +438,7 @@ router.post(
         'user',
         getTenantId(req),
         'key:rotate',
-        { oldKeyId: req.params.id, newKeyId: newKeyHandle.id }
+        { oldKeyId: singleParam(req.params.id), newKeyId: newKeyHandle.id }
       );
 
       res.json(wrapResponse(newKeyHandle, req));
@@ -474,7 +476,7 @@ router.get(
   requirePermission('security:keys:read'),
   async (req: Request, res: Response) => {
     try {
-      const attestation = await zeroTrustService!.hsm.attestKey(req.params.id);
+      const attestation = await zeroTrustService!.hsm.attestKey(singleParam(req.params.id));
       res.json(wrapResponse(attestation, req));
     } catch (error: any) {
       res.status(500).json({
@@ -666,13 +668,13 @@ router.get(
   requirePermission('audit:read'),
   async (req: Request, res: Response) => {
     try {
-      const entry = await zeroTrustService!.audit.getEntry(req.params.id);
+      const entry = await zeroTrustService!.audit.getEntry(singleParam(req.params.id));
 
       if (!entry) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Audit entry not found: ${req.params.id}`,
+            message: `Audit entry not found: ${singleParam(req.params.id)}`,
           },
         });
       }
@@ -712,7 +714,7 @@ router.get(
   requirePermission('audit:verify'),
   async (req: Request, res: Response) => {
     try {
-      const verification = await zeroTrustService!.audit.verifyEntry(req.params.id);
+      const verification = await zeroTrustService!.audit.verifyEntry(singleParam(req.params.id));
       res.json(wrapResponse(verification, req));
     } catch (error: any) {
       res.status(500).json({
@@ -748,7 +750,7 @@ router.get(
   requirePermission('audit:read'),
   async (req: Request, res: Response) => {
     try {
-      const proof = await zeroTrustService!.audit.getMerkleProof(req.params.id);
+      const proof = await zeroTrustService!.audit.getMerkleProof(singleParam(req.params.id));
       res.json(wrapResponse(proof, req));
     } catch (error: any) {
       res.status(500).json({

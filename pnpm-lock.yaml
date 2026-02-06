@@ -14035,9 +14035,6 @@ importers:
       '@graphql-tools/schema':
         specifier: 10.0.30
         version: 10.0.30(graphql@16.12.0)
-      '@intelgraph/context-shell':
-        specifier: workspace:*
-        version: link:../libs/context-shell/node
       '@intelgraph/feature-flags':
         specifier: workspace:*
         version: link:../packages/feature-flags
@@ -23652,6 +23649,9 @@ importers:
       pino-http:
         specifier: ^11.0.0
         version: 11.0.0
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.1.3
       prom-client:
         specifier: ^15.1.3
         version: 15.1.3

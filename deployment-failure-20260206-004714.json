@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-02-06T07:47:14Z",
+  "version": "v1.24.0",
+  "environment": "production",
+  "deployment_type": "canary",
+  "status": "failure",
+  "duration_seconds": 2,
+  "canary_percentage": 10,
+  "monitoring_duration": 2,
+  "slo_compliance": false,
+  "rollback_time": "2026-02-06T07:47:14Z"
+}

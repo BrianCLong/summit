@@ -21,6 +21,9 @@ import type { ComplianceFramework } from '../trust-center/types/index.js';
 
 const router = Router();
 
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
+
 // =============================================================================
 // Public Endpoints (No Auth Required)
 // =============================================================================
@@ -121,7 +124,7 @@ router.get('/status', async (req: Request, res: Response, next: NextFunction) =>
  */
 router.get('/certifications', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { framework } = req.query;
+    const framework = singleParam(req.query.framework);
     const pool = getPostgresPool();
 
     let query = `
@@ -211,7 +214,7 @@ router.get('/slo', async (req: Request, res: Response, next: NextFunction) => {
  */
 router.get('/packs', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { frameworks } = req.query;
+    const frameworks = singleParam(req.query.frameworks);
 
     const frameworkList = frameworks
       ? (frameworks as string).split(',') as ComplianceFramework[]
@@ -231,7 +234,7 @@ router.get('/packs', async (req: Request, res: Response, next: NextFunction) => 
  */
 router.get('/packs/:packId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { packId } = req.params;
+    const packId = singleParam(req.params.packId) ?? '';
 
     const pack = await regulatoryPackService.getPack(packId);
 
@@ -251,7 +254,7 @@ router.get('/packs/:packId', async (req: Request, res: Response, next: NextFunct
  */
 router.get('/packs/:packId/controls', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { packId } = req.params;
+    const packId = singleParam(req.params.packId) ?? '';
 
     const pack = await regulatoryPackService.getPack(packId);
 
@@ -275,7 +278,7 @@ router.get('/packs/:packId/controls', async (req: Request, res: Response, next: 
  */
 router.get('/controls', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { framework } = req.query;
+    const framework = singleParam(req.query.framework);
 
     let controls = Object.values(CONTROL_MAPPINGS);
 
@@ -305,7 +308,7 @@ router.get('/controls', async (req: Request, res: Response, next: NextFunction) 
  */
 router.get('/controls/:controlId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = singleParam(req.params.controlId) ?? '';
 
     const control = CONTROL_MAPPINGS[controlId];
 
@@ -325,8 +328,9 @@ router.get('/controls/:controlId', async (req: Request, res: Response, next: Nex
  */
 router.get('/controls/:controlId/evidence', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
-    const { startDate, endDate } = req.query;
+    const controlId = singleParam(req.params.controlId) ?? '';
+    const startDate = singleParam(req.query.startDate);
+    const endDate = singleParam(req.query.endDate);
     const tenantId = (req as any).tenantId || 'default';
 
     const control = CONTROL_MAPPINGS[controlId];
@@ -336,7 +340,7 @@ router.get('/controls/:controlId/evidence', async (req: Request, res: Response, 
     }
 
     const dateRange = startDate && endDate
-      ? { start: startDate as string, end: endDate as string }
+      ? { start: startDate, end: endDate }
       : undefined;
 
     const snapshots = await evidenceEngine.collectEvidence(
@@ -410,7 +414,7 @@ router.post('/evidence/request', async (req: Request, res: Response, next: NextF
  */
 router.get('/evidence/request/:requestId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { requestId } = req.params;
+    const requestId = singleParam(req.params.requestId) ?? '';
     const pool = getPostgresPool();
 
     const { rows } = await pool.query(
@@ -446,7 +450,7 @@ router.get('/evidence/request/:requestId', async (req: Request, res: Response, n
  */
 router.get('/evidence/packages/:packageId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { packageId } = req.params;
+    const packageId = singleParam(req.params.packageId) ?? '';
     const tenantId = (req as any).tenantId || 'default';
     const pool = getPostgresPool();
 
@@ -533,7 +537,7 @@ router.post('/reports/generate', async (req: Request, res: Response, next: NextF
  */
 router.get('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { reportId } = req.params;
+    const reportId = singleParam(req.params.reportId) ?? '';
     const tenantId = (req as any).tenantId || 'default';
     const pool = getPostgresPool();
 
@@ -558,7 +562,7 @@ router.get('/reports/:reportId', async (req: Request, res: Response, next: NextF
  */
 router.get('/controls/:controlId/assess', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = singleParam(req.params.controlId) ?? '';
     const tenantId = (req as any).tenantId || 'default';
 
     const assessment = await regulatoryPackService.assessControl(controlId, tenantId);
@@ -605,7 +609,7 @@ router.get('/questionnaire/caiq', async (req: Request, res: Response, next: Next
  */
 router.get('/export/oscal', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { framework = 'SOC2_TYPE_II' } = req.query;
+    const framework = singleParam(req.query.framework) ?? 'SOC2_TYPE_II';
 
     const controls = getControlsByFramework(framework as ComplianceFramework);
 

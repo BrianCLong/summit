@@ -89,8 +89,11 @@ export abstract class BaseConnector extends EventEmitter {
 
   /**
    * Write data to the source (Bi-directional support)
+   * Default no-op for read-only connectors.
    */
-  abstract writeRecords(records: any[]): Promise<void>;
+  async writeRecords(_records: any[]): Promise<void> {
+    this.logger.warn('writeRecords called on read-only connector');
+  }
 
   /**
    * Check the health of the connector

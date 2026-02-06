@@ -297,8 +297,8 @@ services:
 
   websocket-server:
     build:
-      context: ./services/websocket-server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/websocket-server/Dockerfile
     command: node dist/index.js
     container_name: summit-websocket-server
     restart: unless-stopped
@@ -456,8 +456,8 @@ services:
 
   ai-sandbox:
     build:
-      context: ./services/ai-sandbox
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/ai-sandbox/Dockerfile
     command: node dist/index.js
     container_name: summit-ai-sandbox
     restart: unless-stopped
@@ -487,8 +487,8 @@ services:
 
   agentic-mesh-evaluation:
     build:
-      context: ./services/agentic-mesh-evaluation
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/agentic-mesh-evaluation/Dockerfile
     container_name: summit-agentic-mesh-evaluation
     restart: unless-stopped
     environment:

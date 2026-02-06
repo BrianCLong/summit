@@ -4,6 +4,8 @@ import { ensureAuthenticated } from '../middleware/auth.js';
 
 const router = Router();
 const psyOpsService = new DefensivePsyOpsService();
+const singleParam = (value: unknown): string | undefined =>
+  Array.isArray(value) ? (value[0] as string | undefined) : typeof value === 'string' ? value : undefined;
 
 // Get active threats
 router.get('/threats', ensureAuthenticated, async (req, res) => {
@@ -40,7 +42,7 @@ router.post('/scan', ensureAuthenticated, async (req, res) => {
 // Resolve threat
 router.post('/threats/:id/resolve', ensureAuthenticated, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = singleParam(req.params.id) ?? '';
     const { notes } = req.body;
     await psyOpsService.resolveThreat(id, notes || 'Resolved by user');
     res.json({ success: true });
