@@ -50,6 +50,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: goodfire-interpretability-seriesb-2026-pr1
+    version: v1
+    path: prompts/governance/goodfire-interpretability-seriesb-2026-pr1@v1.md
+    sha256: 3f9244c7419a4892d61bb2ca28fdc2e8955b238afe6bb38a95ae1de1016a2938
+    description: Add Goodfire Series B interpretability monitoring documentation pack and roadmap update.
+    scope:
+      paths:
+        - docs/standards/goodfire-interpretability-seriesb-2026.md
+        - docs/security/data-handling/goodfire-interpretability-seriesb-2026.md
+        - docs/ops/runbooks/goodfire-interpretability-seriesb-2026.md
+        - docs/governance/repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/governance/goodfire-interpretability-seriesb-2026-pr1@v1.md
+        - prompts/registry.yaml
+        - agents/examples/GOODFIRE_INTERPRETABILITY_SERIESB_2026_PR1.json
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md
