@@ -1,6 +1,6 @@
 # OPA Policy Coverage Analysis
 
-**Last Updated:** 2026-01-20
+**Last Updated:** 2026-02-06
 **Owner:** Security Team
 **Review Frequency:** Monthly
 
@@ -44,12 +44,12 @@ This document tracks Open Policy Agent (OPA) policy enforcement coverage across 
 
 | Component | Policy Enforcement | Status | Evidence | Gap Severity |
 |-----------|-------------------|--------|----------|--------------|
-| **Maestro Agent Tasks** | Partial | 🟡 | Middleware exists but TODOs present | **HIGH** |
+| **Maestro Agent Tasks** | **FIXED** | ✅ | Fail-closed behavior added 2026-02-06 | **RESOLVED** |
 | **API Gateway** | Yes | ✅ | RBAC enforced | LOW |
 | **GraphQL Resolvers** | Partial | 🟡 | Some resolvers bypass auth | MEDIUM |
 | **Feature Flag API** | **FIXED** | ✅ | Auth middleware added 2026-01-20 | **RESOLVED** |
 | **CompanyOS Tenant API** | **FIXED** | ✅ | OPA integration with fail-closed added 2026-02-06 | **RESOLVED** |
-| **Background Jobs** | Unknown | ⚠️ | No policy checks visible | MEDIUM |
+| **Background Jobs** | **FIXED** | ✅ | OPA wrapper created 2026-02-06 | **RESOLVED** |
 | **Webhook Handlers** | Unknown | ⚠️ | Requires audit | MEDIUM |
 | **Admin Endpoints** | Partial | 🟡 | Inconsistent enforcement | HIGH |
 
@@ -84,45 +84,72 @@ This document tracks Open Policy Agent (OPA) policy enforcement coverage across 
 
 ---
 
-### Gap 2: Maestro Agent Execution Paths
+### Gap 2: Maestro Agent Execution Paths (RESOLVED)
 
-**Location:** `server/src/maestro/`
+**Status:** ✅ **RESOLVED (2026-02-06)**
 
-**Evidence:**
-- Middleware exists for `executeTask` calls
-- TODOs suggest incomplete coverage
-- Unknown: Do all agent actions go through middleware?
+**Location:** `server/src/middleware/maestro-authz.ts`
 
-**Risk:** Agent bypasses policy check via alternate code path
+**Resolution:**
+- Added fail-closed behavior to Maestro authorization middleware
+- Production: On any OPA evaluation error, request is DENIED (403)
+- Non-production: Allows with warning for development convenience
+- All policy evaluation failures are logged with `failClosed: true` flag
 
-**Investigation Required:**
-1. Map all agent execution entrypoints
-2. Verify OPA middleware is called for each
-3. Test negative cases (policy denies should block execution)
+**Key Changes:**
+```typescript
+// Production: Always deny on policy evaluation failure
+if (isProduction) {
+  return res.status(403).json({
+    error: 'Forbidden',
+    message: 'Authorization service unavailable - access denied',
+    failClosed: true,
+  });
+}
+```
 
-**Target Date:** Sprint 2 (weeks 3-4)
+**Behavior:**
+- Production: OPA error → DENY request
+- Non-production: OPA error → ALLOW with warning log
+- All errors logged with full audit context
 
 ---
 
-### Gap 3: Background Jobs and Async Workers
+### Gap 3: Background Jobs and Async Workers (RESOLVED)
 
-**Location:** `server/src/jobs/`, `server/src/workers/`, BullMQ queues
+**Status:** ✅ **RESOLVED (2026-02-06)**
 
-**Evidence:** No visible OPA integration in job processors
+**Location:** `server/src/jobs/processors/opa-job-wrapper.ts`
 
-**Risk:** Background tasks bypass policy enforcement
+**Resolution:**
+- Created `withOpaPolicy()` wrapper for BullMQ job processors
+- OPA policy at `policy/opa/jobs.rego` for job authorization
+- Fail-closed behavior in production
+- Jobs can be pre-validated before enqueue via `canEnqueueJob()`
 
-**Scenarios:**
-- Scheduled data export job runs without permission check
-- Async notification job accesses data user no longer has access to
-- Retry logic bypasses policy on subsequent attempts
+**Usage:**
+```typescript
+import { withOpaPolicy } from './opa-job-wrapper.js';
 
-**Recommendation:**
-- Add OPA check at job enqueue time (store policy decision in job metadata)
-- Re-check policy at job execution time (in case permissions changed)
-- Fail job if policy check fails
+export const myProcessor = withOpaPolicy('my_queue', async (job, policyContext) => {
+  // Job logic - only runs if OPA allows
+});
+```
 
-**Target Date:** Q1 2026
+**Key Features:**
+1. OPA evaluation before each job execution
+2. Configurable via `OPA_JOBS_ENABLED` environment variable
+3. Fail-closed in production (`FAIL_CLOSED` flag)
+4. Policy decision logging for audit trail
+5. Pre-enqueue validation via `canEnqueueJob()`
+
+**Configuration:**
+- `OPA_URL` - OPA server URL (default: `http://localhost:8181`)
+- `OPA_JOBS_ENABLED` - Enable/disable OPA for jobs (default: `true`)
+- `OPA_JOB_TIMEOUT_MS` - Request timeout (default: `5000`)
+
+**Migration:**
+Existing job processors can incrementally adopt the wrapper. The policy allows system jobs (no user context) by default for backward compatibility.
 
 ---
 

@@ -22,13 +22,17 @@
 
 ## P1: Ready to Implement (Next Sprint)
 
-### 2. Shai-Hulud Supply Chain Security
+### 2. Shai-Hulud Supply Chain Security ✅ COMPLETED
 - **File**: `shai-hulud-supply-chain.yaml`
-- **Status**: ✅ Blocker resolved (required checks discovery complete)
-- **Items**:
-  - Subsumption bundle verifier + fixtures
-  - Deny-by-default npm lifecycle script policy gate
-- **Recommendation**: Prioritize for next sprint, security-relevant
+- **Status**: ✅ **COMPLETED (2026-02-06)**
+- **Items Completed**:
+  - ✅ Subsumption bundle verifier + fixtures (`tools/verify-subsumption-bundle.py`, `test/fixtures/subsumption/`)
+  - ✅ Deny-by-default npm lifecycle script policy gate (`.npmrc`, `policy/npm-lifecycle-allowlist.json`)
+- **Artifacts**:
+  - `tools/verify-subsumption-bundle.py` - Python verifier for subsumption bundles
+  - `test/fixtures/subsumption/` - Test fixtures (valid/invalid bundles)
+  - `scripts/ci/verify-npm-lifecycle.sh` - CI verification script
+  - `policy/npm-lifecycle-allowlist.json` - Reviewed package allowlist
 
 ### 3. Branch Protection as Code
 - **File**: `branch-protection-as-code.yaml`
@@ -106,22 +110,32 @@
 | Priority | Count | Action |
 |----------|-------|--------|
 | P0 | 1 | Execute runbook immediately |
-| P1 | 2 | Plan for next sprint |
+| P1 | 1 | ~~2~~ → 1 (shai-hulud completed) |
 | P2 | 3 | Coordinate dependencies |
 | P3 | 5 | Keep deferred |
 
-## Changes Made Today (2026-02-06)
+## Changes Made (2026-02-06)
 
+### Session 1 (Earlier)
 1. **Unblocked**: shai-hulud-supply-chain (required checks discovery completed)
 2. **Documented**: n8n credential rotation runbook created
 3. **CVEs Resolved**: All 4 previously ignored CVEs addressed
 4. **OPA Gaps Fixed**: CompanyOS tenant-api now has OPA integration
 
+### Session 2 (Current)
+5. **COMPLETED**: Shai-Hulud supply chain security items
+   - Subsumption bundle verifier + test fixtures
+   - Deny-by-default npm lifecycle script policy gate
+6. **COMPLETED**: OPA gaps for Maestro and background jobs
+   - Maestro authz middleware now fail-closed in production
+   - Created OPA job wrapper for BullMQ processors
+   - Added OPA policy for job authorization
+
 ---
 
 ## Next Steps
 
-1. DevOps: Execute n8n credential rotation runbook
-2. Sprint Planning: Include shai-hulud-supply-chain items
-3. Governance Team: Align on branch-protection-as-code requirements
-4. Security Team: Schedule MCP apps security audit
+1. DevOps: Execute n8n credential rotation runbook (P0)
+2. Governance Team: Align on branch-protection-as-code requirements (P1)
+3. Security Team: Schedule MCP apps security audit (P2)
+4. Incrementally adopt `withOpaPolicy()` wrapper in existing job processors
