@@ -284,6 +284,23 @@ jobs:
           fi
         continue-on-error: true # Non-blocking until implementation complete
 
+  verify-evidence:
+    name: Verify Evidence
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify evidence bundle schema
+        run: pnpm exec ts-node --esm .github/scripts/verify-evidence.ts
+
   compliance-evidence:
     name: Compliance Evidence
     runs-on: ubuntu-22.04
@@ -412,6 +429,7 @@ jobs:
       - mcp-ux-lint
       - provenance
       - schema-validation
+      - verify-evidence
       - compliance-evidence
       - ga-evidence-completeness
     if: always()
@@ -425,6 +443,7 @@ jobs:
           echo "MCP Tool UX Lint: ${{ needs.mcp-ux-lint.result }}"
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
+          echo "Verify Evidence: ${{ needs.verify-evidence.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
           echo ""
@@ -447,6 +466,11 @@ jobs:
 
           if [[ "${{ needs.mcp-ux-lint.result }}" != "success" ]]; then
             echo "::error::MCP Tool UX Lint FAILED - CI BLOCKED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.verify-evidence.result }}" != "success" ]]; then
+            echo "::error::Verify Evidence FAILED - CI BLOCKED"
             exit 1
           fi
 

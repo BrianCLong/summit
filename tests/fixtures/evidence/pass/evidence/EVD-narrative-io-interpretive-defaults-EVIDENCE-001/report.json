@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+  "summary": "Evidence schema fixture: pass",
+  "status": "PASS",
+  "item": "narrative-io-interpretive-defaults",
+  "notes": ["Fixture-only summary for validation"]
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.local/schemas/narratives/report.schema.json",
+  "type": "object",
+  "minProperties": 1,
+  "required": ["summary"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "status": { "type": "string" },
+    "item": { "type": "string" },
+    "scenarios": { "type": "integer" },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

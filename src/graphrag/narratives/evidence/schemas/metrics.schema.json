@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.local/schemas/narratives/metrics.schema.json",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": true
+}

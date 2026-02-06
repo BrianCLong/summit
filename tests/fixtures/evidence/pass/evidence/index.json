@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+      "files": {
+        "report": "evidence/EVD-narrative-io-interpretive-defaults-EVIDENCE-001/report.json",
+        "metrics": "evidence/EVD-narrative-io-interpretive-defaults-EVIDENCE-001/metrics.json",
+        "stamp": "evidence/EVD-narrative-io-interpretive-defaults-EVIDENCE-001/stamp.json"
+      }
+    }
+  ]
+}

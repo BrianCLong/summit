@@ -16,6 +16,7 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
 - `gate/evidence` (PR2)
+- `verify-evidence` (ci-verify workflow)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
 - `lint`

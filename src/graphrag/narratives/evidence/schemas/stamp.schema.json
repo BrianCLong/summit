@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.local/schemas/narratives/stamp.schema.json",
+  "type": "object",
+  "minProperties": 1,
+  "anyOf": [
+    { "required": ["timestamp"] },
+    { "required": ["generated_at"] },
+    { "required": ["generatedAt"] },
+    { "required": ["generated_at_utc"] },
+    { "required": ["ts"] }
+  ],
+  "properties": {
+    "timestamp": { "type": ["number", "string"] },
+    "generated_at": { "type": "string" },
+    "generatedAt": { "type": "string" },
+    "generated_at_utc": { "type": "string" },
+    "ts": { "type": ["number", "string"] },
+    "hash": { "type": "string" },
+    "provenance": { "type": "object" },
+    "version": { "type": ["string", "number"] }
+  },
+  "additionalProperties": true
+}

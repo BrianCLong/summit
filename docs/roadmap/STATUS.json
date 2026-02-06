@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-09T00:00:00Z",
+  "revision_note": "Added Narrative IO evidence foundation gate and fixture scaffolding.",
   "initiatives": [
+    {
+      "id": "narrative-io-evidence-foundation",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Narrative IO Lane 1 evidence schemas, fixtures, and verify-evidence CI gate."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
