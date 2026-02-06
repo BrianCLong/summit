@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Checkout fork
         uses: actions/checkout@v4
-        with:
+
           fetch-depth: 0
 
       - name: Determine upstream remote
@@ -38,8 +38,8 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+
+          node-
           cache: 'pnpm'
 
       - name: Install deps
@@ -55,14 +55,14 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        with:
+
           name: workflow-drift-artifacts
           path: artifact
 
       - name: Comment on PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: marocchino/sticky-pull-request-comment@v2
-        with:
+
           recreate: true
           header: "Workflow Drift Guard"
           message: |

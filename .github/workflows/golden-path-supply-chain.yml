@@ -18,7 +18,7 @@ jobs:
   build-server:
     name: Build Server (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
-        with:
+
           image_name: server
           dockerfile: server/Dockerfile
           context: .

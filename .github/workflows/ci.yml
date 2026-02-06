@@ -45,8 +45,8 @@ jobs:
         uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+
+          node-
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
@@ -101,7 +101,7 @@ jobs:
       - name: Generate Metrics
         if: always()
         uses: actions/upload-artifact@v4
-        with:
+
           name: coverage-report
           path: server/coverage/
 
@@ -126,12 +126,11 @@ jobs:
   security-compliance:
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
-        with:
-          needs: [config-guard]
+    needs: [config-guard]
 
-          strict: true
+      strict: true
 
-          soc-controls:
+  soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -176,7 +175,7 @@ jobs:
       - name: Upload SOC compliance reports
         if: always()
         uses: actions/upload-artifact@v4
-        with:
+
           name: soc-compliance-report
           path: soc-compliance-reports
           retention-days: 90
@@ -201,6 +200,6 @@ jobs:
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
-        with:
+
           name: verification-artifacts
           path: artifacts/**

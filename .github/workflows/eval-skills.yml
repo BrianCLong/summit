@@ -25,7 +25,7 @@ jobs:
         run: make eval-skills-changed
       - name: Upload eval artifacts
         uses: actions/upload-artifact@v4
-        with:
+
           name: eval-skills-changed
           path: evals/skills/**/artifacts/**
 
@@ -43,6 +43,6 @@ jobs:
         run: make eval-skills-all
       - name: Upload eval artifacts
         uses: actions/upload-artifact@v4
-        with:
+
           name: eval-skills-suite
           path: evals/skills/**/artifacts/**

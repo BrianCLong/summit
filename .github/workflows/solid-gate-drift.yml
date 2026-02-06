@@ -19,7 +19,7 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
+
           python-version: "3.12"
 
       - name: Run Drift Script
@@ -27,7 +27,7 @@ jobs:
 
       - name: Upload Drift Artifacts
         uses: actions/upload-artifact@v4
-        with:
+
           name: solid-gate-drift
           path: artifacts/solid-gate-drift/
           retention-days: 30

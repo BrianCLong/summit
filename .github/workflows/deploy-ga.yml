@@ -14,7 +14,7 @@ permissions:
 jobs:
   graph-sync:
     uses: ./.github/workflows/graph-sync-gate.yml
-        with:
+
           secrets: inherit
 
           ga-gates:
@@ -25,7 +25,7 @@ jobs:
 
       - name: Download Metrics
         uses: actions/download-artifact@v4
-        with:
+
           name: graph-sync-metrics
           path: packages/graph-sync-validator/
 

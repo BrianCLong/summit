@@ -77,14 +77,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        - name: Install Dependencies
+        - name: Install Node.js
+        uses: actions/setup-node@v4
+
+          node-
+
+      - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Verify Server Build

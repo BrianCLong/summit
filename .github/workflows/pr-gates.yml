@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
-        with:
+
           fetch-depth: 0
 
       - name: Check for Canary and Rollback Plans
@@ -62,7 +62,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -96,7 +96,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -152,7 +152,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -216,7 +216,7 @@ jobs:
 
       - name: Post Preview URL
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        with:
+
           script: |
             const previewUrl = '${{ steps.deploy.outputs.preview_url }}';
             const deployStatus = '${{ env.DEPLOY_STATUS }}';

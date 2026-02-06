@@ -16,8 +16,8 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "18"
+
+          node-
           cache: pnpm
 
       - name: Install dependencies (script only)

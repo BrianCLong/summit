@@ -72,8 +72,8 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
+
+          node-
           cache: "pnpm"
 
       - name: Install Dependencies
@@ -122,7 +122,7 @@ jobs:
       - name: Upload Audit Report
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
+
           name: security-audit-${{ github.run_id }}
           path: artifacts/security-audit/
           retention-days: 30
@@ -131,7 +131,7 @@ jobs:
       - name: Comment on PR
         if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        with:
+
           script: |
             const critical = ${{ steps.audit.outputs.critical || 0 }};
             const high = ${{ steps.audit.outputs.high || 0 }};
@@ -249,8 +249,8 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
+
+          node-
           cache: "pnpm"
 
       - name: Install Dependencies
@@ -273,7 +273,7 @@ jobs:
       - name: Create Fix PR
         if: steps.check.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
-        with:
+
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "security(deps): auto-fix vulnerabilities"
           title: "security(deps): Auto-fix dependency vulnerabilities"
