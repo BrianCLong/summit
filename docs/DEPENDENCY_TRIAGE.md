@@ -50,6 +50,7 @@ Run these from repo root (or the specified workspace root):
 - After bumping all modules to Go 1.24, rerun with `GOTOOLCHAIN=go1.24.13` failed due to toolchain compile errors on Go 1.24 sources; local Go toolchain upgrade required.
 - Go 1.24.13 installed locally; rerun with PATH override succeeded for most modules.
 - govulncheck now passes for all modules after fixing import paths and Go workspaces.
+- pnpm audit in `apps/a11y-lab` still hangs (even with `--ignore-registry-errors`).
 
 ## Rust (cargo-audit)
 
