@@ -1,0 +1,39 @@
+{
+  "task_id": "PEGRA_BES_MODULE",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "pegra-bes-module",
+    "version": "v1",
+    "sha256": "0757d06de9e9da34dd232f1f913bfdf43af514ffa0de5af1836265daacb80cd3",
+    "path": "prompts/briefs/pegra-bes-module@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/briefs/pegra-bes-module.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/PEGRA_BES_MODULE_TASK.json",
+      "prompts/briefs/pegra-bes-module@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "procurement-espionage"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/briefs/pegra-bes-module.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "PEGra/BES brief is published with MAESTRO alignment and claim bullets.",
+    "Roadmap status updated with initiative entry and revision note.",
+    "Prompt registry includes PEGra/BES prompt hash and scope."
+  ],
+  "stop_conditions": [
+    "Missing required AGENT-METADATA schema in PR body.",
+    "Prompt hash mismatch with registry entry.",
+    "Scope expands beyond declared paths."
+  ]
+}
