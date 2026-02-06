@@ -122,7 +122,7 @@
 3. **CVEs Resolved**: All 4 previously ignored CVEs addressed
 4. **OPA Gaps Fixed**: CompanyOS tenant-api now has OPA integration
 
-### Session 2 (Current)
+### Session 2
 5. **COMPLETED**: Shai-Hulud supply chain security items
    - Subsumption bundle verifier + test fixtures
    - Deny-by-default npm lifecycle script policy gate
@@ -131,6 +131,15 @@
    - Created OPA job wrapper for BullMQ processors
    - Added OPA policy for job authorization
 
+### Session 3 (Current)
+7. **COMPLETED**: Golden path hardening items (BB-004, BB-005)
+   - BB-004: Smoke test timeout now configurable via `SMOKE_TIMEOUT` env var (default 60s)
+   - BB-005: Health check results now written to `health-check-results.json`
+8. **REMOVED**: Deprecated `ingestion.processor.ts` stub
+   - Updated job.manager.ts to use real `ingestionProcessor.ts`
+   - Updated tests to mock OPA wrapper
+9. **UPDATED**: OPA job wrapper adoption complete (6 processors wrapped)
+
 ---
 
 ## Next Steps
@@ -138,4 +147,3 @@
 1. DevOps: Execute n8n credential rotation runbook (P0)
 2. Governance Team: Align on branch-protection-as-code requirements (P1)
 3. Security Team: Schedule MCP apps security audit (P2)
-4. Incrementally adopt `withOpaPolicy()` wrapper in existing job processors
