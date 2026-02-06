@@ -72,7 +72,44 @@ def main():
     success = True
 
     # Validate Items
-    for item in index_data.get("items", []):
+    items = index_data.get("items", [])
+    if isinstance(items, dict):
+        # Convert dict items to list of dicts with id and path/files
+        adapter_items = []
+        for eid, data in items.items():
+            # Legacy format support: data might have "files" or "artifacts" list
+            # The original script expects "path" (directory or file).
+            # If "files" exists, we might need to validate each.
+            # But strictly complying with the script's original intent (directory structure):
+            # We can try to infer a "base path" if they are in the same dir, or just skip path validation
+            # and validate files directly.
+            # To keep it simple and fix the crash:
+
+            # If it's the legacy map format, we construct a mock item object
+            # matching what the script expects, OR we modify the script to handle it.
+
+            # Let's adapt the data for the existing loop if possible, or branch logic.
+            # The existing logic relies heavily on 'path' being a directory or file.
+            # The legacy index lists explicit files.
+
+            paths = data.get("files") or data.get("artifacts") or []
+            if paths:
+                # Use the first file to guess dir? Or just iterate files?
+                # The script logic:
+                # if isdir(path): check report, metrics, stamp
+                # else: check file schema
+
+                # We can emit multiple items for the validator
+                for fpath in paths:
+                     adapter_items.append({"id": eid, "path": fpath})
+            else:
+                 # Fallback if path exists
+                 if "path" in data:
+                     adapter_items.append({"id": eid, "path": data["path"]})
+
+        items = adapter_items
+
+    for item in items:
         evidence_id = item.get("id")
         path = item.get("path")
 
