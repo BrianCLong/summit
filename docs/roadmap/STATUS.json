@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-06T00:26:11Z",
+  "revision_note": "Added evidence-first AI governance docs initiative and baseline artifacts.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -59,6 +59,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+    },
+    {
+      "id": "evidence-first-ai-governance-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence-first AI governance standard, repo assumptions, security data-handling guidance, ops runbook, and competitive positioning baseline."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -176,7 +182,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 15,
+    "total": 16,
     "ga_blockers": []
   }
 }
