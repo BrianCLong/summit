@@ -153,7 +153,7 @@ export class SecureCypherQueryBuilder {
     
     try {
       // Add query timeout and other execution configuration
-      const result = await session.executeWrite(tx =>
+      const result = await session.executeWrite((tx: any) =>
         tx.run(cypher, parameters, {
           // Set query timeout
           timeout: queryTimeout,

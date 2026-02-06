@@ -32,7 +32,7 @@ export class FcrSchemaValidator {
       if (!ok) {
         failures.push(
           ...((validate.errors || []).map(
-            (error) => `${signal.entity_id}: ${error.instancePath} ${error.message}`,
+            (error: { instancePath?: string; message?: string }) => `${signal.entity_id}: ${error.instancePath} ${error.message}`,
           )),
         );
       }
