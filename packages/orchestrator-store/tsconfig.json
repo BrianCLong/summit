@@ -15,7 +15,9 @@
     "removeComments": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "types": [],
+    "typeRoots": []
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "__tests__", "tests", "coverage"]

@@ -14,6 +14,7 @@ The IntelGraph Platform implements a robust job queue system using:
 ## Architecture
 
 ```
+
 ┌──────────────┐
 │ Application  │
 │   Code       │
@@ -43,6 +44,7 @@ The IntelGraph Platform implements a robust job queue system using:
   │ Bull Board  │
   │ Dashboard   │
   └─────────────┘
+
 ```
 
 ## Quick Start
@@ -50,11 +52,15 @@ The IntelGraph Platform implements a robust job queue system using:
 ### 1. Start Redis
 
 ```bash
+
 # Using Docker Compose
+
 docker-compose -f docker-compose.dev.yml up redis
 
 # Or standalone
+
 docker run -p 6379:6379 redis:7-alpine
+
 ```
 
 ### 2. Access Bull Board Dashboard
@@ -80,6 +86,7 @@ export enum QueueName {
   DATA_PROCESSING = 'data-processing',
   ANALYTICS = 'analytics',
 }
+
 ```
 
 ### Get or Create Queue
@@ -88,6 +95,7 @@ export enum QueueName {
 import { queueRegistry, QueueName } from './queues/config';
 
 const queue = queueRegistry.getQueue(QueueName.EMAIL);
+
 ```
 
 ## Adding Jobs
@@ -109,6 +117,7 @@ await addJob(
     priority: JobPriority.HIGH,
   }
 );
+
 ```
 
 ### Delayed Job
@@ -122,6 +131,7 @@ await addJob(
     delay: 24 * 60 * 60 * 1000, // 24 hours
   }
 );
+
 ```
 
 ### Job with Custom Retry
@@ -136,6 +146,7 @@ await addJob(
     priority: JobPriority.CRITICAL,
   }
 );
+
 ```
 
 ## Creating a Job Processor
@@ -180,6 +191,7 @@ export async function processMyJob(job: Job<MyJobData>): Promise<void> {
 queueRegistry.registerWorker(QueueName.DATA_PROCESSING, processMyJob, {
   concurrency: 5,
 });
+
 ```
 
 ### Processor with Progress Updates
@@ -203,6 +215,7 @@ export async function processLargeFile(job: Job<FileData>): Promise<void> {
 
   await job.updateProgress(100);
 }
+
 ```
 
 ### Processor with Error Handling
@@ -231,6 +244,7 @@ export async function processWithRetry(job: Job<Data>): Promise<void> {
     }
   }
 }
+
 ```
 
 ## Scheduled Jobs (Cron)
@@ -263,6 +277,7 @@ await addRepeatableJob(
   {},
   '0 9 * * 1'
 );
+
 ```
 
 ### Cron Pattern Examples
@@ -292,6 +307,7 @@ export enum JobPriority {
 await addJob(queueName, jobName, data, {
   priority: JobPriority.CRITICAL,
 });
+
 ```
 
 ## Retry Configuration
@@ -306,6 +322,7 @@ await queue.add('job-name', data, {
     delay: 2000, // 2s, 4s, 8s
   },
 });
+
 ```
 
 ### Fixed Delay
@@ -318,6 +335,7 @@ await queue.add('job-name', data, {
     delay: 5000, // 5s between each attempt
   },
 });
+
 ```
 
 ### Custom Backoff
@@ -338,11 +356,13 @@ queueRegistry.registerWorker(queueName, processor, {
     },
   },
 });
+
 ```
 
 ## Job Lifecycle
 
 ```
+
 ┌──────────┐
 │  Added   │
 └────┬─────┘
@@ -369,6 +389,7 @@ queueRegistry.registerWorker(queueName, processor, {
              │Permanently  │
              │  Failed     │
              └─────────────┘
+
 ```
 
 ## Monitoring
@@ -403,6 +424,7 @@ const failed = await queue.getFailed();
 
 // Get job by ID
 const job = await queue.getJob('job-id-123');
+
 ```
 
 ### Programmatic Monitoring
@@ -428,6 +450,7 @@ queue.on('completed', (job, result) => {
 queue.on('failed', (job, error) => {
   logger.error(`Job failed: ${job?.id}`, { error: error.message });
 });
+
 ```
 
 ## Best Practices
@@ -435,20 +458,25 @@ queue.on('failed', (job, error) => {
 ### DO
 
 ✅ Use descriptive job names:
+
 ```typescript
 await addJob(queue, 'send-password-reset-email', data);
+
 ```
 
 ✅ Include metadata for debugging:
+
 ```typescript
 await addJob(queue, 'process-upload', {
   userId: 'user123',
   filename: 'data.csv',
   uploadedAt: new Date().toISOString(),
 });
+
 ```
 
 ✅ Set appropriate priorities:
+
 ```typescript
 // Critical user-facing operations
 await addJob(queue, 'send-otp', data, {
@@ -459,9 +487,11 @@ await addJob(queue, 'send-otp', data, {
 await addJob(queue, 'cleanup-temp-files', {}, {
   priority: JobPriority.BACKGROUND,
 });
+
 ```
 
 ✅ Handle errors gracefully:
+
 ```typescript
 try {
   await processor(job.data);
@@ -470,28 +500,34 @@ try {
   // Send to error tracking service
   throw error; // Trigger retry
 }
+
 ```
 
 ✅ Use progress updates for long jobs:
+
 ```typescript
 await job.updateProgress(25);
 await job.updateProgress(50);
 await job.updateProgress(75);
 await job.updateProgress(100);
+
 ```
 
 ### DON'T
 
 ❌ Store large data in jobs:
+
 ```typescript
 // BAD: Store reference instead
 await addJob(queue, 'process', { fileContent: largeString });
 
 // GOOD: Store reference
 await addJob(queue, 'process', { fileId: 'file123' });
+
 ```
 
 ❌ Ignore failures silently:
+
 ```typescript
 // BAD
 catch (error) {
@@ -503,15 +539,18 @@ catch (error) {
   logger.error('Job failed', { error });
   throw error;
 }
+
 ```
 
 ❌ Use jobs for real-time operations:
+
 ```typescript
 // BAD: Use HTTP request instead
 await addJob(queue, 'authenticate-user', credentials);
 
 // GOOD: Use jobs for async work
 await addJob(queue, 'send-welcome-email', { userId });
+
 ```
 
 ## Configuration
@@ -519,18 +558,24 @@ await addJob(queue, 'send-welcome-email', { userId });
 ### Redis Configuration
 
 ```bash
+
 # .env
+
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=your-password
 REDIS_QUEUE_DB=1
+
 ```
 
 ### Queue Worker Configuration
 
 ```bash
+
 # .env
+
 QUEUE_WORKER_CONCURRENCY=5  # Jobs per worker
+
 ```
 
 ### Queue Options
@@ -552,6 +597,7 @@ const queue = new Queue('my-queue', {
     },
   },
 });
+
 ```
 
 ## Troubleshooting

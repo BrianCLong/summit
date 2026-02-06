@@ -24,6 +24,8 @@ jobs:
       - name: Skip (no manifest changes)
         if: steps.pkg.outputs.manifests != 'true'
         run: echo "No manifest changes; skipping audit"
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         if: steps.pkg.outputs.manifests == 'true'
         with:

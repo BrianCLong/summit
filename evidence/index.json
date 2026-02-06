@@ -4,25 +4,25 @@
     {
       "evidence_id": "EVD-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-001/report.json",
+        "metrics": "evidence/EVD-001/metrics.json",
+        "stamp": "evidence/EVD-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-002",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-002/report.json",
+        "metrics": "evidence/EVD-002/metrics.json",
+        "stamp": "evidence/EVD-002/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-003",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-003/report.json",
+        "metrics": "evidence/EVD-003/metrics.json",
+        "stamp": "evidence/EVD-003/stamp.json"
       }
     },
     {
@@ -52,25 +52,25 @@
     {
       "evidence_id": "EVD-openviking-trace-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-openviking-trace-001/report.json",
+        "metrics": "evidence/EVD-openviking-trace-001/metrics.json",
+        "stamp": "evidence/EVD-openviking-trace-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-openviking-trace-002",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-openviking-trace-002/report.json",
+        "metrics": "evidence/EVD-openviking-trace-002/metrics.json",
+        "stamp": "evidence/EVD-openviking-trace-002/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-openviking-trace-003",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-openviking-trace-003/report.json",
+        "metrics": "evidence/EVD-openviking-trace-003/metrics.json",
+        "stamp": "evidence/EVD-openviking-trace-003/stamp.json"
       }
     },
     {
@@ -148,17 +148,17 @@
     {
       "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-PIPELINE-RESILIENCE-001/report.json",
+        "metrics": "evidence/EVD-PIPELINE-RESILIENCE-001/metrics.json",
+        "stamp": "evidence/EVD-PIPELINE-RESILIENCE-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-SKETCHDYNAMICS-PIPELINE-001/report.json",
+        "metrics": "evidence/EVD-SKETCHDYNAMICS-PIPELINE-001/metrics.json",
+        "stamp": "evidence/EVD-SKETCHDYNAMICS-PIPELINE-001/stamp.json"
       }
     },
     {
@@ -172,73 +172,73 @@
     {
       "evidence_id": "EVD-vfgnn-ATT-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-vfgnn-ATT-001/report.json",
+        "metrics": "evidence/EVD-vfgnn-ATT-001/metrics.json",
+        "stamp": "evidence/EVD-vfgnn-ATT-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-vfgnn-NEG-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-vfgnn-NEG-001/report.json",
+        "metrics": "evidence/EVD-vfgnn-NEG-001/metrics.json",
+        "stamp": "evidence/EVD-vfgnn-NEG-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-INHOUSE-DATA-AGENT-ARCH-001/report.json",
+        "metrics": "evidence/EVD-INHOUSE-DATA-AGENT-ARCH-001/metrics.json",
+        "stamp": "evidence/EVD-INHOUSE-DATA-AGENT-ARCH-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-ATLAS-SCHEMA-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-ATLAS-SCHEMA-001/report.json",
+        "metrics": "evidence/EVD-ATLAS-SCHEMA-001/metrics.json",
+        "stamp": "evidence/EVD-ATLAS-SCHEMA-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-ATLAS-PLNR-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-ATLAS-PLNR-001/report.json",
+        "metrics": "evidence/EVD-ATLAS-PLNR-001/metrics.json",
+        "stamp": "evidence/EVD-ATLAS-PLNR-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-ATLAS-XFER-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-ATLAS-XFER-001/report.json",
+        "metrics": "evidence/EVD-ATLAS-XFER-001/metrics.json",
+        "stamp": "evidence/EVD-ATLAS-XFER-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-ATLAS-ATLS-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-ATLAS-ATLS-001/report.json",
+        "metrics": "evidence/EVD-ATLAS-ATLS-001/metrics.json",
+        "stamp": "evidence/EVD-ATLAS-ATLS-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-ATLAS-ATLS-002",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-ATLAS-ATLS-002/report.json",
+        "metrics": "evidence/EVD-ATLAS-ATLS-002/metrics.json",
+        "stamp": "evidence/EVD-ATLAS-ATLS-002/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-ATLAS-GOV-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-ATLAS-GOV-001/report.json",
+        "metrics": "evidence/EVD-ATLAS-GOV-001/metrics.json",
+        "stamp": "evidence/EVD-ATLAS-GOV-001/stamp.json"
       }
     },
     {
@@ -300,17 +300,17 @@
     {
       "evidence_id": "EVD-openviking-contextfs-001",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-openviking-contextfs-001/report.json",
+        "metrics": "evidence/EVD-openviking-contextfs-001/metrics.json",
+        "stamp": "evidence/EVD-openviking-contextfs-001/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-openviking-retrieval-002",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-openviking-retrieval-002/report.json",
+        "metrics": "evidence/EVD-openviking-retrieval-002/metrics.json",
+        "stamp": "evidence/EVD-openviking-retrieval-002/stamp.json"
       }
     },
     {
@@ -399,6 +399,14 @@
         "report": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/report.json",
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-FS-RESEARCHER-001",
+      "files": {
+        "report": "evidence/EVD-FS-RESEARCHER-001/report.json",
+        "metrics": "evidence/EVD-FS-RESEARCHER-001/metrics.json",
+        "stamp": "evidence/EVD-FS-RESEARCHER-001/stamp.json"
       }
     }
   ]
