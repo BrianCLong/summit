@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 
 const wargameSchema = gql`
   # Input for defining a crisis scenario

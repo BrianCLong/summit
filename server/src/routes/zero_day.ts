@@ -4,6 +4,8 @@ import { zeroDayService } from '../zero_day/ZeroDayService.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 /**
  * @swagger
@@ -126,7 +128,7 @@ router.post('/delegate-authority', async (req: AuthenticatedRequest, res: Respon
  */
 router.get('/status/:threatId', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const { threatId } = req.params;
+    const threatId = singleParam(req.params.threatId);
     const log = await zeroDayService.getKillChainStatus(threatId);
     if (log) {
       res.json(log);

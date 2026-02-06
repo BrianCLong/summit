@@ -23,7 +23,7 @@ export class SearchIndexService {
       },
       extractField: (document: SearchableItem, fieldName: string) => {
         // Access nested fields if necessary
-        const record = document as Record<string, unknown>;
+        const record = document as unknown as Record<string, unknown>;
         return record[fieldName];
       }
     });
@@ -106,33 +106,36 @@ export class SearchIndexService {
       throw new Error("caseId is required");
     }
 
-    const opts = {
-      filter: (result: SearchableItem) => {
+    type MiniSearchResult = ReturnType<MiniSearch<SearchableItem>['search']>[number];
+    type MiniSearchOptions = Parameters<MiniSearch<SearchableItem>['search']>[1];
+
+    const opts: MiniSearchOptions = {
+      filter: (result: MiniSearchResult) => {
+        const item = result as unknown as SearchableItem;
         // Filter by caseId
-        if (result.caseId !== query.caseId) return false;
+        if (item.caseId !== query.caseId) return false;
 
         // Apply other filters
         if (query.filters) {
-          if (query.filters.type && query.filters.type.length > 0 && !query.filters.type.includes(result.type)) return false;
+          if (query.filters.type && query.filters.type.length > 0 && !query.filters.type.includes(item.type)) return false;
           if (query.filters.tags && query.filters.tags.length > 0) {
             // check intersection
-            const hasTag = query.filters.tags.some(t => result.tags && result.tags.includes(t));
+            const hasTag = query.filters.tags.some(t => item.tags && item.tags.includes(t));
             if (!hasTag) return false;
           }
-          if (query.filters.source && query.filters.source.length > 0 && !query.filters.source.includes(result.source)) return false;
+          if (query.filters.source && query.filters.source.length > 0 && !query.filters.source.includes(item.source)) return false;
 
           if (query.filters.timeRange) {
-            const created = new Date(result.createdAt).getTime();
+            const created = new Date(item.createdAt).getTime();
             if (query.filters.timeRange.start && created < new Date(query.filters.timeRange.start).getTime()) return false;
             if (query.filters.timeRange.end && created > new Date(query.filters.timeRange.end).getTime()) return false;
           }
         }
         return true;
       },
-      queries: [query.q],
     };
 
-    const results = this.miniSearch.search(query.q, opts) as Array<SearchableItem & { score: number; match: Record<string, string[]> }>;
+    const results = this.miniSearch.search(query.q, opts) as MiniSearchResult[];
 
     // Pagination (manual slicing since minisearch returns all sorted by score)
     const limit = query.limit || 20;
@@ -142,18 +145,19 @@ export class SearchIndexService {
     return pagedResults.map((r) => {
       // Generate snippet (simple substring for now, MiniSearch doesn't do full snippets out of box easily without raw access)
       // We stored content.
-      const content = r.content || '';
+      const item = r as unknown as SearchableItem;
+      const content = item.content || '';
       const snippet = content.length > 100 ? content.substring(0, 100) + '...' : content;
 
       return {
         objectRef: {
-          id: r.id,
-          type: r.type
+          id: item.id,
+          type: item.type
         },
         score: r.score,
         snippet: snippet,
-        matchedFields: Object.keys(r.match),
-        item: r as SearchableItem // The full stored item
+        matchedFields: Object.keys(r.match ?? {}),
+        item: item // The full stored item
       };
     });
   }
@@ -238,7 +242,7 @@ export class SearchIndexService {
             prefix: true
           },
           extractField: (document: SearchableItem, fieldName: string) => {
-            const record = document as Record<string, unknown>;
+            const record = document as unknown as Record<string, unknown>;
             return record[fieldName];
           }
         });

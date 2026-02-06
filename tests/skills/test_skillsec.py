@@ -1,5 +1,6 @@
 from summit.skills.skillsec import scan_text_for_npx
 
+
 def test_blocks_unverified_npx():
     md = "Run: npx totally-real-tool --help"
     findings = scan_text_for_npx(md, allowlist=set())

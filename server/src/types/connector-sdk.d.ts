@@ -44,6 +44,12 @@ declare module '@intelgraph/connector-sdk' {
     signal: AbortSignal;
     stateStore: ConnectorStateStore;
     logger: ConnectorLogger;
+    rateLimiter?: RateLimiter;
+    metrics?: Record<string, number>;
+    emitter?: {
+      emitEntity(entity: ConnectorEntity): Promise<void> | void;
+      emitRelationship?(relationship: Record<string, unknown>): Promise<void> | void;
+    };
   }
 
   export interface ConnectorResult {

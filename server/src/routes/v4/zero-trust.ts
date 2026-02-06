@@ -86,6 +86,9 @@ const getUserId = (req: Request): string => {
   return req.user?.id || req.user?.id || 'anonymous';
 };
 
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
+
 const wrapResponse = <T>(data: T, req: Request): DataEnvelope<T> => {
   return {
     data,
@@ -249,13 +252,14 @@ router.get(
   requirePermission('security:keys:read'),
   async (req: Request, res: Response) => {
     try {
-      const keyHandle = await zeroTrustService!.hsm.getKey(req.params.id);
+      const keyId = singleParam(req.params.id);
+      const keyHandle = await zeroTrustService!.hsm.getKey(keyId);
 
       if (!keyHandle) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Key not found: ${req.params.id}`,
+            message: `Key not found: ${keyId}`,
           },
         });
       }
@@ -309,9 +313,10 @@ router.post(
   requirePermission('security:keys:use'),
   async (req: Request, res: Response) => {
     try {
+      const keyId = singleParam(req.params.id);
       const data = Buffer.from(req.body.data, 'base64');
       const signature = await zeroTrustService!.hsm.sign(
-        req.params.id,
+        keyId,
         data,
         req.body.algorithm
       );
@@ -322,11 +327,11 @@ router.post(
         'user',
         getTenantId(req),
         'key:sign',
-        { keyId: req.params.id }
+        { keyId }
       );
 
       res.json(wrapResponse({
-        keyId: req.params.id,
+        keyId,
         signature: signature.toString('base64'),
         algorithm: req.body.algorithm,
         timestamp: new Date().toISOString(),
@@ -379,12 +384,13 @@ router.post(
   requirePermission('security:keys:use'),
   async (req: Request, res: Response) => {
     try {
+      const keyId = singleParam(req.params.id);
       const data = Buffer.from(req.body.data, 'base64');
       const signature = Buffer.from(req.body.signature, 'base64');
-      const valid = await zeroTrustService!.hsm.verify(req.params.id, data, signature);
+      const valid = await zeroTrustService!.hsm.verify(keyId, data, signature);
 
       res.json(wrapResponse({
-        keyId: req.params.id,
+        keyId,
         valid,
         timestamp: new Date().toISOString(),
       }, req));
@@ -422,10 +428,11 @@ router.post(
   requirePermission('security:keys:rotate'),
   async (req: Request, res: Response) => {
     try {
-      const newKeyHandle = await zeroTrustService!.hsm.rotateKey(req.params.id);
+      const keyId = singleParam(req.params.id);
+      const newKeyHandle = await zeroTrustService!.hsm.rotateKey(keyId);
 
       logger.info({
-        oldKeyId: req.params.id,
+        oldKeyId: keyId,
         newKeyId: newKeyHandle.id,
         rotatedBy: getUserId(req),
       }, 'HSM key rotated');
@@ -436,7 +443,7 @@ router.post(
         'user',
         getTenantId(req),
         'key:rotate',
-        { oldKeyId: req.params.id, newKeyId: newKeyHandle.id }
+        { oldKeyId: keyId, newKeyId: newKeyHandle.id }
       );
 
       res.json(wrapResponse(newKeyHandle, req));
@@ -474,7 +481,8 @@ router.get(
   requirePermission('security:keys:read'),
   async (req: Request, res: Response) => {
     try {
-      const attestation = await zeroTrustService!.hsm.attestKey(req.params.id);
+      const keyId = singleParam(req.params.id);
+      const attestation = await zeroTrustService!.hsm.attestKey(keyId);
       res.json(wrapResponse(attestation, req));
     } catch (error: any) {
       res.status(500).json({
@@ -666,13 +674,14 @@ router.get(
   requirePermission('audit:read'),
   async (req: Request, res: Response) => {
     try {
-      const entry = await zeroTrustService!.audit.getEntry(req.params.id);
+      const entryId = singleParam(req.params.id);
+      const entry = await zeroTrustService!.audit.getEntry(entryId);
 
       if (!entry) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Audit entry not found: ${req.params.id}`,
+            message: `Audit entry not found: ${entryId}`,
           },
         });
       }
@@ -712,7 +721,8 @@ router.get(
   requirePermission('audit:verify'),
   async (req: Request, res: Response) => {
     try {
-      const verification = await zeroTrustService!.audit.verifyEntry(req.params.id);
+      const entryId = singleParam(req.params.id);
+      const verification = await zeroTrustService!.audit.verifyEntry(entryId);
       res.json(wrapResponse(verification, req));
     } catch (error: any) {
       res.status(500).json({
@@ -748,7 +758,8 @@ router.get(
   requirePermission('audit:read'),
   async (req: Request, res: Response) => {
     try {
-      const proof = await zeroTrustService!.audit.getMerkleProof(req.params.id);
+      const entryId = singleParam(req.params.id);
+      const proof = await zeroTrustService!.audit.getMerkleProof(entryId);
       res.json(wrapResponse(proof, req));
     } catch (error: any) {
       res.status(500).json({

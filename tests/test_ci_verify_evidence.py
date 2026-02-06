@@ -1,15 +1,16 @@
-import unittest
-import tempfile
-import shutil
-import os
 import json
+import os
+import shutil
 import sys
+import tempfile
+import unittest
 
 # Add repo root to path to import verify_evidence
 repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(repo_root, "ci", "gates"))
 
 import verify_evidence
+
 
 class TestVerifyEvidence(unittest.TestCase):
     def setUp(self):

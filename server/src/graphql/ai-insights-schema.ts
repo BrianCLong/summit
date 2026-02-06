@@ -5,7 +5,7 @@
  * and link scoring capabilities
  */
 
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 import { getAIInsightsClient } from '../services/ai-insights-client.js';
 import { traceResolver } from './resolvers-tracing.js';
 
@@ -353,12 +353,12 @@ export const aiInsightsResolvers = {
                   method: match.method,
                   features: match.features
                     ? {
-                        nameSimilarity: match.features.name_similarity,
-                        typeMatch: match.features.type_match,
-                        neuralConfidence: match.features.neural_confidence,
-                        attributeSimilarity:
-                          match.features.attribute_similarity || 0,
-                      }
+                      nameSimilarity: match.features.name_similarity,
+                      typeMatch: match.features.type_match,
+                      neuralConfidence: match.features.neural_confidence,
+                      attributeSimilarity:
+                        match.features.attribute_similarity || 0,
+                    }
                     : null,
                 }))
                 .filter((item) => item.entity); // Remove any that couldn't be found

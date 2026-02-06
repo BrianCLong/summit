@@ -1,6 +1,8 @@
 import pytest
-from intelgraph.streaming.narrative_nodes import NarrativeNode
+
 from intelgraph.streaming.narrative_edges import NarrativeEdge
+from intelgraph.streaming.narrative_nodes import NarrativeNode
+
 
 def test_narrative_node_initialization():
     """Test that NarrativeNode initializes correctly with given attributes."""

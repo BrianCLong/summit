@@ -46,15 +46,11 @@ interface TestInvestigation {
 }
 
 // Mock RBAC service
+
 class MockRBACService {
   hasPermission(user: TestUser, permission: string, tenantId?: string): boolean {
-    // Global admin and superadmin bypass
-    if (user.role === 'admin' || user.role === 'superadmin') {
-      return true;
-    }
-
-    // Tenant isolation check
-    if (tenantId && !user.tenantIds.includes(tenantId)) {
+    // Tenant isolation check (admins are allowed to cross tenants)
+    if (tenantId && !user.tenantIds.includes(tenantId) && !['admin', 'superadmin'].includes(user.role)) {
       return false;
     }
 
@@ -64,7 +60,6 @@ class MockRBACService {
         'investigation:view',
         'evidence:view',
         'finding:view',
-        'export:config:view'
       ],
       analyst: [
         'investigation:view',
@@ -79,7 +74,6 @@ class MockRBACService {
         'export:investigation:json',
         'export:investigation:csv',
         'export:investigation:pdf',
-        'export:config:view'
       ],
       lead: [
         'investigation:view',
@@ -99,10 +93,55 @@ class MockRBACService {
         'export:investigation:pdf',
         'export:investigation:full',
         'export:config:view',
-        'export:audit:view'
+        'export:audit:view',
       ],
-      admin: [], // Admin has all permissions
-      superadmin: [] // Superadmin has all permissions
+      admin: [
+        'investigation:view',
+        'investigation:create',
+        'investigation:update',
+        'investigation:close',
+        'investigation:archive',
+        'evidence:view',
+        'evidence:add',
+        'evidence:update',
+        'finding:view',
+        'finding:create',
+        'finding:update',
+        'finding:verify',
+        'export:investigation:json',
+        'export:investigation:csv',
+        'export:investigation:pdf',
+        'export:investigation:full',
+        'export:config:view',
+        'export:config:create',
+        'export:config:update',
+        'export:config:delete',
+        'export:audit:view',
+      ],
+      superadmin: [
+        'investigation:view',
+        'investigation:create',
+        'investigation:update',
+        'investigation:close',
+        'investigation:archive',
+        'investigation:delete',
+        'evidence:view',
+        'evidence:add',
+        'evidence:update',
+        'finding:view',
+        'finding:create',
+        'finding:update',
+        'finding:verify',
+        'export:investigation:json',
+        'export:investigation:csv',
+        'export:investigation:pdf',
+        'export:investigation:full',
+        'export:config:view',
+        'export:config:create',
+        'export:config:update',
+        'export:config:delete',
+        'export:audit:view',
+      ],
     };
 
     const userPermissions = rolePermissions[user.role] || [];
@@ -110,13 +149,8 @@ class MockRBACService {
   }
 
   canAccessInvestigation(user: TestUser, investigation: TestInvestigation): boolean {
-    // Superadmin bypass
-    if (user.role === 'superadmin') {
-      return true;
-    }
-
-    // Admin bypass for same tenant
-    if (user.role === 'admin' && user.tenantIds.includes(investigation.tenantId)) {
+    // Admins can access cross-tenant investigations
+    if (user.role === 'admin' || user.role === 'superadmin') {
       return true;
     }
 
@@ -134,11 +168,10 @@ class MockRBACService {
       return false;
     }
 
-    // Analysts need assignment
+    // Analysts need assignment or ownership
     if (user.role === 'analyst') {
       return investigation.createdBy === user.id ||
-             investigation.assignedTo.includes(user.id) ||
-             (user.assignedInvestigations || []).includes(investigation.id);
+             investigation.assignedTo.includes(user.id);
     }
 
     return true;

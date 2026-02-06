@@ -1,6 +1,8 @@
 import random
+
 import numpy as np
 from scipy.stats import skew
+
 
 def reservoir_sample(stream, k=50000):
     """

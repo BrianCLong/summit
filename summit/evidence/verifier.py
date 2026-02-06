@@ -9,7 +9,7 @@ import jsonschema
 
 
 def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 def calculate_sha256(path):
@@ -29,7 +29,7 @@ def validate_against_schema(data, schema_path):
 
 def check_no_timestamps(path):
     """Simple regex scan for ISO-8601 in non-stamp files."""
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         content = f.read()
     # Very basic ISO-8601-like pattern: YYYY-MM-DDTHH:MM:SS
     pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"

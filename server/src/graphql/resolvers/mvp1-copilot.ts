@@ -1,9 +1,5 @@
 import { CopilotIntegrationService } from '../../services/CopilotIntegrationService.js';
-import {
-  AuthenticationError,
-  ForbiddenError,
-  UserInputError,
-} from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { FeatureFlags } from '../../config/featureFlags.js';
 
 const copilotService = new CopilotIntegrationService();
@@ -13,12 +9,12 @@ interface AuthContext {
     id: string;
     email: string;
     role:
-      | 'viewer'
-      | 'analyst'
-      | 'editor'
-      | 'investigator'
-      | 'admin'
-      | 'super_admin';
+    | 'viewer'
+    | 'analyst'
+    | 'editor'
+    | 'investigator'
+    | 'admin'
+    | 'super_admin';
     tenantId: string;
   };
   tenantId?: string;
@@ -30,7 +26,9 @@ const mvp1CopilotResolvers = {
     // Get Copilot service health status
     copilotHealth: async (_: any, __: any, context: AuthContext) => {
       if (!context.isAuthenticated || !context.user) {
-        throw new AuthenticationError('Authentication required');
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       try {
@@ -50,7 +48,9 @@ const mvp1CopilotResolvers = {
     // Get AI capabilities available to user
     aiCapabilities: async (_: any, __: any, context: AuthContext) => {
       if (!context.isAuthenticated || !context.user) {
-        throw new AuthenticationError('Authentication required');
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       const capabilities = {
@@ -105,16 +105,21 @@ const mvp1CopilotResolvers = {
       }
 
       if (!context.isAuthenticated || !context.user) {
-        throw new AuthenticationError('Authentication required');
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       if (!input.text || input.text.trim().length === 0) {
-        throw new UserInputError('Text is required for entity extraction');
+        throw new GraphQLError('Text is required for entity extraction', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
       }
 
       if (input.text.length > 50000) {
-        throw new UserInputError(
+        throw new GraphQLError(
           'Text exceeds maximum length of 50,000 characters',
+          { extensions: { code: 'BAD_USER_INPUT' } }
         );
       }
 
@@ -210,18 +215,22 @@ const mvp1CopilotResolvers = {
       }
 
       if (!context.isAuthenticated || !context.user) {
-        throw new AuthenticationError('Authentication required');
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       if (!input.entities || input.entities.length === 0) {
-        throw new UserInputError(
+        throw new GraphQLError(
           'At least one entity is required for relationship suggestions',
+          { extensions: { code: 'BAD_USER_INPUT' } }
         );
       }
 
       if (!input.investigationId) {
-        throw new UserInputError(
+        throw new GraphQLError(
           'Investigation ID is required for relationship suggestions',
+          { extensions: { code: 'BAD_USER_INPUT' } }
         );
       }
 
@@ -298,7 +307,9 @@ const mvp1CopilotResolvers = {
       }
 
       if (!context.isAuthenticated || !context.user) {
-        throw new AuthenticationError('Authentication required');
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       // Require elevated permissions for bulk processing
@@ -307,26 +318,30 @@ const mvp1CopilotResolvers = {
           context.user.role,
         )
       ) {
-        throw new ForbiddenError(
+        throw new GraphQLError(
           'Bulk processing requires Editor role or higher',
+          { extensions: { code: 'FORBIDDEN' } }
         );
       }
 
       if (!input.texts || input.texts.length === 0) {
-        throw new UserInputError(
+        throw new GraphQLError(
           'At least one text is required for bulk processing',
+          { extensions: { code: 'BAD_USER_INPUT' } }
         );
       }
 
       if (input.texts.length > 50) {
-        throw new UserInputError(
+        throw new GraphQLError(
           'Maximum 50 texts allowed for bulk processing',
+          { extensions: { code: 'BAD_USER_INPUT' } }
         );
       }
 
       if (!input.investigationId) {
-        throw new UserInputError(
+        throw new GraphQLError(
           'Investigation ID is required for bulk processing',
+          { extensions: { code: 'BAD_USER_INPUT' } }
         );
       }
 
@@ -377,9 +392,9 @@ const mvp1CopilotResolvers = {
             averageConfidence:
               successful.length > 0
                 ? successful.reduce(
-                    (sum, r) => sum + (r.result?.confidence || 0),
-                    0,
-                  ) / successful.length
+                  (sum, r) => sum + (r.result?.confidence || 0),
+                  0,
+                ) / successful.length
                 : 0,
           },
         };

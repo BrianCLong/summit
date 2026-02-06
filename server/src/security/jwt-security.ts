@@ -166,6 +166,9 @@ class JWTSecurityManager {
    * Schedule automatic key rotation
    */
   private scheduleKeyRotation(): void {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
     this.rotationTimer = setInterval(async () => {
       try {
         if (this.currentKey && this.currentKey.expiresAt <= new Date()) {

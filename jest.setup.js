@@ -1,6 +1,10 @@
-const fs = require('fs');
+import fs from 'fs';
+import dotenv from 'dotenv';
+import { createRequire } from 'module';
 
-require('dotenv').config({ path: '.env.test' });
+const require = createRequire(import.meta.url);
+
+dotenv.config({ path: '.env.test' });
 
 process.env.TZ = process.env.TZ || 'UTC';
 process.env.LANG = process.env.LANG || 'en_US.UTF-8';
@@ -13,12 +17,10 @@ if (!global.__TEST_SEED_LOGGED__) {
 }
 
 // Import jest-dom for extended matchers (toBeInTheDocument, toHaveTextContent, etc.)
-require('@testing-library/jest-dom');
+import '@testing-library/jest-dom';
 
 // Configure JSDOM environment for client tests
 if (typeof window !== 'undefined') {
-  require('@testing-library/jest-dom');
-
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({

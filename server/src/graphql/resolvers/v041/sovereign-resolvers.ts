@@ -4,7 +4,7 @@
  * Independent verification, containment, lawful interoperability, and reversible autonomy
  */
 
-import { ApolloError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { Context } from '../../context.js';
 import { logger } from '../../../config/logger.js';
 import { auditLogger } from '../../middleware/auditLogger.js';
@@ -33,10 +33,9 @@ export const sovereignResolvers = {
         return status;
       } catch (error: any) {
         logger.error('SovereignSafeguardsStatus query error:', error);
-        throw new ApolloError(
-          'Failed to get sovereign safeguards status',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get sovereign safeguards status', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -59,10 +58,9 @@ export const sovereignResolvers = {
         return status.independentVerification;
       } catch (error: any) {
         logger.error('IndependentVerificationStatus query error:', error);
-        throw new ApolloError(
-          'Failed to get independent verification status',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get independent verification status', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -85,10 +83,9 @@ export const sovereignResolvers = {
         return status.containmentReadiness;
       } catch (error: any) {
         logger.error('ContainmentReadiness query error:', error);
-        throw new ApolloError(
-          'Failed to get containment readiness',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get containment readiness', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -111,10 +108,9 @@ export const sovereignResolvers = {
         return status.lawfulInteroperability;
       } catch (error: any) {
         logger.error('LawfulInteroperabilityStatus query error:', error);
-        throw new ApolloError(
-          'Failed to get lawful interoperability status',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get lawful interoperability status', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -137,10 +133,9 @@ export const sovereignResolvers = {
         return status.reversibleAutonomy;
       } catch (error: any) {
         logger.error('ReversibleAutonomyStatus query error:', error);
-        throw new ApolloError(
-          'Failed to get reversible autonomy status',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get reversible autonomy status', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -191,10 +186,9 @@ export const sovereignResolvers = {
         };
       } catch (error: any) {
         logger.error('ComplianceMonitoring query error:', error);
-        throw new ApolloError(
-          'Failed to get compliance monitoring data',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get compliance monitoring data', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -230,10 +224,9 @@ export const sovereignResolvers = {
         ];
       } catch (error: any) {
         logger.error('CrossBorderApprovals query error:', error);
-        throw new ApolloError(
-          'Failed to get cross-border approvals',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get cross-border approvals', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -271,10 +264,9 @@ export const sovereignResolvers = {
         ];
       } catch (error: any) {
         logger.error('SovereignAuditTrail query error:', error);
-        throw new ApolloError(
-          'Failed to get sovereign audit trail',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get sovereign audit trail', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
   },
@@ -311,12 +303,11 @@ export const sovereignResolvers = {
         return request;
       } catch (error: any) {
         logger.error('RequestIndependentVerification error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to request independent verification',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to request independent verification', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -343,12 +334,11 @@ export const sovereignResolvers = {
         return result;
       } catch (error: any) {
         logger.error('ConfigureSovereignSafeguards error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to configure sovereign safeguards',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to configure sovereign safeguards', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -375,12 +365,11 @@ export const sovereignResolvers = {
         return result;
       } catch (error: any) {
         logger.error('TestContainmentReadiness error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to test containment readiness',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to test containment readiness', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -413,12 +402,11 @@ export const sovereignResolvers = {
         return result;
       } catch (error: any) {
         logger.error('VerifyLawfulInteroperability error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to verify lawful interoperability',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to verify lawful interoperability', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -445,12 +433,11 @@ export const sovereignResolvers = {
         return result;
       } catch (error: any) {
         logger.error('ConfigureReversibleAutonomy error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to configure reversible autonomy',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to configure reversible autonomy', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -483,12 +470,11 @@ export const sovereignResolvers = {
         return result;
       } catch (error: any) {
         logger.error('EmergencySovereignContainment error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to execute emergency sovereign containment',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to execute emergency sovereign containment', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -519,12 +505,11 @@ export const sovereignResolvers = {
         };
       } catch (error: any) {
         logger.error('SovereignOperationRollback error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to rollback sovereign operation',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to rollback sovereign operation', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -555,12 +540,11 @@ export const sovereignResolvers = {
         };
       } catch (error: any) {
         logger.error('HumanOverrideSovereignAutonomy error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to execute human override',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to execute human override', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -587,12 +571,11 @@ export const sovereignResolvers = {
         return result;
       } catch (error: any) {
         logger.error('RequestCrossBorderApproval error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to request cross-border approval',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to request cross-border approval', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -623,12 +606,11 @@ export const sovereignResolvers = {
         };
       } catch (error: any) {
         logger.error('SubmitJurisdictionCompliance error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to submit jurisdiction compliance',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to submit jurisdiction compliance', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -671,12 +653,11 @@ export const sovereignResolvers = {
         };
       } catch (error: any) {
         logger.error('RequestTranscendentApproval error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to request transcendent approval',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to request transcendent approval', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -702,12 +683,11 @@ export const sovereignResolvers = {
         };
       } catch (error: any) {
         logger.error('ConfigureTranscendentSafeguards error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-              'Failed to configure transcendent safeguards',
-              'MUTATION_ERROR',
-            );
+          : new GraphQLError('Failed to configure transcendent safeguards', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
   },

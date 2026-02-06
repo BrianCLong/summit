@@ -1,8 +1,10 @@
 import pytest
-from summit.acp.registry_client import AgentDescriptor, NpxDist, BinaryDist, BinaryVariant
-from summit.acp.installer import plan_install, InstallPlan
-from summit.acp.policy import AcpPolicy
+
 from summit.acp.auth import AuthMethod, build_terminal_auth_command
+from summit.acp.installer import InstallPlan, plan_install
+from summit.acp.policy import AcpPolicy
+from summit.acp.registry_client import AgentDescriptor, BinaryDist, BinaryVariant, NpxDist
+
 
 def test_plan_install_npx():
     agent = AgentDescriptor(

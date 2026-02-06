@@ -192,8 +192,7 @@ export function getDefaultProvenanceChain(
 /**
  * Entity creation/update input schema
  */
-export const EntityInputSchema = z
-  .object({
+const EntityInputBaseSchema = z.object({
     // Identity
     id: z.string().uuid().optional(),
     canonicalId: z.string().uuid().nullable().optional(),
@@ -232,27 +231,34 @@ export const EntityInputSchema = z
     // Context
     investigationId: z.string().optional(),
     caseId: z.string().optional(),
-  })
-  .transform((data) => ({
-    ...data,
-    policyLabels: data.policyLabels ?? getDefaultPolicyLabels(),
-    provenance: data.provenance ?? getDefaultProvenanceChain(data.source),
-    validFrom: data.validFrom ?? null,
-    validTo: data.validTo ?? null,
-    observedAt: data.observedAt ?? null,
-  }));
+  });
+
+const applyEntityDefaults = <T extends z.ZodTypeAny>(schema: T) =>
+  schema.transform((data: z.infer<T>) => {
+    const base = data as z.infer<typeof EntityInputBaseSchema>;
+    return {
+      ...data,
+      policyLabels: base.policyLabels ?? getDefaultPolicyLabels(),
+      provenance: base.provenance ?? getDefaultProvenanceChain(base.source),
+      validFrom: base.validFrom ?? null,
+      validTo: base.validTo ?? null,
+      observedAt: base.observedAt ?? null,
+    } as z.infer<T>;
+  });
+
+export const EntityInputSchema = applyEntityDefaults(EntityInputBaseSchema);
 
 /**
  * Entity stored format (with system-managed fields)
  */
-export const EntityStoredSchema = EntityInputSchema.extend({
+export const EntityStoredSchema = applyEntityDefaults(EntityInputBaseSchema.extend({
   id: z.string().uuid(),
   recordedAt: z.coerce.date(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
   updatedBy: z.string().optional(),
   version: z.number().int().min(1),
-});
+}));
 
 // =============================================================================
 // RELATIONSHIP INPUT SCHEMA

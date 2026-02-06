@@ -4,7 +4,8 @@ Narrative Edge Definitions for Streaming Intelligence.
 Maps to CLAIM-02: Streaming graph systems now support standing queries and real-time inference.
 """
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 
 class NarrativeEdge:
     """
@@ -41,7 +42,7 @@ class NarrativeEdge:
         self.weight = weight
         self.timestamp = timestamp
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Serialize the edge for evidence bundles.
         """

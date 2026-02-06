@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from src.skills.security.static_scan import scan_skill_dir
+
 
 def test_scan_bad_fixture():
     # Using the actual fixture I created

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { FunnelService } from './FunnelService.js';
+import { singleParam } from '../../utils/params.js';
 import { Funnel } from './types.js';
 import path from 'path';
 
@@ -16,7 +17,7 @@ export const createFunnel = (req: Request, res: Response) => {
 };
 
 export const getFunnelReport = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = singleParam(req.params.id);
     try {
         const report = service.generateReport(id);
         res.json(report);

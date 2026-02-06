@@ -1,12 +1,14 @@
+import os
+import sys
+from pathlib import Path
+
 import pytest
 import yaml
-from pathlib import Path
-import sys
-import os
 
 # Add root to sys.path to import from tools
 sys.path.append(os.getcwd())
 from tools.event_playbook import is_action_allowed
+
 
 def test_event_policy_denies_offensive_actions():
     policy_path = Path("policy/event_policy.yaml")

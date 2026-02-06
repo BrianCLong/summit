@@ -1,7 +1,9 @@
 import pytest
-from summit_harness.subagents import SubagentRegistry, SubagentSpec, SubagentContext
-from summit_harness.harness import AgentHarness, HarnessConfig
+
 from summit_harness.evidence import EvidenceWriter
+from summit_harness.harness import AgentHarness, HarnessConfig
+from summit_harness.subagents import SubagentContext, SubagentRegistry, SubagentSpec
+
 
 def test_subagent_registry():
     registry = SubagentRegistry()

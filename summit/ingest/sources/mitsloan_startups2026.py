@@ -25,17 +25,17 @@ class ExtractedStartup:
     startup_name: str
     problem: str
     solution: str
-    mechanism: List[str]
-    claims: List[Dict]
+    mechanism: list[str]
+    claims: list[dict]
 
-def extract_from_article_text(article_text: str) -> List[ExtractedStartup]:
+def extract_from_article_text(article_text: str) -> list[ExtractedStartup]:
     """
     TODO: Implement deterministic parsing based on headings + labeled fields.
     For now, require fixtures to provide already-separated sections.
     """
     raise NotImplementedError("TODO(ingest): deterministic parser")
 
-def to_profile_v1(x: ExtractedStartup) -> Dict:
+def to_profile_v1(x: ExtractedStartup) -> dict:
     return {
         "startup_name": x.startup_name,
         "source": {"url": SOURCE_URL, "published_date": PUBLISHED_DATE},

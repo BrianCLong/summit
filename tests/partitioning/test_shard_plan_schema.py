@@ -1,8 +1,11 @@
 import json
-import pytest
-from summit.partitioning.shard_plan import ShardPlan
-from summit.partitioning.config import PartitioningConfig
+
 import jsonschema
+import pytest
+
+from summit.partitioning.config import PartitioningConfig
+from summit.partitioning.shard_plan import ShardPlan
+
 
 def test_shard_plan_defaults():
     plan = ShardPlan()

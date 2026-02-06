@@ -8,7 +8,8 @@ import {
 import { logger } from '../utils/logger.js';
 import Ajv from 'ajv';
 
-const ajv = new Ajv();
+const AjvCtor = Ajv as unknown as new (...args: unknown[]) => Ajv;
+const ajv = new AjvCtor();
 
 export class ToolbusExecutionError extends Error {
   constructor(message: string, public code: string) {
@@ -136,7 +137,8 @@ export class ToolbusService {
     while (attempt <= maxRetries) {
       try {
         const fullContext: ConnectorContext = {
-            logger: context.logger as any, // Cast or provide default
+            tenantId: context.tenantId ?? 'global',
+            logger: (context.logger ?? logger) as any,
             metrics: context.metrics as any,
             rateLimiter: limiter || new SimpleRateLimiter(100, 10),
             stateStore: context.stateStore as any,

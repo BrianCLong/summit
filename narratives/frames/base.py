@@ -10,6 +10,6 @@ class FrameLabel:
     method: str
 
 
-def extract_frame(event: Dict[str, Any]) -> FrameLabel:
+def extract_frame(event: dict[str, Any]) -> FrameLabel:
     """Contract: no raw text persistence; event may contain hashed references only."""
     raise NotImplementedError

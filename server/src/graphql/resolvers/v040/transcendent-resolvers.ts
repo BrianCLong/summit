@@ -3,7 +3,7 @@
  * Policy-sandboxed evolution with verifiable meta-optimization
  */
 
-import { ApolloError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { Context } from '../../context.js';
 import logger from '../../../config/logger.js';
 import auditLogger from '../../middleware/auditLogger.js';
@@ -161,7 +161,9 @@ async function executeSandboxValidation(
     return result;
   } catch (error: any) {
     logger.error('Sandbox validation error:', error);
-    throw new ApolloError('Sandbox validation failed', 'SANDBOX_ERROR');
+    throw new GraphQLError('Sandbox validation failed', {
+      extensions: { code: 'SANDBOX_ERROR' },
+    });
   }
 }
 
@@ -192,7 +194,9 @@ async function executeQuantumReasoning(
     };
   } catch (error: any) {
     logger.error('Quantum reasoning error:', error);
-    throw new ApolloError('Quantum reasoning failed', 'QUANTUM_ERROR');
+    throw new GraphQLError('Quantum reasoning failed', {
+      extensions: { code: 'QUANTUM_ERROR' },
+    });
   }
 }
 
@@ -236,10 +240,9 @@ export const transcendentResolvers = {
         };
       } catch (error: any) {
         logger.error('TranscendentStatus query error:', error);
-        throw new ApolloError(
-          'Failed to get transcendent status',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get transcendent status', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
 
@@ -262,10 +265,9 @@ export const transcendentResolvers = {
         return [];
       } catch (error: any) {
         logger.error('EvolutionProposals query error:', error);
-        throw new ApolloError(
-          'Failed to get evolution proposals',
-          'QUERY_ERROR',
-        );
+        throw new GraphQLError('Failed to get evolution proposals', {
+          extensions: { code: 'QUERY_ERROR' },
+        });
       }
     },
   },
@@ -294,9 +296,9 @@ export const transcendentResolvers = {
           config.safetyConstraints.humanOversightRequired === false &&
           config.autonomyTier === AutonomyTier.TIER_4_TRANSCENDENT
         ) {
-          throw new ApolloError(
+          throw new GraphQLError(
             'Tier-4 transcendent operations require human oversight',
-            'SAFETY_VIOLATION',
+            { extensions: { code: 'SAFETY_VIOLATION' } }
           );
         }
 
@@ -321,12 +323,11 @@ export const transcendentResolvers = {
         };
       } catch (error: any) {
         logger.error('EnableTranscendentIntelligence error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-            'Failed to enable transcendent intelligence',
-            'MUTATION_ERROR',
-          );
+          : new GraphQLError('Failed to enable transcendent intelligence', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -347,9 +348,9 @@ export const transcendentResolvers = {
 
         // Validate performance targets
         if (config.performanceTargets.errorRate > 0.01) {
-          throw new ApolloError(
+          throw new GraphQLError(
             'Error rate must be ≤ 1% for transcendent operations',
-            'PERFORMANCE_VIOLATION',
+            { extensions: { code: 'PERFORMANCE_VIOLATION' } }
           );
         }
 
@@ -365,12 +366,11 @@ export const transcendentResolvers = {
         };
       } catch (error: any) {
         logger.error('ConfigureControllerV3 error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-            'Failed to configure Controller v3',
-            'MUTATION_ERROR',
-          );
+          : new GraphQLError('Failed to configure Controller v3', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -442,9 +442,11 @@ export const transcendentResolvers = {
         return evolutionProposal;
       } catch (error: any) {
         logger.error('ProposeEvolution error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError('Failed to propose evolution', 'MUTATION_ERROR');
+          : new GraphQLError('Failed to propose evolution', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -468,12 +470,11 @@ export const transcendentResolvers = {
         return result;
       } catch (error: any) {
         logger.error('ExecuteQuantumReasoning error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-            'Failed to execute quantum reasoning',
-            'MUTATION_ERROR',
-          );
+          : new GraphQLError('Failed to execute quantum reasoning', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -509,12 +510,11 @@ export const transcendentResolvers = {
         };
       } catch (error: any) {
         logger.error('CreateQuantumKnowledgeNetwork error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-            'Failed to create quantum knowledge network',
-            'MUTATION_ERROR',
-          );
+          : new GraphQLError('Failed to create quantum knowledge network', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
 
@@ -556,12 +556,11 @@ export const transcendentResolvers = {
         };
       } catch (error: any) {
         logger.error('EmergencyContainment error:', error);
-        throw error instanceof ApolloError
+        throw error instanceof GraphQLError
           ? error
-          : new ApolloError(
-            'Failed to execute emergency containment',
-            'MUTATION_ERROR',
-          );
+          : new GraphQLError('Failed to execute emergency containment', {
+            extensions: { code: 'MUTATION_ERROR' },
+          });
       }
     },
   },

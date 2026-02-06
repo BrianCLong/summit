@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 import { typeDefs as mainSchema } from './schema.js';
 
 // Health check types for monitoring

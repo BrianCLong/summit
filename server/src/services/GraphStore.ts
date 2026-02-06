@@ -134,9 +134,11 @@ export function createGraphStore(
         );
         const entity = nodeToEntity(res.records[0].get('n'));
         // Ingest into Search Index
-        SearchIndexService.getInstance().onEntityUpsert(entity).catch((err: any) => {
+        SearchIndexService.getInstance()
+          .onEntityUpsert(entity as unknown as Record<string, unknown>)
+          .catch((err: any) => {
           logger.error({ err }, 'Failed to index entity on upsert');
-        });
+          });
         return entity;
       } finally {
         await session.close();

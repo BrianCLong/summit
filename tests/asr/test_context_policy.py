@@ -1,8 +1,11 @@
-import pytest
 import os
+
+import pytest
+
 from summit.audio.asr.policy.context_policy import validate_context
 from summit.audio.asr.providers.qwen3_asr_provider import Qwen3ASRProvider
 from summit.audio.asr.types import ASRRequest
+
 
 def test_context_disabled_by_default(monkeypatch):
     monkeypatch.setenv("SUMMIT_ASR_ENABLED", "1")

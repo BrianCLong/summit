@@ -18,7 +18,11 @@ import axios from 'axios';
 import { OPAEnforcer, createOPAMiddleware } from '../opa-enforcer.js';
 
 // Mock axios
-jest.mock('axios');
+jest.mock('axios', () => ({
+  __esModule: true,
+  default: { post: jest.fn() },
+  post: jest.fn(),
+}));
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock budget ledger

@@ -1,3 +1,5 @@
+process.env.NODE_ENV = 'test';
+
 module.exports = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
@@ -14,6 +16,8 @@ module.exports = {
   roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'libs', 'prompts'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
+    '<rootDir>/server/dist/',
+    '<rootDir>/server/packages_tmp/',
     '<rootDir>/archive/',
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
@@ -22,6 +26,9 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
+    '/server/dist/',
+    '/server/packages_tmp/',
+    '/tests/e2e/',
     '/archive/',
     '/salvage/',
     '/pull/',
@@ -29,6 +36,9 @@ module.exports = {
   watchPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
+    '/server/dist/',
+    '/server/packages_tmp/',
+    '/tests/e2e/',
     '/archive/',
     '/salvage/',
     '/pull/',
@@ -70,7 +80,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
+    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.cjs',
     '^pg$': '<rootDir>/__mocks__/pg.js',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
@@ -85,7 +95,6 @@ module.exports = {
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
-  testTimeout: 30000,
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },

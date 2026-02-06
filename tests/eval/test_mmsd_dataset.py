@@ -1,7 +1,10 @@
 import json
-import pytest
 from pathlib import Path
+
+import pytest
+
 from summit.eval.mmsd.dataset import MMSD2Dataset
+
 
 def test_mmsd_dataset_loading(tmp_path):
     # Setup dummy dataset

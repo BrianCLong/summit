@@ -5,12 +5,12 @@ class FlatteningPolicy:
     def __init__(
         self,
         enabled: bool = False,
-        allowlist: Optional[List[str]] = None,
-        denylist: Optional[List[str]] = None,
+        allowlist: Optional[list[str]] = None,
+        denylist: Optional[list[str]] = None,
         max_depth: int = 5,
         max_list_items: int = 10,
-        redaction_patterns: Optional[List[str]] = None,
-        never_embed: Optional[Set[str]] = None
+        redaction_patterns: Optional[list[str]] = None,
+        never_embed: Optional[set[str]] = None
     ):
         self.enabled = enabled
         self.allowlist = allowlist

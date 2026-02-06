@@ -570,10 +570,11 @@ export class GraphStore {
             }
 
             // Apply clearance filter to entity
+            const neighborClearance = neighbor.policyLabels?.clearance;
             if (
               query.clearance &&
-              compareClearance(neighbor.policyLabels.clearance, query.clearance) >
-                0
+              neighborClearance &&
+              compareClearance(neighborClearance, query.clearance) > 0
             ) {
               continue;
             }

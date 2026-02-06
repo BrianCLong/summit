@@ -124,6 +124,9 @@ interface PolicyDecision {
 
   /** Reason for decision */
   reason: string;
+
+  /** Severity of detected PII (if any) */
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 /**
@@ -151,6 +154,7 @@ export class RedactionMiddleware {
   ): Promise<RedactionResult> {
     const redactedFields: string[] = [];
     const dlpRules: string[] = [];
+    let maxSeverity: 'low' | 'medium' | 'high' | 'critical' | null = null;
 
     // Check if user has required step-up authentication
     const requiresStepUp = this.checkStepUpRequirement(userContext);
@@ -227,6 +231,17 @@ export class RedactionMiddleware {
             userContext,
           );
 
+          if (decision.severity) {
+            const order = ['low', 'medium', 'high', 'critical'] as const;
+            if (!maxSeverity) {
+              maxSeverity = decision.severity;
+            } else if (
+              order.indexOf(decision.severity) > order.indexOf(maxSeverity)
+            ) {
+              maxSeverity = decision.severity;
+            }
+          }
+
           if (!decision.allow && decision.redaction) {
             const redacted = this.applyRedaction(
               value,
@@ -246,6 +261,29 @@ export class RedactionMiddleware {
     };
 
     await processValue(redactedData);
+
+    if (
+      maxSeverity &&
+      userContext.role !== 'ADMIN' &&
+      userContext.clearance < this.getRequiredClearance(maxSeverity) &&
+      !userContext.stepUpToken
+    ) {
+      return {
+        data: null,
+        redactedFields: [],
+        redactedCount: 0,
+        accessDenied: true,
+        denialReason: 'Insufficient clearance',
+        auditEntry: {
+          userId: userContext.userId,
+          action: 'ACCESS_DENIED',
+          timestamp: new Date(),
+          fieldsRedacted: [],
+          dlpRules: ['insufficient-clearance'],
+          purpose: userContext.purpose,
+        },
+      };
+    }
 
     return {
       data: redactedData,
@@ -303,7 +341,7 @@ export class RedactionMiddleware {
 
     // Check clearance level
     const requiredClearance = this.getRequiredClearance(severity);
-    if (userContext.clearance < requiredClearance) {
+    if (userContext.clearance < requiredClearance && !userContext.stepUpToken) {
       return {
         allow: false,
         redaction: {
@@ -311,11 +349,12 @@ export class RedactionMiddleware {
           reason: `Insufficient clearance (required: ${requiredClearance}, have: ${userContext.clearance})`,
         },
         reason: 'insufficient-clearance',
+        severity,
       };
     }
 
     // Return the policy decision
-    return policy;
+    return { ...policy, severity };
   }
 
   /**
@@ -486,7 +525,7 @@ export class RedactionMiddleware {
    */
   private checkStepUpRequirement(userContext: UserContext): boolean {
     // Step-up required for high clearance data or sensitive purposes
-    return userContext.clearance >= 3 ||
+    return userContext.clearance >= 5 ||
            userContext.purpose === 'export' ||
            userContext.purpose === 'legal';
   }
@@ -496,7 +535,8 @@ export class RedactionMiddleware {
    */
   private checkPurposeRequirement(userContext: UserContext): boolean {
     // Purpose required for non-ADMIN roles
-    return userContext.role !== 'ADMIN' && userContext.clearance >= 2;
+    return userContext.role !== 'ADMIN' &&
+           (userContext.purpose === 'export' || userContext.purpose === 'legal');
   }
 }
 

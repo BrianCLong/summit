@@ -4,6 +4,7 @@ import path from 'path';
 import { spawn } from 'child_process';
 import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
+import { singleParam } from '../utils/params.js';
 
 const POLICY_DIR = path.resolve(process.cwd(), '../policy'); // Assuming server is running from server/ directory? No, usually process.cwd() is repo root in this sandbox, but let's check.
 // In the sandbox, process.cwd() is likely the repo root.
@@ -63,7 +64,7 @@ export class OpaController {
 
   static async getPolicyContent(req: Request, res: Response) {
     try {
-      const { filename } = req.params;
+      const filename = singleParam(req.params.filename);
       if (!filename || !filename.endsWith('.rego')) {
         return res.status(400).json({ error: 'Invalid filename' });
       }

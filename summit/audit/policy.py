@@ -1,15 +1,18 @@
+from typing import Any, Dict, List
+
 import yaml
-from typing import Dict, Any, List
-from summit.audit.events import PromptEvent, PolicyDecision
+
+from summit.audit.events import PolicyDecision, PromptEvent
+
 
 class PolicyEngine:
     def __init__(self, config_path: str = "policies/prompt_policy.yaml"):
         self.config_path = config_path
         self.config = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         try:
-            with open(self.config_path, "r") as f:
+            with open(self.config_path) as f:
                 return yaml.safe_load(f)
         except FileNotFoundError:
             # Fallback default if file missing (should not happen in prod)
@@ -65,7 +68,7 @@ class PolicyEngine:
 
         return PolicyDecision(action=action, reasons=["POLICY_PASSED"])
 
-def evaluate_event_with_redaction(event: PromptEvent, redaction_reasons: List[str]) -> PolicyDecision:
+def evaluate_event_with_redaction(event: PromptEvent, redaction_reasons: list[str]) -> PolicyDecision:
     """
     Helper to evaluate policy considering redaction results.
     """

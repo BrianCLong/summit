@@ -509,7 +509,7 @@ describe('Cost Guard Middleware', () => {
       );
 
       // Fast-forward time
-      jest.advanceTimersByTime(35000);
+      await jest.advanceTimersByTimeAsync(35000);
 
       await expect(longOperation).resolves.toBe('completed');
 

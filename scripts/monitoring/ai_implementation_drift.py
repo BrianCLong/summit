@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+
 def check_drift():
     print("Checking for AI Implementation Drift...")
     drift_detected = False
@@ -14,7 +15,7 @@ def check_drift():
     if maturity_file:
         print(f"Loading maturity evidence from {maturity_file}")
         try:
-            with open(maturity_file, 'r') as f:
+            with open(maturity_file) as f:
                 data = json.load(f)
 
             stage = data.get('stage')
@@ -38,7 +39,7 @@ def check_drift():
     if task_file:
         print(f"Loading task profile from {task_file}")
         try:
-            with open(task_file, 'r') as f:
+            with open(task_file) as f:
                 data = json.load(f)
 
             if data.get('output_determinism_required') and data.get('chosen_modality') == 'genai':

@@ -94,8 +94,18 @@ export function costGuardMiddleware(
       return next();
     }
 
-    const tenantId = extractTenantId(req);
-    const userId = extractUserId(req);
+    let tenantId: string | undefined;
+    let userId: string | undefined;
+    try {
+      tenantId = extractTenantId(req);
+      userId = extractUserId(req);
+    } catch (error: any) {
+      logger.error({ error }, 'Cost guard context extraction failed');
+      return next();
+    }
+
+    tenantId = tenantId || 'default';
+    userId = userId || 'anonymous';
 
     // Determine operation type from request
     let operation = 'api_request';

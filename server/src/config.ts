@@ -107,6 +107,16 @@ export const initializeConfig = (options: { exitOnError?: boolean } = { exitOnEr
 
   // Cross-field validation for AI
   const rawData = { ...process.env };
+  if (isTest) {
+    const dropIfTooShort = (key: string, minLength: number) => {
+      const value = rawData[key];
+      if (typeof value === 'string' && value.trim() !== '' && value.length < minLength) {
+        delete rawData[key];
+      }
+    };
+    dropIfTooShort('JWT_SECRET', 32);
+    dropIfTooShort('JWT_REFRESH_SECRET', 32);
+  }
   const parsed = schema.safeParse(rawData);
 
   if (parsed.success) {

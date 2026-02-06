@@ -1,6 +1,8 @@
 import json
 import os
+
 from summit.vuln.normalize.osv_to_vuln_record import osv_to_vuln_record
+
 
 def test_osv_normalization_fixture():
     fixture_path = os.path.join(os.path.dirname(__file__), "fixtures/osv/fixture.json")

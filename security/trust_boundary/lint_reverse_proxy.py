@@ -4,8 +4,9 @@
 import json
 import sys
 
+
 def lint_trust(config_path):
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         config = json.load(f)
 
     if config.get('reverse_proxy_enabled', False):

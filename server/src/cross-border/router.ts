@@ -8,6 +8,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { getCrossBorderGateway } from './gateway.js';
 import { getResilienceManager } from './resilience.js';
 import { getCrossBorderMetrics, updateActiveSessions, updateActivePartners } from './metrics.js';
+import { singleParam } from '../utils/params.js';
 import type { DataClassification } from './types.js';
 
 const router = Router();
@@ -98,14 +99,15 @@ router.get('/partners', (_req, res) => {
  */
 router.get('/partners/:code', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const partner = gateway.getPartner(req.params.code);
+  const partnerCode = singleParam(req.params.code);
+  const partner = gateway.getPartner(partnerCode);
 
   if (!partner) {
     res.status(404).json({ error: 'Partner not found' });
     return;
   }
 
-  const health = gateway.getPartnerHealth(req.params.code);
+  const health = gateway.getPartnerHealth(partnerCode);
 
   res.json({
     ...partner,
@@ -119,7 +121,8 @@ router.get('/partners/:code', (req, res) => {
  */
 router.get('/partners/:code/health', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const health = gateway.getPartnerHealth(req.params.code);
+  const partnerCode = singleParam(req.params.code);
+  const health = gateway.getPartnerHealth(partnerCode);
 
   if (!health) {
     res.status(404).json({ error: 'Partner health not found' });
@@ -231,7 +234,8 @@ router.get('/sessions', (_req, res) => {
  */
 router.get('/sessions/:id', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const session = gateway.getSession(req.params.id);
+  const sessionId = singleParam(req.params.id);
+  const session = gateway.getSession(sessionId);
 
   if (!session) {
     res.status(404).json({ error: 'Session not found' });
@@ -256,7 +260,8 @@ router.post(
       return;
     }
 
-    const message = await gateway.sendMessage(req.params.id, content, {
+    const sessionId = singleParam(req.params.id);
+    const message = await gateway.sendMessage(sessionId, content, {
       translate,
       targetLanguage,
     });
@@ -271,7 +276,8 @@ router.post(
  */
 router.get('/sessions/:id/messages', (req, res) => {
   const gateway = getCrossBorderGateway();
-  const messages = gateway.getMessages(req.params.id);
+  const sessionId = singleParam(req.params.id);
+  const messages = gateway.getMessages(sessionId);
 
   res.json({
     count: messages.length,
@@ -287,7 +293,8 @@ router.post(
   '/sessions/:id/complete',
   asyncHandler(async (req, res) => {
     const gateway = getCrossBorderGateway();
-    await gateway.completeSession(req.params.id);
+    const sessionId = singleParam(req.params.id);
+    await gateway.completeSession(sessionId);
 
     res.json({ success: true });
   })
@@ -310,8 +317,9 @@ router.post(
       return;
     }
 
+    const sessionId = singleParam(req.params.id);
     const response = await gateway.initiateHandover(
-      req.params.id,
+      sessionId,
       targetNation,
       reason
     );

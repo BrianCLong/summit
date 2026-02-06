@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import sys
+from pathlib import Path
 
 # Add root to sys.path to allow importing from packages
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
 from packages.summit_decks.summit_decks.lint import lint_tex
+
 
 def main() -> int:
     bad = ROOT / "fixtures/decks/negative_forbidden_shell/main.tex"

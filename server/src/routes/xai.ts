@@ -16,6 +16,8 @@ import logger from '../utils/logger.js';
 const router = express.Router();
 const xaiExplainer = GraphXAIExplainer.getInstance();
 const detectorService = DetectorService.getInstance();
+const singleParam = (value: string | string[] | undefined): string | undefined =>
+  Array.isArray(value) ? value[0] : value;
 
 // Committee requirement: All XAI operations require reason for access
 router.use(requireReasonForAccess);
@@ -117,7 +119,7 @@ router.get(
   requireAuthority('graph_xai_analysis', ['model_card']),
   async (req, res) => {
     try {
-      const { version } = req.params;
+      const version = singleParam(req.params.version);
 
       if (version) {
         const modelCard = xaiExplainer.getModelCard(version);

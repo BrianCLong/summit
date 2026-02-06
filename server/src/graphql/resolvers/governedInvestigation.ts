@@ -10,7 +10,7 @@
  * - Field-level redaction
  */
 
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { Driver } from 'neo4j-driver';
 import { OPAClient } from '../../middleware/opa-abac.js';
 import { WarrantService } from '../../services/WarrantService.js';
@@ -81,7 +81,9 @@ export async function getInvestigationCaseGraph(
   // ============================================================================
 
   if (!user) {
-    throw new AuthenticationError('Authentication required to access case graph');
+    throw new GraphQLError('Authentication required to access case graph', {
+      extensions: { code: 'UNAUTHENTICATED' },
+    });
   }
 
   // ============================================================================
@@ -89,15 +91,21 @@ export async function getInvestigationCaseGraph(
   // ============================================================================
 
   if (!governance) {
-    throw new ForbiddenError('Governance context is required');
+    throw new GraphQLError('Governance context is required', {
+      extensions: { code: 'FORBIDDEN' },
+    });
   }
 
   if (!governance.purpose) {
-    throw new ForbiddenError('Purpose header (X-Purpose) is required');
+    throw new GraphQLError('Purpose header (X-Purpose) is required', {
+      extensions: { code: 'FORBIDDEN' },
+    });
   }
 
   if (!governance.reasonForAccess) {
-    throw new ForbiddenError('Reason for access header (X-Reason-For-Access) is required');
+    throw new GraphQLError('Reason for access header (X-Reason-For-Access) is required', {
+      extensions: { code: 'FORBIDDEN' },
+    });
   }
 
   // ============================================================================
@@ -161,7 +169,9 @@ export async function getInvestigationCaseGraph(
         complianceFrameworks: ['SOX', 'SOC2'],
       });
 
-      throw new ForbiddenError('Investigation not found or access denied');
+      throw new GraphQLError('Investigation not found or access denied', {
+        extensions: { code: 'FORBIDDEN' },
+      });
     }
 
     const investigation = investigationResult.records[0].get('investigation');
@@ -213,10 +223,11 @@ export async function getInvestigationCaseGraph(
           complianceFrameworks: ['SOX', 'SOC2', 'GDPR'],
         });
 
-        throw new ForbiddenError(
+        throw new GraphQLError(
           `Warrant validation failed: ${warrantValidation.reason}. ` +
           `To request access, contact your compliance officer at compliance@example.com or ` +
-          `submit an access request via /api/access-requests.`
+          `submit an access request via /api/access-requests.`,
+          { extensions: { code: 'FORBIDDEN' } }
         );
       }
     }
@@ -301,13 +312,14 @@ export async function getInvestigationCaseGraph(
         complianceFrameworks: ['SOX', 'SOC2', 'GDPR'],
       });
 
-      throw new ForbiddenError(
+      throw new GraphQLError(
         `Access denied: ${denyReasons.join(', ')}.\n\n` +
         `You can appeal this decision by:\n` +
         `1. Contacting compliance@example.com\n` +
         `2. Submitting an access request at /api/access-requests\n` +
         `3. Obtaining the required warrant for this data classification\n\n` +
-        `Request ID for reference: ${correlationId}`
+        `Request ID for reference: ${correlationId}`,
+        { extensions: { code: 'FORBIDDEN' } }
       );
     }
 
@@ -512,7 +524,7 @@ export async function getInvestigationCaseGraph(
     }, 'Failed to fetch investigation case graph');
 
     // If it's already an Apollo error, rethrow
-    if (error instanceof AuthenticationError || error instanceof ForbiddenError) {
+    if (error instanceof GraphQLError) {
       throw error;
     }
 

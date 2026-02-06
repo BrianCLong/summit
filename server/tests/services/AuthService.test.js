@@ -1,3 +1,4 @@
+const { jest } = require('@jest/globals');
 const AuthService = require('../../src/services/AuthService');
 const { getPostgresPool } = require('../../src/config/database');
 const argon2 = require('argon2');

@@ -1,4 +1,5 @@
 import AuthService from '../services/AuthService.js';
+import { GraphQLError } from 'graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { copilotResolvers as copilotResolversRaw } from './resolvers.copilot.js';
 import { graphResolvers as graphResolversRaw } from './resolvers.graphops.js';
@@ -77,7 +78,9 @@ export const resolvers = {
     ...(erResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
-      if (!user) throw new Error('Not authenticated');
+      if (!user) throw new GraphQLError('Not authenticated', {
+        extensions: { code: 'UNAUTHENTICATED' },
+      });
       return user;
     },
     copilotGoals: async (_: any, { investigationId }: CopilotGoalsArgs) => {
