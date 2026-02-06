@@ -45,14 +45,13 @@ try {
   }
 
   async function hashFile(filepath) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const hash = createHash('sha256');
       const stream = fs.createReadStream(filepath);
       stream.on('data', (data) => hash.update(data));
       stream.on('end', () => resolve(hash.digest('hex')));
       stream.on('error', (e) => {
-        console.warn(`Warning: Failed to hash ${filepath}: ${e.message}`);
-        resolve(null);
+        reject(new Error(`Failed to hash ${filepath}: ${e.message}`));
       });
     });
   }
@@ -76,12 +75,10 @@ try {
 
     if (isRelevant) {
       const digest = await hashFile(file);
-      if (digest) {
-        manifest.push({
-          path: file,
-          digest: `sha256:${digest}`
-        });
-      }
+      manifest.push({
+        path: file,
+        digest: `sha256:${digest}`
+      });
     }
   }
 
@@ -90,12 +87,10 @@ try {
     const distFiles = getUntrackedFiles('dist');
     for (const file of distFiles) {
       const digest = await hashFile(file);
-      if (digest) {
-        manifest.push({
-          path: file,
-          digest: `sha256:${digest}`
-        });
-      }
+      manifest.push({
+        path: file,
+        digest: `sha256:${digest}`
+      });
     }
   }
 

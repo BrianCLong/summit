@@ -42,7 +42,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
           node-version: "20"
 
       - name: Find Orchestrator Run

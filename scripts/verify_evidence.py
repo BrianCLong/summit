@@ -24,7 +24,7 @@ REQUIRED = ["index.json", "report.json", "metrics.json", "stamp.json"]
 def load(p: Path) -> object:
     return json.loads(p.read_text(encoding="utf-8"))
 
-EVIDENCE_ID_RE = re.compile(r"^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$")
+EVIDENCE_ID_RE = re.compile(r"^(EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}|EV_ATTESTATION_V\d_[a-f0-9]{40})$")
 SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
 
 def _require(cond: bool, msg: str) -> None:
