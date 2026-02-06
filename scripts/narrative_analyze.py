@@ -3,7 +3,7 @@ import hashlib
 import json
 import os
 import sys
-from typing import List
+from typing import List, Dict, Any
 
 # Make sure we can import summit modules
 sys.path.append(os.getcwd())
@@ -21,6 +21,15 @@ def calculate_file_hash(filepath):
         for byte_block in iter(lambda: f.read(4096), b""):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
+
+def sanitize_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """Remove potential timestamps from metadata."""
+    sanitized = {}
+    for k, v in metadata.items():
+        if "time" in k or "date" in k:
+            continue
+        sanitized[k] = v
+    return sanitized
 
 def main():
     parser = argparse.ArgumentParser(description="Run narrative analysis pipeline")
@@ -116,7 +125,7 @@ def main():
                 {
                     "detector": e.detector,
                     "score": e.score,
-                    "metadata": e.metadata
+                    "metadata": sanitize_metadata(e.metadata)
                 } for e in events
             ],
             "signatures": [
