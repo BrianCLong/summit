@@ -33,7 +33,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number ||
+    github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -54,6 +55,8 @@ jobs:
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         # version is read from package.json packageManager field
 
+        with:
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:

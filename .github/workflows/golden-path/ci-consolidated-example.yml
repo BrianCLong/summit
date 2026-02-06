@@ -39,19 +39,18 @@ jobs:
     name: 📦 Setup Dependencies
     outputs:
       cache-key: ${{ steps.cache.outputs.cache-primary-key }}
-    
+
     steps:
       - uses: actions/checkout@v4 # v4
-      
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
-          version: ${{ env.PNPM_VERSION }}
+          version: 9.12.0
 
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      
+
       # Restore or create cache
       - name: Cache dependencies
         id: cache
@@ -64,17 +63,17 @@ jobs:
           key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-${{ runner.os }}-
-      
+
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
-  
+
   # Matrix-driven test execution - replaces 5 separate workflows
   test:
     needs: setup
     runs-on: ${{ matrix.os }}
     name: 🧪 Test - ${{ matrix.suite }} (${{ matrix.os }})
-    
+
     strategy:
       fail-fast: false  # Continue other tests if one fails
       matrix:
@@ -90,25 +89,23 @@ jobs:
           - ubuntu-latest
         # Can add node versions if needed
         # node-version: [18, 20]
-        
         # Conditional includes for specific combinations
         include:
           # Run e2e tests on macOS too
           - suite: e2e
             os: macos-latest
-    
+
     steps:
       - uses: actions/checkout@v4 # v4
-      
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
-          version: ${{ env.PNPM_VERSION }}
+          version: 9.12.0
 
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      
+
       # Restore cached dependencies from setup job
       - name: Restore dependencies
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -118,13 +115,13 @@ jobs:
             node_modules
             **/node_modules
           key: ${{ needs.setup.outputs.cache-key }}
-      
+
       - name: Run ${{ matrix.suite }} tests
         run: pnpm test:${{ matrix.suite }}
         env:
           CI: true
           TEST_SUITE: ${{ matrix.suite }}
-      
+
       - name: Upload coverage
         if: matrix.suite != 'e2e'  # Conditional step
         uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
@@ -132,7 +129,7 @@ jobs:
           files: ./coverage/coverage-final.json
           flags: ${{ matrix.suite }}
           name: ${{ matrix.suite }}-coverage
-      
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -142,48 +139,46 @@ jobs:
             test-results/
             coverage/
           retention-days: 30
-  
+
   # Aggregate results from all test jobs
   test-summary:
     needs: test
     if: always()
     runs-on: ubuntu-latest
     name: 📊 Test Summary
-    
+
     steps:
       - name: Check test results
         run: |
           echo "## 🧪 Test Results Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ "${{ needs.test.result }}" == "success" ]; then
             echo "✅ All test suites passed!" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Some test suites failed. Review logs above." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Part of [#14512](https://github.com/BrianCLong/summit/issues/14512) - Workflow Consolidation Example" >> $GITHUB_STEP_SUMMARY
-  
+
   # Quality gates - run in parallel with tests
   lint:
     needs: setup
     runs-on: ubuntu-latest
     name: ✨ Lint
-    
+
     steps:
       - uses: actions/checkout@v4 # v4
-      
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
-          version: ${{ env.PNPM_VERSION }}
+          version: 9.12.0
 
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-      
       - name: Restore dependencies
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -192,25 +187,24 @@ jobs:
             node_modules
             **/node_modules
           key: ${{ needs.setup.outputs.cache-key }}
-      
+
       - name: Run linters
         run: |
           pnpm lint
           pnpm typecheck
-  
+
   # Example of conditional job based on changed files
   docker-build:
     if: contains(github.event.pull_request.labels.*.name, 'docker')
     needs: [test, lint]
     runs-on: ubuntu-latest
     name: 🐳 Docker Build
-    
+
     steps:
       - uses: actions/checkout@v4 # v4
-      
       - name: Build Docker image
         run: docker build -t summit-example:${{ github.sha }} .
-      
+
       - name: Scan image
         run: |
           docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \

@@ -70,6 +70,8 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
+        with:
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -247,6 +249,8 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
+        with:
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -272,7 +276,8 @@ jobs:
 
       - name: Create Fix PR
         if: steps.check.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8
+        uses:
+          peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0     # v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "security(deps): auto-fix vulnerabilities"

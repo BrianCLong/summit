@@ -27,6 +27,8 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
+        with:
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -56,7 +58,8 @@ jobs:
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+        uses:
+          docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f     # v3
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
@@ -71,7 +74,8 @@ jobs:
         with:
           context: ${{ inputs.service_path }}
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{
+            inputs.image_name }}:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -80,7 +84,8 @@ jobs:
       - name: Generate SBOM
         uses: anchore/syft-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
         with:
-          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
+          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{
+            inputs.image_name }}:${{ github.sha }}
           format: spdx-json
           output-file: "sbom.json"
 
@@ -94,14 +99,17 @@ jobs:
       - name: Scan for vulnerabilities
         uses: anchore/scan-action@0d444ed77d83ee2ba7f5ced0d90d640a1281d762 # v3
         with:
-          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
+          image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{
+            inputs.image_name }}:${{ github.sha }}
           fail-on-severity: critical
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@a39c2dc7b40653b5511219e93de1c7d5293aa357 # v3.1.1
 
       - name: Sign the container image
-        run: cosign sign --yes "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}@${{ steps.build-and-push.outputs.digest }}"
+        run: cosign sign --yes "${{ env.REGISTRY }}/${{ github.repository_owner
+          }}/${{ inputs.image_name }}@${{ steps.build-and-push.outputs.digest
+          }}"
         env:
           COSIGN_EXPERIMENTAL: 1
 

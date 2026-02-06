@@ -17,7 +17,8 @@ on:
     - cron: "0 0 * * 1" # Weekly verification
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number ||
+    github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -26,6 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -43,6 +47,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:

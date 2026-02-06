@@ -28,7 +28,9 @@ jobs:
           scripts/ci/iac_plan_diff.sh scripts/ci/envs/stage scripts/ci/envs/prod > artifacts/iac.diff
           scripts/ci/deny_on_drift.sh artifacts/iac.diff
       - name: Secret parity check
-        run: scripts/ci/secret_matrix_check.sh scripts/ci/configs/secrets.stage.json scripts/ci/configs/secrets.prod.json
+        run: scripts/ci/secret_matrix_check.sh
+          scripts/ci/configs/secrets.stage.json
+          scripts/ci/configs/secrets.prod.json
 
   third_party_status:
     runs-on: ubuntu-latest
@@ -36,7 +38,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check provider status
         id: gate
-        run: scripts/ci/provider_status_gate.sh scripts/ci/configs/providers.yaml
+        run: scripts/ci/provider_status_gate.sh
+          scripts/ci/configs/providers.yaml
     outputs:
       ok: ${{ steps.gate.outputs.ok }}
 
@@ -50,16 +53,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "9.12.0"
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version: "20"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "9.12.0"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -97,7 +100,8 @@ jobs:
         uses: actions/checkout@v4 # v6
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
+        uses:
+          anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee     # v0
 
       - name: Generate SBOMs
         run: |
@@ -105,9 +109,11 @@ jobs:
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' registry/app:${{ github.sha }})
           echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
       - name: Generate provenance
-        run: scripts/ci/release-train/provenance_attest.sh ${{ steps.build.outputs.DIGEST }}
+        run: scripts/ci/release-train/provenance_attest.sh ${{
+          steps.build.outputs.DIGEST }}
       - name: Push + record artifact
-        run: scripts/ci/release-train/publish_and_record.sh ${{ steps.build.outputs.DIGEST }} scripts/ci/records/artifacts.json
+        run: scripts/ci/release-train/publish_and_record.sh ${{
+          steps.build.outputs.DIGEST }} scripts/ci/records/artifacts.json
 
   canary_rollout:
     needs: build_and_sign
@@ -116,16 +122,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: "9.12.0"
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version: "20"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "9.12.0"
 
       - name: Generate Evidence Bundle (Provenance)
         run: |
@@ -152,7 +158,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Step up 25% → 50% → 100%
-        run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
+        run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env
+          }} --digest=${{ needs.build_and_sign.outputs.digest }}
 
   post_deploy_verification:
     needs: finalize
@@ -161,6 +168,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Post-deploy probes (latency/error rates/log SLOs)
-        run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=20m
+        run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }}
+          --mode=post --timeout=20m
       - name: Enforce rollback on SLO breach
-        run: scripts/ci/release-train/rollback_if_needed.sh --env=${{ inputs.target_env }}
+        run: scripts/ci/release-train/rollback_if_needed.sh --env=${{
+          inputs.target_env }}

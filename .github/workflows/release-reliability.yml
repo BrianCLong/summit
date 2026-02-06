@@ -15,6 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: 9.12.0
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -26,7 +28,8 @@ jobs:
   check-changelog:
     name: Check Changelog Update
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
+      }}
     steps:
       - uses: actions/checkout@v4 # v6
         with:

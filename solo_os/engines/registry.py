@@ -18,9 +18,7 @@ class EngineRegistry:
                 summary={"error": f"Engine '{req.engine}' not found"}
             )
 
-        # Governance and Execution Checks
         if req.mode == "execute":
-            # Idempotency check
             if not req.idempotency_key:
                 return RunResult(
                     ok=False,
@@ -37,17 +35,25 @@ class EngineRegistry:
                     summary={"error": f"Mode 'execute' for action '{action}' on connector '{connector}' blocked by governance"}
                 )
 
-            # For audit, we might want to pass an audit flag or handle it here.
-            # But the evidence writing happens inside the engine's run() method usually.
-            # We can inject audit info into the payload or handle it in the result.
-            req.payload["_audit"] = {
-                "timestamp": "captured_at_write", # helper will handle
+            # Prepare audit metadata to be included in engine evidence
+            audit_meta = {
                 "mode": req.mode,
                 "action": action,
                 "connector": connector,
                 "idempotency_key": req.idempotency_key,
                 "governance": "approved"
             }
+
+            # Create a new payload to avoid mutating the original
+            new_payload = dict(req.payload)
+            new_payload["_audit"] = audit_meta
+
+            req = RunRequest(
+                engine=req.engine,
+                mode=req.mode,
+                payload=new_payload,
+                idempotency_key=req.idempotency_key
+            )
 
         return self._engines[req.engine].run(req)
 
