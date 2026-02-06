@@ -3,7 +3,7 @@ package risk
 import (
 	"math"
 
-	"platform/device-trust/internal/attestation"
+	"github.com/summit/device-trust/internal/attestation"
 )
 
 type ScoreResult struct {

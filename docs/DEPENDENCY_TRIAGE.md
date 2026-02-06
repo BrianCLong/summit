@@ -49,10 +49,7 @@ Run these from repo root (or the specified workspace root):
 - Notable stdlib IDs: GO-2026-4340, GO-2026-4337, GO-2025-4175, GO-2025-4155, GO-2025-4013, GO-2025-4011, GO-2025-4010, GO-2025-4009, GO-2025-4008, GO-2025-4007, GO-2025-3750 (Windows), GO-2025-3563, GO-2025-3447 (ppc64le), GO-2025-3373, GO-2024-2887, GO-2024-2824.
 - After bumping all modules to Go 1.24, rerun with `GOTOOLCHAIN=go1.24.13` failed due to toolchain compile errors on Go 1.24 sources; local Go toolchain upgrade required.
 - Go 1.24.13 installed locally; rerun with PATH override succeeded for most modules.
-- Remaining govulncheck blockers:
-  - `platform/cce` and `platform/device-trust/go`: invalid import paths (module path mismatch).
-  - `templates/golden-path-platform`: updated `go.work` to 1.24.13 and re-scan passed.
-  - `orchestration/runtime` and `services/retentiond`: required `go mod tidy` before scan; now pass.
+- govulncheck now passes for all modules after fixing import paths and Go workspaces.
 
 ## Rust (cargo-audit)
 

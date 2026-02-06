@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"platform/device-trust/internal/server"
+	"github.com/summit/device-trust/internal/server"
 )
 
 func main() {

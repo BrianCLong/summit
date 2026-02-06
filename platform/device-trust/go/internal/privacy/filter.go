@@ -1,6 +1,6 @@
 package privacy
 
-import "platform/device-trust/internal/attestation"
+import "github.com/summit/device-trust/internal/attestation"
 
 var allowedChecks = map[string]bool{
 	"disk_encryption":      true,

@@ -1,8 +1,8 @@
 package policy
 
 import (
-	"platform/device-trust/internal/attestation"
-	"platform/device-trust/internal/risk"
+	"github.com/summit/device-trust/internal/attestation"
+	"github.com/summit/device-trust/internal/risk"
 )
 
 type BlockList struct {
