@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "metrics": {
+    "fixtures_count": 1,
+    "timestamp_fields_present": false,
+    "schema_valid": true
+  }
+}
