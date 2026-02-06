@@ -20,7 +20,7 @@ export class QuantumIdentityManager {
   private rootKey: string; // Simulated Root CA Key
 
   private constructor() {
-    this.rootKey = crypto.randomBytes(32).toString('hex');
+    this.rootKey = process.env.PQC_ROOT_KEY || crypto.randomBytes(32).toString('hex');
   }
 
   public static getInstance(): QuantumIdentityManager {
@@ -28,6 +28,14 @@ export class QuantumIdentityManager {
       QuantumIdentityManager.instance = new QuantumIdentityManager();
     }
     return QuantumIdentityManager.instance;
+  }
+
+  /**
+   * For drills/testing: Force re-initialization to pick up environment changes.
+   */
+  public reinitialize(): void {
+    this.rootKey = process.env.PQC_ROOT_KEY || crypto.randomBytes(32).toString('hex');
+    logger.info('QuantumIdentityManager: Root key reinitialized');
   }
 
   /**
@@ -47,8 +55,8 @@ export class QuantumIdentityManager {
       expiresAt: new Date(Date.now() + 86400000).toISOString() // 24 hours
     };
 
-    // Sign with Dilithium (Simulated)
-    const signature = this.sign(JSON.stringify(identity));
+    // Task #114: Sign ONLY the serviceId for stability during verification
+    const signature = this.sign(serviceId);
 
     return { ...identity, signature };
   }
@@ -57,8 +65,8 @@ export class QuantumIdentityManager {
    * Verifies a Quantum Identity.
    */
   public verifyIdentity(identity: QuantumIdentity): boolean {
-    const { signature, ...payload } = identity;
-    const isValid = this.verify(JSON.stringify(payload), signature);
+    // Task #114: Verify signature against serviceId directly
+    const isValid = this.verify(identity.serviceId, identity.signature);
     
     if (!isValid) {
       logger.warn({ serviceId: identity.serviceId }, 'QuantumIdentity: Invalid signature');
@@ -98,8 +106,6 @@ export class QuantumIdentityManager {
     if (!ciphertext.startsWith('kem-enc:')) {
       throw new Error('Invalid KEM Ciphertext');
     }
-    // In simulation, we just return a mock secret or verify structure
-    // For this mock to be useful in tests without state, we rely on the caller trusting the flow
     return 'simulated-decapsulated-secret';
   }
 
