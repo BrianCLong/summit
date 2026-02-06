@@ -11,7 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install yaml
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm add yaml
       - run: node scripts/ci/verify_required_checks.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

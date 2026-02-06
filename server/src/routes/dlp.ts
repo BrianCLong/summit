@@ -42,7 +42,7 @@ router.get(
         enabled: policy.enabled,
         priority: policy.priority,
         actionTypes: policy.actions.map((a) => a.type),
-        exemptionCount: policy.exemptions.length,
+        exemptionCount: policy.exemptions?.length ?? 0,
         createdAt: policy.createdAt,
         updatedAt: policy.updatedAt,
       }));
@@ -82,7 +82,7 @@ router.get(
         throw new AppError('Invalid policy ID', 400, 'VALIDATION_ERROR');
       }
 
-      const policy = dlpService.getPolicy(req.params.id);
+      const policy = dlpService.getPolicy(req.params.id as string);
       if (!policy) {
         throw new AppError('DLP policy not found', 404);
       }
@@ -192,7 +192,7 @@ router.put(
         throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
-      const policyId = req.params.id;
+      const policyId = req.params.id as string;
       const updates = { ...req.body, updatedAt: new Date() };
 
       if (!dlpService.getPolicy(policyId)) {
@@ -253,7 +253,7 @@ router.delete(
         throw new AppError('Invalid policy ID', 400, 'VALIDATION_ERROR');
       }
 
-      const policyId = req.params.id;
+      const policyId = req.params.id as string;
 
       if (!dlpService.getPolicy(policyId)) {
         throw new AppError('DLP policy not found', 404);
@@ -305,7 +305,7 @@ router.post(
         throw new AppError('Invalid policy ID', 400, 'VALIDATION_ERROR');
       }
 
-      const policyId = req.params.id;
+      const policyId = req.params.id as string;
       const policy = dlpService.getPolicy(policyId);
 
       if (!policy) {
