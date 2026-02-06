@@ -19,6 +19,16 @@ def test_assumption_registry():
     a2 = registry.get_assumption("A2")
     assert a2["is_valid"] is False
 
+def test_assumption_export():
+    registry = AssumptionRegistry()
+    registry.register("A1", "Test", lambda: True)
+    
+    exported = registry.export()
+    assert len(exported) == 1
+    assert exported[0]["id"] == "A1"
+    assert "last_verified" in exported[0]
+    assert "validity_condition" in exported[0]
+
 def test_rerun_trigger():
     registry = AssumptionRegistry()
     controller = RerunController(registry)

@@ -14,8 +14,8 @@ def test_inflection_metrics_simple():
     metric = InflectionMetric(data)
     result = metric.compute()
 
-    assert result["velocity"] == 10.0
-    assert result["acceleration"] == 0.0
+    assert result["metrics"]["velocity"] == 10.0
+    assert result["metrics"]["acceleration"] == 0.0
     assert result["inflection_point"] is False
 
 def test_inflection_metrics_acceleration():
@@ -29,8 +29,8 @@ def test_inflection_metrics_acceleration():
     metric = InflectionMetric(data)
     result = metric.compute()
 
-    assert result["velocity"] == 4.0
-    assert result["acceleration"] == 1.0 # 4 - 3 = 1
+    assert result["metrics"]["velocity"] == 4.0
+    assert result["metrics"]["acceleration"] == 1.0 # 4 - 3 = 1
     assert result["inflection_point"] is False
 
 def test_inflection_point_detection():
@@ -85,7 +85,7 @@ def test_inflection_point_detection():
     metric = InflectionMetric(data_inflection)
     result = metric.compute()
 
-    assert result["acceleration"] == -2.0
+    assert result["metrics"]["acceleration"] == -2.0
     # accel[-1] = -2
     # accel[-2] = (4-2) - (2-0)? No.
     # Vels: 2, 4, 2
@@ -101,4 +101,4 @@ def test_fixture_loading():
             data = json.load(f)
         metric = InflectionMetric(data)
         result = metric.compute()
-        assert "velocity" in result
+        assert "velocity" in result["metrics"]

@@ -15,7 +15,7 @@ class AssumptionRegistry:
         self.assumptions[id] = {
             "id": id,
             "statement": statement,
-            "condition": validity_condition,
+            "validity_condition": validity_condition,
             "last_verified": datetime.now(timezone.utc).isoformat(),
             "is_valid": True
         }
@@ -28,8 +28,8 @@ class AssumptionRegistry:
         for id, data in self.assumptions.items():
             is_valid = False
             try:
-                if data["condition"]:
-                    is_valid = data["condition"]()
+                if data["validity_condition"]:
+                    is_valid = data["validity_condition"]()
                 else:
                     is_valid = True # No condition means always valid? Or manual?
             except Exception:
@@ -42,6 +42,20 @@ class AssumptionRegistry:
                 invalidated.append(id)
 
         return invalidated
+
+    def export(self) -> List[Dict[str, Any]]:
+        """
+        Export the registry artifacts conforming to assumptions.schema.json
+        """
+        return [
+            {
+                "id": data["id"],
+                "statement": data["statement"],
+                "validity_condition": str(data["validity_condition"]),
+                "last_verified": data["last_verified"]
+            }
+            for data in self.assumptions.values()
+        ]
 
     def get_assumption(self, id: str) -> Optional[Dict[str, Any]]:
         return self.assumptions.get(id)

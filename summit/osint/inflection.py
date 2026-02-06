@@ -54,10 +54,15 @@ class InflectionMetric:
             # Use small epsilon for float comparison if needed, but strict sign change is usually sufficient for discrete
             is_inflection = (acceleration[-1] * acceleration[-2] < 0)
 
+        from datetime import timezone
+
         return {
-            "latest_value": values[-1],
-            "velocity": velocity[-1] if velocity else 0.0,
-            "acceleration": acceleration[-1] if acceleration else 0.0,
-            "jerk": jerk[-1] if jerk else 0.0,
+            "target": self.series[-1].get("id", "unknown"),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "metrics": {
+                "velocity": velocity[-1] if velocity else 0.0,
+                "acceleration": acceleration[-1] if acceleration else 0.0,
+                "jerk": jerk[-1] if jerk else 0.0,
+            },
             "inflection_point": is_inflection
         }
