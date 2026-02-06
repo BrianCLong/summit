@@ -114,6 +114,9 @@ const getUserId = (req: Request): string => {
   return req.user?.id || req.user?.id || 'anonymous';
 };
 
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
+
 const wrapResponse = <T>(data: T, req: Request): DataEnvelope<T> => {
   return {
     data,
@@ -332,13 +335,14 @@ router.get(
   requirePermission('ai:suggestions:read'),
   async (req: Request, res: Response) => {
     try {
-      const suggestion = await policySuggestionService!.getSuggestion(req.params.id);
+      const suggestionId = singleParam(req.params.id);
+      const suggestion = await policySuggestionService!.getSuggestion(suggestionId);
 
       if (!suggestion) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Suggestion not found: ${req.params.id}`,
+            message: `Suggestion not found: ${suggestionId}`,
           },
         });
       }
@@ -389,6 +393,7 @@ router.post(
   requirePermission('ai:suggestions:review'),
   async (req: Request, res: Response) => {
     try {
+      const suggestionId = singleParam(req.params.id);
       const feedback: SuggestionFeedback = {
         reviewedBy: getUserId(req),
         reviewedAt: new Date().toISOString(),
@@ -398,12 +403,12 @@ router.post(
       };
 
       const suggestion = await policySuggestionService!.reviewSuggestion(
-        req.params.id,
+        suggestionId,
         feedback
       );
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId,
         decision: feedback.decision,
         reviewedBy: feedback.reviewedBy,
       }, 'Suggestion reviewed');
@@ -438,10 +443,11 @@ router.post(
   requirePermission('ai:suggestions:implement'),
   async (req: Request, res: Response) => {
     try {
-      const result = await policySuggestionService!.implementSuggestion(req.params.id);
+      const suggestionId = singleParam(req.params.id);
+      const result = await policySuggestionService!.implementSuggestion(suggestionId);
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId,
         policyId: result.policyId,
         implementedBy: getUserId(req),
       }, 'Suggestion implemented');
@@ -787,13 +793,14 @@ router.get(
   requirePermission('ai:anomalies:read'),
   async (req: Request, res: Response) => {
     try {
-      const anomaly = await anomalyService!.getAnomaly(req.params.id);
+      const anomalyId = singleParam(req.params.id);
+      const anomaly = await anomalyService!.getAnomaly(anomalyId);
 
       if (!anomaly) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Anomaly not found: ${req.params.id}`,
+            message: `Anomaly not found: ${anomalyId}`,
           },
         });
       }
@@ -844,15 +851,16 @@ router.patch(
     try {
       const status: AnomalyStatus = req.body.status;
       const notes: string = req.body.notes;
+      const anomalyId = singleParam(req.params.id);
 
       const anomaly = await anomalyService!.updateAnomalyStatus(
-        req.params.id,
+        anomalyId,
         status,
         notes
       );
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId,
         newStatus: status,
         updatedBy: getUserId(req),
       }, 'Anomaly status updated');
@@ -905,6 +913,7 @@ router.post(
   requirePermission('ai:anomalies:resolve'),
   async (req: Request, res: Response) => {
     try {
+      const anomalyId = singleParam(req.params.id);
       const resolution: AnomalyResolution = {
         resolvedBy: getUserId(req),
         resolvedAt: new Date().toISOString(),
@@ -913,10 +922,10 @@ router.post(
         actionsTaken: req.body.actionsTaken || [],
       };
 
-      const anomaly = await anomalyService!.resolveAnomaly(req.params.id, resolution);
+      const anomaly = await anomalyService!.resolveAnomaly(anomalyId, resolution);
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId,
         resolution: resolution.resolution,
         resolvedBy: resolution.resolvedBy,
       }, 'Anomaly resolved');

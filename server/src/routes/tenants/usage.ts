@@ -7,6 +7,8 @@ import { TenantValidator } from '../../middleware/tenantValidator.js';
 import PricingEngine from '../../services/PricingEngine.js';
 
 const router = Router({ mergeParams: true });
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 const querySchema = z.object({
   from: z.string().datetime().optional(),
@@ -24,7 +26,7 @@ const validateRequest = buildRequestValidator({
 
 const enforceTenant = (req: any, res: any, next: any) => {
   try {
-    const tenantId = req.params.tenantId;
+    const tenantId = singleParam(req.params.tenantId);
     const context = TenantValidator.validateTenantAccess(
       { user: req.user },
       tenantId,
@@ -55,7 +57,7 @@ router.get('/', ensureAuthenticated, validateRequest, enforceTenant, async (req,
     });
   }
 
-  const { tenantId } = req.params;
+  const tenantId = singleParam(req.params.tenantId);
   const { from, to, dimension, dimensions, limit } = req.query as Record<
     string,
     any
@@ -175,7 +177,7 @@ router.get(
   enforceTenant,
   async (req, res) => {
     const pool = getPostgresPool();
-    const { tenantId } = req.params;
+    const tenantId = singleParam(req.params.tenantId);
     const { from, to, dimension, dimensions, limit } = req.query as Record<
       string,
       any
@@ -270,7 +272,7 @@ router.get(
   enforceTenant,
   async (req, res) => {
     const pool = getPostgresPool();
-    const { tenantId } = req.params;
+    const tenantId = singleParam(req.params.tenantId);
     const { from, to, dimension, dimensions, limit } = req.query as Record<
       string,
       any

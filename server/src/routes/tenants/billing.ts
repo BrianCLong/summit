@@ -6,6 +6,8 @@ import { finopsReportService } from '../../services/finops/FinopsReportService.j
 import logger from '../../utils/logger.js';
 
 const router = Router({ mergeParams: true });
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 const BillingExportQuery = z.object({
   start: z.string().optional(),
@@ -14,12 +16,12 @@ const BillingExportQuery = z.object({
 });
 
 function attachTenantToBody(req: any, _res: any, next: any) {
-  req.body = { ...req.body, tenantId: req.params.tenantId };
+  req.body = { ...req.body, tenantId: singleParam(req.params.tenantId) };
   return next();
 }
 
 function ensureTenantScope(req: any, res: any, next: any) {
-  const tenantId = req.params.tenantId;
+  const tenantId = singleParam(req.params.tenantId);
   const userTenant = req.user?.tenantId || req.user?.tenant_id;
   const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(req.user?.role);
   if (!isSuper && userTenant && userTenant !== tenantId) {
@@ -37,7 +39,7 @@ router.get(
   async (req, res) => {
     try {
       const { start, end, format } = BillingExportQuery.parse(req.query);
-      const tenantId = req.params.tenantId;
+      const tenantId = singleParam(req.params.tenantId);
 
       const report = await finopsReportService.buildReport(tenantId, start, end);
 
