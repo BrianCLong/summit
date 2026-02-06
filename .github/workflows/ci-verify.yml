@@ -116,6 +116,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Dependency delta gate
+        run: node .github/scripts/deps-delta.mjs
+
       - name: Media provenance gate
         run: npx tsx scripts/ci/verify_media_provenance.ts
 
@@ -316,6 +319,23 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+  evidence-verify:
+    name: Agent Evidence Verify
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify agent evidence fixtures
+        run: node .github/scripts/evidence-verify.mjs
+
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
@@ -413,6 +433,7 @@ jobs:
       - provenance
       - schema-validation
       - compliance-evidence
+      - evidence-verify
       - ga-evidence-completeness
     if: always()
     steps:
@@ -426,6 +447,7 @@ jobs:
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
+          echo "Agent Evidence Verify: ${{ needs.evidence-verify.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
           echo ""
 
@@ -450,6 +472,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.evidence-verify.result }}" != "success" ]]; then
+            echo "::error::Agent Evidence Verify FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -466,6 +493,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Agent Evidence Verify" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY

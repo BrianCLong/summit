@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-OMC-TRACE-001",
+  "extra": "nope",
+  "ops": [
+    {
+      "id": "op-1",
+      "sessionId": "s1",
+      "type": "AgentStart"
+    }
+  ],
+  "summary": "extra field"
+}

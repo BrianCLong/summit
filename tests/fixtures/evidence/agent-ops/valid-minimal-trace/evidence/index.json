@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-OMC-TRACE-001",
+  "files": {
+    "metrics": "metrics.json",
+    "report": "report.json",
+    "stamp": "stamp.json"
+  }
+}

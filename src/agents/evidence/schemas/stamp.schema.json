@@ -1,0 +1,20 @@
+{
+  "$id": "https://summit.local/schemas/agent-trace/stamp.schema.json",
+  "type": "object",
+  "required": ["evidence_id", "generated_at", "hashes"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "hashes": {
+      "type": "object",
+      "required": ["report_sha256", "metrics_sha256", "index_sha256"],
+      "properties": {
+        "report_sha256": { "type": "string" },
+        "metrics_sha256": { "type": "string" },
+        "index_sha256": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

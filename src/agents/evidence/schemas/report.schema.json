@@ -1,0 +1,31 @@
+{
+  "$id": "https://summit.local/schemas/agent-trace/report.schema.json",
+  "type": "object",
+  "required": ["evidence_id", "summary", "ops"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "summary": { "type": "string" },
+    "ops": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "toolName": { "type": "string" },
+          "toolInput": {
+            "type": ["object", "array", "string", "number", "boolean", "null"]
+          },
+          "toolOutput": {
+            "type": ["object", "array", "string", "number", "boolean", "null"]
+          },
+          "sessionId": { "type": "string" },
+          "directory": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

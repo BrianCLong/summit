@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-OMC-TRACE-001",
+  "ops": [
+    {
+      "id": "op-1",
+      "sessionId": "s1",
+      "toolOutput": "sk-1234567890abcdef1234567890",
+      "type": "ToolUse"
+    }
+  ],
+  "summary": "secret trace"
+}

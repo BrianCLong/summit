@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-06T02:05:00Z",
+  "revision_note": "Added agent ops tracing evidence foundation and CI verifier scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -59,6 +59,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+    },
+    {
+      "id": "omc-ops-tracing-foundation",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Agent ops tracing evidence schemas, deterministic verifier, and normalization compatibility scaffolding."
     },
     {
       "id": "promptspec-foundation-lane1",

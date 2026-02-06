@@ -1,0 +1,17 @@
+{
+  "$id": "https://summit.local/schemas/agent-trace/metrics.schema.json",
+  "type": "object",
+  "required": [
+    "event_count",
+    "tool_use_count",
+    "agent_cycles_detected",
+    "policy_violations_count"
+  ],
+  "properties": {
+    "event_count": { "type": "number" },
+    "tool_use_count": { "type": "number" },
+    "agent_cycles_detected": { "type": "boolean" },
+    "policy_violations_count": { "type": "number" }
+  },
+  "additionalProperties": false
+}

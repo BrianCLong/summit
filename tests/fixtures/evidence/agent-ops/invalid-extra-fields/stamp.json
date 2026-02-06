@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-OMC-TRACE-001",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "hashes": {
+    "index_sha256": "sha256-index",
+    "metrics_sha256": "sha256-metrics",
+    "report_sha256": "sha256-report"
+  }
+}
