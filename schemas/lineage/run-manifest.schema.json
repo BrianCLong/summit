@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/lineage/run-manifest.schema.json",
+  "title": "Lineage Run Manifest",
+  "type": "object",
+  "required": [
+    "version",
+    "namespace",
+    "job",
+    "run_id",
+    "run_digest",
+    "algo",
+    "inputs",
+    "row_digests"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"type": "integer", "minimum": 1},
+    "namespace": {"type": "string"},
+    "job": {"type": "string"},
+    "run_id": {"type": "string"},
+    "run_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "algo": {"type": "string", "const": "sha256"},
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "facets"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string"},
+          "facets": {
+            "type": "object",
+            "required": ["digest"],
+            "additionalProperties": false,
+            "properties": {
+              "digest": {
+                "type": "object",
+                "required": ["sha256"],
+                "additionalProperties": false,
+                "properties": {
+                  "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "row_digests": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    }
+  }
+}

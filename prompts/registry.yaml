@@ -871,3 +871,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: openlineage-pg-neo4j-parity
+    version: v1
+    path: prompts/lineage/openlineage-pg-neo4j-parity@v1.md
+    sha256: f8f2fc881209d61ada5586358fd3cf666c09b1fb909d526781f0bcc0145fd4d3
+    description: Deterministic OpenLineage emission, manifest schema, and parity runbook.
+    scope:
+      paths:
+        - services/lineage/__init__.py
+        - services/lineage/emitter.py
+        - services/lineage/openlineage_emit.py
+        - schemas/lineage/run-manifest.schema.json
+        - tests/lineage/fixtures/change_events.json
+        - tests/lineage/test_manifest_determinism.py
+        - docs/lineage/postgres-to-neo4j-mapping.md
+        - docs/ops/runbooks/openlineage-pg-neo4j-parity.md
+        - docs/roadmap/STATUS.json
+        - prompts/lineage/openlineage-pg-neo4j-parity@v1.md
+        - prompts/registry.yaml
+        - agents/examples/OPENLINEAGE_PG_NEO4J_PARITY.task.json
+      domains:
+        - lineage
+        - governance
+        - documentation
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

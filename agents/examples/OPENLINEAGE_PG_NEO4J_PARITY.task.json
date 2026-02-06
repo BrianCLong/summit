@@ -1,0 +1,42 @@
+{
+  "task_id": "OPENLINEAGE_PG_NEO4J_PARITY",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "openlineage-pg-neo4j-parity",
+    "version": "v1",
+    "sha256": "f8f2fc881209d61ada5586358fd3cf666c09b1fb909d526781f0bcc0145fd4d3",
+    "path": "prompts/lineage/openlineage-pg-neo4j-parity@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "services/lineage/",
+      "schemas/lineage/run-manifest.schema.json",
+      "tests/lineage/",
+      "docs/lineage/postgres-to-neo4j-mapping.md",
+      "docs/ops/runbooks/openlineage-pg-neo4j-parity.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/lineage/openlineage-pg-neo4j-parity@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/OPENLINEAGE_PG_NEO4J_PARITY.task.json"
+    ],
+    "domains": ["lineage", "governance", "documentation", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["pytest tests/lineage/test_manifest_determinism.py"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Deterministic run manifest written from fixture input.",
+    "Manifest validates against run-manifest schema.",
+    "OpenLineage emission gated by environment flags."
+  ],
+  "stop_conditions": [
+    "Schema validation fails for deterministic manifest output.",
+    "OpenLineage emission required but endpoint missing."
+  ]
+}
