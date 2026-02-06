@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-06T00:00:00Z",
+  "revision_note": "Added dependency triage status and remediation notes for initial audit wave.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -169,6 +169,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
+    },
+    {
+      "id": "dependency-triage-initial-wave",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump for services/acc)."
     }
   ],
   "summary": {

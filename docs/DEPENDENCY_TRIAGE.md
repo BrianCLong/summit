@@ -33,10 +33,14 @@ Run these from repo root (or the specified workspace root):
 - pnpm audit from repo root: started but did not complete (hung; terminated).
 - pnpm audit in `apps/ui`: started but did not complete (hung; terminated).
 - pnpm audit in `intelgraph-mcp`: failed (no `pnpm-lock.yaml`).
-- npm audit in `webapp`: 1 high severity vulnerability in `hono` (multiple advisories); `npm audit fix` available.
+- npm audit in `webapp`: fixed (0 vulnerabilities after `npm audit fix`).
 - pip-audit on `python/requirements.txt`: stalled while creating isolated env; terminated.
 - cargo audit on `services/safejoin`: stalled fetching RustSec DB; terminated.
 - Remaining audits: pending (requires time + network access).
+  - Remediations applied:
+    - `services/safejoin`: bumped `bytes` to 1.11.1.
+    - `webapp`: `npm audit fix` completed; 0 vulnerabilities reported.
+    - `services/acc`: go.mod set to Go 1.24 + toolchain go1.24.13.
 
 ## Go (govulncheck)
 
