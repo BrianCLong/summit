@@ -96,6 +96,16 @@ Run these from repo root (or the specified workspace root):
   - `tools/summit-mds/requirements.txt`
   - `tools/synth-probe/requirements.txt`
 
+## Python Remediations Applied
+
+- Updated `fastapi` to 0.109.1 in `ga-caseops/packages/caseops/requirements.txt`, `services/prov-ledger/requirements.txt`, `ai/cdis/requirements.txt`, `services/graph-xai/requirements.txt`, and `requirements.txt`.
+- Updated `marshmallow` to 4.1.2 and `python-multipart` to 0.0.22 in `requirements.txt`.
+- Updated `starlette` to 0.49.1 in `requirements.txt`.
+
+## Python Remediation Gaps
+
+- `orjson` (CVE-2025-67221), `ecdsa` (CVE-2024-23342), `dgl` (GHSA-3x5x-fw77-g54c): no fixed version identified in audit output; follow-up required.
+
 ## JS/TS (pnpm)
 
 - `pnpm audit` in `apps/ui` still hangs (even with `--ignore-registry-errors`).
