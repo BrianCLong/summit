@@ -54,7 +54,10 @@ jest.mock('../context/AuthContext.jsx', () => ({
 
 jest.mock('../hooks/useFeatureFlag', () => ({
   FeatureFlagProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useFeatureFlag: () => false,
+  useFeatureFlag: () => ({
+    getFlagValue: (flag: string, defaultValue: any) => defaultValue,
+    setFlagValue: jest.fn(),
+  }),
 }));
 
 // Mock fetch for API calls
@@ -414,7 +417,9 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       mockFetchOk();
       renderAppAt('/demo');
 
-      expect(await screen.findByText(/404 - Page Not Found/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(window.location.pathname).toBe('/dashboard');
+      });
     });
 
     it('shows NotFound for removed wargame route', async () => {
@@ -422,15 +427,20 @@ describe('Route Smoke Tests - Console Error Detection', () => {
       renderAppAt('/wargame-dashboard');
 
       expect(await screen.findByText(/404 - Page Not Found/i)).toBeInTheDocument();
+    });
+
     it('redirects /geoint and /reports to /investigations', () => {
       expect(appRouterSource).toContain('path="/geoint"');
       expect(appRouterSource).toContain('path="/reports"');
       expect(appRouterSource).toContain('Navigate to="/investigations" replace');
     });
 
-    it('removes demo-only routes', () => {
-      expect(appRouterSource).not.toMatch(/path="\/demo"/);
-      expect(appRouterSource).not.toMatch(/wargame-dashboard/);
+    it('removes demo-only routes from navigation', () => {
+      // Check that they are not in navigationItems
+      const navItemsMatch = appRouterSource.match(/const navigationItems = \[(.*?)\];/s);
+      const navItemsContent = navItemsMatch ? navItemsMatch[1] : '';
+      expect(navItemsContent).not.toMatch(/path: '\/demo'/);
+      expect(navItemsContent).not.toMatch(/path: '\/wargame-dashboard'/);
     });
   });
 

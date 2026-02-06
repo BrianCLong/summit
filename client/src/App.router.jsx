@@ -775,14 +775,12 @@ function MainLayout() {
               <Route path="/threats" element={<ThreatsPage />} />
               <Route path="/disclosures" element={<DisclosurePackagerPage />} />
               <Route path="/access-intel" element={<AccessIntelPage />} />
-              <Route
-                path="/geoint"
-                element={<Navigate to="/investigations" replace />}
-              />
-              <Route
-                path="/reports"
-                element={<Navigate to="/investigations" replace />}
-              />
+              
+              {/* Pruned/Redirected routes */}
+              <Route path="/geoint" element={<Navigate to="/investigations" replace />} />
+              <Route path="/reports" element={<Navigate to="/investigations" replace />} />
+              <Route path="/demo" element={<Navigate to="/dashboard" replace />} />
+              
               <Route element={<ProtectedRoute roles={[ADMIN]} />}>
                 <Route path="/partner-console" element={<PartnerConsolePage />} />
               </Route>
