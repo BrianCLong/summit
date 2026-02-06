@@ -12,7 +12,7 @@ scipy==1.17.0
 
 # Computer Vision
 opencv-python==4.13.0.92
-Pillow>=8.3.0
+Pillow==12.1.0
 
 # Audio Processing
 librosa>=0.9.0

@@ -4,6 +4,6 @@ uvicorn==0.40.0
 python-dotenv==1.2.1
 requests==2.32.5
 ipinfo==5.4.0
-transformers
+transformers==5.1.0
 torch
 sentencepiece
