@@ -44,6 +44,20 @@ Run these from repo root (or the specified workspace root):
 - Result: 16 Go stdlib vulnerabilities detected (Go 1.22.2), plus 7 in imported packages and 9 in required modules that are not directly called.
 - Notable stdlib IDs: GO-2026-4340, GO-2026-4337, GO-2025-4175, GO-2025-4155, GO-2025-4013, GO-2025-4011, GO-2025-4010, GO-2025-4009, GO-2025-4008, GO-2025-4007, GO-2025-3750 (Windows), GO-2025-3563, GO-2025-3447 (ppc64le), GO-2025-3373, GO-2024-2887, GO-2024-2824.
 
+## Rust (cargo-audit)
+
+- Module: `services/safejoin`
+- Result: RustSec DB loaded, but scan failed due to registry timeouts while checking yanked crates.
+- Found: RUSTSEC-2026-0007 in `bytes` 1.10.1 (upgrade to >= 1.11.1).
+
+## Python (pip-audit)
+
+- `pip-audit -r python/requirements.txt --no-deps` stalled querying PyPI (network timeout).
+
+## JS/TS (pnpm)
+
+- `pnpm audit` in `apps/ui` still hangs (even with `--ignore-registry-errors`).
+
 ## Next Actions
 
 1. Run audits in each workspace root to produce a consolidated results table.
