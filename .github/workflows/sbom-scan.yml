@@ -47,13 +47,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        with:
+          node-version: 20
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+
+      - name: Install Dependencies (for scripts)
+        run: npm install -g tsx
 
       - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
+        uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0.15.8
         with:
           format: cyclonedx-json
           output-file: sbom.json
+
+      - name: Lint SBOM (Security & Path Traversal)
+        run: npx tsx scripts/sbom/sbom_lint.ts sbom.json
+
+      - name: Generate SBOM Manifest
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_WORKFLOW: ${{ github.workflow }}
+          RUNNER_OS: ${{ runner.os }}
+        run: npx tsx scripts/sbom/generate_manifest.ts
+
+      - name: Sign & Verify SBOM
+        run: ./scripts/sbom/sign_and_verify.sh
 
       - name: Scan with Grype
         uses: anchore/scan-action@0d444ed77d83ee2ba7f5ced0d90d640a1281d762 # v7
@@ -63,19 +87,23 @@ jobs:
           severity-cutoff: high
           only-fixed: false
           grype-config: security/grype-allowlist.yaml
-      - name: Attest SBOM
-        uses: actions/attest-sbom@v3
-        with:
-          subject-path: ${{ github.workspace }}
-          sbom-path: sbom.json
+
+      # - name: Attest SBOM
+      #   uses: actions/attest-sbom@v3 # TODO: Pin to SHA (Policy Enforcement)
+      #   with:
+      #     subject-path: ${{ github.workspace }}
+      #     sbom-path: sbom.json
 
       - name: Upload SBOM artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           name: sbom-scan-results
           path: |
             sbom.json
+            sbom.manifest.json
+            sbom.bundle.json
+            manifest.bundle.json
             results.sarif
           retention-days: 90
 # Linked: https://linear.app/summi7/issue/SUM-10197
