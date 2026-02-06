@@ -32,5 +32,9 @@ class Redis {
   }
 }
 
+class Cluster extends Redis {}
+
 module.exports = Redis;
 module.exports.default = Redis;
+module.exports.Redis = Redis;
+module.exports.Cluster = Cluster;
