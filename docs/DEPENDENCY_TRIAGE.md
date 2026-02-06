@@ -31,6 +31,11 @@ Run these from repo root (or the specified workspace root):
 ## Status
 
 - pnpm audit from repo root: started but did not complete (hung; terminated).
+- pnpm audit in `apps/ui`: started but did not complete (hung; terminated).
+- pnpm audit in `intelgraph-mcp`: failed (no `pnpm-lock.yaml`).
+- npm audit in `webapp`: 1 high severity vulnerability in `hono` (multiple advisories); `npm audit fix` available.
+- pip-audit on `python/requirements.txt`: stalled while creating isolated env; terminated.
+- cargo audit on `services/safejoin`: stalled fetching RustSec DB; terminated.
 - Remaining audits: pending (requires time + network access).
 
 ## Next Actions
