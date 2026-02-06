@@ -1,0 +1,10 @@
+{
+  "id": "EVD-ITT-PRIV-001",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "no-raw-biometrics",
+      "status": "pass"
+    }
+  ]
+}
