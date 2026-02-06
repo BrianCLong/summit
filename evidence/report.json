@@ -1,5 +1,9 @@
 {
-  "summary": "Partitioning eval completed",
-  "scenarios": 3,
-  "status": "PASS"
+  "evidence_id": "EVD-DEEPAGENTS-VFS-ARCH-001",
+  "summary": "VFS architecture and governance scaffolding",
+  "artifacts": [
+    "docs/architecture/vfs.md",
+    "docs/security/vfs-threat-model.md",
+    ".github/policies/vfs-policy.json"
+  ]
 }
