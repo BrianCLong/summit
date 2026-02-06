@@ -131,7 +131,7 @@
    - Created OPA job wrapper for BullMQ processors
    - Added OPA policy for job authorization
 
-### Session 3 (Current)
+### Session 3
 7. **COMPLETED**: Golden path hardening items (BB-004, BB-005)
    - BB-004: Smoke test timeout now configurable via `SMOKE_TIMEOUT` env var (default 60s)
    - BB-005: Health check results now written to `health-check-results.json`
@@ -139,6 +139,12 @@
    - Updated job.manager.ts to use real `ingestionProcessor.ts`
    - Updated tests to mock OPA wrapper
 9. **UPDATED**: OPA job wrapper adoption complete (6 processors wrapped)
+
+### Session 4 (Current)
+10. **FIXED**: TypeScript strict type errors for Express req.params
+    - Fixed 11 files with `string | string[]` type errors
+    - Properly cast req.params values to string where expected
+    - Files: CohortController, ExperimentController, FunnelController, featureFlags, app.ts, conflict-ui-controller, orchestrator-api, OpaController, cross-border/router, router-decision-api, admin/roles
 
 ---
 
