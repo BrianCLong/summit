@@ -15,7 +15,7 @@ opencv-python==4.13.0.92
 Pillow==12.1.0
 
 # Audio Processing
-librosa>=0.9.0
+librosa==0.11.0
 soundfile>=0.10.0
 
 # Data Science
