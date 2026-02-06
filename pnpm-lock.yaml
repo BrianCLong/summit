@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  entities: ^4.5.0
   d3-color: '>=3.1.0'
   node-fetch: '>=2.6.7'
   ws: '>=8.17.1'
@@ -24497,13 +24498,14 @@ packages:
   '@apollo/server@4.12.2':
     resolution: {integrity: sha512-jKRlf+sBMMdKYrjMoiWKne42Eb6paBfDOr08KJnUaeaiyWFj+/040FjVPQI7YGLfdwnYIsl1NUUqS2UdgezJDg==}
     engines: {node: '>=14.16.0'}
-    deprecated: Apollo Server v4 is deprecated and will transition to end-of-life on January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
+    deprecated: Apollo Server v4 is end-of-life since January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
     peerDependencies:
       graphql: ^16.6.0
 
   '@apollo/server@5.2.0':
     resolution: {integrity: sha512-OEAl5bwVitkvVkmZlgWksSnQ10FUr6q2qJMdkexs83lsvOGmd/y81X5LoETmKZux8UiQsy/A/xzP00b8hTHH/w==}
     engines: {node: '>=20'}
+    deprecated: This version of Apollo Server is vulnerable to a denial of service (DoS) attack. Please update to @apollo/server 5.4.0 or later. For more details, see https://github.com/apollographql/apollo-server/security/advisories/GHSA-mp6q-xf9x-fwf7
     peerDependencies:
       graphql: ^16.11.0
 
@@ -26329,16 +26331,16 @@ packages:
       '@deck.gl/core': ~9.2.0
       '@luma.gl/core': ~9.2.4
 
-  '@definitelytyped/header-parser@0.2.22':
-    resolution: {integrity: sha512-zmsZ6cXHpGkPB99WUUKnc237I49RIvHHBW4FzBvBzLNxKPcpqZx505IqqlAYN11ve9wjhYSbPPCI5y+B1nLOfQ==}
+  '@definitelytyped/header-parser@0.2.23':
+    resolution: {integrity: sha512-dNp5+yh8NIr3vUCINzqouWne/5gI+o/VjnK/sTzZqlBmtevy/NfY/dx9NOFJpoaX1Z7q7NbHmNRablAiw0l4zQ==}
     engines: {node: '>=20.17.0'}
 
   '@definitelytyped/typescript-versions@0.1.10':
     resolution: {integrity: sha512-4aBop464n0PUxrlzj1FpAfiNa5P5ENycB0K/Ho22Ay8xAGEGXUpLkaWtFsn2R+Jfn4ldd7lJqfqw0z29sAingQ==}
     engines: {node: '>=20.17.0'}
 
-  '@definitelytyped/utils@0.1.10':
-    resolution: {integrity: sha512-XCd8g2hhZmwytP+sO6AUYILcdfr8Wjwx8laqRpdxdhvg7a4T+eDNM7EuD/O9THFhWc39j/aH54rSSb93WI0gxQ==}
+  '@definitelytyped/utils@0.1.11':
+    resolution: {integrity: sha512-PWq2GtAyA3qQpdBC1qxXbbqdoLVWhxwzoBPWLVwSvI30ftMO9T6gvc3yEtbKiplZzp0gUBZVP0EcSzwjnvIZ4w==}
     engines: {node: '>=20.17.0'}
 
   '@derhuerst/http-basic@8.2.4':
@@ -26379,8 +26381,8 @@ packages:
     resolution: {integrity: sha512-Qkzpg2s9GnVV2I2BjRksUi43U5e6+zaQMcjoJy0C+C5oxaKl+fmckGDQFtRpZpZV0NQekuZZ+tGz7EA9TVnQtQ==}
     engines: {node: '>=12'}
 
-  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
-    resolution: {tarball: https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2}
+  '@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2':
+    resolution: {commit: 06b29aafb7708acef8b3669835c8a7857ebc92d2, repo: https://github.com/electron/node-gyp.git, type: git}
     version: 10.2.0-electron.1
     engines: {node: '>=12.13.0'}
     hasBin: true
@@ -41879,19 +41881,8 @@ packages:
     resolution: {integrity: sha512-rRqJg/6gd538VHvR3PSrdRBb/1Vy2YfzHqzvbhGIQpDRKIa4FgV/54b5Q1xYSxOOwKvjXweS26E0Q+nAMwp2pQ==}
     engines: {node: '>=8.6'}
 
-  entities@2.2.0:
-    resolution: {integrity: sha512-p92if5Nz619I0w+akJrLZH0MX0Pb5DX39XOwQTtXSdQQOaYH03S1uIQp4mhOZtAXrxq4ViO67YTiLBo2638o9A==}
-
   entities@4.5.0:
     resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
-    engines: {node: '>=0.12'}
-
-  entities@6.0.1:
-    resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
-    engines: {node: '>=0.12'}
-
-  entities@7.0.1:
-    resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
 
   env-ci@11.2.0:
@@ -58966,10 +58957,10 @@ snapshots:
       '@luma.gl/core': 9.2.5
       preact: 10.28.2
 
-  '@definitelytyped/header-parser@0.2.22':
+  '@definitelytyped/header-parser@0.2.23':
     dependencies:
       '@definitelytyped/typescript-versions': 0.1.10
-      '@definitelytyped/utils': 0.1.10
+      '@definitelytyped/utils': 0.1.11
       semver: 7.7.3
     transitivePeerDependencies:
       - bare-abort-controller
@@ -58978,7 +58969,7 @@ snapshots:
 
   '@definitelytyped/typescript-versions@0.1.10': {}
 
-  '@definitelytyped/utils@0.1.10':
+  '@definitelytyped/utils@0.1.11':
     dependencies:
       '@types/node': 25.1.0
       cachedir: 2.4.0
@@ -59064,7 +59055,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
+  '@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2':
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.3
@@ -59101,7 +59092,7 @@ snapshots:
 
   '@electron/rebuild@3.7.0':
     dependencies:
-      '@electron/node-gyp': https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2
+      '@electron/node-gyp': git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
       debug: 4.4.3(supports-color@5.5.0)
@@ -82801,7 +82792,7 @@ snapshots:
     dependencies:
       domelementtype: 2.3.0
       domhandler: 4.3.1
-      entities: 2.2.0
+      entities: 4.5.0
 
   dom-serializer@2.0.0:
     dependencies:
@@ -82885,7 +82876,7 @@ snapshots:
 
   dts-critic@3.3.11(typescript@5.9.3):
     dependencies:
-      '@definitelytyped/header-parser': 0.2.22
+      '@definitelytyped/header-parser': 0.2.23
       command-exists: 1.2.9
       rimraf: 3.0.2
       semver: 6.3.1
@@ -82899,9 +82890,9 @@ snapshots:
 
   dtslint@4.2.1(typescript@5.9.3):
     dependencies:
-      '@definitelytyped/header-parser': 0.2.22
+      '@definitelytyped/header-parser': 0.2.23
       '@definitelytyped/typescript-versions': 0.1.10
-      '@definitelytyped/utils': 0.1.10
+      '@definitelytyped/utils': 0.1.11
       dts-critic: 3.3.11(typescript@5.9.3)
       fs-extra: 6.0.1
       json-stable-stringify: 1.3.0
@@ -83144,13 +83135,7 @@ snapshots:
       ansi-colors: 4.1.3
       strip-ansi: 6.0.1
 
-  entities@2.2.0: {}
-
   entities@4.5.0: {}
-
-  entities@6.0.1: {}
-
-  entities@7.0.1: {}
 
   env-ci@11.2.0:
     dependencies:
@@ -85747,14 +85732,14 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
       domutils: 3.2.2
-      entities: 7.0.1
+      entities: 4.5.0
 
   htmlparser2@6.1.0:
     dependencies:
       domelementtype: 2.3.0
       domhandler: 4.3.1
       domutils: 2.8.0
-      entities: 2.2.0
+      entities: 4.5.0
 
   htmlparser2@8.0.2:
     dependencies:
@@ -92335,11 +92320,11 @@ snapshots:
 
   parse5@7.3.0:
     dependencies:
-      entities: 6.0.1
+      entities: 4.5.0
 
   parse5@8.0.0:
     dependencies:
-      entities: 6.0.1
+      entities: 4.5.0
 
   parsedbf@2.0.0: {}
 
@@ -95180,7 +95165,7 @@ snapshots:
 
   rss-parser@3.13.0:
     dependencies:
-      entities: 2.2.0
+      entities: 4.5.0
       xml2js: 0.5.0
 
   run-applescript@7.1.0: {}
