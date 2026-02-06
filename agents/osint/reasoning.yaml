@@ -8,7 +8,7 @@ governance:
 runtime:
   model:
     provider: anthropic
-    name: claude-3-5-opus-20240229
+    name: claude-3-opus-20240229
     parameters:
       temperature: 0.3
       max_tokens: 8192
