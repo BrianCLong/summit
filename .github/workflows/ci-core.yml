@@ -68,6 +68,33 @@ jobs:
       - name: Check error codes documentation
         run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
+  build-package:
+    name: Build & Package
+    runs-on: self-hosted
+    needs: [config-preflight]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: build-artifacts
+          path: |
+            client/dist
+            server/dist
+          retention-days: 7
+
   unit-tests:
     name: Unit Tests
     runs-on: self-hosted
@@ -417,6 +444,7 @@ jobs:
     needs:
       - config-preflight
       - lint-typecheck
+      - build-package
       - unit-tests
       - integration-tests
       - verification-suite
@@ -433,6 +461,7 @@ jobs:
           echo "=== CI Core Gate Status ==="
           echo "Config Preflight: ${{ needs.config-preflight.result }}"
           echo "Lint & Typecheck: ${{ needs.lint-typecheck.result }}"
+          echo "Build & Package: ${{ needs.build-package.result }}"
           echo "Unit Tests: ${{ needs.unit-tests.result }}"
           echo "Integration Tests: ${{ needs.integration-tests.result }}"
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
@@ -452,6 +481,11 @@ jobs:
 
           if [[ "${{ needs.lint-typecheck.result }}" != "success" ]]; then
             echo "::error::Lint & Typecheck FAILED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.build-package.result }}" != "success" ]]; then
+            echo "::error::Build & Package FAILED"
             exit 1
           fi
 
@@ -511,6 +545,7 @@ jobs:
           echo "All primary CI checks passed:" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Config Preflight (Jest/pnpm validation)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Lint & Typecheck" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Build & Package" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Unit Tests" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Integration Tests" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
