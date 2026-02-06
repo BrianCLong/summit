@@ -194,9 +194,18 @@ export class ResidencyGuard {
         // Authoritative region is from shard configuration, falling back to policy config
         const primaryRegion = row.shard_region || row.region;
 
-        const allowedRegions = row.allowed_regions ? JSON.parse(row.allowed_regions) : (row.allowed_transfers ? JSON.parse(row.allowed_transfers) : []);
+        const parseSafe = (val: any) => {
+            if (!val || val === '') return [];
+            try {
+                return typeof val === 'string' ? JSON.parse(val) : val;
+            } catch (e) {
+                return [];
+            }
+        };
+
+        const allowedRegions = parseSafe(row.allowed_regions || row.allowed_transfers);
         // Ensure primary region is in allowed list if not explicitly there
-        if (!allowedRegions.includes(primaryRegion)) {
+        if (primaryRegion && !allowedRegions.includes(primaryRegion)) {
             allowedRegions.push(primaryRegion);
         }
 
