@@ -7,7 +7,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Default deny - all operations must be explicitly allowed
-default allow := false
+default allow = false
 
 # Risk tags requiring four-eyes approval regardless of cost
 risk_tags := {

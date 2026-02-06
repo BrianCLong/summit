@@ -62,7 +62,7 @@ role_can_write if { role_editor_write }
 # Sensitive data read checks
 sensitive_read_basic_ok if {
   input.action == "read"
-  not ("pii" in input.resource.labels)
+  not "pii" in input.resource.labels
 }
 
 sensitive_read_privileged_ok if {
