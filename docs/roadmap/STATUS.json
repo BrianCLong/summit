@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-05T23:30:00Z",
+  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
