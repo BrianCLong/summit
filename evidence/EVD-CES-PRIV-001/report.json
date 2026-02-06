@@ -1,0 +1,5 @@
+{
+  "evidence_id": "EVD-CES-PRIV-001",
+  "summary": "CES privacy gate evidence skeleton (deny-by-default raw content).",
+  "artifacts": []
+}

@@ -1,0 +1,12 @@
+name: ci:agent-guardrails-no-offense
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  agent-guardrails-no-offense:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CES no-offense guardrail gate (skeleton)
+        run: echo "CES no-offense guardrail placeholder."

@@ -18,6 +18,12 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `gate/evidence` (PR2)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
+- `ci:exec-privacy`
+- `ci:agent-guardrails-no-offense`
+- `ci:narrative-grounding`
+- `ci:shadowai-discovery`
+- `ci:tenant-isolation`
+- `ci:dep-delta`
 - `lint`
 - `typecheck`
 - `build`
