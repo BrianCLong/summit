@@ -151,6 +151,21 @@ export const myProcessor = withOpaPolicy('my_queue', async (job, policyContext) 
 **Migration:**
 Existing job processors can incrementally adopt the wrapper. The policy allows system jobs (no user context) by default for backward compatibility.
 
+**Adopted Processors (2026-02-06):**
+The following job processors have been updated to use the OPA wrapper:
+1. `analytics.processor.ts` - Analytics job processing
+2. `ingestionProcessor.ts` - File/data ingestion
+3. `intent.processor.ts` - Federation intent processing
+4. `notification.processor.ts` - Notification delivery
+5. `report.processor.ts` - Report generation
+6. `webhook.processor.ts` - Webhook handling
+
+**Remaining Processors:**
+- `retentionProcessor.ts` - Data retention (may need special handling)
+- `soc2EvidenceJob.ts` - SOC2 evidence collection
+- `ingestion.processor.ts` - Alternate ingestion (duplicate to review)
+- `resource-janitor.ts` - Cleanup jobs (system-level, may bypass OPA)
+
 ---
 
 ### Gap 4: Webhook Handlers

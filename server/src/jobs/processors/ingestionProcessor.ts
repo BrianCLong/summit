@@ -7,6 +7,7 @@ import { subscriptionEngine } from '../../graphql/subscriptionEngine.js';
 import logger from '../../utils/logger.js';
 import { metrics } from '../../observability/metrics.js';
 import EmbeddingService from '../../services/EmbeddingService.js';
+import { withOpaPolicy, JobPolicyContext } from './opa-job-wrapper.js';
 
 const embeddingService = new EmbeddingService();
 
@@ -19,7 +20,8 @@ function splitTextIntoChunks(text: string, chunkSize = 1000, overlap = 200) {
   return chunks;
 }
 
-export const ingestionProcessor = async (job: Job) => {
+// Raw processor implementation (internal)
+const ingestionProcessorImpl = async (job: Job, _policyContext?: JobPolicyContext) => {
    const { path, tenantId, flags } = job.data;
    logger.info({ jobId: job.id, path, tenantId, flags }, 'Processing ingestion job');
 
@@ -155,3 +157,7 @@ async function runExtractors(path: string, flags: any, tenantId: string) {
     }
     return entities;
 }
+
+// Export OPA-wrapped processor for production use
+// The wrapper checks OPA policy before executing the job
+export const ingestionProcessor = withOpaPolicy('ingestion', ingestionProcessorImpl);
