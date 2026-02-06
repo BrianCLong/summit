@@ -1,5 +1,32 @@
 version: 1
 prompts:
+  - id: maestro-scheduler-recovery
+    version: v1
+    path: prompts/maestro/maestro-scheduler-recovery@v1.md
+    sha256: 1bba9baac3d7fb1bb38ee142121e994d0b285589f3a780a9f267dc33c5a346f3
+    description: Harden Maestro scheduler recovery, enqueue dedupe, and MCP governance notes.
+    scope:
+      paths:
+        - server/src/maestro/scheduler/Scheduler.ts
+        - server/src/maestro/runs/runs-repo.ts
+        - server/src/maestro/scheduler/__tests__/Scheduler.test.ts
+        - docs/maestro/EXECUTION_PLAN.md
+        - docs/roadmap/STATUS.json
+        - prompts/maestro/maestro-scheduler-recovery@v1.md
+        - prompts/registry.yaml
+      domains:
+        - maestro
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

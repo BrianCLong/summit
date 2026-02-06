@@ -3,6 +3,8 @@ Maestro Expansion Plan (Dev → Full Orchestrator)
 Scope
 
 - PM integrations (GitHub/Jira), workflow editor, observability, autonomy/RBAC, recipes, UAT, reporting.
+- Scheduler hardening: queued-run recovery, dedupe, and tunable poll intervals.
+- MCP governance: host allowlists, scoped registrations, and health checks under Maestro control plane.
 
 Phases
 
@@ -22,3 +24,5 @@ Validation
 Security
 
 - Secrets via env/SSM; RBAC; audit logs; feature flag gates; outbox + saga; canary rollouts.
+- MCP server registration restricted via allowlisted hosts and scoped tokens.
+- Scheduler recovery is bounded by batch limits to prevent runaway restarts.

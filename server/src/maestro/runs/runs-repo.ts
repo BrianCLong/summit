@@ -133,6 +133,10 @@ class RunsRepo {
       sets.push(`error_message = $${paramCount++}`);
       values.push(data.error_message);
     }
+    if (data.executor_id !== undefined) {
+      sets.push(`executor_id = $${paramCount++}`);
+      values.push(data.executor_id);
+    }
 
     if (sets.length === 0) return this.get(id, tenantId);
 
@@ -172,6 +176,24 @@ class RunsRepo {
       LIMIT $3
     `;
     const result = await getPool().query(query, [pipelineId, tenantId, limit]);
+    return result.rows;
+  }
+
+  async listByStatus(
+    statuses: Run['status'][],
+    limit = 1000,
+    offset = 0,
+  ): Promise<Run[]> {
+    const query = `
+      SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
+             completed_at, duration_ms, cost, input_params, output_data, 
+             error_message, executor_id, created_at, updated_at, tenant_id
+      FROM runs
+      WHERE status = ANY($1)
+      ORDER BY created_at ASC
+      LIMIT $2 OFFSET $3
+    `;
+    const result = await getPool().query(query, [statuses, limit, offset]);
     return result.rows;
   }
 }
@@ -217,6 +239,14 @@ export const runsRepo = {
     limit = 20,
   ): Promise<Run[]> {
     return this.instance.getByPipeline(pipelineId, tenantId, limit);
+  },
+
+  async listByStatus(
+    statuses: Run['status'][],
+    limit = 1000,
+    offset = 0,
+  ): Promise<Run[]> {
+    return this.instance.listByStatus(statuses, limit, offset);
   },
 
   /**
