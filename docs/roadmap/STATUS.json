@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-06T00:00:00Z",
-  "revision_note": "Applied initial Python remediation updates (fastapi/marshmallow/python-multipart/starlette) and documented gaps.",
+  "revision_note": "Applied initial Python remediation updates and confirmed ecdsa latest version already in use.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
