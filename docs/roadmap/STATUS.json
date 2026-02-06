@@ -174,7 +174,7 @@
       "id": "dependency-triage-initial-wave",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. pip-audit batch run (39/57) recorded; remaining files and errors noted. Applied Python remediation updates where fix versions were available."
+      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. pip-audit batch run (39/57) recorded; remaining files and errors noted. Applied Python remediation updates where fix versions were available; moved dgl to optional requirements for summit-cog-war."
     }
   ],
   "summary": {

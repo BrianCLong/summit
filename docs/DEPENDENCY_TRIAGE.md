@@ -106,7 +106,7 @@ Run these from repo root (or the specified workspace root):
 
 - `orjson` (CVE-2025-67221): upgraded to 3.11.7, but advisory status indicates no confirmed fix yet; monitor and reassess.
 - `ecdsa` (CVE-2024-23342): advisory scope indicates versions <= 0.18.0; current 0.19.1 should be outside range, but pip-audit still flags it.
-- `dgl` (GHSA-3x5x-fw77-g54c): no fix available (advisory indicates affected <= 2.4.0); mitigation required (e.g., disable RPC or remove dependency where feasible).
+- `dgl` (GHSA-3x5x-fw77-g54c): removed from default `summit-cog-war/requirements.txt` and moved to `summit-cog-war/requirements-optional-graph.txt` (optional install only).
 
 ## JS/TS (pnpm)
 

@@ -1,0 +1,2 @@
+# Optional graph stack (dgl has a known advisory; install only if required)
+dgl
