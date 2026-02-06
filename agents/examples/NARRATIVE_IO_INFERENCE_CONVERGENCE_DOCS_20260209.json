@@ -1,0 +1,47 @@
+{
+  "task_id": "NARRATIVE_IO_INFERENCE_CONVERGENCE_DOCS_20260209",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-io-inference-convergence-docs",
+    "version": "v1",
+    "sha256": "bbd151eb8846194ea862823ea77a8acd982ee05e6c9aadb809bc27853c0d5eb1",
+    "path": "prompts/governance/narrative-io-inference-convergence-docs@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/governance/repo_assumptions.md",
+      "docs/standards/narrative-io-inference-convergence.md",
+      "docs/security/data-handling/narrative-io-inference-convergence.md",
+      "docs/ops/runbooks/narrative-io-inference-convergence.md",
+      "docs/governance/competitive/narrative-io-inference-convergence.md",
+      "docs/governance/evidence/narrative-io-inference-convergence/",
+      "docs/roadmap/STATUS.json",
+      "prompts/governance/narrative-io-inference-convergence-docs@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NARRATIVE_IO_INFERENCE_CONVERGENCE_DOCS_20260209.json"
+    ],
+    "domains": ["governance", "documentation", "security", "ops"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/governance/evidence/narrative-io-inference-convergence/report.json",
+      "docs/governance/evidence/narrative-io-inference-convergence/metrics.json",
+      "docs/governance/evidence/narrative-io-inference-convergence/stamp.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Governed Narrative IO inference/convergence docs published with authority alignment.",
+    "Evidence artifacts generated for the documentation pack.",
+    "Roadmap status updated to reflect the documentation pack."
+  ],
+  "stop_conditions": [
+    "Missing authority references or evidence artifacts.",
+    "Non-deterministic outputs detected in evidence pack."
+  ]
+}

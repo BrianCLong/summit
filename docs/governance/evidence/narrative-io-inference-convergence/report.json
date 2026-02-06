@@ -1,0 +1,16 @@
+{
+  "artifact": "narrative-io-inference-convergence",
+  "scope": "governed-docs",
+  "summary": {
+    "purpose": "Document inference-first narrative IO standards, data handling, runbook, competitive positioning, and repo assumptions.",
+    "deterministic": true,
+    "governed_exceptions": []
+  },
+  "artifacts": [
+    "docs/governance/repo_assumptions.md",
+    "docs/standards/narrative-io-inference-convergence.md",
+    "docs/security/data-handling/narrative-io-inference-convergence.md",
+    "docs/ops/runbooks/narrative-io-inference-convergence.md",
+    "docs/governance/competitive/narrative-io-inference-convergence.md"
+  ]
+}
