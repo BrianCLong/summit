@@ -47,12 +47,12 @@ Run these from repo root (or the specified workspace root):
 ## Rust (cargo-audit)
 
 - Module: `services/safejoin`
-- Result: RustSec DB loaded, but scan failed due to registry timeouts while checking yanked crates.
+- Result: RustSec DB loaded, but scan failed checking yanked crates (missing crates in local index without refresh).
 - Found: RUSTSEC-2026-0007 in `bytes` 1.10.1 (upgrade to >= 1.11.1).
 
 ## Python (pip-audit)
 
-- `pip-audit -r python/requirements.txt --no-deps` stalled querying PyPI (network timeout).
+- `pip-audit -r python/requirements.txt --no-deps` stalled while creating isolated env (even with OSV + timeout).
 
 ## JS/TS (pnpm)
 
