@@ -21,7 +21,7 @@ soundfile==0.13.1
 # Data Science
 pandas==3.0.0
 matplotlib==3.10.8
-seaborn>=0.11.0
+seaborn==0.13.2
 
 # Web Framework
 streamlit>=1.0.0
