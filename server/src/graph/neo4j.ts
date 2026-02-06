@@ -111,6 +111,15 @@ export async function runCypher<T = unknown>(
     write?: boolean;
   } = {},
 ): Promise<T[]> {
+  // Performance Optimization: Extract tenant/case context from params if missing from options.
+  // This enables caching for the entire graph layer by providing missing metadata.
+  if (!options.tenantId && typeof params.tenantId === 'string') {
+    options.tenantId = params.tenantId;
+  }
+  if (!options.caseId && typeof params.caseId === 'string') {
+    options.caseId = params.caseId;
+  }
+
   // Write-Aware Sharding Gate (Limited GA)
   if (options.write && options.tenantId) {
     const featureAllowed = quotaEnforcer.isFeatureAllowed(options.tenantId, 'write_aware_sharding');

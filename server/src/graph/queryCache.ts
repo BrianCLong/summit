@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import stringify from 'fast-json-stable-stringify';
 import {
   getCachedJson,
   invalidateCache,
@@ -32,17 +33,12 @@ export function normalizeQuery(query: string): string {
   return query.replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Generates a stable SHA1 hash of any serializable object.
+ * Optimization: Uses fast-json-stable-stringify for O(N) performance and consistent key ordering.
+ */
 export function stableHash(input: unknown): string {
-  return crypto.createHash('sha1').update(stableStringify(input)).digest('hex');
-}
-
-function stableStringify(value: unknown): string {
-  if (value === null || value === undefined) return String(value);
-  if (typeof value !== 'object') return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map((v) => stableStringify(v)).join(',')}]`;
-  const obj = value as Record<string, unknown>;
-  const keys = Object.keys(obj).sort();
-  return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`).join(',')}}`;
+  return crypto.createHash('sha1').update(stringify(input)).digest('hex');
 }
 
 export function buildGraphCacheKey(ctx: GraphQueryCacheContext) {

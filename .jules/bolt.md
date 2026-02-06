@@ -18,3 +18,7 @@
 ## 2026-05-22 - [Optimized Supernode Detection]
 **Learning:** Nested loops of O(N*E) for supernode detection in large graphs (>10k nodes, >50k edges) cause severe latency (~6s). Pre-calculating connection Maps in O(E) reduces this to O(N+E), improving performance by >100x (~33ms).
 **Action:** Always pre-calculate frequency/connection maps when iterating over edges for multiple nodes to avoid N*E complexity.
+
+## 2026-05-24 - [Auto-context Extraction for Graph Caching]
+**Learning:** In multi-tenant systems, failing to explicitly pass `tenantId` to caching layers can lead to cache key collisions (security risk) and poor cache hit rates if queries are defaulted to a 'global' namespace. Automatically extracting this context from query parameters at the entry point (e.g. `runCypher`) ensures consistent caching and isolation across the entire application without requiring manual updates to every call site.
+**Action:** Implement auto-extraction of metadata (tenant, case, etc.) from parameters into caching options at the base library level to guarantee consistency.

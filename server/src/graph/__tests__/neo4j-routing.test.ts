@@ -165,6 +165,28 @@ describe('neo4j routing + cache', () => {
     expect(primary.__session.run).toHaveBeenCalledTimes(2);
   });
 
+  it('automatically extracts tenantId from params if missing in options for caching', async () => {
+    const primary = neo4jMock.driver.__get(process.env.NEO4J_URI);
+    primary.__session.run.mockResolvedValue({
+      records: [{ toObject: () => ({ ok: true }) }],
+    });
+
+    // Pass tenantId ONLY in params
+    await runCypher('MATCH (n) RETURN n', { tenantId: 'auto-tenant' }, {});
+
+    // Check if it was cached under 'auto-tenant'
+    // The tags should include 'graph:query:tenant:auto-tenant'
+    const cacheKey = buildGraphCacheKey({
+      query: 'MATCH (n) RETURN n',
+      params: { tenantId: 'auto-tenant' },
+      tenantId: 'auto-tenant',
+    });
+
+    expect(cacheStore.has(cacheKey.cacheKey)).toBe(true);
+    // Verify tags include the extracted tenantId
+    expect(cacheKey.tags).toContain('graph:query:tenant:auto-tenant');
+  });
+
   it('falls back to primary when replica throws', async () => {
     process.env.READ_REPLICA = '1';
     process.env.NEO4J_READ_URI = 'bolt://replica';
