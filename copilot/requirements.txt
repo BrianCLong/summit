@@ -37,5 +37,5 @@ httpx==0.28.1  # For testing API calls
 # Security
 python-jose[cryptography]==3.5.0
 # Utilities
-python-multipart==0.0.21  # For file upload
+python-multipart==0.0.22  # For file upload
 spython-dateutil==2.8.2

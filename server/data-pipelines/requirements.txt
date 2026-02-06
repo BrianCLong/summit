@@ -8,7 +8,7 @@ polars==1.38.0
 # Data validation and quality
 pydantic==2.12.5
 great-expectations==1.11.3
-pandera>=0.17.0
+pandera==0.29.0
 
 # ETL/ELT frameworks
 apache-airflow>=2.8.0
