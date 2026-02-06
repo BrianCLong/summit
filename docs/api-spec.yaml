@@ -3,6 +3,9 @@ info:
   title: IntelGraph Summit API
   version: 1.1.0
   description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
+  contact:
+    name: API Support
+    email: support@example.com
 
 servers:
   - url: /api
@@ -10,6 +13,19 @@ servers:
   - url: /
     description: Root path for monitoring and health
 
+tags:
+  - name: Observability
+    description: Monitoring and health checks
+  - name: Tenancy
+    description: Tenant management
+  - name: Policy
+    description: Policy simulation and checks
+  - name: Export
+    description: Evidence export
+  - name: Receipts
+    description: Receipt verification
+  - name: Maestro
+    description: Orchestration engine
 paths:
   /monitoring/metrics:
     get:
@@ -45,6 +61,8 @@ paths:
 
   /api/tenants:
     post:
+      operationId: createTenant
+      description: Create a new tenant with specified tier and policy profile.
       summary: Create a new tenant
       tags: [Tenancy]
       requestBody:
@@ -62,6 +80,8 @@ paths:
                 $ref: '#/components/schemas/Tenant'
 
     get:
+      operationId: listTenants
+      description: Retrieve a list of all tenants.
       summary: List tenants (Admin only)
       tags: [Tenancy]
       responses:
@@ -76,6 +96,8 @@ paths:
 
   /api/policy/simulate:
     post:
+      operationId: simulatePolicy
+      description: Simulate a policy decision for a given subject and action.
       summary: Simulate a policy decision (Preflight)
       tags: [Governance]
       requestBody:
@@ -94,6 +116,8 @@ paths:
 
   /api/export/bundles:
     post:
+      operationId: createEvidenceBundle
+      description: Create a new evidence bundle for export.
       summary: Create an Intel Bundle export
       tags: [Disclosure]
       requestBody:
@@ -112,6 +136,8 @@ paths:
 
   /api/receipts/{id}:
     get:
+      operationId: getReceipt
+      description: Retrieve a specific receipt by ID.
       summary: Get a signed receipt by ID
       tags: [Provenance]
       parameters:
