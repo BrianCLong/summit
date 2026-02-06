@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-{
-  "testUser": {
-    "username": "admin",
-    "password": "password"
-  }
-}
-=======
 [
   {
     "role": "analyst",
@@ -13,4 +5,3 @@
     "password": "password123"
   }
 ]
->>>>>>> 50f8d7925a (feat: add golden path E2E test harness for consolidated frontend)
