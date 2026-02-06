@@ -38,3 +38,47 @@ jobs:
       - run: |
           pip install PyYAML
           python tools/ci/verify_mcp_deny_by_default.py
+
+  ai-redundancy-gate:
+    name: AI Redundancy & Reviewer Awareness
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run AI Redundancy Check
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: node scripts/ci/ai-redundancy-check.mjs
+
+      - name: Post Reviewer Awareness Comment
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('ai-redundancy-report.md')) {
+              const body = fs.readFileSync('ai-redundancy-report.md', 'utf8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
