@@ -871,3 +871,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: narrative-io-inference-convergence-docs
+    version: v1
+    path: prompts/governance/narrative-io-inference-convergence-docs@v1.md
+    sha256: bbd151eb8846194ea862823ea77a8acd982ee05e6c9aadb809bc27853c0d5eb1
+    description: Governed documentation + evidence artifacts for Narrative IO inference/convergence.
+    scope:
+      paths:
+        - docs/governance/repo_assumptions.md
+        - docs/standards/narrative-io-inference-convergence.md
+        - docs/security/data-handling/narrative-io-inference-convergence.md
+        - docs/ops/runbooks/narrative-io-inference-convergence.md
+        - docs/governance/competitive/narrative-io-inference-convergence.md
+        - docs/governance/evidence/narrative-io-inference-convergence/
+        - docs/roadmap/STATUS.json
+        - prompts/governance/narrative-io-inference-convergence-docs@v1.md
+        - prompts/registry.yaml
+        - agents/examples/NARRATIVE_IO_INFERENCE_CONVERGENCE_DOCS_20260209.json
+      domains:
+        - governance
+        - documentation
+        - security
+        - ops
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
