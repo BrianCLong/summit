@@ -1,13 +1,9 @@
-import { ApolloServer } from 'apollo-server-express';
-import { schema as typeDefs, safeTypes } from './schema/index.js';
-import { resolvers } from './resolvers.js';
+/**
+ * GraphQL Layer Entry Point
+ * Exports modern Apollo Server v5 implementation and types
+ */
 
-export async function mountGraphQL(app: any) {
-  const server = new ApolloServer({
-    typeDefs: [typeDefs, safeTypes],
-    resolvers,
-    context: ({ req }) => ({ user: (req as any).user }),
-  });
-  await server.start();
-  server.applyMiddleware({ app: app as any, path: '/graphql' });
-}
+export * from './apollo-v5-server.js';
+
+// Re-export DataLoaders for convenience
+export { createDataLoaders, type DataLoaders, type DataLoaderContext } from './dataloaders/index.js';

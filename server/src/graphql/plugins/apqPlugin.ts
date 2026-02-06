@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Automatic Persisted Queries (APQ) Plugin for Apollo Server
  * Implements APQ protocol to reduce network bandwidth and improve caching
@@ -8,15 +7,17 @@
  * Client then sends the full query which gets cached for future requests
  */
 
-import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
+import type { ApolloServerPlugin, GraphQLRequestListener, GraphQLRequestContext } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import crypto from 'crypto';
 import pino from 'pino';
 import type { Redis } from 'ioredis';
-import { createCacheClient } from '@packages/cache';
-import type { GraphQLContext } from '../apollo-v5-server.js';
+// @ts-ignore - workspace alias may not be resolved by tsc in this context
+import { createCacheClient } from '@intelgraph/cache';
+import type { GraphQLContext } from '../index.js';
 
-const logger = (pino as any)();
+const logger = (pino as any).default ? (pino as any).default() : (pino as any)();
+const memoryCache = new Map<string, string>();
 
 export interface APQOptions {
   /**
@@ -60,7 +61,7 @@ function hashQuery(query: string): string {
 /**
  * Creates an APQ plugin for Apollo Server
  */
-export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
+export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin<GraphQLContext> {
   const {
     redis,
     ttl = 86400, // 24 hours
@@ -103,10 +104,13 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
   }
 
   return {
-    async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+    async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
       return {
-        async didResolveSource({ request, source }) {
+        async didResolveSource(requestContext: GraphQLRequestContext<GraphQLContext>) {
+          const { request, source, contextValue } = requestContext;
           // Check if this is an APQ request
+          const userId = contextValue?.user?.id ?? 'anonymous';
+          const tenantId = contextValue?.user?.tenantId || 'unknown-tenant';
           const extensions = request.extensions as any;
           const persistedQuery = extensions?.persistedQuery;
 
@@ -114,13 +118,12 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
             // Not an APQ request.
             // If allowlist is enabled, we should BLOCK standard queries unless they are somehow exempted
             // or if allowlisting strictly applies to APQ flow.
-            // Usually, strict security means "No arbitrary queries at all".
             if (allowlistEnabled) {
-                 throw new GraphQLError('Only persisted queries are allowed', {
-                    extensions: {
-                        code: 'PERSISTED_QUERY_REQUIRED',
-                    }
-                 });
+              throw new GraphQLError('Only persisted queries are allowed', {
+                extensions: {
+                  code: 'PERSISTED_QUERY_REQUIRED',
+                }
+              });
             }
             return;
           }
@@ -137,8 +140,8 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
           }
 
           // If query is provided...
-          if (source && source.body) {
-            const computedHash = hashQuery(source.body);
+          if (source) {
+            const computedHash = hashQuery(source);
 
             // Verify that the provided hash matches the query
             if (computedHash !== sha256Hash) {
@@ -152,25 +155,25 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
             // If allowlisting is enabled, clients CANNOT register new queries at runtime.
             // The query must already exist in the cache (preloaded).
             if (allowlistEnabled) {
-                const exists = await getQuery(sha256Hash);
-                if (!exists) {
-                     throw new GraphQLError('Query not found in allowlist', {
-                        extensions: {
-                            code: 'PERSISTED_QUERY_NOT_ALLOWED',
-                        }
-                     });
-                }
-                // If it exists, we are good. We don't need to set it again.
-                return;
+              const exists = await getQuery(sha256Hash);
+              if (!exists) {
+                throw new GraphQLError('Query not found in allowlist', {
+                  extensions: {
+                    code: 'PERSISTED_QUERY_NOT_ALLOWED',
+                  }
+                });
+              }
+              // If it exists, we are good. We don't need to set it again.
+              return;
             }
 
             // Normal APQ: Cache the query
-            await setQuery(sha256Hash, source.body);
+            await setQuery(sha256Hash, source);
 
             logger.debug(
               {
                 hash: sha256Hash,
-                queryLength: source.body.length,
+                queryLength: source.length,
               },
               'APQ: Cached new query'
             );
@@ -209,21 +212,21 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
  * Preload allowlist of queries
  */
 export async function preloadAllowlist(
-    queries: Record<string, string>,
-    redis?: Redis,
-    keyPrefix: string = 'apq:'
+  queries: Record<string, string>,
+  redis?: Redis,
+  keyPrefix: string = 'apq:'
 ): Promise<void> {
-    const promises = [];
-    for (const [hash, query] of Object.entries(queries)) {
-        if (redis) {
-            // Persist indefinitely or long TTL
-            promises.push(redis.set(`${keyPrefix}${hash}`, query));
-        } else {
-            memoryCache.set(hash, query);
-        }
+  const promises = [];
+  for (const [hash, query] of Object.entries(queries)) {
+    if (redis) {
+      // Persist indefinitely or long TTL
+      promises.push(redis.set(`${keyPrefix}${hash}`, query));
+    } else {
+      memoryCache.set(hash, query);
     }
-    if (promises.length > 0) await Promise.all(promises);
-    logger.info({ count: Object.keys(queries).length }, 'Preloaded APQ allowlist');
+  }
+  if (promises.length > 0) await Promise.all(promises);
+  logger.info({ count: Object.keys(queries).length }, 'Preloaded APQ allowlist');
 }
 
 /**

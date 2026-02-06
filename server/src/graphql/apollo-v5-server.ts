@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Apollo Server v5 Configuration for IntelGraph Platform
  * Modern GraphQL server with enhanced security and observability
@@ -16,6 +15,7 @@ import cors from 'cors';
 import { randomUUID } from 'node:crypto';
 import logger from '../utils/logger.js';
 import type { PoolClient } from 'pg';
+import type { GraphQLSchema } from 'graphql';
 
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
@@ -37,18 +37,20 @@ import { createCircuitBreakerPlugin } from './plugins/circuitBreakerPlugin.js';
 import { createProductionGraphQLCostPlugin } from './plugins/graphqlCostPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
 import depthLimit from 'graphql-depth-limit';
+const depthLimitFn = (depthLimit as any).default || depthLimit;
 import { recordEndpointResult } from '../observability/reliability-metrics.js';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
-  dataSources: any;
+  dataSources?: any;
   loaders: DataLoaders;
   pgClient?: PoolClient;
   user?: {
     id: string;
-    roles: string[];
+    roles?: string[];
     tenantId: string;
-  };
+    [key: string]: any;
+  } | null;
   request: {
     ip: string;
     headers: Record<string, string>;
@@ -58,6 +60,13 @@ export interface GraphQLContext {
     traceId: string;
     spanId: string;
   };
+  audit?: {
+    before?: any;
+    after?: any;
+    [key: string]: any;
+  };
+  dlpViolations?: any[];
+  [key: string]: any;
 }
 
 // GraphQL Shield Security Rules
@@ -67,20 +76,20 @@ const permissions = shield({
     health: true,
     version: true,
     // Protected queries require authentication
-    '*': (parent, args, context: GraphQLContext) => {
+    '*': (parent: any, args: any, context: any) => {
       return !!context.user;
     },
   },
   Mutation: {
     // All mutations require authentication
-    '*': (parent, args, context: GraphQLContext) => {
+    '*': (parent: any, args: any, context: any) => {
       return !!context.user;
     },
   },
 });
 
 // Create enhanced GraphQL schema with security
-function createSecureSchema() {
+function createSecureSchema(): GraphQLSchema { // Added return type
   let schema = makeExecutableSchema({
     typeDefs,
     resolvers,
@@ -154,7 +163,7 @@ export function createApolloV5Server(
     schema,
     validationRules: [
       // Recursion and Depth limiting against deep query abuse
-      depthLimit(10),
+      depthLimitFn(10),
     ],
     plugins: [
       // Graceful shutdown
@@ -247,7 +256,8 @@ export function createApolloV5Server(
             async willSendResponse(requestContext) {
               const { response } = requestContext;
               const body = response.body as any;
-              const hasErrors = !!(body.singleResult?.errors?.length || (body.kind === 'single' && body.singleResult?.errors?.length));
+              const singleResult = body.kind === 'single' ? body.singleResult : null;
+              const hasErrors = !!(singleResult?.errors?.length);
 
               const [seconds, nanoseconds] = process.hrtime(start);
               const duration = seconds + nanoseconds / 1e9;

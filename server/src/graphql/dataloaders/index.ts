@@ -32,7 +32,7 @@ import {
   type VerdictLookupKey,
 } from './policyVerdictLoader.js';
 import type { Driver as Neo4jDriver } from 'neo4j-driver';
-import type { Pool as PgPool, PoolClient } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 import type { Redis } from 'ioredis';
 
 export interface DataLoaders {
@@ -59,7 +59,7 @@ export interface DataLoaders {
 
 export interface DataLoaderContext {
   neo4jDriver: Neo4jDriver;
-  pgPool: PgPool;
+  pgPool: Pool;
   pgClient?: PoolClient;
   redis?: Redis | null;
   tenantId: string;

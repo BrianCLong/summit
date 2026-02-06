@@ -1,23 +1,15 @@
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import type { GraphQLError } from 'graphql';
+import type { GraphQLContext } from '../index.js';
 
 /**
  * Apollo Server plugin that sets HTTP status codes based on GraphQL error extensions.
- * 
- * By default, Apollo Server returns HTTP 200 for all GraphQL responses, even those
- * containing errors. This plugin examines the `extensions.http.status` field on
- * GraphQL errors and sets the HTTP response status accordingly.
- * 
- * This is useful for:
- * - RESTful clients that rely on HTTP status codes
- * - Monitoring and alerting systems
- * - Security guardrails and validation
  */
-export const httpStatusCodePlugin = (): ApolloServerPlugin => {
+export const httpStatusCodePlugin = (): ApolloServerPlugin<GraphQLContext> => {
     return {
         async requestDidStart() {
             return {
-                async willSendResponse({ response, contextValue }) {
+                async willSendResponse({ response }) {
                     // Only modify status if there are errors
                     if (response.body.kind === 'single' && response.body.singleResult.errors) {
                         const errors = response.body.singleResult.errors as GraphQLError[];
@@ -47,7 +39,7 @@ export const httpStatusCodePlugin = (): ApolloServerPlugin => {
                         }
                     }
                 },
-            } as GraphQLRequestListener<any>;
+            } as GraphQLRequestListener<GraphQLContext>;
         },
     };
 };

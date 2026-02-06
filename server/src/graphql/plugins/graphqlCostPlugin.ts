@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * GraphQL Cost Analysis Plugin with Dynamic Rate Limiting
  * Enforces query cost limits with per-tenant, multi-tier rate limiting
@@ -7,7 +6,7 @@
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
-import type { GraphQLContext } from '../apollo-v5-server.js';
+import type { GraphQLContext } from '../index.js';
 import { getCostCalculator } from '../services/CostCalculator.js';
 import {
   getTenantRateLimitService,
@@ -23,7 +22,7 @@ import {
 } from '../../monitoring/metrics.js';
 import crypto from 'node:crypto';
 
-const logger = (pino as any)();
+const logger = (pino as any).default ? (pino as any).default() : (pino as any)();
 
 export interface GraphQLCostPluginOptions {
   /**
@@ -303,7 +302,7 @@ export function createGraphQLCostPlugin(
  */
 export function createProductionGraphQLCostPlugin(): ApolloServerPlugin<GraphQLContext> {
   return createGraphQLCostPlugin({
-    enforceLimits: process.env.NODE_ENV === 'production',
+    enforceLimits: process.env.NODE_ENV === 'production' || process.env.ENFORCE_COST_LIMITS === 'true',
     logCosts: true,
     logOverages: true,
     exemptOperations: ['health', 'version', '__schema', 'IntrospectionQuery'],

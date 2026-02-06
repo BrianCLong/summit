@@ -340,7 +340,7 @@ export const legacyResolvers = {
           {
             input: { type: 'PERSON', label, investigationId },
           },
-          context,
+          context as any,
         );
         entities.push(entity);
       }
@@ -358,7 +358,8 @@ export const legacyResolvers = {
                 props: {},
               },
             },
-            context,
+            context as any,
+            undefined,
           );
           relationships.push(rel);
         }

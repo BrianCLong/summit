@@ -1,9 +1,9 @@
-import type { ApolloServerPlugin } from '@apollo/server';
+import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
-import type { GraphQLContext } from '../apollo-v5-server.js';
+import type { GraphQLContext } from '../index.js';
 
-const logger = (pino as any)();
+const logger = (pino as any).default ? (pino as any).default() : (pino as any)();
 
 export interface CircuitBreakerOptions {
   failureThreshold?: number;
@@ -53,7 +53,7 @@ export function createCircuitBreakerPlugin(options: CircuitBreakerOptions = {}):
       state.requestCount++;
       if (state.requestCount > maxRequestsPerMinute) {
         throw new GraphQLError('Rate limit exceeded', {
-           extensions: { code: 'RATE_LIMIT_EXCEEDED' },
+          extensions: { code: 'RATE_LIMIT_EXCEEDED' },
         });
       }
 
@@ -63,35 +63,37 @@ export function createCircuitBreakerPlugin(options: CircuitBreakerOptions = {}):
           state.state = 'HALF_OPEN';
           logger.info({ tenantId }, 'Circuit Breaker: Half-Open');
         } else {
-           throw new GraphQLError('Service unavailable (Circuit Breaker)', {
-             extensions: { code: 'SERVICE_UNAVAILABLE' },
-           });
+          throw new GraphQLError('Service unavailable (Circuit Breaker)', {
+            extensions: { code: 'SERVICE_UNAVAILABLE' },
+          });
         }
       }
 
       return {
         async didEncounterErrors(rc) {
-           // We only care about system errors (5xx equivalents), not user errors (4xx)
-           // But GraphQL errors are mixed. Let's assume network/db errors trigger this.
-           const hasSystemError = rc.errors.some(e => e.extensions?.code === 'INTERNAL_SERVER_ERROR' || e.extensions?.code === 'DB_ERROR');
+          // We only care about system errors (5xx equivalents), not user errors (4xx)
+          const hasSystemError = rc.errors.some(e =>
+            e.extensions?.code === 'INTERNAL_SERVER_ERROR' ||
+            e.extensions?.code === 'DB_ERROR'
+          );
 
-           if (hasSystemError) {
-             state.failures++;
-             state.lastFailure = Date.now();
-             if (state.failures >= failureThreshold) {
-               state.state = 'OPEN';
-               logger.warn({ tenantId }, 'Circuit Breaker: OPENED');
-             }
-           }
+          if (hasSystemError) {
+            state.failures++;
+            state.lastFailure = Date.now();
+            if (state.failures >= failureThreshold) {
+              state.state = 'OPEN';
+              logger.warn({ tenantId }, 'Circuit Breaker: OPENED');
+            }
+          }
         },
         async willSendResponse(rc) {
-           if (state.state === 'HALF_OPEN' && !rc.errors) {
-             state.state = 'CLOSED';
-             state.failures = 0;
-             logger.info({ tenantId }, 'Circuit Breaker: CLOSED');
-           }
+          if (state.state === 'HALF_OPEN' && !rc.errors) {
+            state.state = 'CLOSED';
+            state.failures = 0;
+            logger.info({ tenantId }, 'Circuit Breaker: CLOSED');
+          }
         }
-      };
+      } as GraphQLRequestListener<GraphQLContext>;
     }
   };
 }

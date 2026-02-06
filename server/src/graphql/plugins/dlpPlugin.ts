@@ -12,6 +12,7 @@ import {
 import { dlpService, DLPContext } from '../../services/DLPService.js';
 import logger from '../../utils/logger.js';
 import { GraphQLError } from 'graphql';
+import type { GraphQLContext } from '../index.js';
 
 export interface DLPPluginOptions {
   enabled?: boolean;
@@ -33,13 +34,13 @@ const defaultOptions: DLPPluginOptions = {
   maxContentSize: 512 * 1024, // 512KB
 };
 
-export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
+export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin<GraphQLContext> {
   const config = { ...defaultOptions, ...options };
 
   return {
-    async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+    async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
       return {
-        async didResolveOperation(requestContext: GraphQLRequestContext<any>) {
+        async didResolveOperation(requestContext: GraphQLRequestContext<GraphQLContext>) {
           if (!config.enabled) return;
 
           const { request, contextValue, operationName } = requestContext;
@@ -183,7 +184,7 @@ export function dlpPlugin(options: DLPPluginOptions = {}): ApolloServerPlugin {
           }
         },
 
-        async willSendResponse(requestContext: GraphQLRequestContext<any>) {
+        async willSendResponse(requestContext: GraphQLRequestContext<GraphQLContext>) {
           if (!config.enabled || !config.scanResponse) return;
 
           const { response, contextValue, operationName } = requestContext;

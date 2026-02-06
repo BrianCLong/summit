@@ -1,4 +1,5 @@
 import { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
+import type { GraphQLContext } from '../index.js';
 import { GraphQLSchema, GraphQLField, GraphQLObjectType, getNamedType, isObjectType } from 'graphql';
 import { parse, visit, FieldNode } from 'graphql';
 import { logger } from '../../config/logger.js';
@@ -22,11 +23,11 @@ interface DeprecatedField {
  */
 export function deprecationTrackingPlugin(
   config: DeprecationPluginConfig = {}
-): ApolloServerPlugin {
+): ApolloServerPlugin<GraphQLContext> {
   const { logUsage = true, trackMetrics = true } = config;
 
   return {
-    async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+    async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
       return {
         async willSendResponse({ request, response, contextValue }) {
           if (!request.query || !contextValue.schema) return;

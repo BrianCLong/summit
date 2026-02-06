@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Query Complexity Plugin for Apollo Server
  * Analyzes GraphQL queries and rejects queries that exceed complexity limits
@@ -6,12 +5,13 @@
  */
 
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
-import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
+import gqc from 'graphql-query-complexity';
+const { getComplexity, simpleEstimator, fieldExtensionsEstimator } = (gqc as any).default || gqc;
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
 import { rateLimiter } from '../../services/RateLimiter.js';
 import { cfg } from '../../config.js';
-import type { GraphQLContext } from '../apollo-v5-server.js';
+import type { GraphQLContext } from '../index.js';
 
 const logger = (pino as any)();
 
@@ -142,22 +142,22 @@ export function createQueryComplexityPlugin(
 
               // Use rateLimiter.consume if available
               if (rateLimiter && typeof rateLimiter.consume === 'function') {
-                  const result = await rateLimiter.consume(key, complexity, limit, windowMs);
-                  if (!result.allowed) {
-                    logger.warn(
-                      { key, complexity, limit, remaining: result.remaining },
-                      'Query exceeded complexity rate limit'
-                    );
-                    throw new GraphQLError(
-                      `Rate limit exceeded for query complexity. Try again in ${Math.ceil((result.reset - Date.now()) / 1000)}s`,
-                      {
-                        extensions: {
-                          code: 'COMPLEXITY_RATE_LIMIT_EXCEEDED',
-                          retryAfter: Math.ceil((result.reset - Date.now()) / 1000),
-                        },
-                      }
-                    );
-                  }
+                const result = await rateLimiter.consume(key, complexity, limit, windowMs);
+                if (!result.allowed) {
+                  logger.warn(
+                    { key, complexity, limit, remaining: result.remaining },
+                    'Query exceeded complexity rate limit'
+                  );
+                  throw new GraphQLError(
+                    `Rate limit exceeded for query complexity. Try again in ${Math.ceil((result.reset - Date.now()) / 1000)}s`,
+                    {
+                      extensions: {
+                        code: 'COMPLEXITY_RATE_LIMIT_EXCEEDED',
+                        retryAfter: Math.ceil((result.reset - Date.now()) / 1000),
+                      },
+                    }
+                  );
+                }
               }
             }
 

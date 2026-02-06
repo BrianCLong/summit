@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Comprehensive GraphQL Performance Monitoring Plugin
  * Tracks detailed metrics for query performance, DataLoader usage, and N+1 detection
@@ -7,7 +6,7 @@
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import pino from 'pino';
 import type { DataLoaders } from '../dataloaders/index.js';
-import type { GraphQLContext } from '../apollo-v5-server.js';
+import type { GraphQLContext } from '../index.js';
 
 const logger = (pino as any)();
 
@@ -74,9 +73,9 @@ function countFields(selectionSet: any): number {
 /**
  * Creates a performance monitoring plugin
  */
-export function createPerformanceMonitoringPlugin(): ApolloServerPlugin {
+export function createPerformanceMonitoringPlugin(): ApolloServerPlugin<GraphQLContext> {
   return {
-    async requestDidStart({ request, contextValue }): Promise<GraphQLRequestListener<any>> {
+    async requestDidStart({ request, contextValue }): Promise<GraphQLRequestListener<GraphQLContext>> {
       const startTime = Date.now();
       const resolverCalls: ResolverCallTracker = {};
       let resolverCount = 0;
@@ -212,14 +211,14 @@ function getDataLoaderStats(loaders: DataLoaders) {
  */
 function getLoaderCallCount(loader: any): number {
   // Access internal DataLoader stats
-  return loader._promiseCache?.size || 0;
+  return (loader as any)._promiseCache?.size || 0;
 }
 
 /**
  * Get cache size for a DataLoader
  */
 function getLoaderCacheSize(loader: any): number {
-  return loader._cacheMap?.size || 0;
+  return (loader as any)._cacheMap?.size || 0;
 }
 
 /**

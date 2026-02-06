@@ -27,7 +27,9 @@ for (const p of candidates) {
   }
 }
 
-export const persistedQueriesPlugin: ApolloServerPlugin = {
+import type { GraphQLContext } from '../index.js';
+
+export const persistedQueriesPlugin: ApolloServerPlugin<GraphQLContext> = {
   async requestDidStart() {
     return {
       async didResolveOperation(ctx) {

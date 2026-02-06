@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type {
   ApolloServerPlugin,
   GraphQLRequestListener,
@@ -8,7 +7,8 @@ import axios from 'axios';
 import _ from 'lodash';
 import { provenanceLedger } from '../../provenance/ledger.js';
 import { getAuditSystem } from '../../audit/index.js';
-import type { GraphQLContext } from '../apollo-v5-server.js';
+import type { GraphQLContext } from '../index.js';
+import type { MutationPayload, MutationType } from '../../provenance/types.js';
 
 const { isEqual } = _;
 
@@ -30,7 +30,7 @@ const anonymize = (value: unknown): any => {
   return '[redacted]';
 };
 
-const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
+export const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
   async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
     const start = new Date();
     return {
@@ -43,7 +43,7 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
         const entity =
           (operation.selectionSet.selections[0] as any)?.name?.value ||
           'unknown';
-        const userId = ctx.contextValue?.user?.id ?? null;
+        const userId = ctx.contextValue?.user?.id ?? 'anonymous';
         const tenantId = ctx.contextValue?.user?.tenantId || 'unknown-tenant';
         const requestId = ctx.request.http?.headers.get('x-request-id') || undefined;
         const correlationId = ctx.request.http?.headers.get('x-correlation-id') || undefined;
@@ -78,36 +78,41 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
           }
         }
 
-        const logEntry = {
+        const logEntry: MutationPayload = {
+          mutationType: 'UPDATE' as MutationType,
+          entityId: entity,
+          entityType: entity,
           timestamp: start.toISOString(),
           userId: ANONYMIZE ? anonymize(userId) : userId,
           operation: operation.operation,
           entity,
-          diff,
+          mutationDiff: diff,
         };
 
         // Log to Advanced Audit System
         try {
-          getAuditSystem().recordEvent({
-            eventType: 'resource_modify', // Mutations modify resources
-            action: entity, // Use mutation name as action
-            outcome: ctx.errors ? 'failure' : 'success',
-            userId: userId || 'anonymous',
-            tenantId,
-            serviceId: 'graphql-api',
-            resourceType: 'entity',
-            resourceId: entity,
-            message: `GraphQL Mutation: ${entity}`,
-            level: 'info',
-            requestId,
-            correlationId,
-            details: {
-              diff,
-              operationName: ctx.request.operationName,
-              variables: ANONYMIZE ? {} : ctx.request.variables,
-            },
-            complianceRelevant: true, // Mutations are usually relevant
-          });
+          if (operation) {
+            getAuditSystem().recordEvent({
+              eventType: 'resource_modify',
+              action: entity,
+              outcome: ctx.errors ? 'failure' : 'success',
+              userId: userId || 'anonymous',
+              tenantId,
+              serviceId: 'graphql-api',
+              resourceType: 'entity',
+              resourceId: entity,
+              message: `GraphQL Mutation: ${entity}`,
+              level: 'info',
+              requestId,
+              correlationId,
+              details: {
+                diff,
+                operationName: ctx.request.operationName,
+                variables: ANONYMIZE ? {} : ctx.request.variables,
+              },
+              complianceRelevant: true,
+            });
+          }
         } catch (error: any) {
           if (process.env.NODE_ENV !== 'test') {
             console.error('Failed to log to Advanced Audit System', error);
@@ -120,10 +125,11 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
             tenantId,
             actionType: 'GRAPHQL_MUTATION',
             resourceType: entity,
-            resourceId: entity, // We might not have specific ID easily here
+            resourceId: entity,
             actorId: userId || 'anonymous',
             actorType: userId ? 'user' : 'system',
             payload: logEntry,
+            timestamp: start,
             metadata: {
               requestId,
               correlationId,
@@ -138,11 +144,8 @@ const auditLoggerPlugin: ApolloServerPlugin<GraphQLContext> = {
             await axios.post(`${ELASTIC_URL}/audit/_doc`, logEntry, {
               timeout: 2000,
             });
-          } else {
-            // throw new Error('No Elasticsearch URL'); // Suppress to avoid noise
           }
         } catch (_err) {
-          // Fallback only if no other system is working
           if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
             fs.appendFileSync(LOG_FILE, JSON.stringify(logEntry) + '\n');
           }

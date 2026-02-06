@@ -24,7 +24,8 @@ export const caseResolvers = {
       context: GraphQLContext
     ) => {
       const tenantId = context.user!.tenantId;
-      return caseService.listCases({ tenantId, status, compartment, limit, offset });
+      const normalizedStatus = status as 'closed' | 'open' | 'active' | 'archived' | undefined;
+      return caseService.listCases({ tenantId, status: normalizedStatus, compartment, limit, offset });
     }),
   },
   Mutation: {

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Apollo Server plugin to enforce @budget directive at runtime
  * Blocks any mutation field without @budget - no ad-hoc bypasses allowed
@@ -14,7 +13,7 @@ import {
   FieldNode,
 } from 'graphql';
 import logger from '../../utils/logger.js';
-import type { GraphQLContext } from '../apollo-v5-server.js';
+import type { GraphQLContext } from '../index.js';
 
 interface BudgetPluginOptions {
   /**
@@ -56,7 +55,7 @@ export function requireBudgetPlugin(
   } = options;
 
   return {
-    async requestDidStart(): Promise<GraphQLRequestListener<any>> {
+    async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
       return {
         async didResolveOperation(requestContext) {
           // Only check mutations
@@ -139,7 +138,7 @@ export function requireBudgetPlugin(
             if (enforceBudget) {
               throw new GraphQLError(
                 `Mutation fields missing required @budget directive: ${violationFields.join(', ')}. ` +
-                  `All mutations must declare budget limits for cost control.`,
+                `All mutations must declare budget limits for cost control.`,
                 {
                   extensions: {
                     code: 'BUDGET_DIRECTIVE_REQUIRED',
@@ -204,7 +203,7 @@ function extractMutationFields(operation: OperationDefinitionNode): string[] {
 /**
  * Create plugin with feature flag control
  */
-export function createRequireBudgetPlugin(): ApolloServerPlugin {
+export function createRequireBudgetPlugin(): ApolloServerPlugin<GraphQLContext> {
   return requireBudgetPlugin({
     enforceBudget: process.env.REQUIRE_BUDGET_ENFORCEMENT === 'true',
     logViolations: process.env.LOG_BUDGET_VIOLATIONS !== 'false',
