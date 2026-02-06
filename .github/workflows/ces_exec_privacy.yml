@@ -1,0 +1,12 @@
+name: ci:exec-privacy
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  exec-privacy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CES exec privacy gate (skeleton)
+        run: echo "CES exec privacy gate placeholder."

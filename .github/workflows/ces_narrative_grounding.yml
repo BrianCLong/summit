@@ -1,0 +1,12 @@
+name: ci:narrative-grounding
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  narrative-grounding:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CES narrative grounding gate (skeleton)
+        run: echo "CES narrative grounding gate placeholder."
