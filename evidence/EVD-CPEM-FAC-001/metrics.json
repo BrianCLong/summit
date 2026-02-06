@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "counters": {
+    "initial_risk": 0.8,
+    "remediations_count": 1
+  }
+}
