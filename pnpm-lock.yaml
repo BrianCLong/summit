@@ -13991,8 +13991,8 @@ importers:
         specifier: ^30.1.2
         version: 30.2.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       orval:
-        specifier: ^7.11.2
-        version: 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+        specifier: ^7.21.0
+        version: 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       prettier:
         specifier: ^3.6.2
         version: 3.7.4
@@ -14045,6 +14045,9 @@ importers:
       '@intelgraph/maestro-core':
         specifier: workspace:*
         version: link:../platform/maestro-core
+      '@intelgraph/provenance':
+        specifier: workspace:*
+        version: link:../packages/provenance
       '@intelgraph/telemetry-config':
         specifier: file:../packages/telemetry-config
         version: link:../packages/telemetry-config
@@ -23653,6 +23656,9 @@ importers:
       pino-http:
         specifier: ^11.0.0
         version: 11.0.0
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.1.3
       prom-client:
         specifier: ^15.1.3
         version: 15.1.3
@@ -24536,7 +24542,7 @@ packages:
   '@apollo/server@4.12.2':
     resolution: {integrity: sha512-jKRlf+sBMMdKYrjMoiWKne42Eb6paBfDOr08KJnUaeaiyWFj+/040FjVPQI7YGLfdwnYIsl1NUUqS2UdgezJDg==}
     engines: {node: '>=14.16.0'}
-    deprecated: Apollo Server v4 is end-of-life since January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
+    deprecated: Apollo Server v4 is deprecated and will transition to end-of-life on January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
     peerDependencies:
       graphql: 16.12.0
 
@@ -26419,8 +26425,8 @@ packages:
     resolution: {integrity: sha512-Qkzpg2s9GnVV2I2BjRksUi43U5e6+zaQMcjoJy0C+C5oxaKl+fmckGDQFtRpZpZV0NQekuZZ+tGz7EA9TVnQtQ==}
     engines: {node: '>=12'}
 
-  '@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2':
-    resolution: {commit: 06b29aafb7708acef8b3669835c8a7857ebc92d2, repo: https://github.com/electron/node-gyp.git, type: git}
+  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
+    resolution: {tarball: https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2}
     version: 10.2.0-electron.1
     engines: {node: '>=12.13.0'}
     hasBin: true
@@ -32475,35 +32481,35 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
 
-  '@orval/angular@7.20.0':
-    resolution: {integrity: sha512-Axb0uOH7k/YRUovjCDW+LkGrbeX5UJEo67wzJZFZCo5VHQZJNjKA4AG2m8Jxps9r9xtsW5OsBJiQ6Miruxr5Jw==}
+  '@orval/angular@7.21.0':
+    resolution: {integrity: sha512-AGelR1FfuimtIBBVccUI9MyjNOalLEyJFog8a94thFiqRGtz0JFIPnd8+IqRcmw3wE370PKQQMCqZl1WkjZi8w==}
 
-  '@orval/axios@7.20.0':
-    resolution: {integrity: sha512-QdkEGAGX0pchYgw4kVq/s3qXSvcaWmdhpb73TQRQ4kVzCaJu7LWAMlRy5Mv0uXKJrSD2csJv1IF7831XDFhTtQ==}
+  '@orval/axios@7.21.0':
+    resolution: {integrity: sha512-0t2PqMSdjJ7No6Ng5gTEpqyILmngz1mDw7OQ2TPwOiAEepNfeDgE6NtRh3zbZvrH/H5I+W8dgn+wGYueZQCNjw==}
 
-  '@orval/core@7.20.0':
-    resolution: {integrity: sha512-K5ilcSEOOQVHl6/f0bWAGP+BEf5kRIh7XlXD0AJl/oE76vzFN8BgXgfjRBrpKIBQNUofLRgwYpGJXnhVr3bc4Q==}
+  '@orval/core@7.21.0':
+    resolution: {integrity: sha512-dUkggESlHq1pEUoNMF1ssRSzat5Y+G+pwtah8YoKW4wY3pTB7CNjGtGlD+a9dv3rCHUqYUqKaQD1UWRWWpF+VQ==}
 
-  '@orval/fetch@7.20.0':
-    resolution: {integrity: sha512-Ysq4pgkgJePmHnkAPigOXDC0cGEHoXkY2n/0TowzvBk/MZ6cYZTdgljrYJ/fhPor3bNfwpy2ppVYEvvDsItxOg==}
+  '@orval/fetch@7.21.0':
+    resolution: {integrity: sha512-e5YrZeZGoZhqj9Gzp2ANJx3/36ueMRXxwLwX0C1ps+rmMsFNa26lmQ8FHIscDQTwwULSGEGNUcunfO6X6f8t4w==}
 
-  '@orval/hono@7.20.0':
-    resolution: {integrity: sha512-ESf42JjNFXvfs0Txp4aFNOOoSqvBF9YCgQB+lyP/VYyPffJriDBsE8+T0njuagj0oP8ucJiG/7SH2NYCoR6uhg==}
+  '@orval/hono@7.21.0':
+    resolution: {integrity: sha512-XF5hdzUjDVUjZC2Fd/ROJsp8Us+j2dCSocqfrJmOrjSO1ReTTYy2sKv3c2wk7+TUAojz/0VdTtISf8LZTM+ETQ==}
 
-  '@orval/mcp@7.20.0':
-    resolution: {integrity: sha512-qRmPUnvdIE8jnYu9XcHvQIC7FZ8Dx42VCrRdyQrACJSKhlHbfafARQrw/CK58G+f2ADaYz8xb3TStbcFMiw36A==}
+  '@orval/mcp@7.21.0':
+    resolution: {integrity: sha512-4VQjdj1IDgximy+YWOwA7NzXjSvQ8lb2b6BlkKQk8wtrUW//xfquBmR7TRrtf2HKRx3UGtHsxayx4LP0dIqZgQ==}
 
-  '@orval/mock@7.20.0':
-    resolution: {integrity: sha512-fAuGnoKUOhM9eJm8/+H3Llt3w2hiAYDTK6H15qrheeJyulX3PbGr0QRz2raRoAkHc2G+oNiNruWuryhyr1jjJw==}
+  '@orval/mock@7.21.0':
+    resolution: {integrity: sha512-KgzGfG9JrrX1ciO7c0niyumncWYU9nuUg0CqMf0S2/SrAj+xunydQVja1HEB/eNB/E269pp4KG+S/d6ofe94yQ==}
 
-  '@orval/query@7.20.0':
-    resolution: {integrity: sha512-/sAXHBh8FguOVzKvxxLhKgxISscp1eStZIytcDaBF2Y5wVHpqqUq6B0kFbtClKt2e10nZUZgqAjnDQfSMY4Hrw==}
+  '@orval/query@7.21.0':
+    resolution: {integrity: sha512-4An6IcqRMRReSurHVw2izLHOAX4ZkHPlaK9LubkOH1Nxzymm2ihw4eamt2XKuZ1eF83R3rzYcKwMPK3t+GzeVg==}
 
-  '@orval/swr@7.20.0':
-    resolution: {integrity: sha512-lu6a1dVNzhua9jtBc/UwvyPZd7AFi42iID9eMJH+PeefrVhNexFDdYbOVe4ABrtfdiI4mpMHUDGbmzyrwMLblg==}
+  '@orval/swr@7.21.0':
+    resolution: {integrity: sha512-aHa6WFldrpN8gQYuXfl51ogC+QpFtVzL/u9DQa+hEUAf9MXieMVVDV5w9fR9XJ4nMpV1fSCbeRd7xxqNVtd/Nw==}
 
-  '@orval/zod@7.20.0':
-    resolution: {integrity: sha512-Czzz6aR/eSLy35HZdvKChNYIr4ebbIgyoaX576vKssK+zHY17fftOW4oq0e8CMtlxJseiKBi4IE0n/hQJbt6zw==}
+  '@orval/zod@7.21.0':
+    resolution: {integrity: sha512-bTMAxdtJ8/KxDusTRL0u57YN7H0VWim8pbWj5eQYwo3xABs+puYdF3kKZ2c2biB/jUwgJJEnVkwbZV8XjxaWYw==}
 
   '@paralleldrive/cuid2@2.3.1':
     resolution: {integrity: sha512-XO7cAxhnTZl0Yggq6jOgjiOHhbgcO4NqFqwSmQpjK3b6TEE6Uj/jfSk6wzYyemh3+I0sHirKSetjQwn5cZktFw==}
@@ -47987,8 +47993,8 @@ packages:
     resolution: {integrity: sha512-m0pg2zscbYgWbqRR6ABga5c3sZdEon7bSgjnlXC64kxtxLOyjRcbbUkLj7HFyy/FTD+P2xdBWu8snGhYI0jc4A==}
     engines: {node: '>=20'}
 
-  orval@7.20.0:
-    resolution: {integrity: sha512-mcq0kdn8yPvRdUnzAm1T04naZOM3njbLDLNfnhP9KTk6gOgxJYHha2C3TdddOIVFwpaR4burCHlx5Jq63DtSbA==}
+  orval@7.21.0:
+    resolution: {integrity: sha512-gG6aihg/BUiOgapn0qXsx3mgKU3L6iuzWtQJmvzdXavasyS0i+9e5j7kIpbdbeCYIEQX05kjBIzz5ZQlqzXCDA==}
     engines: {node: '>=22.18.0'}
     hasBin: true
 
@@ -59294,7 +59300,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2':
+  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.3
@@ -59331,7 +59337,7 @@ snapshots:
 
   '@electron/rebuild@3.7.0':
     dependencies:
-      '@electron/node-gyp': git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2
+      '@electron/node-gyp': https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
       debug: 4.4.3(supports-color@5.5.0)
@@ -68688,23 +68694,23 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
 
-  '@orval/angular@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/angular@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
     transitivePeerDependencies:
       - openapi-types
       - supports-color
       - typescript
 
-  '@orval/axios@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/axios@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
     transitivePeerDependencies:
       - openapi-types
       - supports-color
       - typescript
 
-  '@orval/core@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/core@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
       '@apidevtools/swagger-parser': 12.1.0(openapi-types@12.1.3)
       '@ibm-cloud/openapi-ruleset': 1.33.6
@@ -68730,19 +68736,19 @@ snapshots:
       - supports-color
       - typescript
 
-  '@orval/fetch@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/fetch@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       openapi3-ts: 4.5.0
     transitivePeerDependencies:
       - openapi-types
       - supports-color
       - typescript
 
-  '@orval/hono@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/hono@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/zod': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/zod': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       fs-extra: 11.3.3
       lodash.uniq: 4.5.0
       openapi3-ts: 4.5.0
@@ -68751,30 +68757,30 @@ snapshots:
       - supports-color
       - typescript
 
-  '@orval/mcp@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/mcp@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/fetch': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/zod': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/fetch': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/zod': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       openapi3-ts: 4.5.0
     transitivePeerDependencies:
       - openapi-types
       - supports-color
       - typescript
 
-  '@orval/mock@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/mock@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       openapi3-ts: 4.5.0
     transitivePeerDependencies:
       - openapi-types
       - supports-color
       - typescript
 
-  '@orval/query@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/query@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/fetch': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/fetch': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       chalk: 4.1.2
       lodash.omitby: 4.6.0
     transitivePeerDependencies:
@@ -68782,18 +68788,18 @@ snapshots:
       - supports-color
       - typescript
 
-  '@orval/swr@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/swr@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/fetch': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/fetch': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
     transitivePeerDependencies:
       - openapi-types
       - supports-color
       - typescript
 
-  '@orval/zod@7.20.0(openapi-types@12.1.3)(typescript@5.9.3)':
+  '@orval/zod@7.21.0(openapi-types@12.1.3)(typescript@5.9.3)':
     dependencies:
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       lodash.uniq: 4.5.0
       openapi3-ts: 4.5.0
     transitivePeerDependencies:
@@ -85925,7 +85931,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 3.3.0
       domutils: 2.8.0
-      entities: 2.2.0
+      entities: 4.5.0
 
   htmlparser2@6.1.0:
     dependencies:
@@ -92517,20 +92523,20 @@ snapshots:
       string-width: 8.1.0
       strip-ansi: 7.1.2
 
-  orval@7.20.0(openapi-types@12.1.3)(typescript@5.9.3):
+  orval@7.21.0(openapi-types@12.1.3)(typescript@5.9.3):
     dependencies:
       '@apidevtools/swagger-parser': 12.1.0(openapi-types@12.1.3)
       '@commander-js/extra-typings': 14.0.0(commander@14.0.3)
-      '@orval/angular': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/axios': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/core': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/fetch': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/hono': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/mcp': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/mock': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/query': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/swr': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
-      '@orval/zod': 7.20.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/angular': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/axios': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/core': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/fetch': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/hono': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/mcp': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/mock': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/query': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/swr': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
+      '@orval/zod': 7.21.0(openapi-types@12.1.3)(typescript@5.9.3)
       chalk: 4.1.2
       chokidar: 4.0.3
       commander: 14.0.3
