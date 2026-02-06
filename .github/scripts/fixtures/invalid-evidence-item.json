@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-INVALID-000",
+      "files": {
+        "report": "evidence/fixtures/missing-report.json",
+        "metrics": "evidence/fixtures/missing-metrics.json",
+        "stamp": "evidence/fixtures/missing-stamp.json"
+      }
+    }
+  ]
+}

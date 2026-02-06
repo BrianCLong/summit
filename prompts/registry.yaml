@@ -50,6 +50,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agentic-vision-evidence-scaffold
+    version: v1
+    path: prompts/governance/agentic-vision-evidence-scaffold@v1.md
+    sha256: 162f21fc6b257bdcf5952255f89761ca091e0c085da117a71dbbad2da03e16c7
+    description: Scaffold evidence index verification workflow, fixtures, and required checks discovery updates.
+    scope:
+      paths:
+        - .github/scripts/verify-evidence.mjs
+        - .github/scripts/verify-evidence-fixtures.mjs
+        - .github/scripts/fixtures/
+        - .github/workflows/ci-verify-evidence.yml
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/governance/agentic-vision-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - ci
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-06T00:00:00Z",
+  "revision_note": "Added evidence index verification workflow, fixtures, and required checks discovery updates.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -58,7 +58,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added verify-evidence workflow + fixtures for index validation and required checks discovery."
     },
     {
       "id": "promptspec-foundation-lane1",
