@@ -33,7 +33,7 @@
   "author": "Summit Platform",
   "license": "MIT",
   "dependencies": {
-    "fastify": "^5.6.1",
+    "fastify": "^5.7.3",
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.2",
     "@fastify/websocket": "^11.2.0",
