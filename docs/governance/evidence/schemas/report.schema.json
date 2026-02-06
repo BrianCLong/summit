@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit://governance/evidence/report.schema.json",
+  "title": "Governance Evidence Report",
+  "type": "object",
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "item": { "type": "string" },
+    "summary": { "type": "string" },
+    "methodology": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "risks": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "links": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

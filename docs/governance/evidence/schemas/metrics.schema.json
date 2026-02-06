@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit://governance/evidence/metrics.schema.json",
+  "title": "Governance Evidence Metrics",
+  "type": "object",
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": {},
+          "unit": { "type": "string" },
+          "context": { "type": "string" }
+        },
+        "required": ["name", "value"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-09T00:00:00Z",
+  "revision_note": "Added evidence schema scaffolding and index validation gate for governance evidence.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -58,7 +58,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added evidence index validation with schema scaffolds and timestamp placement gate."
     },
     {
       "id": "promptspec-foundation-lane1",
