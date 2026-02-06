@@ -13,7 +13,7 @@ class AuditLogger:
         cleaned_payload = self._clean(payload)
         event = {
             "event_type": event_type,
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "payload": cleaned_payload
         }
         # In real impl, write to secure storage. Here print or no-op.
