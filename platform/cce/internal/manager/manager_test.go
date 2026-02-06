@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"platform/cce/api"
-	"platform/cce/internal/attestation"
-	"platform/cce/internal/storage"
+	"github.com/summit/cce/api"
+	"github.com/summit/cce/internal/attestation"
+	"github.com/summit/cce/internal/storage"
 )
 
 func testManager(t *testing.T) *EnclaveManager {

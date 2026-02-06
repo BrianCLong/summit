@@ -278,6 +278,75 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: dependency-triage-initial-wave
+    version: v1
+    path: prompts/maintenance/dependency-triage-initial-wave@v1.md
+    sha256: 537d581376d77110ac2269f17ef304fefd9a8f91c2d521be7a71bacac177c481
+    description: Initial dependency audit and low-risk remediations with documentation updates.
+    scope:
+      paths:
+        - Cargo.lock
+        - webapp/package-lock.json
+        - docs/DEPENDENCY_TRIAGE.md
+        - docs/roadmap/STATUS.json
+        - alsp/go.mod
+        - ccs/go.mod
+        - cea/go.mod
+        - drst/go.mod
+        - generated/ccc/go/consentguard/go.mod
+        - ico/controller/go.mod
+        - jpr/go.mod
+        - lho/go.mod
+        - libs/configguard/go/go.mod
+        - orchestration/runtime/go.mod
+        - pbs/go.mod
+        - pcbo/go.mod
+        - platform/cce/go.mod
+        - platform/device-trust/go/go.mod
+        - samples/ccc/go/go.mod
+        - sdk/go/abac/go.mod
+        - sdk/go/pcl/go.mod
+        - sdnlib/go.mod
+        - services/addn/go.mod
+        - services/agsm/go.mod
+        - services/cab/go.mod
+        - services/crp/go.mod
+        - services/drift-sentinel/go.mod
+        - services/escp/go.mod
+        - services/fae/go/fae/go.mod
+        - services/idtl/go.mod
+        - services/jitae/go.mod
+        - services/krpcp/go.mod
+        - services/q3c/go.mod
+        - services/qawe/go.mod
+        - services/qpg/go.mod
+        - services/rcsi/go.mod
+        - services/retentiond/go.mod
+        - services/sss/go.mod
+        - streaming/etcwe/go.mod
+        - streaming/sfm/go.mod
+        - templates/golden-path-platform/jobs/hello-job/go.mod
+        - templates/golden-path-platform/services/hello-service/go.mod
+        - tools/c7/go.mod
+        - tools/dmcl/go.mod
+        - tools/rarl/go.mod
+        - tools/rbo/go.mod
+        - tools/scba/go.mod
+        - prompts/maintenance/dependency-triage-initial-wave@v1.md
+        - prompts/registry.yaml
+      domains:
+        - security
+        - maintenance
+        - docs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: eval-baseline-ratchet
     version: v1
     path: prompts/eval/establish-eval-baselines@v1.md

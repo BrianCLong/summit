@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	"platform/cce/api"
-	"platform/cce/internal/attestation"
-	"platform/cce/internal/storage"
+	"github.com/summit/cce/api"
+	"github.com/summit/cce/internal/attestation"
+	"github.com/summit/cce/internal/storage"
 )
 
 // EnclaveManager orchestrates attestation, execution, and storage.

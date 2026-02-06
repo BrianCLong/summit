@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	"platform/cce/internal/grpcstub"
+	"github.com/summit/cce/internal/grpcstub"
 )
 
 // RunJobRequest carries payloads and attestation material for enclave execution.

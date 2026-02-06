@@ -3,7 +3,7 @@ package risk
 import (
 	"testing"
 
-	"platform/device-trust/internal/attestation"
+	"github.com/summit/device-trust/internal/attestation"
 )
 
 func TestScoreNormalization(t *testing.T) {

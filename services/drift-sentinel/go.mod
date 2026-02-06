@@ -1,7 +1,8 @@
 module github.com/summit/drift-sentinel
 
-go 1.21
+go 1.24
 
+toolchain go1.24.13
 require (
 	github.com/xitongsys/parquet-go v1.6.2
 	github.com/xitongsys/parquet-go-source v0.0.0-20241021075129-b732d2ac9c9b

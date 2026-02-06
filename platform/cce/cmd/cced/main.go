@@ -7,11 +7,11 @@ import (
 	"os"
 	"strings"
 
-	"platform/cce/api"
-	"platform/cce/internal/attestation"
-	"platform/cce/internal/grpcstub"
-	"platform/cce/internal/manager"
-	"platform/cce/internal/storage"
+	"github.com/summit/cce/api"
+	"github.com/summit/cce/internal/attestation"
+	"github.com/summit/cce/internal/grpcstub"
+	"github.com/summit/cce/internal/manager"
+	"github.com/summit/cce/internal/storage"
 )
 
 func main() {

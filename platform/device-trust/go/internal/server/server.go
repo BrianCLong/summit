@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"platform/device-trust/internal/attestation"
-	"platform/device-trust/internal/policy"
-	"platform/device-trust/internal/privacy"
+	"github.com/summit/device-trust/internal/attestation"
+	"github.com/summit/device-trust/internal/policy"
+	"github.com/summit/device-trust/internal/privacy"
 )
 
 type EvaluateRequest struct {
