@@ -1,7 +1,8 @@
 import { Queue, Worker } from 'bullmq';
 import { QueueFactory } from '../queue/queue.factory.js';
 import { QueueNames } from './job.definitions.js';
-import { ingestionProcessor } from './processors/ingestion.processor.js';
+// Use the real ingestion processor with OPA policy enforcement
+import { ingestionProcessor } from './processors/ingestionProcessor.js';
 import { reportProcessor } from './processors/report.processor.js';
 import { analyticsProcessor } from './processors/analytics.processor.js';
 import { notificationProcessor } from './processors/notification.processor.js';

@@ -60,12 +60,12 @@
   - Rollout automation (pending ops readiness)
 - **Recommendation**: Requires cross-team coordination
 
-### 6. Subsumption Bundle Framework
+### 6. Subsumption Bundle Framework ✅ COMPLETED
 - **File**: `subsumption-bundle-framework.yaml`
-- **Items**:
-  - Scheduled drift monitor workflow (not required for MWS)
-  - API-based required-check discovery automation (needs repo token/permissions)
-- **Recommendation**: Discovery automation now less urgent (manual discovery completed)
+- **Status**: ✅ **COMPLETED (2026-02-06)**
+- **Items Completed**:
+  - ✅ Scheduled drift monitor workflow (`.github/workflows/subsumption-drift.yml`)
+  - ✅ API-based required-check discovery automation (`.github/workflows/required-checks-discovery.yml`, `scripts/ci/discover-required-checks.sh`)
 
 ---
 
@@ -110,8 +110,8 @@
 | Priority | Count | Action |
 |----------|-------|--------|
 | P0 | 1 | Execute runbook immediately |
-| P1 | 1 | ~~2~~ → 1 (shai-hulud completed) |
-| P2 | 3 | Coordinate dependencies |
+| P1 | 0 | ~~1~~ → 0 (branch-protection blocked on admin token) |
+| P2 | 2 | ~~3~~ → 2 (subsumption-bundle-framework completed) |
 | P3 | 5 | Keep deferred |
 
 ## Changes Made (2026-02-06)
