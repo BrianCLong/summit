@@ -6,4 +6,4 @@ requests==2.32.5
 ipinfo==5.4.0
 transformers==5.1.0
 torch==2.10.0
-sentencepiece
+sentencepiece==0.2.1
