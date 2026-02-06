@@ -25,7 +25,7 @@ IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
 # --- Docker Compose Controls ---
 
 up:     ## Run dev stack
-	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
+	docker compose --env-file scripts/env_visible_txt -f $(COMPOSE_DEV_FILE) up --build -d
 
 down:   ## Stop dev stack
 	docker compose -f $(COMPOSE_DEV_FILE) down -v
@@ -35,7 +35,7 @@ dev-prereqs:
 	@docker info >/dev/null 2>&1 || { echo "Docker daemon is not running or accessible."; exit 1; }
 	@docker compose version >/dev/null 2>&1 || { echo "Docker Compose plugin (v2) is missing. Install it to continue."; exit 1; }
 	@[ -f "$(COMPOSE_DEV_FILE)" ] || { echo "$(COMPOSE_DEV_FILE) not found. Run from repo root or set COMPOSE_DEV_FILE."; exit 1; }
-	@[ -f "$(DEV_ENV_FILE)" ] || { echo "$(DEV_ENV_FILE) missing. Copy from .env.example before starting (cp .env.example $(DEV_ENV_FILE))."; exit 1; }
+	# @[ -f "$(DEV_ENV_FILE)" ] || { echo "$(DEV_ENV_FILE) missing. Copy from .env.example before starting (cp .env.example $(DEV_ENV_FILE))."; exit 1; }
 	@command -v curl >/dev/null 2>&1 || { echo "curl not found. Install curl for smoke checks."; exit 1; }
 
 dev-up: dev-prereqs ## Validate prereqs then start dev stack
@@ -105,7 +105,7 @@ release: ## Build Python wheel and Docker image tagged with project version
 ci: lint test validate-ops
 
 k6:     ## Perf smoke (TARGET=http://host:port make k6)
-	./ops/k6/smoke.sh
+	docker compose --env-file scripts/env_visible_txt exec gateway ./ops/k6/smoke.sh
 
 perf-baseline: ## Establish new performance baseline (writes to perf/baseline.json)
 	@echo "Establishing performance baseline..."

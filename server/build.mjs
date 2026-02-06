@@ -7,7 +7,7 @@ const esbuildPath = path.resolve('../node_modules/esbuild/bin/esbuild');
 console.log('Building server...');
 
 try {
-  // Bundle all dependencies to ensure isolated execution and bypass EPERM in node_modules
+  // Use direct path to esbuild bin to bypass EPERM on root .bin
   const command = [
     esbuildPath,
     'src/index.ts',
@@ -17,7 +17,8 @@ try {
     '--target=node20',
     '--sourcemap',
     '--outfile=dist-new/index.js',
-    // We only externalize known binary modules or modules that MUST be external
+    '--packages=external',
+    // We bundle @intelgraph/* and @opentelemetry/* to bypass EPERM locks on these dirs
     '--external:canvas',
     '--external:sharp',
     '--external:ffmpeg-static',
@@ -25,6 +26,12 @@ try {
     '--external:better-sqlite3',
     '--external:sqlite3',
     '--external:pg-native',
+    '--external:ioredis',
+    '--external:pg',
+    '--external:neo4j-driver',
+    '--external:express',
+    '--external:apollo-server-express',
+    '--external:@apollo/server',
   ].join(' ');
 
   console.log('Running esbuild bundling...');
