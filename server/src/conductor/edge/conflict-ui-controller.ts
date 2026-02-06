@@ -21,7 +21,7 @@ export class ConflictUIController {
    */
   async getConflictDeltas(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = req.params.entityId as string;
       const tenantId = req.headers['x-tenant-id'] as string;
 
       if (!tenantId) {
@@ -87,7 +87,7 @@ export class ConflictUIController {
    */
   async resolveConflicts(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = req.params.entityId as string;
       const tenantId = req.headers['x-tenant-id'] as string;
       const { manualOverrides, approver, resolutionRationale } = req.body;
 
@@ -176,7 +176,7 @@ export class ConflictUIController {
    */
   async getConflictHistory(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = req.params.entityId as string;
       const tenantId = req.headers['x-tenant-id'] as string;
       const limit = parseInt(req.query.limit as string) || 50;
 

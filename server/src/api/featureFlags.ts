@@ -92,7 +92,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Get a specific feature flag evaluation
   router.get('/:flagKey', async (req: Request, res: Response) => {
     try {
-      const { flagKey } = req.params;
+      const flagKey = req.params.flagKey as string;
 
       // Extract context from request
       const context: EvaluationContext = {
@@ -199,7 +199,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   // Get configuration values
   router.get('/config/:key', async (req: Request, res: Response) => {
     try {
-      const { key } = req.params;
+      const key = req.params.key as string;
       const environment = req.query.env as string || process.env.NODE_ENV || 'development';
 
       const value = await deps.configService.getConfig(key, environment);

@@ -23,14 +23,14 @@ export const listExperiments = (req: Request, res: Response) => {
 };
 
 export const stopExperiment = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     experimentService.stopExperiment(id);
     res.status(200).json({ status: 'stopped' });
 };
 
 // Internal endpoint to check assignment (useful for debugging or client-side assignment via API)
 export const getAssignment = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const user = (req as any).user; // Assumes auth middleware populated user
 
     if (!user) {
