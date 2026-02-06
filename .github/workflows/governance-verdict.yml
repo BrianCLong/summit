@@ -1,0 +1,52 @@
+name: GovernanceVerdict
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  verdict:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare inputs (SBOM, signatures, provenance)
+        run: |
+          node scripts/ci/collect_inputs.mjs > /tmp/inputs.json
+          node scripts/ci/sha256sum.mjs /tmp/inputs.json > /tmp/inputs.sha
+          echo "EVIDENCE_ID=EV-$(date -u +%Y-%m-%d)-${{ github.run_id }}-${{ github.run_attempt }}" >> $GITHUB_ENV
+
+      - name: Pull policy repo
+        uses: actions/checkout@v4
+        with:
+          repository: your-org/summit-policy
+          path: summit-policy
+          ref: main
+
+      - name: Install OPA + jq
+        run: |
+          curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x /usr/local/bin/opa
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Evaluate policy
+        id: eval
+        run: |
+          export INPUTS_SHA256=$(cat /tmp/inputs.sha)
+          opa eval -I -f json -d summit-policy/policies -i /tmp/inputs.json 'data.summit.supply_chain.verdict' \
+          | jq '.result[0].expressions[0].value' \
+          | jq --arg eid "$EVIDENCE_ID" --arg sha "$INPUTS_SHA256" '. + {evidence_id:$eid, inputs_sha256:$sha}' \
+          | tee governance_verdict.json
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance_verdict
+          path: governance_verdict.json
+
+      - name: Fail on FAIL
+        run: |
+          test "$(jq -r .verdict governance_verdict.json)" = "PASS"

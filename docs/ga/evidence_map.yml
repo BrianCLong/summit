@@ -10,3 +10,16 @@ required:
     artifact: docs/governance/GOVERNANCE_ACCEPTANCE.md
   - id: graph-sync-validator
     artifact: packages/graph-sync-validator/metrics.json
+evidence_ids:
+  - evidence_id: EV-2026-02-05-00123
+    artifacts:
+      - path: artifacts/sbom/spdx.json
+        type: sbom
+      - path: artifacts/provenance/intoto.jsonl
+        type: provenance
+      - path: governance_verdict.json
+        type: policy-verdict
+    controls:
+      - SOC2: CC7.2
+      - ISO27001: A.8.8
+      - SSDF: PW.6.1
