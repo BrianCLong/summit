@@ -1,0 +1,54 @@
+[
+  {
+    "tenant_id": "tenant-alpha",
+    "source": "m365",
+    "occurred_at": "2026-01-15T12:00:00.000Z",
+    "event_type": "saas.audit",
+    "actor": {
+      "id": "user-123",
+      "type": "identity",
+      "display": "Avery Chen"
+    },
+    "target": {
+      "id": "file-456",
+      "type": "object",
+      "display": "roadmap.xlsx"
+    },
+    "action": "file.read",
+    "payload": {
+      "resource": "OneDrive",
+      "ip": "203.0.113.10",
+      "app_id": "app-987"
+    },
+    "raw_ref": {
+      "source_event_id": "evt-001",
+      "storage_ref": "m365/audit/evt-001"
+    }
+  },
+  {
+    "tenant_id": "tenant-alpha",
+    "source": "slack",
+    "occurred_at": "2026-01-15T12:10:00.000Z",
+    "event_type": "saas.collab",
+    "actor": {
+      "id": "user-456",
+      "type": "identity",
+      "display": "Riley Diaz"
+    },
+    "target": {
+      "id": "channel-ops",
+      "type": "resource",
+      "display": "#ops-secrets"
+    },
+    "action": "channel.read",
+    "payload": {
+      "channel_id": "channel-ops",
+      "message_count": 3,
+      "client": "desktop"
+    },
+    "raw_ref": {
+      "source_event_id": "evt-044",
+      "storage_ref": "slack/audit/evt-044"
+    }
+  }
+]
