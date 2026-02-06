@@ -316,6 +316,21 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+  verify-evidence:
+    name: Evidence Index Validation
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Validate evidence index and schemas
+        run: node .github/scripts/verify-evidence.mjs
+
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
@@ -413,6 +428,7 @@ jobs:
       - provenance
       - schema-validation
       - compliance-evidence
+      - verify-evidence
       - ga-evidence-completeness
     if: always()
     steps:
@@ -426,6 +442,7 @@ jobs:
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
+          echo "Evidence Index Validation: ${{ needs.verify-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
           echo ""
 
@@ -450,6 +467,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.verify-evidence.result }}" != "success" ]]; then
+            echo "::error::Evidence Index Validation FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -466,6 +488,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence Index Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY

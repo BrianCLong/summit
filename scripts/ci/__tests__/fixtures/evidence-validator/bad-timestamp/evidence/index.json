@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-TEST-BAD-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    }
+  ]
+}
