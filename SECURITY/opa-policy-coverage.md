@@ -160,11 +160,16 @@ The following job processors have been updated to use the OPA wrapper:
 5. `report.processor.ts` - Report generation
 6. `webhook.processor.ts` - Webhook handling
 
-**Remaining Processors:**
-- `retentionProcessor.ts` - Data retention (may need special handling)
-- `soc2EvidenceJob.ts` - SOC2 evidence collection
-- `ingestion.processor.ts` - Alternate ingestion (duplicate to review)
-- `resource-janitor.ts` - Cleanup jobs (system-level, may bypass OPA)
+**Explicitly Excluded Processors (with rationale):**
+1. `resource-janitor.ts` - System housekeeping (cleans stale runs); no user context, internal maintenance only
+2. `soc2EvidenceJob.ts` - SOC2 evidence collection; uses pg-boss, system-scheduled, no external input
+3. `retentionProcessor.ts` - Data retention purge; system-scheduled, operates on internal datasets
+4. `ingestion.processor.ts` - Deprecated stub (superseded by `ingestionProcessor.ts`); should be removed
+
+**Exclusion Criteria:**
+- System-level jobs with no user context/input
+- Jobs triggered by internal schedulers (not user requests)
+- Jobs that don't process external/untrusted data
 
 ---
 
