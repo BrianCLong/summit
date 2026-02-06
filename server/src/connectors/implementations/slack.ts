@@ -68,4 +68,9 @@ export class SlackConnector extends BaseConnector {
       });
       return stream;
   }
+
+  async writeRecords(_records: any[]): Promise<void> {
+    // Slack could support sending messages, but not implemented yet
+    throw new Error('SlackConnector write support not yet implemented');
+  }
 }

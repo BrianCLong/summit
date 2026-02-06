@@ -30,4 +30,8 @@ export class JDBCConnector extends BaseConnector {
       stream.push(null);
       return stream;
   }
+
+  async writeRecords(_records: any[]): Promise<void> {
+    throw new Error('JDBCConnector write support not yet implemented');
+  }
 }

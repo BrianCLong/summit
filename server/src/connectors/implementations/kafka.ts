@@ -70,4 +70,10 @@ export class KafkaConnector extends BaseConnector {
 
     return stream;
   }
+
+  async writeRecords(_records: any[]): Promise<void> {
+    // In a real implementation, this would publish messages to Kafka
+    // For now, this is a read-only connector
+    throw new Error('KafkaConnector write support not yet implemented');
+  }
 }
