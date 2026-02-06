@@ -1,0 +1,27 @@
+[
+  {
+    "tenant_id": "tenant-123",
+    "artifact_id": "art-001",
+    "artifact_type": "foia_response",
+    "jurisdiction": "US",
+    "agency_or_court": "EPA",
+    "date_published": "2023-10-01T00:00:00Z",
+    "access_level": "public",
+    "content_hash": "hash123",
+    "provenance": ["foia.gov"],
+    "confidence": 1.0
+  },
+  {
+    "tenant_id": "tenant-123",
+    "artifact_id": "art-002",
+    "artifact_type": "filing",
+    "jurisdiction": "US",
+    "agency_or_court": "SEC",
+    "case_or_docket_id": "000-12345",
+    "date_published": "2023-11-15T00:00:00Z",
+    "access_level": "public",
+    "content_hash": "hash456",
+    "provenance": ["sec.gov"],
+    "confidence": 1.0
+  }
+]

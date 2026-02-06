@@ -1,0 +1,39 @@
+type RENArtifact {
+  id: ID!
+  type: String!
+  jurisdiction: String!
+  agencyOrCourt: String!
+  accessLevel: String!
+  intelligenceYieldScore: Float
+}
+
+type RENFinding {
+  id: ID!
+  scenarioId: String!
+  insights: [RENInsight!]!
+  moves: [RENMove!]!
+  score: Float!
+}
+
+type RENInsight {
+  id: ID!
+  sensitivity: String!
+  description: String!
+  supportingArtifacts: [RENArtifact!]!
+}
+
+type RENMove {
+  id: ID!
+  type: String!
+  rationale: String!
+  legalFriction: Float
+}
+
+type Query {
+  renFindings(tenantId: String!): [RENFinding!]!
+  renArtifacts(tenantId: String!): [RENArtifact!]!
+}
+
+type Mutation {
+  runDegSimulation(tenantId: String!, scenarioId: String): RENFinding!
+}
