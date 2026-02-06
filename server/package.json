@@ -47,6 +47,7 @@
     "@graphql-tools/schema": "10.0.30",
     "@intelgraph/feature-flags": "workspace:*",
     "@intelgraph/maestro-core": "workspace:*",
+    "@intelgraph/provenance": "workspace:*",
     "@intelgraph/telemetry-config": "file:../packages/telemetry-config",
     "@intelgraph/context-shell": "workspace:*",
     "@node-saml/node-saml": "^5.1.0",
