@@ -473,6 +473,30 @@ const mainSchema = `
     tenantId: String!
   }
 
+  type OsintScan {
+    id: ID!
+    target: String!
+    status: String!
+  }
+
+  type SynintAgentFinding {
+    agentName: String!
+    success: Boolean!
+    findings: JSON!
+    errors: [String!]
+    warnings: [String!]
+    startedAt: DateTime
+    completedAt: DateTime
+  }
+
+  type SynintSweep {
+    target: String!
+    startedAt: DateTime!
+    completedAt: DateTime!
+    agents: [SynintAgentFinding!]!
+    meta: JSON
+  }
+
   input CognitiveExposureInput {
     segmentId: ID!
     narrativeId: ID!
@@ -549,6 +573,8 @@ const mainSchema = `
     case(id: ID!, reason: String!, legalBasis: String!): Case
     cases(status: String, compartment: String, limit: Int, offset: Int): [Case!]
     comments(targetType: String!, targetId: String!, limit: Int, offset: Int): [Comment!]
+    osintScans: [OsintScan]
+    osintScan(id: ID!): OsintScan
     health: JSON
   }
 
@@ -635,6 +661,8 @@ const mainSchema = `
     addComment(input: CommentInput!): Comment!
     updateComment(id: ID!, content: String!): Comment!
     deleteComment(id: ID!): Boolean!
+    startOsintScan(target: String!): OsintScan
+    runSynintSweep(target: String!): SynintSweep!
   }
 
   type Subscription {

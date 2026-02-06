@@ -2,12 +2,12 @@ version: '3.9'
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: summit-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
-      POSTGRES_USER: ${POSTGRES_USER:-summit}
+      POSTGRES_DB: ${POSTGRES_DB:-intelgraph}
+      POSTGRES_USER: ${POSTGRES_USER:-intelgraph}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
     ports:
       - '5432:5432'
@@ -202,8 +202,8 @@ services:
 
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/web/Dockerfile.dev
     container_name: summit-web
     restart: unless-stopped
     env_file:
@@ -253,7 +253,7 @@ services:
       HEARTBEAT_INTERVAL: "30000"
       HEARTBEAT_TIMEOUT: "60000"
     ports:
-      - '9001:9001'
+      - '9002:9001'
     depends_on:
       redis:
         condition: service_healthy
@@ -338,7 +338,7 @@ services:
       COLLECTOR_OTLP_ENABLED: true
       SPAN_STORAGE_TYPE: memory
     ports:
-      - '16686:16686' # Jaeger UI
+      - '16687:16686' # Jaeger UI (changed from 16686)
       - '14268:14268' # Jaeger collector HTTP
     networks:
       - summit
@@ -418,8 +418,8 @@ services:
 
   agentic-mesh-evaluation:
     build:
-      context: ./services/agentic-mesh-evaluation
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/agentic-mesh-evaluation/Dockerfile
     container_name: summit-agentic-mesh-evaluation
     restart: unless-stopped
     environment:
