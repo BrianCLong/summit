@@ -1,6 +1,6 @@
-
 import { logger } from '../../config/logger.js';
 import { globalTrafficSteering } from './GlobalTrafficSteering.js';
+import { differentialPrivacyService } from '../../services/DifferentialPrivacyService.js';
 
 export interface FederatedSubQuery {
   region: string;
@@ -16,8 +16,8 @@ export interface ExecutionPlan {
 }
 
 /**
- * Service for Federated Mesh Query Planning (Task #111).
- * Decomposes global queries into regional execution units.
+ * Service for Federated Mesh Query Planning (Task #111 & #113).
+ * Decomposes global queries into regional execution units and guards results with DP.
  */
 export class FederatedQueryPlanner {
   private static instance: FederatedQueryPlanner;
@@ -33,28 +33,22 @@ export class FederatedQueryPlanner {
 
   /**
    * Plans a global query execution across the region mesh.
-   * Uses "Push-Down Reasoning" to optimize execution at the edge.
    */
   public async planQuery(query: string, tenantId: string, params: Record<string, any> = {}): Promise<ExecutionPlan> {
     logger.info({ query, tenantId }, 'FederatedQueryPlanner: Planning execution');
 
-    // 1. Resolve target regions for the tenant
-    // In a global mesh, we might need to query the primary and specific secondary regions
     const decision = await globalTrafficSteering.resolveRegion(tenantId);
     const targetRegions = [decision.targetRegion];
     
-    // Simulating discovery of data in other regions (e.g. for global investigations)
     if (params.globalSearch === true) {
         targetRegions.push('eu-central-1', 'ap-southeast-1');
     }
 
     const subQueries: FederatedSubQuery[] = [];
 
-    // 2. Decompose query into regional units with Push-Down Filters
     for (const region of targetRegions) {
       const pushedDownFilters: string[] = [];
       
-      // Heuristic: Extract WHERE clauses to push down
       if (query.includes('WHERE')) {
           pushedDownFilters.push('temporal_filter');
           pushedDownFilters.push('tenant_isolation');
@@ -76,11 +70,35 @@ export class FederatedQueryPlanner {
   }
 
   /**
-   * Rewrites a global query to be compatible with regional shard schemas.
+   * Executes the plan and applies Sovereign Guards (DP).
    */
+  public async executeFederatedQuery(plan: ExecutionPlan): Promise<any> {
+    // Simulate execution results
+    const rawResults = plan.subQueries.map(sq => {
+      if (plan.mergeStrategy === 'AGGREGATE') {
+        return { region: sq.region, value: Math.floor(Math.random() * 100) };
+      }
+      return { region: sq.region, data: 'Simulated Result' };
+    });
+
+    // If cross-region aggregation, apply Differential Privacy
+    if (plan.mergeStrategy === 'AGGREGATE' && plan.subQueries.length > 1) {
+      const total = rawResults.reduce((acc: number, curr: any) => acc + curr.value, 0);
+      
+      // Apply DP to the aggregate
+      const guarded = differentialPrivacyService.guardResult(
+        { value: total }, 
+        'AGGREGATE'
+      );
+      
+      logger.info({ original: total, guarded: guarded.value }, 'FederatedQueryPlanner: Applied DP to sovereign aggregate');
+      return guarded;
+    }
+
+    return rawResults;
+  }
+
   private rewriteForRegion(query: string, region: string): string {
-    // Simulated query rewriting
-    // e.g. adding region-specific index hints or local schema prefixes
     return `/* Region: ${region} */ ${query}`;
   }
 }
