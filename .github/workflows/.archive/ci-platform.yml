@@ -31,8 +31,7 @@ jobs:
           cache: 'pip'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: |

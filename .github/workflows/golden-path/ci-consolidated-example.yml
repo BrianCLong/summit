@@ -43,8 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
+      - uses: pnpm/action-setup@v4
       
       - uses: actions/setup-node@v4 # v4
         with:
@@ -99,8 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
+      - uses: pnpm/action-setup@v4
       
       - uses: actions/setup-node@v4 # v4
         with:
@@ -173,8 +171,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
+      - uses: pnpm/action-setup@v4
       
       - uses: actions/setup-node@v4 # v4
         with:

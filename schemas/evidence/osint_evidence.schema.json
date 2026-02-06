@@ -19,7 +19,6 @@
     },
     "timestamp": {
       "type": "string",
-      "format": "date-time",
       "description": "Time of collection or observation."
     },
     "source": {

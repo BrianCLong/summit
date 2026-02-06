@@ -52,6 +52,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v4
         with:
+          node-version: ${{ inputs.node-version }}
           cache: pnpm
 
       - name: Install canary dependencies

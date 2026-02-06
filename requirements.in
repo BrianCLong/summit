@@ -16,10 +16,9 @@ prometheus_client
 langchain_community
 pytest-cov
 requests
-neo4j
-pytest-mock
 urllib3>=2.6.0
 openlineage-dbt
 jsonschema
 beautifulsoup4
 deepdiff
+neo4j

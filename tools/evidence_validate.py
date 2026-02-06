@@ -44,15 +44,27 @@ def check_timestamps(data: Any, path: str, allowed: bool) -> bool:
 def main():
     parser = argparse.ArgumentParser(description="Validate evidence artifacts against schemas.")
     parser.add_argument("--schemas", required=True, help="Directory containing schemas")
-    parser.add_argument("--evidence", required=True, help="Root directory for evidence")
+    parser.add_argument("--index", help="Path to evidence index.json")
+    parser.add_argument("--evidence", help="Root directory for evidence (legacy)")
     args = parser.parse_args()
 
     # Load Schemas
+    def get_schema(name):
+        p1 = os.path.join(args.schemas, name)
+        if os.path.exists(p1): return load_json(p1)
+        # Try fallback if schemas dir is just evidence/schemas vs evidence/schema
+        alt = "schema" if "schemas" in args.schemas else "schemas"
+        p2 = os.path.join(os.path.dirname(args.schemas), alt, name)
+        if os.path.exists(p2): return load_json(p2)
+        # Try one more: maybe it is just in the directory provided
+        p3 = os.path.join(args.schemas, name)
+        return load_json(p3)
+
     try:
-        index_schema = load_json(os.path.join(args.schemas, "index.schema.json"))
-        report_schema = load_json(os.path.join(args.schemas, "report.schema.json"))
-        metrics_schema = load_json(os.path.join(args.schemas, "metrics.schema.json"))
-        stamp_schema = load_json(os.path.join(args.schemas, "stamp.schema.json"))
+        index_schema = get_schema("index.schema.json")
+        report_schema = get_schema("report.schema.json")
+        metrics_schema = get_schema("metrics.schema.json")
+        stamp_schema = get_schema("stamp.schema.json")
     except Exception as e:
         print(f"Failed to load schemas: {e}")
         sys.exit(1)
@@ -61,7 +73,11 @@ def main():
         sys.exit(1)
 
     # Validate Index
-    index_path = os.path.join(args.evidence, "index.json")
+    index_path = args.index or os.path.join(args.evidence, "index.json") if args.evidence else None
+    if not index_path:
+        print("Error: Either --index or --evidence must be provided.")
+        sys.exit(1)
+
     index_data = load_json(index_path)
     if index_data is None:
         sys.exit(1)

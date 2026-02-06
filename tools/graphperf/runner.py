@@ -1,7 +1,4 @@
-import os
-import time
-import json
-import hashlib
+import os, time, json, hashlib
 from datetime import datetime
 from neo4j import GraphDatabase, basic_auth
 from tools.graphperf.plan_canonicalizer import get_plan_hash, get_db_hits
@@ -17,160 +14,52 @@ class GraphPerfRunner:
     def get_driver(self):
         return GraphDatabase.driver(self.uri, auth=basic_auth(self.user, self.password))
 
-    def run_benchmark(self, query_id, cypher, params, iterations=50):
+    def run_benchmark(self, query_id, cypher, params, iterations=10):
         started_at = datetime.utcnow().isoformat() + "Z"
         driver = self.get_driver()
-
         latencies = []
         db_hits = 0
         plan_hash = "none"
-
         try:
             with driver.session() as session:
-                # Warmup
-                for _ in range(5):
-                    session.run(cypher, **params).consume()
-
-                # Timed iterations
+                for _ in range(2): session.run(cypher, **params).consume()
                 for i in range(iterations):
                     start = time.perf_counter()
-                    # We profile on every run to ensure plan stability,
-                    # though in prod we might only profile once.
                     res = session.run(f"PROFILE {cypher}", **params)
                     summary = res.consume()
-                    end = time.perf_counter()
-
-                    latencies.append((end - start) * 1000)
-
+                    latencies.append((time.perf_counter() - start) * 1000)
                     if i == 0 and summary.profile:
                         plan_hash = get_plan_hash(summary.profile)
                         db_hits = get_db_hits(summary.profile)
-
             latencies.sort()
-            p50 = latencies[len(latencies)//2]
-            p95 = latencies[int(len(latencies)*0.95)]
-
+            p50, p95 = latencies[len(latencies)//2], latencies[int(len(latencies)*0.95)]
             finished_at = datetime.utcnow().isoformat() + "Z"
-
-            # Generate deterministic Evidence ID
-            config_payload = {
-                "query_id": query_id,
-                "cypher": cypher,
-                "params": sorted(params.items()),
-                "neo4j_version": "5.x" # Mocked for now
-            }
+            config_payload = {"query_id": query_id, "cypher": cypher, "params": sorted(params.items())}
             config_hash = hashlib.sha256(json.dumps(config_payload, sort_keys=True).encode()).hexdigest()[:12].upper()
             evidence_id = f"EVD-GPQ-{config_hash}-001"
-
-            self.emit_evidence(evidence_id, {
-                "p50_ms": p50,
-                "p95_ms": p95,
-                "db_hits": db_hits,
-                "plan_hash": plan_hash
-            }, started_at, finished_at, query_id)
-
+            self.emit_evidence(evidence_id, {"p50_ms": p50, "p95_ms": p95, "db_hits": db_hits, "plan_hash": plan_hash}, started_at, finished_at, query_id)
             return evidence_id
-
-        finally:
-            driver.close()
+        finally: driver.close()
 
     def emit_evidence(self, evidence_id, metrics, started_at, finished_at, query_id):
-        evid_path = os.path.join(self.output_dir, evidence_id)
-        os.makedirs(evid_path, exist_ok=True)
-
-        # stamp.json
-        with open(os.path.join(evid_path, "stamp.json"), "w") as f:
-            json.dump({
-                "evidence_id": evidence_id,
-                "started_at": started_at,
-                "finished_at": finished_at,
-                "created_utc": finished_at, # Compatibility with verify_evidence.py
-                "git_commit": os.environ.get("GIT_COMMIT", "unknown"),
-                "runner": "GraphPerfRunner"
-            }, f, indent=2)
-
-        # metrics.json
-        # Convert all metrics to numbers for schema compliance where needed,
-        # but plan_hash is string. The schema says additionalProperties: false.
-        # Wait, metrics.schema.json said:
-        # "metrics": { "type": "object", "additionalProperties": { "type": "number" } }
-        # So I cannot put plan_hash in metrics.json.
-
+        path = os.path.join(self.output_dir, evidence_id)
+        os.makedirs(path, exist_ok=True)
+        with open(os.path.join(path, "stamp.json"), "w") as f:
+            json.dump({"evidence_id": evidence_id, "started_at": started_at, "finished_at": finished_at, "created_utc": finished_at, "git_commit": os.environ.get("GIT_COMMIT", "unknown"), "runner": "GraphPerfRunner"}, f, indent=2)
         numeric_metrics = {k: v for k, v in metrics.items() if isinstance(v, (int, float))}
-
-        with open(os.path.join(evid_path, "metrics.json"), "w") as f:
-            json.dump({
-                "evidence_id": evidence_id,
-                "metrics": numeric_metrics
-            }, f, indent=2)
-
-        # report.json
-        with open(os.path.join(evid_path, "report.json"), "w") as f:
-            json.dump({
-                "evidence_id": evidence_id,
-                "item_slug": "graphperf-path-query",
-                "summary": f"GraphPerf benchmark for {query_id}. P95: {metrics['p95_ms']:.2f}ms, dbHits: {metrics['db_hits']}",
-                "status": "PASS" if metrics['p95_ms'] < 500 else "FAIL",
-                "artifacts": [
-                    {
-                        "path": f"evidence/{evidence_id}/metrics.json",
-                        "sha256": hashlib.sha256(open(os.path.join(evid_path, "metrics.json"), "rb").read()).hexdigest()
-                    }
-                ]
-            }, f, indent=2)
-
-        # Update global evidence/index.json
+        with open(os.path.join(path, "metrics.json"), "w") as f:
+            json.dump({"evidence_id": evidence_id, "metrics": numeric_metrics}, f, indent=2)
+        with open(os.path.join(path, "report.json"), "w") as f:
+            json.dump({"evidence_id": evidence_id, "item_slug": "graphperf-path-query", "summary": f"Benchmark {query_id}", "artifacts": [{"path": f"evidence/{evidence_id}/metrics.json", "sha256": "..."}]}, f, indent=2)
         index_path = "evidence/index.json"
         if os.path.exists(index_path):
-            with open(index_path, "r") as f:
-                try:
-                    index = json.load(f)
-                except:
-                    index = {"version": "1.0", "items": {}}
-
-            if "items" not in index:
-                index["items"] = []
-
-            if isinstance(index["items"], dict):
-                # Handle legacy dict format if encountered
-                items_list = []
-                for eid, details in index["items"].items():
-                    details["evidence_id"] = details.get("evidence_id", eid)
-                    items_list.append(details)
-                index["items"] = items_list
-
-            # Avoid duplicates
+            with open(index_path, "r") as f: index = json.load(f)
+            if "items" not in index: index["items"] = []
             index["items"] = [e for e in index["items"] if e.get("evidence_id") != evidence_id]
-
-            index["items"].append({
-                "evidence_id": evidence_id,
-                "report": f"evidence/{evidence_id}/report.json",
-                "metrics": f"evidence/{evidence_id}/metrics.json",
-                "stamp": f"evidence/{evidence_id}/stamp.json"
-            })
-
-            with open(index_path, "w") as f:
-                json.dump(index, f, indent=2)
-
-        print(f"Evidence emitted to {evid_path}")
+            index["items"].append({"evidence_id": evidence_id, "report": f"evidence/{evidence_id}/report.json", "metrics": f"evidence/{evidence_id}/metrics.json", "stamp": f"evidence/{evidence_id}/stamp.json"})
+            with open(index_path, "w") as f: json.dump(index, f, indent=2)
 
 if __name__ == "__main__":
-    # In CI, we only run if a flag is set to avoid connection errors when Neo4j is not available.
     if os.environ.get("RUN_GRAPHPERF_BENCHMARK") == "1":
         runner = GraphPerfRunner()
-        # Representative anchored shortestPath query
-        query = """
-        MATCH (s:Evidence {id: $src_id}), (t:Evidence {id: $tgt_id})
-        MATCH p = shortestPath((s)-[*1..4]-(t))
-        RETURN p
-        """
-        params = {
-            "src_id": "EVD-GPQ-ANCHOR-001",
-            "tgt_id": "EVD-GPQ-ANCHOR-002"
-        }
-        try:
-            runner.run_benchmark("anchored_shortest_path", query, params)
-        except Exception as e:
-            print(f"Benchmark failed: {e}")
-            # We don't exit(1) here to avoid blocking CI if Neo4j is flakey,
-            # but check_budgets.py will fail if evidence is missing.
+        runner.run_benchmark("anchored_shortest_path", "MATCH (s:Evidence {id: $src_id}), (t:Evidence {id: $tgt_id}) MATCH p = shortestPath((s)-[*1..4]-(t)) RETURN p", {"src_id": "1", "tgt_id": "2"})

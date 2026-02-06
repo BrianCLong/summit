@@ -34,8 +34,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@v2
-        with:
+      - uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Get pnpm store directory
@@ -87,8 +86,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@v2
-        with:
+      - uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Get pnpm store directory
@@ -126,8 +124,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@v2
-        with:
+      - uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Get pnpm store directory

@@ -137,7 +137,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -181,7 +180,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -222,7 +220,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -300,7 +297,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -378,7 +374,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -464,7 +459,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -523,7 +517,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -592,7 +585,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

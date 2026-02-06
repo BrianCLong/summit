@@ -38,8 +38,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
+        uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Enable corepack
@@ -417,8 +416,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
+        uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Enable corepack
@@ -491,8 +489,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
+        uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Enable corepack

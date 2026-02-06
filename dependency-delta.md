@@ -1,16 +1,13 @@
 # Dependency Delta
 
 ## Added Dependencies
-- `neo4j`: Required for GraphPerf benchmark runner and index health checks.
-- `pytest-mock`: Required for unit testing GraphPerf components with mocked Neo4j drivers.
+- None
 
 ## Removed Dependencies
 - None
 
 ## Rationale
-- These dependencies are required for the new "GraphPerf: Path Query Accelerator" module, which includes database migrations, query shaping, and performance benchmarking.
+- Explain why these changes were made.
 
 ## License Check
-- [x] All new dependencies have compatible licenses (Apache-2.0, MIT, etc.)
-  - `neo4j`: Apache-2.0
-  - `pytest-mock`: MIT
+- [ ] All new dependencies have compatible licenses (Apache-2.0, MIT, etc.)
