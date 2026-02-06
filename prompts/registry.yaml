@@ -392,6 +392,38 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: data-consistency-digest-gate
+    version: v1
+    path: prompts/ci/data-consistency-digest-gate@v1.md
+    sha256: d0d1a5e71e41fcea21c7d62c95a3a1c4209e0266e4450243885bcd5125b73a54
+    description: Deterministic Postgres/Neo4j digest parity gate with CI evidence artifacts.
+    scope:
+      paths:
+        - db/consistency/
+        - graph/consistency/
+        - scripts/ci/
+        - docs/standards/data-consistency-digests.md
+        - docs/security/data-handling/data-consistency-digests.md
+        - docs/ops/runbooks/data-consistency-gate.md
+        - .github/workflows/data-consistency.yml
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/ci/data-consistency-digest-gate@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ci
+        - governance
+        - documentation
+        - data-integrity
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: proof-carrying-plans-evidence-replay
     version: v1
     path: prompts/maestro/proof-carrying-plans-evidence-replay.md

@@ -33,3 +33,11 @@
 
 1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
 2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+
+## Assumptions to validate (consistency gate)
+- Postgres accessible from CI (or via service containers)
+- Neo4j accessible from CI (or via service containers)
+- Neo4j has APOC installed/enabled
+- Postgres has pgcrypto available/enabled (CREATE EXTENSION)
+- Scripts folder exists at scripts/ci/
+- artifacts/ is acceptable for CI artifacts

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-14T00:00:00Z",
+  "revision_note": "Added data consistency digest gate planning and evidence artifacts.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -169,6 +169,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
+    },
+    {
+      "id": "data-consistency-digest-gate",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic Postgres/Neo4j digest parity gate with evidence artifacts and CI wiring."
     }
   ],
   "summary": {
