@@ -370,12 +370,18 @@ export function FileUpload({
       `}</style>
 
       <div
-        className={`dropzone ${isDragging ? 'dragging' : ''} ${loading ? 'loading' : ''}`}
+        className={`dropzone ${isDragging ? 'dragging' : ''} ${loading ? 'loading' : ''} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
         role="button"
         tabIndex={0}
         aria-label="File upload dropzone"
@@ -409,7 +415,7 @@ export function FileUpload({
       />
 
       {errors.length > 0 && (
-        <div className="error-list">
+        <div className="error-list" role="alert" aria-live="polite">
           {errors.map((error, index) => (
             <div key={index} className="error-item">
               {error}
@@ -422,7 +428,7 @@ export function FileUpload({
       )}
 
       {uploadedFiles.length > 0 && (
-        <div className="uploaded-files">
+        <div className="uploaded-files" aria-live="polite">
           <h4>Uploaded Files</h4>
           {uploadedFiles.map((file) => (
             <div key={file.filename} className="uploaded-file">
