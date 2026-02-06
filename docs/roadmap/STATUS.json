@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-14T00:00:00Z",
+  "revision_note": "Added PEGra/BES standards, security data handling, and ops runbook documentation.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -135,6 +135,12 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
+      "id": "procurement-espionage-pegra-bes-docs",
+      "area": "docs/standards",
+      "status": "complete",
+      "summary": "Published PEGra/BES standards, data handling requirements, and operational runbook."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -172,11 +178,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 15,
+    "total": 16,
     "ga_blockers": []
   }
 }
