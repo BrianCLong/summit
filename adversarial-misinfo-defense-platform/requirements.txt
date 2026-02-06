@@ -34,7 +34,7 @@ pytesseract==0.3.13
 tqdm==4.67.3
 
 # Testing
-pytest>=6.2.0
+pytest==9.0.2
 pytest-cov>=2.12.0
 
 # Development
