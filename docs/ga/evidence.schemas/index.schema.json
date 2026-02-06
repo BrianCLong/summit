@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Index",
+  "type": "object",
+  "required": ["version", "evidence"],
+  "properties": {
+    "version": { "type": "string" },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    }
+  }
+}

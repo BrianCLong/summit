@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-06T07:39:53Z",
+  "revision_note": "Added VFS lane-1 scaffolding and evidence gate mappings.",
   "initiatives": [
+    {
+      "id": "deepagents-vfs-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Lane-1 VFS router/backends/tools/tests plus evidence scaffolding and required-checks mapping."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -144,7 +150,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -162,7 +168,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",

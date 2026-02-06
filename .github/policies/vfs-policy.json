@@ -1,0 +1,7 @@
+{
+  "version": "v1",
+  "default": "deny",
+  "mounts": [],
+  "rules": [],
+  "notes": "Deny-by-default policy surface for VFS mounts; populate allow rules per environment."
+}

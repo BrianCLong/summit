@@ -1,0 +1,68 @@
+{
+  "task_id": "VFS_LANE1_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "vfs-lane1-scaffold",
+    "version": "v1",
+    "sha256": "fc0381d65132214d5c0f6de91cbde27dc37187da1cbb9cc9127bc84af50f2aaf",
+    "path": "prompts/ops/vfs-lane1@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/agents/vfs/",
+      "tests/agents/vfs/",
+      "docs/architecture/vfs.md",
+      "docs/security/vfs-threat-model.md",
+      "docs/ga/evidence.schemas/",
+      "docs/ga/verification-map.json",
+      "docs/ga/MVP-4-GA-VERIFICATION.md",
+      "evidence/",
+      ".github/scripts/verify-evidence.ts",
+      ".github/policies/vfs-policy.json",
+      "agent-contract.json",
+      "required_checks.todo.md",
+      "reports/a11y-keyboard/README.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/ops/vfs-lane1@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": [
+      "agents",
+      "governance",
+      "evidence",
+      "docs",
+      "security",
+      "ci"
+    ],
+    "exclusions": [
+      "server/",
+      "client/",
+      "apps/web/"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "evidence/index.json",
+      "evidence/report.json",
+      "evidence/metrics.json",
+      "evidence/stamp.json",
+      "make ga-verify"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "VFS router/backends/tools compile and tests exist",
+    "Evidence bundle + verifier are present",
+    "GA verification map updated and sorted",
+    "Roadmap status updated"
+  ],
+  "stop_conditions": [
+    "Verification gates fail and cannot be resolved",
+    "Attempt to touch restricted paths without override"
+  ]
+}

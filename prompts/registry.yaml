@@ -1,5 +1,44 @@
 version: 1
 prompts:
+  - id: vfs-lane1-scaffold
+    version: v1
+    path: prompts/ops/vfs-lane1@v1.md
+    sha256: fc0381d65132214d5c0f6de91cbde27dc37187da1cbb9cc9127bc84af50f2aaf
+    description: Lane-1 VFS scaffolding with evidence bundle and GA verification updates.
+    scope:
+      paths:
+        - src/agents/vfs/
+        - tests/agents/vfs/
+        - docs/architecture/vfs.md
+        - docs/security/vfs-threat-model.md
+        - docs/ga/evidence.schemas/
+        - docs/ga/verification-map.json
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - evidence/
+        - .github/scripts/verify-evidence.ts
+        - .github/policies/vfs-policy.json
+        - agent-contract.json
+        - required_checks.todo.md
+        - reports/a11y-keyboard/README.md
+        - docs/roadmap/STATUS.json
+        - prompts/ops/vfs-lane1@v1.md
+        - prompts/registry.yaml
+      domains:
+        - agents
+        - governance
+        - evidence
+        - docs
+        - security
+        - ci
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
