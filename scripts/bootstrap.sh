@@ -22,7 +22,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-REQUIRED_NODE_VERSION="20.19.0"
+REQUIRED_NODE_VERSION="22.22.0"
 REQUIRED_PNPM_VERSION="10.0.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"

@@ -79,8 +79,10 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Unit Tests
-        run: pnpm -w test:unit || pnpm -w test:unit
+      - name: Unit Tests & Coverage
+        run: pnpm coverage:collect
+      - name: Verify Coverage Thresholds
+        run: pnpm coverage:gate
       - name: Attach evidence
         if: always()
         run: |
@@ -97,6 +99,33 @@ jobs:
         with:
           name: coverage-report
           path: server/coverage/
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: pnpm e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
   integration-test:
     runs-on: ubuntu-latest

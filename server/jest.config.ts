@@ -117,7 +117,6 @@ const config: Config = {
     'src/services/reporting/__tests__/',
     'src/logging/__tests__/',
     'src/jobs/__tests__/',
-    'tests/',
   ],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   moduleNameMapper: {
@@ -221,7 +220,9 @@ const config: Config = {
     '!src/**/*.d.ts',
   ],
   coverageProvider: 'v8',
-  coverageThreshold,
+  // Disable Jest internal thresholds due to "Cannot read properties of undefined (reading 'sync')" crash.
+  // Coverage enforcement is handled by `scripts/coverage-aggregate.js` in CI.
+  // coverageThreshold,
   coverageReporters: ['text', 'lcov', 'cobertura', 'json-summary'],
   coverageDirectory: '<rootDir>/coverage',
   testTimeout: 30000,
