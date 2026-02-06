@@ -1,11 +1,17 @@
 package maestro.deploy
+import future.keywords
 
 # Allow dev deploys only from maintainers and CI bots
 allow {
   input.env == "dev"
   some role
   role := input.actor.role
-  role == "maintainer" or role == "ci-bot"
+  role == "maintainer"
+}
+
+allow {
+  input.env == "dev"
+  input.actor.role == "ci-bot"
 }
 
 deny[msg] {

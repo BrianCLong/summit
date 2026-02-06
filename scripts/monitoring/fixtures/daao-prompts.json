@@ -1,4 +1,0 @@
-[
-  { "id": "p1", "text": "What is 2+2?", "expectedBand": "easy" },
-  { "id": "p2", "text": "Write a python script to scrape a website using asyncio. Analyze the performance difference compared to synchronous execution.", "expectedBand": "hard" }
-]

@@ -13,4 +13,3 @@ To ensure supply chain security, any change to the project's dependencies must b
 | --- | --- | --- | --- | --- |
 | 2026-01-30 | N/A | jsonschema | Added | Used for evidence bundle validation |
 | 2026-01-30 | N/A | PyYAML | Added | Used for detection rule parsing |
-| 2026-02-02 | N/A | None | None | Documentation update (Business Plan) |

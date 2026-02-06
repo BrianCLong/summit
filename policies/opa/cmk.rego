@@ -1,4 +1,5 @@
 package composer.cmk
+import future.keywords
 
 # Require CMK for artifacts in protected namespaces
 
@@ -19,7 +20,8 @@ allow {
 }
 
 # Wrapper decision
-package composer.decision_cmk
+# package composer.decision_cmk
+# import future.keywords
 
 decision := {
   "policy": "cmk",

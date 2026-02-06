@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import { ResidencyGuard, ResidencyViolationError } from '../data-residency/residency-guard.js';
-import { getCurrentRegion } from '../config/regional-config.js';
 
 export const residencyEnforcement = async (req: Request, res: Response, next: NextFunction) => {
     // Skip health checks and metrics
@@ -30,18 +29,8 @@ export const residencyEnforcement = async (req: Request, res: Response, next: Ne
         const { globalTrafficSteering } = await import('../runtime/global/GlobalTrafficSteering.js');
 
         const decision = await globalTrafficSteering.resolveRegion(tenantId);
-
-        // Active steering
-        const steering = await globalTrafficSteering.resolveSteeringAction(tenantId);
-        res.setHeader('X-Summit-Steering-Advice', steering.targetUrl || steering.action);
-        res.setHeader('X-Summit-Steering-Reason', steering.reason);
-
-        if (steering.action === 'REDIRECT') {
-            const config = await guard.getResidencyConfig(tenantId);
-            if (config?.residencyMode === 'strict') {
-                return res.status(307).redirect(steering.targetUrl!);
-            }
-        }
+        res.setHeader('X-Summit-Steering-Advice', decision.targetRegion);
+        res.setHeader('X-Summit-Steering-Reason', decision.reason);
 
         // Determine context.
         // For GET requests, it's mostly 'compute' (processing) + 'retrieval' (implied).
@@ -49,7 +38,7 @@ export const residencyEnforcement = async (req: Request, res: Response, next: Ne
         // For now, we enforce 'compute' residency for the API node handling the request.
         await guard.enforce(tenantId, {
             operation: 'compute',
-            targetRegion: getCurrentRegion(),
+            targetRegion: process.env.SUMMIT_REGION || process.env.REGION || 'us-east-1',
             dataClassification: 'internal' // Default
         });
 

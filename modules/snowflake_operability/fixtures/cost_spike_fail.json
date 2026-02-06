@@ -1,6 +1,0 @@
-[
-  {"marker": "late_data_policy", "status": "success"},
-  {"marker": "schema_contract", "status": "success"},
-  {"marker": "file_format_checks", "status": "success"},
-  {"marker": "cost_budget", "status": "failure", "details": "cost exceeded 120% of budget"}
-]
