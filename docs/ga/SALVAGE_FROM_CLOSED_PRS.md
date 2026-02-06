@@ -182,6 +182,7 @@ The root `tsconfig.json` was updated to reference only packages that can typeche
 - [GA Definition](./GA_DEFINITION.md)
 - [GA Checklist](./ga-checklist.md)
 - [Express 5 Migration Plan](./EXPRESS5_MIGRATION_PLAN.md) - Deferred post-GA work from #1261
+- [Workspace Setup Requirements](./WORKSPACE_SETUP_REQUIREMENTS.md) - Full typecheck setup guide
 
 ---
 
