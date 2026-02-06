@@ -1,7 +1,8 @@
 module github.com/summit/streaming/sfm
 
-go 1.21
+go 1.24
 
+toolchain go1.24.13
 require github.com/fraugster/parquet-go v0.12.0
 
 require (

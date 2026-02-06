@@ -1,7 +1,8 @@
 module github.com/summit/lho
 
-go 1.22.2
+go 1.24
 
+toolchain go1.24.13
 require github.com/stretchr/testify v1.8.4
 
 require (

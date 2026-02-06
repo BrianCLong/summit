@@ -1,8 +1,8 @@
 module github.com/summit/services/retentiond
 
-go 1.24.0
+go 1.24
 
-toolchain go1.24.3
+toolchain go1.24.13
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.39.2

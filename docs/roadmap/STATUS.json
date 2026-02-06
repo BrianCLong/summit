@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-06T00:00:00Z",
-  "revision_note": "Added dependency triage status and remediation notes for initial audit wave.",
+  "revision_note": "Expanded dependency triage notes with Go toolchain bump across all Go modules.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -174,7 +174,7 @@
       "id": "dependency-triage-initial-wave",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump for services/acc)."
+      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules)."
     }
   ],
   "summary": {

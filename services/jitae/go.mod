@@ -1,7 +1,8 @@
 module github.com/summit/jitae
 
-go 1.24.3
+go 1.24
 
+toolchain go1.24.13
 require (
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.11.1

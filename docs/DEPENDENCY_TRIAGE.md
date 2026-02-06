@@ -40,7 +40,7 @@ Run these from repo root (or the specified workspace root):
   - Remediations applied:
     - `services/safejoin`: bumped `bytes` to 1.11.1.
     - `webapp`: `npm audit fix` completed; 0 vulnerabilities reported.
-    - `services/acc`: go.mod set to Go 1.24 + toolchain go1.24.13.
+    - Go modules: all `go.mod` files set to Go 1.24 + toolchain go1.24.13.
 
 ## Go (govulncheck)
 
