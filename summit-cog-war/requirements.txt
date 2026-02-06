@@ -1,19 +1,19 @@
 # Core Application
-streamlit
+streamlit==1.54.0
 
 # Testing
-pytest
-playwright
+pytest==9.0.2
+playwright==1.58.0
 
 # AI/ML
 # Using 2.12.1+ to address CVE-2023-25668 and CVE-2023-33976
 tensorflow==2.20.0
-torch
-transformers
+torch==2.10.0
+transformers==5.1.0
 # For NeuroGraph/LLM hybrids (optional; see requirements-optional-graph.txt)
-networkx
-spacy
+networkx==3.6.1
+spacy==3.8.11
 # For EvoForge
-numpy
-pandas
-scikit-learn
+numpy==2.4.2
+pandas==3.0.0
+scikit-learn==1.8.0
