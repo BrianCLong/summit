@@ -21,7 +21,7 @@ Summit's multi-cloud infrastructure platform provides unified orchestration, dep
 
 ### High-Level Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                    Summit Multi-Cloud Platform               │
 ├─────────────────────────────────────────────────────────────┤
@@ -46,7 +46,7 @@ Summit's multi-cloud infrastructure platform provides unified orchestration, dep
 │  └─────────────┘  └─────────────┘  └─────────────┘       │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
-```
+```text
 
 ### Key Components
 
@@ -78,7 +78,7 @@ Summit's multi-cloud infrastructure platform provides unified orchestration, dep
 
 ### Directory Structure
 
-```
+```text
 infrastructure/
 ├── terraform/
 │   └── multi-cloud/
@@ -98,7 +98,7 @@ infrastructure/
         ├── istio/                  # Service mesh configs
         ├── configs/                # K8s manifests
         └── policies/               # Network & RBAC policies
-```
+```text
 
 ### Terraform Deployment
 
@@ -152,7 +152,7 @@ terraform plan -out=tfplan
 
 # Apply infrastructure
 terraform apply tfplan
-```
+```text
 
 ### State Management
 
@@ -166,7 +166,7 @@ backend "s3" {
   encrypt        = true
   dynamodb_table = "summit-terraform-lock"
 }
-```
+```text
 
 ## Cloud Abstraction Layer
 
@@ -194,7 +194,7 @@ const data = await storage.download('my-bucket', 'file.txt');
 
 // List objects
 const result = await storage.list('my-bucket', { prefix: 'documents/' });
-```
+```text
 
 ### Multi-Cloud with Failover
 
@@ -208,7 +208,7 @@ const storage = CloudFactory.createMultiCloudStorage([
 
 // Operations failover automatically on provider failure
 await storage.upload('my-bucket', 'file.txt', data);
-```
+```text
 
 ### Supported Services
 
@@ -230,7 +230,7 @@ gcloud container clusters get-credentials summit-production-gke --region us-cent
 # Deploy Istio multi-cluster service mesh
 cd infrastructure/kubernetes/multi-cluster/istio
 ./setup-multi-cluster.sh
-```
+```text
 
 ### Service Mesh Features
 
@@ -255,9 +255,10 @@ spec:
   ports:
   - port: 8080
     targetPort: 8080
-```
+```text
 
 Istio automatically:
+
 - Discovers services across all clusters
 - Load balances requests across clusters
 - Handles failover on cluster failure
@@ -269,24 +270,24 @@ Istio automatically:
 
 Each cloud provider has VPN gateway for secure connectivity:
 
-```
+```text
 On-Premise Network
         │
         ├─── VPN ───► AWS VPC (10.0.0.0/16)
         ├─── VPN ───► Azure VNet (10.1.0.0/16)
         └─── VPN ───► GCP VPC (10.2.0.0/16)
-```
+```text
 
 ### Cross-Cloud Peering
 
 VPCs are peered for low-latency connectivity:
 
-```
+```text
 AWS VPC (10.0.0.0/16)
     │
     ├─── Peering ───► Azure VNet (10.1.0.0/16)
     └─── Peering ───► GCP VPC (10.2.0.0/16)
-```
+```text
 
 ### Private Connectivity Options
 
@@ -330,7 +331,7 @@ curl -X POST http://disaster-recovery:3002/api/failover/test \
 
 # Monitor test progress
 curl http://disaster-recovery:3002/api/failover/status/:test-id
-```
+```text
 
 ## Security
 
@@ -373,7 +374,7 @@ Access dashboards:
 ```bash
 kubectl port-forward -n monitoring svc/grafana 3000:80
 # Open http://localhost:3000
-```
+```text
 
 ### Alerts
 
@@ -394,6 +395,7 @@ kubectl port-forward -n monitoring svc/grafana 3000:80
 
 ### Step-by-Step Deployment
 
+
 1. **Configure Cloud Credentials**
 ```bash
 # AWS
@@ -405,7 +407,8 @@ az login
 # GCP
 gcloud auth login
 gcloud config set project your-project-id
-```
+```text
+
 
 2. **Deploy Infrastructure**
 ```bash
@@ -413,26 +416,30 @@ cd infrastructure/terraform/multi-cloud
 terraform init
 terraform plan
 terraform apply
-```
+```text
+
 
 3. **Configure kubectl**
 ```bash
 # Run the output commands from Terraform
 terraform output kubeconfig_commands
-```
+```text
+
 
 4. **Deploy Service Mesh**
 ```bash
 cd infrastructure/kubernetes/multi-cluster/istio
 ./setup-multi-cluster.sh
-```
+```text
+
 
 5. **Deploy Applications**
 ```bash
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=eks-primary
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=aks-primary
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=gke-primary
-```
+```text
+
 
 6. **Deploy Services**
 ```bash
@@ -444,7 +451,8 @@ kubectl apply -f services/cloud-orchestrator/k8s/
 
 # Disaster Recovery
 kubectl apply -f services/disaster-recovery/k8s/
-```
+```text
+
 
 7. **Verify Deployment**
 ```bash
@@ -456,7 +464,7 @@ kubectl exec -it pod/test-pod -- curl http://api-service.summit.svc.cluster.loca
 
 # Check service mesh
 kubectl get all -n istio-system
-```
+```text
 
 ## Operations
 
@@ -478,11 +486,11 @@ az aks nodepool scale --resource-group summit-production-rg --cluster-name summi
 
 # Scale node pool (GCP)
 gcloud container clusters resize summit-production-gke --num-nodes=5
-```
+```text
 
 ### Troubleshooting
 
-**Issue: Cross-cluster communication failing**
+### Issue: Cross-cluster communication failing**
 ```bash
 # Check Istio connectivity
 istioctl proxy-config cluster pod/api-pod.summit -n summit
@@ -492,9 +500,9 @@ kubectl get serviceentries -A
 
 # Check mTLS
 istioctl authn tls-check pod/api-pod.summit api-service.summit.svc.cluster.local
-```
+```text
 
-**Issue: High costs**
+### Issue: High costs
 ```bash
 # Get rightsizing recommendations
 curl http://cost-optimization:3000/api/rightsizing/recommendations
@@ -504,7 +512,7 @@ curl http://cost-optimization:3000/api/idle-resources
 
 # Review cost breakdown
 curl http://cost-optimization:3000/api/costs/breakdown?groupBy=service
-```
+```text
 
 ### Maintenance Windows
 
@@ -547,6 +555,7 @@ curl http://cost-optimization:3000/api/costs/breakdown?groupBy=service
 ## Support
 
 For issues or questions:
+
 - **Infrastructure**: infrastructure-team@company.com
 - **On-Call**: PagerDuty escalation
 - **Documentation**: [Internal Wiki](https://wiki.company.com/summit)

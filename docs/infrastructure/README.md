@@ -7,6 +7,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 ### Issue #11814 - API Documentation with OpenAPI/Swagger ✅
 
 **Implementation:**
+
 - OpenAPI 3.0 specification at `/openapi/spec.yaml`
 - Swagger UI at `/api/docs`
 - ReDoc at `/api/docs/redoc`
@@ -15,6 +16,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Comprehensive tests
 
 **Key Files:**
+
 - `/server/src/routes/api-docs.ts` - Documentation routes
 - `/openapi/spec.yaml` - OpenAPI specification
 - `/scripts/generate-sdk.sh` - SDK generation script
@@ -27,6 +29,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 ### Issue #11813 - Structured Logging with ELK/OpenTelemetry ✅
 
 **Implementation:**
+
 - Enhanced Winston logger with structured logging
 - Correlation ID middleware
 - OpenTelemetry integration (existing)
@@ -35,6 +38,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Performance and audit logging helpers
 
 **Key Files:**
+
 - `/server/src/utils/logger.ts` - Enhanced logging configuration
 - `/server/src/middleware/correlation-id.ts` - Correlation tracking
 - `/docker-compose.logging.yml` - ELK stack configuration
@@ -48,6 +52,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 ### Issue #11812 - Job Queue with Bull and Redis ✅
 
 **Implementation:**
+
 - Centralized BullMQ queue configuration
 - Bull Board dashboard at `/queues`
 - Example job processors with retry logic
@@ -56,6 +61,7 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Comprehensive error handling
 
 **Key Files:**
+
 - `/server/src/queues/config.ts` - Queue configuration
 - `/server/src/routes/queues-dashboard.ts` - Bull Board integration
 - `/server/src/queues/processors/emailProcessor.ts` - Example processor
@@ -75,7 +81,7 @@ make up
 
 # Access documentation
 open http://localhost:4000/api/docs
-```
+```text
 
 ### 2. Logging Infrastructure
 
@@ -85,7 +91,7 @@ docker-compose -f docker-compose.dev.yml -f docker-compose.logging.yml up
 
 # Access Kibana
 open http://localhost:5601
-```
+```text
 
 ### 3. Job Queues
 
@@ -95,11 +101,11 @@ make up
 
 # Access Bull Board dashboard
 open http://localhost:4000/queues
-```
+```text
 
 ## Architecture Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────┐
 │                 IntelGraph Platform                 │
 ├─────────────────┬───────────────────┬───────────────┤
@@ -123,7 +129,7 @@ open http://localhost:4000/queues
 │  └──────────┘   │  └──────────┘     │  └─────────┘  │
 │                 │                   │               │
 └─────────────────┴───────────────────┴───────────────┘
-```
+```text
 
 ## Testing
 
@@ -132,7 +138,7 @@ open http://localhost:4000/queues
 ```bash
 cd server
 npm test -- api-docs.test.ts
-```
+```text
 
 ### Logging Tests
 
@@ -142,7 +148,7 @@ node -e "import logger from './server/src/utils/logger.js'; logger.info('Test lo
 
 # Check ELK stack
 curl http://localhost:9200/_cluster/health
-```
+```text
 
 ### Queue Tests
 
@@ -155,7 +161,7 @@ node -e "
 import { addJob, QueueName } from './server/src/queues/config.js';
 await addJob(QueueName.EMAIL, 'test', { message: 'Test' });
 "
-```
+```text
 
 ## Quality Checklist
 
@@ -203,6 +209,7 @@ await addJob(QueueName.EMAIL, 'test', { message: 'Test' });
 ## Support
 
 For questions or issues:
+
 - See individual documentation files in this directory
 - Check `/docs` for platform documentation
 - Review code examples in `/server/src`
