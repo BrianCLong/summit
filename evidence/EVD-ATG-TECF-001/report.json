@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-ATG-TECF-001",
+  "area": "TECF",
+  "summary": "TECF schema and validation implementation complete.",
+  "details": {
+    "schema_version": "v0",
+    "validators": ["zod"],
+    "actor_types": ["HUMAN", "SERVICE_ACCOUNT", "BOT", "UNKNOWN"],
+    "asset_types": ["FILE", "DATABASE", "ENDPOINT", "COMMUNICATION_CHANNEL", "CREDENTIAL"],
+    "intent_hypotheses": ["RECON", "LATERAL_MOVEMENT", "STAGING", "EXFIL", "BENIGN"]
+  },
+  "status": "success"
+}

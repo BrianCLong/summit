@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-ATG-GRAPH-001",
+  "area": "Graph",
+  "summary": "ATG graph schema and tenant-scoped query/write scaffolds implemented.",
+  "details": {
+    "labels": ["ATGIdentity", "ATGAsset", "ATGChannel", "ATGPolicy", "ATGHumanContext", "ATGSlice"],
+    "constraints": ["tenant_id + id", "tenant_id + slice_time"],
+    "isolation_strategy": "Mandatory tenant_id parameter in all Cypher queries"
+  },
+  "status": "success"
+}

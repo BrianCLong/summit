@@ -130,3 +130,18 @@ jobs:
           # Parse the JSON array of files and pass each as an argument to the script
           files='${{ steps.files.outputs.result }}'
           echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
+
+  atg-guardrails:
+    name: ATG Agent Guardrails
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run ATG agent guardrails check
+        run: npx tsx .github/scripts/agent_guardrails.ts
