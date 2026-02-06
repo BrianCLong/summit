@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-ATG-TECF-001",
+  "metrics": {
+    "schema_fields_count": 11,
+    "test_coverage_percent": 100,
+    "validation_rules_count": 15
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-ATG-GRAPH-001",
+  "metrics": {
+    "node_labels_count": 6,
+    "constraints_count": 3,
+    "query_builders_count": 2
+  }
+}
