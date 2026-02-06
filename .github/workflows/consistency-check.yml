@@ -1,0 +1,74 @@
+name: data-consistency
+
+on:
+  pull_request:
+    paths:
+      - 'db/**'
+      - 'graph/**'
+      - 'scripts/**'
+      - '.github/workflows/consistency-check.yml'
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    env:
+      PGHOST: ${{ secrets.PGHOST }}
+      PGUSER: ${{ secrets.PGUSER }}
+      PGPASSWORD: ${{ secrets.PGPASSWORD }}
+      PGDATABASE: ${{ secrets.PGDATABASE }}
+      NEO4J_USER: ${{ secrets.NEO4J_USER }}
+      NEO4J_PASS: ${{ secrets.NEO4J_PASS }}
+      PG_DIGEST_SQL: >
+        WITH row_hashes AS (
+          SELECT encode(
+            digest(
+              concat_ws('␟',
+                coalesce(id::text,''),
+                coalesce(name,''),
+                coalesce(kind,''),
+                coalesce(updated_at::text,'')
+              )::bytea,
+              'sha256'
+            ),
+            'hex'
+          ) AS row_hex
+          FROM public.entities
+        )
+        SELECT encode(
+          digest(string_agg(row_hex,'␞' ORDER BY row_hex)::bytea,'sha256'),
+          'hex'
+        )
+        FROM row_hashes;
+      NEO4J_DIGEST_CYPHER: >
+        CALL {
+          MATCH (e:Entity)
+          WITH coalesce(e.id,'') AS id,
+               coalesce(e.name,'') AS name,
+               coalesce(e.kind,'') AS kind,
+               coalesce(e.updated_at,'') AS updated_at
+          WITH apoc.util.sha256(apoc.text.join([id,name,kind,updated_at],'␟')) AS nodeHex
+          RETURN collect(nodeHex) AS nodeHexes
+        }
+        WITH apoc.coll.sort(nodeHexes) AS sorted
+        RETURN apoc.util.sha256(apoc.text.join(sorted,'␞')) AS run_digest;
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Install clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client unzip
+          curl -sSL https://dist.neo4j.org/cypher-shell/cypher-shell-5.22.0.zip -o cs.zip
+          unzip -p cs.zip cypher-shell-5.22.0/cypher-shell > /usr/local/bin/cypher-shell
+          chmod +x /usr/local/bin/cypher-shell
+      - name: Compare run digests
+        run: node scripts/ci/compare_digests.mjs
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-delta
+          path: artifacts/evidence_delta.json

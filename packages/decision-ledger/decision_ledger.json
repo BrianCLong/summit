@@ -236,5 +236,22 @@
     },
     "reasoning": "Captured adenhq/hive subsumption scope, lane-1 gates, and required-check discovery steps with rollback via revert.",
     "reverted": false
+  },
+  {
+    "id": "pg-neo4j-digest-20260206",
+    "timestamp": "2026-02-06T01:26:58Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAiQWRkIGRldGVybWluaXN0aWMgUG9zdGdyZXMvTmVvNGogZGlnZXN0IGNvbnNpc3RlbmN5IENJIGdhdGUiLCAiZmlsZXMiOiBbInNjcmlwdHMvY2kvY29tcGFyZV9kaWdlc3RzLm1qcyIsICIuZ2l0aHViL3dvcmtmbG93cy9jb25zaXN0ZW5jeS1jaGVjay55bWwiLCAiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIl19",
+    "decision": {
+      "action": "add_pg_neo4j_digest_gate",
+      "rule": {
+        "condition": "pg/neo4j digest parity gate required",
+        "action": "add_pg_neo4j_digest_gate",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added deterministic Postgres/Neo4j digest comparison gate with evidence artifact output and CI wiring. Rollback: revert this commit.",
+    "reverted": false
   }
 ]
