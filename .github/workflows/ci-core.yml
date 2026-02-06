@@ -33,7 +33,7 @@ env:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
@@ -46,7 +46,7 @@ jobs:
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -70,7 +70,7 @@ jobs:
 
   build-package:
     name: Build & Package
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +97,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -123,7 +123,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
@@ -185,7 +185,7 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
@@ -214,7 +214,7 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -262,7 +262,7 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
@@ -287,7 +287,7 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -324,7 +324,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Playwright)
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
@@ -366,7 +366,7 @@ jobs:
 
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
@@ -401,7 +401,7 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       actions: read
@@ -440,7 +440,7 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
       - config-preflight
       - lint-typecheck
