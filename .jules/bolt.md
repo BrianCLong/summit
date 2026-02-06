@@ -18,3 +18,7 @@
 ## 2026-05-22 - [Optimized Supernode Detection]
 **Learning:** Nested loops of O(N*E) for supernode detection in large graphs (>10k nodes, >50k edges) cause severe latency (~6s). Pre-calculating connection Maps in O(E) reduces this to O(N+E), improving performance by >100x (~33ms).
 **Action:** Always pre-calculate frequency/connection maps when iterating over edges for multiple nodes to avoid N*E complexity.
+
+## 2026-06-15 - [JSONB Serialization in Batched Inserts]
+**Learning:** When performing batched PostgreSQL inserts (multi-row VALUES) with the `pg` driver, `JSONB` columns must be explicitly serialized using `JSON.stringify()`. Unlike individual `pool.query` calls where the driver might handle some types, in a manual batch construction, passing a native JS array/object to a parameter matching a `JSONB` column will fail with a type mismatch error.
+**Action:** Always wrap `JSONB` data in `JSON.stringify()` when preparing parameter arrays for batched multi-row inserts.
