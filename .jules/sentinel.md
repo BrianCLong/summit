@@ -65,3 +65,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** Several sensitive endpoints defined directly in `server/src/app.ts` (e.g., `/search/evidence`, `/monitoring`, and various `/api/admin` routers) were missing authentication or relied on manual, inconsistent role checks.
 **Learning:** Inline routes in main application files are easily overlooked during security audits. Additionally, inconsistent casing in role names (e.g., 'admin' vs 'ADMIN') can lead to manual check bypasses or availability issues.
 **Prevention:** Enforce a "deny-by-default" posture by applying `authenticateToken` and `ensureRole(['ADMIN', 'admin'])` middleware to all administrative and sensitive data endpoints. Always use standardized middleware rather than manual property checks for role validation.
+
+## 2026-02-06 - [HIGH] Cross-Tenant Data Leakage in Evidence Search
+**Vulnerability:** The `/search/evidence` endpoint in `server/src/app.ts` lacked tenant isolation. Authenticated admin users could search for and view evidence across all tenants.
+**Learning:** RBAC alone is insufficient in multi-tenant systems; even administrators must be restricted to their own tenant's data unless they have explicit cross-tenant privileges.
+**Prevention:** Implement Cypher-level filtering using `node.tenantId` or `node.tenant` properties, parameterized with the `tenantId` from the user's token.
