@@ -2,6 +2,7 @@
  * Workflow Contract v1
  * Maestro Conductor workflow execution API contracts
  */
+/* eslint-disable no-redeclare */
 
 import { z } from 'zod'
 import { PersonEntityV1 } from './entities.js'

@@ -2,6 +2,7 @@
  * Entity Schemas v1
  * Defines canonical entity types for the IntelGraph model
  */
+/* eslint-disable no-redeclare */
 
 import { z } from 'zod'
 import { EntityMetadataV1 } from './provenance.js'

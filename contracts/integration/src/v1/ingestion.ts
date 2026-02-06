@@ -2,6 +2,7 @@
  * Ingestion Contract v1
  * Switchboard → IntelGraph data ingestion API contracts
  */
+/* eslint-disable no-redeclare */
 
 import { z } from 'zod'
 import { EntityV1, PersonEntityV1, OrganizationEntityV1 } from './entities.js'

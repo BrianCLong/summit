@@ -1,12 +1,14 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Tuple
 
+
 @dataclass(frozen=True)
 class StructureObj:
-    lattice: Tuple[float, float, float]
-    species: Tuple[str, ...]
-    coords: Tuple[Tuple[float, float, float], ...]
+    lattice: tuple[float, float, float]
+    species: tuple[str, ...]
+    coords: tuple[tuple[float, float, float], ...]
 
 GRAMMAR_VERSION = "toy-v1"
 
@@ -29,7 +31,7 @@ def decode_structure(text: str) -> StructureObj:
     try:
         lat_parts = lattice_line[0].replace('LATTICE:', '').strip().split()
         if len(lat_parts) != 3:
-             raise ValueError("Lattice must have 3 components")
+            raise ValueError("Lattice must have 3 components")
         lattice = (float(lat_parts[0]), float(lat_parts[1]), float(lat_parts[2]))
 
         species = tuple(species_line[0].replace('SPECIES:', '').strip().split())
@@ -39,14 +41,15 @@ def decode_structure(text: str) -> StructureObj:
         if coords_str:
             for c in coords_str.split(';'):
                 c = c.strip()
-                if not c: continue
+                if not c:
+                    continue
                 parts = c.split()
                 if len(parts) != 3:
-                     raise ValueError(f"Coord must have 3 components: {c}")
+                    raise ValueError(f"Coord must have 3 components: {c}")
                 coords_list.append((float(parts[0]), float(parts[1]), float(parts[2])))
 
         if len(species) != len(coords_list):
-             raise ValueError("Species and coords count mismatch")
+            raise ValueError("Species and coords count mismatch")
 
         coords = tuple(coords_list)
 

@@ -2,6 +2,7 @@
  * Insights API Contract v1
  * CompanyOS product-facing API contracts for insights generation
  */
+/* eslint-disable no-redeclare */
 
 import { z } from 'zod'
 import { PersonEntityV1 } from './entities.js'

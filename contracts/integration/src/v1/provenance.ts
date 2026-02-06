@@ -3,6 +3,7 @@
  * Tracks data lineage, source attribution, and confidence scores
  * for the Summit integration critical path.
  */
+/* eslint-disable no-redeclare */
 
 import { z } from 'zod'
 

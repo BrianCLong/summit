@@ -23,6 +23,7 @@ for (let i = 0; i < iterations; i += 1) {
 }
 const elapsed = performance.now() - start;
 
+// eslint-disable-next-line no-console
 console.log(
   `Compiled ${iterations} procedures in ${elapsed.toFixed(2)}ms (budget ${maxMs}ms)`,
 );

@@ -2,6 +2,7 @@
  * Edge Schemas v1
  * Defines canonical relationship types for the IntelGraph model
  */
+/* eslint-disable no-redeclare */
 
 import { z } from 'zod'
 import { EdgeMetadataV1 } from './provenance.js'

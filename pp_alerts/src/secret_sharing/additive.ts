@@ -12,8 +12,12 @@ export interface ShareBundle {
 }
 
 export function split(value: number, nShares: number, modulus: number): ShareBundle {
-  if (nShares < 2) throw new Error("Need at least 2 shares");
-  if (value >= modulus) throw new Error("Value must be less than modulus");
+  if (nShares < 2) {
+    throw new Error("Need at least 2 shares");
+  }
+  if (value >= modulus) {
+    throw new Error("Value must be less than modulus");
+  }
 
   const shares: Share[] = [];
   let sum = 0;
@@ -28,7 +32,9 @@ export function split(value: number, nShares: number, modulus: number): ShareBun
   // Calculate last share
   // sum + last = value (mod M) => last = value - sum (mod M)
   let last = (value - sum) % modulus;
-  if (last < 0) last += modulus;
+  if (last < 0) {
+    last += modulus;
+  }
 
   shares.push(createShare(nShares - 1, last));
 

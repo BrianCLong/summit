@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -78,7 +79,7 @@ const runCommand = async (
   });
 };
 
-const runGitStatus = async (): Promise<string[]> => {
+const runGitStatus = (): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     const child = spawn('git', ['status', '--porcelain=v1'], {
       cwd: repoRoot,
@@ -152,7 +153,6 @@ const runCase = async (
   traceWriter: { write: (event: TraceEvent) => Promise<void> },
   artifactDir: string,
 ): Promise<CaseResult> => {
-  const caseStart = Date.now();
   await ensureDir(artifactDir);
   await traceWriter.write({
     ts: nowIso(),
@@ -233,7 +233,7 @@ const runCase = async (
   };
 };
 
-const loadModule = async <T>(modulePath: string): Promise<T> => {
+const loadModule = <T>(modulePath: string): Promise<T> => {
   const absolute = path.resolve(repoRoot, modulePath);
   return import(pathToFileURL(absolute).href) as Promise<T>;
 };
@@ -244,14 +244,14 @@ const runDeterministicGrader = async (
   skillDir: string,
   prompts: PromptCase[],
 ): Promise<DeterministicResult> => {
-  const module = await loadModule<{ grade: typeof gradeDeterministic }>(
+  const module = await loadModule<{ grade: GradeDeterministic }>(
     config.deterministic_grader,
   );
   const trace = await parseTrace(tracePath);
   return module.grade({ trace, prompts, skillDir, repoRoot });
 };
 
-type gradeDeterministic = (input: {
+type GradeDeterministic = (input: {
   trace: TraceEvent[];
   prompts: PromptCase[];
   skillDir: string;
@@ -263,14 +263,14 @@ const runRubricGrader = async (
   tracePath: string,
   skillDir: string,
 ): Promise<RubricResult> => {
-  const module = await loadModule<{ grade: typeof gradeRubric }>(
+  const module = await loadModule<{ grade: GradeRubric }>(
     config.rubric.grader,
   );
   const trace = await parseTrace(tracePath);
   return module.grade({ trace, skillDir, repoRoot });
 };
 
-type gradeRubric = (input: {
+type GradeRubric = (input: {
   trace: TraceEvent[];
   skillDir: string;
   repoRoot: string;

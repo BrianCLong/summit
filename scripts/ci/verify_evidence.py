@@ -141,9 +141,12 @@ def main(root_override=None):
             item["evidence_id"] = evd_id
             # Convert report/metrics/stamp paths to list of files
             files = []
-            if "report" in item: files.append(item["report"])
-            if "metrics" in item: files.append(item["metrics"])
-            if "stamp" in item: files.append(item["stamp"])
+            if "report" in item:
+                files.append(item["report"])
+            if "metrics" in item:
+                files.append(item["metrics"])
+            if "stamp" in item:
+                files.append(item["stamp"])
             item["files"] = files
             items.append(item)
     else:
@@ -180,7 +183,11 @@ def main(root_override=None):
             elif fname == "stamp.json":
                 validate_schema(load_json(fpath), schema_dir / "stamp.schema.json", context=f"{evd_id} stamp")
             elif fname == "index.json" and schema_dir == NEW_SCHEMAS:
-                 validate_schema(load_json(fpath), schema_dir / "index.schema.json", context=f"{evd_id} index")
+                validate_schema(
+                    load_json(fpath),
+                    schema_dir / "index.schema.json",
+                    context=f"{evd_id} index",
+                )
 
     # 2. Check for timestamps
     check_timestamps(evid_dir)

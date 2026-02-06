@@ -6,11 +6,9 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../config/logger.js';
 import { metrics } from '../observability/metrics.js';
-import { getPolicyEngine } from '../services/PolicyEngine.js';
 import { TenantContext } from '../tenancy/types.js';
 
 // OPA client for policy evaluation
@@ -200,7 +198,7 @@ const extractSensitiveTags = (req: Request): string[] => {
   
   // Check request body for sensitive indicators
   if (req.body && typeof req.body === 'object') {
-    for (const [key, value] of Object.entries(req.body)) {
+    for (const [key] of Object.entries(req.body)) {
       if (typeof key === 'string' && 
           (key.toLowerCase().includes('ssn') || 
            key.toLowerCase().includes('credit') || 
@@ -404,7 +402,7 @@ export const createAbacMiddleware = (options: AbacMiddlewareOptions = {}) => {
 export const abacMiddleware = createAbacMiddleware();
 
 // Convenience function for programmatic policy checks
-export const checkAbacPermission = async (
+export const checkAbacPermission = (
   userId: string, 
   userRoles: string[], 
   resourceType: string, 
@@ -428,7 +426,7 @@ export const checkAbacPermission = async (
     ...additionalContext,
   };
 
-  return await opaClient.evaluate(policyInput);
+  return opaClient.evaluate(policyInput);
 };
 
 // Initialize the ABAC enforcement system

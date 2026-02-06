@@ -52,7 +52,7 @@ export const createBuiltinTools = (
         },
       },
     },
-    handler: async () => ({
+    handler: () => ({
       tools: deps.getToolIndex(),
       skills: deps.skillsRegistry.list(),
     }),
@@ -90,7 +90,7 @@ export const createBuiltinTools = (
         },
       },
     },
-    handler: async (input) => {
+    handler: (input) => {
       const schema = deps.getToolSchema(input.tool_id);
       return {
         schema,
@@ -130,8 +130,8 @@ export const createBuiltinTools = (
         properties: { skill: { type: 'object' } },
       },
     },
-    handler: async (input) => ({
-      skill: await deps.skillsRegistry.getSkill(input.skill_id),
+    handler: (input) => ({
+      skill: deps.skillsRegistry.getSkill(input.skill_id),
     }),
   };
 
@@ -233,7 +233,7 @@ export const createBuiltinTools = (
         },
       },
     },
-    handler: async (input: { query: string; limit: number }) => ({
+    handler: (input: { query: string; limit: number }) => ({
       rows: Array.from({ length: input.limit }).map((_, index) => ({
         id: `row-${index + 1}`,
         label: `Result for ${input.query}`,
@@ -268,7 +268,7 @@ export const createBuiltinTools = (
         properties: { bundle: { type: 'object' } },
       },
     },
-    handler: async (input, context: ToolExecutionContext) => ({
+    handler: (input, context: ToolExecutionContext) => ({
       bundle: deps.evidenceStore.exportBundle(
         input.session_id ?? context.sessionId,
       ),

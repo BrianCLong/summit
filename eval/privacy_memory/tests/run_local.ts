@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { InMemoryMemoryBroker } from "../../../core/memory/storage_memory";
 import contextCollapseFixtures from "../fixtures/context_collapse.json" assert { type: "json" };
 import assert from "assert";

@@ -2,18 +2,20 @@ import argparse
 import json
 import os
 import sys
-import jsonschema
 from typing import Any, Dict
+
+import jsonschema
+
 
 def load_json(path: str) -> Any:
     try:
-        with open(path, 'r') as f:
+        with open(path) as f:
             return json.load(f)
     except Exception as e:
         print(f"Error loading {path}: {e}")
         return None
 
-def validate_schema(data: Any, schema: Dict, name: str) -> bool:
+def validate_schema(data: Any, schema: dict, name: str) -> bool:
     try:
         jsonschema.validate(instance=data, schema=schema)
         return True
@@ -24,7 +26,7 @@ def validate_schema(data: Any, schema: Dict, name: str) -> bool:
 def check_deterministic_formatting(path: str) -> bool:
     """Check if file is deterministically formatted (indent=2, sort_keys=True)."""
     try:
-        with open(path, 'r') as f:
+        with open(path) as f:
             content = f.read()
 
         if not content.strip():
@@ -130,9 +132,12 @@ def main():
             is_metrics = basename == "metrics.json"
             is_stamp = basename == "stamp.json"
 
-            if is_report: has_report = True
-            if is_metrics: has_metrics = True
-            if is_stamp: has_stamp = True
+            if is_report:
+                has_report = True
+            if is_metrics:
+                has_metrics = True
+            if is_stamp:
+                has_stamp = True
 
             # Validate Kimi items strictly
             if "KIMI-K25" in evd_id:
@@ -168,16 +173,19 @@ def main():
                 # Check formatting only as warning
                 if fpath.endswith(".json"):
                     if not check_deterministic_formatting(full_path):
-                         # Print warning but don't fail unless strict global policy enabled (which we might want to avoid for now)
-                         # print(f"Warning: Formatting mismatch in {fpath}")
-                         pass
+                        # Print warning but don't fail unless strict global policy enabled (which we might want to avoid for now)
+                        # print(f"Warning: Formatting mismatch in {fpath}")
+                        pass
 
         # For Kimi K2.5 items, enforce presence of all 3 artifacts
         if "KIMI-K25" in evd_id:
             missing = []
-            if not has_report: missing.append("report.json")
-            if not has_metrics: missing.append("metrics.json")
-            if not has_stamp: missing.append("stamp.json")
+            if not has_report:
+                missing.append("report.json")
+            if not has_metrics:
+                missing.append("metrics.json")
+            if not has_stamp:
+                missing.append("stamp.json")
 
             if missing:
                 print(f"Error: {evd_id} missing required artifacts: {', '.join(missing)}")

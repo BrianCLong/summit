@@ -236,6 +236,7 @@ export class McpServer {
   private logEvent(event: EvidenceEvent): void {
     this.evidenceStore.recordEvent(event);
     const payload = stableStringify(event as never);
+    // eslint-disable-next-line no-console
     console.info(payload);
   }
 

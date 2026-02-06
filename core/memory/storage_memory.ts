@@ -1,3 +1,4 @@
+/* eslint-disable require-await */
 import { MemoryBroker } from "./broker";
 import { MemoryRecord, MemoryScope } from "./types";
 import { canRead, canWrite } from "./policy";

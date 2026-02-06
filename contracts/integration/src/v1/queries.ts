@@ -2,6 +2,7 @@
  * Query Contract v1
  * IntelGraph query API contracts
  */
+/* eslint-disable no-redeclare */
 
 import { z } from 'zod'
 import { EntityV1, PersonEntityV1 } from './entities.js'
