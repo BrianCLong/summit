@@ -15,17 +15,23 @@ jobs:
   canary:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        # version is read from package.json packageManager field
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: "20"
+
+      - name: Install system dependencies for node-canvas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
 
       - name: Install dependencies (script only)
         run: pnpm add -w js-yaml

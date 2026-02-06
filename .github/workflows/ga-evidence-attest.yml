@@ -17,11 +17,6 @@ on:
         type: boolean
         default: false
 
-  # Optional: trigger on main branch (for testing)
-  # Uncomment to enable automatic attestation on main pushes
-  # push:
-  #   branches: ["main"]
-
 # LEAST-PRIVILEGE PERMISSIONS:
 # - Top-level: read-only by default
 # - generate-pack job: contents read only (no signing)
@@ -47,17 +42,15 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Full history for git metadata
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: "10.0.0"
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
@@ -103,7 +96,7 @@ jobs:
           echo "Evidence pack hash: ${EVIDENCE_HASH}"
 
       - name: Upload Evidence Pack
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4
         with:
           name: ga-evidence-pack-${{ github.run_id }}
           path: dist/ga-evidence/
@@ -138,16 +131,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Download Evidence Pack
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@v4
         with:
           name: ga-evidence-pack-${{ github.run_id }}
           path: dist/ga-evidence/
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        uses: sigstore/cosign-installer@v3
         with:
           cosign-release: v2.2.4
 
@@ -182,7 +175,7 @@ jobs:
             --verbose
 
       - name: Upload Attestations
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4
         with:
           name: ga-evidence-attestations-${{ github.run_id }}
           path: dist/ga-evidence/attestations/
@@ -190,7 +183,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload Complete Evidence Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4
         with:
           name: ga-evidence-complete-${{ github.run_id }}
           path: dist/ga-evidence/

@@ -61,26 +61,32 @@ export function writeEvidence(evidenceId: string, runId: string, result: Verific
   mkdirSync(outputDir, { recursive: true });
 
   const stamp = {
-    evidenceId,
-    runId,
-    timestamp: new Date().toISOString()
+    evidence_id: evidenceId,
+    generated_at: new Date().toISOString(),
+    runId
   };
 
   const metrics = {
-    check_count: result.checks.length,
-    pass_count: result.checks.filter(c => c.status === 'PASS').length
+    evidence_id: evidenceId,
+    metrics: {
+      check_count: result.checks.length,
+      pass_count: result.checks.filter(c => c.status === 'PASS').length
+    }
   };
 
-  const report = result;
+  const report = {
+    evidence_id: evidenceId,
+    summary: `Verification report for run ${runId}`,
+    status: result.status,
+    checks: result.checks
+  };
 
-  // Standardized evidence index format with 'items'
+  // Standardized evidence index format compliant with evidence/schemas/index.schema.json
   const index = {
     version: "1.0",
     items: {
       [evidenceId]: {
-        stamp: "stamp.json",
-        metrics: "metrics.json",
-        report: "report.json"
+        "files": ["stamp.json", "metrics.json", "report.json"]
       }
     }
   };
