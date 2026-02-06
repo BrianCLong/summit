@@ -232,4 +232,77 @@ pnpm ga:verify 2>&1 | tee evidence/ga-recapture/phase1/ga-verify.log
 
 ---
 
-_Document created as part of GA Recapture Phase 0. Updates will be appended as phases progress._
+## Phase 1: Gate Execution Results
+
+**Executed:** 2026-02-06
+
+### Gate Summary
+
+| Gate          | Command          | Result  | Notes                                                              |
+| ------------- | ---------------- | ------- | ------------------------------------------------------------------ |
+| TypeScript    | `pnpm typecheck` | PASS    | No errors                                                          |
+| Unit Tests    | `pnpm test:unit` | PASS    | All tests passing                                                  |
+| Lint (ESLint) | `pnpm lint`      | PARTIAL | ESLint passes, Ruff has 393 Python style errors (all auto-fixable) |
+| GA Verify     | `pnpm ga:verify` | FAIL    | Smoke tests fail - no server running (expected without Docker)     |
+
+### Critical Blocker: Merge Conflict Markers
+
+**18 files contain unresolved merge conflict markers** from PR #17022 (golden path E2E test harness):
+
+| File                                             | Category  |
+| ------------------------------------------------ | --------- |
+| `.ci/required_checks.todo.md`                    | CI Config |
+| `.github/workflows/golden-path-e2e.yml`          | Workflow  |
+| `RUNBOOKS/e2e_golden_path.md`                    | Docs      |
+| `e2e/golden-path/README.md`                      | Docs      |
+| `e2e/golden-path/fixtures/test_users.json`       | Test Data |
+| `e2e/golden-path/package.json`                   | Package   |
+| `e2e/golden-path/pages/DashboardPage.ts`         | Test Code |
+| `e2e/golden-path/pages/LoginPage.ts`             | Test Code |
+| `e2e/golden-path/playwright.config.ts`           | Config    |
+| `e2e/golden-path/tests/golden_path.spec.ts`      | Test Code |
+| `e2e/golden-path/tests/policy_redaction.spec.ts` | Test Code |
+| `e2e/golden-path/tests/smoke.spec.ts`            | Test Code |
+| `scripts/ci/detect_package_manager.sh`           | CI Script |
+| `scripts/ci/evidence_write.mjs`                  | CI Script |
+| `scripts/ci/redaction_scan.sh`                   | CI Script |
+| `scripts/ci/run_golden_path_e2e.sh`              | CI Script |
+| `scripts/ci/start_consolidated_frontend.sh`      | CI Script |
+| `scripts/enhanced_autohealing.sh`                | CI Script |
+
+### Python Lint Issues (Ruff)
+
+393 errors detected, all auto-fixable:
+
+- Import sorting (I001)
+- Modern type annotations (UP006: use `list` instead of `List`)
+- Minor style issues
+
+### Lockfile Sync Issue
+
+The `pnpm-lock.yaml` was out of sync with `packages/cogsec-model/package.json`:
+
+- Missing specifier: `typescript@^5.0.0`
+- Status: **Fixed** - lockfile updated during install
+
+---
+
+## Phase 1 Risk Assessment Update
+
+### Critical (Must Fix Before GA)
+
+1. **Merge Conflict Markers** - 18 files with `<<<<<<<` markers will break builds
+2. **No Docker** - Cannot run full GA gate locally
+
+### High (Should Fix)
+
+3. **Python Lint Errors** - 393 Ruff errors (auto-fixable)
+4. **Lockfile was out of sync** - Fixed, but indicates CI/local parity gap
+
+### Medium
+
+5. **Missing Tooling** - cosign, syft, gh CLI not available locally
+
+---
+
+_Document updated with Phase 1 findings. Proceeding to Phase 2 (GA Delta Backlog)._
