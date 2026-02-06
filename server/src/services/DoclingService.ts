@@ -12,7 +12,7 @@ import { doclingRepository } from "../db/repositories/doclingRepository.js";
 import { doclingGraphRepository } from "../db/repositories/doclingGraphRepository.js";
 import { tenantCostService } from "./TenantCostService.js";
 import { provenanceLedger } from "../provenance/ledger.js";
-import { tracer } from "../observability/tracing.js";
+import { getTracer } from "../observability/tracer.js";
 import type {
   DoclingBaseResponse,
   SummarizeBuildFailureInput,
@@ -43,7 +43,7 @@ class DoclingService {
   async summarizeBuildFailure(
     input: SummarizeBuildFailureInput
   ): Promise<SummarizeBuildFailureResult> {
-    return tracer.trace("docling.summarize", async (span) => {
+    return getTracer().trace("docling.summarize", async (span) => {
       const requestId = input.requestId || randomUUID();
       const parsePayload = {
         requestId,
@@ -256,7 +256,7 @@ class DoclingService {
   }
 
   async extractLicenses(input: ExtractLicensesInput): Promise<ExtractLicensesResult> {
-    return tracer.trace("docling.extract_licenses", async (span) => {
+    return getTracer().trace("docling.extract_licenses", async (span) => {
       const requestId = input.requestId || randomUUID();
       const payload = {
         requestId,
@@ -368,7 +368,7 @@ class DoclingService {
   }
 
   async generateReleaseNotes(input: ReleaseNotesInput): Promise<ReleaseNotesResult> {
-    return tracer.trace("docling.release_notes", async (span) => {
+    return getTracer().trace("docling.release_notes", async (span) => {
       const requestId = input.requestId || randomUUID();
       const payload = {
         requestId,

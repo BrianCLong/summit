@@ -560,7 +560,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "max(workqueue_depth{job=\"intelgraph-server\"})",
+          "expr": "max(intelgraph_job_queue_depth{job=\"intelgraph-server\"})",
           "legendFormat": "{{job}} queue depth",
           "range": true,
           "refId": "A"

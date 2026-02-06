@@ -10,7 +10,7 @@ import { Worker, Job, Queue } from 'bullmq';
 import { Pool } from 'pg';
 import { getPostgresPool, getRedisClient } from '../config/database.js';
 import EmbeddingService from '../services/EmbeddingService.js';
-import { otelService } from '../monitoring/opentelemetry.js';
+import { getTracer } from '../observability/tracer.js';
 import { context, propagation } from '@opentelemetry/api';
 import pino from 'pino';
 
@@ -159,7 +159,7 @@ export class EmbeddingUpsertWorker {
         'process-entity-embedding',
         {
           ...data,
-          traceparent: otelService.getCurrentTraceContext(),
+          traceparent: getTracer().getTraceContext(),
         },
         {
           jobId: `embedding-${data.entityId}-${Date.now()}`,
@@ -193,7 +193,7 @@ export class EmbeddingUpsertWorker {
       : context.active();
 
     return context.with(parentContext, () =>
-      otelService.wrapBullMQJob('entity-embedding', async () => {
+      getTracer().traceQueue('entity-embeddings', 'entity-embedding', async () => {
         const { entityId, investigationId, text, type } = job.data;
 
         logger.debug('Processing embedding job', {
@@ -233,7 +233,7 @@ export class EmbeddingUpsertWorker {
             updated_at: new Date(),
           });
 
-          otelService.addSpanAttributes({
+          getTracer().addAttributes({
             'embedding.entity_id': entityId,
             'embedding.text_length': text.length,
             'embedding.dimension': embedding.length,

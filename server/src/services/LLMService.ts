@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { OpenAI } from 'openai';
 import logger from '../utils/logger.js';
-import { tracer } from '../observability/tracing.js';
+import { getTracer } from '../observability/tracer.js';
 import { metrics as prometheusMetrics } from '../observability/metrics.js';
 
 export interface LLMConfig {
@@ -74,7 +74,7 @@ export class LLMService {
    * Execute a completion request
    */
   async complete(prompt: string, options: CompletionOptions = {}): Promise<string> {
-    return tracer.trace('llm.complete', async (span: any) => {
+    return getTracer().trace('llm.complete', async (span: any) => {
       const startTime = Date.now();
       const provider = options.provider || this.config.defaultProvider;
       const model = options.model || this.config.defaultModel;
@@ -140,7 +140,7 @@ export class LLMService {
    * Chat completion (multi-turn)
    */
   async chat(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
-    return tracer.trace('llm.chat', async (span: any) => {
+    return getTracer().trace('llm.chat', async (span: any) => {
       const startTime = Date.now();
       const provider = options.provider || this.config.defaultProvider;
       const model = options.model || this.config.defaultModel;
