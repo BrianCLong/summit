@@ -1,0 +1,27 @@
+name: mesh-kernel-gates
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  mesh-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Mesh Structure
+        run: |
+          test -d src/mesh
+          test -f src/mesh/README.md
+          test -f src/mesh/governance/policy_capsules.ts
+          test -f src/config/flags.ts
+      - name: Verify Evidence Exists
+        run: |
+          test -d evidence/EVD-MESH-KERNEL-001
+          test -f evidence/EVD-MESH-KERNEL-001/report.json
+          test -f evidence/EVD-MESH-KERNEL-001/stamp.json
+      - name: Verify Flags Default Off
+        run: |
+          # Simple check to ensure false is in the flags file
+          grep "MESH_ENABLED: false" src/config/flags.ts
