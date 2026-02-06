@@ -351,7 +351,6 @@ deny contains msg if {
 	msg := sprintf("Artifact %s signature verification failed", [artifact.name])
 }
 
-
 # === Sovereign Enterprise Agentic AI Mandates ===
 
 # Sovereign operations require multiple independent verifications
