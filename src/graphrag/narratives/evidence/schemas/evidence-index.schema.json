@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.ai/schemas/evidence-index.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "entries"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "area", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^EVD-[a-z0-9-]+-[A-Z]+-\\d{3}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "area": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

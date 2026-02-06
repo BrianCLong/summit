@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+  "summary": "Deterministic evidence schema pass fixture for narrative IO evidence gate.",
+  "notes": ["No raw text stored; derived outputs only."]
+}

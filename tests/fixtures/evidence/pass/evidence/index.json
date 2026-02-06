@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "entries": [
+    {
+      "id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+      "path": "tests/fixtures/evidence/pass/evidence/EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+      "area": "evidence",
+      "description": "Schema validation pass fixture for narrative IO evidence gate."
+    }
+  ]
+}
