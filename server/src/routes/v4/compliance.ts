@@ -25,6 +25,7 @@ import {
   ALL_SOX_CONTROLS,
   SOX_FRAMEWORK,
   ITGC_DOMAINS,
+  type ControlCategory,
   SOXComplianceService,
   createSOXComplianceService,
 } from '../../compliance/frameworks/SOXControls.js';
@@ -110,6 +111,9 @@ const getTenantId = (req: Request): string => {
 const getUserId = (req: Request): string => {
   return req.user?.id || req.user?.id || 'anonymous';
 };
+
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 const wrapResponse = <T>(data: T, req: Request): DataEnvelope<T> => {
   return {
@@ -265,13 +269,14 @@ router.get(
   '/hipaa/controls/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const control = ALL_HIPAA_CONTROLS.find(c => c.id === req.params.id);
+    const controlId = singleParam(req.params.id);
+    const control = ALL_HIPAA_CONTROLS.find(c => c.id === controlId);
 
     if (!control) {
       return res.status(404).json({
         error: {
           code: 'NOT_FOUND',
-          message: `HIPAA control not found: ${req.params.id}`,
+          message: `HIPAA control not found: ${controlId}`,
         },
       });
     }
@@ -378,7 +383,8 @@ router.get(
   '/hipaa/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await hipaaService!.getAssessment(req.params.id);
+    const assessmentId = singleParam(req.params.id);
+    const assessment = await hipaaService!.getAssessment(assessmentId);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
@@ -533,13 +539,14 @@ router.get(
   '/sox/controls/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const control = ALL_SOX_CONTROLS.find(c => c.id === req.params.id);
+    const controlId = singleParam(req.params.id);
+    const control = ALL_SOX_CONTROLS.find(c => c.id === controlId);
 
     if (!control) {
       return res.status(404).json({
         error: {
           code: 'NOT_FOUND',
-          message: `SOX control not found: ${req.params.id}`,
+          message: `SOX control not found: ${controlId}`,
         },
       });
     }
@@ -601,8 +608,18 @@ router.post(
   requirePermission('compliance:assess'),
   async (req: Request, res: Response) => {
     const tenantId = getTenantId(req);
+    const sectionMap: Record<string, ControlCategory> = {
+      '302': 'Section 302 - Management Certification',
+      '404': 'Section 404 - Internal Control Assessment',
+      '409': 'Section 409 - Real-Time Disclosure',
+      ITGC: 'IT General Controls (ITGC)',
+    };
+    const sections = Array.isArray(req.body.sections) ? req.body.sections : [];
+    const categories = sections
+      .map((section) => sectionMap[section])
+      .filter(Boolean) as ControlCategory[];
     const assessment = await soxService!.performAssessment(tenantId, {
-      sections: req.body.sections as any[],
+      categories: categories.length > 0 ? categories : undefined,
     });
 
     logger.info(
@@ -647,7 +664,8 @@ router.get(
   '/sox/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await soxService!.getAssessment(req.params.id);
+    const assessmentId = singleParam(req.params.id);
+    const assessment = await soxService!.getAssessment(assessmentId);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }

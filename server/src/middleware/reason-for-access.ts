@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { writeAudit } from '../utils/audit.js';
 
 export interface ReasonForAccessConfig {
@@ -35,13 +35,16 @@ export function createReasonForAccessMiddleware(config: ReasonForAccessConfig) {
     const reason = (req.headers[HEADER_NAME] as string) || '';
 
     if (!reason) {
-      return next(new ForbiddenError('X-Reason-For-Access header is required for this endpoint'));
+      return next(new GraphQLError('X-Reason-For-Access header is required for this endpoint', {
+        extensions: { code: 'FORBIDDEN' },
+      }));
     }
 
     if (reason.trim().length < minLength) {
       return next(
-        new ForbiddenError(
+        new GraphQLError(
           `X-Reason-For-Access must be at least ${minLength} characters for sensitive endpoints`,
+          { extensions: { code: 'FORBIDDEN' } }
         ),
       );
     }

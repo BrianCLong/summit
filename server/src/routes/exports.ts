@@ -9,6 +9,8 @@ import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 const watermarkVerificationService = new WatermarkVerificationService();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 router.post(
   '/sign-manifest',
@@ -65,7 +67,7 @@ router.post(
     return res.status(404).json({ error: 'Watermark verification not enabled' });
   }
 
-  const { id } = req.params;
+  const id = singleParam(req.params.id);
   const { artifactId, watermark } = req.body || {};
 
   // Security: Prevent path traversal in artifactId

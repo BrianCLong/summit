@@ -10,7 +10,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { Pool } from 'pg';
 import { Logger } from 'pino';
 import { WarrantService } from '../services/WarrantService.js';
@@ -239,8 +239,9 @@ export function createGovernanceMiddleware(
             userId: (req as any).user?.id,
           }, 'Invalid governance context');
 
-          throw new ForbiddenError(
-            `Invalid governance context: ${validation.errors.join(', ')}`
+          throw new GraphQLError(
+            `Invalid governance context: ${validation.errors.join(', ')}`,
+            { extensions: { code: 'FORBIDDEN' } }
           );
         } else {
           // In permissive mode, apply defaults and log warning
@@ -265,7 +266,9 @@ export function createGovernanceMiddleware(
         );
 
         if (!purposeValidation.valid) {
-          throw new ForbiddenError(purposeValidation.reason || 'Invalid access purpose');
+          throw new GraphQLError(purposeValidation.reason || 'Invalid access purpose', {
+            extensions: { code: 'FORBIDDEN' },
+          });
         }
 
         // Store purpose requirements for downstream middleware
@@ -310,8 +313,9 @@ export function createWarrantValidationMiddleware(
       if (!governance?.warrantId) {
         // Check if warrant is required
         if (purposeRequirements?.requiresWarrant) {
-          throw new ForbiddenError(
-            `Access purpose "${governance?.purpose}" requires a warrant. Please provide X-Warrant-Id header.`
+          throw new GraphQLError(
+            `Access purpose "${governance?.purpose}" requires a warrant. Please provide X-Warrant-Id header.`,
+            { extensions: { code: 'FORBIDDEN' } }
           );
         }
         return next();
@@ -321,20 +325,28 @@ export function createWarrantValidationMiddleware(
       const warrant = await warrantService.getWarrant(governance.warrantId);
 
       if (!warrant) {
-        throw new ForbiddenError(`Warrant not found: ${governance.warrantId}`);
+        throw new GraphQLError(`Warrant not found: ${governance.warrantId}`, {
+          extensions: { code: 'FORBIDDEN' },
+        });
       }
 
       if (warrant.status !== 'active') {
-        throw new ForbiddenError(`Warrant is ${warrant.status}: ${governance.warrantId}`);
+        throw new GraphQLError(`Warrant is ${warrant.status}: ${governance.warrantId}`, {
+          extensions: { code: 'FORBIDDEN' },
+        });
       }
 
       if (warrant.expiryDate && new Date() > warrant.expiryDate) {
-        throw new ForbiddenError(`Warrant has expired: ${governance.warrantId}`);
+        throw new GraphQLError(`Warrant has expired: ${governance.warrantId}`, {
+          extensions: { code: 'FORBIDDEN' },
+        });
       }
 
       // Check tenant match
       if ((req as any).user && warrant.tenantId !== (req as any).user.tenant) {
-        throw new ForbiddenError('Warrant does not belong to your tenant');
+        throw new GraphQLError('Warrant does not belong to your tenant', {
+          extensions: { code: 'FORBIDDEN' },
+        });
       }
 
       // Attach warrant to request for downstream use
@@ -365,12 +377,16 @@ export function createReasonValidationMiddleware(
     const governance = (req as any).governance as GovernanceContext;
 
     if (!governance?.reasonForAccess) {
-      return next(new ForbiddenError('Reason for access is required'));
+      return next(new GraphQLError('Reason for access is required', {
+        extensions: { code: 'FORBIDDEN' },
+      }));
     }
 
     // Check if reason is too short or appears to be a placeholder
     if (governance.reasonForAccess.length < minLength) {
-      return next(new ForbiddenError(`Reason for access must be at least ${minLength} characters`));
+      return next(new GraphQLError(`Reason for access must be at least ${minLength} characters`, {
+        extensions: { code: 'FORBIDDEN' },
+      }));
     }
 
     const placeholders = [

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { OPAClient } from './opa-abac.js';
 import { logger } from '../utils/logger.js';
 import type { User } from '../graphql/intelgraph/types.js';
@@ -40,7 +40,9 @@ export function opaGatekeeperMiddleware(opaClient: OPAClient, simulate = false) 
       }
 
       if (!allowed) {
-        throw new ForbiddenError('Access denied by OPA gatekeeper');
+        throw new GraphQLError('Access denied by OPA gatekeeper', {
+          extensions: { code: 'FORBIDDEN' },
+        });
       }
     }
 

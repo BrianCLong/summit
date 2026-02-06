@@ -17,7 +17,7 @@ const mockVerifyToken = jest.fn();
 const mockHasPermission = jest.fn();
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../src/services/AuthService', () => ({
+jest.unstable_mockModule('@server/services/AuthService', () => ({
   __esModule: true,
   default: jest.fn(() => ({
     verifyToken: mockVerifyToken,
@@ -35,7 +35,7 @@ jest.unstable_mockModule('argon2', () => ({
   verify: jest.fn(),
 }));
 
-jest.unstable_mockModule('../../src/config/database', () => ({
+jest.unstable_mockModule('@server/config/database', () => ({
   getPostgresPool: jest.fn(() => ({
     connect: jest.fn(),
     query: jest.fn(),
@@ -51,7 +51,7 @@ jest.unstable_mockModule('../../src/config/database', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { ensureAuthenticated, requirePermission, authMiddleware, auth } = await import('../../src/middleware/auth');
+const { ensureAuthenticated, requirePermission, authMiddleware, auth } = await import('@server/middleware/auth');
 
 describe('Auth Middleware', () => {
   let mockRequest: any;

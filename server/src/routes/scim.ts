@@ -4,6 +4,10 @@ import { ScimUser, ScimGroup, ScimPatchRequest, ScimBulkRequest } from '../servi
 import type { AuthenticatedRequest } from './types.js';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+    Array.isArray(value) ? value[0] : value ?? '';
+const singleQuery = (value: string | string[] | undefined): string | undefined =>
+    Array.isArray(value) ? value[0] : value;
 
 router.use((req, res, next) => {
     if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.headers['content-type'] !== 'application/scim+json' && req.headers['content-type'] !== 'application/json') {
@@ -25,7 +29,11 @@ const handleError = (res: Response, error: any) => {
 
 router.get('/Users', async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const { startIndex, count, filter, sortBy, sortOrder } = req.query;
+        const startIndex = singleQuery(req.query.startIndex as string | string[] | undefined);
+        const count = singleQuery(req.query.count as string | string[] | undefined);
+        const filter = singleQuery(req.query.filter as string | string[] | undefined);
+        const sortBy = singleQuery(req.query.sortBy as string | string[] | undefined);
+        const sortOrder = singleQuery(req.query.sortOrder as string | string[] | undefined);
         const tenantId = req.user?.tenantId || 'default';
         const result = await scimService.listUsers(
             tenantId,
@@ -55,7 +63,8 @@ router.post('/Users', async (req: AuthenticatedRequest, res: Response) => {
 router.get('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
          const tenantId = req.user?.tenantId || 'default';
-         const user = await scimService.getUser(tenantId, req.params.id);
+         const userId = singleParam(req.params.id);
+         const user = await scimService.getUser(tenantId, userId);
          if (!user) {
              res.status(404).json({ schemas: ["urn:ietf:params:scim:api:messages:2.0:Error"], status: "404", detail: "User not found" });
              return;
@@ -69,7 +78,8 @@ router.get('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
 router.put('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const tenantId = req.user?.tenantId || 'default';
-        const user = await scimService.updateUser(tenantId, req.params.id, req.body as ScimUser);
+        const userId = singleParam(req.params.id);
+        const user = await scimService.updateUser(tenantId, userId, req.body as ScimUser);
         res.header('Content-Type', 'application/scim+json').json(user);
     } catch (error: any) {
         handleError(res, error);
@@ -79,7 +89,8 @@ router.put('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
 router.patch('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const tenantId = req.user?.tenantId || 'default';
-        const user = await scimService.patchUser(tenantId, req.params.id, req.body as ScimPatchRequest);
+        const userId = singleParam(req.params.id);
+        const user = await scimService.patchUser(tenantId, userId, req.body as ScimPatchRequest);
         res.header('Content-Type', 'application/scim+json').json(user);
     } catch (error: any) {
         handleError(res, error);
@@ -89,7 +100,8 @@ router.patch('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
 router.delete('/Users/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const tenantId = req.user?.tenantId || 'default';
-        await scimService.deleteUser(tenantId, req.params.id);
+        const userId = singleParam(req.params.id);
+        await scimService.deleteUser(tenantId, userId);
         res.status(204).end();
     } catch (error: any) {
         handleError(res, error);
@@ -100,7 +112,11 @@ router.delete('/Users/:id', async (req: AuthenticatedRequest, res: Response) => 
 
 router.get('/Groups', async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const { startIndex, count, filter, sortBy, sortOrder } = req.query;
+        const startIndex = singleQuery(req.query.startIndex as string | string[] | undefined);
+        const count = singleQuery(req.query.count as string | string[] | undefined);
+        const filter = singleQuery(req.query.filter as string | string[] | undefined);
+        const sortBy = singleQuery(req.query.sortBy as string | string[] | undefined);
+        const sortOrder = singleQuery(req.query.sortOrder as string | string[] | undefined);
         const tenantId = req.user?.tenantId || 'default';
         const result = await scimService.listGroups(
             tenantId,
@@ -130,7 +146,8 @@ router.post('/Groups', async (req: AuthenticatedRequest, res: Response) => {
 router.get('/Groups/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
          const tenantId = req.user?.tenantId || 'default';
-         const group = await scimService.getGroup(tenantId, req.params.id);
+         const groupId = singleParam(req.params.id);
+         const group = await scimService.getGroup(tenantId, groupId);
          if (!group) {
              res.status(404).json({ schemas: ["urn:ietf:params:scim:api:messages:2.0:Error"], status: "404", detail: "Group not found" });
              return;
@@ -144,7 +161,8 @@ router.get('/Groups/:id', async (req: AuthenticatedRequest, res: Response) => {
 router.put('/Groups/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const tenantId = req.user?.tenantId || 'default';
-        const group = await scimService.updateGroup(tenantId, req.params.id, req.body as ScimGroup);
+        const groupId = singleParam(req.params.id);
+        const group = await scimService.updateGroup(tenantId, groupId, req.body as ScimGroup);
         res.header('Content-Type', 'application/scim+json').json(group);
     } catch (error: any) {
          handleError(res, error);
@@ -154,7 +172,8 @@ router.put('/Groups/:id', async (req: AuthenticatedRequest, res: Response) => {
 router.delete('/Groups/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const tenantId = req.user?.tenantId || 'default';
-        await scimService.deleteGroup(tenantId, req.params.id);
+        const groupId = singleParam(req.params.id);
+        await scimService.deleteGroup(tenantId, groupId);
         res.status(204).end();
     } catch (error: any) {
          handleError(res, error);
@@ -164,7 +183,8 @@ router.delete('/Groups/:id', async (req: AuthenticatedRequest, res: Response) =>
 router.patch('/Groups/:id', async (req: AuthenticatedRequest, res: Response) => {
     try {
         const tenantId = req.user?.tenantId || 'default';
-        const group = await scimService.patchGroup(tenantId, req.params.id, req.body as ScimPatchRequest);
+        const groupId = singleParam(req.params.id);
+        const group = await scimService.patchGroup(tenantId, groupId, req.body as ScimPatchRequest);
         res.header('Content-Type', 'application/scim+json').json(group);
     } catch (error: any) {
          handleError(res, error);

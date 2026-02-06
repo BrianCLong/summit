@@ -48,6 +48,7 @@ export class IsolationForestDetector {
   private featureMeans: number[] = [];
   private featureStds: number[] = [];
   private isFitted = false;
+  private scoreThreshold = 0;
   private rng: () => number;
 
   constructor(config: Partial<IsolationForestConfig> = {}) {
@@ -62,6 +63,7 @@ export class IsolationForestDetector {
 
     // Seeded random for reproducibility
     this.rng = this.createRng(this.config.randomState);
+    this.scoreThreshold = 1 - this.config.contamination;
   }
 
   private createRng(seed?: number): () => number {
@@ -107,6 +109,11 @@ export class IsolationForestDetector {
       const tree = this.buildTree(subsample, 0, this.config.maxDepth);
       this.trees.push({ root: tree, maxDepth: this.config.maxDepth });
     }
+
+    const trainingScores = normalizedFeatures.map((vector) =>
+      this.scoreVector(vector),
+    );
+    this.scoreThreshold = this.computeThreshold(trainingScores);
 
     this.isFitted = true;
     this.state = 'ready';
@@ -272,9 +279,7 @@ export class IsolationForestDetector {
       }
       const avgPath = totalPathLength / this.trees.length;
 
-      // Anomaly score: 2^(-avgPath / c(n))
-      // Higher score = more anomalous
-      const rawScore = Math.pow(2, -avgPath / avgPathLen);
+      const rawScore = this.scoreVector(normalized, avgPathLen, totalPathLength);
 
       // Compute feature contributions
       const contributions = this.computeFeatureContributions(
@@ -283,7 +288,7 @@ export class IsolationForestDetector {
       );
 
       // Determine if anomaly based on contamination threshold
-      const isAnomaly = rawScore > 1 - this.config.contamination;
+      const isAnomaly = rawScore >= this.scoreThreshold;
 
       results.push({
         featureId: vector.id,
@@ -341,9 +346,43 @@ export class IsolationForestDetector {
 
   private computeConfidence(score: number): number {
     // Map score to confidence based on distance from threshold
-    const threshold = 1 - this.config.contamination;
+    const threshold = this.scoreThreshold;
     const distance = Math.abs(score - threshold);
     return Math.min(1, 0.5 + distance * 2);
+  }
+
+  private scoreVector(
+    normalized: number[],
+    avgPathLen?: number,
+    totalPathLength?: number,
+  ): number {
+    const avgPathLengthCache =
+      avgPathLen ?? averagePathLength(this.config.subsampleSize);
+
+    let totalPath = totalPathLength ?? 0;
+    if (totalPathLength === undefined) {
+      for (const tree of this.trees) {
+        totalPath += this.pathLength(normalized, tree.root, 0);
+      }
+    }
+
+    const avgPath = totalPath / this.trees.length;
+    return Math.pow(2, -avgPath / avgPathLengthCache);
+  }
+
+  private computeThreshold(scores: number[]): number {
+    if (!scores.length) {
+      return 1 - this.config.contamination;
+    }
+    const sorted = [...scores].sort((a, b) => a - b);
+    const idx = Math.max(
+      0,
+      Math.min(
+        sorted.length - 1,
+        Math.floor((1 - this.config.contamination) * (sorted.length - 1)),
+      ),
+    );
+    return sorted[idx];
   }
 
   /**
@@ -378,6 +417,9 @@ export class IsolationForestDetector {
       const tree = this.buildTree(subsample, 0, this.config.maxDepth);
       this.trees[i] = { root: tree, maxDepth: this.config.maxDepth };
     }
+
+    const newScores = normalizedFeatures.map((vector) => this.scoreVector(vector));
+    this.scoreThreshold = this.computeThreshold(newScores);
   }
 
   getState(): DetectorState {
@@ -402,6 +444,7 @@ export class IsolationForestDetector {
       featureStds: this.featureStds,
       trees: this.trees,
       isFitted: this.isFitted,
+      scoreThreshold: this.scoreThreshold,
     });
   }
 
@@ -415,6 +458,8 @@ export class IsolationForestDetector {
     detector.featureStds = parsed.featureStds;
     detector.trees = parsed.trees;
     detector.isFitted = parsed.isFitted;
+    detector.scoreThreshold =
+      parsed.scoreThreshold ?? 1 - detector.config.contamination;
     detector.state = parsed.isFitted ? 'ready' : 'initializing';
     return detector;
   }

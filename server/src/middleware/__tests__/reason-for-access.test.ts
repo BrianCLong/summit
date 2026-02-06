@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { createReasonForAccessMiddleware } from '../reason-for-access.js';
-import { ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 
 const requestFactory = (overrides: Record<string, any> = {}) => {
   const headers = overrides.headers ?? {};
@@ -61,7 +61,7 @@ describe('reason-for-access middleware', () => {
     await middleware(req as any, res as any, next);
 
     expect(next).toHaveBeenCalledTimes(1);
-    const err = next.mock.calls[0][0] as ForbiddenError;
+    const err = next.mock.calls[0][0] as GraphQLError;
     expect(err.message).toMatch(/required/);
   });
 
@@ -75,7 +75,7 @@ describe('reason-for-access middleware', () => {
 
     await middleware(req as any, res as any, next);
 
-    const err = next.mock.calls[0][0] as ForbiddenError;
+    const err = next.mock.calls[0][0] as GraphQLError;
     expect(err.message).toMatch(/at least/);
   });
 

@@ -6,6 +6,8 @@ import { AppError } from '../lib/errors.js';
 import { logger } from '../config/logger.js';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+    Array.isArray(value) ? value[0] : value ?? '';
 
 // Zod schemas for validation
 const CreateQueueSchema = z.object({
@@ -173,7 +175,7 @@ router.post('/items/batch-decision', ensureAuthenticated, ensureTenant, async (r
 // Get queue stats
 router.get('/queues/:queueId/stats', ensureAuthenticated, ensureTenant, async (req, res, next) => {
     try {
-        const { queueId } = req.params;
+        const queueId = singleParam(req.params.queueId);
         const stats = await reviewQueueService.getQueueStats(
             queueId,
             req.user!.tenantId

@@ -6,6 +6,8 @@ import { ContractAnalyzer } from '../supply-chain/ContractAnalyzer.js';
 import { SupplyChainRiskEngine } from '../supply-chain/SupplyChainRiskEngine.js';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 // Instantiate Services (Singletons for this context)
 const vendorService = new VendorService();
@@ -31,7 +33,8 @@ router.post('/vendors', async (req: Request, res: Response) => {
 });
 
 router.get('/vendors/:id', async (req: Request, res: Response) => {
-  const vendor = await vendorService.getVendor(req.params.id);
+  const vendorId = singleParam(req.params.id);
+  const vendor = await vendorService.getVendor(vendorId);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
   res.json(vendor);
 });
@@ -45,7 +48,7 @@ router.get('/vendors', async (req: Request, res: Response) => {
  * SBOM Upload & Analysis
  */
 router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = singleParam(req.params.id);
   const { sbomJson, productName, version } = req.body;
 
   const vendor = await vendorService.getVendor(id);
@@ -69,7 +72,7 @@ router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
  * Contract Analysis
  */
 router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = singleParam(req.params.id);
   const { contractText } = req.body;
 
   const vendor = await vendorService.getVendor(id);
@@ -88,7 +91,7 @@ router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
  * Risk Assessment
  */
 router.get('/vendors/:id/risk', async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = singleParam(req.params.id);
   const vendor = await vendorService.getVendor(id);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 

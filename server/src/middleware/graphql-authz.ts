@@ -1,5 +1,5 @@
 import { GraphQLFieldConfig, GraphQLResolveInfo } from 'graphql';
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import axios from 'axios';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
@@ -106,7 +106,9 @@ export class GraphQLAuthzPlugin {
 
       // Ensure user is authenticated
       if (!context.user) {
-        throw new AuthenticationError('Authentication required');
+        throw new GraphQLError('Authentication required', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
       }
 
       try {
@@ -128,16 +130,17 @@ export class GraphQLAuthzPlugin {
 
         // Enforce decision
         if (!decision.allow) {
-          throw new ForbiddenError(
+          throw new GraphQLError(
             `Access denied to ${info.fieldName}: ${decision.reason || 'Policy violation'}`,
+            { extensions: { code: 'FORBIDDEN' } }
           );
         }
 
         return next();
       } catch (error: any) {
         if (
-          error instanceof ForbiddenError ||
-          error instanceof AuthenticationError
+          error instanceof GraphQLError &&
+          (error.extensions?.code === 'UNAUTHENTICATED' || error.extensions?.code === 'FORBIDDEN')
         ) {
           throw error;
         }
@@ -147,7 +150,9 @@ export class GraphQLAuthzPlugin {
         );
 
         // Fail secure - deny on error
-        throw new ForbiddenError('Authorization check failed');
+        throw new GraphQLError('Authorization check failed', {
+          extensions: { code: 'FORBIDDEN' },
+        });
       }
     };
   }

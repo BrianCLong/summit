@@ -10,6 +10,9 @@ const analyticsService = AnalyticsService.getInstance();
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
+const singleQueryParam = (value: any): string =>
+  Array.isArray(value) ? value[0] : (value as string) || '';
+
 /**
  * @route GET /analytics/path
  * @desc Calculate paths (shortest, k-paths)
@@ -17,15 +20,19 @@ const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
 router.get(
   '/path',
   asyncHandler(async (req: any, res: any) => {
-    const { sourceId, targetId, algorithm, k, maxDepth } = req.query;
+    const sourceId = singleQueryParam(req.query.sourceId);
+    const targetId = singleQueryParam(req.query.targetId);
+    const algorithm = singleQueryParam(req.query.algorithm);
+    const k = req.query.k ? parseInt(singleQueryParam(req.query.k)) : undefined;
+    const maxDepth = req.query.maxDepth ? parseInt(singleQueryParam(req.query.maxDepth)) : undefined;
 
     if (!sourceId || !targetId) {
       return res.status(400).json({ error: 'sourceId and targetId are required' });
     }
 
     const result = await analyticsService.findPaths(
-      sourceId as string,
-      targetId as string,
+      sourceId,
+      targetId,
       (algorithm as 'shortest' | 'k-paths') || 'shortest',
       { k, maxDepth }
     );
@@ -40,7 +47,7 @@ router.get(
 router.get(
   '/community',
   asyncHandler(async (req: any, res: any) => {
-    const { algorithm } = req.query;
+    const algorithm = singleQueryParam(req.query.algorithm);
     const result = await analyticsService.detectCommunities(
       (algorithm as 'louvain' | 'leiden' | 'lpa') || 'lpa'
     );
@@ -55,10 +62,11 @@ router.get(
 router.get(
   '/centrality',
   asyncHandler(async (req: any, res: any) => {
-    const { algorithm, limit } = req.query;
+    const algorithm = singleQueryParam(req.query.algorithm);
+    const limit = singleQueryParam(req.query.limit);
     const result = await analyticsService.calculateCentrality(
       (algorithm as 'betweenness' | 'eigenvector') || 'betweenness',
-      { limit: limit ? parseInt(limit as string) : 20 }
+      { limit: limit ? parseInt(limit) : 20 }
     );
     res.json(result);
   })
@@ -71,7 +79,7 @@ router.get(
 router.get(
   '/patterns',
   asyncHandler(async (req: any, res: any) => {
-    const { type } = req.query;
+    const type = singleQueryParam(req.query.type);
     if (!type) {
       return res.status(400).json({ error: 'Pattern type is required (temporal-motifs, co-travel, financial-structuring)' });
     }
@@ -89,7 +97,7 @@ router.get(
 router.get(
   '/anomaly',
   asyncHandler(async (req: any, res: any) => {
-    const { type } = req.query;
+    const type = singleQueryParam(req.query.type);
     if (!type) {
       return res.status(400).json({ error: 'Anomaly type is required (degree, temporal-spike, selector-misuse)' });
     }

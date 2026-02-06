@@ -19,7 +19,7 @@ import { describe, it, test, expect, beforeAll, afterAll, jest } from '@jest/glo
 const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
 const describeIf = runAcceptance ? describe : describe.skip;
 
-jest.mock('../src/config/database', () => ({
+jest.mock('@server/config/database', () => ({
     getPostgresPool: jest.fn(() => ({
         connect: jest.fn(),
         query: jest.fn(),

@@ -38,7 +38,7 @@ const createTempDir = (prefix: string) =>
   mkdtempSync(path.join(tmpdir(), prefix));
 
 const ensureMockPool = async () => {
-  const { pool } = await import('../../db/pg.js');
+  const { pool } = await import('@server/db/pg');
   if (typeof (pool.query as any).mockResolvedValueOnce !== 'function') {
     (pool as any).query = jest.fn(() => Promise.resolve({ rows: [] }));
   }
@@ -46,7 +46,7 @@ const ensureMockPool = async () => {
 };
 
 // Mock the database pool
-jest.mock('../../db/pg.js', () => ({
+jest.mock('@server/db/pg', () => ({
   pool: {
     query: jest.fn(() => Promise.resolve({ rows: [] })),
     connect: jest.fn(() =>
@@ -59,14 +59,14 @@ jest.mock('../../db/pg.js', () => ({
 }));
 
 // Mock provenance ledger
-jest.mock('../../provenance/ledger.js', () => ({
+jest.mock('@server/provenance/ledger', () => ({
   provenanceLedger: {
     appendEntry: jest.fn(() => Promise.resolve({})),
   },
 }));
 
 // Mock audit system
-jest.mock('../../audit/advanced-audit-system.js', () => ({
+jest.mock('@server/audit/advanced-audit-system', () => ({
   advancedAuditSystem: {
     logEvent: jest.fn(),
   },

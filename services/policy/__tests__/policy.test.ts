@@ -181,9 +181,47 @@ const createMockPolicyEngine = () => {
 
     // Check conditions (simplified)
     if (rule.conditions) {
-      if (rule.conditions['resource.owner'] === '${subject.userId}') {
-        if (resource.owner !== subject.userId) {
-          return false;
+      const resolveSubjectValue = (token: string): unknown => {
+        if (!token.startsWith('${subject.') || !token.endsWith('}')) {
+          return token;
+        }
+        const key = token.slice('${subject.'.length, -1);
+        return (subject as Record<string, unknown>)[key];
+      };
+
+      for (const [key, rawCondition] of Object.entries(rule.conditions)) {
+        const [source, field] = key.split('.');
+        const subjectValue =
+          source === 'subject'
+            ? (subject as Record<string, unknown>)[field]
+            : undefined;
+        const resourceValue =
+          source === 'resource'
+            ? (resource as Record<string, unknown>)[field]
+            : undefined;
+
+        if (typeof rawCondition === 'string') {
+          if (rawCondition.startsWith('!=')) {
+            const expected = resolveSubjectValue(rawCondition.slice(2));
+            if (expected === undefined || resourceValue === undefined) {
+              return false;
+            }
+            if (resourceValue === expected) {
+              return false;
+            }
+            continue;
+          }
+
+          const expected = resolveSubjectValue(rawCondition);
+          if (source === 'subject') {
+            if (subjectValue !== expected) {
+              return false;
+            }
+          } else if (source === 'resource') {
+            if (resourceValue !== expected) {
+              return false;
+            }
+          }
         }
       }
     }

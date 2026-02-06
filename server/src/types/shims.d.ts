@@ -275,75 +275,26 @@ declare module 'html-escaper' {
   export function unescape(str: string): string;
 }
 
-// Feature flags shim for when the workspace package types aren't available
-declare module '@intelgraph/feature-flags' {
-  export class FeatureFlagService {
-    constructor(config: any);
-    initialize(): Promise<void>;
-    close(): Promise<void>;
-    isReady(): boolean;
-    getBooleanFlag(key: string, defaultValue: boolean, context?: any): Promise<boolean>;
-    getStringFlag(key: string, defaultValue: string, context?: any): Promise<string>;
-    getNumberFlag(key: string, defaultValue: number, context?: any): Promise<number>;
-    getJSONFlag<T = any>(key: string, defaultValue: T, context?: any): Promise<T>;
-    getEvaluation<T = any>(key: string, defaultValue: T, context?: any): Promise<any>;
-    getAllFlags(context?: any): Promise<Record<string, any>>;
-    track(eventName: string, context?: any, data?: any): Promise<void>;
-    getFlagDefinition(key: string): Promise<any>;
-    listFlags(): Promise<any[]>;
-    setMetrics(metrics: any): void;
-    getMetrics(): any;
+[key: string]: any;
   }
-  export interface FeatureFlagProvider {
-    initialize(): Promise<void>;
-    close(): Promise<void>;
-    isReady(): boolean;
-    [key: string]: any;
-  }
-  export interface FlagCache {
-    get<T>(key: string, context: any): Promise<any>;
-    set<T>(key: string, context: any, evaluation: any, ttl: number): Promise<void>;
-    delete(key: string, context: any): Promise<void>;
-    clear(): Promise<void>;
-  }
-  export interface FlagContext {
-    key?: string;
-    [key: string]: any;
-  }
-  export interface FlagEvaluation<T = any> {
-    key: string;
-    value: T;
-    exists: boolean;
-    variation?: string;
-    reason?: string;
-    timestamp: number;
-    fromCache?: boolean;
-  }
-  export interface FlagDefinition {
-    key: string;
-    name: string;
-    description?: string;
-    type: string;
-    [key: string]: any;
-  }
-  export interface FlagMetrics {
-    recordEvaluation(key: string, variation: string, duration: number): void;
-    recordCacheHit(key: string): void;
-    recordCacheMiss(key: string): void;
-    recordError(key: string, error: Error): void;
-  }
-  export interface FeatureFlagConfig {
-    provider: FeatureFlagProvider;
-    cache?: FlagCache;
-    cacheTTL?: number;
-    enableCache?: boolean;
-    enableAnalytics?: boolean;
-    enableMetrics?: boolean;
-    offline?: boolean;
-    defaultContext?: Partial<FlagContext>;
-  }
-  const anyExport: any;
-  export default anyExport;
+export interface FlagMetrics {
+  recordEvaluation(key: string, variation: string, duration: number): void;
+  recordCacheHit(key: string): void;
+  recordCacheMiss(key: string): void;
+  recordError(key: string, error: Error): void;
+}
+export interface FeatureFlagConfig {
+  provider: FeatureFlagProvider;
+  cache?: FlagCache;
+  cacheTTL?: number;
+  enableCache?: boolean;
+  enableAnalytics?: boolean;
+  enableMetrics?: boolean;
+  offline?: boolean;
+  defaultContext?: Partial<FlagContext>;
+}
+const anyExport: any;
+export default anyExport;
 }
 
 declare module 'compression' {

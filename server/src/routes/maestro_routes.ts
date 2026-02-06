@@ -163,6 +163,8 @@ export function buildMaestroRouter(
   opa: OpaEvaluator = opaClient,
 ): Router {
   const router = Router();
+  const singleParam = (value: string | string[] | undefined): string =>
+    Array.isArray(value) ? value[0] : value ?? '';
   const enforceStartRunPolicy = policyActionGate({
     action: 'start_run',
     resource: 'maestro_run',
@@ -178,15 +180,16 @@ export function buildMaestroRouter(
   const enforceRunReadPolicy = createMaestroOPAEnforcer(opa, DEFAULT_POLICY_PATH, {
     action: 'maestro.run.read',
     resourceType: 'maestro/run',
-    resolveResourceId: (req) => req.params.runId,
+    resolveResourceId: (req) => singleParam(req.params.runId),
   });
   const enforceTaskReadPolicy = createMaestroOPAEnforcer(opa, DEFAULT_POLICY_PATH, {
     action: 'maestro.task.read',
     resourceType: 'maestro/task',
-    resolveResourceId: (req) => req.params.taskId || req.params.runId,
+    resolveResourceId: (req) =>
+      singleParam(req.params.taskId) || singleParam(req.params.runId),
     buildResourceAttributes: (req) => ({
-      taskId: req.params.taskId,
-      runId: req.params.runId,
+      taskId: singleParam(req.params.taskId),
+      runId: singleParam(req.params.runId),
     }),
   });
 
@@ -220,7 +223,7 @@ export function buildMaestroRouter(
   // GET /api/maestro/runs/:runId – reconstruct current state (for polling)
   router.get('/runs/:runId', enforceRunReadPolicy, async (req, res, next) => {
     try {
-      const { runId } = req.params;
+      const runId = singleParam(req.params.runId);
       const response = await queries.getRunResponse(runId);
       if (!response) {
         return res.status(404).json({ error: 'Run not found' });
@@ -234,7 +237,7 @@ export function buildMaestroRouter(
   // GET /api/maestro/runs/:runId/tasks – list tasks only
   router.get('/runs/:runId/tasks', enforceRunReadPolicy, async (req, res, next) => {
     try {
-      const { runId } = req.params;
+      const runId = singleParam(req.params.runId);
       const run = await queries.getRunResponse(runId);
       if (!run) return res.status(404).json({ error: 'Run not found' });
       return res.json(run.tasks);
@@ -246,7 +249,7 @@ export function buildMaestroRouter(
   // GET /api/maestro/tasks/:taskId – detailed task + artifacts
   router.get('/tasks/:taskId', enforceTaskReadPolicy, async (req, res, next) => {
     try {
-      const { taskId } = req.params;
+      const taskId = singleParam(req.params.taskId);
       const result = await queries.getTaskWithArtifacts(taskId);
       if (!result) return res.status(404).json({ error: 'Task not found' });
       return res.json(result);

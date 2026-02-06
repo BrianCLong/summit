@@ -211,8 +211,11 @@ function findDwellSequences(
     return [];
   }
 
-  // First split by time gaps
-  const timeSequences = findSequences(entries, maxGapMs);
+  // First split by time gaps (SpacetimeEntry uses `start` as timestamp)
+  const timeSequences = findSequences(
+    entries.map((entry) => ({ entry, timestamp: entry.start })),
+    maxGapMs,
+  ).map((sequence) => sequence.map((item) => item.entry));
   const dwellSequences: SpacetimeEntry[][] = [];
 
   for (const sequence of timeSequences) {

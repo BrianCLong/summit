@@ -17,16 +17,10 @@ import type { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { OPAEnforcer, createOPAMiddleware } from '../opa-enforcer.js';
 
-// Mock axios
-jest.mock('axios', () => ({
-  __esModule: true,
-  default: { post: jest.fn() },
-  post: jest.fn(),
-}));
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock budget ledger
-jest.mock('../../db/budgetLedger', () => {
+jest.mock('@server/db/budgetLedger', () => {
   const ledger = {
     getTenantBudget: jest.fn(),
     getSpendingSummary: jest.fn(),
@@ -40,7 +34,7 @@ jest.mock('../../db/budgetLedger', () => {
   };
 });
 
-const budgetLedgerModule = jest.requireMock('../../db/budgetLedger') as {
+const budgetLedgerModule = jest.requireMock('@server/db/budgetLedger') as {
   __mockLedger: {
     getTenantBudget: jest.MockedFunction<(...args: any[]) => any>;
     getSpendingSummary: jest.MockedFunction<(...args: any[]) => any>;
@@ -65,6 +59,7 @@ describe('OPAEnforcer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(axios, 'post').mockReset();
     if (mockBudgetLedger) {
       Object.values(mockBudgetLedger).forEach((fn) => fn.mockReset());
     }

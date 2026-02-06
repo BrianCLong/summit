@@ -18,7 +18,7 @@ import type { Pool } from 'pg';
 
 const mockGetPostgresPool = jest.fn();
 const mockGetRedisClient = jest.fn();
-jest.unstable_mockModule('../../src/config/database.js', () => ({
+jest.unstable_mockModule('@server/config/database', () => ({
   getPostgresPool: mockGetPostgresPool,
   getRedisClient: mockGetRedisClient,
 }));
@@ -30,13 +30,17 @@ const mockConfig = {
     refreshSecret: 'test-refresh',
   },
 };
-jest.unstable_mockModule('../../src/config/index.js', () => ({
+jest.unstable_mockModule('@server/config', () => ({
   __esModule: true,
   default: mockConfig,
+  cfg: {
+    JWT_SECRET: mockConfig.jwt.secret,
+    JWT_REFRESH_SECRET: mockConfig.jwt.refreshSecret,
+  },
 }));
 
 const mockCheckUserEnrollmentEligibility = jest.fn();
-jest.unstable_mockModule('../../src/services/GAEnrollmentService.js', () => ({
+jest.unstable_mockModule('@server/services/GAEnrollmentService', () => ({
   __esModule: true,
   default: {
     checkUserEnrollmentEligibility: mockCheckUserEnrollmentEligibility,
@@ -44,7 +48,7 @@ jest.unstable_mockModule('../../src/services/GAEnrollmentService.js', () => ({
 }));
 
 const mockGetSecret = jest.fn();
-jest.unstable_mockModule('../../src/services/SecretsService.js', () => ({
+jest.unstable_mockModule('@server/services/SecretsService', () => ({
   __esModule: true,
   secretsService: {
     getSecret: mockGetSecret,
@@ -75,8 +79,8 @@ jest.unstable_mockModule('jsonwebtoken', () => ({
   verify: mockJwtVerify,
 }));
 
-const { default: AuthService } = await import('../../src/services/AuthService.js');
-const { ensureAuthenticated, requirePermission } = await import('../../src/middleware/auth.js');
+const { default: AuthService } = await import('@server/services/AuthService');
+const { ensureAuthenticated, requirePermission } = await import('@server/middleware/auth');
 const { securityTestVectors, createMockRequest, createMockResponse } =
   await import('../utils/auth-test-helpers.js');
 const { default: argon2 } = await import('argon2');

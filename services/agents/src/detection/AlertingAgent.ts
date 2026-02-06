@@ -122,17 +122,17 @@ export class AlertingAgent {
   async processAnomaly(anomaly: DetectedAnomaly): Promise<AnomalyAlert | null> {
     if (!this.config.enabled) return null;
 
-    // Check throttling
-    if (this.isThrottled(anomaly.entityId)) {
-      console.debug(`[AlertingAgent] Throttled alert for entity ${anomaly.entityId}`);
-      return null;
-    }
-
     // Check deduplication
     const existingAlert = this.findDuplicateAlert(anomaly);
     if (existingAlert) {
       await this.updateExistingAlert(existingAlert, anomaly);
       return existingAlert.alert;
+    }
+
+    // Check throttling for new alerts
+    if (this.isThrottled(anomaly.entityId)) {
+      console.debug(`[AlertingAgent] Throttled alert for entity ${anomaly.entityId}`);
+      return null;
     }
 
     // Create new alert

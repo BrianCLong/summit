@@ -12,10 +12,12 @@ const router = express.Router();
 const orchestrator = new PipelineOrchestrator();
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const queueService = new QueueService();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 // Trigger Pipeline Run
 router.post('/pipelines/:key/run', ensureAuthenticated, async (req, res) => {
-  const { key } = req.params;
+  const key = singleParam(req.params.key);
   // In a real app, we'd fetch config from DB
   // For MVP/Demo, we accept config in body or mock it
   const config = req.body as PipelineConfig;
@@ -75,7 +77,8 @@ router.post('/start', ensureAuthenticated, async (req, res) => {
 // Admin API: Check Job Status (New Endpoint)
 router.get('/status/:jobId', ensureAuthenticated, async (req, res) => {
   try {
-    const status = await queueService.getJobStatus(req.params.jobId);
+    const jobId = singleParam(req.params.jobId);
+    const status = await queueService.getJobStatus(jobId);
     if (!status) {
         return res.status(404).json({ error: 'Job not found' });
     }

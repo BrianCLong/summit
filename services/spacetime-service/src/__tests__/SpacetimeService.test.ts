@@ -22,6 +22,7 @@ import type {
 describe('SpacetimeService', () => {
   let service: SpacetimeService;
   let emittedEvents: DerivedEventReference[];
+  let baseTime = 0;
   const defaultContext: PolicyContext = {
     tenantId: 'tenant-1',
     policyLabels: [],
@@ -29,6 +30,7 @@ describe('SpacetimeService', () => {
 
   beforeEach(() => {
     emittedEvents = [];
+    baseTime = Date.now();
     const emitter: DerivedEventEmitter = {
       emit: (event) => emittedEvents.push(event),
     };
@@ -124,7 +126,7 @@ describe('SpacetimeService', () => {
 
   describe('findCoPresence', () => {
     beforeEach(async () => {
-      const now = Date.now();
+      const now = baseTime;
 
       // Entity 1 and 2 are near each other at same time
       for (let i = 0; i < 5; i++) {
@@ -387,7 +389,7 @@ describe('SpacetimeService', () => {
     });
 
     it('detects dwell episodes', () => {
-      const now = Date.now();
+      const now = baseTime;
       const episodes = service.detectDwell({
         entityId: 'dwelling-entity',
         area: {
@@ -414,7 +416,7 @@ describe('SpacetimeService', () => {
     });
 
     it('emits derived events for dwell', () => {
-      const now = Date.now();
+      const now = baseTime;
       service.detectDwell({
         entityId: 'dwelling-entity',
         area: {
@@ -442,7 +444,7 @@ describe('SpacetimeService', () => {
 
   describe('getSpacetimeSummary', () => {
     beforeEach(async () => {
-      const now = Date.now();
+      const now = baseTime;
 
       // Create observation history
       for (let i = 0; i < 20; i++) {
@@ -465,7 +467,7 @@ describe('SpacetimeService', () => {
     });
 
     it('generates spacetime summary', () => {
-      const now = Date.now();
+      const now = baseTime;
       const summary = service.getSpacetimeSummary(
         'summary-entity',
         { start: now - 1200000, end: now },

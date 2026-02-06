@@ -74,6 +74,7 @@ class MockRBACService {
         'export:investigation:json',
         'export:investigation:csv',
         'export:investigation:pdf',
+        'export:config:view',
       ],
       lead: [
         'investigation:view',

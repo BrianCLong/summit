@@ -87,6 +87,10 @@ module.exports = {
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',
+    '^@intelgraph/datalab-service$':
+      '<rootDir>/services/datalab-service/src/index.ts',
+    '^@intelgraph/sandbox-tenant-profile$':
+      '<rootDir>/services/sandbox-tenant-profile/src/index.ts',
     '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src/index.ts',
   },
   transformIgnorePatterns: [

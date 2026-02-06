@@ -17,8 +17,14 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["ES2022", "DOM"],
-    "types": ["node", "jest"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true
@@ -26,7 +32,9 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
@@ -37,7 +45,6 @@
     "**/__tests__/**",
     "health/**",
     "src/ai/models/cv_integration.ts",
-    "src/feature-flags/**",
     "src/graphql/resolvers/search.ts",
     "src/graphql/resolvers/v041/**",
     "src/kpro/**",
@@ -64,7 +71,6 @@
     "src/maestro/mcp/**",
     "src/graphql/plugins/**",
     "src/graphql/resolvers/multimodalResolvers.ts",
-    "src/live-server.ts",
     "src/jobs/purgeStaleData.ts",
     "src/migrations/safety/**",
     "src/db/Neo4jConnectionManager.ts",
@@ -81,14 +87,12 @@
     "src/conductor/scheduler.ts",
     "src/conductor/workerClient.ts",
     "src/connectors/jdbc.ts",
-    "src/featureFlags/**",
     "src/ingest/adapters/kafkaAdapter.ts",
     "src/kafka/**",
     "src/migrations/**",
     "src/services/CredentialVaultService.ts",
     "src/services/K8sDeploymentService.ts",
     "src/workers/behavioral*.ts",
-    "src/graphql/apollo-v5-server.ts",
     "src/graphql/resolvers/legacy.ts",
     "src/graphql/resolvers/v040/**",
     "src/graphql/tools/resolvers.ts",

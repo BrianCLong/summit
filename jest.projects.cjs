@@ -11,6 +11,19 @@ const client = {
   roots: ['<rootDir>/client', '<rootDir>/packages'],
   testEnvironment: 'jsdom',
   setupFilesAfterEnv,
+  transform: {
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: '<rootDir>/client/tsconfig.tests.json',
+      },
+    ],
+    '^.+\\.(js|jsx)$': [
+      'babel-jest',
+      { configFile: '<rootDir>/client/babel.config.cjs' },
+    ],
+  },
 };
 
 const server = {

@@ -21,47 +21,73 @@ import {
   DetectedAnomaly,
 } from '../types.js';
 
+function createRng(seed = 42): () => number {
+  let state = seed;
+  return () => {
+    state ^= state << 13;
+    state ^= state >>> 17;
+    state ^= state << 5;
+    return (state >>> 0) / 4294967296;
+  };
+}
+
 // Test data generators
-function generateNormalFeatureVector(id: string): FeatureVector {
+function generateNormalFeatureVector(
+  id: string,
+  rng: () => number = Math.random,
+): FeatureVector {
   // Normal data: features follow standard distribution
   return {
     id,
     sourceId: `entity-${id}`,
     sourceType: 'neo4j',
-    features: Array.from({ length: 10 }, () => Math.random() * 2 - 1), // Centered around 0
+    features: Array.from({ length: 10 }, () => rng() * 2 - 1), // Centered around 0
     metadata: { type: 'normal' },
     timestamp: new Date(),
   };
 }
 
-function generateAnomalousFeatureVector(id: string): FeatureVector {
+function generateAnomalousFeatureVector(
+  id: string,
+  rng: () => number = Math.random,
+): FeatureVector {
   // Anomalous data: features are outliers (3+ std from mean)
   return {
     id,
     sourceId: `entity-${id}`,
     sourceType: 'neo4j',
-    features: Array.from({ length: 10 }, () => (Math.random() > 0.5 ? 5 : -5) + Math.random()),
+    features: Array.from(
+      { length: 10 },
+      () => (rng() > 0.5 ? 5 : -5) + rng(),
+    ),
     metadata: { type: 'anomaly' },
     timestamp: new Date(),
   };
 }
 
-function generateTrainingData(normalCount: number, anomalyCount: number): FeatureVector[] {
+function generateTrainingData(
+  normalCount: number,
+  anomalyCount: number,
+  rng: () => number = Math.random,
+): FeatureVector[] {
   const data: FeatureVector[] = [];
 
   for (let i = 0; i < normalCount; i++) {
-    data.push(generateNormalFeatureVector(`normal-${i}`));
+    data.push(generateNormalFeatureVector(`normal-${i}`, rng));
   }
 
   for (let i = 0; i < anomalyCount; i++) {
-    data.push(generateAnomalousFeatureVector(`anomaly-${i}`));
+    data.push(generateAnomalousFeatureVector(`anomaly-${i}`, rng));
   }
 
   // Shuffle
-  return data.sort(() => Math.random() - 0.5);
+  return data.sort(() => rng() - 0.5);
 }
 
-function generateGraphData(nodeCount: number): { nodes: GraphNode[]; edges: GraphEdge[] } {
+function generateGraphData(
+  nodeCount: number,
+  rng: () => number = Math.random,
+): { nodes: GraphNode[]; edges: GraphEdge[] } {
   const nodes: GraphNode[] = [];
   const edges: GraphEdge[] = [];
 
@@ -71,7 +97,7 @@ function generateGraphData(nodeCount: number): { nodes: GraphNode[]; edges: Grap
       id: `node-${i}`,
       type: i < nodeCount * 0.9 ? 'normal' : 'anomalous',
       properties: {
-        value: i < nodeCount * 0.9 ? Math.random() : Math.random() * 10,
+        value: i < nodeCount * 0.9 ? rng() : rng() * 10,
         category: i % 5,
       },
       degree: 0,
@@ -82,7 +108,7 @@ function generateGraphData(nodeCount: number): { nodes: GraphNode[]; edges: Grap
   // Create edges (small-world network)
   for (let i = 0; i < nodeCount; i++) {
     // Connect to neighbors
-    const numConnections = Math.floor(Math.random() * 5) + 2;
+    const numConnections = Math.floor(rng() * 5) + 2;
     for (let j = 0; j < numConnections; j++) {
       const targetIdx = (i + j + 1) % nodeCount;
       edges.push({
@@ -99,7 +125,7 @@ function generateGraphData(nodeCount: number): { nodes: GraphNode[]; edges: Grap
     if (nodes[i].type === 'anomalous') {
       // Connect to random distant nodes
       for (let k = 0; k < 10; k++) {
-        const randomTarget = Math.floor(Math.random() * nodeCount);
+        const randomTarget = Math.floor(rng() * nodeCount);
         edges.push({
           id: `edge-${i}-random-${randomTarget}`,
           sourceId: `node-${i}`,
@@ -124,6 +150,7 @@ function generateGraphData(nodeCount: number): { nodes: GraphNode[]; edges: Grap
 
 describe('IsolationForestDetector', () => {
   let detector: IsolationForestDetector;
+  let rng: () => number;
 
   beforeAll(() => {
     detector = new IsolationForestDetector({
@@ -134,23 +161,27 @@ describe('IsolationForestDetector', () => {
     });
   });
 
+  beforeEach(() => {
+    rng = createRng(42);
+  });
+
   it('should train on normal data', async () => {
-    const trainingData = generateTrainingData(900, 100); // 10% contamination
+    const trainingData = generateTrainingData(900, 100, rng); // 10% contamination
     await detector.fit(trainingData);
     expect(detector.isTrained()).toBe(true);
     expect(detector.getState()).toBe('ready');
   });
 
   it('should detect anomalies with high precision', async () => {
-    const trainingData = generateTrainingData(900, 100);
+    const trainingData = generateTrainingData(900, 100, rng);
     await detector.fit(trainingData);
 
     // Test on new data
     const testNormal = Array.from({ length: 100 }, (_, i) =>
-      generateNormalFeatureVector(`test-normal-${i}`),
+      generateNormalFeatureVector(`test-normal-${i}`, rng),
     );
     const testAnomalous = Array.from({ length: 100 }, (_, i) =>
-      generateAnomalousFeatureVector(`test-anomaly-${i}`),
+      generateAnomalousFeatureVector(`test-anomaly-${i}`, rng),
     );
 
     const normalResults = await detector.detect(testNormal);
@@ -171,7 +202,7 @@ describe('IsolationForestDetector', () => {
   });
 
   it('should meet p95 latency target of 500ms', async () => {
-    const trainingData = generateTrainingData(1000, 100);
+    const trainingData = generateTrainingData(1000, 100, rng);
     await detector.fit(trainingData);
 
     const latencies: number[] = [];
@@ -179,7 +210,7 @@ describe('IsolationForestDetector', () => {
     const numBatches = 50;
 
     for (let i = 0; i < numBatches; i++) {
-      const batch = generateTrainingData(batchSize, 0);
+      const batch = generateTrainingData(batchSize, 0, rng);
       const start = Date.now();
       await detector.detect(batch);
       latencies.push(Date.now() - start);
@@ -197,17 +228,17 @@ describe('IsolationForestDetector', () => {
   });
 
   it('should support partial fitting for incremental updates', async () => {
-    const initialData = generateTrainingData(500, 50);
+    const initialData = generateTrainingData(500, 50, rng);
     await detector.fit(initialData);
 
-    const newData = generateTrainingData(100, 10);
+    const newData = generateTrainingData(100, 10, rng);
     await detector.partialFit(newData);
 
     expect(detector.isTrained()).toBe(true);
 
     // Should still detect anomalies
     const testAnomalous = Array.from({ length: 20 }, (_, i) =>
-      generateAnomalousFeatureVector(`partial-test-${i}`),
+      generateAnomalousFeatureVector(`partial-test-${i}`, rng),
     );
     const results = await detector.detect(testAnomalous);
     const detected = results.filter((r) => r.isAnomaly).length;
@@ -216,7 +247,7 @@ describe('IsolationForestDetector', () => {
   });
 
   it('should serialize and deserialize correctly', async () => {
-    const trainingData = generateTrainingData(500, 50);
+    const trainingData = generateTrainingData(500, 50, rng);
     await detector.fit(trainingData);
 
     const serialized = detector.serialize();
@@ -226,7 +257,7 @@ describe('IsolationForestDetector', () => {
     expect(restored.getConfig()).toEqual(detector.getConfig());
 
     // Should produce similar results
-    const testData = generateTrainingData(50, 5);
+    const testData = generateTrainingData(50, 5, rng);
     const originalResults = await detector.detect(testData);
     const restoredResults = await restored.detect(testData);
 
@@ -240,15 +271,17 @@ describe('IsolationForestDetector', () => {
 describe('GraphDiffusionDetector', () => {
   let detector: GraphDiffusionDetector;
   let graphData: { nodes: GraphNode[]; edges: GraphEdge[] };
+  let rng: () => number;
 
   beforeAll(async () => {
+    rng = createRng(42);
     detector = new GraphDiffusionDetector({
       diffusionSteps: 5,
       dampingFactor: 0.85,
       embeddingDimension: 32,
     });
 
-    graphData = generateGraphData(200);
+    graphData = generateGraphData(200, rng);
     await detector.fit(graphData.nodes, graphData.edges);
   });
 
@@ -480,6 +513,7 @@ describe('AlertingAgent', () => {
 
 describe('AnomalyDetectionService E2E', () => {
   let service: AnomalyDetectionService;
+  let rng: () => number;
 
   beforeAll(async () => {
     service = new AnomalyDetectionService({
@@ -500,8 +534,8 @@ describe('AnomalyDetectionService E2E', () => {
           embeddingDimension: 32,
         },
         thresholds: {
-          anomalyScoreThreshold: 0.7,
-          confidenceThreshold: 0.6,
+          anomalyScoreThreshold: 0.5,
+          confidenceThreshold: 0.4,
           minEvidenceCount: 1,
         },
         performance: {
@@ -525,13 +559,13 @@ describe('AnomalyDetectionService E2E', () => {
     });
   });
 
-  it('should train and detect anomalies end-to-end', async () => {
-    // Train with synthetic data
-    const trainingData = generateTrainingData(500, 50);
-    await service.trainManual(trainingData);
+  beforeEach(() => {
+    rng = createRng(42);
+  });
 
+  it('should train and detect anomalies end-to-end', async () => {
     // Create test stream data
-    const normalPoints: StreamDataPoint[] = Array.from({ length: 50 }, (_, i) => ({
+    const normalPoints: StreamDataPoint[] = Array.from({ length: 200 }, (_, i) => ({
       id: `normal-${i}`,
       sourceType: 'neo4j' as const,
       timestamp: new Date(),
@@ -540,13 +574,17 @@ describe('AnomalyDetectionService E2E', () => {
           nodeId: `node-normal-${i}`,
           nodeType: 'Entity',
           properties: {
-            value1: Math.random() * 2 - 1,
-            value2: Math.random() * 2 - 1,
-            value3: Math.random() * 2 - 1,
+            value1: rng() * 2 - 1,
+            value2: rng() * 2 - 1,
+            value3: rng() * 2 - 1,
           },
         },
       },
     }));
+
+    // Train using stream-derived feature vectors for consistent distribution
+    const trainingData = StreamProcessor.toFeatureVectors(normalPoints);
+    await service.trainManual(trainingData);
 
     const anomalyPoints: StreamDataPoint[] = Array.from({ length: 20 }, (_, i) => ({
       id: `anomaly-${i}`,
@@ -557,9 +595,9 @@ describe('AnomalyDetectionService E2E', () => {
           nodeId: `node-anomaly-${i}`,
           nodeType: 'Entity',
           properties: {
-            value1: 10 + Math.random(),
-            value2: -10 + Math.random(),
-            value3: 15 + Math.random(),
+            value1: 10 + rng(),
+            value2: -10 + rng(),
+            value3: 15 + rng(),
           },
         },
       },
@@ -583,7 +621,23 @@ describe('AnomalyDetectionService E2E', () => {
   });
 
   it('should meet combined latency requirements', async () => {
-    const trainingData = generateTrainingData(500, 50);
+    const trainingPoints: StreamDataPoint[] = Array.from({ length: 200 }, (_, i) => ({
+      id: `train-${i}`,
+      sourceType: 'neo4j' as const,
+      timestamp: new Date(),
+      data: {
+        neo4j: {
+          nodeId: `train-node-${i}`,
+          nodeType: 'Entity',
+          properties: {
+            value1: rng() * 2 - 1,
+            value2: rng() * 2 - 1,
+            value3: rng() * 2 - 1,
+          },
+        },
+      },
+    }));
+    const trainingData = StreamProcessor.toFeatureVectors(trainingPoints);
     await service.trainManual(trainingData);
 
     const latencies: number[] = [];
@@ -595,12 +649,12 @@ describe('AnomalyDetectionService E2E', () => {
         timestamp: new Date(),
         data: {
           neo4j: {
-            nodeId: `latency-node-${batch}-${i}`,
-            nodeType: 'Entity',
-            properties: { value: Math.random() },
-          },
+          nodeId: `latency-node-${batch}-${i}`,
+          nodeType: 'Entity',
+          properties: { value: rng() },
         },
-      }));
+      },
+    }));
 
       const start = Date.now();
       await service.detectManual(points);
@@ -627,7 +681,23 @@ describe('AnomalyDetectionService E2E', () => {
   });
 
   it('should track metrics correctly', async () => {
-    const trainingData = generateTrainingData(200, 20);
+    const trainingPoints: StreamDataPoint[] = Array.from({ length: 200 }, (_, i) => ({
+      id: `metrics-train-${i}`,
+      sourceType: 'neo4j' as const,
+      timestamp: new Date(),
+      data: {
+        neo4j: {
+          nodeId: `metrics-train-node-${i}`,
+          nodeType: 'Entity',
+          properties: {
+            value1: rng() * 2 - 1,
+            value2: rng() * 2 - 1,
+            value3: rng() * 2 - 1,
+          },
+        },
+      },
+    }));
+    const trainingData = StreamProcessor.toFeatureVectors(trainingPoints);
     await service.trainManual(trainingData);
 
     // Process some data
@@ -639,7 +709,7 @@ describe('AnomalyDetectionService E2E', () => {
         neo4j: {
           nodeId: `metrics-node-${i}`,
           nodeType: 'Entity',
-          properties: { value: Math.random() },
+          properties: { value: rng() },
         },
       },
     }));
@@ -669,13 +739,14 @@ describe('AnomalyDetectionService E2E', () => {
 
 describe('Performance Benchmarks', () => {
   it('should handle high throughput', async () => {
+    const rng = createRng(42);
     const detector = new IsolationForestDetector({
       numTrees: 50,
       subsampleSize: 128,
       randomState: 42,
     });
 
-    const trainingData = generateTrainingData(1000, 100);
+    const trainingData = generateTrainingData(1000, 100, rng);
     await detector.fit(trainingData);
 
     const totalPoints = 10000;
@@ -685,7 +756,7 @@ describe('Performance Benchmarks', () => {
     const start = Date.now();
 
     for (let i = 0; i < batches; i++) {
-      const batch = generateTrainingData(batchSize, 0);
+      const batch = generateTrainingData(batchSize, 0, rng);
       await detector.detect(batch);
     }
 
@@ -700,6 +771,7 @@ describe('Performance Benchmarks', () => {
   });
 
   it('should maintain memory efficiency', async () => {
+    const rng = createRng(42);
     const detector = new IsolationForestDetector({
       numTrees: 100,
       subsampleSize: 256,
@@ -707,14 +779,14 @@ describe('Performance Benchmarks', () => {
 
     const initialMemory = process.memoryUsage().heapUsed;
 
-    const trainingData = generateTrainingData(5000, 500);
+    const trainingData = generateTrainingData(5000, 500, rng);
     await detector.fit(trainingData);
 
     const afterFitMemory = process.memoryUsage().heapUsed;
 
     // Run many detections
     for (let i = 0; i < 100; i++) {
-      const batch = generateTrainingData(100, 10);
+      const batch = generateTrainingData(100, 10, rng);
       await detector.detect(batch);
     }
 

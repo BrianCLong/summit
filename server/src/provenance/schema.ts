@@ -1,5 +1,5 @@
 
-import { gql } from 'apollo-server-express';
+import gql from 'graphql-tag';
 
 export const provenanceTypeDefs = gql`
   scalar DateTime

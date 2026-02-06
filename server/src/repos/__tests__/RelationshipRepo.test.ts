@@ -14,7 +14,7 @@
 import { jest } from '@jest/globals';
 
 // Mock config before any imports to prevent process.exit
-jest.mock('../../config.js', () => ({
+jest.mock('@server/config', () => ({
   cfg: {
     NODE_ENV: 'test',
     DATABASE_URL: 'postgres://test:test@localhost:5432/test',
@@ -29,7 +29,7 @@ jest.mock('../../config.js', () => ({
 }));
 
 // Mock logger
-jest.mock('../../config/logger.js', () => ({
+jest.mock('@server/config/logger', () => ({
   __esModule: true,
   default: {
     child: jest.fn<any>().mockReturnValue({

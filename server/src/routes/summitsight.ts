@@ -7,6 +7,10 @@ import { SummitsightDataService } from '../summitsight/SummitsightDataService.js
 import { ensureAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
+const singleQuery = (value: string | string[] | undefined): string | undefined =>
+  Array.isArray(value) ? value[0] : value;
 
 const kpiEngine = KPIEngine.getInstance();
 const riskEngine = new RiskEngine();
@@ -18,7 +22,8 @@ const dataService = new SummitsightDataService();
 
 router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const definitions = await dataService.getKPIDefinitions(req.query.category as string);
+    const category = singleQuery(req.query.category as string | string[] | undefined);
+    const definitions = await dataService.getKPIDefinitions(category);
     res.json(definitions);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -28,7 +33,8 @@ router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
 router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId; // Assuming auth middleware attaches user
-    const status = await kpiEngine.getKPIStatus(req.params.id, tenantId);
+    const kpiId = singleParam(req.params.id);
+    const status = await kpiEngine.getKPIStatus(kpiId, tenantId);
     res.json(status);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -38,7 +44,8 @@ router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Res
 router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const values = await dataService.getKPIValues(req.params.id, tenantId, 'daily', 30);
+    const kpiId = singleParam(req.params.id);
+    const values = await dataService.getKPIValues(kpiId, tenantId, 'daily', 30);
     res.json(values);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -50,7 +57,7 @@ router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Re
 router.get('/exec-dashboard/:role', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     // Return curated list of KPIs based on role
-    const role = req.params.role;
+    const role = singleParam(req.params.role);
     let kpisOfInterest: string[] = [];
 
     switch (role) {
@@ -105,7 +112,8 @@ router.get('/warroom', ensureAuthenticated, async (req: Request, res: Response) 
 router.get('/forecast/:kpiId', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const forecast = await forecastingEngine.generateForecast(req.params.kpiId, tenantId);
+    const kpiId = singleParam(req.params.kpiId);
+    const forecast = await forecastingEngine.generateForecast(kpiId, tenantId);
     res.json(forecast);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -115,13 +123,14 @@ router.get('/forecast/:kpiId', ensureAuthenticated, async (req: Request, res: Re
 router.get('/correlation', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const { kpiA, kpiB } = req.query;
+    const kpiA = singleQuery(req.query.kpiA as string | string[] | undefined);
+    const kpiB = singleQuery(req.query.kpiB as string | string[] | undefined);
 
     if (!kpiA || !kpiB) {
         return res.status(400).json({ error: 'kpiA and kpiB are required' });
     }
 
-    const result = await correlationEngine.correlateKPIs(kpiA as string, kpiB as string, tenantId);
+    const result = await correlationEngine.correlateKPIs(kpiA, kpiB, tenantId);
     res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });

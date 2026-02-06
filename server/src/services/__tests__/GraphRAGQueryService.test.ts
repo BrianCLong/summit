@@ -11,7 +11,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
 
 // Mock modules before importing services
-jest.mock('../../observability/metrics', () => ({
+jest.mock('@server/observability/metrics', () => ({
   metrics: {
     featureUsageTotal: { inc: jest.fn() },
     queryDuration: { observe: jest.fn(), startTimer: jest.fn(() => jest.fn()) },
@@ -25,8 +25,8 @@ jest.mock('../../observability/metrics', () => ({
     previewExecuteTotal: { inc: jest.fn() },
   },
 }));
-jest.mock('../../utils/logger');
-jest.mock('../../config/logger');
+jest.mock('@server/utils/logger');
+jest.mock('@server/config/logger');
 import type { Pool } from 'pg';
 import type { Redis } from 'ioredis';
 import type { Driver } from 'neo4j-driver';
@@ -40,7 +40,7 @@ const describeGraphRag =
   process.env.RUN_GRAPHRAG === 'true' ? describe : describe.skip;
 
 // Mock promptRegistry to verify audit linking
-jest.mock('../../prompts/registry.js', () => {
+jest.mock('@server/prompts/registry', () => {
   const getPrompt = jest
     .fn<(id: string) => { meta: { id: string; owner: string } } | null>()
     .mockImplementation((id: string) => {

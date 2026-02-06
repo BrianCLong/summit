@@ -15,13 +15,13 @@ const mockQuery = jest.fn<any>();
 const mockConnect = jest.fn<any>();
 const mockRelease = jest.fn<any>();
 
-await jest.unstable_mockModule('../../provenance/ledger.js', () => ({
+await jest.unstable_mockModule('@server/provenance/ledger', () => ({
   provenanceLedger: {
     appendEntry: jest.fn<any>().mockResolvedValue(undefined),
   },
 }));
 
-await jest.unstable_mockModule('../../config/logger', () => ({
+await jest.unstable_mockModule('@server/config/logger', () => ({
   __esModule: true,
   default: {
     child: jest.fn<any>().mockReturnValue({
@@ -38,7 +38,7 @@ await jest.unstable_mockModule('../../config/logger', () => ({
 }));
 
 const { ProductIncrementRepo } = await import('../ProductIncrementRepo.js');
-const { provenanceLedger } = await import('../../provenance/ledger.js');
+const { provenanceLedger } = await import('@server/provenance/ledger');
 
 describe('ProductIncrementRepo', () => {
   let repo: InstanceType<typeof ProductIncrementRepo>;

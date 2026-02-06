@@ -548,6 +548,12 @@ export class AnomalyDetectionService {
     } else {
       this.metrics.falsePositives++;
     }
+    if (this.metrics.truePositives + this.metrics.falsePositives > 0) {
+      this.metrics.precision =
+        this.metrics.truePositives /
+        (this.metrics.truePositives + this.metrics.falsePositives);
+    }
+    this.metrics.lastUpdated = new Date();
   }
 
   /**

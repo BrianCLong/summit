@@ -26,7 +26,8 @@ router.post('/fcr/ingest', express.json(), async (req, res) => {
     signals as FcrSignal[],
   );
   if (!ingestResult.ok) {
-    res.status(422).json({ ok: false, errors: ingestResult.errors });
+    const errors = 'errors' in ingestResult ? ingestResult.errors : ['Unknown error'];
+    res.status(422).json({ ok: false, errors });
     return;
   }
   res.status(200).json({ ok: true, signals: ingestResult.signals });
@@ -40,7 +41,8 @@ router.post('/fcr/run', express.json(), async (req, res) => {
   }
   const result = await fcrService.runPipeline(tenantId, signals as FcrSignal[]);
   if (!result.ok) {
-    res.status(422).json({ ok: false, errors: result.errors });
+    const errors = 'errors' in result ? result.errors : ['Unknown error'];
+    res.status(422).json({ ok: false, errors });
     return;
   }
   res.status(200).json(result);

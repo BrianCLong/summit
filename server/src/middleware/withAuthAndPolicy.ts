@@ -5,7 +5,7 @@
  * across all GraphQL resolvers using OPA/ABAC policies.
  */
 
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { z } from 'zod';
 import pino from 'pino';
 
@@ -199,7 +199,9 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
           logger.warn(
             `Unauthenticated access attempt. Action: ${validAction}, Operation: ${info.fieldName}, Path: ${info.path}`,
           );
-          throw new AuthenticationError('Authentication required');
+          throw new GraphQLError('Authentication required', {
+            extensions: { code: 'UNAUTHENTICATED' },
+          });
         }
 
         // Build resource from factory
@@ -234,8 +236,9 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
             );
           }
 
-          throw new ForbiddenError(
+          throw new GraphQLError(
             policyResult.reason || 'Access denied by security policy',
+            { extensions: { code: 'FORBIDDEN' } }
           );
         }
 
@@ -257,8 +260,8 @@ export function withAuthAndPolicy<TArgs = any, TResult = any>(
         const duration = Date.now() - startTime;
 
         if (
-          error instanceof AuthenticationError ||
-          error instanceof ForbiddenError
+          error instanceof GraphQLError &&
+          (error.extensions?.code === 'UNAUTHENTICATED' || error.extensions?.code === 'FORBIDDEN')
         ) {
           // Re-throw auth errors as-is
           throw error;

@@ -86,12 +86,25 @@ function calculatePercentile(latencies: number[], percentile: number): number {
   return sorted[Math.max(0, index)];
 }
 
+function calculateMinMax(latencies: number[]): { min: number; max: number } {
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+
+  for (const value of latencies) {
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
+
+  return { min, max };
+}
+
 function createPerformanceResult(
   operation: string,
   latencies: number[],
   totalTimeMs: number,
 ): PerformanceResult {
   const memoryUsage = process.memoryUsage();
+  const { min, max } = calculateMinMax(latencies);
 
   return {
     operation,
@@ -101,8 +114,8 @@ function createPerformanceResult(
     p50LatencyMs: calculatePercentile(latencies, 50),
     p95LatencyMs: calculatePercentile(latencies, 95),
     p99LatencyMs: calculatePercentile(latencies, 99),
-    maxLatencyMs: Math.max(...latencies),
-    minLatencyMs: Math.min(...latencies),
+    maxLatencyMs: max,
+    minLatencyMs: min,
     throughputOps: (latencies.length / totalTimeMs) * 1000,
     memoryUsedMB: memoryUsage.heapUsed / (1024 * 1024),
   };

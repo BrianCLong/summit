@@ -155,46 +155,21 @@ export class RedactionMiddleware {
     const redactedFields: string[] = [];
     const dlpRules: string[] = [];
     let maxSeverity: 'low' | 'medium' | 'high' | 'critical' | null = null;
-
-    // Check if user has required step-up authentication
-    const requiresStepUp = this.checkStepUpRequirement(userContext);
-    if (requiresStepUp && !userContext.stepUpToken) {
-      return {
-        data: null,
-        redactedFields: [],
-        redactedCount: 0,
-        accessDenied: true,
-        denialReason: 'Step-up authentication required',
-        auditEntry: {
-          userId: userContext.userId,
-          action: 'ACCESS_DENIED',
-          timestamp: new Date(),
-          fieldsRedacted: [],
-          dlpRules: ['require-step-up'],
-          purpose: userContext.purpose,
-        },
-      };
-    }
-
-    // Check if purpose is required and provided
-    const requiresPurpose = this.checkPurposeRequirement(userContext);
-    if (requiresPurpose && !userContext.purpose) {
-      return {
-        data: null,
-        redactedFields: [],
-        redactedCount: 0,
-        accessDenied: true,
-        denialReason: 'Purpose justification required',
-        auditEntry: {
-          userId: userContext.userId,
-          action: 'ACCESS_DENIED',
-          timestamp: new Date(),
-          fieldsRedacted: [],
-          dlpRules: ['require-purpose'],
-          purpose: userContext.purpose,
-        },
-      };
-    }
+    const buildAccessDenied = (reason: string, rule: string): RedactionResult => ({
+      data: null,
+      redactedFields: [],
+      redactedCount: 0,
+      accessDenied: true,
+      denialReason: reason,
+      auditEntry: {
+        userId: userContext.userId,
+        action: 'ACCESS_DENIED',
+        timestamp: new Date(),
+        fieldsRedacted: [],
+        dlpRules: [rule],
+        purpose: userContext.purpose,
+      },
+    });
 
     // Deep clone data
     let redactedData = JSON.parse(JSON.stringify(data));
@@ -262,27 +237,16 @@ export class RedactionMiddleware {
 
     await processValue(redactedData);
 
-    if (
-      maxSeverity &&
-      userContext.role !== 'ADMIN' &&
-      userContext.clearance < this.getRequiredClearance(maxSeverity) &&
-      !userContext.stepUpToken
-    ) {
-      return {
-        data: null,
-        redactedFields: [],
-        redactedCount: 0,
-        accessDenied: true,
-        denialReason: 'Insufficient clearance',
-        auditEntry: {
-          userId: userContext.userId,
-          action: 'ACCESS_DENIED',
-          timestamp: new Date(),
-          fieldsRedacted: [],
-          dlpRules: ['insufficient-clearance'],
-          purpose: userContext.purpose,
-        },
-      };
+    if (maxSeverity) {
+      const requiresStepUp = this.checkStepUpRequirement(userContext, maxSeverity);
+      if (requiresStepUp && !userContext.stepUpToken) {
+        return buildAccessDenied('Step-up authentication required', 'require-step-up');
+      }
+
+      const requiresPurpose = this.checkPurposeRequirement(userContext, maxSeverity);
+      if (requiresPurpose && !userContext.purpose) {
+        return buildAccessDenied('Purpose justification required', 'require-purpose');
+      }
     }
 
     return {
@@ -523,20 +487,29 @@ export class RedactionMiddleware {
   /**
    * Check if step-up authentication is required
    */
-  private checkStepUpRequirement(userContext: UserContext): boolean {
-    // Step-up required for high clearance data or sensitive purposes
-    return userContext.clearance >= 5 ||
-           userContext.purpose === 'export' ||
+  private checkStepUpRequirement(
+    userContext: UserContext,
+    maxSeverity: 'low' | 'medium' | 'high' | 'critical',
+  ): boolean {
+    // Step-up required for critical exposure to VIEWERs or sensitive purposes
+    if (userContext.role === 'VIEWER' && maxSeverity === 'critical') {
+      return true;
+    }
+
+    return userContext.purpose === 'export' ||
            userContext.purpose === 'legal';
   }
 
   /**
    * Check if purpose is required
    */
-  private checkPurposeRequirement(userContext: UserContext): boolean {
-    // Purpose required for non-ADMIN roles
+  private checkPurposeRequirement(
+    userContext: UserContext,
+    maxSeverity: 'low' | 'medium' | 'high' | 'critical',
+  ): boolean {
+    // Purpose required for non-ADMIN access to high/critical data
     return userContext.role !== 'ADMIN' &&
-           (userContext.purpose === 'export' || userContext.purpose === 'legal');
+           (maxSeverity === 'high' || maxSeverity === 'critical');
   }
 }
 

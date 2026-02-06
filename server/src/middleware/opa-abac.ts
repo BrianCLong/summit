@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { GraphQLError } from 'graphql';
 import { verify, JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 import { trace } from '@opentelemetry/api';
@@ -158,7 +158,9 @@ export function validateOIDCToken(
 
       span.setStatus({ code: 2, message: 'No authorization header' });
       span.end();
-      throw new AuthenticationError('No authorization token provided');
+      throw new GraphQLError('No authorization token provided', {
+        extensions: { code: 'UNAUTHENTICATED' },
+      });
     }
 
     const token = authHeader.split(' ')[1];
@@ -229,14 +231,16 @@ export function validateOIDCToken(
     span.setStatus({ code: 2, message: (error as Error).message });
     span.end();
 
-    if (error instanceof AuthenticationError) {
+    if (error instanceof GraphQLError && error.extensions?.code === 'UNAUTHENTICATED') {
       throw error;
     }
 
     logger.error('Token validation failed', {
       error: (error as Error).message,
     });
-    throw new AuthenticationError('Invalid or expired token');
+    throw new GraphQLError('Invalid or expired token', {
+      extensions: { code: 'UNAUTHENTICATED' },
+    });
   }
 }
 
@@ -287,23 +291,23 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
       // If used as global middleware, req.params might be empty.
       // Parse path: /api/resourceType/resourceId
       if (!resourceId) {
-          const pathParts = req.path.split('/').filter(Boolean);
-          // Heuristic: api/v1/users/123 -> type=users, id=123
-          if (pathParts.length >= 2) {
-             const potentialId = pathParts[pathParts.length - 1];
-             // Check if it looks like an ID (UUID or numeric or slug)
-             if (potentialId.match(/^[a-zA-Z0-9-]+$/)) {
-                 resourceId = potentialId;
-                 resourceType = pathParts[pathParts.length - 2];
-             } else {
-                 resourceType = potentialId; // Collection access
-             }
-          } else if (pathParts.length === 1) {
-              resourceType = pathParts[0];
+        const pathParts = req.path.split('/').filter(Boolean);
+        // Heuristic: api/v1/users/123 -> type=users, id=123
+        if (pathParts.length >= 2) {
+          const potentialId = pathParts[pathParts.length - 1];
+          // Check if it looks like an ID (UUID or numeric or slug)
+          if (potentialId.match(/^[a-zA-Z0-9-]+$/)) {
+            resourceId = potentialId;
+            resourceType = pathParts[pathParts.length - 2];
+          } else {
+            resourceType = potentialId; // Collection access
           }
+        } else if (pathParts.length === 1) {
+          resourceType = pathParts[0];
+        }
       } else {
-          // If params had ID, try to get type from baseUrl
-          resourceType = req.baseUrl.split('/').pop() || 'api';
+        // If params had ID, try to get type from baseUrl
+        resourceType = req.baseUrl.split('/').pop() || 'api';
       }
 
       // Security: Determine ACR (Authentication Context Reference)
@@ -311,33 +315,33 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
       let currentAcr = 'loa1';
       const stepUpHeader = req.headers['x-step-up-auth'];
       if (stepUpHeader) {
-          if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-             // In dev/test, mock validation
-             if (stepUpHeader === 'valid-token' || stepUpHeader.length > 5) {
-                 currentAcr = 'loa2';
-             }
-          } else {
-             // Production: Verify JWT token signature
-             try {
-                 let publicKey: string | Buffer;
-                 if (process.env.OIDC_PUBLIC_KEY) {
-                    publicKey = process.env.OIDC_PUBLIC_KEY.replace(/\\n/g, '\n');
-                 } else {
-                    throw new Error('OIDC_PUBLIC_KEY required');
-                 }
-
-                 const issuer = process.env.OIDC_ISSUER || 'https://auth.topicality.co/';
-
-                 verify(stepUpHeader as string, publicKey, {
-                    issuer,
-                    algorithms: ['RS256'],
-                 });
-
-                 currentAcr = 'loa2';
-             } catch (err: any) {
-                 logger.warn('Step-Up token verification failed', { error: (err as Error).message });
-             }
+        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
+          // In dev/test, mock validation
+          if (stepUpHeader === 'valid-token' || stepUpHeader.length > 5) {
+            currentAcr = 'loa2';
           }
+        } else {
+          // Production: Verify JWT token signature
+          try {
+            let publicKey: string | Buffer;
+            if (process.env.OIDC_PUBLIC_KEY) {
+              publicKey = process.env.OIDC_PUBLIC_KEY.replace(/\\n/g, '\n');
+            } else {
+              throw new Error('OIDC_PUBLIC_KEY required');
+            }
+
+            const issuer = process.env.OIDC_ISSUER || 'https://auth.topicality.co/';
+
+            verify(stepUpHeader as string, publicKey, {
+              issuer,
+              algorithms: ['RS256'],
+            });
+
+            currentAcr = 'loa2';
+          } catch (err: any) {
+            logger.warn('Step-Up token verification failed', { error: (err as Error).message });
+          }
+        }
       }
 
       const policyInput: OPAPolicyInput = {
@@ -383,11 +387,11 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
 
         // Return structured denial for frontend
         res.status(403).json({
-            error: 'Access Denied',
-            code: 'FORBIDDEN',
-            reason: reason,
-            help: 'Contact your administrator to request access.',
-            rule_id: 'summit.abac' // placeholder
+          error: 'Access Denied',
+          code: 'FORBIDDEN',
+          reason: reason,
+          help: 'Contact your administrator to request access.',
+          rule_id: 'summit.abac' // placeholder
         });
         return;
       }
@@ -395,18 +399,18 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
       // Check obligations
       if (decision.obligations && decision.obligations.length > 0) {
         for (const obligation of decision.obligations) {
-            if (obligation.type === 'step_up') {
-                span.setStatus({ code: 2, message: 'Step-up authentication required' });
-                span.end();
-                res.status(401).json({
-                    error: 'Step-up Authentication Required',
-                    code: 'STEP_UP_REQUIRED',
-                    mechanism: obligation.mechanism || 'webauthn',
-                    message: 'Please re-authenticate with a second factor to perform this action.'
-                });
-                return;
-            }
-            // Future: Handle 'dual_control' obligation (check for approvals in context)
+          if (obligation.type === 'step_up') {
+            span.setStatus({ code: 2, message: 'Step-up authentication required' });
+            span.end();
+            res.status(401).json({
+              error: 'Step-up Authentication Required',
+              code: 'STEP_UP_REQUIRED',
+              mechanism: obligation.mechanism || 'webauthn',
+              message: 'Please re-authenticate with a second factor to perform this action.'
+            });
+            return;
+          }
+          // Future: Handle 'dual_control' obligation (check for approvals in context)
         }
       }
 
@@ -423,7 +427,8 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
       span.end();
 
       if (
-        error instanceof AuthenticationError
+        error instanceof GraphQLError &&
+        error.extensions?.code === 'UNAUTHENTICATED'
       ) {
         throw error;
       }
@@ -551,14 +556,14 @@ export function createABACMiddleware(opaClient: OPAClient) {
 }
 
 function mapMethodToAction(method: string): string {
-    switch(method.toUpperCase()) {
-        case 'GET': return 'read';
-        case 'POST': return 'write';
-        case 'PUT': return 'write';
-        case 'PATCH': return 'write';
-        case 'DELETE': return 'delete';
-        default: return 'read';
-    }
+  switch (method.toUpperCase()) {
+    case 'GET': return 'read';
+    case 'POST': return 'write';
+    case 'PUT': return 'write';
+    case 'PATCH': return 'write';
+    case 'DELETE': return 'delete';
+    default: return 'read';
+  }
 }
 
 /**
@@ -586,16 +591,18 @@ export function createAuthzDirective(opaClient: OPAClient) {
           if (!context.user) {
             span.setStatus({ code: 2, message: 'No user in context' });
             span.end();
-            throw new AuthenticationError('Authentication required');
+            throw new GraphQLError('Authentication required', {
+              extensions: { code: 'UNAUTHENTICATED' },
+            });
           }
 
           const policyInput: OPAPolicyInput = {
             subject: {
-                id: context.user.id,
-                tenantId: context.user.tenant || context.user.tenantId,
-                roles: context.user.roles || [],
-                residency: context.user.residency || 'US',
-                clearance: context.user.clearance || 'public'
+              id: context.user.id,
+              tenantId: context.user.tenant || context.user.tenantId,
+              roles: context.user.roles || [],
+              residency: context.user.residency || 'US',
+              clearance: context.user.clearance || 'public'
             },
             resource: {
               type: info.parentType.name.toLowerCase(),
@@ -610,8 +617,8 @@ export function createAuthzDirective(opaClient: OPAClient) {
             },
             action: info.operation.operation || 'query',
             context: {
-                ip: 'unknown', // Context not always available in GQL resolve without extra wiring
-                time: Date.now()
+              ip: 'unknown', // Context not always available in GQL resolve without extra wiring
+              time: Date.now()
             }
           };
 
@@ -627,19 +634,22 @@ export function createAuthzDirective(opaClient: OPAClient) {
           if (!decision || !decision.allow) {
             span.setStatus({ code: 2, message: 'Field access denied' });
             span.end();
-            throw new ForbiddenError(
+            throw new GraphQLError(
               `Access denied to field ${info.fieldName}: ${decision?.reason || 'policy'}`,
+              { extensions: { code: 'FORBIDDEN' } }
             );
           }
 
           // Check obligations for GraphQL - Fail closed if step-up is required but not satisfied
           if (decision.obligations && decision.obligations.length > 0) {
-              const hasStepUp = decision.obligations.some(o => o.type === 'step_up');
-              if (hasStepUp) {
-                  span.setStatus({ code: 2, message: 'Step-up required for field access' });
-                  span.end();
-                  throw new AuthenticationError('Step-up authentication required to access this field');
-              }
+            const hasStepUp = decision.obligations.some(o => o.type === 'step_up');
+            if (hasStepUp) {
+              span.setStatus({ code: 2, message: 'Step-up required for field access' });
+              span.end();
+              throw new GraphQLError('Step-up authentication required to access this field', {
+                extensions: { code: 'UNAUTHENTICATED' },
+              });
+            }
           }
 
           span.setAttributes({ 'authz.field.allowed': true });
@@ -674,7 +684,9 @@ export function residencyEnforcementMiddleware(
       ip: req.ip,
     });
 
-    throw new ForbiddenError('Access restricted to US residents only');
+    throw new GraphQLError('Access restricted to US residents only', {
+      extensions: { code: 'FORBIDDEN' },
+    });
   }
 
   next();

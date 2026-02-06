@@ -14,6 +14,10 @@ import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
+const singleQuery = (value: string | string[] | undefined): string | undefined =>
+  Array.isArray(value) ? value[0] : value;
 
 // Feature flag check middleware
 const requireFeatureFlag = (flagName: string) => {
@@ -111,7 +115,7 @@ router.post(
   requireFeatureFlag('onboarding.enhancedFlow'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { stepId } = req.params;
+      const stepId = singleParam(req.params.stepId);
       const data = CompleteStepSchema.parse(req.body);
       const { tenantId, id: userId } = req.user!;
 
@@ -139,7 +143,7 @@ router.post(
   requireFeatureFlag('onboarding.enhancedFlow'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { stepId } = req.params;
+      const stepId = singleParam(req.params.stepId);
       const { reason } = SkipStepSchema.parse(req.body);
       const { tenantId, id: userId } = req.user!;
 
@@ -167,8 +171,8 @@ router.get(
   requireFeatureFlag('onboarding.sampleContent'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const persona = (req.query.persona as string) || 'analyst';
-      const type = req.query.type as string | undefined;
+      const persona = singleQuery(req.query.persona as string | string[] | undefined) || 'analyst';
+      const type = singleQuery(req.query.type as string | string[] | undefined);
 
       const result = await enhancedOnboardingService.getSampleContent(
         persona as any,

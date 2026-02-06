@@ -9,6 +9,8 @@ import { OntologyAssertion } from '../governance/ontology/models.js';
 const router = Router();
 const executionService = OntologyExecutionService.getInstance();
 const registryService = SchemaRegistryService.getInstance();
+const singleParam = (value: string | string[] | undefined): string =>
+    Array.isArray(value) ? value[0] : value ?? '';
 
 // Validate
 router.post('/validate', asyncHandler(async (req: Request, res: Response) => {
@@ -56,7 +58,8 @@ router.get('/schema', asyncHandler(async (req: Request, res: Response) => {
 
 // Get specific schema
 router.get('/schema/:version', asyncHandler(async (req: Request, res: Response) => {
-    const schema = registryService.getSchema(req.params.version);
+    const version = singleParam(req.params.version);
+    const schema = registryService.getSchema(version);
     if (!schema) {
         return res.status(404).json({ error: 'Schema version not found' });
     }
@@ -105,7 +108,7 @@ router.post('/schema/:id/approve', asyncHandler(async (req: Request, res: Respon
         return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const schemaId = req.params.id;
+    const schemaId = singleParam(req.params.id);
     const schema = registryService.getSchemaById(schemaId);
 
     if (!schema) {

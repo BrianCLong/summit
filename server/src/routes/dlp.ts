@@ -14,6 +14,8 @@ import { AppError } from '../lib/errors.js';
 import { param, body, query, validationResult } from 'express-validator';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
 
 // Apply authentication to all DLP routes
 router.use(authMiddleware);
@@ -82,7 +84,8 @@ router.get(
         throw new AppError('Invalid policy ID', 400, 'VALIDATION_ERROR');
       }
 
-      const policy = dlpService.getPolicy(req.params.id);
+      const policyId = singleParam(req.params.id);
+      const policy = dlpService.getPolicy(policyId);
       if (!policy) {
         throw new AppError('DLP policy not found', 404);
       }
@@ -99,7 +102,7 @@ router.get(
       logger.error('Failed to get DLP policy', {
         component: 'DLPRoutes',
         error: err.message,
-        policyId: req.params.id,
+        policyId,
         userId: req.user?.id,
       });
       throw new AppError('Failed to retrieve DLP policy', 500);
@@ -192,7 +195,7 @@ router.put(
         throw new AppError('Validation failed', 400, 'VALIDATION_ERROR');
       }
 
-      const policyId = req.params.id;
+      const policyId = singleParam(req.params.id);
       const updates = { ...req.body, updatedAt: new Date() };
 
       if (!dlpService.getPolicy(policyId)) {
@@ -231,7 +234,7 @@ router.put(
       logger.error('Failed to update DLP policy', {
         component: 'DLPRoutes',
         error: err.message,
-        policyId: req.params.id,
+        policyId,
         userId: req.user?.id,
       });
       throw new AppError('Failed to update DLP policy', 500);
@@ -253,7 +256,7 @@ router.delete(
         throw new AppError('Invalid policy ID', 400, 'VALIDATION_ERROR');
       }
 
-      const policyId = req.params.id;
+      const policyId = singleParam(req.params.id);
 
       if (!dlpService.getPolicy(policyId)) {
         throw new AppError('DLP policy not found', 404);
@@ -283,7 +286,7 @@ router.delete(
       logger.error('Failed to delete DLP policy', {
         component: 'DLPRoutes',
         error: err.message,
-        policyId: req.params.id,
+        policyId,
         userId: req.user?.id,
       });
       throw new AppError('Failed to delete DLP policy', 500);
@@ -305,7 +308,7 @@ router.post(
         throw new AppError('Invalid policy ID', 400, 'VALIDATION_ERROR');
       }
 
-      const policyId = req.params.id;
+      const policyId = singleParam(req.params.id);
       const policy = dlpService.getPolicy(policyId);
 
       if (!policy) {
@@ -342,7 +345,7 @@ router.post(
       logger.error('Failed to toggle DLP policy', {
         component: 'DLPRoutes',
         error: err.message,
-        policyId: req.params.id,
+        policyId,
         userId: req.user?.id,
       });
       throw new AppError('Failed to toggle DLP policy', 500);

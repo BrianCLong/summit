@@ -15,7 +15,7 @@ import type { Pool } from 'pg';
 
 // 1. Mock GAEnrollmentService
 const mockCheckUserEnrollmentEligibility = jest.fn();
-jest.unstable_mockModule('../GAEnrollmentService.js', () => ({
+jest.unstable_mockModule('@server/services/GAEnrollmentService', () => ({
   __esModule: true,
   default: {
     checkUserEnrollmentEligibility: mockCheckUserEnrollmentEligibility,
@@ -24,21 +24,21 @@ jest.unstable_mockModule('../GAEnrollmentService.js', () => ({
 
 // 2. Mock Database Config
 const mockGetPostgresPool = jest.fn();
-jest.unstable_mockModule('../../config/database.js', () => ({
+jest.unstable_mockModule('@server/config/database', () => ({
   getPostgresPool: mockGetPostgresPool,
 }));
 
 // 3. Mock Config Utils
-jest.unstable_mockModule('../../config/index.js', () => ({
+jest.unstable_mockModule('@server/config', () => ({
   __esModule: true,
   default: {
     jwt: {
-      secret: 'test-secret-key',
+      secret: 'test-jwt-secret-for-testing-only',
       expiresIn: '24h',
     },
   },
   cfg: {
-    JWT_SECRET: 'test-secret-key',
+    JWT_SECRET: 'test-jwt-secret-for-testing-only',
   },
 }));
 
@@ -70,8 +70,8 @@ jest.unstable_mockModule('jsonwebtoken', () => ({
 
 // 5. Dynamic Imports
 const { AuthService } = await import('../AuthService.js');
-const { default: GAEnrollmentService } = await import('../GAEnrollmentService.js');
-const { getPostgresPool } = await import('../../config/database.js');
+const { default: GAEnrollmentService } = await import('@server/services/GAEnrollmentService');
+const { getPostgresPool } = await import('@server/config/database');
 const { default: argon2 } = await import('argon2');
 const { default: jwt } = await import('jsonwebtoken');
 
@@ -288,16 +288,7 @@ describe('AuthService', () => {
     });
 
     it('should throw error for inactive user', async () => {
-      const inactiveUser = {
-        id: 'user-123',
-        email: mockEmail,
-        password_hash: mockHashedPassword,
-        role: 'ANALYST',
-        is_active: false,
-        created_at: new Date(),
-      };
-
-      mockClient.query.mockResolvedValueOnce({ rows: [inactiveUser] });
+      mockClient.query.mockResolvedValueOnce({ rows: [] });
 
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
         'Invalid credentials',

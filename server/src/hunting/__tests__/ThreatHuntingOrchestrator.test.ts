@@ -196,7 +196,7 @@ function buildLLMChainExecutorMockClass() {
 
 
 // Mock logger first (hoisted to top)
-jest.mock('../../config/logger', () => ({
+jest.mock('@server/config/logger', () => ({
   default: {
     info: jest.fn(),
     error: jest.fn(),
@@ -207,7 +207,7 @@ jest.mock('../../config/logger', () => ({
 
 
 // Mock AutoRemediationHooks to prevent singleton instantiation with unmocked logger
-jest.mock('../AutoRemediationHooks.js', () => {
+jest.mock('@server/hunting/AutoRemediationHooks', () => {
   class MockAutoRemediationHooks extends EventEmitter {
     private plans: RemediationPlan[] = [];
 
@@ -289,13 +289,7 @@ jest.mock('../AutoRemediationHooks.js', () => {
 
 
 // Mock dependencies
-jest.mock('../../graph/neo4j', () => ({
-  runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
-    { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
-    { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
-  ]),
-}));
-jest.mock('../../graph/neo4j.js', () => ({
+jest.mock('@server/graph/neo4j', () => ({
   runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
     { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
     { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
@@ -303,15 +297,7 @@ jest.mock('../../graph/neo4j.js', () => ({
 }));
 
 // Mock other hunting modules that may have singletons
-jest.mock('../CypherTemplateEngine.js', () => {
-  const MockCypherTemplateEngine = buildCypherTemplateEngineMockClass();
-  const engine = new MockCypherTemplateEngine();
-  return {
-    cypherTemplateEngine: engine,
-    CypherTemplateEngine: MockCypherTemplateEngine,
-  };
-});
-jest.mock('../CypherTemplateEngine', () => {
+jest.mock('@server/hunting/CypherTemplateEngine', () => {
   const MockCypherTemplateEngine = buildCypherTemplateEngineMockClass();
   const engine = new MockCypherTemplateEngine();
   return {
@@ -320,15 +306,7 @@ jest.mock('../CypherTemplateEngine', () => {
   };
 });
 
-jest.mock('../LLMChainExecutor.js', () => {
-  const MockLLMChainExecutor = buildLLMChainExecutorMockClass();
-  const mockExecutor = new MockLLMChainExecutor();
-  return {
-    llmChainExecutor: mockExecutor,
-    LLMChainExecutor: MockLLMChainExecutor,
-  };
-});
-jest.mock('../LLMChainExecutor', () => {
+jest.mock('@server/hunting/LLMChainExecutor', () => {
   const MockLLMChainExecutor = buildLLMChainExecutorMockClass();
   const mockExecutor = new MockLLMChainExecutor();
   return {

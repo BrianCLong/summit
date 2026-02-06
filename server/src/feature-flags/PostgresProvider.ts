@@ -8,7 +8,7 @@ import {
   Condition,
   EvaluationReason,
   PercentageRollout,
-} from './types.js';
+} from '@intelgraph/feature-flags';
 import { getPostgresPool } from '../db/postgres.js';
 import logger from '../utils/logger.js';
 import Redis from 'ioredis';

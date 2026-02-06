@@ -1,8 +1,10 @@
 import fs from 'fs';
 import dotenv from 'dotenv';
 import { createRequire } from 'module';
+import { jest as jestGlobal } from '@jest/globals';
 
 const require = createRequire(import.meta.url);
+const jestRef = globalThis.jest ?? jestGlobal;
 
 dotenv.config({ path: '.env.test' });
 
@@ -23,15 +25,15 @@ import '@testing-library/jest-dom';
 if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
-    value: jest.fn().mockImplementation((query) => ({
+    value: jestRef.fn().mockImplementation((query) => ({
       matches: false,
       media: query,
       onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
+      addListener: jestRef.fn(),
+      removeListener: jestRef.fn(),
+      addEventListener: jestRef.fn(),
+      removeEventListener: jestRef.fn(),
+      dispatchEvent: jestRef.fn(),
     })),
   });
 }
@@ -51,7 +53,7 @@ globalThis.it = Object.assign((name, fn, t) => {
 try {
   require.resolve('argon2');
 } catch (error) {
-  jest.mock(
+  jestRef.mock(
     'argon2',
     () => {
       const crypto = require('crypto');
@@ -66,13 +68,13 @@ try {
           });
         });
 
-      const hash = jest.fn(async (input) => {
+      const hash = jestRef.fn(async (input) => {
         const salt = crypto.randomBytes(16).toString('hex');
         const key = await derive(input, salt);
         return `jest-scrypt$${salt}$${key}`;
       });
 
-      const verify = jest.fn(async (stored, input) => {
+      const verify = jestRef.fn(async (stored, input) => {
         if (typeof stored !== 'string' || !stored.startsWith('jest-scrypt$')) {
           return false;
         }

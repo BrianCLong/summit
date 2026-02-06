@@ -23,7 +23,13 @@ import type {
 } from '../types/strategic-planning.js';
 
 // Mock dependencies
-jest.mock('../config/logger.js', () => ({
+const cacheServiceMock = {
+  get: jest.fn(),
+  set: jest.fn(),
+  del: jest.fn(),
+};
+
+jest.mock('@server/config/logger', () => ({
   default: {
     child: () => ({
       info: jest.fn(),
@@ -34,15 +40,11 @@ jest.mock('../config/logger.js', () => ({
   },
 }));
 
-jest.mock('./cacheService.js', () => ({
-  cacheService: {
-    get: jest.fn(),
-    set: jest.fn(),
-    del: jest.fn(),
-  },
+jest.mock('@server/services/CacheService', () => ({
+  cacheService: cacheServiceMock,
 }));
 
-jest.mock('../otel.js', () => ({
+jest.mock('@server/otel', () => ({
   getTracer: () => ({
     startSpan: () => ({
       end: jest.fn(),
@@ -50,7 +52,7 @@ jest.mock('../otel.js', () => ({
   }),
 }));
 
-jest.mock('../provenance/ledger.js', () => ({
+jest.mock('@server/provenance/ledger', () => ({
   provenanceLedger: {
     appendEntry: jest.fn().mockResolvedValue(undefined),
   },
@@ -111,18 +113,20 @@ describe('StrategicPlanningService', () => {
   beforeEach(() => {
     // Create mock client
     mockClient = {
-      query: jest.fn(),
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
       release: jest.fn(),
     } as unknown as jest.Mocked<PoolClient>;
 
     // Create mock pool
     mockPool = {
-      query: jest.fn(),
+      query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
       connect: jest.fn().mockResolvedValue(mockClient),
     } as unknown as jest.Mocked<Pool>;
 
     // Reset mocks
     jest.clearAllMocks();
+    mockPool.query.mockResolvedValue({ rows: [], rowCount: 0 });
+    mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 });
 
     // Create service instance
     service = new StrategicPlanningService(mockPool);
@@ -246,7 +250,7 @@ describe('StrategicPlanningService', () => {
         } as QueryResult);
 
         // Mock cache invalidation (del calls)
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.updatePlan('plan-001', input, testUserId, testTenantId);
@@ -285,7 +289,7 @@ describe('StrategicPlanningService', () => {
           rowCount: 1,
         } as QueryResult);
 
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.updatePlan('plan-001', input, testUserId, testTenantId);
@@ -316,7 +320,7 @@ describe('StrategicPlanningService', () => {
         } as QueryResult); // DELETE
         mockClient.query.mockResolvedValueOnce(undefined as any); // COMMIT
 
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.deletePlan('plan-001', testUserId, testTenantId);
@@ -383,7 +387,7 @@ describe('StrategicPlanningService', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 1 } as QueryResult);
 
         // Mock cache invalidation
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.createObjective(input, testUserId, testTenantId);
@@ -525,7 +529,7 @@ describe('StrategicPlanningService', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 1 } as QueryResult);
 
         // Mock cache invalidation
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.createInitiative(input, testUserId, testTenantId);
@@ -588,7 +592,7 @@ describe('StrategicPlanningService', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 1 } as QueryResult);
 
         // Mock cache invalidation
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const eventPromise = new Promise<{ risk: RiskAssessment }>((resolve) => {
@@ -745,7 +749,7 @@ describe('StrategicPlanningService', () => {
         mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
 
         // Mock cache
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.get as jest.Mock).mockResolvedValue(null);
         (cacheService.set as jest.Mock).mockResolvedValue(undefined);
 
@@ -775,7 +779,7 @@ describe('StrategicPlanningService', () => {
           mockPool.query.mockResolvedValueOnce({ rows: [], rowCount: 0 } as QueryResult);
         }
 
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.get as jest.Mock).mockResolvedValue(null);
         (cacheService.set as jest.Mock).mockResolvedValue(undefined);
 
@@ -879,7 +883,7 @@ describe('StrategicPlanningService', () => {
           rowCount: 1,
         } as QueryResult);
 
-        const { cacheService } = await import('./cacheService.js');
+        const cacheService = cacheServiceMock;
         (cacheService.del as jest.Mock).mockResolvedValue(undefined);
 
         const result = await service.approvePlan('plan-001', testUserId, testTenantId);

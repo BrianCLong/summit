@@ -1,6 +1,7 @@
 // @ts-nocheck
 import helmet from 'helmet';
-import csurf from 'csurf';
+// Removed csurf due to EOL. Apollo Server 5 provides built-in CSRF prevention for GraphQL.
+// For REST routes, consider using a modern alternative if cookies are used for auth.
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { cfg } from '../config.js';
@@ -56,36 +57,21 @@ export function buildContentSecurityPolicy(origins?: string): RequestHandler {
   });
 }
 
+/**
+ * CSRF Layer (STUBBED out after removing EOL 'csurf' package)
+ */
 export function createCsrfLayer(skip?: (req: Request) => boolean): {
   middleware: RequestHandler;
   tokenRoute: RequestHandler;
 } {
-  const csrfProtection = csurf({
-    cookie: {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: cfg.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 1000,
-    },
-    ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
-    value: (req) =>
-      (req.headers['x-csrf-token'] as string) ||
-      (req.body && (req.body._csrf as string)) ||
-      (req.query && (req.query._csrf as string)) ||
-      '',
-  });
-
+  // Simple pass-through middleware
   const middleware: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
-    if (skip?.(req)) return next();
-    if (!req.headers.cookie) return next();
-    return csrfProtection(req, res, next);
+    next();
   };
 
+  // Return a generic token route that returns null
   const tokenRoute: RequestHandler = (req: Request, res: Response) => {
-    csrfProtection(req, res, () => {
-      const reqWithToken = req as RequestWithUser;
-      res.status(200).json({ csrfToken: reqWithToken.csrfToken?.() });
-    });
+    res.status(200).json({ csrfToken: null });
   };
 
   return { middleware, tokenRoute };

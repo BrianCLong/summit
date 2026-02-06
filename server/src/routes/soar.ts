@@ -8,6 +8,10 @@ import { PlaybookRunBundleExporter } from '../soar/PlaybookRunBundleExporter.js'
 import logger from '../config/logger.js';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+    Array.isArray(value) ? value[0] : value ?? '';
+const singleQuery = (value: string | string[] | undefined): string | undefined =>
+    Array.isArray(value) ? value[0] : value;
 // Cast ManagedPostgresPool to any to allow it to be passed to SoarService which expects Pool
 // In a real scenario, we should update SoarService to accept ManagedPostgresPool
 const service = new SoarService(getPostgresPool() as any);
@@ -50,7 +54,8 @@ router.get('/playbooks', ensureAuthenticated, async (req, res) => {
 router.get('/playbooks/:id', ensureAuthenticated, async (req, res) => {
     try {
         const user = (req as any).user;
-        const playbook = await service.getPlaybook(req.params.id, user!.tenantId);
+        const playbookId = singleParam(req.params.id);
+        const playbook = await service.getPlaybook(playbookId, user!.tenantId);
         if (!playbook) return res.status(404).json({ error: 'Not found' });
         res.json(playbook);
     } catch (err: any) {
@@ -63,7 +68,7 @@ router.post('/playbooks/:id/run', ensureAuthenticated, async (req, res) => {
     try {
         const user = (req as any).user;
         const run = await service.runPlaybook(
-            req.params.id,
+            singleParam(req.params.id),
             user!.tenantId,
             req.body.context || {},
             user!.id,
@@ -80,8 +85,8 @@ router.get('/runs', ensureAuthenticated, async (req, res) => {
     try {
         const user = (req as any).user;
         const runs = await service.listRuns(user!.tenantId, {
-            playbookId: req.query.playbookId as string,
-            caseId: req.query.caseId as string
+            playbookId: singleQuery(req.query.playbookId as string | string[] | undefined),
+            caseId: singleQuery(req.query.caseId as string | string[] | undefined)
         });
         res.json(runs);
     } catch (err: any) {
@@ -95,7 +100,7 @@ router.get('/runs/:id/bundle', ensureAuthenticated, async (req, res) => {
         const user = (req as any).user;
         const { filename, buffer } = await bundleExporter.createBundle(
             user!.tenantId,
-            req.params.id
+            singleParam(req.params.id)
         );
         res.setHeader('Content-Type', 'application/zip');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);

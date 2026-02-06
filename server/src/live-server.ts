@@ -6,7 +6,8 @@
 
 import express from 'express';
 import { createServer } from 'http';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/use/ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -416,7 +417,7 @@ const resolvers = {
           await new Promise((resolve) => setTimeout(resolve, 10000));
           const randomInv =
             liveData.investigations[
-              Math.floor(Math.random() * liveData.investigations.length)
+            Math.floor(Math.random() * liveData.investigations.length)
             ];
           randomInv.updatedAt = new Date().toISOString();
           yield { investigationUpdates: randomInv };
@@ -430,7 +431,7 @@ const resolvers = {
           await new Promise((resolve) => setTimeout(resolve, 8000));
           const randomEntity =
             liveData.entities[
-              Math.floor(Math.random() * liveData.entities.length)
+            Math.floor(Math.random() * liveData.entities.length)
             ];
           yield {
             entityChanges: {
@@ -587,8 +588,14 @@ async function startLiveServer() {
 
   // Apply GraphQL middleware
   await server.start();
-  const compatApp = app as any;
-  server.applyMiddleware({ app: compatApp, path: '/graphql' });
+  app.use(
+    '/graphql',
+    cors<cors.CorsRequest>(),
+    express.json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => ({ req }),
+    }),
+  );
 
   const PORT = process.env.PORT || 4001;
 

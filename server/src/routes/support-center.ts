@@ -15,6 +15,10 @@ import logger from '../utils/logger.js';
 import { supportImpersonationService, tenantHealthBundleService } from '../services/support/index.js';
 
 const router = Router();
+const singleParam = (value: string | string[] | undefined): string =>
+  Array.isArray(value) ? value[0] : value ?? '';
+const singleQuery = (value: string | string[] | undefined): string | undefined =>
+  Array.isArray(value) ? value[0] : value;
 
 // Feature flag check middleware
 const requireFeatureFlag = (flagName: string) => {
@@ -114,10 +118,11 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const query = req.query.q as string;
-      const category = req.query.category as string | undefined;
-      const locale = req.query.locale as string | undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const query = singleQuery(req.query.q as string | string[] | undefined);
+      const category = singleQuery(req.query.category as string | string[] | undefined);
+      const locale = singleQuery(req.query.locale as string | string[] | undefined);
+      const limitRaw = singleQuery(req.query.limit as string | string[] | undefined);
+      const limit = limitRaw ? parseInt(limitRaw, 10) : undefined;
 
       if (!query) {
         res.status(400).json({ error: 'Search query is required' });
@@ -147,10 +152,12 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const category = req.query.category as string | undefined;
-      const locale = req.query.locale as string | undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-      const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+      const category = singleQuery(req.query.category as string | string[] | undefined);
+      const locale = singleQuery(req.query.locale as string | string[] | undefined);
+      const limitRaw = singleQuery(req.query.limit as string | string[] | undefined);
+      const offsetRaw = singleQuery(req.query.offset as string | string[] | undefined);
+      const limit = limitRaw ? parseInt(limitRaw, 10) : undefined;
+      const offset = offsetRaw ? parseInt(offsetRaw, 10) : undefined;
 
       const result = await supportCenterService.getArticles({
         category: category as any,
@@ -176,7 +183,7 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { slug } = req.params;
+      const slug = singleParam(req.params.slug);
 
       const result = await supportCenterService.getArticleBySlug(slug, true);
 
@@ -202,7 +209,7 @@ router.post(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+      const id = singleParam(req.params.id);
       const { helpful } = VoteSchema.parse(req.body);
 
       await supportCenterService.voteArticle(id, helpful);
@@ -224,8 +231,8 @@ router.get(
   requireFeatureFlag('support.faq'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const category = req.query.category as string | undefined;
-      const locale = req.query.locale as string | undefined;
+      const category = singleQuery(req.query.category as string | string[] | undefined);
+      const locale = singleQuery(req.query.locale as string | string[] | undefined);
 
       const result = await supportCenterService.getFAQs({
         category: category as any,
@@ -375,7 +382,7 @@ router.post(
   requireFeatureFlag('support.tickets'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { ticketId } = req.params;
+      const ticketId = singleParam(req.params.ticketId);
       const { content, isInternal } = AddMessageSchema.parse(req.body);
       const { id: userId } = req.user!;
 
@@ -404,7 +411,7 @@ router.post(
   requireFeatureFlag('support.escalation'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { ticketId } = req.params;
+      const ticketId = singleParam(req.params.ticketId);
       const { reason } = req.body;
 
       const result = await supportCenterService.escalateTicket(ticketId, reason || 'User requested escalation');
