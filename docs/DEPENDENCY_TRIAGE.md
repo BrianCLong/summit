@@ -47,6 +47,7 @@ Run these from repo root (or the specified workspace root):
 - Module: `services/acc`
 - Result: 16 Go stdlib vulnerabilities detected (Go 1.22.2), plus 7 in imported packages and 9 in required modules that are not directly called.
 - Notable stdlib IDs: GO-2026-4340, GO-2026-4337, GO-2025-4175, GO-2025-4155, GO-2025-4013, GO-2025-4011, GO-2025-4010, GO-2025-4009, GO-2025-4008, GO-2025-4007, GO-2025-3750 (Windows), GO-2025-3563, GO-2025-3447 (ppc64le), GO-2025-3373, GO-2024-2887, GO-2024-2824.
+- After bumping all modules to Go 1.24, rerun with `GOTOOLCHAIN=go1.24.13` failed due to toolchain compile errors on Go 1.24 sources; local Go toolchain upgrade required.
 
 ## Rust (cargo-audit)
 
