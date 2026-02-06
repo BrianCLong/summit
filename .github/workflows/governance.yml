@@ -11,7 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install yaml
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - run: pnpm install yaml
       - run: node scripts/ci/verify_required_checks.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

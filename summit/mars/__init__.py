@@ -1,1 +1,1 @@
-# MARS: Modular Agent with Reflective Search
+# MARS Module

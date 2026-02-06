@@ -50,7 +50,10 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -73,7 +76,10 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -97,7 +103,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -158,7 +167,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -187,7 +199,10 @@ jobs:
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -233,7 +248,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -258,7 +276,10 @@ jobs:
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -295,7 +316,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -347,7 +371,8 @@ jobs:
           cache: "pnpm"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0      - name: Install dependencies
+        uses: pnpm/action-setup@v4 # v4.1.0
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run SOC control tests
@@ -370,7 +395,10 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm

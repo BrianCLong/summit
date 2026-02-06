@@ -42,7 +42,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-
       - name: Determine Report Month
         id: month
         run: |

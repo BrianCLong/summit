@@ -52,7 +52,8 @@ jobs:
           fetch-depth: 0  # Full history for git metadata
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4 # v4
+      - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -135,7 +136,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-
       - name: Download Evidence Pack
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:

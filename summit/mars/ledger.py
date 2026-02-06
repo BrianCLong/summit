@@ -1,43 +1,21 @@
 import json
-from dataclasses import dataclass, field, asdict
-from typing import List
+from .cost import BudgetLedger
 
-@dataclass
-class LedgerEntry:
-    timestamp_ref: str
-    task_id: str
-    cost: float
-    description: str
-
-@dataclass
 class Budget:
-    total_limit: float
-    total_consumed: float = 0.0
-    currency: str = "cost_units"
+    def __init__(self, limit):
+        self.limit = limit
 
-@dataclass
 class Ledger:
-    evidence_id: str
-    budget: Budget
-    entries: List[LedgerEntry] = field(default_factory=list)
-    schema_version: str = "1.0"
+    def __init__(self, budget_limit):
+        self.ledger = BudgetLedger(budget_limit)
 
-    def record_cost(self, task_id: str, cost: float, description: str, timestamp_ref: str):
-        if self.budget.total_consumed + cost > self.budget.total_limit:
-            raise ValueError(f"Budget exceeded: limit {self.budget.total_limit}, "
-                             f"attempted {self.budget.total_consumed + cost}")
+    def save(self, filepath):
+        with open(filepath, 'w') as f:
+            json.dump(self.ledger.to_dict(), f, indent=2, sort_keys=True)
 
-        entry = LedgerEntry(
-            timestamp_ref=timestamp_ref,
-            task_id=task_id,
-            cost=cost,
-            description=description
-        )
-        self.entries.append(entry)
-        self.budget.total_consumed += cost
-
-    def to_dict(self):
-        return asdict(self)
-
-    def to_json(self):
-        return json.dumps(self.to_dict(), indent=2, sort_keys=True)
+def save_ledger(ledger, filepath):
+    if hasattr(ledger, 'save'):
+        ledger.save(filepath)
+    else:
+        with open(filepath, 'w') as f:
+            json.dump(ledger.to_dict(), f, indent=2, sort_keys=True)

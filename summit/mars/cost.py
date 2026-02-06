@@ -1,28 +1,37 @@
-from enum import Enum
-from dataclasses import dataclass
+import json
 
-class TaskType(Enum):
-    DESIGN = "design"
-    DECOMPOSE = "decompose"
-    IMPLEMENT = "implement"
-    EVALUATE = "evaluate"
-    REFLECTION = "reflect"
-
-@dataclass
 class CostModel:
-    costs: dict[TaskType, float]
+    def __init__(self, unit_costs=None):
+        self.unit_costs = unit_costs or {
+            "design": 10,
+            "decompose": 5,
+            "implement": 20,
+            "evaluate": 50
+        }
 
-    @classmethod
-    def default(cls):
-        return cls(costs={
-            TaskType.DESIGN: 1.0,
-            TaskType.DECOMPOSE: 0.5,
-            TaskType.IMPLEMENT: 2.0,
-            TaskType.EVALUATE: 5.0,
-            TaskType.REFLECTION: 1.5,
+    def get_cost(self, task_type):
+        return self.unit_costs.get(task_type, 1)
+
+class BudgetLedger:
+    def __init__(self, budget_limit):
+        self.budget_limit = budget_limit
+        self.total_spent = 0
+        self.entries = []
+
+    def record(self, task_id, task_type, cost):
+        if self.total_spent + cost > self.budget_limit:
+            raise ValueError(f"Budget exceeded: {self.total_spent + cost} > {self.budget_limit}")
+        self.total_spent += cost
+        self.entries.append({
+            "task_id": task_id,
+            "task_type": task_type,
+            "cost_units": cost,
+            "running_total": self.total_spent
         })
 
-    def get_cost(self, task_type: str | TaskType) -> float:
-        if isinstance(task_type, str):
-            task_type = TaskType(task_type)
-        return self.costs.get(task_type, 0.0)
+    def to_dict(self):
+        return {
+            "budget_limit": self.budget_limit,
+            "total_spent": self.total_spent,
+            "entries": self.entries
+        }

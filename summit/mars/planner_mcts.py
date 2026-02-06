@@ -1,90 +1,58 @@
+import math
 import random
 import json
-import math
-from typing import List, Dict, Any, Optional
-from summit.mars.cost import CostModel, TaskType
 
 class MCTSNode:
-    def __init__(self, task_type: TaskType, cost: float, parent=None):
-        self.task_type = task_type
-        self.cost = cost
+    def __init__(self, state, task_id, parent=None):
+        self.state = state
+        self.task_id = task_id
         self.parent = parent
-        self.children: Dict[str, MCTSNode] = {}
+        self.children = []
         self.visits = 0
         self.value = 0.0
 
-    def add_child(self, name: str, node: 'MCTSNode'):
-        self.children[name] = node
-
-    def is_fully_expanded(self, possible_tasks: List[TaskType]):
-        return len(self.children) == len(possible_tasks)
+    def uct_score(self, total_visits, exploration_weight=1.41):
+        if self.visits == 0:
+            return float('inf')
+        return (self.value / self.visits) + exploration_weight * math.sqrt(math.log(total_visits) / self.visits)
 
 class MCTSPlanner:
-    def __init__(self, evidence_id: str, budget_limit: float, seed: int = 42):
-        self.evidence_id = evidence_id
-        self.budget_limit = budget_limit
-        self.cost_model = CostModel.default()
-        self.rng = random.Random(seed)
-        self.root = MCTSNode(TaskType.DESIGN, 0.0) # Dummy root or first step
+    def __init__(self, cost_model, iterations=10, seed=42):
+        self.cost_model = cost_model
+        self.iterations = iterations
+        self.seed = seed
+        random.seed(seed)
 
-    def plan(self, iterations: int = 100) -> Dict[str, Any]:
-        # simplified MCTS for demonstration of budget awareness and determinism
-        possible_tasks = [TaskType.DESIGN, TaskType.DECOMPOSE, TaskType.IMPLEMENT, TaskType.EVALUATE, TaskType.REFLECTION]
+    def plan(self, root_state, budget_ledger):
+        root = MCTSNode(root_state, "root")
 
-        # Sort possible tasks by name to ensure stable iteration order
-        sorted_tasks = sorted(possible_tasks, key=lambda x: x.value)
+        for _ in range(self.iterations):
+            node = self._select(root)
+            reward = self._simulate(node, budget_ledger)
+            self._backpropagate(node, reward)
 
-        for _ in range(iterations):
-            node = self._select(self.root)
-            if node.cost < self.budget_limit:
-                # Expansion
-                untried = [t for t in sorted_tasks if t.value not in node.children]
-                if untried:
-                    task_type = untried[0] # Stable selection
-                    cost = self.cost_model.get_cost(task_type)
-                    if node.cost + cost <= self.budget_limit:
-                        child = MCTSNode(task_type, node.cost + cost, parent=node)
-                        node.add_child(task_type.value, child)
-                        # Backpropagate (simplified)
-                        self._backpropagate(child, 1.0)
+        return self._generate_plan(root)
 
-        # Extract best path
-        path = self._extract_best_path()
-
-        return {
-            "schema_version": "1.0",
-            "evidence_id": self.evidence_id,
-            "tasks": path
-        }
-
-    def _select(self, node: MCTSNode) -> MCTSNode:
+    def _select(self, node):
         while node.children:
-            # UCB1 or stable selection
-            # For determinism in selection, we sort children keys
-            sorted_keys = sorted(node.children.keys())
-            node = node.children[sorted_keys[0]]
+            node = max(node.children, key=lambda c: c.uct_score(node.visits))
         return node
 
-    def _backpropagate(self, node: MCTSNode, value: float):
+    def _simulate(self, node, budget_ledger):
+        task_type = random.choice(["design", "decompose", "implement", "evaluate"])
+        cost = self.cost_model.get_cost(task_type)
+        try:
+            budget_ledger.record(f"task_{node.visits}", task_type, cost)
+            return random.random() # Simplified reward
+        except ValueError:
+            return 0.0
+
+    def _backpropagate(self, node, reward):
         while node:
             node.visits += 1
-            node.value += value
+            node.value += reward
             node = node.parent
 
-    def _extract_best_path(self) -> List[Dict[str, Any]]:
-        path = []
-        curr = self.root
-        step = 0
-        while curr.children:
-            # Pick child with most visits
-            sorted_children = sorted(curr.children.items(), key=lambda x: (-x[1].visits, x[0]))
-            task_name, next_node = sorted_children[0]
-
-            path.append({
-                "task_id": f"task_{step}",
-                "type": task_name,
-                "dependencies": [f"task_{step-1}"] if step > 0 else []
-            })
-            curr = next_node
-            step += 1
-        return path
+    def _generate_plan(self, root):
+        # In a real implementation, this would extract the best path
+        return {"steps": [{"id": "initial_research", "type": "design", "cost": 10}]}

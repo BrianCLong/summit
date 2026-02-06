@@ -52,7 +52,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4.0.0
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -64,7 +63,6 @@ jobs:
 
       - name: Setup k6
         uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1
-
       - name: Start application stack
         run: |
           if [ -f ops/docker-compose.ci.yml ]; then

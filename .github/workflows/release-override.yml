@@ -43,7 +43,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-
       - name: Check Freeze Status
         id: check-freeze
         run: |

@@ -15,10 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-
       - name: Setup k6
         uses: grafana/setup-k6-action@ffe7d7290dfa715e48c2ccc924d068444c94bde2 # v1
-
       - name: Run k6 SLO Probe (Report Only)
         run: |
           k6 run k6/slo-probe.js --env OUTPUT_JSON=true > k6-output.txt

@@ -2,33 +2,16 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "MARS Ledger",
   "type": "object",
-  "required": ["schema_version", "evidence_id", "budget", "entries"],
+  "required": ["budget_limit", "total_spent", "entries"],
   "properties": {
-    "schema_version": { "type": "string", "enum": ["1.0"] },
-    "evidence_id": { "type": "string", "pattern": "^EVID-[A-Z0-9-]{8,16}$" },
-    "budget": {
-      "type": "object",
-      "required": ["total_limit", "total_consumed"],
-      "properties": {
-        "total_limit": { "type": "number", "minimum": 0 },
-        "total_consumed": { "type": "number", "minimum": 0 },
-        "currency": { "type": "string", "default": "cost_units" }
-      }
-    },
+    "budget_limit": { "type": "integer" },
+    "total_spent": { "type": "integer" },
     "entries": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["timestamp_ref", "task_id", "cost", "description"],
-        "properties": {
-          "timestamp_ref": { "type": "string", "description": "Reference to entry in stamp.json" },
-          "task_id": { "type": "string" },
-          "cost": { "type": "number", "minimum": 0 },
-          "description": { "type": "string" }
-        },
-        "additionalProperties": false
+        "required": ["task_id", "task_type", "cost_units", "running_total"]
       }
     }
-  },
-  "additionalProperties": false
+  }
 }

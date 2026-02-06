@@ -50,7 +50,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-
       - name: Install Dependencies
         run: |
           # jq is usually pre-installed, but ensure it's available
@@ -80,7 +79,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-
       - name: Install Dependencies
         run: |
           which jq || sudo apt-get install -y jq
