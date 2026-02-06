@@ -75,6 +75,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: forbid-registry-secrets-policy
+    version: v1
+    path: prompts/ci/forbid-registry-secrets-policy@v1.md
+    sha256: 7c34059ad805d708fa024e343b4d458f2a018274e8fe5d95616318f018f96c4a
+    description: Add a deterministic CI policy gate that blocks long-lived registry secrets.
+    scope:
+      paths:
+        - .github/scripts/policy/
+        - .github/scripts/__tests__/
+        - .github/workflows/ci-policy-registry-secrets.yml
+        - artifacts/policy/
+        - docs/roadmap/STATUS.json
+        - prompts/ci/forbid-registry-secrets-policy@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ci
+        - governance
+        - policy
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md

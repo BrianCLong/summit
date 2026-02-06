@@ -67,6 +67,12 @@
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
     },
     {
+      "id": "dependabot-oidc-registry-policy-gate",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented CI policy gate to block long-lived registry secrets with deterministic artifacts."
+    },
+    {
       "id": "E",
       "name": "Graph-XAI Differentiation",
       "epics": [
