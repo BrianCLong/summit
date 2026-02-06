@@ -1,0 +1,41 @@
+{
+  "task_id": "GOODFIRE_INTERPRETABILITY_SERIESB_2026_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "goodfire-interpretability-seriesb-2026-pr1",
+    "version": "v1",
+    "sha256": "3f9244c7419a4892d61bb2ca28fdc2e8955b238afe6bb38a95ae1de1016a2938",
+    "path": "prompts/governance/goodfire-interpretability-seriesb-2026-pr1@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/standards/goodfire-interpretability-seriesb-2026.md",
+      "docs/security/data-handling/goodfire-interpretability-seriesb-2026.md",
+      "docs/ops/runbooks/goodfire-interpretability-seriesb-2026.md",
+      "docs/governance/repo_assumptions.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/governance/goodfire-interpretability-seriesb-2026-pr1@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/GOODFIRE_INTERPRETABILITY_SERIESB_2026_PR1.json"
+    ],
+    "domains": ["documentation", "governance", "security", "operations"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs review", "roadmap status update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Documentation pack exists for standards, data handling, runbook, and repo assumptions.",
+    "Roadmap status updated with Goodfire Series B monitoring workstream.",
+    "Scope remains limited to declared documentation and governance paths."
+  ],
+  "stop_conditions": [
+    "Missing governance references or readiness assertion alignment.",
+    "Attempted changes outside declared scope paths."
+  ]
+}
