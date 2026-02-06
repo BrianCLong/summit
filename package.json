@@ -122,9 +122,10 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "narrative:analyze": "npx tsx src/narrative/cli.ts"
   },
   "keywords": [
     "intelligence-analysis",
