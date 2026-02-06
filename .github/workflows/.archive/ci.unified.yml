@@ -47,7 +47,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.15.2 --frozen-lockfile=false
+          version: v3.15.2 --no-no-frozen-lockfile=false
       - name: Codegen (GraphQL)
         run: |
           if [ -f codegen.ts ]; then npx -y graphql-code-generator --config codegen.ts || true; fi

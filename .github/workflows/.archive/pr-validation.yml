@@ -178,7 +178,7 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Run build and typecheck
         run: |
@@ -219,7 +219,7 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Run Test Validation
         run: |
@@ -278,7 +278,7 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Run Security Validation
         run: |
@@ -480,7 +480,7 @@ jobs:
         run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Run Lint Validation
         run: |

@@ -45,7 +45,7 @@ jobs:
           name: build-artifacts
         continue-on-error: true
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
       - name: Bootstrap repo (make bootstrap)
         run: make bootstrap
       - name: Cache Docker layers

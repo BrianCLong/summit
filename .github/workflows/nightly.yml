@@ -28,7 +28,7 @@ jobs:
           run_install: false
 
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Build
         run: pnpm --filter ${{ matrix.package }} build

@@ -18,7 +18,7 @@ jobs:
         run: |
           corepack enable || true
           corepack prepare pnpm@9.12.3 --activate || true
-          pnpm i -w --frozen-lockfile=false
+          pnpm i -w --no-no-frozen-lockfile=false
           node scripts/monorepo_heal.mjs || true
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

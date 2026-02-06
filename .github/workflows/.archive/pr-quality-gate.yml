@@ -53,9 +53,9 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        # Using no-frozen-lockfile because we know there are some lockfile drifts in the repo
+        # Using no-no-no-frozen-lockfile because we know there are some lockfile drifts in the repo
         # and we don't want CI to fail on that right now (we want to check code quality).
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-no-no-frozen-lockfile
 
       - name: Lint & Format Check
         run: pnpm run lint
@@ -107,7 +107,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-no-no-frozen-lockfile
 
       - name: Run Unit Tests
         run: pnpm run test:jest
@@ -147,7 +147,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-no-no-frozen-lockfile
 
       - name: Bootstrap Environment
         run: make bootstrap

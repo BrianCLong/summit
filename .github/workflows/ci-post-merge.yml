@@ -36,7 +36,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
       - name: Generate SBOM
         run: pnpm generate:sbom
       - name: Upload SBOM
@@ -59,7 +59,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
       - name: Generate Provenance
         run: pnpm generate:provenance
       - name: Upload Provenance

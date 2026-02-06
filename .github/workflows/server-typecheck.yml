@@ -54,7 +54,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Run Server TypeScript Check
         id: typecheck

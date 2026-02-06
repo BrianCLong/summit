@@ -69,7 +69,7 @@ jobs:
         run: |
           corepack enable || true
           corepack prepare pnpm@9.12.3 --activate || true
-          pnpm i --frozen-lockfile=false
+          pnpm i --no-no-frozen-lockfile=false
           node scripts/monorepo_heal.mjs || true
 
       - name: Typecheck (fast)

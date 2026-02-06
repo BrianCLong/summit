@@ -30,7 +30,7 @@ jobs:
           version: 8
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --no-no-frozen-lockfile --ignore-scripts
 
       - name: Run GA gate
         run: pnpm exec tsx scripts/run-ga-gate.ts

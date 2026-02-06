@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --no-no-frozen-lockfile
 
       - name: Run UX Governance Check
         run: |

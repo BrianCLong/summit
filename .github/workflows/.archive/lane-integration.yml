@@ -36,7 +36,7 @@ jobs:
           node-version: '20.11.x'
 
       - name: Install deps
-        run: pnpm i --no-frozen-lockfile
+        run: pnpm i --no-no-no-frozen-lockfile
 
       # Optional: bail early if test guards fail (no .only / console.error)
       - name: Lint test guards (non-blocking first pass)

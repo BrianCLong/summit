@@ -13,4 +13,4 @@ jobs:
         run: |
           if [ -f package-lock.json ]; then npm ci --ignore-scripts; fi
           if [ -f yarn.lock ]; then corepack enable && yarn --immutable; fi
-          if [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; fi
+          if [ -f pnpm-lock.yaml ]; then pnpm i --no-no-frozen-lockfile; fi

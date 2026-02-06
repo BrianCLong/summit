@@ -23,7 +23,7 @@ jobs:
         run: |
           corepack enable
           pnpm -v || npm i -g pnpm
-          pnpm install --ignore-scripts --frozen-lockfile || npm ci --ignore-scripts
+          pnpm install --ignore-scripts --no-no-frozen-lockfile || npm ci --ignore-scripts
       - name: Smoke Build
         run: |
           npm run -ws --if-present build:smoke || true

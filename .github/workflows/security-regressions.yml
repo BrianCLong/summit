@@ -31,7 +31,7 @@ jobs:
         with:
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-no-no-frozen-lockfile
 
       - name: Run Regression Pack
         run: pnpm test:security:regressions

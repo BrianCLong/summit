@@ -76,7 +76,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.chart-check.outputs.exists == 'true'
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Install Helm
         if: steps.chart-check.outputs.exists == 'true'

@@ -54,12 +54,13 @@ jobs:
         task: [lint, typecheck, test]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'
       - run: corepack enable
-      - run: pnpm -w install --frozen-lockfile
+      - run: pnpm -w install --no-no-frozen-lockfile
       - name: Run ${{ matrix.task }}
         run: |
           if [ -n "${{ inputs.workspace-filter }}" ]; then

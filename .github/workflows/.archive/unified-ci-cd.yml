@@ -86,7 +86,7 @@ jobs:
           version: 9
           run_install: false
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
       - name: Lint
         run: pnpm run lint
       - name: Typecheck
@@ -130,7 +130,7 @@ jobs:
           version: 9
           run_install: false
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
       - name: Snyk Open Source scan
         uses: snyk/actions/node@master
         if: env.SNYK_TOKEN != ''

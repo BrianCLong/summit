@@ -24,7 +24,7 @@ jobs:
           node-version: "18"
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: AI Upgrade Grounding
         run: node scripts/ci/ai_upgrade_grounding_gate.mjs

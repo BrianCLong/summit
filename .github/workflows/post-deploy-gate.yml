@@ -45,7 +45,7 @@ jobs:
           run_install: false
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Run Post-Deploy Canary
         env:

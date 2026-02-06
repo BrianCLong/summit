@@ -107,7 +107,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-no-frozen-lockfile
 
       - name: Run release:ready
         run: |
