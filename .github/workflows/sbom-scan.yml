@@ -49,6 +49,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install dependencies (scripts)
+        run: npm ci || npm install
+
+      - name: Melange Version Gate (CVE-2026-25145)
+        env:
+          GATE_OUTPUT: artifacts/sbom/gate.json
+        run: |
+          mkdir -p artifacts/sbom
+          npx tsx .github/scripts/sbom/melange-version-gate.ts
+
+      - name: Melange Config Lint (CVE-2026-25145)
+        env:
+          GATE_OUTPUT: artifacts/sbom/config_lint.json
+        run: |
+          npx tsx .github/scripts/sbom/melange-config-lint.ts
+
+      - name: Trust Context Gate
+        id: trust
+        env:
+          GATE_OUTPUT: artifacts/sbom/trust.json
+        run: |
+          npx tsx .github/scripts/sbom/trust-context.ts
+
+      - name: Containment Smoke Test
+        env:
+          GATE_OUTPUT: artifacts/sbom/containment_check.json
+        run: |
+          npx tsx .github/scripts/sbom/containment-check.ts
+
       - name: Generate SBOM with Syft
         uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
         with:
@@ -63,11 +92,20 @@ jobs:
           severity-cutoff: high
           only-fixed: false
           grype-config: security/grype-allowlist.yaml
+
       - name: Attest SBOM
+        if: steps.trust.outputs.can_sign == 'true'
         uses: actions/attest-sbom@v3
         with:
           subject-path: ${{ github.workspace }}
           sbom-path: sbom.json
+
+      - name: Package Evidence
+        env:
+          ARTIFACT_DIR: artifacts/sbom
+        run: |
+          if [ -f sbom.json ]; then cp sbom.json artifacts/sbom/sbom.json; fi
+          npx tsx .github/scripts/sbom/evidence-pack.ts
 
       - name: Upload SBOM artifact
         if: always()
@@ -77,5 +115,13 @@ jobs:
           path: |
             sbom.json
             results.sarif
+          retention-days: 90
+
+      - name: Upload Melange Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: melange-protection-evidence
+          path: artifacts/sbom/
           retention-days: 90
 # Linked: https://linear.app/summi7/issue/SUM-10197
