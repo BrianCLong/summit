@@ -400,6 +400,22 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-CIS-GUARD-001",
+      "files": {
+        "report": "evidence/EVD-CIS-GUARD-001/report.json",
+        "metrics": "evidence/EVD-CIS-GUARD-001/metrics.json",
+        "stamp": "evidence/EVD-CIS-GUARD-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-CIS-CIG-001",
+      "files": {
+        "report": "evidence/EVD-CIS-CIG-001/report.json",
+        "metrics": "evidence/EVD-CIS-CIG-001/metrics.json",
+        "stamp": "evidence/EVD-CIS-CIG-001/stamp.json"
+      }
     }
   ]
 }

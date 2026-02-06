@@ -1,5 +1,11 @@
 {
   "SKILL_PRESERVING_MODE": false,
   "ADAPTIVE_COACHING": false,
-  "FEATURE_EXTORTION_PRESSURE": false
+  "FEATURE_EXTORTION_PRESSURE": false,
+  "CIS_ENABLED": false,
+  "PIE_ENABLED": false,
+  "CIE_ENABLED": false,
+  "CIS_INTERNAL_COMMS_CONTENT": false,
+  "CIS_VENDOR_DETECTORS": false,
+  "CIS_ML_MODELS": false
 }
