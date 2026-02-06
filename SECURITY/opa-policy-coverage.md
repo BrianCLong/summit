@@ -48,7 +48,7 @@ This document tracks Open Policy Agent (OPA) policy enforcement coverage across 
 | **API Gateway** | Yes | ✅ | RBAC enforced | LOW |
 | **GraphQL Resolvers** | Partial | 🟡 | Some resolvers bypass auth | MEDIUM |
 | **Feature Flag API** | **FIXED** | ✅ | Auth middleware added 2026-01-20 | **RESOLVED** |
-| **CompanyOS Tenant API** | No | ❌ | TODOs: "Wire in OPA" | **HIGH** |
+| **CompanyOS Tenant API** | **FIXED** | ✅ | OPA integration with fail-closed added 2026-02-06 | **RESOLVED** |
 | **Background Jobs** | Unknown | ⚠️ | No policy checks visible | MEDIUM |
 | **Webhook Handlers** | Unknown | ⚠️ | Requires audit | MEDIUM |
 | **Admin Endpoints** | Partial | 🟡 | Inconsistent enforcement | HIGH |
@@ -57,26 +57,30 @@ This document tracks Open Policy Agent (OPA) policy enforcement coverage across 
 
 ## Identified Gaps
 
-### Gap 1: CompanyOS Tenant API (HIGH PRIORITY)
+### Gap 1: CompanyOS Tenant API (RESOLVED)
 
-**Location:** `companyos/services/tenant-api/src/middleware/authContext.ts:5,49`
+**Status:** ✅ **RESOLVED (2026-02-06)**
 
-**TODOs:**
-```typescript
-// Line 5: TODO: Wire in OPA
-// Line 49: TODO: Replace with OPA
-```
+**Location:** `companyos/services/tenant-api/src/middleware/authContext.ts`
 
-**Current Behavior:** Likely uses local RBAC or no authz at all
+**Resolution:**
+- Added OPA integration with `evaluateOpaPolicy()` function
+- Implemented fail-closed behavior in production (`FAIL_CLOSED = process.env.NODE_ENV === 'production'`)
+- Added policy decision logging for audit trail
+- RBAC fallback for development/test environments when OPA unavailable
+- Created dedicated tenant policy at `companyos/policies/tenant.rego`
 
-**Risk:** Tenant isolation bypass - users could access other tenants' data
+**Key Features:**
+1. OPA evaluation with configurable timeout (`OPA_TIMEOUT_MS`)
+2. Fail-closed: denies all requests if OPA is unreachable in production
+3. Structured logging of all policy decisions
+4. Graceful degradation to RBAC in non-production
 
-**Mitigation:**
-1. Audit all tenant API endpoints
-2. Implement OPA middleware for all routes
-3. Add integration tests for cross-tenant access denial
-
-**Target Date:** Sprint 1 (next 2 weeks)
+**Configuration:**
+- `OPA_URL` - OPA server URL (default: `http://localhost:8181`)
+- `OPA_ENABLED` - Enable/disable OPA (default: `true`)
+- `OPA_TIMEOUT_MS` - Request timeout (default: `5000`)
+- `LOG_POLICY_DECISIONS` - Enable verbose logging in dev
 
 ---
 
@@ -156,43 +160,60 @@ This document tracks Open Policy Agent (OPA) policy enforcement coverage across 
 
 ## Missing Features
 
-### 1. Fail-Closed Default
+### 1. Fail-Closed Default (RESOLVED)
 
-**Current Behavior:** Unknown - need to test OPA service downtime
-
-**Expected Behavior:**
-- If OPA service is unreachable → **DENY** all requests
-- Log critical error
-- Alert on-call team
-- Degrade gracefully (read-only mode?)
+**Status:** ✅ **IMPLEMENTED (2026-02-06)**
 
 **Implementation:**
-```typescript
-try {
-  const decision = await opaClient.evaluate(input);
-  return decision.allow;
-} catch (error) {
-  logger.error('OPA service unreachable - DENYING request', { error });
-  metrics.increment('opa.service_down');
-  return false; // FAIL CLOSED
-}
-```
+The following components now implement fail-closed behavior:
 
-**Target Date:** Sprint 1 (critical for production)
+1. **authz-core** (`packages/authz-core/src/AuthorizationService.ts`)
+   - `failSecure: process.env.NODE_ENV === 'production'`
+
+2. **CompanyOS Tenant API** (`companyos/services/tenant-api/src/middleware/authContext.ts`)
+   - `FAIL_CLOSED = process.env.NODE_ENV === 'production'`
+
+3. **CompanyOS disclosure-export** (`companyos/src/authz/disclosure-export.ts`)
+   - Always fail-closed: `return { allow: false, reason: 'authorization_error' }`
+
+4. **CompanyOS opa-client** (`companyos/src/authz/opa-client.ts`)
+   - Always fail-closed: `return { allow: false, reason: 'opa_error' }`
+
+**Behavior:**
+- Production: If OPA unreachable → **DENY** all requests
+- Non-production: Falls back to RBAC with warning log
+- All OPA errors are logged with structured output
 
 ---
 
-### 2. Policy Decision Logging
+### 2. Policy Decision Logging (PARTIALLY RESOLVED)
 
-**Current State:** Unknown if policy decisions are logged
+**Status:** 🟡 **PARTIALLY IMPLEMENTED (2026-02-06)**
 
-**Required:**
-- Log ALL policy evaluations (allow AND deny)
-- Include: user, action, resource, decision, timestamp
-- Send to provenance ledger for audit trail
-- Enable forensic investigation
+**Implemented:**
+- CompanyOS Tenant API now logs all policy decisions via `logPolicyDecision()`
+- Structured JSON logs include: timestamp, subject, action, resource, decision, reason, obligations
+- Production logs go to stdout for ingestion by logging infrastructure
+- Development logging controllable via `LOG_POLICY_DECISIONS=true`
 
-**Target Date:** Sprint 1 (compliance requirement)
+**Example Log Entry:**
+```json
+{
+  "timestamp": "2026-02-06T10:30:00.000Z",
+  "type": "policy_decision",
+  "subject": "user-123",
+  "action": "tenant:read",
+  "resource": {"type": "tenant", "tenant_id": "acme-corp"},
+  "decision": "allow",
+  "reason": "OPA policy allowed",
+  "obligations": []
+}
+```
+
+**TODO:**
+- [ ] Integrate with provenance ledger for immutable audit trail
+- [ ] Add policy decision logging to other services (authz-core, etc.)
+- [ ] Set up alerting for unusual denial patterns
 
 ---
 

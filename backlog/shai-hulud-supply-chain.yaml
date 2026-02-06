@@ -14,4 +14,5 @@ lanes:
       summary: "Flag suspicious compressed assets in Python packages (flag off)"
       status: deferred
 notes:
-  - "Deferred pending required checks discovery and CI gate alignment."
+  - "Blocker resolved 2026-02-06: Required checks discovery completed (see ci/required_checks.todo.md)"
+  - "Ready for implementation when prioritized"

@@ -268,12 +268,7 @@
   ],
   "pnpm": {
     "auditConfig": {
-      "ignoreCves": [
-        "CVE-2024-22363",
-        "CVE-2023-30533",
-        "CVE-2022-24434",
-        "CVE-2023-28155"
-      ]
+      "ignoreCves": []
     },
     "overrides": {
       "entities": "^4.5.0",
@@ -312,7 +307,8 @@
       "fastify": ">=5.7.2",
       "fast-xml-parser": ">=5.3.4",
       "hono": ">=4.11.7",
-      "multer": ">=2.0.2"
+      "multer": ">=2.0.2",
+      "busboy": ">=1.6.0"
     }
   }
 }
