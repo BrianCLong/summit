@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "metricKeys", "metrics", "summary"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^EVD-[a-z0-9-]+-[A-Z]+-\\d{3}$"
+    },
+    "metricKeys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": ["number", "string", "boolean"] }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string" }
+      }
+    }
+  }
+}

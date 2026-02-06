@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "entries": [
+    {
+      "id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+      "path": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+      "description": "Fixture intentionally violates timestamp rules"
+    }
+  ]
+}

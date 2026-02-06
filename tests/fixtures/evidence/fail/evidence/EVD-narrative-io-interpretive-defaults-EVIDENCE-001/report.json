@@ -1,0 +1,12 @@
+{
+  "id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+  "title": "Evidence schema validation",
+  "summary": "Fixture intentionally violates timestamp rule.",
+  "generatedAt": "2026-02-08T00:00:00Z",
+  "findings": [
+    {
+      "key": "schemaValidation",
+      "value": "fail"
+    }
+  ]
+}

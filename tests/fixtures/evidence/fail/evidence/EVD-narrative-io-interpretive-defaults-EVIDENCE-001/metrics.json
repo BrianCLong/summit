@@ -1,0 +1,11 @@
+{
+  "id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+  "metricKeys": ["fixturesChecked", "failures"],
+  "metrics": {
+    "fixturesChecked": 1,
+    "failures": 1
+  },
+  "summary": {
+    "status": "fail"
+  }
+}

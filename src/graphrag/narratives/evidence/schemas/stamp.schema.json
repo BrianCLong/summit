@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Stamp",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "generatedAt", "hash", "provenance"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^EVD-[a-z0-9-]+-[A-Z]+-\\d{3}$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": { "type": "string" }
+      }
+    }
+  }
+}

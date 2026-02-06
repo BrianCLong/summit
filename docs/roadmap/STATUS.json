@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Resolved roadmap merge conflict and aligned README core components update.",
+  "last_updated": "2026-02-08T12:00:00Z",
+  "revision_note": "Added narrative evidence lane-1 scaffolding status.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -133,6 +133,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+    },
+    {
+      "id": "narrative-io-evidence-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence schemas, validator, fixtures, and verify-evidence gate for narrative intel lane 1."
     },
     {
       "id": "ru-ua-cogwar-lab",

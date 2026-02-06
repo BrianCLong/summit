@@ -1,0 +1,11 @@
+{
+  "id": "EVD-narrative-io-interpretive-defaults-EVIDENCE-001",
+  "title": "Evidence schema validation",
+  "summary": "Fixture validates evidence schema requirements.",
+  "findings": [
+    {
+      "key": "schemaValidation",
+      "value": "pass"
+    }
+  ]
+}
