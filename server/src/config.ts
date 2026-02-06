@@ -42,7 +42,6 @@ export const EnvSchema = z
     SKIP_AI_ROUTES: z.coerce.boolean().default(false),
     SKIP_WEBHOOKS: z.coerce.boolean().default(false),
     SKIP_GRAPHQL: z.coerce.boolean().default(false),
-    FACTFLOW_ENABLED: z.coerce.boolean().default(false),
     // Email Configuration
     SMTP_HOST: z.string().optional(),
     SMTP_PORT: z.coerce.number().optional().default(587),

@@ -3,7 +3,7 @@ import { LlmProvider, ProviderId, ChatCompletionRequest, ChatCompletionResult } 
 import { redactSecrets } from '../safety/log_redaction.js';
 
 export class NvidiaNimProvider implements LlmProvider {
-  id: ProviderId = 'nvidia-nim';
+  id: ProviderId = 'nvidia_nim';
   private apiKey: string;
   private baseUrl: string;
   private defaultModel: string;
@@ -59,7 +59,7 @@ export class NvidiaNimProvider implements LlmProvider {
     };
 
     // Mode handling: default to config default unless requested
-    const mode = request.mode ?? this.modeDefault;
+    const mode = (request as any).mode ?? this.modeDefault;
     if (mode === 'instant') {
       body.extra_body = { thinking: { type: 'disabled' } };
     }
@@ -101,7 +101,7 @@ export class NvidiaNimProvider implements LlmProvider {
           const choice = data.choices?.[0];
 
           return {
-            provider: 'nvidia-nim',
+            provider: 'nvidia_nim',
             model: data.model || request.model,
             content: choice?.message?.content || null,
             toolCalls: choice?.message?.tool_calls?.map((tc: any) => ({

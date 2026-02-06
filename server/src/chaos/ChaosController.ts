@@ -112,6 +112,7 @@ export class ChaosController extends EventEmitter {
         dns_failure: 0,
         timeout: 0,
         exception: 0,
+        region_kill: 0,
       },
       lastInjectionAt: null,
       isEnabled: this.globalConfig.enabled,

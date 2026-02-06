@@ -130,7 +130,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       const envelope = await userService.getUser(
         principal.tenantId,
@@ -205,7 +205,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       // Validate input
       const parseResult = updateUserSchema.safeParse(req.body);
@@ -249,7 +249,7 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
       const hardDelete = req.query.hard === 'true';
 
       const envelope = await userService.deleteUser(
@@ -284,7 +284,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
       const { reason } = req.body;
 
       if (!reason) {
@@ -324,7 +324,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       const envelope = await userService.unlockUser(
         principal.tenantId,
