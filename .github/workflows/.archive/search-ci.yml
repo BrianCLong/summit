@@ -26,6 +26,12 @@ jobs:
         working-directory: services/search-indexer
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
+
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -40,6 +46,6 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          version: v0.61.0
       - name: Check Rego Policies
         run: opa check .ci/policies/search.rego

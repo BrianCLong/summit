@@ -1,8 +1,7 @@
 package intelgraph.export
 
 import future.keywords.every
-
-test_simulate_allows_without_step_up {
+test_simulate_allows_without_step_up if {
   input := {
     "mode": "simulate",
     "action": "export",
@@ -22,8 +21,7 @@ test_simulate_allows_without_step_up {
   d.step_up.satisfied == false
   count(d.redactions) == 3
 }
-
-test_enforce_denies_without_step_up_when_sensitive {
+test_enforce_denies_without_step_up_when_sensitive if {
   input := {
     "mode": "enforce",
     "action": "export",
@@ -39,8 +37,7 @@ test_enforce_denies_without_step_up_when_sensitive {
   d.step_up.required
   not d.step_up.satisfied
 }
-
-test_enforce_allows_with_step_up {
+test_enforce_allows_with_step_up if {
   input := {
     "mode": "enforce",
     "action": "export",
@@ -53,8 +50,7 @@ test_enforce_allows_with_step_up {
   }
   data.intelgraph.export.allow with input as input
 }
-
-test_redactions_merge_tags_and_explicit {
+test_redactions_merge_tags_and_explicit if {
   input := {
     "mode": "simulate",
     "action": "export",

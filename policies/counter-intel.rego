@@ -4,7 +4,7 @@
 
 package counter_intelligence
 
-default allow = false
+default allow := false
 
 # Example rule: Allow containment protocol to be activated if attribution
 # confidence is 'Probable' or higher.

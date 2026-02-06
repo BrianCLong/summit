@@ -20,7 +20,7 @@ jobs:
       - name: Set up OPA
         uses: open-policy-agent/setup-opa@9c3361f8beace1df5a8e053b85fed850d191ebc3 # v1
         with:
-          version: v0.68.0
+          version: v0.61.0
 
       - name: Test release and migration policies
         run: |

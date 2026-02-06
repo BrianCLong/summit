@@ -25,7 +25,7 @@ needs_step_up := sens == "sensitive" or sens == "restricted"
 has_step_up := input.auth.webauthn_verified == true
 
 # Collect DLP redactions from pii:* tags on fields
-redactions_from_tags[entry] {
+redactions_from_tags contains entry if {
   f := input.resource.fields[_]
   some t
   t := f.tags[_]
@@ -34,7 +34,7 @@ redactions_from_tags[entry] {
 }
 
 # Merge explicit masks
-redactions_from_explicit[entry] {
+redactions_from_explicit contains entry if {
   p := input.resource.explicit_dlp_mask_paths[_]
   entry := {"path": p, "reason": "explicit"}
 }
@@ -70,9 +70,9 @@ reasons := r {
 }
 
 # allow rules
-allow { is_simulate }
-allow { is_enforce; not needs_step_up }
-allow { is_enforce; needs_step_up; has_step_up }
+allow if { is_simulate }
+allow if { is_enforce; not needs_step_up }
+allow if { is_enforce; needs_step_up; has_step_up }
 
 # Utility: append iff condition true
 cond_append(arr, cond, v) = out { cond; out := array.concat(arr, [v]) }

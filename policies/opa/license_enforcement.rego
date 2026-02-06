@@ -158,7 +158,7 @@ action_to_permission := {
 }
 
 # Get the permission key for the action
-permission_key := action_to_permission[input.action] if {
+permission_key := action_to_permission contains input.action if {
   input.action in object.keys(action_to_permission)
 }
 

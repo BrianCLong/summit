@@ -75,12 +75,12 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
+          version: v0.61.0
 
       - name: OPA policy check
         run: |
           echo "=== Checking OPA Policy Syntax ==="
-          opa check policies/ policy/maestro || {
+          opa check --rego-v1 policies/ policy/maestro || {
             echo "::error::OPA policy syntax check FAILED"
             exit 1
           }
@@ -88,7 +88,7 @@ jobs:
       - name: OPA policy tests
         run: |
           echo "=== Running OPA Policy Tests ==="
-          (opa test policies/ policy/maestro policy_tests -v || opa test policies/ policy/maestro policy_tests -v) || {
+          (opa test --rego-v1 policies/ policy/maestro policy_tests -v || opa test --rego-v1 policies/ policy/maestro policy_tests -v) || {
             echo "::error::OPA policy tests FAILED"
             exit 1
           }

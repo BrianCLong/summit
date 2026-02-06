@@ -81,8 +81,8 @@ jobs:
           version: v0.61.0
       - name: Verify Policies
         run: |
-          opa check policies/
-          opa test policies/ -v
+          opa check --rego-v1 policies/
+          opa test --rego-v1 policies/ -v
 
   # 4. Smoke Test (Golden Path)
   smoke-test:

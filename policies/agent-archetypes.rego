@@ -13,7 +13,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Default deny
-default allow = false
+default allow := false
 
 # ============================================================================
 # CHIEF OF STAFF POLICIES

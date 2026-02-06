@@ -13,7 +13,7 @@ import future.keywords.in
 # ============================================================================
 
 # Default deny
-default allow = false
+default allow := false
 
 # Allow if all checks pass
 allow if {

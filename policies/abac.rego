@@ -1,7 +1,7 @@
 # (same as in sprint doc)
 package abac.authz
 
-default allow = false
+default allow := false
 
 # Rule to check if tenant is isolated
 tenant_isolated if {

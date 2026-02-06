@@ -9,7 +9,7 @@ package composer.residency
 
 default allow := true
 
-violation[msg] {
+violation contains msg if {
   not input.artifact.region in input.tenant.allowed_regions
   msg := {
     "code": "RESIDENCY_VIOLATION",
@@ -18,8 +18,7 @@ violation[msg] {
     "artifact": input.artifact.digest,
   }
 }
-
-allow {
+allow if {
   count(violation) == 0
 }
 

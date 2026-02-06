@@ -1,6 +1,5 @@
 package companyos.provenance
-
-test_approval_required {
+test_approval_required if {
     input := {
         "action": "delete",
         "resource": {"sensitivity": "high"}

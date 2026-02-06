@@ -44,19 +44,19 @@ valid_authority_binding if {
 }
 
 # Deny if missing required components
-deny[reason] if {
+deny contains reason if {
     input.operation.type in ["export", "classified_query"]
     input.operation.authority_binding == null
     reason := "Missing authority binding for restricted operation"
 }
 
-deny[reason] if {
+deny contains reason if {
     input.operation.type == "export"
     input.operation.export_manifest == null
     reason := "Missing export manifest - Starkey dissent requirement"
 }
 
-deny[reason] if {
+deny contains reason if {
     input.user.license_status != "ACTIVE"
     reason := "Invalid license status - Foster dissent requirement"
 }

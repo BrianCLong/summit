@@ -18,7 +18,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          version: v0.61.0
 
       - name: Run Provenance Gate
         run: |

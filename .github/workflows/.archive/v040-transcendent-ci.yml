@@ -75,7 +75,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          version: v0.61.0
 
       - name: Validate OPA policy syntax
         run: |
@@ -258,7 +258,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          version: v0.61.0
 
       - name: Run transcendent operation simulations
         run: |
