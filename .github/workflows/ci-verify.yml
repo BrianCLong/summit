@@ -149,6 +149,18 @@ jobs:
           fi
         continue-on-error: true # Non-blocking until implementation complete
 
+  evidence-verify:
+    name: Evidence Verify
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+
+      - name: Run evidence structure verification
+        run: node .github/scripts/evidence-verify.mjs evidence
+
   mcp-ux-lint:
     name: MCP Tool UX Lint
     runs-on: ubuntu-latest

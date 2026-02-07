@@ -25,6 +25,18 @@ We are using these names in our CI pipeline definitions, but they might be repor
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 
+## Temporary mapping table (fill after discovery)
+
+| Temporary gate name | Actual required check name |
+| --- | --- |
+| `gate/evidence` | TBD |
+| `gate/supplychain` | TBD |
+| `gate/fimi` | TBD |
+| `lint` | TBD |
+| `typecheck` | TBD |
+| `build` | TBD |
+| `test` | TBD |
+
 ## Temporary gates (Summit Harness & Skills)
 - ci/summit-harness-evidence
 - ci/summit-tool-policy
@@ -38,3 +50,9 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
+
+## PR7 rename checklist
+1) Replace temporary gate names in workflow job names with the actual required check names.
+2) Update this mapping table with the resolved names.
+3) Confirm branch protection rules match the new job names.
+4) Note changes in the PR description and link any related branch-protection tickets.
