@@ -7,7 +7,7 @@ networkx==3.6.1
 nltk==3.9.2
 python-multipart==0.0.22
 uvloop==0.22.1
-pandas
+pandas==3.0.0
 numpy
 requests
 feedparser
