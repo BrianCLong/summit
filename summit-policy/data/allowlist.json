@@ -1,0 +1,5 @@
+{
+  "trusted_builders": [
+    "https://github.com/actions/runner"
+  ]
+}
