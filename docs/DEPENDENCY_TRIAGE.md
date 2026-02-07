@@ -54,19 +54,16 @@ Run these from repo root (or the specified workspace root):
 
 ## Rust (cargo-audit)
 
-- Module: `services/safejoin`
-- Result: RustSec DB loaded, but scan failed checking yanked crates (missing crates in local index without refresh).
-- Found: RUSTSEC-2026-0007 in `bytes` 1.10.1 (upgrade to >= 1.11.1).
+- Repo root: `cargo audit` completed after updating RustSec DB and crates.io index; no advisories listed in output.
 
 ## Python (pip-audit)
 
 - Full sweep completed with `--disable-pip --no-deps` across all requirements files.
 - Remaining vulnerabilities:
   - `requirements.txt`: ecdsa 0.19.1 (CVE-2024-23342) — advisory scope indicates <= 0.18.0; no newer release available.
+  - `services/ml-training/requirements.txt`: mlflow 2.22.4 (multiple advisories) — fixes require mlflow 3.x (breaking upgrade).
   - `summit-cog-war/requirements-optional-graph.txt`: dgl 2.1.0 (GHSA-3x5x-fw77-g54c) — optional install only; no fix currently available.
-- Unpinned requirements still present (needs follow-up pins):
-  - `auto_scientist/requirements.txt`, `backend/requirements.txt`, `cognitive-targeting-engine/requirements.txt`, `cognitive_nlp_engine/requirements.txt`, `data-pipelines/etl-assistant/requirements.txt`, `eval/requirements.txt`, `frontend/requirements.txt`, `impl/runtime/requirements.txt`, `ingestion/requirements.txt`, `intelgraph/requirements.txt`, `maestro/requirements.txt`, `ml/threat_models/requirements.txt`, `mlops/requirements.txt`, `packages/osint/requirements.txt`, `pipelines/requirements.txt`, `policy-fuzzer/requirements.txt`, `python/requirements.txt`, `services/cyber-intel-service/requirements.txt`, `services/er/requirements.txt`, `services/ingest-sandbox/requirements.txt`, `services/ml-training/requirements.txt`, `services/scout/requirements.txt`, `services/strategic-foresight/requirements.txt`, `services/threat-hunting-service/requirements.txt`, `summit-roiforge/requirements.txt`, `tools/alertsync/requirements.txt`, `tools/summit-mds/requirements.txt`.
-- Skipped (not on PyPI / URL pins): `uvicorn` 0.40.1, `redis` 7.2.0, `playwright` 1.48.2, `albumentation` 1.3.1, `spython-dateutil` 2.8.2, `en-core-web-lg`, `en-core-web-sm`, `gitlib`.
+- Skipped (not on PyPI / URL pins): `playwright` 1.48.2, `albumentation` 1.3.1, `spython-dateutil` 2.8.2, `en-core-web-lg`, `en-core-web-sm`, `gitlib`.
 
 ## Python Remediations Applied
 
@@ -75,6 +72,7 @@ Run these from repo root (or the specified workspace root):
 - Updated `starlette` to 0.49.1 in `requirements.txt`.
 - Pinned unversioned requirements in `adversarial-misinfo-defense-platform/requirements.txt` and `server/data-pipelines/requirements.txt` (aligning JS deps to web `package.json` versions where applicable, plus updating Python tooling/runtime pins).
 - Updated `tools/synth-probe/requirements.txt` to `requests==2.32.4` for CVE-2024-47081.
+- Pinned remaining Python requirements across all service requirement files and refreshed MLflow to 2.22.4 (still advisory-flagged).
 
 ## Python Remediation Gaps
 
@@ -85,7 +83,10 @@ Run these from repo root (or the specified workspace root):
 
 ## JS/TS (pnpm)
 
-- `pnpm audit` in `apps/ui` still hangs (even with `--ignore-registry-errors`).
+- `pnpm audit` at repo root timed out after 300s.
+- `pnpm audit` in `apps/ui` timed out after 300s.
+- `pnpm audit` in `intelgraph-mcp` fails (no `pnpm-lock.yaml`).
+- `pnpm audit` in `summit-mini` reports 2 vulnerabilities (1 low, 1 moderate).
 
 ## Next Actions
 
