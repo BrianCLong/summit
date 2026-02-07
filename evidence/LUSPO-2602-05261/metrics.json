@@ -1,0 +1,23 @@
+{
+  "evidence_id": "EVD-LUSPO-2602-05261-LEN-001",
+  "metrics": {
+    "notes": "RLVR length bias evidence baseline metrics scaffold.",
+    "length": {
+      "count": 0,
+      "mean": 0,
+      "median": 0,
+      "p90": 0
+    },
+    "bias": {
+      "corr_length_advantage": 0,
+      "corr_length_is_correct": 0,
+      "mean_len_correct": 0,
+      "mean_len_incorrect": 0
+    },
+    "gates": {
+      "min_median_length": 0,
+      "max_long_wrong_ratio": 0,
+      "collapse_slope": 0
+    }
+  }
+}

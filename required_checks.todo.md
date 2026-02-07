@@ -22,6 +22,9 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `typecheck`
 - `build`
 - `test`
+- `ci/verify-evidence` (LUSPO evidence pack placeholder)
+- `ci/unit` (LUSPO lane-1 placeholder)
+- `ci/security-lite` (LUSPO lane-1 placeholder)
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 

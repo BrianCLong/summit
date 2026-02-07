@@ -1,0 +1,25 @@
+{
+  "run_id": "luspo-2602-05261-evidence-pack",
+  "item_slug": "LUSPO-2602-05261",
+  "evd_ids": [
+    "EVD-LUSPO-2602-05261-LEN-001",
+    "EVD-LUSPO-2602-05261-BIAS-002",
+    "EVD-LUSPO-2602-05261-GATE-003"
+  ],
+  "summary": {
+    "what_ran": "Evidence scaffolding for RLVR length bias metrics, bias checks, and CI gate mapping.",
+    "result": "Deferred pending analyzer + gate implementation; RLVR scaffolding anchored to deterministic evidence pack."
+  },
+  "artifacts": {
+    "metrics": "evidence/LUSPO-2602-05261/metrics.json",
+    "stamp": "evidence/LUSPO-2602-05261/stamp.json"
+  },
+  "data_handling": {
+    "never_log_fields": ["prompt", "completion", "raw_tokens", "pii"],
+    "privacy_note": "Use hashed prompt IDs or redacted excerpts only."
+  },
+  "deny_by_default": {
+    "missing_fields": "Fail gates when required fields are absent.",
+    "fixtures_required": "Positive and negative fixtures must be present before enablement."
+  }
+}

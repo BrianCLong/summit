@@ -1,0 +1,10 @@
+{
+  "eid": "LUSPO-2602-05261",
+  "git_sha": "DEFERRED",
+  "pipeline": "manual",
+  "inputs_manifest_sha256": "DEFERRED",
+  "params_sha256": "DEFERRED",
+  "generated_at": "2026-02-07T00:00:00Z",
+  "runner": "human-validated",
+  "evidence_scope": "evidence"
+}
