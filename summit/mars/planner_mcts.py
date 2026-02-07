@@ -43,7 +43,7 @@ class MCTSPlanner:
         cost = self.cost_model.get_cost(task_type)
         try:
             budget_ledger.record(f"task_{node.visits}", task_type, cost)
-            return random.random() # Simplified reward
+            return random.random()
         except ValueError:
             return 0.0
 
@@ -54,5 +54,8 @@ class MCTSPlanner:
             node = node.parent
 
     def _generate_plan(self, root):
-        # In a real implementation, this would extract the best path
         return {"steps": [{"id": "initial_research", "type": "design", "cost": 10}]}
+
+def budgeted_mcts(root_state, budget_ledger, cost_model, iterations=10, seed=42):
+    planner = MCTSPlanner(cost_model, iterations=iterations, seed=seed)
+    return planner.plan(root_state, budget_ledger)

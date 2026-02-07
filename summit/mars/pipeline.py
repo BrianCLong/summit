@@ -6,7 +6,6 @@ class ModularPipeline:
         self.tasks = []
 
     def decompose(self):
-        # Implementation of Design-Decompose-Implement
         self.tasks.append({"id": "task_1", "type": "implementation", "depends_on": []})
         return self.tasks
 
@@ -15,4 +14,5 @@ class ModularPipeline:
             "nodes": self.tasks,
             "edges": []
         }
+
 MARSPipeline = ModularPipeline

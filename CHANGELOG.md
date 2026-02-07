@@ -15,9 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **MARS Reflective Search**: Implemented MARS-inspired agent loop with budget-aware planning (MCTS), modular construction (Design-Decompose-Implement), and diff-based reflective memory.
-- Added JSON schemas for MARS evidence artifacts in `evidence/schemas/`.
-- Added MARS CLI runner in `summit/mars/run.py` with support for deterministic dry runs and artifact generation.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

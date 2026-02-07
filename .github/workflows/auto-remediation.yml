@@ -109,14 +109,18 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "20"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+
       - name: Run Auto-Remediation
         id: remediate
         env:

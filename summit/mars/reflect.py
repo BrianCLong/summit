@@ -18,4 +18,6 @@ def distill_lesson(lesson_id, source, diff_summary, effect, redactions=None):
         "effect": effect,
         "redactions_applied": redactions or []
     }
-class ReflectionEngine: pass
+
+class ReflectionEngine:
+    pass
