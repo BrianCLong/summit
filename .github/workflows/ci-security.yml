@@ -489,7 +489,7 @@ jobs:
           name: security-reports
           path: aggregated-security
           merge-multiple: true
-          if-no-artifact-found: warn
+
       - name: Generate coverage metrics
         id: metrics
         env:
@@ -507,9 +507,9 @@ jobs:
           DAST_STATUS: ${{ needs.dast.result }}
         run: |
           python - <<'PY'
-            import json
-            import os
-            from pathlib import Path
+              import json
+              import os
+              from pathlib import Path
 
             report_root = Path('aggregated-security')
             files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
