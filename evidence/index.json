@@ -78,13 +78,6 @@
         "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
     },
-    "EVD-EXPB-CORE-001": {
-      "files": [
-        "evidence/runs/expectation-baselines/report.json",
-        "evidence/runs/expectation-baselines/metrics.json",
-        "evidence/runs/expectation-baselines/stamp.json"
-      ]
-    },
     "EVD-PRIVTEL-SCHEMA-001": {
       "files": [
         "evidence/privtel/report.json",

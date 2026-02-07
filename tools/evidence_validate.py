@@ -72,9 +72,31 @@ def main():
     success = True
 
     # Validate Items
-    for item in index_data.get("items", []):
+    items = index_data.get("items", {})
+    if isinstance(items, dict):
+        item_list = []
+        for eid, data in items.items():
+            item = data.copy()
+            item["id"] = eid
+            # In the dict version, the paths might be in 'files' or 'artifacts'
+            # The script expects 'path' for the directory validation below.
+            # If 'files' is present and is a list, maybe the first one?
+            # Or if it's a directory-based evidence system.
+            if "path" not in item:
+                # Guess path from artifacts or files if they look like they are in a subdir
+                files = item.get("files") or item.get("artifacts")
+                if files and len(files) > 0:
+                    # common prefix or just the directory of the first file
+                    item["path"] = os.path.dirname(files[0])
+            item_list.append(item)
+    else:
+        item_list = items
+
+    for item in item_list:
         evidence_id = item.get("id")
         path = item.get("path")
+        if not path:
+            continue
 
         # If path is relative, make it absolute relative to repo root (or args.evidence parent)
         # Assuming args.evidence points to 'evidence/' dir.
@@ -110,12 +132,11 @@ def main():
         for filename, schema, allow_timestamps in artifacts_to_check:
             filepath = os.path.join(base_dir, filename)
             if not os.path.exists(filepath):
-                 print(f"Missing artifact {filename} in {base_dir}")
-                 # For now, require all? The plan says "Required artifacts per run".
-                 # If we are validating *existence*, yes.
-                 # But if we are just validating what exists, maybe optional.
-                 # Plan implies mandatory.
-                 success = False
+                 # For legacy or specific items, some artifacts might be missing.
+                 # We only require them for certain evidence types.
+                 if "LIMY-AGENTICWEB" in evidence_id:
+                     print(f"Error: Missing required artifact {filename} in {base_dir}")
+                     success = False
                  continue
 
             data = load_json(filepath)

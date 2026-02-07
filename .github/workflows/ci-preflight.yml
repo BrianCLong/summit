@@ -21,46 +21,6 @@ on:
 
 concurrency:
   group: ci-preflight-${{ github.ref }}
-  cancel-in-progress: false
-
-  pull_request:
-    branches: [main]
-    paths:
-      - "server/**"
-      - "apps/gateway/**"
-      - "docker-compose.dev.yaml"
-      - "services/opa/**"
-      - ".github/workflows/ci-preflight.yml"
-
-  push:
-    branches: [main]
-    paths:
-      - "server/**"
-      - "apps/gateway/**"
-      - "docker-compose.dev.yaml"
-      - "services/opa/**"
-      - ".github/workflows/ci-preflight.yml"
-
-  pull_request:
-    branches: [main]
-    paths:
-      - "server/**"
-      - "apps/gateway/**"
-      - "docker-compose.dev.yaml"
-      - "services/opa/**"
-      - ".github/workflows/ci-preflight.yml"
-
-  push:
-    branches: [main]
-    paths:
-      - "server/**"
-      - "apps/gateway/**"
-      - "docker-compose.dev.yaml"
-      - "services/opa/**"
-      - ".github/workflows/ci-preflight.yml"
-
-concurrency:
-  group: ci-preflight-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -77,13 +37,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+          cache: pnpm
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
