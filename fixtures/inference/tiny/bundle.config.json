@@ -1,0 +1,12 @@
+{
+  "include": [
+    "metadata.json",
+    "model.txt"
+  ],
+  "entrypoints": {
+    "main": "model.txt"
+  },
+  "parameters": {
+    "batch_dim": 0
+  }
+}

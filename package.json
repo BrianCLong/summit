@@ -64,6 +64,7 @@
     "typecheck:client": "cd client && tsc --noEmit",
     "format": "prettier -w . && ruff format",
     "format:check": "prettier --check AGENTS.md CONTRIBUTING.md docs/roadmap/STATUS.json .github/workflows/ci.yml package.json",
+    "inference:bundle": "node scripts/inference/bundle.mjs",
     "pr:triage": "npx tsx scripts/triage/pr-triage.ts",
     "ci:cluster": "npx tsx scripts/triage/ci-signature-cluster.ts",
     "pr:risk": "node scripts/pr-risk-score.js",
