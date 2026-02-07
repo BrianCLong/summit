@@ -1,0 +1,24 @@
+name: rq-smoke
+
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+jobs:
+  rq-smoke:
+    name: rq-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write rq-smoke report
+        run: |
+          cat <<'EOF' > rq-smoke-report.json
+          {"event_name":"${{ github.event_name }}","ref":"${{ github.ref }}","ref_name":"${{ github.ref_name }}","sha":"${{ github.sha }}"}
+          EOF
+      - name: Upload rq-smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: rq-smoke-${{ github.sha }}
+          path: rq-smoke-report.json
