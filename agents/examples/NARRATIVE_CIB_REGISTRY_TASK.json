@@ -1,0 +1,45 @@
+{
+  "task_id": "NARRATIVE_CIB_REGISTRY_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-cib-registry",
+    "version": "v1",
+    "sha256": "fdcd5d199a16d2f92e2f9142d407ee2c1cc2cb5f2ac3fa554f57372e61c0e2dc",
+    "path": "prompts/research/narrative-cib-registry@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/research/FEATURES_FRAME_CIB.yml",
+      "docs/research/NARRATIVE_IO_READING_LIST.md",
+      "docs/research/NARRATIVE_IO_REFERENCE_TO_PIPELINE_MAP.md",
+      "policy/cib/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/NARRATIVE_CIB_REGISTRY_TASK.json",
+      "prompts/research/narrative-cib-registry@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["research", "governance", "policy", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "policy/cib/policy_test.rego",
+      "policy/cib/feature_registry.rego",
+      "docs/research/FEATURES_FRAME_CIB.yml"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Feature registry and research references exist for narrative and CIB signals.",
+    "OPA policy gate aligns to evidence minimums and risk scoring.",
+    "Roadmap status updated for governance traceability."
+  ],
+  "stop_conditions": [
+    "Policy gate cannot align to evidence minimums.",
+    "Prompt registry entry cannot be updated to include scope."
+  ]
+}

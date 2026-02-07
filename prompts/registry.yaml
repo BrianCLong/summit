@@ -896,3 +896,32 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: narrative-cib-registry
+    version: v1
+    path: prompts/research/narrative-cib-registry@v1.md
+    sha256: fdcd5d199a16d2f92e2f9142d407ee2c1cc2cb5f2ac3fa554f57372e61c0e2dc
+    description: Establish narrative/CIB feature registry, research mappings, and OPA policy gate scaffolding.
+    scope:
+      paths:
+        - docs/research/FEATURES_FRAME_CIB.yml
+        - docs/research/NARRATIVE_IO_READING_LIST.md
+        - docs/research/NARRATIVE_IO_REFERENCE_TO_PIPELINE_MAP.md
+        - policy/cib/
+        - docs/roadmap/STATUS.json
+        - agents/examples/NARRATIVE_CIB_REGISTRY_TASK.json
+        - prompts/research/narrative-cib-registry@v1.md
+        - prompts/registry.yaml
+      domains:
+        - research
+        - governance
+        - policy
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-06T18:20:00Z",
+  "revision_note": "Added narrative/CIB feature registry, policy gate scaffold, and research mapping artifacts.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
