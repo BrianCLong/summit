@@ -9,8 +9,8 @@ jsonschema==4.26.0
 requests==2.32.5
 
 # Testing
-pytest>=7.0.0
-pytest-cov>=4.0.0
+pytest==9.0.2
+pytest==9.0.2
 
 # Optional: Airflow for DAG generation testing
 # apache-airflow>=2.5.0  # Only needed if testing Airflow DAG generation
