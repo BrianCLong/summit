@@ -1,0 +1,143 @@
+{
+  "entities": [
+    {
+      "name": "Reddit",
+      "type": "company"
+    },
+    {
+      "name": "TechCrunch",
+      "type": "publisher"
+    }
+  ],
+  "item_id": "reddit-ma-adtech-2026-02-06",
+  "published_at": "2026-02-06",
+  "signals": [
+    {
+      "claim_text": "Reddit is seeking more M&A, targeting scale leverage or user growth.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "Reddit said it is looking for more acquisitions and targets opportunities that help it scale or grow users.",
+          "snippet_sha256": "ebb73444d6368ad2160dd77ec3756f9b8b755a3f2997862472cd7e9d10a29005",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-001",
+      "type": "ma_intent"
+    },
+    {
+      "claim_text": "Reddit is looking to buy capabilities, technologies, and companies.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "The company said it is looking to buy capabilities, technologies, and companies.",
+          "snippet_sha256": "1391e112befe9d68f9a89305303aab7f9c0b17340fbe8066d9360da118b7ea3e",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-002",
+      "type": "ma_intent"
+    },
+    {
+      "claim_text": "Reddit described scaled opportunities as a spectrum of opportunities.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "Leadership described scaled opportunities as a spectrum of opportunities rather than a single category.",
+          "snippet_sha256": "01638bacba4a696d69e2f0909d88c09a155d4a65aa608660aaacc36d91b0987e",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-003",
+      "type": "ma_intent"
+    },
+    {
+      "claim_text": "Reddit’s adtech team is tucking in acquired tech to accelerate time-to-market from six to twelve months.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "The adtech team is tucking in acquired tech to ship in six to twelve months instead of longer timelines.",
+          "snippet_sha256": "ae9c8f4f0015d408975221a6876eaaf434f51367ce5b300e91de33ed2d394987",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-004",
+      "type": "product_strategy"
+    },
+    {
+      "claim_text": "Q4 results: revenue $726M; ads $690M; DAUq 121.4M; diluted EPS $1.24.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "Q4 results cited revenue of $726M, ad revenue of $690M, DAUq 121.4M, and diluted EPS of $1.24.",
+          "snippet_sha256": "22ea7d469a12d301bc3831ce6c5482631c4ab81161252796d81807fc935da0c9",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-005",
+      "type": "kpi"
+    },
+    {
+      "claim_text": "Prior capability acquisitions include Memorable AI, Spell, Spiketrap, Oterlu, and MeaningCloud.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "The article noted prior capability acquisitions including Memorable AI, Spell, Spiketrap, Oterlu, and MeaningCloud.",
+          "snippet_sha256": "6a96e4d4aee630b29ec014ac20846ccdd2cf276115d507dd9100626027c77bed",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-006",
+      "type": "ma_intent"
+    },
+    {
+      "claim_text": "Q4 results: revenue $726M; ads $690M; DAUq 121.4M; diluted EPS $1.24.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "Reddit reported Q4 2025 revenue of $726M, ad revenue of $690M, DAUq 121.4M, and diluted EPS of $1.24.",
+          "snippet_sha256": "e1c3276d34e607a2eca3ba570e96ab32aaa9b5dcbadf2debbcec0a8d1e7b8679",
+          "source_kind": "reddit_ir",
+          "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-007",
+      "type": "kpi"
+    },
+    {
+      "claim_text": "AI search monetization is positioned as a future opportunity by unifying traditional and AI search.",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "Reddit framed AI search monetization as a future opportunity that unifies traditional and AI search.",
+          "snippet_sha256": "93de91d4dab876fe87c1ec8541991ef39988e29bf5f5fcb59a26ea4a225341f2",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/05/reddit-looks-to-ai-search-as-its-next-big-opportunity/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-008",
+      "type": "product_strategy"
+    },
+    {
+      "claim_text": "AI search usage growth: search WAU 60M→80M and Reddit Answers WAU 1M→15M (Q1’25→Q4’25).",
+      "confidence": "source-asserted",
+      "grounding": [
+        {
+          "snippet": "Search WAU grew from 60M to 80M, and Reddit Answers WAU grew from 1M to 15M between Q1’25 and Q4’25.",
+          "snippet_sha256": "e6ce67ce0445504fecbf86b708dde5fdd59cff84b910cebc9d0387345dc7ba0c",
+          "source_kind": "techcrunch",
+          "url": "https://techcrunch.com/2026/02/05/reddit-looks-to-ai-search-as-its-next-big-opportunity/"
+        }
+      ],
+      "signal_id": "EVI-reddit-ma-adtech-2026-02-06-009",
+      "type": "kpi"
+    }
+  ],
+  "source": "all"
+}
