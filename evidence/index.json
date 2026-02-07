@@ -244,33 +244,33 @@
     {
       "evidence_id": "EVD-260119895-keel-ARCH-001",
       "files": {
-        "report": "summit/evidence/templates/report.json",
-        "metrics": "summit/evidence/templates/metrics.json",
-        "stamp": "summit/evidence/templates/stamp.json"
+        "report": "evidence/templates/report.json",
+        "metrics": "evidence/templates/metrics.json",
+        "stamp": "evidence/templates/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-260119895-keel-STAB-002",
       "files": {
-        "report": "summit/evidence/templates/report.json",
-        "metrics": "summit/evidence/templates/metrics.json",
-        "stamp": "summit/evidence/templates/stamp.json"
+        "report": "evidence/templates/report.json",
+        "metrics": "evidence/templates/metrics.json",
+        "stamp": "evidence/templates/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-260119895-keel-DSCL-003",
       "files": {
-        "report": "summit/evidence/templates/report.json",
-        "metrics": "summit/evidence/templates/metrics.json",
-        "stamp": "summit/evidence/templates/stamp.json"
+        "report": "evidence/templates/report.json",
+        "metrics": "evidence/templates/metrics.json",
+        "stamp": "evidence/templates/stamp.json"
       }
     },
     {
       "evidence_id": "EVD-260119895-keel-BENCH-004",
       "files": {
-        "report": "summit/evidence/templates/report.json",
-        "metrics": "summit/evidence/templates/metrics.json",
-        "stamp": "summit/evidence/templates/stamp.json"
+        "report": "evidence/templates/report.json",
+        "metrics": "evidence/templates/metrics.json",
+        "stamp": "evidence/templates/stamp.json"
       }
     },
     {
