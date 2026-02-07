@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-07T00:00:00Z",
+  "revision_note": "Added companyOS architecture boundary docs for the v1 foundation lane.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "companyos-architecture-boundaries",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published architecture brief and module boundary docs for companyOS v1 foundation lane."
     },
     {
       "id": "B",

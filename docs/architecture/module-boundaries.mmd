@@ -1,0 +1,17 @@
+flowchart LR
+  Edge[Edge / Gateway]
+  Summit[Summit Core]
+  CompanyOS[companyOS]
+  Switchboard[Switchboard]
+  Maestro[Maestro]
+  IntelGraph[IntelGraph]
+
+  Edge -->|Auth + Org Context| Summit
+  Summit -->|Org facts read| CompanyOS
+  Switchboard -->|Policy check| CompanyOS
+  Maestro -->|Policy check| CompanyOS
+  Summit -->|Evidence events| IntelGraph
+  Switchboard -->|Flow/tool evidence| IntelGraph
+  Maestro -->|Job/run evidence| IntelGraph
+  Summit -->|Flow/tool requests| Switchboard
+  Summit -->|Job scheduling| Maestro
