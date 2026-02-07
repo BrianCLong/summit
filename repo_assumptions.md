@@ -1,35 +1,21 @@
 # Repo Assumptions & Validation
 
-## Structure Validation
+## Verified
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+* Repo exists and is MIT licensed.
+* Top-level directories include `.maestro`, `agents`, `agentops`, `audit`, `SECURITY`, `RUNBOOKS`, `.ci`, and `.github`.
+* README names IntelGraph, Maestro Conductor, Switchboard, and the Provenance Ledger as core components.
 
-## Component Mapping
+## Assumed (Deferred pending verification)
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+* Exact pnpm workspace package boundaries and where Maestro runtime wiring lives.
+* Current evidence/provenance schema on disk (e.g., `stamp.json` shape) and whether it is shared across audit/provenance packages.
+* Whether an existing audit/event bus should be extended versus introducing a minimal append-only JSONL journal.
+* Required check names and enforcement expectations in `docs/ci/REQUIRED_CHECKS_POLICY.yml` beyond policy existence.
 
-## Constraints & Checks
+## How to Verify (Intentionally constrained)
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
-
-## Next Steps
-
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+1. Locate Maestro orchestration runtime packages and their config schema.
+2. Find any existing provenance/evidence contract artifacts (e.g., `stamp.json`) and record their canonical schema.
+3. Identify existing audit/event infrastructure to reuse for incident journaling.
+4. Confirm CI required-check names listed in `docs/ci/REQUIRED_CHECKS_POLICY.yml` and compare to branch protection policy.
