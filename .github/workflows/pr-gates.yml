@@ -62,7 +62,8 @@ jobs:
           node-version: "18"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0      - name: Install dependencies
+        uses: pnpm/action-setup@v4 # v4.1.0
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Generate SBOM
@@ -94,7 +95,8 @@ jobs:
           node-version: "18"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0      - name: Install dependencies
+        uses: pnpm/action-setup@v4 # v4.1.0
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build
@@ -148,7 +150,8 @@ jobs:
           node-version: "18"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0      - name: Install dependencies
+        uses: pnpm/action-setup@v4 # v4.1.0
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Deploy Preview Environment
