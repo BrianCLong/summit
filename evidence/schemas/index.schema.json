@@ -1,47 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit evidence index",
+  "title": "Summit Evidence Index",
   "type": "object",
-  "required": ["mappings"],
+  "required": ["version", "items"],
   "properties": {
-<<<<<<< HEAD
-    "version": {
-      "type": "string"
-    },
+    "version": { "type": "integer" },
     "items": {
-      "type": "object",
-      "additionalProperties": {
+      "type": "array",
+      "items": {
         "type": "object",
+        "required": ["evidence_id", "files"],
         "properties": {
-          "evidence_id": { "type": "string" },
-          "files": {
-            "type": "array",
-            "items": { "type": "string" }
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-[A-Z0-9]+-[A-Z]+-[0-9]{3}$"
           },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
-          "artifacts": {
-            "type": "array",
-            "items": { "type": "string" }
+          "files": {
+            "type": "object",
+            "required": ["report", "metrics", "stamp"],
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            },
+            "additionalProperties": false
           }
         },
-        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }],
-        "additionalProperties": true
-      }
-    },
-    "map": {
-=======
-    "mappings": {
->>>>>>> origin/main
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["report", "metrics", "stamp"],
-        "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
-        }
+        "additionalProperties": false
       }
     }
   },

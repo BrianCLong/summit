@@ -400,6 +400,14 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-AIBREAKPOINT20260205-INFRA-001",
+      "files": {
+        "report": "evidence/AIBREAKPOINT20260205/sample-run/report.json",
+        "metrics": "evidence/AIBREAKPOINT20260205/sample-run/metrics.json",
+        "stamp": "evidence/AIBREAKPOINT20260205/sample-run/stamp.json"
+      }
     }
   ]
 }
