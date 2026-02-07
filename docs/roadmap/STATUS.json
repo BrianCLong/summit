@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:12:12Z",
+  "revision_note": "Logged CI incident triage status; telemetry access deferred pending runner/gh availability.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
