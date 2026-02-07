@@ -67,7 +67,8 @@ export async function upsertTickets(items: Ticket[]) {
   await ensureTable();
   if (!items?.length) return { upserted: 0 };
   const pool = getPostgresPool();
-  const sql = `
+  // Single row insert for fallback
+  const singleSql = `
     INSERT INTO maestro_tickets (provider, external_id, title, status, assignee, labels, priority, sprint, project, repo, url, created_at, updated_at)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, COALESCE($12, NOW()), NOW())
     ON CONFLICT (provider, external_id)
@@ -83,26 +84,88 @@ export async function upsertTickets(items: Ticket[]) {
       url = EXCLUDED.url,
       updated_at = NOW();
   `;
+
   let count = 0;
-  for (const t of items) {
+  // Batch processing
+  const BATCH_SIZE = 50;
+  const chunks = [];
+  for (let i = 0; i < items.length; i += BATCH_SIZE) {
+    chunks.push(items.slice(i, i + BATCH_SIZE));
+  }
+
+  for (const batch of chunks) {
     try {
-      await pool.query(sql, [
-        t.provider,
-        t.external_id,
-        t.title,
-        t.status,
-        t.assignee ?? null,
-        t.labels ? JSON.stringify(t.labels) : null,
-        t.priority ?? null,
-        t.sprint ?? null,
-        t.project ?? null,
-        t.repo ?? null,
-        t.url ?? null,
-        t.created_at ?? null,
-      ]);
-      count++;
+      const values: any[] = [];
+      const valueGroups: string[] = [];
+
+      batch.forEach((t, i) => {
+        const offset = i * 12;
+        valueGroups.push(
+          `($${offset + 1},$${offset + 2},$${offset + 3},$${offset + 4},$${offset + 5},$${offset + 6},$${offset + 7},$${offset + 8},$${offset + 9},$${offset + 10},$${offset + 11}, COALESCE($${offset + 12}, NOW()), NOW())`,
+        );
+
+        values.push(
+          t.provider,
+          t.external_id,
+          t.title,
+          t.status,
+          t.assignee ?? null,
+          t.labels ? JSON.stringify(t.labels) : null,
+          t.priority ?? null,
+          t.sprint ?? null,
+          t.project ?? null,
+          t.repo ?? null,
+          t.url ?? null,
+          t.created_at ?? null,
+        );
+      });
+
+      const batchSql = `
+        INSERT INTO maestro_tickets (provider, external_id, title, status, assignee, labels, priority, sprint, project, repo, url, created_at, updated_at)
+        VALUES ${valueGroups.join(',')}
+        ON CONFLICT (provider, external_id)
+        DO UPDATE SET
+          title = EXCLUDED.title,
+          status = EXCLUDED.status,
+          assignee = EXCLUDED.assignee,
+          labels = EXCLUDED.labels,
+          priority = EXCLUDED.priority,
+          sprint = EXCLUDED.sprint,
+          project = EXCLUDED.project,
+          repo = EXCLUDED.repo,
+          url = EXCLUDED.url,
+          updated_at = NOW();
+      `;
+
+      await pool.query(batchSql, values);
+      count += batch.length;
     } catch (e: any) {
-      logger.warn({ err: e, t }, 'ticket upsert failed');
+      logger.warn(
+        { err: e, batchSize: batch.length },
+        'ticket batch upsert failed, falling back to serial',
+      );
+      // Fallback to serial
+      for (const t of batch) {
+        try {
+          await pool.query(singleSql, [
+            t.provider,
+            t.external_id,
+            t.title,
+            t.status,
+            t.assignee ?? null,
+            t.labels ? JSON.stringify(t.labels) : null,
+            t.priority ?? null,
+            t.sprint ?? null,
+            t.project ?? null,
+            t.repo ?? null,
+            t.url ?? null,
+            t.created_at ?? null,
+          ]);
+          count++;
+        } catch (innerE: any) {
+          logger.warn({ err: innerE, t }, 'ticket upsert failed');
+        }
+      }
     }
   }
   return { upserted: count };
