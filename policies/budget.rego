@@ -2,9 +2,9 @@
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.budget.allow"
 
 package intelgraph.budget
-
 import future.keywords.if
 import future.keywords.in
+
 
 # Default deny - all budget requests must be explicitly allowed
 default allow := false

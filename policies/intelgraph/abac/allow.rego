@@ -4,9 +4,9 @@
 # ============================================================================
 
 package intelgraph.abac
-
 import future.keywords.if
 import future.keywords.in
+
 
 # ============================================================================
 # MAIN AUTHORIZATION DECISION

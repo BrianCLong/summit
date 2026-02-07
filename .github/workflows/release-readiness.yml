@@ -50,10 +50,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
         # version is read from package.json packageManager field
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:

@@ -69,7 +69,6 @@ jobs:
 
       - name: Install pnpm
         if: steps.chart-check.outputs.exists == 'true'
-        uses: pnpm/action-setup@v4
         with:
 
           run_install: false

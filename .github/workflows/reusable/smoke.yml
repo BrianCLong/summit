@@ -21,6 +21,7 @@ jobs:
       PNPM_CACHE_FOLDER: ${{ inputs.pnpm_cache_folder }}
     steps:
       - uses: actions/checkout@v4 # v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
