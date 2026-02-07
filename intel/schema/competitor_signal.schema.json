@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Competitor Signal Pack",
+  "type": "object",
+  "required": [
+    "item_id",
+    "source",
+    "published_at",
+    "entities",
+    "signals"
+  ],
+  "properties": {
+    "item_id": {
+      "type": "string",
+      "description": "Signal pack identifier"
+    },
+    "source": {
+      "type": "string",
+      "description": "Source selector used for ingestion"
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Publication date (YYYY-MM-DD)"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": {"type": "string"},
+          "type": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "signal_id",
+          "type",
+          "claim_text",
+          "grounding",
+          "confidence"
+        ],
+        "properties": {
+          "signal_id": {"type": "string"},
+          "type": {
+            "type": "string",
+            "enum": ["ma_intent", "kpi", "product_strategy"]
+          },
+          "claim_text": {"type": "string"},
+          "grounding": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["source_kind", "url", "snippet", "snippet_sha256"],
+              "properties": {
+                "source_kind": {"type": "string"},
+                "url": {"type": "string", "format": "uri"},
+                "snippet": {"type": "string"},
+                "snippet_sha256": {"type": "string"}
+              },
+              "additionalProperties": false
+            }
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["source-asserted", "corroborated"]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

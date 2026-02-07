@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-06T20:15:00Z",
+  "revision_note": "Added competitor signal pack ingestion, drift monitoring, and docs runbook for Reddit M&A intent.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -58,31 +58,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
-    },
-    {
-      "id": "summit-skill-router-ga-orchestrator",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
-    },
-    {
-      "id": "summit-ops-incident-console",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Codex Desktop Summit Ops & Incident Console plan with threads, skills, automation, safe Git profiles, and incident-mode outputs."
-    },
-    {
-      "id": "summit-ga-preflight-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
-    },
-    {
-      "id": "summit-pr-stack-sequencer-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -201,10 +177,10 @@
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     },
     {
-      "id": "summit-architecture-brief",
-      "status": "completed",
+      "id": "competitor-signal-pack-reddit-ma-adtech-2026-02-06",
+      "status": "in_progress",
       "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+      "notes": "Deterministic signal pack ingestion, evidence artifacts, and drift workflow for Reddit M&A/AI-search signals."
     }
   ],
   "summary": {
