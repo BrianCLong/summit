@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T00:00:00Z",
-  "revision_note": "Applied initial Python remediation updates and confirmed ecdsa latest version already in use.",
+  "last_updated": "2026-02-07T00:00:00Z",
+  "revision_note": "Pinned remaining pip-audit unversioned requirements and reduced outstanding Python audit findings to the optional dgl advisory.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -174,7 +174,7 @@
       "id": "dependency-triage-initial-wave",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. pip-audit batch run (39/57) recorded; remaining files and errors noted. Applied Python remediation updates where fix versions were available; moved dgl to optional requirements for summit-cog-war."
+      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. pip-audit rerun across prior error list now passes; remaining issue is optional dgl advisory in summit-cog-war. Pinned unversioned entries in adversarial-misinfo-defense-platform and server/data-pipelines requirements."
     }
   ],
   "summary": {

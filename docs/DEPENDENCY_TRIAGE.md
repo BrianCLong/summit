@@ -60,47 +60,17 @@ Run these from repo root (or the specified workspace root):
 
 ## Python (pip-audit)
 
-- `pip-audit -r python/requirements.txt --no-deps` stalled while creating isolated env (even with OSV + timeout).
-- Batch run (OSV, `--no-deps`, 300s timeout per file): 39/57 completed.
-- Vulnerabilities found:
-  - `airflow/requirements.txt`: starlette 0.48.0 (CVE-2025-62727) → 0.49.1
-  - `ga-caseops/packages/caseops/requirements.txt`: starlette 0.36.3 (CVE-2025-54121, CVE-2024-47874) → 0.47.2/0.40.0
-  - `summit-cog-war/requirements.txt`: dgl 2.1.0 (GHSA-3x5x-fw77-g54c)
-  - `services/prov-ledger/requirements.txt`: starlette 0.40.0 (CVE-2025-54121, CVE-2025-62727) → 0.47.2/0.49.1
-  - `ai/cdis/requirements.txt`: starlette 0.38.6 (CVE-2025-54121, CVE-2024-47874) → 0.47.2/0.40.0
-  - `requirements.txt`: marshmallow 3.26.1 (CVE-2025-68480) → 4.1.2; ecdsa 0.19.1 (CVE-2024-23342); starlette 0.48.0 (CVE-2025-62727) → 0.49.1; orjson 3.11.4 (CVE-2025-67221); python-multipart 0.0.21 (CVE-2026-24486) → 0.0.22
-  - `services/graph-xai/requirements.txt`: fastapi 0.109.0 (PYSEC-2024-38) → 0.109.1; starlette 0.35.1 (CVE-2025-54121, CVE-2024-47874) → 0.47.2/0.40.0
-- Errors/timeouts (needs targeted follow-up):
-  - `v24_modules/requirements.txt`, `apps/ml-engine/src/python/requirements.txt`, `predictive_threat_suite/requirements.txt`, `services/insight-ai/requirements.txt`: pip internal failure during resolution.
-  - `api/requirements.txt`: fastapi==0.130.0 not found on index.
-  - `adversarial-misinfo-defense-platform/requirements.txt`, `server/data-pipelines/requirements.txt`, `server/requirements.txt`: pinned deps incompatible with Python 3.12.
-  - `server/services/osint_service/requirements.txt`: missing `ipqualityscore` package.
-  - `services/vision-api/requirements.txt`: dependency conflicts (torch 2.6.0).
-- Remaining (not yet scanned):
-  - `copilot/requirements.txt`
-  - `frontend/requirements.txt`
-  - `policy-fuzzer/requirements.txt`
-  - `server/src/nlp/scripts/requirements.txt`
-  - `services/cyber-intel-service/requirements.txt`
-  - `services/deepfake-detection-service/requirements.txt`
-  - `services/er/requirements.txt`
-  - `services/ingest-sandbox/requirements.txt`
-  - `services/lac-compiler/requirements.txt`
-  - `services/ml-serving/requirements.txt`
-  - `services/ml-training/requirements.txt`
-  - `services/scout/requirements.txt`
-  - `services/strategic-foresight/requirements.txt`
-  - `services/threat-hunting-service/requirements.txt`
-  - `tools/alertsync/requirements.txt`
-  - `tools/deps-drift/__tests__/fixtures/requirements.txt`
-  - `tools/summit-mds/requirements.txt`
-  - `tools/synth-probe/requirements.txt`
+- Reran pip-audit with `--disable-pip --no-deps` across the prior error list; all files now scan without resolution failures.
+- Remaining vulnerability:
+  - `summit-cog-war/requirements-optional-graph.txt`: dgl 2.1.0 (GHSA-3x5x-fw77-g54c) — optional install only; no fix currently available.
+- Skipped (not on PyPI / URL pins): `uvicorn` 0.40.1, `redis` 7.2.0, `playwright` 1.48.2, `albumentation` 1.3.1, `spython-dateutil` 2.8.2, `en-core-web-lg`, `en-core-web-sm`, `gitlib`.
 
 ## Python Remediations Applied
 
 - Updated `fastapi` to 0.109.1 in `ga-caseops/packages/caseops/requirements.txt`, `services/prov-ledger/requirements.txt`, `ai/cdis/requirements.txt`, `services/graph-xai/requirements.txt`, and `requirements.txt`.
 - Updated `marshmallow` to 4.1.2 and `python-multipart` to 0.0.22 in `requirements.txt`.
 - Updated `starlette` to 0.49.1 in `requirements.txt`.
+- Pinned unversioned requirements in `adversarial-misinfo-defense-platform/requirements.txt` and `server/data-pipelines/requirements.txt` (aligning JS deps to web `package.json` versions where applicable, plus updating Python tooling/runtime pins).
 
 ## Python Remediation Gaps
 
