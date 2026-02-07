@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:58:58Z",
+  "revision_note": "Aligned CI determinism baseline: pnpm cache keys, Buildx cache scopes, reproducible image stamps, and digest drift evals.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",

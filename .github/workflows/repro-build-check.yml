@@ -16,11 +16,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - uses: pnpm/action-setup@v4 # v4
+        with:
+          version: 10.0.0
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
-          cache: pnpm
+      - name: Resolve pnpm store path
+        id: pnpm-cache
+        run: tools/ci/pnpm_store_path.sh
+        shell: bash
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store_path }}
+          key: ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -29,3 +43,11 @@ jobs:
         run: pnpm install --no-frozen-lockfile
       - name: Run Reproducible Builds Check
         run: ./scripts/repro-check.sh || echo "::warning::Reproducible build check failed, but this is currently non-blocking."
+      - name: Evaluate image digest stability
+        run: ./evals/repro/image_digest_eval.sh || echo "::warning::Image digest drift detected (report-only)."
+      - name: Upload reproducibility artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproducibility-artifacts
+          path: artifacts/repro

@@ -75,6 +75,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: fast-deterministic-builds
+    version: v1
+    path: prompts/ci/fast-deterministic-builds-v1.md
+    sha256: 240d2106925f59a42dca8b8cc3c05b42e316ce6ca7952394f4433a9656bb639f
+    description: Implement CI caching and reproducibility baseline with deterministic stamps and digest evals.
+    scope:
+      paths:
+        - .github/workflows/
+        - tools/ci/
+        - evals/
+        - docs/ci/
+        - docs/evidence/
+        - schemas/evidence/
+        - docs/roadmap/STATUS.json
+        - prompts/ci/fast-deterministic-builds-v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - ci
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md

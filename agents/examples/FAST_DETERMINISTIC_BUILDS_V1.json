@@ -1,0 +1,50 @@
+{
+  "task_id": "FAST_DETERMINISTIC_BUILDS_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "fast-deterministic-builds",
+    "version": "v1",
+    "sha256": "240d2106925f59a42dca8b8cc3c05b42e316ce6ca7952394f4433a9656bb639f",
+    "path": "prompts/ci/fast-deterministic-builds-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/workflows/",
+      "tools/ci/",
+      "evals/",
+      "docs/ci/",
+      "docs/evidence/",
+      "schemas/evidence/",
+      "docs/roadmap/STATUS.json",
+      "prompts/ci/fast-deterministic-builds-v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/"
+    ],
+    "domains": ["ci", "governance", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/deterministic/stamp.json",
+      "artifacts/runtime/runtime-stamp.json",
+      "artifacts/repro/metrics.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "pnpm cache keys include OS, pnpm version, and lockfile hash",
+    "Buildx cache scopes include Dockerfile and lockfile hashes",
+    "SOURCE_DATE_EPOCH uses commit timestamp",
+    "Deterministic stamp contains no timestamps and runtime stamp captures run metadata",
+    "Image digest eval emits metrics and diff report on drift"
+  ],
+  "stop_conditions": [
+    "Required hashes cannot be computed",
+    "Deterministic stamp includes timestamp-like values",
+    "Digest evaluation fails to produce metadata outputs"
+  ]
+}

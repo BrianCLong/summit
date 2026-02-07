@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/evidence/deterministic_stamp_v1.jsonschema",
+  "title": "Deterministic Stamp v1",
+  "type": "object",
+  "required": ["schema_version", "commit_sha", "dockerfile", "lockfile", "toolchain"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "deterministic-stamp-v1"
+    },
+    "commit_sha": {
+      "type": "string"
+    },
+    "commit_ref": {
+      "type": "string"
+    },
+    "dockerfile": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "lockfile": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "required": ["pnpm", "node", "docker_buildx"],
+      "additionalProperties": false,
+      "properties": {
+        "pnpm": { "type": "string" },
+        "node": { "type": "string" },
+        "docker_buildx": { "type": "string" }
+      }
+    }
+  }
+}
