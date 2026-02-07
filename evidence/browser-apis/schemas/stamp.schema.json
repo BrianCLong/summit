@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Browser APIs Evidence Stamp",
+  "type": "object",
+  "required": ["generated_at"],
+  "properties": {
+    "generated_at": { "type": "string" }
+  },
+  "additionalProperties": false
+}
