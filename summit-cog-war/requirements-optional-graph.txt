@@ -1,2 +1,2 @@
-# Optional graph stack (dgl has a known advisory; install only if required)
-dgl==2.1.0
+# Optional graph stack (dgl has a known advisory; install manually only if required)
+# pip install dgl==2.1.0
