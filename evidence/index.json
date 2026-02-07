@@ -400,6 +400,46 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-SPEMO-SCHEMA-001",
+      "files": {
+        "report": "evidence/spemo/report.json",
+        "metrics": "evidence/spemo/metrics.json",
+        "stamp": "evidence/spemo/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-SPEMO-ALIGN-001",
+      "files": {
+        "report": "evidence/spemo/report.json",
+        "metrics": "evidence/spemo/metrics.json",
+        "stamp": "evidence/spemo/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-SPEMO-ALIGN-NEG-001",
+      "files": {
+        "report": "evidence/spemo/report.json",
+        "metrics": "evidence/spemo/metrics.json",
+        "stamp": "evidence/spemo/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-SPEMO-FUSION-001",
+      "files": {
+        "report": "evidence/spemo/report.json",
+        "metrics": "evidence/spemo/metrics.json",
+        "stamp": "evidence/spemo/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-SPEMO-API-001",
+      "files": {
+        "report": "evidence/spemo/report.json",
+        "metrics": "evidence/spemo/metrics.json",
+        "stamp": "evidence/spemo/stamp.json"
+      }
     }
   ]
 }

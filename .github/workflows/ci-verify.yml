@@ -149,6 +149,9 @@ jobs:
           fi
         continue-on-error: true # Non-blocking until implementation complete
 
+  mm-evidence-verify:
+    uses: ./.github/workflows/_reusable-mm-evidence.yml
+
   mcp-ux-lint:
     name: MCP Tool UX Lint
     runs-on: ubuntu-latest
@@ -409,6 +412,7 @@ jobs:
       - security-scan
       - policy-compliance
       - governance-checks
+      - mm-evidence-verify
       - mcp-ux-lint
       - provenance
       - schema-validation
@@ -422,6 +426,7 @@ jobs:
           echo "Security Scan: ${{ needs.security-scan.result }}"
           echo "Policy Compliance: ${{ needs.policy-compliance.result }}"
           echo "Governance Checks: ${{ needs.governance-checks.result }}"
+          echo "MM Evidence Verify: ${{ needs.mm-evidence-verify.result }}"
           echo "MCP Tool UX Lint: ${{ needs.mcp-ux-lint.result }}"
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
@@ -437,6 +442,11 @@ jobs:
 
           if [[ "${{ needs.policy-compliance.result }}" != "success" ]]; then
             echo "::error::Policy Compliance FAILED - CI BLOCKED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.mm-evidence-verify.result }}" != "success" ]]; then
+            echo "::error::MM Evidence Verify FAILED - CI BLOCKED"
             exit 1
           fi
 

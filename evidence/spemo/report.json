@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-SPEMO-SCHEMA-001",
+  "summary": "spEMO multimodal evidence schema scaffolded for alignment evaluation gates.",
+  "status": "PASS",
+  "item": "spemo",
+  "classification": "public"
+}

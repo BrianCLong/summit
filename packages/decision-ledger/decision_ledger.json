@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "spemo-mm-evidence-20260209",
+    "timestamp": "2026-02-09T00:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJzY2FmZm9sZCBzcGVtbyBtdWx0aW1vZGFsIGV2aWRlbmNlIHNjaGVtYXMgYW5kIG1tLWV2aWRlbmNlLXZlcmlmeSBnYXRlIiwiZmlsZXMiOlsiZXZpZGVuY2Uvc2NoZW1hcy9yZXBvcnQuc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL21ldHJpY3Muc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL2luZGV4LnNjaGVtYS5qc29uIiwiZXZpZGVuY2Uvc2NoZW1hcy9zdGFtcC5zY2hlbWEuanNvbiIsIi5naXRodWIvc2NyaXB0cy9tbS9ldmlkZW5jZS12ZXJpZnkudHMiLCIuZ2l0aHViL3dvcmtmbG93cy9fcmV1c2FibGUtbW0tZXZpZGVuY2UueW1sIiwiLmdpdGh1Yi93b3JrZmxvd3MvY2ktdmVyaWZ5LnltbCIsImRvY3MvZ2EvbW0tZXZpZGVuY2UtZ2F0ZXMubWQiLCJkb2NzL2dhL01WUC00LUdBLVZFUklGSUNBVElPTi5tZCIsImRvY3MvZ2EvdmVyaWZpY2F0aW9uLW1hcC5qc29uIiwiZXZpZGVuY2Uvc3BlbW8vcmVwb3J0Lmpzb24iLCJldmlkZW5jZS9zcGVtby9tZXRyaWNzLmpzb24iLCJldmlkZW5jZS9zcGVtby9zdGFtcC5qc29uIiwiZXZpZGVuY2UvaW5kZXguanNvbiIsInJlcXVpcmVkX2NoZWNrcy50b2RvLm1kIiwiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIiwiYWdlbnQtY29udHJhY3QuanNvbiIsInJlcG9ydHMvYTExeS1rZXlib2FyZC9SRUFETUUubWQiXX0=",
+    "decision": {
+      "action": "scaffold_spemo_mm_evidence",
+      "rule": {
+        "condition": "multimodal evidence gate required for spEMO alignment",
+        "action": "scaffold_spemo_mm_evidence",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added spEMO multimodal evidence schemas, mm-evidence-verify gate, GA verification mapping, and evidence bundle scaffolding. Rollback: revert the commit that adds mm evidence schemas, workflows, and evidence bundle references.",
+    "reverted": false
   }
 ]
