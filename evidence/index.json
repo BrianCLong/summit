@@ -400,6 +400,30 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-THREATSDAY-CODESPACES-RCE-POLICY-001",
+      "files": {
+        "report": "evidence/EVD-THREATSDAY-CODESPACES-RCE-POLICY-001/report.json",
+        "metrics": "evidence/EVD-THREATSDAY-CODESPACES-RCE-POLICY-001/metrics.json",
+        "stamp": "evidence/EVD-THREATSDAY-CODESPACES-RCE-POLICY-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-THREATSDAY-CODESPACES-RCE-TEST-001",
+      "files": {
+        "report": "evidence/EVD-THREATSDAY-CODESPACES-RCE-TEST-001/report.json",
+        "metrics": "evidence/EVD-THREATSDAY-CODESPACES-RCE-TEST-001/metrics.json",
+        "stamp": "evidence/EVD-THREATSDAY-CODESPACES-RCE-TEST-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-THREATSDAY-CODESPACES-RCE-TEST-002",
+      "files": {
+        "report": "evidence/EVD-THREATSDAY-CODESPACES-RCE-TEST-002/report.json",
+        "metrics": "evidence/EVD-THREATSDAY-CODESPACES-RCE-TEST-002/metrics.json",
+        "stamp": "evidence/EVD-THREATSDAY-CODESPACES-RCE-TEST-002/stamp.json"
+      }
     }
   ]
 }

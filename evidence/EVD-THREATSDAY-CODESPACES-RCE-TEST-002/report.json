@@ -1,0 +1,6 @@
+{
+  "summary": "Positive fixtures for DevEnv auto-exec allowlist coverage.",
+  "scenarios": 3,
+  "status": "PENDING",
+  "item": "threatsday-codespaces-rce"
+}

@@ -1,0 +1,6 @@
+{
+  "summary": "DevEnv auto-exec policy gate evidence bundle.",
+  "scenarios": 1,
+  "status": "PENDING",
+  "item": "threatsday-codespaces-rce"
+}

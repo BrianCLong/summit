@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "exceptions": [
+    {
+      "id": "EXAMPLE-EXPIRED-DEVENV-0001",
+      "paths": [".devcontainer/devcontainer.json"],
+      "keys": ["postCreateCommand"],
+      "owner": "security@example.com",
+      "reason": "Governed Exception example for documentation; do not renew.",
+      "expiresOn": "2024-01-01",
+      "evidenceIds": ["EVD-THREATSDAY-CODESPACES-RCE-TEST-001"]
+    }
+  ]
+}

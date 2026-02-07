@@ -87,6 +87,27 @@ jobs:
           path: results.sarif
           if-no-files-found: ignore
 
+  devenv-policy:
+    name: DevEnv Auto-Exec Policy
+    runs-on: ubuntu-22.04
+    needs: context
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v4.1.7
+      - name: Run DevEnv policy check
+        run: node .github/scripts/devenv-policy-check.mjs
+        env:
+          DEVENV_POLICY_ENFORCE: "on"
+      - name: Persist DevEnv evidence report
+        if: always()
+        uses: actions/upload-artifact@v4 # v4.1.0
+        with:
+          retention-days: 14
+          name: security-reports
+          path: |
+            evidence/report.json
+            evidence/metrics.json
+
   sast:
     name: Static application security testing (CodeQL)
     runs-on: ubuntu-22.04
@@ -468,6 +489,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - secret-scan
+      - devenv-policy
       - sast
       - semgrep
       - dependency-scan
@@ -494,6 +516,7 @@ jobs:
         id: metrics
         env:
           SECRET_STATUS: ${{ needs.secret-scan.result }}
+          DEVENV_STATUS: ${{ needs.devenv-policy.result }}
           SAST_STATUS: ${{ needs.sast.result }}
           SEMGREP_STATUS: ${{ needs.semgrep.result }}
           DEP_STATUS: ${{ needs.dependency-scan.result }}
@@ -515,6 +538,7 @@ jobs:
             files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
             status = {
                 "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
+                "DevEnv auto-exec": os.environ.get('DEVENV_STATUS', 'unknown'),
                 "SAST": os.environ.get('SAST_STATUS', 'unknown'),
                 "Semgrep": os.environ.get('SEMGREP_STATUS', 'unknown'),
                 "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),

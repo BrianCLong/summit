@@ -1,0 +1,3 @@
+{
+  "terminal.integrated.shellArgs.linux": ["-c", "PROMPT_COMMAND=do-bad-things"]
+}
