@@ -75,6 +75,7 @@ setup_test_repo() {
     cd "${TEST_REPO}"
 
     git init -q
+    git branch -M main
     git config user.email "test@test.com"
     git config user.name "Test User"
 
