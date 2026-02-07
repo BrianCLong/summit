@@ -1,4 +1,4 @@
-- evidence_id: EV-PLACEHOLDER
+- evidence_id: EVD-GOV-VERDICT-001
   artifacts:
     - path: artifacts/sbom/spdx.json
       type: sbom

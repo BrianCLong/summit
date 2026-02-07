@@ -29,7 +29,7 @@ jobs:
         run: |
           node scripts/ci/collect_inputs.mjs > /tmp/inputs.json
           node scripts/ci/sha256sum.mjs /tmp/inputs.json > /tmp/inputs.sha
-          echo "EVIDENCE_ID=EV-$(date -u +%Y-%m-%d)-${{ github.run_id }}-${{ github.run_attempt }}" >> $GITHUB_ENV
+          echo "EVIDENCE_ID=EVD-GOV-VERDICT-001" >> $GITHUB_ENV
 
       - name: Evaluate policy
         id: eval

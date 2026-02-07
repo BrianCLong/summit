@@ -1,0 +1,7 @@
+{
+  "verdict": "FAIL",
+  "evidence_id": "EVD-GOV-VERDICT-001",
+  "reasons": ["Placeholder for CI evaluation"],
+  "inputs_sha256": "pending",
+  "policy_version": "2026.02.0"
+}
