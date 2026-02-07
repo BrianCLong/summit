@@ -400,6 +400,30 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-LUSPO-2602-05261-LEN-001",
+      "files": {
+        "report": "evidence/LUSPO-2602-05261/report.json",
+        "metrics": "evidence/LUSPO-2602-05261/metrics.json",
+        "stamp": "evidence/LUSPO-2602-05261/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-LUSPO-2602-05261-BIAS-002",
+      "files": {
+        "report": "evidence/LUSPO-2602-05261/report.json",
+        "metrics": "evidence/LUSPO-2602-05261/metrics.json",
+        "stamp": "evidence/LUSPO-2602-05261/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-LUSPO-2602-05261-GATE-003",
+      "files": {
+        "report": "evidence/LUSPO-2602-05261/report.json",
+        "metrics": "evidence/LUSPO-2602-05261/metrics.json",
+        "stamp": "evidence/LUSPO-2602-05261/stamp.json"
+      }
     }
   ]
 }

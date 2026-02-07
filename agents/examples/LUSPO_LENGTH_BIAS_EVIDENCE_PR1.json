@@ -1,0 +1,49 @@
+{
+  "task_id": "LUSPO_LENGTH_BIAS_EVIDENCE_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "luspo-length-bias-evidence",
+    "version": "v1",
+    "sha256": "f24f121bdca037886782a7de5339cc4f3d26551b13b474fccf3fdd09d8ec5980",
+    "path": "prompts/evidence/luspo-length-bias-evidence@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "evidence/",
+      "docs/ga/",
+      "docs/roadmap/STATUS.json",
+      "required_checks.todo.md",
+      "agent-contract.json",
+      ".gitignore",
+      "reports/a11y-keyboard/README.md",
+      "agents/examples/LUSPO_LENGTH_BIAS_EVIDENCE_PR1.json",
+      "prompts/evidence/luspo-length-bias-evidence@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["evidence", "governance", "documentation", "ga", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "evidence/LUSPO-2602-05261/report.json",
+      "evidence/LUSPO-2602-05261/metrics.json",
+      "evidence/LUSPO-2602-05261/stamp.json",
+      "docs/ga/rlvr-length-evidence.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Evidence pack is deterministic and indexed in evidence/index.json.",
+    "GA verification map and matrix reference the RLVR length-bias evidence pack.",
+    "make ga-verify completes successfully."
+  ],
+  "stop_conditions": [
+    "Tooling instability that blocks deterministic verification.",
+    "Requests to bypass Legacy Mode guardrails.",
+    "Detection of PII in PR diffs."
+  ]
+}

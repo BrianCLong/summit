@@ -871,6 +871,38 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: luspo-length-bias-evidence
+    version: v1
+    path: prompts/evidence/luspo-length-bias-evidence@v1.md
+    sha256: f24f121bdca037886782a7de5339cc4f3d26551b13b474fccf3fdd09d8ec5980
+    description: Scaffold LUSPO RLVR length-bias evidence artifacts and GA verification updates.
+    scope:
+      paths:
+        - evidence/
+        - docs/ga/
+        - docs/roadmap/STATUS.json
+        - required_checks.todo.md
+        - agent-contract.json
+        - .gitignore
+        - reports/a11y-keyboard/README.md
+        - agents/examples/LUSPO_LENGTH_BIAS_EVIDENCE_PR1.json
+        - prompts/evidence/luspo-length-bias-evidence@v1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+        - documentation
+        - ga
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: jest-entities-override
     version: v1
     path: prompts/maintenance/jest-entities-override@v1.md

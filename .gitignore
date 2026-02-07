@@ -365,3 +365,8 @@ evidence-staging/
 *.txt
 tmp-test/
 \n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
+
+# Evidence docs required by GA verification
+!reports/
+!reports/a11y-keyboard/
+!reports/a11y-keyboard/README.md
