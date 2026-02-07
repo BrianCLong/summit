@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "claude-obsidian-pr1-20260207",
+    "timestamp": "2026-02-07T12:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJzY2FmZm9sZCBDbGF1ZGUgT2JzaWRpYW4gUFIxIGV2aWRlbmNlIHN5c3RlbSBhbmQgdmVyaWZpZXIiLCJmaWxlcyI6WyIuZ2l0aWdub3JlIiwiYWdlbnQtY29udHJhY3QuanNvbiIsImRvY3MvZ2EvTVZQLTQtR0EtVkVSSUZJQ0FUSU9OLm1kIiwiZG9jcy9nYS9ldmlkZW5jZS1zeXN0ZW0ubWQiLCJkb2NzL2dhL3ZlcmlmaWNhdGlvbi1tYXAuanNvbiIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsImV2aWRlbmNlL2J1bmRsZXMvQ0xBVURFLU9CU0lESUFOLUNJLTAwMi9tZXRyaWNzLmpzb24iLCJldmlkZW5jZS9idW5kbGVzL0NMQVVERS1PQlNJRElBTi1DSS0wMDIvcmVwb3J0Lmpzb24iLCJldmlkZW5jZS9idW5kbGVzL0NMQVVERS1PQlNJRElBTi1DSS0wMDIvc3RhbXAuanNvbiIsImV2aWRlbmNlL2J1bmRsZXMvQ0xBVURFLU9CU0lESUFOLUVWSUQtMDAxL21ldHJpY3MuanNvbiIsImV2aWRlbmNlL2J1bmRsZXMvQ0xBVURFLU9CU0lESUFOLUVWSUQtMDAxL3JlcG9ydC5qc29uIiwiZXZpZGVuY2UvYnVuZGxlcy9DTEFVREUtT0JTSURJQU4tRVZJRC0wMDEvc3RhbXAuanNvbiIsImV2aWRlbmNlL2luZGV4Lmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL21ldHJpY3Muc2NoZW1hLmpzb24iLCJldmlkZW5jZS9zY2hlbWFzL3JlcG9ydC5zY2hlbWEuanNvbiIsImV2aWRlbmNlL3NjaGVtYXMvc3RhbXAuc2NoZW1hLmpzb24iLCJwcm9tcHRzL2V2aWRlbmNlL2NsYXVkZS1vYnNpZGlhbi1wcjFAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJyZXBvcnRzL2ExMXkta2V5Ym9hcmQvUkVBRE1FLm1kIiwicmVxdWlyZWRfY2hlY2tzLnRvZG8ubWQiLCIuZ2l0aHViL3NjcmlwdHMvZXZpZGVuY2UtdmVyaWZ5Lm1qcyIsIi5naXRodWIvd29ya2Zsb3dzL2NpLWV2aWRlbmNlLnltbCIsInBhY2thZ2VzL2RlY2lzaW9uLWxlZGdlci9kZWNpc2lvbl9sZWRnZXIuanNvbiIsInRlc3RzL2NpL2V2aWRlbmNlLXZlcmlmeS50ZXN0Lm1qcyJdfQ==",
+    "decision": {
+      "action": "scaffold_claude_obsidian_evidence_pr1",
+      "rule": {
+        "condition": "evidence bundle contract and GA verification mapping required",
+        "action": "scaffold_evidence_system",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Scaffolded Claude Obsidian evidence bundles, verifier gate, GA verification mapping, and prompt registry entry with GA keyword evidence allowlist. Rollback: revert the commit and remove the evidence bundle entries from evidence/index.json.",
+    "reverted": false
   }
 ]

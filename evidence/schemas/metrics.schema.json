@@ -1,22 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "evidence_id": { "type": "string" },
-    "avg_latency_ms": { "type": "number" },
-    "avg_fanout": { "type": "number" }
-  },
-  "required": [],
-  "additionalProperties": true
   "$id": "https://summit.local/schemas/metrics.schema.json",
+  "title": "Summit Evidence Metrics",
   "type": "object",
-  "required": ["version", "counters"],
   "properties": {
-    "version": { "type": "integer" },
-    "counters": {
-      "type": "object",
-      "additionalProperties": { "type": "number" }
-    }
+    "docs_scanned": { "type": "number", "minimum": 0 },
+    "docs_emitted": { "type": "number", "minimum": 0 },
+    "excluded_paths": { "type": "number", "minimum": 0 },
+    "duration_ms": { "type": "number", "minimum": 0 }
   },
-  "additionalProperties": false
+  "required": ["docs_scanned", "docs_emitted", "excluded_paths", "duration_ms"],
+  "additionalProperties": true
 }

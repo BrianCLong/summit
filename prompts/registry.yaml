@@ -211,6 +211,47 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: claude-obsidian-pr1-evidence-scaffold
+    version: v1
+    path: prompts/evidence/claude-obsidian-pr1@v1.md
+    sha256: 3527a881f7620b85f6d8877cfc8ad836a3c313811b27310989296a9b823454e5
+    description: Scaffold Claude-in-Obsidian evidence bundle schemas, verifier, and GA mapping.
+    scope:
+      paths:
+        - evidence/index.json
+        - evidence/schemas/report.schema.json
+        - evidence/schemas/metrics.schema.json
+        - evidence/schemas/stamp.schema.json
+        - evidence/bundles/CLAUDE-OBSIDIAN-EVID-001/
+        - evidence/bundles/CLAUDE-OBSIDIAN-CI-002/
+        - .github/scripts/evidence-verify.mjs
+        - .github/workflows/ci-evidence.yml
+        - .gitignore
+        - docs/ga/evidence-system.md
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/verification-map.json
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - agent-contract.json
+        - reports/a11y-keyboard/README.md
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/evidence/claude-obsidian-pr1@v1.md
+        - prompts/registry.yaml
+        - tests/ci/evidence-verify.test.mjs
+      domains:
+        - evidence
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: promptspec-foundation-lane1
     version: v1
     path: prompts/promptspec/promptspec-foundation-lane1@v1.md
