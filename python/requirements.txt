@@ -1,0 +1,26 @@
+fastapi==0.128.4
+uvicorn
+transformers
+torch
+spacy
+networkx
+nltk
+python-multipart
+uvloop
+pandas
+numpy
+requests
+feedparser
+sqlalchemy
+scikit-learn
+# Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.
+aiohttp
+fuzzywuzzy
+python-Levenshtein
+python-dotenv
+python-json-logger
+opentelemetry-api
+opentelemetry-sdk
+neo4j>=5.20
+sentencepiece
+protobuf

@@ -1,0 +1,6 @@
+boto3==1.42.44
+pyyaml
+redis
+neo4j
+pandas
+prometheus_client

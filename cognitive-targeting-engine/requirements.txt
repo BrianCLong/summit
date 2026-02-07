@@ -1,0 +1,6 @@
+fastapi==0.128.4
+uvicorn
+transformers
+torch
+pytest
+pytest-asyncio

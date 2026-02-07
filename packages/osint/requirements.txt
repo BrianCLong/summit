@@ -1,0 +1,4 @@
+fastapi==0.128.4
+pydantic
+beautifulsoup4
+uvicorn

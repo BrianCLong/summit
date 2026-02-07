@@ -1,0 +1,5 @@
+httpx==0.28.1
+pyyaml
+ruff
+mypy
+pytest

@@ -1,0 +1,4 @@
+fastapi==0.128.4
+uvicorn
+pydantic
+datasketch

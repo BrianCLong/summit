@@ -1,0 +1,6 @@
+fastapi==0.128.4
+uvicorn
+hnswlib
+rank-bm25
+sentence-transformers
+requests
