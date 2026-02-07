@@ -22,6 +22,8 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Strict Lint
@@ -41,6 +43,8 @@ jobs:
         with:
           node-version: "20"
           cache: "pnpm"
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev libpixman-1-dev
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Run Flaky Tests
@@ -78,7 +82,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.61.0
+          version: v0.68.0
       - name: Verify Policies
         run: |
           opa check policies/
