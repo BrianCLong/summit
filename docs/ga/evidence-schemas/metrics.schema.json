@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Evidence Metrics",
+  "type": "object",
+  "additionalProperties": {
+    "anyOf": [
+      {"type": "number"},
+      {"type": "integer"},
+      {"type": "string"},
+      {"type": "boolean"},
+      {"type": "object"},
+      {"type": "array"},
+      {"type": "null"}
+    ]
+  }
+}

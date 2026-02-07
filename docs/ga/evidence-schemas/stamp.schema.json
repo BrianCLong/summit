@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Evidence Stamp",
+  "type": "object",
+  "required": ["timestamp", "version"],
+  "properties": {
+    "timestamp": {"type": ["string", "number"]},
+    "version": {"type": ["string", "number"]}
+  },
+  "additionalProperties": true
+}

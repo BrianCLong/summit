@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Evidence Report",
+  "type": "object",
+  "required": ["summary"],
+  "properties": {
+    "summary": {
+      "description": "Human-readable evidence summary.",
+      "anyOf": [{"type": "string"}, {"type": "object"}, {"type": "array"}]
+    },
+    "evidence_id": {"type": "string"},
+    "status": {"type": "string"},
+    "scenarios": {"type": ["number", "integer"]},
+    "artifacts": {"type": "array"}
+  },
+  "additionalProperties": true
+}
