@@ -75,6 +75,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: evidence-structure-verify
+    version: v1
+    path: prompts/ci/evidence-structure-verify@v1.md
+    sha256: 32e5550d6143baadec2b8af1fa5fd4340bb8d3934349ddf8071be6cd5ed7f8e0
+    description: Add evidence structure verification script, CI wiring, and required-check discovery notes.
+    scope:
+      paths:
+        - .github/scripts/evidence-verify.mjs
+        - .github/workflows/ci-verify.yml
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/ci/evidence-structure-verify@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - ci
+        - evidence
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md
