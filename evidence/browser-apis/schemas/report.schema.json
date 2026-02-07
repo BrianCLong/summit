@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Browser APIs Evidence Report",
+  "type": "object",
+  "required": ["item", "claims", "decisions", "compat_matrix"],
+  "properties": {
+    "item": {
+      "type": "object",
+      "required": ["slug", "source", "published_date"],
+      "properties": {
+        "slug": { "type": "string" },
+        "source": { "type": "string" },
+        "published_date": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "compat_matrix": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  },
+  "additionalProperties": false
+}
