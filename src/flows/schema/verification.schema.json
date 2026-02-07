@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/flows/verification.schema.json",
+  "title": "Living Architecture Flows Verification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "unmappedEndpoints", "unmappedEvents", "workflowMismatches"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^v[0-9]+$"
+    },
+    "unmappedEndpoints": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/endpoint" }
+    },
+    "unmappedEvents": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/event" }
+    },
+    "workflowMismatches": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/workflowMismatch" }
+    }
+  },
+  "definitions": {
+    "endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "path", "source"],
+      "properties": {
+        "method": { "type": "string" },
+        "path": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "source"],
+      "properties": {
+        "name": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    },
+    "workflowMismatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow", "expectedFinalEvent", "observedFinalEvent", "source"],
+      "properties": {
+        "workflow": { "type": "string" },
+        "expectedFinalEvent": { "type": "string" },
+        "observedFinalEvent": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    }
+  }
+}
