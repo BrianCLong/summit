@@ -18,6 +18,8 @@ jobs:
           node-version: 18
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Verify evidence index & timestamp discipline
+        run: pnpm exec tsx .github/scripts/evidence_verify.ts
       - name: Validate Fixtures (Pass)
         run: node tools/evidence/validate.mjs
         env:

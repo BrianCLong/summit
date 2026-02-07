@@ -12,6 +12,7 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 - Release Readiness Gate
 - SOC Controls
 - Unit Tests & Coverage
+- evidence-validate
 
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
