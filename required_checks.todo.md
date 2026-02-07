@@ -18,6 +18,8 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `gate/evidence` (PR2)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
+- `verify/evidence`
+- `verify/speculative-off-by-default`
 - `lint`
 - `typecheck`
 - `build`

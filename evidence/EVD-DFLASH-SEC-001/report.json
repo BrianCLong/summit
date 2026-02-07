@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-DFLASH-SEC-001",
+  "summary": "Placeholder for speculative decoding security and redaction controls evidence.",
+  "artifacts": [
+    ".github/policies/speculative-decoding.policy.json"
+  ]
+}
