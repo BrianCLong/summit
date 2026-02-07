@@ -29,7 +29,9 @@ export function validateEgress(
   manifest: any
 ): boolean {
   const toolEntry = manifest.tools?.[toolId];
-  if (!toolEntry) return false;
+  if (!toolEntry) {
+    return false;
+  }
 
   return toolEntry.allowedContextSpaces.includes(contextSpace);
 }

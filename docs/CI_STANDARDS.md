@@ -125,6 +125,30 @@ scripts/ci/verify-sbom-signature.sh ghcr.io/org/app@sha256:...
 - **Adding Steps**: Only add steps to `pr-quality-gate.yml` if they are critical for _every_ PR. Niche checks should be separate or run on a schedule.
 - **Performance**: Monitor execution time. If a job exceeds 10 minutes, investigate optimization (caching, splitting).
 
+## Workflow Hygiene
+
+To maintain a reliable and performant CI fleet, all workflows MUST adhere to these rules:
+
+### 1. Correct Action Sequence (Node + pnpm)
+
+`actions/setup-node` with `cache: 'pnpm'` performs store path resolution using the `pnpm` binary. If `pnpm` is not in the PATH, the step fails immediately.
+
+**Required Pattern:**
+```yaml
+- name: Install pnpm
+  uses: pnpm/action-setup@v4
+- name: Setup Node
+  uses: actions/setup-node@v4
+  with:
+    cache: 'pnpm'
+```
+
+### 2. Infinite Loop Prevention
+
+Workflows that automatically commit or merge changes back into the default branch (e.g., `main`) must NEVER use `push: branches: [main]` as a trigger. This creates an infinite feedback loop that floods the CI queue.
+
+**Use `schedule` or `workflow_dispatch` instead.**
+
 ## Release Evidence Pack
 
 Release workflows produce a compliance evidence bundle to support attestations in

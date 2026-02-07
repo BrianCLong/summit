@@ -1,6 +1,6 @@
-import re
 import math
-from typing import Dict, Any, List
+import re
+from typing import Any, Dict, List
 
 # Common boilerplate phrases and "AI-isms" found in low-quality AI content
 BOILERPLATE_PHRASES = [
@@ -50,7 +50,7 @@ def calculate_boilerplate_score(text: str) -> float:
     # Weighted matches to detect dense slop
     return min(1.0, (matches * 15) / words_count)
 
-def get_slop_score(text: str) -> Dict[str, Any]:
+def get_slop_score(text: str) -> dict[str, Any]:
     """Combines heuristics into a sophisticated slop score."""
     if not text:
         return {"score": 0.0, "reasons": ["EMPTY_CONTENT"], "metrics": {}}

@@ -141,9 +141,12 @@ def main(root_override=None):
             item["evidence_id"] = evd_id
             # Convert report/metrics/stamp paths to list of files
             files = []
-            if "report" in item: files.append(item["report"])
-            if "metrics" in item: files.append(item["metrics"])
-            if "stamp" in item: files.append(item["stamp"])
+            if "report" in item:
+                files.append(item["report"])
+            if "metrics" in item:
+                files.append(item["metrics"])
+            if "stamp" in item:
+                files.append(item["stamp"])
             item["files"] = files
             items.append(item)
     else:

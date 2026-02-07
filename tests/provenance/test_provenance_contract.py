@@ -2,7 +2,7 @@ import base64
 import json
 from pathlib import Path
 
-from cogwar.provenance.ledger import build_record, verify_record, ProvenanceRecord
+from cogwar.provenance.ledger import ProvenanceRecord, build_record, verify_record
 
 
 def test_tampered_hash_fixture() -> None:

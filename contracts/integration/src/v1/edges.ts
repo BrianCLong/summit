@@ -4,12 +4,12 @@
  */
 
 import { z } from 'zod'
-import { EdgeMetadataV1 } from './provenance.js'
+import { EdgeMetadataV1Schema } from './provenance.js'
 
 /**
  * Relationship types for ASSOCIATED_WITH edge
  */
-export const RelationshipTypeV1 = z.enum([
+export const RelationshipTypeV1Schema = z.enum([
   'colleague',
   'family',
   'business',
@@ -20,19 +20,21 @@ export const RelationshipTypeV1 = z.enum([
   'unknown',
 ])
 
-export type RelationshipTypeV1 = z.infer<typeof RelationshipTypeV1>
+export type RelationshipTypeV1 = z.infer<typeof RelationshipTypeV1Schema>
 
 /**
  * ASSOCIATED_WITH Edge - Generic association between persons
  */
-export const AssociatedWithEdgeV1 = z.object({
+export const AssociatedWithEdgeV1Schema = z.object({
   id: z.string().uuid().describe('Unique identifier (UUID v4)'),
   type: z.literal('ASSOCIATED_WITH').describe('Edge type discriminator'),
   version: z.literal('v1').describe('Schema version'),
   from: z.string().uuid().describe('Source entity ID (Person)'),
   to: z.string().uuid().describe('Target entity ID (Person)'),
   attributes: z.object({
-    relationshipType: RelationshipTypeV1.default('unknown').describe('Nature of the relationship'),
+    relationshipType: RelationshipTypeV1Schema.default('unknown').describe(
+      'Nature of the relationship',
+    ),
     strength: z
       .number()
       .min(0)
@@ -43,15 +45,15 @@ export const AssociatedWithEdgeV1 = z.object({
     startDate: z.string().date().optional().describe('When the relationship started (YYYY-MM-DD)'),
     endDate: z.string().date().optional().describe('When the relationship ended (YYYY-MM-DD)'),
   }),
-  metadata: EdgeMetadataV1.describe('Provenance and confidence metadata'),
+  metadata: EdgeMetadataV1Schema.describe('Provenance and confidence metadata'),
 })
 
-export type AssociatedWithEdgeV1 = z.infer<typeof AssociatedWithEdgeV1>
+export type AssociatedWithEdgeV1 = z.infer<typeof AssociatedWithEdgeV1Schema>
 
 /**
  * WORKS_FOR Edge - Person to Organization employment relationship
  */
-export const WorksForEdgeV1 = z.object({
+export const WorksForEdgeV1Schema = z.object({
   id: z.string().uuid().describe('Unique identifier (UUID v4)'),
   type: z.literal('WORKS_FOR').describe('Edge type discriminator'),
   version: z.literal('v1').describe('Schema version'),
@@ -64,15 +66,15 @@ export const WorksForEdgeV1 = z.object({
     endDate: z.string().date().optional().describe('Employment end date (YYYY-MM-DD)'),
     isCurrent: z.boolean().default(true).describe('Whether this is current employment'),
   }),
-  metadata: EdgeMetadataV1.describe('Provenance and confidence metadata'),
+  metadata: EdgeMetadataV1Schema.describe('Provenance and confidence metadata'),
 })
 
-export type WorksForEdgeV1 = z.infer<typeof WorksForEdgeV1>
+export type WorksForEdgeV1 = z.infer<typeof WorksForEdgeV1Schema>
 
 /**
  * OWNS Edge - Ownership relationship (Person/Organization to Organization)
  */
-export const OwnsEdgeV1 = z.object({
+export const OwnsEdgeV1Schema = z.object({
   id: z.string().uuid().describe('Unique identifier (UUID v4)'),
   type: z.literal('OWNS').describe('Edge type discriminator'),
   version: z.literal('v1').describe('Schema version'),
@@ -83,21 +85,21 @@ export const OwnsEdgeV1 = z.object({
     ownershipType: z.enum(['full', 'partial', 'majority', 'minority', 'unknown']).default('unknown'),
     startDate: z.string().date().optional().describe('Ownership start date (YYYY-MM-DD)'),
   }),
-  metadata: EdgeMetadataV1.describe('Provenance and confidence metadata'),
+  metadata: EdgeMetadataV1Schema.describe('Provenance and confidence metadata'),
 })
 
-export type OwnsEdgeV1 = z.infer<typeof OwnsEdgeV1>
+export type OwnsEdgeV1 = z.infer<typeof OwnsEdgeV1Schema>
 
 /**
  * Generic Edge - Union type for all edge types
  */
-export const EdgeV1 = z.discriminatedUnion('type', [
-  AssociatedWithEdgeV1,
-  WorksForEdgeV1,
-  OwnsEdgeV1,
+export const EdgeV1Schema = z.discriminatedUnion('type', [
+  AssociatedWithEdgeV1Schema,
+  WorksForEdgeV1Schema,
+  OwnsEdgeV1Schema,
 ])
 
-export type EdgeV1 = z.infer<typeof EdgeV1>
+export type EdgeV1 = z.infer<typeof EdgeV1Schema>
 
 /**
  * Edge type helpers for narrowing

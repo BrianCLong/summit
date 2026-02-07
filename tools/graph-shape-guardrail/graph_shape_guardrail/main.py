@@ -1,20 +1,21 @@
 import argparse
-import yaml
-import json
-import os
 import hashlib
+import json
 import logging
-from datetime import datetime, timezone
-from neo4j import GraphDatabase
-import psycopg2
+import os
+from datetime import UTC, datetime, timezone
 
-from graph_shape_guardrail.stats import calculate_skewness
-from graph_shape_guardrail.topk import calculate_top_k_mass
+import psycopg2
+import yaml
+from neo4j import GraphDatabase
+
+from graph_shape_guardrail.neo4j_client import Neo4jClient
 from graph_shape_guardrail.policy import PolicyEngine
 from graph_shape_guardrail.sampling import process_degree_stream
-from graph_shape_guardrail.neo4j_client import Neo4jClient
-from graph_shape_guardrail.warehouse import WarehouseClient
+from graph_shape_guardrail.stats import calculate_skewness
+from graph_shape_guardrail.topk import calculate_top_k_mass
 from graph_shape_guardrail.validation import validate_artifact
+from graph_shape_guardrail.warehouse import WarehouseClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("GSG")
@@ -36,7 +37,7 @@ def main():
         logger.error(f"Config file not found: {args.config}")
         return
 
-    with open(args.config, 'r') as f:
+    with open(args.config) as f:
         config = yaml.safe_load(f)
 
     # Database setup
@@ -67,8 +68,10 @@ def main():
             warehouse_client = WarehouseClient(pg_conn)
         except Exception as e:
             logger.error(f"Failed to connect to databases: {e}")
-            if driver: driver.close()
-            if pg_conn: pg_conn.close()
+            if driver:
+                driver.close()
+            if pg_conn:
+                pg_conn.close()
             exit(1)
 
     # Prepare evidence directory
@@ -161,7 +164,7 @@ def main():
             "evidence_id": f"gsg.v1.{args.tenant}.{run_id}",
             "overall_pass": overall_pass,
             "reports": reports,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(UTC).isoformat()
         }
         validate_artifact(report_artifact, "schemas/graph_shape_guardrail/report.schema.json")
 
@@ -191,8 +194,10 @@ def main():
             json.dump(stamp_artifact, f, indent=2, sort_keys=True)
 
     finally:
-        if driver: driver.close()
-        if pg_conn: pg_conn.close()
+        if driver:
+            driver.close()
+        if pg_conn:
+            pg_conn.close()
 
     logger.info(f"Evidence written to {evidence_dir}")
     if not overall_pass:

@@ -1,8 +1,9 @@
 # summit/fimi/surge/surge_detector.py
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 class FIMISurgeDetector:
-    def detect_spikes(self, time_series: List[Dict[str, Any]], threshold: float = 2.0) -> List[Dict[str, Any]]:
+    def detect_spikes(self, time_series: list[dict[str, Any]], threshold: float = 2.0) -> list[dict[str, Any]]:
         if not time_series:
             return []
 

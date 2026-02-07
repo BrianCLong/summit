@@ -1,8 +1,10 @@
-import os
 import json
 import logging
+import os
+from typing import Any, Optional, Union
+
 import redis
-from typing import Optional, Any, Union
+
 from summit.flags import REDIS_CACHE_ENABLED
 
 logger = logging.getLogger(__name__)

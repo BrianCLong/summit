@@ -28,7 +28,7 @@ export const sha256File = async (filePath: string): Promise<string> => {
 export const listFiles = async (dir: string): Promise<string[]> => {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   const files = await Promise.all(
-    entries.map(async (entry) => {
+    entries.map((entry) => {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         return listFiles(fullPath);

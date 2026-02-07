@@ -163,9 +163,12 @@ async def analyze_telemetry(request: TelemetryAnalysisRequest, api_key: str = De
     entities = [{"text": ent.text, "label": ent.label_} for ent in doc.ents]
     sentiment = sum([token.sentiment for token in doc]) / len(doc) if len(doc) > 0 else 0.0
     narratives = []
-    if "disinfo" in request.text.lower(): narratives.append("disinformation_campaign")
-    if "unity" in request.text.lower(): narratives.append("unity_messaging")
-    if "threat" in request.text.lower(): narratives.append("threat_mitigation")
+    if "disinfo" in request.text.lower():
+        narratives.append("disinformation_campaign")
+    if "unity" in request.text.lower():
+        narratives.append("unity_messaging")
+    if "threat" in request.text.lower():
+        narratives.append("threat_mitigation")
     return {"entities": entities, "sentiment": sentiment, "narratives": narratives}
 
 @app.post("/estimate-intent", response_model=IntentEstimationResponse)

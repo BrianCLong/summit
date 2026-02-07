@@ -63,7 +63,7 @@ export class SkillsRegistry {
     return [...this.skills].sort((a, b) => a.id.localeCompare(b.id));
   }
 
-  async getSkill(skillId: string): Promise<SkillReference> {
+  getSkill(skillId: string): SkillReference {
     const skill = this.skills.find((entry) => entry.id === skillId);
     if (!skill) {
       throw new Error(`Unknown skill: ${skillId}`);
@@ -72,7 +72,7 @@ export class SkillsRegistry {
   }
 
   async getSkillSection(skillId: string, section: string): Promise<string> {
-    const skill = await this.getSkill(skillId);
+    const skill = this.getSkill(skillId);
     const content = await readFile(skill.filePath, 'utf-8');
     const sections = content.split(/\n## /g);
     const matched = sections.find((entry) =>

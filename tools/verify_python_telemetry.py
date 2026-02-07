@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 import time
 from typing import Any
 
@@ -10,9 +10,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 os.environ["OTEL_CONSOLE_EXPORTER"] = "true"
 os.environ["NODE_ENV"] = "test"
 
+from summit.scouts.base import Config, Result, Scout
 from summit.telemetry.instrumentation import get_telemetry
 from summit.telemetry.logging import configure_logging
-from summit.scouts.base import Scout, Config, Result
 
 # Configure logging
 configure_logging()
@@ -40,5 +40,4 @@ def main():
         print(f"MockScout failed: {e}")
 
 if __name__ == "__main__":
-    from typing import Any # Import here to avoid issues if not at top
     main()

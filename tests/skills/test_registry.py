@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from src.skills.runtime.registry import SkillRegistry
+
 
 def test_registry_install(tmp_path):
     skill_dir = tmp_path / "my-skill"

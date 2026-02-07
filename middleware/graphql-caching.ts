@@ -304,7 +304,6 @@ export const createPersistedQueryMiddleware = (
 ) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const startTime = Date.now();
       const tenantId = req.headers['x-tenant-id'] as string || 'default';
       const userId = (req.user as any)?.id || 'anonymous';
 

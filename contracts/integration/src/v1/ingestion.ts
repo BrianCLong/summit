@@ -4,63 +4,79 @@
  */
 
 import { z } from 'zod'
-import { EntityV1, PersonEntityV1, OrganizationEntityV1 } from './entities.js'
-import { EdgeV1, AssociatedWithEdgeV1, WorksForEdgeV1, OwnsEdgeV1 } from './edges.js'
-import { SourceMetadataV1, ProvenanceV1 } from './provenance.js'
+import {
+  EntityV1Schema,
+  OrganizationEntityV1Schema,
+  PersonEntityV1Schema,
+} from './entities.js'
+import {
+  AssociatedWithEdgeV1Schema,
+  EdgeV1Schema,
+  OwnsEdgeV1Schema,
+  WorksForEdgeV1Schema,
+} from './edges.js'
+import { ProvenanceV1Schema, SourceMetadataV1Schema } from './provenance.js'
 
 /**
  * Generic Ingestion Request
  */
-export const IngestRequestV1 = z.object({
+export const IngestRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID for tracing and idempotency'),
-  source: SourceMetadataV1.describe('Data source metadata'),
-  provenance: ProvenanceV1.describe('Provenance tracking metadata'),
+  source: SourceMetadataV1Schema.describe('Data source metadata'),
+  provenance: ProvenanceV1Schema.describe('Provenance tracking metadata'),
   payload: z.object({
-    entities: z.array(EntityV1).describe('Entities to ingest'),
-    edges: z.array(EdgeV1).optional().describe('Edges/relationships to ingest'),
+    entities: z.array(EntityV1Schema).describe('Entities to ingest'),
+    edges: z.array(EdgeV1Schema).optional().describe('Edges/relationships to ingest'),
   }),
 })
 
-export type IngestRequestV1 = z.infer<typeof IngestRequestV1>
+export type IngestRequestV1 = z.infer<typeof IngestRequestV1Schema>
 
 /**
  * Person-specific Ingestion Request
  */
-export const IngestPersonRequestV1 = z.object({
+export const IngestPersonRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID for tracing and idempotency'),
-  source: SourceMetadataV1.describe('Data source metadata'),
-  provenance: ProvenanceV1.describe('Provenance tracking metadata'),
+  source: SourceMetadataV1Schema.describe('Data source metadata'),
+  provenance: ProvenanceV1Schema.describe('Provenance tracking metadata'),
   payload: z.object({
-    persons: z.array(PersonEntityV1).describe('Person entities to ingest'),
-    associations: z.array(AssociatedWithEdgeV1).optional().describe('Person associations'),
-    employments: z.array(WorksForEdgeV1).optional().describe('Employment relationships'),
+    persons: z.array(PersonEntityV1Schema).describe('Person entities to ingest'),
+    associations: z
+      .array(AssociatedWithEdgeV1Schema)
+      .optional()
+      .describe('Person associations'),
+    employments: z.array(WorksForEdgeV1Schema).optional().describe('Employment relationships'),
   }),
 })
 
-export type IngestPersonRequestV1 = z.infer<typeof IngestPersonRequestV1>
+export type IngestPersonRequestV1 = z.infer<typeof IngestPersonRequestV1Schema>
 
 /**
  * Organization-specific Ingestion Request
  */
-export const IngestOrganizationRequestV1 = z.object({
+export const IngestOrganizationRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID for tracing and idempotency'),
-  source: SourceMetadataV1.describe('Data source metadata'),
-  provenance: ProvenanceV1.describe('Provenance tracking metadata'),
+  source: SourceMetadataV1Schema.describe('Data source metadata'),
+  provenance: ProvenanceV1Schema.describe('Provenance tracking metadata'),
   payload: z.object({
-    organizations: z.array(OrganizationEntityV1).describe('Organization entities to ingest'),
-    ownerships: z.array(OwnsEdgeV1).optional().describe('Ownership relationships'),
+    organizations: z
+      .array(OrganizationEntityV1Schema)
+      .describe('Organization entities to ingest'),
+    ownerships: z.array(OwnsEdgeV1Schema).optional().describe('Ownership relationships'),
   }),
 })
 
-export type IngestOrganizationRequestV1 = z.infer<typeof IngestOrganizationRequestV1>
+export type IngestOrganizationRequestV1 = z.infer<
+  typeof IngestOrganizationRequestV1Schema
+>
 
 /**
  * Ingestion Error
  */
-export const IngestErrorV1 = z.object({
+export const IngestErrorV1Schema = z.object({
   entityId: z.string().optional().describe('Entity ID that failed (if applicable)'),
   field: z.string().optional().describe('Field that caused the error'),
   error: z.string().describe('Error message'),
@@ -75,12 +91,12 @@ export const IngestErrorV1 = z.object({
     .describe('Error code'),
 })
 
-export type IngestErrorV1 = z.infer<typeof IngestErrorV1>
+export type IngestErrorV1 = z.infer<typeof IngestErrorV1Schema>
 
 /**
  * Generic Ingestion Response
  */
-export const IngestResponseV1 = z.object({
+export const IngestResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID from request'),
   result: z.object({
@@ -89,7 +105,7 @@ export const IngestResponseV1 = z.object({
     entitiesUpdated: z.number().int().nonnegative().describe('Number of existing entities updated'),
     edgesCreated: z.number().int().nonnegative().describe('Number of new edges created'),
     edgesUpdated: z.number().int().nonnegative().optional().describe('Number of edges updated'),
-    errors: z.array(IngestErrorV1).optional().describe('Errors encountered during ingestion'),
+    errors: z.array(IngestErrorV1Schema).optional().describe('Errors encountered during ingestion'),
     skipped: z.number().int().nonnegative().optional().describe('Number of entities skipped'),
   }),
   metadata: z
@@ -100,12 +116,12 @@ export const IngestResponseV1 = z.object({
     .optional(),
 })
 
-export type IngestResponseV1 = z.infer<typeof IngestResponseV1>
+export type IngestResponseV1 = z.infer<typeof IngestResponseV1Schema>
 
 /**
  * Person-specific Ingestion Response
  */
-export const IngestPersonResponseV1 = z.object({
+export const IngestPersonResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID from request'),
   result: z.object({
@@ -114,7 +130,7 @@ export const IngestPersonResponseV1 = z.object({
     personsUpdated: z.number().int().nonnegative().describe('Number of existing persons updated'),
     associationsCreated: z.number().int().nonnegative().describe('Number of associations created'),
     employmentsCreated: z.number().int().nonnegative().optional().describe('Number of employments created'),
-    errors: z.array(IngestErrorV1).optional().describe('Errors encountered during ingestion'),
+    errors: z.array(IngestErrorV1Schema).optional().describe('Errors encountered during ingestion'),
   }),
   metadata: z
     .object({
@@ -124,22 +140,24 @@ export const IngestPersonResponseV1 = z.object({
     .optional(),
 })
 
-export type IngestPersonResponseV1 = z.infer<typeof IngestPersonResponseV1>
+export type IngestPersonResponseV1 = z.infer<typeof IngestPersonResponseV1Schema>
 
 /**
  * Batch Ingestion Status Request
  */
-export const BatchIngestionStatusRequestV1 = z.object({
+export const BatchIngestionStatusRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   batchId: z.string().uuid().describe('Batch ID to query'),
 })
 
-export type BatchIngestionStatusRequestV1 = z.infer<typeof BatchIngestionStatusRequestV1>
+export type BatchIngestionStatusRequestV1 = z.infer<
+  typeof BatchIngestionStatusRequestV1Schema
+>
 
 /**
  * Batch Ingestion Status Response
  */
-export const BatchIngestionStatusResponseV1 = z.object({
+export const BatchIngestionStatusResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   batchId: z.string().uuid().describe('Batch ID'),
   status: z.enum(['pending', 'processing', 'completed', 'failed', 'partial']).describe('Batch status'),
@@ -155,4 +173,6 @@ export const BatchIngestionStatusResponseV1 = z.object({
   completedAt: z.string().datetime().optional().describe('When processing completed'),
 })
 
-export type BatchIngestionStatusResponseV1 = z.infer<typeof BatchIngestionStatusResponseV1>
+export type BatchIngestionStatusResponseV1 = z.infer<
+  typeof BatchIngestionStatusResponseV1Schema
+>

@@ -1,7 +1,8 @@
-from typing import List, Dict, Any
 import statistics
+from typing import Any
 
-def compute_metrics(runs: List[Dict[Any, Any]]) -> Dict[str, Any]:
+
+def compute_metrics(runs: list[dict[Any, Any]]) -> dict[str, Any]:
     if not runs:
         return {
             "total_runs": 0,
@@ -27,7 +28,8 @@ def compute_metrics(runs: List[Dict[Any, Any]]) -> Dict[str, Any]:
     sha_results = {}
     for r in runs:
         sha = r.get("head_sha")
-        if not sha: continue
+        if not sha:
+            continue
         if sha not in sha_results:
             sha_results[sha] = set()
         sha_results[sha].add(r.get("conclusion"))
@@ -48,6 +50,6 @@ def compute_metrics(runs: List[Dict[Any, Any]]) -> Dict[str, Any]:
         "flake_shas": flakes
     }
 
-def compute_trends(current: Dict[str, Any], previous: Dict[str, Any]) -> Dict[str, Any]:
+def compute_trends(current: dict[str, Any], previous: dict[str, Any]) -> dict[str, Any]:
     # Placeholder for trend analysis
     return {}

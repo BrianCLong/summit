@@ -1,7 +1,11 @@
 import { SwarmPlan } from "./planner";
 import { assertWithinBudgets, SwarmBudgets, SwarmUsage } from "./budgets";
 export type RuntimeResult = { ok: boolean; usage: SwarmUsage; outputs: Record<string, string> };
-export async function runPlan(plan: SwarmPlan, budgets: SwarmBudgets, policyCheck?: (toolName: string) => void): Promise<RuntimeResult> {
+export function runPlan(
+  plan: SwarmPlan,
+  budgets: SwarmBudgets,
+  policyCheck?: (toolName: string) => void,
+): Promise<RuntimeResult> {
   const usage: SwarmUsage = { agentsSpawned: 1, stepsExecuted: 0, toolCalls: 0, wallMs: 0 };
   const outputs: Record<string, string> = {};
   const startTime = Date.now();
@@ -13,8 +17,12 @@ export async function runPlan(plan: SwarmPlan, budgets: SwarmBudgets, policyChec
       assertWithinBudgets(budgets, usage);
       outputs[t.taskId] = `Completed: ${t.description}`;
     }
-    return { ok: true, usage, outputs };
+    return Promise.resolve({ ok: true, usage, outputs });
   } catch (e) {
-    return { ok: false, usage, outputs: { error: (e as Error).message } };
+    return Promise.resolve({
+      ok: false,
+      usage,
+      outputs: { error: (e as Error).message },
+    });
   }
 }

@@ -1,5 +1,6 @@
 from summit_harness.tool_policy import DEFAULT_DENY, ToolPolicy
 
+
 def test_harness_default_deny_blocks_unknown_tool():
     assert DEFAULT_DENY.can_use("filesystem.write") is False
     assert DEFAULT_DENY.can_use("shell.run") is False

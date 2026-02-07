@@ -1,8 +1,10 @@
+import json
 import os
 import shutil
-import json
-from plugins.materials.pipeline import redesign
 from pathlib import Path
+
+from plugins.materials.pipeline import redesign
+
 
 def test_pipeline():
     # 1. Test flag OFF

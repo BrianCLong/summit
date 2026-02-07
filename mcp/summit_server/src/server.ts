@@ -236,7 +236,7 @@ export class McpServer {
   private logEvent(event: EvidenceEvent): void {
     this.evidenceStore.recordEvent(event);
     const payload = stableStringify(event as never);
-    console.info(payload);
+    process.stdout.write(`${payload}\n`);
   }
 
   private registerSession(tenantId: string, sessionId: string): boolean {

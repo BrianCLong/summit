@@ -1,0 +1,2170 @@
+{
+  "repo": "BrianCLong/summit",
+  "sample_size": 100,
+  "success_rate_pct": 0,
+  "queue_s": {
+    "p50": 0,
+    "p95": 0
+  },
+  "run_s": {
+    "p50": 0,
+    "p95": 1
+  },
+  "by_workflow": [
+    {
+      "workflow": "Agentic Plan Gate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Auto Approve PRs",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Auto Enqueue Merge Queue",
+      "sample_size": 3,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "CI",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "CI Core (Primary Gate)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "CI Legacy (Non-Blocking)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "CI Preflight Validation",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "CI Signal Gate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "CI Verify (Security & Compliance)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "CI — intelgraph-server",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "CI/CD Supply Chain Integrity",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "CodeQL",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Compliance",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Compliance & Governance",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Comprehensive Test Suite",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Dependency Freeze Check",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Dependency Monitoring",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Dependency Security Audit",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Docker Build & Security Scan",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "E2E Vind Benchmark Test",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "E2E Vind Lifecycle Test",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 2,
+        "p95": 2
+      }
+    },
+    {
+      "workflow": "E2E Vind Smoke Test",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "Entropy Guard",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Evidence Bundle Check",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Experiment Aware Release",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "GA Evidence Collection",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "GA Gate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "GA Gate: Accessibility lint + keyboard smoke",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Gates (GA + Evidence + Determinism)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Golden Path E2E",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Golden Path Supply Chain",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Governance / Evidence ID Consistency",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Governance Check",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Governance Engine",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Integration Tests",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "IntelGraph CI",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Jet-RL CI",
+      "sample_size": 3,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "MVP-4-GA Hard Gate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "OIDC Trust Lint",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "PR Gates",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "PR Preview",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "PR Quality Gate",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Provenance Verification (GSV)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "RC Lockdown",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "RDP Security Gates",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Release Integrity",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Release Readiness Gate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Release Reliability",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Repo Hygiene",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Reproducible Builds Check",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "SLO Smoke Gate",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "SOC Controls",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Secret scanning (enforced)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Security Gates (Moltbook Relay)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "SemVer Label Check",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Server TypeScript Gate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Smoke Gate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Solid Gate (Engineering Quality)",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Supply Chain Gates",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Test Quarantine Manager",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    },
+    {
+      "workflow": "Type Safety Audit",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "UX Governance Check",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Unit Tests & Coverage",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "Verify Narrative Claims",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "agent-guardrails",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "ai-assist-gates",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "ai-governance",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "ci-pr",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "ci/supply-chain-delta",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "ci:cogsec-evidence",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "evidence-validate",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "golden-main",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "governance",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "graph-sync",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "nds-ci",
+      "sample_size": 2,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "parity-check",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "security-supplychain",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "summit-evidence",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "summit-skill-gates",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "supplychain-verify",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 0,
+        "p95": 0
+      }
+    },
+    {
+      "workflow": "🚀 Ultra Merge Orchestrator",
+      "sample_size": 1,
+      "success_rate_pct": 0,
+      "queue_s": {
+        "p50": 0,
+        "p95": 0
+      },
+      "run_s": {
+        "p50": 1,
+        "p95": 1
+      }
+    }
+  ],
+  "runs": [
+    {
+      "workflow": "Test Quarantine Manager",
+      "createdAt": "2026-02-07T18:39:26Z",
+      "startedAt": "2026-02-07T18:39:26Z",
+      "updatedAt": "2026-02-07T18:39:27Z",
+      "status": "pending",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "🚀 Ultra Merge Orchestrator",
+      "createdAt": "2026-02-07T18:38:34Z",
+      "startedAt": "2026-02-07T18:38:34Z",
+      "updatedAt": "2026-02-07T18:38:35Z",
+      "status": "pending",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "Auto Enqueue Merge Queue",
+      "createdAt": "2026-02-07T18:38:16Z",
+      "startedAt": "2026-02-07T18:38:16Z",
+      "updatedAt": "2026-02-07T18:38:17Z",
+      "status": "completed",
+      "conclusion": "skipped",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "Auto Enqueue Merge Queue",
+      "createdAt": "2026-02-07T18:37:44Z",
+      "startedAt": "2026-02-07T18:37:44Z",
+      "updatedAt": "2026-02-07T18:37:44Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "golden-main",
+      "createdAt": "2026-02-07T18:36:47Z",
+      "startedAt": "2026-02-07T18:36:47Z",
+      "updatedAt": "2026-02-07T18:36:47Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Golden Path Supply Chain",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "GA Gate",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "PR Quality Gate",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "pending",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "nds-ci",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CI",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "OIDC Trust Lint",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "RDP Security Gates",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "governance",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Agentic Plan Gate",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Verify Narrative Claims",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "SemVer Label Check",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Governance / Evidence ID Consistency",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CI — intelgraph-server",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "IntelGraph CI",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "RC Lockdown",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Integration Tests",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "parity-check",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ci:cogsec-evidence",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Server TypeScript Gate",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Provenance Verification (GSV)",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "E2E Vind Benchmark Test",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:59Z",
+      "status": "completed",
+      "conclusion": "skipped",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "CI/CD Supply Chain Integrity",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "security-supplychain",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Smoke Gate",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "SLO Smoke Gate",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Secret scanning (enforced)",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Comprehensive Test Suite",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CI Verify (Security & Compliance)",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:59Z",
+      "status": "pending",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "Release Integrity",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "E2E Vind Smoke Test",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "completed",
+      "conclusion": "skipped",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "ci-pr",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "PR Preview",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:59Z",
+      "status": "completed",
+      "conclusion": "skipped",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "GA Evidence Collection",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Supply Chain Gates",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "MVP-4-GA Hard Gate",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:59Z",
+      "status": "pending",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "Release Reliability",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Compliance & Governance",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Auto Enqueue Merge Queue",
+      "createdAt": "2026-02-07T18:35:58Z",
+      "startedAt": "2026-02-07T18:35:58Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "graph-sync",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Solid Gate (Engineering Quality)",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Gates (GA + Evidence + Determinism)",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Release Readiness Gate",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "PR Gates",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Dependency Security Audit",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Governance Check",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ai-assist-gates",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Security Gates (Moltbook Relay)",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Comprehensive Test Suite",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ci/supply-chain-delta",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "UX Governance Check",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CI Core (Primary Gate)",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "pending",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "Unit Tests & Coverage",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ai-governance",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Type Safety Audit",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Evidence Bundle Check",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Dependency Freeze Check",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CI Legacy (Non-Blocking)",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:58Z",
+      "status": "pending",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "E2E Vind Lifecycle Test",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:59Z",
+      "status": "completed",
+      "conclusion": "skipped",
+      "queue_s": 0,
+      "run_s": 2,
+      "total_s": 2
+    },
+    {
+      "workflow": "Repo Hygiene",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Compliance",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "SOC Controls",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "agent-guardrails",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CI Signal Gate",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CodeQL",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "summit-skill-gates",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Jet-RL CI",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Governance Engine",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "summit-evidence",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Golden Path E2E",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Experiment Aware Release",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "GA Gate: Accessibility lint + keyboard smoke",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Auto Approve PRs",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "evidence-validate",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "CI Preflight Validation",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Docker Build & Security Scan",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Dependency Monitoring",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Entropy Guard",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Reproducible Builds Check",
+      "createdAt": "2026-02-07T18:35:57Z",
+      "startedAt": "2026-02-07T18:35:57Z",
+      "updatedAt": "2026-02-07T18:35:57Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "supplychain-verify",
+      "createdAt": "2026-02-07T18:35:54Z",
+      "startedAt": "2026-02-07T18:35:54Z",
+      "updatedAt": "2026-02-07T18:35:54Z",
+      "status": "completed",
+      "conclusion": "skipped",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "nds-ci",
+      "createdAt": "2026-02-07T18:35:54Z",
+      "startedAt": "2026-02-07T18:35:54Z",
+      "updatedAt": "2026-02-07T18:35:54Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Jet-RL CI",
+      "createdAt": "2026-02-07T18:35:54Z",
+      "startedAt": "2026-02-07T18:35:54Z",
+      "updatedAt": "2026-02-07T18:35:54Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Golden Path Supply Chain",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ci-pr",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "PR Quality Gate",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ai-governance",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Release Integrity",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Jet-RL CI",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Repo Hygiene",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "UX Governance Check",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "Experiment Aware Release",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "SLO Smoke Gate",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "E2E Vind Benchmark Test",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:29Z",
+      "status": "completed",
+      "conclusion": "skipped",
+      "queue_s": 0,
+      "run_s": 1,
+      "total_s": 1
+    },
+    {
+      "workflow": "RDP Security Gates",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ai-assist-gates",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    },
+    {
+      "workflow": "ci/supply-chain-delta",
+      "createdAt": "2026-02-07T18:35:28Z",
+      "startedAt": "2026-02-07T18:35:28Z",
+      "updatedAt": "2026-02-07T18:35:28Z",
+      "status": "queued",
+      "conclusion": "",
+      "queue_s": 0,
+      "run_s": 0,
+      "total_s": 0
+    }
+  ]
+}

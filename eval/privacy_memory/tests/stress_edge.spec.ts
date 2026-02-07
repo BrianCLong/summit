@@ -1,9 +1,7 @@
 import { jest } from '@jest/globals';
-import { MemoryBroker, ToolManifest } from '../../../core/memory/broker';
+import { MemoryBroker } from '../../../core/memory/broker';
 import { InMemoryMemoryStorage } from '../../../core/memory/storage_memory';
 import { MemoryRecord, MemoryScope } from '../../../core/memory/types';
-import { RedactionClass } from '../../../core/privacy/classification';
-import { redact } from '../../../core/privacy/redact';
 import { pack } from '../../../core/memory/portability/pack';
 import { verify } from '../../../core/memory/portability/verify';
 

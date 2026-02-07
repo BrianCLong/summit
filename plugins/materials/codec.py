@@ -1,12 +1,14 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Tuple
 
+
 @dataclass(frozen=True)
 class StructureObj:
-    lattice: Tuple[float, float, float]
-    species: Tuple[str, ...]
-    coords: Tuple[Tuple[float, float, float], ...]
+    lattice: tuple[float, float, float]
+    species: tuple[str, ...]
+    coords: tuple[tuple[float, float, float], ...]
 
 GRAMMAR_VERSION = "toy-v1"
 
@@ -39,7 +41,8 @@ def decode_structure(text: str) -> StructureObj:
         if coords_str:
             for c in coords_str.split(';'):
                 c = c.strip()
-                if not c: continue
+                if not c:
+                    continue
                 parts = c.split()
                 if len(parts) != 3:
                      raise ValueError(f"Coord must have 3 components: {c}")

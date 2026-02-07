@@ -1,5 +1,7 @@
 import pytest
-from summit.skills.frontmatter import split_frontmatter, normalize_frontmatter
+
+from summit.skills.frontmatter import normalize_frontmatter, split_frontmatter
+
 
 def test_no_frontmatter():
     fm, body = split_frontmatter("# Hello\nBody")

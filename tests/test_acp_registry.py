@@ -1,5 +1,7 @@
 import json
+
 from summit.acp.registry_client import parse_agents
+
 
 def test_parse_agents_fixture():
     with open("tests/fixtures/acp_registry_min.json") as f:

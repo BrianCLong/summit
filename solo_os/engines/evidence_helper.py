@@ -1,7 +1,8 @@
 import json
-from pathlib import Path
-from datetime import datetime, timezone
 import os
+from datetime import UTC, datetime, timezone
+from pathlib import Path
+
 
 def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics: dict):
     base_path = Path("solo_os/evidence/runs") / engine_name / run_id
@@ -23,7 +24,7 @@ def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics:
     }
 
     stamp = {
-        "created_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "created_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "git_commit": os.environ.get("GIT_COMMIT", "unknown"),
         "run_id": run_id
     }

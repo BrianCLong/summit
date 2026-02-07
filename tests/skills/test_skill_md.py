@@ -1,5 +1,7 @@
 import pytest
-from src.skills.format.skill_md import parse_skill_md, SkillMetadata
+
+from src.skills.format.skill_md import SkillMetadata, parse_skill_md
+
 
 def test_parse_skill_md_valid():
     raw = """---

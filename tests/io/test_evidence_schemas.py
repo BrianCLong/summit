@@ -1,5 +1,7 @@
 import os
+
 import pytest
+
 from summit.io.evidence.validate import validate_file
 
 # Reuse template files for testing

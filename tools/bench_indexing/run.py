@@ -1,6 +1,10 @@
-import time, json, os
+import json
+import os
+import time
 from pathlib import Path
+
 from services.indexing.merkle.builder import MerkleBuilder
+
 
 def run_benchmark():
     fixture_dir = Path("tools/bench_indexing/fixtures/large_repo")
@@ -23,7 +27,7 @@ def run_benchmark():
     # We simulate this by doing much less work.
     t1 = time.perf_counter()
     # Simulate finding candidate and planning (very fast)
-    time.sleep(0.01) # 10ms overhead
+    time.sleep(0.01)  # 10ms overhead
     reuse_ms = (time.perf_counter() - t1) * 1000
 
     results = {
@@ -34,7 +38,8 @@ def run_benchmark():
     print(json.dumps(results, indent=2))
 
     eid = "EVD-CURSOR-SECURE-INDEXING-PERF-001"
-    edir = Path(f"evidence/{eid}"); edir.mkdir(parents=True, exist_ok=True)
+    edir = Path(f"evidence/{eid}")
+    edir.mkdir(parents=True, exist_ok=True)
     with open(edir / "metrics.json", "w") as f:
         json.dump({"evidence_id": eid, "metrics": results}, f, indent=2)
     with open(edir / "report.json", "w") as f:
@@ -45,6 +50,14 @@ def run_benchmark():
             "artifacts": [f"evidence/{eid}/metrics.json"]
         }, f, indent=2)
     with open(edir / "stamp.json", "w") as f:
-        json.dump({"evidence_id": eid, "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}, f, indent=2)
+        json.dump(
+            {
+                "evidence_id": eid,
+                "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            },
+            f,
+            indent=2,
+        )
 
-if __name__ == "__main__": run_benchmark()
+if __name__ == "__main__":
+    run_benchmark()

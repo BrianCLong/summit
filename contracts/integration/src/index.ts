@@ -12,7 +12,11 @@
  *
  * @example
  * ```typescript
- * import { PersonEntityV1, IngestPersonRequestV1 } from '@summit/integration-contracts/v1'
+ * import {
+ *   PersonEntityV1Schema,
+ *   type PersonEntityV1,
+ *   IngestPersonRequestV1Schema,
+ * } from '@summit/integration-contracts/v1'
  *
  * const person: PersonEntityV1 = {
  *   id: '123e4567-e89b-12d3-a456-426614174000',
@@ -23,7 +27,7 @@
  * }
  *
  * // Validate at runtime
- * const validated = PersonEntityV1.parse(person)
+ * const validated = PersonEntityV1Schema.parse(person)
  * ```
  */
 

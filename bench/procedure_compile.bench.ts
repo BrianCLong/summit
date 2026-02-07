@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { performance } from 'node:perf_hooks';
 import assert from 'node:assert/strict';
 import { compileProcedure } from '../agentic/procedures/compiler/compile';

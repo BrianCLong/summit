@@ -6,8 +6,8 @@ import { osintQueue } from '../services/OSINTQueueService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { osintRateLimiter } from '../middleware/osintRateLimiter.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { SimpleFeedCollector } from '../../../packages/osint-collector/src/collectors/SimpleFeedCollector.js';
-import { CollectionType, TaskStatus } from '../../../packages/osint-collector/src/types/index.js';
+import { SimpleFeedCollector } from '@intelgraph/osint-collector';
+import { CollectionType, TaskStatus } from '@intelgraph/osint-collector';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -90,7 +90,7 @@ router.post('/assess-risk', ensureAuthenticated, async (req: Request, res: Respo
   try {
     const { iocs } = req.body;
     if (!iocs || !Array.isArray(iocs)) {
-       return res.status(400).json({ success: false, error: 'iocs array required' });
+      return res.status(400).json({ success: false, error: 'iocs array required' });
     }
 
     const results = [];

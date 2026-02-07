@@ -1,10 +1,13 @@
-import tempfile
-import shutil
-import os
 import json
+import os
+import shutil
+import tempfile
+
+import pytest
+
 from summit.evidence import write_bundle
 from summit.evidence.verify import verify_bundle
-import pytest
+
 
 def test_determinism():
     ctx = {
@@ -28,8 +31,10 @@ def test_determinism():
             p1 = os.path.join(dir1, f)
             p2 = os.path.join(dir2, f)
 
-            with open(p1, "rb") as fh: c1 = fh.read()
-            with open(p2, "rb") as fh: c2 = fh.read()
+            with open(p1, "rb") as fh:
+                c1 = fh.read()
+            with open(p2, "rb") as fh:
+                c2 = fh.read()
 
             assert c1 == c2, f"Content mismatch for {f}"
     finally:
@@ -72,7 +77,7 @@ def test_verifier_failure_tamper():
 
         try:
             verify_bundle(tmp_dir)
-            assert False, "Should have failed"
+            raise AssertionError("Should have failed")
         except RuntimeError as e:
             assert "Hash mismatch" in str(e)
 

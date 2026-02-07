@@ -1,6 +1,7 @@
-from typing import List, Dict, Any
+from typing import Any
 
-def generate_passthrough_plan(selected_pci: List[str]) -> Dict[str, Any]:
+
+def generate_passthrough_plan(selected_pci: list[str]) -> dict[str, Any]:
     """
     Generates a 'plan-only' DangerousOperationPlan for VFIO passthrough.
     Does NOT perform any system mutations.

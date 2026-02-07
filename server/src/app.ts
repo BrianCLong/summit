@@ -44,7 +44,7 @@ import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
-import narrativeRouter from './routes/narrative-routes.js';
+// import narrativeRouter from './routes/narrative-routes.js';
 import receiptsRouter from './routes/receipts.js';
 import predictiveRouter from './routes/predictive.js';
 import { policyRouter } from './routes/policy.js';
@@ -84,7 +84,7 @@ import entityCommentsRouter from './routes/entity-comments.js';
 import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
-import osintRouter from './routes/osint.js';
+// import osintRouter from './routes/osint.js';
 import palettesRouter from './routes/palettes.js';
 
 import swaggerUi from 'swagger-ui-express';
@@ -129,7 +129,7 @@ import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
 import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
-import federatedCampaignRadarRouter from './routes/federated-campaign-radar.js';
+// import federatedCampaignRadarRouter from './routes/federated-campaign-radar.js';
 import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
 import pluginAdminRouter from './routes/plugins/plugin-admin.js';
 import integrationAdminRouter from './routes/integrations/integration-admin.js';
@@ -410,7 +410,7 @@ export const createApp = async () => {
   }
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
-  app.use('/api/narrative', narrativeRouter); // Visualization endpoints
+  // app.use('/api/narrative', narrativeRouter); // Visualization endpoints
   app.use('/api/predictive', predictiveRouter);
   app.use('/api/export', disclosuresRouter); // Mount export under /api/export as per spec
   app.use('/disclosures', disclosuresRouter); // Keep old mount for compat
@@ -440,7 +440,7 @@ export const createApp = async () => {
   app.use('/api/mcp-apps', mcpAppsRouter);
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
-  app.use('/api/osint', osintRouter);
+  // app.use('/api/osint', osintRouter);
 
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
   app.use('/api', adminSmokeRouter);
@@ -481,7 +481,7 @@ export const createApp = async () => {
   app.use('/api/ml-reviews', mlReviewRouter);
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
-  app.use('/api', federatedCampaignRadarRouter);
+  // app.use('/api', federatedCampaignRadarRouter);
   app.use('/api/admin', authenticateToken, ensureRole(['ADMIN', 'admin']), adminGateway);
   app.use('/api/plugins', authenticateToken, ensureRole(['ADMIN', 'admin']), pluginAdminRouter);
   app.use('/api/integrations', authenticateToken, ensureRole(['ADMIN', 'admin']), integrationAdminRouter);

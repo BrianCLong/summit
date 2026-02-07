@@ -1,8 +1,11 @@
 import os
 from typing import Any, Dict, List, Optional
+
 import httpx
+
 from .auth import AzureAuthProvider
 from .catalog import AzureFoundryCatalog
+
 
 class AzureFoundryProvider:
     """
@@ -14,7 +17,7 @@ class AzureFoundryProvider:
         self.auth_provider = auth_provider or AzureAuthProvider()
         self.catalog_service = AzureFoundryCatalog(self.endpoint, self.auth_provider)
 
-    async def get_catalog(self) -> List[Dict[str, Any]]:
+    async def get_catalog(self) -> list[dict[str, Any]]:
         return await self.catalog_service.list_models()
 
     async def chat_completion(

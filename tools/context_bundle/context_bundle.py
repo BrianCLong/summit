@@ -7,7 +7,10 @@ Builds a PR-local "context bundle":
 
 Feature-flag: SUMMIT_CONTEXT_BUNDLE=off
 """
-import os, json, re
+import json
+import os
+import re
+
 
 def find_adrs(keywords):
     adr_dir = "docs/ADR"
@@ -19,7 +22,7 @@ def find_adrs(keywords):
         if file.endswith(".md"):
             path = os.path.join(adr_dir, file)
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     content = f.read().lower()
                     for kw in keywords:
                         if kw.lower() in content:

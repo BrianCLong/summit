@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any
 
 # Deny-by-default safety classifications
 # Keyboards and mice are critical to host operation and should not be passed through by default.
@@ -8,7 +8,7 @@ NEVER_PASSTHROUGH = {
     "pci": ["host bridge", "isa bridge", "ethernet controller"]
 }
 
-def classify_device(dev: Dict[str, Any]) -> str:
+def classify_device(dev: dict[str, Any]) -> str:
     """
     Classifies a device based on its reported kind and description.
     """

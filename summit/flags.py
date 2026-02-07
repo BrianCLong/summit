@@ -1,5 +1,6 @@
 import os
 
+
 def is_feature_enabled(name, default=False):
     val = os.environ.get(name, str(default)).lower()
     return val in ("true", "1", "t", "yes", "y")

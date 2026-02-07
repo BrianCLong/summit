@@ -1,6 +1,8 @@
 import json
+
 import psycopg2
 from psycopg2.extras import RealDictCursor
+
 
 class WarehouseClient:
     def __init__(self, db_conn):

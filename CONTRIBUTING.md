@@ -147,6 +147,22 @@ source ~/.bashrc
   - **Golden Path**: Full stack integration test (blocking).
   - **Security**: SAST/DAST & Secret Scanning (blocking).
 
+### CI/CD Workflow Guidelines
+
+To ensure stable and efficient CI runs, follow these established patterns when creating or modifying GitHub Actions workflows:
+
+1.  **pnpm Setup Order**: Always install `pnpm` *before* setting up Node.js with caching. `actions/setup-node` with `cache: 'pnpm'` will fail if the `pnpm` executable is not already in the PATH during its cache-key calculation phase.
+    ```yaml
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'pnpm'
+    ```
+2.  **Recursive Trigger Prevention**: Never use `push: branches: [main]` for workflows that perform automated merges back into `main` (e.g., merge bots, orchestrators). This creates an infinite feedback loop. Use `schedule` or `workflow_dispatch` instead.
+
 ## ⚖️ Governance
 
 - **Code of Conduct**: Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md).

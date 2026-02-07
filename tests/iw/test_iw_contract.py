@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
 import pytest
+from jsonschema import Draft202012Validator
 
 
 def load_schema() -> dict:

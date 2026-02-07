@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
+from summit.governance.guards import AgentGuard
 from summit.registry.model import AgentDefinition, RiskTier
 from summit.registry.service import RegistryService
-from summit.governance.guards import AgentGuard
+
 
 @pytest.fixture
 def mock_registry_service():

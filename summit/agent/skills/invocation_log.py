@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, Any
+from typing import Any, Dict
 
 _METRICS = {
     "skill_available_count": 0,
@@ -28,7 +28,7 @@ def record_skill_invocation(skill_name: str):
     _METRICS["skill_invoked_count"] += 1
     _METRICS["skills_used"][skill_name] += 1
 
-def get_metrics() -> Dict[str, Any]:
+def get_metrics() -> dict[str, Any]:
     global _METRICS
     available = _METRICS["skill_available_count"]
     invoked = _METRICS["skill_invoked_count"]
