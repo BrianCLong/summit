@@ -65,3 +65,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** Several sensitive endpoints defined directly in `server/src/app.ts` (e.g., `/search/evidence`, `/monitoring`, and various `/api/admin` routers) were missing authentication or relied on manual, inconsistent role checks.
 **Learning:** Inline routes in main application files are easily overlooked during security audits. Additionally, inconsistent casing in role names (e.g., 'admin' vs 'ADMIN') can lead to manual check bypasses or availability issues.
 **Prevention:** Enforce a "deny-by-default" posture by applying `authenticateToken` and `ensureRole(['ADMIN', 'admin'])` middleware to all administrative and sensitive data endpoints. Always use standardized middleware rather than manual property checks for role validation.
+
+## 2026-02-25 - [HIGH] Cross-Tenant Data Leakage in Evidence Search
+**Vulnerability:** The `/search/evidence` endpoint in `server/src/app.ts` performed Neo4j full-text searches without filtering by `tenantId`. This allowed any authenticated user (if unhardened) or any admin (if hardened with role only) to see evidence from all tenants.
+**Learning:** Full-text search indexes in Neo4j (and other DBs) often bypass standard relationship-based security or require explicit `WHERE` clauses to maintain multi-tenant isolation.
+**Prevention:** Always include `WHERE node.tenantId = $tenantId` (or similar) in Cypher queries following a full-text index call. Ensure the `tenantId` is sourced from the authenticated request context, not user input.
