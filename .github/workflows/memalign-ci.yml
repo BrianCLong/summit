@@ -2,29 +2,34 @@ name: MemAlign CI
 
 on:
   push:
+    branches: [ main ]
     paths:
-      - 'packages/memalign/**'
+      - 'src/evals/memalign/**'
+      - 'src/cli/judge_align.ts'
   pull_request:
     paths:
-      - 'packages/memalign/**'
+      - 'src/evals/memalign/**'
+      - 'src/cli/judge_align.ts'
 
 jobs:
-  test:
+  test-and-bench:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/memalign
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          version: "9.12.0"
+          node-version: '18'
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
 
-      - run: pnpm install
-      - run: pnpm test
+      - name: Run Unit Tests
+        run: npx tsx tests/memalign/test_stores.ts && npx tsx tests/memalign/test_ingest.ts && npx tsx tests/memalign/test_judge_wrapper.ts
+
+      - name: Run Benchmark
+        run: npx tsx scripts/bench/memalign_bench.ts
+
+      - name: Verify CLI
+        run: npx tsx src/cli/judge_align.ts --help

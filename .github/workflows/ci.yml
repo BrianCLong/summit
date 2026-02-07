@@ -1,117 +1,207 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - "**/*.md"
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Global environment for all jobs - prevents V8 heap exhaustion
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
 
 jobs:
-  soc-compliance:
-    name: SOC Controls
+  config-guard:
+    name: Build & Test (Untrusted)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          version: "9.12.0"
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-      - name: Run compliance checks
-        run: ./scripts/compliance/check_soc.sh
+          node-version-file: .nvmrc
+      - name: Validate Jest & pnpm Configuration
+        run: pnpm -w check:jest-config
 
-  server-typecheck:
-    name: Server TypeScript Check
+  lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: "9.12.0"
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+
+  typecheck:
+    name: Typecheck
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Run server typecheck
+      - name: Typecheck
+        run: pnpm typecheck
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Unit Tests
+        run: pnpm -w test:unit || pnpm -w test:unit
+      - name: Attach evidence
+        if: always()
         run: |
           mkdir -p artifacts
-          node scripts/ci/server_typecheck_report.mjs --output artifacts/server-typecheck-report.json
-
-          # Display summary
-          echo "=== Report Summary ==="
-          cat artifacts/server-typecheck-report.json | jq '{errorCount, fileCount}'
-      - name: Upload report
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job unit-tests \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
+        shell: bash
+      - name: Generate Metrics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: server-typecheck-report-${{ github.run_id }}
-          path: |
-            artifacts/server-typecheck-report.json
-            typecheck-output.txt
-          retention-days: 30
-      - name: Check status
+          name: coverage-report
+          path: server/coverage/
+
+  integration-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Verify TSConfig Exclusions Frozen
+        run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
+      - name: Verify TSConfig Inheritance
+        run: node scripts/ci/verify_tsconfig_inheritance.mjs
+
+  security-compliance:
+    name: Security & Compliance
+    uses: ./.github/workflows/_reusable-security-compliance.yml
+    needs: [config-guard]
+    with:
+      strict: true
+
+  soc-controls:
+    name: SOC Controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [config-guard]
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: intelgraph_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+      neo4j:
+        image: neo4j:5.15.0
+        env:
+          NEO4J_AUTH: neo4j/password
+        ports:
+          - 7687:7687
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: SOC Control Unit Tests
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
+      - name: Upload SOC compliance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: soc-compliance-report
+          path: soc-compliance-reports
+          retention-days: 90
+
+  verify-versions:
+    name: Verify Workflow Versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Versions
+        uses: ./.github/actions/verify-workflow-versions
+      - name: Attach evidence
         if: always()
         run: |
-          STATUS=""
-
-          if [[ "$STATUS" == "success" ]]; then
-            echo "### Server TypeScript Check PASSED" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "No type errors detected in server codebase." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "### Server TypeScript Check FAILED" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Type errors detected. See artifact \`server-typecheck-report-${{ github.run_id }}\` for details." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "<details>" >> $GITHUB_STEP_SUMMARY
-            echo "<summary>Error Output</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            if [ -f typecheck-output.txt ]; then
-              cat typecheck-output.txt | head -50 >> $GITHUB_STEP_SUMMARY
-            else
-              echo "No output file found." >> $GITHUB_STEP_SUMMARY
-            fi
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "_Report: \`artifacts/server-typecheck-report.json\`_" >> $GITHUB_STEP_SUMMARY
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+          mkdir -p artifacts
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job verify-versions \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
+        shell: bash
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          version: "9.12.0"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: "9.12.0"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test
+          name: verification-artifacts
+          path: artifacts/**

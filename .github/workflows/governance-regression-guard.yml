@@ -1,30 +1,248 @@
 name: Governance Regression Guard
 
+# Prevents governance regression in PRs
+# Ensures compliance score remains COMPLIANT before merging changes
+# that affect governance policies or infrastructure
+#
+# Authority: docs/ci/GOVERNANCE_STAMPING.md
+
 on:
-  push:
-    paths:
-      - 'governance/**'
   pull_request:
+    branches: [main]
     paths:
-      - 'governance/**'
+      # Policy files
+      - "docs/ci/*.yml"
+      - "docs/ci/*.yaml"
+      - "docs/ci/*.md"
+      # State files
+      - "docs/releases/_state/*.json"
+      # Governance scripts
+      - "scripts/release/validate_governance_policies.sh"
+      - "scripts/release/check_governance_compliance.sh"
+      - "scripts/release/generate_governance_lockfile.sh"
+      - "scripts/release/compute_governance_health.sh"
+      - "scripts/release/compute_governance_hash.sh"
+      - "scripts/release/verify_governance_lockfile.sh"
+      # Governance workflows
+      - ".github/workflows/*governance*.yml"
+      - ".github/workflows/_reusable-governance-gate.yml"
+
+  # Manual trigger for testing
+  workflow_dispatch:
+
+# Cancel in-progress runs for the same PR
+concurrency:
+  group: governance-guard-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  governance-check:
+  regression-guard:
+    name: Governance Regression Guard
     runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.compliance.outputs.status }}
+      score: ${{ steps.compliance.outputs.score }}
+      governance_hash: ${{ steps.hash.outputs.governance_hash }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4 # v4
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
         with:
-          version: "9.12.0"
+          python-version: "3.11"
 
-      - uses: actions/setup-node@v4
+      - name: Install Dependencies
+        run: pip install pyyaml
+
+      - name: Make Scripts Executable
+        run: chmod +x scripts/release/*.sh
+
+      - name: Compute Governance Hash
+        id: hash
+        run: |
+          if [[ -f "docs/releases/_state/governance_lockfile.json" ]]; then
+            HASH=$(./scripts/release/compute_governance_hash.sh --quiet 2>/dev/null || sha256sum docs/releases/_state/governance_lockfile.json | cut -d' ' -f1)
+            echo "governance_hash=${HASH}" >> $GITHUB_OUTPUT
+            echo "Governance hash: ${HASH:0:16}..."
+          else
+            echo "governance_hash=" >> $GITHUB_OUTPUT
+            echo "::warning::No governance lockfile found"
+          fi
+
+      - name: Check Governance Compliance
+        id: compliance
+        run: |
+          # Run compliance check
+          RESULT=$(./scripts/release/check_governance_compliance.sh --json 2>&1) || EXIT_CODE=$?
+
+          echo "${RESULT}" > compliance_report.json
+
+          # Parse results
+          STATUS=$(echo "${RESULT}" | jq -r '.compliance.status // "UNKNOWN"')
+          SCORE=$(echo "${RESULT}" | jq -r '.compliance.score // 0')
+
+          echo "status=${STATUS}" >> $GITHUB_OUTPUT
+          echo "score=${SCORE}" >> $GITHUB_OUTPUT
+          echo "exit_code=${EXIT_CODE:-0}" >> $GITHUB_OUTPUT
+
+          # Generate summary
+          echo "## Governance Regression Guard" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status** | **${STATUS}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Score** | **${SCORE}%** |" >> $GITHUB_STEP_SUMMARY
+
+          # Add governance hash
+          HASH="${{ steps.hash.outputs.governance_hash }}"
+          if [[ -n "${HASH}" ]]; then
+            echo "| Governance Hash | \`${HASH:0:16}...\` |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Add component breakdown if available
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Component Scores" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          POLICY_SCORE=$(echo "${RESULT}" | jq -r '.components.required_policies.score // "N/A"')
+          SYNTAX_SCORE=$(echo "${RESULT}" | jq -r '.components.policy_syntax.score // "N/A"')
+          LOCKFILE_SCORE=$(echo "${RESULT}" | jq -r '.components.governance_lockfile.score // "N/A"')
+          HEALTH_SCORE=$(echo "${RESULT}" | jq -r '.components.governance_health.score // "N/A"')
+
+          echo "| Component | Score |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Required Policies | ${POLICY_SCORE}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Policy Syntax | ${SYNTAX_SCORE}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Governance Lockfile | ${LOCKFILE_SCORE}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Governance Health | ${HEALTH_SCORE}% |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Evaluate Regression
+        id: evaluate
+        run: |
+          STATUS="${{ steps.compliance.outputs.status }}"
+          SCORE="${{ steps.compliance.outputs.score }}"
+
+          PASSED="false"
+
+          if [[ "${STATUS}" == "COMPLIANT" ]]; then
+            PASSED="true"
+            echo "## ✅ Governance Regression Guard Passed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No governance regression detected. Compliance status is COMPLIANT." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Governance Regression Guard Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Status:** ${STATUS}" >> $GITHUB_STEP_SUMMARY
+            echo "**Score:** ${SCORE}%" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Required Action" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "This PR introduces a governance regression. Compliance must be COMPLIANT before merging." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Common fixes:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Fix policy syntax errors in YAML/JSON files" >> $GITHUB_STEP_SUMMARY
+            echo "- Ensure required fields are present in policies" >> $GITHUB_STEP_SUMMARY
+            echo "- Regenerate governance lockfile if needed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Run \`./scripts/release/check_governance_compliance.sh --verbose\` locally for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "passed=${PASSED}" >> $GITHUB_OUTPUT
+
+      - name: Log to Audit Trail
+        if: always()
+        run: |
+          STATUS="${{ steps.compliance.outputs.status }}"
+          SCORE="${{ steps.compliance.outputs.score }}"
+          PASSED="${{ steps.evaluate.outputs.passed }}"
+          HASH="${{ steps.hash.outputs.governance_hash }}"
+
+          if [[ "${PASSED}" == "true" ]]; then
+            LOG_STATUS="success"
+            MESSAGE="Governance regression guard passed: ${STATUS} (score: ${SCORE}%)"
+          else
+            LOG_STATUS="failure"
+            MESSAGE="Governance regression guard failed: ${STATUS} (score: ${SCORE}%)"
+          fi
+
+          ./scripts/release/update_governance_audit_log.sh \
+            --event-type guard \
+            --status "${LOG_STATUS}" \
+            --message "${MESSAGE}" \
+            --run-id "${{ github.run_id }}" \
+            --metadata "{\"status\": \"${STATUS}\", \"score\": ${SCORE}, \"passed\": ${PASSED}, \"governance_hash\": \"${HASH:-null}\", \"pr_number\": ${{ github.event.pull_request.number || 0 }}}" \
+            || echo "::warning::Failed to update audit log"
+
+      - name: Upload Compliance Report
+        uses: actions/upload-artifact@v4 # v4
+        if: always()
         with:
-          node-version: 20
-          cache: 'pnpm'
+          name: governance-compliance-report-${{ github.run_number }}
+          path: compliance_report.json
+          retention-days: 30
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+      - name: PR Comment on Failure
+        if: steps.evaluate.outputs.passed == 'false' && github.event_name == 'pull_request'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
+          script: |
+            const fs = require('fs');
+            let report = {};
+            try {
+              report = JSON.parse(fs.readFileSync('compliance_report.json', 'utf8'));
+            } catch (e) {
+              report = { compliance: { status: 'UNKNOWN', score: 0 } };
+            }
 
-      - name: Run governance checks
-        run: ./scripts/governance/check_compliance.sh
+            const status = report.compliance?.status || 'UNKNOWN';
+            const score = report.compliance?.score || 0;
+            const hash = '${{ steps.hash.outputs.governance_hash }}';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ❌ Governance Regression Guard Failed
+
+            This PR introduces a governance regression that must be resolved before merging.
+
+            | Metric | Value |
+            |--------|-------|
+            | Status | ${status} |
+            | Score | ${score}% |
+            | Governance Hash | \`${hash?.substring(0, 16) || 'N/A'}...\` |
+
+            ### What This Means
+
+            Changes in this PR have caused the governance compliance score to fall below the required threshold.
+            Compliance status must be **COMPLIANT** (score >= 90%) before merging.
+
+            ### How to Fix
+
+            1. Run \`./scripts/release/check_governance_compliance.sh --verbose\` locally
+            2. Review the failed checks and fix any issues
+            3. If policy files were changed, ensure required fields are present
+            4. If state files were modified, verify the schema is correct
+            5. Regenerate governance lockfile if needed:
+               \`\`\`bash
+               ./scripts/release/generate_governance_lockfile.sh --sha $(git rev-parse HEAD) --out-dir docs/releases/_state
+               \`\`\`
+
+            ---
+            *This comment was automatically generated by the Governance Regression Guard.*`
+            });
+
+      - name: Fail if Regression Detected
+        if: steps.evaluate.outputs.passed == 'false'
+        run: |
+          echo "::error::Governance regression detected. Status: ${{ steps.compliance.outputs.status }}, Score: ${{ steps.compliance.outputs.score }}%"
+          echo ""
+          echo "This PR introduces changes that reduce governance compliance."
+          echo "Please fix the issues and ensure compliance status is COMPLIANT before merging."
+          exit 1

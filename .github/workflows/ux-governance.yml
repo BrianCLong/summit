@@ -1,40 +1,45 @@
-name: UX Governance
+name: UX Governance Check
 
 on:
-  push:
-    paths:
-      - 'src/**/*.tsx'
-      - 'src/**/*.ts'
-      - 'src/**/*.css'
   pull_request:
-    paths:
-      - 'src/**/*.tsx'
-      - 'src/**/*.ts'
-      - 'src/**/*.css'
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate:
+  ux-governance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # v6
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: "9.12.0"
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
         with:
-          node-version: 20
           cache: 'pnpm'
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+        # Version read from package.json packageManager field
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm lint
+      - name: Run UX Governance Check
+        run: |
+          node scripts/ux-ci-enforcer.js
 
-      - name: Check Types
-        run: pnpm typecheck
-
-      - name: Build
-        run: pnpm build
+      - name: Upload UX Governance Report
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          retention-days: 14
+          name: ux-governance-report
+          path: ux-governance-report.json

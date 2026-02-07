@@ -19,7 +19,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Generate SBOM
         run: npx tsx scripts/compliance/generate_sbom.ts
