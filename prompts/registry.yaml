@@ -496,6 +496,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: spreadsheetbench-verified-docs
+    version: v1
+    path: prompts/docs/spreadsheetbench-verified-docs@v1.md
+    sha256: a9600cb8fd1b0a7c0c0201a87e2e2bedc864e75569125b3f71eaec6482cbd1bf
+    description: Document SpreadsheetBench Verified standards, data handling, and runbook updates with governance alignment.
+    scope:
+      paths:
+        - repo_assumptions.md
+        - docs/standards/spreadsheetbench-verified.md
+        - docs/security/data-handling/spreadsheetbench-verified.md
+        - docs/ops/runbooks/spreadsheetbench-verified.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/SPREADSHEETBENCH_VERIFIED_DOCS_TASK.json
+        - prompts/docs/spreadsheetbench-verified-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+        - evaluation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
