@@ -35,3 +35,7 @@
 ## 2025-12-05 - Tailwind Content Resolution for Mixed-Extension Codebases
 **Learning:** In projects with a mix of JS/JSX and TS/TSX, Tailwind configurations may only target TS/TSX files. This causes utility classes in JS/JSX files to be purged, breaking accessibility features (like `sr-only`) or layout styles.
 **Action:** Always verify `tailwind.config.cjs` includes all relevant file extensions (js, jsx, ts, tsx) when implementing utility-based styles.
+
+## 2026-02-07 - [Navigation Semantics & Icon Grouping]
+**Learning:** Consolidating icon imports into a single, alphabetically sorted block in large router files like `App.router.jsx` significantly improves code maintainability and prevents "Unknown" header labels by providing a cleaner fallback logic for sub-routes.
+**Action:** Always verify icon imports are grouped and sorted to avoid runtime crashes and improve developer experience.

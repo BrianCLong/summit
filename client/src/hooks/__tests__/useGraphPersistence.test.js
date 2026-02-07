@@ -23,7 +23,7 @@ describe('useGraphPersistence', () => {
       nodeTypeColors: { type: 'red' },
     };
 
-    const { rerender } = renderHook(
+    renderHook(
       (props) => useGraphPersistence(props),
       { initialProps }
     );
