@@ -3,33 +3,37 @@
 ## Structure Validation
 
 | Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| --- | --- | --- | --- |
+| `schemas/` | `schemas/` | ✅ Exists | JSON schema store; contains evidence schemas used as reference. |
+| `docs/standards/` | `docs/standards/` | ✅ Exists | Standards documentation directory. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Exists | CI workflows live here; naming still under review. |
+| `artifacts/` | `artifacts/` | ✅ Exists | Artifact output directory used by governance tooling. |
+| `cli/` | `cli/` | ✅ Exists | CLI-related code present; entrypoint still needs validation. |
 
-## Component Mapping
+## Component Mapping (Bottlenecks MWS)
 
 | Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+| --- | --- | --- |
+| Bottlenecks report schema | `schemas/bottlenecks.report.schema.json` | Added under `schemas/` to align with existing schema layout. |
+| Standards doc | `docs/standards/ai-growth-bottlenecks-2026-investorplace.md` | Added under `docs/standards/`. |
+| CLI extractor | `cli/` or `src/` | **Assumed**; needs validation before implementation. |
+| Test runner | `pytest` / `pnpm` | **Assumed**; verify per `pytest.ini`, `package.json`, and CI workflow usage. |
 
-## Constraints & Checks
+## Assumptions Pending Validation
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+* CLI entrypoint (Python/Node) and command wiring are not yet confirmed.
+* Schema validation library (jsonschema/pydantic/zod) is not yet confirmed.
+* CI workflow names for new gates are not yet confirmed.
+* Evidence ID convention should follow `docs/governance/EVIDENCE_ID_POLICY.yml`.
 
-## Next Steps
+## Must-Not-Touch (Discovered)
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+* Release workflows and governance enforcement configs.
+* Security policy docs in `docs/governance/` unless explicitly required.
+* Existing CI gate registries without explicit approval.
+
+## Next Validation Steps
+
+1. Locate CLI entrypoint and command registry.
+2. Identify existing schema validation utilities and artifact hashing conventions.
+3. Confirm CI workflow patterns and required gates before adding new checks.

@@ -1,0 +1,40 @@
+{
+  "task_id": "BOTTLENECKS_SCHEMA_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "ai-growth-bottlenecks-2026-investorplace",
+    "version": "v1",
+    "sha256": "c97c1ef5b75c25d96c3175f6cfe8af84c8f5abe1ac558a1d6761810cfb1e714c",
+    "path": "prompts/standards/ai-growth-bottlenecks-2026-investorplace@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "schemas/bottlenecks.report.schema.json",
+      "docs/standards/ai-growth-bottlenecks-2026-investorplace.md",
+      "repo_assumptions.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/standards/ai-growth-bottlenecks-2026-investorplace@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/BOTTLENECKS_SCHEMA_PR1.json"
+    ],
+    "domains": ["standards", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["schema", "standards-doc", "roadmap-status"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Bottlenecks report schema is added under schemas/.",
+    "Standards doc captures import/export matrices and determinism guarantees.",
+    "Roadmap status records the bottlenecks initiative."
+  ],
+  "stop_conditions": [
+    "Any requirement to modify CI gates or release workflows.",
+    "Need to touch governance policy files beyond documented scope."
+  ]
+}

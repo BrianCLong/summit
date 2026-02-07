@@ -1,5 +1,32 @@
 version: 1
 prompts:
+  - id: ai-growth-bottlenecks-2026-investorplace
+    version: v1
+    path: prompts/standards/ai-growth-bottlenecks-2026-investorplace@v1.md
+    sha256: c97c1ef5b75c25d96c3175f6cfe8af84c8f5abe1ac558a1d6761810cfb1e714c
+    description: Establish schema + standards baseline for AI growth bottlenecks intake.
+    scope:
+      paths:
+        - schemas/bottlenecks.report.schema.json
+        - docs/standards/ai-growth-bottlenecks-2026-investorplace.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/standards/ai-growth-bottlenecks-2026-investorplace@v1.md
+        - prompts/registry.yaml
+        - agents/examples/BOTTLENECKS_SCHEMA_PR1.json
+      domains:
+        - documentation
+        - governance
+        - standards
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
