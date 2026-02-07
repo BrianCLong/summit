@@ -82,9 +82,9 @@ export async function runWithGraphQueryCache<T>(
   const cached = await getCachedJson<T>(cacheKey, { ttlSeconds });
   if (cached !== null) {
     recHit('graph-cache', op, tenantLabel);
-  cacheLatencySeconds
-    ?.labels?.(op, 'hit', tenantLabel)
-    ?.observe?.((Date.now() - start) / 1000);
+    cacheLatencySeconds
+      ?.labels?.(op, 'hit', tenantLabel)
+      ?.observe?.((Date.now() - start) / 1000);
     return cached;
   }
 
