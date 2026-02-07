@@ -1,5 +1,29 @@
 version: 1
 prompts:
+  - id: imputed-intent-23rd-order
+    version: v1
+    path: prompts/analysis/imputed-intent-23rd-order@v1.md
+    sha256: 387dfbe283069b40de2d241e82f92a048267b8fec6c9834ff4d3df8176c70008
+    description: Deliver a governance-first 23rd-order imputed intention artifact and roadmap tracking update.
+    scope:
+      paths:
+        - docs/analysis/imputed-intent-23rd-order.md
+        - docs/roadmap/STATUS.json
+        - prompts/analysis/imputed-intent-23rd-order@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - analysis
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

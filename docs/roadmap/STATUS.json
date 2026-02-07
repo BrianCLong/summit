@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-07T02:08:00Z",
+  "revision_note": "Added 23rd-order MCP imputed-intention governance delivery artifact and tracking entry.",
   "initiatives": [
+    {
+      "id": "mcp-imputed-intent-23rd-order",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governance-first 23rd-order imputed intention delivery artifact for MCP ecosystem alignment."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -182,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
