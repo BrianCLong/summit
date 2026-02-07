@@ -6,6 +6,8 @@
 
 The IntelGraph Platform provides comprehensive API documentation through:
 
+
+
 - **OpenAPI 3.0 Specification** - Machine-readable API contract
 - **Swagger UI** - Interactive API explorer with "Try it out" functionality
 - **ReDoc** - Clean, professional documentation viewer
@@ -180,6 +182,8 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 ## Rate Limiting
 
 API requests are rate-limited based on:
+
+
 
 - User role
 - Endpoint sensitivity

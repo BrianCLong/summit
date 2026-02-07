@@ -8,6 +8,8 @@ This directory contains documentation for the enterprise infrastructure improvem
 
 **Implementation:**
 
+
+
 - OpenAPI 3.0 specification at `/openapi/spec.yaml`
 - Swagger UI at `/api/docs`
 - ReDoc at `/api/docs/redoc`
@@ -16,6 +18,8 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Comprehensive tests
 
 **Key Files:**
+
+
 
 - `/server/src/routes/api-docs.ts` - Documentation routes
 - `/openapi/spec.yaml` - OpenAPI specification
@@ -30,6 +34,8 @@ This directory contains documentation for the enterprise infrastructure improvem
 
 **Implementation:**
 
+
+
 - Enhanced Winston logger with structured logging
 - Correlation ID middleware
 - OpenTelemetry integration (existing)
@@ -38,6 +44,8 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Performance and audit logging helpers
 
 **Key Files:**
+
+
 
 - `/server/src/utils/logger.ts` - Enhanced logging configuration
 - `/server/src/middleware/correlation-id.ts` - Correlation tracking
@@ -53,6 +61,8 @@ This directory contains documentation for the enterprise infrastructure improvem
 
 **Implementation:**
 
+
+
 - Centralized BullMQ queue configuration
 - Bull Board dashboard at `/queues`
 - Example job processors with retry logic
@@ -61,6 +71,8 @@ This directory contains documentation for the enterprise infrastructure improvem
 - Comprehensive error handling
 
 **Key Files:**
+
+
 
 - `/server/src/queues/config.ts` - Queue configuration
 - `/server/src/routes/queues-dashboard.ts` - Bull Board integration
@@ -209,6 +221,8 @@ await addJob(QueueName.EMAIL, 'test', { message: 'Test' });
 ## Support
 
 For questions or issues:
+
+
 
 - See individual documentation files in this directory
 - Check `/docs` for platform documentation

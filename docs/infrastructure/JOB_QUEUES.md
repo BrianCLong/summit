@@ -6,6 +6,8 @@
 
 The IntelGraph Platform implements a robust job queue system using:
 
+
+
 - **BullMQ** - High-performance job queue based on Redis
 - **Redis** - In-memory data store for queue persistence
 - **Bull Board** - Web-based dashboard for queue monitoring
@@ -63,6 +65,8 @@ docker run -p 6379:6379 redis:7-alpine
 Navigate to:  <http://localhost:4000>/queues
 
 The dashboard shows:
+
+
 
 - Active jobs
 - Completed jobs
@@ -381,6 +385,8 @@ Access at  <http://localhost:4000>/queues
 
 Features:
 
+
+
 - View all queues
 - Monitor job states (waiting, active, completed, failed)
 - Inspect job data and results
@@ -600,6 +606,8 @@ const queue = new Queue('my-queue', {
 ## Examples
 
 See `/server/src/queues/processors/` for examples:
+
+
 
 - `emailProcessor.ts` - Email sending with retry
 - `scheduledTasks.ts` - Cron-like scheduled jobs

@@ -259,6 +259,8 @@ spec:
 
 Istio automatically:
 
+
+
 - Discovers services across all clusters
 - Load balances requests across clusters
 - Handles failover on cluster failure
@@ -396,6 +398,8 @@ kubectl port-forward -n monitoring svc/grafana 3000:80
 ### Step-by-Step Deployment
 
 
+
+
 1. **Configure Cloud Credentials**
 ```bash
 # AWS
@@ -410,6 +414,8 @@ gcloud config set project your-project-id
 ```text
 
 
+
+
 2. **Deploy Infrastructure**
 ```bash
 cd infrastructure/terraform/multi-cloud
@@ -419,11 +425,15 @@ terraform apply
 ```text
 
 
+
+
 3. **Configure kubectl**
 ```bash
 # Run the output commands from Terraform
 terraform output kubeconfig_commands
 ```text
+
+
 
 
 4. **Deploy Service Mesh**
@@ -433,12 +443,16 @@ cd infrastructure/kubernetes/multi-cluster/istio
 ```text
 
 
+
+
 5. **Deploy Applications**
 ```bash
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=eks-primary
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=aks-primary
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=gke-primary
 ```text
+
+
 
 
 6. **Deploy Services**
@@ -452,6 +466,8 @@ kubectl apply -f services/cloud-orchestrator/k8s/
 # Disaster Recovery
 kubectl apply -f services/disaster-recovery/k8s/
 ```text
+
+
 
 
 7. **Verify Deployment**
@@ -555,6 +571,8 @@ curl http://cost-optimization:3000/api/costs/breakdown?groupBy=service
 ## Support
 
 For issues or questions:
+
+
 
 - **Infrastructure**: infrastructure-team@company.com
 - **On-Call**: PagerDuty escalation

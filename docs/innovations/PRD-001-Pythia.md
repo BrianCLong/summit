@@ -12,17 +12,23 @@ Current tools in Summit (`PredictiveThreatService`) provide static forecasts bas
 
 ## 3. Non-Goals
 
+
+
 - Real-time molecular dynamics simulation.
 - Replacing the core `PredictiveThreatService` (Pythia wraps it).
 
 
 ## 4. User Stories
 
+
+
 - As an analyst, I want to simulate the takedown of a botnet command node to see predicted network healing time.
 - As a strategist, I want to compare three different intervention packages to minimize collateral damage.
 
 
 ## 5. Functional Requirements
+
+
 
 - `simulateIntervention(scenario: Scenario): SimulationResult`
 - Support for `NodeRemoval`, `EdgeWeightChange`, and `ContentInjection` tactics.
@@ -31,11 +37,15 @@ Current tools in Summit (`PredictiveThreatService`) provide static forecasts bas
 
 ## 6. Non-Functional Requirements
 
+
+
 - Simulation runtime < 5s for subgraphs < 10k nodes.
 - Deterministic seeding for reproducibility.
 
 
 ## 7. Architecture
+
+
 
 - Extends `PredictiveThreatService`.
 - Uses a temporary in-memory graph overlay (copy-on-write) to apply mutations without affecting the live graph.
@@ -48,11 +58,15 @@ User Request -> PythiaService -> Graph Snapshot -> Mutation -> Predictive Model 
 
 ## 9. Policy & Governance
 
+
+
 - Simulations must be logged in `AuditLog` with `is_simulation=true`.
 - Access restricted to `analyst` role or higher.
 
 
 ## 10. Test Strategy
+
+
 
 - Unit tests for graph mutation logic.
 - Integration test with mock Predictive Model.
@@ -60,15 +74,21 @@ User Request -> PythiaService -> Graph Snapshot -> Mutation -> Predictive Model 
 
 ## 11. Rollout
 
+
+
 - Feature flagged `pythia_enabled`.
 - Deploy to "Shadow" mode first.
 
 
 ## 12. Risks
 
+
+
 - Compute cost of simulations. Mitigation: Rate limiting and max subgraph size.
 
 
 ## 13. Success Metrics
+
+
 
 - % of interventions that match simulated outcomes within 20% error margin.

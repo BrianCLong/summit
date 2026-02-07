@@ -6,6 +6,8 @@
 
 The IntelGraph Platform implements enterprise-grade structured logging with:
 
+
+
 - **Winston** - Structured logging library with flexible transports
 - **Pino** - High-performance HTTP request logging
 - **OpenTelemetry** - Distributed tracing integration
@@ -169,11 +171,15 @@ export LOG_LEVEL=info
 
 Every request automatically receives:
 
+
+
 - **Correlation ID** - Unique identifier for the request
 - **Trace ID** - OpenTelemetry trace identifier
 - **Span ID** - OpenTelemetry span identifier
 
 These are automatically included in:
+
+
 
 - Log messages
 - HTTP response headers (`x-correlation-id`, `x-trace-id`)
@@ -216,6 +222,8 @@ docker-compose -f docker-compose.logging.yml up
 ### Kibana Dashboards
 
 Create dashboards for:
+
+
 
 - Error rates over time
 - Request latency (performance logs)
@@ -297,6 +305,8 @@ View traces in Jaeger:
 ### Redacted Fields
 
 Sensitive fields are automatically redacted from logs:
+
+
 
 - `password`
 - `authorization` headers
