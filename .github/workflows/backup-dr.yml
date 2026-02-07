@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload Backup Artifact
         if: ${{ vars.AWS_ENABLED != 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: summit-backup-${{ inputs.backup_set || 'full' }}-${{ github.run_id }}
           path: backups/

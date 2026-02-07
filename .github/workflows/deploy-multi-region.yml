@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload supply chain compliance receipt
         if: always()
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@v6 # v6
         with:
           retention-days: 14
           name: supply-chain-compliance-receipts

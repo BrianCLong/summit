@@ -48,7 +48,7 @@ jobs:
 
       - name: Upload Playwright Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report
           path: playwright-report
@@ -56,7 +56,7 @@ jobs:
 
       - name: Upload Playwright Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-artifacts
           path: test-results
@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload Golden Path Evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: golden-path-evidence
           path: artifacts/evidence/goldenpath-frontend/
@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload Summit Evidence Bundle
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: summit-evidence
           path: artifacts/evidence/

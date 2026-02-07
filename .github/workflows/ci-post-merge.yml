@@ -40,7 +40,7 @@ jobs:
       - name: Generate SBOM
         run: pnpm generate:sbom
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sbom
           path: .evidence/sbom.json
@@ -63,7 +63,7 @@ jobs:
       - name: Generate Provenance
         run: pnpm generate:provenance
       - name: Upload Provenance
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: provenance
           path: .evidence/provenance.json

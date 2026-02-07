@@ -96,7 +96,7 @@ jobs:
         shell: bash
       - name: Generate Metrics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: server/coverage/
@@ -168,7 +168,7 @@ jobs:
         run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
       - name: Upload SOC compliance reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: soc-compliance-report
           path: soc-compliance-reports
@@ -193,7 +193,7 @@ jobs:
         shell: bash
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: verification-artifacts
           path: artifacts/**

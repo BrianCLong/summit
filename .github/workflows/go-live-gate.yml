@@ -144,7 +144,7 @@ jobs:
 
       - name: Upload Evidence Artifact
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v4
         with:
           name: go-live-evidence-${{ steps.capture-sha.outputs.sha }}
           path: artifacts/evidence/go-live/${{ steps.capture-sha.outputs.sha }}/

@@ -45,7 +45,7 @@ jobs:
         run: node --test scripts/ci/__tests__/governance_evidence_contracts.test.mjs
 
       - name: Upload Governance Evidence
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5
         with:
           name: governance-evidence
           path: artifacts/governance/*.evidence.json

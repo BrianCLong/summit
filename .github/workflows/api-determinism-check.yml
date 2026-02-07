@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload Report
         if: always()
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@v6 # v6
         with:
           name: determinism-report-${{ github.run_id }}
           path: artifacts/determinism-check/
