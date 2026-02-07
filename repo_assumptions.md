@@ -1,35 +1,43 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (SpreadsheetBench Verified)
 
-## Structure Validation
+## Readiness assertion
+
+This validation respects the Summit Readiness Assertion and treats unverified paths as intentionally constrained until confirmed.
+
+## Verified vs assumed directory map
 
 | Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| --- | --- | --- | --- |
+| `docs/` | `docs/` | ✅ Verified | Documentation root exists. |
+| `docs/standards/` | `docs/standards/` | ✅ Verified | Standards directory exists. |
+| `docs/security/` | `docs/security/` | ✅ Verified | Security documentation root exists. |
+| `docs/ops/` | `docs/ops/` | ✅ Verified | Operations documentation root exists. |
+| `benchmarks/` | `benchmarks/` | ✅ Verified | Benchmark root exists. |
+| `runners/` | `runners/` | Deferred pending verification | Runner directory presence not confirmed. |
+| `scripts/` | `scripts/` | ✅ Verified | Scripts root exists. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Verified | CI workflows directory exists. |
 
-## Component Mapping
+## Existing CI gates (assumed until confirmed)
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+* `pr-quality-gate.yml` (referenced in AGENTS guidance).
+* `make smoke` golden path target.
 
-## Constraints & Checks
+## Must-not-touch list (default)
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+* Lockfiles: `pnpm-lock.yaml`, `package-lock.json`, `Cargo.lock`.
+* Release automation: `release-please-config.json`, `release-policy.yml`.
+* Security policy baselines and evidence bundles under `docs/ga/`, `docs/governance/`, and `evidence/`.
 
-## Next Steps
+## Validation checklist (SpreadsheetBench Verified PR1)
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+1. Confirm benchmark abstraction location (expected: `benchmarks/`).
+2. Confirm runner abstraction location (expected: `runners/`).
+3. Confirm evidence schema conventions under `evidence/` or `docs/evidence/`.
+4. Confirm CI naming for smoke gates.
+5. Confirm formatting/lint rules for new documentation in `docs/`.
+
+## Next steps (PR1)
+
+* Add SpreadsheetBench Verified standards and data-handling docs in `docs/`.
+* Add a SpreadsheetBench Verified runbook in `docs/ops/runbooks/`.
+* Update `docs/roadmap/STATUS.json` with the new initiative.
