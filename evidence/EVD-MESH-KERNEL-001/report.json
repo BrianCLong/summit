@@ -1,0 +1,9 @@
+{
+  "status": "pass",
+  "summary": "Mesh Kernel Foundation Initialized",
+  "checks": [
+    "flags",
+    "governance",
+    "structure"
+  ]
+}

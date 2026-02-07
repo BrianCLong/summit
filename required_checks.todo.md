@@ -38,3 +38,10 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
+
+
+## Mesh Checks (PR1+)
+- `ci:mesh-tenant-isolation` (Ensure no cross-tenant leakage)
+- `ci:mesh-no-offense-content` (Refusal tests)
+- `ci:mesh-privacy-partitions` (Verify partitions)
+- `ci:mesh-evidence-verify` (Verify evidence contracts)
