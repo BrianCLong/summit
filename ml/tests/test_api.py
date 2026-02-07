@@ -212,9 +212,9 @@ class TestAuthenticationFlow:
     @patch("app.main.jwt.decode")
     def test_invalid_jwt_token(self, mock_decode):
         """Test invalid JWT token handling"""
-        from jose import JWTError
+        import jwt
 
-        mock_decode.side_effect = JWTError("Invalid token")
+        mock_decode.side_effect = jwt.PyJWTError("Invalid token")
 
         from fastapi import HTTPException
 

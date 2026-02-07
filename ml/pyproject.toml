@@ -10,7 +10,7 @@ python = "^3.12"
 fastapi = "^0.115.0"
 uvicorn = "^0.30.0"
 pydantic = "^2.8.0"
-python-jose = "^3.3.0"
+pyjwt = {version = "^2.10.1", extras = ["crypto"]}
 redis = "^5.0.7"
 celery = "^5.4.0"
 numpy = "^2.0.0"

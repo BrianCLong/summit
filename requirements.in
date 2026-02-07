@@ -6,7 +6,7 @@ sqlalchemy==2.*
 asyncpg==0.31.*
 redis==7.*
 python-multipart==0.0.22
-python-jose[cryptography]==3.5.0
+PyJWT[crypto]==2.*
 passlib[bcrypt]==1.7.4
 python-dotenv==1.2.*
 httpx==0.28.*

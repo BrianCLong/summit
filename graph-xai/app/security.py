@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from fastapi import Depends, Header, HTTPException
-from jose import jwt
+import jwt
 
 from .config import get_settings
 from .schemas import ExplainRequest

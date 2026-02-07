@@ -9,7 +9,6 @@ from typing import Any
 
 import jwt
 from fastapi import HTTPException, Request
-from jose import JWTError
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,7 @@ def validate_jwt_token(token: str) -> dict[str, Any]:
             raise HTTPException(status_code=401, detail="Invalid token: missing subject")
 
         return payload
-    except JWTError as e:
+    except jwt.PyJWTError as e:
         logger.warning(f"JWT validation failed: {e}")
         raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
 

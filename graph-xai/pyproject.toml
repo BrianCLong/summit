@@ -11,7 +11,7 @@ dependencies = [
     "networkx",
     "numpy",
     "prometheus-client",
-    "python-jose",
+    "pyjwt[crypto]",
 ]
 
 [project.optional-dependencies]
