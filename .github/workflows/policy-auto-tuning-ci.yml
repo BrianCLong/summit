@@ -30,7 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run Unit Tests
-        run: npx tsx server/src/policy-engine/__tests__/engine.test.ts
+        run: npx jest server/src/policy-engine/__tests__/engine.test.ts
 
       - name: Verify Golden Fixtures
         run: |
