@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-07T00:00:00Z",
+  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -52,19 +52,37 @@
       "id": "sera-cli-proxy",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
+      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails. Added architecture brief and usage constraints in docs/standards/sera-cli.md."
     },
     {
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+    },
+    {
+      "id": "summit-skill-router-ga-orchestrator",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
+    },
+    {
+      "id": "summit-ga-preflight-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
+    },
+    {
+      "id": "summit-pr-stack-sequencer-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
     },
     {
       "id": "promptspec-foundation-lane1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding. Added docs/promptspec/FOUNDATION_LANE1.md and minimal example in promptspec/specs/minimal_example_v0.json."
     },
     {
       "id": "E",
@@ -132,19 +150,19 @@
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab. Added deterministic example and evidence budgeting notes in docs/standards/ru-ua-cogwar-lab.md."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -162,7 +180,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -182,7 +200,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }

@@ -1,0 +1,11 @@
+---
+name: verify-runtime
+version: 1.0.0
+description: Verification runbook
+tasks:
+  - id: t1
+    name: test-task
+    uses: graph:entity-resolution
+    with:
+      entities: []
+
