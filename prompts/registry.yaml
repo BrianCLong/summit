@@ -496,6 +496,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sitrep-2026-02-06-io-espionage-docs
+    version: v1
+    path: prompts/docs/sitrep-2026-02-06-io-espionage-docs@v1.md
+    sha256: 76f014767060ee01ca32c7734444f6331dbc9f2006f659d745b41efa68edbc9e
+    description: Add sitrep 2026-02-06 documentation pack with standards, data handling, and runbook.
+    scope:
+      paths:
+        - repo_assumptions.md
+        - docs/standards/sitrep-2026-02-06-io-espionage.md
+        - docs/security/data-handling/sitrep-2026-02-06-io-espionage.md
+        - docs/ops/runbooks/sitrep-2026-02-06-io-espionage.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/SITREP_2026_02_06_IO_ESPIONAGE_DOCS_TASK.json
+        - prompts/docs/sitrep-2026-02-06-io-espionage-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

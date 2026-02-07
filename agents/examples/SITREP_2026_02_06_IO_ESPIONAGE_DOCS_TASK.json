@@ -1,0 +1,41 @@
+{
+  "task_id": "SITREP_2026_02_06_IO_ESPIONAGE_DOCS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sitrep-2026-02-06-io-espionage-docs",
+    "version": "v1",
+    "sha256": "76f014767060ee01ca32c7734444f6331dbc9f2006f659d745b41efa68edbc9e",
+    "path": "prompts/docs/sitrep-2026-02-06-io-espionage-docs@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "repo_assumptions.md",
+      "docs/standards/sitrep-2026-02-06-io-espionage.md",
+      "docs/security/data-handling/sitrep-2026-02-06-io-espionage.md",
+      "docs/ops/runbooks/sitrep-2026-02-06-io-espionage.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/sitrep-2026-02-06-io-espionage-docs@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SITREP_2026_02_06_IO_ESPIONAGE_DOCS_TASK.json"
+    ],
+    "domains": ["documentation", "governance", "security", "operations"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs-pack"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Standards, data-handling, and runbook docs added for sitrep-2026-02-06.",
+    "Roadmap status updated with sitrep docs initiative.",
+    "Repo assumptions updated for sitrep doc pack."
+  ],
+  "stop_conditions": [
+    "Any requirement to modify production workflows.",
+    "Need to change attribution language beyond source statements."
+  ]
+}

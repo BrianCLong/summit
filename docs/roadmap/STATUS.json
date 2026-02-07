@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:30:00Z",
+  "revision_note": "Added sitrep-2026-02-06 IO/espionage documentation pack.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -135,6 +135,12 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
+      "id": "sitrep-2026-02-06-io-espionage-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Docs pack for sitrep-2026-02-06 (standards, data handling, runbook, repo assumptions)."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -182,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
