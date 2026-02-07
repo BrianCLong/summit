@@ -8,7 +8,7 @@ jobs:
   nds_gates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify evidence scaffolding
         run: python3 tools/ci/verify_evidence.py
       - name: Verify dependency delta

@@ -11,7 +11,7 @@ jobs:
     name: gate/evidence_contract
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -25,7 +25,7 @@ jobs:
     name: gate/agent_inventory_required
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Validate Agent Inventory
         run: |
           if [ ! -f agents/registry/agents.json ]; then
@@ -39,7 +39,7 @@ jobs:
     name: gate/agent_surface_lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run Surface Lints
         run: |
           # Target actual registry/configs if they contain port declarations
@@ -56,7 +56,7 @@ jobs:
     name: gate/relay_policy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run Relay Policy Check
         run: |
           python3 security/relay_policy/enforce.py security/relay_policy/policy.json
@@ -65,7 +65,7 @@ jobs:
     name: gate/supplychain_verify
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify Supply Chain
         run: |
           # In a real scenario, this would check all installed skills

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v6 # v6
 
       # Using standard setup steps instead of reusable workflow to have more control in this single file context,
       # but mirroring the reusable logic.

@@ -8,7 +8,7 @@ jobs:
   drift:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: node scripts/ci/verify_branch_protection.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -20,7 +20,7 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
         with:
           fetch-depth: 0 # Full history required for Gitleaks
 
@@ -70,7 +70,7 @@ jobs:
     name: Policy Compliance
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
@@ -106,7 +106,7 @@ jobs:
     name: Governance Checks
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -153,7 +153,7 @@ jobs:
     name: MCP Tool UX Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -174,7 +174,7 @@ jobs:
     name: Provenance & SBOM
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -253,7 +253,7 @@ jobs:
     name: Schema Validation
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
         with:
           fetch-depth: 0 # Needed for schema diff
 
@@ -288,7 +288,7 @@ jobs:
     name: Compliance Evidence
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -320,7 +320,7 @@ jobs:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4
         with:
           version: 9

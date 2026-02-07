@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v6 # v6
 
       - name: Download actionlint
         run: |

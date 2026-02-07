@@ -20,7 +20,7 @@ jobs:
         cloud: [aws, gcp, azure]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup tools
         uses: actions/setup-python@v5
