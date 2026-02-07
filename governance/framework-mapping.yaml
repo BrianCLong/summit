@@ -56,7 +56,7 @@ frameworks:
       evidence_id: "model_cards"
     art_14_human_oversight:
       summit_control: "ux-human-review"
-      module: "apps/web/src/components/ReviewQueue.tsx"
+      module: "apps/web/src/components/er/AdjudicationQueue.tsx"
       evidence_id: "human_review_logs"
     art_15_accuracy:
       summit_control: "sec-adversarial-test"

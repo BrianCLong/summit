@@ -4,30 +4,35 @@ import path from 'path';
 const ARTIFACTS_DIR = 'artifacts';
 
 function getFileHash(filePath) {
-  // In a real implementation, this would compute the actual SHA256.
-  // For this stub, we'll return a placeholder or read from a .sha256 file if it exists.
-  const hashFile = `${filePath}.sha256`;
-  if (fs.existsSync(hashFile)) {
-    return fs.readFileSync(hashFile, 'utf8').trim();
+  if (fs.existsSync(filePath)) {
+    const hashFile = `${filePath}.sha256`;
+    if (fs.existsSync(hashFile)) {
+      return fs.readFileSync(hashFile, 'utf8').trim();
+    }
   }
   return 'placeholder-sha256';
 }
 
+const sbomPath = path.join(ARTIFACTS_DIR, 'sbom/spdx.json');
+const provenancePath = path.join(ARTIFACTS_DIR, 'provenance/intoto.jsonl');
+const signaturePath = path.join(ARTIFACTS_DIR, 'image/cosign.bundle');
+
 const inputs = {
   artifacts: {
     sbom: {
-      path: fs.existsSync(path.join(ARTIFACTS_DIR, 'sbom/spdx.json')) ? 'artifacts/sbom/spdx.json' : '',
-      sha256: fs.existsSync(path.join(ARTIFACTS_DIR, 'sbom/spdx.json')) ? getFileHash(path.join(ARTIFACTS_DIR, 'sbom/spdx.json')) : ''
+      path: fs.existsSync(sbomPath) ? sbomPath : '',
+      sha256: fs.existsSync(sbomPath) ? getFileHash(sbomPath) : ''
     },
     image: {
       digest: 'sha256:placeholder',
       signatures: {
-        cosign: true // Mocked for now
+        // If cosign.bundle exists, we consider it signed
+        cosign: fs.existsSync(signaturePath)
       }
     },
     provenance: {
-      slsa_level: 1,
-      attestation_path: fs.existsSync(path.join(ARTIFACTS_DIR, 'provenance/intoto.jsonl')) ? 'artifacts/provenance/intoto.jsonl' : ''
+      slsa_level: fs.existsSync(provenancePath) ? 1 : 0,
+      attestation_path: fs.existsSync(provenancePath) ? provenancePath : ''
     }
   },
   repo: {

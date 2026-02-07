@@ -26,6 +26,6 @@ No active security alerts accessible.
 
 ## 7. Governance & Evidence
 - **Compliance Drift**: ❌ FAIL
-  - Drift Output: [DRIFT] Mapped artifact not found: apps/web/src/components/ReviewQueue.tsx...
+  - Drift Output: [DRIFT] Mapped artifact not found: apps/web/src/components/er/AdjudicationQueue.tsx...
 - **Docs Integrity**: ❌ FAIL (139 violations)
 - **Evidence Consistency**: ✅ PASS (4 warnings)

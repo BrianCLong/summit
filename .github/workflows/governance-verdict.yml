@@ -13,6 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
       - name: Prepare inputs (SBOM, signatures, provenance)
         env:
           GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -20,13 +30,6 @@ jobs:
           node scripts/ci/collect_inputs.mjs > /tmp/inputs.json
           node scripts/ci/sha256sum.mjs /tmp/inputs.json > /tmp/inputs.sha
           echo "EVIDENCE_ID=EV-$(date -u +%Y-%m-%d)-${{ github.run_id }}-${{ github.run_attempt }}" >> $GITHUB_ENV
-
-      - name: Install OPA + jq
-        run: |
-          curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x /usr/local/bin/opa
-          sudo mv /usr/local/bin/opa /usr/bin/opa
-          sudo apt-get update && sudo apt-get install -y jq
 
       - name: Evaluate policy
         id: eval

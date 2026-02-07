@@ -400,6 +400,12 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-GOV-VERDICT-001",
+      "files": {
+        "report": "governance_verdict.json"
+      }
     }
   ]
 }

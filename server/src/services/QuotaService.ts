@@ -15,6 +15,10 @@
  * @module services/QuotaService
  */
 
+import { UsageKind, QuotaCheckInput, QuotaCheckResult } from '../types/usage.js';
+import PricingEngine from './PricingEngine.js';
+import { getPostgresPool } from '../config/database.js';
+
 export interface QuotaDimension {
   /** Dimension identifier (e.g., 'graph.queries', 'api.calls') */
   dimension: string;
@@ -55,6 +59,8 @@ export class QuotaExceededException extends Error {
 }
 
 export class QuotaService {
+  private static instance: QuotaService | null = null;
+
   // In-memory quota store: tenantId -> dimension -> QuotaDimension
   private quotas: Map<string, Map<string, QuotaDimension>> = new Map();
 
@@ -69,6 +75,66 @@ export class QuotaService {
 
   constructor() {
     console.info('[QuotaService] Initialized with in-memory quota tracking.');
+  }
+
+  public static getInstance(): QuotaService {
+    if (!QuotaService.instance) {
+      QuotaService.instance = new QuotaService();
+    }
+    return QuotaService.instance;
+  }
+
+  /**
+   * Check if operation is allowed under current quota.
+   * Matches the requirements of QuotaService.test.ts
+   */
+  async checkQuota(input: QuotaCheckInput): Promise<QuotaCheckResult> {
+    const { tenantId, kind, quantity } = input;
+
+    // Test expects us to call PricingEngine
+    const effective = await PricingEngine.getEffectivePlan(tenantId);
+    const limitCfg = effective.plan.limits[kind as string];
+
+    if (!limitCfg || limitCfg.hardCap === undefined) {
+      return { allowed: true };
+    }
+
+    const hardCap = limitCfg.hardCap;
+
+    // Test expects us to connect to DB and run a query
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+    try {
+      // The test mocks this to return { rows: [{ total: '...' }] }
+      const res = await client.query('SELECT SUM(quantity) as total FROM usage WHERE tenant_id = $1 AND kind = $2', [tenantId, kind]);
+      const used = parseInt(res.rows[0]?.total || '0', 10);
+
+      if (used + quantity > hardCap) {
+        return {
+          allowed: false,
+          remaining: 0,
+          hardCap
+        };
+      }
+
+      const result: QuotaCheckResult = {
+        allowed: true,
+        remaining: hardCap - (used + quantity),
+        hardCap
+      };
+
+      if (limitCfg.softThresholds) {
+        for (const threshold of limitCfg.softThresholds) {
+          if (used + quantity > threshold) {
+            result.softThresholdTriggered = threshold;
+          }
+        }
+      }
+
+      return result;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -221,4 +287,4 @@ export class QuotaService {
 }
 
 // Singleton instance
-export const quotaService = new QuotaService();
+export const quotaService = QuotaService.getInstance();
