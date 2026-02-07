@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/metrics.schema.json",
+  "type": "object",
+  "required": ["run_id", "counts"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "counts": {
+      "type": "object",
+      "required": [
+        "items_ingested",
+        "campaigns",
+        "narratives",
+        "claims",
+        "artifacts",
+        "sources_count",
+        "unique_domains",
+        "synthetic_risk_high_count",
+        "cluster_count"
+      ],
+      "properties": {
+        "items_ingested": { "type": "integer", "minimum": 0 },
+        "campaigns": { "type": "integer", "minimum": 0 },
+        "narratives": { "type": "integer", "minimum": 0 },
+        "claims": { "type": "integer", "minimum": 0 },
+        "artifacts": { "type": "integer", "minimum": 0 },
+        "sources_count": { "type": "integer", "minimum": 0 },
+        "unique_domains": { "type": "integer", "minimum": 0 },
+        "synthetic_risk_high_count": { "type": "integer", "minimum": 0 },
+        "cluster_count": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
