@@ -310,20 +310,19 @@ jobs:
             --framework terraform,kubernetes,helm,cloudformation \
             --quiet \
             --download-external-modules true \
-            --output-file-path "$REPORT_DIR" \
-            --output sarif
+            --output sarif > "$REPORT_DIR/checkov.sarif"
       - name: Upload Checkov SARIF
         if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
-          sarif_file: ${{ env.REPORT_DIR }}/results.sarif
+          sarif_file: ${{ env.REPORT_DIR }}/checkov.sarif
       - name: Persist Checkov report
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports-iac-scan
-          path: ${{ env.REPORT_DIR }}/results.sarif
+          path: ${{ env.REPORT_DIR }}/checkov.sarif
 
   opa-policy:
     name: Policy enforcement (OPA/Conftest)
@@ -345,6 +344,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p rendered
+          helm dependency build infra/helm/intelgraph
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > rendered/dev.yaml
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > rendered/prod.yaml
       - name: Conftest policy checks
@@ -374,6 +374,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p rendered
+          helm dependency build infra/helm/intelgraph
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > rendered/dev.yaml
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > rendered/prod.yaml
       - name: Run Kubernetes CIS benchmark

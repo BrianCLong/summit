@@ -59,6 +59,14 @@ services:
       - default
       - observability
 
+  client:
+    build: ./client
+    ports: [ "3000:3000" ]
+    depends_on: [ server ]
+    networks:
+      - default
+      - observability
+
   server:
     build:
       context: ./server
@@ -136,4 +144,4 @@ networks:
   observability:
     driver: bridge
   intelgraph:
-    external: true
+    driver: bridge
