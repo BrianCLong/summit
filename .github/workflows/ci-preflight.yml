@@ -1,61 +1,61 @@
-name: CI Preflight Validation
+name: CI Preflight
 
 on:
-  workflow_dispatch:
-  pull_request:
-    branches: [ main ]
-    paths:
-      - "server/**"
-      - "apps/gateway/**"
-      - "docker-compose.dev.yaml"
-      - "services/opa/**"
-      - ".github/workflows/ci-preflight.yml"
   push:
-    branches: [ main ]
-    paths:
-      - "server/**"
-      - "apps/gateway/**"
-      - "docker-compose.dev.yaml"
-      - "services/opa/**"
-      - ".github/workflows/ci-preflight.yml"
-
-concurrency:
-  group: ci-preflight-${{ github.ref }}
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
 
 jobs:
-  validate-compose:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Validate Docker Compose Config
-        run: docker compose -f docker-compose.dev.yaml config
-
   verify-server-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: "9.12.0"
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify Server Build
-        run: pnpm -C server build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter server build
 
   verify-gateway-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter agent-gateway build
+      - name: Verify Docker Compose config
+        run: |
+          # Create dummy .env file for validation
+          touch .env
+          echo "JWT_SECRET=dummy" >> .env
+          docker compose config
+        env:
+          JWT_SECRET: "dummy_value_for_ci_verification"
 
-      - name: Build Gateway Docker Image
-        run: docker compose -f docker-compose.dev.yaml build gateway
+  e2e-tests:
+    if: github.event_name == 'merge_group'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm test:e2e

@@ -1,71 +1,107 @@
+name: Reusable CI
+
 on:
   workflow_call:
     inputs:
       node-version:
-        description: "Node.js version to use"
         required: false
         type: string
-        default: "20"
+        default: '20'
       package-manager:
-        description: "Package manager (pnpm)"
         required: false
         type: string
-        default: "pnpm"
+        default: 'pnpm'
       workspace-filter:
-        description: "Workspace filter for pnpm commands"
         required: false
         type: string
-        default: ""
+        default: ''
       run-lint:
-        description: "Whether to run lint"
         required: false
         type: boolean
         default: true
       run-typecheck:
-        description: "Whether to run typecheck"
         required: false
         type: boolean
         default: true
       run-tests:
-        description: "Whether to run tests"
         required: false
         type: boolean
         default: true
       run-evidence:
-        description: "Whether to generate evidence"
         required: false
         type: boolean
         default: false
       evidence-artifact-name:
-        description: "Name for evidence artifact"
         required: false
         type: string
-        default: "ci-evidence"
-    secrets:
-      NPM_TOKEN:
-        description: "NPM token for private packages"
-        required: false
+        default: 'ci-evidence'
 
 jobs:
   ci:
+    name: ci
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         task: [lint, typecheck, test]
+        exclude:
+          - task: ${{ !inputs.run-lint && 'lint' || '' }}
+          - task: ${{ !inputs.run-typecheck && 'typecheck' || '' }}
+          - task: ${{ !inputs.run-tests && 'test' || '' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: 'pnpm'
-      - run: corepack enable
-      - run: pnpm -w install --frozen-lockfile
-      - name: Run ${{ matrix.task }}
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run Lint
+        if: matrix.task == 'lint'
         run: |
           if [ -n "${{ inputs.workspace-filter }}" ]; then
-            pnpm --filter "${{ inputs.workspace-filter }}" ${{ matrix.task }}
+            pnpm --filter ${{ inputs.workspace-filter }} lint
           else
-            pnpm -w ${{ matrix.task }}
+            pnpm lint
           fi
+
+      - name: Run Typecheck
+        if: matrix.task == 'typecheck'
+        run: |
+          if [ -n "${{ inputs.workspace-filter }}" ]; then
+            pnpm --filter ${{ inputs.workspace-filter }} typecheck
+          else
+            pnpm typecheck
+          fi
+
+      - name: Run Tests
+        if: matrix.task == 'test'
+        run: |
+          if [ -n "${{ inputs.workspace-filter }}" ]; then
+            pnpm --filter ${{ inputs.workspace-filter }} test
+          else
+            pnpm test
+          fi
+
+      - name: Emit Evidence
+        if: inputs.run-evidence && matrix.task == 'test'
+        run: |
+          mkdir -p artifacts
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job ${{ github.job }} \
+            --runner ${{ runner.os }} \
+            --out artifacts/stamp.json
+
+      - name: Upload Evidence
+        if: inputs.run-evidence && matrix.task == 'test'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.evidence-artifact-name }}
+          path: artifacts/

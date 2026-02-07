@@ -1,0 +1,24 @@
+name: Docker Compose Verify
+
+on:
+  push:
+    paths:
+      - 'docker-compose*.yaml'
+      - 'docker-compose*.yml'
+  pull_request:
+    paths:
+      - 'docker-compose*.yaml'
+      - 'docker-compose*.yml'
+
+jobs:
+  validate-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Docker Compose config
+        run: |
+          docker compose -f docker-compose.dev.yaml config
+        env:
+          JWT_SECRET: "dummy_value_for_ci_verification"
+          NEO4J_PASSWORD: "dummy_value_for_ci_verification"

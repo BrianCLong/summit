@@ -1,19 +1,33 @@
 name: Subsumption Bundle Verify
 
 on:
-  pull_request:
+  push:
     paths:
-      - "subsumption/**"
-      - "scripts/ci/**"
-      - "docs/**"
-      - "evidence/**"
+      - 'subsumption/**/*.yaml'
+      - 'subsumption/**/*.yml'
+  workflow_dispatch:
 
 jobs:
   subsumption-bundle-verify:
-    name: subsumption-bundle-verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify bundle
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Verify Bundle
         run: |
-          node scripts/ci/verify_subsumption_bundle.mjs subsumption/item-unknown/manifest.yaml
+          if [ -f "subsumption/item-unknown/manifest.yaml" ]; then
+             node scripts/ci/verify_subsumption_bundle.mjs subsumption/item-unknown/manifest.yaml
+          else
+             echo "Missing manifest: subsumption/item-unknown/manifest.yaml"
+             exit 1
+          fi

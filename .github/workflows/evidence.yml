@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: python -m pip install --upgrade pip jsonschema pytest
+        run: pnpm install --no-frozen-lockfile
       - name: Verify evidence and policy
         run: python tools/evidence/verify_evidence.py
       - name: Run cogwar contract tests

@@ -1,40 +1,49 @@
 name: CI Signal Gate
+
 on:
+  schedule:
+    - cron: '0 8 * * *' # Daily at 8am UTC
   workflow_dispatch:
-  schedule: [{cron: "*/30 * * * *"}]
-  pull_request:
 
 jobs:
   gate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
 
-      - name: Setup gh + jq
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Setup tools
         run: |
           sudo apt-get update && sudo apt-get install -y jq
           type gh || (type brew >/dev/null 2>&1 && brew install gh) || sudo apt-get install -y gh
-
-      - name: Auth GH (GITHUB_TOKEN)
-        run: gh auth setup-git
+          gh auth setup-git
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Harvest runs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Harvest Signals
         run: |
-          REPO="${{ github.repository }}"
+          REPO="BrianCLong/summit"
           ./scripts/ci/harvest_actions_signals.sh "$REPO" 100
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute metrics
+      - name: Compute Metrics
         run: |
-          REPO="${{ github.repository }}"
+          REPO="BrianCLong/summit"
           jq -f scripts/ci/compute_metrics.jq --arg repo "$REPO" runs_raw.json > runs_metrics.json
           echo "Computed metrics:"
           cat runs_metrics.json | jq .success_rate_pct
 
-      - name: Diff vs prior
+      - name: Diff against Yesterday
         run: |
           # Create a dummy "today" file for the script logic (though the script logic in the user prompt was bash + jq)
           # We'll use a simpler approach here using the jq script we saved.
@@ -63,13 +72,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Enforce policy
+      - name: Gate Check
         run: |
           ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json
 
-      - name: Upload artifacts
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: ci-signal
           path: |

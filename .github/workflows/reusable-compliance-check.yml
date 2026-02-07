@@ -1,0 +1,27 @@
+name: Reusable Compliance Check
+
+on:
+  workflow_call:
+    inputs:
+      policy_path:
+        required: true
+        type: string
+      evidence_path:
+        required: true
+        type: string
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install PyYAML pytest jsonschema
+
+      - name: Run verification
+        run: |
+          python3 -m pytest tests/policies/test_influence_governance.py tests/info_integrity/test_validate.py tests/evals/test_info_integrity_evals.py tests/info_integrity/test_reporting_audit.py

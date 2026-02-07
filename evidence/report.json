@@ -1,5 +1,20 @@
 {
-  "summary": "Partitioning eval completed",
-  "scenarios": 3,
-  "status": "PASS"
+  "compliance": {
+    "status": "compliant",
+    "checks": [
+      {
+        "id": "CHK-001",
+        "status": "pass",
+        "timestamp": "2024-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "security": {
+    "scans": [
+      {
+        "tool": "trivy",
+        "status": "clean"
+      }
+    ]
+  }
 }

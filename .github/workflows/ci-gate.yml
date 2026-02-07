@@ -1,0 +1,49 @@
+name: CI Gate
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+
+jobs:
+  gate:
+    name: GA Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run GA Verification
+        run: |
+          if pnpm run ga:verify; then
+            echo "STATUS=success" >> $GITHUB_ENV
+          else
+            echo "STATUS=failure" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      - name: Report Results
+        if: always()
+        run: |
+          echo "### GA Gate Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$STATUS" == "success" ]; then
+            echo "- Status: PASS" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`$GITHUB_SHA\`" >> $GITHUB_STEP_SUMMARY
+            echo "- GA verification passed. This commit meets GA readiness criteria." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Status: FAIL" >> $GITHUB_STEP_SUMMARY
+            echo "- Commit: \`$GITHUB_SHA\`" >> $GITHUB_STEP_SUMMARY
+            echo "- GA verification failed. Review logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
