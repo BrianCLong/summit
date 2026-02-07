@@ -668,6 +668,7 @@ instructions for full script). Ensure binaries/large files are sanitized before 
 - **PR Metadata:** PRs MUST include the fenced JSON block between `<!-- AGENT-METADATA:START -->` and `<!-- AGENT-METADATA:END -->` following the template in `.github/PULL_REQUEST_TEMPLATE.md`. The metadata must align with the registered prompt scope and allowed operations.
 - **CI Enforcement:** Use `scripts/ci/verify-prompt-integrity.ts` to validate prompt hashes/scopes against the diff and `scripts/ci/validate-pr-metadata.ts` to validate PR metadata and emit execution records.
 - **Artifacts & Archives:** Successful runs emit `artifacts/agent-runs/{task_id}.json` and the CI metrics artifact `agent-metrics.json`; failures must be classified per `docs/ga/AGENT-FAILURE-MODES.md`.
+- **Context Engineering:** Agents must consume context from `.summit/context/` via the `context_report.json` mechanism. See [`docs/standards/context-engineering-coding-agents.md`](docs/standards/context-engineering-coding-agents.md) for the governed taxonomy of Guidance, Instructions, and Interfaces.
 
 ## Agent & Partner Responsibility Boundaries
 
