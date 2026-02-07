@@ -1,35 +1,42 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (Moltbook-Class Pack)
 
-## Structure Validation
+## Verified vs. Assumed Directory Layout
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| Area | Verified Path | Status | Notes |
+| --- | --- | --- | --- |
+| Repo root | `/workspace/summit` | ✅ Verified | Working directory for this change. |
+| Docs | `docs/` | ✅ Verified | Documentation root. |
+| CI workflows | `.github/workflows/` | ✅ Verified | Cataloged in `README.md`. |
+| Evidence tooling | `tools/evidence/` | ✅ Verified | Evidence validation + determinism gates. |
+| CLI | `tools/summitctl/` | ✅ Verified | `summitctl` CLI package. |
+| Tests | `tests/` | ✅ Verified | Root tests directory. |
+| Artifacts | `artifacts/` | ✅ Verified | Evidence artifacts directory exists. |
+| Eval profiles | `eval/` | ⚠️ Deferred pending confirmation | Multiple evals exist; agentic-platform location deferred pending confirmation. |
+| Policy gates | `policy/` | ⚠️ Deferred pending confirmation | Location for deny-by-default policies deferred pending confirmation. |
 
-## Component Mapping
+## CLI Entrypoint
+- Verified CLI name: `summitctl` (run via `npm run summitctl -- <command>`). See `tools/summitctl/README.md`.
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+## Evidence Schema Conventions
+- Evidence bundles use `report.json`, `metrics.json`, and `stamp.json` files; timestamp isolation is enforced (timestamps only allowed in `stamp.json`). See `tools/evidence/verify_evidence.py`.
 
-## Constraints & Checks
+## CI Check Names & Gate Sources
+- Required CI workflows are documented in `.github/workflows/README.md` (e.g., `ci.yml`, `ci-lint-and-unit.yml`, `ci-golden-path.yml`, `security.yml`).
+- Gate IDs like `agentic_platform_secrets_gate` remain **deferred pending confirmation** until a gate registry is confirmed.
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+## Artifact Storage Conventions
+- Evidence tooling in `tools/evidence/verify_evidence.py` expects `evidence/<EVIDENCE_ID>/{report.json,metrics.json,stamp.json}`.
+- Release tooling references `artifacts/<slug>/stamp.json` for verification bundles.
 
-## Next Steps
+## Must-Not-Touch Files (for this pack)
+- Lockfiles: `pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`, `Cargo.lock`.
+- Security policy files: `policy/defensive_only.yml`, `policy/innovation_flags.yml`.
+- Branch protection workflows in `.github/workflows/`.
+- Any files under `docs/governance/` unless explicitly scoped.
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+## Validation Checklist
+1. Confirm eval profile location under `eval/` (or alternate) for agentic-platform pack.
+2. Confirm CI gate registry for secrets/PII/provenance checks.
+3. Confirm evidence schema IDs and whether a new schema entry is required.
+4. Confirm artifact storage path for `artifacts/<slug>/` vs `evidence/<id>/`.
+5. Confirm contribution/license rules for new docs in `docs/`.

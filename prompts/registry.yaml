@@ -1,5 +1,33 @@
 version: 1
 prompts:
+  - id: moltbook-ai-theater-pack
+    version: v1
+    path: prompts/standards/moltbook-ai-theater@v1.md
+    sha256: d0fd1c8dd7c5bcc92dc5d7e0601d2aba5e29880c6fc54519f3c9f0e1669ed5bc
+    description: Create Moltbook-class agentic-platform standards, security data-handling, ops runbook, and update repo assumptions + roadmap status.
+    scope:
+      paths:
+        - docs/standards/moltbook-ai-theater.md
+        - docs/security/data-handling/moltbook-ai-theater.md
+        - docs/ops/runbooks/moltbook-ai-theater.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/standards/moltbook-ai-theater@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
