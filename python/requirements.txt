@@ -22,5 +22,5 @@ python-json-logger==4.0.0
 opentelemetry-api==1.39.1
 opentelemetry-sdk==1.39.1
 neo4j==6.1.0
-sentencepiece
+sentencepiece==0.2.1
 protobuf
