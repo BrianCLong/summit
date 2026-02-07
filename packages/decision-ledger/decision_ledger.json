@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "cib-policy-gate-20260210",
+    "timestamp": "2026-02-10T12:15:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJhZGQgQ0lCIGZlYXR1cmUgcmVnaXN0cnksIHBvbGljeSBnYXRlLCBhbmQgbmFycmF0aXZlIElPIHJlZmVyZW5jZSBkb2NzIiwiZmlsZXMiOlsiZG9jcy9yZXNlYXJjaC9GRUFUVVJFU19GUkFNRV9DSUIueW1sIiwiZG9jcy9yZXNlYXJjaC9OQVJSQVRJVkVfSU9fUkVBRElOR19MSVNULm1kIiwiZG9jcy9yZXNlYXJjaC9OQVJSQVRJVkVfSU9fUkVGRVJFTkNFX1RPX1BJUEVMSU5FX01BUC5tZCIsInBvbGljeS9jaWIvUkVBRE1FLm1kIiwicG9saWN5L2NpYi9mZWF0dXJlX3JlZ2lzdHJ5LnJlZ28iLCJwb2xpY3kvY2liL3BvbGljeV90ZXN0LnJlZ28iLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iLCJwYWNrYWdlcy9kZWNpc2lvbi1sZWRnZXIvZGVjaXNpb25fbGVkZ2VyLmpzb24iLCJwcm9tcHRzL3Jlc2VhcmNoL2NpYi1wb2xpY3ktZ2F0ZUB2MS5tZCIsInByb21wdHMvcmVnaXN0cnkueWFtbCIsImFnZW50cy9leGFtcGxlcy9DSUJfUE9MSUNZX0dBVEVfMjAyNjAyMTAuanNvbiJdfQ==",
+    "decision": {
+      "action": "add_cib_policy_gate",
+      "rule": {
+        "condition": "cib governance gate requires feature registry and evidence minimums",
+        "action": "add_cib_policy_gate",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added CIB feature registry, narrative IO reference docs, and OPA gate scaffolding with evidence minimums. Rollback: revert the commit that adds docs/research/FEATURES_FRAME_CIB.yml, policy/cib/, prompt registry/task spec updates, and roadmap entry.",
+    "reverted": false
   }
 ]

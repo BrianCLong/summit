@@ -896,3 +896,33 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: cib-policy-gate
+    version: v1
+    path: prompts/research/cib-policy-gate@v1.md
+    sha256: 5cffa8e4df9861d59f58a27958863fe38787d4d097cebaf5ec18ca39c06c7378
+    description: Add narrative/CIB feature registry artifacts and policy gate scaffolding.
+    scope:
+      paths:
+        - docs/research/FEATURES_FRAME_CIB.yml
+        - docs/research/NARRATIVE_IO_READING_LIST.md
+        - docs/research/NARRATIVE_IO_REFERENCE_TO_PIPELINE_MAP.md
+        - policy/cib/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/research/cib-policy-gate@v1.md
+        - prompts/registry.yaml
+        - agents/examples/CIB_POLICY_GATE_20260210.json
+      domains:
+        - documentation
+        - governance
+        - policy
+        - research
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

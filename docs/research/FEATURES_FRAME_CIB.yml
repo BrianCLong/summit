@@ -1,0 +1,236 @@
+version: 1
+owner: summit-research
+last_reviewed: "2026-02-06"
+
+scopes:
+  - id: frame
+    description: Narrative framing + rhetorical structure signals (content-level).
+  - id: cib
+    description: Coordinated inauthentic behavior / influence operation signals (behavior-level).
+  - id: xplat
+    description: Cross-platform linkage and campaign stitching signals.
+  - id: explain
+    description: Explainability + audit artifacts suitable for governance and evidence bundles.
+
+signals:
+  # -------------------------
+  # FRAME / NARRATIVE SIGNALS
+  # -------------------------
+  - id: FRAME.VALUE
+    scope: frame
+    description: Value frame label(s) expressed in text (e.g., fairness, loyalty, authority, harm/care).
+    inputs: ["text", "lang", "domain"]
+    outputs: ["labels[]", "confidence"]
+    extraction: ["frame_classifier", "llm_tagging_guarded"]
+    evidence:
+      evidence_id: EV-FRAME-001
+      controls: ["SOC2-CC7.2", "SSDF-PR.2"]
+    eval:
+      metrics: ["macro_f1", "calibration_ece", "paraphrase_stability"]
+      datasets_hint: ["framing_datasets", "internal_gold_frames"]
+
+  - id: FRAME.CAUSAL_ATTRIBUTION
+    scope: frame
+    description: Causal attribution relations (who/what caused what; blame/credit).
+    inputs: ["text"]
+    outputs: ["triples[]", "confidence"]
+    extraction: ["ie_causal", "dependency_patterns", "llm_ie_guarded"]
+    evidence:
+      evidence_id: EV-FRAME-002
+      controls: ["SOC2-CC7.2", "NIST-SA-11"]
+    eval:
+      metrics: ["triple_f1", "temporal_holdout"]
+
+  - id: FRAME.MORAL_EVAL
+    scope: frame
+    description: Moral evaluation / normative judgment applied to actors/events.
+    inputs: ["text"]
+    outputs: ["spans[]", "polarity", "confidence"]
+    extraction: ["sentiment_plus_norms", "llm_span_extraction_guarded"]
+    evidence:
+      evidence_id: EV-FRAME-003
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["span_f1", "human_utility_score"]
+
+  - id: FRAME.REMEDY
+    scope: frame
+    description: Proposed solutions/“remedies” (policy, action, punishment, boycott).
+    inputs: ["text"]
+    outputs: ["remedies[]", "confidence"]
+    extraction: ["intent_acts", "llm_ie_guarded"]
+    evidence:
+      evidence_id: EV-FRAME-004
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["precision_at_k"]
+
+  - id: RHETORIC.EVIDENTIALITY
+    scope: frame
+    description: Evidentiality markers (allegedly, sources say, leaked, anonymous, etc.) and certainty.
+    inputs: ["text"]
+    outputs: ["markers[]", "certainty_score"]
+    extraction: ["lexicon_rules", "classifier"]
+    evidence:
+      evidence_id: EV-RHET-001
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["macro_f1", "robustness_keyword_noise"]
+
+  - id: RHETORIC.SCAPegoating
+    scope: frame
+    description: Scapegoating / blame targeting patterns (outgroup blame, generalized attribution).
+    inputs: ["text"]
+    outputs: ["targets[]", "confidence"]
+    extraction: ["pattern_rules", "classifier", "llm_guarded"]
+    evidence:
+      evidence_id: EV-RHET-002
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["macro_f1"]
+
+  # -------------------------
+  # CIB / COORDINATION SIGNALS
+  # -------------------------
+  - id: CIB.TEMPORAL.SYNC
+    scope: cib
+    description: Temporal synchronization (bursty posting, near-simultaneous messages).
+    inputs: ["events[]"]
+    outputs: ["sync_score", "clusters[]"]
+    extraction: ["burst_detection", "time_window_clustering"]
+    thresholds:
+      warn: 0.70
+      block: 0.85
+    evidence:
+      evidence_id: EV-CIB-001
+      controls: ["SOC2-CC7.2", "NIST-SI-4"]
+    eval:
+      metrics: ["auprc", "false_positive_burst_audit"]
+
+  - id: CIB.TEXT.REUSE
+    scope: cib
+    description: Text reuse / near-duplicate content across accounts.
+    inputs: ["texts[]"]
+    outputs: ["reuse_edges[]", "reuse_score"]
+    extraction: ["minhash_lsh", "embedding_similarity"]
+    thresholds:
+      warn: 0.65
+      block: 0.80
+    evidence:
+      evidence_id: EV-CIB-002
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["precision_at_k", "cluster_purity"]
+
+  - id: CIB.URL.REUSE
+    scope: cib
+    description: URL reuse / shared link infrastructure across accounts/posts.
+    inputs: ["urls[]", "events[]"]
+    outputs: ["url_graph_stats", "shared_domain_score"]
+    extraction: ["url_normalization", "domain_graph"]
+    thresholds:
+      warn: 0.60
+      block: 0.78
+    evidence:
+      evidence_id: EV-CIB-003
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["precision_at_k"]
+
+  - id: CIB.NETWORK.COHESION
+    scope: cib
+    description: Dense coordination subgraphs (retweet/repost/mention clusters).
+    inputs: ["interaction_graph"]
+    outputs: ["communities[]", "cohesion_score"]
+    extraction: ["community_detection", "kcore", "modularity"]
+    thresholds:
+      warn: 0.70
+      block: 0.85
+    evidence:
+      evidence_id: EV-CIB-004
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["stability_over_time", "temporal_delta"]
+
+  - id: CIB.ACCOUNT.SIMILARITY
+    scope: cib
+    description: Account/profile similarity (creation patterns, naming, bios, avatars hash if available).
+    inputs: ["accounts[]"]
+    outputs: ["similarity_score", "clusters[]"]
+    extraction: ["feature_hashing", "pairwise_similarity"]
+    thresholds:
+      warn: 0.65
+      block: 0.80
+    evidence:
+      evidence_id: EV-CIB-005
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["auprc", "fp_rate_on_legit_collections"]
+
+  - id: CIB.CROSSPLATFORM.LINKAGE
+    scope: xplat
+    description: Cross-platform linkage via shared URLs, shared text fingerprints, shared media hashes.
+    inputs: ["platform_streams[]"]
+    outputs: ["xplat_edges[]", "xplat_cluster_score"]
+    extraction: ["canonical_linking", "fingerprints", "media_hash"]
+    thresholds:
+      warn: 0.60
+      block: 0.78
+    evidence:
+      evidence_id: EV-XPLAT-001
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["linkage_precision_recall"]
+
+  - id: CIB.CAMPAIGN.PHASE
+    scope: cib
+    description: Campaign phase labeling (seeding/identification → imitation → amplification → pollution).
+    inputs: ["cluster_time_series"]
+    outputs: ["phase", "confidence", "change_points[]"]
+    extraction: ["change_point_detection", "rules_plus_classifier"]
+    evidence:
+      evidence_id: EV-CAMP-001
+      controls: ["SOC2-CC7.2"]
+    eval:
+      metrics: ["transition_accuracy", "timeline_alignment"]
+
+  # -------------------------
+  # EXPLAIN / AUDIT SIGNALS
+  # -------------------------
+  - id: EXPLAIN.SPAN
+    scope: explain
+    description: Model explanation spans (salient text spans, technique cues) for audit trails.
+    inputs: ["text", "model_output"]
+    outputs: ["spans[]", "rationale"]
+    extraction: ["attribution", "llm_rationale_guarded"]
+    evidence:
+      evidence_id: EV-EXP-001
+      controls: ["SOC2-CC7.2", "SSDF-PO.1"]
+    eval:
+      metrics: ["faithfulness", "human_utility_score"]
+
+policies:
+  # Policy-level aggregations referenced by OPA
+  - id: POLICY.CIB_RISK_SCORE
+    description: Aggregate CIB risk score from weighted coordination signals.
+    formula:
+      type: weighted_sum
+      weights:
+        CIB.TEMPORAL.SYNC: 0.20
+        CIB.TEXT.REUSE: 0.20
+        CIB.URL.REUSE: 0.15
+        CIB.NETWORK.COHESION: 0.20
+        CIB.ACCOUNT.SIMILARITY: 0.10
+        CIB.CROSSPLATFORM.LINKAGE: 0.15
+    thresholds:
+      warn: 0.65
+      block: 0.80
+
+  - id: POLICY.EVIDENCE_MINIMUMS
+    description: Minimum evidence IDs required for “governance green” on narrative/CIB detection artifacts.
+    required_evidence_ids:
+      - EV-CIB-001
+      - EV-CIB-002
+      - EV-CIB-004
+      - EV-XPLAT-001
+      - EV-EXP-001

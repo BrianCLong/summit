@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-10T12:00:00Z",
+  "revision_note": "Added governed CIB policy gate + narrative feature registry artifacts for evidence-first gating.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -135,6 +135,12 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
+      "id": "cib-policy-gate",
+      "status": "partial",
+      "owner": "codex",
+      "notes": "Feature registry + OPA gate scaffolding for CIB/narrative governance with evidence minimums."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -173,10 +179,10 @@
   ],
   "summary": {
     "rc_ready": 8,
-    "partial": 2,
+    "partial": 3,
     "incomplete": 0,
     "not_started": 5,
-    "total": 15,
+    "total": 16,
     "ga_blockers": []
   }
 }
