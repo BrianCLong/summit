@@ -1,0 +1,33 @@
+name: Serious Client Tone Drift
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift-check:
+    name: Detect Drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Drift Script
+        run: python scripts/monitoring/forbes-serious-clients-prompts-2026-02-06-drift.py
+
+      - name: Upload Drift Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: serious-client-tone-drift
+          path: artifacts/serious-client-tone-drift/
+          retention-days: 30

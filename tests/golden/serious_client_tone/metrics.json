@@ -1,0 +1,1 @@
+{"metrics": [{"availability_signal_count": 3, "input_id": "availability_newbie", "serious_client_score": 50, "transformation_first_present": false}, {"availability_signal_count": 0, "input_id": "transformation_strong", "serious_client_score": 100, "transformation_first_present": true}], "version": "0.1.0"}
