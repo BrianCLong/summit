@@ -1,0 +1,117 @@
+name: Supply Chain Evidence Badge
+
+on:
+  pull_request: {}
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+jobs:
+  supplychain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: artifacts/sbom.spdx.json
+
+      - name: Attest SBOM (OIDC)
+        id: attest_sbom
+        uses: actions/attest-sbom@d1e8b2a1f8b74c1b3d9a9f0c1e2a3b4c5d6e7f8a # v2
+        with:
+          sbom-path: artifacts/sbom.spdx.json
+          subject-path: artifacts/sbom.spdx.json
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+
+      - name: Verify attestation
+        id: verify_attestation
+        continue-on-error: true
+        env:
+          COSIGN_SUBJECT: artifacts/sbom.spdx.json
+          ATTESTATION_BUNDLE: ${{ steps.attest_sbom.outputs.bundle-path }}
+          OIDC_ISSUER: https://token.actions.githubusercontent.com
+          CERT_ID_REGEX: https://github.com/${{ github.repository }}.*/.github/workflows/.*
+          PREDICATE_TYPE: spdx
+          VERIFICATION_OUTPUT: artifacts/attestation.verify.json
+        run: bash scripts/ci/verify_attestation.sh
+
+      - name: Derive verification status
+        id: verification_status
+        if: always()
+        run: |
+          if [[ "${{ steps.verify_attestation.outcome }}" == "success" ]]; then
+            echo "status=verified" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pack evidence summary
+        if: always()
+        run: |
+          python tools/evidence/pack_summary.py \
+            --sbom-path artifacts/sbom.spdx.json \
+            --sbom-format spdx-json \
+            --attestation-bundle "${{ steps.attest_sbom.outputs.bundle-path }}" \
+            --predicate-type spdx \
+            --commit-sha "${{ github.sha }}" \
+            --repository "${{ github.repository }}" \
+            --verification-status "${{ steps.verification_status.outputs.status }}" \
+            --verification-issuer "https://token.actions.githubusercontent.com" \
+            --verification-subject "${{ github.repository }}" \
+            --output "out/evidence/${{ github.sha }}/evidence.summary.json"
+
+      - name: Derive badge payload
+        if: always()
+        run: |
+          python tools/evidence/derive_badge_payload.py \
+            --summary "out/evidence/${{ github.sha }}/evidence.summary.json" \
+            --label "sbom" \
+            --output "out/evidence/${{ github.sha }}/badge.json"
+
+      - name: Redaction policy gate
+        if: always()
+        env:
+          PUBLIC_EVIDENCE_DIR: out/evidence/${{ github.sha }}
+          GIT_SHA: ${{ github.sha }}
+        run: bash ci/gates/public_evidence_redaction_pass.sh
+
+      - name: Publish public evidence payloads
+        if: always()
+        run: |
+          python tools/publish/public_evidence_publish.py \
+            --source-dir "out/evidence/${{ github.sha }}" \
+            --dest-dir "public/evidence" \
+            --commit "${{ github.sha }}"
+
+      - name: Upload evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        with:
+          name: supplychain-evidence
+          path: |
+            artifacts/sbom.spdx.json
+            artifacts/attestation.verify.json
+            out/evidence/${{ github.sha }}/badge.json
+            out/evidence/${{ github.sha }}/evidence.summary.json
