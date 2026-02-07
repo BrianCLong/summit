@@ -24,6 +24,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cache-stable-cypher-plan
+    version: v1
+    path: prompts/neo4j/cache-stable-cypher-plan@v1.md
+    sha256: 833a5b151ce0d9f1b7b2d54c59769d73da512769ab24add5e928e3bcf431a78f
+    description: Document cache-stable generated Cypher plan and update roadmap status.
+    scope:
+      paths:
+        - docs/neo4j/cache-stable-cypher.md
+        - docs/roadmap/STATUS.json
+        - prompts/neo4j/cache-stable-cypher-plan@v1.md
+        - prompts/registry.yaml
+        - agents/examples/CACHE_STABLE_CYPHER_PLAN_20260206.json
+      domains:
+        - documentation
+        - governance
+        - neo4j
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md
