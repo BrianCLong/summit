@@ -1,7 +1,7 @@
+package summit.authz_test
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
-package summit.authz_test
 
 import data.summit.authz
 

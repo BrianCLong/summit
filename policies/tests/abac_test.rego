@@ -1,8 +1,8 @@
+
+package policies
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
-
-package policies
 
 # Test tenant isolation: user from tenant A cannot access tenant B data
 test_deny_cross_tenant_access {

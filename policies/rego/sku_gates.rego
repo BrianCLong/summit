@@ -1,7 +1,7 @@
+package intelgraph.sku
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
-package intelgraph.sku
 
 default allow_feature := false
 

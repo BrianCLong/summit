@@ -1,7 +1,7 @@
+package compliance
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
-package compliance
 
 import data.compliance.lib_time as t
 

@@ -128,7 +128,8 @@ def main() -> int:
     IGNORE_DIRS = {
         "schemas", "ecosystem", "jules", "project19", "governance",
         "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs",
-        "runtime", "subsumption", "out", "TELETOK-2025", "ga", "bundles"
+        "runtime", "subsumption", "out", "TELETOK-2025", "ga", "bundles",
+        "summit"
     }
 
     for p in EVID.rglob("*"):

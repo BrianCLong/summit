@@ -1,7 +1,7 @@
+package summit.provenance.gate
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
-package summit.provenance.gate
 
 # Default deny
 default allow = false

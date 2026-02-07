@@ -1,7 +1,7 @@
+package composer.dlp
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
-package composer.dlp
 
 # input.dlp_hits: array of findings from your scanners (post-redaction)
 # Example hit: { "severity": "high", "type": "PII_EMAIL", "path": "/logs/build-123.log" }
@@ -13,6 +13,9 @@ block {
 
 # Shadow-able wrapper decision
 package composer.decision_dlp
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
 decision := {
   "policy": "dlp",

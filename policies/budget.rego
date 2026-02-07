@@ -1,13 +1,11 @@
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
 # IntelGraph Budget Policy: OPA Rego rules for tenant caps + four-eyes approval
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.budget.allow"
 
 package intelgraph.budget
-
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
+
 
 # Default deny - all budget requests must be explicitly allowed
 default allow := false

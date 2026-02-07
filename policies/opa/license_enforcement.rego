@@ -1,16 +1,11 @@
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
 # License Enforcement and Compatibility Policy
 # Enforces data license restrictions and TOS compliance
 
 package intelgraph.license
-
-import future.keywords.contains
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
+
 
 # =============================================================================
 # Main Decision Rules

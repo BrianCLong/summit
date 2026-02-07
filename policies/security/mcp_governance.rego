@@ -1,12 +1,8 @@
+package security.mcp
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
-package security.mcp
 
-import future.keywords.if
-import future.keywords.in
 
 default allow := false
 
