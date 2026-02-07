@@ -1,0 +1,8 @@
+{
+  "agent_id": "agent-openclaw-1",
+  "owner": "governance-team",
+  "team": "governance",
+  "purpose": "ibc validation",
+  "data_classification": "internal",
+  "retention_days": 7
+}

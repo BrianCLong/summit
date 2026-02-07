@@ -16,6 +16,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  evidence:
+    name: Evidence
+    uses: ./.github/workflows/_reusable-evidence.yml
+
   security-scan:
     name: Security Scan
     runs-on: ubuntu-22.04
@@ -406,6 +410,7 @@ jobs:
     name: CI Verify Gate ✅
     runs-on: ubuntu-22.04
     needs:
+      - evidence
       - security-scan
       - policy-compliance
       - governance-checks
@@ -419,6 +424,7 @@ jobs:
       - name: Check critical gates passed
         run: |
           echo "=== CI Verify Gate Status ==="
+          echo "Evidence: ${{ needs.evidence.result }}"
           echo "Security Scan: ${{ needs.security-scan.result }}"
           echo "Policy Compliance: ${{ needs.policy-compliance.result }}"
           echo "Governance Checks: ${{ needs.governance-checks.result }}"
@@ -432,6 +438,11 @@ jobs:
           # Critical gates (BLOCKING)
           if [[ "${{ needs.security-scan.result }}" != "success" ]]; then
             echo "::error::Security Scan FAILED - CI BLOCKED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.evidence.result }}" != "success" ]]; then
+            echo "::error::Evidence job FAILED - CI BLOCKED"
             exit 1
           fi
 
@@ -462,6 +473,7 @@ jobs:
           echo "## ✅ CI Verify Gate: PASSED" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Critical Gates (BLOCKING)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY

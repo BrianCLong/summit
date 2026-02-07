@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "deny_by_default": true,
+  "required_identity_fields": ["agent_id", "owner", "team", "purpose"],
+  "required_context_fields": ["data_classification", "retention_days"],
+  "max_retention_days": 30,
+  "never_log_fields": ["secrets", "tokens", "credentials", "raw_pii"]
+}

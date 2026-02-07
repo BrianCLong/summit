@@ -1,22 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Evidence Metrics",
   "type": "object",
+  "anyOf": [
+    {
+      "required": ["evidence_id", "metrics"]
+    },
+    {
+      "required": ["avg_latency_ms", "avg_fanout"]
+    }
+  ],
   "properties": {
     "evidence_id": { "type": "string" },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
     "avg_latency_ms": { "type": "number" },
     "avg_fanout": { "type": "number" }
   },
-  "required": [],
   "additionalProperties": true
-  "$id": "https://summit.local/schemas/metrics.schema.json",
-  "type": "object",
-  "required": ["version", "counters"],
-  "properties": {
-    "version": { "type": "integer" },
-    "counters": {
-      "type": "object",
-      "additionalProperties": { "type": "number" }
-    }
-  },
-  "additionalProperties": false
 }

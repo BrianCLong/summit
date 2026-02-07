@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-OPENCLAW-MOMENT-GOV-001",
+  "metrics": {
+    "fixtures_passed": 1,
+    "fixtures_failed": 1
+  }
+}
