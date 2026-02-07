@@ -1,0 +1,38 @@
+{
+  "task_id": "AI_PLATFORM_DEVELOPMENTS_ITEM_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "ai-platform-developments-ingest",
+    "version": "v1",
+    "sha256": "f52dc852252e72b37398a73fa89fdc1fbb28732612d3067bf8801bf463bb81b7",
+    "path": "prompts/items/ai-platform-developments-ingest@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/items/ai-platform-developments-copilot-agent-workflows.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/AI_PLATFORM_DEVELOPMENTS_ITEM_20260206.json",
+      "prompts/items/ai-platform-developments-ingest@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "items", "agent-ops"],
+    "exclusions": ["**/node_modules/**", "**/dist/**"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/items/ai-platform-developments-copilot-agent-workflows.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "ITEM ingest document is created with evidence-first structure.",
+    "Roadmap status reflects the ITEM ingest completion."
+  ],
+  "stop_conditions": [
+    "Source list is incomplete: Deferred pending source capture.",
+    "Scope expansion beyond docs/ or governance artifacts: Deferred pending governance review."
+  ]
+}
