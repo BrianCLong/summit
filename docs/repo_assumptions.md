@@ -1,16 +1,32 @@
 # Repo Assumptions & Verification
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+## Verified (Current State)
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+| Item | Evidence |
+| --- | --- |
+| Monorepo structure with `services/` and `src/` | Root directory layout |
+| `src/` contains core logic and libraries | Root directory layout |
+| `services/evals` exists with `runner.ts` | Root directory layout |
+| `src/cli` exists | Root directory layout |
+| `docs/standards/`, `docs/security/data-handling/`, and `docs/ops/runbooks/` exist | Directory layout |
+| pnpm workspace is in use | `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` |
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+## Deferred Pending Validation
+
+| Item | Reason | Validation Plan |
+| --- | --- | --- |
+| UI is Next.js or compatible | Deferred pending repo scan | Inspect `apps/` or `client/` package.json |
+| Testing stack includes Playwright/Vitest | Deferred pending repo scan | Search for Playwright/Vitest configs |
+| Policy-as-code enforcement exists | Deferred pending evidence | Locate enforcement scripts and gates |
+| Feature flag mechanism exists | Deferred pending evidence | Confirm `feature-flags`/`flags` usage |
+
+## Validation Checklist
+
+- [ ] Confirm UI framework (Next.js or other) in `apps/` or `client/`.
+- [ ] Confirm test stack (`playwright`, `vitest`, `jest`) in root configs.
+- [ ] Locate policy enforcement gate scripts.
+- [ ] Locate feature flag wiring and default-off behavior.
+
+## Plan Deviation (Current)
+
+- Documentation-only changes scoped to standards, security data handling, and ops runbooks.
