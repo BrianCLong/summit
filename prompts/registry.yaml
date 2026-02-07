@@ -136,6 +136,38 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: watchboard-evidence-v0
+    version: v1
+    path: prompts/graphrag/watchboard-evidence-v0@v1.md
+    sha256: d285077bf305186c21963df0ba6728bc3dd819b8c049a911cfb0c2e0140a7dbd
+    description: Implement the IntelGraph watchboard evidence system v0 with deterministic schemas, docs, and GA mapping.
+    scope:
+      paths:
+        - agent-contract.json
+        - docs/ga/evidence.md
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/verification-map.json
+        - docs/roadmap/STATUS.json
+        - reports/a11y-keyboard/README.md
+        - src/graphrag/evidence/
+        - tests/graphrag/evidence/
+        - prompts/graphrag/watchboard-evidence-v0@v1.md
+        - prompts/registry.yaml
+        - agents/examples/WATCHBOARD_EVIDENCE_V0.json
+      domains:
+        - graphrag
+        - governance
+        - documentation
+        - testing
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md

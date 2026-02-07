@@ -1,0 +1,45 @@
+{
+  "task_id": "WATCHBOARD_EVIDENCE_V0",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "watchboard-evidence-v0",
+    "version": "v1",
+    "sha256": "d285077bf305186c21963df0ba6728bc3dd819b8c049a911cfb0c2e0140a7dbd",
+    "path": "prompts/graphrag/watchboard-evidence-v0@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "agent-contract.json",
+      "docs/ga/evidence.md",
+      "docs/ga/MVP-4-GA-VERIFICATION.md",
+      "docs/ga/verification-map.json",
+      "docs/roadmap/STATUS.json",
+      "reports/a11y-keyboard/README.md",
+      "src/graphrag/evidence/",
+      "tests/graphrag/evidence/",
+      "prompts/graphrag/watchboard-evidence-v0@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/WATCHBOARD_EVIDENCE_V0.json"
+    ],
+    "domains": ["graphrag", "governance", "documentation", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["make ga-verify", "node scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Evidence schemas and writer are deterministic and documented.",
+    "GA verification map includes watchboard evidence pack entry.",
+    "Roadmap status updated with evidence contract note."
+  ],
+  "stop_conditions": [
+    "Prompt hash mismatch or missing registry entry.",
+    "GA verification failures or scope violations.",
+    "PII detection in diffs."
+  ]
+}

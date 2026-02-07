@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/report.schema.json",
+  "type": "object",
+  "required": ["run_id", "generated_by", "summary", "items"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "generated_by": { "type": "string" },
+    "summary": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "area", "title", "files"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-IO-SITREP20260206-[A-Z]+-[0-9]{3}$"
+          },
+          "area": { "type": "string" },
+          "title": { "type": "string" },
+          "files": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
