@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-CLAUDE-OBSIDIAN-CI-002",
+  "item": "xda-claude-code-obsidian",
+  "summary": "Evidence verifier CI gate wired for Claude-in-Obsidian bundles.",
+  "artifacts": ["metrics.json", "stamp.json"],
+  "policy": {
+    "mode": "read_only",
+    "write_enabled": false
+  }
+}
