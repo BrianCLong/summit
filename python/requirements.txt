@@ -12,7 +12,7 @@ numpy==2.4.2
 requests==2.32.5
 feedparser==6.0.12
 sqlalchemy==2.0.46
-scikit-learn
+scikit-learn==1.8.0
 # Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.
 aiohttp
 fuzzywuzzy
