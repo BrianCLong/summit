@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-AIBREAKPOINT20260205-INFRA-001",
+  "item_slug": "AIBREAKPOINT20260205",
+  "metrics": {
+    "survey_size": 1125,
+    "leaders_expect_growth_pct": 100,
+    "leaders_expect_20pct_growth_pct": 60
+  }
+}

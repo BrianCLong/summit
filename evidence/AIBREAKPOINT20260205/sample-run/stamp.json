@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-AIBREAKPOINT20260205-INFRA-001",
+  "run_id": "sample-run",
+  "generated_at": "2026-02-06T20:15:00Z",
+  "git": {
+    "sha": "UNKNOWN",
+    "ref": "LOCAL"
+  }
+}
