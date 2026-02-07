@@ -124,6 +124,43 @@ jobs:
     with:
       strict: true
 
+  policy-preflight:
+    name: Governance Preflight
+    needs: [lint, unit-tests]
+    uses: ./.github/workflows/policy_preflight.yml
+
+  evidence-bundle:
+    name: Evidence Bundle
+    needs: [policy-preflight]
+    uses: ./.github/workflows/evidence_bundle_generator.yml
+
+  governance-gate:
+    name: Governance Verdict Gate
+    needs: [evidence-bundle]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download evidence bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: evidence-bundle
+          path: artifacts
+      - name: Verify governance verdict
+        run: |
+          ./scripts/verify_governance_verdict.sh \
+            --evidence artifacts/evidence-bundle.json \
+            --policy governance/evidence-id-policy.yml
+
+  promote-artifact:
+    name: Promote Artifact
+    needs: [governance-gate]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag & Sign
+        run: ./scripts/tag_and_sign.sh
+
   soc-controls:
     name: SOC Controls
     runs-on: ubuntu-latest

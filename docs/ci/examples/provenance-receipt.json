@@ -1,0 +1,9 @@
+{
+  "predicate_type": "https://slsa.dev/provenance/v1",
+  "subject": {
+    "name": "summit-artifact",
+    "digest": "sha256:example"
+  },
+  "build_type": "summit/governed-ci",
+  "builder": "summit-ci"
+}

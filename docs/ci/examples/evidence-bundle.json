@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "bundle_version": "1.0",
+  "source_commit": "example",
+  "run_id": "example",
+  "policy_registry": "governance/policy-mapping-registry.yml",
+  "evidence": [
+    {
+      "id": "EV-001",
+      "name": "unit_test_coverage",
+      "required": true,
+      "status": "present",
+      "metadata": {
+        "controls": [
+          "SSDF v1.2 PR.2",
+          "SOC-2 CC7.2",
+          "NIST 800-53 SA-11"
+        ],
+        "description": "Unit test coverage evidence pack."
+      }
+    },
+    {
+      "id": "EV-002",
+      "name": "lint_results",
+      "required": true,
+      "status": "present",
+      "metadata": {
+        "controls": [
+          "SSDF v1.2 ST.1",
+          "SOC-2 CC7.3"
+        ],
+        "description": "Lint + static analysis outputs."
+      }
+    },
+    {
+      "id": "EV-003",
+      "name": "opa_policy_preflight",
+      "required": true,
+      "status": "present",
+      "metadata": {
+        "controls": [
+          "SSDF v1.2 PO.3",
+          "SOC-2 CC2.1"
+        ],
+        "description": "OPA policy preflight verdict.",
+        "preflight": {
+          "allow": true,
+          "failures": []
+        }
+      }
+    },
+    {
+      "id": "EV-004",
+      "name": "provenance_receipt",
+      "required": true,
+      "status": "present",
+      "metadata": {
+        "controls": [
+          "SLSA 1.0",
+          "NIST 800-53 SA-12"
+        ],
+        "description": "Supply-chain provenance receipt."
+      }
+    }
+  ],
+  "provenance": {
+    "predicate_type": "https://slsa.dev/provenance/v1",
+    "subject": {
+      "name": "summit-artifact",
+      "digest": "sha256:example"
+    },
+    "build_type": "summit/governed-ci",
+    "builder": "summit-ci"
+  }
+}

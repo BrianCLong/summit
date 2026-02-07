@@ -1,0 +1,31 @@
+version: 1
+registry:
+  EV-001:
+    name: unit_test_coverage
+    required: true
+    controls:
+      - SSDF v1.2 PR.2
+      - SOC-2 CC7.2
+      - NIST 800-53 SA-11
+    description: Unit test coverage evidence pack.
+  EV-002:
+    name: lint_results
+    required: true
+    controls:
+      - SSDF v1.2 ST.1
+      - SOC-2 CC7.3
+    description: Lint + static analysis outputs.
+  EV-003:
+    name: opa_policy_preflight
+    required: true
+    controls:
+      - SSDF v1.2 PO.3
+      - SOC-2 CC2.1
+    description: OPA policy preflight verdict.
+  EV-004:
+    name: provenance_receipt
+    required: true
+    controls:
+      - SLSA 1.0
+      - NIST 800-53 SA-12
+    description: Supply-chain provenance receipt.

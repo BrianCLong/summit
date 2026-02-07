@@ -1,0 +1,38 @@
+name: Policy Preflight Verification
+
+on:
+  workflow_call:
+    inputs:
+      preflight-input:
+        description: Path to preflight input JSON
+        required: false
+        type: string
+
+jobs:
+  opa_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+      - name: Collect preflight input
+        run: |
+          node scripts/collect-preflight-input.js --out artifacts/preflight-input.json
+      - name: Run OPA Policy Tests
+        run: |
+          opa test policy/governance --fail-defined --fail-unsafe
+      - name: Emit preflight verdict
+        run: |
+          opa eval -i artifacts/preflight-input.json \
+            -d policy/governance/ci-preflight.rego \
+            "data.policy.preflight" \
+            -o json > artifacts/preflight-verdict.json
+      - name: Upload preflight verdict
+        uses: actions/upload-artifact@v4
+        with:
+          name: preflight-verdict
+          path: artifacts/preflight-verdict.json

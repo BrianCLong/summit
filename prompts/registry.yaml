@@ -75,6 +75,53 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: governed-cicd-pipeline
+    version: v1
+    path: prompts/ci/governed-cicd-pipeline@v1.md
+    sha256: 78a1827304e2e33f0c5ccbbcac44a3a1300d0fc5550a874d10f8a5b5dd2d83fe
+    description: Governed CI/CD automation with policy preflight, evidence generation, and verification gates.
+    scope:
+      paths:
+        - .github/workflows/ci.yml
+        - .github/workflows/policy_preflight.yml
+        - .github/workflows/evidence_bundle_generator.yml
+        - policy/governance/ci-preflight.rego
+        - policy/governance/ci-preflight_test.rego
+        - scripts/collect-preflight-input.js
+        - scripts/evidence-generator.js
+        - scripts/verify-governance.js
+        - scripts/generate_evidence.sh
+        - scripts/verify_governance_verdict.sh
+        - scripts/tag_and_sign.sh
+        - scripts/ci/__tests__/evidence_generator.test.mjs
+        - scripts/ci/__tests__/verify_governance.test.mjs
+        - governance/policy-mapping-registry.yml
+        - governance/evidence-id-policy.yml
+        - governance/verdict-runner.json
+        - governance/decisions/ADR-AG-GOVCI-001.md
+        - packages/decision-policy/policy.v3.yaml
+        - docs/ci/examples/evidence-bundle.json
+        - docs/ci/examples/preflight-verdict.json
+        - docs/ci/examples/provenance-receipt.json
+        - docs/ci/CD_OVERVIEW.md
+        - docs/roadmap/STATUS.json
+        - prompts/ci/governed-cicd-pipeline@v1.md
+        - prompts/registry.yaml
+        - agents/examples/GOVERNED_CICD_PIPELINE_20260205.json
+      domains:
+        - ci
+        - governance
+        - evidence
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md

@@ -1,0 +1,25 @@
+version: 1.0
+owner: governance
+source: governance/policy-mapping-registry.yml
+evidence:
+  unit_test_coverage:
+    id: EV-001
+    controls:
+      - SSDF v1.2 PR.2
+      - SOC-2 CC7.2
+      - NIST 800-53 SA-11
+  lint_results:
+    id: EV-002
+    controls:
+      - SSDF v1.2 ST.1
+      - SOC-2 CC7.3
+  opa_policy_preflight:
+    id: EV-003
+    controls:
+      - SSDF v1.2 PO.3
+      - SOC-2 CC2.1
+  provenance_receipt:
+    id: EV-004
+    controls:
+      - SLSA 1.0
+      - NIST 800-53 SA-12

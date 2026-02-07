@@ -1,0 +1,15 @@
+{
+  "name": "governance-verdict-runner",
+  "version": "1.0",
+  "policy": "governance/evidence-id-policy.yml",
+  "evidence_bundle": "artifacts/evidence-bundle.json",
+  "command": "./scripts/verify_governance_verdict.sh --evidence artifacts/evidence-bundle.json --policy governance/evidence-id-policy.yml",
+  "rollback": {
+    "trigger": "missing-required-evidence",
+    "steps": [
+      "Re-run evidence bundle generator",
+      "Inspect governance/evidence-id-policy.yml for missing IDs",
+      "Re-run governance gate"
+    ]
+  }
+}

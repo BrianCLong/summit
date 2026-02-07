@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-06T00:15:00Z",
+  "revision_note": "Added governed CI/CD evidence pipeline automation deliverables.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -169,14 +169,20 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
+    },
+    {
+      "id": "governed-cicd-pipeline",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Governed CI/CD pipeline with OPA preflight, evidence bundle, governance gate, and policy registry."
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 15,
+    "total": 16,
     "ga_blockers": []
   }
 }

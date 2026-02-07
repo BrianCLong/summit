@@ -1,0 +1,8 @@
+version: v3
+name: governed-ci-evidence
+risk_tolerance: low
+rules:
+  - condition: evidence_bundle_generated == true
+    action: allow
+  - condition: governance_verdict != allow
+    action: deny
