@@ -1,6 +1,6 @@
 fastapi==0.128.4
 uvicorn==0.40.0
-hnswlib
+hnswlib==0.8.0
 rank-bm25
 sentence-transformers
 requests
