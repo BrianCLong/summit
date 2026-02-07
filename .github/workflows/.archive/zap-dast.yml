@@ -55,7 +55,7 @@ jobs:
           echo "🏗️  Building application for DAST scan..."
 
           # Install dependencies
-          pnpm install --no-no-frozen-lockfile || pnpm install
+          pnpm install --frozen-lockfile || pnpm install
 
           # Build client if exists
           if [ -d "client" ]; then

@@ -12,12 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
       - name: Install Dependencies
-        run: pnpm install --no-no-frozen-lockfile=false
+        run: pnpm install --frozen-lockfile=false
       - name: Run Unit Tests
         run: pnpm test
 
@@ -29,13 +30,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
 
       - name: Install Dependencies
-        run: pnpm install --no-no-frozen-lockfile=false
+        run: pnpm install --frozen-lockfile=false
 
       - name: Build Application
         run: pnpm build
@@ -65,13 +67,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
 
       - name: Install Dependencies
-        run: pnpm install --no-no-frozen-lockfile=false
+        run: pnpm install --frozen-lockfile=false
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install chromium
@@ -123,6 +126,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -143,6 +147,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           node-version: 18

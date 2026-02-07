@@ -65,6 +65,7 @@ jobs:
           echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'

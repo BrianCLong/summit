@@ -22,6 +22,6 @@ jobs:
           node-version: "20"
           cache: pnpm
       - name: Install dependencies
-        run: pnpm install --no-no-no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run Reproducible Builds Check
         run: ./scripts/repro-check.sh || echo "::warning::Reproducible build check failed, but this is currently non-blocking."

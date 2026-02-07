@@ -31,6 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
+      - - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20.14.x', cache: 'pnpm' }
       - name: Enable corepack + pnpm
@@ -47,7 +48,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
-          version: v3.15.2 --no-no-frozen-lockfile=false
+          version: v3.15.2 --frozen-lockfile=false
       - name: Codegen (GraphQL)
         run: |
           if [ -f codegen.ts ]; then npx -y graphql-code-generator --config codegen.ts || true; fi

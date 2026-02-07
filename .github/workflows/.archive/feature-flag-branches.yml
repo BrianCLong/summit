@@ -34,7 +34,7 @@ jobs:
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm run lint
 
@@ -53,7 +53,7 @@ jobs:
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Unit tests
         run: pnpm run test:unit -- --runInBand
         env:
@@ -74,7 +74,7 @@ jobs:
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Contract tests
         run: pnpm run test:policy
         env:
@@ -95,7 +95,7 @@ jobs:
       - name: Enable corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
       - name: Playwright (flagged flows)

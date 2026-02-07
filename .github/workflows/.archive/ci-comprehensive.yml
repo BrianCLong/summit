@@ -94,7 +94,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint (ESLint + Prettier)
         run: |
@@ -174,7 +174,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Setup test environment
         run: |
@@ -232,7 +232,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: GraphQL schema check
         run: |
@@ -341,7 +341,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build application
         run: |

@@ -21,7 +21,7 @@ jobs:
       - uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install slsa-verifier
         run: |

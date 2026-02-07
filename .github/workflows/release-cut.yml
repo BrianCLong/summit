@@ -139,7 +139,7 @@ jobs:
         uses: pnpm/action-setup@v4 # v4
 
       - name: Install Dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify Go-Live Evidence
         id: verify
@@ -203,7 +203,7 @@ jobs:
         uses: pnpm/action-setup@v4 # v4
 
       - name: Install Dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Release Notes
         id: generate

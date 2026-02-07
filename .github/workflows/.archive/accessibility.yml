@@ -35,7 +35,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run eslint-plugin-jsx-a11y
         run: |
@@ -81,7 +81,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build application
         run: pnpm build --filter=client --filter=web
@@ -120,7 +120,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build application
         run: pnpm build --filter=client --filter=web
@@ -155,7 +155,7 @@ jobs:
         run: npm install -g pa11y pa11y-ci
 
       - name: Build application
-        run: pnpm install --no-no-frozen-lockfile && pnpm build --filter=client
+        run: pnpm install --frozen-lockfile && pnpm build --filter=client
         continue-on-error: true
 
       - name: Start application
@@ -217,7 +217,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright
         run: pnpm exec playwright install --with-deps chromium

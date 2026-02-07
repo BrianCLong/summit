@@ -30,7 +30,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage
         run: pnpm test:coverage
@@ -200,7 +200,7 @@ jobs:
       - name: Get base coverage
         working-directory: base
         run: |
-          pnpm install --no-no-frozen-lockfile
+          pnpm install --frozen-lockfile
           pnpm test:coverage || true
           if [ -f coverage/coverage-summary.json ]; then
             cp coverage/coverage-summary.json /tmp/base-coverage.json
@@ -210,7 +210,7 @@ jobs:
 
       - name: Get PR coverage
         run: |
-          pnpm install --no-no-frozen-lockfile
+          pnpm install --frozen-lockfile
           pnpm test:coverage
 
       - name: Compare coverage

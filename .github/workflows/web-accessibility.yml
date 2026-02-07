@@ -27,7 +27,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: apps/web
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Accessibility lint
         working-directory: apps/web

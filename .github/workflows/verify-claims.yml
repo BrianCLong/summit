@@ -22,5 +22,5 @@ jobs:
         with:
           cache: 'pnpm'
           node-version: "20"
-      - run: pnpm install --no-no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsx scripts/governance/validate_claims.ts

@@ -37,7 +37,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Dependency audit (critical CVEs only)
         run: |
@@ -75,7 +75,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.68.0 # Pinned for legacy Rego syntax compatibility
+          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
 
       - name: OPA policy check
         run: |
@@ -114,7 +114,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Media provenance gate
         run: npx tsx scripts/ci/verify_media_provenance.ts
@@ -172,7 +172,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate SBOM
         run: |
@@ -254,7 +254,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: GraphQL schema compatibility check
         run: |
@@ -286,7 +286,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify control coverage
         run: |

@@ -50,7 +50,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
       - name: Install deps
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Build workspace
         run: pnpm build
       - name: Tests

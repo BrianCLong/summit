@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20.14.x'
@@ -19,7 +20,7 @@ jobs:
         run: |
           corepack enable || true
           corepack prepare pnpm@9.12.3 --activate || true
-          pnpm i --no-no-frozen-lockfile=false
+          pnpm i --frozen-lockfile=false
           pnpm exec playwright install --with-deps
       - name: Heal & build UI
         run: |

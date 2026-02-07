@@ -83,7 +83,7 @@ jobs:
           version: latest
       
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       
       - name: Run Semgrep Supply Chain
         run: |

@@ -28,7 +28,7 @@ jobs:
         with:
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run Evidence Pack with Determinism Check
         run: node scripts/release/ga_evidence_pack.mjs --check-determinism

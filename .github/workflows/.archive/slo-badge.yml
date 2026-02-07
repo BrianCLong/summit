@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -24,7 +25,7 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install -g pnpm
-          pnpm install --no-no-frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Start Environment (Golden Path)
         run: |

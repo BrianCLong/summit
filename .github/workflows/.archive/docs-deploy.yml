@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd website
-          pnpm install --no-no-frozen-lockfile
+          pnpm install --frozen-lockfile
       
       - name: Build documentation
         run: |
@@ -103,7 +103,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd website
-          pnpm install --no-no-frozen-lockfile
+          pnpm install --frozen-lockfile
       
       - name: Lint documentation
         run: |

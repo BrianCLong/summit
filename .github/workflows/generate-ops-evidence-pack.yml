@@ -18,6 +18,7 @@ jobs:
           ref: ${{ github.event.inputs.ref }}
 
       - name: Setup Node
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'

@@ -90,7 +90,7 @@ jobs:
         uses: pnpm/action-setup@v3
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         run: pnpm dlx playwright install --with-deps ${{ matrix.browser }}
@@ -166,7 +166,7 @@ jobs:
         uses: pnpm/action-setup@v3
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run comprehensive integration tests
         run: |

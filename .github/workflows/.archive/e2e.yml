@@ -33,6 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node 18
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -42,7 +43,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate persisted queries (required for test)
         run: pnpm run generate:persisted
@@ -143,6 +144,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node 18
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -160,7 +162,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Run E2E tests (layout=${{ matrix.layout }}, sprite=${{ matrix.sprite }})
         env:
           LAYOUT: ${{ matrix.layout }}
@@ -185,6 +187,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node 18
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -203,7 +206,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Run analytics bridge E2E (with trace)
         env:
           E2E_WS_URL: http://localhost:4000

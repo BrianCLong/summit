@@ -48,7 +48,7 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build artifacts
         id: build

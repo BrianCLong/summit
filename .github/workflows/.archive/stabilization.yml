@@ -17,13 +17,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
+      - - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: '18' , cache: 'pnpm' }
       - name: Install (top-level only)
         run: |
           corepack enable
           pnpm -v || npm i -g pnpm
-          pnpm install --ignore-scripts --no-no-frozen-lockfile || npm ci --ignore-scripts
+          pnpm install --ignore-scripts --frozen-lockfile || npm ci --ignore-scripts
       - name: Smoke Build
         run: |
           npm run -ws --if-present build:smoke || true
@@ -34,6 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 1 }
+      - - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: '18' , cache: 'pnpm' }
       - name: Unit tests (non-flaky subset)

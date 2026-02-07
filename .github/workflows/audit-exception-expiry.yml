@@ -20,6 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
       - name: Use Node.js 20
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'

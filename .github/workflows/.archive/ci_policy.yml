@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Set up Node
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'

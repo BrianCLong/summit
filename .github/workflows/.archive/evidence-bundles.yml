@@ -22,6 +22,7 @@ jobs:
         run: test -f docs/audit/control-mapping.md
 
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -31,7 +32,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Compute timestamp
         id: meta

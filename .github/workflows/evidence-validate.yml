@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: pnpm
-      - run: pnpm install --no-no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - name: Validate Fixtures (Pass)
         run: node tools/evidence/validate.mjs
         env:

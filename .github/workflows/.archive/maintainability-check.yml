@@ -26,6 +26,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           node-version: '20.14.x'
@@ -37,7 +38,7 @@ jobs:
           corepack prepare pnpm@9.12.3 --activate || true
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile=false
+        run: pnpm install --frozen-lockfile=false
 
       - name: Install ESLint plugins for complexity
         run: |
@@ -103,6 +104,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -200,6 +202,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node.js
+        - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4
         with:
           node-version: '20.14.x'
@@ -211,7 +214,7 @@ jobs:
           corepack prepare pnpm@9.12.3 --activate || true
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile=false
+        run: pnpm install --frozen-lockfile=false
 
       - name: Run tests with coverage
         continue-on-error: true

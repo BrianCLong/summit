@@ -61,7 +61,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build current
         run: pnpm run build
@@ -100,7 +100,7 @@ jobs:
         working-directory: baseline
         run: |
           corepack enable
-          pnpm install --no-no-frozen-lockfile
+          pnpm install --frozen-lockfile
           pnpm run build
         env:
           NODE_ENV: production

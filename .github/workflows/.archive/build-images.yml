@@ -65,7 +65,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --no-no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build application
         run: pnpm dlx turbo run build --cache-dir .turbo
