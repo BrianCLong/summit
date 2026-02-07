@@ -316,6 +316,17 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+  evidence-structure:
+    name: Evidence Structure
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+      - name: Verify evidence structure
+        run: node .github/scripts/evidence-verify.mjs
+
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
@@ -413,6 +424,7 @@ jobs:
       - provenance
       - schema-validation
       - compliance-evidence
+      - evidence-structure
       - ga-evidence-completeness
     if: always()
     steps:
@@ -426,6 +438,7 @@ jobs:
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
+          echo "Evidence Structure: ${{ needs.evidence-structure.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
           echo ""
 
@@ -450,6 +463,11 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.evidence-structure.result }}" != "success" ]]; then
+            echo "::error::Evidence Structure FAILED - CI BLOCKED"
+            exit 1
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -466,6 +484,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence Structure" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY
