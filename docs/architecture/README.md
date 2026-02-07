@@ -13,6 +13,7 @@ Use these documents as the canonical references when implementing or reviewing c
 - **Topology & platform shape:** [`docs/architecture/day1-topology.md`](./day1-topology.md), [`docs/architecture/system-map.png`](./system-map.png), [`docs/architecture/service-dependency-map.md`](./service-dependency-map.md)
 - **Cross-cutting concerns:** [`docs/architecture/zero-trust.md`](./zero-trust.md), [`docs/architecture/service-mesh-architecture.md`](./service-mesh-architecture.md), [`docs/architecture/dead-code-policy.md`](./dead-code-policy.md)
 - **Data & provenance:** [`docs/architecture/prov-ledger.md`](./prov-ledger.md), [`docs/architecture/provenance-ledger-beta.md`](./provenance-ledger-beta.md), [`docs/architecture/event-schemas.md`](./event-schemas.md)
+- **GraphRAG claim engineering:** [`docs/architecture/claim-engineering-graphRAG.md`](./claim-engineering-graphRAG.md)
 - **Operational guardrails:** [`docs/architecture/ci-cd-architecture.md`](./ci-cd-architecture.md), [`docs/architecture/dependency-graph.md`](./dependency-graph.md), [`docs/architecture/dependency-risk-table.md`](./dependency-risk-table.md)
 - **Resilience & isolation:** [`docs/architecture/blast-radius-report.txt`](./blast-radius-report.txt), [`docs/architecture/tenant-hierarchy-model.md`](./TENANT_HIERARCHY_MODEL.md), [`docs/architecture/cache-policy.md`](./cache-policy.md)
 - **Agent Architecture:** [`docs/architecture/mcp-first.md`](./mcp-first.md), [`docs/agents/context-engineering.md`](../agents/context-engineering.md)
