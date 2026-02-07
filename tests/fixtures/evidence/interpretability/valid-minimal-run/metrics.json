@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-mechinterp-peeking-inside-llm-SCHEMA-001",
+  "counters": {
+    "artifact_count": 3
+  },
+  "scores": {
+    "schema_valid": 1
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Interpretability Evidence Metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidence_id", "counters", "scores"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-mechinterp-peeking-inside-llm-[A-Z]+-[0-9]{3}$"
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
+  }
+}

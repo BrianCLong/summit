@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Interpretability Evidence Index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "entries"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["evidence_id", "item_slug", "files"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVD-mechinterp-peeking-inside-llm-[A-Z]+-[0-9]{3}$"
+          },
+          "item_slug": {
+            "type": "string",
+            "const": "mechinterp-peeking-inside-llm"
+          },
+          "files": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["report", "metrics", "stamp"],
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

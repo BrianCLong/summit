@@ -871,6 +871,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: interpretability-evidence-scaffold
+    version: v1
+    path: prompts/evidence/interpretability-evidence-scaffold@v1.md
+    sha256: 3eb49b2ab5422857d8f475117db238e6eba295b82e853e2a846aedc0ad3acc0e
+    description: Scaffold mechanistic interpretability evidence schemas, fixtures, and GA documentation.
+    scope:
+      paths:
+        - schemas/evidence/interpretability/
+        - evidence/interpretability/
+        - tests/fixtures/evidence/interpretability/
+        - docs/ga/interpretability-evidence.md
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/verification-map.json
+        - .github/MILESTONES/MVP4-GA-MILESTONE.md
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/evidence/interpretability-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: jest-entities-override
     version: v1
     path: prompts/maintenance/jest-entities-override@v1.md

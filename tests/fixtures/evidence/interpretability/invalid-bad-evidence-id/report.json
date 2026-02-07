@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-bad-id-000",
+  "item_slug": "mechinterp-peeking-inside-llm",
+  "summary": "Invalid evidence id pattern.",
+  "method_tags": ["schema"],
+  "artifacts": [{ "name": "report", "path": "report.json" }],
+  "never_log_fields": ["activations"]
+}

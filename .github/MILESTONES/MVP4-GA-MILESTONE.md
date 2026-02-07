@@ -238,6 +238,7 @@ Auto-generate API docs from GraphQL schema and JSDoc comments.
 - [ ] GRAPH-003: Supernode optimization
 - [ ] RAG-001: Citation enforcement
 - [ ] RAG-002: Confidence scoring
+- [ ] GA-INT-001: Interpretability evidence gate contract
 - [ ] Critical bug fixes
 
 ### Week 3-4 (Sprint 2)

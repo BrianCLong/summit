@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Interpretability Evidence Stamp",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidence_id", "created_at", "toolchain"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-mechinterp-peeking-inside-llm-[A-Z]+-[0-9]{3}$"
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "source": { "type": "string" },
+        "commit": { "type": "string" }
+      }
+    }
+  }
+}

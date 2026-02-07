@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-mechinterp-peeking-inside-llm-SCHEMA-001",
+  "item_slug": "mechinterp-peeking-inside-llm",
+  "summary": "Schema baseline for interpretability evidence bundle.",
+  "method_tags": ["schema", "determinism"],
+  "artifacts": [
+    { "name": "report", "path": "report.json" },
+    { "name": "metrics", "path": "metrics.json" },
+    { "name": "stamp", "path": "stamp.json" }
+  ],
+  "never_log_fields": ["activations", "tokens"]
+}
