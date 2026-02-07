@@ -1,0 +1,50 @@
+{
+  "task_id": "QWEN3CODERNEXT_LANE1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "qwen3-coder-next-lane1",
+    "version": "v1",
+    "sha256": "2dcdd68ab5a0f8bfce69e8afebfe837a3e1f2e964c7d499b64a163ccb0bd7641",
+    "path": "prompts/requests/qwen3-coder-next-lane1@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/agents/providers/",
+      "src/agents/config/",
+      "src/agents/evidence/",
+      "src/agents/guards/",
+      "src/agents/evals/",
+      "docs/architecture/providers/",
+      "docs/ga/",
+      "docs/governance/",
+      ".github/workflows/",
+      ".github/scripts/",
+      "tests/agents/",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["providers", "governance", "evidence", "ci"],
+    "exclusions": ["server/", "apps/"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "docs/ga/evidence.md",
+      "src/agents/evidence/schemas/report.schema.json",
+      "tests/agents/evals/qwen3CoderNextEval.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Local LM Studio provider available behind feature flag.",
+    "Evidence schemas/templates validated by CI gate.",
+    "Token budget and template lint guards enforced with tests."
+  ],
+  "stop_conditions": [
+    "Required checks or governance stop conditions block deterministic verification.",
+    "Requests to bypass GA guardrails or legacy mode gates."
+  ]
+}

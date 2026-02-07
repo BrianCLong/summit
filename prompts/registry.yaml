@@ -8,22 +8,30 @@ prompts:
     scope:
       paths:
         - docs/briefs/io-cogwar-radar-2027.md
+  - id: qwen3-coder-next-lane1
+    version: v1
+    path: prompts/requests/qwen3-coder-next-lane1@v1.md
+    sha256: 2dcdd68ab5a0f8bfce69e8afebfe837a3e1f2e964c7d499b64a163ccb0bd7641
+    description: Lane-1 local provider, evidence schemas, and CI gates for Qwen3-Coder-Next.
+    scope:
+      paths:
+        - src/agents/providers/
+        - src/agents/config/
+        - src/agents/evidence/
+        - src/agents/guards/
+        - src/agents/evals/
+        - docs/architecture/providers/
+        - docs/ga/
+        - docs/governance/
+        - .github/workflows/
+        - .github/scripts/
+        - tests/agents/
         - docs/roadmap/STATUS.json
-        - prompts/briefs/io-cogwar-radar-brief@v1.md
-        - prompts/registry.yaml
       domains:
-        - documentation
+        - providers
+        - evidence
         - governance
-        - io-cogwar
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
+        - ci
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md
