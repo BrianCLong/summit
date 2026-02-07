@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DeR2 Stamp",
+  "type": "object",
+  "required": ["bench_id", "model", "deterministic", "regimes", "inputs", "config_hash"],
+  "properties": {
+    "bench_id": { "type": "string" },
+    "model": { "type": "string" },
+    "deterministic": { "type": "boolean" },
+    "regimes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "inputs": {
+      "type": "object",
+      "required": ["tasks_hash", "concepts_hash", "library_hash"],
+      "properties": {
+        "tasks_hash": { "type": "string" },
+        "concepts_hash": { "type": "string" },
+        "library_hash": { "type": "string" }
+      }
+    },
+    "config_hash": { "type": "string" }
+  }
+}
