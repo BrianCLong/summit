@@ -256,8 +256,7 @@ jobs:
 
     environment:
       name: ${{ inputs.environment }}
-      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{
-        inputs.release_tag }}
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.release_tag }}
 
     steps:
       - name: Checkout

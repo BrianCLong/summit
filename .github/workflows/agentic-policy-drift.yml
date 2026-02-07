@@ -24,5 +24,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run Drift Check
-        run: pnpm exec tsx
-          scripts/monitoring/on-programming-with-agents-drift.ts
+        run: pnpm exec tsx scripts/monitoring/on-programming-with-agents-drift.ts

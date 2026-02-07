@@ -38,5 +38,4 @@ jobs:
 
       - name: Accessibility smoke test
         working-directory: apps/web
-        run: pnpm run test -- --run
-          src/__tests__/accessibility/landmarkKeyboardFlow.test.tsx
+        run: pnpm run test -- --run src/__tests__/accessibility/landmarkKeyboardFlow.test.tsx

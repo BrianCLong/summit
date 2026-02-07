@@ -37,12 +37,8 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
       - uses: actions/setup-node@v4 # v6
         with:
-          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
@@ -131,29 +127,25 @@ jobs:
       - name: Run database migrations
         run: cd server && npx tsx scripts/run-migrations.ts
         env:
-          DATABASE_URL:
-            postgresql://postgres:postgres@localhost:5432/summit_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
       - name: Run integration tests (attempt 1)
         run: pnpm test:integration || echo "retry" > .retry
         env:
-          DATABASE_URL:
-            postgresql://postgres:postgres@localhost:5432/summit_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
           REDIS_URL: redis://localhost:6379
 
       - name: Run integration tests (attempt 2 if needed)
         if: ${{ hashFiles('.retry') != '' }}
         run: pnpm test:integration
         env:
-          DATABASE_URL:
-            postgresql://postgres:postgres@localhost:5432/summit_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
           REDIS_URL: redis://localhost:6379
 
       - name: Verify ecosystem exports
         run: npm test -- test/verification/integrations.node.test.ts --bail
         env:
-          DATABASE_URL:
-            postgresql://postgres:postgres@localhost:5432/summit_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
       - name: Stop Test Infrastructure
         if: always()
@@ -283,14 +275,9 @@ jobs:
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "9.12.0"
       - uses: actions/setup-node@v4 # v6
         with:
           node-version-file: .nvmrc
-          cache: pnpm
-
       - name: Bootstrap and smoke test
         run: |
           echo "=== Bootstrap ==="

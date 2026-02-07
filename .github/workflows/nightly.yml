@@ -12,8 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [graph-sync-validator, intelgraph-server, summit-api,
-              summit-web, connector-sdk]
+        package: [graph-sync-validator, intelgraph-server, summit-api, summit-web, connector-sdk]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4.1.7
 

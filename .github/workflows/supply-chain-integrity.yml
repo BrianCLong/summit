@@ -26,8 +26,7 @@ on:
       - ".github/workflows/supply-chain-integrity.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number ||
-    github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -47,18 +46,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        # version is read from package.json packageManager field
-
-        with:
-          version: 9.12.0
       - name: Set up Node.js
         uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.0.3
         with:
           node-version: "20"
-          cache: "pnpm"
-
       - name: Set up Python
         uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
         with:
@@ -142,8 +133,7 @@ jobs:
 
       # Clean up source artifacts to free disk space for Docker build
       - name: Free Disk Space for Docker Build
-        if: ${{ hashFiles('Dockerfile') != '' && (github.ref ==
-          'refs/heads/main' || github.ref_type == 'tag') }}
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         run: |
           echo "Disk usage before cleanup:"
           df -h
@@ -156,8 +146,7 @@ jobs:
 
       # Build and push container image (only on main branch or tags, not PRs)
       - name: Build and Push Docker Image
-        if: ${{ hashFiles('Dockerfile') != '' && (github.ref ==
-          'refs/heads/main' || github.ref_type == 'tag') }}
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         run: |
           # Docker requires lowercase repository names
           OWNER_LOWER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
@@ -218,8 +207,7 @@ jobs:
 
       # Upload container SBOMs (generated during Docker build)
       - name: Upload Container SBOMs
-        if: ${{ hashFiles('Dockerfile') != '' && (github.ref ==
-          'refs/heads/main' || github.ref_type == 'tag') }}
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
         with:
           name: sboms-container-${{ env.VERSION }}
@@ -228,8 +216,7 @@ jobs:
 
       # Upload container vulnerability reports (generated during Docker build)
       - name: Upload Container Vulnerability Reports
-        if: ${{ hashFiles('Dockerfile') != '' && (github.ref ==
-          'refs/heads/main' || github.ref_type == 'tag') }}
+        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
         with:
           name: vulnerability-reports-container-${{ env.VERSION }}
@@ -242,8 +229,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
         with:
           name: release-evidence-${{ env.VERSION }}
-          path: ./release-evidence/summit-release-${{ env.VERSION
-            }}-evidence.tar.gz
+          path: ./release-evidence/summit-release-${{ env.VERSION }}-evidence.tar.gz
           retention-days: 90
 
   # CI Gate: Final verification of all supply chain integrity
@@ -259,15 +245,13 @@ jobs:
       - name: Download Source SBOMs
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:
-          name: sboms-source-${{
-            needs.supply-chain-integrity.outputs.release-version }}
+          name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./sboms
 
       - name: Download Source Vulnerability Reports
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:
-          name: vulnerability-reports-source-${{
-            needs.supply-chain-integrity.outputs.release-version }}
+          name: vulnerability-reports-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./vulnerability-reports
 
       - name: Install tools
@@ -277,8 +261,7 @@ jobs:
 
       - name: Run CI Supply Chain Gate
         env:
-          RELEASE_VERSION: ${{
-            needs.supply-chain-integrity.outputs.release-version }}
+          RELEASE_VERSION: ${{ needs.supply-chain-integrity.outputs.release-version }}
         run: |
           chmod +x scripts/ci-supply-chain-gate.sh
           ./scripts/ci-supply-chain-gate.sh summit-platform production true false true true true true
@@ -297,16 +280,13 @@ jobs:
       - name: Download Release Evidence Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:
-          name: release-evidence-${{
-            needs.supply-chain-integrity.outputs.release-version }}
+          name: release-evidence-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./releases
 
       - name: Create GitHub Release
-        uses:
-          softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b     # v2.0.5
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.0.5
         with:
-          name: "Release ${{ needs.supply-chain-integrity.outputs.release-version
-            }}"
+          name: "Release ${{ needs.supply-chain-integrity.outputs.release-version }}"
           body: |
             ## Summit Platform Release ${{ needs.supply-chain-integrity.outputs.release-version }}
 
@@ -323,10 +303,7 @@ jobs:
             - Security scan reports included
             - All CI gates passed
           draft: false
-          prerelease: ${{
-            contains(needs.supply-chain-integrity.outputs.release-version, 'rc')
-            || contains(needs.supply-chain-integrity.outputs.release-version,
-            'beta') }}
+          prerelease: ${{ contains(needs.supply-chain-integrity.outputs.release-version, 'rc') || contains(needs.supply-chain-integrity.outputs.release-version, 'beta') }}
           files: |
             ./releases/summit-release-${{ needs.supply-chain-integrity.outputs.release-version }}-evidence.tar.gz
             ./sboms/**

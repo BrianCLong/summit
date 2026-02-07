@@ -87,8 +87,7 @@ jobs:
           cat artifacts/server-typecheck-report.json | jq '{errorCount, fileCount}'
 
       - name: Baseline Comparison (if enabled)
-        if: inputs.baseline_mode == true &&
-          hashFiles('docs/ops/typescript/server-typecheck-baseline.json') != ''
+        if: inputs.baseline_mode == true && hashFiles('docs/ops/typescript/server-typecheck-baseline.json') != ''
         run: |
           echo "=== Baseline Comparison Mode ==="
           node scripts/ci/server_typecheck_report.mjs \

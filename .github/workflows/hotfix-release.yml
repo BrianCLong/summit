@@ -274,8 +274,7 @@ jobs:
     # Configure required reviewers in GitHub: Settings → Environments → hotfix-release
     environment:
       name: hotfix-release
-      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{
-        needs.verify-hotfix.outputs.tag }}
+      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.verify-hotfix.outputs.tag }}
     permissions:
       contents: write
       packages: write

@@ -10,8 +10,7 @@ on:
 
 # ensure only one active CI per PR/Ref
 concurrency:
-  group: ci-pr-${{ github.workflow }}-${{ github.event.pull_request.number ||
-    github.ref }}
+  group: ci-pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -112,21 +111,18 @@ jobs:
       - name: Run database migrations
         run: cd server && npx tsx scripts/run-migrations.ts
         env:
-          DATABASE_URL:
-            postgresql://postgres:postgres@localhost:5432/summit_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
       - name: Run integration tests
         run: pnpm test:integration
         env:
-          DATABASE_URL:
-            postgresql://postgres:postgres@localhost:5432/summit_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
           REDIS_URL: redis://localhost:6379
 
       - name: Verify ecosystem exports
         run: npm test -- test/verification/integrations.node.test.ts --bail
         env:
-          DATABASE_URL:
-            postgresql://postgres:postgres@localhost:5432/summit_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
   verification-suite:
     name: Verification Suite
@@ -190,13 +186,9 @@ jobs:
     needs: [integration-tests, build-test]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with: {version: 9.12.0}
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-          cache: "pnpm"
-
       - name: Bootstrap and smoke test
         run: |
           echo "=== Bootstrap ==="

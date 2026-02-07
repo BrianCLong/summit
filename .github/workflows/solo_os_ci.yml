@@ -2,11 +2,11 @@ name: Solo OS CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'solo_os/**'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'solo_os/**'
 

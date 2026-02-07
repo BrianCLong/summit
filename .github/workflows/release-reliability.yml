@@ -28,8 +28,7 @@ jobs:
   check-changelog:
     name: Check Changelog Update
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog')
-      }}
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
     steps:
       - uses: actions/checkout@v4 # v6
         with:

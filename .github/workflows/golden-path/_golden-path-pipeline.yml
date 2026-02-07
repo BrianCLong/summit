@@ -151,8 +151,7 @@ jobs:
         run: pnpm --filter @intelgraph/${{ inputs.service }} typecheck
 
       - name: Format Check
-        run: pnpm --filter @intelgraph/${{ inputs.service }} format:check ||
-          true
+        run: pnpm --filter @intelgraph/${{ inputs.service }} format:check || true
 
   # ============================================================================
   # Stage 2: Test
@@ -222,14 +221,12 @@ jobs:
         working-directory: .
 
       - name: Unit Tests
-        run: pnpm --filter @intelgraph/${{ inputs.service }} test:unit
-          --coverage
+        run: pnpm --filter @intelgraph/${{ inputs.service }} test:unit --coverage
         env:
           CI: true
 
       - name: Integration Tests
-        run: pnpm --filter @intelgraph/${{ inputs.service }} test:integration ||
-          true
+        run: pnpm --filter @intelgraph/${{ inputs.service }} test:integration || true
         env:
           CI: true
           DATABASE_URL: postgres://test:test@localhost:5432/test
@@ -303,8 +300,7 @@ jobs:
           severity: "CRITICAL,HIGH"
 
       - name: Upload Trivy Results
-        uses:
-          github/codeql-action/upload-sarif@45c373516f557556c15d420e3f5e0aa3d64366bc     # v3
+        uses: github/codeql-action/upload-sarif@45c373516f557556c15d420e3f5e0aa3d64366bc # v3
         if: always()
         with:
           sarif_file: "trivy-fs-results.sarif"
@@ -332,8 +328,7 @@ jobs:
         uses: actions/checkout@v4 # v4
 
       - name: Set up Docker Buildx
-        uses:
-          docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f     # v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
@@ -370,8 +365,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
         with:
-          image: ghcr.io/${{ github.repository }}/${{ inputs.service }}@${{
-            steps.build.outputs.digest }}
+          image: ghcr.io/${{ github.repository }}/${{ inputs.service }}@${{ steps.build.outputs.digest }}
           output-file: sbom.spdx.json
 
       - name: Install Cosign
@@ -465,8 +459,7 @@ jobs:
   canary-rollback:
     name: Canary + Rollback Guard
     needs: verify
-    if: ${{ inputs['canary-enabled'] && !inputs.skip-deploy && github.event_name
-      != 'pull_request' }}
+    if: ${{ inputs['canary-enabled'] && !inputs.skip-deploy && github.event_name != 'pull_request' }}
     uses: ./.github/workflows/golden-path/_canary-rollback.yml
     with:
       service: ${{ inputs.service }}

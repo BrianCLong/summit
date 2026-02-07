@@ -7,8 +7,7 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number ||
-    github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -27,5 +26,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
       - name: Run Reproducible Builds Check
-        run: ./scripts/repro-check.sh || echo "::warning::Reproducible build
-          check failed, but this is currently non-blocking."
+        run: ./scripts/repro-check.sh || echo "::warning::Reproducible build check failed, but this is currently non-blocking."

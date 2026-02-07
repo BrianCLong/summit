@@ -2,13 +2,13 @@ name: Hello Service CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'services/hello-service/**'
       - '.github/workflows/hello-service-ci.yml'
       - '.github/workflows/reusable-golden-path.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'services/hello-service/**'
       - '.github/workflows/hello-service-ci.yml'

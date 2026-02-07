@@ -24,13 +24,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Enable Corepack
         run: corepack enable
@@ -118,13 +114,9 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
@@ -181,8 +173,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash
-          scripts/test-soc-controls.sh soc-compliance-reports
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
       - name: Upload SOC compliance reports
         if: always()
         uses: actions/upload-artifact@v4

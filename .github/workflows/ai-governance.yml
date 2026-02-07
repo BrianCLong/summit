@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: {python-version: "3.11"}
       - run: python3 scripts/verify_evidence.py
 
   policy-deny-default:
@@ -14,5 +14,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+        with: {python-version: "3.11"}
       - run: python3 scripts/verify_governance_artifacts.py

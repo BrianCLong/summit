@@ -39,8 +39,7 @@ jobs:
           pnpm --filter intelgraph-server run format:check || true
 
       - name: Set up OPA
-        uses:
-          open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576     # v2
+        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
           opa-version: latest
 

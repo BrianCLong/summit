@@ -97,16 +97,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4 # v4
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: 9.12.0
-
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      # Restore cached dependencies from setup job
       - name: Restore dependencies
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -171,14 +164,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4 # v4
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: 9.12.0
-
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       - name: Restore dependencies
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:

@@ -1,7 +1,7 @@
 name: supplychain-verify
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   workflow_dispatch: {}
 
 permissions:

@@ -2,11 +2,11 @@ name: GraphCI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'ci/graphci/**'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'ci/graphci/**'
   schedule:

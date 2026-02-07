@@ -26,8 +26,7 @@ on:
       # - server/**, client/** (code changes must trigger this)
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number ||
-    github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 # Global environment for all jobs - prevents V8 heap exhaustion
@@ -77,11 +76,8 @@ jobs:
       - name: Enforce coverage gate
         run: pnpm coverage:gate
         env:
-          COVERAGE_SCOPE: ${{ github.event_name == 'pull_request' && 'changed'
-            || 'all' }}
-          COVERAGE_BASE_REF: ${{ github.event_name == 'pull_request' &&
-            format('origin/{0}', github.event.pull_request.base.ref) ||
-            'origin/main' }}
+          COVERAGE_SCOPE: ${{ github.event_name == 'pull_request' && 'changed' || 'all' }}
+          COVERAGE_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.event.pull_request.base.ref) || 'origin/main' }}
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
