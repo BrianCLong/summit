@@ -11,7 +11,8 @@ interface TimelinePanelProps {
   events: EventItem[];
 }
 
-const TimelinePanel: React.FC<TimelinePanelProps> = ({ events }) => (
+// ⚡ Bolt Optimization: React.memo prevents re-rendering when other App state changes
+const TimelinePanel: React.FC<TimelinePanelProps> = React.memo(({ events }) => (
   <aside className="timeline-panel">
     <h2>Agent Timeline</h2>
     <ul>
@@ -22,6 +23,6 @@ const TimelinePanel: React.FC<TimelinePanelProps> = ({ events }) => (
       ))}
     </ul>
   </aside>
-);
+));
 
 export default TimelinePanel;
