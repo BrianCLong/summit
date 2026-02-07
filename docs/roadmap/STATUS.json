@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:13:35Z",
+  "revision_note": "Captured GitHub Files Changed governance reality check and repo assumptions baseline.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -65,6 +65,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+    },
+    {
+      "id": "github-files-changed-governance-2026-02-05",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Repo reality check baseline for CODEOWNERS + branch protection parity and evidence expectations."
     },
     {
       "id": "E",
@@ -182,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
