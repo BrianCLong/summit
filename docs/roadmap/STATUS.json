@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-07T05:45:59Z",
+  "revision_note": "Added leadership drift standard, data handling policy, runbook scope, and documentation governance tracking.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -133,6 +133,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+    },
+    {
+      "id": "leadership-drift-standards-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Leadership drift standard, data-handling policy, runbook, prompt registry, and roadmap tracking."
     },
     {
       "id": "ru-ua-cogwar-lab",
