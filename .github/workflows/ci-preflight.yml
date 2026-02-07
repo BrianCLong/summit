@@ -26,7 +26,7 @@ jobs:
   validate-compose:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
@@ -34,7 +34,7 @@ jobs:
   verify-server-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -53,7 +53,7 @@ jobs:
   verify-gateway-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Build Gateway Docker Image
         run: docker compose -f docker-compose.dev.yaml build gateway

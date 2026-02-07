@@ -12,7 +12,7 @@ jobs:
   parity_audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install tooling
         run: |
           sudo apt-get update
@@ -33,7 +33,7 @@ jobs:
   third_party_status:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Check provider status
         id: gate
         run: scripts/ci/provider_status_gate.sh scripts/ci/configs/providers.yaml
@@ -48,7 +48,7 @@ jobs:
       digest: ${{ steps.build.outputs.DIGEST }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v6 # v6
 
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
@@ -94,7 +94,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v6 # v6
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v6 # v6
 
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
@@ -150,7 +150,7 @@ jobs:
     needs: [build_and_sign, sbom]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Step up 25% → 50% → 100%
         run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
 
@@ -159,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Post-deploy probes (latency/error rates/log SLOs)
         run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=20m
       - name: Enforce rollback on SLO breach

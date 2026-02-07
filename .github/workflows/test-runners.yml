@@ -19,7 +19,7 @@ jobs:
         test: [1, 2]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Runner Info
         run: |
@@ -92,7 +92,7 @@ jobs:
         test: [1, 2, 3]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Runner Info
         run: |

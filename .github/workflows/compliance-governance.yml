@@ -24,7 +24,7 @@ jobs:
   governance-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -43,7 +43,7 @@ jobs:
   compliance-drift-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

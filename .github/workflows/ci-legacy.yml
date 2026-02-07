@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
         with:
           fetch-depth: 0
 
@@ -164,7 +164,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -196,7 +196,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v6 # v6
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:

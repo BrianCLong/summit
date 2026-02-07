@@ -4,7 +4,7 @@ jobs:
   evidence-verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install jsonschema
@@ -13,7 +13,7 @@ jobs:
   policy-deny-default:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: python3 scripts/verify_governance_artifacts.py

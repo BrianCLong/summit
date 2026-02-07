@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v6 # v6
 
       # ============================================================================
       # MONOREPO SETUP: This monorepo uses pnpm workspaces with client/, server/,

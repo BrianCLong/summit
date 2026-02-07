@@ -10,7 +10,7 @@ jobs:
     name: governance / required-checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: npm install yaml
       - run: node scripts/ci/verify_required_checks.mjs
         env:

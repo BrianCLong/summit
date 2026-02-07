@@ -15,7 +15,7 @@ jobs:
     name: governance-bundle
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -34,7 +34,7 @@ jobs:
             echo "has_token=false" >> $GITHUB_OUTPUT
             echo "::warning::BRANCH_PROTECTION_READ_TOKEN not set, skipping drift check"
           fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         if: steps.check-token.outputs.has_token == 'true'
       - uses: actions/setup-node@v4
         if: steps.check-token.outputs.has_token == 'true'

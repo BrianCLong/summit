@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ vars.POLICY_DRIFT_MONITOR_ENABLED == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Node
         uses: actions/setup-node@v4

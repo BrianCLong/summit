@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout (for scripts)
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v6 # v6
         with:
           sparse-checkout: scripts/ci
 
