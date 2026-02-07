@@ -22,7 +22,8 @@
           "artifacts": {
             "type": "array",
             "items": { "type": "string" }
-          }
+          },
+          "path": { "type": "string" }
         },
         "anyOf": [
           { "required": ["files"] },

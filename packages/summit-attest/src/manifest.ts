@@ -12,7 +12,7 @@ export interface ManifestData {
  */
 export function generateManifest(runId: string, inputs: string[], outputs: string[], timestamp?: string) {
   const manifest: any = {
-    version: "v1",
+    version: "1.0.0",
     runId,
     inputs: [...inputs].sort(),
     outputs: [...outputs].sort(),

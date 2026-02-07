@@ -11,10 +11,10 @@ test('verifyAttestation validates correct attestation', (t) => {
       externalParameters: {
         openlineage: {
           runId: runId
+        },
+        summit: {
+          runManifestDigest: manifestDigest
         }
-      },
-      internalParameters: {
-        runManifestDigest: manifestDigest
       }
     }
   };

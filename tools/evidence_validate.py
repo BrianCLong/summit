@@ -127,12 +127,18 @@ def main():
 
         if files:
             for fpath in files:
-                if not os.path.exists(fpath):
-                    print(f"Warning: File not found for evidence {evidence_id}: {fpath}")
+                # Try relative to evidence root (where index.json is)
+                full_fpath = os.path.join(args.evidence, fpath)
+                if not os.path.exists(full_fpath):
+                    # Try as absolute or relative to CWD
+                    full_fpath = fpath
+
+                if not os.path.exists(full_fpath):
+                    print(f"Warning: File not found for evidence {evidence_id}: {fpath} (Checked {os.path.join(args.evidence, fpath)} and {fpath})")
                     success = False
                     continue
 
-                fname = os.path.basename(fpath)
+                fname = os.path.basename(full_fpath)
                 schema = None
                 allow_timestamps = False
                 if fname == "report.json":
@@ -144,13 +150,13 @@ def main():
                     allow_timestamps = True
 
                 if schema:
-                    data = load_json(fpath)
+                    data = load_json(full_fpath)
                     if data is None:
                         success = False
                         continue
                     if not validate_schema(data, schema, f"{evidence_id}/{fname}"):
                         success = False
-                    if not check_timestamps(data, fpath, allow_timestamps):
+                    if not check_timestamps(data, full_fpath, allow_timestamps):
                         success = False
 
     if not success:
