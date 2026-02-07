@@ -75,6 +75,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: rlm-tea-dmoe-pr1-evidence-scaffold
+    version: v1
+    path: prompts/agents/rlm-tea-dmoe-pr1-evidence-scaffold@v1.md
+    sha256: 8e950a005b566c8f7a3c3851eeb89efbd0249eb9f3001cbfbf5f684146b246be
+    description: Scaffold RLM-TEA-DMOE evidence schemas, deterministic writer utilities, and CI validator hook.
+    scope:
+      paths:
+        - src/agents/evidence/
+        - .github/scripts/evidence-validate.mjs
+        - .github/workflows/ci-verify.yml
+        - tests/agents/evidence/
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - package.json
+        - prompts/agents/rlm-tea-dmoe-pr1-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+        - agents/examples/RLM_TEA_DMOE_PR1_EVIDENCE_SCAFFOLD.json
+      domains:
+        - agents
+        - evidence
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md

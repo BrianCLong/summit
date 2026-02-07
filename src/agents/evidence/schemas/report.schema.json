@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/agents/evidence/report.schema.json",
+  "title": "Evidence Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "area", "summary"],
+  "properties": {
+    "id": { "type": "string" },
+    "area": { "type": "string" },
+    "summary": { "type": "string" },
+    "evidenceIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "task_id": "RLM_TEA_DMOE_PR1_EVIDENCE_SCAFFOLD",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "rlm-tea-dmoe-pr1-evidence-scaffold",
+    "version": "v1",
+    "sha256": "8e950a005b566c8f7a3c3851eeb89efbd0249eb9f3001cbfbf5f684146b246be",
+    "path": "prompts/agents/rlm-tea-dmoe-pr1-evidence-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/agents/evidence/",
+      ".github/scripts/evidence-validate.mjs",
+      ".github/workflows/ci-verify.yml",
+      "tests/agents/evidence/",
+      "required_checks.todo.md",
+      "docs/roadmap/STATUS.json",
+      "package.json",
+      "prompts/agents/rlm-tea-dmoe-pr1-evidence-scaffold@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/RLM_TEA_DMOE_PR1_EVIDENCE_SCAFFOLD.json"
+    ],
+    "domains": ["agents", "evidence", "governance", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["tests/agents/evidence/evidence.test.ts", "pnpm evidence:validate"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Evidence schemas exist under src/agents/evidence/schemas.",
+    "Deterministic evidence writer utilities are available.",
+    "Evidence validator script passes on schema presence and timestamp guardrails.",
+    "Roadmap status updated to reflect evidence scaffold work."
+  ],
+  "stop_conditions": [
+    "Schema files missing or failing validation.",
+    "Evidence validator reports timestamp leakage outside stamp.json."
+  ]
+}
