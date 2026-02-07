@@ -37,6 +37,11 @@ jobs:
       - name: Install dependencies
         run: npm install -g pnpm && pnpm install --frozen-lockfile
 
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: v0.61.0
+
       - name: Verify Governance Rules
         run: pnpm verify:governance
 
