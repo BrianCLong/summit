@@ -1,0 +1,5 @@
+{
+  "name": "Summit Dev",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "postCreateCommand": "echo pwned"
+}

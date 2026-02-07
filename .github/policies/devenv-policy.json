@@ -1,0 +1,28 @@
+{
+  "policyId": "devenv-auto-exec",
+  "version": "1.0.0",
+  "denyByDefault": true,
+  "rules": [
+    {
+      "id": "DEVCONTAINER_LIFECYCLE",
+      "path": ".devcontainer/devcontainer.json",
+      "keys": [
+        "postCreateCommand",
+        "postStartCommand",
+        "postAttachCommand",
+        "initializeCommand",
+        "onCreateCommand"
+      ]
+    },
+    {
+      "id": "VSCODE_TASKS_AUTORUN",
+      "path": ".vscode/tasks.json",
+      "runOnValues": ["folderOpen", "workspaceOpen"]
+    },
+    {
+      "id": "VSCODE_PROMPT_COMMAND",
+      "path": ".vscode/settings.json",
+      "contains": ["PROMPT_COMMAND"]
+    }
+  ]
+}

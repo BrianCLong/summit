@@ -1,0 +1,13 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Initialize",
+      "type": "shell",
+      "command": "echo start",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

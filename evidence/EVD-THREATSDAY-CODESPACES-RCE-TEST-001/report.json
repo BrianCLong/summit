@@ -1,0 +1,6 @@
+{
+  "summary": "Negative fixtures for DevEnv auto-exec denial.",
+  "scenarios": 3,
+  "status": "PENDING",
+  "item": "threatsday-codespaces-rce"
+}
