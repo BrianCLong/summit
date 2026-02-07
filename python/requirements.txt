@@ -9,7 +9,7 @@ python-multipart==0.0.22
 uvloop==0.22.1
 pandas==3.0.0
 numpy==2.4.2
-requests
+requests==2.32.5
 feedparser
 sqlalchemy
 scikit-learn
