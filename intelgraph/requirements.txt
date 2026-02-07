@@ -8,8 +8,8 @@ pydantic==2.12.5
 sqlmodel==0.0.32
 
 # Testing
-pytest>=7.4.0
-pytest-asyncio>=0.23.0
+pytest==9.0.2
+pytest==9.0.2
 httpx>=0.26.0
 
 # Type checking (optional)

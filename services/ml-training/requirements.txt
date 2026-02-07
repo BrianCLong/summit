@@ -5,5 +5,5 @@ torch==2.10.0
 pandas==3.0.0
 numpy==2.4.2
 scikit-learn==1.8.0
-boto3
+boto3==1.42.44
 pydantic==2.6.1

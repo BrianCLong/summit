@@ -2,5 +2,5 @@ boto3==1.42.44
 pyyaml==6.0.3
 redis==7.1.0
 neo4j==6.1.0
-pandas
+pandas==3.0.0
 prometheus_client
