@@ -31,14 +31,6 @@ export const DataSourceSelection = ({ value, onChange, onNext, disabled }: DataS
     return Boolean(value.name && value.source_type && (value.license_template || value.custom_license));
   }, [value.custom_license, value.license_template, value.name, value.source_type]);
 
-  const missingFields = useMemo(() => {
-    const missing = [];
-    if (!value.name) missing.push('Name');
-    if (!value.source_type) missing.push('Source type');
-    if (!value.license_template && !value.custom_license) missing.push('License template');
-    return missing;
-  }, [value.name, value.source_type, value.license_template, value.custom_license]);
-
   const handleRegionChange = (input: string) => {
     const regions = input
       .split(',')
@@ -175,15 +167,6 @@ export const DataSourceSelection = ({ value, onChange, onNext, disabled }: DataS
       </div>
 
       <footer className="iw-actions">
-        {!isComplete && !disabled && (
-          <span
-            role="status"
-            aria-live="polite"
-            className="iw-validation-message"
-          >
-            Missing: {missingFields.join(', ')}
-          </span>
-        )}
         <button
           type="button"
           className="iw-button iw-button-primary"
