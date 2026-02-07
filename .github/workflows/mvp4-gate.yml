@@ -56,7 +56,7 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - name: Setup Node
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: "20"
           cache: "pnpm"
