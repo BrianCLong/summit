@@ -75,6 +75,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: notebooks-evidence-scaffold
+    version: v1
+    path: prompts/notebooks/notebooks-evidence-scaffold@v1.md
+    sha256: 957270bebfe7d1c8df55edc131173ecd3c714ea522cba41935d0a87a1972ad6c
+    description: Scaffold notebooks lane 1 evidence schemas, writer, and CI verification gate.
+    scope:
+      paths:
+        - .github/workflows/ci-verify.yml
+        - .github/scripts/verify-evidence.mjs
+        - src/graphrag/evidence/
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/notebooks/notebooks-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+        - agents/examples/NOTEBOOKS_EVIDENCE_SCAFFOLD_20260207.json
+      domains:
+        - evidence
+        - ci
+        - governance
+        - notebooks
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md

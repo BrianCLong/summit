@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-07T00:12:00Z",
+  "revision_note": "Started notebooks lane 1 evidence scaffolding with CI verification gate and schemas.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "notebooks-lane1-evidence-scaffold",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence schemas, writer, and verification gate for notebooks lane 1."
     },
     {
       "id": "B",

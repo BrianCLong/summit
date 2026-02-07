@@ -402,6 +402,19 @@ jobs:
             echo "Artifacts: ga-evidence-index-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
           fi
 
+  evidence-verify:
+    name: verify/evidence
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+      - name: Verify evidence artifacts
+        run: node .github/scripts/verify-evidence.mjs
+
   ci-verify-gate:
     name: CI Verify Gate ✅
     runs-on: ubuntu-22.04
@@ -414,6 +427,7 @@ jobs:
       - schema-validation
       - compliance-evidence
       - ga-evidence-completeness
+      - evidence-verify
     if: always()
     steps:
       - name: Check critical gates passed
@@ -427,6 +441,7 @@ jobs:
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
+          echo "Evidence Verify: ${{ needs.evidence-verify.result }}"
           echo ""
 
           # Critical gates (BLOCKING)
@@ -442,6 +457,11 @@ jobs:
 
           if [[ "${{ needs.ga-evidence-completeness.result }}" != "success" ]]; then
             echo "::error::GA Evidence Completeness FAILED - CI BLOCKED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.evidence-verify.result }}" != "success" ]]; then
+            echo "::error::Evidence Verify FAILED - CI BLOCKED"
             exit 1
           fi
 
@@ -465,6 +485,7 @@ jobs:
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence Verify" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY

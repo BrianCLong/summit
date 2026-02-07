@@ -1,0 +1,41 @@
+{
+  "task_id": "NOTEBOOKS_EVIDENCE_SCAFFOLD_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "notebooks-evidence-scaffold",
+    "version": "v1",
+    "sha256": "957270bebfe7d1c8df55edc131173ecd3c714ea522cba41935d0a87a1972ad6c",
+    "path": "prompts/notebooks/notebooks-evidence-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/workflows/ci-verify.yml",
+      ".github/scripts/verify-evidence.mjs",
+      "src/graphrag/evidence/",
+      "required_checks.todo.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/notebooks/notebooks-evidence-scaffold@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NOTEBOOKS_EVIDENCE_SCAFFOLD_20260207.json"
+    ],
+    "domains": ["evidence", "ci", "governance", "notebooks"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["ci-verify evidence gate output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Evidence schemas and writer utility exist under src/graphrag/evidence.",
+    "CI verify/evidence job validates evidence index and deps-delta enforcement.",
+    "Required checks discovery list updated with notebook evidence gate."
+  ],
+  "stop_conditions": [
+    "Missing evidence index or required CI gate wiring.",
+    "Lockfile changes without deps-delta documentation."
+  ]
+}
