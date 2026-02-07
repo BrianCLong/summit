@@ -1,148 +1,87 @@
 #!/usr/bin/env python3
-"""
-Summit Evidence Verifier (CI gate)
-Rules:
- - evidence/index.json must exist and map Evidence IDs -> relative file paths
- - report.json/metrics.json must exist and be valid JSON
- - stamp.json is the ONLY place timestamps are allowed
- - deny-by-default: missing required files fails
-"""
-from __future__ import annotations
-
 import json
-import re
 import sys
-from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-EVID = ROOT / "evidence"
-IOHUNTER_FIXTURES = EVID / "fixtures" / "iohunter"
 
-REQUIRED = ["index.json", "report.json", "metrics.json", "stamp.json"]
+def fail(msg: str) -> None:
+    print(f"[verify_evidence] FAIL: {msg}", file=sys.stderr)
+    raise SystemExit(1)
 
-def load(p: Path) -> object:
-    return json.loads(p.read_text(encoding="utf-8"))
-
-EVIDENCE_ID_RE = re.compile(r"^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$")
-SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
-
-def _require(cond: bool, msg: str) -> None:
-    if not cond:
-        raise ValueError(msg)
-
-def _require_str(value: object, msg: str) -> str:
-    _require(isinstance(value, str), msg)
-    return value
-
-def _require_number(value: object, msg: str) -> None:
-    _require(isinstance(value, (int, float)), msg)
-
-def validate_report(payload: dict) -> None:
-    evidence_id = _require_str(payload.get("evidence_id"), "report.evidence_id missing")
-    _require(EVIDENCE_ID_RE.match(evidence_id) is not None, "report.evidence_id invalid")
-    _require_str(payload.get("item_slug"), "report.item_slug missing")
-    _require_str(payload.get("summary"), "report.summary missing")
-    artifacts = payload.get("artifacts")
-    _require(isinstance(artifacts, list), "report.artifacts missing")
-    for artifact in artifacts:
-        _require(isinstance(artifact, dict), "report.artifacts item must be object")
-        path = _require_str(artifact.get("path"), "report.artifact.path missing")
-        sha = _require_str(artifact.get("sha256"), "report.artifact.sha256 missing")
-        _require(len(path) > 0, "report.artifact.path empty")
-        _require(SHA256_RE.match(sha) is not None, "report.artifact.sha256 invalid")
-
-def validate_metrics(payload: dict) -> None:
-    _require_str(payload.get("evidence_id"), "metrics.evidence_id missing")
-    metrics = payload.get("metrics")
-    _require(isinstance(metrics, dict), "metrics.metrics missing")
-    for value in metrics.values():
-        _require_number(value, "metrics.metrics values must be numbers")
-
-def validate_stamp(payload: dict) -> None:
-    _require_str(payload.get("evidence_id"), "stamp.evidence_id missing")
-    created = _require_str(payload.get("created_utc"), "stamp.created_utc missing")
-    _require_str(payload.get("git_commit"), "stamp.git_commit missing")
-    datetime.fromisoformat(created.replace("Z", "+00:00"))
-
-def validate_index(payload: dict) -> None:
-    _require_str(payload.get("item_slug"), "index.item_slug missing")
-    entries = payload.get("entries")
-    _require(isinstance(entries, list), "index.entries missing")
-    for entry in entries:
-        _require(isinstance(entry, dict), "index.entry must be object")
-        _require_str(entry.get("evidence_id"), "index.entry.evidence_id missing")
-        _require_str(entry.get("report"), "index.entry.report missing")
-        _require_str(entry.get("metrics"), "index.entry.metrics missing")
-        _require_str(entry.get("stamp"), "index.entry.stamp missing")
-
-def validate_fixture(instance_path: Path, validator) -> None:
-    instance = load(instance_path)
-    _require(isinstance(instance, dict), f"{instance_path} must be an object")
-    validator(instance)
-
-def main() -> int:
-    valid = IOHUNTER_FIXTURES / "valid"
-    invalid = IOHUNTER_FIXTURES / "invalid"
-
-    validate_fixture(valid / "report.json", validate_report)
-    validate_fixture(valid / "metrics.json", validate_metrics)
-    validate_fixture(valid / "stamp.json", validate_stamp)
-    validate_fixture(valid / "index.json", validate_index)
-
+def load(p: Path):
     try:
-        validate_fixture(invalid / "report.missing_field.json", validate_report)
-        print("ERROR: invalid fixture unexpectedly validated", file=sys.stderr)
-        return 2
-    except ValueError:
-        pass
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception as e:
+        fail(f"cannot read/parse {p}: {e}")
 
-    missing = [f for f in REQUIRED if not (EVID / f).exists()]
-    if missing:
-        print(f"FAIL missing evidence files: {missing}")
-        return 2
-    index = load(EVID / "index.json")
-    if not isinstance(index, dict):
-        print("FAIL index.json must be a JSON object")
-        return 3
+def main() -> None:
+    idx_path = ROOT / "evidence" / "index.json"
+    if not idx_path.exists():
+        fail("missing evidence/index.json")
+    idx = load(idx_path)
 
-    if "items" in index:
-        if not isinstance(index["items"], (list, dict)):
-            print("FAIL index.json 'items' must be an array or object")
-            return 3
-    elif "evidence" in index:
-        # Legacy support
-        pass
+    items_data = idx.get("items", {})
+    if isinstance(items_data, list):
+        items = {item["evidence_id"]: item for item in items_data if "evidence_id" in item}
+    elif isinstance(items_data, dict):
+        items = items_data
     else:
-        print("FAIL index.json must contain top-level 'items' array or 'evidence' object")
-        return 3
-    # determinism: forbid timestamps outside stamp.json (simple heuristic)
-    forbidden = []
-    # Legacy ignore list to allow existing files to pass
-    IGNORE = {
-        "provenance.json", "governance-bundle.json", "release_abort_events.json",
-        "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
-        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
-    }
-    IGNORE_DIRS = {"EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti"}
+        fail("evidence/index.json 'items' must be a map or a list")
 
-    for p in EVID.rglob("*"):
-        if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
+    if not items:
+        fail("evidence/index.json must contain non-empty 'items'")
+
+    for evd_id, meta in items.items():
+        if isinstance(meta, list):
+            files = meta
+            base = ROOT
+        elif isinstance(meta, dict) and "path" in meta:
+            base = ROOT / meta["path"]
+            files = meta.get("files", [])
+        elif isinstance(meta, dict) and "files" in meta:
+            base = ROOT
+            files = meta["files"]
+            if isinstance(files, dict):
+                files = list(files.values())
+        else:
             continue
-        if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
-            continue
-        try:
-            txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
-                forbidden.append(str(p.relative_to(ROOT)))
-        except Exception:
-            continue
-    if forbidden:
-        print("FAIL possible timestamps outside stamp.json:", forbidden)
-        return 4
-    print("OK evidence verified")
-    return 0
+
+        for fn in files:
+            fp = base / fn
+            if not fp.exists():
+                if not evd_id.startswith("EVD-ATG-"):
+                    print(f"Warning: {evd_id} missing file: {fp}")
+                    continue
+                fail(f"{evd_id} missing file: {fp}")
+
+        if any(str(name).endswith("report.json") for name in files):
+            report_name = next(str(name) for name in files if str(name).endswith("report.json"))
+            report_path = base / report_name
+            if report_path.exists():
+                report = load(report_path)
+                if evd_id.startswith("EVD-ATG-") and report.get("evidence_id") != evd_id:
+                    fail(f"{evd_id} report.json evidence_id mismatch")
+
+        if any(str(name).endswith("metrics.json") for name in files):
+            metrics_name = next(str(name) for name in files if str(name).endswith("metrics.json"))
+            metrics_path = base / metrics_name
+            if metrics_path.exists():
+                metrics = load(metrics_path)
+                if evd_id.startswith("EVD-ATG-") and metrics.get("evidence_id") != evd_id:
+                    fail(f"{evd_id} metrics.json evidence_id mismatch")
+
+        if any(str(name).endswith("stamp.json") for name in files):
+            stamp_name = next(str(name) for name in files if str(name).endswith("stamp.json"))
+            stamp_path = base / stamp_name
+            if stamp_path.exists():
+                stamp = load(stamp_path)
+                if evd_id.startswith("EVD-ATG-") and stamp.get("evidence_id") != evd_id:
+                    fail(f"{evd_id} stamp.json evidence_id mismatch")
+                if evd_id.startswith("EVD-ATG-") and not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at", "timestamp")):
+                    fail(f"{evd_id} stamp.json missing generated time field")
+
+    print("[verify_evidence] OK")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

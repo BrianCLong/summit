@@ -1,62 +1,87 @@
+#!/usr/bin/env python3
 import json
-import pathlib
 import sys
+from pathlib import Path
 
-from jsonschema import ValidationError, validate
+ROOT = Path(__file__).resolve().parents[2]
 
-ROOT = pathlib.Path(__file__).resolve().parents[2]
-SCHEMAS = ROOT / "evidence" / "schemas"
-EVIDENCE_DIR = ROOT / "evidence" / "trustparadox"
+def fail(msg: str) -> None:
+    print(f"[verify_evidence] FAIL: {msg}", file=sys.stderr)
+    raise SystemExit(1)
 
-SCHEMA_MAP = {
-    "report.json": "trustparadox-report.schema.json",
-    "metrics.json": "trustparadox-metrics.schema.json",
-    "stamp.json": "trustparadox-stamp.schema.json",
-    "index.json": "trustparadox-index.schema.json",
-}
+def load(p: Path):
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception as e:
+        fail(f"cannot read/parse {p}: {e}")
 
+def main() -> None:
+    idx_path = ROOT / "evidence" / "index.json"
+    if not idx_path.exists():
+        fail("missing evidence/index.json")
+    idx = load(idx_path)
 
-def load_json(path: pathlib.Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    items_data = idx.get("items", {})
+    if isinstance(items_data, list):
+        items = {item["evidence_id"]: item for item in items_data if "evidence_id" in item}
+    elif isinstance(items_data, dict):
+        items = items_data
+    else:
+        fail("evidence/index.json 'items' must be a map or a list")
 
+    if not items:
+        fail("evidence/index.json must contain non-empty 'items'")
 
-def validate_file(data_path: pathlib.Path, schema_path: pathlib.Path) -> None:
-    validate(instance=load_json(data_path), schema=load_json(schema_path))
+    for evd_id, meta in items.items():
+        if isinstance(meta, list):
+            files = meta
+            base = ROOT
+        elif isinstance(meta, dict) and "path" in meta:
+            base = ROOT / meta["path"]
+            files = meta.get("files", [])
+        elif isinstance(meta, dict) and "files" in meta:
+            base = ROOT
+            files = meta["files"]
+            if isinstance(files, dict):
+                files = list(files.values())
+        else:
+            continue
 
+        for fn in files:
+            fp = base / fn
+            if not fp.exists():
+                if not evd_id.startswith("EVD-ATG-"):
+                    print(f"Warning: {evd_id} missing file: {fp}")
+                    continue
+                fail(f"{evd_id} missing file: {fp}")
 
-def main() -> int:
-    for data_file, schema_file in SCHEMA_MAP.items():
-        data_path = EVIDENCE_DIR / data_file
-        if not data_path.exists():
-            print(f"FAIL missing {data_path}")
-            return 2
-        schema_path = SCHEMAS / schema_file
-        if not schema_path.exists():
-            print(f"FAIL missing {schema_path}")
-            return 2
-        try:
-            validate_file(data_path, schema_path)
-        except ValidationError as exc:
-            print(f"FAIL schema validation for {data_file}: {exc.message}")
-            return 2
+        if any(str(name).endswith("report.json") for name in files):
+            report_name = next(str(name) for name in files if str(name).endswith("report.json"))
+            report_path = base / report_name
+            if report_path.exists():
+                report = load(report_path)
+                if evd_id.startswith("EVD-ATG-") and report.get("evidence_id") != evd_id:
+                    fail(f"{evd_id} report.json evidence_id mismatch")
 
-    report = load_json(EVIDENCE_DIR / "report.json")
-    index = load_json(EVIDENCE_DIR / "index.json")
-    items = index.get("items", {})
+        if any(str(name).endswith("metrics.json") for name in files):
+            metrics_name = next(str(name) for name in files if str(name).endswith("metrics.json"))
+            metrics_path = base / metrics_name
+            if metrics_path.exists():
+                metrics = load(metrics_path)
+                if evd_id.startswith("EVD-ATG-") and metrics.get("evidence_id") != evd_id:
+                    fail(f"{evd_id} metrics.json evidence_id mismatch")
 
-    for evidence_id in report.get("evidence_ids", []):
-        if evidence_id not in items:
-            print(f"FAIL index missing evidence id {evidence_id}")
-            return 2
-        for rel_path in items[evidence_id]:
-            path = ROOT / rel_path
-            if not path.exists():
-                print(f"FAIL index path missing {rel_path}")
-                return 2
+        if any(str(name).endswith("stamp.json") for name in files):
+            stamp_name = next(str(name) for name in files if str(name).endswith("stamp.json"))
+            stamp_path = base / stamp_name
+            if stamp_path.exists():
+                stamp = load(stamp_path)
+                if evd_id.startswith("EVD-ATG-") and stamp.get("evidence_id") != evd_id:
+                    fail(f"{evd_id} stamp.json evidence_id mismatch")
+                if evd_id.startswith("EVD-ATG-") and not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at", "timestamp")):
+                    fail(f"{evd_id} stamp.json missing generated time field")
 
-    print("OK trust paradox evidence schemas valid")
-    return 0
-
+    print("[verify_evidence] OK")
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

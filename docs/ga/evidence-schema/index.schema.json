@@ -4,20 +4,14 @@
   "type": "object",
   "required": ["version", "items"],
   "properties": {
-    "version": {
-      "type": "integer",
-      "enum": [1]
-    },
+    "version": { "type": "integer", "enum": [1] },
     "items": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["evidence_id", "files"],
         "properties": {
-          "evidence_id": {
-            "type": "string",
-            "pattern": "^[a-zA-Z0-9_-]+$"
-          },
+          "evidence_id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
           "files": {
             "type": "object",
             "required": ["report", "metrics", "stamp"],

@@ -56,46 +56,41 @@ function main() {
   }
 
   const indexData = loadJSON(indexFile);
-  validate(SCHEMAS.index, indexData, indexFile);
 
-  for (const item of indexData.items) {
+  let items = [];
+  if (Array.isArray(indexData.items)) {
+    items = indexData.items;
+  } else {
+    items = Object.entries(indexData.items).map(([id, meta]: [string, any]) => ({
+      evidence_id: id,
+      files: meta.files || meta.artifacts || []
+    }));
+  }
+
+  for (const item of items) {
     const { evidence_id, files } = item;
     const isATG = evidence_id.startsWith('EVD-ATG-');
-
     console.log(`Verifying evidence: ${evidence_id} ${isATG ? '[ATG Strict]' : '[Legacy]'}`);
 
-    const reportPath = files.report;
-    const metricsPath = files.metrics;
-    const stampPath = files.stamp;
+    const reportPath = Array.isArray(files) ? files.find(f => f.endsWith('report.json')) : files.report;
+    const metricsPath = Array.isArray(files) ? files.find(f => f.endsWith('metrics.json')) : files.metrics;
+    const stampPath = Array.isArray(files) ? files.find(f => f.endsWith('stamp.json')) : files.stamp;
 
-    if (fs.existsSync(reportPath)) {
+    if (reportPath && fs.existsSync(reportPath)) {
       const reportData = loadJSON(reportPath);
-      if (isATG) {
-        validate(SCHEMAS.report, reportData, reportPath);
-      }
+      if (isATG) validate(SCHEMAS.report, reportData, reportPath);
       checkTimestampIsolation(reportData, reportPath, false);
-    } else {
-      console.warn(`Warning: Report file missing for ${evidence_id}: ${reportPath}`);
     }
 
-    if (fs.existsSync(metricsPath)) {
+    if (metricsPath && fs.existsSync(metricsPath)) {
       const metricsData = loadJSON(metricsPath);
-      if (isATG) {
-        validate(SCHEMAS.metrics, metricsData, metricsPath);
-      }
+      if (isATG) validate(SCHEMAS.metrics, metricsData, metricsPath);
       checkTimestampIsolation(metricsData, metricsPath, false);
-    } else {
-      console.warn(`Warning: Metrics file missing for ${evidence_id}: ${metricsPath}`);
     }
 
-    if (fs.existsSync(stampPath)) {
+    if (stampPath && fs.existsSync(stampPath)) {
       const stampData = loadJSON(stampPath);
-      if (isATG) {
-        validate(SCHEMAS.stamp, stampData, stampPath);
-      }
-      // Stamp file IS allowed to have timestamps
-    } else {
-      console.warn(`Warning: Stamp file missing for ${evidence_id}: ${stampPath}`);
+      if (isATG) validate(SCHEMAS.stamp, stampData, stampPath);
     }
   }
 

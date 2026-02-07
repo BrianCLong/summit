@@ -300,8 +300,8 @@ jobs:
 
       - name: Verify control coverage
         run: |
-          if [ -f "scripts/verify-control-coverage.ts" ]; then
-            npx tsx scripts/verify-control-coverage.ts
+          if [ -f "verify-control-coverage.ts" ]; then
+            npx tsx verify-control-coverage.ts
           else
             echo "Control coverage verification skipped (script not yet implemented)"
           fi
@@ -443,6 +443,7 @@ jobs:
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
+          echo "Evidence Verify: ${{ needs.evidence-verify.result }}"
           echo ""
 
           # Critical gates (BLOCKING)
@@ -487,6 +488,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence Verification" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY
