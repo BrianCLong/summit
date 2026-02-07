@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DeR2 Report",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "task_id",
+      "regime",
+      "prompt",
+      "selected_doc_ids",
+      "concepts",
+      "evidence",
+      "output",
+      "expected_answer",
+      "is_correct"
+    ],
+    "properties": {
+      "task_id": { "type": "string" },
+      "regime": {
+        "type": "string",
+        "enum": ["instruction_only", "concepts", "related_only", "full_set"]
+      },
+      "prompt": { "type": "string" },
+      "selected_doc_ids": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "concepts": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "evidence": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["evidence_id", "doc_id", "doc_hash"],
+          "properties": {
+            "evidence_id": { "type": "string" },
+            "doc_id": { "type": "string" },
+            "doc_hash": { "type": "string" }
+          }
+        }
+      },
+      "output": { "type": "string" },
+      "expected_answer": { "type": ["string", "null"] },
+      "is_correct": { "type": "boolean" }
+    }
+  }
+}
