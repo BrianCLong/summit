@@ -27,13 +27,13 @@ jobs:
     steps:
       - name: Dependency review
         uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
-
+        with:
           fail-on-severity: high
           comment-summary-in-pr: true
           allow-ghsas: true
           deny-licenses: AGPL-3.0, GPL-3.0, LGPL-3.0
 
-          snyk-scan:
+  snyk-scan:
     name: Snyk dependency vulnerability scan
     needs: dependency-review
     runs-on: ubuntu-latest
@@ -54,10 +54,9 @@ jobs:
       - name: Run Snyk test across all manifests
         if: env.SNYK_TOKEN != ''
         uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
-
-          env:
+        env:
           SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
-
+        with:
           command: test
           args: >-
             --all-projects
@@ -68,7 +67,7 @@ jobs:
       - name: Upload Snyk SARIF
         if: env.SNYK_TOKEN != ''
         uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4
-
+        with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
 
       - name: Persist Snyk report
@@ -96,13 +95,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7
-      # Note: pnpm version is read from package.json "packageManager" field
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
+      # Note: pnpm version is read from package.json "packageManager" field
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - name: Check Drift
         run: ./scripts/check-lockfile-drift.sh

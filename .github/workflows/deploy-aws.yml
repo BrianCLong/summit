@@ -18,16 +18,16 @@ permissions:
 jobs:
   pre-deploy-gate:
     uses: ./.github/workflows/gate.yml
+    with:
+      region: us-east-1
 
-          region: us-east-1
-
-          build-and-push:
-          needs: pre-deploy-gate
-          runs-on: ubuntu-latest
-          strategy:
-          matrix:
-          service: [maestro, prov-ledger, policy-lac]
-          include:
+  build-and-push:
+    needs: pre-deploy-gate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [maestro, prov-ledger, policy-lac]
+        include:
           - service: maestro
             dockerfile: docker/Dockerfile.maestro
             context: .
@@ -64,7 +64,7 @@ jobs:
 
       - name: Security Scan (Trivy)
         uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
-
+        with:
           scan-type: "fs"
           scan-ref: "."
           trivy-config: trivy.yaml
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload Governance Evidence
         uses: actions/upload-artifact@v4
-
+        with:
           name: governance-evidence-deploy-k8s
           path: evidence-artifacts/
 

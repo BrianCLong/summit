@@ -14,18 +14,17 @@ permissions:
 jobs:
   graph-sync:
     uses: ./.github/workflows/graph-sync-gate.yml
+    secrets: inherit
 
-          secrets: inherit
-
-          ga-gates:
-          needs: graph-sync
-          runs-on: ubuntu-latest
-          steps:
+  ga-gates:
+    needs: graph-sync
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v4
 
       - name: Download Metrics
         uses: actions/download-artifact@v4
-
+        with:
           name: graph-sync-metrics
           path: packages/graph-sync-validator/
 

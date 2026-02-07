@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
-
+        with:
           ref: ${{ inputs.ref }}
 
       - name: Compute identifiers

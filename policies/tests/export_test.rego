@@ -1,3 +1,7 @@
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+import future.keywords.in
 package intelgraph.export
 
 import future.keywords.every

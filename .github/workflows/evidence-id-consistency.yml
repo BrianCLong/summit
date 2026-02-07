@@ -69,7 +69,7 @@ jobs:
 
       - name: Upload Evidence Artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-
+        with:
           name: evidence-id-consistency-${{ github.run_id }}
           path: artifacts/evidence-id-consistency/
           retention-days: 30

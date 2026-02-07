@@ -327,7 +327,7 @@
     },
     "overrides": {
       "@orval/mcp": ">=7.18.0",
-      "@orval/core": ">=7.19.0",
+      "@orval/core": ">=7.21.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
       "debug": ">=4.3.5",

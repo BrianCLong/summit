@@ -1,9 +1,10 @@
 {
-  "version": "1.0",
-  "items": {
-    "EVD-SENTINEL-000": {
-      "path": "summit/evidence/sentinel",
-      "files": ["report.json"]
+  "version": 1.0,
+  "items": [
+    {
+      "evidence_id": "EVD-OPENWORK-EVIDENCE-001",
+      "report": "summit/evidence/report.json",
+      "stamp": "summit/evidence/stamp.json"
     }
-  }
+  ]
 }

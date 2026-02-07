@@ -1,3 +1,7 @@
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+import future.keywords.in
 package composer.cmk
 
 # Require CMK for artifacts in protected namespaces

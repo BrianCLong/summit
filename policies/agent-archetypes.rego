@@ -1,3 +1,6 @@
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 # Agent Archetypes Policy
 #
 # Defines authorization rules for Summit's AI agent archetypes:

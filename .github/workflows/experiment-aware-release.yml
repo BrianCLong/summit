@@ -9,16 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-
+          node-version: '18'
 
-          # In a real scenario, this would install dependencies and run a script using the new package
-          # Here we simulate the check
+      # In a real scenario, this would install dependencies and run a script using the new package
+      # Here we simulate the check
       - name: Calculate Learning Value
         run: |
           echo "Calculating Learning Value for Release Candidates..."

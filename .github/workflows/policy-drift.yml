@@ -32,6 +32,6 @@ jobs:
 
       - name: Archive Drift Report
         uses: actions/upload-artifact@v4
-
+        with:
           name: policy-drift-report
           path: artifacts/policy/drift_report.json

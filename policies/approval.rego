@@ -1,3 +1,6 @@
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 # IntelGraph Approval Policy: Four-eyes enforcement with emergency overrides
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.approval"
 

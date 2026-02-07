@@ -18,15 +18,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
+        with:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
-
-          node-
+        with:
+          node-version: "20"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -88,10 +88,10 @@ jobs:
 
       - name: Upload GA evidence artifacts (if any)
         uses: actions/upload-artifact@v4
-
+        with:
           name: ga-evidence
           path: |
             artifacts/**
             evidence/**
             docs/releases/**
-          continue-on-error: true
+        continue-on-error: true
