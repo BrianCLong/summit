@@ -137,7 +137,6 @@ jobs:
           echo "📦 Hotfix Tag: ${TAG}"
 
       - uses: pnpm/action-setup@v4 # v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:

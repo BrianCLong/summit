@@ -117,7 +117,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
-
       - name: Run Auto-Remediation
         id: remediate
         env:
