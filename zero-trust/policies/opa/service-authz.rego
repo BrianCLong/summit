@@ -5,8 +5,10 @@
 # service based on SPIFFE identity, communication matrix, and contextual attributes.
 
 package zerotrust.service_authz
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # Default deny - all service communication denied unless explicitly allowed and governed
 default allow := false

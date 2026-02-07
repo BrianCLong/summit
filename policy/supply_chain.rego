@@ -1,6 +1,9 @@
 package supply_chain
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Supply chain security policies
 # SLSA compliance and software bill of materials validation

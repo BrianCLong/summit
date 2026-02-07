@@ -1,4 +1,7 @@
 package ci.audit
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
 # CI Gate: Enforce Audit and RFA on Privileged Routes
 

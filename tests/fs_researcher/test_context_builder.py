@@ -20,11 +20,11 @@ def test_archive_source(tmp_path):
     paths = init_workspace(ws_root)
     cb = ContextBuilder(paths)
 
-    cb.archive_source("EVD-001", "Some raw HTML", "http://test.com")
+    cb.archive_source("EVD-001", "Some raw HTML", "https://example-test.com")
 
     source_file = paths.sources_dir / "EVD-001.html"
     assert source_file.exists()
-    assert "http://test.com" in source_file.read_text()
+    assert "https://example-test.com" in source_file.read_text()
     assert "Some raw HTML" in source_file.read_text()
 
 def test_add_kb_note(tmp_path):

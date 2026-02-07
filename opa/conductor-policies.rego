@@ -2,8 +2,10 @@
 # Comprehensive authorization and governance policies
 
 package intelgraph.conductor
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # Core authorization decision
 default allow := false

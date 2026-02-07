@@ -1,4 +1,5 @@
 package entitlements
+import future.keywords.if
 
 # input: { plan, feature }
 allow if {

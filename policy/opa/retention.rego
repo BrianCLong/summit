@@ -1,6 +1,9 @@
 package summit.retention
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 is_retention_cronjob if {
     input.kind == "CronJob"

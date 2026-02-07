@@ -1,4 +1,5 @@
 package conductor
+import future.keywords.in
 
 default allow = true
 

@@ -2,8 +2,10 @@
 # Implements fine-grained access control based on user, resource, and environmental attributes
 
 package abac
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # Default deny - explicit allow required
 default allow := false

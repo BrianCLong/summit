@@ -1,4 +1,5 @@
 package decision_policy.antigravity
+import future.keywords.if
 
 default allow := false
 

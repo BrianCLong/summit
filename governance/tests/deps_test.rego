@@ -1,4 +1,5 @@
 package deps.policy
+import future.keywords.contains
 
 test_unsigned_denied {
   deny contains "unsigned dep: badlib"

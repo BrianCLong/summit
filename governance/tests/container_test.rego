@@ -1,4 +1,5 @@
 package container.policy
+import future.keywords.contains
 
 test_root_denied {
   deny contains "container runs as root"

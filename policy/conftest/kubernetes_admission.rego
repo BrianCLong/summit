@@ -1,6 +1,9 @@
 package kubernetes.admission
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Deny containers without resource limits
 deny contains msg if {

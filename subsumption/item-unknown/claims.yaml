@@ -1,0 +1,5 @@
+claims:
+  - id: "CLAIM-01"
+    description: "Legacy placeholder claim"
+    status: "implemented"
+    evidence_id: "EVD-ITEM-UNKNOWN-001"

@@ -5,8 +5,10 @@
 # for high-risk operations in the Summit/IntelGraph platform.
 
 package intelgraph.approvals
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # ===========================================================================
 # Policy Version

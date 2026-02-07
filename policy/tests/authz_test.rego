@@ -1,4 +1,5 @@
 package policy.tests.authz
+import future.keywords.if
 
 import data.policy.authz.abac
 

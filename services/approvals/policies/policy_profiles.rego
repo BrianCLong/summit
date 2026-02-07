@@ -4,8 +4,10 @@
 # Pre-configured policy profiles that can be selected per-tenant
 
 package intelgraph.approvals.profiles
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # ===========================================================================
 # Standard Profile
