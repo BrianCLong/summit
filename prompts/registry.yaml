@@ -896,3 +896,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: narrative-item-integration-plan
+    version: v1
+    path: prompts/narrative/item-integration-plan@v1.md
+    sha256: e5a59743c1cba26e097e785c5fa5dc724168c1059e286b0b16af5391012f6782
+    description: Document ITEM integration plan for narrative frame graphs and strategy taxonomy, update roadmap status.
+    scope:
+      paths:
+        - docs/narrative/item-integration-plan.md
+        - docs/roadmap/STATUS.json
+        - prompts/narrative/item-integration-plan@v1.md
+        - prompts/registry.yaml
+        - agents/examples/NARRATIVE_ITEM_INTEGRATION_PLAN_20260206.json
+      domains:
+        - documentation
+        - governance
+        - narrative
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,40 @@
+{
+  "task_id": "NARRATIVE_ITEM_INTEGRATION_PLAN_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-item-integration-plan",
+    "version": "v1",
+    "sha256": "e5a59743c1cba26e097e785c5fa5dc724168c1059e286b0b16af5391012f6782",
+    "path": "prompts/narrative/item-integration-plan@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/narrative/item-integration-plan.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/narrative/item-integration-plan@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NARRATIVE_ITEM_INTEGRATION_PLAN_20260206.json"
+    ],
+    "domains": ["documentation", "governance", "narrative"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs-update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Narrative ITEM integration plan documented with MAESTRO alignment and evidence bundle standard.",
+    "Roadmap status updated with current timestamp and narrative initiative note."
+  ],
+  "stop_conditions": [
+    "Scope expansion beyond narrative docs and roadmap requires a new prompt registration.",
+    "Conflicts with governance readiness requirements must halt execution."
+  ],
+  "dependencies": [
+    "docs/SUMMIT_READINESS_ASSERTION.md"
+  ]
+}
