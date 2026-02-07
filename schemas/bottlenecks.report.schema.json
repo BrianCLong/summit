@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit/schemas/bottlenecks.report.schema.json",
+  "title": "AI Growth Bottlenecks Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "source",
+    "taxonomy",
+    "assertions",
+    "hashes"
+  ],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*$"
+    },
+    "source": {
+      "type": "object",
+      "required": ["url", "title"],
+      "properties": {
+        "url": { "type": "string" },
+        "title": { "type": "string" },
+        "published_at": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "taxonomy": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["layer_id", "label", "summary"],
+        "properties": {
+          "layer_id": { "type": "string" },
+          "label": { "type": "string" },
+          "summary": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "hashes": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

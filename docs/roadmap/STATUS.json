@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-07T06:00:34Z",
+  "revision_note": "Added bottlenecks taxonomy schema + standards baseline for InvestorPlace 2026-02-01 intake.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "ai-growth-bottlenecks-2026-investorplace",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Schema + standards baseline for deterministic bottlenecks taxonomy intake and evidence artifacts."
     },
     {
       "id": "B",
