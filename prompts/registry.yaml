@@ -1,5 +1,29 @@
 version: 1
 prompts:
+  - id: ci-observability-brief
+    version: v1
+    path: prompts/briefs/ci-observability-brief@v1.md
+    sha256: 6b17c230f3ffd90dae9553689e2505b66caba0c9a60fda596a5c82e75a2ba172
+    description: Create the evidence-first CI/CD observability brief for 2026-02-06 and update roadmap status.
+    scope:
+      paths:
+        - docs/ci/observability-brief-2026-02-06.md
+        - docs/roadmap/STATUS.json
+        - prompts/briefs/ci-observability-brief@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - ci-observability
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
