@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:18:27Z",
+  "revision_note": "Enforced Sigstore verifier guardrails (Cosign 3.0.2+, Rekor 1.5.0+) and added COSE panic healthcheck tooling.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
