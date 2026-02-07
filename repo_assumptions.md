@@ -1,35 +1,18 @@
 # Repo Assumptions & Validation
 
-## Structure Validation
+## Verified vs Assumed
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| Verified | Assumed |
+| --- | --- |
+| `docs/` exists and contains standards/security/ops subdirectories. | Current CLI includes a native `summit intel` command (added in this change set). |
+| `scripts/` exists and is a suitable location for monitoring drift scripts. | CI conventions accept a dedicated `intel-drift` workflow name. |
+| `intel/schema/` exists for JSON schemas. | The nightly drift job should fail on material deltas by default. |
+| `intel/` exists for intelligence artifacts. | `artifacts/intel/<item>` is an approved location for baseline reports. |
+| `.github/workflows/` exists for CI workflows. | `INTEL_ENABLE_INGEST` remains the default gate for ingest execution. |
+| `docs/roadmap/STATUS.json` is the execution ledger to update per change. | No additional policy exceptions are required for this pack. |
 
-## Component Mapping
+## Must-Not-Touch List
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
-
-## Constraints & Checks
-
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
-
-## Next Steps
-
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `Cargo.lock`)
+- Release automation (`.github/workflows/*release*`, `scripts/release/*`)
+- Security policy roots (`docs/governance/*`, `docs/ga/*`, `agent-contract.json`)

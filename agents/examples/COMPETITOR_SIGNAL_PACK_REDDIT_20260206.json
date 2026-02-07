@@ -1,0 +1,50 @@
+{
+  "task_id": "COMPETITOR_SIGNAL_PACK_REDDIT_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "competitor-signal-pack-reddit-ma-adtech-2026-02-06",
+    "version": "v1",
+    "sha256": "d22dd9a84addc9fdce59db7fa742284d79068152ab1da67a3eb767eafd2b0ee7",
+    "path": "prompts/intel/competitor-signal-pack@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "intel/items/reddit-ma-adtech-2026-02-06/",
+      "intel/schema/competitor_signal.schema.json",
+      "intel/pipelines/",
+      "cli/src/intel/",
+      "cli/src/commands/intel.ts",
+      "cli/src/summit.ts",
+      "scripts/monitoring/reddit-ma-adtech-2026-02-06-drift.py",
+      "docs/standards/reddit-ma-adtech-2026-02-06.md",
+      "docs/security/data-handling/reddit-ma-adtech-2026-02-06.md",
+      "docs/ops/runbooks/reddit-ma-adtech-2026-02-06.md",
+      ".github/workflows/intel-drift.yml",
+      "artifacts/intel/reddit-ma-adtech-2026-02-06/",
+      "repo_assumptions.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/intel/competitor-signal-pack@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["intel", "docs", "ci", "ops"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["artifacts/intel/reddit-ma-adtech-2026-02-06/report.json"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Deterministic report/evidence artifacts are generated for the Reddit signal pack.",
+    "Drift detector emits drift.json and flags material changes.",
+    "Docs cover standards, data handling, and runbook steps."
+  ],
+  "stop_conditions": [
+    "Missing baseline artifacts",
+    "Schema validation fails",
+    "Material drift without verified source changes"
+  ]
+}
