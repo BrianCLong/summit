@@ -1,5 +1,10 @@
 {
-  "summary": "Partitioning eval completed",
-  "scenarios": 3,
-  "status": "PASS"
+  "item": {
+    "slug": "fundamental-nexus-tabular",
+    "source": "venturebeat",
+    "published_date": "2026-02-05"
+  },
+  "runs": [],
+  "summary": "Scaffold only. No runs recorded.",
+  "status": "PENDING"
 }

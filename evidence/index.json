@@ -400,6 +400,46 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-FUNDAMENTAL-TABULAR-SCHEMA-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-FUNDAMENTAL-PROVIDER-002",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-FUNDAMENTAL-EVAL-003",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-FUNDAMENTAL-POLICY-004",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-FUNDAMENTAL-GRAPHRAG-BRIDGE-005",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     }
   ]
 }
