@@ -2,6 +2,30 @@
   "version": "1.0",
   "items": [
     {
+      "evidence_id": "EVD-SKETCHDYNAMICS-GEN-001",
+      "paths": {
+        "report": "evidence/runs/sketchdynamics/report.json",
+        "metrics": "evidence/runs/sketchdynamics/metrics.json",
+        "stamp": "evidence/runs/sketchdynamics/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-ATLAS-FOUND-001",
+      "paths": {
+        "report": "evidence/runs/atlas/report.json",
+        "metrics": "evidence/runs/atlas/metrics.json",
+        "stamp": "evidence/runs/atlas/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-PRIVTEL-VER-001",
+      "paths": {
+        "report": "evidence/runs/privtel/report.json",
+        "metrics": "evidence/runs/privtel/metrics.json",
+        "stamp": "evidence/runs/privtel/stamp.json"
+      }
+    },
+    {
       "evidence_id": "EVD-TS2026W03_AGENTIC_PROD-FOUND-001",
       "paths": {
         "report": "evidence/runs/foundation/report.json",

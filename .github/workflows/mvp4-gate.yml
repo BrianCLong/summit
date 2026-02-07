@@ -73,13 +73,12 @@ jobs:
       - name: Dependency Check
         run: |
           echo "Scanning for Critical CVEs..."
-          pnpm audit --audit-level critical || echo "Audit found vulnerabilities but continuing (non-blocking)"
+          pnpm audit --audit-level critical
 
   # 3. Policy Compliance
   policy-check:
     name: "Governance Policy Check"
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4 # v6
       - name: Setup OPA

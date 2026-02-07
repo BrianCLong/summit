@@ -1,7 +1,4 @@
 {
   "evidence_id": "EVD-TS2026W03_AGENTIC_PROD-FOUND-001",
-  "metrics": {
-    "scaffolding_complete": true,
-    "gate_count": 1
-  }
+  "metrics": {}
 }

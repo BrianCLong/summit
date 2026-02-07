@@ -1,10 +1,5 @@
 {
   "evidence_id": "EVD-TS2026W03_AGENTIC_PROD-FOUND-001",
-  "summary": "Initial foundation evidence scaffolding.",
-  "artifacts": [
-    {
-      "path": "ci/verify/verify_evidence.py",
-      "description": "Evidence verification script"
-    }
-  ]
+  "summary": "Evidence system scaffolding implemented.",
+  "artifacts": []
 }
