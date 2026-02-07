@@ -101,6 +101,7 @@ export class MaestroScheduler {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    this.enqueuedRuns.clear();
   }
 
   // Recover any runs that are in 'queued' state from the DB
