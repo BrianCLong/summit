@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-07T20:41:13Z",
+  "revision_note": "Documented companyOS v1 architecture brief and module boundary artifacts for governance-aligned rollout.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -175,6 +175,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "companyos-architecture-brief-v1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Authored companyOS v1 architecture brief and module boundary diagram for governed tenant/org layer alignment."
     }
   ],
   "summary": {
@@ -182,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
