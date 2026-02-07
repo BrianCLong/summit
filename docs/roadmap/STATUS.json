@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:24:43Z",
+  "revision_note": "Logged OpenLineage UUIDv7 run identity + batch emission ITEM ingest and integration roadmap.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -175,6 +175,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "openlineage-run-identity-batch",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Adopt OpenLineage UUIDv7 run identity, batch emission, and Summit evidence correlation plan."
     }
   ],
   "summary": {
@@ -182,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
