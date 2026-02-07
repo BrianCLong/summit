@@ -1,0 +1,42 @@
+{
+  "task_id": "LIVING_ARCH_FLOWS_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "living-architecture-flows-pr1",
+    "version": "v1",
+    "sha256": "70b0ff6064a2ce4414e123f4c7c797d7c6e95b36f0b1d63d6a718838094a4edc",
+    "path": "prompts/flows/living-architecture-flows-pr1@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/flows/",
+      "docs/architecture/flows/",
+      "docs/repo_assumptions.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/flows/living-architecture-flows-pr1@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/LIVING_ARCH_FLOWS_PR1.task.json"
+    ],
+    "domains": ["architecture", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["schema-files", "documentation-contract", "roadmap-update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Flow and verification schemas exist under src/flows/schema/.",
+    "Flow type definitions exist under src/flows/types.ts.",
+    "Documentation contract exists under docs/architecture/flows/README.md.",
+    "Repo assumptions ledger exists under docs/repo_assumptions.md.",
+    "Roadmap status updated in docs/roadmap/STATUS.json."
+  ],
+  "stop_conditions": [
+    "Any requirement conflicts with governance or readiness assertions.",
+    "Schema scope expands beyond deterministic artifacts."
+  ]
+}
