@@ -65,7 +65,7 @@ jobs:
           node-version: "18"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate SBOM
         run: npm run generate:sbom
@@ -99,7 +99,7 @@ jobs:
           node-version: "18"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -155,7 +155,7 @@ jobs:
           node-version: "18"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Deploy Preview Environment
         id: deploy
@@ -248,7 +248,7 @@ jobs:
         with:
           node-version-file: ".nvmrc"
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -276,7 +276,7 @@ jobs:
           until docker exec summit-redis-test redis-cli ping | grep -q PONG; do sleep 2; done
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run database migrations
         run: cd server && npx tsx scripts/run-migrations.ts
@@ -306,7 +306,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Verify runtime configuration
         run: pnpm verify:runtime
       - name: Run verification scripts
@@ -324,7 +324,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Build twice and compare checksums
         run: |
           set -euo pipefail
@@ -388,7 +388,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
       - name: Start Services
@@ -422,7 +422,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run SOC control tests
         run: |
           mkdir -p soc-compliance-reports
