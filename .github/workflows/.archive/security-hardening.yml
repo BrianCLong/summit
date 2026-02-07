@@ -29,9 +29,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-        with:
-
-      - name: Install Dependencies
+        - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: NPM Audit

@@ -26,8 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-      - name: Setup Node
+        - name: Setup Node
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -44,8 +43,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-      - name: Setup Node
+        - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
@@ -62,8 +60,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-      - name: Setup Node
+        - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -82,8 +79,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-      - name: Setup Node
+        - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -117,8 +113,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-      - name: Setup Node
+        - name: Setup Node
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
@@ -168,8 +163,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-      - name: Setup Node
+        - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

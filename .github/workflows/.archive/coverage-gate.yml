@@ -27,9 +27,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Install dependencies
+        - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage
@@ -195,9 +193,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Get base coverage
+        - name: Get base coverage
         working-directory: base
         run: |
           pnpm install --frozen-lockfile

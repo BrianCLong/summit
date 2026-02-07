@@ -181,9 +181,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Install dependencies
+        - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
 
       - name: Run health check
@@ -281,9 +279,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Install dependencies
+        - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
 
       - name: Run extraction
@@ -330,9 +326,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Install dependencies
+        - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
 
       - name: Generate report

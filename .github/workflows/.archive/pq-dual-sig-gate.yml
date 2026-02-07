@@ -51,9 +51,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Cache pnpm dependencies
+        - name: Cache pnpm dependencies
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store

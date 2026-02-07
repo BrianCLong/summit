@@ -58,9 +58,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-
-      - name: Install Dependencies
+        - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build Packages
@@ -123,9 +121,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-
-      - name: Generate Evidence Bundle (Provenance)
+        - name: Generate Evidence Bundle (Provenance)
         run: |
           if [ -f scripts/compliance/generate_evidence.ts ]; then
             # Install tsx globally or usage npx to run the script

@@ -79,9 +79,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Get pnpm store directory
+        - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
         run: |
@@ -246,9 +244,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Install dependencies
+        - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers

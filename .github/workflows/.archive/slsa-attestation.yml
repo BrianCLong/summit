@@ -44,9 +44,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
-        with:
-
-      - name: Install dependencies
+        - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build artifacts

@@ -16,15 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -39,15 +38,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -76,7 +74,11 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true

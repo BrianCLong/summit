@@ -78,9 +78,7 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-
-      - name: Get pnpm store directory
+        - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
         run: |

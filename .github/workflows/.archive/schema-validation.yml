@@ -68,9 +68,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-        with:
-
-      - name: Install dependencies
+        - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
           sleep 10  # Wait for services
