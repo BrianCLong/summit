@@ -10,7 +10,7 @@ uvloop==0.22.1
 pandas==3.0.0
 numpy==2.4.2
 requests==2.32.5
-feedparser
+feedparser==6.0.12
 sqlalchemy
 scikit-learn
 # Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.
