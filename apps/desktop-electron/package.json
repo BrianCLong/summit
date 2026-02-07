@@ -41,7 +41,7 @@
     "vite": "^7.1.11",
     "vite-plugin-electron": "^0.28.0",
     "vite-plugin-electron-renderer": "^0.14.6",
-    "wait-on": "^8.0.1"
+    "wait-on": "^9.0.3"
   },
   "build": {
     "appId": "com.intelgraph.desktop",
