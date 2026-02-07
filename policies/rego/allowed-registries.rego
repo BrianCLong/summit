@@ -1,5 +1,7 @@
 package policies.allowedregistries
 
+import future.keywords.in
+
 default allow = false
 
 allow {

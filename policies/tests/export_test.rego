@@ -1,5 +1,7 @@
 package intelgraph.export
 
+import future.keywords.in
+
 import future.keywords.every
 
 test_simulate_allows_without_step_up {
@@ -72,4 +74,3 @@ test_redactions_merge_tags_and_explicit {
   some r in d.redactions; r.path == "email"
   some s in d.redactions; s.path == "notes.secret"
 }
-

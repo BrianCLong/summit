@@ -1,5 +1,7 @@
 package intelgraph.export
 
+import future.keywords.in
+
 # Export policy for IntelGraph GA Core — simulate/enforce, DLP redactions, WebAuthn step-up.
 # Decision object intentionally explicit for audit & UX payloads.
 
@@ -77,4 +79,3 @@ allow { is_enforce; needs_step_up; has_step_up }
 # Utility: append iff condition true
 cond_append(arr, cond, v) = out { cond; out := array.concat(arr, [v]) }
 cond_append(arr, cond, _) = arr { not cond }
-

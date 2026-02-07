@@ -1,5 +1,8 @@
 package export.v2
 
+import future.keywords.in
+import future.keywords.if
+
 default allow := false
 
 # Simulation mode: when true, decision.allow_effective may be true even if would_allow is false
@@ -62,4 +65,3 @@ decision := {
 } {
   allow_effective := (would_allow or simulate)
 }
-

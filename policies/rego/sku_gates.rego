@@ -1,5 +1,7 @@
 package intelgraph.sku
 
+import future.keywords.in
+
 default allow_feature := false
 
 # input.subject.tier: "Team" | "Business" | "Enterprise"

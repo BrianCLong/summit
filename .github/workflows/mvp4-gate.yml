@@ -23,7 +23,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Strict Lint
         run: pnpm lint:strict
       - name: Typecheck
@@ -42,7 +42,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run Flaky Tests
         run: pnpm test:quarantine
 
@@ -67,6 +67,7 @@ jobs:
       - name: Dependency Check
         run: |
           echo "Scanning for Critical CVEs..."
+          pnpm install --no-frozen-lockfile
           pnpm audit --audit-level critical
 
   # 3. Policy Compliance

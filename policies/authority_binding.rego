@@ -3,6 +3,9 @@
 
 package intelgraph.authority
 
+import future.keywords.in
+import future.keywords.if
+
 import rego.v1
 
 # Default deny - Committee requirement
