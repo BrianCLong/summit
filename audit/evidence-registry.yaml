@@ -29,6 +29,12 @@ evidence:
     artifact_path: audit/ga-evidence/debt-trends
     retention: 365d
     integrity: sha256-with-immutable-storage
+  - id: app-surface-preflight
+    description: Policy preflight evidence bundles for App Surface tool invocation checks
+    source: app-surface/policy-preflight
+    artifact_path: audit/app-surface
+    retention: 365d
+    integrity: sha256-with-deterministic-hashing
   - id: exception-approvals
     description: Time-bounded risk acceptances with approvals and expiry metadata
     source: audit/exceptions.yaml

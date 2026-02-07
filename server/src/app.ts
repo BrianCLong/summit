@@ -81,6 +81,7 @@ import maestroRouter from './routes/maestro.js';
 import mcpAppsRouter from './routes/mcp-apps.js';
 import caseRouter from './routes/cases.js';
 import entityCommentsRouter from './routes/entity-comments.js';
+import appSurfaceRouter from './routes/app-surface.js';
 import tenantsRouter from './routes/tenants.js';
 import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
@@ -426,6 +427,7 @@ export const createApp = async () => {
   app.use('/api', ticketLinksRouter);
   app.use('/api/cases', caseRouter);
   app.use('/api/entities', entityCommentsRouter);
+  app.use('/api/app-surface', appSurfaceRouter);
   app.use('/api/aurora', auroraRouter);
   app.use('/api/oracle', oracleRouter);
   app.use('/api/phantom-limb', phantomLimbRouter);
