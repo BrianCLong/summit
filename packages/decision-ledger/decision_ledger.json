@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "narrative-io-reading-list-20260209",
+    "timestamp": "2026-02-06T19:16:39.868331Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJwdWJsaXNoIG5hcnJhdGl2ZS9pbyByZWFkaW5nIGxpc3QsIG1hcHBpbmcgdGFibGUsIGFuZCBnb3Zlcm5hbmNlIHNjYWZmb2xkcyIsImZpbGVzIjpbImRvY3MvcmVzZWFyY2gvTkFSUkFUSVZFX0lPX1JFQURJTkdfTElTVC5tZCIsImRvY3MvcmVzZWFyY2gvTkFSUkFUSVZFX0lPX1JFRkVSRU5DRV9UT19QSVBFTElORV9NQVAubWQiLCJkb2NzL3Jlc2VhcmNoL0lOREVYLm1kIiwicG9saWN5L2NpYi9SRUFETUUubWQiLCJldmFsL25hcnJhdGl2ZXMvUkVBRE1FLm1kIiwiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIiwicHJvbXB0cy9yZXNlYXJjaC9uYXJyYXRpdmUtaW8tcmVhZGluZy1saXN0QHYxLm1kIiwicHJvbXB0cy9yZWdpc3RyeS55YW1sIiwiYWdlbnRzL2V4YW1wbGVzL05BUlJBVElWRV9JT19SRUFESU5HX0xJU1RfMjAyNjAyMDkuanNvbiIsInBhY2thZ2VzL2RlY2lzaW9uLWxlZGdlci9kZWNpc2lvbl9sZWRnZXIuanNvbiJdLCJyb2xsYmFjayI6IlJldmVydCB0aGUgY29tbWl0IHRoYXQgYWRkcyB0aGUgbmFycmF0aXZlL0lPIHJlc2VhcmNoIGFydGlmYWN0cywgcHJvbXB0IHJlZ2lzdHJ5IGVudHJ5LCB0YXNrIHNwZWMsIHJvYWRtYXAgdXBkYXRlLCBhbmQgZGVjaXNpb24gbGVkZ2VyIGVudHJ5LiJ9",
+    "decision": {
+      "action": "document_narrative_io_reading_list",
+      "rule": {
+        "condition": "narrative/io research artifacts required for governed docs",
+        "action": "document_narrative_io_reading_list",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Published narrative/IO reading list, mapping table, and governance scaffolds with roadmap update and prompt/task registration. Rollback: revert the associated documentation commit.",
+    "reverted": false
   }
 ]

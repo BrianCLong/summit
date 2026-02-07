@@ -1,0 +1,43 @@
+{
+  "task_id": "NARRATIVE_IO_READING_LIST_20260209",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-io-reading-list",
+    "version": "v1",
+    "sha256": "083c2720739567f4937407ac16adbea6977af844225f9b524400b2488c731215",
+    "path": "prompts/research/narrative-io-reading-list@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/research/NARRATIVE_IO_READING_LIST.md",
+      "docs/research/NARRATIVE_IO_REFERENCE_TO_PIPELINE_MAP.md",
+      "docs/research/INDEX.md",
+      "policy/cib/README.md",
+      "eval/narratives/README.md",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json",
+      "prompts/research/narrative-io-reading-list@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NARRATIVE_IO_READING_LIST_20260209.json"
+    ],
+    "domains": ["documentation", "governance", "research", "io-cogwar"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/research/NARRATIVE_IO_READING_LIST.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Reading list and mapping table published under docs/research.",
+    "Policy and evaluation README scaffolds link to the research artifacts.",
+    "Roadmap status and decision ledger updated with rollback guidance."
+  ],
+  "stop_conditions": [
+    "Prompt registry entry cannot be verified against the SHA-256 hash.",
+    "Decision ledger entry cannot be recorded deterministically."
+  ]
+}

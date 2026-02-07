@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-06T19:14:38Z",
+  "revision_note": "Added narrative/IO research reading list, mapping table, and policy/eval placeholders for CIB governance.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -132,7 +132,7 @@
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+      "notes": "Added narrative/IO reading list, pipeline mapping, and governance scaffolds (policy + eval references)."
     },
     {
       "id": "ru-ua-cogwar-lab",
@@ -144,7 +144,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -162,7 +162,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
