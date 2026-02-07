@@ -6,7 +6,7 @@ spacy==3.8.11
 networkx==3.6.1
 nltk==3.9.2
 python-multipart==0.0.22
-uvloop
+uvloop==0.22.1
 pandas
 numpy
 requests
