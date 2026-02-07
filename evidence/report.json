@@ -1,5 +1,6 @@
 {
-  "summary": "Partitioning eval completed",
-  "scenarios": 3,
-  "status": "PASS"
+  "version": 1,
+  "summary": "Dependency homepage evidence bundle generated",
+  "status": "PASS",
+  "artifacts": []
 }
