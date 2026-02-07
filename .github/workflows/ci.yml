@@ -41,11 +41,23 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
+      - name: Resolve pnpm store path
+        id: pnpm-cache
+        run: tools/ci/pnpm_store_path.sh
+        shell: bash
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store_path }}
+          key: ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
@@ -58,11 +70,23 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+      - name: Resolve pnpm store path
+        id: pnpm-cache
+        run: tools/ci/pnpm_store_path.sh
+        shell: bash
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store_path }}
+          key: ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -77,11 +101,23 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+      - name: Resolve pnpm store path
+        id: pnpm-cache
+        run: tools/ci/pnpm_store_path.sh
+        shell: bash
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store_path }}
+          key: ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
@@ -161,11 +197,23 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+      - name: Resolve pnpm store path
+        id: pnpm-cache
+        run: tools/ci/pnpm_store_path.sh
+        shell: bash
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store_path }}
+          key: ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{ steps.pnpm-cache.outputs.pnpm_version }}-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: SOC Control Unit Tests
@@ -185,6 +233,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify Versions
         uses: ./.github/actions/verify-workflow-versions
+      - name: Emit deterministic and runtime stamps
+        run: tools/ci/emit_stamps.sh
+        shell: bash
+      - name: Verify deterministic stamp has no timestamps
+        run: python tools/ci/verify_deterministic_stamp_no_timestamps.py artifacts/deterministic/stamp.json
+        shell: bash
       - name: Attach evidence
         if: always()
         run: |
