@@ -136,6 +136,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: leadership-drift-standard-pack
+    version: v1
+    path: prompts/standards/leadership-drift@v1.md
+    sha256: 1f84bf61652b4b2b0d14ac11d23ff8ce55b22e1cba42eae2fc0a178d08a10334
+    description: Publish leadership drift standard, data handling policy, runbook, and roadmap update.
+    scope:
+      paths:
+        - docs/standards/leadership-drift.md
+        - docs/security/data-handling/leadership-drift.md
+        - docs/ops/runbooks/leadership-drift.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/standards/leadership-drift@v1.md
+        - prompts/registry.yaml
+        - agents/examples/LEADERSHIP_DRIFT_DOCS_20260207.json
+      domains:
+        - documentation
+        - governance
+        - security
+        - ops
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
