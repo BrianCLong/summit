@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/agents/evidence/stamp.schema.json",
+  "title": "Evidence Stamp",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["generated_at_iso"],
+  "properties": {
+    "generated_at_iso": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

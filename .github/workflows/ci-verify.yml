@@ -266,6 +266,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Evidence schema validation
+        run: pnpm evidence:validate
+
       - name: GraphQL schema compatibility check
         run: |
           if npm run graphql:schema:check 2>/dev/null; then
