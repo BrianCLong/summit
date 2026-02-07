@@ -15,6 +15,7 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `verify/evidence` (Notebook lane 1)
 - `gate/evidence` (PR2)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
@@ -22,6 +23,8 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `typecheck`
 - `build`
 - `test`
+- `verify/notebook-sources-only`
+- `verify/citations-required`
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 

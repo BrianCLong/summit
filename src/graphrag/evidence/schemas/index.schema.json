@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidenceIndex",
+  "type": "object",
+  "required": ["version", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "number" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "files"],
+        "additionalProperties": false,
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "files": {
+            "type": "object",
+            "required": ["report", "metrics", "stamp"],
+            "additionalProperties": false,
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
