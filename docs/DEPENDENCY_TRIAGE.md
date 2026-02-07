@@ -60,9 +60,12 @@ Run these from repo root (or the specified workspace root):
 
 ## Python (pip-audit)
 
-- Reran pip-audit with `--disable-pip --no-deps` across the prior error list; all files now scan without resolution failures.
-- Remaining vulnerability:
+- Full sweep completed with `--disable-pip --no-deps` across all requirements files.
+- Remaining vulnerabilities:
+  - `requirements.txt`: ecdsa 0.19.1 (CVE-2024-23342) — advisory scope indicates <= 0.18.0; no newer release available.
   - `summit-cog-war/requirements-optional-graph.txt`: dgl 2.1.0 (GHSA-3x5x-fw77-g54c) — optional install only; no fix currently available.
+- Unpinned requirements still present (needs follow-up pins):
+  - `auto_scientist/requirements.txt`, `backend/requirements.txt`, `cognitive-targeting-engine/requirements.txt`, `cognitive_nlp_engine/requirements.txt`, `data-pipelines/etl-assistant/requirements.txt`, `eval/requirements.txt`, `frontend/requirements.txt`, `impl/runtime/requirements.txt`, `ingestion/requirements.txt`, `intelgraph/requirements.txt`, `maestro/requirements.txt`, `ml/threat_models/requirements.txt`, `mlops/requirements.txt`, `packages/osint/requirements.txt`, `pipelines/requirements.txt`, `policy-fuzzer/requirements.txt`, `python/requirements.txt`, `services/cyber-intel-service/requirements.txt`, `services/er/requirements.txt`, `services/ingest-sandbox/requirements.txt`, `services/ml-training/requirements.txt`, `services/scout/requirements.txt`, `services/strategic-foresight/requirements.txt`, `services/threat-hunting-service/requirements.txt`, `summit-roiforge/requirements.txt`, `tools/alertsync/requirements.txt`, `tools/summit-mds/requirements.txt`.
 - Skipped (not on PyPI / URL pins): `uvicorn` 0.40.1, `redis` 7.2.0, `playwright` 1.48.2, `albumentation` 1.3.1, `spython-dateutil` 2.8.2, `en-core-web-lg`, `en-core-web-sm`, `gitlib`.
 
 ## Python Remediations Applied
@@ -71,6 +74,7 @@ Run these from repo root (or the specified workspace root):
 - Updated `marshmallow` to 4.1.2 and `python-multipart` to 0.0.22 in `requirements.txt`.
 - Updated `starlette` to 0.49.1 in `requirements.txt`.
 - Pinned unversioned requirements in `adversarial-misinfo-defense-platform/requirements.txt` and `server/data-pipelines/requirements.txt` (aligning JS deps to web `package.json` versions where applicable, plus updating Python tooling/runtime pins).
+- Updated `tools/synth-probe/requirements.txt` to `requests==2.32.4` for CVE-2024-47081.
 
 ## Python Remediation Gaps
 
