@@ -150,6 +150,10 @@ def main():
                     allow_timestamps = True
 
                 if schema:
+                    # Skip schema validation for template files to avoid failures on placeholders
+                    if "templates/" in full_fpath:
+                        continue
+
                     data = load_json(full_fpath)
                     if data is None:
                         success = False

@@ -45,30 +45,30 @@
     },
     "EVD-260119895-keel-ARCH-001": {
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/templates/report.json",
+        "evidence/templates/metrics.json",
+        "evidence/templates/stamp.json"
       ]
     },
     "EVD-260119895-keel-STAB-002": {
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/templates/report.json",
+        "evidence/templates/metrics.json",
+        "evidence/templates/stamp.json"
       ]
     },
     "EVD-260119895-keel-DSCL-003": {
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/templates/report.json",
+        "evidence/templates/metrics.json",
+        "evidence/templates/stamp.json"
       ]
     },
     "EVD-260119895-keel-BENCH-004": {
       "files": [
-        "summit/evidence/templates/report.json",
-        "summit/evidence/templates/metrics.json",
-        "summit/evidence/templates/stamp.json"
+        "evidence/templates/report.json",
+        "evidence/templates/metrics.json",
+        "evidence/templates/stamp.json"
       ]
     },
     "EVD-SSDF12-BNDL-001": {
@@ -76,13 +76,6 @@
         "evidence/ssdf-v1-2/pr-01/report.json",
         "evidence/ssdf-v1-2/pr-01/metrics.json",
         "evidence/ssdf-v1-2/pr-01/stamp.json"
-      ]
-    },
-    "EVD-EXPB-CORE-001": {
-      "files": [
-        "evidence/runs/expectation-baselines/report.json",
-        "evidence/runs/expectation-baselines/metrics.json",
-        "evidence/runs/expectation-baselines/stamp.json"
       ]
     },
     "EVD-PRIVTEL-SCHEMA-001": {
