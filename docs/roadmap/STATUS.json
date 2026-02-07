@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T21:45:00Z",
-  "revision_note": "Expanded evidence contract docs and examples; added PromptSpec foundation guide; updated SERA CLI constraints; added NOG runbook data handling/escalation; added RU-UA cogwar deterministic example.",
+  "last_updated": "2026-02-07T00:00:00Z",
+  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -64,7 +64,19 @@
       "id": "summit-skill-router-ga-orchestrator",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, and emit deterministic evidence-first outputs."
+      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
+    },
+    {
+      "id": "summit-ga-preflight-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
+    },
+    {
+      "id": "summit-pr-stack-sequencer-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -188,7 +200,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }

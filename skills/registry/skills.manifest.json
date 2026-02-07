@@ -1,39 +1,21 @@
 {
   "version": 1,
-  "generated_at": "2026-01-14T20:10:00Z",
+  "generated_at": "2026-02-07T22:38:01Z",
   "skills": [
     {
-      "name": "eks-skill",
-      "display_name": "AWS EKS skill",
-      "source": "https://github.com/SkillsMP/eks-skill",
+      "name": "artifacts-builder",
+      "display_name": "Artifacts Builder",
+      "source": "https://github.com/SkillsMP/artifacts-builder",
       "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
       "sha256": "DEFERRED_PENDING_SHA256",
-      "overlay": "skills/overlays/eks-skill",
+      "overlay": "skills/overlays/artifacts-builder",
       "status": "intentionally-constrained",
       "governed_exception": true,
-      "domains": ["devops", "eks", "kubernetes"]
-    },
-    {
-      "name": "github-actions-templates",
-      "display_name": "GitHub Actions Templates",
-      "source": "https://github.com/SkillsMP/github-actions-templates",
-      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
-      "sha256": "DEFERRED_PENDING_SHA256",
-      "overlay": "skills/overlays/github-actions-templates",
-      "status": "intentionally-constrained",
-      "governed_exception": true,
-      "domains": ["devops", "ci-cd", "security"]
-    },
-    {
-      "name": "iac-terraform",
-      "display_name": "Terraform / Terragrunt IaC",
-      "source": "https://github.com/SkillsMP/iac-terraform",
-      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
-      "sha256": "DEFERRED_PENDING_SHA256",
-      "overlay": "skills/overlays/iac-terraform",
-      "status": "intentionally-constrained",
-      "governed_exception": true,
-      "domains": ["iac", "terraform", "devops"]
+      "domains": [
+        "ui",
+        "react",
+        "design-systems"
+      ]
     },
     {
       "name": "devops-iac-engineer",
@@ -44,7 +26,56 @@
       "overlay": "skills/overlays/devops-iac-engineer",
       "status": "intentionally-constrained",
       "governed_exception": true,
-      "domains": ["devops", "observability", "iac"]
+      "domains": [
+        "devops",
+        "observability",
+        "iac"
+      ]
+    },
+    {
+      "name": "eks-skill",
+      "display_name": "AWS EKS skill",
+      "source": "https://github.com/SkillsMP/eks-skill",
+      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
+      "sha256": "DEFERRED_PENDING_SHA256",
+      "overlay": "skills/overlays/eks-skill",
+      "status": "intentionally-constrained",
+      "governed_exception": true,
+      "domains": [
+        "devops",
+        "eks",
+        "kubernetes"
+      ]
+    },
+    {
+      "name": "github-actions-templates",
+      "display_name": "GitHub Actions Templates",
+      "source": "https://github.com/SkillsMP/github-actions-templates",
+      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
+      "sha256": "DEFERRED_PENDING_SHA256",
+      "overlay": "skills/overlays/github-actions-templates",
+      "status": "intentionally-constrained",
+      "governed_exception": true,
+      "domains": [
+        "devops",
+        "ci-cd",
+        "security"
+      ]
+    },
+    {
+      "name": "iac-terraform",
+      "display_name": "Terraform / Terragrunt IaC",
+      "source": "https://github.com/SkillsMP/iac-terraform",
+      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
+      "sha256": "DEFERRED_PENDING_SHA256",
+      "overlay": "skills/overlays/iac-terraform",
+      "status": "intentionally-constrained",
+      "governed_exception": true,
+      "domains": [
+        "iac",
+        "terraform",
+        "devops"
+      ]
     },
     {
       "name": "knowledge-graph-builder",
@@ -55,7 +86,11 @@
       "overlay": "skills/overlays/knowledge-graph-builder",
       "status": "intentionally-constrained",
       "governed_exception": true,
-      "domains": ["graph", "intelgraph", "data-fusion"]
+      "domains": [
+        "graph",
+        "intelgraph",
+        "data-fusion"
+      ]
     },
     {
       "name": "query-expert",
@@ -66,18 +101,11 @@
       "overlay": "skills/overlays/query-expert",
       "status": "intentionally-constrained",
       "governed_exception": true,
-      "domains": ["query", "graphql", "performance"]
-    },
-    {
-      "name": "artifacts-builder",
-      "display_name": "Artifacts Builder",
-      "source": "https://github.com/SkillsMP/artifacts-builder",
-      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
-      "sha256": "DEFERRED_PENDING_SHA256",
-      "overlay": "skills/overlays/artifacts-builder",
-      "status": "intentionally-constrained",
-      "governed_exception": true,
-      "domains": ["ui", "react", "design-systems"]
+      "domains": [
+        "query",
+        "graphql",
+        "performance"
+      ]
     },
     {
       "name": "shadcn-ui-expert",
@@ -88,7 +116,41 @@
       "overlay": "skills/overlays/shadcn-ui-expert",
       "status": "intentionally-constrained",
       "governed_exception": true,
-      "domains": ["ui", "shadcn", "accessibility"]
+      "domains": [
+        "ui",
+        "shadcn",
+        "accessibility"
+      ]
+    },
+    {
+      "name": "summit-ga-preflight-hard-gate-auditor",
+      "display_name": "Summit GA Preflight",
+      "source": "local://skills/summit-ga-preflight-hard-gate-auditor",
+      "commit": "DEFERRED_PENDING_LOCAL",
+      "sha256": "11bb8560cb006eef66a8848091c610fc9bbe491a1f08126fcc25221c91a6b6cc",
+      "overlay": "skills/overlays/summit-ga-preflight-hard-gate-auditor",
+      "status": "intentionally-constrained",
+      "governed_exception": true,
+      "domains": [
+        "governance",
+        "ga",
+        "ci"
+      ]
+    },
+    {
+      "name": "summit-pr-stack-sequencer",
+      "display_name": "Summit PR Stack Sequencer",
+      "source": "local://skills/summit-pr-stack-sequencer",
+      "commit": "DEFERRED_PENDING_LOCAL",
+      "sha256": "5fbb80328febf40c71241fb2248534bc4e1bd0265bfd06e7ec3e29f60dd580f2",
+      "overlay": "skills/overlays/summit-pr-stack-sequencer",
+      "status": "intentionally-constrained",
+      "governed_exception": true,
+      "domains": [
+        "ci",
+        "release",
+        "governance"
+      ]
     }
   ]
 }
