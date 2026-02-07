@@ -1,3 +1,4 @@
+import future.keywords
 package intelgraph.policy.export
 
 default allow := false

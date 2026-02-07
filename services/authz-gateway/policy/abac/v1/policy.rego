@@ -1,3 +1,4 @@
+import future.keywords
 package summit.abac.v1
 
 default allow = false

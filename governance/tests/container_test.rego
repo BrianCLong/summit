@@ -1,3 +1,4 @@
+import future.keywords
 package container.policy
 
 test_root_denied {

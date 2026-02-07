@@ -1,3 +1,4 @@
+import future.keywords
 package intelgraph.graphql
 
 default allow := false

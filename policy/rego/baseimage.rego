@@ -1,3 +1,4 @@
+import future.keywords
 package images
 allow if {
   startswith(input.image, "gcr.io/distroless/")

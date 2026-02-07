@@ -1,3 +1,4 @@
+import future.keywords
 # Unit tests for approval policies
 package intelgraph.approvals_test
 

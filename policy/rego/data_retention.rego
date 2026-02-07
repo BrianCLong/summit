@@ -1,3 +1,4 @@
+import future.keywords
 package data.retention
 # Example policy: PII data must have a retention period
 deny contains msg if {

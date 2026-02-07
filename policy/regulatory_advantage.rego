@@ -1,3 +1,4 @@
+import future.keywords
 package summit.regulatory
 
 # Policy-as-code for Regulatory Advantage

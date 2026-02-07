@@ -178,6 +178,7 @@
     "jest-junit": "16.0.0",
     "jest-watch-typeahead": "^2.2.2",
     "js-yaml": "^4.1.1",
+    "jscpd": "3.5.10",
     "lint-staged": "^16.2.7",
     "markdownlint-cli": "^0.45.0",
     "minimatch": "^10.1.1",

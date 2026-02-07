@@ -1,3 +1,4 @@
+import future.keywords
 package kubernetes
 
 import rego.v1

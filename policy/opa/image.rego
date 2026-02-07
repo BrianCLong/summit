@@ -1,3 +1,4 @@
+import future.keywords
 package kubernetes.admission
 
 deny contains msg if {

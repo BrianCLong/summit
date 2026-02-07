@@ -1,3 +1,4 @@
+import future.keywords
 package repo.flow
 
 deny[msg] {

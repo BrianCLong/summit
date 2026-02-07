@@ -1,3 +1,4 @@
+import future.keywords
 package maestro.routing
 default allow = false
 

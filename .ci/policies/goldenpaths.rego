@@ -1,3 +1,4 @@
+import future.keywords
 package goldenpaths
 
 default allow = false

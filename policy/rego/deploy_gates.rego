@@ -1,3 +1,4 @@
+import future.keywords
 package deploy.gates
 
 # Require cosign signature, SBOM, and no critical vulns

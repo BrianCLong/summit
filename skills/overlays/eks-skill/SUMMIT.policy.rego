@@ -1,3 +1,4 @@
+import future.keywords
 package summit.skills.overlays
 
 permissions["eks-skill"] = {
