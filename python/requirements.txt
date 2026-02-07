@@ -18,7 +18,7 @@ aiohttp==3.13.3
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.27.3
 python-dotenv==1.2.1
-python-json-logger
+python-json-logger==4.0.0
 opentelemetry-api
 opentelemetry-sdk
 neo4j>=5.20
