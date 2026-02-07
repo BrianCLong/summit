@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-06T19:29:02Z",
+  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -169,6 +169,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "SDD playbook, spec template, and Claude Code interop standard docs."
+    },
+    {
+      "id": "cicd-signal-deltas-2026",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     }
   ],
   "summary": {
@@ -176,7 +182,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 15,
+    "total": 16,
     "ga_blockers": []
   }
 }
