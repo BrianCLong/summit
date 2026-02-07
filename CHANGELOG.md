@@ -23,6 +23,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
+## [4.2.3] - CI/CD Hardening - 2026-02-07
+
+### Fixed
+- **CI/CD**: Fixed git submodule errors by removing phantom index entries.
+- **CI/CD**: Fixed SLSA build workflow network access.
+- **CI/CD**: Fixed `ga-gate.yml` workflow dependency order.
+- **CI/CD**: Updated OPA image tag to a valid version.
+- **Testing**: Fixed `require` vs `import` issues in integration tests.
+- **Testing**: Fixed `pg` mocking and metrics exports in tests.
+- **Testing**: Added missing methods to `ProvenanceLedgerV2` mock.
+- **Server**: Fixed potential crash in `pg.ts` with optional chaining.
+- **Versioning**: Aligned server package version with client (4.2.3).
+
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
 ### Fixed

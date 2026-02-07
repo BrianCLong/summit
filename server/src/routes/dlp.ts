@@ -82,7 +82,7 @@ router.get(
         throw new AppError('Invalid policy ID', 400, 'VALIDATION_ERROR');
       }
 
-      const policy = dlpService.getPolicy(req.params.id);
+      const policy = dlpService.getPolicy(req.params.id as string);
       if (!policy) {
         throw new AppError('DLP policy not found', 404);
       }
