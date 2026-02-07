@@ -23,8 +23,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -49,10 +51,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:
@@ -94,6 +99,7 @@ jobs:
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@a39c2dc7b40653b5511219e93de1c7d5293aa357 # v3.1.1
+
       - name: Sign the container image
         run: cosign sign --yes "${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}@${{ steps.build-and-push.outputs.digest }}"
         env:
@@ -107,6 +113,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:

@@ -68,6 +68,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
+
       - name: Install Git 2.47.1+ and disable bundle URIs
         shell: bash
         run: |

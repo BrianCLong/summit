@@ -47,6 +47,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
+
       - name: Download Site Artifact
         id: download
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
@@ -166,6 +167,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
+
       - name: Download Alert Report
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
         with:
@@ -339,6 +341,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
+
       - name: Check for Open Alerts to Close
         id: check-close
         run: |

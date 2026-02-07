@@ -10,7 +10,13 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["task_id", "task_type", "cost_units", "running_total"]
+        "required": ["task_id", "task_type", "cost_units", "running_total"],
+        "properties": {
+          "task_id": { "type": "string" },
+          "task_type": { "type": "string" },
+          "cost_units": { "type": "integer" },
+          "running_total": { "type": "integer" }
+        }
       }
     }
   }

@@ -87,6 +87,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - name: Check Freeze Mode
         run: |
           chmod +x scripts/release/enforce_freeze_gate.sh
@@ -203,6 +204,7 @@ jobs:
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@b0eb0c1eb5f79b7ec602946f1fa93f3fc06f6e70 # v2
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -517,6 +519,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - name: Download All Artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
@@ -703,6 +706,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
       - name: Download GA Release Bundle
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:

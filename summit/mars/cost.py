@@ -1,12 +1,19 @@
 import json
+from enum import Enum
+
+class TaskType(str, Enum):
+    DESIGN = "design"
+    DECOMPOSE = "decompose"
+    IMPLEMENT = "implement"
+    EVALUATE = "evaluate"
 
 class CostModel:
     def __init__(self, unit_costs=None):
         self.unit_costs = unit_costs or {
-            "design": 10,
-            "decompose": 5,
-            "implement": 20,
-            "evaluate": 50
+            TaskType.DESIGN: 10,
+            TaskType.DECOMPOSE: 5,
+            TaskType.IMPLEMENT: 20,
+            TaskType.EVALUATE: 50
         }
 
     def get_cost(self, task_type):

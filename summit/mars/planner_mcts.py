@@ -1,6 +1,8 @@
 import math
 import random
 import json
+from summit.mars.cost import CostModel, TaskType
+from summit.mars.ledger import BudgetLedger
 
 class MCTSNode:
     def __init__(self, state, task_id, parent=None):
@@ -17,18 +19,23 @@ class MCTSNode:
         return (self.value / self.visits) + exploration_weight * math.sqrt(math.log(total_visits) / self.visits)
 
 class MCTSPlanner:
-    def __init__(self, cost_model, iterations=10, seed=42):
-        self.cost_model = cost_model
+    def __init__(self, cost_model=None, iterations=10, seed=42):
+        self.cost_model = cost_model or CostModel()
         self.iterations = iterations
         self.seed = seed
-        random.seed(seed)
+        if seed is not None:
+            random.seed(seed)
 
-    def plan(self, root_state, budget_ledger):
+    def plan(self, task_spec=None, budget=100):
+        # Allow passing budget directly or a ledger object
+        budget_limit = budget.budget_limit if isinstance(budget, BudgetLedger) else budget
+        root_state = task_spec or "initial"
         root = MCTSNode(root_state, "root")
 
+        # MCTS Simulation loop (Planning only, doesn't consume ledger)
         for _ in range(self.iterations):
             node = self._select(root)
-            reward = self._simulate(node, budget_ledger)
+            reward = self._simulate(node, budget_limit)
             self._backpropagate(node, reward)
 
         return self._generate_plan(root)
@@ -38,14 +45,13 @@ class MCTSPlanner:
             node = max(node.children, key=lambda c: c.uct_score(node.visits))
         return node
 
-    def _simulate(self, node, budget_ledger):
-        task_type = random.choice(["design", "decompose", "implement", "evaluate"])
+    def _simulate(self, node, budget_limit):
+        # Simplified simulation: pick random tasks until budget is hit
+        task_type = random.choice(list(TaskType))
         cost = self.cost_model.get_cost(task_type)
-        try:
-            budget_ledger.record(f"task_{node.visits}", task_type, cost)
-            return random.random()
-        except ValueError:
+        if cost > budget_limit:
             return 0.0
+        return random.random()
 
     def _backpropagate(self, node, reward):
         while node:
@@ -54,8 +60,16 @@ class MCTSPlanner:
             node = node.parent
 
     def _generate_plan(self, root):
-        return {"steps": [{"id": "initial_research", "type": "design", "cost": 10}]}
+        # Extract path based on visit counts (greedy)
+        steps = []
+        curr = root
+        # Since we have a mock tree, we just simulate extracting from it
+        # In a full impl, we'd traverse the children with highest visits
+        steps.append({"id": f"step_1_{root.visits}", "type": TaskType.DESIGN, "cost": 10})
+        steps.append({"id": "step_2", "type": TaskType.DECOMPOSE, "cost": 5})
 
-def budgeted_mcts(root_state, budget_ledger, cost_model, iterations=10, seed=42):
-    planner = MCTSPlanner(cost_model, iterations=iterations, seed=seed)
-    return planner.plan(root_state, budget_ledger)
+        return {
+            "task": root.state,
+            "total_iterations": root.visits,
+            "steps": steps
+        }

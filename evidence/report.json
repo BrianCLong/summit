@@ -1,5 +1,5 @@
 {
-  "evidence_id": "EVID-MARS-AUTO1",
-  "summary": "MARS Autonomous Research Run Completed",
+  "summary": "Partitioning eval completed",
+  "scenarios": 3,
   "status": "PASS"
 }

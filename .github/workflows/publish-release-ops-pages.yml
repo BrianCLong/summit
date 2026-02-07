@@ -417,6 +417,7 @@ jobs:
       - name: Setup Pages
         if: inputs.dry_run != true
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v4
+
       - name: Upload Pages Artifact
         if: inputs.dry_run != true
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v3

@@ -35,8 +35,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
+
       - name: Install Cosign
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+
       - name: Verify SBOM attestation and signature (deployment gate)
         run: scripts/ci/verify-sbom-signature.sh "${{ inputs.image_ref }}"
         env:
@@ -59,6 +61,7 @@ jobs:
 
       - name: Set up yq
         uses: mikefarah/yq@065b200af9851db0d5132f50bc10b1406ea5c0a8 # v4.50.1
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

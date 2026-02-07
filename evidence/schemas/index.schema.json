@@ -2,45 +2,26 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "summit evidence index",
   "type": "object",
+  "required": ["items"],
   "properties": {
     "version": {
       "type": ["string", "integer"]
     },
     "items": {
-      "oneOf": [
-        {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {
-              "evidence_id": { "type": "string" },
-              "files": {
-                "oneOf": [
-                   { "type": "array", "items": { "type": "string" } },
-                   { "type": "object" }
-                ]
-              },
-              "title": { "type": "string" },
-              "category": { "type": "string" },
-              "artifacts": {
-                "type": "array",
-                "items": { "type": "string" }
-              }
-            }
-          }
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id"],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "files": {
+            "type": "object"
+          },
+          "title": { "type": "string" },
+          "category": { "type": "string" }
         },
-        {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["evidence_id"],
-            "properties": {
-              "evidence_id": { "type": "string" },
-              "files": { "type": "object" }
-            }
-          }
-        }
-      ]
+        "additionalProperties": true
+      }
     },
     "mappings": {
       "type": "object",

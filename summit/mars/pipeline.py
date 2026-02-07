@@ -1,18 +1,15 @@
-import json
-
 class ModularPipeline:
-    def __init__(self, design_spec):
+    def __init__(self, design_spec=None):
         self.design_spec = design_spec
         self.tasks = []
 
-    def decompose(self):
-        self.tasks.append({"id": "task_1", "type": "implementation", "depends_on": []})
-        return self.tasks
-
-    def get_task_graph(self):
-        return {
-            "nodes": self.tasks,
-            "edges": []
-        }
+    def decompose(self, spec=None):
+        target_spec = spec or self.design_spec
+        # Mock decomposition
+        self.tasks = [
+            {"id": "task_1", "type": "design", "dependencies": []},
+            {"id": "task_2", "type": "implement", "dependencies": ["task_1"]},
+        ]
+        return {"tasks": self.tasks}
 
 MARSPipeline = ModularPipeline

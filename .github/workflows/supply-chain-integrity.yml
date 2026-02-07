@@ -247,6 +247,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v4.1.7
+
       - name: Download Source SBOMs
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:

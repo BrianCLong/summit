@@ -49,6 +49,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
@@ -94,8 +95,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
+
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
+
       - name: Generate SBOMs
         run: |
           docker build -t registry/app:${{ github.sha }} .
@@ -112,6 +115,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:

@@ -88,7 +88,7 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     healthcheck:
-      test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || true']
+      test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1']
       interval: 15s
       timeout: 30s
       retries: 20
@@ -338,7 +338,7 @@ services:
       - 'prometheus.port=9001'
 
   prometheus:
-    image: prometheus/prometheus:v2.54.1
+    image: prom/prometheus:v2.54.1
     container_name: summit-prometheus
     restart: unless-stopped
     volumes:
