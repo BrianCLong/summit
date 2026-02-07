@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T21:05:00Z",
+  "revision_note": "Added governance overlay agent-platforms ITEM brief and tracking entry.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -129,6 +129,12 @@
       "notes": "Standards + pack skeleton for cw-ruua-isrhamas comparison assets."
     },
     {
+      "id": "governance-overlay-agent-platforms-brief",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Authored governance overlay ITEM brief and integrated readiness-aligned next actions."
+    },
+    {
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
@@ -182,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
