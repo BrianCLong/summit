@@ -45,6 +45,7 @@ paths:
 
   /api/tenants:
     post:
+      operationId: createTenant
       summary: Create a new tenant
       tags: [Tenancy]
       requestBody:
@@ -62,6 +63,7 @@ paths:
                 $ref: '#/components/schemas/Tenant'
 
     get:
+      operationId: listTenants
       summary: List tenants (Admin only)
       tags: [Tenancy]
       responses:
@@ -76,6 +78,7 @@ paths:
 
   /api/policy/simulate:
     post:
+      operationId: simulatePolicy
       summary: Simulate a policy decision (Preflight)
       tags: [Governance]
       requestBody:
@@ -94,6 +97,7 @@ paths:
 
   /api/export/bundles:
     post:
+      operationId: exportBundle
       summary: Create an Intel Bundle export
       tags: [Disclosure]
       requestBody:
@@ -112,6 +116,7 @@ paths:
 
   /api/receipts/{id}:
     get:
+      operationId: getReceipt
       summary: Get a signed receipt by ID
       tags: [Provenance]
       parameters:
