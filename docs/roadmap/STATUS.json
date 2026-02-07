@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-05T23:30:00Z",
-  "revision_note": "Pinned entities override to restore Jest parse5 decode path and logged dependency guardrail.",
+  "last_updated": "2026-02-08T20:45:00Z",
+  "revision_note": "Added Temporal Honesty architecture baseline and initiative tracking.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -65,6 +65,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+    },
+    {
+      "id": "temporal-honesty-integration",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Temporal Honesty baseline: temporal manifests, assumption scope, confidence decay, credibility checks, and evidence-first artifacts."
     },
     {
       "id": "E",
@@ -172,11 +178,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 15,
+    "total": 16,
     "ga_blockers": []
   }
 }
