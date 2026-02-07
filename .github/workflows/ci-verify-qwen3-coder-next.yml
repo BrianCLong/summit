@@ -1,0 +1,47 @@
+name: ci-verify-qwen3-coder-next
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-evidence-schemas:
+    name: verify/evidence-schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx .github/scripts/verify-evidence-schemas.ts
+
+  verify-provider-contract:
+    name: verify/provider-contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx .github/scripts/verify-provider-contract.ts
+
+  verify-dependency-delta:
+    name: verify/dependency-delta
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx .github/scripts/check-dependency-delta.ts

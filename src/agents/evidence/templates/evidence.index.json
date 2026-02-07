@@ -1,0 +1,12 @@
+{
+  "evidence": [
+    {
+      "evidence_id": "EVD-QWEN3CODERNEXT-PROV-001",
+      "paths": {
+        "report": "evidence/EVD-QWEN3CODERNEXT-PROV-001/report.json",
+        "metrics": "evidence/EVD-QWEN3CODERNEXT-PROV-001/metrics.json",
+        "stamp": "evidence/EVD-QWEN3CODERNEXT-PROV-001/stamp.json"
+      }
+    }
+  ]
+}

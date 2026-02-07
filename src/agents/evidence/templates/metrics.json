@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-QWEN3CODERNEXT-PROV-001",
+  "metrics": {
+    "contract_pass": 1,
+    "response_length": 0
+  }
+}
