@@ -1,16 +1,30 @@
-# Repo Assumptions & Verification
+# Repository Assumptions (Software Factory Subsumption)
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+Status: Intentionally constrained pending verification.
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Verify (grounded checks)
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+- Language mix (Python/Go/TypeScript) and primary runtime targets.
+- Current agent runner entrypoints and where they live (CLI, service, or scripts).
+- Existing test harness style (unit/integration/e2e) and naming conventions.
+- CI system and job names (GitHub Actions or equivalent workflows).
+- Evidence folder conventions and artifact retention patterns.
+- Logging and telemetry approach (structured logs, metrics, traces).
+
+## Must-not-touch (until verified)
+
+- Release workflow files.
+- Security policy files.
+- Anything under `infra/` or production deployment manifests.
+
+## Checklist (to run before implementation)
+
+- `rg -n "evidence|eval|scenario|harness|agent"` to map existing primitives.
+- List CI jobs and required checks for baseline policy gates.
+- Confirm license and contribution rules.
+
+## Default constraints (if verification is blocked)
+
+- Feature flags default OFF for any new pipeline.
+- Deny-by-default for external network calls in tests.
+- Only additive modules and minimal wiring changes.
