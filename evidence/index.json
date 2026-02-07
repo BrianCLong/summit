@@ -400,6 +400,14 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-OPENCLAW-MOMENT-GOV-001",
+      "files": {
+        "report": "evidence/EVD-OPENCLAW-MOMENT-GOV-001/report.json",
+        "metrics": "evidence/EVD-OPENCLAW-MOMENT-GOV-001/metrics.json",
+        "stamp": "evidence/EVD-OPENCLAW-MOMENT-GOV-001/stamp.json"
+      }
     }
   ]
 }

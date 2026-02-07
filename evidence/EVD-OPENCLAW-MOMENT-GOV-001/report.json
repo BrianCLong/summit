@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVD-OPENCLAW-MOMENT-GOV-001",
+  "area": "governance/ibc",
+  "status": "pass",
+  "artifacts": [
+    "evidence/fixtures/pass/ibc_ok.json",
+    "evidence/fixtures/fail/ibc_missing_owner.json"
+  ],
+  "summary": "IBC deny-by-default fixtures validated for OpenClaw governance scaffold."
+}
