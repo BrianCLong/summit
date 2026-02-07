@@ -17,7 +17,7 @@ scikit-learn==1.8.0
 aiohttp==3.13.3
 fuzzywuzzy==0.18.0
 python-Levenshtein==0.27.3
-python-dotenv
+python-dotenv==1.2.1
 python-json-logger
 opentelemetry-api
 opentelemetry-sdk
