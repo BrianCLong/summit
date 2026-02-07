@@ -16,6 +16,10 @@ on:
         required: false
         default: "5.3.1"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write

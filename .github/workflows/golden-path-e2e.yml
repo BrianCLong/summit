@@ -9,6 +9,10 @@ on:
     - cron: "0 2 * * *" # Nightly at 2 AM
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   golden-path-e2e:
     runs-on: ubuntu-latest

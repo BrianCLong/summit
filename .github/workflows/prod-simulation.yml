@@ -9,6 +9,10 @@ on:
       - 'scripts/ci/simulate_prod_deploy.sh'
       - '.github/workflows/prod-simulation.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   simulate-prod:
     name: "🚀 Prod Simulation"

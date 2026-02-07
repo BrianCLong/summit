@@ -12,6 +12,10 @@ on:
       - 'client/**'
       - '.github/workflows/summit-ci.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-python:
     runs-on: ubuntu-latest
