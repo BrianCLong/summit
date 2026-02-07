@@ -1,17 +1,73 @@
+import { jest, describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 import request from 'supertest';
-import { createApp } from '../../app.js';
-import { getPostgresPool } from '../../db/postgres.js';
-import { evidenceProvenanceService } from '../evidence/provenance-service.js';
-import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+
+// Mock DB
+const mockQuery = jest.fn().mockImplementation((text: any, params: any) => {
+    const sql = (typeof text === 'string' ? text : text.text || '').toUpperCase();
+
+    if (sql.includes('INSERT INTO RUN')) {
+        return Promise.resolve({ rowCount: 1, rows: [{ id: 'mock-run-id' }] });
+    }
+    if (sql.includes('INSERT INTO ROUTER_DECISIONS')) {
+        return Promise.resolve({ rowCount: 1, rows: [{ id: 'mock-decision-id' }] });
+    }
+    if (sql.includes('SELECT') && sql.includes('ROUTER_DECISIONS')) {
+        return Promise.resolve({
+            rowCount: 1,
+            rows: [{
+                id: 'mock-decision-id',
+                selected_model: 'gpt-4',
+                candidates: [{ model: 'gpt-4', score: 0.95 }, { model: 'gpt-3.5-turbo', score: 0.8 }],
+                can_override: true
+            }]
+        });
+    }
+    if (sql.includes('INSERT INTO MCP_SERVERS')) {
+         return Promise.resolve({ rowCount: 1, rows: [{ id: 'mock-mcp-id', name: 'test-mcp-server' }] });
+    }
+    if (sql.includes('SELECT') && sql.includes('MCP_SERVERS')) {
+         return Promise.resolve({ rowCount: 1, rows: [{ id: 'mock-mcp-id', name: 'test-mcp-server' }] });
+    }
+
+    return Promise.resolve({ rowCount: 0, rows: [] });
+});
+
+const mockPool = {
+    query: mockQuery,
+    read: mockQuery,
+    write: mockQuery,
+    connect: jest.fn().mockResolvedValue({
+        query: mockQuery,
+        release: jest.fn(),
+    }),
+    end: jest.fn(),
+    healthCheck: jest.fn().mockResolvedValue([{ healthy: true }]),
+    slowQueryInsights: jest.fn().mockReturnValue([]),
+    on: jest.fn(),
+    transaction: jest.fn().mockImplementation((cb: any) => cb({ query: mockQuery })),
+    withTransaction: jest.fn().mockImplementation((cb: any) => cb({ query: mockQuery })),
+};
+
+jest.unstable_mockModule('../../db/postgres.js', () => ({
+    getPostgresPool: () => mockPool,
+    closePostgresPool: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Dynamic imports
+const { createApp } = await import('../../app.js');
+const { getPostgresPool, closePostgresPool } = await import('../../db/postgres.js');
+const { evidenceProvenanceService } = await import('../evidence/provenance-service.js');
 
 describe('Maestro Integration Tests', () => {
   let testRunId: string;
   let authToken: string;
   let app: any;
+  let server: any;
 
   beforeAll(async () => {
     // Create app
     app = await createApp();
+    server = app.listen(0);
 
     // Setup test database
     const pool = getPostgresPool();
@@ -31,8 +87,13 @@ describe('Maestro Integration Tests', () => {
 
   afterAll(async () => {
     const pool = getPostgresPool();
-    await pool.query('ROLLBACK');
-    await pool.end();
+    // await pool.query('ROLLBACK'); // Mock doesn't strictly need rollback but good practice
+
+    await closePostgresPool();
+
+    if (server) {
+        await new Promise((resolve) => server.close(resolve));
+    }
   });
 
   describe('Router Decision Transparency', () => {
