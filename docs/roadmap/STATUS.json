@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:54:14Z",
+  "revision_note": "Queued scoped vector retrieval integration plan for Neo4j SEARCH + in-index filtering.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -65,6 +65,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+    },
+    {
+      "id": "scoped-vector-retrieval-neo4j-2026-01",
+      "status": "not_started",
+      "owner": "codex",
+      "notes": "Plan governed integration for Neo4j 2026.01 SEARCH-based vector retrieval with in-index filtering, policy-scoped fallbacks, and evidence-first evals (Deferred pending A1-A3 validation)."
     },
     {
       "id": "E",
@@ -181,8 +187,8 @@
     "rc_ready": 8,
     "partial": 2,
     "incomplete": 0,
-    "not_started": 5,
-    "total": 16,
+    "not_started": 6,
+    "total": 17,
     "ga_blockers": []
   }
 }
