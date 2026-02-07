@@ -80,7 +80,8 @@ export async function upsertTickets(items: Ticket[]) {
   } catch (e) {
     // If table ensuring fails, we might still want to try (it might already exist)
     // but the original code just logged warning.
-    // My ensureTable now throws, so I should handle it here to match original behavior of "best effort".
+    // My ensureTable now throws, so we catch it here to match original "best effort" behavior.
+    logger.debug({ err: e }, 'ensureTable failed in upsertTickets, proceeding anyway');
   }
 
   if (!items?.length) return { upserted: 0 };
