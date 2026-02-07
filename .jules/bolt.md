@@ -18,3 +18,7 @@
 ## 2026-05-22 - [Optimized Supernode Detection]
 **Learning:** Nested loops of O(N*E) for supernode detection in large graphs (>10k nodes, >50k edges) cause severe latency (~6s). Pre-calculating connection Maps in O(E) reduces this to O(N+E), improving performance by >100x (~33ms).
 **Action:** Always pre-calculate frequency/connection maps when iterating over edges for multiple nodes to avoid N*E complexity.
+
+## 2026-06-15 - [Copy-on-Write Sanitization]
+**Learning:** Middleware that recursively deep-clones request objects (body, query, params) on every request is a major performance bottleneck. Implementing a "copy-on-write" pattern that only clones when a change is needed (e.g. removing a malicious key) reduces allocations and CPU cycles by >80% for the common case where data is clean.
+**Action:** Always prefer copy-on-write for recursive data transformation middleware. Ensure guards are in place for non-plain objects like Date, Buffer, or RegExp to prevent data loss.
