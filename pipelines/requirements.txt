@@ -2,7 +2,7 @@
 
 # Core dependencies
 pyyaml==6.0.3
-jsonschema>=4.0.0
+jsonschema==4.26.0
 
 # OpenLineage integration
 # openlineage-python>=0.20.0  # Uncomment to enable
