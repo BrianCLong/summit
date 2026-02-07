@@ -467,6 +467,27 @@ prompts:
     verification:
       tiers_required:
         - B
+  - id: narrative-io-detection-pack
+    version: v1
+    path: prompts/analysis/narrative-io-detection-pack@v1.md
+    sha256: bac30762eb4ca35da661fb4476e02e9c2f7769c0c100b804918a932963345ebc
+    description: Create the narrative & influence ops detection pack analysis report and roadmap update.
+    scope:
+      paths:
+        - docs/analysis-reports/
+        - docs/roadmap/STATUS.json
+        - prompts/analysis/narrative-io-detection-pack@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - narrative-ops
+    verification:
+      tiers_required:
+        - C
+    allowed_operations:
+      - create
+      - edit
   - id: nog-governed-ops-docs
     version: v1
     path: prompts/docs/nog-governed-ops-docs@v1.md
