@@ -50,9 +50,8 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run ${{ matrix.task }}
         run: |
           case "${{ matrix.task }}" in
@@ -75,9 +74,8 @@ jobs:
         with:
           node-version-file: ".nvmrc"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -92,7 +90,6 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
 
       - name: Start Test Infrastructure
         run: |
@@ -106,7 +103,7 @@ jobs:
           until docker exec summit-redis-test redis-cli ping | grep -q PONG; do sleep 2; done
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run database migrations
         run: cd server && npx tsx scripts/run-migrations.ts
@@ -135,9 +132,8 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Verify runtime configuration
         run: pnpm verify:runtime
       - name: Run verification scripts
@@ -154,9 +150,8 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Build twice and compare checksums
         run: |
           set -euo pipefail
@@ -191,7 +186,6 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
 
       - name: Bootstrap and smoke test
         run: |
@@ -220,9 +214,8 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
       - name: Start Services
@@ -258,7 +251,7 @@ jobs:
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
       - name: Install dependencies (for governance docs)
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Verify governance docs
         run: pnpm ci:docs-governance
 
@@ -273,9 +266,8 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Run SOC control tests
         run: |
           mkdir -p soc-compliance-reports

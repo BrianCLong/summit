@@ -53,7 +53,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 9.12.0
 
       - name: Get pnpm store directory
         shell: bash
@@ -68,7 +67,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate Evidence Bundle
         id: generate

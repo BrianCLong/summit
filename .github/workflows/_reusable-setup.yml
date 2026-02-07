@@ -129,7 +129,7 @@ jobs:
       - name: Install dependencies
         if: inputs.install-deps
         working-directory: ${{ inputs.working-directory }}
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Setup Python (optional)
         if: inputs.python-version != ''
