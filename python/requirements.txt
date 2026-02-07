@@ -14,7 +14,7 @@ feedparser==6.0.12
 sqlalchemy==2.0.46
 scikit-learn==1.8.0
 # Existing libraries like statsmodels, PuLP, rdkit are assumed to be available in the environment.
-aiohttp
+aiohttp==3.13.3
 fuzzywuzzy
 python-Levenshtein
 python-dotenv
