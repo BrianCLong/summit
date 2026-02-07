@@ -211,6 +211,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: software-factory-evidence-pr1
+    version: v1
+    path: prompts/evidence/software-factory-evidence-pr1@v1.md
+    sha256: f186e8e9448042ed40a53d7787a38c0c8cc109df3bdf445b5e7a55572ae15e9b
+    description: Scaffold software-factory evidence schemas, deterministic writer, and validation runner baseline.
+    scope:
+      paths:
+        - evidence/schemas/report.schema.json
+        - evidence/schemas/metrics.schema.json
+        - evidence/schemas/stamp.schema.json
+        - evidence/schemas/index.schema.json
+        - src/agents/validation/
+        - tests/agents/validation/
+        - docs/roadmap/STATUS.json
+        - prompts/evidence/software-factory-evidence-pr1@v1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: promptspec-foundation-lane1
     version: v1
     path: prompts/promptspec/promptspec-foundation-lane1@v1.md

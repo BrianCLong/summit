@@ -1,22 +1,11 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit/evidence/metrics.schema.json",
   "type": "object",
+  "required": ["satisfaction", "scenarios_total", "scenarios_passed"],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "avg_latency_ms": { "type": "number" },
-    "avg_fanout": { "type": "number" }
-  },
-  "required": [],
-  "additionalProperties": true
-  "$id": "https://summit.local/schemas/metrics.schema.json",
-  "type": "object",
-  "required": ["version", "counters"],
-  "properties": {
-    "version": { "type": "integer" },
-    "counters": {
-      "type": "object",
-      "additionalProperties": { "type": "number" }
-    }
+    "satisfaction": { "type": "number", "minimum": 0, "maximum": 1 },
+    "scenarios_total": { "type": "integer", "minimum": 0 },
+    "scenarios_passed": { "type": "integer", "minimum": 0 }
   },
   "additionalProperties": false
 }
