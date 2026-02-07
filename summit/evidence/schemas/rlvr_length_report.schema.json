@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RLVRLengthReport",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "input_hash",
+    "input_records",
+    "lengths",
+    "trend",
+    "policy",
+    "histogram",
+    "hash_chain",
+    "redaction",
+    "evidence_ids"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVID:lspo:length-report:[a-f0-9]{64}$"
+    },
+    "input_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "input_records": { "type": "integer", "minimum": 1 },
+    "lengths": {
+      "type": "object",
+      "required": ["mean", "p50", "p95", "min", "max"],
+      "properties": {
+        "mean": { "type": "number" },
+        "p50": { "type": "number" },
+        "p95": { "type": "number" },
+        "min": { "type": "integer", "minimum": 0 },
+        "max": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "trend": {
+      "type": "object",
+      "required": ["slope", "drop_pct", "window", "collapse"],
+      "properties": {
+        "slope": { "type": "number" },
+        "drop_pct": { "type": "number" },
+        "window": { "type": "integer", "minimum": 1 },
+        "collapse": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": ["max_len", "overlong_ratio", "overlong_ratio_threshold", "overlong_flag"],
+      "properties": {
+        "max_len": { "type": ["integer", "null"], "minimum": 1 },
+        "overlong_ratio": { "type": "number" },
+        "overlong_ratio_threshold": { "type": "number" },
+        "overlong_flag": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "histogram": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "hash_chain": {
+      "type": "object",
+      "required": ["enabled", "final", "algorithm"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "final": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "algorithm": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "redaction": {
+      "type": "object",
+      "required": ["applied", "redacted_fields"],
+      "properties": {
+        "applied": { "type": "boolean" },
+        "redacted_fields": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "evidence_ids": {
+      "type": "object",
+      "required": ["report", "metrics", "stamp"],
+      "properties": {
+        "report": {
+          "type": "string",
+          "pattern": "^EVID:lspo:length-report:[a-f0-9]{64}$"
+        },
+        "metrics": {
+          "type": "string",
+          "pattern": "^EVID:lspo:length-metrics:[a-f0-9]{64}$"
+        },
+        "stamp": {
+          "type": "string",
+          "pattern": "^EVID:lspo:length-stamp:[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

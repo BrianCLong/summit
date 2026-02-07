@@ -1,0 +1,4 @@
+{"step": 0, "response_len": 8, "prompt": "secret prompt"}
+{"step": 1, "response_len": 6, "response": "user@example.com"}
+{"step": 2, "response_len": 4, "note": "ok"}
+{"step": 3, "response_len": 3, "token": "abc123"}
