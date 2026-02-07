@@ -3,4 +3,4 @@ uvicorn==0.40.0
 hnswlib==0.8.0
 rank-bm25==0.2.2
 sentence-transformers==5.2.2
-requests
+requests==2.32.5

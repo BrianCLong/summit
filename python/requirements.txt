@@ -3,7 +3,7 @@ uvicorn==0.40.0
 transformers==5.1.0
 torch==2.10.0
 spacy==3.8.11
-networkx
+networkx==3.6.1
 nltk
 python-multipart
 uvloop
