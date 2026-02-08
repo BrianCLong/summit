@@ -74,6 +74,12 @@ export const ConfigSchema = (z as any).object({
     GRAPH_EXPAND_CACHE: (z as any).coerce.boolean().default(true),
     AI_REQUEST_ENABLED: (z as any).coerce.boolean().default(true),
   }).default({}),
+
+  partitioning: (z as any).object({
+    enabled: (z as any).coerce.boolean().default(false),
+    strategy: (z as any).enum(['hash', 'range', 'list']).default('hash'),
+    shardCount: (z as any).coerce.number().default(1),
+  }).default({}),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

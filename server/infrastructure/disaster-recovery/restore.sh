@@ -118,6 +118,25 @@ else
     echo "Warning: redis.rdb not found in backup."
 fi
 
+# Restore Neo4j
+echo "Restoring Neo4j..."
+if [ -f "$BACKUP_DIR/neo4j_data.tar.gz" ]; then
+    NEO4J_DATA_DIR="/neo4j_data"
+    if [ -d "$NEO4J_DATA_DIR" ]; then
+        echo "Clearing existing Neo4j data..."
+        # Use find/delete or rm -rf, ensuring variable is set
+        rm -rf "${NEO4J_DATA_DIR:?}"/*
+
+        echo "Extracting Neo4j backup..."
+        tar -xzf "$BACKUP_DIR/neo4j_data.tar.gz" -C "$NEO4J_DATA_DIR"
+        echo "Neo4j restored. Please restart the Neo4j container to load changes."
+    else
+        echo "Warning: /neo4j_data mount not found. Cannot restore Neo4j data automatically."
+    fi
+else
+    echo "Warning: neo4j_data.tar.gz not found in backup."
+fi
+
 # Cleanup
 echo "Cleaning up extracted files..."
 rm -rf "$BACKUP_DIR"
