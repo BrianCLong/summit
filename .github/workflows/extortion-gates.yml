@@ -12,6 +12,10 @@ on:
       - 'packages/extortion/**'
       - 'scripts/ci/.*extortion'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
