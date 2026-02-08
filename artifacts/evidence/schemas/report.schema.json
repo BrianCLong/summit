@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["evidenceId", "area", "summary"],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^EVD-SUMMIT-[A-Z0-9_]+-[0-9]{3}$"
+    },
+    "area": { "type": "string" },
+    "summary": { "type": "string" },
+    "details": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
