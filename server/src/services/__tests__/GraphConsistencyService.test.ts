@@ -1,11 +1,11 @@
 import { describe, it, expect, jest, beforeEach, afterEach, beforeAll } from '@jest/globals';
 
 // Mock dependencies
-jest.unstable_mockModule('../../db/neo4j.js', () => ({
+jest.unstable_mockModule(new URL('../../db/neo4j.ts', import.meta.url).pathname, () => ({
   getNeo4jDriver: jest.fn(),
 }));
 
-jest.unstable_mockModule('../../config/logger.js', () => ({
+jest.unstable_mockModule(new URL('../../config/logger.ts', import.meta.url).pathname, () => ({
   __esModule: true,
   default: {
     child: jest.fn().mockReturnThis(),
@@ -23,7 +23,7 @@ describe('GraphConsistencyService', () => {
 
   beforeAll(async () => {
     ({ GraphConsistencyService } = await import('../GraphConsistencyService.js'));
-    ({ getNeo4jDriver } = await import('../../db/neo4j.js'));
+    ({ getNeo4jDriver } = await import(new URL('../../db/neo4j.ts', import.meta.url).pathname));
   });
 
   beforeEach(() => {

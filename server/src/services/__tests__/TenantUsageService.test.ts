@@ -4,13 +4,13 @@ const readMock = jest.fn() as jest.MockedFunction<
   (...args: any[]) => Promise<{ rows: any[] }>
 >;
 
-jest.mock('../../config/database.js', () => ({
+jest.mock(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: () => ({
     read: readMock,
   }),
 }));
 
-jest.mock('../../utils/logger.js', () => ({
+jest.mock(new URL('../../utils/logger.ts', import.meta.url).pathname, () => ({
   default: {
     error: jest.fn(),
   },

@@ -6,7 +6,7 @@ let queryCallCount = 0;
 let releaseCallCount = 0;
 
 // Mock modules before imports
-jest.mock('../../config/database.js', () => ({
+jest.mock(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: () => ({
     connect: () => Promise.resolve({
       query: () => {
@@ -20,7 +20,7 @@ jest.mock('../../config/database.js', () => ({
   }),
 }));
 
-jest.mock('../../utils/logger.js', () => ({
+jest.mock(new URL('../../utils/logger.ts', import.meta.url).pathname, () => ({
   default: {
     error: jest.fn(),
     info: jest.fn(),

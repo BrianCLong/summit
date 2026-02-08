@@ -6,7 +6,7 @@ const mockGetNeo4jDriver = jest.fn();
 const mockAppendEntry = jest.fn();
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../config/database.js', () => ({
+jest.unstable_mockModule(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getNeo4jDriver: mockGetNeo4jDriver,
 }));
 

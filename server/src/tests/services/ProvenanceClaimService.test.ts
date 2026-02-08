@@ -4,7 +4,7 @@ import { pool } from '../../db/pg.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
 
 // Mock dependencies
-jest.mock('../../db/pg.js', () => ({
+jest.mock(new URL('../../db/pg.ts', import.meta.url).pathname, () => ({
   pool: {
     connect: jest.fn(),
   },

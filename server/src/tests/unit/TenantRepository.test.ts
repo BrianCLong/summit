@@ -7,7 +7,7 @@ const mockPool = {
   query: jest.fn(),
 };
 
-jest.mock('../../config/database.js', () => ({
+jest.mock(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: () => mockPool,
 }));
 

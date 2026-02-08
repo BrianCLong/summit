@@ -21,7 +21,7 @@ const redisMock = {
 };
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../config/database.js', () => ({
+jest.unstable_mockModule(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getRedisClient: () => redisMock,
 }));
 

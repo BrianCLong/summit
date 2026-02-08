@@ -5,7 +5,7 @@ import { EventSourcingService } from '../EventSourcingService.js';
 import { UserRepository } from '../../data/UserRepository.js';
 
 // Mock dependencies
-jest.mock('../ComplianceMonitoringService.js');
+jest.mock(new URL('../ComplianceMonitoringService.ts', import.meta.url).pathname);
 jest.mock('../EventSourcingService.js');
 jest.mock('../../data/UserRepository.js');
 

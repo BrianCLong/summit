@@ -9,7 +9,7 @@ import {
 } from '../../../maestro/evidence/receipt.js';
 import { evidenceRoutes } from '../evidence-routes.js';
 
-jest.mock('../../auth/rbac-middleware.js', () => {
+jest.mock(new URL('../../auth/rbac-middleware.ts', import.meta.url).pathname, () => {
   const allow = (permission: string) => (req: any, res: any, next: any) => {
     if (req.headers[`x-allow-${permission}`]) {
       req.user = { userId: 'user-1', permissions: [permission] };
@@ -25,12 +25,15 @@ jest.mock('../../auth/rbac-middleware.js', () => {
 
 const queryMock = jest.fn();
 
-jest.mock('../../../db/postgres.js', () => ({
+jest.mock(new URL('../../../db/postgres.ts', import.meta.url).pathname, () => ({
   getPostgresPool: () => ({
     query: (...args: any[]) => queryMock(...args),
   }),
 }));
 
+if (!process.env.NO_NETWORK_LISTEN) {
+  process.env.NO_NETWORK_LISTEN = 'true';
+}
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 

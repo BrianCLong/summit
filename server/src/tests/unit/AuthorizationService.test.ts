@@ -9,12 +9,12 @@ const mockRBAC = {
   evaluateAccess: jest.fn(),
 };
 
-jest.mock('../../auth/multi-tenant-rbac.js', () => ({
+jest.mock(new URL('../../auth/multi-tenant-rbac.ts', import.meta.url).pathname, () => ({
   getMultiTenantRBAC: () => mockRBAC,
   MultiTenantRBACManager: jest.fn(),
 }));
 
-jest.mock('../../config/database.js', () => ({
+jest.mock(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: () => ({
     query: jest.fn(),
   }),

@@ -3,7 +3,7 @@ import { DeceptionService } from '../DeceptionService.js';
 import { neo } from '../../db/neo4j.js';
 
 // Mock neo4j
-jest.mock('../../db/neo4j.js', () => ({
+jest.mock(new URL('../../db/neo4j.ts', import.meta.url).pathname, () => ({
   neo: {
     run: jest.fn(),
   },

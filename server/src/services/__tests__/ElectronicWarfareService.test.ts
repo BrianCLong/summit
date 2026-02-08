@@ -7,7 +7,7 @@ import {
 } from '../ElectronicWarfareService.js';
 
 // Mock logger to avoid console output during tests
-jest.mock('../../utils/logger', () => ({
+jest.mock(new URL('../../utils/logger.ts', import.meta.url).pathname, () => ({
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),

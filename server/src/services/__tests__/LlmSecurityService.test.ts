@@ -15,7 +15,7 @@ const mockPolicyEvaluate = jest.fn() as jest.Mock<any>;
 const mockDlpScanContent = jest.fn() as jest.Mock<any>;
 const mockDlpApplyActions = jest.fn() as jest.Mock<any>;
 
-jest.unstable_mockModule('../PolicyService.js', () => ({
+jest.unstable_mockModule(new URL('../PolicyService.ts', import.meta.url).pathname, () => ({
   policyService: {
     evaluate: mockPolicyEvaluate,
   },
@@ -28,7 +28,7 @@ jest.unstable_mockModule('../DLPService.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../../utils/logger.js', () => ({
+jest.unstable_mockModule(new URL('../../utils/logger.ts', import.meta.url).pathname, () => ({
   __esModule: true,
   default: {
     info: jest.fn(),

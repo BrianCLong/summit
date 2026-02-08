@@ -8,7 +8,7 @@ import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals
 import type { DuplicateCandidate } from '../SimilarityService.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../../config/database.js', () => ({}));
+jest.unstable_mockModule(new URL('../../config/database.ts', import.meta.url).pathname, () => ({}));
 jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
   otelService: {
     wrapNeo4jOperation: jest.fn((name: string, fn: () => any) => fn()),
@@ -16,7 +16,7 @@ jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
   },
 }));
 jest.unstable_mockModule('../../monitoring/metrics.js', () => ({}));
-jest.unstable_mockModule('../../utils/logger.js', () => ({
+jest.unstable_mockModule(new URL('../../utils/logger.ts', import.meta.url).pathname, () => ({
   default: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
 }));
 

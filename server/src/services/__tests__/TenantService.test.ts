@@ -11,7 +11,7 @@ const mockLoggerError = jest.fn();
 const mockLoggerDebug = jest.fn();
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../config/database.js', () => ({
+jest.unstable_mockModule(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: mockGetPostgresPool,
 }));
 
@@ -21,7 +21,7 @@ jest.unstable_mockModule('../../provenance/ledger.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../../utils/logger.js', () => {
+jest.unstable_mockModule(new URL('../../utils/logger.ts', import.meta.url).pathname, () => {
   const logger = {
     info: mockLoggerInfo,
     warn: mockLoggerWarn,

@@ -11,7 +11,7 @@ const mockDriver = {
   session: () => mockSession,
 };
 
-jest.mock('../../db/neo4j.js', () => ({
+jest.mock(new URL('../../db/neo4j.ts', import.meta.url).pathname, () => ({
   getNeo4jDriver: () => mockDriver,
 }));
 

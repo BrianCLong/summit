@@ -12,7 +12,7 @@ interface Neo4jRecord {
 }
 
 // Mock getNeo4jDriver
-jest.mock('../../config/database', () => ({
+jest.mock(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getNeo4jDriver: jest.fn()
 }));
 

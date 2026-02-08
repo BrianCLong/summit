@@ -19,7 +19,7 @@ const classifyMock = mockClassify as jest.MockedFunction<
 
 beforeAll(async () => {
   jest.resetModules();
-  await jest.unstable_mockModule('../../../src/pii/classifier.js', () => ({
+  await jest.unstable_mockModule(new URL('../../../src/pii/classifier.ts', import.meta.url).pathname, () => ({
     ClassificationEngine: jest.fn().mockImplementation(() => ({
       classify: mockClassify,
     })),

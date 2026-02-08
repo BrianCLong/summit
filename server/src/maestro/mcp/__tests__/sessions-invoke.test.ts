@@ -3,7 +3,7 @@ import request from 'supertest';
 import { jest, describe, it, expect, beforeAll } from '@jest/globals';
 
 // Mock conductor MCP client
-jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
+jest.unstable_mockModule(new URL('../../../conductor/mcp/client.ts', import.meta.url).pathname, () => ({
   mcpClient: {
     executeTool: jest.fn(
       async (_server: string, tool: string, _args: any, scopes: string[]) => {
@@ -17,7 +17,7 @@ jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
   initializeMCPClient: jest.fn(),
 }));
 
-jest.unstable_mockModule('../../../capability-fabric/policy-gate.js', () => ({
+jest.unstable_mockModule(new URL('../../../capability-fabric/policy-gate.ts', import.meta.url).pathname, () => ({
   evaluateCapabilityPolicy: jest.fn(async () => ({ allow: true, reason: 'allow' })),
 }));
 

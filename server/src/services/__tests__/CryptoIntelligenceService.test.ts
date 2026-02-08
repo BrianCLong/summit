@@ -3,7 +3,7 @@ import { CryptoIntelligenceService } from '../CryptoIntelligenceService.js';
 import { getNeo4jDriver } from '../../db/neo4j.js';
 
 // Mock getNeo4jDriver
-jest.mock('../../db/neo4j.js', () => ({
+jest.mock(new URL('../../db/neo4j.ts', import.meta.url).pathname, () => ({
   getNeo4jDriver: jest.fn(),
 }));
 

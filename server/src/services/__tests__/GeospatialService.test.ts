@@ -6,7 +6,7 @@ const mPool = {
 };
 
 // Mock database config to avoid connection issues
-jest.mock('../../config/database', () => ({
+jest.mock(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: jest.fn(() => mPool),
 }));
 

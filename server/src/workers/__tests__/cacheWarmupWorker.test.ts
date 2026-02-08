@@ -10,11 +10,11 @@ describe('cacheWarmupWorker', () => {
     const queueAdd = jest.fn();
     const workerConstructor = jest.fn();
 
-    await mockEsmModule('../../src/db/redis.js', () => ({
+    await mockEsmModule('../../db/redis.ts', () => ({
       getRedisClient: () => ({ __isMock: true }),
       getRedisConnectionOptions: () => ({}),
       isRedisMock: () => true,
-    }));
+    }, import.meta.url);
 
     await mockEsmModule('bullmq', () => ({
       Queue: jest.fn(() => ({ add: queueAdd })),

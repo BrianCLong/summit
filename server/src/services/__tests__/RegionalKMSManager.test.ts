@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 
 const queryMock = jest.fn();
-jest.unstable_mockModule('../../config/database.js', () => ({
+jest.unstable_mockModule(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
     getPostgresPool: () => ({
         query: queryMock,
     }),

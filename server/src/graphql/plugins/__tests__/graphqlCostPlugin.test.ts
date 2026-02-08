@@ -6,25 +6,29 @@
 import { describe, it, expect, beforeAll, beforeEach, jest } from '@jest/globals';
 import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { createGraphQLCostPlugin } from '../graphqlCostPlugin.js';
-import { createTestCostCalculator, type CostConfig } from '../../services/CostCalculator.js';
+import type { CostConfig } from '../../services/CostCalculator.js';
 
 // Mock cost calculator
-jest.mock('../../services/CostCalculator.js', () => {
-  const actualModule = jest.requireActual('../../services/CostCalculator.js');
-  return {
-    ...actualModule,
-    getCostCalculator: jest.fn(),
-  };
-});
+jest.unstable_mockModule(
+  new URL('../../services/CostCalculator.ts', import.meta.url).pathname,
+  async () => {
+    const actualModule = await import(
+      new URL('../../services/CostCalculator.ts', import.meta.url).pathname
+    );
+    return {
+      ...actualModule,
+      getCostCalculator: jest.fn(),
+    };
+  },
+);
 
 // Mock rate limiter service
-jest.mock('../../services/TenantRateLimitService.js', () => ({
+jest.unstable_mockModule(new URL('../../services/TenantRateLimitService.ts', import.meta.url).pathname, () => ({
   getTenantRateLimitService: jest.fn(),
 }));
 
 // Mock metrics
-jest.mock('../../../monitoring/metrics.js', () => ({
+jest.unstable_mockModule(new URL('../../../monitoring/metrics.ts', import.meta.url).pathname, () => ({
   graphqlQueryCostHistogram: {
     labels: jest.fn(() => ({ observe: jest.fn() })),
   },
@@ -91,19 +95,29 @@ const resolvers = {
 
 describe('GraphQL Cost Plugin Integration', () => {
   let server: ApolloServer;
+  let createGraphQLCostPlugin: typeof import('../graphqlCostPlugin.js').createGraphQLCostPlugin;
   let mockCostCalculator: any;
   let mockRateLimitService: any;
+  let createTestCostCalculator: typeof import('../../services/CostCalculator.js').createTestCostCalculator;
 
-  beforeAll(() => {
-    // Setup mocks
+  beforeAll(async () => {
+    ({ createGraphQLCostPlugin } = await import('../graphqlCostPlugin.js'));
+    ({ createTestCostCalculator } = await import(
+      new URL('../../services/CostCalculator.ts', import.meta.url).pathname
+    ));
     mockCostCalculator = createTestCostCalculator(testConfig);
-    const { getCostCalculator } = require('../../services/CostCalculator.js');
+
+    const { getCostCalculator } = await import(
+      new URL('../../services/CostCalculator.ts', import.meta.url).pathname
+    );
     getCostCalculator.mockResolvedValue(mockCostCalculator);
 
     mockRateLimitService = {
       checkLimit: jest.fn(),
     };
-    const { getTenantRateLimitService } = require('../../services/TenantRateLimitService.js');
+    const { getTenantRateLimitService } = await import(
+      new URL('../../services/TenantRateLimitService.ts', import.meta.url).pathname
+    );
     getTenantRateLimitService.mockReturnValue(mockRateLimitService);
   });
 

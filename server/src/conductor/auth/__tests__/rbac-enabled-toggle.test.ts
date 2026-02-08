@@ -1,11 +1,11 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-jest.mock('../jwt-rotation.js', () => ({
+jest.mock(new URL('../jwt-rotation.ts', import.meta.url).pathname, () => ({
   jwtRotationManager: {
     verifyToken: jest.fn(),
   },
 }));
 
-jest.mock('../../config/logger.js', () => ({
+jest.mock(new URL('../../config/logger.ts', import.meta.url).pathname, () => ({
   info: jest.fn(),
   warn: jest.fn(),
   error: jest.fn(),

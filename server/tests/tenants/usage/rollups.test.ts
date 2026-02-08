@@ -4,7 +4,7 @@ const mockQuery = jest.fn();
 const mockRelease = jest.fn();
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../../src/config/database.js', () => ({
+jest.unstable_mockModule(new URL('../../../src/config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: () => ({
     connect: jest.fn(async () => ({
       query: mockQuery,

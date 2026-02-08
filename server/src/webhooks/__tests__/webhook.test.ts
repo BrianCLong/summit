@@ -7,7 +7,7 @@ import express from 'express';
 import { webhookService } from '../webhook.service.js';
 
 // Mock pg module
-jest.mock('../../db/pg.js', () => ({
+jest.mock(new URL('../../db/pg.ts', import.meta.url).pathname, () => ({
   pg: {
     oneOrNone: jest.fn(),
     many: jest.fn(),

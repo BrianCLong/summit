@@ -1,29 +1,25 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { pricingReadRoutes } from '../pricing-read-routes.js';
-import { listPools, currentPricing } from '../../scheduling/pools.js';
+let pricingReadRoutes: typeof import('../pricing-read-routes.js').pricingReadRoutes;
+let mockedListPools: jest.MockedFunction<typeof import('../../scheduling/pools.js').listPools>;
+let mockedCurrentPricing: jest.MockedFunction<typeof import('../../scheduling/pools.js').currentPricing>;
 
-jest.mock('../../auth/rbac-middleware', () => ({
+jest.unstable_mockModule(new URL('../../auth/rbac-middleware.ts', import.meta.url).pathname, () => ({
   requirePermission: () => (_req: any, _res: any, next: any) => next(),
 }));
 
-jest.mock('../../scheduling/pools', () => ({
+jest.unstable_mockModule(new URL('../../scheduling/pools.ts', import.meta.url).pathname, () => ({
   listPools: jest.fn(),
   currentPricing: jest.fn(),
 }));
 
-jest.mock('../../config/logger', () => ({
+jest.unstable_mockModule(new URL('../../../config/logger.ts', import.meta.url).pathname, () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
   debug: jest.fn(),
-}), { virtual: true });
-
-const mockedListPools = listPools as jest.MockedFunction<typeof listPools>;
-const mockedCurrentPricing = currentPricing as jest.MockedFunction<
-  typeof currentPricing
->;
+}));
 
 const buildApp = () => {
   const app = express();
@@ -36,6 +32,13 @@ const run = process.env.NO_NETWORK_LISTEN !== 'true';
 const describeIf = run ? describe : describe.skip;
 
 describeIf('pricingReadRoutes', () => {
+  beforeAll(async () => {
+    ({ pricingReadRoutes } = await import('../pricing-read-routes.js'));
+    ({ listPools: mockedListPools, currentPricing: mockedCurrentPricing } = await import(
+      new URL('../../scheduling/pools.ts', import.meta.url).pathname,
+    ));
+  });
+
   beforeEach(() => {
     mockedListPools.mockReset();
     mockedCurrentPricing.mockReset();

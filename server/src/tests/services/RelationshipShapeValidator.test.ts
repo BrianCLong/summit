@@ -3,7 +3,7 @@ import { RelationshipShapeValidator } from '../../services/RelationshipShapeVali
 import { getNeo4jDriver } from '../../config/database.js';
 
 // Mock dependencies
-jest.mock('../../config/database.js', () => ({
+jest.mock(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getNeo4jDriver: jest.fn(),
 }));
 

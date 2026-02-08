@@ -5,7 +5,7 @@ const mockQuery: jest.MockedFunction<
 > = jest.fn();
 
 // Mocks
-jest.unstable_mockModule('../connectionManager.js', () => ({
+jest.unstable_mockModule(new URL('../connectionManager.ts', import.meta.url).pathname, () => ({
   WebSocketConnectionPool: jest.fn().mockImplementation(() => ({
     registerConnection: jest.fn(),
     removeConnection: jest.fn(),
@@ -16,13 +16,13 @@ jest.unstable_mockModule('../connectionManager.js', () => ({
   ManagedConnection: jest.fn()
 }));
 
-jest.unstable_mockModule('../../db/postgres.js', () => ({
+jest.unstable_mockModule(new URL('../../db/postgres.ts', import.meta.url).pathname, () => ({
   getPostgresPool: jest.fn(() => ({
     query: mockQuery
   }))
 }));
 
-jest.unstable_mockModule('../../middleware/observability/otel-tracing.js', () => ({
+jest.unstable_mockModule(new URL('../../middleware/observability/otel-tracing.ts', import.meta.url).pathname, () => ({
     otelService: {
         createSpan: jest.fn().mockReturnValue({
             addSpanAttributes: jest.fn(),
@@ -31,14 +31,14 @@ jest.unstable_mockModule('../../middleware/observability/otel-tracing.js', () =>
     }
 }));
 
-jest.unstable_mockModule('../../observability/metrics.js', () => ({
+jest.unstable_mockModule(new URL('../../observability/metrics.ts', import.meta.url).pathname, () => ({
     activeConnections: {
         inc: jest.fn(),
         dec: jest.fn()
     }
 }));
 
-jest.unstable_mockModule('../../yjs/YjsHandler.js', () => ({
+jest.unstable_mockModule(new URL('../../yjs/YjsHandler.ts', import.meta.url).pathname, () => ({
     YjsHandler: jest.fn()
 }));
 

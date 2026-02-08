@@ -13,14 +13,14 @@ const loggerMock = {
   warn: jest.fn(),
 };
 
-jest.unstable_mockModule('../../db/postgres.js', () => ({
+jest.unstable_mockModule(new URL('../../db/postgres.ts', import.meta.url).pathname, () => ({
   getPostgresPool: jest.fn(() => ({
     write: mockWrite,
     withTransaction: mockWithTransaction,
   })),
 }));
 
-jest.unstable_mockModule('../../utils/logger.js', () => ({
+jest.unstable_mockModule(new URL('../../utils/logger.ts', import.meta.url).pathname, () => ({
   logger: loggerMock,
   default: loggerMock,
 }));
@@ -33,7 +33,7 @@ describe('PostgresUsageMeteringService', () => {
 
   beforeAll(async () => {
     ({ PostgresUsageMeteringService: ServiceClass } = await import('../service.js'));
-    ({ getPostgresPool } = await import('../../db/postgres.js'));
+    ({ getPostgresPool } = await import(new URL('../../db/postgres.ts', import.meta.url).pathname));
   });
 
   beforeEach(async () => {

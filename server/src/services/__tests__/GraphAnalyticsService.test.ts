@@ -3,7 +3,7 @@ import { cacheService } from '../CacheService.js';
 
 const mockRunCypher = jest.fn();
 
-jest.mock('../../graph/neo4j', () => ({
+jest.mock(new URL('../../graph/neo4j.ts', import.meta.url).pathname, () => ({
   __esModule: true,
   runCypher: mockRunCypher,
   getDriver: jest.fn(() => ({

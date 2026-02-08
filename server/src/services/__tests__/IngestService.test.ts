@@ -21,7 +21,7 @@ const mockLoggerWarn = jest.fn();
 const mockLoggerError = jest.fn();
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../config/database', () => ({
+jest.unstable_mockModule(new URL('../../config/database.ts', import.meta.url).pathname, () => ({
   getPostgresPool: jest.fn(() => ({
     connect: mockPgConnect,
     query: mockPgQuery,
@@ -47,7 +47,7 @@ jest.unstable_mockModule('neo4j-driver', () => ({
   },
 }));
 
-jest.unstable_mockModule('../../config/logger', () => ({
+jest.unstable_mockModule(new URL('../../config/logger.ts', import.meta.url).pathname, () => ({
   __esModule: true,
   default: {
     child: () => ({

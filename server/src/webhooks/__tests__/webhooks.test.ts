@@ -12,7 +12,7 @@ jest.unstable_mockModule('bullmq', () => ({
   Worker: jest.fn(),
 }));
 
-jest.unstable_mockModule('../metrics', () => ({
+jest.unstable_mockModule(new URL('../metrics.ts', import.meta.url).pathname, () => ({
   recordDeliveryMetric: mockRecordDeliveryMetric,
 }));
 

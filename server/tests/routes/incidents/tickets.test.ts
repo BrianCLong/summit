@@ -2,16 +2,16 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
 import ticketRouter from '../../../src/routes/incidents/tickets';
-import { IncidentService } from '../../../src/services/IncidentService';
-import { JiraAdapter } from '../../../src/integrations/jira/adapter';
-import { eventService } from '../../../src/events/EventService';
+import { IncidentService } from '../../../src/services/IncidentService.js';
+import { JiraAdapter } from '../../../src/integrations/jira/adapter.js';
+import { eventService } from '../../../src/events/EventService.js';
 
-jest.mock('../../../src/services/IncidentService');
-jest.mock('../../../src/integrations/jira/adapter');
-jest.mock('../../../src/events/EventService');
+jest.mock(new URL('../../../src/services/IncidentService.ts', import.meta.url).pathname);
+jest.mock(new URL('../../../src/integrations/jira/adapter.ts', import.meta.url).pathname);
+jest.mock(new URL('../../../src/events/EventService.ts', import.meta.url).pathname);
 
 // Mock Auth Middleware
-jest.mock('../../../src/middleware/auth', () => ({
+jest.mock(new URL('../../../src/middleware/auth.ts', import.meta.url).pathname, () => ({
     ensureAuthenticated: (req: any, res: any, next: any) => {
         req.user = { id: 'user-1', tenantId: 'tenant-1' };
         next();

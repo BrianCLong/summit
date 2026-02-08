@@ -1,14 +1,14 @@
 import { CostOptimizationService, OptimizationType, ImplementationEffort, RiskLevel } from '../CostOptimizationService.js';
 import { describe, expect, test, jest, beforeEach } from '@jest/globals';
 
-jest.mock('../../db/pg.js', () => ({
+jest.mock(new URL('../../db/pg.ts', import.meta.url).pathname, () => ({
   pg: {
     query: jest.fn<() => Promise<any>>(),
     oneOrNone: jest.fn<() => Promise<any>>(),
   },
 }));
 
-jest.mock('../../db/neo4j.js', () => ({
+jest.mock(new URL('../../db/neo4j.ts', import.meta.url).pathname, () => ({
   neo: {
     session: jest.fn<() => any>(),
   },

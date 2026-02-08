@@ -6,7 +6,7 @@
 // Simulate HTML entity escaping like DOMPurify would
 import { jest, describe, it, expect } from '@jest/globals';
 
-jest.unstable_mockModule('../../utils/htmlSanitizer.js', () => ({
+jest.unstable_mockModule(new URL('../../utils/htmlSanitizer.ts', import.meta.url).pathname, () => ({
   sanitizeHtml: (input: string) => {
     return input
       .replace(/&/g, '&amp;')

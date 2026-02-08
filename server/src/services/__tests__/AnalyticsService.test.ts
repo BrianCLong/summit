@@ -2,7 +2,7 @@ import { AnalyticsService } from '../AnalyticsService.js';
 import { jest } from '@jest/globals';
 
 // Mock runCypher
-jest.mock('../../graph/neo4j.js', () => ({
+jest.mock(new URL('../../graph/neo4j.ts', import.meta.url).pathname, () => ({
   runCypher: jest.fn(),
   getDriver: jest.fn().mockReturnValue({
     session: jest.fn().mockReturnValue({

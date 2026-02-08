@@ -3,7 +3,7 @@ import type { SimulationEngineService } from '../SimulationEngineService.js';
 import { EventEmitter } from 'events';
 
 // Mock dependencies
-jest.unstable_mockModule('../../utils/logger.js', () => ({
+jest.unstable_mockModule(new URL('../../utils/logger.ts', import.meta.url).pathname, () => ({
   __esModule: true,
   default: {
     info: jest.fn(),

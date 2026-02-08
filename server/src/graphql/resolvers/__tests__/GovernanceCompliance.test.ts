@@ -12,7 +12,7 @@ const resolved = (value: any) => {
     return fn;
 };
 
-jest.mock('../../../db/neo4j.js', () => ({
+jest.mock(new URL('../../../db/neo4j.ts', import.meta.url).pathname, () => ({
     getNeo4jDriver: jest.fn(() => ({
         session: jest.fn(() => ({
             run: resolved({ records: [] }),
@@ -22,18 +22,18 @@ jest.mock('../../../db/neo4j.js', () => ({
     isNeo4jMockMode: jest.fn(() => false),
 }));
 
-jest.mock('../../../provenance/ledger.js', () => ({
+jest.mock(new URL('../../../provenance/ledger.ts', import.meta.url).pathname, () => ({
     provenanceLedger: {
         appendEntry: jest.fn().mockResolvedValue(true as never)
     }
 }));
 
-jest.mock('../../../utils/cacheHelper.js', () => ({
+jest.mock(new URL('../../../utils/cacheHelper.ts', import.meta.url).pathname, () => ({
     withCache: (keyGen: any, resolver: any) => resolver,
     listCacheKey: () => 'key'
 }));
 
-jest.mock('../../subscriptions.js', () => ({
+jest.mock(new URL('../../subscriptions.ts', import.meta.url).pathname, () => ({
     pubsub: { publish: jest.fn() },
     ENTITY_CREATED: 'ENTITY_CREATED',
     ENTITY_UPDATED: 'ENTITY_UPDATED',

@@ -5,7 +5,7 @@ import { jest } from '@jest/globals';
 const mockMaintainPartitions = jest.fn().mockResolvedValue(undefined);
 const mockDetachOldPartitions = jest.fn().mockResolvedValue(undefined);
 
-jest.unstable_mockModule('../../db/partitioning.js', () => ({
+jest.unstable_mockModule(new URL('../../db/partitioning.ts', import.meta.url).pathname, () => ({
   partitionManager: {
     maintainPartitions: mockMaintainPartitions,
     detachOldPartitions: mockDetachOldPartitions
