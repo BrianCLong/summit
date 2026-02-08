@@ -2,7 +2,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package.json ./
 RUN npm install --ignore-scripts
-COPY tsconfig.json jest.config.cjs .eslintrc.cjs ./
+COPY tsconfig.json jest.config.cjs eslint.config.mjs ./
 COPY src ./src
 COPY scripts ./scripts
 RUN npm run build
