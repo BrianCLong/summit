@@ -1,0 +1,5 @@
+{
+  "id": "EVD-PIDM-CORE-001",
+  "title": "PIDM foundation evidence: schemas + deny-by-default fixtures",
+  "summary": "Ensures PIDM evidence layout is present and policy defaults to deny."
+}
