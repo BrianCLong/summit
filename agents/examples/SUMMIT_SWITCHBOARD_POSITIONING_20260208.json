@@ -1,0 +1,40 @@
+{
+  "task_id": "SUMMIT_SWITCHBOARD_POSITIONING_20260208",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "summit-switchboard-positioning-architecture",
+    "version": "v0.1",
+    "sha256": "094c6bbf2d5d05db136bfc96f96dcf6dbb3c8fe518519cbfe5229a1f28864ce0",
+    "path": "prompts/switchboard/summit-switchboard-positioning-architecture@v0.1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/switchboard/",
+      "docs/roadmap/STATUS.json",
+      "prompts/switchboard/summit-switchboard-positioning-architecture@v0.1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SUMMIT_SWITCHBOARD_POSITIONING_20260208.json"
+    ],
+    "domains": ["documentation", "switchboard", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/switchboard/summit-switchboard-positioning-architecture.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Summit Switchboard positioning and architecture v0.1 documentation published.",
+    "Roadmap status updated with the new initiative entry.",
+    "Prompt registry updated with the Summit Switchboard positioning prompt."
+  ],
+  "stop_conditions": [
+    "Governance constraints cannot be satisfied within declared scope.",
+    "Required evidence outputs cannot be produced."
+  ]
+}
