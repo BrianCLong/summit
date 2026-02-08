@@ -111,6 +111,10 @@ export const maestroSynthesisOperations = createMockMetric();
 export const maestroThompsonSamplingRewards = createMockMetric();
 export const maestroWebScrapingRequests = createMockMetric();
 export const memoryUsage = createMockMetric();
+export const narrativeSimulationActiveSimulations = createMockMetric();
+export const narrativeSimulationTicksTotal = createMockMetric();
+export const narrativeSimulationEventsTotal = createMockMetric();
+export const narrativeSimulationDurationSeconds = createMockMetric();
 export const neighborhoodCacheHitRatio = createMockMetric();
 export const neighborhoodCacheLatencyMs = createMockMetric();
 export const pbacDecisionsTotal = createMockMetric();
@@ -249,6 +253,10 @@ export const metrics = {
   mcpSessionsTotal,
   mcpInvocationsTotal,
   memoryUsage,
+  narrativeSimulationActiveSimulations,
+  narrativeSimulationTicksTotal,
+  narrativeSimulationEventsTotal,
+  narrativeSimulationDurationSeconds,
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,
   pbacDecisionsTotal,

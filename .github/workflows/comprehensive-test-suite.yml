@@ -51,6 +51,12 @@ jobs:
           FORCE_COLOR: 3
         run: pnpm -r test --coverage
 
+      - name: Run Apps/Web Tests
+        run: cd apps/web && pnpm test --runInBand
+
+      - name: Run Frontend Tests
+        run: cd frontend && pnpm test --runInBand
+
       - name: Verify Coverage Thresholds
         run: node scripts/coverage-aggregate.js
         env:
