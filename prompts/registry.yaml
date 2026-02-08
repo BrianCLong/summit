@@ -1,5 +1,33 @@
 version: 1
 prompts:
+  - id: tenant-status-hardening
+    version: v1
+    path: prompts/tenants/tenant-status-hardening@v1.md
+    sha256: 0183afa3316c3f558f4b322c1a42209b031546bd553d7c58702a44705f2b6489
+    description: Add tenant status patch endpoint with provenance, tests, and Sprint +3 roadmap registration.
+    scope:
+      paths:
+        - server/src/routes/tenants.ts
+        - server/src/services/TenantService.ts
+        - server/src/routes/__tests__/tenants.test.ts
+        - docs/roadmap/STATUS.json
+        - prompts/tenants/tenant-status-hardening@v1.md
+        - prompts/registry.yaml
+        - agents/examples/TENANT_STATUS_HARDENING_20260206.json
+      domains:
+        - server
+        - governance
+        - tenancy
+        - compliance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

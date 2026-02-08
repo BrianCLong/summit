@@ -1,0 +1,42 @@
+{
+  "task_id": "TENANT_STATUS_HARDENING_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "tenant-status-hardening",
+    "version": "v1",
+    "sha256": "0183afa3316c3f558f4b322c1a42209b031546bd553d7c58702a44705f2b6489",
+    "path": "prompts/tenants/tenant-status-hardening@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/routes/tenants.ts",
+      "server/src/services/TenantService.ts",
+      "server/src/routes/__tests__/tenants.test.ts",
+      "docs/roadmap/STATUS.json",
+      "prompts/tenants/tenant-status-hardening@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/TENANT_STATUS_HARDENING_20260206.json"
+    ],
+    "domains": ["server", "governance", "tenancy", "compliance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["jest tenants.test.ts output", "roadmap status update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "PATCH /api/tenants/{id} supports status active|suspended",
+    "Tenant status change emits provenance entry",
+    "Tenant route test covers status update",
+    "Sprint +3 initiative registered in roadmap status"
+  ],
+  "stop_conditions": [
+    "Policy gate bypass required",
+    "Scope change outside declared paths",
+    "Missing provenance ledger integration"
+  ]
+}
