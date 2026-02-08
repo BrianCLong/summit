@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Hardened HTTP ingest idempotency by switching fallback IDs to deterministic content hashing; added regression coverage.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
