@@ -26,6 +26,10 @@ on:
 # - Top-level: read-only by default
 # - generate-pack job: contents read only (no signing)
 # - attest job: id-token write for OIDC signing
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
