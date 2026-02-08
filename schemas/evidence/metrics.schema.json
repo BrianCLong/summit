@@ -1,22 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Metrics",
   "type": "object",
-  "anyOf": [
-    { "required": ["evidence_id", "metrics"] },
-    {
-      "required": ["eid", "metrics"],
-      "properties": {
-        "metrics": {
-          "type": "object",
-          "additionalProperties": { "type": "number" }
-        }
-      }
-    }
-  ],
+  "required": ["evidence_id"],
   "properties": {
     "evidence_id": { "type": "string" },
-    "eid": { "type": "string" },
-    "metrics": { "type": "object" }
+    "cosign_exit_code": { "type": "integer" }
   },
   "additionalProperties": true
 }

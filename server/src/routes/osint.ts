@@ -8,6 +8,7 @@ import { osintRateLimiter } from '../middleware/osintRateLimiter.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { SimpleFeedCollector } from '../../../packages/osint-collector/src/collectors/SimpleFeedCollector.js';
 import { CollectionType, TaskStatus } from '../../../packages/osint-collector/src/types/index.js';
+import { securityAudit } from '../audit/security-audit-logger.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -35,6 +36,18 @@ router.post('/score/:id', ensureAuthenticated, async (req: Request, res: Respons
 router.post('/ingest-feed', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const { url } = req.body;
+
+    securityAudit.logDataImport({
+      actor: (req as AuthenticatedRequest).user?.tenantId ?? 'unknown',
+      tenantId: (req as AuthenticatedRequest).user?.tenantId,
+      resourceType: 'osint_feed',
+      resourceId: url ?? 'unknown',
+      action: 'ingest',
+      details: { feedUrl: url },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+      dataClassification: 'confidential',
+    });
 
     // Use the Real Collector
     const collector = new SimpleFeedCollector({
@@ -92,6 +105,18 @@ router.post('/assess-risk', ensureAuthenticated, async (req: Request, res: Respo
     if (!iocs || !Array.isArray(iocs)) {
        return res.status(400).json({ success: false, error: 'iocs array required' });
     }
+
+    securityAudit.logSensitiveRead({
+      actor: (req as AuthenticatedRequest).user?.tenantId ?? 'unknown',
+      tenantId: (req as AuthenticatedRequest).user?.tenantId,
+      resourceType: 'osint_risk_assessment',
+      resourceId: `batch-${iocs.length}`,
+      action: 'assess',
+      details: { iocCount: iocs.length },
+      ipAddress: req.ip,
+      userAgent: req.get('user-agent'),
+      dataClassification: 'confidential',
+    });
 
     const results = [];
     const llmEndpoint = process.env.LLM_ENDPOINT;

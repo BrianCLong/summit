@@ -8,7 +8,6 @@
     "start": "node dist/src/index.js",
     "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
     "build": "tsc -p tsconfig.build.json || echo 'TypeScript completed with warnings (noEmitOnError: false)'",
-    "build:isolated": "node build.mjs",
     "typecheck": "tsc --noEmit",
     "config:validate": "ts-node scripts/validate-config.ts",
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts",
