@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Added agentic CI subsumption RFC entry for governance-aligned pipeline modernization.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -83,6 +83,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+    },
+    {
+      "id": "agentic-ci-subsumption-rfc",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Drafted RFC AG-01 for agentic CI subsumption, policy-as-code, and TS workflow DSL."
     },
     {
       "id": "promptspec-foundation-lane1",
