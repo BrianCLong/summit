@@ -3,33 +3,10 @@
     "@apollo/server": {
       "advisories": [
         {
-          "affected_nodes": [
-            "@apollo/server@5.2.0"
-          ],
-          "affected_versions": [
-            "5.2.0"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112926,
-          "importers": [
-            "apps/gateway",
-            "apps/intelgraph-api",
-            "apps/server",
-            "companyos/services/tenant-api",
-            "packages/api-framework",
-            "packages/rate-limiter",
-            "server",
-            "services/admin-api",
-            "services/admin-automation",
-            "services/api-gateway",
-            "services/battle-api",
-            "services/config-service",
-            "services/control-tower-service",
-            "services/data-monetization-engine",
-            "services/digital-twin",
-            "services/graph-core",
-            "services/prov-ledger",
-            "services/sandbox-gateway"
-          ],
+          "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (>=5.0.0 <5.4.0).",
           "severity": "high",
           "title": "Apollo Serve vulnerable to Denial of Service with `startStandaloneServer`",
@@ -49,7 +26,8 @@
         }
       ],
       "locked_versions": [
-        "5.2.0"
+        "4.13.0",
+        "5.4.0"
       ]
     },
     "@isaacs/brace-expansion": {
@@ -445,11 +423,11 @@
   },
   "summary": {
     "bulk_source": "/tmp/pnpm-audit/bulk-full.json",
-    "generated_at": "2026-02-08T04:45:12.115601+00:00",
+    "generated_at": "2026-02-08T04:50:18.963716+00:00",
     "lockfile": "/media/bcl/SUMMIT_LNX/summit/pnpm-lock.yaml",
     "packages_with_advisories": 17,
     "total_advisories": 21,
-    "total_affected_importers": 22,
-    "total_affected_versions": 15
+    "total_affected_importers": 5,
+    "total_affected_versions": 14
   }
 }

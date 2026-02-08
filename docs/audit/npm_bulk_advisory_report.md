@@ -1,18 +1,18 @@
 # NPM bulk advisory report
 
-- Generated: 2026-02-08T04:45:12.115601+00:00
+- Generated: 2026-02-08T04:50:18.963716+00:00
 - Lockfile: `/media/bcl/SUMMIT_LNX/summit/pnpm-lock.yaml`
 - Advisories: 21
 - Packages with advisories: 17
-- Affected versions: 15
-- Affected importers: 22
+- Affected versions: 14
+- Affected importers: 5
 
 ## @apollo/server
 - Apollo Serve vulnerable to Denial of Service with `startStandaloneServer` (high)
   - ID: 1112926
   - Range: `>=5.0.0 <5.4.0`
-  - Affected versions: 5.2.0
-  - Importers: apps/gateway, apps/intelgraph-api, apps/server, companyos/services/tenant-api, packages/api-framework, packages/rate-limiter, server, services/admin-api, services/admin-automation, services/api-gateway, services/battle-api, services/config-service, services/control-tower-service, services/data-monetization-engine, services/digital-twin, services/graph-core, services/prov-ledger, services/sandbox-gateway
+  - Affected versions: None
+  - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (>=5.0.0 <5.4.0).
 - Apollo Serve vulnerable to Denial of Service with `startStandaloneServer` (high)
   - ID: 1112927
