@@ -1,12 +1,16 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "": "http://json-schema.org/draft-07/schema#",
   "title": "Evidence Stamp",
   "type": "object",
   "properties": {
+    "hash": { "type": "string" },
+    "version": { "type": "string" },
+    "date": { "type": "string", "format": "date-time" },
     "timestamp": { "type": "string", "format": "date-time" },
     "git_sha": { "type": "string" },
     "pipeline_mode": { "type": "string", "enum": ["offline", "connected"] },
     "snapshot_manifest_hash": { "type": "string" }
   },
-  "required": ["timestamp", "git_sha", "snapshot_manifest_hash"]
+  "required": ["hash", "date"],
+  "additionalProperties": true
 }

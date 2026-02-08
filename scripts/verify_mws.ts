@@ -35,6 +35,10 @@ async function verify() {
 
   // 3. Evidence
   console.log("[3] Testing Evidence Ledger...");
+  const metrics = {
+    duration: 100,
+    toolsUsed: 5,
+  };
   const report = {
     packName: manifest.name,
     runId: 'test-run-' + Date.now(),
@@ -42,12 +46,9 @@ async function verify() {
       hooks: { 'tmux-reminder': true },
       mcp: true,
     },
-    metrics: {
-      duration: 100,
-      toolsUsed: 5,
-    },
+    // metrics extracted
   };
-  const evidenceDir = await writeEvidence(report, 'artifacts/evidence_test');
+  const evidenceDir = await writeEvidence(report, { outputDir: 'artifacts/evidence_test', metrics });
   console.log(`    ✅ Evidence written to ${evidenceDir}`);
 
   console.log("MWS Verification Completed Successfully.");
