@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://switchboard.dev/schemas/skill.manifest.v0.1.json",
+  "title": "Switchboard Skill Manifest v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "skill_id",
+    "name",
+    "version",
+    "publisher",
+    "entrypoint",
+    "capability_profile",
+    "policy",
+    "determinism",
+    "verification"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "switchboard.skill.manifest.v0.1"
+    },
+    "skill_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9]+)?$"
+    },
+    "publisher": {
+      "type": "object",
+      "required": ["publisher_id", "display_name", "contact"],
+      "properties": {
+        "publisher_id": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "contact": {
+          "type": "string",
+          "format": "email"
+        }
+      }
+    },
+    "entrypoint": {
+      "type": "object",
+      "required": ["runtime", "module", "handler"],
+      "properties": {
+        "runtime": {
+          "type": "string",
+          "enum": ["node20", "python3.11", "go1.22"]
+        },
+        "module": {
+          "type": "string"
+        },
+        "handler": {
+          "type": "string"
+        }
+      }
+    },
+    "capability_profile": {
+      "type": "string",
+      "description": "Path to permissions.json relative to bundle root"
+    },
+    "policy": {
+      "type": "object",
+      "required": ["rego", "defaults"],
+      "properties": {
+        "rego": { "type": "string" },
+        "defaults": { "type": "string" }
+      }
+    },
+    "determinism": {
+      "type": "object",
+      "required": ["lockfile", "buildinfo", "reproducible_build"],
+      "properties": {
+        "lockfile": { "type": "string" },
+        "buildinfo": { "type": "string" },
+        "reproducible_build": { "type": "boolean" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["sandbox_suite", "golden_receipts_dir"],
+      "properties": {
+        "sandbox_suite": { "type": "string" },
+        "golden_receipts_dir": { "type": "string" }
+      }
+    },
+    "interfaces": {
+      "type": "object",
+      "properties": {
+        "inputs_schema": { "type": "string" },
+        "outputs_schema": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "homepage": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}
