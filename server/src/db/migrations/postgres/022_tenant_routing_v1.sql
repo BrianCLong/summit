@@ -2,6 +2,7 @@
 
 CREATE TABLE IF NOT EXISTS tenant_partitions (
     partition_key TEXT PRIMARY KEY,
+    tenant_id TEXT, -- Added for Task #97/Task #111 compatibility
     strategy TEXT NOT NULL DEFAULT 'shared',
     schema_name TEXT,
     write_connection_url TEXT,
