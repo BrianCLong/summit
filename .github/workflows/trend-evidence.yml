@@ -4,6 +4,10 @@ on:
     paths:
       - "evidence/**"
       - "docs/trends/**"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest

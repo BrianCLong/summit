@@ -8,6 +8,10 @@ on:
       - 'bundle/manifest.vmworkbench.json'
       - 'ci/verify_bundle.py'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-bundle:
     name: Verify VM Workbench Bundle
