@@ -1,0 +1,17 @@
+{
+  "name": "@summit/receipts",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "cbor": "^9.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^20.0.0"
+  }
+}
