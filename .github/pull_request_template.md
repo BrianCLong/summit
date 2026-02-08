@@ -31,13 +31,6 @@
 - **Tradeoffs**:
 - **Stop Condition**:
 
-## Execution Governor & Customer Impact
-
-- [ ] **Single Product Mode**: Respects active product (FactFlow) or includes `.exec-override`.
-- [ ] **Frozen Code**: Does not touch frozen products without override.
-- **Customer Impact**: <!-- Positive/Negative impact on end user? -->
-- **Rollback Plan**: <!-- How to revert if production breaks? -->
-
 ## Evidence Bundle
 
 <!-- Attach evidence that your change works and is safe. See docs/evidence-bundle-spec.md -->

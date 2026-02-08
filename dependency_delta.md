@@ -16,6 +16,3 @@ Use this file to document changes to project dependencies.
 - Action: Add
 - Package: @summit/sgf-schema, @summit/sgf-ledger, @summit/sgf-evidence, @summit/sgf-evals
 - Reason: Initial implementation of Summit Governance Fabric (SGF) components.
-
-## 2026-02-01
-- Added neo4j and psycopg2-binary for Graph Shape Guardrail

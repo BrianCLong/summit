@@ -41,7 +41,7 @@
     "papaparse": "^5.4.1",
     "parquetjs-lite": "^0.8.7",
     "pino": "^8.16.2",
-    "pino-http": "^11.0.0",
+    "pino-http": "^8.6.0",
     "ssh2-sftp-client": "^9.1.0",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"

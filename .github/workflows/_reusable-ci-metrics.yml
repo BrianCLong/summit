@@ -69,7 +69,7 @@ jobs:
           REPO="${{ github.repository }}"
 
           # Fetch job data from GitHub API
-          JOBS_JSON=$(gh api "/repos/${REPO}/actions/runs/${RUN_ID}/jobs" --jq '.jobs')
+          JOBS_JSON=$(gh api "/repos/${REPO}/actions/runs/${RUN_ID}/jobs" --jq ".jobs")
 
           # Calculate metrics
           TOTAL_JOBS=$(echo "$JOBS_JSON" | jq 'length')
@@ -99,7 +99,7 @@ jobs:
           fi
 
           # Calculate queue time (time from workflow trigger to first job start)
-          WORKFLOW_CREATED="${{ github.event.workflow_run.created_at || github.event.pull_request.updated_at || '' }}"
+          WORKFLOW_CREATED="${{ github.event.workflow_run.created_at || github.event.pull_request.updated_at || "" }}"
           QUEUE_SECONDS=0
           if [ -n "$WORKFLOW_CREATED" ] && [ -n "$START_TIME" ]; then
             CREATED_EPOCH=$(date -d "$WORKFLOW_CREATED" +%s 2>/dev/null || echo 0)
@@ -131,7 +131,7 @@ jobs:
 
           # Create metrics JSON
           mkdir -p artifacts/ci-metrics
-          cat > artifacts/ci-metrics/run-metrics.json << EOF
+          cat > artifacts/ci-metrics/run-metrics.json << EOF_JSON
           {
             "run_id": "${{ github.run_id }}",
             "run_number": ${{ github.run_number }},
@@ -157,13 +157,13 @@ jobs:
             },
             "job_timings": ${JOB_TIMINGS}
           }
-          EOF
+          EOF_JSON
 
           echo "::notice::CI Metrics: ${SUCCESS_RATE}% success rate, ${DURATION_MINUTES}m duration, ${QUEUE_SECONDS}s queue time"
 
       - name: Upload Metrics Artifact
         id: upload
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: ci-metrics-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/ci-metrics/

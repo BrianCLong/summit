@@ -1,23 +1,25 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Report",
   "type": "object",
+  "required": ["evidence_id", "summary"],
   "properties": {
-    "evidence_id": { "type": "string" },
-    "summary": { "type": "string" },
-    "scenarios": { "type": "integer" },
-    "status": { "type": "string" },
-    "item": { "type": "string" }
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-[A-Za-z0-9-]+$"
+    },
+    "item": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": ["array", "object"]
+    },
+    "item_slug": {
+      "type": "string"
+    }
   },
-  "required": [],
   "additionalProperties": true
-  "$id": "https://summit.local/schemas/report.schema.json",
-  "type": "object",
-  "required": ["version", "classification", "summary"],
-  "properties": {
-    "version": { "type": "integer" },
-    "classification": { "type": "string", "enum": ["public", "internal", "restricted"] },
-    "summary": { "type": "string" },
-    "notes": { "type": "array", "items": { "type": "string" } }
-  },
-  "additionalProperties": false
 }

@@ -64,10 +64,10 @@ CREATE TABLE IF NOT EXISTS maestro.case_participants (
     removed_at TIMESTAMP WITH TIME ZONE,
     removed_by VARCHAR(255),
     is_active BOOLEAN DEFAULT true,
-    metadata JSONB DEFAULT '{}'
-);
+    metadata JSONB DEFAULT '{}',
 
-CREATE UNIQUE INDEX IF NOT EXISTS unq_case_participants_active ON maestro.case_participants(case_id, user_id, role_id) WHERE is_active = true;
+    UNIQUE(case_id, user_id, role_id) WHERE is_active = true
+);
 
 CREATE INDEX IF NOT EXISTS idx_case_participants_case_id ON maestro.case_participants(case_id);
 CREATE INDEX IF NOT EXISTS idx_case_participants_user_id ON maestro.case_participants(user_id) WHERE is_active = true;
@@ -97,13 +97,13 @@ CREATE TABLE IF NOT EXISTS maestro.case_stages (
 
 -- Default stages for 'investigation' case type
 INSERT INTO maestro.case_stages (case_type, name, description, order_index, is_initial, is_terminal, sla_hours, allowed_transitions) VALUES
-    ('investigation', 'intake', 'Initial case intake and triage', 1, true, false, 24, '{"analysis", "closed"}'),
-    ('investigation', 'analysis', 'Active investigation and analysis', 2, false, false, 168, '{"review", "escalated", "closed"}'), -- 7 days
-    ('investigation', 'review', 'Review and validation', 3, false, false, 48, '{"approved", "analysis"}'),
-    ('investigation', 'approved', 'Approved for action', 4, false, false, 24, '{"completed", "closed"}'),
-    ('investigation', 'escalated', 'Escalated for senior review', 5, false, false, 24, '{"analysis", "review", "closed"}'),
-    ('investigation', 'completed', 'Investigation completed', 6, false, true, NULL, '{}'),
-    ('investigation', 'closed', 'Case closed', 7, false, true, NULL, '{}')
+    ('investigation', 'intake', 'Initial case intake and triage', 1, true, false, 24, '["analysis", "closed"]'),
+    ('investigation', 'analysis', 'Active investigation and analysis', 2, false, false, 168, '["review", "escalated", "closed"]'), -- 7 days
+    ('investigation', 'review', 'Review and validation', 3, false, false, 48, '["approved", "analysis"]'),
+    ('investigation', 'approved', 'Approved for action', 4, false, false, 24, '["completed", "closed"]'),
+    ('investigation', 'escalated', 'Escalated for senior review', 5, false, false, 24, '["analysis", "review", "closed"]'),
+    ('investigation', 'completed', 'Investigation completed', 6, false, true, NULL, '[]'),
+    ('investigation', 'closed', 'Case closed', 7, false, true, NULL, '[]')
 ON CONFLICT (case_type, name) DO NOTHING;
 
 CREATE INDEX IF NOT EXISTS idx_case_stages_case_type ON maestro.case_stages(case_type);
@@ -256,10 +256,10 @@ CREATE TABLE IF NOT EXISTS maestro.case_graph_references (
     removed_at TIMESTAMP WITH TIME ZONE,
     removed_by VARCHAR(255),
     is_active BOOLEAN DEFAULT true,
-    metadata JSONB DEFAULT '{}'
-);
+    metadata JSONB DEFAULT '{}',
 
-CREATE UNIQUE INDEX IF NOT EXISTS unq_case_graph_refs_active ON maestro.case_graph_references(case_id, graph_entity_id) WHERE is_active = true;
+    UNIQUE(case_id, graph_entity_id) WHERE is_active = true
+);
 
 CREATE INDEX IF NOT EXISTS idx_case_graph_refs_case_id ON maestro.case_graph_references(case_id) WHERE is_active = true;
 CREATE INDEX IF NOT EXISTS idx_case_graph_refs_entity_id ON maestro.case_graph_references(graph_entity_id);

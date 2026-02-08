@@ -4,12 +4,6 @@
     "feature.policy-guard": {"value": false, "percentage": 0, "tenants": {"allow": [], "deny": []}},
     "feature.web.flag-hydration": {"value": true, "percentage": 100},
     "feature.build.bazel": {"value": false, "percentage": 0},
-    "feature.qos.override-api": {"value": true, "percentage": 50, "tenants": {"allow": ["trusted-alpha"], "deny": ["safety-test"]}},
-    "feature.investigation.bulk-operations": {"value": false, "percentage": 0},
-    "feature.investigation.delete": {"value": false, "percentage": 0},
-    "feature.investigation.export": {"value": false, "percentage": 0},
-    "feature.osint.ingestion": {"value": false, "percentage": 0},
-    "feature.osint.enrichment": {"value": false, "percentage": 0},
-    "feature.graph.cross-tenant-visibility": {"value": false, "percentage": 0}
+    "feature.qos.override-api": {"value": true, "percentage": 50, "tenants": {"allow": ["trusted-alpha"], "deny": ["safety-test"]}}
   }
 }

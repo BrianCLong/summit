@@ -50,8 +50,6 @@ export const resolvers = {
         includeCitations: input.includeCitations ?? true,
         includeGraphPaths: input.includeGraphPaths ?? true,
         includeCounterfactuals: input.includeCounterfactuals ?? false,
-        strategy: input.strategy ?? (input.useKg2Rag ? "KG2RAG" : "BASELINE"),
-        useKg2Rag: input.useKg2Rag,
         temporalScope: input.temporalScope,
         entityFilters: input.entityFilters,
         relationshipFilters: input.relationshipFilters,

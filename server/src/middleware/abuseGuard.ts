@@ -31,8 +31,6 @@ interface RateWindow {
   tenantId: string;
 }
 
-import { UEBAModels, ActivityEvent } from '../security/UEBAModels.js';
-
 // Anomaly detection result
 interface AnomalyResult {
   isAnomaly: boolean;
@@ -57,10 +55,8 @@ export class AbuseGuard {
   private redis: Redis;
   private metrics: PrometheusMetrics;
   private throttledTenants: Map<string, ThrottleState> = new Map();
-  private ueba: UEBAModels;
 
   constructor(config: Partial<AbuseGuardConfig> = {}) {
-    this.ueba = new UEBAModels();
     this.config = {
       enabled: true,
       windowSizeMinutes: 10,
@@ -170,29 +166,8 @@ export class AbuseGuard {
             // Record the request and analyze for anomalies
             const anomalyResult = await this.recordAndAnalyze(tenantId);
 
-            // === UEBA Integration (Phase 4) ===
-            const userId = (req.user as any)?.id || (req.user as any)?.sub || 'anonymous';
-            const uebaEvent: ActivityEvent = {
-              entityId: userId,
-              entityType: 'user',
-              action: `${req.method}:${req.path}`,
-              resource: req.path,
-              region: req.headers['x-region'] as string || 'unknown',
-              timestamp: new Date().toISOString()
-            };
-
-            const uebaResult = await this.ueba.analyzeAnomaly(uebaEvent);
-            await this.ueba.updateProfile(uebaEvent);
-
-            if (uebaResult.isAnomaly || anomalyResult.isAnomaly) {
-              const combinedResult = {
-                ...anomalyResult,
-                isAnomaly: true,
-                score: Math.max(anomalyResult.zScore * 10, uebaResult.score),
-                reasons: [...(uebaResult.reasons || [])]
-              };
-
-              await this.handleAnomaly(tenantId, combinedResult as any);
+            if (anomalyResult.isAnomaly) {
+              await this.handleAnomaly(tenantId, anomalyResult);
 
               // If anomaly triggered throttling, block this request
               if (this.isThrottled(tenantId)) {
