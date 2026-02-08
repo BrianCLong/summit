@@ -9,7 +9,14 @@ description = "IntelGraph Core Repository"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "jsonschema",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-sdk>=1.20.0",
+    "opentelemetry-exporter-otlp>=1.20.0",
+    "opentelemetry-instrumentation-fastapi",
+    "opentelemetry-instrumentation-logging",
+    "prometheus-fastapi-instrumentator",
+    "python-json-logger",
+    "structlog",
 ]
 
 [project.optional-dependencies]

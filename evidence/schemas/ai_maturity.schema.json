@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "stage": {
+      "type": "string",
+      "enum": ["stage_1_experiment", "stage_2_pilot", "stage_3_operational", "stage_4_future_ready"]
+    },
+    "decision_rights_defined": { "type": "boolean" },
+    "model_inventory_present": { "type": "boolean" },
+    "runtime_monitoring": { "type": "boolean" },
+    "owner_role": { "type": "string" }
+  },
+  "required": ["stage", "decision_rights_defined", "model_inventory_present", "runtime_monitoring", "owner_role"],
+  "additionalProperties": false
+}

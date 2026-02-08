@@ -1,25 +1,16 @@
-# Repo Assumptions & Reality Check
+# Repo Assumptions & Verification
 
-## Verified Facts
-*   **Infrastructure**: Node.js 18+, pnpm, Docker Compose.
-*   **Backend**: `server/` directory contains a Node.js/TypeScript application.
-*   **Database**: Postgres (managed migrations) and Neo4j.
-*   **Migrations**: Located in `server/db/managed-migrations/`. System expects `.up.sql` and `.down.sql` files.
-*   **GraphQL**:
-    *   Main schema definition: `server/src/graphql/schema.ts` (exports `typeDefs`).
-    *   Resolvers aggregation: `server/src/graphql/resolvers/index.ts`.
-    *   Directives: `authDirective.ts` implements `@scope` and `@auth`.
-*   **Modules**: `server/src/modules/` is the location for domain modules.
-*   **Testing**: Jest is used for testing (`server/__tests__`).
+**Verified:**
+*   Monorepo structure with `services/` and `src/`.
+*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
+*   `services/evals` exists but only contains `runner.ts`.
+*   `src/evals` does NOT exist (will be created).
+*   TypeScript environment.
+*   `src/cli` exists.
 
-## Assumptions
-*   The `server/db/managed-migrations` path is correctly configured in the environment where `npm run migrate` runs.
-*   The `MigrationManager` is robust enough to handle new tables without manual intervention in the database structure (other than running the migration).
-*   The `@scope` directive is fully functional and wired up in the schema transformer.
+**Assumed:**
+*   We can add shared evaluation logic to `src/evals`.
+*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
 
-## "Do Not Touch" List
-*   `.pnpm-store/`
-*   `.qwen-cache/`
-*   `.archive/`
-*   `GOLDEN/datasets/`
-*   Existing migration files in `server/db/managed-migrations/` (unless fixing a bug, which is out of scope).
+**Plan Deviation:**
+*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.

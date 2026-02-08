@@ -46,6 +46,10 @@ on:
         type: number
         default: 7
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -176,7 +180,7 @@ jobs:
             || echo "::warning::Failed to update audit log"
 
       - name: Upload Verification Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
         if: steps.check-exists.outputs.exists == 'true'
         with:
           name: governance-lockfile-verification-${{ github.run_number }}

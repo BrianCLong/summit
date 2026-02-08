@@ -1,0 +1,15 @@
+version: 1
+item_slug: cipher-to-fear-extortion
+claims:
+  - id: CLAIM-01
+    text: "Today’s ransomware operations have evolved beyond file encryption to weaponize stolen data, legal liability, and psychological pressure."
+    status: "subsumed"
+    evidence_id: "EVD-EXTORTION-20260127-NOTE"
+  - id: CLAIM-02
+    text: "The known solution—restore from backup—no longer addresses the threat."
+    status: "subsumed"
+    evidence_id: "EVD-EXTORTION-20260127-NOTE"
+  - id: CLAIM-08
+    text: "Psychological pressure points include Surveillance & Awareness (perceived omniscience) and Artificial Time Pressure (deadlines)."
+    status: "subsumed"
+    evidence_id: "EVD-EXTORTION-20260127-NOTE"
