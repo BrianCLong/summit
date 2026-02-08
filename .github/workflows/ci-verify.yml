@@ -316,6 +316,23 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+  evidence-schema-validation:
+    name: Evidence Schema Validation
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify evidence schemas
+        run: npx tsx .github/scripts/verify-evidence.ts
+
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
@@ -413,6 +430,7 @@ jobs:
       - provenance
       - schema-validation
       - compliance-evidence
+      - evidence-schema-validation
       - ga-evidence-completeness
     if: always()
     steps:
@@ -426,6 +444,7 @@ jobs:
           echo "Provenance & SBOM: ${{ needs.provenance.result }}"
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
+          echo "Evidence Schema Validation: ${{ needs.evidence-schema-validation.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
           echo ""
 
@@ -442,6 +461,11 @@ jobs:
 
           if [[ "${{ needs.ga-evidence-completeness.result }}" != "success" ]]; then
             echo "::error::GA Evidence Completeness FAILED - CI BLOCKED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.evidence-schema-validation.result }}" != "success" ]]; then
+            echo "::error::Evidence Schema Validation FAILED - CI BLOCKED"
             exit 1
           fi
 
@@ -464,6 +488,7 @@ jobs:
           echo "### Critical Gates (BLOCKING)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence Schema Validation" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
