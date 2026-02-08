@@ -293,6 +293,7 @@ export const createApp = async () => {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
+            tenantId: 'global',
           };
           return next();
         }
@@ -588,12 +589,19 @@ export const createApp = async () => {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
 
-  app.get('/search/evidence', authenticateToken, async (req, res) => {
+  app.get('/search/evidence', authenticateToken, ensureRole(['admin', 'analyst']), async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
 
-    if (!q) {
-      return res.status(400).send({ error: "Query parameter 'q' is required" });
+    if (!q || typeof q !== 'string') {
+      return res.status(400).send({ error: "Query parameter 'q' is required and must be a string" });
     }
+
+    // Sanitize and validate pagination parameters to prevent DoS
+    const skipNum = Math.max(0, parseInt(skip as string, 10) || 0);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10));
+
+    // Extract tenantId for isolation
+    const tenantId = (req as any).user?.tenantId || (req as any).user?.tenant_id || 'global';
 
     const driver = getNeo4jDriver();
     const session = driver.session();
@@ -601,6 +609,7 @@ export const createApp = async () => {
     try {
       const searchQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN node, score
         SKIP $skip
         LIMIT $limit
@@ -608,16 +617,18 @@ export const createApp = async () => {
 
       const countQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN count(node) as total
       `;
 
       const [searchResult, countResult] = await Promise.all([
         session.run(searchQuery, {
           query: q,
-          skip: Number(skip),
-          limit: Number(limit),
+          tenantId,
+          skip: neo4j.int(skipNum),
+          limit: neo4j.int(limitNum),
         }),
-        session.run(countQuery, { query: q }),
+        session.run(countQuery, { query: q, tenantId }),
       ]);
 
       const evidence = searchResult.records.map((record: any) => ({
