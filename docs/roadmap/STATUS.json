@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Scaffolded concierge evidence schemas, validation script, and required checks discovery artifact.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "decagon-concierge-evidence-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence schemas, deterministic bundle writer, and schema validation gate scaffolding for concierge agents."
     },
     {
       "id": "B",
