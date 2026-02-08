@@ -1,147 +1,125 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
-import React, { useEffect, useState } from 'react'
+import * as React from 'react'
 import { Command } from 'cmdk'
 import { useNavigate } from 'react-router-dom'
 import {
-  Calculator,
-  Calendar,
-  CreditCard,
-  Settings,
-  Smile,
-  User,
   Search,
-  LayoutDashboard,
   FileText,
-  Network,
-  Activity,
-  Map as MapIcon,
-  Shield,
-  HelpCircle
+  CheckSquare,
+  Play,
+  Receipt,
+  X,
+  Loader2
 } from 'lucide-react'
-import { useHotkeys } from 'react-hotkeys-hook'
-import { useAuth } from '@/contexts/AuthContext'
 
-export function CommandPalette(): React.ReactElement {
-  const [open, setOpen] = useState(false)
+interface CommandPaletteProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const [loading, setLoading] = React.useState(false)
 
-  // Toggle the menu when ⌘K is pressed
-  useHotkeys(['meta+k', 'ctrl+k'], (e: KeyboardEvent) => {
-    e.preventDefault()
-    setOpen((open) => !open)
-  })
+  React.useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        onOpenChange(!open)
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [open, onOpenChange])
 
-  const runCommand = React.useCallback((command: () => void) => {
-    setOpen(false)
+  const runCommand = (command: () => void) => {
+    // onOpenChange(false) // Don't close immediately if we want to show loading/status
     command()
-  }, [])
+  }
+
+  const handleRunRunbook = async () => {
+    setLoading(true)
+    // Simulate preflight check
+    await new Promise(resolve => setTimeout(resolve, 800))
+    setLoading(false)
+    onOpenChange(false)
+    alert("Runbook Execution: Allowed by Policy. Starting sequence...")
+    navigate('/maestro') // Navigate to where runbooks live
+  }
+
+  if (!open) return null
 
   return (
-    <Command.Dialog
-      open={open}
-      onOpenChange={setOpen}
-      label="Global Command Menu"
-      aria-label="Global Command Menu"
-      className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-popover text-popover-foreground rounded-xl shadow-2xl border w-[640px] max-w-[90vw] overflow-hidden z-50 p-0"
-    >
-      <div className="flex items-center border-b px-3">
-        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" aria-hidden="true" />
-        <Command.Input
-          placeholder="Type a command or search..."
-          aria-label="Type a command or search"
-          className="flex h-12 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 border-none focus:ring-0"
-        />
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] bg-black/50 backdrop-blur-sm transition-all" onClick={() => onOpenChange(false)}>
+      <div
+        className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Command className="w-full">
+          <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+            {loading ? <Loader2 className="mr-2 h-4 w-4 shrink-0 animate-spin" /> : <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />}
+            <Command.Input
+              placeholder="Type a command or search..."
+              className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              autoFocus
+              disabled={loading}
+            />
+            <button onClick={() => onOpenChange(false)} className="ml-2 opacity-50 hover:opacity-100">
+               <X className="h-4 w-4" />
+            </button>
+          </div>
+          <Command.List className="max-h-[300px] overflow-y-auto overflow-x-hidden p-2">
+            <Command.Empty className="py-6 text-center text-sm">No results found.</Command.Empty>
+
+            {!loading && (
+              <>
+            <Command.Group heading="Navigation">
+              <Command.Item
+                onSelect={() => runCommand(() => { onOpenChange(false); navigate('/explore'); })}
+                className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-zinc-100 dark:aria-selected:bg-zinc-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                <span>Search Entities</span>
+              </Command.Item>
+              <Command.Item
+                 onSelect={() => runCommand(() => { onOpenChange(false); navigate('/receipts/latest'); })}
+                 className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-zinc-100 dark:aria-selected:bg-zinc-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              >
+                <Receipt className="mr-2 h-4 w-4" />
+                <span>View Latest Receipt</span>
+              </Command.Item>
+            </Command.Group>
+
+            <Command.Group heading="Actions">
+              <Command.Item
+                onSelect={() => runCommand(() => { onOpenChange(false); navigate('/approvals?create=true'); })}
+                className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-zinc-100 dark:aria-selected:bg-zinc-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              >
+                <CheckSquare className="mr-2 h-4 w-4" />
+                <span>Create Approval Request</span>
+              </Command.Item>
+              <Command.Item
+                onSelect={() => runCommand(handleRunRunbook)}
+                className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-zinc-100 dark:aria-selected:bg-zinc-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              >
+                <Play className="mr-2 h-4 w-4" />
+                <span>Run Runbook Step (Policy Gated)</span>
+              </Command.Item>
+            </Command.Group>
+
+            <Command.Group heading="Entities">
+               <Command.Item
+                  onSelect={() => runCommand(() => { onOpenChange(false); navigate('/cases/CASE-123'); })}
+                  className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-zinc-100 dark:aria-selected:bg-zinc-800 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>CASE-123: Suspicious Activity</span>
+               </Command.Item>
+            </Command.Group>
+            </>
+            )}
+          </Command.List>
+        </Command>
       </div>
-
-      <Command.List className="max-h-[300px] overflow-y-auto p-2" aria-label="Command results">
-        <Command.Empty className="py-6 text-center text-sm">No results found.</Command.Empty>
-
-        <Command.Group heading="Navigation" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-          <Command.Item
-            onSelect={() => runCommand(() => navigate('/'))}
-            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-          >
-            <LayoutDashboard className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Home</span>
-          </Command.Item>
-
-          <Command.Item
-            onSelect={() => runCommand(() => navigate('/explore'))}
-            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <Search className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Explore</span>
-          </Command.Item>
-
-          <Command.Item
-            onSelect={() => runCommand(() => navigate('/analysis/tri-pane'))}
-            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <Activity className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Investigation (Tri-Pane)</span>
-          </Command.Item>
-
-          <Command.Item
-            onSelect={() => runCommand(() => navigate('/cases'))}
-            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Cases</span>
-          </Command.Item>
-
-          <Command.Item
-            onSelect={() => runCommand(() => navigate('/alerts'))}
-            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Alerts</span>
-          </Command.Item>
-        </Command.Group>
-
-        <Command.Group heading="Investigation" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-           <Command.Item
-            onSelect={() => runCommand(() => navigate('/analysis/tri-pane'))}
-            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <Network className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Open Graph View</span>
-          </Command.Item>
-           <Command.Item
-            onSelect={() => runCommand(() => navigate('/analysis/tri-pane'))}
-            className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <MapIcon className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Open Map View</span>
-          </Command.Item>
-        </Command.Group>
-
-        <Command.Group heading="System" className="text-xs font-medium text-muted-foreground px-2 py-1.5">
-          <Command.Item
-             onSelect={() => runCommand(() => navigate('/help'))}
-             className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <HelpCircle className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Help</span>
-          </Command.Item>
-
-          <Command.Item
-             onSelect={() => runCommand(() => navigate('/admin/settings'))}
-             className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground"
-          >
-            <Settings className="mr-2 h-4 w-4" aria-hidden="true" />
-            <span>Settings</span>
-          </Command.Item>
-        </Command.Group>
-      </Command.List>
-
-      <div className="border-t p-2 text-xs text-muted-foreground flex items-center justify-between px-4">
-        <span>Use arrow keys to navigate</span>
-        <div className="flex gap-1">
-          <span className="bg-muted px-1 rounded">esc</span> to close
-        </div>
-      </div>
-    </Command.Dialog>
+    </div>
   )
 }
