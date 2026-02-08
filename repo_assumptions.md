@@ -3,33 +3,42 @@
 ## Structure Validation
 
 | Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+|---|---|---|---|
+| `summit/` | `summit/` | ✅ Exists | Core Python package. |
+| `pyproject.toml` | `pyproject.toml` | ✅ Exists | Defines dependencies (OTEL, Structlog, FastAPI). |
+| `summit/observability.py` | `summit/observability.py` | ✅ Exists | Existing OTEL/Prometheus setup. |
+| `summit/agents/` | `summit/agents/` | ✅ Exists | Contains `ShadowAgent` (in `finance/`). |
 
 ## Component Mapping
 
 | Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+|---|---|---|
+| Observability Schema | `summit/observability/schema.py` | Create new. |
+| Evidence ID Logic | `summit/observability/evidence.py` | Create new. |
+| Decision Provenance | `summit/observability/provenance.py` | Create new. |
+| State Snapshot | `summit/observability/state.py` | Create new. |
+| Lineage Graph | `summit/observability/lineage.py` | Create new. |
+| Conflict Log | `summit/observability/conflicts.py` | Create new. |
+| Wrapper | `summit/observability/wrapper.py` | Create new. |
+| Existing Obs Setup | `summit/observability.py` | Will integrate with or move to `summit/observability/__init__.py`. |
 
-## Constraints & Checks
+## Agent Interface Findings
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+* **Assumption**: `agent.decide(request) -> decision dict`.
+* **Reality**:
+    * `summit.policy.permission_broker.PermissionBroker` has `decide(request)`.
+    * `summit.agents.finance.shadow_agent.ShadowAgent` has `process(inputs)`.
+    * No unified `Agent` base class found in `summit/agent` or `summit/agents`.
+* **Action**: The wrapper will primarily target the `decide` pattern but should be flexible (e.g., support `process` or custom method names via config).
 
-## Next Steps
+## Observability Stack
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+* **Existing**: `opentelemetry`, `structlog`, `prometheus-fastapi-instrumentator`.
+* **Plan**: Leverage existing OTEL stack. The new `ObservableAgent` should emit OTEL spans and structured logs compatible with the existing setup.
+
+## Must-Not-Touch
+
+* `summit/acp/` (Agent Control Plane internals).
+* `summit/agents/cli.py` (CLI entry point).
+* `summit/observability.py` (Existing setup - I should probably *import* from it or refactor it carefully, but for now I will treat it as "legacy" to integrate with, ensuring I don't break existing apps using it).
+
