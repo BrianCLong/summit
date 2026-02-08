@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Pinned remaining Python requirements; full pip-audit sweep now only flags ecdsa, mlflow 3.x upgrade gap, and optional dgl. Added pnpm and cargo audit status notes.",
+  "revision_note": "Replaced python-jose with PyJWT, bumped mlflow to 3.5.0, removed optional dgl from requirements, and verified targeted pip-audit checks are clean.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -174,7 +174,7 @@
       "id": "dependency-triage-initial-wave",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. Full pip-audit sweep completed with --disable-pip --no-deps; remaining findings are ecdsa (scope notes in docs), mlflow 3.x upgrade gap in services/ml-training, and optional dgl advisory in summit-cog-war. Pinned unversioned Python requirements across all service files; fixed requests CVE in tools/synth-probe. pnpm audit: root/apps-ui timed out, summit-mini shows 2 low/moderate vulns, intelgraph-mcp lacks lockfile. cargo audit at repo root completed without advisories listed."
+      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. Replaced python-jose with PyJWT[crypto], bumped mlflow to 3.5.0, and removed optional dgl from the audit path; targeted pip-audit checks for requirements.txt, services/ml-training, and summit-cog-war optional graph are clean. Pinned unversioned Python requirements across all service files; fixed requests CVE in tools/synth-probe. pnpm audit: root/apps-ui timed out, summit-mini shows 2 low/moderate vulns, intelgraph-mcp lacks lockfile. cargo audit at repo root completed without advisories listed."
     }
   ],
   "summary": {
