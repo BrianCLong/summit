@@ -21,9 +21,21 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("items", {})
-    if not isinstance(items, dict) or not items:
-        fail("evidence/index.json must contain non-empty 'items' map")
+    items_data = idx.get("items", {})
+    if not items_data:
+        fail("evidence/index.json must contain non-empty 'items'")
+
+    # Normalize items to a dict keyed by evidence_id
+    items = {}
+    if isinstance(items_data, list):
+        for item in items_data:
+            if "evidence_id" not in item:
+                fail("item in evidence/index.json missing 'evidence_id'")
+            items[item["evidence_id"]] = item
+    elif isinstance(items_data, dict):
+        items = items_data
+    else:
+        fail("evidence/index.json 'items' must be a list or dict")
 
     for evd_id, meta in items.items():
         if isinstance(meta, list):
