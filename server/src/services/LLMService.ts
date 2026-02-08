@@ -198,6 +198,51 @@ export class LLMService {
   }
 
   /**
+   * Generate embeddings for text
+   */
+  async embeddings(
+    text: string | string[],
+    model: string = 'text-embedding-3-small',
+  ): Promise<number[][]> {
+    return tracer.trace('llm.embeddings', async (span: any) => {
+      const startTime = Date.now();
+      span.setAttributes({
+        'llm.model': model,
+        'llm.input_type': typeof text === 'string' ? 'string' : 'array',
+      });
+
+      try {
+        const response = await this.openai.embeddings.create({
+          model: model,
+          input: text,
+        });
+
+        const embeddings = response.data.map((d) => d.embedding);
+
+        if (prometheusMetrics.llmRequestDuration) {
+          prometheusMetrics.llmRequestDuration.observe(
+            {
+              provider: 'openai',
+              model,
+              status: 'success',
+            },
+            (Date.now() - startTime) / 1000,
+          );
+        }
+
+        return embeddings;
+      } catch (error: any) {
+        this.metrics.errorCount++;
+        logger.error('LLM embeddings request failed', {
+          model,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
+    });
+  }
+
+  /**
    * OpenAI implementation
    */
   private async callOpenAI(prompt: string, options: CompletionOptions): Promise<{ text: string; usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number }; provider: string }> {
