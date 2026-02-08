@@ -1,0 +1,30 @@
+[
+  {
+    "description": "Missing license",
+    "asset": {
+      "asset_id": "bad-asset-1",
+      "provenance": { "source": "unknown", "method": "scrape" },
+      "privacy": { "has_pii": false },
+      "shareability": "internal"
+    }
+  },
+  {
+    "description": "Missing provenance",
+    "asset": {
+      "asset_id": "bad-asset-2",
+      "license": { "name": "MIT" },
+      "privacy": { "has_pii": false },
+      "shareability": "internal"
+    }
+  },
+  {
+    "description": "PII without retention policy",
+    "asset": {
+      "asset_id": "bad-asset-3",
+      "license": { "name": "MIT" },
+      "provenance": { "source": "api", "method": "api" },
+      "privacy": { "has_pii": true },
+      "shareability": "internal"
+    }
+  }
+]
