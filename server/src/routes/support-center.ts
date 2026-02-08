@@ -12,7 +12,10 @@ import { supportCenterService } from '../support/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
-import { supportImpersonationService, tenantHealthBundleService } from '../services/support/index.js';
+import {
+  supportImpersonationService,
+  tenantHealthBundleService,
+} from '../services/support/index.js';
 
 const router = Router();
 
@@ -103,6 +106,7 @@ const TenantHealthBundleSchema = z.object({
   tenantId: z.string().min(1),
   reason: z.string().min(5).max(2000),
 });
+
 
 /**
  * Search knowledge base and FAQs
@@ -336,6 +340,7 @@ router.post(
     }
   }
 );
+
 
 /**
  * Create support ticket
