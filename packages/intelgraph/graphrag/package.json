@@ -2,6 +2,7 @@
   "name": "@intelgraph/graphrag",
   "version": "0.1.0",
   "description": "GraphRAG implementation focusing on Path-Native context and Graph-First retrieval.",
+  "type": "module",
   "main": "index.ts",
   "scripts": {
     "test": "jest",

@@ -1,0 +1,3 @@
+{"id": "q1", "query": "What was the revenue of Company A in 2023?", "timeScope": "2023", "expectedEntities": ["Company A"], "expectedRelations": ["has_revenue"]}
+{"id": "q2", "query": "Who was the CEO of IntelGraph in 2024?", "timeScope": "2024", "expectedEntities": ["IntelGraph", "CEO"], "expectedRelations": ["held_by"]}
+{"id": "q3", "query": "What events occurred in the cyber domain during Oct 2025?", "timeScope": "Oct 2025", "expectedEntities": ["cyber domain"], "expectedRelations": ["event_in"]}
