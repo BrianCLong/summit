@@ -12,6 +12,7 @@ import {
 } from 'prom-client';
 import { getPostgresPool } from '../config/database.js';
 import { getNeo4jDriver } from '../config/database.js';
+import { isNeo4jMockMode } from '../db/neo4j.js';
 import logger from '../config/logger.js';
 // @ts-ignore - HybridEntityResolutionService class doesn't exist (exports resolveEntities function instead)
 // import { HybridEntityResolutionService } from './HybridEntityResolutionService.js';
@@ -338,6 +339,10 @@ export class GACoreMetricsService {
 
   private async collectDataQualityMetrics(): Promise<void> {
     try {
+      if (isNeo4jMockMode()) {
+        this.dataQualityScoreOverall.set(0.8);
+        return;
+      }
       const session = getNeo4jDriver().session();
 
       // Simple data quality assessment
@@ -346,11 +351,11 @@ export class GACoreMetricsService {
         WITH COUNT(e) as total,
              COUNT(CASE WHEN e.name IS NOT NULL AND e.name <> '' THEN 1 END) as with_names,
              COUNT(CASE WHEN e.created_at IS NOT NULL THEN 1 END) as with_dates
-        RETURN (with_names + with_dates)::float / (total * 2) as quality_score
+        RETURN CASE WHEN total = 0 THEN 0.8 ELSE toFloat(with_names + with_dates) / (total * 2) END as quality_score
       `);
 
-      const qualityScore =
-        result.records[0]?.get('quality_score')?.toNumber() || 0.8;
+      const scoreVal = result.records[0]?.get('quality_score');
+      const qualityScore = typeof scoreVal === 'number' ? scoreVal : (scoreVal?.toNumber?.() || 0.8);
       this.dataQualityScoreOverall.set(qualityScore);
 
       await session.close();
