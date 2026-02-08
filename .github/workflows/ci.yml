@@ -6,6 +6,8 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
+  schedule:
+    - cron: "0 3 * * *"
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -102,6 +104,25 @@ jobs:
         with:
           name: coverage-report
           path: server/coverage/
+
+  smoke-fast:
+    name: Smoke (Fast)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Smoke (GA)
+        run: pnpm ga:smoke
 
   integration-test:
     runs-on: ubuntu-latest
