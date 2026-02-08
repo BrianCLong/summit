@@ -1,0 +1,23 @@
+name: Evidence Gate
+
+on:
+  pull_request:
+    paths:
+      - 'artifacts/evidence/**'
+      - 'packages/evidence/**'
+      - 'ci/gates/evidence_contract.sh'
+      - 'scripts/ci_evidence_contract_runner.py'
+
+jobs:
+  validate-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install jsonschema
+      - name: Run Evidence Contract Gate
+        run: bash ci/gates/evidence_contract.sh
