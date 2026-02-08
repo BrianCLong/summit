@@ -1,0 +1,8 @@
+{
+  "name": "@intelgraph/cdc-projection",
+  "version": "1.0.0",
+  "description": "Reliable CDC projection system with deterministic provenance",
+  "type": "module",
+  "main": "src/canonical_consumer.js",
+  "dependencies": {}
+}
