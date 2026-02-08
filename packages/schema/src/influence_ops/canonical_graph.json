@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.io/schemas/influence_ops/canonical_graph.json",
+  "title": "Influence Ops Canonical Graph",
+  "description": "Canonical influence-operations graph payload with provenance and temporal constraints.",
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/edge"
+      }
+    }
+  },
+  "required": ["nodes", "edges"],
+  "additionalProperties": false,
+  "definitions": {
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "source_id": { "type": "string" },
+        "collected_at": { "type": "string", "format": "date-time" },
+        "method": {
+          "type": "string",
+          "enum": ["API", "API_LESS", "HUMAN_REPORT", "INFERENCE"]
+        },
+        "transform_chain": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "source_id",
+        "collected_at",
+        "method",
+        "transform_chain",
+        "confidence"
+      ],
+      "additionalProperties": false
+    },
+    "temporal": {
+      "type": "object",
+      "properties": {
+        "observed_at_start": { "type": "string", "format": "date-time" },
+        "observed_at_end": { "type": "string", "format": "date-time" },
+        "ingest_run_id": { "type": "string" }
+      },
+      "required": ["observed_at_start"],
+      "additionalProperties": false
+    },
+    "node": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Account",
+            "Persona",
+            "Channel",
+            "Post",
+            "Media",
+            "Narrative",
+            "Claim",
+            "Campaign",
+            "ActorHypothesis"
+          ]
+        },
+        "tenant_id": { "type": "string" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "provenance": { "$ref": "#/definitions/provenance" },
+        "temporal": { "$ref": "#/definitions/temporal" }
+      },
+      "required": ["id", "type", "tenant_id", "provenance", "temporal"],
+      "additionalProperties": false
+    },
+    "edge": {
+      "type": "object",
+      "properties": {
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "AMPLIFIES",
+            "COORDINATES_WITH",
+            "REPOSTS",
+            "DERIVES_FROM",
+            "TARGETS",
+            "LOCALIZES_TO",
+            "LIKELY_SAME_AS"
+          ]
+        },
+        "tenant_id": { "type": "string" },
+        "properties": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "provenance": { "$ref": "#/definitions/provenance" },
+        "temporal": { "$ref": "#/definitions/temporal" }
+      },
+      "required": [
+        "source",
+        "target",
+        "type",
+        "tenant_id",
+        "provenance",
+        "temporal"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

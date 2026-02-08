@@ -148,7 +148,7 @@ def main():
         json.dump(report, f, indent=2)
 
     print(f"Scorecard generated at {report_path}")
-    print(f"Overall Score: {report['overall_score']}/100")
+    print("Overall score generated successfully.")
 
 
 if __name__ == "__main__":

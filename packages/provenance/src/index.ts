@@ -1,6 +1,6 @@
-import { createHash, generateKeyPairSync, sign, verify } from 'crypto';
+import { createHash, generateKeyPairSync, sign, verify } from "crypto";
 
-export const RECEIPT_VERSION = '0.1.0';
+export const RECEIPT_VERSION = "0.1.0";
 
 export interface ActorRef {
   id: string;
@@ -24,7 +24,7 @@ export interface RedactionRule {
 }
 
 export interface ReceiptSignature {
-  algorithm: 'ed25519';
+  algorithm: "ed25519";
   keyId: string;
   publicKey: string;
   value: string;
@@ -75,9 +75,9 @@ function sortJson(value: any): any {
     return value.map((item) => sortJson(item));
   }
 
-  if (value && typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, any>).sort(
-      ([a], [b]) => a.localeCompare(b),
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, any>).sort(([a], [b]) =>
+      a.localeCompare(b)
     );
     return entries.reduce<Record<string, any>>((acc, [k, v]) => {
       acc[k] = sortJson(v);
@@ -105,17 +105,17 @@ export function canonicalizeReceiptPayload(receipt: Receipt): string {
 
 export function computeReceiptPayloadHash(receipt: Receipt): string {
   const canonical = canonicalizeReceiptPayload(receipt);
-  return createHash('sha256').update(canonical).digest('hex');
+  return createHash("sha256").update(canonical).digest("hex");
 }
 
 export function computeReceiptHash(receipt: Receipt): string {
   const { proofs: _proofs, ...rest } = receipt;
   const canonical = JSON.stringify(sortJson(rest as unknown as Record<string, unknown>));
-  return createHash('sha256').update(canonical).digest('hex');
+  return createHash("sha256").update(canonical).digest("hex");
 }
 
 export function verifyReceiptSignature(receipt: Receipt): boolean {
-  if (receipt.signature.algorithm !== 'ed25519') return false;
+  if (receipt.signature.algorithm !== "ed25519") return false;
 
   const payloadHash = computeReceiptPayloadHash(receipt);
   if (payloadHash !== receipt.payloadHash) {
@@ -124,13 +124,13 @@ export function verifyReceiptSignature(receipt: Receipt): boolean {
 
   return verify(
     null,
-    Buffer.from(payloadHash, 'hex'),
+    Buffer.from(payloadHash, "hex"),
     {
-      key: Buffer.from(receipt.signature.publicKey, 'base64'),
-      format: 'der',
-      type: 'spki',
+      key: Buffer.from(receipt.signature.publicKey, "base64"),
+      format: "der",
+      type: "spki",
     },
-    Buffer.from(receipt.signature.value, 'base64'),
+    Buffer.from(receipt.signature.value, "base64")
   );
 }
 
@@ -140,31 +140,31 @@ export interface SigningResult extends ReceiptSignature {
 }
 
 export function signReceipt(
-  receipt: Omit<Receipt, 'signature' | 'proofs' | 'payloadHash' | 'version'> & {
+  receipt: Omit<Receipt, "signature" | "proofs" | "payloadHash" | "version"> & {
     signature?: Partial<ReceiptSignature>;
   },
-  keyId?: string,
+  keyId?: string
 ): Receipt {
-  const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+  const { publicKey, privateKey } = generateKeyPairSync("ed25519");
   const baseReceipt: Receipt = {
     ...receipt,
     version: RECEIPT_VERSION,
-    payloadHash: '',
+    payloadHash: "",
     signature: {
-      algorithm: 'ed25519',
-      keyId: keyId ?? 'default',
-      publicKey: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
-      value: '',
+      algorithm: "ed25519",
+      keyId: keyId ?? "default",
+      publicKey: publicKey.export({ type: "spki", format: "der" }).toString("base64"),
+      value: "",
       signedAt: new Date().toISOString(),
       ...receipt.signature,
     },
     proofs: {
-      receiptHash: '',
+      receiptHash: "",
     },
   };
 
   const payloadHash = computeReceiptPayloadHash(baseReceipt);
-  const signature = sign(null, Buffer.from(payloadHash, 'hex'), privateKey).toString('base64');
+  const signature = sign(null, Buffer.from(payloadHash, "hex"), privateKey).toString("base64");
   const signed: Receipt = {
     ...baseReceipt,
     payloadHash,
@@ -183,17 +183,17 @@ export function applyRedactions<T extends object>(source: T, redactions: Redacti
   const clone: Record<string, unknown> = JSON.parse(JSON.stringify(source));
 
   for (const rule of redactions) {
-    const segments = rule.path.split('.').filter(Boolean);
+    const segments = rule.path.split(".").filter(Boolean);
     let cursor: any = clone;
 
     for (let i = 0; i < segments.length; i += 1) {
       const key = segments[i]!;
 
       if (i === segments.length - 1) {
-        if (cursor && typeof cursor === 'object' && key in cursor) {
+        if (cursor && typeof cursor === "object" && key in cursor) {
           delete cursor[key];
         }
-      } else if (cursor && typeof cursor === 'object' && key in cursor) {
+      } else if (cursor && typeof cursor === "object" && key in cursor) {
         cursor = cursor[key];
       } else {
         break;
@@ -218,17 +218,18 @@ export const verifyReceipt = verifyReceiptSignature;
  * Apply redaction to specific fields in a receipt, marking hashes as REDACTED
  * and tracking disclosure metadata.
  */
-export function applyRedaction<T extends { hashes?: { inputs?: Array<{ name: string; hash: string; redactable?: boolean }> }; disclosure?: { redactions?: string[]; reason?: string } }>(
-  receipt: T,
-  fieldsToRedact: string[],
-  reason: string,
-): T {
+export function applyRedaction<
+  T extends {
+    hashes?: { inputs?: Array<{ name: string; hash: string; redactable?: boolean }> };
+    disclosure?: { redactions?: string[]; reason?: string };
+  },
+>(receipt: T, fieldsToRedact: string[], reason: string): T {
   const clone = JSON.parse(JSON.stringify(receipt)) as T;
 
   if (clone.hashes?.inputs) {
     for (const input of clone.hashes.inputs) {
       if (fieldsToRedact.includes(input.name) && input.redactable !== false) {
-        input.hash = 'REDACTED';
+        input.hash = "REDACTED";
       }
     }
   }
@@ -241,6 +242,7 @@ export function applyRedaction<T extends { hashes?: { inputs?: Array<{ name: str
   return clone;
 }
 
-export * from './trace-model';
-export * from './replay-runner';
-export * from './mapping';
+export * from "./trace-model";
+export * from "./replay-runner";
+export * from "./mapping";
+export * from "./stamp";

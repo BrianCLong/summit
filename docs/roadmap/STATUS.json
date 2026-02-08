@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-11T18:10:00Z",
+  "revision_note": "Resolved roadmap conflict state and added IO PR2 normalization hardening: canonical EVID:: IDs, deterministic schema eval outputs, and CLI io command wiring.",
   "initiatives": [
+    {
+      "id": "influence-ops-pr2-normalization-hardening-2026-02-11",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Standardized IO evidence IDs to EVID::<tenant>::<domain>::<artifact>::<date>::<gitsha7>::<runid8>, wired CLI io command registration, and hardened schema roundtrip eval outputs for deterministic report/metrics/stamp generation."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -24,10 +30,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -36,9 +39,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -47,9 +48,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -224,7 +223,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }

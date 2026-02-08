@@ -1,0 +1,275 @@
+{
+  "@types/minimatch": {
+    "current": "6.0.0",
+    "latest": "6.0.0",
+    "wanted": "6.0.0",
+    "isDeprecated": true,
+    "dependencyType": "devDependencies"
+  },
+  "@types/uuid": {
+    "current": "11.0.0",
+    "latest": "11.0.0",
+    "wanted": "11.0.0",
+    "isDeprecated": true,
+    "dependencyType": "devDependencies"
+  },
+  "apollo-server-express": {
+    "current": "3.13.0",
+    "latest": "3.13.0",
+    "wanted": "3.13.0",
+    "isDeprecated": true,
+    "dependencyType": "dependencies"
+  },
+  "@axe-core/playwright": {
+    "current": "4.11.0",
+    "latest": "4.11.1",
+    "wanted": "4.11.0",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@graphql-inspector/cli": {
+    "current": "6.0.5",
+    "latest": "6.0.7",
+    "wanted": "6.0.5",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@mui/material": {
+    "current": "7.3.6",
+    "latest": "7.3.7",
+    "wanted": "7.3.6",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "axios": {
+    "current": "1.13.4",
+    "latest": "1.13.5",
+    "wanted": "1.13.4",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "body-parser": {
+    "current": "2.2.1",
+    "latest": "2.2.2",
+    "wanted": "2.2.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "dotenv": {
+    "current": "17.2.3",
+    "latest": "17.2.4",
+    "wanted": "17.2.3",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "minimatch": {
+    "current": "10.1.1",
+    "latest": "10.1.2",
+    "wanted": "10.1.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "pg-mem": {
+    "current": "3.0.5",
+    "latest": "3.0.12",
+    "wanted": "3.0.5",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "zustand": {
+    "current": "5.0.9",
+    "latest": "5.0.11",
+    "wanted": "5.0.9",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "@playwright/test": {
+    "current": "1.57.0",
+    "latest": "1.58.2",
+    "wanted": "1.57.0",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@types/node": {
+    "current": "25.0.10",
+    "latest": "25.2.3",
+    "wanted": "25.0.10",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@typescript-eslint/eslint-plugin": {
+    "current": "8.53.1",
+    "latest": "8.55.0",
+    "wanted": "8.53.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@typescript-eslint/parser": {
+    "current": "8.53.1",
+    "latest": "8.55.0",
+    "wanted": "8.53.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "eslint-plugin-jest": {
+    "current": "29.11.0",
+    "latest": "29.13.0",
+    "wanted": "29.11.0",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "ioredis": {
+    "current": "5.8.2",
+    "latest": "5.9.2",
+    "wanted": "5.8.2",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "pino": {
+    "current": "10.1.0",
+    "latest": "10.3.1",
+    "wanted": "10.1.0",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "prettier": {
+    "current": "3.7.4",
+    "latest": "3.8.1",
+    "wanted": "3.7.4",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "supertest": {
+    "current": "7.1.4",
+    "latest": "7.2.2",
+    "wanted": "7.1.4",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "typescript-eslint": {
+    "current": "8.50.1",
+    "latest": "8.55.0",
+    "wanted": "8.50.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "zod": {
+    "current": "3.25.76",
+    "latest": "4.3.6",
+    "wanted": "4.2.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@commitlint/cli": {
+    "current": "19.8.1",
+    "latest": "20.4.1",
+    "wanted": "19.8.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@commitlint/config-conventional": {
+    "current": "19.8.1",
+    "latest": "20.4.1",
+    "wanted": "19.8.1",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@eslint/js": {
+    "current": "9.39.2",
+    "latest": "10.0.1",
+    "wanted": "9.39.2",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@semantic-release/github": {
+    "current": "11.0.6",
+    "latest": "12.0.5",
+    "wanted": "11.0.6",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@semantic-release/npm": {
+    "current": "12.0.2",
+    "latest": "13.1.4",
+    "wanted": "12.0.2",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "@types/jest": {
+    "current": "29.5.14",
+    "latest": "30.0.0",
+    "wanted": "29.5.14",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "cbor": {
+    "current": "9.0.2",
+    "latest": "10.0.11",
+    "wanted": "9.0.2",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "eslint": {
+    "current": "9.39.2",
+    "latest": "10.0.0",
+    "wanted": "9.39.2",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "globals": {
+    "current": "15.15.0",
+    "latest": "17.3.0",
+    "wanted": "15.15.0",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "jest": {
+    "current": "29.7.0",
+    "latest": "30.2.0",
+    "wanted": "29.7.0",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "jest-extended": {
+    "current": "4.0.2",
+    "latest": "7.0.0",
+    "wanted": "4.0.2",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "jest-watch-typeahead": {
+    "current": "2.2.2",
+    "latest": "3.0.1",
+    "wanted": "2.2.2",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "neo4j-driver": {
+    "current": "5.28.2",
+    "latest": "6.0.1",
+    "wanted": "5.28.2",
+    "isDeprecated": false,
+    "dependencyType": "dependencies"
+  },
+  "semantic-release": {
+    "current": "24.2.9",
+    "latest": "25.0.3",
+    "wanted": "24.2.9",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "eslint-plugin-react-refresh": {
+    "current": "0.4.26",
+    "latest": "0.5.0",
+    "wanted": "0.4.26",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  },
+  "markdownlint-cli": {
+    "current": "0.45.0",
+    "latest": "0.47.0",
+    "wanted": "0.45.0",
+    "isDeprecated": false,
+    "dependencyType": "devDependencies"
+  }
+}

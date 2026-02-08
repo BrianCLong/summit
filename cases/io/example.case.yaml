@@ -1,0 +1,18 @@
+version: 1
+case_id: io-cib-coordination-demo
+hypothesis: Coordinated amplification network is boosting narrative cluster around claim family N-42.
+sources_allowed:
+  - telegram
+  - tiktok
+  - discord
+detectors:
+  - temporal_synchrony
+  - text_reuse
+  - co_amplification_motif
+thresholds:
+  confidence_min: 0.7
+  synchrony_zscore_min: 2.5
+export_formats:
+  - report.json
+  - metrics.json
+  - stamp.json

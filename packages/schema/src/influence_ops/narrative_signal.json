@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.io/schemas/influence_ops/narrative_signal.json",
+  "title": "Influence Ops Narrative Signal",
+  "description": "Narrative-level signal payload for diffusion and cross-lingual tracking.",
+  "type": "object",
+  "properties": {
+    "signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "narrative_id": { "type": "string" },
+          "claim_id": { "type": "string" },
+          "language": { "type": "string" },
+          "signal_type": {
+            "type": "string",
+            "enum": [
+              "NARRATIVE_EMERGENCE",
+              "NARRATIVE_AMPLIFICATION",
+              "NARRATIVE_DRIFT",
+              "CROSS_LINGUAL_LINK"
+            ]
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "source_id": { "type": "string" },
+              "collected_at": { "type": "string", "format": "date-time" },
+              "transform_chain": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1
+              }
+            },
+            "required": ["source_id", "collected_at", "transform_chain"],
+            "additionalProperties": false
+          },
+          "temporal": {
+            "type": "object",
+            "properties": {
+              "observed_at_start": { "type": "string", "format": "date-time" },
+              "observed_at_end": { "type": "string", "format": "date-time" }
+            },
+            "required": ["observed_at_start"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "narrative_id",
+          "claim_id",
+          "language",
+          "signal_type",
+          "score",
+          "provenance",
+          "temporal"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["signals"],
+  "additionalProperties": false
+}

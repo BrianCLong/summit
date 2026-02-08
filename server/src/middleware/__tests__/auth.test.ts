@@ -6,6 +6,14 @@ import { randomUUID } from 'crypto';
 import { jest, describe, it, expect, beforeAll, beforeEach } from '@jest/globals';
 import AuthService from '../../services/AuthService.js';
 
+jest.unstable_mockModule('../../observability/metrics.js', () => ({
+  metrics: {
+    pbacDecisionsTotal: {
+      inc: jest.fn(),
+    },
+  },
+}));
+
 let ensureAuthenticated: typeof import('../auth.js').ensureAuthenticated;
 let requirePermission: typeof import('../auth.js').requirePermission;
 const verifyTokenMock: any = jest.fn();
