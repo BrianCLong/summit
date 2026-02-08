@@ -31,17 +31,20 @@ export class RiskRepository {
       );
 
       const savedScore = scoreRows[0];
-      const savedSignals: RiskSignal[] = [];
 
       // 2. Insert Risk Signals
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
+        // BOLT: Optimized batched insertion with chunking to reduce database round-trips.
+        // multi-row VALUES is significantly faster than individual inserts in a loop.
+        const chunkSize = 100;
+        for (let i = 0; i < input.signals.length; i += chunkSize) {
+          const chunk = input.signals.slice(i, i + chunkSize);
+          const values: any[] = [];
+          const placeholders: string[] = [];
+          let paramIndex = 1;
+
+          for (const sig of chunk) {
+            values.push(
               savedScore.id,
               sig.type,
               sig.source,
@@ -49,18 +52,24 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
+              sig.detectedAt || new Date(),
+            );
+            placeholders.push(
+              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`,
+            );
+            paramIndex += 8;
+          }
+
+          await tx.query(
+            `INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${placeholders.join(', ')}`,
+            values,
           );
-          savedSignals.push(this.mapSignal(sigRows[0]));
         }
       }
 
-      return {
-        ...this.mapScore(savedScore),
-        // Note: signals are not part of RiskScore interface but usually returned in a full object
-        // For strict typing we return the RiskScore entity
-      };
+      return this.mapScore(savedScore);
     });
   }
 
