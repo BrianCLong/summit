@@ -23,7 +23,7 @@ import type {
 } from '../types/strategic-planning.js';
 
 // Mock dependencies
-jest.mock('../config/logger.js', () => ({
+jest.mock(new URL('../config/logger.ts', import.meta.url).pathname, () => ({
   default: {
     child: () => ({
       info: jest.fn(),

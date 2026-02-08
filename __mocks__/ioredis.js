@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 const mockRedis = {
   get: jest.fn(() => Promise.resolve(null)),
   set: jest.fn(() => Promise.resolve('OK')),
@@ -32,5 +34,7 @@ class Redis {
   }
 }
 
-module.exports = Redis;
-module.exports.default = Redis;
+class Cluster extends Redis {}
+
+export { Redis, Cluster };
+export default Redis;

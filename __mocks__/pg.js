@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 const mockQuery = jest.fn(() => Promise.resolve({ rows: [], rowCount: 0 }));
 
 const mockClient = {
@@ -27,10 +29,9 @@ class Client {
   }
 }
 
-module.exports = {
-  Pool,
-  Client,
-  types: {
-    setTypeParser: jest.fn(),
-  },
+const types = {
+  setTypeParser: jest.fn(),
 };
+
+export { Pool, Client, types };
+export default { Pool, Client, types };

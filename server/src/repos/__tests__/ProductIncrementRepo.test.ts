@@ -15,13 +15,17 @@ const mockQuery = jest.fn<any>();
 const mockConnect = jest.fn<any>();
 const mockRelease = jest.fn<any>();
 
-await jest.unstable_mockModule('../../provenance/ledger.js', () => ({
+await jest.unstable_mockModule(
+  new URL('../../provenance/ledger.ts', import.meta.url).pathname,
+  () => ({
   provenanceLedger: {
     appendEntry: jest.fn<any>().mockResolvedValue(undefined),
   },
 }));
 
-await jest.unstable_mockModule('../../config/logger', () => ({
+await jest.unstable_mockModule(
+  new URL('../../config/logger.ts', import.meta.url).pathname,
+  () => ({
   __esModule: true,
   default: {
     child: jest.fn<any>().mockReturnValue({

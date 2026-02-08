@@ -196,7 +196,7 @@ function buildLLMChainExecutorMockClass() {
 
 
 // Mock logger first (hoisted to top)
-jest.mock('../../config/logger', () => ({
+jest.mock(new URL('../../config/logger.ts', import.meta.url).pathname, () => ({
   default: {
     info: jest.fn(),
     error: jest.fn(),
@@ -207,7 +207,9 @@ jest.mock('../../config/logger', () => ({
 
 
 // Mock AutoRemediationHooks to prevent singleton instantiation with unmocked logger
-jest.mock('../AutoRemediationHooks.js', () => {
+jest.mock(
+  new URL('../AutoRemediationHooks.ts', import.meta.url).pathname,
+  () => {
   class MockAutoRemediationHooks extends EventEmitter {
     private plans: RemediationPlan[] = [];
 
@@ -289,13 +291,17 @@ jest.mock('../AutoRemediationHooks.js', () => {
 
 
 // Mock dependencies
-jest.mock('../../graph/neo4j', () => ({
+jest.mock(
+  new URL('../../graph/neo4j.ts', import.meta.url).pathname,
+  () => ({
   runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
     { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
     { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
   ]),
 }));
-jest.mock('../../graph/neo4j.js', () => ({
+jest.mock(
+  new URL('../../graph/neo4j.ts', import.meta.url).pathname,
+  () => ({
   runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
     { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
     { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },

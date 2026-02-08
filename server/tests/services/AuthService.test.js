@@ -1,13 +1,9 @@
-const AuthService = require('../../src/services/AuthService');
-const { getPostgresPool } = require('../../src/config/database');
-const argon2 = require('argon2');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-
-// Mock database pool and client
-jest.mock('../../src/config/database', () => ({
-  getPostgresPool: jest.fn(),
-}));
+import { jest } from '@jest/globals';
+import AuthService from '../../src/services/AuthService.js';
+import * as database from '../../src/config/database.js';
+import * as argon2 from 'argon2';
+import * as jwt from 'jsonwebtoken';
+import crypto from 'node:crypto';
 
 // Mock argon2 and jsonwebtoken
 jest.mock('argon2', () => ({
@@ -21,7 +17,7 @@ jest.mock('jsonwebtoken', () => ({
 }));
 
 // Mock logger to prevent console noise during tests
-jest.mock('../../src/utils/logger', () => ({
+jest.mock(new URL('../../src/utils/logger.ts', import.meta.url).pathname, () => ({
   error: jest.fn(),
   warn: jest.fn(),
   info: jest.fn(),
@@ -29,7 +25,7 @@ jest.mock('../../src/utils/logger', () => ({
 }));
 
 // Mock config
-jest.mock('../../src/config/index.js', () => ({
+jest.mock(new URL('../../src/config/index.ts', import.meta.url).pathname, () => ({
   default: {
     jwt: {
       secret: 'test-secret-key',
@@ -42,6 +38,7 @@ describe('AuthService', () => {
   let authService;
   let mockClient;
   let mockPool;
+  let mockGetPostgresPool;
 
   beforeEach(() => {
     mockClient = {
@@ -51,7 +48,9 @@ describe('AuthService', () => {
     mockPool = {
       connect: jest.fn(() => mockClient),
     };
-    getPostgresPool.mockReturnValue(mockPool);
+    mockGetPostgresPool = jest
+      .spyOn(database, 'getPostgresPool')
+      .mockReturnValue(mockPool);
     authService = new AuthService();
 
     // Reset mocks before each test

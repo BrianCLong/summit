@@ -17,7 +17,9 @@ const mockVerifyToken = jest.fn();
 const mockHasPermission = jest.fn();
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../src/services/AuthService', () => ({
+jest.unstable_mockModule(
+  new URL('../../src/services/AuthService.ts', import.meta.url).pathname,
+  () => ({
   __esModule: true,
   default: jest.fn(() => ({
     verifyToken: mockVerifyToken,
@@ -35,7 +37,9 @@ jest.unstable_mockModule('argon2', () => ({
   verify: jest.fn(),
 }));
 
-jest.unstable_mockModule('../../src/config/database', () => ({
+jest.unstable_mockModule(
+  new URL('../../src/config/database.ts', import.meta.url).pathname,
+  () => ({
   getPostgresPool: jest.fn(() => ({
     connect: jest.fn(),
     query: jest.fn(),

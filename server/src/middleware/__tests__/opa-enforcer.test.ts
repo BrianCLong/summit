@@ -18,11 +18,15 @@ import axios from 'axios';
 import { OPAEnforcer, createOPAMiddleware } from '../opa-enforcer.js';
 
 // Mock axios
-jest.mock('axios');
+jest.mock('axios', () => ({
+  default: {
+    post: jest.fn(),
+  },
+}));
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 // Mock budget ledger
-jest.mock('../../db/budgetLedger', () => {
+jest.mock(new URL('../../db/budgetLedger.ts', import.meta.url).pathname, () => {
   const ledger = {
     getTenantBudget: jest.fn(),
     getSpendingSummary: jest.fn(),
@@ -36,7 +40,9 @@ jest.mock('../../db/budgetLedger', () => {
   };
 });
 
-const budgetLedgerModule = jest.requireMock('../../db/budgetLedger') as {
+const budgetLedgerModule = jest.requireMock(
+  new URL('../../db/budgetLedger.ts', import.meta.url).pathname,
+) as {
   __mockLedger: {
     getTenantBudget: jest.MockedFunction<(...args: any[]) => any>;
     getSpendingSummary: jest.MockedFunction<(...args: any[]) => any>;

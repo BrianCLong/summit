@@ -18,7 +18,9 @@ import type { Pool } from 'pg';
 
 const mockGetPostgresPool = jest.fn();
 const mockGetRedisClient = jest.fn();
-jest.unstable_mockModule('../../src/config/database.js', () => ({
+jest.unstable_mockModule(
+  new URL('../../src/config/database.ts', import.meta.url).pathname,
+  () => ({
   getPostgresPool: mockGetPostgresPool,
   getRedisClient: mockGetRedisClient,
 }));
@@ -30,13 +32,17 @@ const mockConfig = {
     refreshSecret: 'test-refresh',
   },
 };
-jest.unstable_mockModule('../../src/config/index.js', () => ({
+jest.unstable_mockModule(
+  new URL('../../src/config/index.ts', import.meta.url).pathname,
+  () => ({
   __esModule: true,
   default: mockConfig,
 }));
 
 const mockCheckUserEnrollmentEligibility = jest.fn();
-jest.unstable_mockModule('../../src/services/GAEnrollmentService.js', () => ({
+jest.unstable_mockModule(
+  new URL('../../src/services/GAEnrollmentService.ts', import.meta.url).pathname,
+  () => ({
   __esModule: true,
   default: {
     checkUserEnrollmentEligibility: mockCheckUserEnrollmentEligibility,
@@ -44,7 +50,9 @@ jest.unstable_mockModule('../../src/services/GAEnrollmentService.js', () => ({
 }));
 
 const mockGetSecret = jest.fn();
-jest.unstable_mockModule('../../src/services/SecretsService.js', () => ({
+jest.unstable_mockModule(
+  new URL('../../src/services/SecretsService.ts', import.meta.url).pathname,
+  () => ({
   __esModule: true,
   secretsService: {
     getSecret: mockGetSecret,

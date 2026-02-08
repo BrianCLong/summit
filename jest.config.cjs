@@ -4,7 +4,7 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
-      'ts-jest',
+      require.resolve('ts-jest'),
       {
         useESM: true,
         tsconfig: 'tsconfig.test.json',
@@ -18,6 +18,7 @@ module.exports = {
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
     '<rootDir>/packages/cli/',
+    '<rootDir>/packages/work-graph/packages/work-graph/',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -72,23 +73,24 @@ module.exports = {
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
   ],
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
+    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.cjs',
     '^pg$': '<rootDir>/__mocks__/pg.js',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
-    '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
+    '^@opentelemetry/sdk-node$': '<rootDir>/__mocks__/otel-sdk-node.cjs',
+    '^@opentelemetry/exporter-trace-otlp-http$': '<rootDir>/__mocks__/otel-exporter-trace-otlp-http.cjs',
+    '^puppeteer$': '<rootDir>/__mocks__/puppeteer.cjs',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',
     '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src/index.ts',
   },
+  resolver: '<rootDir>/jest.resolver.cjs',
   transformIgnorePatterns: [
     'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|jose|.*\\.mjs$))',
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
-  testTimeout: 30000,
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
