@@ -8,6 +8,16 @@
     "summary": { "type": "string" },
     "environment": { "type": "string" },
     "backend": { "type": "string" },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "digest": {
+          "type": "string",
+          "description": "Optional artifact digest (e.g., sha256:...). When present, it SHOULD match the digest used in sigstore verification."
+        }
+      },
+      "additionalProperties": true
+    },
     "artifacts": {
       "type": "array",
       "items": { "type": "string" }

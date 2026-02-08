@@ -1,0 +1,47 @@
+{
+  "task_id": "SIGSTORE_BUNDLE_VERIFY_20260208",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sigstore-bundle-verify",
+    "version": "v1",
+    "sha256": "2e1109c6fadf94c9d5a78079e3a1c4360142df91701f7dfa9437fa6e8db82a8c",
+    "path": "prompts/ci/sigstore-bundle-verify@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/actions/sigstore-verify/action.yml",
+      "ci/attest/verify.sh",
+      "policy/opa/sigstore.rego",
+      "policy/tests/sigstore_gate_test.rego",
+      "summit/evidence/schemas/report.schema.json",
+      "docs/roadmap/STATUS.json",
+      "prompts/ci/sigstore-bundle-verify@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SIGSTORE_BUNDLE_VERIFY_20260208.json"
+    ],
+    "domains": ["ci", "governance", "supply-chain"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "node scripts/check-boundaries.cjs",
+      "make smoke"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Composite action enforces cosign version floors and bundle-first verification.",
+    "Verification script rejects missing bundle, trust root, or signing config when required.",
+    "OPA policy gate enforces cosign version floors with tests.",
+    "Evidence schema documents optional subject digest.",
+    "Roadmap status updated to reflect sigstore gate work."
+  ],
+  "stop_conditions": [
+    "Verification inputs cannot satisfy bundle-first requirements.",
+    "Required checks are deferred pending network access."
+  ]
+}
