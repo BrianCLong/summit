@@ -1,21 +1,20 @@
 # Runbook: Narrative IO Inference & Convergence
 
-## Running Analysis
-Run the analysis CLI:
+## Execution
+Run analysis on a daily snapshot:
 ```bash
-pnpm run narrative:analyze --in <snapshot.json> --out <output_dir>
+pnpm run narrative:analyze -- --in tests/narrative/fixtures/day0.json --out /tmp/out
 ```
 
-## Drift Detection
-Run the drift check:
-```bash
-npx tsx scripts/monitoring/narrative-io-inference-convergence-drift.ts
-```
-
-## Interpreting Convergence
-*   **Converging:** Variance < 0.2. Narratives are aligning on implicit assumptions. High risk of coordinated IO.
-*   **Diverging:** Variance > 0.5. Narratives are fragmented.
-*   **Stable:** Variance 0.2 - 0.5. Normal baseline.
+## Interpretation
+- **Convergence Direction:** Vector alignment of implied narratives. High cosine similarity indicates convergence.
+- **Consensus:** Agreement on explicit claims. Distinct from convergence (agreement on implicit assumptions).
+- **Redundancy:** Structural similarity without lexical overlap. High redundancy + low lexical overlap = coordinated messaging.
 
 ## Tuning
-Adjust thresholds in `src/narrative/redundancy/cluster.ts` if cluster sizes are too large (reduce threshold) or too small (increase threshold).
+- Adjust `similarity_threshold` in `src/narrative/redundancy/similarity.ts` if false positives occur.
+- Adjust `inference_confidence` threshold if defaults are too noisy.
+
+## Determinism
+- Ensure `seeded` random number generator is used.
+- Sort all outputs by stable keys (e.g., ID) before hashing.

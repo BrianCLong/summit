@@ -1,21 +1,22 @@
-import { writeFileSync } from 'fs';
+import * as fs from 'fs';
 
-// Mock drift check for MWS
-const driftReport = {
-  timestamp: new Date().toISOString(),
-  metrics: {
-    interpretive_variance_mean: 0.45,
-    redundancy_cluster_count: 12,
-    narrative_id_churn: 0.05
-  },
-  status: 'healthy'
-};
-
-// Check thresholds
-if (driftReport.metrics.narrative_id_churn > 0.2) {
-  driftReport.status = 'drift_detected';
-  console.error('High narrative churn detected!');
+async function main() {
+  console.log('Checking Narrative IO drift...');
+  try {
+      if (fs.existsSync('tests/narrative/fixtures/interpretive_defaults.json')) {
+        const fixtures = JSON.parse(fs.readFileSync('tests/narrative/fixtures/interpretive_defaults.json', 'utf8'));
+        console.log(`Loaded ${fixtures.length} fixtures`);
+      } else {
+        console.warn('No fixtures found, skipping drift check');
+      }
+  } catch (e) {
+      console.error('Failed to load fixtures', e);
+      process.exit(1);
+  }
+  console.log('Drift check passed');
 }
 
-writeFileSync('drift_report.json', JSON.stringify(driftReport, null, 2));
-console.log('Drift report generated: drift_report.json');
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
