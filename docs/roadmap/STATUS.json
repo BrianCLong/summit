@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added Postgres CDC blueprint in docs/streaming.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -52,7 +52,7 @@
       "id": "sera-cli-proxy",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
+      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails. Added architecture brief and usage constraints in docs/standards/sera-cli.md."
     },
     {
       "id": "governance-evidence-contracts",
@@ -65,12 +65,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
-    },
-    {
-      "id": "summit-ops-incident-console",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Codex Desktop Summit Ops & Incident Console plan with threads, skills, automation, safe Git profiles, and incident-mode outputs."
     },
     {
       "id": "summit-ga-preflight-skill",
@@ -88,7 +82,7 @@
       "id": "promptspec-foundation-lane1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding. Added docs/promptspec/FOUNDATION_LANE1.md and minimal example in promptspec/specs/minimal_example_v0.json."
     },
     {
       "id": "E",
@@ -156,13 +150,13 @@
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab. Added deterministic example and evidence budgeting notes in docs/standards/ru-ua-cogwar-lab.md."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",
@@ -199,12 +193,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "summit-architecture-brief",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     }
   ],
   "summary": {
@@ -212,7 +200,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
