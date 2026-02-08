@@ -1,6 +1,6 @@
 # NPM bulk advisory report
 
-- Generated: 2026-02-08T05:47:06.359868+00:00
+- Generated: 2026-02-08T06:52:45.127223+00:00
 - Lockfile: `pnpm-lock.yaml`
 - Advisories: 21
 - Packages with advisories: 17

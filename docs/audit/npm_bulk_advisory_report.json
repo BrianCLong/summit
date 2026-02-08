@@ -343,7 +343,7 @@
   },
   "summary": {
     "bulk_source": "/tmp/pnpm-audit/bulk-full.json",
-    "generated_at": "2026-02-08T05:47:06.359868+00:00",
+    "generated_at": "2026-02-08T06:52:45.127223+00:00",
     "lockfile": "pnpm-lock.yaml",
     "packages_with_advisories": 17,
     "total_advisories": 21,
