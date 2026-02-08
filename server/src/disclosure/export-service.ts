@@ -10,6 +10,7 @@ import { makeBundle } from './bundle.js';
 import { disclosureMetrics } from '../metrics/disclosureMetrics.js';
 import { RedactionService } from '../redaction/redact.js';
 import fetch from 'node-fetch';
+import { securityAudit } from '../audit/security-audit-logger.js';
 
 export type ExportArtifact =
   | 'audit-trail'
@@ -197,6 +198,24 @@ export class DisclosureExportService {
     job.status = 'running';
     job.startedAt = new Date().toISOString();
     disclosureMetrics.exportStarted(job.tenantId);
+
+    securityAudit.logDataExport({
+      actor: job.tenantId,
+      actorType: 'service',
+      tenantId: job.tenantId,
+      resourceType: 'disclosure_export',
+      resourceId: job.id,
+      action: 'export',
+      details: {
+        artifacts: job.request.artifacts,
+        window: {
+          start: job.request.startTime.toISOString(),
+          end: job.request.endTime.toISOString(),
+        },
+      },
+      complianceFrameworks: ['SOC2', 'GDPR'],
+      dataClassification: 'confidential',
+    });
 
     const startedAt = Date.now();
     const artifacts: { name: string; path: string; sha256?: string }[] = [];

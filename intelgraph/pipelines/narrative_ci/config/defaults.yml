@@ -1,0 +1,14 @@
+thresholds:
+  seeding_density:
+    high: 0.7
+    low: 0.3
+  handoff_score:
+    critical: 0.8
+    warning: 0.5
+  compression_ratio:
+    normalized: 0.6
+  resilience:
+    high: 0.75
+state_machine:
+  dormant_runs: 5
+  reactivation_similarity: 0.85
