@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added TCI skill routing plan and execution lane mapping.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -77,6 +77,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+    },
+    {
+      "id": "tci-skill-routing-plan",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published Temporal Claims Intelligence (TCI) skill routing plan with governance, MAESTRO alignment, and PR stack sequencing."
     },
     {
       "id": "promptspec-foundation-lane1",
