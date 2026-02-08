@@ -12,6 +12,7 @@
 | `scripts/` | `scripts/` | ✅ Exists | Root directory. |
 | `tests/` | `tests/` | ✅ Exists | Root directory. |
 | `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| `artifacts/` | `artifacts/` | ✅ Exists | Evidence and performance artifacts directory. |
 
 ## Component Mapping
 
@@ -28,8 +29,10 @@
 * **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
 * **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
 * **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+* **Perf Evidence**: `artifacts/` exists and is the default location for deterministic perf evidence bundles.
 
 ## Next Steps
 
 1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
 2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+3. Implement **PR-1: Pydantic v2 performance standards** in `docs/standards/pydantic-perf-v2.md`.
