@@ -1,35 +1,33 @@
 # Repo Assumptions & Validation
 
-## Structure Validation
+## ✅ Verified Paths (in-repo)
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| Path | Status | Notes |
+| --- | --- | --- |
+| `.github/workflows/` | ✅ Verified | Workflow directory present at repo root. |
+| `docs/` | ✅ Verified | Documentation root. |
+| `docs/standards/` | ✅ Verified | Standards repository (STD-*). |
+| `docs/ops/runbooks/` | ✅ Verified | Ops runbooks directory. |
+| `docs/security/data-handling/` | ✅ Verified | Security data-handling guidance. |
+| `docs/roadmap/STATUS.json` | ✅ Verified | Roadmap execution ledger; updates required per governance. |
+| `agent-contract.json` | ✅ Verified | Machine-readable GA contract referenced by governance. |
 
-## Component Mapping
+## ⚠️ Assumptions (Deferred pending validation)
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+| Topic | Assumption | Rationale |
+| --- | --- | --- |
+| Evidence schema | Evidence bundle schema lives under `evidence/` with JSON layout aligned to governance. | Prior repo pattern; not revalidated in this pass. |
+| Adapter seams | Adapter interfaces live outside `docs/` and are wired through feature flags. | Planned for later PRs; not implemented here. |
+| CI gate names | `pr-quality-gate.yml` and standard lint/test workflows enforce documentation updates. | Governance references only; workflow names unvalidated here. |
 
-## Constraints & Checks
+## Must-Not-Touch List (Governed Exceptions Required)
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+* `docs/governance/*` (policy and constitutional artifacts)
+* `governance/*` (OPA/rego, policy enforcement)
+* `.github/workflows/*` (CI policy enforcement)
+* `agent-contract.json` (GA contract)
+* `docs/ga/*` (GA guardrails and evidence gates)
 
-## Next Steps
+## Next Action (Final)
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+Proceed with documentation-only additions for the sandboxed agent runtime pattern. All implementation changes remain deferred and feature-flagged until governance sign-off.
