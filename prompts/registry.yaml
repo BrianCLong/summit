@@ -922,3 +922,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: switchboard-router-observability
+    version: v1
+    path: prompts/switchboard/switchboard-router-observability@v1.md
+    sha256: 08dc4dfcc36f7dcc58264211c51275b2268d426f028d2fc62521ee1ef56afd4f
+    description: Centralize Switchboard router observability defaults and error logging.
+    scope:
+      paths:
+        - october2025/companyos-switchboard/apps/web/src/switchboard/
+        - docs/roadmap/STATUS.json
+        - prompts/switchboard/switchboard-router-observability@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - switchboard
+        - observability
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
