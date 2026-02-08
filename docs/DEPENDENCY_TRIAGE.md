@@ -58,12 +58,8 @@ Run these from repo root (or the specified workspace root):
 
 ## Python (pip-audit)
 
-- Targeted re-audits (`--disable-pip --no-deps`) now show **no known vulnerabilities** for:
-  - `requirements.txt`
-  - `services/ml-training/requirements.txt`
-  - `summit-cog-war/requirements-optional-graph.txt`
-- Follow-up full sweep across every `requirements*.txt` file still recommended for a consolidated report.
-- Skipped (not on PyPI / URL pins): `playwright` 1.48.2, `albumentation` 1.3.1, `spython-dateutil` 2.8.2, `en-core-web-lg`, `en-core-web-sm`, `gitlib`.
+- Full sweep across every `requirements*.txt` file (`pip-audit --disable-pip --no-deps`) completed with **no known vulnerabilities**.
+- Skipped (not on PyPI / URL pins): `playwright` 1.48.2, `albumentation` 1.3.1, `spython-dateutil` 2.8.2, `en-core-web-lg`, `en-core-web-sm`, `gitlib`, `ipqualityscore` (optional; commented out).
 
 ## Python Remediations Applied
 

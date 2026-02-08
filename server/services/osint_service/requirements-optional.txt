@@ -1,1 +1,2 @@
-ipqualityscore
+# Optional enrichment client (not pinned on PyPI; install manually if required)
+# ipqualityscore
