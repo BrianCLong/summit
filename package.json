@@ -23,6 +23,8 @@
     "test:client": "cd client && npm test",
     "test:web": "cd apps/web && npm test",
     "test:e2e": "npx playwright test",
+    "test:e2e:investigations": "npx playwright test e2e/golden-path-investigations.spec.ts",
+    "test:e2e:golden-path": "npx playwright test e2e/golden-path-frontend.spec.ts e2e/golden-path-investigations.spec.ts",
     "test:a11y-gate": "pnpm exec playwright test -c playwright.a11y-keyboard.config.ts",
     "test:release-bundle-sdk": "cd packages/release-bundle && pnpm test",
     "test:release-scripts": "node --test scripts/release/__tests__/*.test.mjs",
