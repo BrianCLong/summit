@@ -1,21 +1,12 @@
-# Required Checks Discovery (TODO)
+## Required checks discovery
+1) In your Git hosting UI, open "Branch protection rules" for the default branch.
+2) Copy the exact required check names into this file.
+3) Update `ci/gates/required_checks.json` accordingly.
 
-## UI Steps
+## Temporary gate names (to be renamed)
+- gate.workspace_root_enforced
+- gate.remote_write_requires_approval
+- gate.audit_hash_chain
+- gate.extension_signature_required
+- gate.never_log_fields
 
-1. GitHub UI → Settings → Branches → Branch protection rules.
-2. Record required status checks.
-
-## API Steps
-
-- `GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
-
-## Current Checks (Temporary Convention)
-
-- `gate/evidence-validate`
-- `gate/osint-policy`
-- `gate/depdelta`
-
-## Plan
-
-1. Record official check names in `ci/required_checks.json` once discovered.
-2. Add a mapping file to preserve existing names for two releases.

@@ -1,5 +1,5 @@
 name: ci-post-merge
-"on":
+on:
   workflow_run:
     workflows:
       - ci-pr
@@ -28,8 +28,6 @@ jobs:
         with:
           ref: ${{ needs.gate.outputs.sha }}
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -51,8 +49,6 @@ jobs:
         with:
           ref: ${{ needs.gate.outputs.sha }}
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

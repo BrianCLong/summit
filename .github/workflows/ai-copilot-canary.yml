@@ -1,5 +1,5 @@
 name: AI Copilot Canary
-"on":
+on:
   schedule:
     - cron: 15 * * * *
   workflow_dispatch: null

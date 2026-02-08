@@ -1,5 +1,5 @@
 name: GA Gate
-"on":
+on:
   pull_request:
     branches:
       - main

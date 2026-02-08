@@ -1,5 +1,5 @@
 name: ci-pr
-"on":
+on:
   pull_request:
     types:
       - opened
@@ -47,8 +47,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -75,8 +73,6 @@ jobs:
         with:
           node-version-file: .nvmrc
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Validate Jest & pnpm Configuration
@@ -89,8 +85,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -128,8 +122,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -148,8 +140,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -187,8 +177,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -216,8 +204,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -272,8 +258,6 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

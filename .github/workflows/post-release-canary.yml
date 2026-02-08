@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies (script only)
         # Using pnpm add -w to respect workspace root
-        run: pnpm add -w js-yaml
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run Canary Check
         run: node scripts/canary-check.cjs

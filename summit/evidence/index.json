@@ -2,9 +2,10 @@
   "version": "1.0",
   "items": [
     {
-      "evidence_id": "EVD-OPENWORK-EVIDENCE-001",
-      "report": "summit/evidence/report.json",
-      "stamp": "summit/evidence/stamp.json"
+      "id": "EVD-OPENWORK-EVIDENCE-001",
+      "report": "report.json",
+      "metrics": "metrics.json",
+      "stamp": "stamp.json"
     }
   ]
 }

@@ -1,5 +1,5 @@
 name: Redaction Layer Tests
-"on":
+on:
   pull_request:
     paths:
       - docs/ci/REDACTION_POLICY.yml

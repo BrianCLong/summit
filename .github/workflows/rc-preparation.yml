@@ -1,5 +1,5 @@
 name: RC Preparation
-"on":
+on:
   workflow_dispatch:
     inputs:
       base_version:

@@ -1,5 +1,5 @@
 name: procedure-lint
-"on":
+on:
   pull_request:
     paths:
       - agentic/procedures/**

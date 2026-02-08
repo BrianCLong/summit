@@ -1,5 +1,5 @@
 name: Policy Auto-Tuning CI
-"on":
+on:
   push:
     paths:
       - server/src/policy-engine/**

@@ -1,5 +1,5 @@
 name: Doc Link Check
-"on":
+on:
   push:
     branches:
       - main

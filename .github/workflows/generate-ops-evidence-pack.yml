@@ -1,5 +1,5 @@
 name: Generate Ops Evidence Pack
-"on":
+on:
   workflow_dispatch:
     inputs:
       ref:

@@ -1,5 +1,5 @@
 name: CI Core (Primary Gate)
-"on":
+on:
   pull_request:
     branches:
       - main
@@ -40,9 +40,7 @@ jobs:
       - config-preflight
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -64,9 +62,7 @@ jobs:
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y libpixman-1-dev libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -87,9 +83,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -142,9 +136,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -171,9 +163,7 @@ jobs:
       - unit-tests
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -216,9 +206,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -242,9 +230,7 @@ jobs:
       - integration-tests
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -280,9 +266,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -322,9 +306,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+        uses: pnpm/action-setup@v4
       - name: Use Node
         uses: actions/setup-node@v4
         with:
@@ -350,9 +332,7 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 10.0.0
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

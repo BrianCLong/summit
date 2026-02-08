@@ -1,5 +1,5 @@
 name: Publish Release Ops Internal
-"on":
+on:
   workflow_dispatch:
     inputs:
       run_id:

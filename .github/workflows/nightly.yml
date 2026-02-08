@@ -1,5 +1,5 @@
 name: Nightly (Long-Tail Matrix)
-"on":
+on:
   schedule:
     - cron: 0 2 * * *
   workflow_dispatch: null
@@ -19,9 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Use pinned pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
-        with:
-          version: 9.12.0
+        uses: pnpm/action-setup@v4
           run_install: false
       - name: Setup Node
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238

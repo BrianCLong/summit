@@ -1,5 +1,5 @@
 name: audit-exception-expiry
-"on":
+on:
   pull_request:
     paths:
       - audit/exceptions.yaml

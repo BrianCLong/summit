@@ -1,5 +1,5 @@
 name: Reusable Test Suite
-"on":
+on:
   workflow_call:
     inputs:
       test-type:

@@ -1,5 +1,5 @@
 name: Graph Sync Verification
-"on":
+on:
   workflow_call:
     outputs:
       metrics_path:

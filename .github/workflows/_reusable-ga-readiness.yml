@@ -1,5 +1,5 @@
 name: "Reusable: GA Readiness"
-"on":
+on:
   workflow_call:
     inputs:
       ref:
@@ -41,9 +41,7 @@ jobs:
         id: capture-sha
         run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
-        with:
-          version: 10
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

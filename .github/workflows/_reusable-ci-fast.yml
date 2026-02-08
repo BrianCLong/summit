@@ -1,5 +1,5 @@
 name: _reusable-ci-fast
-"on":
+on:
   workflow_call:
     inputs:
       test-command:

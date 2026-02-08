@@ -651,14 +651,6 @@ components:
         cost_hint:
           type: number
 
-    WebInterfacesResponse:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/WebInterface'
-
     OrchestrateWebResponse:
       type: object
       properties:

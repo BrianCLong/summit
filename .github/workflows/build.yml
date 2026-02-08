@@ -1,5 +1,5 @@
 name: Supply Chain Build
-"on":
+on:
   push:
     branches:
       - main

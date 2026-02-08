@@ -1,5 +1,5 @@
 name: Governance Engine
-"on":
+on:
   pull_request:
     branches:
       - main
