@@ -1,0 +1,26 @@
+{
+  "name": "@summit/gdelt-connector",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "bash test_determinism.sh"
+  },
+  "dependencies": {
+    "@summit/evidence": "workspace:*",
+    "axios": "^1.6.0",
+    "csv-parse": "^5.5.0",
+    "adm-zip": "^0.5.10",
+    "md5": "^2.3.0",
+    "fs-extra": "^11.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/adm-zip": "^0.5.0",
+    "@types/md5": "^2.3.0",
+    "@types/fs-extra": "^11.0.0"
+  }
+}
