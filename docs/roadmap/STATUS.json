@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:33:30Z",
+  "revision_note": "Added pnpm setup to PR Quality Gate LongRunJob validation to prevent missing pnpm failures.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
