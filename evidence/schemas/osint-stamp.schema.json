@@ -1,0 +1,10 @@
+{
+  "$id": "https://summit/evidence/osint-stamp.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["generated_at"],
+  "properties": {
+    "generated_at": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": false
+}
