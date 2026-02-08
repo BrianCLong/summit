@@ -1,0 +1,18 @@
+{
+  "$id": "https://summit/evidence/osint-metrics.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["facts_total", "facts_confirmed", "facts_unknown"],
+  "properties": {
+    "facts_total": { "type": "integer", "minimum": 0 },
+    "facts_confirmed": { "type": "integer", "minimum": 0 },
+    "facts_unknown": { "type": "integer", "minimum": 0 },
+    "facts_single_source": { "type": "integer", "minimum": 0 },
+    "facts_unverifiable": { "type": "integer", "minimum": 0 },
+    "provenance_missing_count": { "type": "integer", "minimum": 0 },
+    "conflict_count": { "type": "integer", "minimum": 0 },
+    "downgrade_count": { "type": "integer", "minimum": 0 },
+    "avg_sources_per_fact": { "type": "number", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

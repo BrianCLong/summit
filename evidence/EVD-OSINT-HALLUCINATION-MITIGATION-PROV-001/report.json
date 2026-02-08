@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-OSINT-HALLUCINATION-MITIGATION-PROV-001",
+  "item_slug": "OSINT-HALLUCINATION-MITIGATION",
+  "summary": "OSINT evidence scaffolding for hallucination mitigation schemas and index entry.",
+  "artifacts": [
+    "evidence/EVD-OSINT-HALLUCINATION-MITIGATION-PROV-001/metrics.json",
+    "evidence/EVD-OSINT-HALLUCINATION-MITIGATION-PROV-001/stamp.json"
+  ]
+}

@@ -1,12 +1,18 @@
 {
   "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "revision_note": "Added OSINT hallucination mitigation Lane 1 evidence scaffolding initiative.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "osint-hallucination-mitigation-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Lane 1 evidence scaffolding, evidence index entry, and required checks discovery steps for OSINT hallucination mitigation."
     },
     {
       "id": "B",
@@ -200,7 +206,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }

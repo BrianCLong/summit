@@ -1,0 +1,11 @@
+{
+  "facts_total": 0,
+  "facts_confirmed": 0,
+  "facts_unknown": 0,
+  "facts_single_source": 0,
+  "facts_unverifiable": 0,
+  "provenance_missing_count": 0,
+  "conflict_count": 0,
+  "downgrade_count": 0,
+  "avg_sources_per_fact": 0
+}
