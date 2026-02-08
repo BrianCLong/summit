@@ -1,0 +1,57 @@
+scalar Date
+scalar JSON
+
+enum CampaignPhaseName {
+  SHAPING
+  SEEDING
+  AMPLIFICATION
+  CONSOLIDATION
+  REACTIVATION
+}
+
+enum CampaignPhaseStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  SUSPENDED
+}
+
+type CampaignPhase {
+  phase_id: ID!
+  campaign_id: String!
+  phase_name: CampaignPhaseName!
+  description: String
+  status: CampaignPhaseStatus!
+  tactics: [String]
+  target_segments: [String]
+  vulnerabilities_targeted: [String]
+  start_date: Date
+  end_date: Date
+  metrics: JSON
+  provenance_id: String
+}
+
+input CampaignPhaseInput {
+  campaign_id: String!
+  phase_name: CampaignPhaseName!
+  description: String
+  status: CampaignPhaseStatus
+  tactics: [String]
+  target_segments: [String]
+  vulnerabilities_targeted: [String]
+  start_date: Date
+  end_date: Date
+  metrics: JSON
+  provenance_id: String
+}
+
+type Query {
+  campaignPhase(phase_id: ID!): CampaignPhase
+  campaignPhases(campaign_id: String!): [CampaignPhase]
+}
+
+type Mutation {
+  createCampaignPhase(input: CampaignPhaseInput!): CampaignPhase
+  updateCampaignPhase(phase_id: ID!, input: CampaignPhaseInput!): CampaignPhase
+  deleteCampaignPhase(phase_id: ID!): Boolean
+}
