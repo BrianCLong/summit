@@ -1,4 +1,6 @@
-import { ApolloServer, gql } from 'apollo-server';
+import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
+import gql from 'graphql-tag';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -38,6 +40,11 @@ const resolvers = {
 
 const server = new ApolloServer({ typeDefs, resolvers });
 
-server.listen({ port: 4000 }).then(({ url }) => {
-  process.stdout.write(`🚀 Gateway ready at ${url}\n`);
-});
+startStandaloneServer(server, { listen: { port: 4000 } })
+  .then(({ url }) => {
+    process.stdout.write(`🚀 Gateway ready at ${url}\n`);
+  })
+  .catch((error) => {
+    process.stderr.write(`[gateway] startup failed: ${error?.message || error}\n`);
+    process.exit(1);
+  });

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { gql } from 'apollo-server';
+import gql from 'graphql-tag';
 
 export const typeDefs = gql`
   type Evidence { id: ID!, hash: String!, metadata: String }

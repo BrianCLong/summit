@@ -1,4 +1,5 @@
-import { ApolloServer } from 'apollo-server';
+import { ApolloServer } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
 import { schema } from './graphql/schema';
 import { resolvers } from './graphql/resolvers';
 import { driver as neo4jDriver } from './db/neo4j';
@@ -8,10 +9,18 @@ import { auditMiddleware } from './middleware/audit';
 const server = new ApolloServer({
   schema,
   resolvers,
-  context: ({ req }) => ({ driver: neo4jDriver, user: (req as any).user }),
   plugins: [auditMiddleware], // Logs all ops
 });
 
-server
-  .listen({ port: 4000 })
-  .then(({ url }) => console.log(`Active Measures at ${url}`));
+async function main() {
+  const { url } = await startStandaloneServer(server, {
+    listen: { port: 4000 },
+    context: async ({ req }) => ({ driver: neo4jDriver, user: (req as any).user }),
+  });
+  console.log(`Active Measures at ${url}`);
+}
+
+main().catch((error) => {
+  console.error('[active-measures] startup failed', error);
+  process.exit(1);
+});

@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server';
+import gql from 'graphql-tag';
 
 export const typeDefs = gql`
   type NLResult { cypher: String!, plan: String!, estimate: Int!, sandboxResult: String }
