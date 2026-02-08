@@ -1,0 +1,46 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: switchboard-approvals
+    folder: Switchboard
+    interval: 1m
+    rules:
+      - uid: switchboard_approval_cycle_time_burn
+        title: Switchboard Approval Cycle Time Burn
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum by (le) (rate(switchboard_approval_cycle_time_ms_bucket[5m]))) > 300000
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Approval cycle time p95 > 5m"
+      - uid: switchboard_policy_eval_latency_high
+        title: Switchboard Policy Eval Latency High
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum by (le) (rate(switchboard_policy_eval_ms_bucket[5m]))) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Policy eval p95 > 100ms"
+      - uid: switchboard_receipt_verification_failures
+        title: Switchboard Receipt Verification Failures
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: prometheus
+            model:
+              expr: rate(switchboard_receipt_verify_failures_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Receipt verification failures detected"
