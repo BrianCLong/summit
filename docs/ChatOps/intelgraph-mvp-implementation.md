@@ -821,7 +821,7 @@ afterAll(async () => {
 
 ```javascript
 const request = require('supertest');
-const { ApolloServer } = require('apollo-server-express');
+const { ApolloServer } = require('@apollo/server');
 const express = require('express');
 const typeDefs = require('../../graphql/schema');
 const resolvers = require('../../graphql/resolvers');

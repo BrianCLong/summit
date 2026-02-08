@@ -16,11 +16,11 @@ This document provides justification for CVEs that are explicitly ignored in `pn
 **Package:** `dicer@0.3.0`
 **Severity:** HIGH (CVSS 7.5)
 **CWE:** CWE-248 (Uncaught Exception)
-**Path:** `apollo-server-express → apollo-server-core → @apollographql/graphql-upload-8-fork → busboy → dicer`
+**Path:** Legacy Apollo Server v3 upload chain (removed)
 
 ### Status
 
-🔴 **NO PATCH AVAILABLE** - Package maintainer has not released a fix
+✅ **RESOLVED** - Apollo Server v3 + upload chain removed
 
 ### Vulnerability Description
 
@@ -37,8 +37,7 @@ Malicious multipart form data can crash Node.js service via HeaderParser. Comple
 
 **Long-term Plan:**
 
-- 🗓️ Upgrade to Apollo Server v4 (Q1 2026)
-- Apollo Server v4 uses different upload handling without dicer dependency
+- ✅ Migrated to `@apollo/server` and removed GraphQL upload chain
 
 ### Justification
 
@@ -49,9 +48,9 @@ Malicious multipart form data can crash Node.js service via HeaderParser. Comple
 
 ### Review Schedule
 
-- **Next Review:** 2026-02-01
+- **Next Review:** 2026-03-01
 - **Owner:** Security Team
-- **Re-evaluate:** After Apollo Server v4 upgrade completes
+- **Re-evaluate:** Verify no new upload chains reintroduce dicer
 
 ### References
 

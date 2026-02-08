@@ -60,7 +60,7 @@ This report documents a comprehensive security sweep of the summit repository, i
 - **Paths:**
   - `server>apollo-server-testing>apollo-server-core>@apollographql/graphql-upload-8-fork>busboy>dicer`
 - **Remediation:**
-  - Replace `apollo-server-express@3.13.0` with newer Apollo Server v4 (uses different upload handling)
+  - Replace `apollo-server-express@3.13.0` with `@apollo/server` (completed; upload chain removed)
   - OR implement input validation/sanitization on form uploads
   - OR remove file upload functionality if unused
 - **Status:** 🔴 OPEN (requires mitigation strategy)
@@ -318,7 +318,7 @@ Expand to GA-grade policy with:
 **Priority 2: Mitigate unpatchable vulnerabilities**
 
 4. **dicer** (HIGH) - No patch available
-   - **Option A:** Upgrade `apollo-server-express@3.13.0` → Apollo Server v4 (recommended)
+   - **Option A:** Upgrade `apollo-server-express@3.13.0` → `@apollo/server` (completed)
    - **Option B:** Add input validation/rate limiting on upload endpoints
    - **Option C:** Disable file uploads if unused
    - Document mitigation strategy

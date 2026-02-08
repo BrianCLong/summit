@@ -192,15 +192,19 @@ export async function applyDatabaseOptimizations(
  * This example shows how to set up a GraphQL server with all optimizations
  */
 
-export function setupGraphQLServer(
+export async function setupGraphQLServer(
   neo4jDriver: Neo4jDriver,
   postgresPool: PostgresPool,
   cacheManager: RedisCacheManager,
 ) {
-  const { ApolloServer } = require('apollo-server-express');
+  const { ApolloServer } = require('@apollo/server');
+  const { expressMiddleware } = require('@apollo/server/express4');
+  const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
   const express = require('express');
+  const { createServer } = require('http');
 
   const app = express();
+  const httpServer = createServer(app);
 
   // 1. Add query tracking middleware
   app.use(createQueryTrackingMiddleware());
@@ -370,27 +374,9 @@ export function setupGraphQLServer(
       },
     },
 
-    // 4. Create context with all optimization features
-    context: async ({ req }) => {
-      // Extract tenant from request (adjust based on your auth)
-      const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
-
-      // Create fresh DataLoaders for this request
-      const loaders = createDataLoaders(postgresPool, neo4jDriver, tenantId);
-
-      return {
-        tenantId,
-        loaders,
-        neo4jDriver,
-        postgresPool,
-        cacheManager,
-        queryTracker: req.queryTracker,
-        cacheMonitor: req.cacheMonitor,
-      };
-    },
-
-    // 5. Enable plugins for performance monitoring
+    // 4. Enable plugins for performance monitoring
     plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
       {
         requestDidStart: async (requestContext) => {
           const start = Date.now();
@@ -415,7 +401,28 @@ export function setupGraphQLServer(
     ],
   });
 
-  return { app, server };
+  await server.start();
+  app.use('/graphql', expressMiddleware(server, {
+    context: async ({ req }) => {
+      // Extract tenant from request (adjust based on your auth)
+      const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
+
+      // Create fresh DataLoaders for this request
+      const loaders = createDataLoaders(postgresPool, neo4jDriver, tenantId);
+
+      return {
+        tenantId,
+        loaders,
+        neo4jDriver,
+        postgresPool,
+        cacheManager,
+        queryTracker: req.queryTracker,
+        cacheMonitor: req.cacheMonitor,
+      };
+    },
+  }));
+
+  return { app, server, httpServer };
 }
 
 /**
@@ -561,18 +568,19 @@ export async function bootstrapApplication() {
     // console.log('');
 
     // 3. Set up GraphQL server
-    const { app, server } = setupGraphQLServer(neo4jDriver, postgresPool, cacheManager);
+    const { app, server, httpServer } = await setupGraphQLServer(
+      neo4jDriver,
+      postgresPool,
+      cacheManager,
+    );
 
     // 4. Set up monitoring
     setupMonitoringEndpoints(app);
     console.log('');
 
     // 5. Start server
-    await server.start();
-    server.applyMiddleware({ app });
-
     const PORT = process.env.PORT || 4000;
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
       console.log(`📊 Metrics available at http://localhost:${PORT}/metrics`);
       console.log(`🏥 Health check at http://localhost:${PORT}/health/database`);

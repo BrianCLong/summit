@@ -883,7 +883,7 @@ generates:
 // server/src/graphql/resolvers/user.resolvers.ts
 import { Resolvers, User } from '../generated/graphql-types';
 import { Context } from '../context';
-import { ForbiddenError, UserInputError } from 'apollo-server-express';
+import { ForbiddenError, UserInputError } from '@apollo/server/errors';
 
 export const userResolvers: Resolvers = {
   Query: {
