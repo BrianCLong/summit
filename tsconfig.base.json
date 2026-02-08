@@ -2,7 +2,10 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,12 +15,33 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@intelgraph/maestro-sdk/*": ["packages/maestro-sdk/src/*"],
-      "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],
-      "@intelgraph/flags/*": ["libs/flags/node/*"],
-      "@intelgraph/audit/*": ["libs/audit/node/*"],
-      "@summit/agent-gym": ["packages/agent-gym/src/index.ts"],
-      "@summit/agent-gym-metrics": ["packages/agent-gym-metrics/src/index.ts"]
+      "@intelgraph/maestro-sdk/*": [
+        "packages/maestro-sdk/src/*"
+      ],
+      "@summitsec/vcr-kit/*": [
+        "packages/vcr-kit/src/*"
+      ],
+      "@intelgraph/flags/*": [
+        "libs/flags/node/*"
+      ],
+      "@intelgraph/audit/*": [
+        "libs/audit/node/*"
+      ],
+      "@summit/agent-gym": [
+        "packages/agent-gym/src/index.ts"
+      ],
+      "@summit/agent-gym-metrics": [
+        "packages/agent-gym-metrics/src/index.ts"
+      ],
+      "@summit/receipts": [
+        "packages/receipts/src/index.ts"
+      ],
+      "@summit/export": [
+        "packages/export/src/index.ts"
+      ],
+      "@summit/mcp": [
+        "packages/mcp/src/index.ts"
+      ]
     }
   }
 }
