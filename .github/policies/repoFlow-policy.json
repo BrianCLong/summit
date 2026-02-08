@@ -1,0 +1,23 @@
+{
+  "version": "1",
+  "denyPaths": [
+    "docs/security/never-log",
+    "docs/security/data-handling"
+  ],
+  "requiredEvidenceFields": [
+    "evidenceId",
+    "repo.url",
+    "repo.ref",
+    "changes.filesTouched",
+    "sandbox.profile",
+    "sandbox.exitCode",
+    "policy.decision",
+    "policy.policyHash"
+  ],
+  "secretPatterns": [
+    "apikey",
+    "secret",
+    "token",
+    "password"
+  ]
+}

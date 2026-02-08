@@ -1,0 +1,31 @@
+name: RepoFlow Verify
+
+on:
+  pull_request:
+    paths:
+      - 'src/agents/repoFlow/**'
+      - 'tests/agents/repo_workflow/**'
+      - '.github/policies/repoFlow-policy.json'
+      - '.github/scripts/check-evidence-artifacts.ts'
+      - 'scripts/ci/repoflow-profile.js'
+
+jobs:
+  repoflow-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run repo flow tests
+        run: pnpm test -- tests/agents/repo_workflow
+      - name: Profile artifacts
+        run: pnpm summit:repoFlow:profile
