@@ -1,18 +1,10 @@
-# Memory Privacy Tool Manifest
-# Declares allowed context spaces and redaction classes for each tool.
-
 tools:
-  web_search:
-    description: "External web search tool"
-    allowedContextSpaces: ["personal", "work:public"]
-    allowedRedactionClasses: ["pii"] # PII will be redacted by default unless specified here
-
-  slack_connector:
-    description: "Slack messaging tool"
-    allowedContextSpaces: ["work:acme", "work:public"]
-    allowedRedactionClasses: ["pii", "financial"]
-
-  medical_advisor:
-    description: "Medical research tool"
-    allowedContextSpaces: ["health"]
-    allowedRedactionClasses: ["phi"]
+  - id: "search-tool"
+    allowed_context_spaces: ["work:acme", "personal"]
+    redaction_classes: ["pii", "financial"]
+  - id: "medical-analyzer"
+    allowed_context_spaces: ["health"]
+    redaction_classes: ["pii"]
+  - id: "billing-assistant"
+    allowed_context_spaces: ["finance"]
+    redaction_classes: []

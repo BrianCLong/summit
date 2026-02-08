@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { AnalyticsService } from '../services/AnalyticsService.js';
 import { logger } from '../config/logger.js';
-import { dpEngine } from '../privacy/dp/DifferentialPrivacyEngine.js';
 import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
 
 const router = Router();
@@ -36,25 +35,15 @@ router.get(
 
 /**
  * @route GET /analytics/community
- * @desc Detect communities (Privacy-Preserving)
+ * @desc Detect communities
  */
 router.get(
   '/community',
   asyncHandler(async (req: any, res: any) => {
-    const { algorithm, dp = 'true' } = req.query;
+    const { algorithm } = req.query;
     const result = await analyticsService.detectCommunities(
       (algorithm as 'louvain' | 'leiden' | 'lpa') || 'lpa'
     );
-
-    // Apply Differential Privacy to community sizes if enabled
-    if (dp === 'true' && result.communities) {
-      result.communities = result.communities.map((c: any) => ({
-        ...c,
-        size: dpEngine.privatizeAggregate(c.size, { epsilon: 0.5 }),
-        isPrivatized: true
-      }));
-    }
-
     res.json(result);
   })
 );

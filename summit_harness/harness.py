@@ -1,49 +1,56 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any
+from typing import Dict, Any, List, Optional
 from .evidence import EvidenceWriter
+from .subagents import SubagentRegistry, SubagentContext
 
 @dataclass
 class HarnessConfig:
+    """
+    Configuration for the Agent Harness.
+    """
     max_steps: int = 50
     enabled: bool = False
 
 class AgentHarness:
-    def __init__(self, cfg: HarnessConfig, evidence: EvidenceWriter):
+    """
+    Core harness loop for agentic engineering tasks.
+    """
+    def __init__(self, cfg: HarnessConfig, evidence: EvidenceWriter, registry: Optional[SubagentRegistry] = None):
         self.cfg = cfg
         self.evidence = evidence
+        self.registry = registry or SubagentRegistry()
 
-    def run(self, item: str) -> Dict[str, Any]:
+    def run(self, item: str, agent_name: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Executes the harness loop for a given task item.
+        """
         if not self.cfg.enabled:
-            return {"status": "disabled"}
+            return {"status": "disabled", "reason": "Harness not enabled"}
 
-        run_id = "run-001" # TODO: generate deterministic run_id
-        evd_id = f"EVD-CLAUDECODE-SUBAGENTS-FOUNDATION-{run_id}"
+        # Skeleton loop: Plan -> Delegate -> Act -> Verify
+        run_id = "run_" + str(hash(item) % 10000)
 
-        # 1. Plan
-        # 2. Delegate
-        # 3. Act
-        # 4. Verify
+        context = None
+        if agent_name:
+            spec = self.registry.get(agent_name)
+            context = SubagentContext(name=agent_name)
+            # Delegation logic would go here: initialize context, run subagent steps
 
         report = {
-            "evidence_id": evd_id,
-            "summary": f"Agent Harness run for {item} completed successfully",
-            "item_slug": "agent-harness",
-            "artifacts": ["report.json", "metrics.json", "stamp.json"]
+            "run_id": run_id,
+            "item": item,
+            "results": {"outcome": "initialized"},
+            "evidence_ids": [f"EVD-CLAUDECODE-SUBAGENTS-{run_id}"]
         }
-
         metrics = {
-            "evidence_id": evd_id,
-            "metrics": {"steps": 0}
+            "run_id": run_id,
+            "counters": {
+                "steps": 0,
+                "tool_calls": 0,
+                "policy_denials": 0
+            }
         }
 
         self.evidence.write(report=report, metrics=metrics)
-
-        # Stamp must be written separately as it contains the only allowed timestamps
-        from datetime import datetime, timezone
-        stamp = {
-            "evidence_id": evd_id,
-            "generated_at": datetime.now(timezone.utc).isoformat()
-        }
-        self.evidence.write_stamp(stamp)
 
         return {"status": "ok", "run_id": run_id}

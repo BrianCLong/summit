@@ -1,8 +1,0 @@
-{
-  "dur_ms": 0,
-  "files_touched": 0,
-  "commands_run": [],
-  "network_used": false,
-  "sandbox_mode": "read_only",
-  "policy_decisions": ["deny_by_default"]
-}

@@ -16,10 +16,6 @@ on:
       - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
       - "policy/**"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 

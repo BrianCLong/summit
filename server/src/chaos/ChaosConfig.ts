@@ -23,8 +23,7 @@ export type ChaosInjectorType =
   | 'packet_loss'
   | 'dns_failure'
   | 'timeout'
-  | 'exception'
-  | 'region_kill';
+  | 'exception';
 
 export interface LatencyConfig {
   /** Minimum latency to inject in ms */

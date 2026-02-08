@@ -1,6 +1,6 @@
 # OPA Policy Coverage Analysis
 
-**Last Updated:** 2026-02-06
+**Last Updated:** 2026-01-20
 **Owner:** Security Team
 **Review Frequency:** Monthly
 
@@ -44,12 +44,12 @@ This document tracks Open Policy Agent (OPA) policy enforcement coverage across 
 
 | Component | Policy Enforcement | Status | Evidence | Gap Severity |
 |-----------|-------------------|--------|----------|--------------|
-| **Maestro Agent Tasks** | **FIXED** | ✅ | Fail-closed behavior added 2026-02-06 | **RESOLVED** |
+| **Maestro Agent Tasks** | Partial | 🟡 | Middleware exists but TODOs present | **HIGH** |
 | **API Gateway** | Yes | ✅ | RBAC enforced | LOW |
 | **GraphQL Resolvers** | Partial | 🟡 | Some resolvers bypass auth | MEDIUM |
 | **Feature Flag API** | **FIXED** | ✅ | Auth middleware added 2026-01-20 | **RESOLVED** |
-| **CompanyOS Tenant API** | **FIXED** | ✅ | OPA integration with fail-closed added 2026-02-06 | **RESOLVED** |
-| **Background Jobs** | **FIXED** | ✅ | OPA wrapper created 2026-02-06 | **RESOLVED** |
+| **CompanyOS Tenant API** | No | ❌ | TODOs: "Wire in OPA" | **HIGH** |
+| **Background Jobs** | Unknown | ⚠️ | No policy checks visible | MEDIUM |
 | **Webhook Handlers** | Unknown | ⚠️ | Requires audit | MEDIUM |
 | **Admin Endpoints** | Partial | 🟡 | Inconsistent enforcement | HIGH |
 
@@ -57,99 +57,68 @@ This document tracks Open Policy Agent (OPA) policy enforcement coverage across 
 
 ## Identified Gaps
 
-### Gap 1: CompanyOS Tenant API (RESOLVED)
+### Gap 1: CompanyOS Tenant API (HIGH PRIORITY)
 
-**Status:** ✅ **RESOLVED (2026-02-06)**
+**Location:** `companyos/services/tenant-api/src/middleware/authContext.ts:5,49`
 
-**Location:** `companyos/services/tenant-api/src/middleware/authContext.ts`
+**TODOs:**
+```typescript
+// Line 5: TODO: Wire in OPA
+// Line 49: TODO: Replace with OPA
+```
 
-**Resolution:**
-- Added OPA integration with `evaluateOpaPolicy()` function
-- Implemented fail-closed behavior in production (`FAIL_CLOSED = process.env.NODE_ENV === 'production'`)
-- Added policy decision logging for audit trail
-- RBAC fallback for development/test environments when OPA unavailable
-- Created dedicated tenant policy at `companyos/policies/tenant.rego`
+**Current Behavior:** Likely uses local RBAC or no authz at all
 
-**Key Features:**
-1. OPA evaluation with configurable timeout (`OPA_TIMEOUT_MS`)
-2. Fail-closed: denies all requests if OPA is unreachable in production
-3. Structured logging of all policy decisions
-4. Graceful degradation to RBAC in non-production
+**Risk:** Tenant isolation bypass - users could access other tenants' data
 
-**Configuration:**
-- `OPA_URL` - OPA server URL (default: `http://localhost:8181`)
-- `OPA_ENABLED` - Enable/disable OPA (default: `true`)
-- `OPA_TIMEOUT_MS` - Request timeout (default: `5000`)
-- `LOG_POLICY_DECISIONS` - Enable verbose logging in dev
+**Mitigation:**
+1. Audit all tenant API endpoints
+2. Implement OPA middleware for all routes
+3. Add integration tests for cross-tenant access denial
+
+**Target Date:** Sprint 1 (next 2 weeks)
 
 ---
 
-### Gap 2: Maestro Agent Execution Paths (RESOLVED)
+### Gap 2: Maestro Agent Execution Paths
 
-**Status:** ✅ **RESOLVED (2026-02-06)**
+**Location:** `server/src/maestro/`
 
-**Location:** `server/src/middleware/maestro-authz.ts`
+**Evidence:**
+- Middleware exists for `executeTask` calls
+- TODOs suggest incomplete coverage
+- Unknown: Do all agent actions go through middleware?
 
-**Resolution:**
-- Added fail-closed behavior to Maestro authorization middleware
-- Production: On any OPA evaluation error, request is DENIED (403)
-- Non-production: Allows with warning for development convenience
-- All policy evaluation failures are logged with `failClosed: true` flag
+**Risk:** Agent bypasses policy check via alternate code path
 
-**Key Changes:**
-```typescript
-// Production: Always deny on policy evaluation failure
-if (isProduction) {
-  return res.status(403).json({
-    error: 'Forbidden',
-    message: 'Authorization service unavailable - access denied',
-    failClosed: true,
-  });
-}
-```
+**Investigation Required:**
+1. Map all agent execution entrypoints
+2. Verify OPA middleware is called for each
+3. Test negative cases (policy denies should block execution)
 
-**Behavior:**
-- Production: OPA error → DENY request
-- Non-production: OPA error → ALLOW with warning log
-- All errors logged with full audit context
+**Target Date:** Sprint 2 (weeks 3-4)
 
 ---
 
-### Gap 3: Background Jobs and Async Workers (RESOLVED)
+### Gap 3: Background Jobs and Async Workers
 
-**Status:** ✅ **RESOLVED (2026-02-06)**
+**Location:** `server/src/jobs/`, `server/src/workers/`, BullMQ queues
 
-**Location:** `server/src/jobs/processors/opa-job-wrapper.ts`
+**Evidence:** No visible OPA integration in job processors
 
-**Resolution:**
-- Created `withOpaPolicy()` wrapper for BullMQ job processors
-- OPA policy at `policy/opa/jobs.rego` for job authorization
-- Fail-closed behavior in production
-- Jobs can be pre-validated before enqueue via `canEnqueueJob()`
+**Risk:** Background tasks bypass policy enforcement
 
-**Usage:**
-```typescript
-import { withOpaPolicy } from './opa-job-wrapper.js';
+**Scenarios:**
+- Scheduled data export job runs without permission check
+- Async notification job accesses data user no longer has access to
+- Retry logic bypasses policy on subsequent attempts
 
-export const myProcessor = withOpaPolicy('my_queue', async (job, policyContext) => {
-  // Job logic - only runs if OPA allows
-});
-```
+**Recommendation:**
+- Add OPA check at job enqueue time (store policy decision in job metadata)
+- Re-check policy at job execution time (in case permissions changed)
+- Fail job if policy check fails
 
-**Key Features:**
-1. OPA evaluation before each job execution
-2. Configurable via `OPA_JOBS_ENABLED` environment variable
-3. Fail-closed in production (`FAIL_CLOSED` flag)
-4. Policy decision logging for audit trail
-5. Pre-enqueue validation via `canEnqueueJob()`
-
-**Configuration:**
-- `OPA_URL` - OPA server URL (default: `http://localhost:8181`)
-- `OPA_JOBS_ENABLED` - Enable/disable OPA for jobs (default: `true`)
-- `OPA_JOB_TIMEOUT_MS` - Request timeout (default: `5000`)
-
-**Migration:**
-Existing job processors can incrementally adopt the wrapper. The policy allows system jobs (no user context) by default for backward compatibility.
+**Target Date:** Q1 2026
 
 ---
 
@@ -187,60 +156,43 @@ Existing job processors can incrementally adopt the wrapper. The policy allows s
 
 ## Missing Features
 
-### 1. Fail-Closed Default (RESOLVED)
+### 1. Fail-Closed Default
 
-**Status:** ✅ **IMPLEMENTED (2026-02-06)**
+**Current Behavior:** Unknown - need to test OPA service downtime
+
+**Expected Behavior:**
+- If OPA service is unreachable → **DENY** all requests
+- Log critical error
+- Alert on-call team
+- Degrade gracefully (read-only mode?)
 
 **Implementation:**
-The following components now implement fail-closed behavior:
-
-1. **authz-core** (`packages/authz-core/src/AuthorizationService.ts`)
-   - `failSecure: process.env.NODE_ENV === 'production'`
-
-2. **CompanyOS Tenant API** (`companyos/services/tenant-api/src/middleware/authContext.ts`)
-   - `FAIL_CLOSED = process.env.NODE_ENV === 'production'`
-
-3. **CompanyOS disclosure-export** (`companyos/src/authz/disclosure-export.ts`)
-   - Always fail-closed: `return { allow: false, reason: 'authorization_error' }`
-
-4. **CompanyOS opa-client** (`companyos/src/authz/opa-client.ts`)
-   - Always fail-closed: `return { allow: false, reason: 'opa_error' }`
-
-**Behavior:**
-- Production: If OPA unreachable → **DENY** all requests
-- Non-production: Falls back to RBAC with warning log
-- All OPA errors are logged with structured output
-
----
-
-### 2. Policy Decision Logging (PARTIALLY RESOLVED)
-
-**Status:** 🟡 **PARTIALLY IMPLEMENTED (2026-02-06)**
-
-**Implemented:**
-- CompanyOS Tenant API now logs all policy decisions via `logPolicyDecision()`
-- Structured JSON logs include: timestamp, subject, action, resource, decision, reason, obligations
-- Production logs go to stdout for ingestion by logging infrastructure
-- Development logging controllable via `LOG_POLICY_DECISIONS=true`
-
-**Example Log Entry:**
-```json
-{
-  "timestamp": "2026-02-06T10:30:00.000Z",
-  "type": "policy_decision",
-  "subject": "user-123",
-  "action": "tenant:read",
-  "resource": {"type": "tenant", "tenant_id": "acme-corp"},
-  "decision": "allow",
-  "reason": "OPA policy allowed",
-  "obligations": []
+```typescript
+try {
+  const decision = await opaClient.evaluate(input);
+  return decision.allow;
+} catch (error) {
+  logger.error('OPA service unreachable - DENYING request', { error });
+  metrics.increment('opa.service_down');
+  return false; // FAIL CLOSED
 }
 ```
 
-**TODO:**
-- [ ] Integrate with provenance ledger for immutable audit trail
-- [ ] Add policy decision logging to other services (authz-core, etc.)
-- [ ] Set up alerting for unusual denial patterns
+**Target Date:** Sprint 1 (critical for production)
+
+---
+
+### 2. Policy Decision Logging
+
+**Current State:** Unknown if policy decisions are logged
+
+**Required:**
+- Log ALL policy evaluations (allow AND deny)
+- Include: user, action, resource, decision, timestamp
+- Send to provenance ledger for audit trail
+- Enable forensic investigation
+
+**Target Date:** Sprint 1 (compliance requirement)
 
 ---
 

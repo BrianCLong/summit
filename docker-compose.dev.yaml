@@ -161,21 +161,9 @@ services:
       OTEL_SERVICE_VERSION: 1.0.0
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-      FEATURE_LAC_ENFORCE: "true"
-      COPILOT_NLQ: "true"
-      UI_TRIPANE: "true"
-      POLICY_COMPILER_URL: "http://policy-compiler:8080"
-      OPA_DECISION_URL: "http://opa:8181/v1/data/policy/authz/abac/decision"
-      TYPESENSE_HOST: "typesense"
-      TYPESENSE_PORT: "8108"
-      TYPESENSE_API_KEY: "xyz"
     depends_on:
       api:
         condition: service_healthy
-      policy-compiler:
-        condition: service_started
-      typesense:
-        condition: service_started
     ports:
       - '4100:4100'
     healthcheck:
@@ -189,39 +177,6 @@ services:
       - 'prometheus.job=summit_gateway'
       - 'prometheus.port=4100'
 
-  ui:
-    build: ./apps/ui
-    ports: [ "3000:80" ]
-
-  prov-ledger:
-    build: ./services/prov-ledger
-    ports: [ "8101:8080" ]
-
-  policy-compiler:
-    build: ./services/policy-compiler
-    ports: [ "8102:8080" ]
-
-  ai-nlq:
-    build: ./services/ai-nlq
-    ports: [ "8103:8080" ]
-
-  er-service:
-    build: ./services/er-service
-    ports: [ "8104:8080" ]
-
-  ingest:
-    build: ./services/ingest
-    ports: [ "8105:8080" ]
-
-  zk-tx:
-    build: ./services/zk-tx
-    ports: [ "8106:8080" ]
-
-  predictd:
-    build:
-      context: .
-      dockerfile: services/predictd/Dockerfile
-
   slo-exporter:
     build:
       context: ./apps/slo-exporter
@@ -232,7 +187,6 @@ services:
       PORT: 9092
       PROMETHEUS_URL: http://prometheus:9090
       API_URL: http://api:4000
-      PREDICTD_PORT: 4001
     ports:
       - '9092:9092'
     depends_on:
@@ -245,29 +199,6 @@ services:
     labels:
       - 'prometheus.job=slo_exporter'
       - 'prometheus.port=9092'
-
-  typesense:
-    image: typesense/typesense:0.25.2
-    ports:
-      - "8108:8108"
-    environment:
-      - TYPESENSE_DATA_DIR=/data
-      - TYPESENSE_API_KEY=xyz
-      - TYPESENSE_ENABLE_CORS=true
-    volumes:
-      - ./tmp/typesense-data:/data
-
-  opa:
-    image: openpolicyagent/opa:0.61.0
-    ports:
-      - "8181:8181"
-    command:
-      - "run"
-      - "--server"
-      - "--addr=0.0.0.0:8181"
-      - "/policies"
-    volumes:
-      - ./services/opa/policies:/policies
 
   web:
     build:
@@ -528,4 +459,3 @@ volumes:
 networks:
   summit:
     driver: bridge
->>>>>>> origin/main

@@ -8,3 +8,9 @@ Event:
     window:
       type: object
       required: [pre_start, start, end, post_end]
+EventPlaybookRun:
+  required: [event_id, detectors, outputs]
+  properties:
+    event_id: {type: string}
+    detectors: {type: array, items: {type: string}}
+    outputs: {type: object}

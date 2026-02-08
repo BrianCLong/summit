@@ -193,17 +193,6 @@ export function transformNeo4jIntegers(obj: any): any {
     return obj.inSafeRange() ? obj.toNumber() : obj.toString();
   }
 
-  // Handle Neo4j temporal types
-  if (
-    obj instanceof neo4j.types.DateTime ||
-    obj instanceof neo4j.types.Date ||
-    obj instanceof neo4j.types.Time ||
-    obj instanceof neo4j.types.LocalDateTime ||
-    obj instanceof neo4j.types.LocalTime
-  ) {
-    return obj.toString();
-  }
-
   // Handle Arrays
   if (Array.isArray(obj)) {
     let newArr: any[] | null = null;
