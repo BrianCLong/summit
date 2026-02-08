@@ -120,7 +120,7 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
@@ -309,7 +309,14 @@
       "preact": ">=10.25.4",
       "@types/react": "18.3.11",
       "@types/react-dom": "18.3.0",
-      "graphql": "16.12.0"
+      "graphql": "16.12.0",
+      "@isaacs/brace-expansion": "5.0.1",
+      "diff@<4": "3.5.1",
+      "diff@>=4 <6": "4.0.4",
+      "diff@>=6 <8.0.3": "8.0.3",
+      "fast-xml-parser": "5.3.4",
+      "lodash": "4.17.23",
+      "lodash-es": "4.17.23"
     }
   }
 }

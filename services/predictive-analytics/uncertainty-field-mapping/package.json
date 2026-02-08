@@ -30,7 +30,7 @@
     "winston": "^3.11.0",
     "date-fns": "^2.30.0",
     "uuid": "^9.0.1",
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.23"
   },
   "devDependencies": {
     "@types/jest": "^29.5.10",

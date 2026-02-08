@@ -128,7 +128,7 @@
     "jsonwebtoken": "9.0.2",
     "juice": "^10.0.0",
     "kafkajs": "^2.2.4",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "lru-cache": "^11.2.4",
     "minisearch": "^7.2.0",
     "mjml": "^4.15.0",
