@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "#/definitions/Claim" },
+    { "$ref": "#/definitions/Assumption" },
+    { "$ref": "#/definitions/Frame" },
+    { "$ref": "#/definitions/Artifact" },
+    { "$ref": "#/definitions/Narrative" },
+    { "$ref": "#/definitions/Handoff" }
+  ],
+  "definitions": {
+    "Claim": {
+      "type": "object",
+      "required": ["node_id", "kind", "text", "confidence"],
+      "properties": {
+        "node_id": { "type": "string" },
+        "kind": { "const": "Claim" },
+        "text": { "type": "string" },
+        "confidence": { "type": "number" },
+        "status": { "type": "string" },
+        "provenance_receipt_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Assumption": {
+      "type": "object",
+      "required": ["node_id", "kind", "text"],
+      "properties": {
+        "node_id": { "type": "string" },
+        "kind": { "const": "Assumption" },
+        "text": { "type": "string" },
+        "stability_score": { "type": "number" },
+        "provenance_receipt_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Frame": {
+      "type": "object",
+      "required": ["node_id", "kind", "description"],
+      "properties": {
+        "node_id": { "type": "string" },
+        "kind": { "const": "Frame" },
+        "description": { "type": "string" },
+        "sentiment": { "type": "string" },
+        "provenance_receipt_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "Artifact": {
+      "type": "object",
+      "required": ["node_id", "kind", "content_sha256", "uri", "published_at"],
+      "properties": {
+        "node_id": { "type": "string" },
+        "kind": { "const": "Artifact" },
+        "content_sha256": { "type": "string" },
+        "uri": { "type": "string" },
+        "source": { "type": "string" },
+        "outlet_tier": { "type": "string" },
+        "published_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Narrative": {
+      "type": "object",
+      "required": ["node_id", "kind", "summary", "state"],
+      "properties": {
+        "node_id": { "type": "string" },
+        "kind": { "const": "Narrative" },
+        "summary": { "type": "string" },
+        "state": { "type": "string" },
+        "score": { "type": "number" }
+      }
+    },
+    "Handoff": {
+      "type": "object",
+      "required": ["node_id", "kind", "from_tier", "to_tier"],
+      "properties": {
+        "node_id": { "type": "string" },
+        "kind": { "const": "Handoff" },
+        "from_tier": { "type": "string" },
+        "to_tier": { "type": "string" },
+        "score": { "type": "number" },
+        "provenance_receipt_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "claims_count": { "type": "integer" },
+    "artifacts_count": { "type": "integer" },
+    "handoff_events_count": { "type": "integer" },
+    "state_transitions_count": { "type": "integer" },
+    "assumption_stability_score": { "type": "number" },
+    "register_shift_score": { "type": "number" },
+    "top_signals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "signal_name": { "type": "string" },
+          "weight": { "type": "number" }
+        }
+      }
+    }
+  }
+}

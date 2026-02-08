@@ -1,0 +1,12 @@
+{
+  "run_id": "RUN-001",
+  "new_claims": [
+    {
+      "node_id": "CLAIM-001",
+      "text": "Valid payload",
+      "properties": {
+        "source": "reuters"
+      }
+    }
+  ]
+}
