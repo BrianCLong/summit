@@ -1,0 +1,28 @@
+version: 1
+name: segment-governance
+status: enforced
+owner: governance
+allowed_features:
+  - geo_region_coarse
+  - language
+  - platform_community_tag
+  - public_interest_topic_tag
+  - time_window_bucket
+prohibited_inferences:
+  - individual_identity
+  - individual_psychographics
+  - health_status
+  - religion
+  - sexual_orientation
+  - precise_location
+  - biometric_identifier
+  - political_party_affiliation
+requirements:
+  - segment_level_only
+  - uncertainty_bounds_required
+  - provenance_required
+  - policy_gate_required
+ci_gates:
+  - segment_policy_gate
+notes:
+  - "Segments must be coarse, non-sensitive, and policy-enforced."
