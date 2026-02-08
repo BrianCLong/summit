@@ -1,14 +1,13 @@
 export type EvidenceReport = {
-  packName: string;
+  evidence_id?: string;
+  packName?: string;
   runId: string;
-  policyResults: {
+  policyResults?: {
     hooks: Record<string, boolean>;
     mcp: boolean;
   };
-  metrics: {
-    duration: number;
-    toolsUsed: number;
-  };
+  metrics?: Record<string, any>;
+  [key: string]: any;
 };
 
 export type EvidenceStamp = {
