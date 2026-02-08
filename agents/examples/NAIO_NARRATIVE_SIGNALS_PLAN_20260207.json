@@ -1,0 +1,38 @@
+{
+  "task_id": "NAIO_NARRATIVE_SIGNALS_PLAN_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "naio-narrative-signals-plan",
+    "version": "v1",
+    "sha256": "cfea269e026fb2fd6fbaacb3b0519c339a1eeb2333396326e51d177a0f884a52",
+    "path": "prompts/narrative/naio-integration-plan@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/narrative-signals/naio-integration-plan.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/narrative/naio-integration-plan@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NAIO_NARRATIVE_SIGNALS_PLAN_20260207.json"
+    ],
+    "domains": ["documentation", "governance", "narrative-signals"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/narrative-signals/naio-integration-plan.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "NAIO integration plan documented with architecture, MAESTRO alignment, and PR stack.",
+    "Roadmap status updated with the NAIO narrative signals plan initiative.",
+    "Prompt registry entry added with valid sha256."
+  ],
+  "stop_conditions": [
+    "Governance policy changes required beyond documentation scope.",
+    "Evidence-first requirements cannot be satisfied."
+  ]
+}
