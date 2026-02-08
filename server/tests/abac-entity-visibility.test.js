@@ -1,5 +1,5 @@
 import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy';
-import { ForbiddenError } from 'apollo-server-express';
+import { ForbiddenError } from '@apollo/server/errors';
 describe('mission tag and temporal ABAC', () => {
   const baseUser = {
     id: 'u1',

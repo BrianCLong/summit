@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { AuthenticationError, ForbiddenError } from '@apollo/server/errors';
 import { verify, JwtPayload } from 'jsonwebtoken';
 import axios from 'axios';
 import { trace } from '@opentelemetry/api';

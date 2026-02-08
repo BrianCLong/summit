@@ -1,5 +1,5 @@
 import { GraphQLFieldConfig, GraphQLResolveInfo } from 'graphql';
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { AuthenticationError, ForbiddenError } from '@apollo/server/errors';
 import axios from 'axios';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';

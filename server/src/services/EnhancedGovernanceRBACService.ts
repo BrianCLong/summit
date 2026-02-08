@@ -7,7 +7,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError, AuthenticationError } from 'apollo-server-express';
+import { ForbiddenError, AuthenticationError } from '@apollo/server/errors';
 import { Pool } from 'pg';
 import pino from 'pino';
 import { WarrantService } from '../services/WarrantService.js';

@@ -1,5 +1,5 @@
 import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy.js';
-import { ForbiddenError } from 'apollo-server-express';
+import { ForbiddenError } from '@apollo/server/errors';
 import { describe, it, test, expect } from '@jest/globals';
 
 describe('mission tag and temporal ABAC', () => {

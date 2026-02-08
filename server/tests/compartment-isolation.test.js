@@ -1,4 +1,4 @@
-import { ForbiddenError } from 'apollo-server-express';
+import { ForbiddenError } from '@apollo/server/errors';
 import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy';
 describe('compartment-aware investigation isolation', () => {
   const baseUser = {

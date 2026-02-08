@@ -3,7 +3,7 @@
  * Policy-sandboxed evolution with verifiable meta-optimization
  */
 
-import { ApolloError } from 'apollo-server-express';
+import { ApolloError } from '@apollo/server/errors';
 import { Context } from '../../context.js';
 import logger from '../../../config/logger.js';
 import auditLogger from '../../middleware/auditLogger.js';

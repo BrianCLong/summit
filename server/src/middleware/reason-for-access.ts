@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError } from 'apollo-server-express';
+import { ForbiddenError } from '@apollo/server/errors';
 import { writeAudit } from '../utils/audit.js';
 
 export interface ReasonForAccessConfig {

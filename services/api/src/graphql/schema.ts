@@ -5,7 +5,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
   scalar DateTime

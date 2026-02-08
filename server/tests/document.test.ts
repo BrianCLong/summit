@@ -1,6 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { createTestClient } from 'apollo-server-testing';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
 let typeDefs: any;
 let resolvers: any;
 let neo: any;
@@ -12,7 +11,7 @@ const describeIf = run ? describe : describe.skip;
 
 describeIf('GraphQL Document API', () => {
   let server: ApolloServer;
-  let testClient: any;
+  let execute: (query: string, variables?: Record<string, unknown>) => Promise<any>;
   let createdDocId: string;
 
   beforeAll(async () => {
@@ -27,29 +26,39 @@ describeIf('GraphQL Document API', () => {
       resolvers,
       context: () => ({ user: { tenantId: 'test-tenant' } }),
     });
-    testClient = createTestClient(server as any);
+    await server.start();
+    execute = async (query, variables) => {
+      const response = await server.executeOperation({
+        query,
+        variables,
+      });
+      if (response?.body?.kind === 'single') {
+        return response.body.singleResult;
+      }
+      return response;
+    };
 
     // Run the ingestion script to populate the database with the taxonomy
     const taxonomy = parseTaxonomy();
     await ingestTaxonomy(taxonomy);
 
     // Create a document to be used in tests
-    const response = await testClient.mutate({
-      mutation: `
+    const response = await execute(
+      `
         mutation CreateDocument($input: DocumentInput!) {
           createDocument(input: $input) {
             id
           }
         }
       `,
-      variables: {
+      {
         input: {
           tenantId: 'test-tenant',
           name: 'My Test Invoice',
           category: 'Finance',
         },
       },
-    });
+    );
     createdDocId = response.data.createDocument.id;
   });
 
@@ -91,8 +100,8 @@ describeIf('GraphQL Document API', () => {
       },
     };
 
-    const response1 = await testClient.mutate({ mutation: createMutation, variables: variables1 });
-    const response2 = await testClient.mutate({ mutation: createMutation, variables: variables2 });
+    const response1 = await execute(createMutation, variables1);
+    const response2 = await execute(createMutation, variables2);
 
     expect(response1.data.createDocument.id).toBe(response2.data.createDocument.id);
     expect(response2.data.createDocument.entity.props.custom).toBe('value2');
@@ -104,8 +113,8 @@ describeIf('GraphQL Document API', () => {
   });
 
   it('fetches a single document by ID', async () => {
-    const response = await testClient.query({
-      query: `
+    const response = await execute(
+      `
         query Document($id: ID!, $tenantId: String!) {
           document(id: $id, tenantId: $tenantId) {
             id
@@ -114,11 +123,11 @@ describeIf('GraphQL Document API', () => {
           }
         }
       `,
-      variables: {
+      {
         id: createdDocId,
         tenantId: 'test-tenant',
       },
-    });
+    );
 
     expect(response.data.document.id).toBe(createdDocId);
     expect(response.data.document.category).toBe('Finance');
@@ -126,26 +135,26 @@ describeIf('GraphQL Document API', () => {
   });
 
   it('returns null for a non-existent document', async () => {
-    const response = await testClient.query({
-      query: `
+    const response = await execute(
+      `
         query Document($id: ID!, $tenantId: String!) {
           document(id: $id, tenantId: $tenantId) {
             id
           }
         }
       `,
-      variables: {
+      {
         id: 'non-existent-id',
         tenantId: 'test-tenant',
       },
-    });
+    );
 
     expect(response.data.document).toBeNull();
   });
 
   it('fetches documents with name filter', async () => {
-    const response = await testClient.query({
-      query: `
+    const response = await execute(
+      `
         query Documents($tenantId: String!, $name: String) {
           documents(tenantId: $tenantId, name: $name) {
             id
@@ -155,11 +164,11 @@ describeIf('GraphQL Document API', () => {
           }
         }
       `,
-      variables: {
+      {
         tenantId: 'system',
         name: 'NDA / MNDA',
       },
-    });
+    );
 
     expect(response.data.documents.length).toBe(1);
     expect(response.data.documents[0].variants).toContain('NDA');
@@ -167,43 +176,43 @@ describeIf('GraphQL Document API', () => {
   });
 
   it('fetches documents with category and subType filters', async () => {
-    const response = await testClient.query({
-      query: `
+    const response = await execute(
+      `
         query Documents($tenantId: String!, $category: String, $subType: String) {
           documents(tenantId: $tenantId, category: $category, subType: $subType) {
             id
           }
         }
       `,
-      variables: {
+      {
         tenantId: 'system',
         category: 'Legal',
         subType: 'NDA',
       },
-    });
+    );
 
     expect(response.data.documents.length).toBe(1);
   });
 
   it('fetches document relationships', async () => {
     // Find a document that should have relationships
-    const msaResponse = await testClient.query({
-      query: `
+    const msaResponse = await execute(
+      `
           query Documents($tenantId: String!, $name: String) {
             documents(tenantId: $tenantId, name: $name) {
               id
             }
           }
         `,
-      variables: {
+      {
         tenantId: 'system',
         name: 'MSA / SOW',
       },
-    });
+    );
     const msaId = msaResponse.data.documents[0].id;
 
-    const response = await testClient.query({
-      query: `
+    const response = await execute(
+      `
         query Document($id: ID!, $tenantId: String!) {
           document(id: $id, tenantId: $tenantId) {
             relationships {
@@ -215,11 +224,11 @@ describeIf('GraphQL Document API', () => {
           }
         }
       `,
-      variables: {
+      {
         id: msaId,
         tenantId: 'system',
       },
-    });
+    );
 
     expect(response.data.document.relationships.length).toBeGreaterThan(0);
     expect(response.data.document.relationships[0].type).toBe('GOVERNING_AGREEMENT');

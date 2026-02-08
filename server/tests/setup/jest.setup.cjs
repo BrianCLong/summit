@@ -72,15 +72,18 @@ jest.mock('node-fetch', () => ({
   Request: jest.fn(),
 }));
 
-// Mock apollo-server-express for ESM compatibility
-jest.mock('apollo-server-express', () => ({
+// Mock @apollo/server for ESM compatibility
+jest.mock('@apollo/server', () => ({
   __esModule: true,
   ApolloServer: jest.fn().mockImplementation(() => ({
     start: jest.fn().mockResolvedValue(undefined),
     stop: jest.fn().mockResolvedValue(undefined),
-    applyMiddleware: jest.fn(),
     executeOperation: jest.fn().mockResolvedValue({ data: {} }),
   })),
+}));
+
+jest.mock('@apollo/server/errors', () => ({
+  __esModule: true,
   AuthenticationError: class AuthenticationError extends Error {
     constructor(message) {
       super(message);
@@ -93,7 +96,12 @@ jest.mock('apollo-server-express', () => ({
       this.name = 'ForbiddenError';
     }
   },
-  gql: (strings) => strings.join(''),
+  ApolloError: class ApolloError extends Error {
+    constructor(message) {
+      super(message);
+      this.name = 'ApolloError';
+    }
+  },
 }));
 
 // Mock pg globally to avoid real database connections

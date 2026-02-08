@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { createReasonForAccessMiddleware } from '../reason-for-access.js';
-import { ForbiddenError } from 'apollo-server-express';
+import { ForbiddenError } from '@apollo/server/errors';
 
 const requestFactory = (overrides: Record<string, any> = {}) => {
   const headers = overrides.headers ?? {};

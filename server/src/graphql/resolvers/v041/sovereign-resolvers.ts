@@ -4,7 +4,7 @@
  * Independent verification, containment, lawful interoperability, and reversible autonomy
  */
 
-import { ApolloError } from 'apollo-server-express';
+import { ApolloError } from '@apollo/server/errors';
 import { Context } from '../../context.js';
 import { logger } from '../../../config/logger.js';
 import { auditLogger } from '../../middleware/auditLogger.js';

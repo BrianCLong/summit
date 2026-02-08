@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError } from 'apollo-server-express';
+import { ForbiddenError } from '@apollo/server/errors';
 import { OPAClient } from './opa-abac.js';
 import { logger } from '../utils/logger.js';
 import type { User } from '../graphql/intelgraph/types.js';

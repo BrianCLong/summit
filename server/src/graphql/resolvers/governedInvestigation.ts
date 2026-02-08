@@ -10,7 +10,7 @@
  * - Field-level redaction
  */
 
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { AuthenticationError, ForbiddenError } from '@apollo/server/errors';
 import { Driver } from 'neo4j-driver';
 import { OPAClient } from '../../middleware/opa-abac.js';
 import { WarrantService } from '../../services/WarrantService.js';

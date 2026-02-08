@@ -3,7 +3,7 @@ import {
   AuthenticationError,
   ForbiddenError,
   UserInputError,
-} from 'apollo-server-express';
+} from '@apollo/server/errors';
 import { FeatureFlags } from '../../config/featureFlags.js';
 
 const copilotService = new CopilotIntegrationService();

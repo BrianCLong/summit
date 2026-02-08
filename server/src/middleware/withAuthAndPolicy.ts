@@ -5,7 +5,7 @@
  * across all GraphQL resolvers using OPA/ABAC policies.
  */
 
-import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+import { AuthenticationError, ForbiddenError } from '@apollo/server/errors';
 import { z } from 'zod';
 import pino from 'pino';
 

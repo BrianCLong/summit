@@ -1,11 +1,11 @@
 # NPM bulk advisory report
 
-- Generated: 2026-02-08T05:03:00.862066+00:00
-- Lockfile: `/media/bcl/SUMMIT_LNX/summit/pnpm-lock.yaml`
+- Generated: 2026-02-08T05:47:06.359868+00:00
+- Lockfile: `pnpm-lock.yaml`
 - Advisories: 21
 - Packages with advisories: 17
-- Affected versions: 5
-- Affected importers: 4
+- Affected versions: 0
+- Affected importers: 0
 
 ## @apollo/server
 - Apollo Serve vulnerable to Denial of Service with `startStandaloneServer` (high)
@@ -65,7 +65,7 @@
 - Crash in HeaderParser in dicer (high)
   - ID: 1093150
   - Range: `<=0.3.1`
-  - Affected versions: 0.3.0
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (<=0.3.1).
 
@@ -93,8 +93,8 @@
 - Elliptic Uses a Cryptographic Primitive with a Risky Implementation (low)
   - ID: 1112030
   - Range: `<=6.6.1`
-  - Affected versions: 6.6.1
-  - Importers: packages/blockchain, packages/digital-signatures
+  - Affected versions: None
+  - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (<=6.6.1).
 
 ## fast-xml-parser
@@ -123,7 +123,7 @@
 - kangax html-minifier REDoS vulnerability (high)
   - ID: 1105440
   - Range: `<=4.0.0`
-  - Affected versions: 4.0.0
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (<=4.0.0).
 
@@ -147,16 +147,16 @@
 - MJML allows mj-include directory traversal due to an incomplete fix for CVE-2020-12827 (moderate)
   - ID: 1111537
   - Range: `<=4.18.0`
-  - Affected versions: 4.18.0
-  - Importers: server
+  - Affected versions: None
+  - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (<=4.18.0).
 
 ## pkg
 - Pkg Local Privilege Escalation (moderate)
   - ID: 1096454
   - Range: `<=5.8.1`
-  - Affected versions: 5.8.1
-  - Importers: cli
+  - Affected versions: None
+  - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (<=5.8.1).
 
 ## undici

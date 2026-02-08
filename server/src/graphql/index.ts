@@ -1,4 +1,6 @@
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import express from 'express';
 import { schema as typeDefs, safeTypes } from './schema/index.js';
 import { resolvers } from './resolvers.js';
 
@@ -9,5 +11,11 @@ export async function mountGraphQL(app: any) {
     context: ({ req }) => ({ user: (req as any).user }),
   });
   await server.start();
-  server.applyMiddleware({ app: app as any, path: '/graphql' });
+  app.use(
+    '/graphql',
+    express.json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => ({ user: (req as any).user }),
+    }),
+  );
 }

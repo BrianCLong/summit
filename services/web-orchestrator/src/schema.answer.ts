@@ -1,5 +1,5 @@
 // services/web-orchestrator/src/schema.answer.ts
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 export const typeDefsAnswer = gql`
   scalar JSON
   type OrchestratedAnswer {

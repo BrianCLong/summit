@@ -6,7 +6,8 @@
 
 import express from 'express';
 import { createServer } from 'http';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/use/ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -587,8 +588,7 @@ async function startLiveServer() {
 
   // Apply GraphQL middleware
   await server.start();
-  const compatApp = app as any;
-  server.applyMiddleware({ app: compatApp, path: '/graphql' });
+  app.use('/graphql', express.json(), expressMiddleware(server));
 
   const PORT = process.env.PORT || 4001;
 

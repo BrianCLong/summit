@@ -1,7 +1,7 @@
 
 import { jest } from '@jest/globals';
 import { Request, Response } from 'express';
-import { AuthenticationError } from 'apollo-server-express';
+import { AuthenticationError } from '@apollo/server/errors';
 
 // Mock dependencies
 const mockEvaluate = jest.fn() as jest.MockedFunction<

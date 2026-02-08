@@ -5,7 +5,7 @@
  * and link scoring capabilities
  */
 
-import { gql } from 'apollo-server-express';
+import { gql } from 'graphql-tag';
 import { getAIInsightsClient } from '../services/ai-insights-client.js';
 import { traceResolver } from './resolvers-tracing.js';
 

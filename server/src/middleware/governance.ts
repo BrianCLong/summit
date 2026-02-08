@@ -10,7 +10,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { ForbiddenError } from 'apollo-server-express';
+import { ForbiddenError } from '@apollo/server/errors';
 import { Pool } from 'pg';
 import { Logger } from 'pino';
 import { WarrantService } from '../services/WarrantService.js';
