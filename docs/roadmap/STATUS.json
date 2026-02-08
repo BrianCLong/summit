@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:30:00Z",
+  "revision_note": "Validated repo assumptions for CogWar MWS alignment; recorded evidence and CI workflow verification.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -205,6 +205,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "cogwar-mws-repo-assumptions",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Captured verified vs deferred repo layout, CI workflow presence, evidence schema locations, and must-not-touch zones for CogWar MWS."
     }
   ],
   "summary": {
@@ -212,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
