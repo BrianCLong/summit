@@ -1,0 +1,15 @@
+{
+  "claims": [
+    {
+      "claim_id": "c_signal_phishing_targets_high_value",
+      "claim_normal_form": "German agencies warned of state-linked Signal phishing campaigns targeting politicians, military officials, and journalists via fake support chats.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.62,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_signal_0001"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": "a_user_brief_2026_02_07",
+      "artifact_type": "user_provided_summary",
+      "uri_refs": [
+        "rferl:https://www.rferl.org/a/general-alekseyev-assassination-russia-intelligence-gru-ukraine-war/33672037.html",
+        "wfmd:https://www.wfmd.com/2026/02/07/russia-to-interrogate-two-suspects-in-attempted-assassination-of-top-military-general/"
+      ],
+      "anchors": [
+        "anchor:GRU Assassination Attempt block"
+      ],
+      "integrity": {
+        "hash_algo": "sha256",
+        "hash": "hash_placeholder_user_text"
+      }
+    }
+  ]
+}

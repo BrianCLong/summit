@@ -1,0 +1,49 @@
+{
+  "handoff_model": {
+    "model_id": "handoff_risk_v1",
+    "features": [
+      "official_warning_present",
+      "targets_high_value",
+      "platform_brand_salience",
+      "cross-sector_targets",
+      "evidence_completeness_penalty"
+    ],
+    "scoring": "0..100 weighted sum with penalties"
+  },
+  "handoff_assessment": {
+    "narrative_id": "n_germany_signal_phishing",
+    "risk_score": 63,
+    "risk_band": "medium",
+    "feature_contributions": [
+      {
+        "feature": "official_warning_present",
+        "weight": 18,
+        "value": 1
+      },
+      {
+        "feature": "targets_high_value",
+        "weight": 18,
+        "value": 1
+      },
+      {
+        "feature": "platform_brand_salience",
+        "weight": 10,
+        "value": 1
+      },
+      {
+        "feature": "cross-sector_targets",
+        "weight": 10,
+        "value": 1
+      },
+      {
+        "feature": "evidence_completeness_penalty",
+        "weight": -7,
+        "value": 1
+      }
+    ],
+    "alerts": [
+      "Moderate probability of handoff into broader media discourse, especially if victim confirmation emerges."
+    ],
+    "provenance_id": "p_signal_0001"
+  }
+}

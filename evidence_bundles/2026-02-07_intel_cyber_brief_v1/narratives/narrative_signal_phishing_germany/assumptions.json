@@ -1,0 +1,14 @@
+{
+  "assumptions": [
+    {
+      "assumption_id": "s_human_layer_precedes_technical",
+      "assumption_normal_form": "The operation prioritizes human-layer account takeover to enable broader access or influence.",
+      "scope": "narrative",
+      "confidence": 0.64,
+      "supported_by_claim_ids": [
+        "c_signal_phishing_targets_high_value"
+      ],
+      "provenance_id": "p_signal_0001"
+    }
+  ]
+}
