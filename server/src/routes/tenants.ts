@@ -67,6 +67,25 @@ function ensureTenantScope(req: Request, res: Response, next: NextFunction): voi
   next();
 }
 
+/**
+ * SECURITY: Middleware to enforce admin-only access for sensitive operations.
+ * Only users with ADMIN, admin, or SUPER_ADMIN roles are allowed.
+ */
+function ensureAdminRole(req: Request, res: Response, next: NextFunction): void {
+  const authReq = req as AuthenticatedRequest;
+  const role = authReq.user?.role || '';
+  const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'admin'];
+  if (!allowedRoles.includes(role)) {
+    logger.warn({ userId: authReq.user?.id, role }, 'Admin-only access denied');
+    res.status(403).json({
+      success: false,
+      error: 'Forbidden: Admin access required'
+    });
+    return;
+  }
+  next();
+}
+
 function buildReceipt(action: string, tenantId: string, actorId: string) {
   const issuedAt = new Date().toISOString();
   const payload = `${action}:${tenantId}:${actorId}:${issuedAt}`;
@@ -257,6 +276,7 @@ router.post(
 router.patch(
   '/:id',
   ensureAuthenticated,
+  ensureAdminRole, // SECURITY: Only admins can change tenant status (active/suspended)
   ensureTenantScope,
   policyGate(),
   ensurePolicy('update', 'tenant'),
