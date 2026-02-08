@@ -70,7 +70,7 @@ jobs:
 
       - name: Run Integration Tests
         working-directory: server
-        run: npm run test:integration
+        run: npm run test:integration -- --coverage
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
           NEO4J_URI: bolt://localhost:7687
@@ -81,3 +81,11 @@ jobs:
           JWT_REFRESH_SECRET: test-refresh-secret-at-least-32-chars-long
           NODE_ENV: test
           CI: true
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-coverage-report
+          path: server/coverage/
+          retention-days: 30
