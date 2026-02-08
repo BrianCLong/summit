@@ -565,6 +565,42 @@ prompts:
         - maestro
         - governance
         - ci
+  - id: agentic-orchestration-context-rag
+    version: v1
+    path: prompts/engineering/agentic-orchestration-context-rag@v1.md
+    sha256: 240aee0cf8bc145c356d83395486eafa8818c05dee1c6f48b65a1294f5d48d2e
+    description: Implement predictive orchestration selection, hybrid context management, and agentic RAG scaffolding.
+    scope:
+      paths:
+        - src/orchestration/architectureSelector.ts
+        - src/agents/index.ts
+        - src/context/hybridContextManager.ts
+        - src/context/llmAdapters/simpleLLMClient.ts
+        - src/intelgraph/agenticRag.ts
+        - tests/orchestration/architectureSelector.test.ts
+        - tests/context/hybridContextManager.test.ts
+        - tests/intelgraph/agenticRag.test.ts
+        - docs/agent-orchestration-and-agentic-rag.md
+        - docs/roadmap/STATUS.json
+        - prompts/engineering/agentic-orchestration-context-rag@v1.md
+        - prompts/registry.yaml
+        - agents/examples/AGENTIC_ORCH_CONTEXT_RAG_20260208.json
+      domains:
+        - orchestration
+        - context
+        - intelgraph
+        - governance
+        - documentation
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: federated-campaign-radar-implementation
     version: v1
     path: prompts/federated-campaign-radar-implementation.md
