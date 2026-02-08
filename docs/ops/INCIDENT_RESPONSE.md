@@ -63,3 +63,21 @@
 *   **Security Officer:** security@companyos.io
 *   **DevOps Lead:** [Internal Contact]
 *   **Legal:** [Internal Contact]
+
+## 6. Specific Component Checks
+
+### Agent Runtime Health
+
+To verify the health of the Agent Runtime during an incident:
+
+1.  **Check Health Endpoint:**
+    ```bash
+    curl -f https://<runtime-service-url>/health
+    ```
+    Expected output: `{"status": "healthy", "details": {...}}`
+
+2.  **Check Logs for Correlation IDs:**
+    Look for `correlationId` in logs to trace specific requests.
+    ```bash
+    grep "correlationId" /var/log/agent-runtime.log
+    ```
