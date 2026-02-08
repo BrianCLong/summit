@@ -33,3 +33,18 @@
 
 1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
 2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+
+## AI Psych Safety Trust Pack (Deferred Pending Validation)
+
+### To Verify
+- Does Summit use `summit/` as the package root for policy packs?
+- Where do pack/policy/checks live today (e.g., `summit/packs/` or `packages/`)?
+- Existing artifact schema naming conventions (`report.json`, `metrics.json`, `stamp.json`).
+- CI gate names for Python/pack validation (pytest, ruff, mypy, or equivalent).
+- Must-not-touch files (lockfiles, vendor directories, generated baselines, release workflows).
+
+### Validation Checklist (Before PR-1 merges)
+- `rg -n "artifacts/"` for conventions and expected output layout.
+- `rg -n "pack" summit/` to locate existing pack framework patterns.
+- Inspect `.github/workflows/*` for gates and naming.
+- Run the full test suite locally after pack implementation.
