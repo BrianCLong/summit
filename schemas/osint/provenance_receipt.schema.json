@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/osint/provenance_receipt.schema.json",
+  "title": "OSINT Provenance Receipt",
+  "type": "object",
+  "required": [
+    "receipt_id",
+    "artifact_ids",
+    "source_ids",
+    "risk_envelope",
+    "collected_at",
+    "flags"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "receipt_id": { "type": "string" },
+    "artifact_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "source_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "risk_envelope": { "type": "string" },
+    "collected_at": { "type": "string", "format": "date-time" },
+    "flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

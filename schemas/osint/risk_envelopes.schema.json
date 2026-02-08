@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/osint/risk_envelopes.schema.json",
+  "title": "OSINT Risk Envelopes",
+  "type": "object",
+  "required": ["version", "envelopes"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "envelopes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "description",
+          "allowed_methods",
+          "allow_authenticated_access",
+          "allow_headless_browsing",
+          "max_alerts_per_run",
+          "min_corroboration",
+          "require_human_review_on_escalation"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "description": { "type": "string" },
+          "allowed_methods": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "allow_authenticated_access": { "type": "boolean" },
+          "allow_headless_browsing": { "type": "boolean" },
+          "max_alerts_per_run": { "type": "integer", "minimum": 1 },
+          "min_corroboration": { "type": "integer", "minimum": 1 },
+          "require_human_review_on_escalation": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-OSINT-LIMITS-ENVELOPE-SOURCES-001",
+  "title": "OSINT source registry scaffolding",
+  "summary": "Source registry defaults with onboarding checklist and reliability tiers committed.",
+  "status": "scaffolded",
+  "artifacts": [
+    "config/osint/sources.yml",
+    "schemas/osint/source_registry.schema.json"
+  ],
+  "generated_by": "osint-governance-verify"
+}

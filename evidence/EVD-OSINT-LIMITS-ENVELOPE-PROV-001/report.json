@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-OSINT-LIMITS-ENVELOPE-PROV-001",
+  "title": "OSINT provenance receipt scaffolding",
+  "summary": "Provenance and collection event schemas added to enforce traceability requirements.",
+  "status": "scaffolded",
+  "artifacts": [
+    "schemas/osint/provenance_receipt.schema.json",
+    "schemas/osint/collection_event.schema.json"
+  ],
+  "generated_by": "osint-governance-verify"
+}

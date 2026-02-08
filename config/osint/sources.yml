@@ -1,0 +1,63 @@
+version: 1
+default_risk_envelope: conservative
+source_tiers:
+  tier_1_high:
+    description: "High-reliability sources with explicit automation terms and stable APIs."
+  tier_2_medium:
+    description: "Moderate-reliability sources with published access terms and verified provenance."
+  tier_3_low:
+    description: "Low-reliability sources requiring corroboration and human review before escalation."
+source_onboarding_checklist:
+  - Confirm ToS explicitly allows automation or licensed API access.
+  - Record approved collection methods and disallowed methods.
+  - Capture rate limits, quotas, and backoff requirements.
+  - Document licensing and redistribution constraints.
+  - Validate provenance expectations and required metadata fields.
+  - Assign reliability tier and review cadence.
+  - Register privacy classification and retention TTLs.
+  - Add negative-policy fixtures for new source rules.
+  - Obtain human review sign-off for scope or rate-limit changes.
+sources:
+  - id: summit-news-api
+    name: "Summit News API"
+    tos_class: "allows_automation"
+    allowed_methods:
+      - api
+    disallowed_methods:
+      - circumvent
+      - credential_share
+      - paywall_bypass
+    reliability_tier: tier_1_high
+    license: "commercial"
+    rate_limit_per_min: 60
+    geo_restrictions: []
+    notes: "Primary API source for news metadata."
+  - id: summit-rss-wire
+    name: "Summit RSS Wire"
+    tos_class: "robots_allowed"
+    allowed_methods:
+      - rss
+    disallowed_methods:
+      - headless_browser
+      - paywall_bypass
+    reliability_tier: tier_2_medium
+    license: "attribution_required"
+    rate_limit_per_min: 30
+    geo_restrictions:
+      - "EU"
+    notes: "RSS feed with robots-allowed access only."
+  - id: summit-open-web
+    name: "Summit Open Web"
+    tos_class: "manual_review_required"
+    allowed_methods:
+      - api
+      - rss
+    disallowed_methods:
+      - headless_browser
+      - paywall_bypass
+      - circumvent
+    reliability_tier: tier_3_low
+    license: "unknown"
+    rate_limit_per_min: 10
+    geo_restrictions: []
+    notes: "Low-reliability public sources requiring corroboration."

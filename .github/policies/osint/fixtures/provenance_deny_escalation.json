@@ -1,0 +1,10 @@
+{
+  "collection": {
+    "provenance": {
+      "artifact_ids": ["A1"],
+      "corroboration_count": 1,
+      "single_source": true,
+      "escalation": true
+    }
+  }
+}

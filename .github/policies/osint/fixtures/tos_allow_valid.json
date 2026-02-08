@@ -1,0 +1,12 @@
+{
+  "collection": {
+    "source_id": "summit-news-api",
+    "method": "api"
+  },
+  "source_registry": {
+    "summit-news-api": {
+      "allowed_methods": ["api"],
+      "disallowed_methods": ["paywall_bypass"]
+    }
+  }
+}

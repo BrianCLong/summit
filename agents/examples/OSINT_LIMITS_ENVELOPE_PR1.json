@@ -1,0 +1,46 @@
+{
+  "task_id": "OSINT_LIMITS_ENVELOPE_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "osint-guardrails-pr1",
+    "version": "v1",
+    "sha256": "c49c6265b215927aa7a3b78e1471e62638e62fcfbf9037d19aa25a5b74c01c74",
+    "path": "prompts/governance/osint-guardrails-pr1@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "config/osint/",
+      "schemas/osint/",
+      ".github/policies/osint/",
+      ".github/workflows/osint-governance-verify.yml",
+      "evidence/index.json",
+      "evidence/EVD-OSINT-LIMITS-ENVELOPE-*/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/OSINT_LIMITS_ENVELOPE_PR1.json"
+    ],
+    "domains": ["governance", "policy", "evidence", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "opa-test-output",
+      "schema-presence-checks",
+      "evidence-index-entry"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "OSINT configs, schemas, and policy gates are added with deny-by-default fixtures.",
+    "CI workflow validates OPA tests and schema presence.",
+    "Evidence index includes OSINT limit envelope entries."
+  ],
+  "stop_conditions": [
+    "Policy fixtures fail in CI.",
+    "Schema presence checks fail.",
+    "Evidence index missing required OSINT entries."
+  ]
+}

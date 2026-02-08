@@ -1,0 +1,9 @@
+{
+  "collection": {
+    "pii_fields": [],
+    "redactions": [],
+    "retention_ttl_days": 0,
+    "never_log_fields": ["tokens"],
+    "logged_fields": ["title"]
+  }
+}
