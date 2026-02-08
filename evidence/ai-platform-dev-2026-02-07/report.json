@@ -1,0 +1,26 @@
+{
+  "bundleId": "ai-platform-dev-2026-02-07",
+  "summary": "Lane 1 evidence bundle scaffold for MCP governance and evidence verification.",
+  "evidence": [
+    {
+      "id": "EVD-ai-platform-dev-2026-02-07-MCP-001",
+      "status": "planned",
+      "notes": "Manifest conformance summary placeholder."
+    },
+    {
+      "id": "EVD-ai-platform-dev-2026-02-07-SEC-001",
+      "status": "planned",
+      "notes": "Policy enforcement fixtures placeholder."
+    },
+    {
+      "id": "EVD-ai-platform-dev-2026-02-07-CTX-001",
+      "status": "planned",
+      "notes": "Context pipeline trace placeholder."
+    },
+    {
+      "id": "EVD-ai-platform-dev-2026-02-07-TOOL-001",
+      "status": "planned",
+      "notes": "Tool search benchmark placeholder."
+    }
+  ]
+}
