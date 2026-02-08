@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IO Content",
+  "type": "object",
+  "required": ["content_id", "provenance"],
+  "properties": {
+    "content_id": { "type": "string" },
+    "text": { "type": "string" },
+    "media_urls": { "type": "array", "items": { "type": "string" } },
+    "language": { "type": "string" },
+    "provenance": { "$ref": "./provenance.json" }
+  }
+}
