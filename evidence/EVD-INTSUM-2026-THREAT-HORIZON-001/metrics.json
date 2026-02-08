@@ -3,5 +3,6 @@
   "source_count": 1,
   "processing_time_ms": 12,
   "avg_latency_ms": 0.003,
-  "avg_fanout": 1.0
+  "avg_fanout": 1.0,
+  "evidence_id": "EVD-INTSUM-2026-THREAT-HORIZON-001"
 }
