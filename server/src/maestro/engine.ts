@@ -31,15 +31,16 @@ export class MaestroEngine {
   constructor(private deps: MaestroDependencies) {
     this.db = deps.db;
 
-    // Initialize BullMQ
-    this.queue = new Queue('maestro_v2', { connection: deps.redisConnection });
-    this.queueEvents = new QueueEvents('maestro_v2', { connection: deps.redisConnection });
+    // Initialize BullMQ with duplicated connections to avoid sharing blocking/non-blocking state
+    const connection = deps.redisConnection;
+    this.queue = new Queue('maestro_v2', { connection: connection.duplicate() });
+    this.queueEvents = new QueueEvents('maestro_v2', { connection: connection.duplicate() });
 
     // Initialize generic worker
     this.worker = new Worker('maestro_v2', async (job: any) => {
       const { taskId, runId, tenantId } = job.data;
       return this.processTask(taskId, runId, tenantId);
-    }, { connection: deps.redisConnection, concurrency: 5 });
+    }, { connection: connection.duplicate(), concurrency: 5 });
 
     // Setup event listeners
     this.setupEventListeners();

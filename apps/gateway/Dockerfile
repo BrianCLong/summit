@@ -1,6 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
-RUN npm install -g pnpm
+RUN npm install -g pnpm typescript
 COPY apps/gateway/package.json ./apps/gateway/
 COPY pnpm-lock.yaml pnpm-workspace.yaml* ./
 
@@ -9,7 +9,7 @@ COPY packages ./packages
 COPY ga-graphai/packages ./ga-graphai/packages
 
 WORKDIR /app/apps/gateway
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --filter @intelgraph/gateway... --no-frozen-lockfile
 
 # Copy source
 COPY apps/gateway .

@@ -298,20 +298,20 @@ export const deploymentRollbacksTotal = createCounter({
 });
 
 // Human-in-the-loop approvals
-const approvalsPending = createGauge({
+export const approvalsPending = createGauge({
   registers: [],
   name: 'approvals_pending',
   help: 'Current pending approvals requiring human review',
 });
 
-const approvalsApprovedTotal = createCounter({
+export const approvalsApprovedTotal = createCounter({
   registers: [],
   name: 'approvals_approved_total',
   help: 'Total approvals granted by human reviewers',
   labelNames: ['reviewer_role'],
 });
 
-const approvalsRejectedTotal = createCounter({
+export const approvalsRejectedTotal = createCounter({
   registers: [],
   name: 'approvals_rejected_total',
   help: 'Total approvals rejected by human reviewers',
@@ -1156,6 +1156,11 @@ try {
   register.registerMetric(policyDecisionsTotal);
 } catch (e) { }
 
+// Debug log to verify metrics loading
+if (process.env.NODE_ENV === 'test') {
+  // console.log('DEBUG: metrics.ts loaded in test environment');
+}
+
 export const metrics = {
   graphExpandRequestsTotal,
   aiRequestTotal,
@@ -1243,3 +1248,5 @@ export const metrics = {
   agentExecutionDuration,
   policyDecisionsTotal,
 };
+
+export default metrics;
