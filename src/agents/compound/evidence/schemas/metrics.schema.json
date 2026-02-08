@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "compound.metrics.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "files_changed": { "type": "number", "minimum": 0 },
+        "tests_run": { "type": "number", "minimum": 0 }
+      },
+      "required": ["files_changed", "tests_run"]
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail"] }
+      },
+      "required": ["status"]
+    }
+  },
+  "required": ["counts", "outcome"]
+}

@@ -1,0 +1,8 @@
+{
+  "EVD-CLAUDE-COMPOUND-PLAN-001": { "path": "report.json", "kind": "plan" },
+  "EVD-CLAUDE-COMPOUND-WORK-001": { "path": "report.json", "kind": "work" },
+  "EVD-CLAUDE-COMPOUND-ASSESS-001": { "path": "report.json", "kind": "assess" },
+  "EVD-CLAUDE-COMPOUND-MEMORY-001": { "path": "report.json", "kind": "memory" },
+  "EVD-CLAUDE-COMPOUND-METRICS-001": { "path": "metrics.json", "kind": "metrics" },
+  "EVD-CLAUDE-COMPOUND-STAMP-001": { "path": "stamp.json", "kind": "stamp" }
+}

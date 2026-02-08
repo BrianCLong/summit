@@ -1,0 +1,22 @@
+{
+  "plan": {
+    "summary": "Define compound evidence schema skeletons.",
+    "steps": ["Add schemas", "Add validator", "Add fixtures"]
+  },
+  "work": {
+    "summary": "Implemented schema validation and emit helpers.",
+    "changes": ["Added schema files", "Added validator logic"]
+  },
+  "assess": {
+    "summary": "Schemas are strict and deterministic.",
+    "rubrics": {
+      "security": "No secret material added.",
+      "quality": "Fixtures cover pass and fail cases.",
+      "architecture": "Scope isolated to compound evidence module."
+    }
+  },
+  "compound": {
+    "summary": "Memory updates recorded for future runs.",
+    "memory_updates": ["Keep timestamps isolated to stamp.json."]
+  }
+}
