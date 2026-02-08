@@ -75,10 +75,12 @@ module.exports = {
   moduleNameMapper: {
     '^node-fetch$': '<rootDir>/__mocks__/node-fetch.cjs',
     '^pg$': '<rootDir>/__mocks__/pg.js',
-    '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
+    '^ioredis$': '<rootDir>/__mocks__/ioredis.cjs',
     '^@opentelemetry/sdk-node$': '<rootDir>/__mocks__/otel-sdk-node.cjs',
     '^@opentelemetry/exporter-trace-otlp-http$': '<rootDir>/__mocks__/otel-exporter-trace-otlp-http.cjs',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.cjs',
+    '^pptxgenjs$': '<rootDir>/__mocks__/pptxgenjs.cjs',
+    '^pkcs11js$': '<rootDir>/__mocks__/pkcs11js.cjs',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',

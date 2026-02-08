@@ -1,0 +1,72 @@
+{
+  "datasets": [
+    {
+      "datasetId": "baseline",
+      "description": "Minimal baseline dataset for guardrail evaluation",
+      "pairs": [
+        {
+          "id": "baseline-1",
+          "entityA": {
+            "id": "a1",
+            "labels": ["Entity"],
+            "properties": { "name": "Alpha", "email": "alpha@example.com" }
+          },
+          "entityB": {
+            "id": "a2",
+            "labels": ["Entity"],
+            "properties": { "name": "Alpha", "email": "alpha@example.com" }
+          },
+          "isMatch": true
+        },
+        {
+          "id": "baseline-2",
+          "entityA": {
+            "id": "b1",
+            "labels": ["Entity"],
+            "properties": { "name": "Beta" }
+          },
+          "entityB": {
+            "id": "c1",
+            "labels": ["Entity"],
+            "properties": { "name": "Gamma" }
+          },
+          "isMatch": false
+        }
+      ]
+    },
+    {
+      "datasetId": "low-recall",
+      "description": "Dataset designed to fail strict guardrails",
+      "pairs": [
+        {
+          "id": "low-recall-1",
+          "entityA": {
+            "id": "d1",
+            "labels": ["Entity"],
+            "properties": { "name": "Delta" }
+          },
+          "entityB": {
+            "id": "e1",
+            "labels": ["Entity"],
+            "properties": { "name": "Echo" }
+          },
+          "isMatch": false
+        },
+        {
+          "id": "low-recall-2",
+          "entityA": {
+            "id": "f1",
+            "labels": ["Entity"],
+            "properties": { "name": "Foxtrot" }
+          },
+          "entityB": {
+            "id": "g1",
+            "labels": ["Entity"],
+            "properties": { "name": "Golf" }
+          },
+          "isMatch": true
+        }
+      ]
+    }
+  ]
+}
