@@ -136,6 +136,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: switchboard-flywheel-epic
+    version: v1
+    path: prompts/strategy/switchboard-flywheel-epic@v1.md
+    sha256: 952c74e698bb63a9b8bf4b654fdd0750ab40ecfb4bd973f595d39df0b2d545b0
+    description: Document Switchboard Flywheel strategy track with epic PR map, gates, and evidence artifacts.
+    scope:
+      paths:
+        - docs/roadmap/strategic/switchboard-flywheel-epic.md
+        - docs/roadmap/STATUS.json
+        - prompts/strategy/switchboard-flywheel-epic@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SWITCHBOARD_FLYWHEEL_EPIC_20260208.json
+        - packages/decision-ledger/decision_ledger.json
+      domains:
+        - strategy
+        - governance
+        - documentation
+        - switchboard
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md

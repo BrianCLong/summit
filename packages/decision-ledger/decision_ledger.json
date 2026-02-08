@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "switchboard-flywheel-20260208",
+    "timestamp": "2026-02-08T04:40:42Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJkb2N1bWVudCBzd2l0Y2hib2FyZCBmbHl3aGVlbCBzdHJhdGVneSB0cmFjayBhbmQgZ292ZXJuYW5jZSBnYXRlcyIsImZpbGVzIjpbImRvY3Mvcm9hZG1hcC9zdHJhdGVnaWMvc3dpdGNoYm9hcmQtZmx5d2hlZWwtZXBpYy5tZCIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsInByb21wdHMvc3RyYXRlZ3kvc3dpdGNoYm9hcmQtZmx5d2hlZWwtZXBpY0B2MS5tZCIsInByb21wdHMvcmVnaXN0cnkueWFtbCIsImFnZW50cy9leGFtcGxlcy9TV0lUQ0hCT0FSRF9GTFlXSEVFTF9FUElDXzIwMjYwMjA4Lmpzb24iLCJwYWNrYWdlcy9kZWNpc2lvbi1sZWRnZXIvZGVjaXNpb25fbGVkZ2VyLmpzb24iXX0=",
+    "decision": {
+      "action": "document_switchboard_flywheel_strategy",
+      "rule": {
+        "condition": "switchboard flywheel strategy track required",
+        "action": "document_strategy_track",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Documented Switchboard Flywheel strategy track with PR-1..PR-8 epic gates, evidence artifacts, and roadmap update. Rollback: revert the commit adding the strategy track doc, prompt registry entry, task spec, and status update.",
+    "reverted": false
   }
 ]
