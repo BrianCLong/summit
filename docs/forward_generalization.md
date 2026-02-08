@@ -1,41 +1,66 @@
-# Forward Generalization Strategy
+# Forward Generalization Framework
 
-## Cross-Domain Fusion (Fusion Layer)
+This framework formalizes Summit’s expansion from IO specialization into reusable,
+compliance-grade platform primitives. It is intentionally constrained to deterministic,
+policy-aligned behavior.
 
-The Fusion Layer unifies analysis across domains (IO, Supply Chain, Geo Risk, Brand Protection).
+## Strategic objectives
 
-**Core Concepts:**
--   **Shared Entities**: Organizations, assets, locations, narratives, and events are canonicalized across domains.
--   **Unified Provenance**: Common standards for data lineage and access policy.
--   **Plug-in Detectors**: Domain-specific detectors operate on the shared graph.
+- **Cross-domain fusion**: unify IO, supply chain, geo risk, and brand protection via shared
+  canonical entities and provenance.
+- **Reusable human–AI patterns**: codify hypothesis → evidence → critique → escalation → publish.
+- **Multi-tenant marketplace**: share playbooks, detection rules, enrichers, and eval packs with
+  signing and policy scans.
 
-## Human-AI Collaboration (HITL) Patterns
+## Fusion layer
 
-Standardized patterns for analyst interaction:
+Define a Fusion Layer that enforces:
 
-1.  **Hypothesis -> Evidence -> Critique -> Escalation -> Publish**:
-    -   Structured workflow for investigations.
-    -   AI suggests hypotheses; analysts verify with evidence.
-2.  **Structured Feedback Loops**:
-    -   Analyst actions (accept/reject/modify) are captured as training/eval data.
-    -   Requires explicit consent and governance.
-3.  **Analyst Decision Records (ADR)**:
-    -   Formal records of key decisions, stored in CompanyOS.
-    -   Includes rationale, evidence citations, and confidence levels.
+- Shared canonical entities (orgs, assets, locations, narratives, events).
+- Shared provenance + access policy (tenant-scoped + evidence-first).
+- Domain-specific detectors as plug-ins, controlled by a common governance contract.
 
-## Multi-Tenant Marketplace
+**Deliverables:**
 
-A platform for sharing capabilities across tenants safely.
+- `docs/fusion_layer.md` (interface + governance contract)
+- `libs/fusion/` (interfaces + validation hooks)
 
-**Shareable Artifacts:**
--   **Playbooks**: Maestro workflow definitions.
--   **Detection Rules**: Logic for identifying threats.
--   **Enrichment Modules**: Data augmentation services.
--   **Evaluation Packs**: Benchmark datasets and scoring metrics.
+## Human–AI collaboration patterns
 
-**Safety & Governance:**
--   **Signed Artifacts**: Cryptographic verification of origin and integrity.
--   **Versioning**: Semantic versioning for all shared components.
--   **Policy Scanning**: Automated checks for PII, ToS compliance, and legal restrictions.
--   **Reproducibility**: Evidence bundles must verify performance claims.
--   **Tenant Isolation**: Strict boundaries to prevent data leakage during sharing.
+Standardize analyst workflows with deterministic evidence outputs:
+
+1. Hypothesis formation
+2. Evidence collection (policy-approved)
+3. Automated analysis (deterministic, cited)
+4. Critique + red-team review
+5. Escalation gates
+6. Publish with signed evidence bundles
+
+**Deliverables:**
+
+- `docs/hitl/patterns.md`
+- ADR-style Analyst Decision Records in CompanyOS
+
+## Marketplace primitives
+
+All shared artifacts must be:
+
+- Signed
+- Versioned
+- Policy-scanned (PII/ToS/legal)
+- Reproducible (evidence bundle included)
+
+**Deliverables:**
+
+- Maestro playbooks registry with tenant isolation tests
+- Signed artifact verification in CI gates
+
+## Deterministic evidence requirements
+
+Every shared artifact must emit:
+
+- `report.json`
+- `metrics.json`
+- `stamp.json`
+
+This ensures portability across tenants and deterministic replay.

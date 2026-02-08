@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schema/io/campaign.schema.json",
+  "title": "IO Campaign",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["campaign_id", "name", "status", "created_at", "provenance"],
+  "properties": {
+    "campaign_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "paused", "closed", "unknown"]
+    },
+    "description": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "entity_id of participating actors"
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  }
+}

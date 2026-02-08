@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schema/io/engagement.schema.json",
+  "title": "IO Engagement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["content_id", "account_id", "type", "timestamp", "provenance"],
+  "properties": {
+    "content_id": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["like", "share", "comment", "view", "reaction", "other"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  }
+}
