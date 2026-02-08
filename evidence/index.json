@@ -401,12 +401,20 @@
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
     },
-    {
+    "EVD-NARRATIVE-CI-METRICS-001": {
       "evidence_id": "EVD-NARRATIVE-CI-METRICS-001",
       "files": {
         "report": "evidence/EVD-NARRATIVE-CI-METRICS-001/report.json",
         "metrics": "evidence/EVD-NARRATIVE-CI-METRICS-001/metrics.json",
         "stamp": "evidence/EVD-NARRATIVE-CI-METRICS-001/stamp.json"
+      }
+    },
+    "EVD-codag-workflowviz-SCHEMA-001": {
+      "evidence_id": "EVD-codag-workflowviz-SCHEMA-001",
+      "files": {
+        "report": "evidence/workflow-graphs/report.json",
+        "metrics": "evidence/workflow-graphs/metrics.json",
+        "stamp": "evidence/workflow-graphs/stamp.json"
       }
     }
   }
