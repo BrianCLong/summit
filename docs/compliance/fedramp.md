@@ -1,29 +1,19 @@
-# FedRAMP Compliance Pathway
+# FedRAMP Moderate Control Mapping
 
-## Strategy: FedRAMP High
-Summit is pursuing **FedRAMP High** authorization to serve agencies requiring the protection of highly sensitive unclassified data.
+This document maps Summit GA features to FedRAMP Moderate controls.
 
-## Architecture Alignment
+| Control ID | Control Name | Summit Feature | Evidence Artifact |
+| :--- | :--- | :--- | :--- |
+| **AC-2** | Account Management | Policy-First Execution (OPA) | `policy/opa/agent_gates.rego` |
+| **AU-3** | Content of Audit Records | GraphRAG Evidence IDs | `artifacts/graphrag-report.json` |
+| **CM-8** | Information System Component Inventory | SBOM Generation | `sbom.spdx.json` |
+| **SI-7** | Software, Firmware, and Information Integrity | SLSA Provenance & Cosign | `provenance.intoto.jsonl` |
+| **SC-7** | Boundary Protection | Webhook Ingest Gates | `ingest/webhooks/` |
 
-### 1. Boundary Definition
-*   **Authorization Boundary:** Includes all production Kubernetes clusters, managed databases (RDS/Aurora), and load balancers.
-*   **External Interconnections:** Strictly controlled via Trusted Internet Connections (TIC) 3.0 compliant gateways.
+## Implementation Details
 
-### 2. Data Segmentation
-*   **Multi-Tenancy:** Implemented via strict logical separation (PostgreSQL Row-Level Security, OPA Policies) and dedicated encryption keys per tenant (AWS KMS).
-*   **Federal Enclave:** Federal customers are hosted in a dedicated `us-gov-west-1` AWS GovCloud environment, physically separated from commercial tenants.
+### AC-2: Policy-First Execution
+All agent actions are mediated by Open Policy Agent (OPA) gates defined in `policy/opa/`. Default deny policies ensure no unauthorized tools are executed.
 
-## Control Implementation Status
-
-| Control Family | Status | Key Implementation Details |
-| :--- | :--- | :--- |
-| **AC (Access Control)** | ✅ Ready | MFA enforced (YubiKey/CAC), Just-In-Time (JIT) access for admins. |
-| **AU (Audit and Accountability)** | ✅ Ready | Centralized logging to WORM storage (S3 Object Lock); Splunk integration. |
-| **CM (Configuration Management)** | ✅ Ready | Immutable infrastructure; drift detection via ArgoCD. |
-| **IA (Identification and Auth)** | ✅ Ready | ICAM integration; support for PIV/CAC derived credentials. |
-| **SC (System and Comm Protection)** | ✅ Ready | FIPS 140-3 validated encryption (TLS 1.3) for all data in transit. |
-
-## Roadmap to ATO
-1.  **Readiness Assessment (3PAO):** Scheduled Q4 2024.
-2.  **In-Process Designation:** Q1 2025 (Sponsorship identified).
-3.  **Full Authorization:** Target Q3 2025.
+### AU-3: Audit Records
+GraphRAG generates deterministic `EVID-` identifiers for every retrieval path, ensuring full traceability of AI decisions.
