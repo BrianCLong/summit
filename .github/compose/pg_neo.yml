@@ -1,0 +1,42 @@
+# This file defines the mock services for the GitHub Actions CI environment.
+# It simulates the PostgreSQL and Neo4j databases required for integration tests
+# without connecting to live external resources.
+
+version: '3.8'
+
+services:
+  # PostgreSQL service for relational data testing
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: summit_test
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U summit -d summit_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  # Neo4j service for graph data testing
+  neo4j:
+    image: neo4j:5.12-community
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:7474"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    tmpfs:
+      - /data
+      - /logs

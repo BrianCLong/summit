@@ -12,6 +12,8 @@ const createMockMetric = () => ({
 
 // Export all individual metrics (alphabetically sorted)
 export const admissionDecisionsTotal = createMockMetric();
+export const agentExecutionDuration = createMockMetric();
+export const agentExecutionsTotal = createMockMetric();
 export const aiJobDuration = createMockMetric();
 export const aiJobsProcessing = createMockMetric();
 export const aiJobsQueued = createMockMetric();
@@ -114,6 +116,7 @@ export const memoryUsage = createMockMetric();
 export const neighborhoodCacheHitRatio = createMockMetric();
 export const neighborhoodCacheLatencyMs = createMockMetric();
 export const pbacDecisionsTotal = createMockMetric();
+export const policyDecisionsTotal = createMockMetric();
 export const pipelineCompletenessRatio = createMockMetric();
 export const pipelineCorrectnessRatio = createMockMetric();
 export const pipelineFreshnessSeconds = createMockMetric();
@@ -144,6 +147,8 @@ export const rollbackEventsTotal = createMockMetric();
 // Export metrics object
 export const metrics = {
   admissionDecisionsTotal,
+  agentExecutionDuration,
+  agentExecutionsTotal,
   aiJobDuration,
   aiJobsProcessing,
   aiJobsQueued,
@@ -252,6 +257,7 @@ export const metrics = {
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,
   pbacDecisionsTotal,
+  policyDecisionsTotal,
   pipelineCompletenessRatio,
   pipelineCorrectnessRatio,
   pipelineFreshnessSeconds,
