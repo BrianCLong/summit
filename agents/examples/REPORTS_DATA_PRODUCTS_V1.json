@@ -1,0 +1,44 @@
+{
+  "task_id": "REPORTS_DATA_PRODUCTS_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "reports-data-products-v1",
+    "version": "v1",
+    "sha256": "74163f2091fb972e15e7adfcc78befa299d7f60fb5cc64b5b01fa6bb5e658902",
+    "path": "prompts/engineering/reports-data-products-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "server/src/reporting/",
+      "server/src/routes/reports.ts",
+      "server/src/app.ts",
+      "docs/roadmap/STATUS.json",
+      "prompts/engineering/reports-data-products-v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/REPORTS_DATA_PRODUCTS_V1.json"
+    ],
+    "domains": ["reporting", "api", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["server/src/reporting/__tests__/report-store.test.ts"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Report exports are tenant-scoped and return deterministic manifests",
+    "Manifest receipts hash-chain correctly",
+    "Report download endpoint works for authorized tenants"
+  ],
+  "stop_conditions": [
+    "Missing prompt registration",
+    "Policy or governance scope mismatch"
+  ],
+  "dependencies": [
+    "server/src/reporting/service.ts",
+    "server/src/evidence/attestation/sign.ts"
+  ]
+}

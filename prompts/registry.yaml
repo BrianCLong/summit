@@ -577,6 +577,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: reports-data-products-v1
+    version: v1
+    path: prompts/engineering/reports-data-products-v1.md
+    sha256: 74163f2091fb972e15e7adfcc78befa299d7f60fb5cc64b5b01fa6bb5e658902
+    description: Implement Sprint +2 Data Products report exports with manifests and tenant scoping.
+    scope:
+      paths:
+        - server/src/reporting/
+        - server/src/routes/reports.ts
+        - server/src/app.ts
+        - docs/roadmap/STATUS.json
+        - prompts/engineering/reports-data-products-v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - reporting
+        - api
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: implement-context-shell
     version: v1
     path: prompts/implement/context-shell@v1.md
