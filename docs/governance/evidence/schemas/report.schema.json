@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/report.schema.json",
+  "title": "Summit Evidence Report (Lane 1)",
+  "type": "object",
+  "properties": {
+    "summary": { "type": "string" },
+    "status": { "type": "string" },
+    "evidence_id": { "type": "string" }
+  },
+  "additionalProperties": true
+}

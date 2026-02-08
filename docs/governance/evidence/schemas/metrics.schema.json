@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/metrics.schema.json",
+  "title": "Summit Evidence Metrics (Lane 1)",
+  "type": "object",
+  "additionalProperties": {
+    "oneOf": [
+      { "type": "number" },
+      { "type": "integer" },
+      { "type": "string" },
+      { "type": "boolean" },
+      { "type": "object" },
+      { "type": "array" }
+    ]
+  }
+}
