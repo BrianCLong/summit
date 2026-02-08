@@ -1,0 +1,25 @@
+{
+  "incidents": [
+    {
+      "id": "inc-1",
+      "type": "cyber",
+      "timestamp": 1700000000000,
+      "description": "Sensitive documents leaked from government server regarding Project X.",
+      "severity": "high"
+    }
+  ],
+  "narratives": [
+    {
+      "id": "nar-1",
+      "startTime": 1700043200000,
+      "summary": "Project X proves government corruption and coverup.",
+      "keywords": ["project", "x", "leak", "corruption"]
+    },
+    {
+      "id": "nar-2",
+      "startTime": 1700200000000,
+      "summary": "Unrelated celebrity gossip.",
+      "keywords": ["celebrity", "gossip", "scandal"]
+    }
+  ]
+}

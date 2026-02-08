@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.local/schemas/cogwar-campaign.schema.json",
+  "title": "Cognitive Warfare Campaign Object",
+  "description": "A normalized entity representing a suspected influence operation across channels and domains.",
+  "type": "object",
+  "required": [
+    "campaign_id",
+    "name",
+    "status",
+    "vectors",
+    "metrics",
+    "evidence_bundle_id"
+  ],
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "pattern": "^CMP-CW26-[0-9]{8}-[A-Z0-9]{8}$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["suspected", "monitoring", "confirmed", "attribution-pending", "archived"]
+    },
+    "vectors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["social", "cyber", "physical", "cognitive"]
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "adaptivity_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "swarm_coordination_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cross_domain_correlation": { "type": "number", "minimum": 0, "maximum": 1 },
+        "attention_load": { "type": "number" },
+        "trust_shock": { "type": "number" }
+      },
+      "required": ["adaptivity_score", "swarm_coordination_score"]
+    },
+    "evidence_bundle_id": {
+      "type": "string",
+      "pattern": "^EVD:CW26:.*$"
+    },
+    "attributed_actors": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
