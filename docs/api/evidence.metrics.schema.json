@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence.metrics.schema.json",
+  "title": "EvidenceMetrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidenceId", "runId", "counters"],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^EVD-[A-Z0-9-]+$"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    }
+  }
+}
