@@ -82,7 +82,7 @@ Run these from repo root (or the specified workspace root):
 - `pnpm audit` at repo root timed out/hung after 300s (network retries still stalled).
 - `pnpm audit` in `apps/ui` timed out/hung after 300s (network retries still stalled).
 - `pnpm audit` in `intelgraph-mcp` fails (no `pnpm-lock.yaml`).
-- `pnpm audit` in `summit-mini` reports 2 vulnerabilities (1 low, 1 moderate).
+- `pnpm audit` in `summit-mini` reports 0 vulnerabilities after overrides (diff/esbuild).
 
 ## Next Actions
 
