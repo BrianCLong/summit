@@ -37,12 +37,24 @@ router.post(
     try {
       const payload = SupportBundleSchema.parse(req.body);
       const user = req.user as any;
+      const userTenantId = (user?.tenantId || user?.defaultTenantId) as string;
+      const userRole = user?.role as string;
       const actor = {
         id: user?.id as string,
-        role: user?.role as string,
-        tenantId: (user?.tenantId || user?.defaultTenantId) as string,
+        role: userRole,
+        tenantId: userTenantId,
         email: user?.email as string | undefined,
       };
+
+      // SECURITY: Validate cross-tenant access authorization
+      // Non-admin users can only generate bundles for their own tenant
+      const isAdmin = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(userRole);
+      if (!isAdmin && payload.tenantId !== userTenantId) {
+        res.status(403).json({
+          error: 'Forbidden: Cannot generate support bundle for another tenant'
+        });
+        return;
+      }
 
       const result = await supportBundleService.generateBundle({
         actor,
