@@ -49,10 +49,8 @@ dev-down: dev-prereqs ## Stop dev stack and remove volumes
 dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Running dev smoke checks..."
 	@docker compose -f $(COMPOSE_DEV_FILE) ps
-	@echo "Checking UI at http://localhost:3000 ..."
-	@curl -sSf http://localhost:3000 > /dev/null || { echo "UI not responding on port 3000."; exit 1; }
-	@echo "Checking Gateway health at http://localhost:8080/health ..."
-	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
+	@node smoke-test.js
+	@$(MAKE) k6 TARGET=http://localhost:4000
 	@echo "Dev smoke checks passed."
 
 restart: down up
