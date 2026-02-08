@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-OLKG-LINEAGE-001",
+      "files": {
+        "report": "report.json",
+        "metrics": "metrics.json",
+        "stamp": "stamp.json"
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "summary": "Evidence verifier should fail on timestamp in report",
+  "status": "FAIL",
+  "timestamp": "2026-02-08T02:00:00Z",
+  "evidence_id": "EVD-OLKG-GATE-001"
+}
