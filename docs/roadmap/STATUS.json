@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:30:00Z",
+  "revision_note": "Added competitor decode evidence scaffolding (schemas, determinism writer, and required check discovery stubs); Added evidence contract schemas and CI evidence verification scaffold; Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI_CD high-signal delta action register.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -58,7 +58,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added competitor decode evidence schema scaffolding and deterministic writer. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
