@@ -896,3 +896,27 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: summit-switchboard-positioning-architecture
+    version: v0.1
+    path: prompts/switchboard/summit-switchboard-positioning-architecture@v0.1.md
+    sha256: 094c6bbf2d5d05db136bfc96f96dcf6dbb3c8fe518519cbfe5229a1f28864ce0
+    description: Define Summit Switchboard positioning, boundaries, and v0.1 architecture modules.
+    scope:
+      paths:
+        - docs/switchboard/
+        - docs/roadmap/STATUS.json
+        - prompts/switchboard/summit-switchboard-positioning-architecture@v0.1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - switchboard
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
