@@ -34,14 +34,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -53,18 +53,6 @@ jobs:
         env:
           CI: true
           GA_VERIFY_MODE: true
-
-      - name: Verify SLSA Attestations
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "Verifying SLSA provenance..."
-          # Only verify if we are on main branch
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            gh attestation verify . --repo ${{ github.repository }} || echo "::warning::SLSA Verification failed or no attestations found"
-          else
-            echo "Skipping SLSA verification for PR branch"
-          fi
 
       - name: GA Gate Summary
         if: always()

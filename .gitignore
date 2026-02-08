@@ -365,15 +365,3 @@ evidence-staging/
 *.txt
 tmp-test/
 \n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
-.pnpm-store/
-dist-isolated/
-services/agent-runtime-restored/
-services/api-gateway-restored/
-services/prov-ledger-restored/
-services/graph-xai-restored-2/
-libs/context-shell/node/
-packages/osint-collector/src/collectors/*.js
-packages/osint-collector/src/core/*.js
-packages/osint-collector/src/types/*.js
-packages/osint-collector/src/utils/*.js
-evidence/skills/

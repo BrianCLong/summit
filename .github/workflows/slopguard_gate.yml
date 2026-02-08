@@ -7,10 +7,6 @@ on:
       - 'ingest/**'
       - 'datasets/**'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   slopguard:
     runs-on: ubuntu-22.04

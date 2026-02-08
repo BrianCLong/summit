@@ -11,10 +11,6 @@ on:
       - 'server/src/policy-engine/**'
       - 'server/src/scripts/policy-propose.ts'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   test-engine:
     runs-on: ubuntu-latest

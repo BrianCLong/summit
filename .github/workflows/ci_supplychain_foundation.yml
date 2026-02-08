@@ -8,10 +8,6 @@ on:
       - "Dockerfile"
       - ".github/workflows/ci_supplychain_foundation.yml"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   validate:
     runs-on: ubuntu-latest

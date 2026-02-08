@@ -42,10 +42,6 @@ on:
         description: "Health score percentage"
         value: ${{ jobs.health-check.outputs.score }}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   issues: read
