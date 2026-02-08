@@ -165,6 +165,42 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: koreai-agentic-evidence-scaffold
+    version: v1
+    path: prompts/evidence/koreai-agentic-evidence-scaffold@v1.md
+    sha256: 9d1033425ea029209639278bdcfb68c2a27909ec693ec3fac0183e8b192709c3
+    description: Scaffold deterministic evidence bundle and GA verification gates for koreai-agentic.
+    scope:
+      paths:
+        - evidence/runs/koreai-agentic/
+        - evidence/index.json
+        - .github/scripts/verify-evidence.mjs
+        - .github/workflows/ci-verify.yml
+        - docs/ga/evidence-system.md
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/verification-map.json
+        - reports/a11y-keyboard/README.md
+        - required_checks.todo.md
+        - agent-contract.json
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/evidence/koreai-agentic-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+        - agents/examples/KOREAI_AGENTIC_EVIDENCE_SCAFFOLD_20260208.json
+      domains:
+        - evidence
+        - governance
+        - documentation
+        - ci
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: svc-repo-recon
     version: v1
     path: prompts/governance/svc-repo-recon@v1.md

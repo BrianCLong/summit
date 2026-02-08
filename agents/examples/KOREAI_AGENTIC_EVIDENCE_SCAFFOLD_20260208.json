@@ -1,0 +1,46 @@
+{
+  "task_id": "KOREAI_AGENTIC_EVIDENCE_SCAFFOLD_20260208",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "koreai-agentic-evidence-scaffold",
+    "version": "v1",
+    "sha256": "9d1033425ea029209639278bdcfb68c2a27909ec693ec3fac0183e8b192709c3",
+    "path": "prompts/evidence/koreai-agentic-evidence-scaffold@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "evidence/runs/koreai-agentic/",
+      "evidence/index.json",
+      ".github/scripts/verify-evidence.mjs",
+      ".github/workflows/ci-verify.yml",
+      "docs/ga/evidence-system.md",
+      "docs/ga/MVP-4-GA-VERIFICATION.md",
+      "docs/ga/verification-map.json",
+      "reports/a11y-keyboard/README.md",
+      "required_checks.todo.md",
+      "agent-contract.json",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json"
+    ],
+    "domains": ["evidence", "governance", "documentation", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["make ga-verify", "node .github/scripts/verify-evidence.mjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Evidence bundle exists for koreai-agentic with determinism enforced.",
+    "GA verification map includes deterministic evidence system entry.",
+    "Evidence verification script passes."
+  ],
+  "stop_conditions": [
+    "ga-verify fails with unresolved determinism or missing evidence.",
+    "Evidence index references missing files.",
+    "Required checks cannot be mapped deterministically."
+  ]
+}
