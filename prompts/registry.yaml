@@ -75,6 +75,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: codex-desktop-summit-workspace
+    version: v1
+    path: prompts/docs/codex-desktop-summit@v1.md
+    sha256: 758f481d7d16ac921d91661f1de570a7553715916cc0f19bd0fd9e648e1e0c1f
+    description: Create the Codex Desktop Summit workspace guide and update roadmap status and task spec.
+    scope:
+      paths:
+        - docs/codex-desktop-summit.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/CODEX_DESKTOP_SUMMIT_WORKSPACE_20260208.json
+        - prompts/docs/codex-desktop-summit@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - automation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md

@@ -1,0 +1,47 @@
+{
+  "task_id": "CODEX_DESKTOP_SUMMIT_WORKSPACE_20260208",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "codex-desktop-summit-workspace",
+    "version": "v1",
+    "sha256": "758f481d7d16ac921d91661f1de570a7553715916cc0f19bd0fd9e648e1e0c1f",
+    "path": "prompts/docs/codex-desktop-summit@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/codex-desktop-summit.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/CODEX_DESKTOP_SUMMIT_WORKSPACE_20260208.json",
+      "prompts/docs/codex-desktop-summit@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": [
+      "documentation",
+      "governance",
+      "automation"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/codex-desktop-summit.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Codex Desktop workspace guide exists in docs/codex-desktop-summit.md",
+    "Roadmap status updated with a revision note and timestamp",
+    "Prompt registry and prompt file updated for this task"
+  ],
+  "stop_conditions": [
+    "Scope expansion beyond declared documentation and metadata paths",
+    "Required governance references are missing from the guide"
+  ]
+}
