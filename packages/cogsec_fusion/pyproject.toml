@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cogsec-fusion"
+version = "0.1.0"
+description = "Cognitive Security Fusion Pack for IntelGraph"
+requires-python = ">=3.8"
+dependencies = [
+    "requests",
+    "pydantic",
+    "jsonschema",
+    "PyYAML"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest"
+]
