@@ -1,0 +1,30 @@
+{
+  "items": [
+    {
+      "schema": "campaign_phase.graph.json",
+      "status": "valid",
+      "sample_data_snippet": "{'nodes': [{'id': 'camp1', 'type': 'Campaign', 'properties': {'name': 'Test Campaign', 'status': 'AC"
+    },
+    {
+      "schema": "narrative_market.graph.json",
+      "status": "valid",
+      "sample_data_snippet": "{'nodes': [{'id': 'market1', 'type': 'NarrativeMarket'}, {'id': 'metric1', 'type': 'MarketMetric', '"
+    },
+    {
+      "schema": "cognitive_layer.graph.json",
+      "status": "valid",
+      "sample_data_snippet": "{'nodes': [{'id': 'cog1', 'type': 'CognitiveState', 'properties': {'uncertainty': 0.2}}, {'id': 'def"
+    },
+    {
+      "schema": "proof_layer.graph.json",
+      "status": "valid",
+      "sample_data_snippet": "{'nodes': [{'id': 'proof1', 'type': 'ProofObject', 'properties': {'proofType': 'VIDEO', 'isSynthetic"
+    },
+    {
+      "schema": "wargame.graph.json",
+      "status": "valid",
+      "sample_data_snippet": "{'nodes': [{'id': 'scenario1', 'type': 'WargameScenario', 'properties': {'scenarioName': 'Red Team 1"
+    }
+  ],
+  "evidence_id": "EVID-IOPS-20260208-v2-schema-gitsha7"
+}
