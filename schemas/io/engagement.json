@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IO Engagement",
+  "type": "object",
+  "required": ["target_id", "actor_id", "type", "timestamp", "provenance"],
+  "properties": {
+    "target_id": { "type": "string" },
+    "actor_id": { "type": "string" },
+    "type": { "type": "string", "enum": ["like", "share", "comment", "click", "view"] },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "provenance": { "$ref": "./provenance.json" }
+  }
+}
