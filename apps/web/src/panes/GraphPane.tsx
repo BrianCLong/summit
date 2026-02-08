@@ -3,6 +3,9 @@
 import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react';
 import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
 import { useWorkspaceStore } from '../store/workspaceStore';
+import { EvidenceTrailPeek } from '@/components/evidence/EvidenceTrailPeek';
+import { useFeatureFlag } from '@/hooks/useFeatureFlag';
+import { features } from '@/config/features';
 
 interface GraphWrapperProps {
   children: (width: number, height: number) => React.ReactNode;
@@ -39,6 +42,16 @@ const GraphWrapper = ({ children }: GraphWrapperProps) => {
 export const GraphPane = () => {
   const { entities, links, selectedEntityIds, selectEntity, isSyncing, syncError, retrySync } = useWorkspaceStore();
   const graphRef = useRef<ForceGraphMethods | undefined>(undefined);
+  const evidenceTrailEnabled = useFeatureFlag('evidenceTrailPeek', features.evidenceTrailPeek);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
+  const [evidencePeekOpen, setEvidencePeekOpen] = useState(false);
+  const [evidenceNodeId, setEvidenceNodeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!evidencePeekOpen) {
+      setEvidenceNodeId(null);
+    }
+  }, [evidencePeekOpen]);
 
   // Syncing indicator logic (only show if lag > 250ms)
   const [showSyncing, setShowSyncing] = useState(false);
@@ -67,6 +80,20 @@ export const GraphPane = () => {
     selectEntity(node.id);
   }, [selectEntity]);
 
+  const handleNodeRightClick = useCallback(
+    (node: any, event?: MouseEvent) => {
+      if (!evidenceTrailEnabled) return;
+      if (event?.preventDefault) {
+        event.preventDefault();
+      }
+      const bounds = (event?.currentTarget as HTMLElement | null)?.getBoundingClientRect();
+      const x = bounds ? event.clientX - bounds.left : event?.clientX ?? 0;
+      const y = bounds ? event.clientY - bounds.top : event?.clientY ?? 0;
+      setContextMenu({ x, y, nodeId: node.id });
+    },
+    [evidenceTrailEnabled],
+  );
+
   // Effect to highlight/zoom on selection
   useEffect(() => {
     if (selectedEntityIds.length === 1 && graphRef.current) {
@@ -77,7 +104,10 @@ export const GraphPane = () => {
   }, [selectedEntityIds]);
 
   return (
-    <div className="w-full h-full relative bg-slate-900 border border-slate-800 rounded-lg overflow-hidden flex flex-col">
+    <div
+      className="w-full h-full relative bg-slate-900 border border-slate-800 rounded-lg overflow-hidden flex flex-col"
+      onPointerDown={() => contextMenu && setContextMenu(null)}
+    >
         <div className="absolute top-2 left-2 z-10 bg-slate-900/80 backdrop-blur px-3 py-1 rounded text-xs font-mono text-purple-400 border border-purple-900/50">
             NETWORK ANALYSIS
         </div>
@@ -103,6 +133,35 @@ export const GraphPane = () => {
              </div>
         )}
 
+        {evidenceTrailEnabled && selectedEntityIds.length === 1 && (
+          <div className="absolute top-2 right-2 z-20">
+            <EvidenceTrailPeek
+              nodeId={selectedEntityIds[0]}
+              triggerLabel="Evidence trail"
+              triggerVariant="outline"
+            />
+          </div>
+        )}
+
+        {contextMenu && (
+          <div
+            className="absolute z-30 rounded-md border border-slate-700 bg-slate-950/90 px-3 py-2 text-xs text-white shadow-lg"
+            style={{ top: contextMenu.y, left: contextMenu.x }}
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            <button
+              className="hover:text-cyan-300"
+              onClick={() => {
+                setEvidenceNodeId(contextMenu.nodeId);
+                setEvidencePeekOpen(true);
+                setContextMenu(null);
+              }}
+            >
+              Evidence trail
+            </button>
+          </div>
+        )}
+
       <GraphWrapper>
         {(width, height) => (
           <ForceGraph2D
@@ -116,12 +175,23 @@ export const GraphPane = () => {
             linkColor={() => '#475569'}
             backgroundColor="#0f172a"
             onNodeClick={handleNodeClick}
+            onNodeRightClick={handleNodeRightClick}
             cooldownTicks={100}
             linkDirectionalArrowLength={3.5}
             linkDirectionalArrowRelPos={1}
           />
         )}
       </GraphWrapper>
+
+      {evidenceTrailEnabled && evidenceNodeId && (
+        <EvidenceTrailPeek
+          nodeId={evidenceNodeId}
+          open={evidencePeekOpen}
+          onOpenChange={setEvidencePeekOpen}
+          showTrigger={false}
+          contextLabel={`Node ${evidenceNodeId}`}
+        />
+      )}
     </div>
   );
 };
