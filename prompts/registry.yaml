@@ -24,6 +24,55 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: copilot-model-previews-lane1
+    version: v1
+    path: prompts/governance/copilot-model-previews-lane1@v1.md
+    sha256: 7578617ed94dd0c3475513bf21ffb55e9186bb35a8e88b6fc2943126aa319c07
+    description: Lane-1 governance scaffolding for Copilot model previews and evidence gates.
+    scope:
+      paths:
+        - .github/scripts/verify-evidence.mjs
+        - .github/workflows/ci-verify.yml
+        - agent-contract.json
+        - agents/examples/COPILOT_MODEL_PREVIEWS_LANE1_20260207.json
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/ga-copilot-model-previews.md
+        - docs/ga/verification-map.json
+        - docs/governance/copilot-models.md
+        - docs/roadmap/STATUS.json
+        - evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/report.json
+        - evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/metrics.json
+        - evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/stamp.json
+        - evidence/EVD-CLAUDEOPUS46FAST-COST-002/report.json
+        - evidence/EVD-CLAUDEOPUS46FAST-COST-002/metrics.json
+        - evidence/EVD-CLAUDEOPUS46FAST-COST-002/stamp.json
+        - evidence/EVD-CLAUDEOPUS46FAST-GATES-003/report.json
+        - evidence/EVD-CLAUDEOPUS46FAST-GATES-003/metrics.json
+        - evidence/EVD-CLAUDEOPUS46FAST-GATES-003/stamp.json
+        - evidence/index.json
+        - prompts/governance/copilot-model-previews-lane1@v1.md
+        - prompts/registry.yaml
+        - reports/a11y-keyboard/README.md
+        - required_checks.todo.md
+        - src/connectors/copilot/models.catalog.json
+        - src/connectors/copilot/readCatalog.ts
+        - src/policies/copilotModelPolicy.test.ts
+        - src/policies/copilotModelPolicy.ts
+      domains:
+        - governance
+        - evidence
+        - policy
+        - docs
+        - ci
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md

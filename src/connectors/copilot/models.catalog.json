@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "id": "anthropic/claude-opus-4.6-fast",
+      "state": "preview",
+      "tiers": ["copilot_pro_plus", "copilot_enterprise"],
+      "surfaces": [
+        "vscode_chat",
+        "vscode_ask",
+        "vscode_edit",
+        "vscode_agent",
+        "copilot_cli"
+      ],
+      "policyRequiredKeys": ["enable_fast_mode_opus_4_6"],
+      "premiumMultiplier": 9,
+      "promoWindow": {
+        "startISO": "2026-02-07T00:00:00Z",
+        "endISO": "2026-02-16T23:59:59Z"
+      },
+      "sources": [
+        {
+          "label": "GitHub changelog: Claude Opus 4.6 fast public preview",
+          "url": "https://github.blog/changelog/2026-02-07-claude-opus-4-6-fast-is-now-in-public-preview-for-github-copilot/"
+        },
+        {
+          "label": "GitHub Copilot requests and premium multipliers",
+          "url": "https://docs.github.com/en/copilot/about-github-copilot/requests-in-github-copilot"
+        }
+      ]
+    }
+  ]
+}

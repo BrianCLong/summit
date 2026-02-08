@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-CLAUDEOPUS46FAST-GATES-003",
+  "metrics": {
+    "workflow_jobs": 1,
+    "verification_steps": 2
+  }
+}

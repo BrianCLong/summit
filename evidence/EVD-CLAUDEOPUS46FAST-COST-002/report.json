@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-CLAUDEOPUS46FAST-COST-002",
+  "summary": "Deny-by-default enforcement for promo-window premium multipliers.",
+  "artifacts": ["src/policies/copilotModelPolicy.test.ts"],
+  "notes": "Tests assert failures when multiplier data is missing during the published promo window."
+}
