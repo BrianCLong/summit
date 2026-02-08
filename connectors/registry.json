@@ -602,6 +602,37 @@
       "path": "connectors/ofac_sdn_connector/"
     },
     {
+      "id": "gdelt-gkg",
+      "name": "GDELT GKG Connector",
+      "description": "Ingest narrative metadata from the GDELT Global Knowledge Graph",
+      "version": "0.1.0",
+      "status": "experimental",
+      "category": "osint",
+      "capabilities": [
+        "pull",
+        "batch"
+      ],
+      "entityTypes": [
+        "GDELT_Record",
+        "Theme",
+        "Location"
+      ],
+      "relationshipTypes": [
+        "MENTIONS"
+      ],
+      "authentication": [
+        "none"
+      ],
+      "rateLimit": {
+        "requestsPerMinute": 4,
+        "burstLimit": 1
+      },
+      "license": "GDELT-Open-Data",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/gdelt-gkg.md",
+      "path": "connectors/gdelt_gkg/"
+    },
+    {
       "id": "rss-news",
       "name": "RSS News Connector",
       "description": "Ingest news articles from RSS/Atom feeds",
