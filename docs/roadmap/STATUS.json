@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-07T02:30:00Z",
+  "revision_note": "Expanded NDD documentation with API and testing strategy details.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -151,6 +151,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
+    },
+    {
+      "id": "ndd-module",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Narrative Dynamics & Durability (NDD) architecture, security, evals, ops runbook, product spec, API surface, and testing strategy."
     },
     {
       "id": "ru-ua-cogwar-lab",
