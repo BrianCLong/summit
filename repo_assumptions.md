@@ -1,35 +1,44 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (Agentic Analytics 2026)
 
-## Structure Validation
+## Readiness Reference
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+Summit Readiness Assertion: `docs/SUMMIT_READINESS_ASSERTION.md`.
 
-## Component Mapping
+## Verified (Evidence First)
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+| Item | Status | Evidence | Notes |
+| --- | --- | --- | --- |
+| Repo root exists | ✅ Verified | `summit/` | Working directory is `/workspace/summit`. |
+| `agentic/` | ✅ Verified | Root listing | Candidate home for agentic workflow artifacts. |
+| `analytics/` | ✅ Verified | Root listing | Candidate home for analytics references. |
+| `agents/` | ✅ Verified | Root listing | Existing agent definitions. |
+| `audit/` | ✅ Verified | Root listing | Audit artifacts/logs present. |
+| `alerting/` | ✅ Verified | Root listing | Alerting surface present. |
+| `api/` | ✅ Verified | Root listing | API surface present. |
+| `docs/` | ✅ Verified | Root listing | Documentation zone confirmed. |
+| `scripts/` | ✅ Verified | Root listing | Automation and tooling. |
+| `.github/workflows/` | ✅ Verified | Root listing | CI workflows present. |
+| `GOLDEN/` | ✅ Verified | Root listing | Golden-path fixtures present. |
 
-## Constraints & Checks
+## Assumed (Deferred Pending Validation)
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+| Assumption | Rationale | Validation Action |
+| --- | --- | --- |
+| Agent orchestration home | Likely `agentic/` or `agents/` based on naming. | Confirm canonical agent runtime location + ownership. |
+| Evidence schema conventions | Existing evidence bundles suggest an established schema. | Locate authoritative evidence schema and map outputs. |
+| CI gates & exact commands | README hints at pnpm/make targets, but CI is authoritative. | Inspect `.github/workflows/*` for gate names and required steps. |
+| PR metadata policy | PR template mandates agent metadata blocks. | Confirm `.github/PULL_REQUEST_TEMPLATE.md` usage for this track. |
 
-## Next Steps
+## Validation Checklist (Execute Before PR2+)
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+1. Confirm agent orchestration path and ownership (avoid cross-zone coupling).
+2. Confirm evidence schema location and required artifact naming.
+3. Confirm CI gate commands and minimum test expectations.
+4. Confirm policy docs for agent prompt registry compliance.
+5. Confirm any existing standards in `docs/standards/` relevant to analytics.
+
+## Constraints
+
+- Feature-flag default remains OFF (AGENTIC_ANALYTICS_ENABLED=false).
+- No direct external actions; recommendations only (human approval required).
+- Changes remain confined to the documentation zone in PR1.
