@@ -150,6 +150,7 @@ import factFlowRouter from './factflow/routes.js';
 import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 import { buildApprovalsRouter } from './routes/approvals.js';
 import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
+import appSurfaceRouter from './routes/app-surface.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -470,6 +471,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
+  app.use('/api/app-surface', appSurfaceRouter);
   app.use('/dr', drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
