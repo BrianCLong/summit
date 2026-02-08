@@ -2,12 +2,17 @@
  * PKI (Public Key Infrastructure) Manager
  */
 
-import { ec as EC } from 'elliptic';
+import { getPublicKey, sign, utils, verify } from '@noble/secp256k1';
+import { sha256 } from '@noble/hashes/sha256';
 import * as forge from 'node-forge';
 import { Logger } from 'pino';
 import { v4 as uuidv4 } from 'uuid';
 
-const ec = new EC('secp256k1');
+const bytesToHex = (bytes: Uint8Array): string =>
+  Buffer.from(bytes).toString('hex');
+
+const hexToBytes = (hex: string): Uint8Array =>
+  Uint8Array.from(Buffer.from(hex, 'hex'));
 
 export interface KeyPair {
   publicKey: string;
@@ -47,11 +52,12 @@ export class PKIManager {
    * Generate ECDSA key pair
    */
   generateECDSAKeyPair(): KeyPair {
-    const keyPair = ec.genKeyPair();
+    const privateKey = utils.randomPrivateKey();
+    const publicKey = getPublicKey(privateKey, false);
 
     return {
-      publicKey: keyPair.getPublic('hex'),
-      privateKey: keyPair.getPrivate('hex'),
+      publicKey: bytesToHex(publicKey),
+      privateKey: bytesToHex(privateKey),
       algorithm: 'ECDSA',
     };
   }
@@ -73,11 +79,10 @@ export class PKIManager {
    * Sign data with ECDSA
    */
   signECDSA(data: string, privateKeyHex: string): string {
-    const key = ec.keyFromPrivate(privateKeyHex, 'hex');
-    const hash = forge.md.sha256.create().update(data).digest().toHex();
-    const signature = key.sign(hash);
+    const hash = sha256(Buffer.from(data, 'utf8'));
+    const signature = sign(hash, privateKeyHex, { der: true });
 
-    return signature.toDER('hex');
+    return typeof signature === 'string' ? signature : bytesToHex(signature);
   }
 
   /**
@@ -85,10 +90,9 @@ export class PKIManager {
    */
   verifyECDSA(data: string, signature: string, publicKeyHex: string): boolean {
     try {
-      const key = ec.keyFromPublic(publicKeyHex, 'hex');
-      const hash = forge.md.sha256.create().update(data).digest().toHex();
+      const hash = sha256(Buffer.from(data, 'utf8'));
 
-      return key.verify(hash, signature);
+      return verify(hexToBytes(signature), hash, hexToBytes(publicKeyHex));
     } catch (error) {
       return false;
     }
@@ -257,8 +261,8 @@ export class PKIManager {
       const signature = this.signECDSA(data, privateKey);
       signatures.push(signature);
 
-      const key = ec.keyFromPrivate(privateKey, 'hex');
-      publicKeys.push(key.getPublic('hex'));
+      const publicKey = getPublicKey(hexToBytes(privateKey), false);
+      publicKeys.push(bytesToHex(publicKey));
     }
 
     return {
