@@ -12,6 +12,10 @@ on:
       - 'modules/archsim/**'
       - 'schemas/archsim/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   archsim-foundation:
     runs-on: ubuntu-latest
