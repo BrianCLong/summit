@@ -1,0 +1,180 @@
+version: 1
+namespace: summit.narratives
+id_policy:
+  algo: sha256
+  canonicalization: unicode_nfkc_whitespace_collapse
+nodes:
+  Artifact:
+    description: Observed content item (post/article/video transcript chunk)
+    keys: [artifact_id]
+    props:
+      artifact_id: {type: string, required: true}
+      uri: {type: string, required: false}
+      platform: {type: string, required: false}
+      content_hash: {type: string, required: true}
+      lang: {type: string, required: false}
+      text_excerpt: {type: string, required: false}
+      media_type: {type: string, required: false} # text|image|video|audio|mixed
+      collected_at_ref: {type: string, required: false} # pointer to stamp.json record
+      integrity:
+        type: object
+        required: false
+        shape:
+          hash_algo: {type: string}
+          hash: {type: string}
+          size_bytes: {type: integer}
+  Actor:
+    keys: [actor_id]
+    props:
+      actor_id: {type: string, required: true}
+      handle: {type: string, required: false}
+      display_name: {type: string, required: false}
+      actor_type: {type: string, required: false} # individual|org|media|bot_suspected|unknown
+      tier: {type: string, required: false} # fringe|influencer|semi_legit|mainstream|official
+  Narrative:
+    keys: [narrative_id]
+    props:
+      narrative_id: {type: string, required: true}
+      label: {type: string, required: false}
+      state: {type: string, required: true} # seeded|contested|normalized|institutionalized|exhausted|dormant|reactivated
+      first_seen_ref: {type: string, required: false}
+      last_seen_ref: {type: string, required: false}
+      topic_tags: {type: list, items: string, required: false}
+  Frame:
+    keys: [frame_id]
+    props:
+      frame_id: {type: string, required: true}
+      narrative_id: {type: string, required: true}
+      frame_normal_form: {type: string, required: true}
+      polarity_target: {type: string, required: false}
+      solution_hook: {type: string, required: false}
+  Claim:
+    keys: [claim_id]
+    props:
+      claim_id: {type: string, required: true}
+      claim_normal_form: {type: string, required: true}
+      verifiability: {type: string, required: false} # verifiable|nonverifiable|normative|question
+      stance: {type: string, required: false} # assert|deny|question|imply
+  Assumption:
+    keys: [assumption_id]
+    props:
+      assumption_id: {type: string, required: true}
+      assumption_normal_form: {type: string, required: true}
+      scope: {type: string, required: false} # local|narrative|cross_narrative
+  Community:
+    keys: [community_id]
+    props:
+      community_id: {type: string, required: true}
+      method: {type: string, required: false} # louvain|leiden|labelprop|manual
+      label: {type: string, required: false}
+  Event:
+    keys: [event_id]
+    props:
+      event_id: {type: string, required: true}
+      event_type: {type: string, required: false}
+      summary: {type: string, required: false}
+      time_ref: {type: string, required: false}
+  Evidence:
+    keys: [evidence_id]
+    props:
+      evidence_id: {type: string, required: true}
+      evidence_type: {type: string, required: false} # report|dataset|factcheck|official_statement|doc
+      uri: {type: string, required: false}
+      excerpt: {type: string, required: false}
+
+relationships:
+  PUBLISHED:
+    from: Actor
+    to: Artifact
+    props:
+      published_ref: {type: string, required: false}
+  IN_COMMUNITY:
+    from: Actor
+    to: Community
+    props: {}
+  MENTIONS:
+    from: Artifact
+    to: Actor
+    props: {}
+  COMPOSED_OF:
+    from: Narrative
+    to: Frame
+    props:
+      weight: {type: number, required: false}
+  EXPRESSES:
+    from: Artifact
+    to: Frame
+    props:
+      confidence: {type: number, required: true}
+      method: {type: string, required: true} # classifier|rules|hybrid
+      provenance_id: {type: string, required: true}
+  MAKES:
+    from: Artifact
+    to: Claim
+    props:
+      confidence: {type: number, required: true}
+      span: {type: string, required: false} # stable pointer e.g., char offsets "120:184"
+      provenance_id: {type: string, required: true}
+  SUPPORTED_BY:
+    from: Frame
+    to: Assumption
+    props:
+      confidence: {type: number, required: true}
+      provenance_id: {type: string, required: true}
+  AMPLIFIED:
+    from: Community
+    to: Artifact
+    props:
+      weight: {type: number, required: false}
+      observed_ref: {type: string, required: false}
+  TRIGGERED_BY:
+    from: Narrative
+    to: Event
+    props:
+      confidence: {type: number, required: false}
+      provenance_id: {type: string, required: false}
+  DISPUTED_BY:
+    from: Claim
+    to: Evidence
+    props:
+      confidence: {type: number, required: false}
+      provenance_id: {type: string, required: false}
+  BROKEN_BY:
+    from: Assumption
+    to: Evidence
+    props:
+      confidence: {type: number, required: false}
+      provenance_id: {type: string, required: false}
+  HANDOFF_TO:
+    from: Narrative
+    to: Community
+    props:
+      handoff_score: {type: number, required: true}
+      from_tier: {type: string, required: false}
+      to_tier: {type: string, required: false}
+      observed_ref: {type: string, required: false}
+      provenance_id: {type: string, required: true}
+
+indexes:
+  - label: Artifact
+    props: [artifact_id]
+  - label: Actor
+    props: [actor_id, handle]
+  - label: Narrative
+    props: [narrative_id, state]
+  - label: Frame
+    props: [frame_id, narrative_id]
+  - label: Assumption
+    props: [assumption_id]
+  - label: Claim
+    props: [claim_id]
+constraints:
+  - type: unique
+    label: Artifact
+    prop: artifact_id
+  - type: unique
+    label: Actor
+    prop: actor_id
+  - type: unique
+    label: Narrative
+    prop: narrative_id

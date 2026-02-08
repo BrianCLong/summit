@@ -1,0 +1,32 @@
+{
+  "version": "1",
+  "provenance_id": "sha256:...",
+  "generated_by": {
+    "pipeline": "summit-narrative",
+    "pipeline_version": "x.y.z",
+    "model": "model-name",
+    "model_version": "opaque-string",
+    "policy_version": "opa-policy-hash"
+  },
+  "inputs": [
+    {
+      "artifact_id": "sha256:...",
+      "content_hash": "sha256:...",
+      "span": "120:184"
+    }
+  ],
+  "transforms": [
+    {"name": "canonicalize", "hash": "sha256:..."},
+    {"name": "embed", "hash": "sha256:..."},
+    {"name": "cluster", "hash": "sha256:..."},
+    {"name": "extract", "hash": "sha256:..."}
+  ],
+  "outputs": [
+    {
+      "type": "Claim|Frame|Assumption",
+      "id": "sha256:...",
+      "confidence": 0.92,
+      "normal_form": "..."
+    }
+  ]
+}
