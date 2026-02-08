@@ -50,8 +50,8 @@ def test_violation_logic():
     assert validate("analysis_only", {"region": "US", "volume": 100}) is True
 
     # Negative case: prohibited intent
-    with pytest.raises(ValueError, match="Prohibited intent: microtargeting"):
-        validate("microtargeting", {"region": "US"})
+    with pytest.raises(ValueError, match="Prohibited intent: identify persuadable individuals"):
+        validate("identify persuadable individuals", {"region": "US"})
 
     # Negative case: prohibited fields
     with pytest.raises(ValueError, match=r"Prohibited fields present: \['psychographic_segment'\]"):

@@ -38,3 +38,11 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
+
+## OES/EOT Checks (Planned)
+- `ci:eot-integrity`
+- `ci:oes-inference`
+- `ci:oes-paths`
+- `ci:oes-cross-domain`
+- `ci:oes-pattern-shaping`
+- `ci:oes-safety-constraints`
