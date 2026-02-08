@@ -70,7 +70,7 @@ jobs:
         run: pnpm evidence:post-deploy:verify
 
       - name: Upload Evidence Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: post-deploy-evidence-${{ github.sha }}
           path: artifacts/evidence/post-deploy/${{ github.sha }}/

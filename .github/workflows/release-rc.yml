@@ -194,7 +194,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v6
         with:
           name: verification-output
           path: artifacts/verification/
@@ -388,7 +388,7 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload RC Pipeline Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v6
         with:
           name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
           path: ${{ steps.assemble.outputs.bundle_dir }}

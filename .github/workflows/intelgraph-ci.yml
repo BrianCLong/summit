@@ -53,7 +53,7 @@ jobs:
             policy/
 
       - name: Upload OPA Bundle as Artifact
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@v6 # v6
         with:
           name: opa-bundle
           path: policy/bundle.tar.gz

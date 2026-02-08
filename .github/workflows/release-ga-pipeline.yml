@@ -216,7 +216,7 @@ jobs:
 
       - name: Upload Skills Evidence
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v6
         with:
           name: skills-evidence
           path: evidence/skills
@@ -338,7 +338,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v4
         with:
           name: verification-output
           path: artifacts/verification/
@@ -412,7 +412,7 @@ jobs:
           echo "Signature created: staging/ga-bundle/provenance.json.sig"
 
       - name: Upload GA Bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v4
         with:
           name: ga-bundle-staging
           path: staging/ga-bundle/
@@ -489,7 +489,7 @@ jobs:
           fi
 
       - name: Upload Publish Guard Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v4
         with:
           name: publish-guard-report
           path: artifacts/publish-guard/
@@ -615,7 +615,7 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload GA Release Bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v4
         with:
           name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle-${{ needs.gate.outputs.tag }}

@@ -71,7 +71,7 @@ jobs:
         run: bash scripts/ci/parity_check.sh
 
       - name: Upload parity artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: parity_result_${{ matrix.cloud }}
           path: parity_result.json

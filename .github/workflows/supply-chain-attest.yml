@@ -80,7 +80,7 @@ jobs:
           subject-path: artifacts/build.tar.gz
 
       - name: Upload artifacts (for audit)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: supply-chain
           path: |

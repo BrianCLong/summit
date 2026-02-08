@@ -235,7 +235,7 @@ jobs:
           echo "Achieved SLSA Level: $LEVEL"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@v6 # v6
         with:
           name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |

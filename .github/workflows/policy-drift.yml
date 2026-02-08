@@ -31,7 +31,7 @@ jobs:
         run: npx tsx scripts/monitoring/policy-cards-v0-drift.ts
 
       - name: Archive Drift Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: policy-drift-report
           path: artifacts/policy/drift_report.json

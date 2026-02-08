@@ -122,7 +122,7 @@ jobs:
 
       - name: Upload SLO artifacts
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@47309c993abb98030a35d55ef7ff34b7fa1074b5 # v4
         with:
           name: slo-gate-results-${{ github.run_id }}
           path: |
