@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T04:34:12Z",
+  "revision_note": "Added Governed Multi-Agent OS documentation initiative with readiness-aligned governance guarantees.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -59,6 +59,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+    },
+    {
+      "id": "governed-multi-agent-os",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governed OS doc set: overview, policy graph, provenance graph, auditor verify, SLOs/dashboards, security model. Anchored to Summit Readiness Assertion with evidence-first guarantees."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
