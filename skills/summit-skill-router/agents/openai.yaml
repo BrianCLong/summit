@@ -1,0 +1,4 @@
+interface:
+  display_name: "Summit Skill Router (GA Orchestrator)"
+  short_description: "Route Summit requests to best skills"
+  default_prompt: "Use $summit-skill-router to route my Summit request to the right skills and plan the work."
