@@ -1,0 +1,66 @@
+services:
+  server:
+    image: summit-server:latest
+    environment:
+      - PORT=4000
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://summit:summit@postgres:5432/summit
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=summit-password
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=hardening-secret
+      - JWT_REFRESH_SECRET=hardening-refresh-secret
+      - SKIP_FEDERAL_CHECKS=false
+      - ALLOW_SOFTWARE_CRYPTO=true
+      - OTEL_SERVICE_NAME=summit-server-hardening
+    volumes:
+      - ./server/src/app-hardening.ts:/app/src/app.ts
+      - ./server/src/index-hardening.ts:/app/src/index.ts
+      - ./server/src/federal/hsm-enforcement.ts:/app/src/federal/hsm-enforcement.ts
+    command: node --no-warnings --loader ts-node/esm src/index.ts
+    networks:
+      - summit
+
+  api-gateway:
+    image: summit-gateway:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./gateway-proxy.js:/app/index.js
+    command: node index.js
+    depends_on:
+      - server
+    networks:
+      - summit
+
+  neo4j:
+    image: neo4j:5.12
+    environment:
+      - NEO4J_AUTH=neo4j/summit-password
+      - NEO4J_PLUGINS=["apoc"]
+    networks:
+      - summit
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - summit
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=summit
+      - POSTGRES_USER=summit
+      - POSTGRES_PASSWORD=summit
+    networks:
+      - summit
+
+networks:
+  summit:
+    driver: bridge
