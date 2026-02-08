@@ -1,0 +1,7 @@
+{
+  "user": "1001:1001",
+  "readOnly": true,
+  "seccomp": ".github/policies/model-sandbox/security-profile.json",
+  "modelPath": "package.json",
+  "network": "none"
+}

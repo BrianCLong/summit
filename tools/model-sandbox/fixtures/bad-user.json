@@ -1,0 +1,7 @@
+{
+  "user": "root",
+  "readOnly": true,
+  "seccomp": ".github/policies/model-sandbox/security-profile.json",
+  "modelPath": "tools/model-sandbox/fixtures/dummy-weights.bin",
+  "network": "none"
+}

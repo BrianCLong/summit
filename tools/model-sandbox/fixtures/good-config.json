@@ -1,0 +1,8 @@
+{
+  "user": "1001:1001",
+  "readOnly": true,
+  "seccomp": ".github/policies/model-sandbox/security-profile.json",
+  "modelPath": "tools/model-sandbox/fixtures/dummy-weights.bin",
+  "network": "none",
+  "mounts": ["/tmp"]
+}
