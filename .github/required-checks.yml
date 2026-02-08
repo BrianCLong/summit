@@ -11,6 +11,7 @@ required_checks:
   - ci / lint
   - ci / test
   - ci / build
+  - rq-smoke / rq-smoke
   - governance / required-checks
   - governance / branch-protection
 
