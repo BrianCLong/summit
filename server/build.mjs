@@ -81,7 +81,7 @@ async function runBuild() {
     }
 
     await esbuild.build({
-      entryPoints: ['src/index.ts'],
+      entryPoints: [path.join(__dirname, 'src', 'index.ts')],
       bundle: true,
       platform: 'node',
       format: 'esm',

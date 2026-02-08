@@ -151,12 +151,12 @@ services:
 
   gateway:
     build:
-      context: ./services/dev-gateway
+      context: apps/gateway
     container_name: summit-gateway
     restart: unless-stopped
     environment:
-      PORT: 4100
-      # OpenTelemetry Configuration
+      PORT: 8080
+      # ... (rest of env)
       OTEL_SERVICE_NAME: summit-gateway
       OTEL_SERVICE_VERSION: 1.0.0
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
@@ -177,7 +177,7 @@ services:
       typesense:
         condition: service_started
     ports:
-      - '4100:4100'
+      - '8080:8080'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
       interval: 15s

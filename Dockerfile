@@ -46,13 +46,13 @@ RUN pnpm run build
 
 # Create healthcheck script
 RUN echo "const http = require('http'); \
-const options = { host: 'localhost', port: 3000, path: '/healthz', timeout: 2000 }; \
-const request = http.request(options, (res) => { \
+  const options = { host: 'localhost', port: 3000, path: '/healthz', timeout: 2000 }; \
+  const request = http.request(options, (res) => { \
   if (res.statusCode == 200) process.exit(0); \
   else process.exit(1); \
-}); \
-request.on('error', (err) => process.exit(1)); \
-request.end();" > healthcheck.js
+  }); \
+  request.on('error', (err) => process.exit(1)); \
+  request.end();" > healthcheck.js
 
 # ==============================================================================
 # Stage 3: Production Runtime
@@ -66,7 +66,7 @@ WORKDIR /app
 COPY --from=base --chown=node:node /app/node_modules ./node_modules
 
 # Copy built server
-COPY --from=build --chown=node:node /app/server/dist ./server/dist
+COPY --from=build --chown=node:node /app/server/dist-isolated ./server/dist
 COPY --from=build --chown=node:node /app/server/package.json ./server/
 
 # Copy built packages (workspace dependencies)
