@@ -28,3 +28,10 @@ test_approval_requires_security_role if {
     "approval": {"decision": "approve", "actor_roles": ["security"]}
   }
 }
+
+test_approval_allows_incident_commander_role if {
+  allow with input as {
+    "action": "approve",
+    "approval": {"decision": "approve", "actor_roles": ["incident_commander"]}
+  }
+}

@@ -47,10 +47,13 @@ is_privileged_command {
   input.command.privileged == true
 }
 
+# SECURITY: Allow approval from any required approver role (security or incident_commander)
+# Previously only checked for "security" role, missing incident_commander
 allow {
   input.action == "approve"
   input.approval.decision == "approve"
-  "security" in input.approval.actor_roles
+  some role in ["security", "incident_commander"]
+  role in input.approval.actor_roles
 }
 
 allow {
