@@ -4,6 +4,12 @@
     "feature.policy-guard": {"value": true, "percentage": 100, "tenants": {"allow": [], "deny": []}, "salt": "dev-policy"},
     "feature.web.flag-hydration": {"value": true, "percentage": 100},
     "feature.build.bazel": {"value": true, "percentage": 50, "salt": "dev-build"},
-    "feature.qos.override-api": {"value": true, "percentage": 100}
+    "feature.qos.override-api": {"value": true, "percentage": 100},
+    "feature.investigation.bulk-operations": {"value": true, "percentage": 100},
+    "feature.investigation.delete": {"value": true, "percentage": 100},
+    "feature.investigation.export": {"value": true, "percentage": 100},
+    "feature.osint.ingestion": {"value": true, "percentage": 100},
+    "feature.osint.enrichment": {"value": true, "percentage": 100},
+    "feature.graph.cross-tenant-visibility": {"value": true, "percentage": 100}
   }
 }
