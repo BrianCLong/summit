@@ -154,9 +154,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: pnpm/action-setup@v4 # v4
 
       - name: Run MCP UX Linter
@@ -322,8 +319,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"

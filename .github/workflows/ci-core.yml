@@ -38,7 +38,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
 
