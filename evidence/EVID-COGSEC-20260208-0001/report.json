@@ -1,0 +1,20 @@
+{
+  "evidence_id": "EVID-COGSEC-20260208-0001",
+  "items": [
+    {
+      "check": "Schema Validation",
+      "status": "PASS",
+      "details": "Sample incident validated"
+    },
+    {
+      "check": "Spoof Detection",
+      "status": "PASS",
+      "details": "Detected spoof: [('summit.gov', 0.8)]"
+    },
+    {
+      "check": "Provenance Score",
+      "status": "PASS",
+      "score": 0.8
+    }
+  ]
+}
