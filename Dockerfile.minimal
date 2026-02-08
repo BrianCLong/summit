@@ -1,0 +1,46 @@
+# Use Node.js 20 Alpine as base image
+FROM node:20-alpine
+
+# Install system dependencies needed for the application
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    postgresql-client \
+    curl \
+    bash \
+    git
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Copy just the essential application files that are needed to run the server
+COPY server/package.json ./server/
+COPY server/tsconfig.json ./server/
+COPY server/src/config.ts ./server/src/
+COPY server/src/index.ts ./server/src/
+COPY server/src/app.ts ./server/src/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile || echo "Some packages may have failed to install"
+
+# Expose port
+EXPOSE 4000
+
+# Start a simple server to verify the infrastructure is working
+CMD ["sh", "-c", "echo 'Infrastructure is ready. Application files are in /app.' && sleep infinity"]

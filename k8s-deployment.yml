@@ -1,0 +1,577 @@
+# Kubernetes Deployment Configuration for Summit Application
+# This configuration is optimized for cloud Kubernetes services (EKS, AKS, GKE)
+
+---
+# Namespace for Summit Application
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: summit-app
+  labels:
+    name: summit-app
+
+---
+# ConfigMap for Summit Application Environment Variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: summit-config
+  namespace: summit-app
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  CORS_ORIGIN: "https://yourdomain.com"
+  ALLOWED_ORIGINS: "https://yourdomain.com"
+  ENABLE_INSECURE_DEV_AUTH: "false"
+  AI_ENABLED: "false"
+  POLICY_DRY_RUN: "true"
+  VITE_API_URL: "http://summit-server.summit-app.svc.cluster.local:4000/graphql"
+  VITE_WS_URL: "ws://summit-server.summit-app.svc.cluster.local:4000/graphql"
+
+---
+# Secret for Summit Application Sensitive Data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: summit-secrets
+  namespace: summit-app
+type: Opaque
+data:
+  # These values should be base64 encoded
+  # Example: echo -n 'your_password' | base64
+  postgres-password: c3VtaXRfcG9zdGdyZXNfcGFzc3dvcmQ=  # summit_postgres_password
+  neo4j-password: c3VtaXRfbmVvNGpfcGFzc3dvcmQ=        # summit_neo4j_password
+  jwt-secret: ZGVmYXVsdF9qd3Rfc2VjcmV0X2Zvcl9kZXY=    # default_jwt_secret_for_dev
+  jwt-refresh-secret: ZGVmYXVsdF9yZWZyZXNoX3NlY3JldF9mb3JfZGV2  # default_refresh_secret_for_dev
+  session-secret: ZGVmYXVsdF9zZXNzaW9uX3NlY3JldF9mb3JfZGV2  # default_session_secret_for_dev
+
+---
+# Persistent Volume Claims for Databases
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neo4j-pvc
+  namespace: summit-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: summit-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: summit-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# Neo4j StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: neo4j
+  namespace: summit-app
+spec:
+  serviceName: neo4j
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo4j
+  template:
+    metadata:
+      labels:
+        app: neo4j
+    spec:
+      containers:
+      - name: neo4j
+        image: neo4j:2025.01-enterprise
+        ports:
+        - containerPort: 7474
+          name: http
+        - containerPort: 7687
+          name: bolt
+        env:
+        - name: NEO4J_AUTH
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: neo4j-password
+        - name: NEO4J_server_memory_heap_max__size
+          value: "2G"
+        - name: NEO4J_server_memory_pagecache_size
+          value: "1G"
+        - name: NEO4J_server_cluster_enabled
+          value: "false"
+        volumeMounts:
+        - name: neo4j-storage
+          mountPath: /data
+        - name: neo4j-logs
+          mountPath: /logs
+        - name: neo4j-import
+          mountPath: /import
+        - name: neo4j-plugins
+          mountPath: /plugins
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 7474
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 7474
+          initialDelaySeconds: 120
+          periodSeconds: 30
+      volumes:
+      - name: neo4j-storage
+        persistentVolumeClaim:
+          claimName: neo4j-pvc
+      - name: neo4j-logs
+        emptyDir: {}
+      - name: neo4j-import
+        emptyDir: {}
+      - name: neo4j-plugins
+        emptyDir: {}
+
+---
+# Neo4j Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: neo4j
+  namespace: summit-app
+spec:
+  selector:
+    app: neo4j
+  ports:
+  - name: http
+    port: 7474
+    targetPort: 7474
+  - name: bolt
+    port: 7687
+    targetPort: 7687
+  type: ClusterIP
+
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: summit-app
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "intelgraph"
+        - name: POSTGRES_USER
+          value: "intelgraph_user"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: postgres-password
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+          requests:
+            memory: "1Gi"
+            cpu: "0.5"
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - intelgraph_user
+            - -d
+            - intelgraph
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - intelgraph_user
+            - -d
+            - intelgraph
+          initialDelaySeconds: 30
+          periodSeconds: 30
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: summit-app
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP
+
+---
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: summit-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        command:
+        - redis-server
+        - --appendonly
+        - "yes"
+        - --maxmemory
+        - "512mb"
+        - --maxmemory-policy
+        - allkeys-lru
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "0.5"
+          requests:
+            memory: "512Mi"
+            cpu: "0.25"
+        readinessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+      - name: redis-storage
+        persistentVolumeClaim:
+          claimName: redis-pvc
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: summit-app
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
+
+---
+# Summit Server Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summit-server
+  namespace: summit-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: summit-server
+  template:
+    metadata:
+      labels:
+        app: summit-server
+    spec:
+      containers:
+      - name: summit-server
+        image: summit-server:latest
+        ports:
+        - containerPort: 4000
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://intelgraph_user:$(POSTGRES_PASSWORD)@postgres:5432/intelgraph"
+        - name: NEO4J_URI
+          value: "bolt://neo4j:7687"
+        - name: NEO4J_USER
+          value: "neo4j"
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: neo4j-password
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: jwt-secret
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: jwt-refresh-secret
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: session-secret
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: NODE_ENV
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: LOG_LEVEL
+        - name: ENABLE_INSECURE_DEV_AUTH
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: ENABLE_INSECURE_DEV_AUTH
+        - name: AI_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: AI_ENABLED
+        - name: CORS_ORIGIN
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: CORS_ORIGIN
+        - name: ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: ALLOWED_ORIGINS
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: summit-secrets
+              key: postgres-password
+        resources:
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4000
+          initialDelaySeconds: 120
+          periodSeconds: 30
+
+---
+# Summit Server Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-server
+  namespace: summit-app
+spec:
+  selector:
+    app: summit-server
+  ports:
+  - port: 4000
+    targetPort: 4000
+  type: ClusterIP
+
+---
+# Summit Web Client Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summit-web
+  namespace: summit-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: summit-web
+  template:
+    metadata:
+      labels:
+        app: summit-web
+    spec:
+      containers:
+      - name: summit-web
+        image: summit-web:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: VITE_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: VITE_API_URL
+        - name: VITE_WS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: VITE_WS_URL
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: summit-config
+              key: NODE_ENV
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "0.5"
+          requests:
+            memory: "512Mi"
+            cpu: "0.25"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# Summit Web Client Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-web
+  namespace: summit-app
+spec:
+  selector:
+    app: summit-web
+  ports:
+  - port: 3000
+    targetPort: 3000
+  type: ClusterIP
+
+---
+# Ingress for External Access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: summit-ingress
+  namespace: summit-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - yourdomain.com
+    secretName: summit-tls-cert
+  rules:
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: summit-web
+            port:
+              number: 3000
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: summit-server
+            port:
+              number: 4000
+      - path: /graphql
+        pathType: Prefix
+        backend:
+          service:
+            name: summit-server
+            port:
+              number: 4000

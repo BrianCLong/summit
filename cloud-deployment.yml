@@ -1,0 +1,346 @@
+# Cloud Deployment Configuration for Summit Application
+# This configuration is optimized for cloud deployment platforms (AWS ECS, Azure Container Instances, Google Cloud Run, etc.)
+
+version: '3.8'
+
+services:
+  # Neo4j Graph Database Service
+  neo4j:
+    image: neo4j:2025.01-enterprise
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-summit_neo4j_password}
+      - NEO4J_server_memory_heap_max__size=2G
+      - NEO4J_server_memory_pagecache_size=1G
+      - NEO4J_server_cluster_enabled=false
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4JLABS_PLUGINS=["apoc", "graph-data-science"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/import
+      - neo4j_plugins:/plugins
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider localhost:7474 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=intelgraph
+      - POSTGRES_USER=intelgraph_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-summit_postgres_password}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backups:/backups
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intelgraph_user -d intelgraph"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # Redis Cache Service
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Provenance Ledger Service
+  prov-ledger:
+    image: summit-prov-ledger:${IMAGE_TAG:-latest}
+    build:
+      context: ./services/prov-ledger
+      dockerfile: Dockerfile
+    ports:
+      - "4010:4010"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://intelgraph_user:summit_postgres_password@postgres:5432/intelgraph}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret_for_dev}
+      - NODE_ENV=${NODE_ENV:-production}
+      - LOG_LEVEL=info
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4010/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Policy and LAC Service
+  policy-lac:
+    image: summit-policy-lac:${IMAGE_TAG:-latest}
+    build:
+      context: ./gateway/policy-lac
+      dockerfile: Dockerfile
+    ports:
+      - "4011:4000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://intelgraph_user:summit_postgres_password@postgres:5432/intelgraph}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret_for_dev}
+      - NODE_ENV=${NODE_ENV:-production}
+      - LOG_LEVEL=info
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Natural Language to Cypher Service
+  nl2cypher:
+    image: summit-nl2cypher:${IMAGE_TAG:-latest}
+    build:
+      context: ./server/ai/nl2cypher
+      dockerfile: Dockerfile
+    ports:
+      - "4020:4020"
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-summit_neo4j_password}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret_for_dev}
+      - NODE_ENV=${NODE_ENV:-production}
+      - LOG_LEVEL=info
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-""}
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4020/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Main Server Service
+  server:
+    image: summit-server:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-postgresql://intelgraph_user:summit_postgres_password@postgres:5432/intelgraph}
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-summit_neo4j_password}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret_for_dev}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-default_refresh_secret_for_dev}
+      - SESSION_SECRET=${SESSION_SECRET:-default_session_secret_for_dev}
+      - NODE_ENV=${NODE_ENV:-production}
+      - LOG_LEVEL=info
+      - ENABLE_INSECURE_DEV_AUTH=false
+      - AI_ENABLED=${AI_ENABLED:-false}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-""}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-""}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://yourdomain.com}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://yourdomain.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # API Gateway Service
+  api-gateway:
+    image: summit-api-gateway:${IMAGE_TAG:-latest}
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:4000"
+    environment:
+      - GRAPH_SERVICE_URL=http://server:4000
+      - POLICY_DRY_RUN=${POLICY_DRY_RUN:-true}
+      - ENABLE_INSECURE_DEV_AUTH=false
+      - JWT_SECRET=${JWT_SECRET:-default_jwt_secret_for_dev}
+      - NODE_ENV=${NODE_ENV:-production}
+      - LOG_LEVEL=info
+    depends_on:
+      server:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Web Client Service
+  web:
+    image: summit-web:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:4000/graphql}
+      - VITE_WS_URL=${VITE_WS_URL:-ws://localhost:4000/graphql}
+      - NODE_ENV=${NODE_ENV:-production}
+    depends_on:
+      - server
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Backup Service
+  backup-service:
+    image: summit-backup-service:${IMAGE_TAG:-latest}
+    build:
+      context: ./server/infrastructure/disaster-recovery
+      dockerfile: Dockerfile
+    volumes:
+      - backups:/backups
+      - redis_data:/redis_data
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=intelgraph_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-summit_postgres_password}
+      - REDIS_HOST=redis
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_BUCKET=${S3_BUCKET:-summit-backups}
+      - S3_REGION=${S3_REGION:-us-east-1}
+      - S3_ENDPOINT=${S3_ENDPOINT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+volumes:
+  neo4j_data:
+    driver: local
+  neo4j_logs:
+    driver: local
+  neo4j_import:
+    driver: local
+  neo4j_plugins:
+    driver: local
+  postgres_data:
+    driver: local
+  postgres_backups:
+    driver: local
+  redis_data:
+    driver: local
+  backups:
+    driver: local

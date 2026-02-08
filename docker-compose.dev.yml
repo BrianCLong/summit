@@ -1,461 +1,121 @@
-version: '3.9'
+version: '3.8'
 
 services:
-  postgres:
-    image: pgvector/pgvector:pg16
-    container_name: summit-postgres
-    restart: unless-stopped
+  neo4j:
+    image: neo4j:2025.01
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-intelgraph}
-      POSTGRES_USER: ${POSTGRES_USER:-intelgraph}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
-    ports:
-      - '5432:5432'
+      - NEO4J_AUTH=neo4j/test1234
+    ports: 
+      - "7474:7474"
+      - "7687:7687"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}']
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      - neo4j_data:/data
     networks:
-      - summit
+      - default
+      - observability
+      - intelgraph
 
   redis:
     image: redis:7-alpine
-    container_name: summit-redis
-    restart: unless-stopped
-    command: redis-server --appendonly yes
-    ports:
-      - '6379:6379'
+    ports: 
+      - "6379:6379"
     volumes:
       - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 10
+    command: redis-server --appendonly yes
     networks:
-      - summit
+      - default
+      - observability
+      - intelgraph
 
-  neo4j:
-    image: neo4j:5-community
-    container_name: summit-neo4j
-    restart: unless-stopped
+  postgres:
+    image: postgres:16-alpine
     environment:
-      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env (see .env.example)}
-      NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
-      NEO4J_PLUGINS: '["apoc","graph-data-science"]'
-    ports:
-      - '7474:7474'
-      - '7687:7687'
+      - POSTGRES_PASSWORD=postgres
+    ports: 
+      - "5432:5432"
     volumes:
-      - neo4j_data:/data
-      - neo4j_logs:/logs
-    healthcheck:
-      test:
-        ['CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1"']
-      interval: 15s
-      timeout: 10s
-      retries: 10
+      - pg_data:/var/lib/postgresql/data
     networks:
-      - summit
+      - default
+      - observability
+      - intelgraph
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: summit-elasticsearch
-    restart: unless-stopped
+  # Additional services for a complete development environment
+  jaeger:
+    image: jaegertracing/all-in-one:1.66
     environment:
-      - discovery.type=single-node
-      - cluster.name=summit-search
-      - node.name=summit-search-node-1
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - xpack.security.enabled=true
-      - xpack.security.http.ssl.enabled=false
-      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-devpassword}
-      - xpack.security.enrollment.enabled=false
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
+      - COLLECTOR_OTLP_ENABLED=true
     ports:
-      - '9200:9200'
-      - '9300:9300'
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    healthcheck:
-      test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1']
-      interval: 15s
-      timeout: 30s
-      retries: 20
+      - "16686:16686"  # Jaeger UI
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
     networks:
-      - summit
-    labels:
-      - 'prometheus.job=summit_elasticsearch'
-      - 'prometheus.port=9200'
-
-  api:
-    build:
-      context: .
-      dockerfile: server/Dockerfile.dev
-    container_name: summit-api
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      PORT: 4000
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}}
-      NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      ELASTICSEARCH_URL: http://elasticsearch:9200
-      ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-devpassword}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-600}
-      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
-      # OpenTelemetry Configuration
-      OTEL_SERVICE_NAME: summit-api
-      OTEL_SERVICE_VERSION: 1.0.0
-      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
-    ports:
-      - '4000:4000'
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      neo4j:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
-      interval: 15s
-      timeout: 30s
-      retries: 20
-    networks:
-      - summit
-    labels:
-      - 'prometheus.job=summit_api'
-      - 'prometheus.port=4000'
-
-  gateway:
-    build:
-      context: ./services/dev-gateway
-    container_name: summit-gateway
-    restart: unless-stopped
-    environment:
-      PORT: 4100
-      # OpenTelemetry Configuration
-      OTEL_SERVICE_NAME: summit-gateway
-      OTEL_SERVICE_VERSION: 1.0.0
-      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-    depends_on:
-      api:
-        condition: service_healthy
-    ports:
-      - '4100:4100'
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
-      interval: 15s
-      timeout: 5s
-      retries: 10
-    networks:
-      - summit
-    labels:
-      - 'prometheus.job=summit_gateway'
-      - 'prometheus.port=4100'
-
-  slo-exporter:
-    build:
-      context: ./apps/slo-exporter
-      dockerfile: Dockerfile
-    container_name: summit-slo-exporter
-    restart: unless-stopped
-    environment:
-      PORT: 9092
-      PROMETHEUS_URL: http://prometheus:9090
-      API_URL: http://api:4000
-    ports:
-      - '9092:9092'
-    depends_on:
-      prometheus:
-        condition: service_started
-      api:
-        condition: service_healthy
-    networks:
-      - summit
-    labels:
-      - 'prometheus.job=slo_exporter'
-      - 'prometheus.port=9092'
-
-  web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile.dev
-    container_name: summit-web
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      VITE_API_URL: http://api:4000/graphql
-      VITE_WS_URL: ws://api:4000/graphql
-      VITE_WEBSOCKET_URL: ws://websocket-server:9001
-      VITE_PORT: 3000
-    ports:
-      - '3000:3000'
-    depends_on:
-      api:
-        condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
-      interval: 15s
-      timeout: 5s
-      retries: 10
-    networks:
-      - summit
-
-  websocket-server:
-    build:
-      context: .
-      dockerfile: services/websocket-server/Dockerfile
-    command: node dist/index.js
-    container_name: summit-websocket-server
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      PORT: 9001
-      HOST: 0.0.0.0
-      NODE_ENV: ${NODE_ENV:-development}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
-      JWT_ALGORITHM: HS256
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
-      CORS_CREDENTIALS: "true"
-      CLUSTERING_ENABLED: "true"
-      NODE_ID: ws-dev-1
-      PERSISTENCE_ENABLED: "true"
-      PERSISTENCE_TTL: "3600"
-      HEARTBEAT_INTERVAL: "30000"
-      HEARTBEAT_TIMEOUT: "60000"
-    ports:
-      - '9002:9001'
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })']
-      interval: 15s
-      timeout: 10s
-      retries: 3
-    networks:
-      - summit
-    labels:
-      - 'prometheus.job=websocket_server'
-      - 'prometheus.port=9001'
-
-  prometheus:
-    image: prom/prometheus:v2.54.1
-    container_name: summit-prometheus
-    restart: unless-stopped
-    volumes:
-      - ./observability/prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro
-      - ./observability/prometheus/alerts:/etc/prometheus/alerts:ro
-      - ./observability/prometheus/recording-rules.yaml:/etc/prometheus/recording-rules.yaml:ro
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.enable-lifecycle'
-      - '--storage.tsdb.retention.time=30d'
-    ports:
-      - '9090:9090'
-    networks:
-      - summit
+      - observability
 
   grafana:
-    image: grafana/grafana:10.4.7
-    container_name: summit-grafana
-    restart: unless-stopped
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
-      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel
-      GF_FEATURE_TOGGLES_ENABLE: tempoSearch tempoBackendSearch
+    image: grafana/grafana-enterprise
     ports:
-      - '3001:3000'
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - observability
     depends_on:
-      prometheus:
-        condition: service_started
-      loki:
-        condition: service_started
-      jaeger:
-        condition: service_started
-    networks:
-      - summit
+      - postgres
 
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.87.0
-    container_name: summit-otel-collector
-    command:
-      - '--config=/etc/otel-collector-config.yml'
-    volumes:
-      - ./observability/otel/collector-config-dev.yaml:/etc/otel-collector-config.yml
+  prometheus:
+    image: prom/prometheus:v3.1.0
     ports:
-      - '4317:4317' # OTLP gRPC receiver
-      - '4318:4318' # OTLP HTTP receiver
-      - '8888:8888' # Prometheus metrics
-      - '8889:8889' # Prometheus exporter
-      - '13133:13133' # Health check
-    networks:
-      - summit
-    depends_on:
-      - jaeger
-      - prometheus
-
-  jaeger:
-    image: jaegertracing/all-in-one:1.52
-    container_name: summit-jaeger
-    restart: unless-stopped
-    environment:
-      COLLECTOR_OTLP_ENABLED: true
-      SPAN_STORAGE_TYPE: memory
-    ports:
-      - '16687:16686' # Jaeger UI (changed from 16686)
-      - '14268:14268' # Jaeger collector HTTP
-    networks:
-      - summit
-
-  loki:
-    image: grafana/loki:2.9.3
-    container_name: summit-loki
-    restart: unless-stopped
-    ports:
-      - '3100:3100'
-    command: -config.file=/etc/loki/local-config.yaml
+      - "9090:9090"
     volumes:
-      - ./observability/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
-      - loki_data:/loki
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/etc/prometheus/console_libraries --web.console.templates=/etc/prometheus/consoles --storage.tsdb.retention.time=200h --web.enable-lifecycle
     networks:
-      - summit
+      - observability
 
-  promtail:
-    image: grafana/promtail:2.9.3
-    container_name: summit-promtail
-    restart: unless-stopped
-    volumes:
-      - ./observability/promtail/promtail-config.yaml:/etc/promtail/config.yaml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: -config.file=/etc/promtail/config.yaml
-    depends_on:
-      - loki
-    networks:
-      - summit
-
-  alertmanager:
-    image: prom/alertmanager:v0.26.0
-    container_name: summit-alertmanager
-    restart: unless-stopped
-    ports:
-      - '9093:9093'
-    volumes:
-      - ./observability/alertmanager/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml:ro
-      - alertmanager_data:/alertmanager
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yaml'
-      - '--storage.path=/alertmanager'
-    networks:
-      - summit
-
-  ai-sandbox:
+  # Summit application service
+  app:
     build:
       context: .
-      dockerfile: services/ai-sandbox/Dockerfile
-    command: node dist/index.js
-    container_name: summit-ai-sandbox
-    restart: unless-stopped
-    environment:
-      PORT: 4020
-      NODE_ENV: development
-      LOG_LEVEL: info
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      WORKER_CONCURRENCY: 4
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      dockerfile: Dockerfile.focus
     ports:
-      - '4020:4020'
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:4020/health']
-      interval: 15s
-      timeout: 5s
-      retries: 10
-    networks:
-      - summit
-    labels:
-      - 'prometheus.job=summit_ai_sandbox'
-      - 'prometheus.port=4020'
-
-  agentic-mesh-evaluation:
-    build:
-      context: .
-      dockerfile: services/agentic-mesh-evaluation/Dockerfile
-    container_name: summit-agentic-mesh-evaluation
-    restart: unless-stopped
+      - "4000:4000"
     environment:
-      NODE_ENV: development
-      PORT: 4200
-      HOST: 0.0.0.0
-      REDIS_URL: redis://redis:6379
-      LOG_LEVEL: info
-    ports:
-      - '4200:4200'
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres?sslmode=disable
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=test1234
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=dev-secret-do-not-use-in-production
+      - SESSION_SECRET=dev-session-secret-do-not-use-in-production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - GRAFANA_URL=http://grafana:3000
     depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:4200/health", (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})']
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      - postgres
+      - neo4j
+      - redis
     networks:
-      - summit
-    labels:
-      - 'prometheus.job=agentic_mesh_evaluation'
-      - 'prometheus.port=4200'
-      - 'prometheus.path=/metrics'
+      - default
+      - observability
+    volumes:
+      - .:/app
+      - /app/node_modules
 
 volumes:
-  postgres_data:
-  redis_data:
-  neo4j_data:
-  neo4j_logs:
-  elasticsearch_data:
-  grafana_data:
-  prometheus_data:
-  loki_data:
-  alertmanager_data:
+  neo4j_data: {}
+  pg_data: {}
+  redis_data: {}
+  grafana_data: {}
+  prometheus_data: {}
 
 networks:
-  summit:
+  observability:
     driver: bridge
+  intelgraph:
+    driver: bridge
+  default:

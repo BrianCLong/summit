@@ -1,0 +1,23 @@
+# Use Node.js 18 Alpine as base image
+FROM node:18-alpine
+
+# Install system dependencies
+RUN apk add --no-cache curl
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY client/package*.json ./
+
+# Install dependencies with legacy peer deps to handle version conflicts
+RUN npm install --legacy-peer-deps
+
+# Copy the rest of the client files
+COPY client/ .
+
+# Expose port
+EXPOSE 3000
+
+# Start the client application
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]

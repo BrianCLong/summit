@@ -1,0 +1,56 @@
+version: '3.8'
+
+# This is a minimal docker-compose file that only starts the infrastructure services
+# without attempting to build the application services that are failing due to missing LFS objects
+
+services:
+  neo4j:
+    image: neo4j:2025.01
+    environment:
+      - NEO4J_AUTH=neo4j/test1234
+    ports: 
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - default
+      - observability
+      - intelgraph
+
+  redis:
+    image: redis:7-alpine
+    ports: 
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - default
+      - observability
+      - intelgraph
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports: 
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - default
+      - observability
+      - intelgraph
+
+volumes:
+  neo4j_data: {}
+  pg_data: {}
+  redis_data: {}
+
+networks:
+  observability:
+    driver: bridge
+  intelgraph:
+    driver: bridge
+  default:
