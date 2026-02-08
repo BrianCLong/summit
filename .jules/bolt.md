@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-07-16 - [Batched Supernode Detection with Degree Store]
+**Learning:** Checking the degree of many nodes individually in a loop causes an N+1 query problem. Batching these checks with Cypher's `UNWIND` reduces round-trips from N to 1. Furthermore, using `size((e)--())` instead of counting matched relationships leverages Neo4j's degree store, turning an O(N) operation into O(1).
+**Action:** Always batch multi-node property or degree checks using `UNWIND` and prefer `size()` on patterns for O(1) degree lookups.
