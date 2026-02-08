@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:30:00Z",
+  "revision_note": "Added Influence Ops Suite documentation track with governance, strategy, security, and runbook deliverables.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -177,6 +177,12 @@
       "notes": "One-pager mapping IO/CogWar radar scope to Summit/IntelGraph defensive capabilities."
     },
     {
+      "id": "influence-ops-suite-docs-v1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published Influence Ops Suite documentation: scope, collection constraints, attribution policy, forward generalization strategy, security threat model, and ops runbook."
+    },
+    {
       "id": "runbook-cognitive-security-defense",
       "area": "docs/runbooks",
       "status": "complete",
@@ -212,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
