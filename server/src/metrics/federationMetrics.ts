@@ -35,3 +35,10 @@ export const poolHeartbeats = new Counter({
   labelNames: ['pool'] as const,
   registers: [registry],
 });
+
+export const featureFlagEnabledGauge = new Gauge({
+  name: 'maestro_feature_flag_enabled',
+  help: 'Feature flag enabled status (1=enabled, 0=disabled)',
+  labelNames: ['flag'] as const,
+  registers: [registry],
+});
