@@ -19,6 +19,16 @@
       "name": "summit-pr-stack-sequencer",
       "path": "skills/summit-pr-stack-sequencer/SKILL.md",
       "sha256": "5fbb80328febf40c71241fb2248534bc4e1bd0265bfd06e7ec3e29f60dd580f2"
+    },
+    {
+      "allowed_tools": null,
+      "compatibility": null,
+      "description": "Configure a Summit Ops & Incident Console with project threads, safe Git profiles, monitoring automations, and incident-mode workflows.",
+      "license": "UNLICENSED",
+      "metadata": {},
+      "name": "summit-ops-incident-console",
+      "path": "skills/summit-ops-incident-console/SKILL.md",
+      "sha256": "091514b422fbdfcb141f82fe5a6096dc30d0f84377576e2d91f66f6346364b2d"
     }
   ],
   "version": 1

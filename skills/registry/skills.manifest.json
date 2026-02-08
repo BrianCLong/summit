@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-02-07T22:38:01Z",
+  "generated_at": "2026-02-08T00:14:33Z",
   "skills": [
     {
       "name": "artifacts-builder",
@@ -150,6 +150,22 @@
         "ci",
         "release",
         "governance"
+      ]
+    },
+    {
+      "name": "summit-ops-incident-console",
+      "display_name": "Summit Ops & Incident Console",
+      "source": "local://skills/summit-ops-incident-console",
+      "commit": "DEFERRED_PENDING_LOCAL",
+      "sha256": "091514b422fbdfcb141f82fe5a6096dc30d0f84377576e2d91f66f6346364b2d",
+      "overlay": "skills/overlays/summit-ops-incident-console",
+      "status": "intentionally-constrained",
+      "governed_exception": true,
+      "domains": [
+        "ops",
+        "governance",
+        "security",
+        "ci"
       ]
     }
   ]

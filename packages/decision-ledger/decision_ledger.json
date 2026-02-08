@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "summit-ops-incident-console-20260208",
+    "timestamp": "2026-02-08T00:14:33Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAic3VtbWl0IG9wcyBpbmNpZGVudCBjb25zb2xlIHNraWxsIHNjYWZmb2xkaW5nIiwgImZpbGVzIjogWyJza2lsbHMvc3VtbWl0LW9wcy1pbmNpZGVudC1jb25zb2xlL1NLSUxMLm1kIiwgInNraWxscy9zdW1taXQtb3BzLWluY2lkZW50LWNvbnNvbGUvcmVmZXJlbmNlcy9wcm9qZWN0LXNldHVwLm1kIiwgInNraWxscy9zdW1taXQtb3BzLWluY2lkZW50LWNvbnNvbGUvcmVmZXJlbmNlcy9hdXRvbWF0aW9ucy5tZCIsICJza2lsbHMvc3VtbWl0LW9wcy1pbmNpZGVudC1jb25zb2xlL3JlZmVyZW5jZXMvY29uZmlnLXByb2ZpbGVzLnRvbWwiLCAic2tpbGxzL3N1bW1pdC1vcHMtaW5jaWRlbnQtY29uc29sZS9yZWZlcmVuY2VzL2luY2lkZW50LW1vZGUubWQiLCAic2tpbGxzL2luZGV4Lmpzb24iLCAic2tpbGxzL3JlZ2lzdHJ5L3NraWxscy5tYW5pZmVzdC5qc29uIiwgInNraWxscy9yZWdpc3RyeS9za2lsbHMubG9jay5qc29uIiwgImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsICJwcm9tcHRzL29wcy9zdW1taXQtb3BzLWluY2lkZW50LWNvbnNvbGVAdjEubWQiLCAicHJvbXB0cy9yZWdpc3RyeS55YW1sIiwgImFnZW50cy9leGFtcGxlcy9TVU1NSVRfT1BTX0lOQ0lERU5UX0NPTlNPTEVfMjAyNjAyMDguanNvbiIsICJwYWNrYWdlcy9kZWNpc2lvbi1sZWRnZXIvZGVjaXNpb25fbGVkZ2VyLmpzb24iXX0=",
+    "decision": {
+      "action": "scaffold_summit_ops_incident_console",
+      "rule": {
+        "condition": "Summit Ops incident console guidance required",
+        "action": "scaffold_summit_ops_incident_console",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added Summit Ops & Incident Console skill pack, prompt registry entry, task spec, and roadmap update with safe Git profiles and incident-mode guidance. Rollback: revert the commit that adds the skill folder, prompt registry updates, task spec, and decision ledger entry.",
+    "reverted": false
   }
 ]

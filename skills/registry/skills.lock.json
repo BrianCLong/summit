@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-02-07T22:38:01Z",
+  "generated_at": "2026-02-08T00:14:33Z",
   "skills": [
     {
       "name": "artifacts-builder",
@@ -89,6 +89,15 @@
       "commit": "DEFERRED_PENDING_LOCAL",
       "sha256": "5fbb80328febf40c71241fb2248534bc4e1bd0265bfd06e7ec3e29f60dd580f2",
       "path": "skills/external/summit-pr-stack-sequencer",
+      "governed_exception": true,
+      "exception_reason": "Local skill pending external source pin and overlay governance review."
+    },
+    {
+      "name": "summit-ops-incident-console",
+      "source": "local://skills/summit-ops-incident-console",
+      "commit": "DEFERRED_PENDING_LOCAL",
+      "sha256": "091514b422fbdfcb141f82fe5a6096dc30d0f84377576e2d91f66f6346364b2d",
+      "path": "skills/external/summit-ops-incident-console",
       "governed_exception": true,
       "exception_reason": "Local skill pending external source pin and overlay governance review."
     }
