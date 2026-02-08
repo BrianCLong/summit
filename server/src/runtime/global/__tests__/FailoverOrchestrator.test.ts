@@ -9,7 +9,9 @@ jest.unstable_mockModule('axios', () => ({
 
 const setRegionStatusMock = jest.fn();
 const getStatusMock = jest.fn();
-jest.unstable_mockModule('../../../services/RegionalAvailabilityService.js', () => ({
+jest.unstable_mockModule(
+    new URL('../../../services/RegionalAvailabilityService.ts', import.meta.url).pathname,
+    () => ({
     RegionalAvailabilityService: {
         getInstance: () => ({
             setRegionStatus: setRegionStatusMock,
@@ -18,13 +20,16 @@ jest.unstable_mockModule('../../../services/RegionalAvailabilityService.js', () 
     },
 }));
 
-jest.unstable_mockModule('../../../config/regional-config.js', () => ({
-    getCurrentRegion: () => 'us-east-1',
-    REGIONAL_CONFIG: {
-        'us-east-1': { region: 'us-east-1', baseUrl: 'https://us-east.summit.io' },
-        'us-west-2': { region: 'us-west-2', baseUrl: 'https://us-west.summit.io' },
-    },
-}));
+jest.unstable_mockModule(
+    new URL('../../../config/regional-config.ts', import.meta.url).pathname,
+    () => ({
+        getCurrentRegion: () => 'us-east-1',
+        REGIONAL_CONFIG: {
+            'us-east-1': { region: 'us-east-1', baseUrl: 'https://us-east.summit.io' },
+            'us-west-2': { region: 'us-west-2', baseUrl: 'https://us-west.summit.io' },
+        },
+    }),
+);
 
 const { FailoverOrchestrator } = await import('../FailoverOrchestrator.js');
 

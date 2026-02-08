@@ -1,8 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import sessionsRouter, { requireScope } from '../sessions-api.js';
-import invokeRouter from '../invoke-api.js';
-import { jest, describe, it, expect } from '@jest/globals';
+import { jest, describe, it, expect, beforeAll } from '@jest/globals';
 
 // Mock conductor MCP client
 jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
@@ -23,12 +21,23 @@ jest.unstable_mockModule('../../../capability-fabric/policy-gate.js', () => ({
   evaluateCapabilityPolicy: jest.fn(async () => ({ allow: true, reason: 'allow' })),
 }));
 
+if (!process.env.NO_NETWORK_LISTEN) {
+  process.env.NO_NETWORK_LISTEN = 'true';
+}
 const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+let sessionsRouter: typeof import('../sessions-api.js').default;
+let invokeRouter: typeof import('../invoke-api.js').default;
 
 describeIf('MCP sessions + invoke', () => {
   const app = express();
-  app.use('/api/maestro/v1', sessionsRouter);
-  app.use('/api/maestro/v1', invokeRouter);
+
+  beforeAll(async () => {
+    ({ default: sessionsRouter } = await import('../sessions-api.js'));
+    ({ default: invokeRouter } = await import('../invoke-api.js'));
+    app.use('/api/maestro/v1', sessionsRouter);
+    app.use('/api/maestro/v1', invokeRouter);
+  });
 
   it('creates and uses a session token', async () => {
     // Create session with scope

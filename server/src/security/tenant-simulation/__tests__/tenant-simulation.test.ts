@@ -8,11 +8,14 @@ import { validateTenantAccess, TenantValidator } from '../../../middleware/tenan
 import { getNeo4jDriver } from '../../../config/database.js'; // We will mock this
 
 // Mock database config to avoid real connection attempts in this simulation
-jest.mock('../../../config/database', () => ({
+jest.mock(
+  new URL('../../../config/database.ts', import.meta.url).pathname,
+  () => ({
     getNeo4jDriver: jest.fn(),
     getPostgresPool: jest.fn(),
-    getRedisClient: jest.fn()
-}));
+    getRedisClient: jest.fn(),
+  }),
+);
 
 describe('Tenant Boundary Leak Simulation Engine', () => {
   let app: ReturnType<typeof createApp>;

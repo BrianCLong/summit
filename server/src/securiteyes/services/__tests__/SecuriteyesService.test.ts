@@ -1,15 +1,24 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { SecuriteyesService } from '../SecuriteyesService.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { SecuriteyesService as SecuriteyesServiceType } from '../SecuriteyesService.js';
 import { NODE_LABELS } from '../../models/types.js';
 
 // Mock dependencies
 const mockRunCypher = jest.fn();
-jest.mock('../../../graph/neo4j', () => ({
-  runCypher: (...args: any[]) => mockRunCypher(...args)
-}));
+jest.unstable_mockModule(
+  new URL('../../../graph/neo4j.ts', import.meta.url).pathname,
+  () => ({
+    runCypher: (...args: any[]) => mockRunCypher(...args),
+  }),
+);
+
+let SecuriteyesService: typeof SecuriteyesServiceType;
 
 describe('SecuriteyesService', () => {
-    let service: SecuriteyesService;
+    let service: SecuriteyesServiceType;
+
+    beforeAll(async () => {
+        ({ SecuriteyesService } = await import('../SecuriteyesService.js'));
+    });
 
     beforeEach(() => {
         service = SecuriteyesService.getInstance();

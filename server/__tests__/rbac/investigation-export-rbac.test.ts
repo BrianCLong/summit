@@ -48,8 +48,8 @@ interface TestInvestigation {
 // Mock RBAC service
 class MockRBACService {
   hasPermission(user: TestUser, permission: string, tenantId?: string): boolean {
-    // Global admin and superadmin bypass
-    if (user.role === 'admin' || user.role === 'superadmin') {
+    // Superadmin bypass
+    if (user.role === 'superadmin') {
       return true;
     }
 
@@ -63,8 +63,7 @@ class MockRBACService {
       viewer: [
         'investigation:view',
         'evidence:view',
-        'finding:view',
-        'export:config:view'
+        'finding:view'
       ],
       analyst: [
         'investigation:view',
@@ -101,7 +100,29 @@ class MockRBACService {
         'export:config:view',
         'export:audit:view'
       ],
-      admin: [], // Admin has all permissions
+      admin: [
+        'investigation:view',
+        'investigation:create',
+        'investigation:update',
+        'investigation:close',
+        'investigation:archive',
+        'evidence:view',
+        'evidence:add',
+        'evidence:update',
+        'finding:view',
+        'finding:create',
+        'finding:update',
+        'finding:verify',
+        'export:investigation:json',
+        'export:investigation:csv',
+        'export:investigation:pdf',
+        'export:investigation:full',
+        'export:config:view',
+        'export:config:create',
+        'export:config:update',
+        'export:config:delete',
+        'export:audit:view'
+      ],
       superadmin: [] // Superadmin has all permissions
     };
 

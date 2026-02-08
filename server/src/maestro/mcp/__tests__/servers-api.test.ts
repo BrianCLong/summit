@@ -1,13 +1,17 @@
 import express from 'express';
 import request from 'supertest';
-import router, { checkMCPHealth } from '../servers-api.js';
-import { jest, describe, it, expect } from '@jest/globals';
+import { jest, describe, it, expect, beforeAll } from '@jest/globals';
 
+if (!process.env.NO_NETWORK_LISTEN) {
+  process.env.NO_NETWORK_LISTEN = 'true';
+}
 const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';
 const describeIf = NO_NETWORK_LISTEN ? describe.skip : describe;
 
 // Mock the repo to avoid DB
-jest.unstable_mockModule('../MCPServersRepo.js', () => ({
+jest.unstable_mockModule(
+  new URL('../MCPServersRepo.ts', import.meta.url).pathname,
+  () => ({
   mcpServersRepo: {
     create: jest.fn(async (input: any) => ({
       id: 's1',
@@ -63,9 +67,15 @@ jest.unstable_mockModule('../MCPServersRepo.js', () => ({
   },
 }));
 
+let router: typeof import('../servers-api.js').default;
+
 describeIf('MCP Servers API', () => {
   const app = express();
-  app.use('/api/maestro/v1/mcp', router);
+
+  beforeAll(async () => {
+    ({ default: router } = await import('../servers-api.js'));
+    app.use('/api/maestro/v1/mcp', router);
+  });
 
   it('creates an MCP server', async () => {
     const res = await request(app)

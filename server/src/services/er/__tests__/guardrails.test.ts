@@ -1,18 +1,24 @@
 import { jest, describe, it, expect, beforeEach, afterAll, beforeAll } from '@jest/globals';
 
-jest.unstable_mockModule('../../../provenance/ledger.js', () => ({
-  provenanceLedger: {
-    appendEntry: jest.fn(),
-  },
-}));
+jest.unstable_mockModule(
+  new URL('../../../provenance/ledger.ts', import.meta.url).pathname,
+  () => ({
+    provenanceLedger: {
+      appendEntry: jest.fn(),
+    },
+  }),
+);
 
 const mockDlq = {
   enqueue: jest.fn(),
 };
 
-jest.unstable_mockModule('../../../lib/dlq/index.js', () => ({
-  dlqFactory: jest.fn(() => mockDlq),
-}));
+jest.unstable_mockModule(
+  new URL('../../../lib/dlq/index.ts', import.meta.url).pathname,
+  () => ({
+    dlqFactory: jest.fn(() => mockDlq),
+  }),
+);
 
 describe('EntityResolutionV2Service guardrails', () => {
   let EntityResolutionV2Service: typeof import('../EntityResolutionV2Service.js').EntityResolutionV2Service;

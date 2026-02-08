@@ -1,26 +1,43 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, beforeAll, jest } from '@jest/globals';
 
-// Mock dependencies BEFORE importing the service under test
-jest.mock('../../../services/investigationWorkflowService.js', () => ({
-  investigationWorkflowService: {
-    getInvestigation: jest.fn(),
-  },
-}));
+jest.unstable_mockModule(
+  new URL(
+    '../../../services/investigationWorkflowService.ts',
+    import.meta.url,
+  ).pathname,
+  () => ({
+    investigationWorkflowService: {
+      getInvestigation: jest.fn(),
+    },
+  }),
+);
 
-jest.mock('../../../config/logger.js', () => ({
-  __esModule: true,
-  default: {
-    info: jest.fn(),
-    error: jest.fn(),
-    child: jest.fn().mockReturnThis(),
-  },
-}));
+jest.unstable_mockModule(
+  new URL('../../../config/logger.ts', import.meta.url).pathname,
+  () => ({
+    __esModule: true,
+    default: {
+      info: jest.fn(),
+      error: jest.fn(),
+      child: jest.fn().mockReturnThis(),
+    },
+  }),
+);
 
-import { scenarioService } from '../../../cases/scenarios/ScenarioService.js';
-import { investigationWorkflowService } from '../../../services/investigationWorkflowService.js';
+let scenarioService: typeof import('../../../cases/scenarios/ScenarioService.js').scenarioService;
+let investigationWorkflowService: {
+  getInvestigation: jest.Mock;
+};
 
 describe('ScenarioService', () => {
     const mockInvestigationId = 'inv-123';
+
+    beforeAll(async () => {
+        ({ scenarioService } = await import('../../../cases/scenarios/ScenarioService.js'));
+        ({ investigationWorkflowService } = await import(
+          '../../../services/investigationWorkflowService.js'
+        ));
+    });
 
     beforeEach(() => {
         // Reset state

@@ -2,19 +2,25 @@
 import { describe, it, expect, jest, beforeEach, beforeAll } from '@jest/globals';
 
 // Mock dependencies
-jest.unstable_mockModule('../../../config/database.js', () => ({
-  getPostgresPool: jest.fn(),
-}));
+jest.unstable_mockModule(
+  new URL('../../../config/database.ts', import.meta.url).pathname,
+  () => ({
+    getPostgresPool: jest.fn(),
+  }),
+);
 
-jest.unstable_mockModule('../../UserManagementService.js', () => ({
-  userManagementService: {
-    listUsers: jest.fn(),
-    getUser: jest.fn(),
-    createUser: jest.fn(),
-    updateUser: jest.fn(),
-    deleteUser: jest.fn(),
-  },
-}));
+jest.unstable_mockModule(
+  new URL('../../UserManagementService.ts', import.meta.url).pathname,
+  () => ({
+    userManagementService: {
+      listUsers: jest.fn(),
+      getUser: jest.fn(),
+      createUser: jest.fn(),
+      updateUser: jest.fn(),
+      deleteUser: jest.fn(),
+    },
+  }),
+);
 
 describe('ScimService', () => {
     let ScimService: typeof import('../ScimService.js').ScimService;

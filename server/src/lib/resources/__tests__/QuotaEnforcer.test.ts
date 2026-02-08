@@ -1,16 +1,19 @@
-import { QuotaEnforcer } from '../QuotaEnforcer.js';
-import { rateLimiter } from '../../../services/RateLimiter.js';
-import { quotaConfigService } from '../QuotaConfig.js';
-import { jest } from '@jest/globals';
+import { jest, beforeAll, beforeEach, describe, it, expect } from '@jest/globals';
+import type { QuotaEnforcer as QuotaEnforcerType } from '../QuotaEnforcer.js';
 
 // Mock dependencies
-jest.mock('../../../services/RateLimiter.js', () => ({
-  rateLimiter: {
-    checkLimit: jest.fn(),
-  },
-}));
+jest.unstable_mockModule(
+  new URL('../../../services/RateLimiter.ts', import.meta.url).pathname,
+  () => ({
+    rateLimiter: {
+      checkLimit: jest.fn(),
+    },
+  }),
+);
 
-jest.mock('../QuotaConfig.js', () => ({
+jest.unstable_mockModule(
+  new URL('../QuotaConfig.ts', import.meta.url).pathname,
+  () => ({
     quotaConfigService: {
         getTenantPlan: jest.fn(),
         getTenantOverrides: jest.fn(),
@@ -23,20 +26,35 @@ jest.mock('../QuotaConfig.js', () => ({
 }));
 
 // Mock PrometheusMetrics
-jest.mock('../../../utils/metrics.js', () => {
-    return {
-        PrometheusMetrics: jest.fn().mockImplementation(() => ({
-            createCounter: jest.fn(),
-            incrementCounter: jest.fn(),
-            createGauge: jest.fn(),
-            setGauge: jest.fn(),
-        })),
-    };
-});
+jest.unstable_mockModule(
+  new URL('../../../utils/metrics.ts', import.meta.url).pathname,
+  () => ({
+    PrometheusMetrics: jest.fn().mockImplementation(() => ({
+      createCounter: jest.fn(),
+      incrementCounter: jest.fn(),
+      createGauge: jest.fn(),
+      setGauge: jest.fn(),
+    })),
+  }),
+);
 
+
+let QuotaEnforcer: typeof QuotaEnforcerType;
+let rateLimiter: { checkLimit: jest.Mock };
+let quotaConfigService: {
+  getTenantPlan: jest.Mock;
+  getTenantOverrides: jest.Mock;
+  getFeatureAllowlist: jest.Mock;
+};
 
 describe('QuotaEnforcer', () => {
-  let enforcer: QuotaEnforcer;
+  let enforcer: QuotaEnforcerType;
+
+  beforeAll(async () => {
+    ({ QuotaEnforcer } = await import('../QuotaEnforcer.js'));
+    ({ rateLimiter } = await import('../../../services/RateLimiter.js'));
+    ({ quotaConfigService } = await import('../QuotaConfig.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

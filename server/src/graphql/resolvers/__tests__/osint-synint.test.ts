@@ -1,12 +1,18 @@
 import { jest, describe, it, expect, beforeAll, beforeEach } from '@jest/globals';
 
-jest.unstable_mockModule('../../../services/osint-synint/SynintClient.js', () => ({
-  SynintClient: jest.fn()
-}));
+jest.unstable_mockModule(
+  new URL('../../../services/osint-synint/SynintClient.ts', import.meta.url).pathname,
+  () => ({
+    SynintClient: jest.fn(),
+  }),
+);
 
-jest.unstable_mockModule('../../../db/neo4j.js', () => ({
-  getNeo4jDriver: jest.fn()
-}));
+jest.unstable_mockModule(
+  new URL('../../../db/neo4j.ts', import.meta.url).pathname,
+  () => ({
+    getNeo4jDriver: jest.fn(),
+  }),
+);
 
 describe("runSynintSweep Resolver", () => {
   let resolvers: any;

@@ -1,22 +1,29 @@
-import { jest, describe, expect, test } from '@jest/globals';
-import {
-  createDefaultTransportRegistry,
-  selectTransportName,
-} from '../registry.js';
-import { WebSocketJsonRpcClientTransport } from '../websocket-jsonrpc.js';
+import { jest, describe, expect, test, beforeAll } from '@jest/globals';
 import type { MCPServerConfig } from '../../../types/index.js';
 import type { TransportConnectOptions } from '../types.js';
-import WebSocket from 'ws';
+import type { WebSocketJsonRpcClientTransport as WebSocketJsonRpcClientTransportType } from '../websocket-jsonrpc.js';
+import type {
+  createDefaultTransportRegistry as createDefaultTransportRegistryType,
+  selectTransportName as selectTransportNameType,
+} from '../registry.js';
 
-jest.mock('ws', () => {
-  const MockWebSocket = jest.fn();
-  return {
-    __esModule: true,
-    default: Object.assign(MockWebSocket, { OPEN: 1 }),
-  };
+const MockWebSocket = Object.assign(jest.fn(), { OPEN: 1 });
+
+jest.unstable_mockModule('ws', () => ({
+  __esModule: true,
+  default: MockWebSocket,
+}));
+
+let createDefaultTransportRegistry: typeof createDefaultTransportRegistryType;
+let selectTransportName: typeof selectTransportNameType;
+let WebSocketJsonRpcClientTransport: typeof WebSocketJsonRpcClientTransportType;
+
+beforeAll(async () => {
+  ({ createDefaultTransportRegistry, selectTransportName } = await import(
+    '../registry.js'
+  ));
+  ({ WebSocketJsonRpcClientTransport } = await import('../websocket-jsonrpc.js'));
 });
-
-const MockWebSocket = WebSocket as jest.MockedClass<typeof WebSocket>;
 
 const baseConfig: MCPServerConfig = {
   url: 'ws://localhost:8001',
@@ -69,7 +76,7 @@ describe('WebSocket transport metadata', () => {
       on: jest.fn().mockReturnThis(),
       removeAllListeners: jest.fn().mockReturnThis(),
       close: jest.fn(),
-      readyState: WebSocket.OPEN,
+      readyState: MockWebSocket.OPEN,
     } as any;
 
     MockWebSocket.mockImplementation(() => mockWs);

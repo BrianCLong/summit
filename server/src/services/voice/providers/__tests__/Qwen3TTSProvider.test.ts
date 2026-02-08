@@ -3,7 +3,9 @@ import type { SpeechJob } from '../../types.js';
 
 const mockGetInstance = jest.fn();
 
-jest.unstable_mockModule('../../VoiceProvenanceLedger.js', () => ({
+jest.unstable_mockModule(
+  new URL('../../VoiceProvenanceLedger.ts', import.meta.url).pathname,
+  () => ({
   VoiceProvenanceLedger: {
     getInstance: mockGetInstance,
   },

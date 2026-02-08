@@ -299,14 +299,6 @@ jest.mock(
     { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
   ]),
 }));
-jest.mock(
-  new URL('../../graph/neo4j.ts', import.meta.url).pathname,
-  () => ({
-  runCypher: jest.fn<() => Promise<unknown[]>>().mockResolvedValue([
-    { id: 'entity-1', name: 'Test Entity', type: 'HOST' },
-    { id: 'entity-2', name: 'Test Entity 2', type: 'USER' },
-  ]),
-}));
 
 // Mock other hunting modules that may have singletons
 jest.mock('../CypherTemplateEngine.js', () => {

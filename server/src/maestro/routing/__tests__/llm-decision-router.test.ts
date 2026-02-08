@@ -4,20 +4,27 @@ import path from 'node:path';
 import { beforeEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import type { QueryFeatures } from '../learning-to-rank.js';
 
-jest.unstable_mockModule('../../../db/postgres.js', () => ({
-  getPostgresPool: jest.fn(() => ({
-    query: jest.fn().mockResolvedValue({ rows: [] }),
-  })),
-}));
-
-jest.unstable_mockModule('../../../middleware/observability/otel-tracing.js', () => ({
-  otelService: {
-    createSpan: jest.fn(() => ({
-      addSpanAttributes: jest.fn(),
-      end: jest.fn(),
+jest.unstable_mockModule(
+  new URL('../../../db/postgres.ts', import.meta.url).pathname,
+  () => ({
+    getPostgresPool: jest.fn(() => ({
+      query: jest.fn().mockResolvedValue({ rows: [] }),
     })),
-  },
-}));
+  }),
+);
+
+jest.unstable_mockModule(
+  new URL('../../../middleware/observability/otel-tracing.ts', import.meta.url)
+    .pathname,
+  () => ({
+    otelService: {
+      createSpan: jest.fn(() => ({
+        addSpanAttributes: jest.fn(),
+        end: jest.fn(),
+      })),
+    },
+  }),
+);
 
 const baseFeatures: QueryFeatures = {
   complexity: 0.6,

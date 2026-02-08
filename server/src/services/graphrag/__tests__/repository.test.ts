@@ -1,17 +1,24 @@
 
-import { describe, expect, it, beforeEach, jest } from '@jest/globals';
-import { Neo4jCaseGraphRepository } from '../repositories/CaseGraphRepository.js';
-import { runCypher } from '../../../graph/neo4j.js';
+import { describe, expect, it, beforeEach, beforeAll, jest } from '@jest/globals';
 
 // Mock runCypher
-jest.mock('../../../graph/neo4j', () => ({
-  runCypher: jest.fn(),
-}));
+jest.unstable_mockModule(
+  new URL('../../../graph/neo4j.ts', import.meta.url).pathname,
+  () => ({
+    runCypher: jest.fn(),
+  }),
+);
 
 describe('Neo4jCaseGraphRepository', () => {
-  let repo: Neo4jCaseGraphRepository;
-  // @ts-ignore
-  const mockRunCypher = runCypher as jest.Mock;
+  let Neo4jCaseGraphRepository: typeof import('../repositories/CaseGraphRepository.js').Neo4jCaseGraphRepository;
+  let repo: InstanceType<typeof Neo4jCaseGraphRepository>;
+  let mockRunCypher: jest.Mock;
+
+  beforeAll(async () => {
+    ({ Neo4jCaseGraphRepository } = await import('../repositories/CaseGraphRepository.js'));
+    const { runCypher } = await import('../../../graph/neo4j.ts');
+    mockRunCypher = runCypher as jest.Mock;
+  });
 
   beforeEach(() => {
     repo = new Neo4jCaseGraphRepository();

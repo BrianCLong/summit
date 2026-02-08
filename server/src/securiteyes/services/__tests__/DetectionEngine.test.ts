@@ -1,6 +1,6 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { DetectionEngine } from '../DetectionEngine.js';
-import { SecuriteyesService } from '../SecuriteyesService.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { DetectionEngine as DetectionEngineType } from '../DetectionEngine.js';
+import type { SecuriteyesService as SecuriteyesServiceType } from '../SecuriteyesService.js';
 
 // Mock SecuriteyesService
 const mockSecuriteyesService = {
@@ -10,16 +10,25 @@ const mockSecuriteyesService = {
   createIndicator: jest.fn().mockResolvedValue({ id: 'ind-1' })
 };
 
-jest.mock('../SecuriteyesService', () => {
-    return {
+jest.unstable_mockModule(
+    new URL('../SecuriteyesService.ts', import.meta.url).pathname,
+    () => ({
         SecuriteyesService: {
-            getInstance: jest.fn(() => mockSecuriteyesService)
-        }
-    };
-});
+            getInstance: jest.fn(() => mockSecuriteyesService),
+        },
+    }),
+);
+
+let DetectionEngine: typeof DetectionEngineType;
+let SecuriteyesService: typeof SecuriteyesServiceType;
 
 describe('DetectionEngine', () => {
-    let engine: DetectionEngine;
+    let engine: DetectionEngineType;
+
+    beforeAll(async () => {
+        ({ DetectionEngine } = await import('../DetectionEngine.js'));
+        ({ SecuriteyesService } = await import('../SecuriteyesService.js'));
+    });
 
     beforeEach(() => {
         engine = DetectionEngine.getInstance();

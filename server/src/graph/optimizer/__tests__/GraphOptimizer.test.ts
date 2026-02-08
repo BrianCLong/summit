@@ -1,32 +1,45 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { GraphOptimizer } from '../GraphOptimizer.js';
-import { OptimizationContext } from '../types.js';
-import { getRedisClient } from '../../../db/redis.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { GraphOptimizer as GraphOptimizerType } from '../GraphOptimizer.js';
+import type { OptimizationContext } from '../types.js';
 
 // Mock dependencies
-jest.mock('../../../db/redis', () => ({
-  getRedisClient: jest.fn()
-}));
+jest.unstable_mockModule(
+  new URL('../../../db/redis.ts', import.meta.url).pathname,
+  () => ({
+    getRedisClient: jest.fn(),
+  }),
+);
 
-jest.mock('../../../lib/telemetry/comprehensive-telemetry', () => ({
-  telemetry: {
-    subsystems: {
-      database: {
-        cache: {
-          hits: { add: jest.fn() },
-          misses: { add: jest.fn() }
+jest.unstable_mockModule(
+  new URL('../../../lib/telemetry/comprehensive-telemetry.ts', import.meta.url)
+    .pathname,
+  () => ({
+    telemetry: {
+      subsystems: {
+        database: {
+          cache: {
+            hits: { add: jest.fn() },
+            misses: { add: jest.fn() },
+          },
+          batch: {
+            size: { record: jest.fn() },
+          },
         },
-        batch: {
-          size: { record: jest.fn() }
-        }
-      }
-    }
-  }
-}));
+      },
+    },
+  }),
+);
 
 describe('GraphOptimizer', () => {
-  let optimizer: GraphOptimizer;
+  let optimizer: GraphOptimizerType;
   let mockRedis: any;
+  let GraphOptimizer: typeof GraphOptimizerType;
+  let getRedisClient: jest.Mock;
+
+  beforeAll(async () => {
+    ({ GraphOptimizer } = await import('../GraphOptimizer.js'));
+    ({ getRedisClient } = await import('../../../db/redis.js'));
+  });
 
   beforeEach(() => {
     mockRedis = {

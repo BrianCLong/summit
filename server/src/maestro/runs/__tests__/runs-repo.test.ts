@@ -1,15 +1,18 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { RunCreateInput } from '../runs-repo.js';
+import type { RunCreateInput } from '../runs-repo.js';
 
 // Define mock Query function
 const mockQuery = jest.fn();
 
 // Mock database module BEFORE importing the repo
-jest.mock('../../../config/database.js', () => ({
-  getPostgresPool: jest.fn(() => ({
-    query: mockQuery,
-  })),
-}));
+jest.unstable_mockModule(
+  new URL('../../../config/database.ts', import.meta.url).pathname,
+  () => ({
+    getPostgresPool: jest.fn(() => ({
+      query: mockQuery,
+    })),
+  }),
+);
 
 // Helper to import runsRepo dynamically inside tests or `beforeAll` if needed,
 // but typically jest.mock works if hoisted.

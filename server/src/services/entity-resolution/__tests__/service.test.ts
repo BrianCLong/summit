@@ -1,21 +1,37 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { EntityResolutionService } from '../service.js';
-import { EntityInput } from '../models.js';
-import { provenanceLedger } from '../../../provenance/ledger.js';
-import * as neo4jModule from '../../../graph/neo4j.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { EntityInput } from '../models.js';
 
-// Mocks
-jest.mock('../../../provenance/ledger', () => ({
-  provenanceLedger: {
-    appendEntry: jest.fn().mockResolvedValue({})
-  }
-}));
+const mockAppendEntry = jest.fn().mockResolvedValue({});
+const mockGetDriver = jest.fn();
+
+jest.unstable_mockModule(
+  new URL('../../../provenance/ledger.ts', import.meta.url).pathname,
+  () => ({
+    provenanceLedger: {
+      appendEntry: mockAppendEntry,
+    },
+  }),
+);
+jest.unstable_mockModule(
+  new URL('../../../graph/neo4j.ts', import.meta.url).pathname,
+  () => ({
+    getDriver: mockGetDriver,
+  }),
+);
+
+let EntityResolutionService: typeof import('../service.js').EntityResolutionService;
+let provenanceLedger: { appendEntry: jest.Mock };
 
 describe('EntityResolutionService', () => {
   let service: EntityResolutionService;
   let mockRun: jest.Mock;
   let mockSession: { run: jest.Mock; close: jest.Mock; executeWrite: jest.Mock };
   let mockDriver: { session: jest.Mock };
+
+  beforeAll(async () => {
+    ({ EntityResolutionService } = await import('../service.js'));
+    ({ provenanceLedger } = await import('../../../provenance/ledger.js'));
+  });
 
   beforeEach(() => {
     service = new EntityResolutionService();
@@ -31,7 +47,7 @@ describe('EntityResolutionService', () => {
     mockDriver = {
       session: jest.fn().mockReturnValue(mockSession),
     };
-    jest.spyOn(neo4jModule, 'getDriver').mockReturnValue(mockDriver as any);
+    mockGetDriver.mockReturnValue(mockDriver as any);
   });
 
   it('should identify a merge candidate', async () => {

@@ -1,6 +1,6 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { RiskManager } from '../RiskManager.js';
-import { SecuriteyesService } from '../SecuriteyesService.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { RiskManager as RiskManagerType } from '../RiskManager.js';
+import type { SecuriteyesService as SecuriteyesServiceType } from '../SecuriteyesService.js';
 
 const mockSecuriteyesService = {
   getOrCreateRiskProfile: jest.fn().mockReturnValue(Promise.resolve({ principalId: 'p1', riskScore: 10, riskFactors: {} })),
@@ -8,21 +8,34 @@ const mockSecuriteyesService = {
   getHighRiskProfiles: jest.fn().mockResolvedValue([{ principalId: 'p1', riskScore: 80 }])
 };
 
-jest.mock('../SecuriteyesService', () => {
-    return {
-        SecuriteyesService: {
-            getInstance: jest.fn(() => mockSecuriteyesService)
-        }
-    };
-});
+jest.unstable_mockModule(
+  new URL('../SecuriteyesService.ts', import.meta.url).pathname,
+  () => ({
+    SecuriteyesService: {
+      getInstance: jest.fn(() => mockSecuriteyesService),
+    },
+  }),
+);
 
-// Mock runCypher for getHighRiskProfiles
-jest.mock('../../../graph/neo4j.js', () => ({
-  runCypher: jest.fn().mockResolvedValue([{ n: { properties: { principalId: 'p1', riskScore: 80 } } }])
-}));
+jest.unstable_mockModule(
+  new URL('../../../graph/neo4j.ts', import.meta.url).pathname,
+  () => ({
+    runCypher: jest
+      .fn()
+      .mockResolvedValue([{ n: { properties: { principalId: 'p1', riskScore: 80 } } }]),
+  }),
+);
+
+let RiskManager: typeof RiskManagerType;
+let SecuriteyesService: typeof SecuriteyesServiceType;
 
 describe('RiskManager', () => {
-    let manager: RiskManager;
+    let manager: RiskManagerType;
+
+    beforeAll(async () => {
+        ({ RiskManager } = await import('../RiskManager.js'));
+        ({ SecuriteyesService } = await import('../SecuriteyesService.js'));
+    });
 
     beforeEach(() => {
         manager = RiskManager.getInstance();

@@ -1,22 +1,31 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { StatisticalDetector } from '../StatisticalDetector.js';
-import { SecuriteyesService } from '../SecuriteyesService.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { StatisticalDetector as StatisticalDetectorType } from '../StatisticalDetector.js';
+import type { SecuriteyesService as SecuriteyesServiceType } from '../SecuriteyesService.js';
 
 const mockSecuriteyesService = {
   getRecentSuspiciousEvents: jest.fn().mockResolvedValue([]),
   createSuspiciousEvent: jest.fn().mockResolvedValue({ id: 'evt-1' })
 };
 
-jest.mock('../SecuriteyesService', () => {
-    return {
-        SecuriteyesService: {
-            getInstance: jest.fn(() => mockSecuriteyesService)
-        }
-    };
-});
+jest.unstable_mockModule(
+  new URL('../SecuriteyesService.ts', import.meta.url).pathname,
+  () => ({
+    SecuriteyesService: {
+      getInstance: jest.fn(() => mockSecuriteyesService),
+    },
+  }),
+);
+
+let StatisticalDetector: typeof StatisticalDetectorType;
+let SecuriteyesService: typeof SecuriteyesServiceType;
 
 describe('StatisticalDetector', () => {
-    let detector: StatisticalDetector;
+    let detector: StatisticalDetectorType;
+
+    beforeAll(async () => {
+        ({ StatisticalDetector } = await import('../StatisticalDetector.js'));
+        ({ SecuriteyesService } = await import('../SecuriteyesService.js'));
+    });
 
     beforeEach(() => {
         detector = StatisticalDetector.getInstance();

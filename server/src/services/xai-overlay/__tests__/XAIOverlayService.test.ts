@@ -11,7 +11,9 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { FeatureVector } from '../../../risk/RiskEngine.js';
 
-jest.mock('../../../federal/dual-notary.js', () => ({
+jest.unstable_mockModule(
+  new URL('../../../federal/dual-notary.ts', import.meta.url).pathname,
+  () => ({
   __esModule: true,
   dualNotary: {
     notarizeRoot: jest.fn(async () => ({
@@ -24,7 +26,8 @@ jest.mock('../../../federal/dual-notary.js', () => ({
     verifyNotarizedRoot: jest.fn(async () => ({ valid: true })),
     healthCheck: jest.fn(async () => ({ status: 'ok' })),
   },
-}));
+  }),
+);
 
 let XAIOverlayService: typeof import('../XAIOverlayService.js').XAIOverlayService;
 let externalVerifier: typeof import('../ExternalVerifier.js').externalVerifier;

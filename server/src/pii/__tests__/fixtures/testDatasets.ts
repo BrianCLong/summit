@@ -4,6 +4,7 @@
  * Contains sample datasets with various PII types and sensitivity levels
  * for testing detection, tagging, and redaction functionality.
  */
+import { describe, it, expect } from '@jest/globals';
 
 /**
  * Low-sensitivity dataset
@@ -209,6 +210,17 @@ export const mixedSensitivityDataset = [
     },
   },
 ];
+
+describe('pii test datasets', () => {
+  it('exports sample datasets', () => {
+    expect(lowSensitivityDataset.length).toBeGreaterThan(0);
+    expect(mediumSensitivityDataset.length).toBeGreaterThan(0);
+    expect(highSensitivityDataset.length).toBeGreaterThan(0);
+    expect(criticalSensitivityDataset.length).toBeGreaterThan(0);
+    expect(healthcareDataset.length).toBeGreaterThan(0);
+    expect(mixedSensitivityDataset.length).toBeGreaterThan(0);
+  });
+});
 
 /**
  * Nested structure dataset for testing recursive detection

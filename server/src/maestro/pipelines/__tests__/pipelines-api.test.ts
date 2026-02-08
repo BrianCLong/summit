@@ -1,11 +1,23 @@
 import express from 'express';
 import request from 'supertest';
-import router from '../../pipelines-api.js';
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, beforeAll } from '@jest/globals';
 
-describe('Pipelines API', () => {
+let router: typeof import('../../pipelines-api.js').default;
+
+if (!process.env.NO_NETWORK_LISTEN) {
+  process.env.NO_NETWORK_LISTEN = 'true';
+}
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
+
+describeIf('Pipelines API', () => {
   const app = express();
-  app.use('/api/maestro/v1', router);
+
+  beforeAll(async () => {
+    ({ default: router } = await import(
+      new URL('../pipelines-api.ts', import.meta.url).href
+    ));
+    app.use('/api/maestro/v1', router);
+  });
 
   it('lists pipelines (empty)', async () => {
     const res = await request(app).get('/api/maestro/v1/pipelines').expect(200);

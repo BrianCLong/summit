@@ -1,15 +1,19 @@
 
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { coordinationService } from '../service.js';
-import { budgetManager } from '../budget-manager.js';
-import { CoordinationSchema, SharedBudget } from '../types.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import type { CoordinationSchema, SharedBudget } from '../types.js';
 
 // Mock dependencies
-jest.mock('../../MaestroService', () => ({
-  maestroService: {
-    logAudit: jest.fn().mockReturnValue(Promise.resolve(undefined))
-  }
-}));
+jest.unstable_mockModule(
+  new URL('../../MaestroService.ts', import.meta.url).pathname,
+  () => ({
+    maestroService: {
+      logAudit: jest.fn().mockReturnValue(Promise.resolve(undefined)),
+    },
+  }),
+);
+
+let coordinationService: typeof import('../service.js').coordinationService;
+let budgetManager: typeof import('../budget-manager.js').budgetManager;
 
 describe('Coordination System', () => {
   const schema: CoordinationSchema = {
@@ -26,6 +30,11 @@ describe('Coordination System', () => {
   };
 
   let coordinationId: string;
+
+  beforeAll(async () => {
+    ({ coordinationService } = await import('../service.js'));
+    ({ budgetManager } = await import('../budget-manager.js'));
+  });
 
   beforeEach(() => {
     // Reset budget manager state if needed, but it's a singleton in-memory map.

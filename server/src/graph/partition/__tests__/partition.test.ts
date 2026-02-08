@@ -21,8 +21,10 @@ jest.mock('neo4j-driver', () => ({
 
 describe('Edge-Scale Graph Partitioning', () => {
   let shardManager: ShardManager;
+  const originalEnv = { ...process.env };
 
   beforeEach(async () => {
+    process.env.ZERO_FOOTPRINT = 'true';
     // Reset singleton if possible, or just re-register
     // Since it's a private constructor singleton, we can't easily reset it without
     // adding a reset method or accessing private instance.
@@ -34,6 +36,7 @@ describe('Edge-Scale Graph Partitioning', () => {
 
   afterEach(async () => {
     await shardManager.closeAll();
+    process.env = { ...originalEnv };
   });
 
   it('should register shards correctly', async () => {

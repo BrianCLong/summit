@@ -7,13 +7,20 @@ const mockPool = {
 };
 const mockAppendEntry = jest.fn();
 
-jest.unstable_mockModule('../../../db/pg', () => ({ pool: mockPool }));
-jest.unstable_mockModule('../../../provenance/ledger', () => ({
+jest.unstable_mockModule(
+  new URL('../../../db/pg.ts', import.meta.url).pathname,
+  () => ({ pool: mockPool }),
+);
+jest.unstable_mockModule(
+  new URL('../../../provenance/ledger.ts', import.meta.url).pathname,
+  () => ({
   provenanceLedger: {
     appendEntry: mockAppendEntry,
   },
 }));
-jest.unstable_mockModule('../../../lib/resources/quota-manager', () => ({
+jest.unstable_mockModule(
+  new URL('../../../lib/resources/quota-manager.ts', import.meta.url).pathname,
+  () => ({
   __esModule: true,
   default: {
     getQuotaForTenant: jest.fn().mockReturnValue({}),
