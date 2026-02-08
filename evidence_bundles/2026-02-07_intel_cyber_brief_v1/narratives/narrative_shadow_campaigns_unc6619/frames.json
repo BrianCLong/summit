@@ -1,0 +1,14 @@
+{
+  "frames": [
+    {
+      "frame_id": "f_global_persistent_espionage",
+      "frame_normal_form": "A strategic, persistent espionage program is harvesting government and infrastructure intelligence at scale.",
+      "polarity_target": "victim_governments",
+      "solution_hook": "hunt + rebuild trust boundaries + segmentation + kernel integrity checks",
+      "supported_by_assumption_ids": [
+        "s_objective_policy_intel_theft",
+        "s_long_term_access_priority"
+      ]
+    }
+  ]
+}

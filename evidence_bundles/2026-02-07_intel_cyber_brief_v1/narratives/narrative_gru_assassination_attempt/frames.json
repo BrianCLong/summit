@@ -1,0 +1,23 @@
+{
+  "frames": [
+    {
+      "frame_id": "f_peace_talks_sabotage",
+      "frame_normal_form": "The attack is a Ukrainian attempt to sabotage peace talks and provoke escalation.",
+      "polarity_target": "ukraine",
+      "solution_hook": "retaliation / security crackdown / negotiation hardening",
+      "supported_by_assumption_ids": [
+        "s_peace_talks_sabotage_frame",
+        "s_attribution_is_informational_weapon"
+      ]
+    },
+    {
+      "frame_id": "f_intel_leadership_targeting",
+      "frame_normal_form": "Senior intelligence leadership are legitimate wartime targets in the ongoing conflict.",
+      "polarity_target": "intelligence_leadership",
+      "solution_hook": "heightened counterintelligence posture",
+      "supported_by_assumption_ids": [
+        "s_target_selection_is_strategic"
+      ]
+    }
+  ]
+}

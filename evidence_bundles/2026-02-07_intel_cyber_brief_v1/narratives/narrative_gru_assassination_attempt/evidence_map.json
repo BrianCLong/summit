@@ -1,0 +1,29 @@
+{
+  "narrative_id": "n_gru_assassination_attempt",
+  "artifact_to_claims": {
+    "a_user_brief_2026_02_07": [
+      "c_alekseyev_shot_on_feb6",
+      "c_alekseyev_regained_consciousness",
+      "c_two_suspects_detained",
+      "c_russia_accuses_ukraine",
+      "c_alekseyev_sanctioned_for_cyber"
+    ]
+  },
+  "claim_to_assumptions": {
+    "c_russia_accuses_ukraine": [
+      "s_attribution_is_informational_weapon",
+      "s_peace_talks_sabotage_frame"
+    ],
+    "c_alekseyev_shot_on_feb6": [
+      "s_target_selection_is_strategic"
+    ]
+  },
+  "assumption_to_frames": {
+    "s_peace_talks_sabotage_frame": [
+      "f_peace_talks_sabotage"
+    ],
+    "s_target_selection_is_strategic": [
+      "f_intel_leadership_targeting"
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "assumptions": [
+    {
+      "assumption_id": "s_attribution_is_informational_weapon",
+      "assumption_normal_form": "Public attribution statements are being used to shape negotiation and escalation dynamics, not merely convey facts.",
+      "scope": "narrative",
+      "confidence": 0.66,
+      "supported_by_claim_ids": [
+        "c_russia_accuses_ukraine"
+      ],
+      "provenance_id": "p_gru_0001"
+    },
+    {
+      "assumption_id": "s_target_selection_is_strategic",
+      "assumption_normal_form": "Targeting a senior intelligence official is intended to create strategic effects beyond the individual casualty outcome.",
+      "scope": "narrative",
+      "confidence": 0.62,
+      "supported_by_claim_ids": [
+        "c_alekseyev_shot_on_feb6"
+      ],
+      "provenance_id": "p_gru_0001"
+    },
+    {
+      "assumption_id": "s_peace_talks_sabotage_frame",
+      "assumption_normal_form": "Linking the attack to 'peace talks sabotage' is a deliberate framing choice to justify countermeasures.",
+      "scope": "narrative",
+      "confidence": 0.7,
+      "supported_by_claim_ids": [
+        "c_russia_accuses_ukraine"
+      ],
+      "provenance_id": "p_gru_0001"
+    }
+  ]
+}

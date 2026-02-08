@@ -1,0 +1,13 @@
+{
+  "frames": [
+    {
+      "frame_id": "f_trust_impersonation",
+      "frame_normal_form": "Trust impersonation (support/admin) is being used to compromise high-value communications.",
+      "polarity_target": "targets",
+      "solution_hook": "out-of-band verification + device attestation + anti-impersonation training",
+      "supported_by_assumption_ids": [
+        "s_human_layer_precedes_technical"
+      ]
+    }
+  ]
+}

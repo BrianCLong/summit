@@ -1,0 +1,18 @@
+{
+  "narrative_id": "n_gru_assassination_attempt",
+  "label": "Russian GRU deputy chief targeted in Moscow shooting; Russia attributes to Ukraine",
+  "state": "contested",
+  "topic_tags": [
+    "russia",
+    "gru",
+    "assassination",
+    "attribution",
+    "peace-talks",
+    "escalation"
+  ],
+  "scope": "geopolitical_intelligence",
+  "source_artifact_ids": [
+    "a_user_brief_2026_02_07"
+  ],
+  "notes": "Narrative contains both confirmed operational facts (injury, detentions) and contested attribution (Ukraine responsibility)."
+}

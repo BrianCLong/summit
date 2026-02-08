@@ -1,0 +1,55 @@
+{
+  "version": "1",
+  "provenance_id": "p_shadow_0001",
+  "generated_by": {
+    "pipeline": "summit-evidence-bundler",
+    "pipeline_version": "0.1.0",
+    "model": "analyst_synthesis_from_user_summary",
+    "model_version": "n/a",
+    "policy_version": "policy_hash_placeholder"
+  },
+  "inputs": [
+    {
+      "artifact_id": "a_user_brief_2026_02_07",
+      "anchors": [
+        "anchor:Global Cyber Espionage Campaign block"
+      ]
+    }
+  ],
+  "transforms": [
+    {
+      "name": "canonicalize",
+      "hash": "hash_placeholder"
+    },
+    {
+      "name": "extract_claims",
+      "hash": "hash_placeholder"
+    },
+    {
+      "name": "infer_assumptions",
+      "hash": "hash_placeholder"
+    },
+    {
+      "name": "score_handoff",
+      "hash": "hash_placeholder"
+    }
+  ],
+  "outputs": [
+    {
+      "type": "Narrative",
+      "id": "n_shadow_campaigns_unc6619"
+    },
+    {
+      "type": "Claim",
+      "id": "c_70_networks_37_countries"
+    },
+    {
+      "type": "Assumption",
+      "id": "s_long_term_access_priority"
+    },
+    {
+      "type": "Frame",
+      "id": "f_global_persistent_espionage"
+    }
+  ]
+}

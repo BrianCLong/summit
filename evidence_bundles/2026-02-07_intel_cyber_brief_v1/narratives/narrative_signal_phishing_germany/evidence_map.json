@@ -1,0 +1,18 @@
+{
+  "narrative_id": "n_germany_signal_phishing",
+  "artifact_to_claims": {
+    "a_user_brief_2026_02_07": [
+      "c_signal_phishing_targets_high_value"
+    ]
+  },
+  "claim_to_assumptions": {
+    "c_signal_phishing_targets_high_value": [
+      "s_human_layer_precedes_technical"
+    ]
+  },
+  "assumption_to_frames": {
+    "s_human_layer_precedes_technical": [
+      "f_trust_impersonation"
+    ]
+  }
+}
