@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/schemas/control-plane-agent-manifest.json",
+  "title": "Summit Control Plane Agent Manifest",
+  "description": "Enhanced definition of a Governed AI Agent with Frontier-parity capabilities. Enforces explicit configuration wrapped in regulatory-grade compliance controls.",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "version",
+    "governance",
+    "runtime",
+    "evidence",
+    "experience",
+    "context"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier for the agent (e.g., 'code-review-agent')."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the agent configuration."
+    },
+    "governance": {
+      "type": "object",
+      "required": ["owner", "classification", "policy_set"],
+      "properties": {
+        "owner": { "type": "string" },
+        "classification": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
+        "policy_set": { "type": "string" },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"], "default": "medium" },
+        "boundaries": {
+          "type": "object",
+          "properties": {
+            "session_limits": {
+              "type": "object",
+              "properties": {
+                "max_steps": { "type": "integer", "default": 25 },
+                "max_time_ms": { "type": "integer", "default": 300000 }
+              }
+            },
+            "resource_quotas": {
+              "type": "object",
+              "properties": {
+                "max_tokens": { "type": "integer" },
+                "max_cost_usd": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["model", "instructions", "tools"],
+      "properties": {
+        "model": {
+          "type": "object",
+          "required": ["provider", "name"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["openai", "anthropic", "google", "meta", "custom"] },
+            "name": { "type": "string" },
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+                "top_p": { "type": "number" },
+                "max_tokens": { "type": "integer" },
+                "effort": { "type": "string", "enum": ["low", "medium", "high"] }
+              }
+            }
+          }
+        },
+        "instructions": {
+          "type": "object",
+          "required": ["source", "sha256"],
+          "properties": {
+            "source": { "type": "string" },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "permission"],
+            "properties": {
+              "name": { "type": "string" },
+              "permission": { "type": "string", "enum": ["read-only", "read-write", "admin", "sandbox-only"] },
+              "timeout_ms": { "type": "integer", "default": 30000 }
+            }
+          }
+        }
+      }
+    },
+    "experience": {
+      "type": "object",
+      "required": ["onboarding_flow"],
+      "properties": {
+        "onboarding_flow": { "type": "string" },
+        "feedback_loops": { "type": "array", "items": { "type": "string" } },
+        "learning_enabled": { "type": "boolean", "default": false }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["graph_grounding"],
+      "properties": {
+        "shared_context_id": { "type": "string" },
+        "graph_grounding": { "type": "boolean", "default": true },
+        "persistence": { "type": "string", "enum": ["ephemeral", "session", "permanent"], "default": "session" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["log_level", "required_artifacts"],
+      "properties": {
+        "log_level": { "type": "string", "enum": ["info", "debug", "audit", "trace"], "default": "audit" },
+        "required_artifacts": { "type": "array", "items": { "type": "string" } },
+        "replay_mode": { "type": "string", "enum": ["deterministic", "best-effort", "none"], "default": "deterministic" }
+      }
+    }
+  }
+}
