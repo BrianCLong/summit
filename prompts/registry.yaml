@@ -922,3 +922,24 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: supply-chain-sigstore-bundle-first
+    version: v1
+    path: prompts/docs/supply-chain-sigstore-bundle-first@v1.md
+    sha256: 37dd1d8253fbd23edd5281935a8ebcdc46406f2973f92a174601b2a2c22970c1
+    description: Create bundle-first Sigstore governance spec and update roadmap status.
+    scope:
+      paths:
+        - docs/supply-chain/sigstore-bundle-first-governance.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/supply-chain-sigstore-bundle-first@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - supply-chain
+        - governance
+    verification:
+      tiers_required:
+        - C
+    allowed_operations:
+      - create
+      - edit
