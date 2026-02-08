@@ -21,50 +21,6 @@ on:
 
   # Manual trigger with configuration options
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Dry run mode (no state changes, no issue writes)"
-        type: boolean
-        default: false
-      threshold_minutes:
-        description: "Age threshold (minutes) before raising blocker issues"
-        type: number
-        default: 90
-      enable_issue_writes:
-        description: "Enable issue creation/updates"
-        type: boolean
-        default: true
-      enable_routing:
-        description: "Enable routing label application"
-        type: boolean
-        default: true
-      enable_escalation:
-        description: "Enable escalation threshold checks"
-        type: boolean
-        default: true
-      enable_notify:
-        description: "Enable notifications (Slack/email)"
-        type: boolean
-        default: false
-      force_digest:
-        description: "Force digest generation (ignore cadence window)"
-        type: boolean
-        default: false
-      force_handoff:
-        description: "Force handoff generation (ignore cadence window)"
-        type: boolean
-        default: false
-      verbose:
-        description: "Enable verbose logging"
-        type: boolean
-        default: false
-
-  # Trigger on workflow changes (for testing)
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/release-ops-orchestrator.yml"
 
 # Prevent concurrent runs - only one orchestrator cycle at a time
 concurrency:
