@@ -1,5 +1,29 @@
 version: 1
 prompts:
+  - id: governed-agent-integration-reference
+    version: v1
+    path: prompts/architecture/governed-agent-integration-reference@v1.md
+    sha256: b3cc1444eeaf4755f9a7912fb42feeb6f1726cf1212cf50d06b1f0ea49e2bd53
+    description: Publish governed agent integration reference architecture and update roadmap status.
+    scope:
+      paths:
+        - docs/architecture/governed-agent-integration-reference.md
+        - docs/roadmap/STATUS.json
+        - prompts/architecture/governed-agent-integration-reference@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - architecture
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
