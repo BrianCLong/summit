@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NarrativeMetrics",
+  "type": "object",
+  "required": ["run_id", "metrics"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "resilience_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "seeding_density": { "type": "number", "minimum": 0, "maximum": 1 },
+        "handoff_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "compression_ratio": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

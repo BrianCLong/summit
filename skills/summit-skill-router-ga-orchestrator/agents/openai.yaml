@@ -1,4 +1,0 @@
-interface:
-  display_name: "Summit Skill Router (GA Orchestrator)"
-  short_description: "Route Summit tasks to skills with GA preflight"
-  default_prompt: "Use $summit-skill-router-ga-orchestrator to route this Summit request and return a deterministic GA-ready plan."
