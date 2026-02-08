@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Assumptions Registry",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": { "type": "string" },
+      "statement": { "type": "string" },
+      "validity_condition": { "type": "string" },
+      "last_verified": { "type": "string", "format": "date-time" }
+    },
+    "required": ["id", "statement"]
+  }
+}
