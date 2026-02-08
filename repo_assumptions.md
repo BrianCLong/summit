@@ -1,35 +1,37 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (CogWar MWS)
 
-## Structure Validation
+**Readiness reference:** Summit Readiness Assertion governs posture and exceptions. See
+`docs/SUMMIT_READINESS_ASSERTION.md`.
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+## Validation Checklist (Executed)
 
-## Component Mapping
+1. `ls -la .github/workflows` → confirmed workflow inventory and gate candidates.
+2. `cat package.json pnpm-workspace.yaml` → confirmed monorepo scripts + workspace layout.
+3. `rg -n "evidence_id|report.json|stamp.json" -S` → confirmed evidence patterns + schemas.
+4. `ls src` → confirmed `src/` root for new CogWar schema placement.
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+## Verified vs Deferred (Repo Shape)
 
-## Constraints & Checks
+| Item | Status | Notes |
+| --- | --- | --- |
+| `.github/workflows/` | ✅ Verified | Large workflow inventory present; see required check discovery in `required_checks.todo.md`. |
+| `package.json` scripts | ✅ Verified | Jest-based root tests; pnpm scripts defined. |
+| `pnpm-workspace.yaml` | ✅ Verified | Workspace spans `apps/*`, `packages/*`, `client`, `server`, `services/*`, `cli`, `tools/*`, etc. |
+| `src/` root | ✅ Verified | `src/` exists; CogWar schemas placed under `src/cogwar/schema/`. |
+| Evidence patterns | ✅ Verified | Evidence directories and schemas present under `evidence/`, `agentops/evidence/`, `intel/schema/`, `tests/evidence/`. |
+| Required CI check names | ❓ Deferred pending verification | Branch protection API/UI confirmation required to map exact status check names. |
+| Governance-required PR metadata | ❓ Deferred pending verification | Must align with `.github/PULL_REQUEST_TEMPLATE.md` metadata block before PR submission. |
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+## Must-Not-Touch Files (Governance/Authority)
 
-## Next Steps
+- `docs/SUMMIT_READINESS_ASSERTION.md`
+- `docs/governance/CONSTITUTION.md`
+- `docs/governance/META_GOVERNANCE.md`
+- `docs/governance/AGENT_MANDATES.md`
+- `agent-contract.json`
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+## Next Enforcement Actions
+
+- Add CogWar schemas and tests in scoped paths only.
+- Record updated roadmap status in `docs/roadmap/STATUS.json`.
+- Use governed exceptions if any deviation from deterministic artifacts is required.
