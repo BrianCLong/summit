@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
   "last_updated": "2026-02-08T00:15:00Z",
   "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+=======
+  "last_updated": "2026-02-08T01:21:28Z",
+  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+>>>>>>> ba7d91d549 (docs: add sigstore bundle-first governance spec)
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -201,10 +206,17 @@
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     },
     {
+<<<<<<< HEAD
       "id": "summit-architecture-brief",
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+=======
+      "id": "supply-chain-sigstore-bundle-governance",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Bundle-first Sigstore governance specification with 24+ order intent map and MAESTRO alignment in docs/supply-chain/sigstore-bundle-first-governance.md."
+>>>>>>> ba7d91d549 (docs: add sigstore bundle-first governance spec)
     }
   ],
   "summary": {
@@ -212,7 +224,11 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
+<<<<<<< HEAD
     "total": 16,
+=======
+    "total": 18,
+>>>>>>> ba7d91d549 (docs: add sigstore bundle-first governance spec)
     "ga_blockers": []
   }
 }
