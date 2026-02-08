@@ -1,4 +1,4 @@
-fastapi==0.109.2
+fastapi==0.115.12
 uvicorn==0.27.1
 mlflow==3.5.0
 torch==2.10.0
@@ -6,4 +6,4 @@ pandas==2.2.3
 numpy==2.4.2
 scikit-learn==1.8.0
 boto3==1.42.44
-pydantic==2.6.1
+pydantic==2.12.5
