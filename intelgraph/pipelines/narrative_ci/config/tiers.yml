@@ -1,0 +1,30 @@
+tiers:
+  - id: fringe
+    name: "Fringe / Unverified"
+    score_weight: 0.2
+  - id: mainstream
+    name: "Mainstream Media"
+    score_weight: 0.6
+  - id: security_news
+    name: "Security News / Tech Reporting"
+    score_weight: 0.7
+  - id: vendor_intel
+    name: "Vendor Intelligence Report"
+    score_weight: 0.85
+  - id: govt_cert
+    name: "Government / CERT Advisory"
+    score_weight: 0.95
+
+allowed_handoffs:
+  - from: fringe
+    to: mainstream
+    risk_level: high
+  - from: mainstream
+    to: vendor_intel
+    risk_level: medium
+  - from: vendor_intel
+    to: govt_cert
+    risk_level: low
+  - from: security_news
+    to: govt_cert
+    risk_level: medium

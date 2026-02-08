@@ -1,0 +1,38 @@
+[
+  {
+    "node_id": "ART-001",
+    "kind": "Artifact",
+    "source": "Reuters",
+    "outlet_tier": "mainstream",
+    "uri": "https://www.reuters.com/world/two-suspects-attempted-killing-russian-general-will-soon-be-interrogated-2026-02-07",
+    "content_sha256": "aaaa1111",
+    "published_at": "2026-02-07T08:00:00Z"
+  },
+  {
+    "node_id": "ART-002",
+    "kind": "Artifact",
+    "source": "The Guardian",
+    "outlet_tier": "mainstream",
+    "uri": "https://www.theguardian.com/world/2026/feb/06/russia-military-general-vladimir-alekseyev",
+    "content_sha256": "bbbb2222",
+    "published_at": "2026-02-06T20:00:00Z"
+  },
+  {
+    "node_id": "ART-003",
+    "kind": "Artifact",
+    "source": "Unit 42",
+    "outlet_tier": "vendor_intel",
+    "uri": "https://unit42.paloaltonetworks.com/shadow-campaigns-uncovering-global-espionage",
+    "content_sha256": "cccc3333",
+    "published_at": "2026-02-07T09:00:00Z"
+  },
+  {
+    "node_id": "ART-004",
+    "kind": "Artifact",
+    "source": "BleepingComputer",
+    "outlet_tier": "security_news",
+    "uri": "https://www.bleepingcomputer.com/news/security/germany-warns-of-signal-account-hijacking-targeting-senior-figures",
+    "content_sha256": "dddd4444",
+    "published_at": "2026-02-07T10:00:00Z"
+  }
+]
