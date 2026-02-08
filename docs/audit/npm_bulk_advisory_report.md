@@ -1,11 +1,11 @@
 # NPM bulk advisory report
 
-- Generated: 2026-02-08T04:50:18.963716+00:00
+- Generated: 2026-02-08T05:03:00.862066+00:00
 - Lockfile: `/media/bcl/SUMMIT_LNX/summit/pnpm-lock.yaml`
 - Advisories: 21
 - Packages with advisories: 17
-- Affected versions: 14
-- Affected importers: 5
+- Affected versions: 5
+- Affected importers: 4
 
 ## @apollo/server
 - Apollo Serve vulnerable to Denial of Service with `startStandaloneServer` (high)
@@ -25,7 +25,7 @@
 - @isaacs/brace-expansion has Uncontrolled Resource Consumption (high)
   - ID: 1112954
   - Range: `<=5.0.0`
-  - Affected versions: 5.0.0
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (<=5.0.0).
 
@@ -57,8 +57,8 @@
 - JavaScript SDK v2 users should add validation to the region parameter value in or migrate to v3 (low)
   - ID: 1111997
   - Range: `>=2.0.0 <=3.0.0`
-  - Affected versions: 2.1693.0
-  - Importers: packages/tasks-core
+  - Affected versions: None
+  - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (>=2.0.0 <=3.0.0).
 
 ## dicer
@@ -73,19 +73,19 @@
 - jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch (low)
   - ID: 1112703
   - Range: `<3.5.1`
-  - Affected versions: 3.5.0
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (<3.5.1).
 - jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch (low)
   - ID: 1112704
   - Range: `>=4.0.0 <4.0.4`
-  - Affected versions: 4.0.2
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (>=4.0.0 <4.0.4).
 - jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch (low)
   - ID: 1112706
   - Range: `>=6.0.0 <8.0.3`
-  - Affected versions: 8.0.2
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (>=6.0.0 <8.0.3).
 
@@ -101,7 +101,7 @@
 - fast-xml-parser has RangeError DoS Numeric Entities Bug (high)
   - ID: 1112708
   - Range: `>=4.3.6 <=5.3.3`
-  - Affected versions: 4.5.3, 5.2.5
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (>=4.3.6 <=5.3.3).
 
@@ -131,15 +131,15 @@
 - Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions (moderate)
   - ID: 1112455
   - Range: `>=4.0.0 <=4.17.22`
-  - Affected versions: 4.17.21
-  - Importers: server
+  - Affected versions: None
+  - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (>=4.0.0 <=4.17.22).
 
 ## lodash-es
 - Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions (moderate)
   - ID: 1112453
   - Range: `>=4.0.0 <=4.17.22`
-  - Affected versions: 4.17.21
+  - Affected versions: None
   - Importers: None
   - Recommended: Upgrade to a version outside the vulnerable range (>=4.0.0 <=4.17.22).
 
