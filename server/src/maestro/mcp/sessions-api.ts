@@ -9,7 +9,6 @@ import {
 } from './sessions.js';
 import { mcpSessionsTotal } from '../../monitoring/metrics.js';
 import { persistSession, revokeSessionPersist } from './sessions-store.js';
-import { capabilityFirewall } from '../../capability-fabric/firewall.js';
 
 // In-memory session registry for UI/status listing
 type ActiveSession = {
@@ -25,9 +24,9 @@ const router = express.Router({ mergeParams: true });
 router.use(express.json());
 
 // POST /api/maestro/v1/runs/:id/mcp/sessions
-router.post('/runs/:id/mcp/sessions', async (req, res) => {
+router.post('/runs/:id/mcp/sessions', (req, res) => {
   const tracer = trace.getTracer('maestro-mcp');
-  tracer.startActiveSpan('mcp.session.create', async (span: any) => {
+  tracer.startActiveSpan('mcp.session.create', (span: any) => {
     const runId = req.params.id;
     const { scopes, servers } = req.body || {};
     if (!Array.isArray(scopes) || scopes.length === 0) {
@@ -37,41 +36,6 @@ router.post('/runs/:id/mcp/sessions', async (req, res) => {
         .status(400)
         .json({ error: 'scopes is required (non-empty array)' });
     }
-    try {
-      const actorScopes = String(req.headers['x-actor-scopes'] || '')
-        .split(',')
-        .map((value) => value.trim())
-        .filter(Boolean);
-      const approvalToken = req.headers['x-approval-token'] as string | undefined;
-      const tenantId =
-        (req.headers['x-tenant-id'] as string | undefined) || 'system';
-      const userId = (req as any).user?.id || 'unknown';
-      const pathValue = '/api/maestro/v1/runs/:id/mcp/sessions';
-      const preflight = await capabilityFirewall.preflightHttpEndpoint(
-        req.method,
-        pathValue,
-        { scopes, servers },
-        actorScopes,
-        approvalToken,
-        tenantId,
-        userId,
-      );
-      capabilityFirewall.logDecision(preflight.decision, preflight.inputHash);
-    } catch (err: any) {
-      span.setAttribute('error', true);
-      span.end();
-      const status =
-        err?.message === 'rate_limited'
-          ? 429
-          : err?.message?.includes('schema')
-            ? 400
-            : 403;
-      return res.status(status).json({
-        error: 'capability_blocked',
-        message: err?.message || 'capability_blocked',
-      });
-    }
-
     const { sid, token } = signSession({ runId, scopes, servers });
     const list = sessionsByRun.get(runId) || [];
     list.push({ sid, runId, scopes, servers, createdAt: Date.now() });

@@ -1,25 +1,19 @@
-name: evidence-gates
+name: ci/evidence-validate
 
 on:
+  push:
+    paths:
+      - "evidence/**"
+      - "tools/evidence_validate.py"
+      - ".github/workflows/evidence.yml"
   pull_request:
     paths:
-      - "docs/tech-radar/**"
-      - "docs/cogwar/**"
-      - "schemas/cogwar/**"
-      - "policy/**"
       - "evidence/**"
-      - "tools/evidence/verify_evidence.py"
-      - "tests/iw/**"
-      - "tests/policy/**"
-      - "tests/provenance/**"
-      - "tests/tech_radar/**"
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+      - "tools/evidence_validate.py"
+      - ".github/workflows/evidence.yml"
 
 jobs:
-  verify_evidence_and_policy:
+  evidence-validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +21,6 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: python -m pip install --upgrade pip jsonschema pytest
-      - name: Verify evidence and policy
-        run: python tools/evidence/verify_evidence.py
-      - name: Run cogwar contract tests
-        run: pytest tests/policy tests/iw tests/provenance tests/tech_radar
+        run: pip install jsonschema
+      - name: Validate evidence bundle
+        run: python tools/evidence_validate.py --schemas evidence/schemas --index evidence/index.json

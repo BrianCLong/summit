@@ -24,10 +24,13 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Enable Corepack
+        run: corepack enable
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -36,14 +39,16 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          node-version: '18'
           cache: 'pnpm'
-          node-version-file: .nvmrc
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
+      - run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - run: pnpm run lint
 
   typecheck:
@@ -53,15 +58,17 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - name: Typecheck
         run: pnpm typecheck
 
@@ -72,18 +79,17 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - name: Unit Tests
         run: pnpm -w test:unit || pnpm -w test:unit
       - name: Attach evidence
@@ -109,8 +115,6 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -161,13 +165,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: for i in 1 2 3; do pnpm install --frozen-lockfile && exit 0 || sleep 15; done; exit 1
       - name: SOC Control Unit Tests
         run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
       - name: Upload SOC compliance reports
@@ -201,3 +207,11 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  ci-metrics:
+    name: CI Metrics
+    needs: [config-guard, lint, typecheck, unit-tests, integration-test, security-compliance, soc-controls, verify-versions]
+    if: always()
+    uses: ./.github/workflows/_reusable-ci-metrics.yml
+    with:
+      workflow_name: 'CI'

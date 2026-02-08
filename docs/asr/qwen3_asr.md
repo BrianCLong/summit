@@ -1,60 +1,49 @@
-# Qwen3-ASR Integration
+# Qwen3-ASR 0.6B Integration Scaffold
 
-This document describes the integration of the `Qwen3-ASR-0.6B` model into the Summit platform.
+This scaffold aligns with the Summit Readiness Assertion and records a governed, deny-by-default
+path for ASR integration while preserving current release readiness. It is intentionally
+constrained pending fixture-backed evals and governance sign-off.
 
-## Overview
+## Scope
 
-The Qwen3-ASR integration provides a unified interface for Automatic Speech Recognition (ASR) supporting 52 languages and dialects. It features both offline and streaming inference capabilities and supports "promptable ASR" via a secure context policy.
+- Clean-room ASR interface, provider stub, and CLI wiring.
+- Evidence runner that emits deterministic artifacts (timestamps only in `stamp.json`).
+- Security redaction gate to prevent logging audio/context payloads.
 
-## Architecture
+## Enablement Flags
 
-The module is located at `summit/audio/asr/` and follows the standard Summit provider pattern:
+All capability is disabled by default and requires explicit opt-in:
 
-- `provider.py`: Base abstract class for ASR providers.
-- `types.py`: Data contracts (Request/Result).
-- `providers/qwen3_asr_provider.py`: Implementation for Qwen3-ASR supporting Transformers and vLLM backends.
-- `policy/context_policy.py`: Security gate for textual context.
+- `SUMMIT_ASR_ENABLED=1` to allow provider execution.
+- `ASR_CLI_ENABLED=1` to use the CLI wrapper.
+- `EVAL_ASR_RUNNER=1` to run the evidence runner.
 
-## Enablement
+## Evidence Artifacts
 
-By default, the ASR module is disabled. To enable it, use the following environment variables or feature flags:
+The eval runner writes:
 
-- `FEATURE_QWEN3_ASR=1`: Enable the main ASR feature.
-- `SUMMIT_ASR_ENABLED=1`: Alternative environment variable to enable ASR.
-- `ASR_CLI_ENABLED=1`: Enable the CLI tool.
-- `ASR_CONTEXT_ENABLED=1`: Enable the promptable context feature (requires security audit).
+- `report.json`
+- `metrics.json`
+- `stamp.json`
+- `index.json`
 
-## Security & Privacy
+Only `stamp.json` includes timestamps.
 
-- **Redaction**: Audio data and context are never logged in plaintext. The `redact_for_logs` utility ensures sensitive fields are masked.
-- **Context Policy**: A dedicated policy engine validates promptable context for PII (emails, SSNs, IPs) and enforces length limits.
-- **Deny-by-Default**: All external integrations and advanced features require explicit opt-in.
+## Data Handling Defaults
 
-## Usage
+- Audio and transcript inputs are sensitive by default.
+- The redaction gate masks `audio` and `context` fields in logs.
+- Evidence artifacts store metadata only (no raw audio payloads).
 
-### CLI
+## MAESTRO Alignment
 
-```bash
-ASR_CLI_ENABLED=1 FEATURE_QWEN3_ASR=1 python3 -m summit.audio.asr.cli \
-    --audio "path/to/audio.wav" \
-    --audio-type "path" \
-    --language "en" \
-    --timestamps
-```
+- **MAESTRO Layers:** Foundation, Data, Agents, Tools, Observability, Security.
+- **Threats Considered:** prompt injection via contextual ASR inputs, sensitive data leakage via
+  logs, and tool abuse through enablement flags.
+- **Mitigations:** deny-by-default flags, redaction of sensitive fields, and deterministic evidence
+  outputs to support auditability.
 
-### Python API
+## Roadmap Notes
 
-```python
-from summit.audio.asr.providers.qwen3_asr_provider import Qwen3ASRProvider
-from summit.audio.asr.types import ASRRequest
-
-provider = Qwen3ASRProvider(backend="transformers")
-request = ASRRequest(audio="...", audio_type="base64")
-result = provider.transcribe(request)
-print(result.text)
-```
-
-## Backends
-
-1. **Transformers**: Standard compatibility backend using the `qwen-asr` package.
-2. **vLLM**: High-throughput backend recommended for production streaming and batch workloads.
+- Streaming/vLLM backends remain intentionally constrained.
+- Timestamp alignment and context policies remain gated behind additional approvals.
