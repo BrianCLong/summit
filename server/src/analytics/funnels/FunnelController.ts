@@ -16,7 +16,7 @@ export const createFunnel = (req: Request, res: Response) => {
 };
 
 export const getFunnelReport = (req: Request, res: Response) => {
-    const { id } = req.params;
+    const id = req.params.id as string;
     try {
         const report = service.generateReport(id);
         res.json(report);

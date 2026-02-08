@@ -310,7 +310,8 @@
       "fast-xml-parser": ">=5.3.4",
       "hono": ">=4.11.7",
       "multer": ">=2.0.2",
-      "busboy": ">=1.6.0"
+      "busboy": ">=1.6.0",
+      "@apollo/server": ">=5.4.0"
     }
   }
 }

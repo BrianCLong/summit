@@ -1,16 +1,23 @@
 version: 1
 items:
   - title: "Add scheduled drift monitor workflow"
-    owner: "TBD"
+    owner: "codex"
     estimate: "S"
     dependency: "Foundation bundle verifier merged"
-    reason_deferred: "Not required for MWS"
+    status: completed
+    completed_at: "2026-02-06"
+    artifacts:
+      - ".github/workflows/subsumption-drift.yml"
     related_claim_ids: ["SUMMIT_ORIGINAL"]
     required_gates_later: ["nightly-drift-check"]
   - title: "Add api-based required-check discovery automation"
-    owner: "TBD"
+    owner: "codex"
     estimate: "M"
     dependency: "required_checks.todo.md completed"
-    reason_deferred: "Needs repo token/permissions decisions"
+    status: completed
+    completed_at: "2026-02-06"
+    artifacts:
+      - "scripts/ci/discover-required-checks.sh"
+      - ".github/workflows/required-checks-discovery.yml"
     related_claim_ids: ["SUMMIT_ORIGINAL"]
     required_gates_later: ["verify-required-checks"]

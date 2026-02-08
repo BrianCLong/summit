@@ -60,12 +60,12 @@
   - Rollout automation (pending ops readiness)
 - **Recommendation**: Requires cross-team coordination
 
-### 6. Subsumption Bundle Framework
+### 6. Subsumption Bundle Framework ✅ COMPLETED
 - **File**: `subsumption-bundle-framework.yaml`
-- **Items**:
-  - Scheduled drift monitor workflow (not required for MWS)
-  - API-based required-check discovery automation (needs repo token/permissions)
-- **Recommendation**: Discovery automation now less urgent (manual discovery completed)
+- **Status**: ✅ **COMPLETED (2026-02-06)**
+- **Items Completed**:
+  - ✅ Scheduled drift monitor workflow (`.github/workflows/subsumption-drift.yml`)
+  - ✅ API-based required-check discovery automation (`.github/workflows/required-checks-discovery.yml`, `scripts/ci/discover-required-checks.sh`)
 
 ---
 
@@ -110,8 +110,8 @@
 | Priority | Count | Action |
 |----------|-------|--------|
 | P0 | 1 | Execute runbook immediately |
-| P1 | 1 | ~~2~~ → 1 (shai-hulud completed) |
-| P2 | 3 | Coordinate dependencies |
+| P1 | 0 | ~~1~~ → 0 (branch-protection blocked on admin token) |
+| P2 | 2 | ~~3~~ → 2 (subsumption-bundle-framework completed) |
 | P3 | 5 | Keep deferred |
 
 ## Changes Made (2026-02-06)
@@ -122,7 +122,7 @@
 3. **CVEs Resolved**: All 4 previously ignored CVEs addressed
 4. **OPA Gaps Fixed**: CompanyOS tenant-api now has OPA integration
 
-### Session 2 (Current)
+### Session 2
 5. **COMPLETED**: Shai-Hulud supply chain security items
    - Subsumption bundle verifier + test fixtures
    - Deny-by-default npm lifecycle script policy gate
@@ -131,6 +131,39 @@
    - Created OPA job wrapper for BullMQ processors
    - Added OPA policy for job authorization
 
+### Session 3
+7. **COMPLETED**: Golden path hardening items (BB-004, BB-005)
+   - BB-004: Smoke test timeout now configurable via `SMOKE_TIMEOUT` env var (default 60s)
+   - BB-005: Health check results now written to `health-check-results.json`
+8. **REMOVED**: Deprecated `ingestion.processor.ts` stub
+   - Updated job.manager.ts to use real `ingestionProcessor.ts`
+   - Updated tests to mock OPA wrapper
+9. **UPDATED**: OPA job wrapper adoption complete (6 processors wrapped)
+
+### Session 4
+10. **FIXED**: TypeScript strict type errors (20 errors resolved)
+    - Express `req.params` string casts (16 files total)
+    - Connector `writeRecords` implementations (7 files)
+    - Duplicate property removal (config.ts)
+    - ProviderId fixes (nvidia-nim.ts)
+    - Missing property additions (ChaosController)
+    - Implicit any type fixes (5 files)
+    - Error count: 237 → 217 (20 fixed)
+
+### Session 5
+11. **COMPLETED**: All remaining TypeScript errors fixed
+    - provenance-beta.ts: 10 `req.params` string casts
+    - TypeScript compilation: ✅ Exit code 0 (no errors)
+    - Total errors fixed: 237 → 0
+12. **FIXED**: ESLint configuration issues
+    - Removed deprecated hapi type stubs (@types/hapi__catbox, @types/hapi__shot)
+    - Added .pnpm-store and node_modules_* to .eslintignore
+    - ESLint now passes with 0 errors (only warnings)
+13. **VERIFIED**: GA verification passes (exit code 0)
+    - TypeScript build mode (tsc -b) passes
+    - All unit tests pass
+    - PR #18055 created with all fixes
+
 ---
 
 ## Next Steps
@@ -138,4 +171,3 @@
 1. DevOps: Execute n8n credential rotation runbook (P0)
 2. Governance Team: Align on branch-protection-as-code requirements (P1)
 3. Security Team: Schedule MCP apps security audit (P2)
-4. Incrementally adopt `withOpaPolicy()` wrapper in existing job processors

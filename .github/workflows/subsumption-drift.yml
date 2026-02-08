@@ -1,0 +1,151 @@
+name: Subsumption Bundle Drift Monitor
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 3 AM UTC daily
+  workflow_dispatch:
+  push:
+    paths:
+      - 'evidence/subsumption/**'
+      - 'tools/verify-subsumption-bundle.py'
+      - 'policy/npm-lifecycle-allowlist.json'
+      - 'scripts/ci/verify-npm-lifecycle.sh'
+
+jobs:
+  subsumption-bundle-verification:
+    name: Verify Subsumption Bundles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verify All Subsumption Bundles
+        id: verify-bundles
+        run: |
+          echo "## Subsumption Bundle Verification" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "evidence/subsumption" ]; then
+            python3 tools/verify-subsumption-bundle.py \
+              --all-bundles evidence/subsumption \
+              --project-root . \
+              --verbose \
+              --ci | tee bundle-verification.log
+
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat bundle-verification.log >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No subsumption bundles found in evidence/subsumption" | tee bundle-verification.log
+            echo "⚠️ No bundles to verify" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Verification Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: subsumption-bundle-report
+          path: bundle-verification.log
+
+  npm-lifecycle-verification:
+    name: Verify npm Lifecycle Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify npm Lifecycle Allowlist
+        id: verify-lifecycle
+        run: |
+          echo "## npm Lifecycle Script Verification" >> $GITHUB_STEP_SUMMARY
+
+          chmod +x scripts/ci/verify-npm-lifecycle.sh
+          ./scripts/ci/verify-npm-lifecycle.sh --verbose | tee lifecycle-verification.log
+
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat lifecycle-verification.log >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check .npmrc Configuration
+        run: |
+          echo "### .npmrc Configuration Check" >> $GITHUB_STEP_SUMMARY
+
+          if grep -q "ignore-scripts=true" .npmrc; then
+            echo "✅ ignore-scripts=true is set" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ CRITICAL: ignore-scripts=true is NOT set!" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Upload Lifecycle Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-lifecycle-report
+          path: lifecycle-verification.log
+
+  drift-summary:
+    name: Generate Drift Summary
+    needs: [subsumption-bundle-verification, npm-lifecycle-verification]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Reports
+        uses: actions/download-artifact@v4
+        with:
+          path: drift-reports
+
+      - name: Generate Summary
+        run: |
+          echo "# Subsumption Drift Monitor Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Bundle Verification | ${{ needs.subsumption-bundle-verification.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lifecycle Verification | ${{ needs.npm-lifecycle-verification.result }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create Issue on Failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `[DRIFT] Subsumption Bundle Drift Detected - ${new Date().toISOString().split('T')[0]}`;
+            const body = `## Drift Detected
+
+            The nightly subsumption drift monitor has detected issues.
+
+            **Workflow Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
+
+            Please investigate and remediate.
+
+            /cc @security-team
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['drift', 'security', 'automated']
+            });

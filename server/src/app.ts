@@ -382,7 +382,8 @@ export const createApp = async () => {
   // Requires authentication and admin role
   app.get('/api/admin/rate-limits/:userId', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     try {
-      const status = await advancedRateLimiter.getStatus(req.params.userId);
+      const userId = req.params.userId as string;
+      const status = await advancedRateLimiter.getStatus(userId);
       res.json(status);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rate limit status' });
