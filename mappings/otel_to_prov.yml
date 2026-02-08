@@ -1,0 +1,36 @@
+version: 1.1
+prefixes:
+  prov: "http://www.w3.org/ns/prov#"
+  ol: "https://openlineage.io/spec/1-0-5/"
+  otel: "https://opentelemetry.io/schemas/1.25.0/attributes/"
+mappings:
+  Dataset:
+    id: "ol:Dataset"
+    type: "@id"
+  Run:
+    id: "ol:Run"
+    type: "@id"
+  JobRun:
+    id: "ol:Job"
+    type: "@id"
+  ProducerApp:
+    id: "prov:Agent"
+    type: "@id"
+  runId: "ol:runId"
+  nominalTime: "ol:nominalTime"
+  namespace: "ol:namespace"
+  name: "ol:name"
+  label: "prov:label"
+  facets: "ol:facets"
+  service.name: "otel:service.name"
+  service.version: "otel:service.version"
+  telemetry.sdk.name: "otel:telemetry.sdk.name"
+  used:
+    id: "prov:used"
+    type: "@id"
+  wasGeneratedBy:
+    id: "prov:wasGeneratedBy"
+    type: "@id"
+  wasAssociatedWith:
+    id: "prov:wasAssociatedWith"
+    type: "@id"
