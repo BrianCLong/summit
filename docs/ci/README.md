@@ -241,6 +241,7 @@ gh run cancel <run-id>  # Cancel stale run
 
 ## Related Documentation
 
+- [CI_GOVERNANCE_OVERLAY.md](./CI_GOVERNANCE_OVERLAY.md) - CI governance overlay blueprint for evidence-first GitHub Actions and Codespaces hardening
 - [GOVERNANCE_LOCKFILE.md](./GOVERNANCE_LOCKFILE.md) - Lockfile format and verification
 - [BRANCH_PROTECTION_RECONCILIATION.md](./BRANCH_PROTECTION_RECONCILIATION.md) - Protection alignment
 - [CANARY_ROLLOUT.md](./CANARY_ROLLOUT.md) - Canary promotion process
