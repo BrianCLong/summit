@@ -88,9 +88,19 @@ const schema = {
       },
       "required": ["GRAPH_EXPAND_CACHE", "AI_REQUEST_ENABLED"],
       "default": {}
+    },
+    "partitioning": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "strategy": { "type": "string", "enum": ["hash", "range", "list"], "default": "hash" },
+        "shardCount": { "type": "integer", "default": 1 }
+      },
+      "required": ["enabled", "strategy", "shardCount"],
+      "default": {}
     }
   },
-  "required": ["env", "port", "neo4j", "postgres", "redis", "jwt", "bcrypt", "rateLimit", "cors", "features"],
+  "required": ["env", "port", "neo4j", "postgres", "redis", "jwt", "bcrypt", "rateLimit", "cors", "features", "partitioning"],
   "additionalProperties": false
 };
 
@@ -148,6 +158,11 @@ export function loadConfig() {
       // Preserve specific logic from original index.ts
       GRAPH_EXPAND_CACHE: process.env.GRAPH_EXPAND_CACHE !== '0',
       AI_REQUEST_ENABLED: process.env.AI_REQUEST_ENABLED !== '0',
+    },
+    partitioning: {
+      enabled: process.env.PARTITIONING_ENABLED === 'true',
+      strategy: process.env.PARTITIONING_STRATEGY || 'hash',
+      shardCount: process.env.PARTITIONING_SHARD_COUNT ? parseInt(process.env.PARTITIONING_SHARD_COUNT, 10) : 1,
     },
   };
 

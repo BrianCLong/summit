@@ -7,6 +7,9 @@
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
+import { CacheManager, createCacheManager } from '../cache/AdvancedCachingStrategy.js';
+import { RedisService } from '../cache/redis.js';
+import { PartitioningService } from '../services/partitioning/PartitioningService.js';
 
 const repoLogger = logger.child({ name: 'CaseRepo' });
 
@@ -79,7 +82,30 @@ interface CaseRow {
 }
 
 export class CaseRepo {
-  constructor(private pg: Pool) { }
+  private cacheManager: CacheManager | null = null;
+  private partitioning: PartitioningService;
+
+  constructor(
+    private pg: Pool,
+    cacheManager?: CacheManager,
+    partitioning?: PartitioningService
+  ) {
+    if (cacheManager) {
+      this.cacheManager = cacheManager;
+    } else {
+      try {
+        const redisClient = RedisService.getInstance().getClient();
+        this.cacheManager = createCacheManager(redisClient, {
+          keyPrefix: 'ig:case:',
+          defaultTtl: 300, // 5 minutes
+        });
+      } catch (e) {
+        repoLogger.warn({ error: e }, 'Redis/Cache initialization failed, falling back to database only');
+        this.cacheManager = null;
+      }
+    }
+    this.partitioning = partitioning || PartitioningService.getInstance();
+  }
 
   /**
    * Create a new case
@@ -118,7 +144,15 @@ export class CaseRepo {
       'Case created',
     );
 
-    return this.mapRow(rows[0]);
+    const result = this.mapRow(rows[0]);
+    if (this.cacheManager) {
+      const partitionKey = this.partitioning.getPartitionKey(result.id);
+      const cacheKey = partitionKey ? `${partitionKey}:${result.id}` : result.id;
+      this.cacheManager.set(cacheKey, result).catch((err) => {
+        repoLogger.warn({ error: err }, 'Cache write failed during create');
+      });
+    }
+    return result;
   }
 
   /**
@@ -200,6 +234,15 @@ export class CaseRepo {
         },
         'Case updated',
       );
+
+      // Invalidate cache
+      if (this.cacheManager) {
+        const partitionKey = this.partitioning.getPartitionKey(input.id);
+        const cacheKey = partitionKey ? `${partitionKey}:${input.id}` : input.id;
+        this.cacheManager.delete(cacheKey).catch((err) => {
+          repoLogger.warn({ error: err }, 'Cache invalidation failed during update');
+        });
+      }
     }
 
     return rows[0] ? this.mapRow(rows[0]) : null;
@@ -235,6 +278,15 @@ export class CaseRepo {
 
       if (rowCount && rowCount > 0) {
         repoLogger.warn({ caseId: id }, 'Case deleted');
+
+        // Invalidate cache
+        if (this.cacheManager) {
+          const partitionKey = this.partitioning.getPartitionKey(id);
+          const cacheKey = partitionKey ? `${partitionKey}:${id}` : id;
+          this.cacheManager.delete(cacheKey).catch((err) => {
+            repoLogger.warn({ error: err }, 'Cache invalidation failed during delete');
+          });
+        }
       }
 
       return rowCount !== null && rowCount > 0;
@@ -257,6 +309,30 @@ export class CaseRepo {
    * Find case by ID
    */
   async findById(id: string, tenantId?: string): Promise<Case | null> {
+    const partitionKey = this.partitioning.getPartitionKey(id);
+    const cacheKey = partitionKey ? `${partitionKey}:${id}` : id;
+
+    // Try cache
+    if (this.cacheManager) {
+      try {
+        const cached = await this.cacheManager.get<Case>(cacheKey);
+        if (cached) {
+          // Verify tenantId if provided
+          if (!tenantId || cached.tenantId === tenantId) {
+            // Restore Date objects from JSON strings
+            return {
+              ...cached,
+              createdAt: new Date(cached.createdAt),
+              updatedAt: new Date(cached.updatedAt),
+              closedAt: cached.closedAt ? new Date(cached.closedAt) : undefined,
+            };
+          }
+        }
+      } catch (err) {
+        repoLogger.warn({ error: err }, 'Cache read failed');
+      }
+    }
+
     const params = [id];
     let query = `SELECT * FROM maestro.cases WHERE id = $1`;
 
@@ -268,7 +344,16 @@ export class CaseRepo {
     const { rows } = (await this.pg.query(query, params)) as {
       rows: CaseRow[];
     };
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    const result = rows[0] ? this.mapRow(rows[0]) : null;
+
+    // Set cache
+    if (result && this.cacheManager) {
+      this.cacheManager.set(cacheKey, result).catch((err) => {
+        repoLogger.warn({ error: err }, 'Cache write failed');
+      });
+    }
+
+    return result;
   }
 
   /**
