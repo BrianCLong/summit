@@ -5,10 +5,9 @@ This file tracks the status of CI check discovery and alignment with branch prot
 ## Current status
 GitHub Actions currently executes many checks, but we need to verify their exact names as reported to the GitHub Status API to ensure our "Always Required" and "Conditional Required" policies match exactly what GitHub expects.
 
-## Known check names (Verify these)
-- CI Core (Primary Gate) / CI Core Gate ✅
-- CI / Unit Tests
-- GA Gate
+## Known check names (Verified)
+- CI Core Gate ✅
+- gate
 - Release Readiness Gate
 - SOC Controls
 - Unit Tests & Coverage
