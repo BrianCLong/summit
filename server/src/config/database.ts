@@ -263,8 +263,7 @@ async function connectRedis(): Promise<Redis | null> {
 }
 
 function getNeo4jDriver(): Neo4jDriver {
-  if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
-  return neo4jDriver;
+  return getSharedNeo4jDriver();
 }
 
 function getPostgresPool(): ManagedPostgresPool {
