@@ -29,7 +29,17 @@
 * **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
 * **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
 
+## Sigstore Smoke Harness Assumptions (2026-02-07)
+
+* **Assumed**: Node/TypeScript monorepo with `pnpm`, CI workflows in `.github/workflows/`, tests under `tests/`.
+* **Assumed must-not-touch**: release/deploy workflows, CodeQL workflow, secret handling.
+* **Validate before merge**:
+  1. Identify the workflow and script entrypoint for Summit’s supply-chain verification gate.
+  2. Confirm whether Cosign/Rekor are vendored binaries or container-based tools.
+  3. Verify artifact upload conventions and evidence schema expectations.
+
 ## Next Steps
 
 1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
 2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+3. Implement **Sigstore negative-case smoke harness** under `src/agents/supplychain/sigstore_smoke/`.
