@@ -1,35 +1,55 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (AgentApp Recon)
 
-## Structure Validation
+## Summit Readiness Assertion (preemptive)
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+- Reference: `docs/SUMMIT_READINESS_ASSERTION.md` (governs absolute readiness and must stay aligned).
 
-## Component Mapping
+## VERIFIED (from repo scan)
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+### CLI & Control Plane
+- `summitctl` exists under `tools/summitctl/` with command docs in `tools/summitctl/README.md`.
+- `summitctl` is referenced in multiple runbooks and governance docs as the primary CLI.
 
-## Constraints & Checks
+### Evidence / Artifact Conventions
+- Governance evidence locations are defined in `docs/governance/EVIDENCE.md`.
+- Evidence schema registry exists under `evidence/schemas/`, including RAG schemas (`rag_report.schema.json`, `rag_metrics.schema.json`, `rag_stamp.schema.json`).
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+### Connectors / Ingestion SDK
+- Connector SDK lives in `connectors/` with a manifest schema (`connectors/SDK_MANIFEST_SCHEMA.yaml`) and registry (`connectors/registry.json`).
+- Multiple connector implementations exist, including RSS/Atom and STIX/TAXII connectors.
 
-## Next Steps
+### Graph / RAG Modules
+- GraphRAG service exists in `services/graphrag/src/kg2rag/` with tests.
+- Server GraphRAG routes and schema exist under `server/src/routes/graphrag.ts` and `server/src/graphql/schema/graphrag.graphql`.
+- RAG tooling scripts exist under `tools/` (e.g., `rag_ingest.py`, `rag_query.py`, `rag_index.py`).
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+### CI / Governance Checks
+- Primary PR gate is defined in `.github/workflows/pr-quality-gate.yml`.
+- Evidence validation workflows exist (e.g., `evidence-id-consistency.yml`, `evidence-validate.yml`).
+- Governance gates are defined under `.github/workflows/governance-*.yml`.
+
+## ASSUMED (Deferred pending validation)
+
+- AgentApp runtime does **not** currently exist; new module paths for `agentapps/` will need to be created under a verified service or package location. (Deferred pending explicit owner sign-off and target runtime selection.)
+- Evidence writer for AgentApp outputs should align with existing evidence schemas or require new schemas. (Deferred pending schema ownership review.)
+- CLI surface for `summit agentapp run` should live in `summitctl` unless a Python CLI already exists. (Deferred pending CLI ownership review.)
+
+## PATH FINALIZATION (recommended anchors)
+
+| Capability | Verified Anchor | Notes |
+| --- | --- | --- |
+| CLI entrypoint | `tools/summitctl/` | Preferred platform CLI. Extend with `agentapp` subcommands. |
+| Evidence output conventions | `docs/governance/EVIDENCE.md` + `evidence/schemas/` | Reuse evidence bundle paths + schema registry. |
+| Connector packaging | `connectors/` | Use registry + manifest schema for marketplace-style bundles. |
+| Graph/RAG substrate | `services/graphrag/`, `server/src/ai/rag/` | Keep RAG policy gates aligned with existing graphrag controls. |
+| CI checks | `.github/workflows/pr-quality-gate.yml` + evidence workflows | Align new checks with existing quality gate. |
+
+## GOVERNED EXCEPTIONS (if required)
+
+- Any deviation from the verified anchors must be logged as a **Governed Exception** with explicit authority references and rollback steps.
+
+## NEXT ACTIONS (constrained)
+
+1. Draft AgentApp spec schema in a new module under the verified CLI + evidence anchors.
+2. Propose a minimal `summitctl agentapp run --dry-run` stub that emits evidence artifacts.
+3. Submit an evidence schema update only if the existing `rag_*` / `report` schemas cannot cover AgentApp outputs.

@@ -1,0 +1,197 @@
+name: Governance / Policy Change Request
+description: Propose changes to OPA policies, prompt registry, evidence standards, or release gates
+title: "[GOVERNANCE] "
+labels: ["area:governance", "triage:needed", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Governance Change Request
+        
+        Use this form to propose changes to governance policies, including:
+        - OPA policies (release gate, security, compliance)
+        - Prompt registry and prompt-hash validation
+        - Evidence standards and bundle requirements
+        - Release gate rules and criteria
+        
+        **Evidence-first workflow**: All governance changes must include risk analysis and migration plans.
+
+  - type: dropdown
+    id: policy_type
+    attributes:
+      label: Policy Type
+      description: "Which governance policy area is affected?"
+      options:
+        - Prompt Registry (prompt-hash, registry.yaml)
+        - Evidence Standard (evidence bundles, artifacts)
+        - OPA Policy (release gate, security, compliance)
+        - Release Gate (CI gates, required checks)
+        - CI/CD Workflow (pipeline rules, required jobs)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: policy_affected
+    attributes:
+      label: Policy/File Affected
+      description: "Specific policy file or registry entry affected"
+      placeholder: "e.g., policies/release_gate.rego, prompts/registry.yaml, .github/workflows/policy.check.release-gate.yml"
+    validations:
+      required: true
+
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Rationale
+      description: "Why is this governance change needed?"
+      placeholder: |
+        - Problem: [describe current limitation or gap]
+        - Business need: [why this change is necessary]
+        - Alignment: [how this aligns with security/compliance goals]
+        - Precedent: [similar changes or industry standards]
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_change
+    attributes:
+      label: Proposed Change
+      description: "Detailed description of the proposed policy change"
+      placeholder: |
+        **Current behavior:**
+        [describe current policy/rule]
+        
+        **Proposed behavior:**
+        [describe new policy/rule]
+        
+        **Example:**
+        ```rego
+        # Current
+        allow if { input.critical_vulnerabilities == 0 }
+        
+        # Proposed
+        allow if { 
+          input.critical_vulnerabilities == 0
+          or approved_waiver_exists
+        }
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk_analysis
+    attributes:
+      label: Risk Analysis
+      description: "What are the security, compliance, and operational risks?"
+      placeholder: |
+        **Security risks:**
+        - [potential security implications]
+        
+        **Compliance risks:**
+        - [regulatory or policy compliance concerns]
+        
+        **Operational risks:**
+        - [impact on CI/CD, release velocity, developer experience]
+        
+        **Mitigation:**
+        - [how risks will be mitigated]
+    validations:
+      required: true
+
+  - type: textarea
+    id: compatibility_impact
+    attributes:
+      label: Compatibility Impact
+      description: "Will this change break existing workflows, PRs, or releases?"
+      placeholder: |
+        **Breaking changes:**
+        - [list any breaking changes]
+        
+        **Affected workflows:**
+        - [which CI/CD workflows will be affected]
+        
+        **Affected teams/repos:**
+        - [who needs to be notified]
+        
+        **Backward compatibility:**
+        - [is this change backward compatible? If not, what's the migration path?]
+    validations:
+      required: true
+
+  - type: textarea
+    id: migration_plan
+    attributes:
+      label: Migration Plan
+      description: "How will existing systems/workflows transition to the new policy?"
+      placeholder: |
+        **Phase 1: Preparation**
+        - [update documentation, notify stakeholders]
+        
+        **Phase 2: Rollout**
+        - [deploy policy change, monitor for issues]
+        
+        **Phase 3: Validation**
+        - [verify policy works as expected, measure impact]
+        
+        **Rollback plan:**
+        - [how to revert if issues arise]
+        
+        **Timeline:**
+        - [estimated timeline for each phase]
+    validations:
+      required: true
+
+  - type: textarea
+    id: auditability_notes
+    attributes:
+      label: Auditability Notes
+      description: "How will this change be audited and monitored?"
+      placeholder: |
+        **Audit trail:**
+        - [what logs/metrics will be generated]
+        
+        **Monitoring:**
+        - [what dashboards/alerts will track this policy]
+        
+        **Compliance verification:**
+        - [how to verify policy is enforced correctly]
+        
+        **Evidence artifacts:**
+        - [what evidence will be generated for audits]
+    validations:
+      required: true
+
+  - type: input
+    id: reviewers
+    attributes:
+      label: Required Reviewers
+      description: "GitHub usernames of stakeholders who must review this change (comma-separated)"
+      placeholder: "@security-team, @release-engineering, @governance-owner"
+    validations:
+      required: true
+
+  - type: textarea
+    id: related_policies
+    attributes:
+      label: Related Policies/Issues
+      description: "Links to related policies, issues, or governance decisions"
+      placeholder: |
+        - Related policy: [link to policy file]
+        - Related issue: #XXXX
+        - Governance decision: [link to decision record]
+        - Upstream reference: [link to external standard/guideline]
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: governance_checklist
+    attributes:
+      label: Governance Checklist
+      description: "Confirm you have addressed the following requirements"
+      options:
+        - label: Risk analysis includes security, compliance, and operational impacts
+        - label: Migration plan includes rollback steps and timeline
+        - label: Auditability requirements are documented
+        - label: Required reviewers have been identified and tagged
+        - label: Compatibility impact has been assessed for existing workflows
