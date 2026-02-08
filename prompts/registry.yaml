@@ -895,3 +895,28 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: jest-entities-override
+    version: v1
+    path: prompts/maintenance/jest-entities-override@v1.md
+    sha256: f1ef077d68bb34b6bf128b0f4aa15cc8c27a3ded28c0106f695ee042095b9370
+    description: Pin entities for parse5/Jest compatibility and update governance artifacts.
+    scope:
+      paths:
+        - package.json
+        - pnpm-lock.yaml
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/maintenance/jest-entities-override@v1.md
+        - prompts/registry.yaml
+      domains:
+        - dependencies
+        - testing
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - edit
