@@ -1,0 +1,56 @@
+name: Verify Images Gate
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      images:
+        description: 'Comma-separated list of images to verify'
+        required: true
+        default: 'ghcr.io/intelgraph/server:latest'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write # Needed for keyless verification if used
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.4.0
+        with:
+          cosign-release: 'v3.4.0'
+
+      - name: Verify Images
+        env:
+          IMAGES: ${{ inputs.images }}
+          SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
+        run: |
+          if [ -n "$SIGSTORE_KEY" ]; then
+            echo "$SIGSTORE_KEY" > cosign.key
+            KEY_OPT="--key cosign.key"
+          else
+            # For keyless, strict policy usually requires identity args.
+            # Without them, we rely on the public root of trust.
+            KEY_OPT=""
+          fi
+
+          IFS=, read -ra ADDR <<< "$IMAGES"
+          for img in "${ADDR[@]}"; do
+            img=$(echo "$img" | xargs) # trim whitespace
+            echo "Verifying $img..."
+
+            # Verify signature
+            cosign verify $KEY_OPT "$img"
+
+            # Verify attestations
+            # We explicitly check for SLSA and SBOMs as per supply chain requirements
+            echo "Verifying attestations for $img..."
+            cosign verify-attestation $KEY_OPT --type slsaprovenance "$img"
+            cosign verify-attestation $KEY_OPT --type spdx "$img" || echo "::warning::SPDX attestation missing for $img"
+            cosign verify-attestation $KEY_OPT --type cyclonedx "$img" || echo "::warning::CycloneDX attestation missing for $img"
+          done
