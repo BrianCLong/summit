@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T10:48:35Z",
+  "revision_note": "Added Agentic CI + Policy-as-Code RFC entry for TS-first DSL and GitHub-native artifacts.",
   "initiatives": [
+    {
+      "id": "agentic-ci-pac-integration",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "RFC drafted for Agentic CI + Policy-as-Code integration with TS-first DSL and GitHub-native artifacts."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -212,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 23,
     "ga_blockers": []
   }
 }
