@@ -16,7 +16,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
           node-version: '20'
 
       - name: Install dependencies
@@ -27,7 +26,6 @@ jobs:
       # OIDC Authentication
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
-        with:
           role-to-assume: arn:aws:iam::<acct>:role/summit-preview-deployer
           aws-region: us-east-1
 

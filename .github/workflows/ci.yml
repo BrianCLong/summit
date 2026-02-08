@@ -26,7 +26,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Enable Corepack
@@ -41,10 +40,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           node-version: '18'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
@@ -59,10 +56,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
@@ -79,10 +74,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
@@ -102,7 +95,6 @@ jobs:
       - name: Generate Metrics
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: coverage-report
           path: server/coverage/
 
@@ -114,7 +106,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
@@ -126,7 +117,6 @@ jobs:
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
     needs: [config-guard]
-    with:
       strict: true
 
   soc-controls:
@@ -162,10 +152,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           node-version-file: .nvmrc
           cache: "pnpm"
       - name: Install dependencies
@@ -175,7 +163,6 @@ jobs:
       - name: Upload SOC compliance reports
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: soc-compliance-report
           path: soc-compliance-reports
           retention-days: 90
@@ -200,6 +187,5 @@ jobs:
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: verification-artifacts
           path: artifacts/**

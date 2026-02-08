@@ -42,6 +42,5 @@ jobs:
       - name: Upload SLO Evidence
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: predeploy-slo-${{ inputs.environment }}-${{ github.sha }}
           path: artifacts/gates/predeploy-slo.json

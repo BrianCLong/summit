@@ -17,17 +17,14 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
           node-version: 20
           cache: 'pnpm'
 
       - name: Setup Python
         uses: actions/setup-python@v5
-        with:
           python-version: '3.10'
           cache: 'pip'
 
@@ -53,7 +50,6 @@ jobs:
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: test-results
           path: |
             coverage/

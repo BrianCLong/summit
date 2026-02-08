@@ -19,13 +19,11 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-        with:
           cache: 'pnpm'
           node-version: '20'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
-        with:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -38,7 +36,6 @@ jobs:
       - name: Upload Evidence Bundle
         if: always()
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4
-        with:
           name: ga-evidence-bundle-${{ github.sha }}
           path: |
             dist/ga-evidence/

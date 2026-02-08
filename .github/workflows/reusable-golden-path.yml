@@ -29,7 +29,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
           node-version: "18"
           cache: "pnpm"
 
@@ -60,7 +59,6 @@ jobs:
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
-        with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +66,6 @@ jobs:
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
           context: ${{ inputs.service_path }}
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
@@ -79,21 +76,18 @@ jobs:
 
       - name: Generate SBOM
         uses: anchore/syft-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
-        with:
           image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
           format: spdx-json
           output-file: "sbom.json"
 
       - name: Upload SBOM as artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
           retention-days: 14
           name: sbom-${{ inputs.image_name }}-${{ github.sha }}
           path: sbom.json
 
       - name: Scan for vulnerabilities
         uses: anchore/scan-action@0d444ed77d83ee2ba7f5ced0d90d640a1281d762 # v3
-        with:
           image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ inputs.image_name }}:${{ github.sha }}
           fail-on-severity: critical
 
@@ -116,7 +110,6 @@ jobs:
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
-        with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}

@@ -23,7 +23,6 @@ jobs:
           cat last3.txt
       - name: Verify required checks are green
         uses: actions/github-script@v7
-        with:
           script: |
             const fs = require('fs');
             const shas = fs.readFileSync('last3.txt','utf8').trim().split('\n');

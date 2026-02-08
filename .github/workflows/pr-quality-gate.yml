@@ -18,13 +18,11 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
           node-version: 20
           cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -41,13 +39,11 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
           node-version: 20
           cache: "pnpm"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -61,7 +57,6 @@ jobs:
   security-scan:
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
-    with:
       run_dast: false # DAST is too slow for a PR check
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
@@ -86,7 +81,6 @@ jobs:
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
-        with:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14

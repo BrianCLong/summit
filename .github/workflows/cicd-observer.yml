@@ -26,7 +26,6 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
-        with:
           python-version: '3.11'
 
       - name: Install dependencies
@@ -49,6 +48,5 @@ jobs:
 
       - name: Upload Report Artifacts
         uses: actions/upload-artifact@4cedc5d8ad05778b4b148182d23437de7a715539 # v4.6.0
-        with:
           name: cicd-report
           path: evidence/daily-report/

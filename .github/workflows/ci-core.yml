@@ -38,7 +38,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: actions/setup-node@v4 # v6
-        with:
           cache: "pnpm"
           node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
@@ -51,10 +50,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -77,10 +74,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -94,7 +89,6 @@ jobs:
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
         if: always()
         continue-on-error: true
-        with:
           files: ./coverage/coverage-final.json
           flags: unit
 
@@ -104,10 +98,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -156,7 +148,6 @@ jobs:
       - name: Upload integration test results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
-        with:
           name: integration-test-results
           path: |
             test-results/
@@ -168,10 +159,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -187,7 +176,6 @@ jobs:
       - name: Upload verification results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
-        with:
           name: verification-results
           path: |
             server/scripts/verify-*.log
@@ -200,10 +188,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -238,7 +224,6 @@ jobs:
       - name: Upload build checksums
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
-        with:
           name: build-checksums
           path: build-checksums-*.txt
           retention-days: 30
@@ -249,10 +234,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -265,7 +248,6 @@ jobs:
       - name: Upload governance docs integrity report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
-        with:
           name: governance-docs-integrity
           path: artifacts/governance/docs-integrity
           retention-days: 30
@@ -277,10 +259,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -302,7 +282,6 @@ jobs:
       - name: Upload smoke test logs
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
-        with:
           name: smoke-test-logs
           path: |
             *.log
@@ -317,10 +296,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -348,7 +325,6 @@ jobs:
       - name: Upload Playwright Report
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
-        with:
           name: playwright-report
           path: reports/playwright
           retention-days: 7
@@ -366,13 +342,11 @@ jobs:
 
       - name: Use Node
         uses: actions/setup-node@v4
-        with:
           node-version-file: .nvmrc
           cache: "pnpm"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
 
       - name: Install dependencies
@@ -385,7 +359,6 @@ jobs:
 
       - name: Upload SOC compliance reports
         uses: actions/upload-artifact@v4
-        with:
           name: soc-compliance-report
           path: soc-compliance-reports
           retention-days: 90
@@ -399,10 +372,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
           version: "10.0.0"
       - uses: actions/setup-node@v4 # v6
-        with:
           node-version-file: .nvmrc
           cache: pnpm
 
@@ -426,7 +397,6 @@ jobs:
       - name: Upload drift artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
-        with:
           name: branch-protection-drift
           path: artifacts/governance/branch-protection-drift
           retention-days: 30

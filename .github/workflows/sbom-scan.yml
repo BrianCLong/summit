@@ -51,13 +51,11 @@ jobs:
 
       - name: Generate SBOM with Syft
         uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
-        with:
           format: cyclonedx-json
           output-file: sbom.json
 
       - name: Scan with Grype
         uses: anchore/scan-action@0d444ed77d83ee2ba7f5ced0d90d640a1281d762 # v7
-        with:
           sbom: sbom.json
           fail-build: true
           severity-cutoff: high
@@ -65,14 +63,12 @@ jobs:
           grype-config: security/grype-allowlist.yaml
       - name: Attest SBOM
         uses: actions/attest-sbom@v3
-        with:
           subject-path: ${{ github.workspace }}
           sbom-path: sbom.json
 
       - name: Upload SBOM artifact
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: sbom-scan-results
           path: |
             sbom.json

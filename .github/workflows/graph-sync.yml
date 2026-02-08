@@ -13,13 +13,11 @@ jobs:
         run: pnpm -w install --frozen-lockfile
       - name: Neo4j & PG services
         uses: hoverkraft-tech/compose-action@v2
-        with:
           compose-file: .github/compose/pg_neo.yml
       - name: Validate Graph↔PG sync
         run: node scripts/ci/validate_graph_pg_sync.mjs
       - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: graph-sync-evidence
           path: artifacts/graph-sync/*.json

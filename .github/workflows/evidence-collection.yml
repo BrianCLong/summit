@@ -71,7 +71,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
           node-version: "20"
           cache: "pnpm"
 
@@ -125,7 +124,6 @@ jobs:
       - name: Upload Evidence Artifacts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
           name: evidence-${{ steps.collect.outputs.run_id || github.run_id }}
           path: |
             artifacts/evidence/
@@ -173,7 +171,6 @@ jobs:
     steps:
       - name: Download Evidence
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
           name: evidence-${{ needs.collect.outputs.run_id || github.run_id }}
           path: evidence/
 
@@ -189,7 +186,6 @@ jobs:
 
       - name: Upload Release Archive
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
           name: release-evidence-${{ github.ref_name }}
           path: evidence-*.tar.gz
           retention-days: 90

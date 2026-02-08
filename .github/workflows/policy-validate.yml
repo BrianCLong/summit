@@ -18,12 +18,10 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
           run_install: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
           node-version: "18"
           cache: "pnpm"
 
@@ -53,6 +51,5 @@ jobs:
       - name: Archive Artifacts
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: policy-evidence
           path: artifacts/policy/

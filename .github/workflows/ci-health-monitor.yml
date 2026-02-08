@@ -18,13 +18,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
           fetch-depth: 0
 
       - name: Check recent workflow runs
         id: workflow_check
         uses: actions/github-script@v7
-        with:
           script: |
             const { data: runs } = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
@@ -75,7 +73,6 @@ jobs:
       - name: Create health check issue
         if: steps.workflow_check.outputs.success_rate < 95
         uses: actions/github-script@v7
-        with:
           script: |
             const success_rate = parseInt('${{ steps.workflow_check.outputs.success_rate }}');
             const failure_count = parseInt('${{ steps.workflow_check.outputs.failure_count }}');

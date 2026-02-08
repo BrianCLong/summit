@@ -40,7 +40,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
           fetch-depth: 0
 
       - name: Validate Request
@@ -109,7 +108,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
           fetch-depth: 0
 
       - name: Execute Rollback
@@ -145,7 +143,6 @@ jobs:
       - name: Upload Report
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
           name: rollback-report-${{ inputs.tag }}-${{ github.run_id }}
           path: artifacts/reports/rollback-*.md
           retention-days: 90

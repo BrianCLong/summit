@@ -22,6 +22,5 @@ jobs:
 
       - name: Run actionlint
         uses: rhysd/actionlint-action@v1
-        with:
           fail-on-error: true
           # actionlint will automatically find .github/actionlint.yaml

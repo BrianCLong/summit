@@ -75,7 +75,6 @@ jobs:
         if: github.event.inputs.mode == 'plan'
         uses: actions/create-github-app-token@v1
         continue-on-error: true
-        with:
           app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
           private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
 
@@ -157,7 +156,6 @@ jobs:
 
       - name: Upload Reconciliation Plan
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        with:
           name: branch-protection-reconcile-plan
           path: |
             ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md
@@ -180,7 +178,6 @@ jobs:
       - name: Create Issue for Plan
         if: steps.reconcile.outputs.needs_reconciliation == 'true' && github.event.inputs.mode == 'plan'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             const fs = require('fs');
             const planPath = '${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md';
