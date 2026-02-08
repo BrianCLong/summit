@@ -1,0 +1,38 @@
+{
+  "task_id": "CACHE_STABLE_CYPHER_PLAN_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "cache-stable-cypher-plan",
+    "version": "v1",
+    "sha256": "833a5b151ce0d9f1b7b2d54c59769d73da512769ab24add5e928e3bcf431a78f",
+    "path": "prompts/neo4j/cache-stable-cypher-plan@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/neo4j/cache-stable-cypher.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/neo4j/cache-stable-cypher-plan@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/CACHE_STABLE_CYPHER_PLAN_20260206.json"
+    ],
+    "domains": ["documentation", "governance", "neo4j"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/neo4j/cache-stable-cypher.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Cache-stable generated Cypher plan documented with validation steps and evidence artifacts.",
+    "Roadmap status updated with new in-progress initiative.",
+    "Prompt registry updated with valid SHA-256 entry."
+  ],
+  "stop_conditions": [
+    "If evidence requirements cannot be met with available artifacts.",
+    "If declared scope must expand beyond the registered paths."
+  ]
+}

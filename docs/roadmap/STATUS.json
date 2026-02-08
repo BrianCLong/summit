@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:10:00Z",
+  "revision_note": "Added cache-stable generated Cypher initiative and Neo4j plan-cache governance plan reference.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "neo4j-cache-stable-cypher",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Cache-stable generated Cypher plan: canonicalization, cache policy directives, planner/runtime benchmarking, and evidence artifacts (docs/neo4j/cache-stable-cypher.md)."
     },
     {
       "id": "B",
