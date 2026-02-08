@@ -1,0 +1,335 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cognitive Security Fusion Graph",
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/Incident"
+          },
+          {
+            "$ref": "#/definitions/Actor"
+          },
+          {
+            "$ref": "#/definitions/Persona"
+          },
+          {
+            "$ref": "#/definitions/Org"
+          },
+          {
+            "$ref": "#/definitions/Platform"
+          },
+          {
+            "$ref": "#/definitions/Channel"
+          },
+          {
+            "$ref": "#/definitions/Domain"
+          },
+          {
+            "$ref": "#/definitions/Artifact"
+          },
+          {
+            "$ref": "#/definitions/Narrative"
+          },
+          {
+            "$ref": "#/definitions/TTP"
+          },
+          {
+            "$ref": "#/definitions/LegalNorm"
+          },
+          {
+            "$ref": "#/definitions/PolicyConstraint"
+          },
+          {
+            "$ref": "#/definitions/EventVenue"
+          }
+        ]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ATTRIBUTED_TO",
+              "AMPLIFIES",
+              "IMPERSONATES",
+              "HOSTED_ON",
+              "TARGETS",
+              "DEBUNKED_BY",
+              "CITES",
+              "CONSTRAINED_BY"
+            ]
+          },
+          "properties": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "type"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Incident": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Incident"
+        },
+        "description": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "description",
+        "timestamp"
+      ]
+    },
+    "Actor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Actor"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "Persona": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Persona"
+        },
+        "handle": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "Org": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Org"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "Platform": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Platform"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "Channel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Channel"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "Domain": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Domain"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "Artifact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Artifact"
+        },
+        "content_type": {
+          "type": "string"
+        },
+        "provenance_score": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "Narrative": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "Narrative"
+        },
+        "claim": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "TTP": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "TTP"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "LegalNorm": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "LegalNorm"
+        },
+        "citation": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "PolicyConstraint": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "PolicyConstraint"
+        },
+        "rule": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "EventVenue": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "const": "EventVenue"
+        },
+        "name": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    }
+  }
+}
