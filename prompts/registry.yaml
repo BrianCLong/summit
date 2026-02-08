@@ -896,3 +896,36 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: governance-ops-deliverables
+    version: v1
+    path: prompts/governance/governance-ops-deliverables@v1.md
+    sha256: 91788a435e810f2e6db45a6585c337b437e047602ed834adc6012cec6e78e73f
+    description: Produce Governance Operations Plane deliverables (architecture, security, evals, ops, PRD).
+    scope:
+      paths:
+        - docs/roadmap/ai-governance-update-skill-routing.md
+        - docs/roadmap/governance-ops-architecture-plan.md
+        - docs/security/governance-ops-threat-model.md
+        - docs/evals/governance-ops-evals.md
+        - docs/runbooks/governance-ops-incident-mode.md
+        - docs/product/governance-ops-prd.md
+        - docs/roadmap/STATUS.json
+        - prompts/governance/governance-ops-deliverables@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - documentation
+        - roadmap
+        - security
+        - evals
+        - ops
+        - product
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
