@@ -1,5 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { CausalGraphService } from '../services/CausalGraphService.js';
+import { getNeo4jDriver } from '../config/database.js';
 
 // Mock Neo4j driver and session
 const mockRun = jest.fn();
@@ -9,7 +10,8 @@ const mockSession = jest.fn(() => ({
   close: mockClose,
 }));
 
-jest.mock('../config/database', () => ({
+jest.mock('../config/database.js', () => ({
+  __esModule: true,
   getNeo4jDriver: jest.fn(() => ({
     session: mockSession,
   })),
@@ -25,7 +27,7 @@ describe('CausalGraphService', () => {
         run: mockRun,
         close: mockClose,
     });
-    (require('../config/database').getNeo4jDriver as jest.Mock).mockReturnValue({
+    (getNeo4jDriver as jest.Mock).mockReturnValue({
         session: mockSession,
     });
     service = new CausalGraphService();

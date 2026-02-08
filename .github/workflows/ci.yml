@@ -85,7 +85,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
-        run: pnpm -w test:unit || pnpm -w test:unit
+        run: pnpm -w test:unit -- --coverage || pnpm -w test:unit -- --coverage
       - name: Attach evidence
         if: always()
         run: |
