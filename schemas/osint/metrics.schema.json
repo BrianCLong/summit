@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OSINT Metrics",
+  "type": "object",
+  "required": ["playbookId", "totals"],
+  "additionalProperties": false,
+  "properties": {
+    "playbookId": { "type": "string", "minLength": 1 },
+    "totals": {
+      "type": "object",
+      "required": ["findings", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "findings": { "type": "integer", "minimum": 0 },
+        "sources": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "durations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "collectMs": { "type": "integer", "minimum": 0 },
+        "verifyMs": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
