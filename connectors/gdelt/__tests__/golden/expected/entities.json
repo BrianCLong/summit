@@ -1,0 +1,66 @@
+{
+  "entities": [
+    {
+      "id": "channel-www.tucsonpost.com",
+      "type": "Channel",
+      "properties": {
+        "id": "channel-www.tucsonpost.com",
+        "channel_type": "web",
+        "name": "www.tucsonpost.com",
+        "url": "http://www.tucsonpost.com/news/278854842/hideki-matsuyama-overtakes-ryo-hisatsune-for-phoenix-open-lead"
+      }
+    },
+    {
+      "id": "narrative-20260208004500-10",
+      "type": "Narrative",
+      "properties": {
+        "id": "narrative-20260208004500-10",
+        "title": "Hideki Matsuyama overtakes Ryo Hisatsune for Phoenix Open lead",
+        "topic": "GENERAL_GOVERNMENT",
+        "themes": [
+          "GENERAL_GOVERNMENT",
+          "AFFECT",
+          "TAX_FNCACT",
+          "TAX_FNCACT_PEER",
+          "TAX_DISEASE",
+          "TAX_DISEASE_STROKE",
+          "MANMADE_DISASTER_IMPLIED",
+          "WB_678_DIGITAL_GOVERNMENT",
+          "WB_694_BROADCAST_AND_MEDIA",
+          "WB_133_INFORMATION_AND_COMMUNICATION_TECHNOLOGIES"
+        ],
+        "created_at_source": "20260208004500"
+      }
+    },
+    {
+      "id": "signal-20260208004500-10-tone",
+      "type": "LegitimacySignal",
+      "properties": {
+        "id": "signal-20260208004500-10-tone",
+        "signal_type": "tone",
+        "value": -2.2140221402214,
+        "observed_at_source": "20260208004500"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-signal-20260208004500-10-tone-supports-narrative-20260208004500-10",
+      "type": "SUPPORTS",
+      "from": "signal-20260208004500-10-tone",
+      "to": "narrative-20260208004500-10",
+      "properties": {
+        "weight": 0.022140221402214003
+      }
+    },
+    {
+      "id": "rel-channel-www.tucsonpost.com-amplifies-narrative-20260208004500-10",
+      "type": "AMPLIFIES",
+      "from": "channel-www.tucsonpost.com",
+      "to": "narrative-20260208004500-10",
+      "properties": {
+        "observed_at": "20260208004500"
+      }
+    }
+  ]
+}

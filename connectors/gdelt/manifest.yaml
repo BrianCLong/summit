@@ -1,0 +1,99 @@
+# GDELT Global Knowledge Graph (GKG) Connector Manifest
+# Version: 1.0.0
+
+# === Core Metadata ===
+name: gdelt-gkg
+display_name: "GDELT Global Knowledge Graph"
+description: "Connector for the GDELT Global Knowledge Graph (GKG) - a real-time global narrative and metadata stream extracting themes, people, organizations, locations, and emotions from worldwide news."
+version: "1.0.0"
+author: "IntelGraph Data Intake Team"
+license: "MIT"
+
+# === Connector Type ===
+ingestion_type: batch
+supported_formats:
+  - csv
+
+# === Data Source Configuration ===
+source:
+  type: api
+  authentication:
+    type: none
+    required_credentials: []
+  base_url: "http://data.gdeltproject.org/gdeltv2/lastupdate.txt"
+  documentation_url: "https://www.gdeltproject.org/data.html"
+
+# === Rate Limiting ===
+# GDELT GKG is updated every 15 minutes, no aggressive rate limiting needed
+rate_limit:
+  enabled: true
+  type: per_source
+  requests_per_hour: 4
+  burst_size: 1
+  backoff_strategy: exponential
+  max_retries: 3
+
+# === Schema & Mapping ===
+schema_mapping_file: schema_mapping.py
+entity_types:
+  - Narrative
+  - Channel
+  - LegitimacySignal
+relationship_types:
+  - AMPLIFIES
+  - SUPPORTS
+
+# === Testing ===
+sample_data_file: __tests__/golden/input/sample_gkg.csv
+golden_tests:
+  enabled: true
+  test_cases:
+    - name: basic_gkg_ingestion
+      input: __tests__/golden/input/sample_gkg.csv
+      expected: __tests__/golden/expected/entities.json
+
+# === Compliance & Governance ===
+compliance:
+  pii_detection: true
+  pii_fields:
+    - PERSONS
+  license_check: true
+  data_classification: public
+  retention_days: 90
+  data_source_license: "GDELT - Free for Non-Commercial/Commercial Use (check TOS)"
+  terms_of_service: "https://www.gdeltproject.org/about.html"
+
+# === Observability ===
+observability:
+  metrics_enabled: true
+  sli_targets:
+    availability: 0.95          # 95% success rate
+    latency_p95_ms: 60000       # 95th percentile < 60s (large file downloads)
+    data_freshness_hours: 1     # GKG is updated every 15 mins
+  slo_window_days: 30
+  alert_on_slo_breach: true
+
+# === Resource Limits ===
+resources:
+  max_concurrent_requests: 1
+  batch_size: 1000
+  timeout_seconds: 300
+  memory_limit_mb: 1024         # GKG files can be large
+
+# === Dependencies ===
+dependencies:
+  python: ">=3.11"
+  packages:
+    - httpx>=0.27.0
+
+# === Metadata ===
+metadata:
+  category: news
+  tags:
+    - gdelt
+    - gkg
+    - narrative
+    - osint
+    - news
+  update_frequency: 15-min
+  maintainer: "data-intake-team@intelgraph.io"

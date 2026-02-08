@@ -650,6 +650,38 @@
       "maintainer": "summit-core",
       "documentation": "docs/connectors/rss-news.md",
       "path": "connectors/rss_news_connector/"
+    },
+    {
+      "id": "gdelt-gkg",
+      "name": "GDELT Global Knowledge Graph Connector",
+      "description": "Ingest real-time global narrative signals from GDELT GKG",
+      "version": "1.0.0",
+      "status": "experimental",
+      "category": "osint",
+      "capabilities": [
+        "pull",
+        "batch"
+      ],
+      "entityTypes": [
+        "Narrative",
+        "Channel",
+        "LegitimacySignal"
+      ],
+      "relationshipTypes": [
+        "AMPLIFIES",
+        "SUPPORTS"
+      ],
+      "authentication": [
+        "none"
+      ],
+      "rateLimit": {
+        "requestsPerMinute": 1,
+        "burstLimit": 1
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/gdelt-gkg.md",
+      "path": "connectors/gdelt/"
     }
   ],
   "categories": [
