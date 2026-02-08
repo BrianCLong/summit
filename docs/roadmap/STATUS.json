@@ -1,7 +1,14 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T04:58:21Z",
+  "revision_note": "Added Sprint +1 governed delivery plan for Incident Hub, Runbook Center, Tenant Console, and metering.",
   "initiatives": [
+    {
+      "id": "sprint-plus1-incident-hub-runbook-tenant-console",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Sprint +1 delivery plan for Incident Hub v1, Runbook Center v1, Tenant Console v1, and metering v0 (governed extension).",
+      "evidence": "sprint/sprint-plus1-incident-hub-runbook-tenant-console.md"
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
