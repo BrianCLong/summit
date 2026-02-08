@@ -250,7 +250,8 @@ export class CostCalculator {
       }
 
       // Calculate total cost
-      const totalCost = baseCost * listMultiplier * argMultiplier + childComplexity;
+      const nestedCost = typeof childComplexity === 'number' ? childComplexity : 0;
+      const totalCost = baseCost * listMultiplier * argMultiplier + nestedCost;
 
       return totalCost;
     };

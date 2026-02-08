@@ -1,5 +1,6 @@
 import pino from 'pino';
 import { DisclosurePackager, EvidenceItem } from './DisclosurePackager.js';
+import { CitationValidationError } from '../graphrag/types.js';
 
 const log = (pino as any)({ name: 'ReportServiceV2' });
 
@@ -68,12 +69,14 @@ export class ReportServiceV2 {
 
   private validateCitations(req: ReportRequest): void {
     if (!req.citations || req.citations.length === 0) {
-      throw new Error("BLOCK: Publication blocked. No citations provided for claims.");
+      throw new CitationValidationError(
+        'BLOCK: Publication blocked. No citations provided for claims.',
+      );
     }
 
     for (const cit of req.citations) {
       if (!cit.evidenceId) {
-         throw new Error("BLOCK: Invalid citation detected.");
+        throw new CitationValidationError('BLOCK: Invalid citation detected.');
       }
     }
   }

@@ -40,10 +40,10 @@ class PredictiveAnalyzer {
     }
     const firstValue = data[0].value;
     const lastValue = data[data.length - 1].value;
-    if (lastValue > firstValue * 1.5) {
+    if (lastValue >= firstValue * 1.5) {
       return 'increasing';
     }
-    if (lastValue < firstValue * 0.5) {
+    if (lastValue <= firstValue * 0.5) {
       return 'decreasing';
     }
     return 'stable';
@@ -77,8 +77,11 @@ class PredictiveAnalyzer {
     const mean = values.reduce((a, b) => a + b) / values.length;
     const stdDev = Math.sqrt(values.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / values.length);
     const lastPoint = data[data.length - 1];
-    // Anomaly if the last point is more than 3 standard deviations from the mean.
-    if (Math.abs(lastPoint.value - mean) > 3 * stdDev) {
+    if (stdDev === 0) {
+      return null;
+    }
+    // Anomaly if the last point is more than 2 standard deviations from the mean.
+    if (Math.abs(lastPoint.value - mean) >= 2 * stdDev) {
       return lastPoint;
     }
     return null;

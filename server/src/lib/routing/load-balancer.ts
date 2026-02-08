@@ -11,8 +11,8 @@ import { Backend } from './types.js';
 class LoadBalancer {
   private static instance: LoadBalancer;
   private backends: Backend[] = [];
-  private router = AdaptiveRouter.getInstance();
-  private metrics = MetricsCollector.getInstance();
+  private router = AdaptiveRouter;
+  private metrics = MetricsCollector;
   private healthCheckInterval: NodeJS.Timeout | null = null;
   private metricsUpdateInterval: NodeJS.Timeout | null = null;
   private stickySessions = new Map<string, string>();
