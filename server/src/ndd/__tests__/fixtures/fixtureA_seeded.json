@@ -1,0 +1,24 @@
+[
+  {
+    "id": "cluster_001",
+    "frames": ["Frame A", "Frame B"],
+    "originators": ["actor_1", "actor_2", "actor_1"],
+    "volume": 100,
+    "startTime": "2024-01-01T00:00:00Z",
+    "lastActive": "2024-01-02T00:00:00Z",
+    "connectivityIndex": 0.5,
+    "postCorrectionVolume": 50,
+    "expectedDecay": 10
+  },
+  {
+    "id": "cluster_002",
+    "frames": ["Frame C"],
+    "originators": ["actor_3", "actor_4", "actor_5", "actor_6"],
+    "volume": 200,
+    "startTime": "2024-01-03T00:00:00Z",
+    "lastActive": "2024-01-04T00:00:00Z",
+    "connectivityIndex": 0.1,
+    "postCorrectionVolume": 10,
+    "expectedDecay": 100
+  }
+]
