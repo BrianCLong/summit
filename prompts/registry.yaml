@@ -50,6 +50,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: spec-1-software-factory-method
+    version: v1
+    path: prompts/specs/spec-1-software-factory-method@v1.md
+    sha256: 14641208306cd81f6e16f47cbe234b965c2ef485217bc505bcada7907284c004
+    description: Author the SPEC-1 Software Factory Method architecture with diagrams, schemas, and governance alignment.
+    scope:
+      paths:
+        - specs/SPEC-1-SOFTWARE-FACTORY-METHOD.md
+        - docs/roadmap/STATUS.json
+        - prompts/specs/spec-1-software-factory-method@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SPEC1_SOFTWARE_FACTORY_METHOD_TASK.json
+      domains:
+        - documentation
+        - governance
+        - specs
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md
