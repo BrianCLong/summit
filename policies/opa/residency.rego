@@ -1,5 +1,7 @@
 package composer.residency
 
+import rego.v1
+
 # Input contract (example):
 # input = {
 #   "mode": "enforce" | "shadow",

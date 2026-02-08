@@ -3,12 +3,8 @@ from summit.api.factflow.router import router as factflow_router
 from summit.api.factlaw.router import router as factlaw_router
 from summit.api.factmarkets.router import router as factmarkets_router
 from summit.api.factgov.router import router as factgov_router
-from summit.observability import setup_observability
 
 app = FastAPI(title="Summit Multi-Product API")
-
-# Setup Observability (Prometheus, OTel, Logging)
-setup_observability(app)
 
 # Include all product routers
 app.include_router(factflow_router)

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["node", "pg", "crypto-js", "uuid"],
     "target": "ES2020",
     "module": "commonjs",
     "lib": ["ES2020"],
@@ -18,5 +19,5 @@
     "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "__tests__", "tests", "coverage"]
+  "exclude": ["node_modules", "dist", "src/__tests__", "tests", "coverage"]
 }

@@ -4,7 +4,6 @@
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
-  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
@@ -138,6 +137,7 @@
   ],
   "author": "IntelGraph Team",
   "license": "MIT",
+  "packageManager": "pnpm@9.12.0",
   "engines": {
     "node": ">=18.18",
     "npm": ">=8.0.0"
@@ -246,7 +246,7 @@
     "commander": "^14.0.2",
     "cross-env": "^10.0.0",
     "docx": "^9.5.1",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.2.1",
     "ioredis": "^5.8.2",
     "jest-extended": "^4.0.2",
     "neo4j-driver": "^5.28.1",
@@ -273,6 +273,7 @@
       "ignoreCves": []
     },
     "overrides": {
+      "@orval/core": ">=7.21.0",
       "entities": "^4.5.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",

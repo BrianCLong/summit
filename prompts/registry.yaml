@@ -425,6 +425,7 @@ prompts:
     scope:
       paths:
         - docs/runbooks/
+        - docs/roadmap/
         - docs/roadmap/STATUS.json
         - agents/examples/
         - prompts/docs/runbooks-update@v1.md
@@ -676,18 +677,10 @@ prompts:
         - prompts/registry.yaml
         - agents/examples/
       domains:
-        - architecture
+ HEAD
+        - competitive-intel
+        - product-strategy
         - governance
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: competitive-subsumption-protocol-v4-1
     version: v1
     path: prompts/competitive/competitive-subsumption-protocol-v4.1.md
@@ -704,29 +697,14 @@ prompts:
         - agents/examples/
       domains:
         - documentation
-        - competitive-intel
-        - product-strategy
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: sar-agentic-app-runtime
-    version: v1
     path: prompts/architecture/sar-agentic-app-runtime@v1.md
     sha256: 0c2ea2abded4bee786ab44a93066948cac8bff1dc60d94cb3cd56faa15c367d8
     description: Summit App Runtime architecture, governance, and compatibility plan with SAR deliverables.
-    scope:
-      paths:
         - docs/architecture/sar-agentic-app-runtime.md
         - prompts/architecture/sar-agentic-app-runtime@v1.md
-        - prompts/registry.yaml
-      domains:
+
+ origin/main
         - architecture
         - governance
         - documentation

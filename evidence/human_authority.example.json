@@ -1,6 +1,0 @@
-{
-  "decision_type": "loan_application_denial",
-  "ai_role": "recommendation_only",
-  "human_override_required": true,
-  "override_logged": true
-}

@@ -350,4 +350,3 @@ declare module 'compression' {
   const anyExport: any;
   export = anyExport;
 }
-

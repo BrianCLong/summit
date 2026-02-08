@@ -4,7 +4,10 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 
 
 @dataclass
