@@ -422,6 +422,79 @@ export class TenantService {
     }
   }
 
+  async updateStatus(
+    tenantId: string,
+    status: 'active' | 'suspended',
+    actorId: string,
+    reason?: string,
+  ): Promise<Tenant> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const current = this.mapRowToTenant(existing.rows[0]);
+      if (current.status === status) {
+        await client.query('ROLLBACK');
+        return current;
+      }
+
+      const statusHistory = Array.isArray(current.config?.lifecycle?.statusHistory)
+        ? current.config.lifecycle.statusHistory
+        : [];
+
+      const nextConfig = {
+        ...(current.config || {}),
+        lifecycle: {
+          ...(current.config?.lifecycle || {}),
+          statusHistory: [
+            {
+              previousStatus: current.status,
+              nextStatus: status,
+              actorId,
+              reason,
+              changedAt: new Date().toISOString(),
+            },
+            ...statusHistory,
+          ].slice(0, 10),
+        },
+      };
+
+      const result = await client.query(
+        'UPDATE tenants SET status = $1, config = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+        [status, nextConfig, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_STATUS_UPDATED',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          previousStatus: current.status,
+          nextStatus: status,
+          reason,
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return tenant;
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to update tenant status', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async rollbackSettings(
     tenantId: string,
     actorId: string,

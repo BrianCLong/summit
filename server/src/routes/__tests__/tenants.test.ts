@@ -12,6 +12,7 @@ const mockGetPostgresPool = jest.fn();
 const mockGetRedisClient = jest.fn();
 const mockAppendEntry = jest.fn();
 const mockRepoBy = jest.fn();
+const mockUpdateStatus = jest.fn();
 const mockEnsurePolicy = jest.fn((_action: string, _resource: string) => (_req: any, _res: any, next: any) => next());
 
 let currentUser: any = {
@@ -27,6 +28,7 @@ jest.unstable_mockModule('../../services/TenantService.js', () => ({
     updateSettings: mockUpdateSettings,
     disableTenant: mockDisableTenant,
     createTenant: mockCreateTenant,
+    updateStatus: mockUpdateStatus,
   },
   createTenantSchema: {
     parse: (v: any) => v,
@@ -119,6 +121,12 @@ describeIf('tenants routes', () => {
       config: {},
       settings: {},
     });
+    mockUpdateStatus.mockResolvedValue({
+      id: 'tenant-1',
+      status: 'suspended',
+      config: {},
+      settings: {},
+    });
     mockCreateTenant.mockResolvedValue({
       id: 'tenant-1',
       name: 'Acme',
@@ -169,6 +177,16 @@ describeIf('tenants routes', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.status).toBe('disabled');
     expect(res.body.receipt.action).toBe('TENANT_DISABLED');
+  });
+
+  it('updates tenant status with receipt', async () => {
+    const res = await request(app)
+      .patch('/api/tenants/tenant-1')
+      .send({ status: 'suspended', reason: 'maintenance' });
+    expect(res.status).toBe(200);
+    expect(res.body.data.status).toBe('suspended');
+    expect(res.body.receipt.action).toBe('TENANT_STATUS_UPDATED');
+    expect(mockUpdateStatus).toHaveBeenCalledWith('tenant-1', 'suspended', 'user-1', 'maintenance');
   });
 
   it('blocks cross-tenant access', async () => {
