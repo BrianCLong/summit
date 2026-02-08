@@ -18,13 +18,13 @@
     "db:reset": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
-    "@apollo/server": "^4.13.0",
+    "@apollo/server": "5.4.0",
     "argon2": "^0.31.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^6.9.0",
-    "graphql": "^16.8.0",
+    "graphql": "^16.12.0",
     "graphql-tag": "^2.12.6",
     "graphql-subscriptions": "^2.0.0",
     "helmet": "^7.0.0",
