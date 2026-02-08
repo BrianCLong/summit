@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schema/io/provenance.schema.json",
+  "title": "IO Provenance Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "collection_method",
+    "timestamp",
+    "hash",
+    "license",
+    "retention_class",
+    "tenant_id",
+    "chain_of_custody"
+  ],
+  "properties": {
+    "source": {
+      "type": "string",
+      "description": "Platform, partner feed, or internal system identifier."
+    },
+    "collection_method": {
+      "type": "string",
+      "description": "API/export/partner/approved capture method."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC3339 collection timestamp."
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$",
+      "description": "SHA-256 hash of the normalized payload."
+    },
+    "license": {
+      "type": "string",
+      "description": "License/ToS reference for the source data."
+    },
+    "retention_class": {
+      "type": "string",
+      "description": "Policy-defined retention class."
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant scope identifier."
+    },
+    "chain_of_custody": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["actor", "action", "timestamp"],
+        "properties": {
+          "actor": {
+            "type": "string",
+            "description": "System or human actor performing custody action."
+          },
+          "action": {
+            "type": "string",
+            "description": "Custody action description."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}
