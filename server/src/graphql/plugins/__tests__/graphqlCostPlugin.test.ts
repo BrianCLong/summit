@@ -8,11 +8,27 @@ import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import type { CostConfig } from '../../services/CostCalculator.js';
 
-const pluginBaseUrl = new URL('../graphqlCostPlugin.ts', import.meta.url);
-const costCalculatorPath = new URL('../services/CostCalculator.ts', pluginBaseUrl).pathname;
-const tenantRateLimitPath = new URL('../services/TenantRateLimitService.ts', pluginBaseUrl).pathname;
-const metricsPath = new URL('../../monitoring/metrics.ts', pluginBaseUrl).pathname;
+const pluginPath = new URL('../graphqlCostPlugin.ts', import.meta.url).pathname;
+const costCalculatorPath = new URL('../../services/CostCalculator.ts', import.meta.url).pathname;
+const tenantRateLimitPath = new URL(
+  '../../services/TenantRateLimitService.ts',
+  import.meta.url
+).pathname;
+const metricsPath = new URL('../../../monitoring/metrics.ts', import.meta.url).pathname;
 const mockRateLimitService = { checkLimit: jest.fn() };
+const mockCostCalculator = {
+  calculateCost: jest.fn((schema: any, document: any) => {
+    const hasExpensiveField = document.definitions.some((definition: any) => {
+      if (definition.kind !== 'OperationDefinition') {
+        return false;
+      }
+      return definition.selectionSet.selections.some(
+        (selection: any) => selection.kind === 'Field' && selection.name.value === 'expensive'
+      );
+    });
+    return hasExpensiveField ? 2000 : 100;
+  }),
+};
 
 // Mock metrics
 jest.unstable_mockModule(metricsPath, () => ({
@@ -38,6 +54,14 @@ jest.unstable_mockModule(metricsPath, () => ({
   graphqlPerTenantOverageCount: {
     labels: jest.fn(() => ({ inc: jest.fn() })),
   },
+}));
+
+jest.unstable_mockModule(costCalculatorPath, () => ({
+  getCostCalculator: async () => mockCostCalculator,
+}));
+
+jest.unstable_mockModule(tenantRateLimitPath, () => ({
+  getTenantRateLimitService: () => mockRateLimitService,
 }));
 
 
@@ -89,25 +113,19 @@ const resolvers = {
 describe('GraphQL Cost Plugin Integration', () => {
   let server: ApolloServer;
   let createGraphQLCostPlugin: typeof import('../graphqlCostPlugin.js').createGraphQLCostPlugin;
-  let mockCostCalculator: any;
 
   beforeAll(async () => {
-    const costModule = await import(costCalculatorPath);
-    mockCostCalculator = await costModule.getCostCalculator();
-    (mockCostCalculator as any).config = testConfig;
-
-    (globalThis as any).__tenantRateLimitServiceOverride = mockRateLimitService;
-
-    ({ createGraphQLCostPlugin } = await import(pluginBaseUrl.pathname));
+    ({ createGraphQLCostPlugin } = await import(pluginPath));
   });
 
   afterAll(async () => {
-    delete (globalThis as any).__tenantRateLimitServiceOverride;
+    // no-op
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockRateLimitService.checkLimit.mockReset();
+    mockCostCalculator.calculateCost.mockClear();
   });
 
   describe('Under-limit queries', () => {

@@ -75,6 +75,63 @@ export function createGraphQLCostPlugin(
     exemptTenants = [],
   } = options;
 
+  const getLimitType = (reason?: string): string => {
+    switch (reason) {
+      case 'QUERY_TOO_EXPENSIVE':
+        return 'per_query';
+      case 'TENANT_RATE_LIMIT_EXCEEDED':
+        return 'per_minute';
+      case 'TENANT_HOURLY_LIMIT_EXCEEDED':
+        return 'per_hour';
+      case 'USER_RATE_LIMIT_EXCEEDED':
+        return 'per_user';
+      default:
+        return 'unknown';
+    }
+  };
+
+  const buildErrorMessage = (limitResult: TenantRateLimitResult): string => {
+    const { reason, cost, limits, remaining, retryAfter } = limitResult;
+
+    switch (reason) {
+      case 'QUERY_TOO_EXPENSIVE':
+        return (
+          `Query is too expensive (cost: ${cost}). ` +
+          `Maximum cost per query is ${limits.perQuery}. ` +
+          `Please simplify your query or reduce the number of fields requested.`
+        );
+
+      case 'TENANT_RATE_LIMIT_EXCEEDED':
+        return (
+          `Rate limit exceeded for your organization (cost: ${cost}). ` +
+          `You have used your per-minute quota of ${limits.perMinute} cost points. ` +
+          `Remaining capacity: ${remaining.perMinute}. ` +
+          `Retry after ${retryAfter || 60} seconds.`
+        );
+
+      case 'TENANT_HOURLY_LIMIT_EXCEEDED':
+        return (
+          `Hourly rate limit exceeded for your organization (cost: ${cost}). ` +
+          `You have used your hourly quota of ${limits.perHour} cost points. ` +
+          `Remaining capacity: ${remaining.perHour}. ` +
+          `Retry after ${retryAfter || 3600} seconds.`
+        );
+
+      case 'USER_RATE_LIMIT_EXCEEDED':
+        return (
+          `Personal rate limit exceeded (cost: ${cost}). ` +
+          `You have exceeded your individual quota within your organization. ` +
+          `Retry after ${retryAfter || 60} seconds.`
+        );
+
+      default:
+        return (
+          `Query rejected due to cost limits (cost: ${cost}). ` +
+          `Please try again later or contact support for assistance.`
+        );
+    }
+  };
+
   return {
     async requestDidStart(): Promise<GraphQLRequestListener<GraphQLContext>> {
       let queryCost = 0;
@@ -164,7 +221,7 @@ export function createGraphQLCostPlugin(
               graphqlPerTenantOverageCount.labels(tenantId, tier).inc();
 
               graphqlCostRateLimitHits
-                .labels(tenantId, this.getLimitType(limitResult.reason), tier)
+                .labels(tenantId, getLimitType(limitResult.reason), tier)
                 .inc();
 
               // Log overage event
@@ -189,7 +246,7 @@ export function createGraphQLCostPlugin(
 
               // Throw error if enforcement is enabled
               if (enforceLimits) {
-                throw new GraphQLError(this.buildErrorMessage(limitResult), {
+                throw new GraphQLError(buildErrorMessage(limitResult), {
                   extensions: {
                     code: 'GRAPHQL_COST_LIMIT_EXCEEDED',
                     cost: queryCost,
@@ -236,65 +293,8 @@ export function createGraphQLCostPlugin(
     /**
      * Get human-readable limit type from reason code
      */
-    getLimitType(reason?: string): string {
-      switch (reason) {
-        case 'QUERY_TOO_EXPENSIVE':
-          return 'per_query';
-        case 'TENANT_RATE_LIMIT_EXCEEDED':
-          return 'per_minute';
-        case 'TENANT_HOURLY_LIMIT_EXCEEDED':
-          return 'per_hour';
-        case 'USER_RATE_LIMIT_EXCEEDED':
-          return 'per_user';
-        default:
-          return 'unknown';
-      }
-    },
-
-    /**
-     * Build user-friendly error message
-     */
-    buildErrorMessage(limitResult: TenantRateLimitResult): string {
-      const { reason, cost, limits, remaining, retryAfter } = limitResult;
-
-      switch (reason) {
-        case 'QUERY_TOO_EXPENSIVE':
-          return (
-            `Query is too expensive (cost: ${cost}). ` +
-            `Maximum cost per query is ${limits.perQuery}. ` +
-            `Please simplify your query or reduce the number of fields requested.`
-          );
-
-        case 'TENANT_RATE_LIMIT_EXCEEDED':
-          return (
-            `Rate limit exceeded for your organization (cost: ${cost}). ` +
-            `You have used your per-minute quota of ${limits.perMinute} cost points. ` +
-            `Remaining capacity: ${remaining.perMinute}. ` +
-            `Retry after ${retryAfter || 60} seconds.`
-          );
-
-        case 'TENANT_HOURLY_LIMIT_EXCEEDED':
-          return (
-            `Hourly rate limit exceeded for your organization (cost: ${cost}). ` +
-            `You have used your hourly quota of ${limits.perHour} cost points. ` +
-            `Remaining capacity: ${remaining.perHour}. ` +
-            `Retry after ${retryAfter || 3600} seconds.`
-          );
-
-        case 'USER_RATE_LIMIT_EXCEEDED':
-          return (
-            `Personal rate limit exceeded (cost: ${cost}). ` +
-            `You have exceeded your individual quota within your organization. ` +
-            `Retry after ${retryAfter || 60} seconds.`
-          );
-
-        default:
-          return (
-            `Query rejected due to cost limits (cost: ${cost}). ` +
-            `Please try again later or contact support for assistance.`
-          );
-      }
-    },
+    getLimitType,
+    buildErrorMessage,
   };
 }
 
