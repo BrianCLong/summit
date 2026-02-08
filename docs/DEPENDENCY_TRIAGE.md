@@ -79,8 +79,9 @@ Run these from repo root (or the specified workspace root):
 
 ## JS/TS (pnpm)
 
-- `pnpm audit --json` at repo root timed out/hung after 300s (network retries still stalled).
-- `pnpm audit --json` in `apps/ui` timed out/hung after 300s (network retries still stalled).
+- `pnpm audit --json` at repo root timed out/hung after 300s even with explicit registry.
+- `pnpm audit --json` in `apps/ui` timed out/hung after 300s even with explicit registry.
+- `npm audit` fallback at repo root fails (no package-lock.json; npm requires a lockfile).
 - `pnpm audit` in `intelgraph-mcp` fails (no `pnpm-lock.yaml`).
 - `pnpm audit` in `summit-mini` reports 0 vulnerabilities after overrides (diff/esbuild).
 
