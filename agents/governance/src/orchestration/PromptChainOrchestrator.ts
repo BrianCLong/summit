@@ -91,6 +91,7 @@ export interface ValidationResult {
   passed: boolean;
   message: string;
   details?: Record<string, unknown>;
+  action?: 'warn' | 'reject' | 'remediate';
 }
 
 export interface ChainMetrics {
@@ -260,7 +261,11 @@ export class PromptChainOrchestrator {
 
       // Update final metrics
       state.metrics.totalLatencyMs = Date.now() - startTime;
-      state.status = 'completed';
+
+      // Only mark as completed if not already failed
+      if (state.status === 'running') {
+          state.status = 'completed';
+      }
 
       // Emit completion event
       this.emitEvent({
@@ -274,7 +279,7 @@ export class PromptChainOrchestrator {
         actor: request.context.userContext.userId,
         action: 'execute_chain',
         resource: request.chain.id,
-        outcome: 'success',
+        outcome: state.status === 'completed' ? 'success' : 'failure',
         classification: request.context.classification,
         details: {
           chainName: request.chain.name,
@@ -286,12 +291,13 @@ export class PromptChainOrchestrator {
 
       return {
         chainId: request.chain.id,
-        success: true,
+        success: state.status === 'completed',
         outputs: state.outputs,
         steps: state.stepResults,
         metrics: state.metrics,
         provenance,
         hallucinationReport,
+        errors: state.status === 'failed' ? ['Chain execution failed'] : undefined,
       };
     } catch (error) {
       state.status = 'failed';
@@ -406,23 +412,28 @@ export class PromptChainOrchestrator {
               break;
           }
 
-          // Only retry for 'remediate' action validations - reject/warn don't trigger retry
-          const remediableFailures = validationResults.filter(
-            (v) => !v.passed && step.validations.find(
-              (sv) => sv.type === v.type && sv.action === 'remediate'
-            )
+          // Check validation actions
+          const failedRejecting = validationResults.filter(
+            (v) => !v.passed && v.action === 'reject'
           );
 
-          // If no remediable failures, don't retry (reject/warn should fail immediately)
-          if (remediableFailures.length === 0) {
-              break;
+          if (failedRejecting.length > 0) {
+            // Immediate failure on reject action
+            break;
           }
 
-          // If validations failed and we have retries left, append feedback
-          if (vAttempt < maxValidationRetries) {
-              const feedback = this.constructFeedback(remediableFailures);
+          const failedRemediable = validationResults.filter(
+            (v) => !v.passed && v.action === 'remediate'
+          );
+
+          // Only retry if we have remediable failures and retries left
+          if (failedRemediable.length > 0 && vAttempt < maxValidationRetries) {
+              const feedback = this.constructFeedback(failedRemediable);
               // Append feedback to prompt
               currentPrompt += `\n\n${feedback}`;
+          } else {
+             // If no remediable failures (only warnings or no retries left), break
+             break;
           }
       }
 
@@ -472,15 +483,25 @@ export class PromptChainOrchestrator {
    * Construct feedback message from validation results
    */
   private constructFeedback(results: ValidationResult[]): string {
-    const errors = results.filter(r => !r.passed).map(r => `- ${r.message}`);
-
-    return [
-        "Type errors are detected in your output.",
-        "Correct them through the validation errors and try again.",
+    const feedbackLines = [
+        "Errors detected in your output. Please correct them and try again.",
         "",
-        "Validation errors:",
-        ...errors
-    ].join("\n");
+        "Validation errors:"
+    ];
+
+    for (const result of results) {
+        let typePrefix = "";
+        switch (result.type) {
+            case 'schema': typePrefix = "[Schema Error]"; break;
+            case 'regex': typePrefix = "[Format Error]"; break;
+            case 'safety': typePrefix = "[Safety Violation]"; break;
+            case 'hallucination': typePrefix = "[Hallucination Detected]"; break;
+            default: typePrefix = "[Validation Error]";
+        }
+        feedbackLines.push(`- ${typePrefix} ${result.message}`);
+    }
+
+    return feedbackLines.join("\n");
   }
 
   /**
@@ -604,6 +625,7 @@ export class PromptChainOrchestrator {
           type: validation.type,
           passed: false,
           message: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
+          action: validation.action, // Include action from config
         });
       }
     }
@@ -619,33 +641,39 @@ export class PromptChainOrchestrator {
     output: string,
     context: Record<string, unknown>,
   ): Promise<ValidationResult> {
+    // Helper to add action to result
+    const withAction = (res: Omit<ValidationResult, 'action'>): ValidationResult => ({
+      ...res,
+      action: validation.action
+    });
+
     switch (validation.type) {
       case 'regex': {
         const pattern = new RegExp(validation.config.pattern as string);
         const passed = pattern.test(output);
-        return {
+        return withAction({
           type: 'regex',
           passed,
           message: passed ? 'Pattern matched' : 'Pattern not matched',
-        };
+        });
       }
 
       case 'schema': {
         // Simplified schema validation
         try {
           const parsed = JSON.parse(output);
-          return {
+          return withAction({
             type: 'schema',
             passed: true,
             message: 'Valid JSON',
             details: { parsed },
-          };
+          });
         } catch {
-          return {
+          return withAction({
             type: 'schema',
             passed: false,
             message: 'Invalid JSON schema',
-          };
+          });
         }
       }
 
@@ -656,28 +684,28 @@ export class PromptChainOrchestrator {
           output.toLowerCase().includes(pattern.toLowerCase()),
         );
 
-        return {
+        return withAction({
           type: 'safety',
           passed: !hasBlockedContent,
           message: hasBlockedContent ? 'Blocked content detected' : 'Content safe',
-        };
+        });
       }
 
       case 'hallucination': {
         // Placeholder for hallucination detection
-        return {
+        return withAction({
           type: 'hallucination',
           passed: true,
           message: 'Hallucination check passed',
-        };
+        });
       }
 
       default:
-        return {
+        return withAction({
           type: validation.type,
           passed: true,
           message: 'Unknown validation type - skipped',
-        };
+        });
     }
   }
 

@@ -46,6 +46,11 @@ class MockProvider implements LLMProviderAdapter {
   } as any;
 
   calls: string[] = [];
+  failUntilCall = 0;
+
+  constructor(failCount = 0) {
+      this.failUntilCall = failCount;
+  }
 
   async execute(
     prompt: string,
@@ -54,8 +59,8 @@ class MockProvider implements LLMProviderAdapter {
   ): Promise<LLMExecutionResult> {
     this.calls.push(prompt);
 
-    // Check if prompt contains feedback about invalid JSON
-    if (prompt.includes('Validation errors:') && prompt.includes('Invalid JSON schema')) {
+    // If we've passed the failure threshold, succeed
+    if (this.calls.length > this.failUntilCall) {
       return {
         output: '{"result": "success"}',
         inputTokens: 10,
@@ -82,9 +87,8 @@ class MockProvider implements LLMProviderAdapter {
 }
 
 describe('Validation Feedback Loop', () => {
-  it('should retry with feedback when validation fails', async () => {
-    const policyEngine = new AgentPolicyEngine({ failSafe: 'allow' }); // Allow all for simplicity
-    // Hack: mocking evaluateChain to always allow
+  it('should retry with feedback when validation fails with action: remediate', async () => {
+    const policyEngine = new AgentPolicyEngine({ failSafe: 'allow' });
     vi.spyOn(policyEngine, 'evaluateChain').mockResolvedValue({
       allow: true,
       reason: 'Allowed',
@@ -96,7 +100,7 @@ describe('Validation Feedback Loop', () => {
         maxValidationRetries: 3
     });
 
-    const provider = new MockProvider();
+    const provider = new MockProvider(1); // Fail once
     orchestrator.registerProvider(provider);
 
     const chain: PromptChain = {
@@ -148,10 +152,114 @@ describe('Validation Feedback Loop', () => {
       context: createMockContext(),
     });
 
-    // Expect success because the feedback loop should have fixed it
     expect(result.success).toBe(true);
     expect(result.steps[0].output).toEqual({ result: 'success' });
     expect(provider.calls.length).toBe(2);
+    // Provider calls are not modified by append, but prompt argument is.
+    // Wait, provider.execute receives the prompt string.
     expect(provider.calls[1]).toContain('Validation errors:');
+  });
+
+  it('should fail immediately when validation fails with action: reject', async () => {
+    const policyEngine = new AgentPolicyEngine({ failSafe: 'allow' });
+    vi.spyOn(policyEngine, 'evaluateChain').mockResolvedValue({
+      allow: true,
+      reason: 'Allowed',
+      policyPath: 'root',
+      auditLevel: 'info',
+    });
+
+    const orchestrator = new PromptChainOrchestrator(policyEngine, {
+        maxValidationRetries: 3
+    });
+
+    const provider = new MockProvider(5); // Fail always
+    orchestrator.registerProvider(provider);
+
+    const chain: PromptChain = {
+      id: 'chain-reject',
+      name: 'Test Chain Reject',
+      description: 'Test',
+      steps: [
+        {
+          id: 'step-1',
+          sequence: 1,
+          llmProvider: 'test-provider',
+          prompt: { template: 'Generate JSON', variables: [], maxTokens: 100, temperature: 0, classification: 'UNCLASSIFIED' },
+          inputMappings: {}, outputMappings: {},
+          validations: [
+            { type: 'schema', config: {}, action: 'reject' }
+          ],
+          timeout: 1000,
+          retryPolicy: { maxRetries: 0, backoffMs: 0, backoffMultiplier: 1, retryableErrors: [] },
+        },
+      ],
+      governance: {
+        requiredApprovals: [], maxCostPerExecution: 100, maxDurationMs: 60000, allowedClassifications: ['UNCLASSIFIED'], auditLevel: 'standard', incidentEscalation: [],
+      },
+      provenance: { createdBy: 'test', createdAt: new Date(), version: '1.0', slsaLevel: 'SLSA_0', attestations: [] },
+      metadata: {},
+    };
+
+    const result = await orchestrator.executeChain({
+      chain,
+      inputs: {},
+      context: createMockContext(),
+    });
+
+    expect(result.success).toBe(false);
+    expect(provider.calls.length).toBe(1); // Should not retry
+  });
+
+  it('should exhaust retries and fail', async () => {
+    const policyEngine = new AgentPolicyEngine({ failSafe: 'allow' });
+    vi.spyOn(policyEngine, 'evaluateChain').mockResolvedValue({
+      allow: true,
+      reason: 'Allowed',
+      policyPath: 'root',
+      auditLevel: 'info',
+    });
+
+    const orchestrator = new PromptChainOrchestrator(policyEngine, {
+        maxValidationRetries: 2
+    });
+
+    const provider = new MockProvider(10); // Fail always
+    orchestrator.registerProvider(provider);
+
+    const chain: PromptChain = {
+      id: 'chain-exhaust',
+      name: 'Test Chain Exhaust',
+      description: 'Test',
+      steps: [
+        {
+          id: 'step-1',
+          sequence: 1,
+          llmProvider: 'test-provider',
+          prompt: { template: 'Generate JSON', variables: [], maxTokens: 100, temperature: 0, classification: 'UNCLASSIFIED' },
+          inputMappings: {}, outputMappings: {},
+          validations: [
+            { type: 'schema', config: {}, action: 'remediate' }
+          ],
+          timeout: 1000,
+          retryPolicy: { maxRetries: 0, backoffMs: 0, backoffMultiplier: 1, retryableErrors: [] },
+        },
+      ],
+      governance: {
+        requiredApprovals: [], maxCostPerExecution: 100, maxDurationMs: 60000, allowedClassifications: ['UNCLASSIFIED'], auditLevel: 'standard', incidentEscalation: [],
+      },
+      provenance: { createdBy: 'test', createdAt: new Date(), version: '1.0', slsaLevel: 'SLSA_0', attestations: [] },
+      metadata: {},
+    };
+
+    const result = await orchestrator.executeChain({
+      chain,
+      inputs: {},
+      context: createMockContext(),
+    });
+
+    expect(result.success).toBe(false);
+    // Initial call + 2 retries = 3 calls total
+    expect(provider.calls.length).toBe(3);
   });
 });
