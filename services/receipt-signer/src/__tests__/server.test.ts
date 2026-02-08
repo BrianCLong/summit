@@ -1,6 +1,5 @@
-import request from 'supertest';
-import { createSignerApp } from '../server';
-import { ReceiptSigner } from '../signer';
+import { createSignerApp } from '../server.js';
+import { ReceiptSigner } from '../signer.js';
 
 describe('receipt-signer service', () => {
   const signer = new ReceiptSigner('test-key');
@@ -16,22 +15,33 @@ describe('receipt-signer service', () => {
 
   it('signs and verifies payloads', async () => {
     const payload = 'abc123';
-    const signRes = await request(app.server).post('/sign').send({ payload });
+    const signRes = await app.inject({
+      method: 'POST',
+      url: '/sign',
+      payload: { payload },
+    });
 
-    expect(signRes.status).toBe(200);
-    expect(signRes.body.signature.value).toBeTruthy();
-    expect(signRes.body.signature.keyId).toBe('test-key');
+    expect(signRes.statusCode).toBe(200);
+    const signBody = signRes.json();
+    expect(signBody.signature.value).toBeTruthy();
+    expect(signBody.signature.keyId).toBe('test-key');
 
-    const verifyRes = await request(app.server)
-      .post('/verify')
-      .send({ payload, signature: signRes.body.signature });
+    const verifyRes = await app.inject({
+      method: 'POST',
+      url: '/verify',
+      payload: { payload, signature: signBody.signature },
+    });
 
-    expect(verifyRes.status).toBe(200);
-    expect(verifyRes.body.valid).toBe(true);
+    expect(verifyRes.statusCode).toBe(200);
+    expect(verifyRes.json().valid).toBe(true);
   });
 
   it('rejects malformed requests', async () => {
-    const res = await request(app.server).post('/sign').send({});
-    expect(res.status).toBe(400);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/sign',
+      payload: {},
+    });
+    expect(res.statusCode).toBe(400);
   });
 });

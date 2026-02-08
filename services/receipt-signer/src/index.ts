@@ -3,9 +3,9 @@ export {
   ReceiptSigner,
   type SignRequest,
   type SignedPayload,
-} from './signer';
+} from './signer.js';
 
-export { InMemoryReceiptStore, type ReceiptStore } from './store';
+export { InMemoryReceiptStore, type ReceiptStore } from './store.js';
 
 // Re-export utility functions from provenance package
 export { hashReceiptPayload } from '@intelgraph/provenance';

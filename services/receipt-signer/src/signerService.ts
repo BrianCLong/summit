@@ -3,7 +3,7 @@ import {
   canonicalReceiptPayload,
 } from '@intelgraph/provenance';
 import pino from 'pino';
-import { KmsClient } from './kmsClient';
+import { KmsClient } from './kmsClient.js';
 
 export interface SignerServiceOptions {
   kmsClient: KmsClient;

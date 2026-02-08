@@ -1,5 +1,5 @@
 import { ExecutionReceipt } from '@intelgraph/provenance';
-import { ReceiptSignerService } from './signerService';
+import { ReceiptSignerService } from './signerService.js';
 
 export interface PipelineContext {
   receipt: ExecutionReceipt;

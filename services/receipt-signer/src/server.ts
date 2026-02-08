@@ -1,5 +1,7 @@
 import Fastify from 'fastify';
-import { ReceiptSigner, SignRequest, SignedPayload } from './signer';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import { ReceiptSigner, SignRequest, SignedPayload } from './signer.js';
 
 export function createSignerApp(signer = new ReceiptSigner()) {
   const app = Fastify({
@@ -40,7 +42,11 @@ export function createSignerApp(signer = new ReceiptSigner()) {
   return app;
 }
 
-if (require.main === module) {
+const isMain = process.argv[1]
+  ? path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  : false;
+
+if (isMain) {
   const app = createSignerApp();
   const port = process.env.PORT ? Number(process.env.PORT) : 3900;
   app.listen({ port, host: '0.0.0.0' }).catch((err) => {
