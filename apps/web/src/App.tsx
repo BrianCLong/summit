@@ -56,6 +56,11 @@ const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
 
+// New Switchboard Pages
+const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
+const ReceiptsPage = React.lazy(() => import('@/pages/ReceiptsPage'))
+const TenantOpsPage = React.lazy(() => import('@/pages/TenantOpsPage'))
+
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
 
@@ -70,22 +75,12 @@ import { CommandStatusProvider } from '@/features/internal-command/CommandStatus
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
+import { CommandPalette } from '@/components/CommandPalette'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
   const [showExplain, setShowExplain] = React.useState(false);
   const demoModeEnabled = isDemoModeEnabled()
-
-  React.useEffect(()=>{
-    const onKey=(e:KeyboardEvent)=>{
-      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
-        e.preventDefault();
-        setShowPalette(true);
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return ()=>window.removeEventListener('keydown', onKey);
-  },[]);
 
   return (
     <ApolloProvider client={apolloClient}>
@@ -117,17 +112,9 @@ function App() {
                         </div>
                       }
                     >
-                      {/* Explain overlay stub */}
-                      {showPalette && (
-                         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
-                           <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                             <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                             <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
-                               Explain this view
-                             </button>
-                           </div>
-                         </div>
-                      )}
+                      {/* Command Palette */}
+                      <CommandPalette open={showPalette} onOpenChange={setShowPalette} />
+
                       {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
 
                       <Routes>
@@ -203,6 +190,11 @@ function App() {
                         {/* Cases */}
                         <Route path="cases" element={<CasesPage />} />
                         <Route path="cases/:id" element={<CaseDetailPage />} />
+
+                        {/* Switchboard Routes */}
+                        <Route path="approvals" element={<ApprovalsPage />} />
+                        <Route path="receipts/:id" element={<ReceiptsPage />} />
+                        <Route path="tenant-ops" element={<TenantOpsPage />} />
 
                         {/* Dashboards - Wrapped with DataFetchErrorBoundary */}
                         <Route

@@ -72,7 +72,7 @@ export const DecisionRecordSchema = z.object({
   id: z.string().uuid(),
   actor: ActorSchema,
   decision: DecisionType,
-  reason: z.string().optional(),
+  reason: z.string().min(1),
   conditions: z.array(PolicyConditionSchema).default([]),
   timestamp: z.string().datetime(),
   receipt_id: z.string().optional(),
@@ -126,7 +126,7 @@ export type ApprovalRequest = z.infer<typeof ApprovalRequestSchema>;
 export const ApprovalDecisionSchema = z.object({
   decision: DecisionType,
   actor: ActorSchema,
-  reason: z.string().optional(),
+  reason: z.string().min(1),
   conditions: z.array(PolicyConditionSchema).optional(),
 });
 export type ApprovalDecisionInput = z.infer<typeof ApprovalDecisionSchema>;
@@ -137,7 +137,7 @@ export type ApprovalDecisionInput = z.infer<typeof ApprovalDecisionSchema>;
 
 export const CancelRequestSchema = z.object({
   actor: ActorSchema,
-  reason: z.string().optional(),
+  reason: z.string().min(1),
 });
 export type CancelRequestInput = z.infer<typeof CancelRequestSchema>;
 
