@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-19T00:00:00Z",
+  "revision_note": "Added Evidence-Trail Peek overlay delivery tracking and evidence map updates.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "evidence-trail-peek-overlay",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence-Trail Peek overlay with evidence index, top artifacts, and minimized claims wiring."
     },
     {
       "id": "B",
@@ -200,7 +206,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }

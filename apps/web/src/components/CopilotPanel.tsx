@@ -9,6 +9,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, Code, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { EvidenceTrailPeek } from '@/components/EvidenceTrailPeek';
+import { useFeatureFlags } from '@/contexts/FeatureFlagContext';
 
 // Define types locally if not available globally
 interface TranslationResult {
@@ -18,6 +20,7 @@ interface TranslationResult {
   estimatedCost: number;
   isValid?: boolean;
   validationError?: string;
+  answerId?: string;
   // GraphRAG extensions
   citations?: { id: string; source: string; url?: string; confidence: number }[];
 }
@@ -30,6 +33,8 @@ export function CopilotPanel() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('prompt');
   const { toast } = useToast();
+  const { isEnabled } = useFeatureFlags();
+  const evidenceTrailEnabled = isEnabled('features.evidenceTrailPeek', false);
 
   // jQuery ref for the action panel
   const actionPanelRef = useRef<HTMLDivElement>(null);
@@ -149,7 +154,7 @@ export function CopilotPanel() {
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col gap-4">
+        <CardContent className="relative flex-1 flex flex-col gap-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
             <TabsList>
               <TabsTrigger value="prompt">Prompt</TabsTrigger>
@@ -299,6 +304,13 @@ export function CopilotPanel() {
               </div>
             </TabsContent>
           </Tabs>
+
+          {evidenceTrailEnabled && result?.answerId && (
+            <EvidenceTrailPeek
+              answerId={result.answerId}
+              className="absolute right-4 top-4 w-[360px] max-w-full"
+            />
+          )}
         </CardContent>
       </Card>
     </div>

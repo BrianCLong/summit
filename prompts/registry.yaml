@@ -136,6 +136,40 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: evidence-trail-peek
+    version: v1
+    path: prompts/ux/evidence-trail-peek@v1.md
+    sha256: 67f49431224d810409d7a199ca3b2c0dcab9e70c5a89abf978b332d93192d99d
+    description: Evidence-Trail Peek overlay with provenance timeline, top artifacts, and minimized claims.
+    scope:
+      paths:
+        - apps/web/src/components/EvidenceTrailPeek.tsx
+        - apps/web/src/components/CopilotPanel.tsx
+        - server/src/routes/evidence-trail.ts
+        - server/src/app.ts
+        - server/src/featureFlags/initialFeatureFlags.ts
+        - docs/ga/evidence_map.yml
+        - docs/ga/MVP-4-GA-VERIFICATION.md
+        - docs/ga/verification-map.json
+        - docs/roadmap/STATUS.json
+        - reports/a11y-keyboard/README.md
+        - walkthrough.md
+        - prompts/ux/evidence-trail-peek@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ux
+        - api
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
