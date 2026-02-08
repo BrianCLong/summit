@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Structured Retrieval Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "item_slug", "evidence"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "item_slug": {"type": "string"},
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rows", "row_count", "bytes", "policy"],
+      "properties": {
+        "rows": {"type": "array"},
+        "row_count": {"type": "integer", "minimum": 0},
+        "bytes": {"type": "integer", "minimum": 0},
+        "policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["allowed", "reasons"],
+          "properties": {
+            "allowed": {"type": "boolean"},
+            "reasons": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    }
+  }
+}
