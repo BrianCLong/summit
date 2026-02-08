@@ -584,15 +584,11 @@ pnpm typecheck
 
 ## Building Binaries
 
-```bash
-# Build all platform binaries
-pnpm pkg:all
+Binary packaging via `pkg` has been removed. Use the compiled output with Node:
 
-# Build specific platform
-pnpm pkg:linux
-pnpm pkg:macos
-pnpm pkg:macos-arm
-pnpm pkg:windows
+```bash
+pnpm build
+node dist/cli.js
 ```
 
 ## License
