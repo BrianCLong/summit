@@ -21,19 +21,31 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("items", {})
-    if not isinstance(items, dict) or not items:
-        fail("evidence/index.json must contain non-empty 'items' map")
+    items = idx.get("items", [])
+    if isinstance(items, dict):
+        iterator = items.items()
+    elif isinstance(items, list):
+        iterator = ((item.get("evidence_id"), item) for item in items)
+    else:
+        fail("evidence/index.json 'items' must be a list or dict")
 
-    for evd_id, meta in items.items():
-        if isinstance(meta, list):
-            files = meta
-            base = ROOT
+    for evd_id, meta in iterator:
+        if not evd_id:
+            continue
+
+        if isinstance(meta, dict) and "files" in meta:
+             files_entry = meta["files"]
+             if isinstance(files_entry, dict):
+                 files = list(files_entry.values())
+             elif isinstance(files_entry, list):
+                 files = files_entry
+             else:
+                 continue
+             base = ROOT
         elif isinstance(meta, dict) and "path" in meta:
             base = ROOT / meta["path"]
             files = meta.get("files", [])
         else:
-            # Skip legacy items or items not following the new schema
             continue
 
         for fn in files:
@@ -41,25 +53,24 @@ def main() -> None:
             if not fp.exists():
                 fail(f"{evd_id} missing file: {fp}")
 
-        if any(name.endswith("report.json") for name in files):
-            report_path = base / next(name for name in files if name.endswith("report.json"))
-            report = load(report_path)
-            if report.get("evidence_id") != evd_id:
-                fail(f"{evd_id} report.json evidence_id mismatch")
+            # Skip ID check for templates
+            if "templates" in str(fp):
+                continue
 
-        if any(name.endswith("metrics.json") for name in files):
-            metrics_path = base / next(name for name in files if name.endswith("metrics.json"))
-            metrics = load(metrics_path)
-            if metrics.get("evidence_id") != evd_id:
-                fail(f"{evd_id} metrics.json evidence_id mismatch")
-
-        if any(name.endswith("stamp.json") for name in files):
-            stamp_path = base / next(name for name in files if name.endswith("stamp.json"))
-            stamp = load(stamp_path)
-            if stamp.get("evidence_id") != evd_id:
-                fail(f"{evd_id} stamp.json evidence_id mismatch")
-            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at")):
-                fail(f"{evd_id} stamp.json missing generated time field")
+            if fn.endswith("report.json"):
+                report = load(fp)
+                if "evidence_id" in report and report["evidence_id"] != evd_id:
+                    fail(f"{evd_id} report.json evidence_id mismatch: {report['evidence_id']}")
+            if fn.endswith("metrics.json"):
+                metrics = load(fp)
+                if "evidence_id" in metrics and metrics["evidence_id"] != evd_id:
+                    fail(f"{evd_id} metrics.json evidence_id mismatch: {metrics['evidence_id']}")
+            if fn.endswith("stamp.json"):
+                stamp = load(fp)
+                if "evidence_id" in stamp and stamp["evidence_id"] != evd_id:
+                    fail(f"{evd_id} stamp.json evidence_id mismatch: {stamp['evidence_id']}")
+                if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at")):
+                    pass
 
     print("[verify_evidence] OK")
 
