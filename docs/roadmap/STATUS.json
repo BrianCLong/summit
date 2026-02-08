@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added Codex Desktop Summit workspace guide and daily loop plan.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -77,6 +77,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+    },
+    {
+      "id": "codex-desktop-summit-workspace",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Codex Desktop Summit workspace guide covering skills layout, daily loop automation, and safety settings."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -200,7 +206,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }
