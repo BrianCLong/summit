@@ -24,6 +24,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: narrative-analysis-update-20260208
+    version: v1
+    path: prompts/research/narrative-analysis-update-20260208.md
+    sha256: 835e8a7a9df52b5ea61f85492aaabfb935a99d7c3df2c165c9a85c1f916fd1fa
+    description: Publish the 2026-02-08 narrative analysis research update and roadmap revision note.
+    scope:
+      paths:
+        - docs/research/narrative_analysis_2026_02_08.md
+        - docs/roadmap/STATUS.json
+        - prompts/research/narrative-analysis-update-20260208.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - research
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md
