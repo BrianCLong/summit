@@ -1,5 +1,30 @@
 version: 1
 prompts:
+  - id: govos-1-governed-multi-agent-os
+    version: v1
+    path: prompts/epics/govos-1-governed-multi-agent-os@v1.md
+    sha256: eb01ec40753e208354ad52e26d9000528dae5ee92b7f44782eea6513c200b873
+    description: Create GOVOS-1 governed multi-agent OS epic doc and register roadmap status.
+    scope:
+      paths:
+        - docs/epics/govos-1-governed-multi-agent-os.md
+        - docs/roadmap/STATUS.json
+        - prompts/epics/govos-1-governed-multi-agent-os@v1.md
+        - prompts/registry.yaml
+        - agents/examples/GOVOS_1_EPIC_DOC_20260208.json
+      domains:
+        - documentation
+        - governance
+        - epics
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
