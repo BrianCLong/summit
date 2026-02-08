@@ -25,16 +25,10 @@ runs:
         case "$COSIGN_VERSION" in
           3.0.[0-3]) echo "cosign must be >= 3.0.4 due to bundle verification advisory"; exit 1;;
         esac
-    - name: Install cosign (pinned)
-      shell: bash
-      run: |
-        set -euo pipefail
-        v="${{ inputs.cosign_version }}"
-        os="$(uname | tr '[:upper:]' '[:lower:]')"
-        arch="$(uname -m)"
-        curl -sSfL -o cosign "https://github.com/sigstore/cosign/releases/download/v${v}/cosign-${os}-${arch}"
-        chmod +x cosign
-        sudo mv cosign /usr/local/bin/cosign
+    - name: Install cosign (pinned with checksum verification)
+      uses: sigstore/cosign-installer@dc72c7d5c4d10cd6bcb8cf6e3fd625a9e5e537da # v3.7.0
+      with:
+        cosign-release: 'v${{ inputs.cosign_version }}'
     - name: Verify (bundle-first)
       shell: bash
       run: |
