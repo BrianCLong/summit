@@ -58,7 +58,9 @@ router.post('/reports:generate', async (req, res) => {
     const reportId = crypto.randomUUID();
 
     const access = (req as any).accessContext;
-    const tenantId = input.tenantId || access.tenantId;
+    // SECURITY: Always use authenticated tenant context - never allow user input to override
+    // This prevents IDOR attacks where a user could generate reports for other tenants
+    const tenantId = access.tenantId;
     if (!tenantId) {
       res.status(400).json({ error: 'tenantId is required for report generation' });
       return;
@@ -110,7 +112,11 @@ router.post('/reports:generate', async (req, res) => {
 
 router.get('/reports/:id', (req, res) => {
   const access = (req as any).accessContext;
-  const record = reportStore.get(req.params.id, access?.tenantId);
+  if (!access?.tenantId) {
+    res.status(400).json({ error: 'tenantId is required' });
+    return;
+  }
+  const record = reportStore.get(req.params.id, access.tenantId);
   if (!record) {
     res.status(404).json({ error: 'Report not found' });
     return;
@@ -130,7 +136,11 @@ router.get('/reports/:id', (req, res) => {
 
 router.get('/reports/:id/download', (req, res) => {
   const access = (req as any).accessContext;
-  const record = reportStore.get(req.params.id, access?.tenantId);
+  if (!access?.tenantId) {
+    res.status(400).json({ error: 'tenantId is required' });
+    return;
+  }
+  const record = reportStore.get(req.params.id, access.tenantId);
   if (!record) {
     res.status(404).json({ error: 'Report not found' });
     return;

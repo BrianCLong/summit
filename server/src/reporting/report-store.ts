@@ -137,10 +137,12 @@ export class ReportStore {
     return record;
   }
 
-  get(reportId: string, tenantId?: string): StoredReport | undefined {
+  get(reportId: string, tenantId: string): StoredReport | undefined {
     const record = this.reports.get(reportId);
     if (!record) return undefined;
-    if (tenantId && record.tenantId && record.tenantId !== tenantId) {
+    // SECURITY: Strict tenant scoping - caller must provide tenantId and it must match
+    // This prevents tenant bypass attacks where undefined tenantId could leak data
+    if (record.tenantId !== tenantId) {
       return undefined;
     }
     return record;
