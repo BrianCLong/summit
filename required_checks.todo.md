@@ -39,3 +39,12 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
+
+## Required checks discovery (Personal Intelligence Layer)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rules → note required checks
+2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3) Temporary gates (rename once verified):
+   - verify/personal-intelligence-policy
+   - verify/personal-intelligence-evidence
+   - verify/dependency-delta
+4) Rename plan: update workflow job names and required checks list once the branch protection API confirms the exact names.

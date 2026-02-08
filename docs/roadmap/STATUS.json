@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T12:30:00Z",
+  "revision_note": "Added Personal Intelligence evidence/policy scaffolding and security readiness anchors.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "personal-intelligence-layer-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Personal Intelligence Layer lane-1 evidence and policy scaffolding with deny-by-default gates."
     },
     {
       "id": "B",
