@@ -288,11 +288,14 @@ export const createApp = async () => {
         // SEC-2025-001: Fail Closed by default.
         // Only allow bypass if explicitly enabled via env var.
         if (process.env.ENABLE_INSECURE_DEV_AUTH === 'true') {
-          console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
+          console.warn(
+            'Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)',
+          );
           (req as any).user = {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
+            tenantId: 'global',
           };
           return next();
         }
@@ -588,8 +591,10 @@ export const createApp = async () => {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
 
-  app.get('/search/evidence', authenticateToken, async (req, res) => {
+  app.get('/search/evidence', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
+    const user = (req as any).user;
+    const tenantId = user?.tenantId || 'global';
 
     if (!q) {
       return res.status(400).send({ error: "Query parameter 'q' is required" });
@@ -601,6 +606,7 @@ export const createApp = async () => {
     try {
       const searchQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN node, score
         SKIP $skip
         LIMIT $limit
@@ -608,16 +614,18 @@ export const createApp = async () => {
 
       const countQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN count(node) as total
       `;
 
       const [searchResult, countResult] = await Promise.all([
         session.run(searchQuery, {
           query: q,
+          tenantId,
           skip: Number(skip),
           limit: Number(limit),
         }),
-        session.run(countQuery, { query: q }),
+        session.run(countQuery, { query: q, tenantId }),
       ]);
 
       const evidence = searchResult.records.map((record: any) => ({
