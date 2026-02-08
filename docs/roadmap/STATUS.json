@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added OSINT repo assumptions log for playbook runner validation.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -193,6 +193,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "osint-repo-assumptions-log",
+      "status": "complete",
+      "owner": "codex",
+      "notes": "Added docs/governance/repo_assumptions.md to track verified vs assumed repo facts for OSINT playbook runner work."
     }
   ],
   "summary": {
