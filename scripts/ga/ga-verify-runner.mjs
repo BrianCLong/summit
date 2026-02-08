@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { writeEvidenceIndex } from './ga-index-writer.mjs';
 
 const steps = [
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
@@ -107,7 +108,15 @@ const handleSignal = (signal) => {
     finishedAt: new Date().toISOString(),
     status: 'aborted',
     failureSummary: { signal },
-  }).finally(() => {
+  }).then(() =>
+    writeEvidenceIndex({
+      outDir,
+      sha,
+      status: 'aborted',
+      startedAt: stamp.startedAt,
+      steps: stamp.steps,
+    })
+  ).finally(() => {
     clearInterval(heartbeat);
     process.exit(1);
   });
@@ -140,6 +149,13 @@ const main = async () => {
     throw error;
   } finally {
     clearInterval(heartbeat);
+    await writeEvidenceIndex({
+      outDir,
+      sha,
+      status: stamp.status,
+      startedAt: stamp.startedAt,
+      steps: stamp.steps,
+    });
   }
 };
 
