@@ -1,0 +1,8 @@
+{
+  "query": "List the capital cities of France, Germany, and Spain.",
+  "ground_truth": [
+    {"Country": "France", "Capital": "Paris"},
+    {"Country": "Germany", "Capital": "Berlin"},
+    {"Country": "Spain", "Capital": "Madrid"}
+  ]
+}
