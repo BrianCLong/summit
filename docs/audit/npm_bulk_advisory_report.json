@@ -11,9 +11,24 @@
           ],
           "id": 1112926,
           "importers": [
+            "apps/gateway",
+            "apps/intelgraph-api",
+            "apps/server",
+            "companyos/services/tenant-api",
             "packages/api-framework",
+            "packages/rate-limiter",
             "server",
-            "services/api-gateway"
+            "services/admin-api",
+            "services/admin-automation",
+            "services/api-gateway",
+            "services/battle-api",
+            "services/config-service",
+            "services/control-tower-service",
+            "services/data-monetization-engine",
+            "services/digital-twin",
+            "services/graph-core",
+            "services/prov-ledger",
+            "services/sandbox-gateway"
           ],
           "recommended_action": "Upgrade to a version outside the vulnerable range (>=5.0.0 <5.4.0).",
           "severity": "high",
@@ -22,29 +37,10 @@
           "vulnerable_versions": ">=5.0.0 <5.4.0"
         },
         {
-          "affected_nodes": [
-            "@apollo/server@4.12.2"
-          ],
-          "affected_versions": [
-            "4.12.2"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112927,
-          "importers": [
-            "apps/gateway",
-            "apps/intelgraph-api",
-            "apps/server",
-            "companyos/services/tenant-api",
-            "packages/rate-limiter",
-            "services/admin-api",
-            "services/admin-automation",
-            "services/battle-api",
-            "services/config-service",
-            "services/control-tower-service",
-            "services/data-monetization-engine",
-            "services/digital-twin",
-            "services/graph-core",
-            "services/sandbox-gateway"
-          ],
+          "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (>=4.2.0 <4.13.0).",
           "severity": "high",
           "title": "Apollo Serve vulnerable to Denial of Service with `startStandaloneServer`",
@@ -53,7 +49,6 @@
         }
       ],
       "locked_versions": [
-        "4.12.2",
         "5.2.0"
       ]
     },
@@ -82,12 +77,8 @@
     "@modelcontextprotocol/sdk": {
       "advisories": [
         {
-          "affected_nodes": [
-            "@modelcontextprotocol/sdk@1.25.2"
-          ],
-          "affected_versions": [
-            "1.25.2"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112952,
           "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (>=1.10.0 <=1.25.3).",
@@ -98,18 +89,14 @@
         }
       ],
       "locked_versions": [
-        "1.25.2"
+        "1.26.0"
       ]
     },
     "@orval/core": {
       "advisories": [
         {
-          "affected_nodes": [
-            "@orval/core@7.20.0"
-          ],
-          "affected_versions": [
-            "7.20.0"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112712,
           "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (>=7.19.0 <7.21.0).",
@@ -120,22 +107,16 @@
         }
       ],
       "locked_versions": [
-        "7.20.0"
+        "8.2.0"
       ]
     },
     "apollo-server": {
       "advisories": [
         {
-          "affected_nodes": [
-            "apollo-server@3.13.0"
-          ],
-          "affected_versions": [
-            "3.13.0"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112928,
-          "importers": [
-            "services/prov-ledger"
-          ],
+          "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (>=2.0.0 <=3.13.0).",
           "severity": "high",
           "title": "Apollo Serve vulnerable to Denial of Service with `startStandaloneServer`",
@@ -143,9 +124,7 @@
           "vulnerable_versions": ">=2.0.0 <=3.13.0"
         }
       ],
-      "locked_versions": [
-        "3.13.0"
-      ]
+      "locked_versions": []
     },
     "aws-sdk": {
       "advisories": [
@@ -301,45 +280,10 @@
     "fastify": {
       "advisories": [
         {
-          "affected_nodes": [
-            "fastify@4.29.1",
-            "fastify@5.6.2"
-          ],
-          "affected_versions": [
-            "4.29.1",
-            "5.6.2"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112876,
-          "importers": [
-            "packages/prov-ledger",
-            "prov-ledger-service",
-            "services/agent-runtime",
-            "services/agentic-mesh-evaluation",
-            "services/ai-sandbox",
-            "services/ai-service-platform",
-            "services/bundle-pipeline-service",
-            "services/collaboration-service",
-            "services/data-factory-service",
-            "services/data-marketplace",
-            "services/data-pool",
-            "services/decision-api",
-            "services/distributed-registry",
-            "services/entity-resolution",
-            "services/etl-service",
-            "services/feature-flags",
-            "services/health-aggregator",
-            "services/labeling-service",
-            "services/license-registry",
-            "services/media-pipeline-service",
-            "services/policy-aware-cache",
-            "services/policy-engine",
-            "services/receipt-signer",
-            "services/secure-elections",
-            "services/streaming-ingest",
-            "services/sync-service",
-            "services/unified-audit",
-            "services/universal-ingestion"
-          ],
+          "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (<=5.7.2).",
           "severity": "low",
           "title": "Fastify Vulnerable to DoS via Unbounded Memory Allocation in sendWebStream",
@@ -347,45 +291,10 @@
           "vulnerable_versions": "<=5.7.2"
         },
         {
-          "affected_nodes": [
-            "fastify@4.29.1",
-            "fastify@5.6.2"
-          ],
-          "affected_versions": [
-            "4.29.1",
-            "5.6.2"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112877,
-          "importers": [
-            "packages/prov-ledger",
-            "prov-ledger-service",
-            "services/agent-runtime",
-            "services/agentic-mesh-evaluation",
-            "services/ai-sandbox",
-            "services/ai-service-platform",
-            "services/bundle-pipeline-service",
-            "services/collaboration-service",
-            "services/data-factory-service",
-            "services/data-marketplace",
-            "services/data-pool",
-            "services/decision-api",
-            "services/distributed-registry",
-            "services/entity-resolution",
-            "services/etl-service",
-            "services/feature-flags",
-            "services/health-aggregator",
-            "services/labeling-service",
-            "services/license-registry",
-            "services/media-pipeline-service",
-            "services/policy-aware-cache",
-            "services/policy-engine",
-            "services/receipt-signer",
-            "services/secure-elections",
-            "services/streaming-ingest",
-            "services/sync-service",
-            "services/unified-audit",
-            "services/universal-ingestion"
-          ],
+          "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (<5.7.2).",
           "severity": "high",
           "title": "Fastify's Content-Type header tab character allows body validation bypass",
@@ -394,8 +303,7 @@
         }
       ],
       "locked_versions": [
-        "4.29.1",
-        "5.6.2"
+        "5.7.4"
       ]
     },
     "html-minifier": {
@@ -518,12 +426,8 @@
     "undici": {
       "advisories": [
         {
-          "affected_nodes": [
-            "undici@5.29.0"
-          ],
-          "affected_versions": [
-            "5.29.0"
-          ],
+          "affected_nodes": [],
+          "affected_versions": [],
           "id": 1112496,
           "importers": [],
           "recommended_action": "Upgrade to a version outside the vulnerable range (<6.23.0).",
@@ -534,7 +438,6 @@
         }
       ],
       "locked_versions": [
-        "5.29.0",
         "6.23.0",
         "7.19.2"
       ]
@@ -542,11 +445,11 @@
   },
   "summary": {
     "bulk_source": "/tmp/pnpm-audit/bulk-full.json",
-    "generated_at": "2026-02-08T04:27:38.672979+00:00",
+    "generated_at": "2026-02-08T04:45:12.115601+00:00",
     "lockfile": "/media/bcl/SUMMIT_LNX/summit/pnpm-lock.yaml",
     "packages_with_advisories": 17,
     "total_advisories": 21,
-    "total_affected_importers": 50,
-    "total_affected_versions": 24
+    "total_affected_importers": 22,
+    "total_affected_versions": 15
   }
 }
