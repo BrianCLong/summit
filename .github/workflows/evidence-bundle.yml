@@ -1,0 +1,65 @@
+name: evidence-bundle
+on:
+  push:
+    tags: ['v*.*.*']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      BUILD_STARTED_AT: ${{ github.event.head_commit.timestamp }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) Build deterministic artifacts
+      - name: Build
+        run: |
+          mkdir -p dist artifacts
+          # Placeholder build command - replace with actual build
+          echo "Building artifact..." > dist/build.log
+
+          # Deterministic tar
+          tar --sort=name --owner=0 --group=0 --numeric-owner \
+              --mtime='UTC 2020-01-01' -czf artifacts/build.tgz dist/
+
+          # Stamp file
+          # Handle potential missing env var
+          TS="${BUILD_STARTED_AT:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+          printf '{"build_started_at":"%s","runner":"%s","run_id":"%s"}\n' \
+            "${TS}" "${{ runner.name }}" "${{ github.run_id }}" > artifacts/stamp.json
+
+      # 2) Produce signed evidence files
+      - name: Generate evidence
+        run: |
+          mkdir -p evidence
+          node scripts/ci/generate_attestation.mjs > evidence/attestation.json
+          node scripts/ci/generate_sbom.mjs > evidence/sbom.runtime.json
+          node scripts/ci/generate_provenance.mjs > evidence/provenance.json
+          node scripts/ci/generate_test_summary.mjs > evidence/tests.json
+
+          # sign each (example: minisign)
+          # Note: Install minisign and set up .ci/minisign.key to enable signing
+          # sudo apt-get install -y minisign
+          # for f in evidence/*.json; do minisign -Sm "$f" -s .ci/minisign.key; done
+
+      - name: Verify evidence policy
+        run: node scripts/ci/verify_evidence_policy.mjs \
+             --policy docs/governance/EVIDENCE_ID_POLICY.yml \
+             --dir evidence
+
+      # 3) Publish machine-readable index
+      - name: Build evidence index
+        run: node scripts/ci/build_evidence_index.mjs \
+             --release "${{ github.ref_name }}" \
+             --commit "${{ github.sha }}" \
+             --evidence-dir evidence \
+             --out releases/${{ github.ref_name }}/evidence_index.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ github.ref_name }}
+          path: |
+            releases/${{ github.ref_name }}/evidence_index.json
+            evidence/*.json
+            evidence/*.minisig
+            artifacts/build.tgz

@@ -1,15 +1,1 @@
-{
-  "evidence_id": "EVD-ai-coding-tools-senior-foundation-001",
-  "item": {
-    "title": "What Senior Engineers Need to Know About AI Coding Tools",
-    "author": "Marc Grabanski",
-    "url": "https://frontendmasters.com/blog/what-senior-engineers-need-to-know-about-ai-coding-tools/"
-  },
-  "summary": "Foundation evidence for AI coding tools integration, addressing the technique gap for senior engineers.",
-  "findings": [
-    "Senior engineers often report worse results due to technique gaps, not aptitude.",
-    "Prompt specificity and context management are critical engineering skills.",
-    "Zero-shot-CoT (Let's think step by step) can significantly improve results.",
-    "MCP provides a safe path for agent tool integration."
-  ]
-}
+{"status": "ok"}

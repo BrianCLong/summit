@@ -19,7 +19,6 @@ import { cognitiveSecurityResolvers } from './cognitive-security.js';
 import { deduplicationResolvers } from './deduplication.js';
 import ticketLinksResolvers from './ticket-links.js';
 import { factGovResolvers } from '../../modules/factgov/resolvers.js';
-import { osintSynintResolvers } from './osint-synint.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040.js';
@@ -68,7 +67,6 @@ const resolvers = {
       wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
   },
   Mutation: {
-    ...(osintSynintResolvers.Mutation || {}),
     ...entityResolvers.Mutation,
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,

@@ -1,0 +1,19 @@
+diff a/.github/workflows/dependency-monitor.yml b/.github/workflows/dependency-monitor.yml	(rejected hunks)
+@@ -95,13 +95,13 @@ jobs:
+     runs-on: ubuntu-latest
+     steps:
+       - uses: actions/checkout@v4 # v4.1.7
++      # Note: pnpm version is read from package.json "packageManager" field
++      - name: Install pnpm
++        uses: pnpm/action-setup@v4 # v4.1.0
+       - name: Setup Node
+         uses: actions/setup-node@v4 # v4
+         with:
+-          cache: 'pnpm'
++          cache: "pnpm"
+           node-version-file: .nvmrc
+-      # Note: pnpm version is read from package.json "packageManager" field
+-      - name: Install pnpm
+-        uses: pnpm/action-setup@v4 # v4.1.0
+       - name: Check Drift
+         run: ./scripts/check-lockfile-drift.sh

@@ -91,7 +91,7 @@ export class EnhancedGovernanceService {
   private warrantService: WarrantService;
   private logger: any;
   private config: GovernanceConfig;
-  
+
   constructor(db: Pool, warrantService: WarrantService, logger: any, config?: Partial<GovernanceConfig>) {
     this.db = db;
     this.warrantService = warrantService;
@@ -128,7 +128,7 @@ export class EnhancedGovernanceService {
     const reasonForAccess = (req.headers['x-reason-for-access'] as string) || '';
     const expectedSensitivity = (req.headers['x-sensitivity'] as string) || undefined;
     const tenantId = (req.headers['x-tenant-id'] as string) || user?.tenantId || this.config.defaultTenantId || 'global';
-    
+
     return {
       purpose,
       legalBasis,
@@ -219,16 +219,16 @@ export class EnhancedGovernanceService {
     // Check reason quality (not just length but meaningfulness)
     if (context.reasonForAccess) {
       const meaninglessReasons = [
-        'test', 'testing', 'debug', 'temp', 'temporary', 'asdf', 
-        'placeholder', 'todo', 'tbd', 'work in progress', 
+        'test', 'testing', 'debug', 'temp', 'temporary', 'asdf',
+        'placeholder', 'todo', 'tbd', 'work in progress',
         'for testing', 'development', 'internal use'
       ];
-      
+
       const lowerReason = context.reasonForAccess.toLowerCase();
       if (meaninglessReasons.some(reason => lowerReason.includes(reason))) {
         warnings.push(`Potentially meaningless reason for access: ${context.reasonForAccess}`);
       }
-      
+
       if (context.reasonForAccess.length < 10) {
         warnings.push('Short reason for access may indicate insufficient justification');
       }
@@ -253,14 +253,14 @@ export class EnhancedGovernanceService {
     try {
       // First, get the purpose policy configuration from database
       const purposePolicy = await this.getPurposePolicy(purpose);
-      
+
       if (!purposePolicy) {
         this.logger.warn({
           purpose,
           userId: user.id,
           tenantId
         }, 'Unknown access purpose requested');
-        
+
         return {
           allowed: false,
           reason: `Unknown access purpose: ${purpose}`,
@@ -274,7 +274,7 @@ export class EnhancedGovernanceService {
           userId: user.id,
           tenantId
         }, 'Purpose policy is inactive');
-        
+
         return {
           allowed: false,
           reason: `Purpose ${purpose} is deactivated`,
@@ -283,10 +283,10 @@ export class EnhancedGovernanceService {
       }
 
       // Check role requirements
-      const roleMatch = purposePolicy.requiredRoles.some(requiredRole => 
+      const roleMatch = purposePolicy.requiredRoles.some(requiredRole =>
         user.roles.includes(requiredRole) || user.roles.includes('admin') || user.roles.includes('owner')
       );
-      
+
       if (!roleMatch && purposePolicy.requiredRoles.length > 0) {
         this.logger.warn({
           purpose,
@@ -295,7 +295,7 @@ export class EnhancedGovernanceService {
           requiredRoles: purposePolicy.requiredRoles,
           userRoles: user.roles
         }, 'User lacks required roles for purpose');
-        
+
         return {
           allowed: false,
           reason: `Insufficient role for purpose: ${purpose}. Required: ${purposePolicy.requiredRoles.join(', ')}`,
@@ -304,10 +304,10 @@ export class EnhancedGovernanceService {
       }
 
       // Check permission requirements
-      const permissionMatch = purposePolicy.requiredPermissions.some(requiredPerm => 
+      const permissionMatch = purposePolicy.requiredPermissions.some(requiredPerm =>
         user.permissions.includes(requiredPerm) || user.permissions.includes('*')
       );
-      
+
       if (!permissionMatch && purposePolicy.requiredPermissions.length > 0) {
         this.logger.warn({
           purpose,
@@ -316,7 +316,7 @@ export class EnhancedGovernanceService {
           requiredPermissions: purposePolicy.requiredPermissions,
           userPermissions: user.permissions
         }, 'User lacks required permissions for purpose');
-        
+
         return {
           allowed: false,
           reason: `Insufficient permissions for purpose: ${purpose}. Required: ${purposePolicy.requiredPermissions.join(', ')}`,
@@ -333,7 +333,7 @@ export class EnhancedGovernanceService {
           requiredClearance: purposePolicy.requiredClearance,
           userClearance: user.clearanceLevel
         }, 'User lacks required clearance level for purpose');
-        
+
         return {
           allowed: false,
           reason: `Insufficient clearance for purpose: ${purpose}. Required: ${purposePolicy.requiredClearance}, User: ${user.clearanceLevel}`,
@@ -351,7 +351,7 @@ export class EnhancedGovernanceService {
             allowedDepartments: purposePolicy.allowedDepartments,
             userDepartment: user.department
           }, 'User department not allowed for purpose');
-          
+
           return {
             allowed: false,
             reason: `Department ${user.department} not authorized for purpose: ${purpose}`,
@@ -370,7 +370,7 @@ export class EnhancedGovernanceService {
             allowedLocations: purposePolicy.allowedLocations,
             userLocation: user.location
           }, 'User location not allowed for purpose');
-          
+
           return {
             allowed: false,
             reason: `Location ${user.location} not authorized for purpose: ${purpose}`,
@@ -384,12 +384,12 @@ export class EnhancedGovernanceService {
         const now = new Date();
         const currentHour = now.getHours();
         const currentDate = now.toISOString().split('T')[0];
-        
+
         // Check if current hour is in allowed range
         const hourAllowed = purposePolicy.timeBasedRestrictions.allowedHours.some(
           ([start, end]) => currentHour >= start && currentHour < end
         );
-        
+
         if (!hourAllowed) {
           this.logger.warn({
             purpose,
@@ -398,14 +398,14 @@ export class EnhancedGovernanceService {
             currentHour,
             allowedHours: purposePolicy.timeBasedRestrictions.allowedHours
           }, 'Access time not allowed for purpose');
-          
+
           return {
             allowed: false,
             reason: `Access to purpose ${purpose} not allowed at current time: ${currentHour}:00`,
             auditTrail: [`Time restriction blocked purpose: ${purpose} by ${user.id} at ${currentHour}:00`]
           };
         }
-        
+
         // Check if current date is blocked holiday
         if (purposePolicy.timeBasedRestrictions.blockedHolidays.includes(currentDate)) {
           this.logger.warn({
@@ -414,7 +414,7 @@ export class EnhancedGovernanceService {
             tenantId,
             currentDate
           }, 'Access blocked due to holiday restriction');
-          
+
           return {
             allowed: false,
             reason: `Access to purpose ${purpose} blocked on ${currentDate} (holiday restriction)`,
@@ -433,7 +433,7 @@ export class EnhancedGovernanceService {
             tenantId,
             rateLimit: purposePolicy.rateLimiting
           }, 'Rate limit exceeded for purpose');
-          
+
           return {
             allowed: false,
             reason: `Rate limit exceeded for purpose ${purpose}: ${rateCheck.retryAfter}s remaining`,
@@ -464,7 +464,7 @@ export class EnhancedGovernanceService {
         userId: user.id,
         tenantId
       }, 'Unexpected error in access purpose validation');
-      
+
       // Fail securely - if validation fails due to internal error, deny access
       return {
         allowed: false,
@@ -503,8 +503,8 @@ export class EnhancedGovernanceService {
    * Check rate limiting for user/purpose combination
    */
   private async checkRateLimit(
-    userId: string, 
-    purpose: string, 
+    userId: string,
+    purpose: string,
     limitConfig: { requests: number; windowMs: number }
   ): Promise<{ allowed: boolean; retryAfter?: number }> {
     // In a real implementation, this would check against Redis or similar
@@ -519,12 +519,12 @@ export class EnhancedGovernanceService {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
         const user = (req as any).user as UserWithRoles; // Comes from auth middleware
-        
+
         if (!user) {
           // If no user context, proceed with minimal validation
           const minimalContext = this.extractGovernanceContext(req);
           (req as any).governance = minimalContext;
-          
+
           // Log anonymous access with governance context
           this.logger.warn({
             path: req.path,
@@ -532,7 +532,7 @@ export class EnhancedGovernanceService {
             governance: minimalContext,
             ip: req.ip
           }, 'Anonymous request with governance context');
-          
+
           return next();
         }
 
@@ -818,46 +818,46 @@ export class EnhancedGovernanceService {
   /**
    * Analyze the semantic quality of a reason for access
    */
-  private analyzeReasonSemantics(reason: string): { 
-    meaningful: boolean; 
-    score: number; 
-    issues: string[] 
+  private analyzeReasonSemantics(reason: string): {
+    meaningful: boolean;
+    score: number;
+    issues: string[]
   } {
     const lowerReason = reason.toLowerCase();
     const issues: string[] = [];
-    
+
     // Check for meaningless phrases
     const meaninglessPatterns = [
-      'test', 'testing', 'debug', 'temp', 'temporary', 'asdf', 
-      'placeholder', 'todo', 'tbd', 'work in progress', 
-      'dev', 'staging only', 'for demo', 'dummy', 'sample', 
+      'test', 'testing', 'debug', 'temp', 'temporary', 'asdf',
+      'placeholder', 'todo', 'tbd', 'work in progress',
+      'dev', 'staging only', 'for demo', 'dummy', 'sample',
       'example', 'not real', 'fake', 'practice', 'training only'
     ];
-    
+
     for (const pattern of meaninglessPatterns) {
       if (lowerReason.includes(pattern)) {
         issues.push(`Contains meaningless pattern: '${pattern}'`);
       }
     }
-    
+
     // Check for insufficient specificity
     if (lowerReason.length > 50 && lowerReason.split(/\s+/).every(word => word.length < 3)) {
       issues.push('Reason contains insufficient specific information');
     }
-    
+
     // Check for repetition
     const words = lowerReason.match(/\b\w+\b/g) || [];
     const uniqueWords = new Set(words);
     if (words.length > 10 && uniqueWords.size / words.length < 0.5) {
       issues.push('Reason contains too much repetition');
     }
-    
+
     // Basic meaningfulness score (0.0-1.0)
     let score = 1.0;
     score -= issues.length * 0.2; // Penalize for each issue
     if (lowerReason.length < 25) score -= 0.1; // Short reasons are less meaningful
     if (score < 0) score = 0;
-    
+
     return {
       meaningful: score > 0.3,
       score,
@@ -882,10 +882,10 @@ export class EnhancedGovernanceService {
       userAccessPatterns: await this.getUserAccessPatterns(tenantId),
       recommendation: 'All governance systems operating within acceptable parameters with 99.9%+ compliance'
     };
-    
+
     return report;
   }
-  
+
   /**
    * Placeholder methods for audit report generation
    */
@@ -904,7 +904,7 @@ export class EnhancedGovernanceService {
 export const initializeEnhancedGovernance = (db: Pool, warrantService: WarrantService) => {
   const logger = (pino as any)();
   const service = new EnhancedGovernanceService(db, warrantService, logger);
-  
+
   return {
     service,
     middleware: service.createGovernanceMiddleware(),

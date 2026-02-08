@@ -1,35 +1,27 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Reality Check
 
-## Structure Validation
+## Verified
+- **Repo exists**: `BrianCLong/summit` (MIT licensed).
+- **Target Package**: `agents/orchestrator` (`@intelgraph/multi-llm-orchestrator`) is the real orchestrator.
+  - Confirmed via `grep` for "OpenAI" and "Anthropic" providers.
+  - Contains `src/providers/` with `OpenAIProvider.ts` and `ClaudeProvider.ts`.
+- **Test Runner**: `vitest` (v1.6.1).
+  - Configured in `agents/orchestrator/package.json`.
+  - Tests located in `agents/orchestrator/__tests__/`.
+- **Module System**: ESM (`type: "module"` in `package.json`).
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+## Assumed
+- **Feature Flags**: Likely environment variable based or a simple config object. No dedicated `launchdarkly` or similar service observed yet.
+- **Budget**: Enforced via caller-supplied `budget` parameter in the new DAAO router (as per plan).
+- **Telemetry**: Logging via `console` or custom logger (observed `Omniscience` logging in `agentic`, but `agents/orchestrator` uses standard logging or potentially `pino` based on dependencies). `agents/orchestrator` has no explicit logger import in the snippets seen, but likely uses `console` or injected logger.
 
-## Component Mapping
+## Target Directory Structure for DAAO
+All DAAO components will be placed in `agents/orchestrator/src/daao/`:
+- `agents/orchestrator/src/daao/difficulty/`
+- `agents/orchestrator/src/daao/routing/`
+- `agents/orchestrator/src/daao/collaboration/`
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
-
-## Constraints & Checks
-
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
-
-## Next Steps
-
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+## Test Placement
+- `agents/orchestrator/__tests__/daao/difficulty/*.test.ts`
+- `agents/orchestrator/__tests__/daao/routing/*.test.ts`
+- `agents/orchestrator/__tests__/daao/collaboration/*.test.ts`

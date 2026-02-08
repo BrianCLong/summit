@@ -1,5 +1,7 @@
 package composer.cmk
 
+import rego.v1
+
 # Require CMK for artifacts in protected namespaces
 
 needs_cmk {
