@@ -38,3 +38,18 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
+
+## Required checks discovery (Summit PR stack)
+1) GitHub UI: Repo → Settings → Branches → Branch protection rules → copy required checks list
+2) GitHub API: GET /repos/{owner}/{repo}/branches/main/protection/required_status_checks
+3) Record exact check names and update workflow job names to match
+
+## Temporary naming convention (until verified)
+- ci-core
+- ci-pr
+- ci-security
+- ci-verify
+
+## Rename plan
+Once official names are confirmed, update workflow job names and this file to reflect the exact
+required check names enforced by branch protection.

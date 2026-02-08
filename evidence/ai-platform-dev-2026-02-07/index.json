@@ -1,0 +1,25 @@
+{
+  "bundleId": "ai-platform-dev-2026-02-07",
+  "entries": {
+    "EVD-ai-platform-dev-2026-02-07-MCP-001": {
+      "files": ["report.json"],
+      "status": "planned",
+      "notes": "Manifest conformance summary placeholder."
+    },
+    "EVD-ai-platform-dev-2026-02-07-SEC-001": {
+      "files": ["report.json"],
+      "status": "planned",
+      "notes": "Policy enforcement fixtures placeholder."
+    },
+    "EVD-ai-platform-dev-2026-02-07-CTX-001": {
+      "files": ["report.json"],
+      "status": "planned",
+      "notes": "Context pipeline trace placeholder."
+    },
+    "EVD-ai-platform-dev-2026-02-07-TOOL-001": {
+      "files": ["report.json"],
+      "status": "planned",
+      "notes": "Tool search benchmark placeholder."
+    }
+  }
+}
