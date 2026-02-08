@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-OSINTLEGAL-DATAACCESS-001",
+  "summary": "Deny-by-default policy evaluator rejects unknown tool identifiers.",
+  "references": [
+    "tests/agents/policy/policyEval.test.ts#denies-unknown-tools-by-default"
+  ]
+}

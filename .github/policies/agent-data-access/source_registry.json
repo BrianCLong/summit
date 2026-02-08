@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "sources": {
+    "public-web": {
+      "id": "public-web",
+      "name": "Public Web Sources",
+      "description": "Allowlisted public sources collected without authentication.",
+      "classification": "PUBLIC",
+      "jurisdiction": ["GLOBAL"],
+      "lawful_basis": "public_interest",
+      "retention_days": 30,
+      "collection_methods": ["api", "secure_browser"],
+      "enabled": true
+    },
+    "internal-summit-store": {
+      "id": "internal-summit-store",
+      "name": "Summit Internal Intel Store",
+      "description": "Summit-controlled internal intelligence datastore.",
+      "classification": "INTERNAL",
+      "jurisdiction": ["US"],
+      "lawful_basis": "contract",
+      "retention_days": 365,
+      "collection_methods": ["etl", "api"],
+      "enabled": true
+    },
+    "restricted-provider-example": {
+      "id": "restricted-provider-example",
+      "name": "Restricted Provider Example",
+      "description": "Restricted provider data requiring explicit approval.",
+      "classification": "RESTRICTED",
+      "jurisdiction": ["US"],
+      "lawful_basis": "consent",
+      "retention_days": 90,
+      "collection_methods": ["api"],
+      "requires_approval": true,
+      "enabled": false
+    }
+  }
+}
