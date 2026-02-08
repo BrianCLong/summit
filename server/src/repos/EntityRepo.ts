@@ -13,6 +13,7 @@ import {
   assertTenantMatch,
   resolveTenantId,
 } from '../tenancy/tenantScope.js';
+import { getNeo4jBatchWriter } from '../db/neo4jBatchWriter.js';
 
 const repoLogger = logger.child({ name: 'EntityRepo' });
 
@@ -102,19 +103,24 @@ export class EntityRepo {
 
       await client.query('COMMIT');
 
-      // 3. Attempt immediate Neo4j write (best effort)
+      // 3. Queue Neo4j write (batched)
       try {
-        await this.upsertNeo4jNode({
-          id: entity.id,
-          tenantId: entity.tenant_id,
-          kind: entity.kind,
-          labels: entity.labels,
-          props: entity.props,
-        });
+        getNeo4jBatchWriter().queueCreateNode(
+          'Entity',
+          {
+            id: entity.id,
+            kind: entity.kind,
+            labels: entity.labels,
+            props: entity.props,
+            createdAt: entity.created_at.toISOString(),
+            updatedAt: entity.updated_at.toISOString(),
+          },
+          entity.tenant_id,
+        );
       } catch (neo4jError) {
         repoLogger.warn(
           { entityId: id, error: neo4jError },
-          'Neo4j write failed, will retry via outbox',
+          'Neo4j batch write queue failed, will retry via outbox',
         );
       }
 
@@ -243,13 +249,13 @@ export class EntityRepo {
 
         await client.query('COMMIT');
 
-        // Best effort Neo4j delete
+        // Queue Neo4j delete (batched)
         try {
-          await this.deleteNeo4jNode(id);
+          getNeo4jBatchWriter().queueDeleteNode(id, scopedTenantId);
         } catch (neo4jError) {
           repoLogger.warn(
             { entityId: id, error: neo4jError },
-            'Neo4j delete failed, will retry via outbox',
+            'Neo4j batch delete queue failed, will retry via outbox',
           );
         }
 

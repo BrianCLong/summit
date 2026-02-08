@@ -20,8 +20,10 @@ jobs:
       # Using standard setup steps instead of reusable workflow to have more control in this single file context,
       # but mirroring the reusable logic.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "22.x"
           cache: "pnpm"

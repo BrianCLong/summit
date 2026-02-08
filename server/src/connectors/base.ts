@@ -88,6 +88,11 @@ export abstract class BaseConnector extends EventEmitter {
   abstract readStream(options?: any): Promise<Readable>;
 
   /**
+   * Write data to the source (Bi-directional support)
+   */
+  abstract writeRecords(records: any[]): Promise<void>;
+
+  /**
    * Check the health of the connector
    */
   async healthCheck(): Promise<ConnectorHealth> {

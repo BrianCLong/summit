@@ -10,6 +10,10 @@ on:
       - "evidence/**"
       - "tests/fixtures/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     name: ci/verify-subsump-bundle
