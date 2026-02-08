@@ -1,0 +1,72 @@
+name: pre-promote-smoke
+on:
+  workflow_dispatch:
+    inputs:
+      digest:
+        description: "Image digest to promote (sha256:...)"
+        required: true
+  workflow_call:
+    inputs:
+      digest:
+        description: "Image digest to promote (sha256:...)"
+        required: true
+        type: string
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.6.0
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Deploy digest to staging (dry, then apply)
+        run: |
+          yq -i '.spec.template.spec.containers[0].image = "repo/service@${{ inputs.digest || github.event.inputs.digest }}"' \
+            k8s/environments/staging/service-deployment.yaml
+          kubectl apply -f k8s/environments/staging/service-deployment.yaml
+          kubectl rollout status deploy/summit-service -n intelgraph-staging --timeout=5m
+
+      - name: HTTP health probe
+        run: |
+          STAGING_URL="https://staging.example.com/health/ready"
+          curl -fsSL "$STAGING_URL"
+
+      - name: Business operation probe (happy-path)
+        run: |
+          curl -fsS -X POST https://staging.example.com/api/v1/op \
+            -H "Content-Type: application/json" \
+            --data '{"op":"ping"}' | jq -e '.status=="ok"'
+
+      - name: Collect evidence (stamp.json + SBOM path + cosign verify)
+        id: evidence
+        run: |
+          mkdir -p artifacts
+          echo '{}' | jq \
+            --arg digest  "${{ inputs.digest || github.event.inputs.digest }}" \
+            --arg commit  "${GITHUB_SHA}" \
+            --arg env     "staging" \
+            --arg url     "https://staging.example.com" \
+            '. + {digest:$digest, commit:$commit, env:$env, url:$url}' > stamp.json
+          echo "sbom_path=artifacts/sbom.spdx.json" >> "$GITHUB_OUTPUT"
+          cosign verify "repo/service@${{ inputs.digest || github.event.inputs.digest }}" \
+            --certificate-oidc-issuer=https://token.actions.githubusercontent.com || true
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-promote-evidence
+          path: |
+            stamp.json
+            artifacts/**

@@ -1,0 +1,39 @@
+name: promote-by-digest
+on:
+  workflow_dispatch:
+    inputs:
+      digest:
+        description: "sha256:..."
+        required: true
+jobs:
+  pre-smoke:
+    uses: ./.github/workflows/pre-promote-smoke.yml
+    with:
+      digest: ${{ github.event.inputs.digest }}
+
+  parity:
+    needs: pre-smoke
+    uses: ./.github/workflows/validate-parity.yml
+    with:
+      digest: ${{ github.event.inputs.digest }}
+
+  promote:
+    needs: parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Pin prod to digest & rollout
+        run: |
+          yq -i '.spec.template.spec.containers[0].image = "repo/service@${{ github.event.inputs.digest }}"' \
+            k8s/environments/prod/service-deployment.yaml
+          kubectl apply -f k8s/environments/prod/service-deployment.yaml
+          kubectl rollout status deploy/summit-service -n intelgraph-production --timeout=10m
