@@ -114,6 +114,8 @@ export class SupernodeQueryOptimizer {
 
   /**
    * Get supernode information for an entity
+   *
+   * BOLT OPTIMIZATION: Use fast degree store checks and simplified Cypher.
    */
   async getSupernodeInfo(entityId: string): Promise<SupernodeInfo | null> {
     // Check cache first
@@ -134,22 +136,22 @@ export class SupernodeQueryOptimizer {
     // Query Neo4j for connection counts
     const session = this.neo4j.session();
     try {
+      // Optimized query: Uses size((e)--()) for O(1) degree lookup
       const result = await session.run(
         `
         MATCH (e:Entity {id: $entityId})
-        OPTIONAL MATCH (e)-[r_out]->()
-        WITH e, count(r_out) AS outgoing
-        OPTIONAL MATCH (e)<-[r_in]-()
-        WITH e, outgoing, count(r_in) AS incoming
+        WITH e,
+             size((e)--()) AS connectionCount,
+             size((e)-->()) AS outgoing,
+             size((e)<--()) AS incoming
         OPTIONAL MATCH (e)-[r]-()
-        WITH e, outgoing, incoming, type(r) AS relType
-        WITH e, outgoing, incoming, relType, count(*) AS typeCount
+        WITH e, connectionCount, outgoing, incoming, type(r) AS relType, count(r) AS typeCount
         ORDER BY typeCount DESC
-        WITH e, outgoing, incoming, collect({type: relType, count: typeCount})[0..5] AS topTypes
+        WITH e, connectionCount, outgoing, incoming, collect({type: relType, count: typeCount})[0..5] AS topTypes
         RETURN e.id AS entityId,
                e.label AS label,
                e.type AS type,
-               outgoing + incoming AS connectionCount,
+               connectionCount,
                outgoing,
                incoming,
                topTypes
@@ -193,15 +195,84 @@ export class SupernodeQueryOptimizer {
 
   /**
    * Detect supernodes in a list of entity IDs
+   *
+   * BOLT OPTIMIZATION: Batched Neo4j query to avoid N+1 problem.
+   * Uses degree store (size((e)--())) for O(1) connection count checks.
    */
   async detectSupernodes(entityIds: string[]): Promise<SupernodeInfo[]> {
-    const supernodes: SupernodeInfo[] = [];
+    if (!entityIds.length) return [];
 
-    for (const entityId of entityIds) {
-      const info = await this.getSupernodeInfo(entityId);
-      if (info && info.connectionCount >= this.config.supernodeThreshold) {
-        supernodes.push(info);
+    const supernodes: SupernodeInfo[] = [];
+    const idsToFetch: string[] = [];
+
+    // 1. Check local memory cache
+    for (const id of entityIds) {
+      if (this.supernodeCache.has(id)) {
+        const info = this.supernodeCache.get(id)!;
+        if (info.connectionCount >= this.config.supernodeThreshold) {
+          supernodes.push(info);
+        }
+      } else {
+        idsToFetch.push(id);
       }
+    }
+
+    if (idsToFetch.length === 0) return supernodes;
+
+    // 2. Batched Neo4j query for missing IDs
+    const session = this.neo4j.session();
+    try {
+      // Optimized query:
+      // - Filters by threshold using fast size((e)--()) check
+      // - Only fetches expensive top connection types for actual supernodes
+      const result = await session.run(
+        `
+        UNWIND $entityIds AS id
+        MATCH (e:Entity {id: id})
+        WITH e, size((e)--()) AS connectionCount
+        WHERE connectionCount >= $threshold
+        OPTIONAL MATCH (e)-[r]-()
+        WITH e, connectionCount, type(r) AS relType, count(r) AS typeCount
+        ORDER BY typeCount DESC
+        WITH e, connectionCount, collect({type: relType, count: typeCount})[0..5] AS topTypes
+        RETURN e.id AS entityId,
+               e.label AS label,
+               e.type AS type,
+               connectionCount,
+               size((e)-->()) AS outgoing,
+               size((e)<--()) AS incoming,
+               topTypes
+        `,
+        { entityIds: idsToFetch, threshold: this.config.supernodeThreshold }
+      );
+
+      for (const record of result.records) {
+        const info: SupernodeInfo = {
+          entityId: record.get('entityId'),
+          label: record.get('label') || 'Unknown',
+          type: record.get('type') || 'Entity',
+          connectionCount: record.get('connectionCount').toNumber(),
+          incomingCount: record.get('incoming').toNumber(),
+          outgoingCount: record.get('outgoing').toNumber(),
+          topConnectionTypes: record.get('topTypes') || [],
+          lastUpdated: new Date(),
+        };
+
+        // Update local cache
+        this.supernodeCache.set(info.entityId, info);
+        supernodes.push(info);
+
+        // Update Redis cache asynchronously
+        if (this.redis && this.config.cachePrecomputedStats) {
+          this.redis.setex(
+            `supernode:${info.entityId}`,
+            this.config.statsCacheTTL,
+            JSON.stringify(info)
+          ).catch(err => serviceLogger.warn('Failed to update Redis cache', { entityId: info.entityId, err }));
+        }
+      }
+    } finally {
+      await session.close();
     }
 
     return supernodes;
