@@ -50,6 +50,45 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: evidence-trail-peek
+    version: v1
+    path: prompts/features/evidence-trail-peek@v1.md
+    sha256: 2faa11e687cfb8778aea67883185c51b9f420149e9836fb451334ab0c0f157b1
+    description: Evidence-Trail Peek overlay with read-only APIs, telemetry, E2E coverage, and governance docs.
+    scope:
+      paths:
+        - apps/web/src/components/evidence/EvidenceTrailPeek.tsx
+        - apps/web/src/components/CopilotPanel.tsx
+        - apps/web/src/panes/GraphPane.tsx
+        - apps/web/src/telemetry/evidenceTrailPeek.ts
+        - apps/web/src/config/features.ts
+        - server/src/routes/evidence-trail-peek.ts
+        - server/src/routes/__tests__/evidence-trail-peek.test.ts
+        - server/src/app.ts
+        - e2e/tests/evidence-trail-peek.cy.ts
+        - docs/standards/evidence-trail-peek.md
+        - docs/security/data-handling/evidence-trail-peek.md
+        - docs/ops/runbooks/evidence-trail-peek.md
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/features/evidence-trail-peek@v1.md
+        - prompts/registry.yaml
+        - agents/examples/EVIDENCE_TRAIL_PEEK_20260208.json
+      domains:
+        - ui
+        - api
+        - governance
+        - telemetry
+        - documentation
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md

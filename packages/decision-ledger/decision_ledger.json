@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "evidence-trail-peek-20260208",
+    "timestamp": "2026-02-08T00:00:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJldmlkZW5jZS10cmFpbC1wZWVrIG92ZXJsYXksIHJlYWQtb25seSBBUElzLCB0ZWxlbWV0cnksIGUyZSwgYW5kIGRvY3MiLCJmaWxlcyI6WyJzZXJ2ZXIvc3JjL3JvdXRlcy9ldmlkZW5jZS10cmFpbC1wZWVrLnRzIiwic2VydmVyL3NyYy9yb3V0ZXMvX190ZXN0c19fL2V2aWRlbmNlLXRyYWlsLXBlZWsudGVzdC50cyIsInNlcnZlci9zcmMvYXBwLnRzIiwiYXBwcy93ZWIvc3JjL2NvbXBvbmVudHMvZXZpZGVuY2UvRXZpZGVuY2VUcmFpbFBlZWsudHN4IiwiYXBwcy93ZWIvc3JjL3BhbmVzL0dyYXBoUGFuZS50c3giLCJhcHBzL3dlYi9zcmMvY29tcG9uZW50cy9Db3BpbG90UGFuZWwudHN4IiwiYXBwcy93ZWIvc3JjL3RlbGVtZXRyeS9ldmlkZW5jZVRyYWlsUGVlay50cyIsImFwcHMvd2ViL3NyYy9jb25maWcvZmVhdHVyZXMudHMiLCJlMmUvdGVzdHMvZXZpZGVuY2UtdHJhaWwtcGVlay5jeS50cyIsImRvY3Mvc3RhbmRhcmRzL2V2aWRlbmNlLXRyYWlsLXBlZWsubWQiLCJkb2NzL3NlY3VyaXR5L2RhdGEtaGFuZGxpbmcvZXZpZGVuY2UtdHJhaWwtcGVlay5tZCIsImRvY3Mvb3BzL3J1bmJvb2tzL2V2aWRlbmNlLXRyYWlsLXBlZWsubWQiLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iLCJwYWNrYWdlcy9kZWNpc2lvbi1sZWRnZXIvZGVjaXNpb25fbGVkZ2VyLmpzb24iLCJwcm9tcHRzL2ZlYXR1cmVzL2V2aWRlbmNlLXRyYWlsLXBlZWtAdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvRVZJREVOQ0VfVFJBSUxfUEVFS18yMDI2MDIwOC5qc29uIl19",
+    "decision": {
+      "action": "implement_evidence_trail_peek",
+      "rule": {
+        "condition": "auditable overlay and read-only evidence trail endpoints required",
+        "action": "ship_evidence_trail_peek",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Implemented Evidence-Trail Peek overlay, read-only endpoints, telemetry, and runbook/standards docs with default-off feature flag. Rollback: revert the evidence-trail-peek commit set and disable the feature flag.",
+    "reverted": false
   }
 ]
