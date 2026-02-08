@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:14:23Z",
+  "revision_note": "Added reasoning scope isolation docs, schemas, and policy baseline.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "reasoning-scope-isolation-ga",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Baseline docs, schemas, and policy for reasoning scope isolation, inference firewall, claim lifetimes, and contamination benchmark."
     },
     {
       "id": "B",

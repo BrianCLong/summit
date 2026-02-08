@@ -1,0 +1,13 @@
+version: 0.1.0
+policy_id: reasoning-scope-default
+facts_only_default: true
+allow_inference_templates: []
+retention:
+  derived_days: 30
+  scope_days: 90
+thresholds:
+  contamination_drift_auc_max: 0.15
+  ttl_sweeper_lag_ms_max: 600000
+promotion:
+  require_approval: true
+  require_provenance: true
