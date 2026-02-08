@@ -798,6 +798,48 @@ prompts:
         - docs/skillpacks-lazy-mcp.md
         - docs/roadmap/STATUS.json
         - artifacts/tool-loading-report.json
+    domains:
+      - skillpacks
+      - mcp
+      - governance
+      - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: narrative-infra-epistemic-fatigue-pr1
+    version: v1
+    path: prompts/narrative/narrative-infra-epistemic-fatigue-pr1.md
+    sha256: e224e3cedf190868a9c3b6cacc94111a17b93f2750835c76ef6346287b73c97c
+    description: Narrative frame and infrastructure schemas with deterministic ids for GraphRAG.
+    scope:
+      paths:
+        - services/graphrag/src/narratives/
+        - services/graphrag/src/__tests__/narratives/
+        - services/graphrag/src/index.ts
+        - docs/roadmap/STATUS.json
+        - agents/examples/NARRATIVE_INFRA_EPISTEMIC_FATIGUE_PR1.json
+        - prompts/narrative/narrative-infra-epistemic-fatigue-pr1.md
+        - prompts/registry.yaml
+      domains:
+        - graphrag
+        - narrative-intel
+        - governance
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
         - artifacts/tool-loading-report.md
         - agents/examples/
         - prompts/skillpacks/
