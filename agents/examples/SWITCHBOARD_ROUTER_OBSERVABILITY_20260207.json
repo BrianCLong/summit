@@ -1,0 +1,36 @@
+{
+  "task_id": "SWITCHBOARD_ROUTER_OBSERVABILITY_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "switchboard-router-observability",
+    "version": "v1",
+    "sha256": "08dc4dfcc36f7dcc58264211c51275b2268d426f028d2fc62521ee1ef56afd4f",
+    "path": "prompts/switchboard/switchboard-router-observability@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "october2025/companyos-switchboard/apps/web/src/switchboard/",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/switchboard/switchboard-router-observability@v1.md",
+      "agents/examples/"
+    ],
+    "domains": ["switchboard", "observability", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["vitest run (switchboard router tests)"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Switchboard router uses shared observability helpers with structured error logging.",
+    "Prompt registry and roadmap status updated for the change."
+  ],
+  "stop_conditions": [
+    "Switchboard router tests cannot be executed due to missing dependencies."
+  ]
+}
