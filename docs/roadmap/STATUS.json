@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-08T00:05:00Z",
+  "revision_note": "Aligned CI lint strict gate to avoid pnpm argument passthrough failures while preserving zero-warnings enforcement.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -174,7 +174,7 @@
       "id": "cicd-signal-deltas-2026",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+      "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets. Aligned lint strict gate to run via pnpm lint:strict with explicit max-warnings enforcement."
     }
   ],
   "summary": {
