@@ -41,6 +41,9 @@
     },
     {
       "path": "services/streaming-ingest"
+    },
+    {
+      "path": "packages/switchboard"
     }
   ]
 }
