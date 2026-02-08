@@ -1,9 +1,0 @@
-{
-  "run_id": "RUN-20260208",
-  "metrics": {
-    "resilience_score": 0.5,
-    "seeding_density": 0,
-    "handoff_score": 0.45,
-    "compression_ratio": 0.8
-  }
-}

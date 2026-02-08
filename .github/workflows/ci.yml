@@ -24,10 +24,11 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -36,13 +37,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4                - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
           node-version-file: .nvmrc
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
@@ -53,13 +53,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4                - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -72,12 +71,8 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Setup Node
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4                - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -109,8 +104,6 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -160,8 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
+        uses: pnpm/action-setup@v4                - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

@@ -65,10 +65,6 @@ on:
         description: "Container registry password/token"
         required: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   packages: write
@@ -100,7 +96,7 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
         with:
           driver-opts: |
-            network=none
+            network=host
             image=moby/buildkit:v0.12.4
 
       - name: Log in to Container Registry

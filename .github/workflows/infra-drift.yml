@@ -8,10 +8,6 @@ on:
       - ".github/workflows/infra-drift.yml"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: write
@@ -30,6 +26,8 @@ jobs:
   drift:
     name: Drift – plan & risk
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     defaults:
       run:
         shell: bash

@@ -14,10 +14,6 @@ on:
       - "tests/provenance/**"
       - "tests/tech_radar/**"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   verify_evidence_and_policy:
     runs-on: ubuntu-latest

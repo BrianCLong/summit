@@ -11,10 +11,6 @@ on:
     - cron: "0 03 * * *"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   security-events: write
@@ -99,6 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+      # Note: pnpm version is read from package.json "packageManager" field
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
       - name: Setup Node
@@ -106,6 +103,5 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
-      # Note: pnpm version is read from package.json "packageManager" field
       - name: Check Drift
         run: ./scripts/check-lockfile-drift.sh
