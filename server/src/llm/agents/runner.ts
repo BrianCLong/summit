@@ -2,7 +2,7 @@
 import { LlmOrchestrator, ChatCompletionRequest, ChatCompletionResult, ChatMessage, ToolCallInvocation } from '../types.js';
 import { ToolRegistry } from '../tools/registry.js';
 import { logger, correlationStorage } from '../../config/logger.js';
-import { metrics } from '../../lib/observability/metrics.js';
+import { metrics } from '../../monitoring/metrics.js';
 
 export interface AgentPlanStep {
   type: "llm_call" | "tool_call" | "decision";
@@ -38,9 +38,7 @@ export class AgentRunner {
     }, 'Agent execution started');
 
     // Increment total executions
-    // Note: We need to define this metric in observability/metrics.ts first or cast to any if we are lazy,
-    // but the plan is to add it properly. Assuming it exists now.
-    (metrics as any).agentExecutionsTotal?.inc({ tenant: tenantId, status: 'started' });
+    metrics.agentExecutionsTotal?.inc({ tenant: tenantId, status: 'started' });
 
     const steps: AgentPlanStep[] = [];
     const messages: ChatMessage[] = [
@@ -143,8 +141,8 @@ export class AgentRunner {
         correlationId
     }, 'Agent execution completed successfully');
 
-    (metrics as any).agentExecutionsTotal?.inc({ tenant: tenantId, status: 'success' });
-    (metrics as any).agentExecutionDuration?.observe({ tenant: tenantId, status: 'success' }, duration);
+    metrics.agentExecutionsTotal?.inc({ tenant: tenantId, status: 'success' });
+    metrics.agentExecutionDuration?.observe({ tenant: tenantId, status: 'success' }, duration);
 
     return { finalAnswer, steps };
     } catch (error: any) {
@@ -156,8 +154,8 @@ export class AgentRunner {
             correlationId
         }, 'Agent execution failed');
 
-        (metrics as any).agentExecutionsTotal?.inc({ tenant: tenantId, status: 'failure' });
-        (metrics as any).agentExecutionDuration?.observe({ tenant: tenantId, status: 'failure' }, duration);
+        metrics.agentExecutionsTotal?.inc({ tenant: tenantId, status: 'failure' });
+        metrics.agentExecutionDuration?.observe({ tenant: tenantId, status: 'failure' }, duration);
         throw error;
     }
   }

@@ -8,7 +8,7 @@
 import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
 import EmbeddingService from './EmbeddingService.js';
-import { otelService } from '../monitoring/opentelemetry.js';
+import { getTracer } from '../observability/tracer.js';
 import {
   vectorQueriesTotal,
   vectorQueryDurationSeconds,
@@ -98,7 +98,7 @@ export class SimilarityService {
   async findSimilar(query: SimilarityQuery): Promise<SimilarityResult> {
     const startTime = Date.now();
 
-    return otelService.wrapNeo4jOperation('similarity-search', async () => {
+    return getTracer().traceDbQuery('postgres', 'similarity-search', 'vector-search', async () => {
       try {
         const validated = SimilarityQuerySchema.parse(query);
 
@@ -150,7 +150,7 @@ export class SimilarityService {
           topSimilarity: results[0]?.similarity || 0,
         });
 
-        otelService.addSpanAttributes({
+        getTracer().addAttributes({
           'similarity.investigation_id': validated.investigationId,
           'similarity.query_type': queryType,
           'similarity.results_count': results.length,
@@ -183,8 +183,10 @@ export class SimilarityService {
   async findSimilarBulk(
     query: BulkSimilarityQuery,
   ): Promise<Map<string, SimilarEntity[]>> {
-    return otelService.wrapNeo4jOperation(
+    return getTracer().traceDbQuery(
+      'postgres',
       'bulk-similarity-search',
+      'bulk-vector-search',
       async () => {
         try {
           const validated = BulkSimilarityQuerySchema.parse(query);
@@ -565,8 +567,10 @@ export class SimilarityService {
     const topK = params.topK ?? 5; // Top K similar entities per entity
     const includeReasons = params.includeReasons ?? true;
 
-    return otelService.wrapNeo4jOperation(
+    return getTracer().traceDbQuery(
+      'postgres',
       'find-duplicate-candidates',
+      'hybrid-deduplication',
       async () => {
         try {
           serviceLogger.info('Finding duplicate candidates', {
@@ -724,7 +728,7 @@ export class SimilarityService {
             threshold,
           });
 
-          otelService.addSpanAttributes({
+          getTracer().addAttributes({
             'dedup.investigation_id': params.investigationId,
             'dedup.candidate_count': candidates.length,
             'dedup.entity_count': entities.length,

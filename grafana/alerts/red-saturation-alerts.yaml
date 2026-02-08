@@ -47,7 +47,7 @@ groups:
           summary: "Memory saturation risk"
           description: "Available memory dropped below 10% of total capacity."
       - alert: SummitQueueBackpressure
-        expr: max_over_time(workqueue_depth{job="intelgraph-server"}[5m]) > 150
+        expr: max_over_time(intelgraph_job_queue_depth{job="intelgraph-server"}[5m]) > 150
         for: 5m
         labels:
           severity: critical
