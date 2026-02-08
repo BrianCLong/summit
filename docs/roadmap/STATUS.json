@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Expanded workflow optimization report with affected-only execution, pnpm store caching, and fast/full lane CI guidance.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -198,7 +198,7 @@
       "id": "cicd-signal-deltas-2026",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+      "notes": "Documented CI/CD high-signal deltas with enforced action register, evidence targets, and affected-only CI acceleration guidance."
     },
     {
       "id": "summit-architecture-brief",
