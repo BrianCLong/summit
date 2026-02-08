@@ -1,3 +1,4 @@
+-- NO_TRANSACTION
 -- Strengthen per-tenant hot embedding materialization for pgvector
 
 -- Ensure tenant scoping columns exist for hot-path queries
@@ -8,10 +9,10 @@ ALTER TABLE IF EXISTS entity_embeddings
 ADD COLUMN IF NOT EXISTS investigation_id VARCHAR(255);
 
 -- Indexes to keep recency scans online-safe
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_entity_embeddings_tenant_updated_at
+CREATE INDEX  IF NOT EXISTS idx_entity_embeddings_tenant_updated_at
 ON entity_embeddings (tenant_id, updated_at DESC);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_entity_embeddings_tenant_investigation
+CREATE INDEX  IF NOT EXISTS idx_entity_embeddings_tenant_investigation
 ON entity_embeddings (tenant_id, investigation_id);
 
 -- Rebuild the materialized view to cap hot embeddings per tenant using a configurable window
@@ -44,10 +45,10 @@ CROSS JOIN params p
 WHERE r.rn <= p.per_tenant;
 
 -- Unique and vector indexes to keep refreshes concurrent and searches fast
-CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS idx_tenant_hot_entity_embeddings_pk
+CREATE UNIQUE INDEX  IF NOT EXISTS idx_tenant_hot_entity_embeddings_pk
 ON tenant_hot_entity_embeddings (tenant_id, entity_id);
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS tenant_hot_entity_embeddings_hnsw
+CREATE INDEX  IF NOT EXISTS tenant_hot_entity_embeddings_hnsw
 ON tenant_hot_entity_embeddings
 USING hnsw (embedding vector_cosine_ops)
 WITH (m = 32, ef_construction = 200);
@@ -63,7 +64,7 @@ AS $$
 BEGIN
   PERFORM set_config('ig.hot_embeddings.window', window_override::text, true);
   PERFORM set_config('ig.hot_embeddings.per_tenant', per_tenant::text, true);
-  REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_hot_entity_embeddings;
+  REFRESH MATERIALIZED VIEW  tenant_hot_entity_embeddings;
 END;
 $$;
 
