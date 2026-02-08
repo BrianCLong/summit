@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-07T02:08:00Z",
-  "revision_note": "Added 23rd-order MCP imputed-intention governance delivery artifact and tracking entry.",
+  "last_updated": "2026-02-08T00:15:00Z",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added 23rd-order MCP imputed-intention governance delivery artifact and tracking entry.",
   "initiatives": [
-    {
-      "id": "mcp-imputed-intent-23rd-order",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Governance-first 23rd-order imputed intention delivery artifact for MCP ecosystem alignment."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -65,6 +59,30 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+    },
+    {
+      "id": "summit-skill-router-ga-orchestrator",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
+    },
+    {
+      "id": "summit-ops-incident-console",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Codex Desktop Summit Ops & Incident Console plan with threads, skills, automation, safe Git profiles, and incident-mode outputs."
+    },
+    {
+      "id": "summit-ga-preflight-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
+    },
+    {
+      "id": "summit-pr-stack-sequencer-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -150,7 +168,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -168,7 +186,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -181,6 +199,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "summit-architecture-brief",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "mcp-imputed-intent-23rd-order",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governance-first 23rd-order imputed intention delivery artifact for MCP ecosystem alignment."
     }
   ],
   "summary": {
