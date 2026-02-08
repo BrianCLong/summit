@@ -32,6 +32,3 @@
 **Learning:** When a user action removes the triggering element from the DOM (e.g., clicking a "quick prompt" chip that disappears upon selection), focus is lost to the body, confusing keyboard users.
 **Action:** Always programmatically move focus to the next logical element (e.g., the input field) before the trigger disappears.
 
-## 2025-12-05 - Tailwind Content Resolution for Mixed-Extension Codebases
-**Learning:** In projects with a mix of JS/JSX and TS/TSX, Tailwind configurations may only target TS/TSX files. This causes utility classes in JS/JSX files to be purged, breaking accessibility features (like `sr-only`) or layout styles.
-**Action:** Always verify `tailwind.config.cjs` includes all relevant file extensions (js, jsx, ts, tsx) when implementing utility-based styles.

@@ -1,7 +1,3 @@
-"""
-ACP Authentication.
-Implements auth methods (agent, env_var, terminal) and enforcement.
-"""
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Literal, Optional

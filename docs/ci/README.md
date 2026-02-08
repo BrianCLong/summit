@@ -129,11 +129,6 @@ SLSA Level 3 compliant container builds with SBOM and provenance.
 - Cosign signing
 - Multi-platform support
 
-## Protocols & Playbooks
-
-- `COMPETITIVE_INTELLIGENCE_PROTOCOL.md`: Competitive intelligence subsumption protocol,
-  including target intake, extraction, integration, PR stack slicing, and gates.
-
 ## Actions Pinning
 
 All actions are pinned to SHA hashes in `.github/actions-lock.json`:
