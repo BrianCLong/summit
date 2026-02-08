@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SwitchboardEvidenceMetrics",
+  "description": "Determinism contract for Switchboard evidence metrics.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "evidenceId": { "type": "string" },
+    "counters": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "gauges": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
+  },
+  "required": ["evidenceId", "counters", "gauges"]
+}

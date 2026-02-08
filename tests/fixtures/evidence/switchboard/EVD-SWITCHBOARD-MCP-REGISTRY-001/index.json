@@ -1,0 +1,9 @@
+{
+  "evidenceId": "EVD-SWITCHBOARD-MCP-REGISTRY-001",
+  "area": "REGISTRY",
+  "artifactPaths": [
+    "report.json",
+    "metrics.json",
+    "stamp.json"
+  ]
+}

@@ -14,6 +14,7 @@ This ledger tracks recent agent activity so humans can spot thrash, stalls, or c
 | TB-03   | main                           | n/a       | Agent | done             | Created HUMAN_STEERING.md.                                | 2026-02-01 |
 | TB-01   | main                           | n/a       | Agent | done             | Hardened agent-contract.json.                             | 2026-02-01 |
 | TB-08   | main                           | n/a       | Agent | done             | Integrated Email & Multimodal Vision/Signal services.     | 2026-02-02 |
+| SWITCHBOARD_LANE1_EVIDENCE | work | (pending) | Codex | in-progress | Switchboard MCP control-plane evidence scaffolding. | 2026-02-08 |
 
 ## How to update
 
