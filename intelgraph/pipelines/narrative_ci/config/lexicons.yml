@@ -1,0 +1,8 @@
+version: 1
+register_markers:
+  hedging: ["may", "might", "suggests", "raising questions", "possible", "alleged"]
+  legalistic: ["pursuant", "hereby", "whereas", "statute", "jurisdiction", "liable"]
+implied_reference_markers:
+  - "you already know"
+  - "as we said"
+  - "everyone knows"

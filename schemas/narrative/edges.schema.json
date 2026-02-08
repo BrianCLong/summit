@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Narrative Edges",
+  "type": "object",
+  "required": ["version", "edges"],
+  "properties": {
+    "version": { "type": "integer" },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "from", "to"],
+        "properties": {
+          "type": { "type": "string" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "props": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
