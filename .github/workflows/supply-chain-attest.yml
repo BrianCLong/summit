@@ -63,6 +63,8 @@ jobs:
       # Use Cosign for modern signing and attestation
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v3.0.2
 
       - name: Sign and Attest build artifact (Keyless)
         run: |
