@@ -81,7 +81,7 @@ ENV GIT_SHA=${GIT_SHA}
 
 # Build the application
 WORKDIR /app/server
-RUN pnpm run build:isolated
+RUN pnpm build
 
 # Prune dev dependencies (optional, can be tricky in monorepo)
 # RUN pnpm prune --prod
@@ -110,10 +110,13 @@ RUN addgroup --system --gid 1001 summit && \
 WORKDIR /app/server
 
 # Copy built application and necessary workspace files
-COPY --from=builder --chown=summit:summit /app/server/dist-isolated ./dist
+COPY --from=builder --chown=summit:summit /app/server/dist ./dist
 COPY --from=builder --chown=summit:summit /app/server/package.json ./
-# We need node_modules at root for third-party dependencies (workspace deps are bundled)
+# We need node_modules at root for workspace dependencies to resolve
 COPY --from=builder --chown=summit:summit /app/node_modules /app/node_modules
+# We might need linked packages if they are symlinked
+COPY --from=builder --chown=summit:summit /app/packages /app/packages
+COPY --from=builder --chown=summit:summit /app/libs /app/libs
 
 # Copy runtime assets if any
 # COPY --from=builder --chown=summit:summit /app/server/prisma ./prisma

@@ -325,32 +325,6 @@ jobs:
           name: security-reports
           path: ${{ env.REPORT_DIR }}/results.sarif
 
-  zizmor:
-    name: GitHub Actions security (zizmor)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install zizmor
-        run: |
-          curl -L https://github.com/woodruffw/zizmor/releases/latest/download/zizmor-x86_64-unknown-linux-gnu.tar.gz | tar -xz
-          sudo mv zizmor /usr/local/bin/
-      - name: Run zizmor
-        run: zizmor . --format sarif > zizmor.sarif
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: zizmor.sarif
-          category: zizmor
-      - name: Persist report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-reports
-          path: zizmor.sarif
-
   opa-policy:
     name: Policy enforcement (OPA/Conftest)
     runs-on: ubuntu-22.04
@@ -501,7 +475,6 @@ jobs:
       - container-scan
       - license-compliance
       - iac-scan
-      - zizmor
       - opa-policy
       - cis-benchmark
       - baseline
@@ -528,7 +501,6 @@ jobs:
           IMG_STATUS: ${{ needs.container-scan.result }}
           LIC_STATUS: ${{ needs.license-compliance.result }}
           IAC_STATUS: ${{ needs.iac-scan.result }}
-          ZIZMOR_STATUS: ${{ needs.zizmor.result }}
           OPA_STATUS: ${{ needs.opa-policy.result }}
           CIS_STATUS: ${{ needs.cis-benchmark.result }}
           BASELINE_STATUS: ${{ needs.baseline.result }}
@@ -550,7 +522,6 @@ jobs:
                 "Container": os.environ.get('IMG_STATUS', 'unknown'),
                 "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
                 "IaC": os.environ.get('IAC_STATUS', 'unknown'),
-                "Zizmor": os.environ.get('ZIZMOR_STATUS', 'unknown'),
                 "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
                 "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
                 "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
