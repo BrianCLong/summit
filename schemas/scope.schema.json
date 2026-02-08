@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scope",
+  "type": "object",
+  "required": [
+    "scope_id",
+    "created_at",
+    "agent_id",
+    "policy_id",
+    "dataset_snapshot_id"
+  ],
+  "properties": {
+    "scope_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "agent_id": { "type": "string" },
+    "policy_id": { "type": "string" },
+    "dataset_snapshot_id": { "type": "string" },
+    "closed_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}
