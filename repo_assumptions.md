@@ -1,35 +1,32 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (Kimi K2.5 NVIDIA Integrate)
 
 ## Structure Validation
 
 | Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| --- | --- | --- | --- |
+| `docs/standards/` | `docs/standards/` | ✅ Exists | Standards documentation tree. |
+| `docs/security/data-handling/` | `docs/security/data-handling/` | ✅ Exists | Data handling policies and addenda. |
+| `docs/ops/runbooks/` | `docs/ops/runbooks/` | ✅ Exists | Operational runbooks. |
+| `feature_flags.json` | `feature_flags.json` | ✅ Exists | Repository-level feature flag defaults. |
+| `flags/catalog.yaml` | `flags/catalog.yaml` | ✅ Exists | Flag catalog metadata. |
+| `flags/targets/*.yaml` | `flags/targets/*.yaml` | ✅ Exists | Per-environment flag values. |
 
 ## Component Mapping
 
 | Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+| --- | --- | --- |
+| NVIDIA/Kimi standards doc | `docs/standards/kimi-k2-5-nvidia-endpoints.md` | Create file in standards tree. |
+| Data handling policy | `docs/security/data-handling/kimi-k2-5-nvidia-endpoints.md` | Create file in data-handling tree. |
+| Ops runbook | `docs/ops/runbooks/kimi-k2-5-nvidia-endpoints.md` | Create file in runbooks tree. |
+| Feature flags | `feature_flags.json` + `flags/catalog.yaml` | Add `FEATURE_NVIDIA_INTEGRATE` and `FEATURE_KIMI_THINKING` defaults plus catalog entries. |
 
 ## Constraints & Checks
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+- **No egress by default**: outbound allowlist required for NVIDIA integrate endpoint.
+- **Feature flags default OFF**: enable only with explicit environment config.
+- **Evidence-first**: deterministic artifacts, no timestamps in outputs.
 
 ## Next Steps
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+1. Validate existing provider adapter patterns before implementing the NVIDIA client.
+2. Add deterministic test fixtures for request building and streaming parser.

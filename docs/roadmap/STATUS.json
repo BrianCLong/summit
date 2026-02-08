@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:30:00Z",
+  "revision_note": "Documented NVIDIA Kimi K2.5 integrate standards, data handling, ops runbook, and default-off feature flags.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -135,6 +135,12 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
+      "id": "nvidia-kimi-k2-5-integrate-docs",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Standards, data handling, ops runbook, and default-off feature flag scaffolding for NVIDIA Kimi K2.5 integrate endpoint."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -182,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }

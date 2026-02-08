@@ -55,6 +55,34 @@
       "linked_epic": "EPIC-13",
       "migration_link": "epics/02/migrations#qos",
       "canary": {"steps": [0, 25, 50, 100], "source": "slo-gate"}
+    },
+    {
+      "key": "feature.nvidia.integrate",
+      "type": "boolean",
+      "owner": "platform@gov.intelgraph",
+      "created": "2026-02-06",
+      "risk": "medium",
+      "default": false,
+      "environments": ["dev", "stage", "prod"],
+      "kill_switch": true,
+      "expires": "2026-08-31",
+      "linked_epic": "EPIC-24",
+      "migration_link": "epics/24/migrations#nvidia-integrate",
+      "canary": {"steps": [0, 10, 25, 50, 100], "source": "canary-pipeline"}
+    },
+    {
+      "key": "feature.kimi.thinking",
+      "type": "boolean",
+      "owner": "platform@gov.intelgraph",
+      "created": "2026-02-06",
+      "risk": "low",
+      "default": false,
+      "environments": ["dev", "stage", "prod"],
+      "kill_switch": true,
+      "expires": "2026-08-31",
+      "linked_epic": "EPIC-24",
+      "migration_link": "epics/24/migrations#kimi-thinking",
+      "canary": {"steps": [0, 25, 50, 100], "source": "release-train"}
     }
   ]
 }
