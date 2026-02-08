@@ -1,0 +1,6 @@
+{
+  "inferred_nodes": [
+    { "id": "claim-1", "type": "Claim" }
+  ],
+  "provenance_edges": []
+}

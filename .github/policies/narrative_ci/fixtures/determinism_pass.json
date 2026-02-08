@@ -1,0 +1,5 @@
+{
+  "payloads": [
+    { "run_id": "fixture-run", "values": [1, 2, 3] }
+  ]
+}

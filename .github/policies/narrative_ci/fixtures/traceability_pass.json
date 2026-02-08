@@ -1,0 +1,10 @@
+{
+  "inferred_nodes": [
+    { "id": "claim-1", "type": "Claim" },
+    { "id": "frame-1", "type": "Frame" }
+  ],
+  "provenance_edges": [
+    { "from_type": "Artifact", "to": "claim-1" },
+    { "from_type": "Artifact", "to": "frame-1" }
+  ]
+}

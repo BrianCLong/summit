@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-10T00:00:00Z",
+  "revision_note": "Added narrative CI lane-1 scaffold entry.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -193,6 +193,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "narrative-ci-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Scaffolded narrative CI lane-1 pipeline, schemas, and policy gates with deterministic evidence bundling."
     }
   ],
   "summary": {
@@ -200,7 +206,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 21,
     "ga_blockers": []
   }
 }
