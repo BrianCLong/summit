@@ -13,6 +13,10 @@ on:
       - "server/**"
       - "policy/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-verify:
     runs-on: ubuntu-latest
