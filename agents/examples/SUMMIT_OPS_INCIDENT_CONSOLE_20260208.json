@@ -1,0 +1,58 @@
+{
+  "task_id": "SUMMIT_OPS_INCIDENT_CONSOLE_20260208",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "summit-ops-incident-console",
+    "version": "v1",
+    "sha256": "91e7e30059298954fd0b76dad62f85b2eaaac5660fc55a346f00eea201e80c30",
+    "path": "prompts/ops/summit-ops-incident-console@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "skills/summit-ops-incident-console/",
+      "skills/index.json",
+      "skills/registry/skills.manifest.json",
+      "skills/registry/skills.lock.json",
+      "docs/roadmap/STATUS.json",
+      "prompts/ops/summit-ops-incident-console@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SUMMIT_OPS_INCIDENT_CONSOLE_20260208.json",
+      "packages/decision-ledger/decision_ledger.json"
+    ],
+    "domains": [
+      "ops",
+      "governance",
+      "ci",
+      "security"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "skill registry update",
+      "decision ledger entry",
+      "roadmap status update"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Summit Ops incident console skill files are created with project, automation, and incident-mode guidance.",
+    "Skill registries include the new skill with correct SHA-256.",
+    "Roadmap status reflects the new Summit Ops console initiative.",
+    "DecisionLedger entry captures the change and rollback path."
+  ],
+  "stop_conditions": [
+    "Prompt registry mismatch or SHA-256 validation fails.",
+    "Required files fall outside declared scope.",
+    "Governance constraints require human countersign."
+  ],
+  "dependencies": [
+    "docs/SUMMIT_READINESS_ASSERTION.md",
+    "docs/governance/CONSTITUTION.md",
+    "docs/governance/META_GOVERNANCE.md"
+  ]
+}

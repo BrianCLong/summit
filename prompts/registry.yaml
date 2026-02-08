@@ -1,5 +1,35 @@
 version: 1
 prompts:
+  - id: summit-ops-incident-console
+    version: v1
+    path: prompts/ops/summit-ops-incident-console@v1.md
+    sha256: 91e7e30059298954fd0b76dad62f85b2eaaac5660fc55a346f00eea201e80c30
+    description: Configure the Summit Ops & Incident Console skill pack with safe Git profiles, monitoring automations, and incident-mode workflows.
+    scope:
+      paths:
+        - skills/summit-ops-incident-console/
+        - skills/index.json
+        - skills/registry/skills.manifest.json
+        - skills/registry/skills.lock.json
+        - docs/roadmap/STATUS.json
+        - prompts/ops/summit-ops-incident-console@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SUMMIT_OPS_INCIDENT_CONSOLE_20260208.json
+        - packages/decision-ledger/decision_ledger.json
+      domains:
+        - ops
+        - governance
+        - ci
+        - security
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

@@ -1,0 +1,47 @@
+# Codex Desktop profile guidance for Summit Ops
+
+[project]
+name = "summit-ops"
+root = "~/src/summit"
+trusted = true
+
+[profiles.workspace-write]
+approval_policy = "on-request"
+sandbox_mode = "enabled"
+allow_network = false
+
+# Auto-approved safe commands (read-only / diagnostic)
+safeCommands = [
+  "git status",
+  "git diff",
+  "git log --oneline -n 20",
+  "rg --files",
+  "rg -n",
+  "pnpm lint",
+  "pnpm test",
+  "pnpm typecheck",
+  "make smoke"
+]
+
+# Require explicit approval for destructive Git operations
+requireApprovalFor = [
+  "git push --force",
+  "git push --force-with-lease",
+  "git reset --hard",
+  "git checkout -D",
+  "git branch -D",
+  "git clean -fd",
+  "git rebase --onto"
+]
+
+[profiles.read-only]
+approval_policy = "never"
+sandbox_mode = "enabled"
+allow_network = false
+safeCommands = [
+  "git status",
+  "git diff",
+  "git log --oneline -n 50",
+  "rg --files",
+  "rg -n"
+]
