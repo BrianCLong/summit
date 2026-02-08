@@ -283,7 +283,9 @@ function AppHeader({ onMenuClick }) {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPage = navigationItems.find(
-    (item) => item.path === location.pathname,
+    (item) =>
+      location.pathname === item.path ||
+      location.pathname.startsWith(item.path + '/'),
   );
 
   // Show demo walkthrough link only in demo mode

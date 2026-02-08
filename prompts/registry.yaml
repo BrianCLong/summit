@@ -1,29 +1,5 @@
 version: 1
 prompts:
-  - id: io-cogwar-radar-brief
-    version: v1
-    path: prompts/briefs/io-cogwar-radar-brief@v1.md
-    sha256: 178dc352c7c343c12cea0e88a595e088049a33f1ef53e4ef565a1294336934fb
-    description: Create the defensive-only IO/CogWar Radar 2027 brief and update roadmap status.
-    scope:
-      paths:
-        - docs/briefs/io-cogwar-radar-2027.md
-        - docs/roadmap/STATUS.json
-        - prompts/briefs/io-cogwar-radar-brief@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - io-cogwar
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md
@@ -41,31 +17,6 @@ prompts:
         - content
         - governance
         - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: semhl-required-checks
-    version: v1
-    path: prompts/ci/semhl-required-checks@v1.md
-    sha256: 09fb75e7c769abfdcb3eaab9322f2160e92cbf08b0f1fe62eaac022aca644147
-    description: Update semantic highlighting required check guidance and roadmap status notes.
-    scope:
-      paths:
-        - required_checks.todo.md
-        - docs/roadmap/STATUS.json
-        - prompts/ci/semhl-required-checks@v1.md
-        - prompts/registry.yaml
-        - agents/examples/SEMHL_REQUIRED_CHECKS_PR1.json
-      domains:
-        - documentation
-        - governance
-        - ci
     verification:
       tiers_required:
         - C
@@ -104,38 +55,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: ru-ua-cogwar-lab
-    version: v1
-    path: prompts/cogwar/ru-ua-cogwar-lab@v1.md
-    sha256: 68b953ae92fc46eb75c9b2875842e05b12f01bfbc3a53866bf5f609014e33306
-    description: Deterministic cogwar campaign schema, examples, packs, and governance docs.
-    scope:
-      paths:
-        - schemas/cogwar/
-        - examples/cogwar/ru-ua/
-        - scripts/cogwar/
-        - scripts/monitoring/ru-ua-cogwar-lab-drift.mjs
-        - dist/cogwar/
-        - tests/cogwar/
-        - docs/standards/ru-ua-cogwar-lab.md
-        - docs/security/data-handling/ru-ua-cogwar-lab.md
-        - docs/ops/runbooks/ru-ua-cogwar-lab.md
-        - docs/roadmap/STATUS.json
-        - prompts/cogwar/ru-ua-cogwar-lab@v1.md
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - documentation
-        - cogwar
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
@@ -165,29 +84,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: svc-repo-recon
-    version: v1
-    path: prompts/governance/svc-repo-recon@v1.md
-    sha256: 6e0e7b88347517f8de0e6d1ae29bb6511cbe4a985702e2dc6875cee47812b54a
-    description: Capture verified repo assumptions and guardrails for Summit Verified Change (SVC) recon.
-    scope:
-      paths:
-        - repo_assumptions.md
-        - docs/roadmap/STATUS.json
-        - prompts/governance/svc-repo-recon@v1.md
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md
@@ -202,49 +98,6 @@ prompts:
       domains:
         - governance
         - evidence
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: promptspec-foundation-lane1
-    version: v1
-    path: prompts/promptspec/promptspec-foundation-lane1@v1.md
-    sha256: 50e7d7c4e80bd32ecf7a092f7450e018f295438cbd3bbc20be48eddb32a3a904
-    description: Scaffold PromptSpec, evidence index, eval rubric, and policy gate foundations.
-    scope:
-      paths:
-        - promptspec/
-        - schemas/promptspec.schema.json
-        - schemas/evidence.index.schema.json
-        - evidence/index.py
-        - evidence/write_evidence.py
-        - eval/runner.py
-        - eval/rubrics/
-        - eval/fixtures/
-        - policy/gate.py
-        - policy/rules.json
-        - docs/required_checks.todo.md
-        - dependency_delta.md
-        - tests/policy/test_denies_guarantees.py
-        - tests/evidence/test_index_determinism.py
-        - tests/promptspec/
-        - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/promptspec/promptspec-foundation-lane1@v1.md
-        - prompts/registry.yaml
-        - agents/examples/PROMPTSPEC_FOUNDATION_LANE1_20260207.json
-      domains:
-        - governance
-        - evidence
-        - eval
-        - policy
-        - promptspec
-        - docs
     verification:
       tiers_required:
         - C
@@ -332,36 +185,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: sera-cli-proxy
-    version: v1
-    path: prompts/integrations/sera-cli-proxy@v1.md
-    sha256: 274b54b3a12f321fa647087bc2cc529c994dee37802c570a14abf7d2a05d3504
-    description: Implement Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails.
-    scope:
-      paths:
-        - cli/src/commands/sera-proxy.ts
-        - cli/src/sera-proxy/
-        - cli/__tests__/sera-proxy.test.ts
-        - docs/standards/sera-cli.md
-        - docs/security/data-handling/sera-cli.md
-        - docs/ops/runbooks/sera-cli.md
-        - docs/roadmap/STATUS.json
-        - prompts/integrations/sera-cli-proxy@v1.md
-        - prompts/registry.yaml
-      domains:
-        - integrations
-        - cli
-        - governance
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: agent-native-loop-n4
     version: v1
     path: prompts/governance/agent-native-loop-n4.md
@@ -392,31 +215,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: proof-carrying-plans-evidence-replay
-    version: v1
-    path: prompts/maestro/proof-carrying-plans-evidence-replay.md
-    sha256: d9b0323e9782df87a0cef430e42eb60e3dd8e476e2b446a602528a9e67f17592
-    description: Proof-carrying plan IR, action contracts, evidence bundles, and deterministic replay harness.
-    scope:
-      paths:
-        - agents/orchestrator/
-        - prompts/maestro/
-        - agents/examples/
-        - docs/roadmap/STATUS.json
-        - prompts/registry.yaml
-      domains:
-        - orchestration
-        - evidence
-        - governance
-    verification:
-      tiers_required:
-        - A
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: runbooks-docs-update
     version: v1
     path: prompts/docs/runbooks-update@v1.md
@@ -433,60 +231,6 @@ prompts:
         - documentation
         - operations
         - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: longhorizon-ai-native-engineering-team
-    version: v1
-    path: prompts/longhorizon/longhorizon-ai-native-engineering-team.md
-    sha256: 2fc49a1292583add618fc867a3a3fd70962222b7ae78d82cfcf238cdb1dadf43
-    description: LongHorizon orchestration with MAP-Elites, island model, and stateful memory.
-    scope:
-      paths:
-        - src/longhorizon/
-        - src/cli/maestro-longhorizon.ts
-        - tests/longhorizon/
-        - docs/longhorizon.md
-        - examples/longhorizon/
-        - prompts/longhorizon/
-        - prompts/registry.yaml
-        - agents/examples/longhorizon-task.json
-        - docs/roadmap/STATUS.json
-      domains:
-        - orchestration
-        - governance
-        - evidence
-        - memory
-        - evaluation
-    verification:
-      tiers_required:
-        - B
-  - id: nog-governed-ops-docs
-    version: v1
-    path: prompts/docs/nog-governed-ops-docs@v1.md
-    sha256: 671b5dcfc2e1fe6ca3e0fb75a84a7e9cbbc661f8cb07ebdc1529699bd88c4646
-    description: Document governed narrative risk ops standards, security handling, and runbook updates.
-    scope:
-      paths:
-        - repo_assumptions.md
-        - docs/standards/nog-governed-agents.md
-        - docs/security/data-handling/nog-governed-agents.md
-        - docs/ops/runbooks/nog-governed-agents.md
-        - docs/roadmap/STATUS.json
-        - agents/examples/NOG_GOVERNED_OPS_DOCS_TASK.json
-        - prompts/docs/nog-governed-ops-docs@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - security
-        - operations
     verification:
       tiers_required:
         - C
@@ -520,124 +264,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: maestro-longrun-job-engine
-    version: v1
-    path: prompts/engineering/maestro-longrun-job-engine.md
-    sha256: 32faf8eb39eea30e6bcaa8645727a9a5f2665bcd335b68e50e87eeb2d5f1e1e3
-    description: Implement Maestro Long-Run Job Engine with governed checkpoints, budgets, and CI gates.
-    scope:
-      paths:
-        - libs/maestro/longrun/
-        - scripts/ci/
-        - docs/maestro/
-        - .github/workflows/
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/engineering/maestro-longrun-job-engine.md
-        - prompts/registry.yaml
-      domains:
-        - maestro
-        - governance
-        - ci
-  - id: federated-campaign-radar-implementation
-    version: v1
-    path: prompts/federated-campaign-radar-implementation.md
-    sha256: f24cb004a3529f2735297dc5d579498b74aa5e6decee63dcb73fc0c5e2678b6f
-    description: Implement Federated Campaign Radar schemas, services, policies, routes, and documentation.
-    scope:
-      paths:
-        - docs/federated-campaign-radar*.md
-        - docs/runbooks/federated-campaign-radar*.md
-        - docs/roadmap/STATUS.json
-        - schemas/fcr/
-        - server/src/services/fcr/
-        - server/src/routes/federated-campaign-radar.ts
-        - server/src/app.ts
-        - server/policies/
-        - server/src/provenance/
-        - fixtures/fcr-sample.json
-        - openapi/spec.yaml
-        - agents/examples/
-        - artifacts/agent-runs/
-        - prompts/federated-campaign-radar-implementation.md
-        - prompts/registry.yaml
-      domains:
-        - federation
-        - privacy
-        - governance
-        - provenance
-        - observability
-        - api
-    verification:
-      tiers_required:
-        - B
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: implement-context-shell
-    version: v1
-    path: prompts/implement/context-shell@v1.md
-    sha256: 5144cf0c5d9e3e0a7f382e5e319914b1dd234d3cc1115718e0fadc914a496985
-    description: Implement Context Shell with policy gating, evidence logging, and Maestro integration.
-    scope:
-      paths:
-        - libs/context-shell/
-        - server/src/maestro/
-        - docs/runbooks/
-        - docs/roadmap/STATUS.json
-        - jest.config.cjs
-        - jest.projects.cjs
-        - agents/examples/
-        - prompts/implement/context-shell@v1.md
-        - prompts/registry.yaml
-      domains:
-        - tooling
-        - governance
-        - maestro
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: summit-mcp-server-v1
-    version: v1
-    path: prompts/mcp/summit-mcp-server-v1.md
-    sha256: e8991ef35612bc87b3689b667e2d67797e69f5947efe7eac15253cce907358f9
-    description: Summit MCP server vertical slice with progressive disclosure, policy gating, and evidence bundles.
-    scope:
-      paths:
-        - mcp/summit_server/
-        - skills/mcp/
-        - skills/README.md
-        - docs/mcp-server.md
-        - docs/roadmap/STATUS.json
-        - fixtures/mcp/
-        - tests/mcp/
-        - agents/examples/
-        - prompts/mcp/summit-mcp-server-v1.md
-        - prompts/registry.yaml
-      domains:
-        - mcp
-        - governance
-        - evidence
-        - policy
-        - transport
-    verification:
-      tiers_required:
-        - B
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: adr-pr-template-cleanup
     version: v1
     path: prompts/docs/adr-pr-template-cleanup@v1.md
@@ -654,6 +280,33 @@ prompts:
         - documentation
         - governance
         - quality
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: io-cogwar-radar-brief
+    version: v1
+    path: prompts/docs/io-cogwar-radar-brief@v1.md
+    sha256: 29e1e846516778c390cf978558937aa16389e3e54a3d3d955d482f3796bdf70e
+    description: Draft a defensive IO/CogWar radar brief with roadmap status and governance artifacts.
+    scope:
+      paths:
+        - docs/briefs/
+        - docs/roadmap/STATUS.json
+        - prompts/docs/io-cogwar-radar-brief@v1.md
+        - prompts/registry.yaml
+        - agents/examples/IO_COGWAR_RADAR_BRIEF_20260202.json
+        - packages/decision-ledger/decision_ledger.json
+      domains:
+        - documentation
+        - governance
+        - info-ops
+        - cogwar
     verification:
       tiers_required:
         - C
@@ -688,81 +341,6 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: competitive-subsumption-protocol-v4-1
-    version: v1
-    path: prompts/competitive/competitive-subsumption-protocol-v4.1.md
-    sha256: a86aa6168b2b2af54a996d0bb7c00a0cdbe8b56bb2af629b84685640ca314e5e
-    description: Summit competitive subsumption protocol (evidence-first, deterministic, patch-first).
-    scope:
-      paths:
-        - docs/ci/competitive-intel/
-        - docs/ci/targets/
-        - docs/ci/evidence/
-        - docs/roadmap/STATUS.json
-        - prompts/competitive/competitive-subsumption-protocol-v4.1.md
-        - prompts/registry.yaml
-        - agents/examples/
-      domains:
-        - documentation
-        - competitive-intel
-        - product-strategy
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: sar-agentic-app-runtime
-    version: v1
-    path: prompts/architecture/sar-agentic-app-runtime@v1.md
-    sha256: 0c2ea2abded4bee786ab44a93066948cac8bff1dc60d94cb3cd56faa15c367d8
-    description: Summit App Runtime architecture, governance, and compatibility plan with SAR deliverables.
-    scope:
-      paths:
-        - docs/architecture/sar-agentic-app-runtime.md
-        - prompts/architecture/sar-agentic-app-runtime@v1.md
-        - prompts/registry.yaml
-      domains:
-        - architecture
-        - governance
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: pr-17714-update
-    version: v1
-    path: prompts/pr/pr-17714-update@v1.md
-    sha256: 197e7e05eb008021a4b9b25ea569189ac652b99b5deeda908b979aa678a1b328
-    description: Update PR 17714 scoped changes.
-    scope:
-      paths:
-        - docs/
-        - nds/
-        - prompts/pr/pr-17714-update@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - operations
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: pr-17730-update
     version: v1
     path: prompts/pr/pr-17730-update@v1.md
@@ -785,114 +363,4 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - create
-      - edit
-  - id: lazy-mcp-skillpacks
-    version: v1
-    path: prompts/skillpacks/lazy-mcp-skillpacks@v1.md
-    sha256: a5127a0addcbc97f6f863d5a02ee286c0267f44abe5e39f24934f9e7d717eee8
-    description: Implement lazy-loaded MCP skillpacks with adaptive sharding and governance evidence.
-    scope:
-      paths:
-        - packages/agent-skillpacks/
-        - .summit/skillpacks/
-        - docs/skillpacks-lazy-mcp.md
-        - docs/roadmap/STATUS.json
-        - artifacts/tool-loading-report.json
-        - artifacts/tool-loading-report.md
-        - agents/examples/
-        - prompts/skillpacks/
-        - prompts/registry.yaml
-      domains:
-        - agent-tooling
-        - governance
-        - mcp
-        - evidence
-    verification:
-      tiers_required:
-        - B
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: summit-labs-scaffold
-    version: v1
-    path: prompts/labs/summit-labs-scaffold-v1.md
-    sha256: 4497084e918cf58c6e8e4394085706d5cf94484a7fcb53cc63853592839c952b
-    description: Scaffold Summit Labs documentation, preview spec, and promotion gates.
-    scope:
-      paths:
-        - labs/
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/labs/
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - documentation
-        - roadmap
-        - labs
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: kimik25-evidence-scaffold
-    version: v1
-    path: prompts/evidence/kimik25-evidence-scaffold@v1.md
-    sha256: bf7fa8fb88d42633c7d7fe399403da277b52606ac82d2279ecad840437972059
-    description: Scaffold KIMIK25 evidence bundles, fixtures, and verification checks.
-    scope:
-      paths:
-        - evidence/
-        - ci/check_evidence.py
-        - tools/emit_evidence.py
-        - tests/test_evidence_schemas.py
-        - .gitignore
-        - docs/roadmap/STATUS.json
-        - prompts/evidence/kimik25-evidence-scaffold@v1.md
-        - prompts/registry.yaml
-      domains:
-        - evidence
-        - governance
-        - ci
-        - testing
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: jest-entities-override
-    version: v1
-    path: prompts/maintenance/jest-entities-override@v1.md
-    sha256: f1ef077d68bb34b6bf128b0f4aa15cc8c27a3ded28c0106f695ee042095b9370
-    description: Pin entities for parse5/Jest compatibility and update governance artifacts.
-    scope:
-      paths:
-        - package.json
-        - pnpm-lock.yaml
-        - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/maintenance/jest-entities-override@v1.md
-        - prompts/registry.yaml
-      domains:
-        - dependencies
-        - testing
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
       - edit

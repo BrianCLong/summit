@@ -38,8 +38,6 @@ A non-exhaustive list of such components includes (examples):
 
 - Node.js, pnpm, and associated JavaScript/TypeScript libraries
   (MIT, Apache-2.0, BSD, or other OSS licenses as noted in their packages).
-- Design inspiration: LangChain Deep Agents context management write-up
-  (Jan 28, 2026, LangChain blog).
 - Any other vendored or embedded libraries identified in package metadata
   (e.g., package.json, pnpm-lock.yaml) or source headers.
 

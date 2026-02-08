@@ -102,7 +102,7 @@ jobs:
           ./scripts/release/generate_release_train_dashboard.sh ${ARGS}
 
       - name: Upload Dashboard JSON
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: release-train-dashboard
           path: |

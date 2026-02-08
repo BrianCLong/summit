@@ -1,5 +1,3 @@
 features:
-  cognitive_domain: false
-  model_ti: false
-  agentic_defense: false
   event_playbooks: false
+  event_fusion: false

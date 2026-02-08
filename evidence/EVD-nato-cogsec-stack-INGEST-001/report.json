@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-nato-cogsec-stack-INGEST-001",
-  "summary": "CogSec ingest evidence bundle scaffolded for deterministic validation.",
-  "artifacts": [
-    "evidence/EVD-nato-cogsec-stack-INGEST-001/metrics.json",
-    "evidence/EVD-nato-cogsec-stack-INGEST-001/stamp.json"
-  ]
-}

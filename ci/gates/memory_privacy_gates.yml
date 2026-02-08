@@ -1,18 +1,25 @@
-# Memory Privacy CI Gates
-# These are temporary names until branch protection check names are confirmed.
+# Memory Privacy CI Gates - Temporary Configuration
+# These checks are required for GA readiness and will be mapped to branch protection names.
 
 gates:
-  - name: ci/memory-privacy-foundation
-    description: "Lint and unit tests for core/memory and core/privacy"
-    command: "npm run test:memory-privacy-core"
+  - id: ci/memory-privacy-foundation
+    name: Memory Privacy Foundation
+    description: Unit tests and policy validation for memory core
+    trigger_paths:
+      - core/memory/**
+      - core/privacy/**
     required: true
 
-  - name: ci/memory-privacy-eval
-    description: "Run privacy evaluation fixtures and context leak tests"
-    command: "npm run test:memory-privacy-eval"
+  - id: ci/memory-privacy-eval
+    name: Memory Privacy Evaluation
+    description: Privacy-memory eval harness (leakage/redaction)
+    trigger_paths:
+      - eval/privacy_memory/**
     required: true
 
-  - name: ci/memory-privacy-evidence
-    description: "Validate memory privacy evidence artifacts and determinism"
-    command: "npm run verify:memory-privacy-evidence"
+  - id: ci/memory-privacy-evidence
+    name: Memory Privacy Evidence
+    description: Validation of memory-specific evidence artifacts
+    trigger_paths:
+      - evidence/EVD-MITTR-AIMEM-PRIV-*/**
     required: true
