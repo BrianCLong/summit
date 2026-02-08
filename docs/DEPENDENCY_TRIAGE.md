@@ -41,7 +41,8 @@ Run these from repo root (or the specified workspace root):
     - `services/safejoin`: bumped `bytes` to 1.11.1.
     - `webapp`: `npm audit fix` completed; 0 vulnerabilities reported.
     - Go modules: all `go.mod` files set to Go 1.24 + toolchain go1.24.13.
-  - MLflow 3.5.0 upgrade not smoke-tested locally (mlflow not installed in base environment).
+  - MLflow 3.5.0 smoke test completed in a minimal venv (MLflow file-store run + log params/metrics).
+  - Full `services/ml-training` dependency install remains heavy due to CUDA-enabled torch wheels; not exercised in smoke test.
 
 ## Go (govulncheck)
 
