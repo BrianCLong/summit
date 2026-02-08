@@ -136,6 +136,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cse-graph-extensions
+    version: v1
+    path: prompts/standards/cse-graph-extensions@v1.md
+    sha256: 7871b1cd6c0f0d8228aa907773f05e169636ebf784dedb0a4f477d9d90d476ec
+    description: Define the CSE graph extensions standard, schema, and roadmap alignment updates.
+    scope:
+      paths:
+        - docs/standards/cognitive-security-engine.md
+        - docs/standards/README.md
+        - schemas/cogwar/cse.graph.v1.schema.json
+        - docs/roadmap/STATUS.json
+        - prompts/standards/cse-graph-extensions@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - io-cogwar
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
