@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:30:00Z",
+  "revision_note": "Validated repo assumptions for graph-grounded agent planning; recorded evidence sources and deferred validations.",
   "initiatives": [
+    {
+      "id": "repo-assumptions-graph-grounded-agent",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Repo assumptions validated with evidence-first inventory for graph-grounded agent lane; deferred CLI and redaction discovery."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -208,11 +214,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
