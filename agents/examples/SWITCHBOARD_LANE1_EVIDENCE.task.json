@@ -1,0 +1,47 @@
+{
+  "task_id": "SWITCHBOARD_LANE1_EVIDENCE",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "switchboard-lane1-evidence",
+    "version": "v1",
+    "sha256": "63566a32116bf391ee3e06e26edcabb19129ad4604fceaf15b03b1b81c44f250",
+    "path": "prompts/switchboard/switchboard-lane1-evidence@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/agents/switchboard/",
+      "tests/agents/switchboard/",
+      "tests/fixtures/evidence/switchboard/",
+      "docs/ga/evidence.md",
+      "docs/ga/switchboard-truth-table.md",
+      "docs/roadmap/STATUS.json",
+      ".github/workflows/_reusable-switchboard-gates.yml",
+      "required_checks.todo.md",
+      "agent-contract.json",
+      "prompts/switchboard/switchboard-lane1-evidence@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["governance", "switchboard", "evidence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "tests/agents/switchboard/evidence.determinism.test.ts",
+      "docs/ga/evidence.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Switchboard evidence schemas and determinism test are present.",
+    "Switchboard control-plane skeleton exists under src/agents/switchboard.",
+    "Truth table and evidence contract documentation are published."
+  ],
+  "stop_conditions": [
+    "Changes to restricted areas without override.",
+    "Requests to bypass GA verification gates."
+  ]
+}

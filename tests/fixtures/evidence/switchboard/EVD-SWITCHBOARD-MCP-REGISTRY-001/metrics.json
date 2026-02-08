@@ -1,0 +1,9 @@
+{
+  "evidenceId": "EVD-SWITCHBOARD-MCP-REGISTRY-001",
+  "counters": {
+    "registry_entries": 1
+  },
+  "gauges": {
+    "registry_healthchecks": 0
+  }
+}

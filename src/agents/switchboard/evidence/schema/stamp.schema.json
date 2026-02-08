@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SwitchboardStamp",
+  "description": "Determinism contract for timestamp isolation in Switchboard evidence stamps.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "runId": { "type": "string" }
+  },
+  "required": ["generatedAt", "runId"]
+}

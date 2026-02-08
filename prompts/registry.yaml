@@ -1,5 +1,36 @@
 version: 1
 prompts:
+  - id: switchboard-lane1-evidence
+    version: v1
+    path: prompts/switchboard/switchboard-lane1-evidence@v1.md
+    sha256: 63566a32116bf391ee3e06e26edcabb19129ad4604fceaf15b03b1b81c44f250
+    description: Switchboard MCP control-plane Lane 1 evidence scaffolding.
+    scope:
+      paths:
+        - src/agents/switchboard/
+        - tests/agents/switchboard/
+        - tests/fixtures/evidence/switchboard/
+        - docs/ga/evidence.md
+        - docs/ga/switchboard-truth-table.md
+        - docs/roadmap/STATUS.json
+        - .github/workflows/_reusable-switchboard-gates.yml
+        - required_checks.todo.md
+        - agent-contract.json
+        - prompts/switchboard/switchboard-lane1-evidence@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - switchboard
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

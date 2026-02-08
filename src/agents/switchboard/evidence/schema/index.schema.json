@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SwitchboardEvidenceIndex",
+  "description": "Determinism contract for Switchboard evidence indexes.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "evidenceId": { "type": "string" },
+    "area": { "type": "string" },
+    "artifactPaths": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["evidenceId", "area", "artifactPaths"]
+}

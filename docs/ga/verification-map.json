@@ -4,76 +4,67 @@
     "tier": "A",
     "artifact": "e2e/a11y-keyboard/a11y-gate.spec.ts",
     "ciStatus": "wired",
-    "evidence": ["reports/a11y-keyboard/README.md", ".github/workflows/a11y-keyboard-smoke.yml"],
-    "keywords": ["accessibility", "keyboard"],
+    "evidence": [
+      "reports/a11y-keyboard/README.md",
+      ".github/workflows/a11y-keyboard-smoke.yml"
+    ],
+    "keywords": [
+      "accessibility",
+      "keyboard"
+    ],
     "notes": "Blocks GA on serious/critical axe findings or keyboard navigation regressions; artifact upload required."
-  },
-  {
-    "feature": "Demo Mode Hard Gate",
-    "tier": "B",
-    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
-    "ciStatus": "wired",
-    "evidence": ["scripts/demo-up.sh", "docs/archive/README-UPDATED.md"],
-    "keywords": ["DEMO_MODE", "Demo Mode"],
-    "notes": "Demo mode must remain behind explicit gate; verification is node-native to avoid Jest instability."
-  },
-  {
-    "feature": "Rate Limiting",
-    "tier": "B",
-    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
-    "ciStatus": "wired",
-    "evidence": ["docs/API_RATE_LIMITING.md"],
-    "keyword": "rate limiting",
-    "notes": "Documentation-driven contract while runtime harness is stabilized."
   },
   {
     "feature": "AuthN/AuthZ Helpers",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
     "ciStatus": "wired",
-    "evidence": ["docs/AUTHZ_IMPLEMENTATION_SUMMARY.md"],
+    "evidence": [
+      "docs/AUTHZ_IMPLEMENTATION_SUMMARY.md"
+    ],
     "keyword": "Authorization",
     "notes": "Ensures helper guidance is anchored to the audited AuthZ summary."
-  },
-  {
-    "feature": "Observability Taxonomy",
-    "tier": "B",
-    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
-    "ciStatus": "wired",
-    "evidence": [
-      "summit_observability/METRICS.md",
-      "summit_observability/LOGS.md",
-      "summit_observability/EVENTS.md"
-    ],
-    "keywords": ["metrics", "logs", "events"],
-    "notes": "Keeps the metrics/logs/events taxonomy intact."
   },
   {
     "feature": "Data Classification & Governance",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
     "ciStatus": "wired",
-    "evidence": ["docs/DATA_GOVERNANCE.md"],
+    "evidence": [
+      "docs/DATA_GOVERNANCE.md"
+    ],
     "keyword": "Governance",
     "notes": "Guards the canonical governance document."
   },
   {
-    "feature": "Policy Preflight & Receipts",
-    "tier": "C",
-    "artifact": "scripts/ga/verify-ga-surface.mjs",
-    "ciStatus": "wired",
-    "evidence": ["PROVENANCE_SCHEMA.md"],
-    "keyword": "provenance",
-    "notes": "Validated via schema checks to avoid test runner dependency."
-  },
-  {
-    "feature": "Ingestion Security Hardening",
+    "feature": "Demo Mode Hard Gate",
     "tier": "B",
     "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
     "ciStatus": "wired",
-    "evidence": ["docs/security/security-architecture-and-policies.md"],
-    "keyword": "ingestion",
-    "notes": "Ensures ingestion hardening expectations stay documented."
+    "evidence": [
+      "scripts/demo-up.sh",
+      "docs/archive/README-UPDATED.md"
+    ],
+    "keywords": [
+      "DEMO_MODE",
+      "Demo Mode"
+    ],
+    "notes": "Demo mode must remain behind explicit gate; verification is node-native to avoid Jest instability."
+  },
+  {
+    "feature": "GA Gate Artifact Closure",
+    "tier": "C",
+    "artifact": "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
+      "GA_READINESS_REPORT.md"
+    ],
+    "keywords": [
+      "Gate Artifacts",
+      "Go/No-Go"
+    ],
+    "notes": "Tracks explicit GA gate artifacts (Terraform, DR restore, canary, migration sequencing) and ties them to evidence paths."
   },
   {
     "feature": "Generative UI Plan Contract",
@@ -85,16 +76,95 @@
       "docs/ga/genui/TOOL_MANUAL.md",
       "docs/ga/genui/ANTI_FOOTGUNS.md"
     ],
-    "keywords": ["Structured Plan", "Tool", "Footguns"],
+    "keywords": [
+      "Structured Plan",
+      "Tool",
+      "Footguns"
+    ],
     "notes": "Ensures the GenUI contract, tool schema, and anti-footgun guardrails remain anchored."
   },
   {
-    "feature": "GA Gate Artifact Closure",
-    "tier": "C",
-    "artifact": "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
+    "feature": "Ingestion Security Hardening",
+    "tier": "B",
+    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
     "ciStatus": "wired",
-    "evidence": ["docs/ga/MVP4_GA_GATE_ARTIFACTS.md", "GA_READINESS_REPORT.md"],
-    "keywords": ["Gate Artifacts", "Go/No-Go"],
-    "notes": "Tracks explicit GA gate artifacts (Terraform, DR restore, canary, migration sequencing) and ties them to evidence paths."
+    "evidence": [
+      "docs/security/security-architecture-and-policies.md"
+    ],
+    "keyword": "ingestion",
+    "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "Media Authenticity & Provenance",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_media_provenance.ts",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/governance/media_provenance.md"
+    ],
+    "keywords": [
+      "media",
+      "provenance",
+      "authenticity"
+    ],
+    "notes": "Blocks media changes without deterministic provenance evidence."
+  },
+  {
+    "feature": "Observability Taxonomy",
+    "tier": "B",
+    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
+    "ciStatus": "wired",
+    "evidence": [
+      "summit_observability/METRICS.md",
+      "summit_observability/LOGS.md",
+      "summit_observability/EVENTS.md"
+    ],
+    "keywords": [
+      "metrics",
+      "logs",
+      "events"
+    ],
+    "notes": "Keeps the metrics/logs/events taxonomy intact."
+  },
+  {
+    "feature": "Policy Preflight & Receipts",
+    "tier": "C",
+    "artifact": "scripts/ga/verify-ga-surface.mjs",
+    "ciStatus": "wired",
+    "evidence": [
+      "PROVENANCE_SCHEMA.md"
+    ],
+    "keyword": "provenance",
+    "notes": "Validated via schema checks to avoid test runner dependency."
+  },
+  {
+    "feature": "Rate Limiting",
+    "tier": "B",
+    "artifact": "testing/ga-verification/ga-features.ga.test.mjs",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/API_RATE_LIMITING.md"
+    ],
+    "keyword": "rate limiting",
+    "notes": "Documentation-driven contract while runtime harness is stabilized."
+  },
+  {
+    "feature": "Switchboard MCP Evidence Contract",
+    "tier": "B",
+    "artifact": "tests/agents/switchboard/evidence.determinism.test.ts",
+    "ciStatus": "pending",
+    "evidence": [
+      "docs/ga/evidence.md",
+      "src/agents/switchboard/evidence/schema/index.schema.json",
+      "src/agents/switchboard/evidence/schema/report.schema.json",
+      "src/agents/switchboard/evidence/schema/metrics.schema.json",
+      "src/agents/switchboard/evidence/schema/stamp.schema.json"
+    ],
+    "keywords": [
+      "switchboard",
+      "evidence",
+      "determinism"
+    ],
+    "notes": "Deterministic evidence artifacts with timestamp isolation in stamp.json."
   }
 ]
