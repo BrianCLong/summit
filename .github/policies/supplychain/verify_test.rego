@@ -33,3 +33,19 @@ test_allow_fail_unpinned if {
 		"trust": {"pinned": false}
 	}
 }
+
+test_allow_fail_cve_3_0_3 if {
+	not allow with input as {
+		"evidence": {"result": "pass"},
+		"cosign": {"version": "3.0.3"},
+		"trust": {"pinned": true}
+	}
+}
+
+test_allow_fail_cve_2_6_1 if {
+	not allow with input as {
+		"evidence": {"result": "pass"},
+		"cosign": {"version": "2.6.1"},
+		"trust": {"pinned": true}
+	}
+}

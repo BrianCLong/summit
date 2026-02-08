@@ -6,5 +6,5 @@
   "properties": {
     "timestamp": { "type": "string", "format": "date-time" }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }
