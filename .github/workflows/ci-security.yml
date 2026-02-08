@@ -463,6 +463,23 @@ jobs:
             ${{ env.REPORT_DIR }}/zap-report.md
             ${{ env.REPORT_DIR }}/zap-report.json
 
+
+  osint-policy-gate:
+    name: OSINT Policy Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Validate OSINT Fixtures
+        run: npx tsx tests/policies/osintPolicyGate.test.ts
   security-summary:
     name: Aggregate security coverage
     runs-on: ubuntu-22.04
@@ -479,6 +496,7 @@ jobs:
       - cis-benchmark
       - baseline
       - dast
+      - osint-policy-gate
     if: ${{ always() }}
     outputs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}

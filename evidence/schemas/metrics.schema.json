@@ -2,21 +2,11 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "evidence_id": { "type": "string" },
-    "avg_latency_ms": { "type": "number" },
-    "avg_fanout": { "type": "number" }
+    "run_id": { "type": "string" },
+    "counters": { "type": "object" },
+    "timings_ms": { "type": "object" },
+    "quality": { "type": "object" }
   },
-  "required": [],
-  "additionalProperties": true
-  "$id": "https://summit.local/schemas/metrics.schema.json",
-  "type": "object",
-  "required": ["version", "counters"],
-  "properties": {
-    "version": { "type": "integer" },
-    "counters": {
-      "type": "object",
-      "additionalProperties": { "type": "number" }
-    }
-  },
+  "required": ["run_id", "counters", "timings_ms"],
   "additionalProperties": false
 }
