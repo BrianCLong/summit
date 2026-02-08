@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.io/schemas/influence_ops/v2/proof_layer.graph.json",
+  "title": "Proof Layer Schema",
+  "description": "Graph schema for proof objects and synthetic signals.",
+  "type": "object",
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["ProofObject", "SyntheticSignal", "Swarm"]
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "proofType": { "type": "string", "enum": ["VIDEO", "SCREENSHOT", "LEAK", "DOC"] },
+              "isSynthetic": { "type": "boolean" },
+              "hash": { "type": "string" }
+            }
+          }
+        },
+        "required": ["id", "type"]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["SUPPORTED_BY_PROOF", "LIKELY_SYNTHETIC", "COORDINATED_WITH"]
+          },
+          "properties": {
+            "type": "object",
+            "properties": {
+              "confidence": { "type": "number" }
+            }
+          }
+        },
+        "required": ["source", "target", "type"]
+      }
+    }
+  },
+  "required": ["nodes", "edges"]
+}

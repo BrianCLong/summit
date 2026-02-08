@@ -2,6 +2,7 @@ import pino from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 import { authGuard } from '../utils/auth.js';
+import { flagGuard } from '../utils/flagGuard.js';
 
 const logger = (pino as any)();
 
@@ -212,10 +213,13 @@ const investigationResolvers = {
       };
     }, 'write:case'),
 
-    deleteInvestigation: authGuard(async (_: any, { id }: { id: string }) => {
-      logger.info(`Deleting investigation: ${id} (placeholder)`);
-      return true;
-    }, 'write:case'),
+    deleteInvestigation: flagGuard(
+      authGuard(async (_: any, { id }: { id: string }) => {
+        logger.info(`Deleting investigation: ${id} (placeholder)`);
+        return true;
+      }, 'write:case'),
+      'feature.investigation.delete',
+    ),
   },
 };
 
