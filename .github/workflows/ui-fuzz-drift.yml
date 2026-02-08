@@ -1,0 +1,46 @@
+name: ui-fuzz-drift
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  ui-fuzz-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Restore drift history cache
+        uses: actions/cache@v4
+        with:
+          path: artifacts/ui_fuzz_drift/history.json
+          key: ui-fuzz-drift-history
+      - name: Start client dev server
+        run: pnpm run client:dev &
+      - name: Wait for client
+        run: npx tsx tools/ui_fuzz/scripts/wait_for_url.ts http://localhost:3000 60000
+      - name: Run UI fuzz smoke
+        env:
+          UI_FUZZ_BASE_URL: http://localhost:3000
+          UI_FUZZ_ALLOWLIST: localhost
+          UI_FUZZ_SEED: 7331
+        run: pnpm ui-fuzz:smoke
+      - name: Run drift detector
+        run: npx tsx scripts/monitoring/bombadil-ui-fuzz-drift.ts
+      - name: Upload drift artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-fuzz-drift-artifacts
+          path: artifacts/ui_fuzz_drift/

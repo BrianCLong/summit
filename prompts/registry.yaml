@@ -1,5 +1,38 @@
 version: 1
 prompts:
+  - id: implement-ui-fuzz-probe
+    version: v1
+    path: prompts/implement/ui-fuzz-probe@v1.md
+    sha256: 92cb1f09e3a18b9e2c454afa484fa837cdd33f75b1945d8cf5edcedb53ef01c6
+    description: Implement Bombadil-inspired deterministic UI fuzz probe, CI smoke, and drift monitoring.
+    scope:
+      paths:
+        - tools/ui_fuzz/
+        - scripts/monitoring/bombadil-ui-fuzz-drift.ts
+        - docs/standards/bombadil-ui-fuzz.md
+        - docs/security/data-handling/bombadil-ui-fuzz.md
+        - docs/ops/runbooks/bombadil-ui-fuzz.md
+        - docs/roadmap/STATUS.json
+        - .github/workflows/ui-fuzz.yml
+        - .github/workflows/ui-fuzz-drift.yml
+        - package.json
+        - prompts/implement/ui-fuzz-probe@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - tooling
+        - ci
+        - security
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
