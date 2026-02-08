@@ -1,4 +1,0 @@
-interface:
-  display_name: "Summit PR Stack Sequencer (Merge Train Captain)"
-  short_description: "Plan deterministic merge trains for stacked PRs with GA gates"
-  default_prompt: "Use $summit-pr-stack-sequencer to build a PR DAG and merge-train runbook for these Summit PRs."
