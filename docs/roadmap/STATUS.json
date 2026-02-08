@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register; Normalized evidence/index.json to match evidence schema; Added UI Fuzz Probe scaffolding; Added Maestro Long-Run Job Engine governance scaffolding and CI gates; Expanded RepoFlow subsumption implementation scope and evidence gates; Added narrative frame/infrastructure schema and deterministic ids for narrative intel. and evidence-first lane-1 posture; Added narrative analysis research update for 2026-02-08; Published AI platform daily summary runbook for 2026-02-04; Added graph tech signal update brief for GraphRAG governance alignment.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
