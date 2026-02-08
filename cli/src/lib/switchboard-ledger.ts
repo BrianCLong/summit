@@ -7,6 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import { Redactor } from './redaction.js';
 
 export interface LedgerEntry<T = Record<string, unknown>> {
   seq: number;
@@ -29,6 +30,7 @@ function stableStringify(value: unknown): string {
   }
   if (value && typeof value === 'object') {
     const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([, val]) => val !== undefined)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, val]) => `"${key}":${stableStringify(val)}`);
     return `{${entries.join(',')}}`;
@@ -46,12 +48,14 @@ export class CapsuleLedger {
   private lastHash: string;
   private seq: number;
   private sessionId: string;
+  private redactor?: Redactor;
 
-  constructor(sessionDir: string, sessionId: string) {
+  constructor(sessionDir: string, sessionId: string, redactor?: Redactor) {
     this.ledgerPath = path.join(sessionDir, 'ledger.jsonl');
     this.lastHash = 'GENESIS';
     this.seq = 0;
     this.sessionId = sessionId;
+    this.redactor = redactor;
     fs.mkdirSync(sessionDir, { recursive: true });
   }
 
@@ -61,12 +65,16 @@ export class CapsuleLedger {
 
   append<T = Record<string, unknown>>(type: string, data: T): LedgerEntry<T> {
     const timestamp = new Date().toISOString();
+
+    // Redact data before logging and hashing
+    const safeData = this.redactor ? this.redactor.redactObject(data) : data;
+
     const entryBase = {
       seq: this.seq + 1,
       timestamp,
       session_id: this.sessionId,
       type,
-      data,
+      data: safeData,
       prev_hash: this.lastHash,
     };
     const entryHash = computeEntryHash(entryBase);
