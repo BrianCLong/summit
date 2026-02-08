@@ -25,6 +25,9 @@ module.exports = {
     '/archive/',
     '/salvage/',
     '/pull/',
+    '/tests/e2e/',
+    '/client/tests/',
+    '/services/sandbox-gateway/tests/',
   ],
   watchPathIgnorePatterns: [
     '/node_modules/',
@@ -80,7 +83,7 @@ module.exports = {
     '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src/index.ts',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|.*\\.mjs$))',
+    'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|jose|.*\\.mjs$))',
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',
