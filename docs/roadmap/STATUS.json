@@ -159,6 +159,12 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
+      "id": "narrative-infra-epistemic-fatigue",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Narrative frame + infrastructure schemas and deterministic ids for GraphRAG narrative intelligence."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",

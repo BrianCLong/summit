@@ -37,6 +37,14 @@ export type { FusionConfig, ConflictInfo } from './fusion/ContextFusion.js';
 export { CounterfactualEngine } from './analysis/CounterfactualEngine.js';
 export type { Counterfactual, SensitivityAnalysis } from './analysis/CounterfactualEngine.js';
 
+// Narrative intelligence
+export {
+  createInfrastructureFingerprint,
+  createNarrativeFrameId,
+  createNarrativeInfrastructureId,
+} from './narratives/ids.js';
+export * from './narratives/schema.js';
+
 // LLM integration
 export { LLMIntegration } from './llm/LLMIntegration.js';
 export type { LLMConfig, LLMResponse, EmbeddingResponse } from './llm/LLMIntegration.js';

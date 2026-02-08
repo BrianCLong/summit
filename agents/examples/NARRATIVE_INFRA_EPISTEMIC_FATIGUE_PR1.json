@@ -1,0 +1,47 @@
+{
+  "task_id": "NARRATIVE_INFRA_EPISTEMIC_FATIGUE_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-infra-epistemic-fatigue-pr1",
+    "version": "v1",
+    "sha256": "e224e3cedf190868a9c3b6cacc94111a17b93f2750835c76ef6346287b73c97c",
+    "path": "prompts/narrative/narrative-infra-epistemic-fatigue-pr1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "services/graphrag/src/narratives/",
+      "services/graphrag/src/__tests__/narratives/",
+      "services/graphrag/src/index.ts",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/NARRATIVE_INFRA_EPISTEMIC_FATIGUE_PR1.json",
+      "prompts/narrative/narrative-infra-epistemic-fatigue-pr1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": [
+      "graphrag",
+      "narrative-intel",
+      "governance",
+      "testing"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "services/graphrag/src/__tests__/narratives/schema.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Narrative frame and infrastructure schemas compile with deterministic ids.",
+    "Unit tests validate deterministic hashing and schema parsing.",
+    "STATUS.json includes the narrative infra initiative entry."
+  ],
+  "stop_conditions": [
+    "Scope expands beyond graphrag narrative schema + ids.",
+    "Prompt hash mismatch detected in registry."
+  ]
+}
