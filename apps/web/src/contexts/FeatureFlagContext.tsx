@@ -24,7 +24,8 @@ export function FeatureFlagProvider({ children }: { children: React.ReactNode })
   const [flags, setFlags] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { user, token } = useAuth();
+  const { user, token: contextToken } = useAuth() as { user: any; token?: string };
+  const token = contextToken ?? localStorage.getItem('auth_token');
 
   const fetchFlags = useCallback(async () => {
     if (!token) return;
