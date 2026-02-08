@@ -84,7 +84,7 @@ Run these from repo root (or the specified workspace root):
 - `pnpm audit --json` in `client` and `server` timed out/hung after 180s even with explicit registry.
 - `npm audit` fallback at repo root fails (workspace:* protocol prevents generating a package-lock.json).
 - `npm audit` in `apps/ui` succeeds after generating a local package-lock (0 vulnerabilities).
-- Custom bulk audit script (npm advisory bulk API) against all pnpm-lock packages returned 21 advisories (see `/tmp/pnpm-audit/bulk-full.json`).
+- Custom bulk audit script (npm advisory bulk API) against all pnpm-lock packages returned 21 advisories (see `/tmp/pnpm-audit/bulk-full.json`). Mapped to lockfile: 17 packages / 24 versions affected; report in `docs/audit/npm_bulk_advisory_report.md`.
 - `pnpm audit` in `intelgraph-mcp` fails (no `pnpm-lock.yaml`).
 - `pnpm audit` in `summit-mini` reports 0 vulnerabilities after overrides (diff/esbuild).
 
