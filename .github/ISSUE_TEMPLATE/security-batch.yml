@@ -1,0 +1,79 @@
+name: Security Batch
+description: Recurring sprint issue for security dashboard triage, CIS benchmark checks, and CI readiness.
+title: "Security Batch: YYYY-MM-DD"
+labels:
+  - "type:security"
+  - "area:security"
+  - "lane:security"
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Security Batch Sprint
+        Use this template to run the recurring security batch. Reference:
+        - Runbook: docs/security/SECURITY_BATCH.md
+        - CIS checks: docs/security/SECURITY_CIS.md
+  - type: input
+    id: sprint-window
+    attributes:
+      label: Sprint window
+      description: Planned dates for this security batch.
+      placeholder: "2026-02-10 → 2026-02-24"
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+      description: Primary accountable owner for this batch.
+      placeholder: "@security-lead"
+    validations:
+      required: true
+  - type: input
+    id: dashboard-review
+    attributes:
+      label: Security dashboard review
+      description: Link to GitHub security/code view review and timestamp.
+      placeholder: "https://github.com/<org>/<repo>/security/code (reviewed YYYY-MM-DD)"
+    validations:
+      required: true
+  - type: input
+    id: cis-run
+    attributes:
+      label: CIS benchmark run evidence
+      description: Link to evidence artifact or report (must be ≤ 7 days old).
+      placeholder: "artifacts/security/cis-report-YYYY-MM-DD.md"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ] No open **high/critical** alerts in GitHub `security/code` view.
+        - [ ] CIS benchmark run completed in the last 7 days and archived.
+        - [ ] CI green on `.github/workflows/ci.yml` for touched components.
+        - [ ] Security batch findings logged as follow-on issues.
+    validations:
+      required: true
+  - type: textarea
+    id: execution-log
+    attributes:
+      label: Execution log
+      description: Capture commands, evidence links, and notes.
+      placeholder: |
+        - Command: ./scripts/security-hardening-suite.sh (CIS validation)
+        - Evidence: <link>
+        - Notes: ...
+    validations:
+      required: true
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Verification
+      options:
+        - label: CI workflow results reviewed (ci.yml)
+        - label: CIS benchmark evidence attached
+        - label: Security dashboard alerts triaged
+        - label: Follow-on issues created and labeled lane:security
