@@ -1,6 +1,6 @@
 # Email Template System
 
-Comprehensive email template system for IntelGraph with support for MJML/React Email templates, A/B testing, analytics tracking, unsubscribe management, and deliverability optimization.
+Comprehensive email template system for IntelGraph with support for HTML/React Email templates, A/B testing, analytics tracking, unsubscribe management, and deliverability optimization.
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@ Comprehensive email template system for IntelGraph with support for MJML/React E
 ## Features
 
 ✅ **Multi-Provider Support**: SMTP, SendGrid, AWS SES, Mailgun, Postmark
-✅ **Responsive Templates**: MJML and React Email support
+✅ **Responsive Templates**: HTML and React Email support (legacy MJML templates are no longer rendered)
 ✅ **A/B Testing**: Built-in variant testing with statistical analysis
 ✅ **Email Analytics**: Open tracking, click tracking, bounce tracking
 ✅ **Unsubscribe Management**: One-click unsubscribe, preference center, frequency limits
@@ -122,7 +122,7 @@ await emailService.sendFromTemplate(
 ```
 email-service/
 ├── EmailService.ts              # Main service coordinator
-├── TemplateRenderer.ts          # MJML/React Email renderer
+├── TemplateRenderer.ts          # HTML/React Email renderer
 ├── EmailQueue.ts                # BullMQ queue management
 ├── types.ts                     # Type definitions
 │
@@ -132,8 +132,8 @@ email-service/
 │   └── [Other providers...]
 │
 ├── templates/
-│   ├── welcome.mjml             # Welcome email template
-│   ├── password-reset.mjml      # Password reset
+│   ├── welcome.mjml             # Legacy MJML template (not rendered)
+│   ├── password-reset.mjml      # Legacy MJML template (not rendered)
 │   ├── investigation-shared.mjml
 │   ├── alert-critical.mjml
 │   └── weekly-digest.mjml
@@ -217,25 +217,25 @@ await emailService.sendEmail(
 
 ## Template Development
 
-### Creating MJML Templates
+### Creating HTML Templates
 
-1. Create a new `.mjml` file in `templates/`
-2. Use MJML components for responsive design
+1. Create a new HTML template in your template store (MJML support removed)
+2. Use responsive HTML/CSS for email clients
 3. Use `{{variable}}` syntax for dynamic content
 
-```xml
-<mjml>
-  <mj-body>
-    <mj-section>
-      <mj-column>
-        <mj-text>Hello {{firstName}}!</mj-text>
-        <mj-button href="{{actionUrl}}">
-          Click Here
-        </mj-button>
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>
+```html
+<html>
+  <body>
+    <table role="presentation" width="100%">
+      <tr>
+        <td>
+          <p>Hello {{firstName}}!</p>
+          <p><a href="{{actionUrl}}">Click Here</a></p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
 ```
 
 ### Template Variables
@@ -451,7 +451,7 @@ _dmarc.example.com. IN TXT "v=DMARC1; p=quarantine; rua=mailto:dmarc@example.com
 
 2. **HTML Content**
    - Maintain text-to-HTML ratio above 30%
-   - Use responsive design (MJML handles this)
+   - Use responsive design (inline CSS is recommended)
    - Include alt text for all images
    - Test across multiple email clients
 

@@ -5,7 +5,7 @@
  * Main service for sending emails with support for:
  * - Multiple providers (SMTP, SendGrid, AWS SES, etc.)
  * - Queue management with retry logic
- * - Template rendering (MJML + React Email)
+ * - Template rendering (HTML + React Email)
  * - A/B testing
  * - Analytics and tracking
  * - Unsubscribe management

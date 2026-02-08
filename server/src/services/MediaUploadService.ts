@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { createWriteStream, createReadStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';
+import { Readable } from 'stream';
 import { createHash } from 'crypto';
 import * as path from 'path';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
-import type { Upload } from 'graphql-upload-ts';
 import pino from 'pino';
 import exifReader from 'exif-reader';
 import {
@@ -89,6 +89,16 @@ export enum MediaType {
   GEOSPATIAL = 'GEOSPATIAL',
 }
 
+export interface UploadPayload {
+  filename: string;
+  mimetype: string;
+  encoding?: string;
+  createReadStream?: () => Readable;
+  data?: string;
+}
+
+export type UploadInput = UploadPayload | Promise<UploadPayload>;
+
 export class MediaUploadService {
   private config: MediaUploadConfig;
   private imageProcessingPipeline?: ImageProcessingPipeline;
@@ -121,13 +131,44 @@ export class MediaUploadService {
     }
   }
 
+  private resolveUploadPayload(upload: UploadPayload): {
+    stream: Readable;
+    filename: string;
+    mimetype: string;
+  } {
+    if (!upload) {
+      throw new Error('Upload payload is required');
+    }
+
+    if (typeof upload.createReadStream === 'function') {
+      return {
+        stream: upload.createReadStream(),
+        filename: upload.filename,
+        mimetype: upload.mimetype,
+      };
+    }
+
+    if (typeof upload.data === 'string') {
+      const buffer = Buffer.from(upload.data, 'base64');
+      return {
+        stream: Readable.from(buffer),
+        filename: upload.filename,
+        mimetype: upload.mimetype,
+      };
+    }
+
+    throw new Error(
+      'Upload payload must include createReadStream() or base64 data',
+    );
+  }
+
   /**
    * Upload and process a media file with comprehensive metadata extraction
    */
-  async uploadMedia(upload: Upload, userId?: string): Promise<MediaMetadata> {
+  async uploadMedia(upload: UploadInput, userId?: string): Promise<MediaMetadata> {
     const uploadResolved = await upload;
-    const { createReadStream, filename, mimetype } = uploadResolved;
-    const stream = createReadStream();
+    const { stream, filename, mimetype } =
+      this.resolveUploadPayload(uploadResolved);
 
     logger.info(
       `Starting upload for file: ${filename}, type: ${mimetype}, user: ${userId}`,

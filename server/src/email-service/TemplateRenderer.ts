@@ -2,10 +2,9 @@
 /**
  * Template Renderer
  *
- * Renders email templates using MJML and React Email
+ * Renders email templates using HTML templates and React Email
  */
 
-import mjml2html from 'mjml';
 import { render as renderReactEmail } from '@react-email/render';
 import { htmlToText } from 'html-to-text';
 import juice from 'juice';
@@ -67,29 +66,14 @@ export class TemplateRenderer {
   }
 
   /**
-   * Render MJML template
+   * Render legacy MJML/HTML template
    */
   private async renderMJML(
     mjmlContent: string,
     variables: Record<string, unknown>,
   ): Promise<string> {
-    // Interpolate variables in MJML
-    const interpolatedMjml = this.interpolate(mjmlContent, variables);
-
-    // Convert MJML to HTML
-    const result = mjml2html(interpolatedMjml, {
-      keepComments: false,
-      beautify: false,
-      minify: true,
-    });
-
-    if (result.errors.length > 0) {
-      throw new Error(
-        `MJML rendering errors: ${result.errors.map((e) => e.message).join(', ')}`,
-      );
-    }
-
-    return result.html;
+    // Treat stored content as HTML (MJML support removed)
+    return this.interpolate(mjmlContent, variables);
   }
 
   /**

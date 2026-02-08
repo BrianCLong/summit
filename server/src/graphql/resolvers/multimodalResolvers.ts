@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Upload } from 'graphql-upload-ts';
+import { GraphQLScalarType } from 'graphql';
 import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import { MultimodalDataService } from '../../services/MultimodalDataService.js';
 import { MediaUploadService } from '../../services/MediaUploadService.js';
@@ -11,6 +11,15 @@ import {
 } from '../subscriptionEngine.js';
 
 const logger = (pino as any)({ name: 'MultimodalResolvers' });
+
+const UploadScalar = new GraphQLScalarType({
+  name: 'Upload',
+  description:
+    'Upload payload via variables (supports { filename, mimetype, data } base64).',
+  serialize: (value) => value,
+  parseValue: (value) => value,
+  parseLiteral: () => null,
+});
 
 export interface MultimodalContext {
   user: any;
@@ -675,7 +684,7 @@ export const multimodalResolvers = {
   },
 
   // Scalar resolvers
-  Upload: require('graphql-upload-ts').GraphQLUpload,
+  Upload: UploadScalar,
 };
 
 export default multimodalResolvers;

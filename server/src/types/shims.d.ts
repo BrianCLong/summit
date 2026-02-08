@@ -190,10 +190,6 @@ declare module 'fluent-ffmpeg' {
   const anyExport: any;
   export = anyExport;
 }
-declare module 'graphql-upload-ts' {
-  const anyExport: any;
-  export = anyExport;
-}
 declare module 'sharp' {
   const anyExport: any;
   export = anyExport;
@@ -350,4 +346,3 @@ declare module 'compression' {
   const anyExport: any;
   export = anyExport;
 }
-

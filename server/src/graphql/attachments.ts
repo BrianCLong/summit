@@ -1,7 +1,6 @@
-// graphql-upload-ts types are not properly exported, using any for now
-const GraphQLUpload: any = null; // TODO: Fix graphql-upload-ts import
+import { GraphQLScalarType } from 'graphql';
 import { AttachmentService } from '../services/AttachmentService.js';
-import type { Readable } from 'stream';
+import { Readable } from 'stream';
 
 const service = new AttachmentService();
 
@@ -18,12 +17,30 @@ export const attachmentTypeDefs = `#graphql
   }
 `;
 
+const UploadScalar = new GraphQLScalarType({
+  name: 'Upload',
+  description:
+    'Upload payload via variables (supports { filename, mimetype, data } base64).',
+  serialize: (value) => value,
+  parseValue: (value) => value,
+  parseLiteral: () => null,
+});
+
 export const attachmentResolvers = {
-  Upload: GraphQLUpload,
+  Upload: UploadScalar,
   Mutation: {
     async uploadAttachment(_: unknown, { file }: { file: Promise<any> }) {
       const upload = await file;
-      const stream: Readable = upload.createReadStream();
+      let stream: Readable;
+      if (typeof upload.createReadStream === 'function') {
+        stream = upload.createReadStream();
+      } else if (typeof upload.data === 'string') {
+        stream = Readable.from(Buffer.from(upload.data, 'base64'));
+      } else {
+        throw new Error(
+          'Upload payload must include createReadStream() or base64 data',
+        );
+      }
       const meta = await service.save(stream, {
         filename: upload.filename,
         mimeType: upload.mimetype,
