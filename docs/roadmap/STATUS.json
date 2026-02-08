@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-07T12:00:00Z",
+  "revision_note": "Added Copilot model preview governance lane-1 scaffolding and evidence gates.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "copilot-model-previews-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Cataloged Copilot preview model metadata, cost multiplier governance, evidence gates, and GA checklist."
     },
     {
       "id": "B",

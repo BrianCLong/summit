@@ -1,0 +1,69 @@
+{
+  "task_id": "COPILOT_MODEL_PREVIEWS_LANE1_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "copilot-model-previews-lane1",
+    "version": "v1",
+    "sha256": "7578617ed94dd0c3475513bf21ffb55e9186bb35a8e88b6fc2943126aa319c07",
+    "path": "prompts/governance/copilot-model-previews-lane1@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/scripts/verify-evidence.mjs",
+      ".github/workflows/ci-verify.yml",
+      "agent-contract.json",
+      "agents/examples/COPILOT_MODEL_PREVIEWS_LANE1_20260207.json",
+      "docs/ga/MVP-4-GA-VERIFICATION.md",
+      "docs/ga/ga-copilot-model-previews.md",
+      "docs/ga/verification-map.json",
+      "docs/governance/copilot-models.md",
+      "docs/roadmap/STATUS.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/report.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/metrics.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/stamp.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-COST-002/report.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-COST-002/metrics.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-COST-002/stamp.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-GATES-003/report.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-GATES-003/metrics.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-GATES-003/stamp.json",
+      "evidence/index.json",
+      "prompts/governance/copilot-model-previews-lane1@v1.md",
+      "prompts/registry.yaml",
+      "reports/a11y-keyboard/README.md",
+      "required_checks.todo.md",
+      "src/connectors/copilot/models.catalog.json",
+      "src/connectors/copilot/readCatalog.ts",
+      "src/policies/copilotModelPolicy.test.ts",
+      "src/policies/copilotModelPolicy.ts"
+    ],
+    "domains": ["governance", "evidence", "policy", "docs", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "evidence/index.json",
+      "evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001",
+      "evidence/EVD-CLAUDEOPUS46FAST-COST-002",
+      "evidence/EVD-CLAUDEOPUS46FAST-GATES-003"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Copilot preview model catalog entry is encoded with public facts.",
+    "Deny-by-default multiplier tests cover promo window enforcement.",
+    "Evidence index references all new evidence artifacts.",
+    "GA checklist updated with Copilot preview governance acceptance criteria."
+  ],
+  "stop_conditions": [
+    "Evidence artifacts missing or timestamp leakage outside stamp.json.",
+    "Policy prerequisites cannot be expressed as data.",
+    "Verification gates conflict with existing GA guardrails."
+  ],
+  "dependencies": ["docs/ga/AGENTS.md", "docs/governance/AGENTS.md"],
+  "approvals": []
+}

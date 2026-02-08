@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-CLAUDEOPUS46FAST-CATALOG-001",
+  "summary": "Catalog entry for Claude Opus 4.6 fast preview profile and prerequisites.",
+  "artifacts": ["src/connectors/copilot/models.catalog.json"],
+  "notes": "Public preview availability, surfaces, tiers, policy prerequisites, and promo window encoded as data."
+}
