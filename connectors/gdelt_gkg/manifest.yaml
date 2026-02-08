@@ -1,0 +1,33 @@
+name: gdelt-gkg
+version: 0.1.0
+description: GDELT Global Knowledge Graph (GKG) connector (sample parsing for v2.1 TSV extracts)
+author: summit-core
+ingestion_type: batch
+supported_formats:
+  - tsv
+schema_mapping_file: schema_mapping.py
+sample_data_file: sample_gkg_v21.tsv
+golden_io_tests:
+  - test_gdelt_gkg_connector.py
+rate_limit:
+  requests_per_hour: 240
+  burst_limit: 5
+  backoff_strategy: exponential
+  max_retries: 3
+pii_flags:
+  - field_name: document_identifier
+    description: Document URL (may contain personal data in query params)
+    severity: medium
+    redaction_policy: allow
+license:
+  type: GDELT-Open-Data
+  classification: open-data
+  attribution_required: true
+  allowed_use_cases:
+    - research
+    - analysis
+  blocked_fields: []
+lineage:
+  enabled: true
+  source_system: gdelt-gkg
+  data_classification: external
