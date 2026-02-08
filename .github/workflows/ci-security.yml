@@ -610,3 +610,34 @@ jobs:
           DASHBOARD_URL: ${{ needs.security-summary.outputs.dashboard_url }}
         run: |
           echo "All security controls succeeded. Approvers can review ${DASHBOARD_URL} before promoting to production."
+
+  sigstore-verify:
+    name: Sigstore bundle verification
+    runs-on: ubuntu-latest
+    if: vars.SIGSTORE_VERIFY_ENABLED == 'true'
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Demo: Verify cosign itself (if we could download it)
+      # For now, we just download a dummy or use the action to verify a test artifact
+      - name: Download test artifact
+        run: |
+          echo "test artifact" > artifact.bin
+          echo "{}" > bundle.sigstore.json # Dummy bundle
+
+      - name: Run Sigstore Verification
+        uses: ./.github/actions/sigstore-verify
+        with:
+          cosign_version: "3.0.4"
+          artifact: "artifact.bin"
+          bundle: "bundle.sigstore.json"
+          evidence_id: "EVD-SIGSTORE-BUNDLEFIRST-CI-001"
+
+      - name: Upload Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence
+          path: evidence/
