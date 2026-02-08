@@ -5,6 +5,10 @@ on:
     paths:
       - 'packages/narrative-engine/src/schema.graphql'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   enforce-frame-integrity:
     runs-on: ubuntu-latest
