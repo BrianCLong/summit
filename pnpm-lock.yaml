@@ -5347,6 +5347,12 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)
 
+  packages/companyos-sdk:
+    devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/competitive-execution:
     devDependencies:
       '@types/node':
@@ -7758,6 +7764,12 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)
+
+  packages/graph:
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
 
   packages/graph-ai-core:
     devDependencies:
@@ -11792,6 +11804,8 @@ importers:
 
   packages/sb: {}
 
+  packages/schema: {}
+
   packages/sdk:
     devDependencies:
       '@types/node':
@@ -12651,6 +12665,25 @@ importers:
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
+
+  packages/switchboard:
+    dependencies:
+      '@summit/receipts':
+        specifier: workspace:*
+        version: link:../receipts
+      cbor:
+        specifier: ^9.0.2
+        version: 9.0.2
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.3
+        version: 25.0.10
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.0.10)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@25.0.10)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/synthetic-data:
     dependencies:
@@ -19043,6 +19076,22 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)
+
+  services/gov-policy:
+    dependencies:
+      express:
+        specifier: '>=4.21.0'
+        version: 5.2.1
+      typescript:
+        specifier: 5.7.3
+        version: 5.7.3
+    devDependencies:
+      '@types/express':
+        specifier: ^4.17.17
+        version: 4.17.25
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
 
   services/govtech-export-engine:
     dependencies:
@@ -52730,6 +52779,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  typescript@5.7.3:
+    resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   typescript@5.8.3:
     resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
@@ -70821,7 +70875,9 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
@@ -98857,6 +98913,8 @@ snapshots:
       - supports-color
 
   typescript@5.6.3: {}
+
+  typescript@5.7.3: {}
 
   typescript@5.8.3: {}
 
