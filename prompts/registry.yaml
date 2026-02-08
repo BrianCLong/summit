@@ -496,6 +496,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: narrative-dominance-operationalization
+    version: v1
+    path: prompts/docs/narrative-dominance-operationalization@v1.md
+    sha256: 208130d1771ddeba7470e364b0ac00adb93e6096731339981975c56830873a13
+    description: Expand narrative dominance standards with operational high-signal extensions for determinism and longitudinal analysis.
+    scope:
+      paths:
+        - docs/standards/narrative-dominance-tech.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/NARRATIVE_DOMINANCE_OPERATIONALIZATION_TASK.json
+        - prompts/docs/narrative-dominance-operationalization@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - narrative-intel
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md

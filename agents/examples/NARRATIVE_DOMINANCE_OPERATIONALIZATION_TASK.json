@@ -1,0 +1,37 @@
+{
+  "task_id": "NARRATIVE_DOMINANCE_OPERATIONALIZATION",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "narrative-dominance-operationalization",
+    "version": "v1",
+    "sha256": "208130d1771ddeba7470e364b0ac00adb93e6096731339981975c56830873a13",
+    "path": "prompts/docs/narrative-dominance-operationalization@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/standards/narrative-dominance-tech.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/NARRATIVE_DOMINANCE_OPERATIONALIZATION_TASK.json",
+      "prompts/docs/narrative-dominance-operationalization@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "narrative-intel"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/standards/narrative-dominance-tech.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Operationalization extensions documented with detection signals and deterministic metrics.",
+    "Roadmap status updated to reflect narrative ops documentation progress."
+  ],
+  "stop_conditions": [
+    "Requirement to modify runtime behavior or production configs.",
+    "Need to expand scope beyond declared documentation paths."
+  ]
+}
