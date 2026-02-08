@@ -17,6 +17,24 @@ class EvidencePaths:
     stamp: Path
     index: Path
 
+
+def _normalize_value(value: Any, precision: int) -> Any:
+    if isinstance(value, float):
+        return round(value, precision)
+    if isinstance(value, dict):
+        return {k: _normalize_value(v, precision) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_normalize_value(v, precision) for v in value]
+    return value
+
+
+def write_deterministic_json(path: Path, obj: dict[str, Any], *, precision: int = 6) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    normalized = _normalize_value(obj, precision)
+    serialized = json.dumps(normalized, sort_keys=True, separators=(",", ":")) + "\n"
+    path.write_text(serialized, encoding="utf-8")
+
+
 def default_paths(root: Path) -> EvidencePaths:
     return EvidencePaths(
         root=root,
@@ -26,9 +44,11 @@ def default_paths(root: Path) -> EvidencePaths:
         index=root / "index.json",
     )
 
+
 def write_json(path: Path, obj: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
 
 def init_evidence_bundle(root: Path, *, run_id: str) -> EvidencePaths:
     """
@@ -80,6 +100,7 @@ def init_evidence_bundle(root: Path, *, run_id: str) -> EvidencePaths:
 
     return p
 
+
 def init_evidence(paths: EvidencePaths, run_id: str, item_slug: str, evidence_id: Optional[str] = None) -> None:
     """
     Initialize evidence files with deterministic structure.
@@ -106,8 +127,10 @@ def init_evidence(paths: EvidencePaths, run_id: str, item_slug: str, evidence_id
         "evidence": {}
     })
 
+
 def _sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
+
 
 def write_bundle(run_ctx: dict, out_dir: str) -> None:
     root = Path(out_dir)

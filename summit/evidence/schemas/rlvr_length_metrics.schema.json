@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RLVRLengthMetrics",
+  "type": "object",
+  "required": ["evidence_id", "metrics"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVID:lspo:length-metrics:[a-f0-9]{64}$"
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "length_mean",
+        "length_p50",
+        "length_p95",
+        "length_min",
+        "length_max",
+        "length_slope",
+        "length_drop_pct",
+        "length_collapse",
+        "overlong_ratio",
+        "overlong_flag"
+      ],
+      "properties": {
+        "length_mean": { "type": "number" },
+        "length_p50": { "type": "number" },
+        "length_p95": { "type": "number" },
+        "length_min": { "type": "integer", "minimum": 0 },
+        "length_max": { "type": "integer", "minimum": 0 },
+        "length_slope": { "type": "number" },
+        "length_drop_pct": { "type": "number" },
+        "length_collapse": { "type": "boolean" },
+        "overlong_ratio": { "type": "number" },
+        "overlong_flag": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

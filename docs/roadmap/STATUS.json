@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-06T19:29:02Z",
-  "revision_note": "Added CI/CD high-signal delta action register for SSDF, OSPS, SLSA, ISO 27001, and NIST supply-chain guidance.",
+  "last_updated": "2026-02-06T20:15:00Z",
+  "revision_note": "Added RLVR length-bias evidence artifacts and deterministic length-report workflow for LUSPO validation.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -58,7 +58,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added RLVR length-bias evidence artifacts and deterministic length-report CLI for LUSPO validation."
     },
     {
       "id": "promptspec-foundation-lane1",

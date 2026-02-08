@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RLVRLengthStamp",
+  "type": "object",
+  "required": ["evidence_id", "git_sha", "deterministic"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVID:lspo:length-stamp:[a-f0-9]{64}$"
+    },
+    "git_sha": { "type": "string" },
+    "deterministic": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}
