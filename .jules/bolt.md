@@ -18,3 +18,11 @@
 ## 2026-05-22 - [Optimized Supernode Detection]
 **Learning:** Nested loops of O(N*E) for supernode detection in large graphs (>10k nodes, >50k edges) cause severe latency (~6s). Pre-calculating connection Maps in O(E) reduces this to O(N+E), improving performance by >100x (~33ms).
 **Action:** Always pre-calculate frequency/connection maps when iterating over edges for multiple nodes to avoid N*E complexity.
+
+## 2026-05-24 - [Auto-context Extraction for Graph Caching]
+**Learning:** In multi-tenant systems, failing to explicitly pass `tenantId` to caching layers can lead to cache key collisions (security risk) and poor cache hit rates if queries are defaulted to a 'global' namespace. Automatically extracting this context from query parameters at the entry point (e.g. `runCypher`) ensures consistent caching and isolation across the entire application without requiring manual updates to every call site.
+**Action:** Implement auto-extraction of metadata (tenant, case, etc.) from parameters into caching options at the base library level to guarantee consistency.
+
+## 2025-05-15 - [Graph Cache Key Generation]
+**Learning:** Replaced custom recursive stable stringify with `fast-json-stable-stringify` for O(N) performance and consistent hash generation across different parameter orderings. Discovered that the repository had severe CI-blocking issues (merge conflict markers in YAML/JSON, schema mismatches) that needed resolution before the performance fix could be verified in a clean environment.
+**Action:** Use standard libraries for stable hashing and always verify basic repository integrity when inheriting a broken state.

@@ -71,12 +71,9 @@ steps:
     type: edit
     file: "packages/${input.package_name}/package.json"
     merge_diff: |
-      <<<<<<< SEARCH
       "name": "${input.package_name}",
-      =======
       "name": "${input.scope}/${input.package_name}",
       "private": true,
-      >>>>>>> REPLACE
 
   - id: verify_structure
     type: verify

@@ -1,5 +1,8 @@
 {
+  "version": 1,
+  "classification": "public",
   "summary": "Partitioning eval completed",
+  "evidence_id": "EVD-REPORT-001",
   "scenarios": 3,
   "status": "PASS"
 }
