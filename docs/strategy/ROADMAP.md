@@ -21,6 +21,7 @@
 *   **[Arch] Agent Identity System:** Implement SPIFFE/OIDC for agent workloads.
 *   **[Cap] Policy Engine v1:** Embed OPA policies into the `AgentRuntime`.
 *   **[Del] Solvers Alpha:** Internal release of "Certified Solvers" (e.g., CodeAuditAgent).
+*   **[Cap] Context Receipts:** Schema and pipeline for governed context compaction.
 
 ### Bet 2: Continuous Assurance (CAaaS)
 *   **[Arch] Provenance Ledger V2:** Migration to immutable, append-only log storage with Merkle Tree verification.
@@ -31,6 +32,7 @@
 *   **[Arch] High-Volume Ingestion:** Upgrade `ingestion-service` for social/news firehose (Kafka/Redpanda).
 *   **[Cap] Narrative Graph Schema:** Define ontology for Claims, Narratives, and Sources.
 *   **[Del] Threat Dashboard v1:** Basic visualization of narrative clusters in `apps/web`.
+*   **[Cap] Multimodal Ingestion:** Support for PDF/Image evidence types.
 
 ### Bet 4: Auto-Scientist SDK
 *   **[Arch] Experiment Graph API:** GraphQL mutations for recording hypotheses and results.
@@ -45,6 +47,7 @@
 *   **[Arch] Agent Registry:** Repository for signed, verified agent images.
 *   **[Cap] Verification Pipeline:** Automated test harness for third-party agents.
 *   **[Del] Public Marketplace Beta:** Limited partner access to publish agents.
+*   **[Arch] Frontier Parity:** Shared context and identity layers matching OpenAI Frontier.
 
 ### Bet 2: Continuous Assurance
 *   **[Cap] Real-time Drift Detection:** Alerting when system state deviates from compliance policy.
