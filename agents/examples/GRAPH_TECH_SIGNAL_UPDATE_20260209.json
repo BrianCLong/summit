@@ -1,0 +1,37 @@
+{
+  "task_id": "GRAPH_TECH_SIGNAL_UPDATE_20260209",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "graph-tech-signal-update",
+    "version": "v1",
+    "sha256": "7e73ded6bef20f92b0adc686d9997c94d50e35cfbb9a273443d1458f2df3e12b",
+    "path": "prompts/briefs/graph-tech-signal-update@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "briefs/2026-02-09-graph-tech-signal-update.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/briefs/graph-tech-signal-update@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/GRAPH_TECH_SIGNAL_UPDATE_20260209.json"
+    ],
+    "domains": ["documentation", "governance", "graph-tech"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["briefs/2026-02-09-graph-tech-signal-update.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Publish the graph tech signal update brief with evidence-first structure.",
+    "Record the brief publication in docs/roadmap/STATUS.json."
+  ],
+  "stop_conditions": [
+    "Any request to change governance or policy files outside the declared scope.",
+    "Any requirement for Tier A/B verification beyond documentation updates."
+  ]
+}

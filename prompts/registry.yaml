@@ -24,6 +24,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: graph-tech-signal-update
+    version: v1
+    path: prompts/briefs/graph-tech-signal-update@v1.md
+    sha256: 7e73ded6bef20f92b0adc686d9997c94d50e35cfbb9a273443d1458f2df3e12b
+    description: Publish the Daily Graph Tech & Neo4j Automation incremental signal update brief with roadmap status update.
+    scope:
+      paths:
+        - briefs/2026-02-09-graph-tech-signal-update.md
+        - docs/roadmap/STATUS.json
+        - prompts/briefs/graph-tech-signal-update@v1.md
+        - prompts/registry.yaml
+        - agents/examples/GRAPH_TECH_SIGNAL_UPDATE_20260209.json
+      domains:
+        - documentation
+        - governance
+        - graph-tech
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md
