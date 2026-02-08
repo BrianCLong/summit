@@ -37,5 +37,5 @@
 **Action:** Always verify `tailwind.config.cjs` includes all relevant file extensions (js, jsx, ts, tsx) when implementing utility-based styles.
 
 ## 2026-02-07 - [Navigation Semantics & Icon Grouping]
-**Learning:** Consolidating icon imports into a single, alphabetically sorted block in large router files like `App.router.jsx` significantly improves code maintainability and prevents "Unknown" header labels by providing a cleaner fallback logic for sub-routes.
-**Action:** Always verify icon imports are grouped and sorted to avoid runtime crashes and improve developer experience.
+**Learning:** Consolidating icon imports into a single, alphabetically sorted block in large router files like `App.router.jsx` significantly improves code maintainability. Additionally, refining the `AppHeader` title logic to conditionally display the page label prevents confusing "Unknown" suffixes on sub-routes.
+**Action:** Always verify icon imports are grouped and sorted for maintainability, and ensure header logic handles missing route labels gracefully.
