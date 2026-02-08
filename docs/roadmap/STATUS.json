@@ -183,6 +183,12 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
+      "id": "ai-platform-daily-summary-2026-02-04",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
+    },
+    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
