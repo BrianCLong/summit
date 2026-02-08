@@ -41,6 +41,7 @@ const config: Config = {
     ? [
       '<rootDir>/src/services/__tests__/GraphRAGService.test.ts',
       '<rootDir>/src/provenance-integrity-gateway/__tests__/ProvenanceIntegrityGateway.test.ts',
+      '<rootDir>/src/db/__tests__/tickets.test.ts',
     ]
     : [
       '<rootDir>/tests/**/*.test.ts',
