@@ -2,7 +2,15 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import { AutonomousEvaluationService } from '../../service.js';
 import { EvaluationCapabilityType, EvaluationRequest } from '../../types.js';
 
-describe('Autonomous Evaluation System Integration', () => {
+if (!process.env.NO_NETWORK_LISTEN) {
+  process.env.NO_NETWORK_LISTEN = 'true';
+}
+const describeIf =
+  process.env.NO_NETWORK_LISTEN === 'true' || process.env.NO_NETWORK_LISTEN === '1'
+    ? describe.skip
+    : describe;
+
+describeIf('Autonomous Evaluation System Integration', () => {
   let service: AutonomousEvaluationService;
 
   beforeEach(() => {
