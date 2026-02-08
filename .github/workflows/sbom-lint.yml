@@ -1,0 +1,50 @@
+name: SBOM Linting
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sbom/**'
+      - '.github/workflows/sbom-lint.yml'
+
+jobs:
+  test-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install tsx
+        run: npm install -g tsx
+
+      - name: Test Clean
+        run: npx tsx scripts/sbom/sbom_lint.ts tests/sbom/fixtures/clean.json
+
+      - name: Test Malicious Path (Should Fail)
+        run: |
+          if npx tsx scripts/sbom/sbom_lint.ts tests/sbom/fixtures/malicious_path.json; then
+            echo 'Failed to detect malicious path'
+            false
+          else
+            echo 'Detected malicious path correctly'
+          fi
+
+      - name: Test Malicious Key (Should Fail)
+        run: |
+          if npx tsx scripts/sbom/sbom_lint.ts tests/sbom/fixtures/malicious_key.json; then
+            echo 'Failed to detect key'
+            false
+          else
+            echo 'Detected key correctly'
+          fi
+
+      - name: Test Huge License (Should Fail)
+        run: |
+          if npx tsx scripts/sbom/sbom_lint.ts tests/sbom/fixtures/huge_license.json; then
+            echo 'Failed to detect huge license'
+            false
+          else
+            echo 'Detected huge license correctly'
+          fi
