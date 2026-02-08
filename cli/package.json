@@ -9,6 +9,7 @@
     "intelgraph": "./dist/cli.js",
     "ig": "./dist/cli.js",
     "summit": "./dist/summit.js",
+    "switchboard": "./dist/cli.js",
     "igraph-run": "./dist/bin/run.js"
   },
   "scripts": {

@@ -14,6 +14,9 @@ import {
 } from './switchboard-capsule.js';
 import { CapsuleLedger } from './switchboard-ledger.js';
 import { CapsulePolicyGate, CapsulePolicyAction } from './switchboard-policy.js';
+import { Redactor } from './redaction.js';
+import { secretsVault } from './switchboard-secrets.js';
+import { GuardrailManager, GuardrailConfig } from './switchboard-guardrails.js';
 
 export interface CapsuleRunOptions {
   manifestPath: string;
@@ -148,15 +151,38 @@ function evaluatePolicy(
   }
 }
 
-function loadSecrets(step: CapsuleStep, gate: CapsulePolicyGate, ledger: CapsuleLedger): Record<string, string> {
+function loadSecrets(
+  step: CapsuleStep,
+  gate: CapsulePolicyGate,
+  ledger: CapsuleLedger,
+  redactor: Redactor,
+  manifest: CapsuleManifest
+): Record<string, string> {
   const secrets: Record<string, string> = {};
   for (const handle of step.secrets) {
     evaluatePolicy(ledger, gate, { type: 'secret', secret_handle: handle }, handle);
-    const value = process.env[`SWITCHBOARD_SECRET_${handle}`];
+
+    // 1. Try local secrets vault first
+    let value = secretsVault.getScopedSecret(
+      {
+        tenantId: manifest.name, // Using manifest name as a tenant/org proxy
+        toolId: step.id,
+        purpose: 'capsule-run',
+      },
+      handle
+    );
+
+    // 2. Fallback to environment variable
     if (!value) {
-      throw new Error(`Secret handle missing in environment: ${handle}`);
+      value = process.env[`SWITCHBOARD_SECRET_${handle}`];
     }
+
+    if (!value) {
+      throw new Error(`Secret handle missing in vault and environment: ${handle}`);
+    }
+
     secrets[handle] = value;
+    redactor.register(value);
   }
   return secrets;
 }
@@ -192,7 +218,8 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
     'utf8'
   );
 
-  const ledger = new CapsuleLedger(sessionDir, sessionId);
+  const redactor = new Redactor();
+  const ledger = new CapsuleLedger(sessionDir, sessionId, redactor);
   ledger.append('capsule_start', {
     manifest_path: path.resolve(options.manifestPath),
     network_mode: manifest.network_mode,
@@ -200,6 +227,14 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
   });
 
   const gate = new CapsulePolicyGate(manifest, options.waiverToken);
+
+  // Initialize Guardrails (merged from global and per-step in the loop)
+  const globalGuardrailConfig: GuardrailConfig = manifest.guardrails ?? {
+    maxConcurrent: 1, // Sequential execution for now
+    timeoutMs: 60000,
+    rateLimit: { tokensPerSecond: 2, burst: 5 },
+  };
+  const guardrails = new GuardrailManager(globalGuardrailConfig);
 
   const readPaths = normalizeCapsulePaths(manifest.allowed_paths.read);
   const writePaths = normalizeCapsulePaths(manifest.allowed_paths.write);
@@ -245,21 +280,40 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       evaluatePolicy(ledger, gate, { type: 'network', allow_network: step.allow_network }, 'network');
       evaluatePathActions(step, gate, ledger);
 
-      const secrets = loadSecrets(step, gate, ledger);
+      // Check Guardrails (potentially overriding with step-specific limits)
+      const activeGuardrails = step.guardrails ? new GuardrailManager(step.guardrails) : guardrails;
+
+      const guardDecision = activeGuardrails.check();
+      ledger.append('guardrail_decision', {
+        step_id: stepId,
+        allow: guardDecision.allow,
+        reason: guardDecision.reason,
+      });
+      if (!guardDecision.allow) {
+        throw new Error(`Guardrail denied execution: ${guardDecision.reason}`);
+      }
+
+      const secrets = loadSecrets(step, gate, ledger, redactor, manifest);
       const env = buildEnv(manifest, secrets);
 
       const start = Date.now();
+      activeGuardrails.startExecution();
       const result = spawnSync(step.command, step.args, {
         cwd: workspaceDir,
         env,
         encoding: 'utf8',
+        timeout: activeGuardrails.getTimeout(),
       });
+      activeGuardrails.endExecution();
       const durationMs = Date.now() - start;
 
       const stdoutPath = path.join(outputsDir, `${stepId}.stdout.log`);
       const stderrPath = path.join(outputsDir, `${stepId}.stderr.log`);
-      fs.writeFileSync(stdoutPath, result.stdout ?? '', 'utf8');
-      fs.writeFileSync(stderrPath, result.stderr ?? '', 'utf8');
+      // Redact logs written to disk
+      const safeStdout = redactor.redact(result.stdout ?? '');
+      const safeStderr = redactor.redact(result.stderr ?? '');
+      fs.writeFileSync(stdoutPath, safeStdout, 'utf8');
+      fs.writeFileSync(stderrPath, safeStderr, 'utf8');
 
       ledger.append('tool_exec', {
         step_id: stepId,

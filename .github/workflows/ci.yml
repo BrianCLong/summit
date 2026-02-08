@@ -86,6 +86,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
         run: pnpm -w test:unit || pnpm -w test:unit
+      - name: Switchboard Doctor Check
+        run: ./node_modules/.bin/tsx cli/src/cli.ts switchboard doctor
       - name: Attach evidence
         if: always()
         run: |
