@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Supply Chain Evidence Summary v1",
+  "type": "object",
+  "required": ["schemaVersion", "commit", "attestation", "sbom", "verification"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "commit": {
+      "type": "object",
+      "required": ["sha"],
+      "properties": {
+        "sha": { "type": "string" },
+        "repository": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "sbom": {
+      "type": "object",
+      "required": ["path", "format"],
+      "properties": {
+        "path": { "type": "string" },
+        "format": { "type": "string" },
+        "sha256": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "attestation": {
+      "type": "object",
+      "required": ["predicateType", "status"],
+      "properties": {
+        "predicateType": { "type": "string" },
+        "status": { "type": "string", "enum": ["present", "missing"] },
+        "bundlePath": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["verified", "failed", "skipped"] },
+        "issuer": { "type": "string" },
+        "subject": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Endpoint Badge Payload v1",
+  "type": "object",
+  "required": ["schemaVersion", "label", "message", "color"],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "label": { "type": "string", "minLength": 1 },
+    "message": { "type": "string", "minLength": 1 },
+    "color": { "type": "string", "minLength": 1 },
+    "labelColor": { "type": "string" },
+    "style": { "type": "string" },
+    "logo": { "type": "string" },
+    "logoColor": { "type": "string" },
+    "namedLogo": { "type": "string" },
+    "cacheSeconds": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

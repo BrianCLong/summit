@@ -1,5 +1,64 @@
 version: 1
 prompts:
+  - id: evidence-badge-supplychain
+    version: v1
+    path: prompts/evidence/evidence-badge-supplychain@v1.md
+    sha256: 1f4b575b6b8866300dbf9aafbbc01d75003486f2df982143b64a66e8f60e4441
+    description: Evidence Badge v1 supply-chain workflow with deterministic badge payloads and PR surface.
+    scope:
+      paths:
+        - .github/workflows/supplychain.yml
+        - .github/workflows/pr_comment_evidence.yml
+        - schemas/badges/endpoint_badge_v1.jsonschema
+        - schemas/evidence/supplychain_summary_v1.jsonschema
+        - scripts/ci/write_badge_json.mjs
+        - scripts/ci/validate_badge_schema.mjs
+        - scripts/ci/actions_sha_pinned.mjs
+        - scripts/ci/verify_attestation.sh
+        - ci/gates/badge_schema_validate.sh
+        - ci/gates/actions_sha_pinned.sh
+        - ci/gates/public_evidence_redaction_pass.sh
+        - ci/gates/attestation_verification_required.sh
+        - ci/gates/evidence_comment_present.sh
+        - evals/evidence/badge_determinism_eval/README.md
+        - evals/evidence/badge_determinism_eval/run.sh
+        - evals/supplychain/attestation_present_eval/README.md
+        - evals/supplychain/verification_eval/README.md
+        - evals/security/public_safe_fields_eval/README.md
+        - evals/ux/comment_update_idempotent_eval/README.md
+        - tests/regression/test_badge_json_has_no_timestamps.py
+        - tests/regression/test_workflow_refuses_unpinned_actions.py
+        - tests/regression/test_verification_failure_red_badge.py
+        - tests/regression/test_badge_never_contains_private_urls.py
+        - tests/regression/test_comment_is_singleton.py
+        - tools/evidence/pack_summary.py
+        - tools/evidence/derive_badge_payload.py
+        - tools/publish/public_evidence_publish.py
+        - policies/public_evidence_redaction.rego
+        - docs/evidence/badges.md
+        - docs/ci/supplychain_workflow.md
+        - docs/security/public_evidence_policy.md
+        - docs/security/threat-model-evidence-badges.md
+        - docs/product/evidence_badge_pr_ux.md
+        - docs/roadmap/STATUS.json
+        - governance/decisions/ADR-AG-EVIDENCE-BADGE-001.md
+        - governance/tradeoffs/tradeoff_ledger.jsonl
+        - prompts/evidence/evidence-badge-supplychain@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ci
+        - security
+        - governance
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
