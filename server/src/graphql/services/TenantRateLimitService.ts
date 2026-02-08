@@ -336,8 +336,17 @@ let tenantRateLimitServiceInstance: TenantRateLimitService | null = null;
  * Get or create the singleton tenant rate limit service instance
  */
 export function getTenantRateLimitService(): TenantRateLimitService {
+  const override = (globalThis as any).__tenantRateLimitServiceOverride;
+  if (override) {
+    return override as TenantRateLimitService;
+  }
   if (!tenantRateLimitServiceInstance) {
     tenantRateLimitServiceInstance = new TenantRateLimitService();
   }
   return tenantRateLimitServiceInstance;
+}
+
+// Test hook to override the singleton without touching module internals.
+export function setTenantRateLimitService(service: TenantRateLimitService | null): void {
+  tenantRateLimitServiceInstance = service;
 }

@@ -15,10 +15,13 @@ jest.unstable_mockModule(new URL('../../scheduling/pools.ts', import.meta.url).p
 }));
 
 jest.unstable_mockModule(new URL('../../../config/logger.ts', import.meta.url).pathname, () => ({
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
+  __esModule: true,
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  },
 }));
 
 const buildApp = () => {
@@ -28,8 +31,10 @@ const buildApp = () => {
   return app;
 };
 
-const run = process.env.NO_NETWORK_LISTEN !== 'true';
-const describeIf = run ? describe : describe.skip;
+if (!process.env.NO_NETWORK_LISTEN) {
+  process.env.NO_NETWORK_LISTEN = 'true';
+}
+const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
 describeIf('pricingReadRoutes', () => {
   beforeAll(async () => {
