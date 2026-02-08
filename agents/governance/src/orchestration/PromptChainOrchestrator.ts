@@ -406,9 +406,21 @@ export class PromptChainOrchestrator {
               break;
           }
 
+          // Only retry for 'remediate' action validations - reject/warn don't trigger retry
+          const remediableFailures = validationResults.filter(
+            (v) => !v.passed && step.validations.find(
+              (sv) => sv.type === v.type && sv.action === 'remediate'
+            )
+          );
+
+          // If no remediable failures, don't retry (reject/warn should fail immediately)
+          if (remediableFailures.length === 0) {
+              break;
+          }
+
           // If validations failed and we have retries left, append feedback
           if (vAttempt < maxValidationRetries) {
-              const feedback = this.constructFeedback(validationResults);
+              const feedback = this.constructFeedback(remediableFailures);
               // Append feedback to prompt
               currentPrompt += `\n\n${feedback}`;
           }
