@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["evidenceId", "generatedAt", "runId"],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^EVD-SUMMIT-[A-Z0-9_]+-[0-9]{3}$"
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "runId": { "type": "string" }
+  },
+  "additionalProperties": false
+}
