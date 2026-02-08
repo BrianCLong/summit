@@ -1,0 +1,14 @@
+# .github/workflows/safety-gate.yml
+name: Tool Safety Gate
+on:
+  pull_request:
+  push:
+jobs:
+  safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install pytest pyyaml
+      - run: pytest -q safety/tests/test_agent_tool_safety.py
