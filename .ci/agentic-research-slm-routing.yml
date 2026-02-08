@@ -1,0 +1,4 @@
+name: Agentic Research SLM Routing Gate
+steps:
+  - name: Run Tests
+    command: npx jest __tests__/agentic-research/maestro-slm-routing.test.ts
