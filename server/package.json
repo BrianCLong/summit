@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-server",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "IntelGraph Platform Backend API",
   "main": "dist/src/index.js",
   "type": "module",
