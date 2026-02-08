@@ -1,0 +1,57 @@
+name: CI Security Preflight
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Setup Node for scripts
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
+        with:
+          node-version: '20'
+
+      - name: Install script deps
+        run: npm install yaml@2.x
+
+      - name: Collect action refs
+        id: collect
+        run: node scripts/ci/collect-actions.js > refs.json
+
+      - name: Build OPA bundle input
+        run: |
+          node -e "const fs=require('fs'); const yaml=require('yaml'); const refs=JSON.parse(fs.readFileSync('refs.json','utf8')); const allowlist=yaml.parse(fs.readFileSync('policy/tool-allowlist.yml','utf8')); fs.writeFileSync('input.json', JSON.stringify({refs: refs.refs || [], allowlist}, null, 2));"
+
+      - name: Evaluate OPA policy
+        run: |
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa
+          ./opa eval -f pretty -i input.json -d policy/preflight.rego 'data.gh.preflight.allow' > allow.txt
+          ./opa eval -f json   -i input.json -d policy/preflight.rego 'data.gh.preflight' > result.json
+          jq '{allow: .result[0].expressions[0].value.allow, violations: (.result[0].expressions[0].value.violation // [])}' result.json > policy_result.json
+
+      - name: Emit deterministic evidence JSON
+        run: node scripts/ci/emit-deterministic-json.js < policy_result.json > evidence.action_pinning_verified.json
+
+      - name: Upload evidence (artifact)
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: evidence.action_pinning_verified
+          path: evidence.action_pinning_verified.json
+
+      - name: Fail on violations
+        run: |
+          ALLOW=$(jq -r .allow evidence.action_pinning_verified.json)
+          if [ "$ALLOW" != "true" ]; then
+            echo "::error:: Unpinned or non-allowlisted actions found."
+            jq -r '.violations[]' evidence.action_pinning_verified.json || true
+            exit 1
+          fi
