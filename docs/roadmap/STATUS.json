@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Replaced python-jose with PyJWT, bumped mlflow to 3.5.0, removed optional dgl from requirements, and completed a clean full pip-audit sweep across all requirements*.txt files.",
+  "revision_note": "Replaced python-jose with PyJWT, bumped mlflow to 3.5.0, removed optional dgl from requirements, completed a clean full pip-audit sweep, and retried pnpm audits (root/apps-ui still hang; summit-mini reports 2 vulns).",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -174,7 +174,7 @@
       "id": "dependency-triage-initial-wave",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. Replaced python-jose with PyJWT[crypto], bumped mlflow to 3.5.0, removed optional dgl from the audit path, and completed a clean full pip-audit sweep across all requirements*.txt files. Pinned unversioned Python requirements across all service files; fixed requests CVE in tools/synth-probe. pnpm audit: root/apps-ui timed out, summit-mini shows 2 low/moderate vulns, intelgraph-mcp lacks lockfile. cargo audit at repo root completed without advisories listed."
+      "notes": "Recorded initial audit outcomes; applied early fixes (bytes 1.11.1, webapp npm audit fix, Go toolchain bump across all Go modules). govulncheck now passes across all Go modules. Replaced python-jose with PyJWT[crypto], bumped mlflow to 3.5.0, removed optional dgl from the audit path, and completed a clean full pip-audit sweep across all requirements*.txt files. Pinned unversioned Python requirements across all service files; fixed requests CVE in tools/synth-probe. pnpm audit: root/apps-ui still hang after retry, summit-mini shows 2 low/moderate vulns, intelgraph-mcp lacks lockfile. cargo audit at repo root completed without advisories listed."
     }
   ],
   "summary": {

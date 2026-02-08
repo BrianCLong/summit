@@ -30,8 +30,8 @@ Run these from repo root (or the specified workspace root):
 
 ## Status
 
-- pnpm audit from repo root: started but did not complete (hung; terminated).
-- pnpm audit in `apps/ui`: started but did not complete (hung; terminated).
+- pnpm audit from repo root: retried with network access; still hung/terminated.
+- pnpm audit in `apps/ui`: retried with network access; still hung/terminated.
 - pnpm audit in `intelgraph-mcp`: failed (no `pnpm-lock.yaml`).
 - npm audit in `webapp`: fixed (0 vulnerabilities after `npm audit fix`).
 - pip-audit targeted re-runs for `requirements.txt`, `services/ml-training/requirements.txt`, and `summit-cog-war/requirements-optional-graph.txt`: completed clean.
@@ -41,6 +41,7 @@ Run these from repo root (or the specified workspace root):
     - `services/safejoin`: bumped `bytes` to 1.11.1.
     - `webapp`: `npm audit fix` completed; 0 vulnerabilities reported.
     - Go modules: all `go.mod` files set to Go 1.24 + toolchain go1.24.13.
+  - MLflow 3.5.0 upgrade not smoke-tested locally (mlflow not installed in base environment).
 
 ## Go (govulncheck)
 
@@ -77,8 +78,8 @@ Run these from repo root (or the specified workspace root):
 
 ## JS/TS (pnpm)
 
-- `pnpm audit` at repo root timed out after 300s.
-- `pnpm audit` in `apps/ui` timed out after 300s.
+- `pnpm audit` at repo root timed out/hung after 300s (network retries still stalled).
+- `pnpm audit` in `apps/ui` timed out/hung after 300s (network retries still stalled).
 - `pnpm audit` in `intelgraph-mcp` fails (no `pnpm-lock.yaml`).
 - `pnpm audit` in `summit-mini` reports 2 vulnerabilities (1 low, 1 moderate).
 
