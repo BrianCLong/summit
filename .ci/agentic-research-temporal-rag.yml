@@ -1,0 +1,6 @@
+name: Agentic Research Temporal RAG Gate
+steps:
+  - name: Run Tests
+    command: npx jest __tests__/agentic-research/intelgraph-temporal-rag.test.ts
+  - name: Generate Evidence
+    command: npx tsx agentic-research/intelgraph-temporal-rag/src/evidenceRun.ts
