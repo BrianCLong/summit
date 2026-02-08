@@ -1,0 +1,39 @@
+{
+  "task_id": "SPEC1_SOFTWARE_FACTORY_METHOD",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "spec-1-software-factory-method",
+    "version": "v1",
+    "sha256": "14641208306cd81f6e16f47cbe234b965c2ef485217bc505bcada7907284c004",
+    "path": "prompts/specs/spec-1-software-factory-method@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "specs/SPEC-1-SOFTWARE-FACTORY-METHOD.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "agents/examples/SPEC1_SOFTWARE_FACTORY_METHOD_TASK.json",
+      "prompts/specs/spec-1-software-factory-method@v1.md"
+    ],
+    "domains": ["documentation", "governance", "specs"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/roadmap/STATUS.json update", "spec method doc"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Method doc includes diagrams, schemas, and governance alignment.",
+    "Prompt registry entry matches prompt hash.",
+    "Roadmap status updated with SPEC-1 method entry."
+  ],
+  "stop_conditions": [
+    "Prompt hash mismatch.",
+    "Policy-required files outside declared scope.",
+    "Governance alignment cannot be asserted."
+  ]
+}
