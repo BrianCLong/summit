@@ -1,4 +1,0 @@
-interface:
-  display_name: "Summit GA Preflight"
-  short_description: "Deterministic GA/merge preflight auditor"
-  default_prompt: "Use $summit-ga-preflight-hard-gate-auditor to assess GA readiness and list minimal blockers."
