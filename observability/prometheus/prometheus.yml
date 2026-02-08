@@ -7,10 +7,14 @@ alerting:
     - static_configs:
         - targets: ['alertmanager:9093']
 
+# Rule files are deployed from ./observability/prometheus via docker volume mount to /etc/prometheus
+# These files must exist in the container or Prometheus will fail to start.
 rule_files:
-  - "/etc/prometheus/alert-rules.yml"
-  - "/etc/prometheus/alert-rules-intelgraph.yml"
-  - "/etc/prometheus/summit-alerts.yml"
+  - "/etc/prometheus/*rules*.yml"
+  - "/etc/prometheus/*rules*.yaml"
+  - "/etc/prometheus/*alerts*.yml"
+  - "/etc/prometheus/*alerts*.yaml"
+  - "/etc/prometheus/*budgets*.yaml"
 
 scrape_configs:
   - job_name: 'prometheus'
