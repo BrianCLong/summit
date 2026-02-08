@@ -50,8 +50,10 @@ def test_violation_logic():
     assert validate("analysis_only", {"region": "US", "volume": 100}) is True
 
     # Negative case: prohibited intent
-    with pytest.raises(ValueError, match="Prohibited intent: microtargeting"):
-        validate("microtargeting", {"region": "US"})
+    # Note: 'microtargeting' was removed from policy.yaml but is hardcoded here.
+    # We should use an intent that IS in the policy, like 'automate amplification'.
+    with pytest.raises(ValueError, match="Prohibited intent: automate amplification"):
+        validate("automate amplification", {"region": "US"})
 
     # Negative case: prohibited fields
     with pytest.raises(ValueError, match=r"Prohibited fields present: \['psychographic_segment'\]"):
