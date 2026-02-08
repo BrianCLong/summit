@@ -1,0 +1,49 @@
+apiVersion: governance.summit.io/v1alpha1
+kind: SegmentPolicy
+metadata:
+  name: influence-segment-governance
+  description: "Governance rules for audience segment definitions and inference."
+
+spec:
+  # Allowed attributes for segment definition
+  allowedAttributes:
+    - category: "geographic"
+      allowedValues: ["country_code", "region", "city_bin"]
+      description: "Coarse geographic location only."
+
+    - category: "demographic"
+      allowedValues: ["language", "age_bracket", "gender_proxy"]
+      constraints: "No individual identification; strictly aggregate."
+
+    - category: "psychographic"
+      allowedValues: ["interest_tags", "platform_affinity", "media_consumption_patterns"]
+      description: "Behavioral signals aggregated at segment level."
+
+    - category: "cognitive"
+      allowedValues: ["trust_indices", "identity_anchors", "susceptibility_scores"]
+      constraints: "Aggregate only; derived from public/authorized data."
+
+  # Prohibited attributes and inferences
+  prohibitedAttributes:
+    - "pii_email"
+    - "pii_phone"
+    - "pii_ssn"
+    - "pii_device_id"
+    - "individual_cognitive_score"
+    - "individual_political_affiliation" # Unless explicitly authorized
+    - "individual_religious_belief" # Unless explicitly authorized
+    - "protected_class_inference"
+
+  # Enforcement
+  enforcement:
+    - mechanism: "schema_validation"
+      action: "reject"
+    - mechanism: "api_gateway"
+      action: "block"
+    - mechanism: "audit_log"
+      action: "log_violation"
+
+  # Data Handling
+  dataHandling:
+    - "Segments must contain minimum k-anonymity (k >= 50)."
+    - "No segment can be targeted if it resolves to a single individual."
