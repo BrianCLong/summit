@@ -16,62 +16,53 @@ RUN apk add --no-cache \
     pangomm-dev \
     libjpeg-turbo-dev \
     freetype-dev \
-    postgresql-client \
     curl
 
 # Install nodemon globally
-RUN npm install -g pnpm nodemon
+RUN npm install -g nodemon
 
 # Create a non-root user
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Set npm/pnpm resilience
+# Set npm resilience and skip browser downloads
 ENV PUPPETEER_SKIP_DOWNLOAD=1 \
     NPM_CONFIG_AUDIT=false \
     NPM_CONFIG_FUND=false \
     NPM_CONFIG_ENGINE_STRICT=false
 
-# Copy workspace configuration
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY tsconfig.base.json tsconfig.json ./
-COPY server/package.json ./server/
-COPY packages/feature-flags/package.json ./packages/feature-flags/
-COPY packages/osint-collector/package.json ./packages/osint-collector/
-COPY packages/maestro-core/package.json ./packages/maestro-core/
-COPY packages/telemetry-config/package.json ./packages/telemetry-config/
-COPY packages/types/package.json ./packages/types/
-COPY libs/context-shell/node/package.json ./libs/context-shell/node/
+RUN npm config set fetch-retries 5 \
+ && npm config set fetch-retry-mintimeout 20000 \
+ && npm config set fetch-retry-maxtimeout 120000 \
+ && npm config set fetch-timeout 600000
 
-# Install dependencies for the server workspace
-RUN pnpm install --filter intelgraph-server... --filter @intelgraph/osint-collector... --filter @intelgraph/maestro-core... --filter @intelgraph/types... --frozen-lockfile || pnpm install --filter intelgraph-server... --filter @intelgraph/osint-collector... --filter @intelgraph/maestro-core... --filter @intelgraph/types...
+# Copy package files and internal tarballs
+COPY package*.json intelgraph-feature-flags-4.2.3.tgz intelgraph-telemetry-config-4.2.3.tgz maestro-core-4.2.3.tgz ./
 
-# Copy workspace packages source for building
-COPY packages/feature-flags ./packages/feature-flags/
-COPY packages/osint-collector ./packages/osint-collector/
-COPY packages/maestro-core ./packages/maestro-core/
-COPY packages/types ./packages/types/
+# Update package.json to use local file: dependencies instead of workspace:
+RUN node -e 'const fs = require("fs"); \
+    const pkg = JSON.parse(fs.readFileSync("package.json", "utf8")); \
+    pkg.dependencies["@intelgraph/feature-flags"] = "file:./intelgraph-feature-flags-4.2.3.tgz"; \
+    pkg.dependencies["@intelgraph/telemetry-config"] = "file:./intelgraph-telemetry-config-4.2.3.tgz"; \
+    pkg.dependencies["@intelgraph/maestro-core"] = "file:./maestro-core-4.2.3.tgz"; \
+    fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2));'
 
-# Build workspace packages
-RUN pnpm --filter @intelgraph/feature-flags run build
-RUN pnpm --filter @intelgraph/osint-collector run build
-RUN pnpm --filter @intelgraph/maestro-core run build
+# Remove lockfile to avoid workspace protocol issues
+RUN rm -f package-lock.json
 
-# Copy the rest of the code
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy source code and set permissions
 COPY . .
-
-# Set permissions
-RUN mkdir -p server/uploads server/logs && chown -R appuser:appgroup /app
-
-# Switch to the server directory for execution
-WORKDIR /app/server
+RUN mkdir -p uploads logs && chown -R appuser:appgroup /app
 
 # Switch to non-root user
 USER appuser
 
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/health/ready || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:4000/graphql || exit 1
 
 # Expose ports
 EXPOSE 4000 9229
 
 # Start development server
-CMD ["pnpm", "run", "dev"]
+CMD ["npm", "run", "dev"]

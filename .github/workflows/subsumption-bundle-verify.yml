@@ -8,10 +8,6 @@ on:
       - "docs/**"
       - "evidence/**"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   subsumption-bundle-verify:
     name: subsumption-bundle-verify
