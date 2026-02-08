@@ -1,35 +1,44 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Reality Check
 
-## Structure Validation
+## 1. Monorepo Structure (Verified)
+- **Root:** Contains `package.json`, `pnpm-workspace.yaml`, `fixtures/`, `docs/`, `scripts/`.
+- **Packages:** Extensive use of `packages/*` for modular functionality (e.g., `packages/disinformation-detection`, `packages/agent-identification`).
+- **Server:** A dedicated `server/` directory exists, likely the monolith backend.
+- **Evidence Schemas:** Located in `evidence/schemas/`.
+- **CI Workflows:** Located in `.github/workflows/`.
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+## 2. Path Mapping for New Features
+Based on the existing structure, the new "CogWar" capabilities will be implemented as follows:
 
-## Component Mapping
+| Planned Capability | Target Path | Rationale |
+| :--- | :--- | :--- |
+| **Detectors & Core Logic** | `packages/cogwar/src/` | Follows the granular package pattern (e.g., `packages/influence-detection`). Keeping it isolated avoids monolithic bloat in `server/`. |
+| **JSON Schemas** | `evidence/schemas/cogwar-*.schema.json` | Central registry for evidence schemas is `evidence/schemas/`. |
+| **Fixtures** | `fixtures/cogwar/*.jsonl` | Root `fixtures/` directory exists and is the standard location. |
+| **Documentation** | `docs/standards/`, `docs/ops/runbooks/` | Matches existing documentation structure. |
+| **CI Workflows** | `.github/workflows/cogwar-ci.yml` | Additive workflow to avoid modifying complex shared workflows like `ci-core.yml`. |
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+## 3. Verified CI Checks (for Gating)
+The following checks are present in `.github/workflows/` and will be respected/utilized:
+- `ci-core.yml`: Likely runs basic lint/test/build.
+- `ci-security.yml`: Handles security scans.
+- `evidence-check.yml`: Verifies evidence schemas.
+- `governance-gate.yml`: Enforces governance policies.
+- `schema-compatibility-check.yml`: Ensures schema backward compatibility.
 
-## Constraints & Checks
+## 4. "Must-Not-Touch" Files
+- `pnpm-lock.yaml` (unless adding dependencies via pnpm).
+- Existing shared schemas in `evidence/schemas/` (unless strictly necessary for bug fixes).
+- `ci-core.yml` (unless absolutely required; prefer additive workflows).
+- `server/src/**` (avoid modifying core monolithic logic unless integrating the new package).
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+## 5. Validation Checklist Status
+- [x] `ls -la .github/workflows`: Confirmed existence of core and security workflows.
+- [x] `cat package.json pnpm-workspace.yaml`: Confirmed pnpm workspace structure.
+- [x] Locate "evidence" directory: Confirmed `evidence/schemas/`.
+- [x] Confirm pipeline locations: Confirmed `packages/` as the module home.
 
-## Next Steps
+## 6. Deviation from User Prompt
+- User suggested `src/cogwar`. I am deviating to `packages/cogwar/src` to align with the monorepo structure.
+- User suggested modifying `ci-verify.yml`. I will create `.github/workflows/cogwar-ci.yml` instead to ensure safe, additive changes.
 
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
