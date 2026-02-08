@@ -293,6 +293,7 @@ export const createApp = async () => {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
+            tenantId: 'global',
           };
           return next();
         }
@@ -588,8 +589,9 @@ export const createApp = async () => {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
 
-  app.get('/search/evidence', authenticateToken, async (req, res) => {
+  app.get('/search/evidence', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
+    const tenantId = (req as any).user?.tenantId || 'global';
 
     if (!q) {
       return res.status(400).send({ error: "Query parameter 'q' is required" });
@@ -601,6 +603,7 @@ export const createApp = async () => {
     try {
       const searchQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN node, score
         SKIP $skip
         LIMIT $limit
@@ -608,16 +611,18 @@ export const createApp = async () => {
 
       const countQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN count(node) as total
       `;
 
       const [searchResult, countResult] = await Promise.all([
         session.run(searchQuery, {
           query: q,
+          tenantId,
           skip: Number(skip),
           limit: Number(limit),
         }),
-        session.run(countQuery, { query: q }),
+        session.run(countQuery, { query: q, tenantId }),
       ]);
 
       const evidence = searchResult.records.map((record: any) => ({
