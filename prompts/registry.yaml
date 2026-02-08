@@ -104,6 +104,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: diu-cadds-connector
+    version: v1
+    path: prompts/ingest/diu-cadds-connector@v1.md
+    sha256: 085ac6b8ae866ec8609d67f412a3af558fa3f0753176f1d9290fadd7260c0e74
+    description: Implement DIU CADDS connector + parser with redaction, citations, and tests.
+    scope:
+      paths:
+        - src/connectors/diu/
+        - tests/connectors/diu/
+        - tests/fixtures/diu/
+        - docs/roadmap/STATUS.json
+        - prompts/ingest/diu-cadds-connector@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ingest
+        - governance
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: ru-ua-cogwar-lab
     version: v1
     path: prompts/cogwar/ru-ua-cogwar-lab@v1.md
