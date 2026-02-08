@@ -26,7 +26,6 @@
   "dependencies": {
     "@apollo/server": "^4.13.0",
     "@open-policy-agent/opa-wasm": "^1.8.0",
-    "apollo-server-express": "^3.13.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

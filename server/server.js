@@ -1,7 +1,9 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const { ApolloServer } = require('apollo-server-express');
+const { ApolloServer } = require('@apollo/server');
+const { expressMiddleware } = require('@apollo/server/express4');
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
 const crypto = require('crypto');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -310,97 +312,15 @@ async function startServer() {
     }
     
     const { depthLimit } = require('./src/graphql/validation/depthLimit');
+    const realtimeMutationsPlugin = require('./src/graphql/plugins/realtimeMutations');
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
       validationRules: [depthLimit(Number(process.env.GRAPHQL_MAX_DEPTH) || 10)],
-      context: async ({ req, connection }) => {
-        if (connection) {
-          return connection.context;
-        }
-        
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        let user = null;
-        
-        if (token) {
-          const authService = new AuthService();
-          user = await authService.verifyToken(token);
-        }
-        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
-        const clientIp = req.ip;
-        const userAgent = req.get('User-Agent');
-        req.sessionId = sessionId;
-        return {
-          user,
-          req,
-          logger,
-          sessionId,
-          clientIp,
-          userAgent,
-        };
-      },
-      subscriptions: {
-        onConnect: async (connectionParams) => {
-          const token = connectionParams.authorization?.replace('Bearer ', '');
-          let user = null;
-          
-          if (token) {
-            const authService = new AuthService();
-            user = await authService.verifyToken(token);
-          }
-          
-          return { user };
-        }
-      },
-      const realtimeMutationsPlugin = require('./src/graphql/plugins/realtimeMutations');
-
-// ... inside startServer function ...
-
-    const apolloServer = new ApolloServer({
-      typeDefs,
-      resolvers,
-      validationRules: [depthLimit(Number(process.env.GRAPHQL_MAX_DEPTH) || 10)],
-      context: async ({ req, connection }) => {
-        if (connection) {
-          return connection.context;
-        }
-        
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        let user = null;
-        
-        if (token) {
-          const authService = new AuthService();
-          user = await authService.verifyToken(token);
-        }
-        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
-        const clientIp = req.ip;
-        const userAgent = req.get('User-Agent');
-        req.sessionId = sessionId;
-        return {
-          user,
-          req,
-          logger,
-          sessionId,
-          clientIp,
-          userAgent,
-        };
-      },
-      subscriptions: {
-        onConnect: async (connectionParams) => {
-          const token = connectionParams.authorization?.replace('Bearer ', '');
-          let user = null;
-          
-          if (token) {
-            const authService = new AuthService();
-            user = await authService.verifyToken(token);
-          }
-          
-          return { user };
-        }
-      },
       plugins: [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
         pbacPlugin(),
-        realtimeMutationsPlugin(), // Add the new plugin here
+        realtimeMutationsPlugin(),
         {
           requestDidStart() {
             return {
@@ -415,14 +335,31 @@ async function startServer() {
         }
       ]
     });
-    });
     
     await apolloServer.start();
-    apolloServer.applyMiddleware({ 
-      app, 
-      path: '/graphql',
-      cors: false
-    });
+    app.use('/graphql', expressMiddleware(apolloServer, {
+      context: async ({ req }) => {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        let user = null;
+        
+        if (token) {
+          const authService = new AuthService();
+          user = await authService.verifyToken(token);
+        }
+        const sessionId = req.headers['x-session-id'] || crypto.randomUUID();
+        const clientIp = req.ip;
+        const userAgent = req.get('User-Agent');
+        req.sessionId = sessionId;
+        return {
+          user,
+          req,
+          logger,
+          sessionId,
+          clientIp,
+          userAgent,
+        };
+      }
+    }));
 
     // Optional GraphQL WS server using graphql-ws if available
     try {

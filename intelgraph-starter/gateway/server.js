@@ -1,5 +1,7 @@
 import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { createServer } from 'http';
 import { readFileSync } from 'fs';
 import { createClient } from 'redis';
@@ -105,16 +107,15 @@ const resolvers = {
   }
 };
 
+const httpServer = createServer(app);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ({ req }) => ({ user: req.user })
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })]
 });
 
 await server.start();
-server.applyMiddleware({ app, path: '/graphql' });
-
-const httpServer = createServer(app);
+app.use('/graphql', expressMiddleware(server, { context: async ({ req }) => ({ user: req.user }) }));
 httpServer.listen({ port }, () => {
   process.stdout.write(`Gateway ready at http://localhost:${port}${server.graphqlPath}\n`);
 });

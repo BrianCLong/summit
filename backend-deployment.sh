@@ -426,7 +426,7 @@ log_step "Creating service implementations..."
 
 # Create GraphQL schema
 cat > src/graphql/schema.js << 'EOF'
-const { gql } = require('apollo-server-express');
+const gql = require('graphql-tag');
 
 const typeDefs = gql`
   scalar DateTime
@@ -1189,7 +1189,7 @@ cat > server.js << 'EOF'
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const { ApolloServer } = require('apollo-server-express');
+const { ApolloServer } = require('@apollo/server');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');

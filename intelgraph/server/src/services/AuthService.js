@@ -1076,7 +1076,9 @@ module.exports = authMiddleware;
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const { ApolloServer } = require('apollo-server-express');
+const { ApolloServer } = require('@apollo/server');
+const { expressMiddleware } = require('@apollo/server/express4');
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -1181,41 +1183,8 @@ async function startServer() {
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
-      context: async ({ req, connection }) => {
-        if (connection) {
-          // WebSocket connection for subscriptions
-          return connection.context;
-        }
-
-        // HTTP request
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        let user = null;
-
-        if (token) {
-          const authService = new AuthService();
-          user = await authService.verifyToken(token);
-        }
-
-        return {
-          user,
-          req,
-          logger,
-        };
-      },
-      subscriptions: {
-        onConnect: async (connectionParams) => {
-          const token = connectionParams.authorization?.replace('Bearer ', '');
-          let user = null;
-
-          if (token) {
-            const authService = new AuthService();
-            user = await authService.verifyToken(token);
-          }
-
-          return { user };
-        },
-      },
       plugins: [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
         {
           requestDidStart() {
             return {
@@ -1234,11 +1203,26 @@ async function startServer() {
     });
 
     await apolloServer.start();
-    apolloServer.applyMiddleware({
-      app,
-      path: '/graphql',
-      cors: false, // Handled by express cors middleware
-    });
+    app.use(
+      '/graphql',
+      expressMiddleware(apolloServer, {
+        context: async ({ req }) => {
+          const token = req.headers.authorization?.replace('Bearer ', '');
+          let user = null;
+
+          if (token) {
+            const authService = new AuthService();
+            user = await authService.verifyToken(token);
+          }
+
+          return {
+            user,
+            req,
+            logger,
+          };
+        },
+      }),
+    );
 
     // Socket.IO for real-time features
     io.on('connection', (socket) => {

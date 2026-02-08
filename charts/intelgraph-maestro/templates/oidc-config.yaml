@@ -143,7 +143,7 @@ data:
     // OIDC Authentication Middleware for GraphQL API
     import jwt from 'jsonwebtoken';
     import jwksClient from 'jwks-rsa';
-    import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
+    import { AuthenticationError, ForbiddenError } from '@apollo/server/errors';
 
     // JWKS client configuration
     const client = jwksClient({

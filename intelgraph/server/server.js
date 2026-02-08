@@ -1,7 +1,9 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const { ApolloServer } = require('apollo-server-express');
+const { ApolloServer } = require('@apollo/server');
+const { expressMiddleware } = require('@apollo/server/express4');
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -155,28 +157,20 @@ async function startServer() {
     const apolloServer = new ApolloServer({
       typeDefs,
       resolvers,
-      context: async ({ req, connection }) => {
-        if (connection) {
-          return connection.context;
-        }
-
-        // TODO: Extract user from token
-        const user = { id: 'mock-user-id', role: 'ADMIN' };
-
-        return {
-          req,
-          logger,
-          user
-        };
-      },
+      plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     });
 
     await apolloServer.start();
-    apolloServer.applyMiddleware({
-      app,
-      path: '/graphql',
-      cors: false,
-    });
+    app.use('/graphql', expressMiddleware(apolloServer, { context: async ({ req }) => {
+      // TODO: Extract user from token
+      const user = { id: 'mock-user-id', role: 'ADMIN' };
+
+      return {
+        req,
+        logger,
+        user,
+      };
+    }}));
 
     // Socket.IO setup
     io.on('connection', (socket) => {
