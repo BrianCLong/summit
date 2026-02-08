@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NDD Eval Output",
+  "type": "object",
+  "required": ["fixture_id", "metrics", "pass"],
+  "properties": {
+    "fixture_id": {"type": "string"},
+    "metrics": {"type": "object"},
+    "pass": {"type": "boolean"},
+    "notes": {"type": "string"}
+  }
+}
