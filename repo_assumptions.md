@@ -33,3 +33,19 @@
 
 1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
 2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+
+## Structured RAG (PR1)
+### Verified
+- **Feature flags**: `summit/flags.py` uses env-based toggles; new `SUMMIT_STRUCTURED_RAG` added.
+- **Retrieval layout**: `summit/retrieval/` exists with `hybrid/` but no structured retrieval module yet.
+
+### Assumed
+- **Structured retrieval entrypoint**: Future integration point to be confirmed in `summit/retrieval/` routing.
+- **Evidence artifact conventions**: Existing patterns will be aligned in later PRs once evidence modules are verified.
+
+## Structured RAG (Implementation)
+### Verified
+- **Structured retrieval module**: `summit/retrieval/structured/` with planner, policy, executor, pipeline, and config.
+- **Evidence writer**: `summit/evidence/structured/` with deterministic artifacts and schema.
+- **Tests**: `tests/structured_rag/` covers disambiguation, aggregation, policy guards, and evidence determinism.
+
