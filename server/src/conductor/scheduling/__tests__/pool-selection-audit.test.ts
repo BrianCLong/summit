@@ -1,6 +1,9 @@
-import { jest } from '@jest/globals';
+import { jest, beforeAll, afterEach, describe, it, expect } from '@jest/globals';
 
 describe('recordPoolSelectionAudit', () => {
+  let recordPoolSelectionAudit: typeof import('../pool-selection-audit.js').recordPoolSelectionAudit;
+  let queryMock: jest.Mock;
+
   afterEach(() => {
     jest.resetModules();
     delete process.env.DATABASE_URL;
@@ -8,9 +11,7 @@ describe('recordPoolSelectionAudit', () => {
 
   it('skips gracefully when DATABASE_URL is missing', async () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    const { recordPoolSelectionAudit } = await import(
-      '../pool-selection-audit'
-    );
+    ({ recordPoolSelectionAudit } = await import('../pool-selection-audit.js'));
 
     await expect(
       recordPoolSelectionAudit({
@@ -26,15 +27,13 @@ describe('recordPoolSelectionAudit', () => {
 
   it('inserts an audit row when database is configured', async () => {
     process.env.DATABASE_URL = 'postgres://test-db';
-    const queryMock = jest.fn();
+    queryMock = jest.fn();
 
-    jest.doMock('pg', () => ({
+    jest.unstable_mockModule('pg', () => ({
       Pool: jest.fn(() => ({ query: queryMock })),
     }));
 
-    const { recordPoolSelectionAudit } = await import(
-      '../pool-selection-audit'
-    );
+    ({ recordPoolSelectionAudit } = await import('../pool-selection-audit.js'));
 
     await recordPoolSelectionAudit({
       tenantId: 'tenant-2',

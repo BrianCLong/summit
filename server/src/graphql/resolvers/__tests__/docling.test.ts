@@ -1,10 +1,35 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { doclingResolvers } from '../docling.js';
-import { doclingService } from '../../../services/DoclingService.js';
-import { doclingRepository } from '../../../db/repositories/doclingRepository.js';
+import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+
+jest.unstable_mockModule(
+  new URL('../../../services/DoclingService.ts', import.meta.url).pathname,
+  () => ({
+    doclingService: {
+      summarizeBuildFailure: jest.fn(),
+    },
+  }),
+);
+
+jest.unstable_mockModule(
+  new URL('../../../db/repositories/doclingRepository.ts', import.meta.url)
+    .pathname,
+  () => ({
+    doclingRepository: {
+      findSummaryByRequestId: jest.fn(),
+    },
+  }),
+);
 
 describe('docling resolvers', () => {
   const ctx = { user: { tenantId: 'tenant-1' } };
+  let doclingResolvers: typeof import('../docling.js').doclingResolvers;
+  let doclingService: { summarizeBuildFailure: jest.Mock };
+  let doclingRepository: { findSummaryByRequestId: jest.Mock };
+
+  beforeAll(async () => {
+    ({ doclingResolvers } = await import('../docling.js'));
+    ({ doclingService } = await import('../../../services/DoclingService.js'));
+    ({ doclingRepository } = await import('../../../db/repositories/doclingRepository.js'));
+  });
 
   beforeEach(() => {
     jest.resetAllMocks();

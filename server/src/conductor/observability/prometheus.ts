@@ -148,6 +148,17 @@ export const capacityActiveReservationsGauge = createGauge({
   help: 'Number of active capacity reservations',
 });
 
+export const pricingRefreshTotal = createCounter({
+  name: 'pricing_refresh_total',
+  help: 'Total number of pricing refresh attempts',
+  labelNames: ['status'],
+});
+
+export const pricingRefreshLastSuccessTimestamp = createGauge({
+  name: 'pricing_refresh_last_success_timestamp',
+  help: 'Unix timestamp of the last successful pricing refresh',
+});
+
 // Register all conductor metrics with the main registry
 try {
 [
@@ -170,6 +181,8 @@ try {
   capacityReservationsCounter,
   capacityReserveLatencyMs,
   capacityActiveReservationsGauge,
+  pricingRefreshTotal,
+  pricingRefreshLastSuccessTimestamp,
 ].forEach((metric) => register.registerMetric(metric));
 } catch (e) {}
 
