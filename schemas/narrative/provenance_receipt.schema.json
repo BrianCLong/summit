@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Narrative Provenance Receipt",
+  "type": "object",
+  "required": ["version", "receipts"],
+  "properties": {
+    "version": { "type": "integer" },
+    "receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target", "sources"],
+        "properties": {
+          "receipt_id": { "type": "string" },
+          "target": {
+            "type": "object",
+            "required": ["type", "id"],
+            "properties": {
+              "type": { "type": "string" },
+              "id": { "type": "string" }
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["artifact_id", "content_sha256"],
+              "properties": {
+                "artifact_id": { "type": "string" },
+                "content_sha256": { "type": "string" }
+              }
+            }
+          },
+          "confidence": { "type": "number" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

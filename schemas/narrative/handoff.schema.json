@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Narrative Handoff",
+  "type": "object",
+  "required": ["version", "run_id", "candidates"],
+  "properties": {
+    "version": { "type": "integer" },
+    "run_id": { "type": "string" },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["handoff_id", "narrative_id", "from_tier", "to_tier", "score"],
+        "properties": {
+          "handoff_id": { "type": "string" },
+          "narrative_id": { "type": "string" },
+          "from_tier": { "type": "string" },
+          "to_tier": { "type": "string" },
+          "score": { "type": "number" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

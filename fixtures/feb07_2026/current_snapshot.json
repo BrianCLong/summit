@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "run_id": "run_0002",
+  "narratives": [
+    {
+      "narrative_id": "narr_alekseyev_hit",
+      "title": "Alekseyev assassination attempt",
+      "state": "Contested"
+    },
+    {
+      "narrative_id": "narr_shadow_campaigns",
+      "title": "Shadow Campaigns global espionage",
+      "state": "Normalized"
+    },
+    {
+      "narrative_id": "narr_signal_phishing",
+      "title": "Signal account hijacking via fake support",
+      "state": "Seeded"
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "clm_alekseyev_regained_consciousness",
+      "claim_hash": "hash:cur_regained_consciousness",
+      "text_norm": "Alekseyev regained consciousness after surgery following the assassination attempt.",
+      "verifiability": 0.7,
+      "confidence": 0.6,
+      "supporting_artifact_ids": ["art_reuters_alekseyev_2026_02_07"]
+    },
+    {
+      "claim_id": "clm_shadow_campaigns_37_155",
+      "claim_hash": "hash:cur_shadow_37_155",
+      "text_norm": "Shadow Campaigns compromised targets across 37 countries and conducted reconnaissance across 155 countries.",
+      "verifiability": 0.9,
+      "confidence": 0.8,
+      "supporting_artifact_ids": ["art_unit42_shadow_campaigns"]
+    },
+    {
+      "claim_id": "clm_signal_hijacking_fake_support",
+      "claim_hash": "hash:cur_signal_fake_support",
+      "text_norm": "Targets are being phished via fake Signal support chats to hijack Signal accounts.",
+      "verifiability": 0.85,
+      "confidence": 0.75,
+      "supporting_artifact_ids": ["art_bleepingcomputer_signal_germany"]
+    }
+  ]
+}

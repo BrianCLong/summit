@@ -1,0 +1,8 @@
+version: 1
+handoff:
+  alert_score: 0.70
+state_machine:
+  institutionalize_handoff_score: 0.80
+  contest_min_counterclaims: 2
+delta:
+  max_items: 200

@@ -1,0 +1,21 @@
+version: 1
+tiers:
+  fringe:
+    rank: 10
+    examples: ["forums", "anonymous channels"]
+  influencer:
+    rank: 20
+    examples: ["large personal accounts"]
+  newsletter:
+    rank: 30
+    examples: ["substack-like"]
+  mainstream:
+    rank: 40
+    examples: ["major outlets"]
+  vendor_intel:
+    rank: 50
+    examples: ["security vendor threat intel"]
+  govt_cert:
+    rank: 60
+    examples: ["national cybersecurity agencies"]
+allowed_tier_labels: ["fringe", "influencer", "newsletter", "mainstream", "vendor_intel", "govt_cert"]

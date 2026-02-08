@@ -1,0 +1,4 @@
+{
+  "allowed_tiers": ["fringe", "mainstream", "govt_cert"],
+  "handoff_candidates": [{ "to_tier": "govt_cert" }]
+}
