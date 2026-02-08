@@ -24,6 +24,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: influence-defense-methods-brief
+    version: v1
+    path: prompts/briefs/influence-defense-methods@v1.md
+    sha256: 1dc8aa1b5c52d503cfb83c729b23cf56d19099bb1c0b992d63efa8c1965cfbe9
+    description: Create Summit-native defensive influence method families brief and update roadmap status.
+    scope:
+      paths:
+        - docs/briefs/influence-defense-methods.md
+        - docs/roadmap/STATUS.json
+        - prompts/briefs/influence-defense-methods@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - influence-defense
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md
