@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Command } from 'cmdk'
-import { Search, FileText, User, AlertTriangle, Zap } from 'lucide-react'
+import { Search, FileText, User, AlertTriangle, Zap, Eye } from 'lucide-react'
 import { useSearch } from '@/contexts/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { EvidenceTrailPeek } from './EvidenceTrailPeek'
+import { isFeatureEnabled } from '../config'
 import { useDemoMode } from '@/components/common/DemoIndicator'
 
 interface SearchResult {
@@ -21,6 +23,7 @@ export function GlobalSearch() {
   const { isOpen, query, setQuery, closeSearch } = useSearch()
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [evidenceAnswerId, setEvidenceAnswerId] = useState<string | null>(null)
   const navigate = useNavigate()
   const isDemoMode = useDemoMode()
 
@@ -254,6 +257,19 @@ export function GlobalSearch() {
                                   </div>
                                 )}
                               </div>
+                              {isFeatureEnabled('features.evidenceTrailPeek') && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setEvidenceAnswerId(result.id)
+                                  }}
+                                  className="mr-2 p-1 hover:bg-muted rounded-md text-muted-foreground transition-colors"
+                                  title="Evidence Trail Peek"
+                                  aria-label="View Evidence"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </button>
+                              )}
                               {result.badge && (
                                 <Badge
                                   variant={
@@ -293,6 +309,12 @@ export function GlobalSearch() {
             </div>
           </div>
         </Command>
+      {evidenceAnswerId && (
+        <EvidenceTrailPeek
+          answer_id={evidenceAnswerId}
+          onClose={() => setEvidenceAnswerId(null)}
+        />
+      )}
       </div>
     </div>
   )

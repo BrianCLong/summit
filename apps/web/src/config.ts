@@ -2,7 +2,8 @@ export type FeatureKey =
   | 'maestro.newRunConsole'
   | 'dashboard.realtime'
   | 'ui.annotationsV1'
-  | 'ui.mapClustering';
+  | 'ui.mapClustering'
+  | 'features.evidenceTrailPeek';
 
 export interface WebConfig {
   apiBaseUrl: string;
@@ -56,6 +57,7 @@ const config: WebConfig = {
     'dashboard.realtime': getEnv('VITE_ENABLE_REALTIME_DASHBOARD') === 'true',
     'ui.annotationsV1': getEnv('VITE_ENABLE_UI_ANNOTATIONS_V1') === 'true',
     'ui.mapClustering': getEnv('VITE_ENABLE_MAP_CLUSTERING') === 'true',
+    'features.evidenceTrailPeek': getEnv('VITE_ENABLE_EVIDENCE_TRAIL_PEEK', 'true') === 'true',
   },
   integrations: {
     github: {
