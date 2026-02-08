@@ -1,0 +1,552 @@
+{
+  "packages": {
+    "@apollo/server": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "@apollo/server@5.2.0"
+          ],
+          "affected_versions": [
+            "5.2.0"
+          ],
+          "id": 1112926,
+          "importers": [
+            "packages/api-framework",
+            "server",
+            "services/api-gateway"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=5.0.0 <5.4.0).",
+          "severity": "high",
+          "title": "Apollo Serve vulnerable to Denial of Service with `startStandaloneServer`",
+          "url": "https://github.com/advisories/GHSA-mp6q-xf9x-fwf7",
+          "vulnerable_versions": ">=5.0.0 <5.4.0"
+        },
+        {
+          "affected_nodes": [
+            "@apollo/server@4.12.2"
+          ],
+          "affected_versions": [
+            "4.12.2"
+          ],
+          "id": 1112927,
+          "importers": [
+            "apps/gateway",
+            "apps/intelgraph-api",
+            "apps/server",
+            "companyos/services/tenant-api",
+            "packages/rate-limiter",
+            "services/admin-api",
+            "services/admin-automation",
+            "services/battle-api",
+            "services/config-service",
+            "services/control-tower-service",
+            "services/data-monetization-engine",
+            "services/digital-twin",
+            "services/graph-core",
+            "services/sandbox-gateway"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=4.2.0 <4.13.0).",
+          "severity": "high",
+          "title": "Apollo Serve vulnerable to Denial of Service with `startStandaloneServer`",
+          "url": "https://github.com/advisories/GHSA-mp6q-xf9x-fwf7",
+          "vulnerable_versions": ">=4.2.0 <4.13.0"
+        }
+      ],
+      "locked_versions": [
+        "4.12.2",
+        "5.2.0"
+      ]
+    },
+    "@isaacs/brace-expansion": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "@isaacs/brace-expansion@5.0.0"
+          ],
+          "affected_versions": [
+            "5.0.0"
+          ],
+          "id": 1112954,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<=5.0.0).",
+          "severity": "high",
+          "title": "@isaacs/brace-expansion has Uncontrolled Resource Consumption",
+          "url": "https://github.com/advisories/GHSA-7h2j-956f-4vf2",
+          "vulnerable_versions": "<=5.0.0"
+        }
+      ],
+      "locked_versions": [
+        "5.0.0"
+      ]
+    },
+    "@modelcontextprotocol/sdk": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "@modelcontextprotocol/sdk@1.25.2"
+          ],
+          "affected_versions": [
+            "1.25.2"
+          ],
+          "id": 1112952,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=1.10.0 <=1.25.3).",
+          "severity": "high",
+          "title": "@modelcontextprotocol/sdk has cross-client data leak via shared server/transport instance reuse",
+          "url": "https://github.com/advisories/GHSA-345p-7cg4-v4c7",
+          "vulnerable_versions": ">=1.10.0 <=1.25.3"
+        }
+      ],
+      "locked_versions": [
+        "1.25.2"
+      ]
+    },
+    "@orval/core": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "@orval/core@7.20.0"
+          ],
+          "affected_versions": [
+            "7.20.0"
+          ],
+          "id": 1112712,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=7.19.0 <7.21.0).",
+          "severity": "critical",
+          "title": "Orval has Code Injection via unsanitized x-enum-descriptions using JS comments",
+          "url": "https://github.com/advisories/GHSA-gch2-phqh-fg9q",
+          "vulnerable_versions": ">=7.19.0 <7.21.0"
+        }
+      ],
+      "locked_versions": [
+        "7.20.0"
+      ]
+    },
+    "apollo-server": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "apollo-server@3.13.0"
+          ],
+          "affected_versions": [
+            "3.13.0"
+          ],
+          "id": 1112928,
+          "importers": [
+            "services/prov-ledger"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=2.0.0 <=3.13.0).",
+          "severity": "high",
+          "title": "Apollo Serve vulnerable to Denial of Service with `startStandaloneServer`",
+          "url": "https://github.com/advisories/GHSA-mp6q-xf9x-fwf7",
+          "vulnerable_versions": ">=2.0.0 <=3.13.0"
+        }
+      ],
+      "locked_versions": [
+        "3.13.0"
+      ]
+    },
+    "aws-sdk": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "aws-sdk@2.1693.0"
+          ],
+          "affected_versions": [
+            "2.1693.0"
+          ],
+          "id": 1111997,
+          "importers": [
+            "packages/tasks-core"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=2.0.0 <=3.0.0).",
+          "severity": "low",
+          "title": "JavaScript SDK v2 users should add validation to the region parameter value in or migrate to v3",
+          "url": "https://github.com/advisories/GHSA-j965-2qgj-vjmq",
+          "vulnerable_versions": ">=2.0.0 <=3.0.0"
+        }
+      ],
+      "locked_versions": [
+        "2.1693.0"
+      ]
+    },
+    "dicer": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "dicer@0.3.0"
+          ],
+          "affected_versions": [
+            "0.3.0"
+          ],
+          "id": 1093150,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<=0.3.1).",
+          "severity": "high",
+          "title": "Crash in HeaderParser in dicer",
+          "url": "https://github.com/advisories/GHSA-wm7h-9275-46v2",
+          "vulnerable_versions": "<=0.3.1"
+        }
+      ],
+      "locked_versions": [
+        "0.3.0"
+      ]
+    },
+    "diff": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "diff@3.5.0"
+          ],
+          "affected_versions": [
+            "3.5.0"
+          ],
+          "id": 1112703,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<3.5.1).",
+          "severity": "low",
+          "title": "jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch",
+          "url": "https://github.com/advisories/GHSA-73rr-hh4g-fpgx",
+          "vulnerable_versions": "<3.5.1"
+        },
+        {
+          "affected_nodes": [
+            "diff@4.0.2"
+          ],
+          "affected_versions": [
+            "4.0.2"
+          ],
+          "id": 1112704,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=4.0.0 <4.0.4).",
+          "severity": "low",
+          "title": "jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch",
+          "url": "https://github.com/advisories/GHSA-73rr-hh4g-fpgx",
+          "vulnerable_versions": ">=4.0.0 <4.0.4"
+        },
+        {
+          "affected_nodes": [
+            "diff@8.0.2"
+          ],
+          "affected_versions": [
+            "8.0.2"
+          ],
+          "id": 1112706,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=6.0.0 <8.0.3).",
+          "severity": "low",
+          "title": "jsdiff has a Denial of Service vulnerability in parsePatch and applyPatch",
+          "url": "https://github.com/advisories/GHSA-73rr-hh4g-fpgx",
+          "vulnerable_versions": ">=6.0.0 <8.0.3"
+        }
+      ],
+      "locked_versions": [
+        "3.5.0",
+        "4.0.2",
+        "8.0.2"
+      ]
+    },
+    "elliptic": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "elliptic@6.6.1"
+          ],
+          "affected_versions": [
+            "6.6.1"
+          ],
+          "id": 1112030,
+          "importers": [
+            "packages/blockchain",
+            "packages/digital-signatures"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<=6.6.1).",
+          "severity": "low",
+          "title": "Elliptic Uses a Cryptographic Primitive with a Risky Implementation",
+          "url": "https://github.com/advisories/GHSA-848j-6mx2-7j84",
+          "vulnerable_versions": "<=6.6.1"
+        }
+      ],
+      "locked_versions": [
+        "6.6.1"
+      ]
+    },
+    "fast-xml-parser": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "fast-xml-parser@4.5.3",
+            "fast-xml-parser@5.2.5"
+          ],
+          "affected_versions": [
+            "4.5.3",
+            "5.2.5"
+          ],
+          "id": 1112708,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=4.3.6 <=5.3.3).",
+          "severity": "high",
+          "title": "fast-xml-parser has RangeError DoS Numeric Entities Bug",
+          "url": "https://github.com/advisories/GHSA-37qj-frw5-hhjh",
+          "vulnerable_versions": ">=4.3.6 <=5.3.3"
+        }
+      ],
+      "locked_versions": [
+        "4.5.3",
+        "5.2.5",
+        "5.3.4"
+      ]
+    },
+    "fastify": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "fastify@4.29.1",
+            "fastify@5.6.2"
+          ],
+          "affected_versions": [
+            "4.29.1",
+            "5.6.2"
+          ],
+          "id": 1112876,
+          "importers": [
+            "packages/prov-ledger",
+            "prov-ledger-service",
+            "services/agent-runtime",
+            "services/agentic-mesh-evaluation",
+            "services/ai-sandbox",
+            "services/ai-service-platform",
+            "services/bundle-pipeline-service",
+            "services/collaboration-service",
+            "services/data-factory-service",
+            "services/data-marketplace",
+            "services/data-pool",
+            "services/decision-api",
+            "services/distributed-registry",
+            "services/entity-resolution",
+            "services/etl-service",
+            "services/feature-flags",
+            "services/health-aggregator",
+            "services/labeling-service",
+            "services/license-registry",
+            "services/media-pipeline-service",
+            "services/policy-aware-cache",
+            "services/policy-engine",
+            "services/receipt-signer",
+            "services/secure-elections",
+            "services/streaming-ingest",
+            "services/sync-service",
+            "services/unified-audit",
+            "services/universal-ingestion"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<=5.7.2).",
+          "severity": "low",
+          "title": "Fastify Vulnerable to DoS via Unbounded Memory Allocation in sendWebStream",
+          "url": "https://github.com/advisories/GHSA-mrq3-vjjr-p77c",
+          "vulnerable_versions": "<=5.7.2"
+        },
+        {
+          "affected_nodes": [
+            "fastify@4.29.1",
+            "fastify@5.6.2"
+          ],
+          "affected_versions": [
+            "4.29.1",
+            "5.6.2"
+          ],
+          "id": 1112877,
+          "importers": [
+            "packages/prov-ledger",
+            "prov-ledger-service",
+            "services/agent-runtime",
+            "services/agentic-mesh-evaluation",
+            "services/ai-sandbox",
+            "services/ai-service-platform",
+            "services/bundle-pipeline-service",
+            "services/collaboration-service",
+            "services/data-factory-service",
+            "services/data-marketplace",
+            "services/data-pool",
+            "services/decision-api",
+            "services/distributed-registry",
+            "services/entity-resolution",
+            "services/etl-service",
+            "services/feature-flags",
+            "services/health-aggregator",
+            "services/labeling-service",
+            "services/license-registry",
+            "services/media-pipeline-service",
+            "services/policy-aware-cache",
+            "services/policy-engine",
+            "services/receipt-signer",
+            "services/secure-elections",
+            "services/streaming-ingest",
+            "services/sync-service",
+            "services/unified-audit",
+            "services/universal-ingestion"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<5.7.2).",
+          "severity": "high",
+          "title": "Fastify's Content-Type header tab character allows body validation bypass",
+          "url": "https://github.com/advisories/GHSA-jx2c-rxcm-jvmq",
+          "vulnerable_versions": "<5.7.2"
+        }
+      ],
+      "locked_versions": [
+        "4.29.1",
+        "5.6.2"
+      ]
+    },
+    "html-minifier": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "html-minifier@4.0.0"
+          ],
+          "affected_versions": [
+            "4.0.0"
+          ],
+          "id": 1105440,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<=4.0.0).",
+          "severity": "high",
+          "title": "kangax html-minifier REDoS vulnerability",
+          "url": "https://github.com/advisories/GHSA-pfq8-rq6v-vf5m",
+          "vulnerable_versions": "<=4.0.0"
+        }
+      ],
+      "locked_versions": [
+        "4.0.0"
+      ]
+    },
+    "lodash": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "lodash@4.17.21"
+          ],
+          "affected_versions": [
+            "4.17.21"
+          ],
+          "id": 1112455,
+          "importers": [
+            "server"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=4.0.0 <=4.17.22).",
+          "severity": "moderate",
+          "title": "Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions",
+          "url": "https://github.com/advisories/GHSA-xxjr-mmjv-4gpg",
+          "vulnerable_versions": ">=4.0.0 <=4.17.22"
+        }
+      ],
+      "locked_versions": [
+        "4.17.21",
+        "4.17.23"
+      ]
+    },
+    "lodash-es": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "lodash-es@4.17.21"
+          ],
+          "affected_versions": [
+            "4.17.21"
+          ],
+          "id": 1112453,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (>=4.0.0 <=4.17.22).",
+          "severity": "moderate",
+          "title": "Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions",
+          "url": "https://github.com/advisories/GHSA-xxjr-mmjv-4gpg",
+          "vulnerable_versions": ">=4.0.0 <=4.17.22"
+        }
+      ],
+      "locked_versions": [
+        "4.17.21"
+      ]
+    },
+    "mjml": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "mjml@4.18.0"
+          ],
+          "affected_versions": [
+            "4.18.0"
+          ],
+          "id": 1111537,
+          "importers": [
+            "server"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<=4.18.0).",
+          "severity": "moderate",
+          "title": "MJML allows mj-include directory traversal due to an incomplete fix for CVE-2020-12827",
+          "url": "https://github.com/advisories/GHSA-45h5-66jx-r2wf",
+          "vulnerable_versions": "<=4.18.0"
+        }
+      ],
+      "locked_versions": [
+        "4.18.0"
+      ]
+    },
+    "pkg": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "pkg@5.8.1"
+          ],
+          "affected_versions": [
+            "5.8.1"
+          ],
+          "id": 1096454,
+          "importers": [
+            "cli"
+          ],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<=5.8.1).",
+          "severity": "moderate",
+          "title": "Pkg Local Privilege Escalation",
+          "url": "https://github.com/advisories/GHSA-22r3-9w55-cj54",
+          "vulnerable_versions": "<=5.8.1"
+        }
+      ],
+      "locked_versions": [
+        "5.8.1"
+      ]
+    },
+    "undici": {
+      "advisories": [
+        {
+          "affected_nodes": [
+            "undici@5.29.0"
+          ],
+          "affected_versions": [
+            "5.29.0"
+          ],
+          "id": 1112496,
+          "importers": [],
+          "recommended_action": "Upgrade to a version outside the vulnerable range (<6.23.0).",
+          "severity": "moderate",
+          "title": "Undici has an unbounded decompression chain in HTTP responses on Node.js Fetch API via Content-Encoding leads to resource exhaustion",
+          "url": "https://github.com/advisories/GHSA-g9mf-h72j-4rw9",
+          "vulnerable_versions": "<6.23.0"
+        }
+      ],
+      "locked_versions": [
+        "5.29.0",
+        "6.23.0",
+        "7.19.2"
+      ]
+    }
+  },
+  "summary": {
+    "bulk_source": "/tmp/pnpm-audit/bulk-full.json",
+    "generated_at": "2026-02-08T04:27:38.672979+00:00",
+    "lockfile": "/media/bcl/SUMMIT_LNX/summit/pnpm-lock.yaml",
+    "packages_with_advisories": 17,
+    "total_advisories": 21,
+    "total_affected_importers": 50,
+    "total_affected_versions": 24
+  }
+}
