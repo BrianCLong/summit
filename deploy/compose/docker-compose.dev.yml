@@ -1,15 +1,14 @@
 services:
   # Frontend Development Server
   client:
-    image: node:20-alpine
-    working_dir: /app/client
-    command: /bin/sh -c "npm install -g pnpm && pnpm install && pnpm dev --host"
-    # build:
-    #   context: ../../
-    #   dockerfile: client/Dockerfile.dev
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
     volumes:
-      - ../../:/app
+      - ./client:/app
       - /app/node_modules
+    ports:
+      - '3000:3000'
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:4000/graphql
@@ -20,7 +19,7 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:3000' ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -39,13 +38,11 @@ services:
 
   # Database Migrations
   migrations:
-    image: node:20-alpine
-    working_dir: /app/server
-    # build:
-    #   context: ../../
-    #   dockerfile: server/Dockerfile.dev
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
     volumes:
-      - ../../:/app
+      - ./server:/app
       - /app/node_modules
     environment:
       - NODE_ENV=development
@@ -62,24 +59,21 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    command: /bin/sh -c "npm install -g pnpm && pnpm install && npm run migrate"
+    command: ['node', 'scripts/db_migrate.cjs']
     networks:
       - intelgraph-dev
 
   # Backend Development Server
   server:
-    image: node:20-alpine
-    working_dir: /app/server
-    command: /bin/sh -c "npm install -g pnpm && pnpm install && npm run dev"
-    # build:
-    #   context: ../../
-    #   dockerfile: server/Dockerfile.dev
-    #   no_cache: true
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+      no_cache: true
     volumes:
-      - ../../:/app
+      - ./server:/app
       - /app/node_modules
     ports:
-      - '4001:4000'
+      - '4000:4000'
       - '9229:9229' # Debug port
     environment:
       - NODE_ENV=development
@@ -112,7 +106,7 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:4000/health/ready' ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -139,14 +133,18 @@ services:
     volumes:
       - neo4j_dev_data:/data
       - neo4j_dev_logs:/logs
-      - ../../backups/neo4j:/backups
+      - ./backups/neo4j:/backups
     ports:
       - '7474:7474'
       - '7687:7687'
     networks:
       - intelgraph-dev
     healthcheck:
-      test: [ 'CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1' ]
+      test:
+        [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1',
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -170,12 +168,12 @@ services:
       - '5432:5432'
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
-      - ../../server/db/migrations/postgres:/docker-entrypoint-initdb.d
-      - ../../backups/postgres:/backups
+      - ./server/db/migrations/postgres:/docker-entrypoint-initdb.d
+      - ./backups/postgres:/backups
     networks:
       - intelgraph-dev
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U $POSTGRES_USER -d $POSTGRES_DB' ]
+      test: ['CMD-SHELL', 'pg_isready -U $POSTGRES_USER -d $POSTGRES_DB']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -199,7 +197,7 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: [ 'CMD', 'redis-cli', '-a', 'devpassword', '--raw', 'INFO' ]
+      test: ['CMD', 'redis-cli', '-a', 'devpassword', '--raw', 'INFO']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -215,7 +213,7 @@ services:
   # AI/ML Microservice
   intelgraph-ml:
     build:
-      context: ../../ml
+      context: ./ml
       dockerfile: Dockerfile
     environment:
       - UVICORN_HOST=0.0.0.0
@@ -240,7 +238,7 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:8081/health' ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8081/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -256,9 +254,17 @@ services:
   # ML Worker (Celery)
   intelgraph-ml-worker:
     build:
-      context: ../../ml
+      context: ./ml
       dockerfile: Dockerfile
-    command: [ 'celery', '-A', 'app.celery_app', 'worker', '--loglevel=INFO', '--concurrency=2' ]
+    command:
+      [
+        'celery',
+        '-A',
+        'app.celery_app',
+        'worker',
+        '--loglevel=INFO',
+        '--concurrency=2',
+      ]
     environment:
       - REDIS_URL=redis://:devpassword@redis:6379/0
       - NEO4J_URI=bolt://neo4j:7687
@@ -286,96 +292,6 @@ services:
           cpus: '0.5'
           memory: 512M
 
-  # GraphQL API Gateway
-  api-gateway:
-    build: ../../services/api-gateway-restored
-    ports:
-      - "4000:4000"
-    environment:
-      - NODE_ENV=development
-      - PORT=4000
-      - GRAPH_SERVICE_URL=http://server:4000
-      - PROV_LEDGER_URL=http://prov-ledger:4010
-      - AGENT_RUNTIME_URL=http://agent-runtime:4012
-      - GRAPH_XAI_URL=http://graph-xai:4011
-      - CORS_ORIGIN=http://localhost:3000
-    depends_on:
-      server:
-        condition: service_healthy
-      prov-ledger:
-        condition: service_healthy
-      agent-runtime:
-        condition: service_healthy
-      graph-xai:
-        condition: service_healthy
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4000/health/ready" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Provenance Ledger
-  prov-ledger:
-    build: ../../services/prov-ledger-restored
-    ports:
-      - "4010:4010"
-    environment:
-      - NODE_ENV=development
-      - PORT=4010
-      - DATABASE_URL=postgres://intelgraph:devpassword@postgres:5432/intelgraph_dev
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4010/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Agent Runtime
-  agent-runtime:
-    build: ../../services/agent-runtime-restored
-    ports:
-      - "4012:4012"
-    environment:
-      - NODE_ENV=development
-      - PORT=4012
-      - REDIS_URL=redis://:devpassword@redis:6379
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4012/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Graph XAI
-  graph-xai:
-    build: ../../services/graph-xai-restored-2
-    ports:
-      - "4011:4011"
-    environment:
-      - NODE_ENV=development
-      - PORT=4011
-      - REDIS_URL=redis://:devpassword@redis:6379/0
-    depends_on:
-      redis:
-        condition: service_healthy
-    networks:
-      - intelgraph-dev
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4011/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   # Database Administration
   adminer:
     image: adminer:latest
@@ -392,7 +308,6 @@ volumes:
   neo4j_dev_logs:
   postgres_dev_data:
   redis_dev_data:
-
 
 networks:
   intelgraph-dev:
