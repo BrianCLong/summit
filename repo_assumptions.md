@@ -33,3 +33,18 @@
 
 1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
 2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+
+## Bombadil UI Fuzz Probe (planned work)
+### Verified
+- **Repo already contains `repo_assumptions.md`** that must be updated for new initiatives.
+- **Root-level docs hierarchy** includes `docs/security/`, `docs/ops/`, `docs/standards/` (targets for new docs).
+
+### Assumed (must validate before coding)
+- **UI entrypoint**: The Summit UI can be launched locally for smoke probes.
+- **Existing CI artifact upload patterns** exist to follow for `artifacts/` uploads.
+- **Browser automation**: Playwright browsers are available in CI runtime.
+
+### Must-not-touch for UI fuzz PR1 (doc-only)
+- `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+- `.github/workflows/*`
+- `SECURITY/` (any file)

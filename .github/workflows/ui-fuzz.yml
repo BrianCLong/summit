@@ -1,0 +1,45 @@
+name: ui-fuzz-smoke
+
+on:
+  pull_request:
+    paths:
+      - 'tools/ui_fuzz/**'
+      - 'docs/standards/bombadil-ui-fuzz.md'
+      - 'docs/security/data-handling/bombadil-ui-fuzz.md'
+      - 'docs/ops/runbooks/bombadil-ui-fuzz.md'
+      - 'scripts/monitoring/bombadil-ui-fuzz-drift.ts'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  ui-fuzz-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Start client dev server
+        run: pnpm run client:dev &
+      - name: Wait for client
+        run: npx tsx tools/ui_fuzz/scripts/wait_for_url.ts http://localhost:3000 60000
+      - name: Run UI fuzz smoke
+        env:
+          UI_FUZZ_BASE_URL: http://localhost:3000
+          UI_FUZZ_ALLOWLIST: localhost
+          UI_FUZZ_SEED: 7331
+        run: pnpm ui-fuzz:smoke
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-fuzz-artifacts
+          path: artifacts/ui_fuzz/
