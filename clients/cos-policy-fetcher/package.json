@@ -9,7 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "undici": "^6.19.8",
+    "undici": "^6.23.0",
     "tar": "^7.4.3"
   },
   "devDependencies": {

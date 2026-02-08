@@ -14,7 +14,7 @@
     "@intelgraph/common-types": "workspace:*",
     "@intelgraph/distributed-registry": "workspace:*",
     "@intelgraph/data-pool": "workspace:*",
-    "fastify": "^4.28.0",
+    "fastify": "^5.7.3",
     "zod": "^3.23.0",
     "ethers": "^6.12.0"
   },

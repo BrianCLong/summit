@@ -39,7 +39,7 @@
     "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts"
   },
   "dependencies": {
-    "@apollo/server": "5.2.0",
+    "@apollo/server": "5.4.0",
     "@as-integrations/express4": "1.1.2",
     "@aws-sdk/client-s3": "^3.962.0",
     "@bull-board/api": "6.12.0",

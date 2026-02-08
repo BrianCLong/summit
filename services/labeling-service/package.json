@@ -17,7 +17,7 @@
     "seed": "tsx src/scripts/seed.ts"
   },
   "dependencies": {
-    "fastify": "^5.6.1",
+    "fastify": "^5.7.3",
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.2",
     "pg": "^8.11.0",
