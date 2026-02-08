@@ -14,3 +14,11 @@
 ## 2026-02-03 - [Batched PostgreSQL Inserts with Chunking]
 **Learning:** Inserting many records individually in a loop is a major performance bottleneck. Using multi-row `INSERT INTO ... VALUES (), (), ...` reduces round-trips from N to 1. However, PostgreSQL has a parameter limit (65,535), so large batches must be chunked (e.g., 100 records per batch) to avoid runtime errors.
 **Action:** Use multi-row `VALUES` for batched PostgreSQL inserts and always implement chunking to handle arbitrarily large input arrays safely.
+
+## 2026-05-22 - [Optimized Supernode Detection]
+**Learning:** Nested loops of O(N*E) for supernode detection in large graphs (>10k nodes, >50k edges) cause severe latency (~6s). Pre-calculating connection Maps in O(E) reduces this to O(N+E), improving performance by >100x (~33ms).
+**Action:** Always pre-calculate frequency/connection maps when iterating over edges for multiple nodes to avoid N*E complexity.
+
+## 2026-07-15 - [Safe Batched Upserts with Fallback]
+**Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
+**Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.

@@ -48,7 +48,7 @@ export function compileRegistry(registry: CapabilityRegistry) {
         matchers: capability.matchers ?? [],
       };
       return acc;
-    },
+    }, {}
   );
 
   return {
