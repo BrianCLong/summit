@@ -1,0 +1,23 @@
+{
+  "runId": "019c2732-83aa-70ea-bb2c-31c5f86a39c4",
+  "subject": "openlineage://test-ns/runs/019c2732-83aa-70ea-bb2c-31c5f86a39c4",
+  "timestamp": "2026-02-04T05:53:26.075Z",
+  "status": "FAIL",
+  "postgresCount": 2,
+  "neo4jCount": 1,
+  "postgresAggregateDigest": "528fbb3bd0f1cab09608b4d6794fc763e9363a15eaa187780590e4c670898ce4",
+  "neo4jAggregateDigest": "4b3930f927e161d17a4ade476875644c0a01f97ef10894c4d168b32972d972b7",
+  "mismatches": [
+    {
+      "id": "1",
+      "type": "DIGEST_MISMATCH",
+      "postgresDigest": "344d98fb5bc96c1ea6b943c24cb2cceaf877d1720da1e0c62c9b1fa98959859e",
+      "neoDigest": "0da5a192fa1ae91fc4e4880c75c687c3c879805f8f6410c9e2f7b2188b4d2562"
+    },
+    {
+      "id": "2",
+      "type": "MISSING_IN_NEO4J",
+      "postgresDigest": "575b7a9280b846db429072bae01ccb12565c42ae2e046ad2655d5231f15b0a76"
+    }
+  ]
+}
