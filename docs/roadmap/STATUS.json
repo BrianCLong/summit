@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T12:30:00Z",
+  "revision_note": "Published governed agent integration reference architecture and recorded it in the roadmap.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -205,14 +205,20 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "governed-agent-integration-reference",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published governed agent integration reference architecture with endpoints, events, policy hooks, and audit receipts."
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
