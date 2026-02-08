@@ -1,0 +1,30 @@
+name: ci_verify_evidence
+
+on:
+  pull_request:
+    paths:
+      - "evidence/index.json"
+      - "evidence/**/report.json"
+      - "evidence/**/metrics.json"
+      - "evidence/**/stamp.json"
+      - "evidence/schemas/*.schema.json"
+      - ".github/scripts/verify-evidence.mjs"
+      - "docs/ga/evidence-system.md"
+      - ".github/workflows/ci-verify.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify_evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+      - name: Verify evidence artifacts
+        run: node .github/scripts/verify-evidence.mjs
