@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll, jest } from '@jest/globals';
 import request from 'supertest';
-// import { createApp } from '../../app.js';
-import { pg } from '../../db/pg.js';
-import { webhookQueue } from '../webhook.queue.js';
 import express from 'express';
-import { webhookService } from '../webhook.service.js';
+
+let pg: typeof import('../../db/pg.js').pg;
+let webhookQueue: typeof import('../webhook.queue.js').webhookQueue;
+let webhookService: typeof import('../webhook.service.js').webhookService;
 
 // Mock pg module
-jest.mock(new URL('../../db/pg.ts', import.meta.url).pathname, () => ({
+jest.unstable_mockModule(new URL('../../db/pg.ts', import.meta.url).pathname, () => ({
   pg: {
     oneOrNone: jest.fn(),
     many: jest.fn(),
@@ -15,12 +15,15 @@ jest.mock(new URL('../../db/pg.ts', import.meta.url).pathname, () => ({
 }));
 
 // Mock Queue
-jest.mock('../webhook.queue.js', () => ({
+jest.unstable_mockModule(new URL('../webhook.queue.ts', import.meta.url).pathname, () => ({
   webhookQueue: {
     add: jest.fn(),
   },
 }));
 
+if (!process.env.NO_NETWORK_LISTEN) {
+  process.env.NO_NETWORK_LISTEN = 'true';
+}
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
@@ -29,6 +32,9 @@ describeIf('Webhook API', () => {
   const tenantId = 'test-tenant-id';
 
   beforeAll(async () => {
+    ({ pg } = await import('../../db/pg.js'));
+    ({ webhookQueue } = await import('../webhook.queue.js'));
+    ({ webhookService } = await import('../webhook.service.js'));
     app = express();
     app.use(express.json());
     app.use('/api/webhooks', (await import('../../routes/webhooks.js')).default);

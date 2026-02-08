@@ -5,11 +5,14 @@ jest.mock(new URL('../jwt-rotation.ts', import.meta.url).pathname, () => ({
   },
 }));
 
-jest.mock(new URL('../../config/logger.ts', import.meta.url).pathname, () => ({
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
+jest.mock(new URL('../../../config/logger.ts', import.meta.url).pathname, () => ({
+  __esModule: true,
+  default: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
 }));
 
 const originalEnv = process.env.RBAC_ENABLED;
