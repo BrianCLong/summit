@@ -1,0 +1,5 @@
+{
+  "evidence_items_checked": 3,
+  "timestamp_isolation": true,
+  "ci_gate": "ci-verify/evidence-verify"
+}

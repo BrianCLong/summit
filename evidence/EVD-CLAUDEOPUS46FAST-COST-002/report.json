@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-CLAUDEOPUS46FAST-COST-002",
+  "summary": "Deny-by-default premium multiplier enforcement for the Opus 4.6 fast promo window.",
+  "artifacts": [
+    "src/policies/copilotModelPolicy.ts",
+    "src/policies/copilotModelPolicy.test.ts",
+    "tests/policies/copilotModelPolicy.test.ts"
+  ],
+  "notes": [
+    "Promo window enforcement rejects missing multipliers.",
+    "Positive fixture asserts multiplier acceptance."
+  ]
+}

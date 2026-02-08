@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added Copilot model preview governance evidence gates and documentation.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -58,7 +58,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Added Copilot model preview evidence catalog, cost enforcement, and CI gate artifacts."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
@@ -162,7 +162,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -180,7 +180,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",

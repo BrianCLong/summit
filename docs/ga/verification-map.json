@@ -96,5 +96,18 @@
     "evidence": ["docs/ga/MVP4_GA_GATE_ARTIFACTS.md", "GA_READINESS_REPORT.md"],
     "keywords": ["Gate Artifacts", "Go/No-Go"],
     "notes": "Tracks explicit GA gate artifacts (Terraform, DR restore, canary, migration sequencing) and ties them to evidence paths."
+  },
+  {
+    "feature": "Copilot Model Preview Governance",
+    "tier": "B",
+    "artifact": "docs/ga/ga-copilot-model-previews.md",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/governance/copilot-models.md",
+      "docs/ga/ga-copilot-model-previews.md",
+      "src/connectors/copilot/models.catalog.json"
+    ],
+    "keywords": ["copilot", "preview", "multiplier"],
+    "notes": "Ensures preview model adoption records policy prerequisites, cost multipliers, and evidence IDs."
   }
 ]

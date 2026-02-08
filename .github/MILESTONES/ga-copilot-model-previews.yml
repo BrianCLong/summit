@@ -1,0 +1,20 @@
+id: ga-copilot-model-previews
+name: GA Copilot Model Previews
+classification: patch
+acceptance:
+  - evidence_present: true
+    evidence_ids:
+      - EVD-CLAUDEOPUS46FAST-CATALOG-001
+      - EVD-CLAUDEOPUS46FAST-COST-002
+      - EVD-CLAUDEOPUS46FAST-GATES-003
+  - deny_by_default_tests: true
+    artifacts:
+      - src/policies/copilotModelPolicy.test.ts
+      - tests/policies/copilotModelPolicy.test.ts
+  - docs_complete: true
+    artifacts:
+      - docs/governance/copilot-models.md
+      - docs/ga/ga-copilot-model-previews.md
+  - fallback_chain_documented: true
+    artifacts:
+      - docs/ga/ga-copilot-model-previews.md

@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-CLAUDEOPUS46FAST-GATES-003",
+  "summary": "CI evidence verification gate validates evidence index integrity and timestamp isolation.",
+  "artifacts": [
+    ".github/scripts/verify-evidence.ts",
+    ".github/workflows/ci-verify.yml",
+    "evidence/index.json"
+  ],
+  "notes": [
+    "Evidence verification is enforced as a blocking CI gate.",
+    "Timestamp isolation applies to report/metrics artifacts."
+  ]
+}

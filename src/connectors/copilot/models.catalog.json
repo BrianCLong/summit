@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "profiles": [
+    {
+      "id": "anthropic/claude-opus-4.6-fast",
+      "state": "preview",
+      "tiers": ["copilot_pro_plus", "copilot_enterprise"],
+      "surfaces": [
+        "vscode_chat",
+        "vscode_ask",
+        "vscode_edit",
+        "vscode_agent",
+        "copilot_cli"
+      ],
+      "policyRequiredKeys": ["enable_fast_mode_opus_4_6"],
+      "premiumMultiplier": 9,
+      "promoWindow": {
+        "startISO": "2026-02-07T00:00:00Z",
+        "endISO": "2026-02-16T23:59:59Z"
+      }
+    }
+  ]
+}

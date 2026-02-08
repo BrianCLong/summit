@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-CLAUDEOPUS46FAST-CATALOG-001",
+  "summary": "Catalog entry records Claude Opus 4.6 fast preview tiers, surfaces, policy prerequisite, and promo window.",
+  "artifacts": [
+    "src/connectors/copilot/models.catalog.json",
+    "src/connectors/copilot/readCatalog.ts"
+  ],
+  "notes": [
+    "Data-only catalog aligned to public Copilot availability signals.",
+    "Policy keys are Summit-defined and avoid GitHub internal naming."
+  ]
+}

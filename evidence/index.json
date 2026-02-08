@@ -400,6 +400,30 @@
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-CLAUDEOPUS46FAST-CATALOG-001",
+      "files": {
+        "report": "evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/report.json",
+        "metrics": "evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/metrics.json",
+        "stamp": "evidence/EVD-CLAUDEOPUS46FAST-CATALOG-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-CLAUDEOPUS46FAST-COST-002",
+      "files": {
+        "report": "evidence/EVD-CLAUDEOPUS46FAST-COST-002/report.json",
+        "metrics": "evidence/EVD-CLAUDEOPUS46FAST-COST-002/metrics.json",
+        "stamp": "evidence/EVD-CLAUDEOPUS46FAST-COST-002/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-CLAUDEOPUS46FAST-GATES-003",
+      "files": {
+        "report": "evidence/EVD-CLAUDEOPUS46FAST-GATES-003/report.json",
+        "metrics": "evidence/EVD-CLAUDEOPUS46FAST-GATES-003/metrics.json",
+        "stamp": "evidence/EVD-CLAUDEOPUS46FAST-GATES-003/stamp.json"
+      }
     }
   ]
 }
