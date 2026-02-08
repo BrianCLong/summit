@@ -1,43 +1,36 @@
 import json
+from summit.self_evolve.evidence import EvolutionEvidenceWriter
 
-import pytest
+def test_evidence_determinism(tmp_path):
+    writer = EvolutionEvidenceWriter(tmp_path)
+    evd_id = "EVD-TEST-123"
+    data = {"b": 2, "a": 1, "nested": {"d": 4, "c": 3}}
 
-from connectors.spiderfoot import OsintEvent, write_normalized
+    writer.write_evidence(evd_id, data)
 
+    with open(tmp_path / "evidence.json", "r") as f:
+        content1 = f.read()
 
-def test_determinism(tmp_path):
-    events = [
-        OsintEvent(type="A", value="1"),
-        OsintEvent(type="B", value="2")
-    ]
-
-    p1 = tmp_path / "1.json"
-    p2 = tmp_path / "2.json"
-
-    write_normalized(events, str(p1))
-    write_normalized(events, str(p2))
-
-    assert p1.read_bytes() == p2.read_bytes()
-
-
-from summit_harness.evidence import EvidenceWriter
-from pathlib import Path
-
-def test_harness_evidence_writer_determinism(tmp_path):
-    writer = EvidenceWriter(tmp_path)
-    report = {"evidence_id": "EVD-1", "summary": "test", "item_slug": "slug", "artifacts": ["a.txt"]}
-    metrics = {"evidence_id": "EVD-1", "metrics": {"m1": 1.0}}
-
-    # Run twice
-    writer.write(report, metrics)
-    p1 = tmp_path / "report.json"
-    content1 = p1.read_text()
-
-    writer.write(report, metrics)
-    content2 = p1.read_text()
+    # Re-run
+    writer.write_evidence(evd_id, data)
+    with open(tmp_path / "evidence.json", "r") as f:
+        content2 = f.read()
 
     assert content1 == content2
-    # Check that keys are sorted in output
-    data = json.loads(content1)
-    keys = list(data.keys())
-    assert keys == sorted(keys)
+
+    # Check sorting
+    parsed = json.loads(content1)
+    assert list(parsed["data"].keys()) == ["a", "b", "nested"]
+    assert list(parsed["data"]["nested"].keys()) == ["c", "d"]
+
+def test_no_timestamps_in_evidence_or_metrics(tmp_path):
+    writer = EvolutionEvidenceWriter(tmp_path)
+    evd_id = "EVD-TEST-456"
+
+    writer.write_evidence(evd_id, {"info": "no time here"})
+    writer.write_metrics(evd_id, {"count": 10})
+
+    with open(tmp_path / "evidence.json", "r") as f:
+        assert "timestamp" not in f.read().lower()
+    with open(tmp_path / "metrics.json", "r") as f:
+        assert "timestamp" not in f.read().lower()

@@ -7,12 +7,15 @@ class HarnessConfig:
     max_steps: int = 50
     enabled: bool = False
 
+from .subagents import SubagentRegistry
+
 class AgentHarness:
-    def __init__(self, cfg: HarnessConfig, evidence: EvidenceWriter):
+    def __init__(self, cfg: HarnessConfig, evidence: EvidenceWriter, registry: SubagentRegistry = None):
         self.cfg = cfg
         self.evidence = evidence
+        self.registry = registry or SubagentRegistry()
 
-    def run(self, item: str) -> Dict[str, Any]:
+    def run(self, item: str, agent_name: str = None) -> Dict[str, Any]:
         if not self.cfg.enabled:
             return {"status": "disabled"}
 

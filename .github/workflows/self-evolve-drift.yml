@@ -1,0 +1,27 @@
+name: Self-Evolving Agents Drift Detection
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+jobs:
+  drift-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          pip install pytest
+          # Add other dependencies as needed
+      - name: Run Drift Detector
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          ./scripts/monitoring/self-evolving-agents-drift.py \
+            --baseline artifacts/self-evolving-agents/baseline.json \
+            --current artifacts/self-evolving-agents/latest_run.json \
+            --output artifacts/self-evolving-agents/drift_report.json

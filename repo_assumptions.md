@@ -1,35 +1,28 @@
-# Repo Assumptions & Validation
+# Repo Assumptions - self-evolving-agents
 
-## Structure Validation
+This document tracks verified vs assumed repository structures and invariants for the `self-evolving-agents` feature implementation.
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+## ✅ Verified Paths & Components
 
-## Component Mapping
+- `summit/`: Primary Python package for core logic.
+- `summit_harness/`: Modular agent harness and subagent runtime.
+- `docs/standards/`: Standards documentation.
+- `docs/security/data-handling/`: Data handling and privacy documentation.
+- `docs/ops/runbooks/`: Operational runbooks.
+- `tests/`: Unified test suite directory.
+- `tools/evidence_validate.py`: Evidence integrity and determinism verifier.
+- `summit/flags.py`: Feature flag management.
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+## ⚠️ Assumptions
 
-## Constraints & Checks
+- `summit/self_evolve/` is the preferred namespace for this feature (requested by user).
+- `summit_harness` is the runtime used for agent execution that we will wrap or enhance.
+- Evidence artifacts should follow the `index.json` + `report.json` + `metrics.json` + `stamp.json` pattern.
+- Python 3.12+ environment is available for execution.
 
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+## 🚫 Must-Not-Touch List
 
-## Next Steps
-
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+- Lockfiles: `pnpm-lock.yaml`, `package-lock.json`, `Cargo.lock`, `requirements.txt` (unless specifically required for dependencies).
+- Core Governance: `docs/governance/CONSTITUTION.md`, `docs/governance/META_GOVERNANCE.md`.
+- Identity/Security: `.security/`, `keys/`, `secrets/`.
+- CI/CD Pipelines: `.github/workflows/` (except when adding the scheduled drift job).
