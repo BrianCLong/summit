@@ -1,0 +1,43 @@
+{
+  "task_id": "CODEX_DESKTOP_GA_CONTROL_ROOM_20260208",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "codex-desktop-ga-control-room",
+    "version": "v2",
+    "sha256": "96f766c47da605b19b239f709a4332c4ab2fb7816ea2f70171f66e08c439e8c1",
+    "path": "prompts/docs/codex-desktop-ga-control-room@v2.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/codex-desktop/",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json",
+      "prompts/docs/codex-desktop-ga-control-room@v2.md",
+      "prompts/registry.yaml",
+      "agents/examples/CODEX_DESKTOP_GA_CONTROL_ROOM_20260208.json"
+    ],
+    "domains": ["documentation", "governance", "ops"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/codex-desktop/ga-control-room-run-2026-02-06.md",
+      "scripts/check-boundaries.cjs"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Codex Desktop GA Control Room + Architecture Lab setup docs are present.",
+    "GA thread run output captured with evidence-first sections.",
+    "Roadmap status updated with Codex Desktop initiatives.",
+    "DecisionLedger entry recorded with rollback path."
+  ],
+  "stop_conditions": [
+    "Evidence bundle cannot be produced deterministically.",
+    "DecisionLedger update fails or is rejected by schema."
+  ]
+}

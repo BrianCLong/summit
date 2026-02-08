@@ -1,5 +1,57 @@
 version: 1
 prompts:
+  - id: codex-desktop-ga-control-room
+    version: v2
+    path: prompts/docs/codex-desktop-ga-control-room@v2.md
+    sha256: 96f766c47da605b19b239f709a4332c4ab2fb7816ea2f70171f66e08c439e8c1
+    description: Stand up Codex Desktop GA Control Room and Architecture Lab artifacts with UEF outputs and MAESTRO alignment.
+    scope:
+      paths:
+        - docs/codex-desktop/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/docs/codex-desktop-ga-control-room@v2.md
+        - prompts/registry.yaml
+        - agents/examples/CODEX_DESKTOP_GA_CONTROL_ROOM_20260208.json
+      domains:
+        - documentation
+        - governance
+        - ops
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: codex-desktop-ga-control-room
+    version: v1
+    path: prompts/docs/codex-desktop-ga-control-room@v1.md
+    sha256: d7778db4447cdb78b5bd5b6c4b3d265b8625e21820e5eacc7461c9efde23b4d8
+    description: Stand up Codex Desktop GA Control Room and Architecture Lab artifacts with evidence-first run outputs.
+    scope:
+      paths:
+        - docs/codex-desktop/
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/docs/codex-desktop-ga-control-room@v1.md
+        - prompts/registry.yaml
+        - agents/examples/CODEX_DESKTOP_GA_CONTROL_ROOM_20260208.json
+      domains:
+        - documentation
+        - governance
+        - ops
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
