@@ -7,29 +7,14 @@ alerting:
     - static_configs:
         - targets: ['alertmanager:9093']
 
+# Rule files are deployed from ./observability/prometheus via docker volume mount to /etc/prometheus
+# These files must exist in the container or Prometheus will fail to start.
 rule_files:
-  - "/etc/prometheus/alert-rules.yml"
-  - "/etc/prometheus/alert-rules-intelgraph.yml"
-  - "/etc/prometheus/summit-alerts.yml"
-  - "/etc/prometheus/alerts-golden-path.yml"
-  - "/etc/prometheus/alerts.yaml"
-  - "/etc/prometheus/alerts.yml"
-  - "/etc/prometheus/anomaly-alerts.yaml"
-  - "/etc/prometheus/api-budgets.yaml"
-  - "/etc/prometheus/companyos-api-alert-rules.yaml"
-  - "/etc/prometheus/companyos-api-recording-rules.yaml"
-  - "/etc/prometheus/finops-rules.yaml"
-  - "/etc/prometheus/governance-alerts.yaml"
-  - "/etc/prometheus/graph-cache-rules.yaml"
-  - "/etc/prometheus/inference-rules.yaml"
-  - "/etc/prometheus/log-budget-rules.yaml"
-  - "/etc/prometheus/ml-rules.yaml"
-  - "/etc/prometheus/recording-rules.yaml"
-  - "/etc/prometheus/redis-rules.yaml"
-  - "/etc/prometheus/search-quality-rules.yaml"
-  - "/etc/prometheus/search-shadow-rules.yaml"
-  - "/etc/prometheus/slo-burn-rules.yaml"
-  - "/etc/prometheus/tenant-rules.yaml"
+  - "/etc/prometheus/*rules*.yml"
+  - "/etc/prometheus/*rules*.yaml"
+  - "/etc/prometheus/*alerts*.yml"
+  - "/etc/prometheus/*alerts*.yaml"
+  - "/etc/prometheus/*budgets*.yaml"
 
 scrape_configs:
   - job_name: 'prometheus'
