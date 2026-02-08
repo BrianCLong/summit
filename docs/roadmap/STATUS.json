@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Added agentic orchestration, hybrid context management, and agentic RAG integration scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "agentic-orchestration-context-rag",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Predictive orchestration selector, hybrid context manager, and agentic RAG scaffolding with tests and integration guidance."
     },
     {
       "id": "B",
@@ -212,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
