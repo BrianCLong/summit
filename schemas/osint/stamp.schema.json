@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OSINT Stamp",
+  "type": "object",
+  "required": ["runStartedAt", "runFinishedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "runStartedAt": { "type": "string", "format": "date-time" },
+    "runFinishedAt": { "type": "string", "format": "date-time" }
+  }
+}

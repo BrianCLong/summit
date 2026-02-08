@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OSINT Report",
+  "type": "object",
+  "required": ["playbookId", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "playbookId": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "entity", "provenance"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "entity": {
+            "type": "object",
+            "required": ["type", "value", "normalizedValue"],
+            "additionalProperties": false,
+            "properties": {
+              "type": { "type": "string" },
+              "value": { "type": "string" },
+              "normalizedValue": { "type": "string" }
+            }
+          },
+          "attributes": { "type": "object" },
+          "provenance": {
+            "type": "object",
+            "required": ["sourceName", "collector", "requestId", "collectedAt"],
+            "additionalProperties": false,
+            "properties": {
+              "sourceType": { "type": "string" },
+              "sourceName": { "type": "string" },
+              "url": { "type": "string" },
+              "collectedAt": { "type": "string", "format": "date-time" },
+              "collector": { "type": "string" },
+              "requestId": { "type": "string" }
+            }
+          },
+          "evidenceRef": { "type": "string" },
+          "verification": {
+            "type": "object",
+            "required": ["status"],
+            "additionalProperties": false,
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["unconfirmed", "corroborated", "conflict"]
+              },
+              "corroboratingSources": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "findingIds", "verification"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "text": { "type": "string", "minLength": 1 },
+          "findingIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" }
+          },
+          "verification": {
+            "type": "object",
+            "required": ["status"],
+            "additionalProperties": false,
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["unconfirmed", "corroborated", "conflict"]
+              },
+              "corroboratingSources": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
