@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvidenceReport",
+  "type": "object",
+  "required": ["runId", "summary", "evidenceIds"],
+  "properties": {
+    "runId": { "type": "string" },
+    "summary": { "type": "string" },
+    "evidenceIds": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "details": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false
+}

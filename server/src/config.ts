@@ -35,7 +35,6 @@ export const EnvSchema = z
     GA_CLOUD: z.coerce.boolean().default(false),
     AWS_REGION: z.string().optional(),
     AI_ENABLED: z.coerce.boolean().default(false),
-    FACTFLOW_ENABLED: z.coerce.boolean().default(false),
     KAFKA_ENABLED: z.coerce.boolean().default(false),
     OPENAI_API_KEY: z.string().optional(),
     ANTHROPIC_API_KEY: z.string().optional(),
