@@ -29,6 +29,7 @@ jobs:
       - name: Setup tools
         uses: actions/setup-python@v5
         with:
+          aws-region: us-east-1
           python-version: '3.11'
       - name: Install jq
         run: |
@@ -37,20 +38,23 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
+          aws-region: us-east-1
           terraform_version: 1.8.5
 
       - name: Setup AWS CLI
         if: matrix.cloud == 'aws'
-        uses: aws-actions/setup-cli@v2
+        uses: aws-actions/configure-aws-credentials@v4
       - name: Setup gcloud
         if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v2
         with:
+          aws-region: us-east-1
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Setup Azure CLI
         if: matrix.cloud == 'azure'
         uses: azure/login@v2
         with:
+          aws-region: us-east-1
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -73,5 +77,6 @@ jobs:
       - name: Upload parity artifact
         uses: actions/upload-artifact@v4
         with:
+          aws-region: us-east-1
           name: parity_result_${{ matrix.cloud }}
           path: parity_result.json
