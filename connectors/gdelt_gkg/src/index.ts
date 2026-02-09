@@ -81,7 +81,7 @@ async function run(options: any) {
     const md5sum = createHash('md5').update(buffer).digest('hex');
     if (md5sum !== entry.md5) {
       console.warn(`MD5 mismatch for ${entry.filename}. Expected ${entry.md5}, got ${md5sum}`);
-      // throw new Error(`MD5 mismatch for ${entry.filename}`);
+      throw new Error(`MD5 mismatch for ${entry.filename}`);
     }
 
     // Unzip
