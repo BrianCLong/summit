@@ -21,15 +21,25 @@ else
   HASH="unknown-hash"
 fi
 
-# Create evidence manifest
+EVIDENCE_ID="sha256:${HASH}"
+
+# Create evidence manifest (deterministic, no timestamps)
 cat <<EOF > "${OUTPUT_DIR}/manifest.json"
 {
   "projection": "${PROJECTION_NAME}",
   "source_commit": "${COMMIT_SHA}",
-  "evidence_id": "sha256:${HASH}",
-  "generated_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "evidence_id": "${EVIDENCE_ID}",
   "type": "projection-provenance"
 }
 EOF
 
-echo "Evidence bundle generated at ${OUTPUT_DIR}/manifest.json"
+# Create stamp.json for timestamps (following repo rules)
+cat <<EOF > "${OUTPUT_DIR}/stamp.json"
+{
+  "evidence_id": "${EVIDENCE_ID}",
+  "created_utc": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "git_commit": "${COMMIT_SHA}"
+}
+EOF
+
+echo "Evidence bundle generated at ${OUTPUT_DIR}/"

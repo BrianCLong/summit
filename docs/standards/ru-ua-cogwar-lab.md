@@ -63,6 +63,20 @@ outputs to shorten feedback loops and enforce evidence-first workflows.
 - Automated generation of disinformation content
 - Autonomous collection from restricted/private sources
 
+## Deterministic Pack Example
+
+Example campaign pack (schema-valid, deterministic):
+- `examples/cogwar/ru-ua/aid-fatigue.campaign.json`
+
+## Evidence Budgeting
+
+Evidence scope is intentionally constrained to keep packs deterministic and reviewable.
+Budgeting is enforced by schema caps and disciplined evidence selection.
+
+- `indicators` are capped by schema (`maxItems: 200`).
+- Each `indicator.max_matches` defaults to `50` unless explicitly reduced.
+- `evidence` entries must remain minimal; expansions require a governed exception.
+
 ## Threat-Informed Requirements
 
 - **Attribution laundering**: Require `confidence` and `evidence_refs[]` for `ATTRIBUTED` status.

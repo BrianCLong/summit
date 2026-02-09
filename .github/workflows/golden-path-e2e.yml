@@ -5,14 +5,6 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-    paths:
-      - 'client/**'
-      - 'apps/web/**'
-      - 'server/src/graphql/**'
-      - 'server/src/investigations/**'
-      - 'server/src/services/investigationWorkflowService.ts'
-      - 'e2e/golden-path*.spec.ts'
-      - 'flags/**'
   schedule:
     - cron: "0 2 * * *" # Nightly at 2 AM
   workflow_dispatch:
@@ -21,51 +13,62 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
-
 jobs:
+<<<<<<< HEAD
   golden-path-investigations:
     name: Golden Path - Investigations
     if: false  # Temporarily disabled for GA merge surge
+=======
+  golden-path-e2e:
+>>>>>>> bf2d74e9ec (feat: implement reliable CDC projection system with deterministic provenance)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: '20'
           cache: 'pnpm'
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "pnpm"
+
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: |
+          cd e2e/golden-path
+          pnpm exec playwright install --with-deps chromium
 
-      - name: Run Investigation Golden Path
+      - name: Run Golden Path E2E
         env:
           BASE_URL: http://localhost:3000
-          PLAYWRIGHT_USE_WEBSERVER: 'true'
-        run: pnpm test:e2e:investigations
+          GOLDEN_PATH_E2E_ENABLED: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '1' || '0' }}
+          GOLDEN_PATH_JOURNEY: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'basic' }}
+        run: ./scripts/ci/run_golden_path_e2e.sh
 
       - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-investigations
-          path: reports/playwright
+          name: playwright-report
+          path: playwright-report
           retention-days: 7
 
-      - name: Upload Test Results
+      - name: Upload Playwright Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
+<<<<<<< HEAD
           name: test-results-investigations
           path: test-results
           retention-days: 7
@@ -112,6 +115,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-frontend
+=======
+          name: playwright-artifacts
+>>>>>>> bf2d74e9ec (feat: implement reliable CDC projection system with deterministic provenance)
           path: test-results
           retention-days: 7
 
@@ -120,5 +126,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: golden-path-evidence
+          path: artifacts/evidence/goldenpath-frontend/
+          retention-days: 7
+
+      - name: Upload Summit Evidence Bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-evidence
           path: artifacts/evidence/
           retention-days: 7
