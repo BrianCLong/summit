@@ -9,10 +9,6 @@ on:
       - 'k6/**'
       - '.github/workflows/perf.yml'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   perf:
     runs-on: ubuntu-latest

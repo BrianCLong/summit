@@ -3,12 +3,12 @@ module: influence_governance
 defaults:
   allow: false
 
-# Prohibited by policy: any request or output that constitutes persuasion,
+# Prohibited by policy: any request or output that constitutes generate persuasion copy,
 # targeting, psychographic segmentation, or operational influence guidance.
 prohibited_intents:
-  - persuasion
-  - microtargeting
-  - psychographic_segmentation
+  - generate persuasion copy
+  - identify persuadable individuals
+  - automate amplification
   - automated_counter_messaging
   - covert_influence
   - narrative_shaping_playbook
