@@ -4,7 +4,10 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 
 
 @dataclass
@@ -13,7 +16,12 @@ class MismatchReport:
     mean_abs_logprob_delta: float = 0.0
     violations: int = 0
 
-def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
+def compute_mismatch_metrics(
+    train_vals: dict[str, Any], rollout_vals: dict[str, Any]
+) -> MismatchReport:
+    if torch is None:
+        return MismatchReport()
+
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
         train_logprobs = train_vals.get("log_probs")
