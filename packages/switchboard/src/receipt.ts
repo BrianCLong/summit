@@ -2,10 +2,19 @@ import { createHash } from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionReceipt, ToolCallRequest, PolicyDecision, CredentialGrant } from './types.js';
 
+function sortObjectKeys(obj: any): any {
+  if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
+    return obj;
+  }
+  const sorted: any = {};
+  Object.keys(obj).sort().forEach(key => {
+    sorted[key] = sortObjectKeys(obj[key]);
+  });
+  return sorted;
+}
+
 export function calculateHash(data: any): string {
-  // Use a stable stringify if possible, but for minimal implementation JSON.stringify is okay
-  // if we assume keys are ordered or inputs are simple.
-  const str = JSON.stringify(data);
+  const str = JSON.stringify(sortObjectKeys(data));
   return createHash('sha256').update(str).digest('hex');
 }
 
