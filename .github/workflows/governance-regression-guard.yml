@@ -79,7 +79,7 @@ jobs:
         id: compliance
         run: |
           # Run compliance check
-          RESULT=$(./scripts/release/check_governance_compliance.sh --json 2>&1) || EXIT_CODE=$?
+          RESULT=$(./scripts/release/check_governance_compliance.sh --json) || EXIT_CODE=$?
 
           echo "${RESULT}" > compliance_report.json
 

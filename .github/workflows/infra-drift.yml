@@ -55,8 +55,8 @@ jobs:
       - name: Generate workspace matrix (rollout-aware)
         id: mx
         run: |
-          IFS=',' read -ra ALL_WS <<< "$DRIFT_WORKSPACES"
-          echo "matrix=$(printf '%s' "${ALL_WS[@]}" | jq -R -s 'split(",")')" >> $GITHUB_OUTPUT
+          # IFS=... removed
+          echo "matrix=$(echo "$DRIFT_WORKSPACES" | jq -R .split(",").)" >> $GITHUB_OUTPUT
 
       - name: Save workspace matrix
         run: echo "${{ steps.mx.outputs.matrix }}"
