@@ -65,7 +65,7 @@ export class VerticalSaaSManager {
     if (!pack) throw new Error('Vertical Pack not found');
 
     logger.info({ packId, tenantId, vertical: pack.vertical }, 'VerticalSaaS: Activating pack and playbooks');
-    
+
     // In real system, provision playbooks into the tenant's environment
     // and initialize SLA tracking jobs.
   }

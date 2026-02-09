@@ -44,7 +44,7 @@ export class DarkLaunchService {
   public async setFlag(flag: DarkLaunchFlag): Promise<void> {
     const flagKey = `${flag.subsystem}:${flag.feature}`;
     this.flags.set(flagKey, flag);
-    
+
     const pool = getPostgresPool();
     await pool.query(
       `INSERT INTO dark_launch_flags (subsystem, feature, enabled, sampling_rate, is_shadow_only, updated_at)

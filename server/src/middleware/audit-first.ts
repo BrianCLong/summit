@@ -55,7 +55,7 @@ function redactPayload(body: any): any {
 
 /**
  * Audit-First Middleware
- * 
+ *
  * Captures sensitive operations and stamps them into the non-repudiable Provenance Ledger.
  */
 export function auditFirstMiddleware(

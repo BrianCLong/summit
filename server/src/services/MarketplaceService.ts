@@ -65,7 +65,7 @@ export class MarketplaceService {
    */
   public async publishAsset(asset: Omit<MarketplaceAsset, 'id' | 'certified' | 'pqcSignature'>): Promise<MarketplaceAsset> {
     logger.info({ name: asset.name }, 'Marketplace: Publishing new asset');
-    
+
     // In a real system, this would trigger a certification workflow (human + AI audit)
     const newAsset: MarketplaceAsset = {
       ...asset,

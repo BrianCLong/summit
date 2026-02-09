@@ -96,11 +96,11 @@ VALUES ('global', 'us-east-1', 'shard-001')
 ON CONFLICT (tenant_id) DO NOTHING;
 
 INSERT INTO data_residency_configs (
-  id, tenant_id, region, country, jurisdiction, 
+  id, tenant_id, region, country, jurisdiction,
   data_classifications, allowed_transfers, retention_policy_days, encryption_required, residency_mode
-) VALUES ('residency-global-init', 'global', 'us-east-1', 'US', 'US', 
-  '["public", "internal", "confidential"]'::jsonb, 
-  '["us-west-2", "eu-central-1"]'::jsonb, 
+) VALUES ('residency-global-init', 'global', 'us-east-1', 'US', 'US',
+  '["public", "internal", "confidential"]'::jsonb,
+  '["us-west-2", "eu-central-1"]'::jsonb,
   2555, true, 'strict'
 )
 ON CONFLICT (tenant_id) DO NOTHING;

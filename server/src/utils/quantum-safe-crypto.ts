@@ -24,7 +24,7 @@ export class QuantumSafeCrypto {
    */
   public async generateHybridKey(): Promise<{ classical: string; quantumSafe: string }> {
     logger.info('PQC: Generating experimental hybrid key');
-    
+
     // Classical ECC component
     const { publicKey } = crypto.generateKeyPairSync('ec', {
       namedCurve: 'secp256k1',

@@ -1,8 +1,0 @@
-diff a/packages/maestro-core/package.json b/packages/maestro-core/package.json	(rejected hunks)
-@@ -1,5 +1,5 @@
- {
--  "name": "@maestro/core",
-+  "name": "@intelgraph/maestro-core",
-   "version": "4.2.3",
-   "description": "Maestro orchestration engine core",
-   "main": "dist/index.js",

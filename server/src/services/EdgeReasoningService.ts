@@ -51,7 +51,7 @@ export class EdgeReasoningService {
 
     // 2. Simulate Local Reasoning (e.g. anomaly detection on a graph snippet)
     const inferenceId = randomUUID();
-    
+
     // Simulating sub-second processing
     return {
       inferenceId,

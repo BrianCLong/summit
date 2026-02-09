@@ -12,7 +12,7 @@ async function runMarketplaceDrill() {
   console.log('--- Step 1: Discovering Certified Connectors ---');
   const connectors = await marketplaceService.listAssets({ type: 'connector', certified: true });
   console.log(`Found ${connectors.length} certified connectors.`);
-  
+
   if (connectors.length === 0) {
     throw new Error('No assets found in registry');
   }

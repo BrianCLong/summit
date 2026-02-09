@@ -37,7 +37,7 @@ export function createSafeClient(baseURL?: string): AxiosInstance {
       const url = new URL(config.url, config.baseURL);
       const host = url.hostname;
 
-      const isAllowed = EGRESS_ALLOW_LIST.some(allowed => 
+      const isAllowed = EGRESS_ALLOW_LIST.some(allowed =>
         host === allowed || host.endsWith(`.${allowed}`)
       );
 
@@ -57,8 +57,8 @@ export function createSafeClient(baseURL?: string): AxiosInstance {
   client.interceptors.request.use(async (config) => {
     // Only apply PQC headers for internal service-to-service calls
     const isInternal = config.url && (
-        config.url.includes('server') || 
-        config.url.includes('gateway') || 
+        config.url.includes('server') ||
+        config.url.includes('gateway') ||
         config.url.includes('ai-sandbox') ||
         config.url.includes('agentic-mesh-evaluation')
     );
@@ -66,7 +66,7 @@ export function createSafeClient(baseURL?: string): AxiosInstance {
     if (isInternal) {
       const serviceId = process.env.SERVICE_ID || 'summit-api';
       const identity = quantumIdentityManager.issueIdentity(serviceId);
-      
+
       config.headers['X-Summit-PQC-Identity'] = JSON.stringify(identity);
       logger.debug({ serviceId, url: config.url }, 'PQC Identity attached to request');
     }

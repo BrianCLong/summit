@@ -67,7 +67,7 @@ async function runSchemaDriftDrill() {
   }
 
   console.log(`\nDrill Summary: ${successCount}/${testCases.length} successful mappings.`);
-  
+
   if (successCount === testCases.length) {
     logger.info('✅ Schema Drift Drill Passed');
     process.exit(0);
