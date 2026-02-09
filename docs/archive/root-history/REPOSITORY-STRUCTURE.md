@@ -76,7 +76,7 @@ summit/
 │   │   ├── api/                        # API documentation
 │   │   ├── deployment/                 # Deployment guides
 │   │   └── archive/                    # Archived docs
-│   ├── RUNBOOKS/                       # Operational runbooks (40+)
+│   ├── runbooks/                       # Operational runbooks (40+)
 │   │   ├── INDEX.md                    # Runbook index
 │   │   ├── dev-bootstrap.yaml
 │   │   ├── rollback.yaml
@@ -426,11 +426,11 @@ pnpm build
 - `docs/deployment/` - Deployment guides (K8s, Helm, Terraform)
 
 ### Operational Runbooks
-- `RUNBOOKS/INDEX.md` - Runbook catalog
-- `RUNBOOKS/dev-bootstrap.yaml` - Development setup
-- `RUNBOOKS/disaster-recovery.json` - DR procedures
-- `RUNBOOKS/rollback.yaml` - Rollback procedures
-- `RUNBOOKS/release-captain-quick-reference.md` - Release process
+- `runbooks/INDEX.md` - Runbook catalog
+- `runbooks/dev-bootstrap.yaml` - Development setup
+- `runbooks/disaster-recovery.json` - DR procedures
+- `runbooks/rollback.yaml` - Rollback procedures
+- `runbooks/release-captain-quick-reference.md` - Release process
 
 ### Architecture Decisions
 - `adr/` - Architecture Decision Records

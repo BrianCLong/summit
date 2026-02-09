@@ -74,7 +74,7 @@ BACKUP_ID=summit-backup-full-20250120T020000Z
 
 - **Complete Guide**: [docs/BACKUP_RESTORE_DR_GUIDE.md](docs/BACKUP_RESTORE_DR_GUIDE.md)
 - **Backup Sets Config**: [config/backup-sets.yaml](config/backup-sets.yaml)
-- **DR Drill Scenarios**: [RUNBOOKS/dr-drill-scenarios.yaml](RUNBOOKS/dr-drill-scenarios.yaml)
+- **DR Drill Scenarios**: [runbooks/dr-drill-scenarios.yaml](runbooks/dr-drill-scenarios.yaml)
 - **CI/CD Workflow**: [.github/workflows/backup-restore-validation.yml](.github/workflows/backup-restore-validation.yml)
 
 ## DR Drill Scenarios

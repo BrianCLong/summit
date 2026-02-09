@@ -87,16 +87,16 @@ All 4 Sprint 1 objectives have been completed with comprehensive documentation, 
 ### Deliverables
 
 **Runbooks Created**:
-1. `RUNBOOKS/graphql-high-latency.md` - 4 diagnosis scenarios, mitigation steps
-2. `RUNBOOKS/graphql-high-error-rate.md` - 5 error type patterns, remediation
-3. `RUNBOOKS/golden-path-failure.md` - Step-by-step debugging per golden path step
-4. `RUNBOOKS/RACI-MATRIX.md` - Complete role definitions and decision authority
-5. `RUNBOOKS/TTD-TTR-IMPROVEMENTS.md` - 5 improvements to reduce incident response time
+1. `runbooks/graphql-high-latency.md` - 4 diagnosis scenarios, mitigation steps
+2. `runbooks/graphql-high-error-rate.md` - 5 error type patterns, remediation
+3. `runbooks/golden-path-failure.md` - Step-by-step debugging per golden path step
+4. `runbooks/RACI-MATRIX.md` - Complete role definitions and decision authority
+5. `runbooks/TTD-TTR-IMPROVEMENTS.md` - 5 improvements to reduce incident response time
 
 **Templates Created**:
-1. `RUNBOOKS/templates/incident-ticket.md` - Comprehensive incident tracking template
-2. `RUNBOOKS/templates/stakeholder-update.md` - 6 communication templates (initial, progress, mitigation, resolution, SEV3/4, status page)
-3. `RUNBOOKS/templates/postmortem-comprehensive.md` - Blameless postmortem template with 5 Whys, timeline, action items
+1. `runbooks/templates/incident-ticket.md` - Comprehensive incident tracking template
+2. `runbooks/templates/stakeholder-update.md` - 6 communication templates (initial, progress, mitigation, resolution, SEV3/4, status page)
+3. `runbooks/templates/postmortem-comprehensive.md` - Blameless postmortem template with 5 Whys, timeline, action items
 
 ### Key Features
 
@@ -244,14 +244,14 @@ All 4 Sprint 1 objectives have been completed with comprehensive documentation, 
 7. apps/gateway/OBSERVABILITY.md
 
 ### Incident Response (8 files)
-1. RUNBOOKS/graphql-high-latency.md
-2. RUNBOOKS/graphql-high-error-rate.md
-3. RUNBOOKS/golden-path-failure.md
-4. RUNBOOKS/RACI-MATRIX.md
-5. RUNBOOKS/TTD-TTR-IMPROVEMENTS.md
-6. RUNBOOKS/templates/incident-ticket.md
-7. RUNBOOKS/templates/stakeholder-update.md
-8. RUNBOOKS/templates/postmortem-comprehensive.md
+1. runbooks/graphql-high-latency.md
+2. runbooks/graphql-high-error-rate.md
+3. runbooks/golden-path-failure.md
+4. runbooks/RACI-MATRIX.md
+5. runbooks/TTD-TTR-IMPROVEMENTS.md
+6. runbooks/templates/incident-ticket.md
+7. runbooks/templates/stakeholder-update.md
+8. runbooks/templates/postmortem-comprehensive.md
 
 ### Security & Testing (3 files)
 1. CICD_SECURITY_REVIEW.md
@@ -321,26 +321,26 @@ All deliverables are **production-ready** and require only:
 
 **SRE Team**:
 - OBSERVABILITY_IMPLEMENTATION.md
-- RUNBOOKS/TTD-TTR-IMPROVEMENTS.md
+- runbooks/TTD-TTR-IMPROVEMENTS.md
 - observability/prometheus/alerts/graphql-alerts.yaml
 
 **On-Call Engineers**:
-- RUNBOOKS/graphql-high-latency.md
-- RUNBOOKS/graphql-high-error-rate.md
-- RUNBOOKS/golden-path-failure.md
-- RUNBOOKS/RACI-MATRIX.md
+- runbooks/graphql-high-latency.md
+- runbooks/graphql-high-error-rate.md
+- runbooks/golden-path-failure.md
+- runbooks/RACI-MATRIX.md
 
 **DevOps Team**:
 - CICD_SECURITY_REVIEW.md
-- RUNBOOKS/templates/incident-ticket.md
+- runbooks/templates/incident-ticket.md
 
 **QA/Test Engineers**:
 - TEST_COVERAGE_GAPS.md
 
 **Engineering Managers**:
 - This summary (SPRINT1_EXECUTION_SUMMARY.md)
-- RUNBOOKS/RACI-MATRIX.md
-- RUNBOOKS/TTD-TTR-IMPROVEMENTS.md
+- runbooks/RACI-MATRIX.md
+- runbooks/TTD-TTR-IMPROVEMENTS.md
 
 ---
 

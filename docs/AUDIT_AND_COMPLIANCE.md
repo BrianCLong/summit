@@ -936,7 +936,7 @@ if (access.minimumNecessaryJustification.length < 30) { // Changed from 20
 - **Documentation**: [docs/ARCHITECTURE.md](./ARCHITECTURE.md)
 - **Security Policies**: [SECURITY/](../SECURITY/)
 - **API Reference**: [docs/API.md](./API.md)
-- **Runbooks**: [RUNBOOKS/compliance-monitoring.md](../RUNBOOKS/compliance-monitoring.md)
+- **Runbooks**: [runbooks/compliance-monitoring.md](../runbooks/compliance-monitoring.md)
 
 ---
 

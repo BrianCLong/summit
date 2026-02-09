@@ -509,7 +509,7 @@ Convert operational runbooks into executable pipelines.
 
 **Before (RUNBOOK):**
 ```yaml
-# RUNBOOKS/ransomware-triage.yaml
+# runbooks/ransomware-triage.yaml
 - Step 1: Gather incident context
 - Step 2: Identify patient zero
 - Step 3: Map lateral movement
@@ -524,7 +524,7 @@ kind: Pipeline
 metadata:
   name: ransomware-triage
   annotations:
-    runbook: RUNBOOKS/ransomware-triage.yaml
+    runbook: runbooks/ransomware-triage.yaml
 spec:
   triggers:
     - type: manual
@@ -867,7 +867,7 @@ A: Results are stored per-runtime. Local runs output to stdout/stderr. Check `pi
 - **Issues**: File issues in the Summit repository
 - **Documentation**: This guide + inline schema docs
 - **Examples**: See `pipelines/manifests/` directory
-- **Runbooks**: See `RUNBOOKS/` directory
+- **Runbooks**: See `runbooks/` directory
 
 ---
 

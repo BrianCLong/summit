@@ -279,7 +279,7 @@ watch -n 30 'curl -s https://prometheus.intelgraph.io/api/v1/query \
 
 ### Rollback & Feature-Flag Strategy
 
-- If any smoke or soak check fails, **pause all promotions**, disable launch-specific flags using the runbook in `RUNBOOKS/feature-flags.md`, and execute the rollback procedure in the next section.
+- If any smoke or soak check fails, **pause all promotions**, disable launch-specific flags using the runbook in `runbooks/feature-flags.md`, and execute the rollback procedure in the next section.
 - Keep kill-switch flags enabled for at least 24h post-merge so rollback can be executed without new deployments.
 - For partial failures isolated to a feature, prefer flagging off that feature and re-running smoke/soak before initiating a full rollback.
 
@@ -449,7 +449,7 @@ The weekly release train has been cut.
 **Highlights**:
 {HIGHLIGHTS}
 
-:link: [Release Notes]({RELEASE_URL}) | [Grafana]({GRAFANA_URL}) | [Runbook](./RUNBOOKS/release-captain.md)
+:link: [Release Notes]({RELEASE_URL}) | [Grafana]({GRAFANA_URL}) | [Runbook](./runbooks/release-captain.md)
 ```
 
 ### Canary Progress

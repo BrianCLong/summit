@@ -45,7 +45,7 @@ Queue + workers]
 
   %% Ops / Runbooks / Governance
   OBS --> RUN[Runbooks & Operator Playbooks
-(RUNBOOKS/)]
+(runbooks/)]
   API --> SEC[Security & Compliance
 (SECURITY/ + compliance/ + audit/)]
   MQ --> SEC
@@ -75,7 +75,7 @@ flowchart TB
   ROOT --> AI[AI/ML + Domain Modules]
   ROOT --> AG[Agentic Development Tooling]
 
-  GOV --> RUNBOOKS[RUNBOOKS/]
+  GOV --> RUNBOOKS[runbooks/]
   GOV --> SECURITY[SECURITY/ + .security/]
   GOV --> COMPLIANCE[compliance/]
   GOV --> AUDIT[audit/]

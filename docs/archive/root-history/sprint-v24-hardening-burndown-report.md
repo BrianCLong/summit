@@ -23,7 +23,7 @@ This report summarizes the execution of the sprint plan. All planned, non-code a
 
 - **Evidence:**
   - Enabled canary configuration in `/charts/gateway/values.yaml`.
-  - Scaffolded migration gate with `/scripts/migration-gate.sh` and `/RUNBOOKS/schema-migration-playbook.md`.
+  - Scaffolded migration gate with `/scripts/migration-gate.sh` and `/runbooks/schema-migration-playbook.md`.
   - Updated `/.maestro/pipeline.yaml` with canary and migration steps.
 
 ### ✅ EPIC D — Security & Policy

@@ -136,7 +136,7 @@ stages:
 
 - [Architecture Guide](./ARCHITECTURE.md)
 - [Security Model](./SECURITY.md)
-- [Operator Runbooks](./RUNBOOKS/)
+- [Operator Runbooks](./runbooks/)
 - [Plugin Development](./SDK.md)
 - [Policy Reference](./POLICIES.md)
 

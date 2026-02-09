@@ -93,8 +93,8 @@ Wire complete observability for Core GA:
    - Alertmanager config: Route to Slack, PagerDuty, or email
 
 6. **Runbooks**:
-   - RUNBOOKS/perf-regression.md: "SLO violated → Check slow queries → Add indexes"
-   - RUNBOOKS/ingest-backlog.md: "Throughput low → Scale workers → Check Redis queue"
+   - runbooks/perf-regression.md: "SLO violated → Check slow queries → Add indexes"
+   - runbooks/ingest-backlog.md: "Throughput low → Scale workers → Check Redis queue"
    - Include: Diagnosis steps, remediation, escalation path
 
 DELIVERABLES:
@@ -136,11 +136,11 @@ DELIVERABLES:
    - Resource utilization panels
    - Node exporter metrics (if available)
 
-9. RUNBOOKS/perf-regression.md
+9. runbooks/perf-regression.md
    - Steps: Check dashboard → Identify slow queries → Run EXPLAIN → Add index
    - Example commands, expected outcomes
 
-10. RUNBOOKS/ingest-backlog.md
+10. runbooks/ingest-backlog.md
     - Steps: Check Redis queue depth → Scale workers → Monitor throughput
     - Escalation: If backlog >1M, page on-call
 
