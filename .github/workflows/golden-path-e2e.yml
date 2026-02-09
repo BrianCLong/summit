@@ -14,13 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-<<<<<<< HEAD
-  golden-path-investigations:
-    name: Golden Path - Investigations
-    if: false  # Temporarily disabled for GA merge surge
-=======
   golden-path-e2e:
->>>>>>> 4a2ce70785 (fix(ci): repair evidence structure and test collection)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -68,56 +62,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-<<<<<<< HEAD
-          name: test-results-investigations
-          path: test-results
-          retention-days: 7
-
-  golden-path-frontend:
-    name: Golden Path - Consolidated Frontend
-    if: false  # Temporarily disabled for GA merge surge
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Run Frontend Golden Path
-        env:
-          BASE_URL: http://localhost:3000
-          PLAYWRIGHT_USE_WEBSERVER: 'true'
-        run: pnpm test:e2e:golden-path
-
-      - name: Upload Playwright Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-frontend
-          path: reports/playwright
-          retention-days: 7
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-frontend
-=======
           name: playwright-artifacts
->>>>>>> 4a2ce70785 (fix(ci): repair evidence structure and test collection)
           path: test-results
           retention-days: 7
 
