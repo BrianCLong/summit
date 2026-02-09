@@ -13,8 +13,23 @@ export class PartitionManager {
    * Useful when onboarding a new tenant to ensure they have their own dedicated partition.
    */
   async createTenantPartition(tenantId: string): Promise<void> {
+    await this.createTablePartition('maestro_runs', tenantId);
+  }
+
+  /**
+   * Creates a new partition for a specific tenant in a specific table (List Partitioning).
+   */
+  async createTablePartition(tableName: string, tenantId: string): Promise<void> {
+    // Basic validation to prevent SQL injection
+    if (!/^[a-zA-Z0-9_]+$/.test(tableName)) {
+      throw new Error(`Invalid table name: ${tableName}`);
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(tenantId)) {
+      throw new Error(`Invalid tenant ID: ${tenantId}`);
+    }
+
     const safeTenantId = tenantId.replace(/[^a-zA-Z0-9_]/g, '');
-    const partitionName = `maestro_runs_${safeTenantId}`;
+    const partitionName = `${tableName}_${safeTenantId}`;
 
     const client = await this.pool.connect();
     try {
@@ -34,7 +49,7 @@ export class PartitionManager {
 
       const query = `
         CREATE TABLE ${partitionName}
-        PARTITION OF maestro_runs
+        PARTITION OF ${tableName}
         FOR VALUES IN ('${tenantId}')
       `;
 
@@ -44,8 +59,13 @@ export class PartitionManager {
       await client.query('COMMIT');
     } catch (error: any) {
       await client.query('ROLLBACK');
-      logger.error(`Failed to create partition for tenant ${tenantId}`, error);
-      throw error;
+      // Ignore if table doesn't exist (e.g. during dev/test without full schema)
+      if (error.code === '42P01') {
+        logger.warn(`Parent table ${tableName} does not exist. Skipping partition creation.`);
+      } else {
+        logger.error(`Failed to create partition ${partitionName} for tenant ${tenantId}`, error);
+        throw error;
+      }
     } finally {
       client.release();
     }

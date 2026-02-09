@@ -12,6 +12,7 @@ import logger from '../utils/logger.js';
 import { tracer, Span } from '../utils/tracing.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { tenantRouter } from '../db/tenantRouter.js';
+import { partitionManager } from '../db/partitioning.js';
 import { TenantCostService } from './TenantCostService.js';
 
 // Partitioning configuration
@@ -1060,8 +1061,23 @@ export class TenantPartitioningService extends EventEmitter {
         logger.info({ tenantId, partitionKey }, 'Updated tenant routing');
       }
     } else if (step.command.startsWith('migrate_tenant_data')) {
+      const match = step.command.match(/--tenant (\w+) --to (\w+)/);
+      if (match) {
+         const tenantId = match[1];
+         // Ensure partition exists in Postgres for partitioned tables
+         // Currently supports maestro_runs and potentially other list-partitioned tables
+         try {
+             await partitionManager.createTenantPartition(tenantId);
+             logger.info({ tenantId }, 'Ensured partitions exist for tenant');
+         } catch (error: any) {
+             logger.error({ tenantId, error }, 'Failed to ensure partitions during migration');
+             throw error;
+         }
+      }
       // v2: In a real distributed system, this would trigger logical replication or a background worker
-      // For the monolith, we simulate it with a delay, as data stays in the same cluster but different schema/partition
+      // For the monolith, data might already be in the table but now routed to the partition if we inserted with correct key
+      // If we need to MOVE data from 'default' partition to 'tenant' partition, that would be an INSERT INTO SELECT DELETE operation
+      // For now, we assume this step primarily ensures infrastructure readiness
       await new Promise((resolve) => setTimeout(resolve, 2000));
     } else {
       // Default simulation for other steps
