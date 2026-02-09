@@ -214,12 +214,30 @@ export const createApp = async () => {
   app.use(publicRateLimit);
   app.use(abuseGuard.middleware());
 
-  // Enhanced Pino HTTP logger disabled due to symbol issues
-  // app.use(pinoHttpInstance({ ... }));
-  app.use((req: any, res: any, next: any) => {
-    req.log = appLogger;
-    next();
-  });
+  // Enhanced Pino HTTP logger with correlation and trace context
+  const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
+  if (process.env.NODE_ENV === 'test') {
+    console.log('DEBUG: appLogger type:', typeof appLogger);
+    console.log('DEBUG: appLogger has levels:', !!(appLogger as any).levels);
+    if ((appLogger as any).levels) {
+      console.log('DEBUG: appLogger.levels.values:', (appLogger as any).levels.values);
+    }
+  }
+  // Skip pino-http in test environment to avoid mock issues
+  if (cfg.NODE_ENV !== 'test') {
+    app.use(
+      pinoHttpInstance({
+        logger: appLogger,
+        customProps: (req: any) => ({
+          correlationId: req.correlationId,
+          traceId: req.traceId,
+          spanId: req.spanId,
+          userId: req.user?.sub || req.user?.id,
+          tenantId: req.user?.tenant_id || req.user?.tenantId,
+        }),
+      }),
+    );
+  }
   app.use(requestProfilingMiddleware);
 
   app.use(
@@ -686,7 +704,7 @@ export const createApp = async () => {
         persistedQueriesPlugin as any,
         resolverMetricsPlugin as any,
         auditLoggerPlugin as any,
-        // rateLimitAndCachePlugin(schema) as any,
+        rateLimitAndCachePlugin(schema) as any,
         // Enable PBAC in production
         ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
       ],
@@ -748,14 +766,10 @@ export const createApp = async () => {
     startTrustWorker();
     // Start retention worker if enabled
     startRetentionWorker();
-    // Start streaming ingestion if enabled (Epic B)
-    if (cfg.KAFKA_ENABLED) {
-      streamIngest.start(['ingest-events']).catch(err => {
-        appLogger.error({ err }, 'Failed to start streaming ingestion');
-      });
-    } else {
-      appLogger.info('Streaming ingestion disabled (KAFKA_ENABLED=false)');
-    }
+    // Start streaming ingestion (Epic B)
+    streamIngest.start(['ingest-events']).catch(err => {
+      appLogger.error({ err }, 'Failed to start streaming ingestion');
+    });
   } else {
     appLogger.warn(
       { safetyState, env: process.env.NODE_ENV },

@@ -1,6 +1,0 @@
-diff a/.gitignore b/.gitignore	(rejected hunks)
-@@ -364,4 +364,3 @@ release-assets/
- evidence-staging/
- *.txt
- tmp-test/
--\n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
