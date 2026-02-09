@@ -120,7 +120,7 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            helm lint helm/
+            helm lint helm/summit/
           fi
 
       - name: Terraform Plan
