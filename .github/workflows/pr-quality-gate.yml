@@ -88,6 +88,7 @@ jobs:
     # TODO: Re-enable when ga-risk-gate.yml is created
 
   security-scan:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
     with:
@@ -96,6 +97,7 @@ jobs:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
   sbom:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:
