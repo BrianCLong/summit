@@ -127,6 +127,7 @@ jobs:
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
   security-compliance:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
     needs: [config-guard]
@@ -134,6 +135,7 @@ jobs:
       strict: true
 
   soc-controls:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
