@@ -8,7 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4.1.7
       - uses: pnpm/action-setup@fe82b585a737a081b3c43d76e16a75f53f6a2353 # v3.0.0
-        if: ${{ hashFiles('pnpm-lock.yaml') != '' }}
       - name: Verify npm/yarn/pnpm lockfile
         run: |
           if [ -f package-lock.json ]; then npm ci --ignore-scripts; fi

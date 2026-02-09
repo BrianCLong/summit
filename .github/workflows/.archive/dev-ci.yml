@@ -21,7 +21,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-      - run: pnpm -v && node -v
 
   lint:
     runs-on: ubuntu-latest
@@ -31,7 +30,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
   typecheck:
@@ -42,7 +40,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
       - run: pnpm run typecheck
 
   unit:
@@ -59,7 +56,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
       - run: pnpm run test -- --ci --reporters=default --reporters=jest-junit || pnpm run test:ci || true
       - uses: actions/upload-artifact@v4
         if: always()

@@ -8,17 +8,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   integrity:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"

@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-COGSEC-DRILL-001",
-  "metrics": {
-    "time_to_triage_minutes": 15,
-    "decision_confidence": 0.95,
-    "scenario_severity": "SEV-1"
-  }
-}

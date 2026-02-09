@@ -14,10 +14,6 @@ on:
       - server/package.json
       - docs/releases/**
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   release-lint:
     runs-on: ubuntu-latest
