@@ -74,7 +74,7 @@ jobs:
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
             chmod +x scripts/security/trivy-scan.sh
-            ./scripts/security/trivy-scan.sh
+            ./scripts/security/trivy-scan.sh summit-app:${{ github.sha }} trivy-report.json
           else
             echo "Trivy scan script not found, skipping."
           fi
@@ -119,8 +119,11 @@ jobs:
 
       - name: Helm Lint
         run: |
-          if [ -d "helm" ]; then
-            helm lint helm/
+          if [ -d "helm/summit" ]; then
+            helm lint helm/summit
+          elif [ -d "helm" ]; then
+            # If specific chart not found, try to find Chart.yaml in subdirectories
+            find helm -name Chart.yaml -exec dirname {} \; | xargs -n1 helm lint
           fi
 
       - name: Terraform Plan

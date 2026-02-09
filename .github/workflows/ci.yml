@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version-file: .nvmrc
+          node-version: "22"
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
