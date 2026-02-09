@@ -293,6 +293,7 @@ export const createApp = async () => {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
+            id: 'dev-user', // Add ID to ensure downstream helpers rely on this user, not headers
           };
           return next();
         }
@@ -394,6 +395,24 @@ export const createApp = async () => {
   app.use('/auth/sso', ssoRouter);
   app.use('/api/auth', authRouter); // Alternative path
   app.use('/sso', ssoRouter);
+
+  // SEC-2025-002: Enforce authentication globally for /api routes
+  // This mitigates the risk of missing authentication checks in individual routers.
+  app.use('/api', (req, res, next) => {
+    // Exempt known public paths (must be robust against mount point logic)
+    // Note: req.path is relative to the mount point (/api)
+
+    // Public Webhooks (e.g., GitHub, Jira)
+    if (isPublicWebhook(req)) return next();
+
+    // Auth routes (redundant as they are mounted before, but good for safety)
+    if (req.path.startsWith('/auth')) return next();
+
+    // Health checks if exposed under /api
+    if (req.path.startsWith('/health')) return next();
+
+    return authenticateToken(req, res, next);
+  });
 
   // Other routes
   // app.use('/api/policy', policyRouter);
