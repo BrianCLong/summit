@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@electron/node-gyp': 10.2.0-electron.1
   entities: ^4.5.0
   d3-color: '>=3.1.0'
   node-fetch: '>=2.6.7'
@@ -156,6 +157,12 @@ importers:
       '@semantic-release/npm':
         specifier: ^12.0.2
         version: 12.0.2(semantic-release@24.2.9(typescript@5.9.3))
+      '@types/hapi__catbox':
+        specifier: ^10.2.6
+        version: 10.2.6
+      '@types/hapi__shot':
+        specifier: ^4.1.6
+        version: 4.1.6
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -26497,9 +26504,8 @@ packages:
     resolution: {integrity: sha512-Qkzpg2s9GnVV2I2BjRksUi43U5e6+zaQMcjoJy0C+C5oxaKl+fmckGDQFtRpZpZV0NQekuZZ+tGz7EA9TVnQtQ==}
     engines: {node: '>=12'}
 
-  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
-    resolution: {tarball: https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2}
-    version: 10.2.0-electron.1
+  '@electron/node-gyp@10.2.0-electron.1':
+    resolution: {integrity: sha512-YdpRE6qSNYyf7gBv1LBDc8OAs8f/mZthzM1k4pFzodNq8dBGf64MWC5Bq8VVlgdafjQXLpINHvtRAUC9uinoqw==}
     engines: {node: '>=12.13.0'}
     hasBin: true
 
@@ -36933,6 +36939,9 @@ packages:
     resolution: {integrity: sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==}
     deprecated: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
 
+  '@types/hapi__catbox@10.2.6':
+    resolution: {integrity: sha512-qdMHk4fBlwRfnBBDJaoaxb+fU9Ewi2xqkXD3mNjSPl2v/G/8IJbDpVRBuIcF7oXrcE8YebU5M8cCeKh1NXEn0w==}
+
   '@types/hapi__catbox@12.1.0':
     resolution: {integrity: sha512-v4XNUu6w9LmGgDZ4+OT1dSuvme5qNxFFyMVpqYPNugw4zN5xpWsNCsN7/0jG7wCKx39EQctW9iTT1O55UnH6/Q==}
     deprecated: This is a stub types definition. @hapi/catbox provides its own type definitions, so you do not need this installed.
@@ -36942,6 +36951,9 @@ packages:
 
   '@types/hapi__mimos@4.1.4':
     resolution: {integrity: sha512-i9hvJpFYTT/qzB5xKWvDYaSXrIiNqi4ephi+5Lo6+DoQdwqPXQgmVVOZR+s3MBiHoFqsCZCX9TmVWG3HczmTEQ==}
+
+  '@types/hapi__shot@4.1.6':
+    resolution: {integrity: sha512-h33NBjx2WyOs/9JgcFeFhkxnioYWQAZxOHdmqDuoJ1Qjxpcs+JGvSjEEoDeWfcrF+1n47kKgqph5IpfmPOnzbg==}
 
   '@types/hapi__shot@6.0.0':
     resolution: {integrity: sha512-CUxk0AEQRpIT2cx7EYXkqaXm60LP46ZyEhr/7uov7D/ZLysA5DKkfBtPIYnoWvn8qfcFV/7YHLd3U9gThuhb0A==}
@@ -59358,7 +59370,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/node-gyp@https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2':
+  '@electron/node-gyp@10.2.0-electron.1':
     dependencies:
       env-paths: 2.2.1
       exponential-backoff: 3.1.3
@@ -59395,7 +59407,7 @@ snapshots:
 
   '@electron/rebuild@3.7.0':
     dependencies:
-      '@electron/node-gyp': https://codeload.github.com/electron/node-gyp/tar.gz/06b29aafb7708acef8b3669835c8a7857ebc92d2
+      '@electron/node-gyp': 10.2.0-electron.1
       '@malept/cross-spawn-promise': 2.0.0
       chalk: 4.1.2
       debug: 4.4.3(supports-color@5.5.0)
@@ -70848,7 +70860,9 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
@@ -76264,6 +76278,8 @@ snapshots:
     dependencies:
       handlebars: 4.7.8
 
+  '@types/hapi__catbox@10.2.6': {}
+
   '@types/hapi__catbox@12.1.0':
     dependencies:
       '@hapi/catbox': 12.1.1
@@ -76282,6 +76298,10 @@ snapshots:
   '@types/hapi__mimos@4.1.4':
     dependencies:
       '@types/mime-db': 1.43.6
+
+  '@types/hapi__shot@4.1.6':
+    dependencies:
+      '@types/node': 20.19.27
 
   '@types/hapi__shot@6.0.0':
     dependencies:

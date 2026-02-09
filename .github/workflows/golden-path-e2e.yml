@@ -27,7 +27,6 @@ env:
 jobs:
   golden-path-investigations:
     name: Golden Path - Investigations
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -47,6 +46,9 @@ jobs:
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build Feature Flags
+        run: pnpm --filter @intelgraph/feature-flags build
 
       - name: Run Investigation Golden Path
         env:
@@ -72,7 +74,6 @@ jobs:
 
   golden-path-frontend:
     name: Golden Path - Consolidated Frontend
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -92,6 +93,9 @@ jobs:
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build Feature Flags
+        run: pnpm --filter @intelgraph/feature-flags build
 
       - name: Run Frontend Golden Path
         env:
