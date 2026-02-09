@@ -1,15 +1,7 @@
-import {
-  execFile
-} from 'node:child_process';
-import {
-  createHash
-} from 'node:crypto';
-import {
-  readFileSync
-} from 'node:fs';
-import {
-  resolve
-} from 'node:path';
+import { execFile } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import yaml from 'js-yaml';
 
 export const VerificationState = {
@@ -75,7 +67,7 @@ async function ghApi(endpoint, options = {}) {
 }
 
 export function classifyHttpError(status, headers, body) {
-  const normalizedMessage = String(typeof body === 'string' ? body : body?.message || '').toLowerCase();
+  const normalizedMessage = String(body || '').toLowerCase();
   if (status === 403) {
     const remaining = headers?.get?.('X-RateLimit-Remaining') ?? headers?.['x-ratelimit-remaining'];
     if (remaining === '0' || remaining === 0 || normalizedMessage.includes('rate limit')) 
@@ -85,9 +77,16 @@ export function classifyHttpError(status, headers, body) {
       return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message };
     return { state: VerificationState.UNVERIFIABLE_ERROR, message: `403: ${message}` };
   }
-  if (status === 404) return { state: VerificationState.NO_PROTECTION, message: 'Branch protection not configured' };
-  const message = typeof body === 'string' ? body : body?.message ?? `HTTP ${status}`;
-  return { state: VerificationState.UNVERIFIABLE_ERROR, message };
+  if (status === 404) return { state: VerificationState.NO_PROTECTION, message: 'No protection' };
+  return { state: VerificationState.UNVERIFIABLE_ERROR, message: `HTTP ${status}` };
+}
+
+function classifyGitHubApiError({ status, message, remaining }) {
+  const res = classifyHttpError(status, { 'x-ratelimit-remaining': remaining }, message);
+  if (res.state === VerificationState.RATE_LIMITED) return 'rate_limited';
+  if (res.state === VerificationState.UNVERIFIABLE_PERMISSIONS) return 'permission';
+  if (res.state === VerificationState.NO_PROTECTION) return 'not_configured';
+  return 'unknown';
 }
 
 export async function fetchRequiredStatusChecks({ repo, branch }) {
@@ -100,7 +99,7 @@ export async function fetchRequiredStatusChecks({ repo, branch }) {
       return res;
     } catch (err) {
       const status = Number(err.message.match(/\b(\d{3})\b/)?.[1] || 0);
-      if (status) return { ...classifyHttpError(status, {}, { message: err.message }), required_contexts: [], strict: false };
+      if (status) return { ...classifyHttpError(status, {}, err.message), required_contexts: [], strict: false };
       throw err;
     }
   }
@@ -119,8 +118,7 @@ export async function fetchRequiredStatusChecks({ repo, branch }) {
       }
     });
     if (!response.ok) {
-      let body;
-      try { body = await response.json(); } catch { body = await response.text(); }
+      const body = await response.text();
       return { ...classifyHttpError(response.status, response.headers, body), required_contexts: [], strict: false };
     }
     const data = await response.json();
@@ -142,13 +140,9 @@ function normalizeRequiredStatusChecks(data, source) {
 export function loadPolicy(policyPath) {
   const parsed = yaml.load(readFileSync(resolve(policyPath), 'utf8'));
   const req = parsed?.branch_protection?.required_status_checks;
-  if (!req) throw new Error('Invalid policy');
   return {
     branch: parsed.branch_protection.branch,
-    required_status_checks: {
-      strict: Boolean(req.strict),
-      required_contexts: normalizeContexts(req.contexts || [])
-    }
+    required_status_checks: { strict: Boolean(req.strict), required_contexts: normalizeContexts(req.contexts || []) }
   };
 }
 
@@ -159,22 +153,25 @@ export function computeDiff(p, a) {
 }
 
 function parseRemoteRepo(url) {
-  if (!url || typeof url !== 'string') return null;
   const match = url.match(/github\.com[:/](.+?)\/(.+?)(\.git)?$/);
   return match ? `${match[1]}/${match[2]}` : null;
 }
 
-export async function inferRepoFromGit() {
+async function inferRepoFromGit() {
   try {
     const { stdout } = await execFileAsync('git', ['config', '--get', 'remote.origin.url']);
     return parseRemoteRepo(stdout.trim());
-  } catch { return null; }
+  } catch (error) {
+    return null;
+  }
 }
 
 export {
   GitHubApiError,
+  classifyGitHubApiError,
   ghApi,
   hashObject,
+  inferRepoFromGit,
   normalizeContexts,
   sortKeysDeep,
   stableJson,
