@@ -1,12 +1,7 @@
 // @ts-nocheck
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
+import { getTracer, initializeTracing } from '../../observability/tracer.js';
 
 const logger = (pino as any)({ name: 'observability-otel' });
 
@@ -21,8 +16,6 @@ interface TracingConfig {
 
 class OpenTelemetryService {
   private static instance: OpenTelemetryService;
-  private sdk: NodeSDK | null = null;
-  private tracer: ReturnType<typeof trace.getTracer> | null = null;
   private config: TracingConfig;
 
   private constructor(config: Partial<TracingConfig> = {}) {
@@ -44,51 +37,17 @@ class OpenTelemetryService {
   }
 
   public initialize(): void {
-    if (this.sdk) {
-      logger.warn('OpenTelemetry SDK already initialized');
-      return;
-    }
-
     try {
-      const resource = Resource.default().merge(
-        new Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-          [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: this.config.environment,
-        }),
-      );
-
-      const traceExporters: JaegerExporter[] = [];
-      if (this.config.jaegerEndpoint) {
-        traceExporters.push(
-          new JaegerExporter({ endpoint: this.config.jaegerEndpoint }),
-        );
-      }
-
-      const metricReaders: PrometheusExporter[] = [];
-      // Use port 9464 as standard
-      metricReaders.push(
-        new PrometheusExporter({
-          port: parseInt(process.env.PROMETHEUS_PORT || '9464'),
-        }),
-      );
-
-      this.sdk = new NodeSDK({
-        resource,
-        traceExporter: traceExporters.length > 0 ? traceExporters[0] : undefined,
-        metricReader: metricReaders.length > 0 ? metricReaders[0] : undefined,
-        instrumentations: [
-          getNodeAutoInstrumentations({
-            '@opentelemetry/instrumentation-fs': { enabled: false },
-          }),
-        ],
+      const tracer = initializeTracing({
+        serviceName: this.config.serviceName,
+        serviceVersion: this.config.serviceVersion,
+        environment: this.config.environment,
+        jaegerEndpoint: this.config.jaegerEndpoint,
+        sampleRate: this.config.sampleRate
       });
-
-      this.sdk.start();
-      this.tracer = trace.getTracer(this.config.serviceName, this.config.serviceVersion);
-
+      tracer.initialize();
       logger.info(
-        `OpenTelemetry initialized. Service: ${this.config.serviceName}, Env: ${this.config.environment}`,
+        `OpenTelemetry initialized via core tracer. Service: ${this.config.serviceName}, Env: ${this.config.environment}`,
       );
     } catch (error: any) {
       logger.error(
@@ -98,11 +57,9 @@ class OpenTelemetryService {
   }
 
   public async shutdown(): Promise<void> {
-    if (this.sdk) {
-      await this.sdk.shutdown();
-      this.sdk = null;
-      logger.info('OpenTelemetry SDK shutdown');
-    }
+    const tracer = getTracer();
+    await tracer.shutdown();
+    logger.info('OpenTelemetry SDK shutdown');
   }
 
   public startSpan(
@@ -110,8 +67,8 @@ class OpenTelemetryService {
     attributes: Record<string, string | number | boolean> = {},
     kind: (typeof SpanKind)[keyof typeof SpanKind] = SpanKind.INTERNAL,
   ) {
-    if (!this.tracer) return this.createNoOpSpan();
-    return this.tracer.startSpan(name, {
+    const tracer = getTracer();
+    return tracer.startSpan(name, {
       kind,
       attributes: {
         'service.name': this.config.serviceName,
@@ -159,7 +116,7 @@ class OpenTelemetryService {
   }
 
   public getTracer() {
-    return this.tracer;
+    return trace.getTracer(this.config.serviceName, this.config.serviceVersion);
   }
 }
 

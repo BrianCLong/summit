@@ -1,25 +1,13 @@
 /**
  * OpenTelemetry Instrumentation
  *
- * Replaces custom tracing with industry-standard OpenTelemetry
- * for Apollo GraphQL, Neo4j, and BullMQ operations.
+ * Wrapper around the core observability/tracer to provide backward compatibility
+ * and specialized wrapping methods.
  */
 
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { NodeSDK } from '@opentelemetry/sdk-node';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import * as resources from '@opentelemetry/resources';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
+import { getTracer, initializeTracing } from '../observability/tracer.js';
 
 const logger: pino.Logger = (pino as any)({ name: 'opentelemetry' });
 
@@ -33,8 +21,6 @@ interface TracingConfig {
 }
 
 class OpenTelemetryService {
-  private sdk: NodeSDK | null = null;
-  private tracer: any = null;
   private config: TracingConfig;
 
   constructor(config: Partial<TracingConfig> = {}) {
@@ -57,66 +43,15 @@ class OpenTelemetryService {
    */
   initialize(): void {
     try {
-      // Configure resource
-      const resource = resources.Resource.default().merge(
-        new resources.Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-          [SemanticResourceAttributes.SERVICE_VERSION]:
-            this.config.serviceVersion,
-          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
-            this.config.environment,
-        }),
-      );
-
-      // Configure exporters
-      const traceExporters: any[] = [];
-
-      if (this.config.jaegerEndpoint) {
-        traceExporters.push(
-          new JaegerExporter({
-            endpoint: this.config.jaegerEndpoint,
-          }),
-        );
-      }
-
-      // Configure metrics
-      const metricReaders: any[] = [];
-
-      // Prometheus metrics
-      metricReaders.push(
-        new PrometheusExporter({
-          port: parseInt(process.env.PROMETHEUS_PORT || '9464'),
-        }),
-      );
-
-      // Initialize SDK
-      this.sdk = new NodeSDK({
-        resource,
-        traceExporter:
-          traceExporters.length > 0 ? traceExporters[0] : undefined,
-        metricReader: metricReaders.length > 0 ? metricReaders[0] : undefined,
-        instrumentations: [
-          getNodeAutoInstrumentations({
-            // Disable instrumentation for certain modules if needed
-            '@opentelemetry/instrumentation-fs': {
-              enabled: false,
-            },
-          }),
-        ],
+      const tracer = initializeTracing({
+        serviceName: this.config.serviceName,
+        serviceVersion: this.config.serviceVersion,
+        environment: this.config.environment,
+        jaegerEndpoint: this.config.jaegerEndpoint,
+        sampleRate: this.config.sampleRate
       });
-
-      // Start the SDK
-      this.sdk.start();
-
-      // Get tracer
-      this.tracer = trace.getTracer(
-        this.config.serviceName,
-        this.config.serviceVersion,
-      );
-
-      logger.info(
-        `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, Jaeger Enabled: ${!!this.config.jaegerEndpoint}`,
-      );
+      tracer.initialize();
+      logger.info('OpenTelemetry initialized via core tracer');
     } catch (error: any) {
       logger.error(
         `Failed to initialize OpenTelemetry. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -128,10 +63,9 @@ class OpenTelemetryService {
    * Shutdown OpenTelemetry SDK
    */
   async shutdown(): Promise<void> {
-    if (this.sdk) {
-      await this.sdk.shutdown();
-      logger.info('OpenTelemetry SDK shutdown');
-    }
+    const tracer = getTracer();
+    await tracer.shutdown();
+    logger.info('OpenTelemetry SDK shutdown');
   }
 
   /**
@@ -142,11 +76,8 @@ class OpenTelemetryService {
     attributes: Record<string, any> = {},
     kind: typeof SpanKind.INTERNAL = SpanKind.INTERNAL,
   ) {
-    if (!this.tracer) {
-      return this.createNoOpSpan();
-    }
-
-    return this.tracer.startSpan(name, {
+    const tracer = getTracer();
+    return tracer.startSpan(name, {
       kind,
       attributes: {
         'service.name': this.config.serviceName,
@@ -314,18 +245,6 @@ class OpenTelemetryService {
   }
 
   /**
-   * Create no-op span for when tracing is disabled
-   */
-  private createNoOpSpan() {
-    return {
-      setStatus: () => {},
-      setAttributes: () => {},
-      addEvent: () => {},
-      end: () => {},
-    };
-  }
-
-  /**
    * Get service health and metrics
    */
   getHealth(): {
@@ -334,11 +253,12 @@ class OpenTelemetryService {
     environment: string;
     tracerActive: boolean;
   } {
+    const tracer = getTracer();
     return {
-      enabled: !!this.sdk,
+      enabled: tracer.isInitialized(),
       serviceName: this.config.serviceName,
       environment: this.config.environment,
-      tracerActive: !!this.tracer,
+      tracerActive: tracer.isInitialized(),
     };
   }
 }
