@@ -15,10 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
 ### Added
+- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
@@ -43,12 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All governance and security checks pass
 
 ### Added
+- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 - Generated SBOM at `.evidence/sbom.json`
 - CLI test suite: 262 tests passing
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 
 ### Added
+- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 - **Reliability Hardening**:
   - Added exponential backoff retry logic (3 attempts) to Maestro LLM execution with cancellation support.
   - Added 60s timeout to Maestro LLM calls to prevent hanging jobs.
@@ -97,6 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2024-12-28
 
 ### Added
+- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 
 #### Core Platform
 - Multi-tenant architecture with strict tenant isolation

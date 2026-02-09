@@ -1,0 +1,6 @@
+{
+  "mixed_outcome_rate": 0.0,
+  "advantage_variance": 0.0,
+  "sage_enabled": true,
+  "num_rollouts": 0
+}

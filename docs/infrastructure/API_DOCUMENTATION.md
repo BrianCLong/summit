@@ -17,19 +17,19 @@ The IntelGraph Platform provides comprehensive API documentation through:
 
 Start the server and access documentation at:
 
-- **Swagger UI**: http://localhost:4000/api/docs
-- **ReDoc**: http://localhost:4000/api/docs/redoc
-- **GraphQL Playground**: http://localhost:4000/api/docs/graphql-playground
-- **OpenAPI JSON**: http://localhost:4000/api/docs/openapi.json
-- **OpenAPI YAML**: http://localhost:4000/api/docs/openapi.yaml
-- **GraphQL Schema**: http://localhost:4000/api/docs/graphql-schema
+- **Swagger UI**: <http://localhost:4000/api/docs>
+- **ReDoc**: <http://localhost:4000/api/docs>/redoc
+- **GraphQL Playground**: <http://localhost:4000/api/docs>/graphql-playground
+- **OpenAPI JSON**: <http://localhost:4000/api/docs>/openapi.json
+- **OpenAPI YAML**: <http://localhost:4000/api/docs>/openapi.yaml
+- **GraphQL Schema**: <http://localhost:4000/api/docs>/graphql-schema
 
 ### Production
 
 Documentation endpoints are available in production at:
-```
+```bash
 https://api.intelgraph.example.com/api/docs
-```
+```bash
 
 ## OpenAPI Specification
 
@@ -48,7 +48,7 @@ The OpenAPI specification is located at `/openapi/spec.yaml` and includes:
 2. Validate the changes:
    ```bash
    python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
-   ```
+   ```bash
 3. Restart the server to see changes
 4. Test endpoints using Swagger UI
 
@@ -73,7 +73,7 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-```
+```bash
 
 ## SDK Generation
 
@@ -88,7 +88,7 @@ Generate client SDKs automatically:
 # Generate specific SDK
 ./scripts/generate-sdk.sh typescript
 ./scripts/generate-sdk.sh python
-```
+```bash
 
 ### TypeScript SDK
 
@@ -107,7 +107,7 @@ const response = await fetch('http://localhost:4000/api/cases', {
 
 const cases: paths['/api/cases']['get']['responses']['200']['content']['application/json']
   = await response.json();
-```
+```bash
 
 ### Python SDK
 
@@ -116,7 +116,7 @@ Install the generated Python client:
 ```bash
 cd generated-clients/python
 pip install -e .
-```
+```bash
 
 Usage:
 
@@ -133,15 +133,15 @@ with ApiClient(configuration) as api_client:
     api_instance = cases_api.CasesApi(api_client)
     cases = api_instance.get_cases()
     print(cases)
-```
+```bash
 
 ## GraphQL Documentation
 
 ### Schema Access
 
 The GraphQL schema is automatically documented and available at:
-- Playground: http://localhost:4000/api/docs/graphql-playground
-- Raw Schema: http://localhost:4000/api/docs/graphql-schema
+- Playground: <http://localhost:4000/api/docs>/graphql-playground
+- Raw Schema: <http://localhost:4000/api/docs>/graphql-schema
 
 ### Example Queries
 
@@ -159,7 +159,7 @@ query GetInvestigation($id: ID!) {
     }
   }
 }
-```
+```bash
 
 ## Authentication
 
@@ -168,7 +168,7 @@ All API endpoints (except documentation and health checks) require JWT authentic
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   http://localhost:4000/api/cases
-```
+```bash
 
 ### Obtaining a Token
 
@@ -184,17 +184,17 @@ API requests are rate-limited based on:
 - Request window (default: 60 seconds)
 
 Rate limit headers in responses:
-```
+```bash
 X-RateLimit-Limit: 600
 X-RateLimit-Remaining: 599
 X-RateLimit-Reset: 1234567890
-```
+```bash
 
 ## Testing API Endpoints
 
 ### Using Swagger UI
 
-1. Navigate to http://localhost:4000/api/docs
+1. Navigate to <http://localhost:4000/api/docs>
 2. Click "Authorize" and enter your JWT token
 3. Expand an endpoint
 4. Click "Try it out"
@@ -214,7 +214,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"title": "New Investigation", "status": "draft"}' \
   http://localhost:4000/api/cases
-```
+```bash
 
 ## Troubleshooting
 
@@ -223,7 +223,7 @@ curl -X POST \
 Check that `/openapi/spec.yaml` exists and is valid YAML:
 ```bash
 python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
-```
+```bash
 
 ### Swagger UI not showing endpoints
 
@@ -236,11 +236,11 @@ python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
 Ensure Docker is running for Python client generation:
 ```bash
 docker ps
-```
+```bash
 
 ## Architecture
 
-```
+```bash
 ┌─────────────────┐
 │   OpenAPI Spec  │
 │  spec.yaml      │
@@ -262,7 +262,7 @@ docker ps
     │  TypeScript │  Python  │
     │   Client    │  Client  │
     └─────────────┴──────────┘
-```
+```bash
 
 ## Files
 

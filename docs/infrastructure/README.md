@@ -75,7 +75,7 @@ make up
 
 # Access documentation
 open http://localhost:4000/api/docs
-```
+```bash
 
 ### 2. Logging Infrastructure
 
@@ -85,7 +85,7 @@ docker-compose -f docker-compose.dev.yml -f docker-compose.logging.yml up
 
 # Access Kibana
 open http://localhost:5601
-```
+```bash
 
 ### 3. Job Queues
 
@@ -95,11 +95,11 @@ make up
 
 # Access Bull Board dashboard
 open http://localhost:4000/queues
-```
+```bash
 
 ## Architecture Overview
 
-```
+```bash
 ┌─────────────────────────────────────────────────────┐
 │                 IntelGraph Platform                 │
 ├─────────────────┬───────────────────┬───────────────┤
@@ -123,7 +123,7 @@ open http://localhost:4000/queues
 │  └──────────┘   │  └──────────┘     │  └─────────┘  │
 │                 │                   │               │
 └─────────────────┴───────────────────┴───────────────┘
-```
+```bash
 
 ## Testing
 
@@ -132,7 +132,7 @@ open http://localhost:4000/queues
 ```bash
 cd server
 npm test -- api-docs.test.ts
-```
+```bash
 
 ### Logging Tests
 
@@ -142,7 +142,7 @@ node -e "import logger from './server/src/utils/logger.js'; logger.info('Test lo
 
 # Check ELK stack
 curl http://localhost:9200/_cluster/health
-```
+```bash
 
 ### Queue Tests
 
@@ -155,7 +155,7 @@ node -e "
 import { addJob, QueueName } from './server/src/queues/config.js';
 await addJob(QueueName.EMAIL, 'test', { message: 'Test' });
 "
-```
+```bash
 
 ## Quality Checklist
 

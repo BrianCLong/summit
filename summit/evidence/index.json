@@ -11,6 +11,12 @@
       "report": "summit/evidence/report.json",
       "metrics": "summit/evidence/metrics.json",
       "stamp": "summit/evidence/stamp.json"
+    },
+    {
+      "evidence_id": "SAGE-SELF-HINT-GRPO-001",
+      "report": "reports/sage-self-hint-grpo/run.json",
+      "metrics": "reports/sage-self-hint-grpo/metrics.json",
+      "stamp": "reports/sage-self-hint-grpo/stamp.json"
     }
   ]
 }

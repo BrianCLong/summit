@@ -1,35 +1,16 @@
-# Repo Assumptions & Validation
+# Repo Reality Check
 
-## Structure Validation
+## Verified
+* `summit` is the root python package.
+* `summit/post_training/recipes/typhoon_s/opd_trainer.py` exists and uses PyTorch.
+* `summit/post_training/recipes/typhoon_s/ink_grpo.py` exists but is only a config dataclass.
+* `tools/summit-fara` contains an agent loop with placeholder GRPO comments.
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+## Assumed (and will be created)
+* `summit/rl` will be the new home for the RL pipeline to support SAGE.
+* `summit/rl/trainers/grpo.py` will be created (or mocked) as the target for SAGE integration.
+* Evidence artifacts will be stored in `reports/sage-self-hint-grpo/` following the pattern seen in `summit/evidence/templates`.
 
-## Component Mapping
-
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
-
-## Constraints & Checks
-
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
-
-## Next Steps
-
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+## Must-not-touch
+* `summit/post_training/recipes/typhoon_s/*` (unless strictly necessary, will leave as is).
+* `packages/*` (TypeScript/Node.js code).

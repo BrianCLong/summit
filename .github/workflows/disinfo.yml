@@ -12,10 +12,6 @@ on:
       - 'packages/disinfo-news-ecosystem/**'
       - 'fixtures/disinfo/**'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   CI: true
 
