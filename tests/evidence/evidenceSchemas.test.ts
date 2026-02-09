@@ -49,10 +49,18 @@ async function runTest() {
 
     const stamp = JSON.parse(await fs.readFile(stampPath, 'utf-8'));
     if (!stamp.created_at) throw new Error('Stamp created_at missing');
+    if (!stamp.generated_at) throw new Error('Stamp generated_at missing');
 
     // Check index
     const indexPath = path.join(TEST_DIR, 'evidence', 'index.json');
     const index = JSON.parse(await fs.readFile(indexPath, 'utf-8'));
+
+    if (index.items['EVD-TEST-001']) {
+        console.log('✅ Index items found');
+    } else {
+        throw new Error('Index items missing');
+    }
+
     if (index.entries.length !== 1) throw new Error('Index entries length mismatch');
     if (index.entries[0].evidence_id !== 'EVD-TEST-001') throw new Error('Index evidence_id mismatch');
 

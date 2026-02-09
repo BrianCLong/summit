@@ -52,22 +52,20 @@ export async function writeEvidenceBundle(options: EvidenceBundleOptions): Promi
   const stamp = {
     run_id: runId,
     created_at: new Date().toISOString(),
+    generated_at: new Date().toISOString(), // Required by verifier
     git_sha: gitSha
   };
   await fs.writeFile(path.join(evidenceDir, 'stamp.json'), JSON.stringify(stamp, null, 2));
 
   // 4. Update evidence/index.json
   const indexFile = path.join(rootDir, 'evidence', 'index.json');
-  let indexData: any = { item_slug: itemSlug, entries: [] };
+  let indexData: any = { item_slug: itemSlug, items: {}, entries: [] };
 
   try {
     const content = await fs.readFile(indexFile, 'utf-8');
     indexData = JSON.parse(content);
-    // If index exists but has different structure, try to adapt or reset if needed.
-    // For this implementation, we assume the schema we defined.
-    if (!indexData.entries) {
-        indexData.entries = [];
-    }
+    if (!indexData.entries) indexData.entries = [];
+    if (!indexData.items) indexData.items = {};
   } catch (e) {
     // File might not exist or be invalid, start fresh
   }
@@ -75,7 +73,16 @@ export async function writeEvidenceBundle(options: EvidenceBundleOptions): Promi
   // Add or update entry for this run's primary evidence ID (taking first from list or generated)
   const primaryEvidenceId = evidenceIds[0] || `EVD-${itemSlug}-${runId}`;
 
-  // Check if entry exists
+  // New schema 'items'
+  indexData.items[primaryEvidenceId] = {
+    files: [
+      path.join('evidence', runId, 'report.json'),
+      path.join('evidence', runId, 'metrics.json'),
+      path.join('evidence', runId, 'stamp.json')
+    ]
+  };
+
+  // Legacy/Alternate 'entries' support
   const existingEntryIndex = indexData.entries.findIndex((e: any) => e.evidence_id === primaryEvidenceId);
   const newEntry = {
     evidence_id: primaryEvidenceId,

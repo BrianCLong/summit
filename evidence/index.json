@@ -1,5 +1,15 @@
 {
   "item_slug": "OSINT-ENTERPRISE-INIT",
+  "items": {
+    "EVD-ICOSINT2426-SCHEMA-001": {
+        "files": [
+            "evidence/schemas/report.schema.json",
+            "evidence/schemas/metrics.schema.json",
+            "evidence/schemas/stamp.schema.json",
+            "evidence/schemas/index.schema.json"
+        ]
+    }
+  },
   "entries": [
     {
       "evidence_id": "EVD-ICOSINT2426-SCHEMA-001",
