@@ -1,1 +1,1 @@
-export * from './types/influence_ops_v2.js';
+export * from './scope/ScopeManager.js';

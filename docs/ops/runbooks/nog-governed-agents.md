@@ -29,11 +29,21 @@ controls and auditable outputs.
 - `metrics.json`
 - `stamp.json` (git SHA + evidence IDs; no timestamps)
 
+## Data Handling
+- Follow `docs/security/data-handling/narrative-ops-detection-2026-01-28.md`.
+- Never log regulated identifiers or access tokens.
+- Store evidence bundles in governed locations only; no ad-hoc exports.
+
 ## Alerts & On-Call Signals
 - **Drift detector failure** (policy or schema drift).
 - **Policy evaluation errors** (engine unavailable or invalid policy).
 - **Audit hash-chain verification failures**.
 - **Evidence bundle missing artifacts**.
+
+## Escalation
+- **Immediate**: policy evaluation errors, audit hash-chain failures.
+- **High**: drift detector failure, missing evidence artifacts.
+- **Process**: quarantine outputs, notify governance, and document in the audit log.
 
 ## SLO Assumptions
 - **Report run success**: 99% over 7-day rolling window (Intentionally constrained).

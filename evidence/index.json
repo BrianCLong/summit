@@ -1,102 +1,5 @@
 {
-  "version": 1,
-  "evidence": {
-    "EVD-001": {
-      "evidence_id": "EVD-001",
-      "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
-      }
-    },
-    "EVD-002": {
-      "evidence_id": "EVD-002",
-      "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
-      }
-    },
-    "EVD-003": {
-      "evidence_id": "EVD-003",
-      "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
-      }
-    },
-    "EVD-MITTR-AGENTIC-WORKFORCE-001": {
-      "evidence_id": "EVD-MITTR-AGENTIC-WORKFORCE-001",
-      "files": {
-        "report": "evidence/MITTR-AGENTIC-WORKFORCE/report.json",
-        "metrics": "evidence/MITTR-AGENTIC-WORKFORCE/metrics.json",
-        "stamp": "evidence/MITTR-AGENTIC-WORKFORCE/stamp.json"
-      }
-    },
-    "EVD-FORBES-AGENTIC-AI-2026-001": {
-      "evidence_id": "EVD-FORBES-AGENTIC-AI-2026-001",
-      "files": {
-        "report": "evidence/FORBES-AGENTIC-AI-2026/report.json",
-        "metrics": "evidence/FORBES-AGENTIC-AI-2026/metrics.json",
-        "stamp": "evidence/FORBES-AGENTIC-AI-2026/stamp.json"
-      }
-    },
-    "EVD-DISINFO-NEWS-ECOSYSTEM-2026-001": {
-      "evidence_id": "EVD-DISINFO-NEWS-ECOSYSTEM-2026-001",
-      "files": {
-        "report": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/report.json",
-        "metrics": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/metrics.json",
-        "stamp": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/stamp.json"
-      }
-    },
-    "EVD-openviking-trace-001": {
-      "evidence_id": "EVD-openviking-trace-001",
-      "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
-      }
-    },
-    "EVD-openviking-trace-002": {
-      "evidence_id": "EVD-openviking-trace-002",
-      "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
-      }
-    },
-    "EVD-openviking-trace-003": {
-      "evidence_id": "EVD-openviking-trace-003",
-      "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
-      }
-    },
-    "EVD-COGWAR-2026-EVENT-001": {
-      "evidence_id": "EVD-COGWAR-2026-EVENT-001",
-      "files": {
-        "report": "evidence/EVD-COGWAR-2026-EVENT-001/report.json",
-        "metrics": "evidence/EVD-COGWAR-2026-EVENT-001/metrics.json",
-        "stamp": "evidence/EVD-COGWAR-2026-EVENT-001/stamp.json"
-      }
-    },
-    "EVD-COGWAR-2026-EVENT-002": {
-      "evidence_id": "EVD-COGWAR-2026-EVENT-002",
-      "files": {
-        "report": "evidence/EVD-COGWAR-2026-EVENT-002/report.json",
-        "metrics": "evidence/EVD-COGWAR-2026-EVENT-002/metrics.json",
-        "stamp": "evidence/EVD-COGWAR-2026-EVENT-002/stamp.json"
-      }
-    },
-    "EVD-COGWAR-2026-EVENT-003": {
-      "evidence_id": "EVD-COGWAR-2026-EVENT-003",
-      "files": {
-        "report": "evidence/EVD-COGWAR-2026-EVENT-003/report.json",
-        "metrics": "evidence/EVD-COGWAR-2026-EVENT-003/metrics.json",
-        "stamp": "evidence/EVD-COGWAR-2026-EVENT-003/stamp.json"
-      }
-    },
+  "items": {
     "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
       "evidence_id": "EVD-MITTR-AIMEM-PRIV-MODEL-001",
       "files": {
@@ -399,14 +302,6 @@
         "report": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/report.json",
         "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
-      }
-    },
-    {
-      "evidence_id": "EVD-NARRATIVE-CI-METRICS-001",
-      "files": {
-        "report": "evidence/EVD-NARRATIVE-CI-METRICS-001/report.json",
-        "metrics": "evidence/EVD-NARRATIVE-CI-METRICS-001/metrics.json",
-        "stamp": "evidence/EVD-NARRATIVE-CI-METRICS-001/stamp.json"
       }
     }
   }
