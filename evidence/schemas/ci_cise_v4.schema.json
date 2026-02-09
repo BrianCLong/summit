@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CISEv4 Evidence Schema",
+  "type": "object",
+  "properties": {
+    "target": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["repo", "product", "paper", "platform"] },
+        "slug": { "type": "string" }
+      },
+      "required": ["name", "type", "slug"]
+    },
+    "run": {
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "analyst": { "type": "string" },
+        "scope": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["date", "analyst", "scope"]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "license_hint": { "type": "string" },
+          "excerpt_sha256": { "type": "string" },
+          "notes": { "type": "string" }
+        },
+        "required": ["id", "title", "url"]
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "claim": { "type": "string" },
+          "evidence": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "type": { "type": "string", "enum": ["fact", "inference", "proposal"] }
+        },
+        "required": ["id", "claim", "evidence", "confidence", "type"]
+      }
+    }
+  },
+  "required": ["target", "run", "sources", "claims"]
+}

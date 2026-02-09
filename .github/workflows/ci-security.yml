@@ -80,7 +80,7 @@ jobs:
       # Note: Gitleaks v2 action handles SARIF upload internally when GITHUB_TOKEN is provided
       - name: Persist report artifact
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -138,7 +138,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/semgrep.sarif
       - name: Persist Semgrep report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -178,7 +178,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
       - name: Persist Snyk report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -213,7 +213,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
       - name: Persist filesystem report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -262,7 +262,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
       - name: Persist container reports
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -289,7 +289,7 @@ jobs:
             .
       - name: Persist license report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -319,7 +319,7 @@ jobs:
           sarif_file: ${{ env.REPORT_DIR }}/results.sarif
       - name: Persist Checkov report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -351,7 +351,7 @@ jobs:
         run: conftest test rendered --policy policies/opa
       - name: Persist rendered manifests
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -390,7 +390,7 @@ jobs:
           fi
       - name: Persist CIS report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -408,7 +408,7 @@ jobs:
           REPORT_DIR="$REPORT_DIR" scripts/security/baseline-check.sh
       - name: Persist baseline report
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -454,7 +454,7 @@ jobs:
         run: docker compose -f docker-compose.yml down
       - name: Persist ZAP reports
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -483,13 +483,37 @@ jobs:
     outputs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
     steps:
-      - name: Download all security reports
+      - name: Download artifacts (Filesystem)
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: security-reports-fs
+          path: aggregated-security
+          merge-multiple: true
+          if-no-artifact-found: ignore
+
+      - name: Download artifacts (License)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.7
+        with:
+          name: security-reports-license
+          path: aggregated-security
+          merge-multiple: true
+          if-no-artifact-found: ignore
+
+      - name: Download artifacts (Infra)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.7
+        with:
+          name: security-reports-infra
+          path: aggregated-security
+          merge-multiple: true
+          if-no-artifact-found: ignore
+
+      - name: Download artifacts (General)
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.7
         with:
           name: security-reports
           path: aggregated-security
           merge-multiple: true
-          if-no-artifact-found: warn
+          if-no-artifact-found: ignore
       - name: Generate coverage metrics
         id: metrics
         env:
@@ -507,35 +531,35 @@ jobs:
           DAST_STATUS: ${{ needs.dast.result }}
         run: |
           python - <<'PY'
-            import json
-            import os
-            from pathlib import Path
+import json
+import os
+from pathlib import Path
 
-            report_root = Path('aggregated-security')
-            files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
-            status = {
-                "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
-                "SAST": os.environ.get('SAST_STATUS', 'unknown'),
-                "Semgrep": os.environ.get('SEMGREP_STATUS', 'unknown'),
-                "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),
-                "Filesystem": os.environ.get('FS_STATUS', 'unknown'),
-                "Container": os.environ.get('IMG_STATUS', 'unknown'),
-                "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
-                "IaC": os.environ.get('IAC_STATUS', 'unknown'),
-                "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
-                "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
-                "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
-                "DAST": os.environ.get('DAST_STATUS', 'skipped'),
-            }
-            summary = {
-                "reportCount": len(files),
-                "reports": files,
-                "statuses": status,
-            }
-            report_root.mkdir(parents=True, exist_ok=True)
-            with (report_root / 'security-summary.json').open('w', encoding='utf-8') as fh:
-                json.dump(summary, fh, indent=2)
-          PY
+report_root = Path('aggregated-security')
+files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
+status = {
+    "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
+    "SAST": os.environ.get('SAST_STATUS', 'unknown'),
+    "Semgrep": os.environ.get('SEMGREP_STATUS', 'unknown'),
+    "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),
+    "Filesystem": os.environ.get('FS_STATUS', 'unknown'),
+    "Container": os.environ.get('IMG_STATUS', 'unknown'),
+    "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
+    "IaC": os.environ.get('IAC_STATUS', 'unknown'),
+    "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
+    "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
+    "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
+    "DAST": os.environ.get('DAST_STATUS', 'skipped'),
+}
+summary = {
+    "reportCount": len(files),
+    "reports": files,
+    "statuses": status,
+}
+report_root.mkdir(parents=True, exist_ok=True)
+with (report_root / 'security-summary.json').open('w', encoding='utf-8') as fh:
+    json.dump(summary, fh, indent=2)
+PY
       - name: Publish job summary
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
@@ -556,7 +580,7 @@ jobs:
               .write();
       - name: Upload aggregated summary
         if: always()
-        uses: actions/upload-artifact@v4 # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
           name: security-reports
@@ -581,34 +605,3 @@ jobs:
           DASHBOARD_URL: ${{ needs.security-summary.outputs.dashboard_url }}
         run: |
           echo "All security controls succeeded. Approvers can review ${DASHBOARD_URL} before promoting to production."
-
-  sigstore-verify:
-    name: Sigstore bundle verification
-    runs-on: ubuntu-latest
-    if: vars.SIGSTORE_VERIFY_ENABLED == 'true'
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      # Demo: Verify cosign itself (if we could download it)
-      # For now, we just download a dummy or use the action to verify a test artifact
-      - name: Download test artifact
-        run: |
-          echo "test artifact" > artifact.bin
-          echo "{}" > bundle.sigstore.json # Dummy bundle
-
-      - name: Run Sigstore Verification
-        uses: ./.github/actions/sigstore-verify
-        with:
-          cosign_version: "3.0.4"
-          artifact: "artifact.bin"
-          bundle: "bundle.sigstore.json"
-          evidence_id: "EVD-SIGSTORE-BUNDLEFIRST-CI-001"
-
-      - name: Upload Evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence
-          path: evidence/

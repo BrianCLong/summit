@@ -7,10 +7,10 @@
 // import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
-import logger from '../utils/logger.js';
-import { getBudgetLedgerManager } from '../db/budgetLedger.js';
-import { estimateTokensAndCost } from '../lib/tokcount-enhanced.js';
-import { SafeMutationMetrics } from '../monitoring/safeMutationsMetrics.js';
+import logger from '../utils/logger';
+import { getBudgetLedgerManager } from '../db/budgetLedger';
+import { estimateTokensAndCost } from '../lib/tokcount-enhanced';
+import { SafeMutationMetrics } from '../monitoring/safeMutationsMetrics';
 
 interface ReconcileJobData {
   ledgerId: string;

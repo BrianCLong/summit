@@ -1,7 +1,0 @@
-individual_id
-device_id
-raw_handle
-psychographic_segment
-persona_target
-message_variant
-call_to_action

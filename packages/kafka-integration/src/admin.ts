@@ -2,7 +2,7 @@
 // @ts-nocheck
 import { Kafka, Admin, ITopicConfig } from 'kafkajs';
 import pino from 'pino';
-import { KafkaClusterConfig, TopicConfig } from './types.js';
+import { KafkaClusterConfig, TopicConfig } from './types';
 
 const logger = pino({ name: 'kafka-admin' });
 

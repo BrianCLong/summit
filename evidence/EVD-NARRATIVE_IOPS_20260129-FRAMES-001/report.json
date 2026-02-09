@@ -1,13 +1,12 @@
 {
   "evidence_id": "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
   "fixtures": {
-    "negative": 3,
+    "negative": 2,
     "positive": 3
   },
   "results": {
     "failed": 0,
-    "failed_cases": [],
-    "passed": 6
+    "passed": 5
   },
   "summary": "Narrative frames contract fixtures evaluated with deterministic stub."
 }

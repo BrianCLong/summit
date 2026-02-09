@@ -1,2 +1,2 @@
-export * from './executor.js';
-export * from './guard.js';
+export * from './executor';
+export * from './guard';

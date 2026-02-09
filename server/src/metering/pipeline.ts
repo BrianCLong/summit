@@ -1,12 +1,12 @@
 // @ts-nocheck
-import logger from '../utils/logger.js';
-import { postgresMeterRepository } from './postgres-repository.js';
-import { meterStore } from './persistence.js';
+import logger from '../utils/logger';
+import { postgresMeterRepository } from './postgres-repository';
+import { meterStore } from './persistence';
 import {
   MeterEvent,
   MeterEventKind,
   TenantUsageDailyRow,
-} from './schema.js';
+} from './schema';
 
 type DeadLetter = { event: MeterEvent; reason: string };
 

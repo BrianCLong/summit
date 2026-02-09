@@ -105,7 +105,7 @@ combining multiple layers of authentication and authorization:
       {
         name: 'Session Manager',
         type: 'authentication',
-        location: '/server/src/middleware/session.js',
+        location: '/server/src/middleware/session.ts',
         description: 'Secure session handling with rotation',
       },
       {
@@ -198,7 +198,7 @@ combining multiple layers of authentication and authorization:
           },
           {
             name: 'MFA Settings',
-            config: '/server/src/config/mfa.js',
+            config: '/server/src/config/mfa.ts',
           },
         ],
       },
@@ -250,7 +250,7 @@ combining multiple layers of authentication and authorization:
       `,
       expectedResult: 'All protected endpoints return 401 without valid authentication',
       automation: {
-        script: 'tests/compliance/access-auth-required.test.js',
+        script: 'tests/compliance/access-auth-required.test.ts',
         schedule: '0 */4 * * *',
         timeout: 300000,
         retries: 2,
@@ -271,7 +271,7 @@ combining multiple layers of authentication and authorization:
       `,
       expectedResult: 'Role-based access restrictions are enforced correctly',
       automation: {
-        script: 'tests/compliance/access-rbac.test.js',
+        script: 'tests/compliance/access-rbac.test.ts',
         schedule: '0 2 * * *',
         timeout: 600000,
         retries: 1,
@@ -292,7 +292,7 @@ combining multiple layers of authentication and authorization:
       `,
       expectedResult: 'Cross-tenant data access is completely prevented',
       automation: {
-        script: 'tests/compliance/access-tenant-isolation.test.js',
+        script: 'tests/compliance/access-tenant-isolation.test.ts',
         schedule: '0 3 * * *',
         timeout: 600000,
         retries: 1,
@@ -313,7 +313,7 @@ combining multiple layers of authentication and authorization:
       `,
       expectedResult: 'MFA is required for all privileged operations',
       automation: {
-        script: 'tests/compliance/access-mfa.test.js',
+        script: 'tests/compliance/access-mfa.test.ts',
         schedule: '0 4 * * *',
         timeout: 300000,
         retries: 2,
@@ -538,7 +538,7 @@ data durability and rapid recovery:
           },
           {
             name: 'Retention Policy',
-            config: '/server/src/config/retention.js',
+            config: '/server/src/config/retention.ts',
           },
         ],
       },
@@ -592,7 +592,7 @@ data durability and rapid recovery:
       `,
       expectedResult: 'All scheduled backups completed successfully',
       automation: {
-        script: 'tests/compliance/backup-completion.test.js',
+        script: 'tests/compliance/backup-completion.test.ts',
         schedule: '0 6 * * *',
         timeout: 300000,
         retries: 2,
@@ -613,7 +613,7 @@ data durability and rapid recovery:
       `,
       expectedResult: 'Backup checksums match and data is restorable',
       automation: {
-        script: 'tests/compliance/backup-integrity.test.js',
+        script: 'tests/compliance/backup-integrity.test.ts',
         schedule: '0 2 * * 0',
         timeout: 1800000,
         retries: 1,
@@ -635,7 +635,7 @@ data durability and rapid recovery:
       `,
       expectedResult: 'Full recovery completes within 4-hour RTO',
       automation: {
-        script: 'tests/compliance/recovery-test.test.js',
+        script: 'tests/compliance/recovery-test.test.ts',
         schedule: '0 3 1 * *',
         timeout: 14400000,
         retries: 0,
@@ -655,7 +655,7 @@ data durability and rapid recovery:
       `,
       expectedResult: 'Backups are replicated with < 1 hour lag',
       automation: {
-        script: 'tests/compliance/backup-replication.test.js',
+        script: 'tests/compliance/backup-replication.test.ts',
         schedule: '0 7 * * *',
         timeout: 600000,
         retries: 2,
@@ -898,7 +898,7 @@ process with post-implementation review.`,
       `,
       expectedResult: 'Direct pushes to protected branches are blocked',
       automation: {
-        script: 'tests/compliance/change-pr-required.test.js',
+        script: 'tests/compliance/change-pr-required.test.ts',
         schedule: '0 */2 * * *',
         timeout: 120000,
         retries: 2,
@@ -918,7 +918,7 @@ process with post-implementation review.`,
       `,
       expectedResult: 'All merged PRs have required approvals',
       automation: {
-        script: 'tests/compliance/change-review.test.js',
+        script: 'tests/compliance/change-review.test.ts',
         schedule: '0 5 * * *',
         timeout: 600000,
         retries: 1,
@@ -938,7 +938,7 @@ process with post-implementation review.`,
       `,
       expectedResult: 'No deployments without passing CI checks',
       automation: {
-        script: 'tests/compliance/change-ci-pass.test.js',
+        script: 'tests/compliance/change-ci-pass.test.ts',
         schedule: '0 */4 * * *',
         timeout: 300000,
         retries: 2,
@@ -958,7 +958,7 @@ process with post-implementation review.`,
       `,
       expectedResult: 'All commits are cryptographically signed',
       automation: {
-        script: 'tests/compliance/change-signed-commits.test.js',
+        script: 'tests/compliance/change-signed-commits.test.ts',
         schedule: '0 6 * * *',
         timeout: 600000,
         retries: 1,

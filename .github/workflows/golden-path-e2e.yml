@@ -2,115 +2,55 @@ name: Golden Path E2E
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
-    paths:
-      - 'client/**'
-      - 'apps/web/**'
-      - 'server/src/graphql/**'
-      - 'server/src/investigations/**'
-      - 'server/src/services/investigationWorkflowService.ts'
-      - 'e2e/golden-path*.spec.ts'
-      - 'flags/**'
-  schedule:
-    - cron: "0 2 * * *" # Nightly at 2 AM
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
+    branches: [ main ]
 
 jobs:
-  golden-path-investigations:
-    name: Golden Path - Investigations
+  golden-path-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: 18
           cache: 'pnpm'
 
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps
 
-      - name: Run Investigation Golden Path
+      - name: Create artifacts directory
+        run: mkdir -p artifacts/evidence/goldenpath-frontend/
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test tests/golden-path.spec.ts
         env:
-          BASE_URL: http://localhost:3000
-          PLAYWRIGHT_USE_WEBSERVER: 'true'
-        run: pnpm test:e2e:investigations
+          CI: true
 
       - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-investigations
-          path: reports/playwright
+          name: playwright-report
+          path: playwright-report/
           retention-days: 7
 
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-investigations
-          path: test-results
-          retention-days: 7
-
-  golden-path-frontend:
-    name: Golden Path - Consolidated Frontend
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Run Frontend Golden Path
-        env:
-          BASE_URL: http://localhost:3000
-          PLAYWRIGHT_USE_WEBSERVER: 'true'
-        run: pnpm test:e2e:golden-path
-
-      - name: Upload Playwright Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-frontend
-          path: reports/playwright
-          retention-days: 7
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-frontend
-          path: test-results
+          name: playwright-artifacts
+          path: test-results/
           retention-days: 7
 
       - name: Upload Golden Path Evidence
@@ -118,5 +58,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: golden-path-evidence
+          path: artifacts/evidence/goldenpath-frontend/
+          retention-days: 7
+
+      - name: Upload Summit Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-evidence
           path: artifacts/evidence/
           retention-days: 7

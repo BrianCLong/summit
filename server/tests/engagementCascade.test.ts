@@ -1,4 +1,4 @@
-import { engagementCascade } from './mocks/engagement-cascade.js';
+import { engagementCascade } from './mocks/engagement-cascade';
 import { describe, it, expect } from '@jest/globals';
 
 describe('engagementCascade', () => {

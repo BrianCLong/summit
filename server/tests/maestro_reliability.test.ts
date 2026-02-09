@@ -1,10 +1,10 @@
 
 import { jest } from '@jest/globals';
-import { Maestro } from '../src/maestro/core.js';
-import { IntelGraphClient } from '../src/intelgraph/client.js';
-import { CostMeter } from '../src/maestro/cost_meter.js';
-import { OpenAILLM } from '../src/maestro/adapters/llm_openai.js';
-import { Task } from '../src/maestro/types.js';
+import { Maestro } from '../src/maestro/core';
+import { IntelGraphClient } from '../src/intelgraph/client';
+import { CostMeter } from '../src/maestro/cost_meter';
+import { OpenAILLM } from '../src/maestro/adapters/llm_openai';
+import { Task } from '../src/maestro/types';
 
 describe('Maestro Reliability', () => {
   let maestro: Maestro;

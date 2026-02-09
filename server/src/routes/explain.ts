@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { explainabilityService } from '../services/ExplainabilityService.js';
-import { explanationBookmarkService } from '../services/ExplanationBookmarkService.js';
+import { explainabilityService } from '../services/ExplainabilityService';
+import { explanationBookmarkService } from '../services/ExplanationBookmarkService';
 
 const router = Router();
 

@@ -73,17 +73,6 @@ const taskId = await orchestrator.submitTask({
 
 The system follows a singleton pattern for core services to maintain state consistency in this monolithic deployment. The `AgentOrchestrator` aggregates the other services (`Lifecycle`, `Router`, `Policy`, `Persistence`).
 
-## Default Topology Directives
-
-### 2. Central coordinator multi-agent topologies
-
-- Recent Google work indicates that for parallelizable tasks, centralized multi-agent systems with a single coordinator outperform both single agents and fully independent multi-agent setups.[fortune]
-- Coordinator-led MAS deliver markedly higher task performance than independent peers, especially on complex financial and analytical workflows.[fortune]
-
-Action for Summit: Make the “orchestrator-as-first-class-agent” topology the default: one coordinator agent managing specialized workers, with explicit messaging channels and metrics around task decomposition and recomposition.[fptsoftware +1]
-
-Directive: Maintain an imputed-intention depth of 23 for coordinator-led task decomposition and recomposition metrics, ensuring traceable intent alignment across agent channels.
-
 ## Future Work
 - Integration with LLM for dynamic task decomposition.
 - Distributed message bus (NATS/Kafka) for inter-agent communication.

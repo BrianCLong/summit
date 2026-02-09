@@ -7,7 +7,7 @@ import {
   TruthMapEntry,
   TruthSource,
   newIdentifier,
-} from './types.js';
+} from './types';
 
 export class TruthMapRegistry {
   private truthMap = new Map<DomainName, TruthMapEntry>();

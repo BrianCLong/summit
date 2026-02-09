@@ -6,17 +6,10 @@ import { FailureSimulator } from '../operational-intelligence/failure-simulator.
 import { FailureScenario, MetricSignal, ObservabilitySignal, ServiceDependencyEdge } from '../operational-intelligence/types.js';
 
 const now = Date.now();
-let idCounter = 0;
-
-const nextId = (prefix: string) => {
-  const id = `${prefix}-${idCounter}`;
-  idCounter += 1;
-  return id;
-};
 
 function buildMetric(partial: Partial<MetricSignal> = {}): MetricSignal {
   return {
-    id: nextId('metric'),
+    id: `metric-${Math.random()}`,
     kind: 'metric',
     name: 'latency_ms',
     value: 120,
@@ -29,7 +22,7 @@ function buildMetric(partial: Partial<MetricSignal> = {}): MetricSignal {
 
 function buildLog(service: string, severity: 'info' | 'warn' | 'error' | 'critical', correlationId: string): ObservabilitySignal {
   return {
-    id: nextId('log'),
+    id: `log-${Math.random()}`,
     kind: 'log',
     message: `${service} message`,
     service,
@@ -41,7 +34,7 @@ function buildLog(service: string, severity: 'info' | 'warn' | 'error' | 'critic
 
 function buildTrace(service: string, durationMs: number, correlationId: string, traceId?: string): ObservabilitySignal {
   return {
-    id: nextId('trace'),
+    id: `trace-${Math.random()}`,
     kind: 'trace',
     spanId: 'span-1',
     traceId: traceId ?? correlationId,

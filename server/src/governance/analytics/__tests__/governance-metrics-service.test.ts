@@ -17,9 +17,9 @@ global.fetch = mockFetch as any;
 
 describe('GovernanceMetricsService', () => {
   type GovernanceMetricsServiceType =
-    import('../governance-metrics-service.js').GovernanceMetricsService;
-  type TimeRange = import('../types.js').TimeRange;
-  let createGovernanceMetricsService: typeof import('../governance-metrics-service.js').createGovernanceMetricsService;
+    import('../governance-metrics-service').GovernanceMetricsService;
+  type TimeRange = import('../types').TimeRange;
+  let createGovernanceMetricsService: typeof import('../governance-metrics-service').createGovernanceMetricsService;
   let service: GovernanceMetricsServiceType;
   const testTenantId = 'test-tenant';
   const testTimeRange: TimeRange = {
@@ -29,7 +29,7 @@ describe('GovernanceMetricsService', () => {
   };
 
   beforeAll(async () => {
-    const module = await import('../governance-metrics-service.js');
+    const module = await import('../governance-metrics-service');
     createGovernanceMetricsService = module.createGovernanceMetricsService;
   });
 
@@ -486,7 +486,7 @@ describe('GovernanceMetricsService', () => {
 
 describe('Prometheus Query Definitions', () => {
   it('should have all required validation queries', async () => {
-    const { VALIDATION_QUERIES } = await import('../prometheus-queries.js');
+    const { VALIDATION_QUERIES } = await import('../prometheus-queries');
 
     expect(VALIDATION_QUERIES).toHaveProperty('validationRate');
     expect(VALIDATION_QUERIES).toHaveProperty('validatedDecisions');
@@ -495,7 +495,7 @@ describe('Prometheus Query Definitions', () => {
   });
 
   it('should have all required incident queries', async () => {
-    const { INCIDENT_QUERIES } = await import('../prometheus-queries.js');
+    const { INCIDENT_QUERIES } = await import('../prometheus-queries');
 
     expect(INCIDENT_QUERIES).toHaveProperty('totalIncidents');
     expect(INCIDENT_QUERIES).toHaveProperty('incidentsBySeverity');
@@ -503,7 +503,7 @@ describe('Prometheus Query Definitions', () => {
   });
 
   it('should have all required compliance queries', async () => {
-    const { COMPLIANCE_QUERIES } = await import('../prometheus-queries.js');
+    const { COMPLIANCE_QUERIES } = await import('../prometheus-queries');
 
     expect(COMPLIANCE_QUERIES).toHaveProperty('complianceScore');
     expect(COMPLIANCE_QUERIES).toHaveProperty('gapCount');
@@ -511,7 +511,7 @@ describe('Prometheus Query Definitions', () => {
   });
 
   it('should have performance queries for p95 tracking', async () => {
-    const { PERFORMANCE_QUERIES } = await import('../prometheus-queries.js');
+    const { PERFORMANCE_QUERIES } = await import('../prometheus-queries');
 
     expect(PERFORMANCE_QUERIES).toHaveProperty('dashboardLatencyP95');
     expect(PERFORMANCE_QUERIES).toHaveProperty('metricsRefreshLatency');

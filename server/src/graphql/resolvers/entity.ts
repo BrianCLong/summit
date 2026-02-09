@@ -1,271 +1,138 @@
 // @ts-nocheck
 
-import { getNeo4jDriver, isNeo4jMockMode, transformNeo4jIntegers } from '../../db/neo4j.js';
-
+import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
 import neo4j from 'neo4j-driver';
-
 import { randomUUID as uuidv4 } from 'node:crypto';
-
 import pino from 'pino';
-
 import {
-
   pubsub,
-
   ENTITY_CREATED,
-
   ENTITY_UPDATED,
-
   ENTITY_DELETED,
-
   tenantEvent,
-
 } from '../subscriptions.js';
-
 import { getPostgresPool } from '../../db/postgres.js';
-
 import axios from 'axios';
-
 import { GraphQLError } from 'graphql';
-
 import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
-
 import { withCache, listCacheKey } from '../../utils/cacheHelper.js';
-
 import type { GraphQLContext } from '../apollo-v5-server.js';
-
 import { authGuard } from '../utils/auth.js';
-
 import { provenanceLedger } from '../../provenance/ledger.js';
 
-
-
 const logger = (pino as any)();
-
-
+const driver = getNeo4jDriver();
 
 const entityResolvers = {
-
   Query: {
-
     entity: authGuard(async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
-
       // Return mock data if database is not available
-
       if (isNeo4jMockMode()) {
-
         return getMockEntity(id);
-
       }
-
-
 
       try {
-
         // Use DataLoader for batched entity fetching
-
         const entity = await context.loaders.entityLoader.load(id);
-
-        return transformNeo4jIntegers(entity);
-
+        return entity;
       } catch (error: any) {
-
         logger.error({ error, id }, 'Error fetching entity by ID');
-
         // Fallback to mock data if database connection fails
-
         logger.warn('Falling back to mock entity data');
-
         return getMockEntity(id);
-
       }
-
     }),
-
     entities: authGuard(withCache(
-
       // Cache key generator
-
       (_parent: unknown, args: any, context: GraphQLContext) => {
-
         const tenantId = context?.user?.tenantId || 'default';
-
         return listCacheKey('entities', { ...args, tenantId });
-
       },
-
       // Resolver implementation
-
       async (
-
         _: unknown,
-
         {
-
           type,
-
           q,
-
           limit,
-
           offset,
-
         }: { type?: string; q?: string; limit: number; offset: number },
-
         context: GraphQLContext,
-
       ) => {
-
         // Return mock data if database is not available
-
         if (isNeo4jMockMode()) {
-
           return getMockEntities(type, q, limit, offset);
-
         }
 
-
-
-        const driver = getNeo4jDriver();
-
         const session = driver.session();
-
         try {
-
           const tenantId = context.user!.tenantId;
-
           // Optimized: Use labels in MATCH if type is provided
-
           // MATCH (n:Entity) -> MATCH (n:Entity:Type)
-
           let query = 'MATCH (n:Entity';
-
           const params: any = { tenantId };
 
-
-
           if (type) {
-
             // Validating type to prevent injection (simple alphanumeric check)
-
             if (/^[a-zA-Z0-9_]+$/.test(type)) {
-
               query += `:${type}`;
-
             }
-
           }
-
-
 
           query += ') WHERE n.tenantId = $tenantId';
 
-
-
           if (q) {
-
             // Optimized search using Fulltext Index if available, falling back to CONTAINS
-
             // Note: 'entity_fulltext_idx' must be created via migration
-
             try {
-
               // We construct a separate query for fulltext search to get IDs, then MATCH
-
               // This is often more performant than complex WHERE clauses if the index is large
-
               const fulltextQuery = `
-
                 CALL db.index.fulltext.queryNodes("entity_fulltext_idx", $q) YIELD node, score
-
                 WHERE node.tenantId = $tenantId
-
                 ${type ? `AND $type IN labels(node)` : ''}
-
                 RETURN node SKIP $offset LIMIT $limit
-
               `;
 
-
-
               // Try to execute fulltext search
-
               const result = await session.run(fulltextQuery, { ...params, q, type, offset: neo4j.int(offset), limit: neo4j.int(limit) });
-
               return result.records.map((record) => {
-
                 const entity = record.get('node');
-
-                return transformNeo4jIntegers({
-
+                return {
                   id: entity.properties.id,
-
                   type: entity.labels[0],
-
                   props: entity.properties,
-
                   createdAt: entity.properties.createdAt,
-
                   updatedAt: entity.properties.updatedAt,
-
-                });
-
+                };
               });
 
-
-
             } catch (err: any) {
-
               // Fallback if index doesn't exist or other error
-
               logger.warn({ err }, 'Fulltext search failed, falling back to legacy CONTAINS search');
 
-
-
               // Revert to building the legacy query
-
               query += ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
-
               params.q = q;
-
               query += ' RETURN n SKIP $offset LIMIT $limit';
-
             }
-
           } else {
-
             query += ' RETURN n SKIP $offset LIMIT $limit';
-
           }
-
           params.limit = neo4j.int(limit);
-
           params.offset = neo4j.int(offset);
 
-
-
           const result = await session.run(query, params);
-
           return result.records.map((record) => {
-
             const entity = record.get('n');
-
-            return transformNeo4jIntegers({
-
+            return {
               id: entity.properties.id,
-
               type: entity.labels[0],
-
               props: entity.properties,
-
               createdAt: entity.properties.createdAt,
-
               updatedAt: entity.properties.updatedAt,
-
-            });
-
+            };
           });
-
         } catch (error: any) {
           logger.error(
             { error, type, q, limit, offset },
