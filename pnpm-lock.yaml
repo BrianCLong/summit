@@ -46,6 +46,14 @@ overrides:
 
 pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
+patchedDependencies:
+  '@types/hapi__catbox@12.1.0':
+    hash: 8c32609aadff569b6e5f07cd38c774ea775525f5bdf73c459ac4e95bb33434fb
+    path: patches/@types__hapi__catbox@12.1.0.patch
+  '@types/hapi__shot@6.0.0':
+    hash: 8c32609aadff569b6e5f07cd38c774ea775525f5bdf73c459ac4e95bb33434fb
+    path: patches/@types__hapi__shot@6.0.0.patch
+
 importers:
 
   .:
@@ -10168,12 +10176,6 @@ importers:
         specifier: ^15.1.3
         version: 15.1.3
     devDependencies:
-      '@types/hapi__catbox':
-        specifier: ^12.1.0
-        version: 12.1.0
-      '@types/hapi__shot':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@types/node':
         specifier: ^20.10.0
         version: 20.19.27
@@ -76529,7 +76531,7 @@ snapshots:
     dependencies:
       handlebars: 4.7.8
 
-  '@types/hapi__catbox@12.1.0':
+  '@types/hapi__catbox@12.1.0(patch_hash=8c32609aadff569b6e5f07cd38c774ea775525f5bdf73c459ac4e95bb33434fb)':
     dependencies:
       '@hapi/catbox': 12.1.1
 
@@ -76538,9 +76540,9 @@ snapshots:
       '@hapi/boom': 9.1.4
       '@hapi/iron': 6.0.0
       '@hapi/podium': 4.1.3
-      '@types/hapi__catbox': 12.1.0
+      '@types/hapi__catbox': 12.1.0(patch_hash=8c32609aadff569b6e5f07cd38c774ea775525f5bdf73c459ac4e95bb33434fb)
       '@types/hapi__mimos': 4.1.4
-      '@types/hapi__shot': 6.0.0
+      '@types/hapi__shot': 6.0.0(patch_hash=8c32609aadff569b6e5f07cd38c774ea775525f5bdf73c459ac4e95bb33434fb)
       '@types/node': 20.19.27
       joi: 17.13.3
 
@@ -76548,7 +76550,7 @@ snapshots:
     dependencies:
       '@types/mime-db': 1.43.6
 
-  '@types/hapi__shot@6.0.0':
+  '@types/hapi__shot@6.0.0(patch_hash=8c32609aadff569b6e5f07cd38c774ea775525f5bdf73c459ac4e95bb33434fb)':
     dependencies:
       '@hapi/shot': 6.0.2
 
