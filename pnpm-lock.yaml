@@ -3497,7 +3497,7 @@ importers:
   connectors/gdelt_gkg:
     dependencies:
       '@summit/evidence':
-        specifier: workspace:*
+        specifier: file:../../packages/evidence
         version: link:../../packages/evidence
       adm-zip:
         specifier: ^0.5.10
@@ -3511,9 +3511,6 @@ importers:
       fs-extra:
         specifier: ^11.1.0
         version: 11.3.3
-      md5:
-        specifier: ^2.3.0
-        version: 2.3.0
     devDependencies:
       '@types/adm-zip':
         specifier: ^0.5.0
