@@ -1,31 +1,10 @@
 // Conductor Configuration and Initialization
 // Sets up MCP servers, registers them, and initializes the conductor system
 
-import { initializeConductor, ConductorConfig } from './index';
-import { mcpRegistry } from './mcp/client';
-import GraphOpsServer, { GraphOpsConfig } from './mcp/servers/graphops-server';
-import FilesServer, { FilesServerConfig } from './mcp/servers/files-server';
-import type {
-  MCPTransportName,
-  MCPTransportNegotiationPolicy,
-} from './mcp/transport/types.js';
-
-const MCP_TRANSPORTS: MCPTransportName[] = ['stdio', 'http', 'jsonrpc', 'grpc'];
-const MCP_TRANSPORT_POLICIES: MCPTransportNegotiationPolicy[] = [
-  'prefer_grpc_fallback_http',
-  'strict',
-];
-
-function readTransportEnv<T extends string>(
-  value: string | undefined,
-  allowed: readonly T[],
-  fallback: T,
-): T {
-  if (!value) {
-    return fallback;
-  }
-  return allowed.includes(value as T) ? (value as T) : fallback;
-}
+import { initializeConductor, ConductorConfig } from './index.js';
+import { mcpRegistry } from './mcp/client.js';
+import GraphOpsServer, { GraphOpsConfig } from './mcp/servers/graphops-server.js';
+import FilesServer, { FilesServerConfig } from './mcp/servers/files-server.js';
 
 const u1 = process.env.NEO4J_USER;
 const u2 = process.env.NEO4J_USERNAME;
@@ -128,16 +107,6 @@ export async function initializeConductorSystem(): Promise<{
     defaultTimeoutMs: parseInt(process.env.CONDUCTOR_TIMEOUT_MS || '30000'),
     maxConcurrentTasks: parseInt(process.env.CONDUCTOR_MAX_CONCURRENT || '10'),
     auditEnabled: process.env.CONDUCTOR_AUDIT_ENABLED === 'true',
-    mcpTransport: readTransportEnv(
-      process.env.MCP_TRANSPORT,
-      MCP_TRANSPORTS,
-      'jsonrpc',
-    ),
-    mcpTransportPolicy: readTransportEnv(
-      process.env.MCP_TRANSPORT_POLICY,
-      MCP_TRANSPORT_POLICIES,
-      'strict',
-    ),
     llmProviders: {
       light: {
         endpoint: process.env.LLM_LIGHT_ENDPOINT || 'https://api.openai.com/v1',
@@ -341,7 +310,7 @@ export async function shutdownConductorSystem(servers: {
     }
 
     // Shutdown main conductor
-    const { conductor } = await import('./index');
+    const { conductor } = await import('./index.js');
     if (conductor) {
       await conductor.shutdown();
     }
@@ -375,8 +344,6 @@ export function getConductorEnvConfig(): Record<string, string> {
     FILES_PORT: '8002',
     FILES_BASE_PATH: '/tmp/intelgraph-files',
     FILES_MAX_SIZE: '10485760',
-    MCP_TRANSPORT: 'jsonrpc',
-    MCP_TRANSPORT_POLICY: 'strict',
 
     // Authentication
     MCP_AUTH_TOKEN: 'conductor-token-12345',

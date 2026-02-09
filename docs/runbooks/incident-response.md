@@ -421,7 +421,7 @@ kubectl port-forward svc/postgresql 5432:5432 -n intelgraph-db
 - **Grafana**: https://grafana.intelgraph.ai
 - **Prometheus**: https://prometheus.intelgraph.ai
 - **PagerDuty**: https://intelgraph.pagerduty.com
-- **Runbooks Index**: [RUNBOOKS/INDEX.md](INDEX.md)
+- **Runbooks Index**: [Runbook Index](../runbooks/README.md)
 
 ---
 

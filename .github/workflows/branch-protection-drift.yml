@@ -30,10 +30,6 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   issues: write
@@ -45,7 +41,6 @@ env:
 jobs:
   check-drift:
     name: Check Branch Protection Drift
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
 
     outputs:
@@ -129,7 +124,7 @@ jobs:
           echo "Extra in GitHub: ${EXTRA}"
 
       - name: Upload Drift Report
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: branch-protection-drift-report
           path: |

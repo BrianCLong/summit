@@ -82,6 +82,7 @@ setup_test_repo() {
     echo "initial" > file.txt
     git add file.txt
     git commit -q -m "Initial commit"
+    git branch -M main
 
     # Store main HEAD
     MAIN_HEAD=$(git rev-parse HEAD)

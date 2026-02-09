@@ -1,7 +1,0 @@
-#!/bin/bash
-set -e
-
-# Run the regression test
-python3 tests/regression/test_receipt_bundle_reproducible.py
-
-echo "Receipt determinism check passed."

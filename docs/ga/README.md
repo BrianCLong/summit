@@ -3,7 +3,7 @@
 This directory contains the required artifacts for the GA Release.
 
 ## 1. Release Runbooks
-* [ ] [Deployment Runbook](DEPLOY.md)
+* [ ] [Deployment Runbook](../DEPLOY.md)
 * [ ] [Rollback Runbook](ROLLBACK.md)
 * [ ] [Observability Runbook](OBSERVABILITY.md)
 
