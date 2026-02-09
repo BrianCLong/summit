@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   build-server:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Build Server (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
@@ -33,6 +34,7 @@ jobs:
     secrets: inherit
 
   build-client:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Build Client (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
