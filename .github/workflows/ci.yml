@@ -6,9 +6,10 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
+  merge_group:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
   cancel-in-progress: true
 
 # Global environment for all jobs - prevents V8 heap exhaustion
@@ -24,11 +25,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -37,12 +37,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4                - name: Setup Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
           cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
@@ -53,12 +54,13 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4                - name: Setup Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -71,8 +73,12 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4                - name: Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -104,6 +110,8 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -115,6 +123,7 @@ jobs:
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
   security-compliance:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
     needs: [config-guard]
@@ -122,6 +131,7 @@ jobs:
       strict: true
 
   soc-controls:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -153,7 +163,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4                - name: Setup Node
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

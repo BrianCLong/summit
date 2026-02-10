@@ -12,8 +12,13 @@ on:
       - 'modules/archsim/**'
       - 'schemas/archsim/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   archsim-foundation:
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

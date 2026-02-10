@@ -50,17 +50,25 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4.1.0
+        with:
+          version: "9.12.0"
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version: "20"
 
+<<<<<<< HEAD
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
         with:
           version: "10.0.0"
 
+=======
+>>>>>>> main
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -116,17 +124,25 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4.1.0
+        with:
+          version: "9.12.0"
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version: "20"
 
+<<<<<<< HEAD
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
         with:
           version: "10.0.0"
 
+=======
+>>>>>>> main
       - name: Generate Evidence Bundle (Provenance)
         run: |
           if [ -f scripts/compliance/generate_evidence.ts ]; then

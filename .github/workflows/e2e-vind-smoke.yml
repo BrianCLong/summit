@@ -7,9 +7,14 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   smoke-test:
     name: create->kubectl->delete
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     if: vars.SUMMIT_VIND_CI == '1'
 

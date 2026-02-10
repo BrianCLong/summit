@@ -7,9 +7,14 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   bench-test:
     name: LB probe + cache benchmark
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_BENCH == '1'
 

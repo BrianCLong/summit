@@ -21,7 +21,7 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -33,24 +33,26 @@ env:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
+      - name: Validate Jest & pnpm Configuration
+        run: node scripts/ci/validate-jest-config.cjs
+
+  lint-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version-file: .nvmrc
-      - name: Validate Jest & pnpm Configuration
-        run: node scripts/ci/validate-jest-config.cjs
-
-  lint-typecheck:
-    name: Lint & Typecheck
-    runs-on: self-hosted
-    needs: [config-preflight]
-    steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -67,13 +69,41 @@ jobs:
       - name: Check error codes documentation
         run: cd server && npx tsx scripts/check-error-codes-doc.ts
 
+  build-package:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    needs: [config-preflight]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: build-artifacts
+          path: |
+            client/dist
+            server/dist
+          retention-days: 7
+
   unit-tests:
     name: Unit Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -94,10 +124,11 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -155,10 +186,11 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -183,11 +215,12 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -230,10 +263,11 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -254,11 +288,12 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -290,12 +325,13 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Playwright)
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -331,7 +367,7 @@ jobs:
 
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
@@ -340,14 +376,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Use Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0      - name: Install dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run SOC control tests
@@ -364,13 +402,14 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       actions: read
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4.1.0      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -402,10 +441,11 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs:
       - config-preflight
       - lint-typecheck
+      - build-package
       - unit-tests
       - integration-tests
       - verification-suite
@@ -422,6 +462,7 @@ jobs:
           echo "=== CI Core Gate Status ==="
           echo "Config Preflight: ${{ needs.config-preflight.result }}"
           echo "Lint & Typecheck: ${{ needs.lint-typecheck.result }}"
+          echo "Build & Package: ${{ needs.build-package.result }}"
           echo "Unit Tests: ${{ needs.unit-tests.result }}"
           echo "Integration Tests: ${{ needs.integration-tests.result }}"
           echo "Verification Suite: ${{ needs.verification-suite.result }}"
@@ -441,6 +482,11 @@ jobs:
 
           if [[ "${{ needs.lint-typecheck.result }}" != "success" ]]; then
             echo "::error::Lint & Typecheck FAILED"
+            exit 1
+          fi
+
+          if [[ "${{ needs.build-package.result }}" != "success" ]]; then
+            echo "::error::Build & Package FAILED"
             exit 1
           fi
 
@@ -500,6 +546,7 @@ jobs:
           echo "All primary CI checks passed:" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Config Preflight (Jest/pnpm validation)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Lint & Typecheck" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Build & Package" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Unit Tests" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Integration Tests" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Verification Suite" >> $GITHUB_STEP_SUMMARY
