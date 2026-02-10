@@ -1,0 +1,36 @@
+name: Composer 1.5 Drift Detection
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily
+  workflow_dispatch:
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Run Hard Task Benchmark
+        run: |
+          mkdir -p artifacts/bench
+          export PYTHONPATH=.
+          python -c 'from summit.bench.run import run_benchmark; import json; summary = run_benchmark("summit/bench/suites/hard.yaml", mode="composer15_like"); print(json.dumps(summary))' > artifacts/bench/summary.json
+
+      - name: Calculate Metrics
+        run: |
+          export PYTHONPATH=.
+          python -c 'from summit.bench.metrics import calculate_metrics; import json; summary=json.load(open("artifacts/bench/summary.json")); metrics=calculate_metrics(summary["results"]); json.dump(metrics, open("artifacts/bench/metrics.json", "w"))'
+
+      - name: Check for Drift
+        run: |
+          python scripts/monitoring/composer-1-5-drift.py artifacts/bench/metrics.json

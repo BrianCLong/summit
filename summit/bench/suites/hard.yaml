@@ -1,0 +1,12 @@
+name: "hard-tasks-v1"
+description: "Tasks requiring adaptive deliberation and recursive summarization"
+cases:
+  - id: "HT-001"
+    prompt: "Refactor the authentication middleware to support multi-tenant JWTs without breaking existing sessions."
+    difficulty: "hard"
+    expected_files: ["summit/auth/middleware.py"]
+
+  - id: "HT-002"
+    prompt: "Investigate why the drift detection job is flaky on weekends and fix it."
+    difficulty: "hard"
+    context_load: "high"
