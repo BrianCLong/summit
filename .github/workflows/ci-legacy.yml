@@ -21,7 +21,7 @@ concurrency:
 jobs:
   quarantine-tests:
     name: Quarantine Tests (Flaky)
-    if: false 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -54,7 +54,7 @@ jobs:
 
   jest-legacy-suite:
     name: Jest/ts-jest Suite (ESM Issues)
-    if: false 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
@@ -86,7 +86,7 @@ jobs:
 
   experimental-checks:
     name: Experimental Checks
-    if: false 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -126,7 +126,7 @@ jobs:
 
   deprecated-checks:
     name: Deprecated Checks (Migration in Progress)
-    if: false 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -165,7 +165,7 @@ jobs:
 
   performance-regression:
     name: Performance Regression Tests
-    if: false 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -198,7 +198,7 @@ jobs:
 
   accessibility-audit:
     name: Web Accessibility Audit
-    if: false 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -239,7 +239,7 @@ jobs:
       - deprecated-checks
       - performance-regression
       - accessibility-audit
-    if: (false ) && (always())
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (always())
     steps:
       - name: Report results (non-blocking)
         run: |
