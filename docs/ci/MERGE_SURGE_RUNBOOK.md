@@ -38,6 +38,11 @@ When `MERGE_SURGE=true`, the following behaviors are active:
 3.  **Gate Success Semantics:**
     *   The `CI Core Gate ✅` (the primary required check) treats `skipped` results as `success`.
 
+### Critical Safety: Workflow Validity Gate
+Regardless of `MERGE_SURGE` status, the **Workflow Validity Gate** is **ALWAYS ACTIVE** and **MANDATORY** for any PR touching `.github/workflows/**`.
+*   This catches duplicated `if:` keys, malformed YAML, and invalid expressions *before* they can cause a global CI outage.
+*   **Check Name:** `Workflow Validity Gate / Workflow Validity Check`
+
 ### Exit Ramp: Disabling Surge Mode
 To return the repository to standard CI behavior (e.g., after a release crunch or when runner capacity increases):
 
