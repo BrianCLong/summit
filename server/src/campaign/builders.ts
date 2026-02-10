@@ -7,6 +7,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export async function loadCampaignTemplate(templateName: string): Promise<Campaign> {
+  // Validate templateName to prevent Path Traversal
+  if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
+      throw new Error(`Invalid template name: ${templateName}`);
+  }
+
   const filePath = path.join(__dirname, 'templates', `${templateName}.json`);
   try {
     const data = await fs.readFile(filePath, 'utf-8');
