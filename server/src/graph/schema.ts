@@ -134,4 +134,4 @@ export interface HasPolicyEdge {
   type: 'HAS_POLICY';
 }
 
-export * from './maestro-schema.js';
+export * from './maestro-schema';

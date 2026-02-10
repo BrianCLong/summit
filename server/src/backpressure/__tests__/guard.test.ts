@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { BackpressureGuard } from '../guard.js';
+import { BackpressureGuard } from '../guard';
 
 describe('BackpressureGuard', () => {
   let guard: BackpressureGuard;

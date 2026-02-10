@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import { TelemetryScrubber } from '../scrubber.js';
-import { TelemetryService } from '../TelemetryService.js';
-import { ALLOWLIST } from '../allowlist.js';
+import { TelemetryScrubber } from '../scrubber.ts';
+import { TelemetryService } from '../TelemetryService.ts';
+import { ALLOWLIST } from '../allowlist.ts';
 
 // Use a unique directory for this test run to avoid conflicts
 const TEST_LOG_DIR = path.join(__dirname, 'test_logs_' + Date.now());

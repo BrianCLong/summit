@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-SYNTHDATA-COV-001",
-  "item_slug": "synthetic-data-coverage",
-  "summary": "Synthetic QA-to-Cypher coverage evidence slot is reserved for evaluation runs.",
-  "claims": ["Synthetic QA-to-Cypher coverage evidence slot is reserved for evaluation runs."],
-  "decisions": [],
-  "findings": []
-}

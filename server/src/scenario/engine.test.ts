@@ -1,8 +1,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { ScenarioEngine } from './engine.js';
-import { ScenarioDefinition, SimulationState } from './types.js';
+import { ScenarioEngine } from './engine';
+import { ScenarioDefinition, SimulationState } from './types';
 
 describe('Cross-Domain Scenario Simulation', () => {
   const engine = new ScenarioEngine();

@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-CURSOR-INDEXING-HYBRID-001",
-  "summary": "router uses semantic + regex paths verified",
-  "artifacts": [
-    "summit/retrieval/hybrid/router.ts",
-    "summit/retrieval/hybrid/router.test.ts"
-  ]
-}

@@ -6,7 +6,6 @@
     "declaration": true,
     "composite": false,
     "skipLibCheck": true,
-    "types": ["node"],
     "noEmit": false
   },
   "include": ["src"],

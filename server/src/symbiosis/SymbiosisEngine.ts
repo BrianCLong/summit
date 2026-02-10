@@ -6,12 +6,12 @@ import {
   SymbiosisKPIs,
   InjectionContext,
   SymbiosisResponse
-} from './types.js';
-import { TrajectoryPredictor } from './layers/TrajectoryPredictor.js';
-import { ProbabilisticFusionCore } from './layers/ProbabilisticFusionCore.js';
-import { EvolutionaryMemoryFabric } from './layers/EvolutionaryMemoryFabric.js';
-import { InjectionOrchestrator } from './layers/InjectionOrchestrator.js';
-import { MetaSymbiote } from './layers/MetaSymbiote.js';
+} from './types';
+import { TrajectoryPredictor } from './layers/TrajectoryPredictor';
+import { ProbabilisticFusionCore } from './layers/ProbabilisticFusionCore';
+import { EvolutionaryMemoryFabric } from './layers/EvolutionaryMemoryFabric';
+import { InjectionOrchestrator } from './layers/InjectionOrchestrator';
+import { MetaSymbiote } from './layers/MetaSymbiote';
 
 export class SymbiosisEngine {
   private predictor: TrajectoryPredictor;

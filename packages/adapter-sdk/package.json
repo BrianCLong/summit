@@ -9,9 +9,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "pnpm run build",
     "dev": "tsc -w -p tsconfig.json",
-    "test": "echo 'Tests skipped due to vitest ESM compatibility issue' && exit 0",
+    "test": "vitest",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

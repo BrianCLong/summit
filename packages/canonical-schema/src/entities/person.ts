@@ -3,7 +3,7 @@
  * Canonical person entity type with rich identity attributes
  */
 
-import { CanonicalEntityBase, CanonicalEntityType } from '../core/base.js';
+import { CanonicalEntityBase, CanonicalEntityType } from '../core/base';
 
 export interface PersonName {
   value: string;

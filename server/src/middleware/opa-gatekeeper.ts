@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError } from 'apollo-server-express';
-import { OPAClient } from './opa-abac.js';
-import { logger } from '../utils/logger.js';
-import type { User } from '../graphql/intelgraph/types.js';
+import { OPAClient } from './opa-abac';
+import { logger } from '../utils/logger';
+import type { User } from '../graphql/intelgraph/types';
 
 export function opaGatekeeperMiddleware(opaClient: OPAClient, simulate = false) {
   return async (req: Request, res: Response, next: NextFunction) => {

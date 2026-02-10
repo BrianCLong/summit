@@ -1,7 +1,0 @@
-{
-  "config/execution_governor.yml": "b5076925d61bb4782a49f50141a09f3528664fc1dc4490129ef4a182425052fe",
-  "docs/standards/execution-governor.md": "f70063f3b72e42aa698e772a7e323a1f7316a970f3379c46a47d69c1f96ad499",
-  "scripts/execution/checkpoint.ts": "a2d6c3df3570fecf99066ff39ab2fa04c09ac53b21ce3ae5891188ee08fa2eba",
-  "scripts/execution/guard_single_product.ts": "801296cc5fb818d97d769a0b0e9dc1573ed4296a752a9f0f7a73b8f254ee4830",
-  "scripts/execution/scorecard.ts": "585ce6b0642cf5bf577590ab693fc1b55e3f5eadf9208e7aafb49f3522aece39"
-}

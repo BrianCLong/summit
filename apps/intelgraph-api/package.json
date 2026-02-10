@@ -35,7 +35,7 @@
     "@types/node": "20.19.27",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3",
-    "eslint": "^9.39.2",
+    "eslint": "^9.39.1",
     "@types/jsonwebtoken": "^9.0.6"
   },
   "types": "dist/index.d.ts",

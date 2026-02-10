@@ -30,7 +30,7 @@ describe('Trust Center API', () => {
 
   describe.skip('API Structure', () => {
     it('should export TRUST_CENTER_API_SCHEMA with required tables', async () => {
-      const { TRUST_CENTER_API_SCHEMA } = await import('../routes/trust-center-api.js');
+      const { TRUST_CENTER_API_SCHEMA } = await import('../routes/trust-center-api.ts');
 
       expect(TRUST_CENTER_API_SCHEMA).toBeDefined();
       expect(TRUST_CENTER_API_SCHEMA).toContain('CREATE TABLE IF NOT EXISTS certifications');
@@ -38,7 +38,7 @@ describe('Trust Center API', () => {
     });
 
     it('should have default router export', async () => {
-      const routerModule = await import('../routes/trust-center-api.js');
+      const routerModule = await import('../routes/trust-center-api.ts');
       expect(routerModule.default).toBeDefined();
     });
   });

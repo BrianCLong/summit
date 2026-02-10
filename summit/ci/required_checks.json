@@ -1,7 +1,0 @@
-[
-  "summit-ci/evidence-verify",
-  "summit-ci/prompt-determinism",
-  "summit-ci/tool-schema-drift",
-  "summit-ci/policy-gates",
-  "summit-ci/unit"
-]

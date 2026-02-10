@@ -1,8 +1,0 @@
-{
-  "AGENTS_ENABLED": false,
-  "max_parallel_tasks": 2,
-  "default_model": "gpt-4-turbo",
-  "mcp_allowlist_path": "mcp/allowlist.yaml",
-  "policy_path": "policy/ai-coding/",
-  "log_level": "INFO"
-}

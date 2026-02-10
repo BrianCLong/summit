@@ -5,7 +5,7 @@
  */
 
 import type { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts/oas31';
-import type { APIConfig, RouteDefinition, HTTPMethod } from '../types.js';
+import type { APIConfig, RouteDefinition, HTTPMethod } from '../types';
 
 export class OpenAPIGenerator {
   private config: APIConfig;
