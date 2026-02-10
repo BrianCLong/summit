@@ -4,7 +4,7 @@ on:
     branches: [ main ]
     paths: [ "infra/**", ".github/workflows/infra-parity.yml" ]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
