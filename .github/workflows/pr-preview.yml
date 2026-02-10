@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   deploy-preview:
-    if: (false  # Temporarily disabled for GA merge surge) && (github.repository == 'summit/summit' && github.event.pull_request.head.repo.full_name == github.repository)
+    if: (false ) && (github.repository == 'summit/summit' && github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
 
     steps:

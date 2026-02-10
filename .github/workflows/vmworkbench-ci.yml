@@ -15,7 +15,7 @@ concurrency:
 jobs:
   verify-bundle:
     name: Verify VM Workbench Bundle
-    if: false  # Temporarily disabled for GA merge surge
+    if: false 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
