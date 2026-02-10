@@ -52,6 +52,10 @@ const MissionControlPage = React.lazy(() => import('@/features/mission-control/M
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
+const ApprovalsPage = React.lazy(() => import('@/pages/switchboard/ApprovalsPage'))
+const ApprovalDetailPage = React.lazy(() => import('@/pages/switchboard/ApprovalDetailPage'))
+const IncidentsPage = React.lazy(() => import('@/pages/switchboard/IncidentsPage'))
+const IncidentDetailPage = React.lazy(() => import('@/pages/switchboard/IncidentDetailPage'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
@@ -203,6 +207,12 @@ function App() {
                         {/* Cases */}
                         <Route path="cases" element={<CasesPage />} />
                         <Route path="cases/:id" element={<CaseDetailPage />} />
+
+                        {/* Switchboard */}
+                        <Route path="switchboard/approvals" element={<ApprovalsPage />} />
+                        <Route path="switchboard/approvals/:id" element={<ApprovalDetailPage />} />
+                        <Route path="switchboard/incidents" element={<IncidentsPage />} />
+                        <Route path="switchboard/incidents/:id" element={<IncidentDetailPage />} />
 
                         {/* Dashboards - Wrapped with DataFetchErrorBoundary */}
                         <Route
