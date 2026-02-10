@@ -1,5 +1,5 @@
 import fc from 'fast-check';
-import { addEdge, addNode, computeMerkleRoot } from '../src/prov/merge.js';
+import { addEdge, addNode, computeMerkleRoot } from '../src/prov/merge';
 
 describe('Graph invariants', () => {
   it('no dangling edges after add/remove cycles', () => {

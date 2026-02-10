@@ -13,21 +13,16 @@ on:
       - "server/**"
       - "policy/**"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-and-verify:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4 # v6
-        with:
           node-version: "20"
           cache: "pnpm"
 
@@ -42,7 +37,6 @@ jobs:
 
       - name: Set up OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
-        with:
           opa-version: latest
 
       - name: Build OPA Policy Bundle
@@ -53,8 +47,7 @@ jobs:
             policy/
 
       - name: Upload OPA Bundle as Artifact
-        uses: actions/upload-artifact@v4 # v6
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
           name: opa-bundle
           path: policy/bundle.tar.gz
           retention-days: 7
@@ -68,7 +61,6 @@ jobs:
     name: Security Gate
     needs: build-and-verify
     uses: ./.github/workflows/ci-security.yml
-    with:
       run_dast: false
       run_snyk: false
     secrets: inherit

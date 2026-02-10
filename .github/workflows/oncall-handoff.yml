@@ -57,7 +57,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate On-Call Handoff
@@ -118,8 +117,7 @@ jobs:
           git push
 
       - name: Upload Handoff Artifact
-        uses: actions/upload-artifact@v4 # v6
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
           name: oncall-handoff-${{ github.run_id }}
           path: |
             artifacts/release-train/oncall_handoff.md

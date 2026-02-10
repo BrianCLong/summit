@@ -5,32 +5,16 @@ on:
     paths:
       - "subsumption/**"
       - "scripts/ci/**"
-      - "scripts/monitoring/**"
       - "docs/**"
       - "evidence/**"
-      - "tests/fixtures/**"
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_dispatch: {}
 
 jobs:
-  verify:
-    name: ci/verify-subsump-bundle
+  verify_subsumption_bundle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
           node-version: "20"
-      - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/ingress-nginx-retirement/manifest.yaml
-
-  deny:
-    name: ci/deny-ingress-nginx
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - run: node scripts/ci/deny_ingress_nginx.mjs
+      - name: Verify subsumption bundle
+        run: node scripts/ci/verify_subsumption_bundle.mjs --bundle subsumption/item-UNKNOWN

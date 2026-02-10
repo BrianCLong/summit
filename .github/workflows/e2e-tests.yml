@@ -6,13 +6,8 @@ on:
   pull_request:
     branches: [main, develop]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   e2e-tests:
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -21,9 +16,9 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
           node-version-file: .nvmrc
           cache: 'pnpm'
 
@@ -43,7 +38,6 @@ jobs:
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
-        with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30

@@ -27,10 +27,6 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -142,7 +138,6 @@ jobs:
     steps:
       - name: Trigger Drift Detection
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,

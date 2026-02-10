@@ -46,10 +46,6 @@ on:
         type: number
         default: 7
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -180,9 +176,8 @@ jobs:
             || echo "::warning::Failed to update audit log"
 
       - name: Upload Verification Report
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         if: steps.check-exists.outputs.exists == 'true'
-        with:
           name: governance-lockfile-verification-${{ github.run_number }}
           path: verification_report.json
           retention-days: 30
@@ -190,7 +185,6 @@ jobs:
       - name: PR Comment on Failure
         if: failure() && github.event_name == 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
           script: |
             const fs = require('fs');
             let report = { status: 'unknown', summary: {} };

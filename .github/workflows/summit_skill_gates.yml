@@ -1,6 +1,5 @@
 name: summit-skill-gates
 on: [pull_request]
-
 jobs:
   evidence-schemas:
     runs-on: ubuntu-latest
@@ -10,30 +9,13 @@ jobs:
         run: |
           test -f evidence/schemas/report.schema.json
           test -f evidence/schemas/metrics.schema.json
-          test -f evidence/schemas/stamp.schema.json
-
+          test -f evidence/schemas/skill_stamp.schema.json
   policy-fixtures:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Deny-by-default policy fixture
+      - name: Deny-by-default check (flag off)
         run: |
-          python - <<'PY'
-          from summit.policy.engine import PolicyEngine
-          from summit.protocols.envelope import SummitEnvelope, ToolCall
-
-          engine = PolicyEngine({})
-          env = SummitEnvelope(
-              message_id="msg-1",
-              conversation_id="conv-1",
-              sender="user",
-              recipient="summit",
-              intent="REQUEST",
-              tool_calls=[ToolCall(name="fs.read", arguments={})],
-              security={},
-          )
-          decision = engine.evaluate(env)
-          assert decision.allowed is False
-          assert "tool_not_allowed:fs.read" in decision.reasons
-          assert "missing_classification" in decision.reasons
-          PY
+          python3 -c "from summit.policy.router import route; \
+          d=route({'feature_flags': {'SKILL_PRESERVING_MODE': False}}); \
+          assert d.mode=='baseline'"

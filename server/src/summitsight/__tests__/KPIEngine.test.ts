@@ -1,6 +1,6 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { KPIEngine } from '../engine/KPIEngine.js';
-import { SummitsightDataService } from '../SummitsightDataService.js';
+import { KPIEngine } from '../engine/KPIEngine';
+import { SummitsightDataService } from '../SummitsightDataService';
 
 // Mock DataService
 jest.mock('../SummitsightDataService');

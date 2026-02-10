@@ -2,9 +2,9 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-import { BoundedContent, ContentBoundary } from './contentBoundary.js';
-import { JudgeScores } from './judge.js';
-import { PolicyDecision } from './policy.js';
+import { BoundedContent, ContentBoundary } from './contentBoundary';
+import { JudgeScores } from './judge';
+import { PolicyDecision } from './policy';
 
 export interface EvidenceArtifact {
   id: string;

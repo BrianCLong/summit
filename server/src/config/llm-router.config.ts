@@ -1,5 +1,5 @@
 
-import { LLMRouterConfig } from '../services/llm/interfaces.js';
+import { LLMRouterConfig } from '../services/llm/interfaces';
 
 export const llmRouterConfig: LLMRouterConfig = {
   providers: [

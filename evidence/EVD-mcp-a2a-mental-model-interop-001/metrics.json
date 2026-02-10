@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-mcp-a2a-mental-model-interop-001",
-  "metrics": {
-    "tool_manifest_bytes": 0,
-    "agentcard_count": 0,
-    "routing_latency_ms": 0
-  }
-}

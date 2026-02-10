@@ -24,7 +24,6 @@ on:
 permissions:
   contents: read
   issues: write
-  actions: read
 
 jobs:
   enforce-postmortems:
@@ -33,7 +32,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
           fetch-depth: 0 # Need all history for tags
 
       - name: Find Hotfix Tags Without Post-Mortems
@@ -257,8 +255,7 @@ jobs:
           fi
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4 # v6
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
           name: postmortem-enforcement-report
           path: artifacts/postmortem-check/
           retention-days: 30

@@ -56,7 +56,6 @@ jobs:
     steps:
       - name: Checkout (for scripts)
         uses: actions/checkout@v4 # v6
-        with:
           sparse-checkout: scripts/ci
 
       - name: Collect Workflow Metrics
@@ -163,8 +162,7 @@ jobs:
 
       - name: Upload Metrics Artifact
         id: upload
-        uses: actions/upload-artifact@v4 # v4
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
           name: ci-metrics-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/ci-metrics/
           retention-days: 30

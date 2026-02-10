@@ -10,17 +10,12 @@ on:
       - 'prompts/**'
       - 'tools/promptpack_lint/**'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
-        with:
           python-version: '3.12'
       - run: pip install -e tools/promptpack_lint
       - run: promptpack-lint --repo .

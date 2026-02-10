@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
-import { createPlugin } from './sdk.js';
-import { vaultReadKvV2 } from '../vault/helpers.js';
+import { createPlugin } from './sdk';
+import { vaultReadKvV2 } from '../vault/helpers';
 
 type Inputs = { hash: string };
 type Output = { data?: any; source: 'virustotal'; fromCache?: boolean };

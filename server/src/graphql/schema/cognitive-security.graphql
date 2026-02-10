@@ -832,18 +832,6 @@ type NarrativeCascade {
   hops: [CascadeHop!]!
 }
 
-type NarrativeConflict {
-  competingNarrativeId: ID!
-  competingNarrative: CogSecNarrative!
-  conflictScore: Float!
-  contradictingClaims: [ContradictingPair!]!
-}
-
-type ContradictingPair {
-  claim1: CogSecClaim!
-  claim2: CogSecClaim!
-}
-
 type CascadeHop {
   id: ID!
   cascadeId: ID!
@@ -1021,7 +1009,6 @@ extend type Query {
   # Influence Pathways
   influencePathways(narrativeId: ID!): [NarrativeCascade!]!
   narrativeEarlyWarnings(watchlistId: ID): [TippingPointIndicator!]!
-  narrativeConflicts(narrativeId: ID!): [NarrativeConflict!]!
 }
 
 type NarrativeGraph {

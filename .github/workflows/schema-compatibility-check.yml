@@ -39,10 +39,6 @@ on:
     tags:
       - "v*.*.*-rc.*"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: write
@@ -60,7 +56,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
           fetch-depth: 0
 
       - name: Check for RC Phase
@@ -126,8 +121,7 @@ jobs:
 
       - name: Upload Report
         if: always()
-        uses: actions/upload-artifact@v4 # v6
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
           name: schema-compatibility-report-${{ github.run_id }}
           path: artifacts/reports/schema-compatibility-*.md
           retention-days: 30
@@ -136,7 +130,6 @@ jobs:
       - name: Comment on PR
         if: github.event_name == 'pull_request' && steps.check.outputs.status == 'FAIL'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        with:
           script: |
             const breaking = '${{ steps.check.outputs.breaking_changes }}';
             const baseline = '${{ steps.rc-phase.outputs.rc_tag }}';

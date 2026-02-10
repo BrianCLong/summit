@@ -16,12 +16,10 @@ permissions:
 
 jobs:
   deploy-preview:
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     if: github.repository == 'summit/summit' && github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - uses: actions/checkout@v4
-        with:
           fetch-depth: 1
           submodules: false
 

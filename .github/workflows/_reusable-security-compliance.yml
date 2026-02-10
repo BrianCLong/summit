@@ -38,22 +38,20 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # v4
-        with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-        with:
           cache: 'pnpm'
-          node-version-file: .nvmrc
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+          version: 9.12.0
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
-        with:
           python-version: "3.11"
 
       - name: Install System Dependencies
@@ -83,13 +81,12 @@ jobs:
 
       - name: Trivy FS Scan
         uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
-        with:
           scan-type: "fs"
           severity: "CRITICAL,HIGH"
           exit-code: "1"
 
       - name: Dependency Audit (NPM)
-        run: pnpm audit --audit-level=high
+        run: npm audit --audit-level=high
 
       # ═══════════════════════════════════════════════════════════════════════════
       # 3. Compliance & Licenses

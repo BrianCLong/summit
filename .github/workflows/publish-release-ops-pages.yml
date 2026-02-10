@@ -115,7 +115,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
           fetch-depth: 0 # Full history for snapshot branch access
 
       - name: Download Orchestrator Artifacts
@@ -234,8 +233,7 @@ jobs:
 
       - name: Upload Triage Packet
         if: steps.health-check.outputs.level == 'WARN' || steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
-        uses: actions/upload-artifact@v4 # v4
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
           name: redaction-triage-${{ needs.check-trigger.outputs.artifact_run_id }}
           path: artifacts/redaction-triage/
           retention-days: 30
@@ -421,7 +419,6 @@ jobs:
       - name: Upload Pages Artifact
         if: inputs.dry_run != true
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v3
-        with:
           path: site/release-ops
 
       - name: Deploy to GitHub Pages

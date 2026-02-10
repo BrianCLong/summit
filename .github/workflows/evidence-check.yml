@@ -4,10 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, labeled, reopened]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: read
@@ -28,7 +24,6 @@ jobs:
       - name: Checkout code
         if: steps.check-label.outputs.required == 'true'
         uses: actions/checkout@v4
-        with:
           fetch-depth: 0
 
       - name: Verify Evidence Bundle

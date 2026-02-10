@@ -52,7 +52,6 @@ jobs:
 
       - name: Setup toolchain
         uses: ./.github/actions/setup-toolchain
-        with:
           node-version: ${{ inputs.node-version }}
           pnpm-version: ${{ inputs.pnpm-version }}
           working-directory: ${{ inputs.working-directory }}
@@ -92,8 +91,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4 # v6
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
           retention-days: 14
           name: test-results-${{ inputs.test-type }}
           path: |
@@ -105,6 +103,5 @@ jobs:
       - name: Upload coverage
         if: ${{ inputs.upload-coverage && inputs.test-type == 'unit' }}
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        with:
           directory: ${{ inputs.working-directory }}/coverage
           fail_ci_if_error: false

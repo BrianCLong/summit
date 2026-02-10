@@ -4,7 +4,7 @@ import { getPostgresPool } from '../config/database.js';
 import {
   FactRun, FactTask, FactSecurity, FactOps,
   KPIDefinition, KPIValue, Forecast, RiskAssessment
-} from './types.js';
+} from './types';
 
 export class SummitsightDataService {
   private pool: Pool;

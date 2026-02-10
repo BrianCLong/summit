@@ -1,7 +1,7 @@
-import { InferenceRequest, InferenceResponse, ModelVersion } from './types.js';
-import { featureStore } from './feature_store.js';
-import { modelRegistry } from './registry.js';
-import { logger } from '../config/logger.js';
+import { InferenceRequest, InferenceResponse, ModelVersion } from './types';
+import { featureStore } from './feature_store';
+import { modelRegistry } from './registry';
+import { logger } from '../config/logger';
 import axios from 'axios';
 
 /**

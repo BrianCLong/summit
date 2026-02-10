@@ -9,10 +9,6 @@ on:
       - "evidence/**"
       - ".github/workflows/subsumption-bundle-verifier.yml"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   subsumption-bundle-verifier:
     runs-on: ubuntu-latest
@@ -20,7 +16,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Use Node
         uses: actions/setup-node@v4
-        with:
           node-version: "20"
       - name: Verify subsumption bundle (azure-turin-v7)
         run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/azure-turin-v7/manifest.yaml

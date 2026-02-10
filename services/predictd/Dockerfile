@@ -17,11 +17,8 @@ COPY services/predictd/package.json ./services/predictd/package.json
 # Install dependencies for the service only
 RUN pnpm install --filter predictd --prod --ignore-scripts
 
-# Copy only required sources to reduce build context size
-COPY services/predictd ./services/predictd
-COPY packages/predictive-graph-intelligence ./packages/predictive-graph-intelligence
-COPY packages/graph-algorithms ./packages/graph-algorithms
-COPY tsconfig.base.json ./tsconfig.base.json
+# Copy the entire monorepo source code
+COPY . .
 
 # Set the final working directory
 WORKDIR /app/services/predictd

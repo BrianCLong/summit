@@ -48,15 +48,13 @@ jobs:
 
       - name: Upload supply chain compliance receipt
         if: always()
-        uses: actions/upload-artifact@v4 # v6
-        with:
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
           retention-days: 14
           name: supply-chain-compliance-receipts
           path: artifacts/compliance-receipts
 
       - name: Set up Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4
-        with:
           version: "v3.12.0"
 
       - name: Set up yq
@@ -64,7 +62,6 @@ jobs:
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
-        with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
           aws-region: us-east-1
 

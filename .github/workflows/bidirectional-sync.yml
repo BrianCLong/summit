@@ -8,22 +8,16 @@ on:
     branches:
       - main
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   sync:
     runs-on: ubuntu-latest
-permissions:
-  contents: write
-  issues: write
+    permissions:
+      contents: write
       pull-requests: write
 
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v4 # v6
-        with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -60,7 +54,6 @@ permissions:
       - name: Comment on PR if conflicts
         if: steps.merge.outcome == 'failure'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        with:
           script: |
             github.rest.issues.createComment({
               issue_number: 14642,

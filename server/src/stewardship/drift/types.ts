@@ -20,7 +20,7 @@ export interface DriftSignal {
   current: number;
   delta: number;
   timestamp: Date;
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 export interface DriftDetector {

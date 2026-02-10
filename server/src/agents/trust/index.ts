@@ -6,6 +6,6 @@
  * @module agents/trust
  */
 
-export { TrustScoringService, getTrustScoringService } from './TrustScoringService.js';
-export type { TrustScoringConfig } from './TrustScoringService.js';
-export * from './types.js';
+export { TrustScoringService, getTrustScoringService } from './TrustScoringService.ts';
+export type { TrustScoringConfig } from './TrustScoringService.ts';
+export * from './types.ts';
