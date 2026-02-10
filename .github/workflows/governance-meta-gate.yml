@@ -3,18 +3,9 @@ name: Governance Meta Gate
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - ".github/workflows/**"
-      - "scripts/ci/**"
-      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
-      - "policy/**"
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/**"
-      - "scripts/ci/**"
-      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
-      - "policy/**"
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
