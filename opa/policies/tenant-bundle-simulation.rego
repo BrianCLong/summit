@@ -11,7 +11,8 @@ default decision := {
 }
 
 overlay_allows_cross_tenant if {
-    some overlay in input.overlays_applied
+    some overlay
+    overlay := input.overlays_applied[_]
     overlay.id == "mission-exception"
     overlay.effect == "allow_cross_tenant"
 }

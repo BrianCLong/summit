@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { ClaimValidator, ValidationStrategy, ValidationContext } from '../ClaimValidator.js';
-import { Claim, VerificationResult } from '../types.js';
+import { ClaimValidator, ValidationStrategy, ValidationContext } from '../ClaimValidator';
+import { Claim, VerificationResult } from '../types';
 
 describe('ClaimValidator', () => {
   let validator: ClaimValidator;

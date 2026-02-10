@@ -120,20 +120,6 @@ curl http://localhost:4000/api/investigations \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-## RBAC Permissions
-
-Investigation and export endpoints enforce role-based access control. Use these permissions when
-assigning roles or diagnosing authorization failures:
-
-| Permission | Allowed Roles | Example Endpoints |
-| --- | --- | --- |
-| `investigations:read` | viewer, investigator, admin | `GET /api/investigations/:id`, `GET /api/investigations/:id/analyses/:analysisId` |
-| `investigations:write` | investigator, admin | `POST /api/investigations`, `POST /api/investigations/:id/analyze` |
-| `investigations:delete` | admin | `DELETE /api/investigations/:id` |
-| `export:investigations` | admin | `POST /api/export`, `GET /api/export/:jobId`, `POST /api/analytics/export` |
-
-Unauthorized access returns `403 Forbidden` with a permission error payload.
-
 ### Token Refresh
 
 Access tokens expire after 15 minutes. Use the refresh token to get a new one:

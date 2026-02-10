@@ -1,5 +1,5 @@
-import { SimpleGraphEngine } from './SimpleGraph.js';
-import { SimulationRequest, SimulationResult, SimulationStep } from '../contracts/predictive/types.js';
+import { SimpleGraphEngine } from './SimpleGraph';
+import { SimulationRequest, SimulationResult, SimulationStep } from '../contracts/predictive/types';
 
 export class CampaignSimulator {
   static simulate(graph: SimpleGraphEngine, request: SimulationRequest): SimulationResult {

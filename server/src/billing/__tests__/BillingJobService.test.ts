@@ -2,11 +2,11 @@ import { jest } from '@jest/globals';
 const mockGetPostgresPool = jest.fn();
 const mockGenerateAndExportReport = jest.fn();
 
-jest.unstable_mockModule('../../config/database.js', () => ({
+jest.unstable_mockModule('../../config/database.ts', () => ({
   getPostgresPool: mockGetPostgresPool,
 }));
 
-jest.unstable_mockModule('../../config/logger.js', () => ({
+jest.unstable_mockModule('../../config/logger.ts', () => ({
   __esModule: true,
   default: {
     info: jest.fn(),
@@ -15,15 +15,15 @@ jest.unstable_mockModule('../../config/logger.js', () => ({
   },
 }));
 
-jest.unstable_mockModule('../BillingService.js', () => ({
+jest.unstable_mockModule('../BillingService.ts', () => ({
   billingService: {
     generateAndExportReport: mockGenerateAndExportReport,
   },
 }));
 
-const { BillingJobService } = await import('../BillingJobService.js');
-const { getPostgresPool } = await import('../../config/database.js');
-const { billingService } = await import('../BillingService.js');
+const { BillingJobService } = await import('../BillingJobService');
+const { getPostgresPool } = await import('../../config/database.ts');
+const { billingService } = await import('../BillingService.ts');
 
 describe('BillingJobService', () => {
   let jobService: InstanceType<typeof BillingJobService>;

@@ -4,8 +4,8 @@
  * Pre-built integrations for Summit platform services.
  */
 
-import type { EvaluationContext } from './evaluator.js';
-import type { Operation } from './schema/policy.schema.js';
+import type { EvaluationContext } from './evaluator';
+import type { Operation } from './schema/policy.schema';
 
 // -----------------------------------------------------------------------------
 // GraphQL Integration

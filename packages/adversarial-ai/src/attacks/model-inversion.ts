@@ -1,4 +1,4 @@
-import { ModelInversionResult, MembershipInferenceResult, ModelExtractionResult } from '../types.js';
+import { ModelInversionResult, MembershipInferenceResult, ModelExtractionResult } from '../types';
 
 /**
  * Model Inversion Attack

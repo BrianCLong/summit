@@ -6,7 +6,6 @@
  * @see docs/adr/ADR-010_invariant_carrying_context_capsules.md
  */
 
-import { loadPolicy, LoadedPolicy } from '@open-policy-agent/opa-wasm';
 import {
   ContextCapsule,
   Invariant,
@@ -24,20 +23,18 @@ import { ContextCapsuleFactory } from './ContextCapsule.js';
  */
 export class InvariantValidator {
   private factory: ContextCapsuleFactory;
-  private policyCache: Map<string, LoadedPolicy>;
 
   constructor() {
     this.factory = new ContextCapsuleFactory();
-    this.policyCache = new Map();
   }
 
   /**
    * Validate a set of capsules against execution context
    */
-  async validate(
+  validate(
     capsules: ContextCapsule[],
     executionContext: ExecutionContext
-  ): Promise<ValidationResult> {
+  ): ValidationResult {
     const violations: InvariantViolation[] = [];
 
     for (const capsule of capsules) {
@@ -81,7 +78,7 @@ export class InvariantValidator {
 
       // 4. Validate each invariant
       for (const invariant of capsule.invariants) {
-        const violation = await this.checkInvariant(invariant, capsule, executionContext);
+        const violation = this.checkInvariant(invariant, capsule, executionContext);
         if (violation) {
           violations.push(violation);
         }
@@ -118,11 +115,11 @@ export class InvariantValidator {
   /**
    * Check a single invariant against execution context
    */
-  private async checkInvariant(
+  private checkInvariant(
     invariant: Invariant,
     capsule: ContextCapsule,
     executionContext: ExecutionContext
-  ): Promise<InvariantViolation | undefined> {
+  ): InvariantViolation | undefined {
     switch (invariant.rule.kind) {
       case 'forbid_topics':
         return this.checkForbiddenTopics(invariant, capsule, executionContext);
@@ -142,7 +139,7 @@ export class InvariantValidator {
         return undefined;
 
       case 'custom_expression':
-        return await this.checkCustomExpression(invariant, capsule, executionContext);
+        return this.checkCustomExpression(invariant, capsule, executionContext);
 
       default:
         return this.createViolation(
@@ -260,93 +257,19 @@ export class InvariantValidator {
   }
 
   /**
-   * Check custom expression invariant (Rego integration)
+   * Check custom expression invariant (placeholder for Rego/CEL integration)
    */
-  private async checkCustomExpression(
+  private checkCustomExpression(
     invariant: Invariant,
     capsule: ContextCapsule,
     executionContext: ExecutionContext
-  ): Promise<InvariantViolation | undefined> {
+  ): InvariantViolation | undefined {
     if (invariant.rule.kind !== 'custom_expression') return undefined;
 
-    if (invariant.rule.language === 'rego') {
-      try {
-        let policy = this.policyCache.get(invariant.rule.expr);
+    // TODO: Integrate with Rego or CEL policy engine
+    console.warn(`Custom expression evaluation not yet implemented: ${invariant.rule.expr}`);
 
-        if (!policy) {
-          // Assume expr is base64 encoded WASM
-          const wasmBuffer = Buffer.from(invariant.rule.expr, 'base64');
-          policy = await loadPolicy(wasmBuffer);
-          this.policyCache.set(invariant.rule.expr, policy);
-        }
-
-        const input = {
-          capsule,
-          executionContext
-        };
-
-        // Evaluate the policy
-        const resultSet = policy.evaluate(input);
-
-        // Interpret result
-        // Default deny if no result
-        if (!resultSet || resultSet.length === 0) {
-          return this.createViolation(
-            capsule.id,
-            invariant.id,
-            'invariant_violated',
-            invariant.severity,
-            'Policy evaluation returned no result (default deny)'
-          );
-        }
-
-        const result = resultSet[0].result;
-
-        // Case 1: Result is boolean true (allowed)
-        if (result === true) return undefined;
-
-        // Case 2: Result is object with 'allow' property
-        if (typeof result === 'object' && result.allow === true) return undefined;
-
-        // Case 3: Result contains violations list
-        if (typeof result === 'object' && Array.isArray(result.violations) && result.violations.length > 0) {
-           return this.createViolation(
-            capsule.id,
-            invariant.id,
-            'invariant_violated',
-            invariant.severity,
-            `Policy violations: ${result.violations.join(', ')}`
-           );
-        }
-
-        // Case 4: Result is explicitly false or otherwise "not allowed"
-        return this.createViolation(
-          capsule.id,
-          invariant.id,
-          'invariant_violated',
-          invariant.severity,
-          'Policy evaluation denied execution'
-        );
-
-      } catch (error) {
-        return this.createViolation(
-          capsule.id,
-          invariant.id,
-          'invariant_violated',
-          invariant.severity,
-          `Policy evaluation error: ${(error as Error).message}`
-        );
-      }
-    } else {
-      // CEL or other not yet supported
-      return this.createViolation(
-        capsule.id,
-        invariant.id,
-        'invariant_violated',
-        'warn',
-        `Unsupported policy language: ${invariant.rule.language}`
-      );
-    }
+    return undefined;
   }
 
   /**

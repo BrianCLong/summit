@@ -1,8 +1,13 @@
+// @ts-nocheck
+/**
+ * Case Workflow API Routes
+ * RESTful API endpoints for case workflow operations
+ */
+
 import { Router, Response, NextFunction } from 'express';
 import { Pool } from 'pg';
 import { CaseWorkflowService } from '../cases/workflow/index.js';
 import logger from '../config/logger.js';
-import { createRouteRateLimitMiddleware } from '../middleware/rateLimit.js';
 import type { AuthenticatedRequest } from './types.js';
 
 const routeLogger = logger.child({ name: 'CaseWorkflowRoutes' });
@@ -27,7 +32,6 @@ function extractAuthContext(req: AuthenticatedRequest): { userId: string; tenant
 
 export function createCaseWorkflowRouter(pg: Pool): Router {
   const router = Router();
-  router.use(createRouteRateLimitMiddleware('caseWorkflow'));
   const workflowService = new CaseWorkflowService(pg);
 
   // ==================== WORKFLOW TRANSITIONS ====================

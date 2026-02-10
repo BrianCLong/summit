@@ -29,9 +29,9 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
 
     try {
       // Import DB connections dynamically
-      const pgModule = await import('../src/db/pg.js');
+      const pgModule = await import('../src/db/pg');
       pg = pgModule.pg;
-      const neo4jModule = await import('../src/db/neo4j.js');
+      const neo4jModule = await import('../src/db/neo4j');
       getNeo4jDriver = neo4jModule.getNeo4jDriver;
 
       jest.setTimeout(30000);
@@ -40,13 +40,13 @@ describeNetwork('Golden Path Guardrails - Negative Tests', () => {
         fs.writeFileSync(logFile, 'DEBUG: Starting beforeAll\n');
       } catch (e) { console.error('Failed to write log file', e); }
 
-      const dbConfigModule = await import('../src/config/database.js');
+      const dbConfigModule = await import('../src/config/database');
       await dbConfigModule.connectPostgres();
       await dbConfigModule.connectNeo4j();
       await dbConfigModule.connectRedis();
       try { fs.appendFileSync(logFile, 'DEBUG: DB connected\n'); } catch (_) { }
 
-      const appModule = await import('../src/app.js');
+      const appModule = await import('../src/app');
       const createApp = appModule.createApp;
       app = await createApp();
       server = app.listen(0);

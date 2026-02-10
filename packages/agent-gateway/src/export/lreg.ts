@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ensureCoverage } from '../dissent/gate.js';
+import { ensureCoverage } from '../dissent/gate';
 
 export async function exportLREG(
   runId: string,

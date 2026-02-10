@@ -1,4 +1,4 @@
-import { streamProcess } from '../src/conductor/steps/streamProcess.js';
+import { streamProcess } from '../src/conductor/steps/streamProcess';
 
 test('freshness gate blocks stale', async () => {
   const ctx: any = { id: 'r1', setOutputs: jest.fn() };
