@@ -70,11 +70,13 @@ async function main() {
     .command('doctor')
     .description('Verify local Summit developer environment and auto-heal common issues')
     .option('--env-file <path>', 'Path to the .env file', '.env')
+    .option('--profile <name>', 'Use named profile from config')
     .option('--fix', 'Attempt to auto-heal missing dependencies', false)
     .option('--json', 'Output JSON instead of human-friendly text', false)
     .action(async (options) => {
       const report = await runDoctor({
         envFile: options.envFile,
+        profile: options.profile,
         autoFix: options.fix,
       });
 
@@ -97,6 +99,41 @@ async function main() {
       if (report.summary.failed > 0) {
         process.exitCode = 1;
       }
+    });
+
+  program
+    .command('demo')
+    .description('Launch the Summit platform demo environment')
+    .option('--profile <name>', 'Use named profile from config')
+    .action(async (options) => {
+      const { loadConfig, getProfile } = await import('./lib/config.js');
+      const config = await loadConfig();
+      const profile = getProfile(config, options.profile);
+
+      const env: NodeJS.ProcessEnv = {
+        ...process.env,
+        DEMO_MODE: '1',
+      };
+
+      if (profile.switchboard) {
+        if (profile.switchboard.tenantId) env.SWITCHBOARD_TENANT_ID = profile.switchboard.tenantId;
+        if (profile.switchboard.registryPath) env.SWITCHBOARD_REGISTRY_PATH = profile.switchboard.registryPath;
+        if (profile.switchboard.policyPath) env.SWITCHBOARD_POLICY_PATH = profile.switchboard.policyPath;
+        if (profile.switchboard.secretsNamespace) env.SWITCHBOARD_SECRETS_NAMESPACE = profile.switchboard.secretsNamespace;
+      }
+
+      console.log(chalk.bold('\n🚀 Launching Summit Demo...'));
+      const { spawn } = await import('child_process');
+      const demoProcess = spawn('bash', ['scripts/demo-up.sh'], {
+        stdio: 'inherit',
+        env,
+      });
+
+      demoProcess.on('exit', (code) => {
+        if (code !== 0) {
+          process.exit(code || 1);
+        }
+      });
     });
 
   const adk = program

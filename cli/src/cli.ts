@@ -45,7 +45,7 @@ async function main(): Promise<void> {
   registerAuditCommands(program);
   registerRunCommands(program);
   registerDeterminismCommands(program);
-  registerSwitchboardCommands(program);
+  registerSwitchboardCommands(program, config);
 
   // Parse and execute
   await program.parseAsync(process.argv);

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import net from 'net';
 import dotenv from 'dotenv';
+import { loadConfig, getProfile, type Profile } from './lib/config.js';
 
 export type DoctorStatus = 'pass' | 'warn' | 'fail';
 
@@ -28,6 +29,7 @@ export interface DoctorReport {
 
 export interface DoctorOptions {
   envFile?: string;
+  profile?: string;
   autoFix?: boolean;
   redisProbe?: PortProbe;
   postgresProbe?: PortProbe;
@@ -59,12 +61,20 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<DoctorRepo
     dotenv.config({ path: envPath });
   }
 
+  // Load profile configuration
+  const config = await loadConfig();
+  const profile = getProfile(config, options.profile);
+
   results.push(checkNodeVersion(MIN_NODE_MAJOR));
   results.push(await checkPnpm(execRunner, Boolean(options.autoFix)));
   results.push(await checkDocker(execRunner));
   results.push(await checkMakefileTargets(cwd));
-  results.push(await checkRedis(portProbe));
-  results.push(await checkPostgres(postgresProbe));
+  results.push(await checkRedis(portProbe, profile));
+  results.push(await checkPostgres(postgresProbe, profile));
+
+  if (profile.switchboard) {
+    results.push(checkSwitchboardProfile(profile));
+  }
 
   const summary = summarise(results, envPath);
 
@@ -229,8 +239,8 @@ export async function checkMakefileTargets(cwd: string): Promise<DoctorCheckResu
   };
 }
 
-export async function checkRedis(probe: PortProbe): Promise<DoctorCheckResult> {
-  const { host, port } = resolveRedisConfig();
+export async function checkRedis(probe: PortProbe, profile?: Profile): Promise<DoctorCheckResult> {
+  const { host, port } = resolveRedisConfig(profile);
   const reachable = await probe(host, port);
 
   if (reachable) {
@@ -249,8 +259,8 @@ export async function checkRedis(probe: PortProbe): Promise<DoctorCheckResult> {
   };
 }
 
-export async function checkPostgres(probe: PortProbe): Promise<DoctorCheckResult> {
-  const { host, port } = resolvePostgresConfig();
+export async function checkPostgres(probe: PortProbe, profile?: Profile): Promise<DoctorCheckResult> {
+  const { host, port } = resolvePostgresConfig(profile);
   const reachable = await probe(host, port);
 
   if (reachable) {
@@ -309,7 +319,7 @@ export async function ensureEnvFile(
   };
 }
 
-export function resolveRedisConfig(): { host: string; port: number } {
+export function resolveRedisConfig(profile?: Profile): { host: string; port: number } {
   if (process.env.REDIS_URL) {
     try {
       const url = new URL(process.env.REDIS_URL);
@@ -319,12 +329,12 @@ export function resolveRedisConfig(): { host: string; port: number } {
     }
   }
 
-  const host = process.env.REDIS_HOST || '127.0.0.1';
+  const host = process.env.REDIS_HOST || profile?.neo4j?.uri?.split('://')[1]?.split(':')[0] || '127.0.0.1';
   const port = Number(process.env.REDIS_PORT || 6379);
   return { host, port };
 }
 
-export function resolvePostgresConfig(): { host: string; port: number } {
+export function resolvePostgresConfig(profile?: Profile): { host: string; port: number } {
   if (process.env.DATABASE_URL) {
     try {
       const url = new URL(process.env.DATABASE_URL);
@@ -334,9 +344,27 @@ export function resolvePostgresConfig(): { host: string; port: number } {
     }
   }
 
-  const host = process.env.POSTGRES_HOST || '127.0.0.1';
-  const port = Number(process.env.POSTGRES_PORT || 5432);
+  const host = process.env.POSTGRES_HOST || profile?.postgres?.host || '127.0.0.1';
+  const port = Number(process.env.POSTGRES_PORT || profile?.postgres?.port || 5432);
   return { host, port };
+}
+
+export function checkSwitchboardProfile(profile: Profile): DoctorCheckResult {
+  const sb = profile.switchboard;
+  if (!sb || !sb.tenantId) {
+    return {
+      name: 'Switchboard Profile',
+      status: 'fail',
+      message: 'Active profile is missing Switchboard configuration',
+      fix: 'Use "switchboard profile create" to configure the profile',
+    };
+  }
+
+  return {
+    name: 'Switchboard Profile',
+    status: 'pass',
+    message: `Profile active for tenant: ${sb.tenantId}`,
+  };
 }
 
 export async function probePort(host: string, port: number): Promise<boolean> {
