@@ -6,7 +6,7 @@
  * @module tests/integration/graphql
  */
 
-import { graphql, GraphQLSchema, ExecutionResult } from 'graphql';
+import { graphql, GraphQLSchema, ExecutionResult } from "graphql";
 import {
   enhancedContextFactory,
   createAdminContext,
@@ -14,7 +14,7 @@ import {
   createViewerContext,
   createUnauthenticatedContext,
   type TestContextEnhanced,
-} from '../../factories/enhanced';
+} from "../../factories/enhanced";
 
 /**
  * Resolver test options
@@ -88,10 +88,7 @@ export class ResolverTester {
   /**
    * Execute a GraphQL query
    */
-  async query<T = any>(
-    query: string,
-    options: QueryOptions = {}
-  ): Promise<ResolverTestResult<T>> {
+  async query<T = any>(query: string, options: QueryOptions = {}): Promise<ResolverTestResult<T>> {
     const startTime = Date.now();
     const context = this.buildContext(options.context);
 
@@ -175,9 +172,7 @@ export class ResolverTester {
   /**
    * Create a tester with mocked data sources
    */
-  withMockedDataSources(
-    mocks: Partial<TestContextEnhanced['dataSources']>
-  ): ResolverTester {
+  withMockedDataSources(mocks: Partial<TestContextEnhanced["dataSources"]>): ResolverTester {
     return new ResolverTester({
       schema: this.schema,
       context: {
@@ -226,7 +221,7 @@ export const resolverAssertions = {
    */
   noErrors(result: ResolverTestResult): void {
     if (result.hasErrors) {
-      const messages = result.errors?.map((e) => e.message).join(', ');
+      const messages = result.errors?.map((e) => e.message).join(", ");
       throw new Error(`Expected no errors, got: ${messages}`);
     }
   },
@@ -236,17 +231,16 @@ export const resolverAssertions = {
    */
   hasError(result: ResolverTestResult, messagePattern: string | RegExp): void {
     if (!result.hasErrors) {
-      throw new Error('Expected errors, but got none');
+      throw new Error("Expected errors, but got none");
     }
 
-    const pattern = typeof messagePattern === 'string'
-      ? new RegExp(messagePattern, 'i')
-      : messagePattern;
+    const pattern =
+      typeof messagePattern === "string" ? new RegExp(messagePattern, "i") : messagePattern;
 
     const hasMatchingError = result.errors?.some((e) => pattern.test(e.message));
 
     if (!hasMatchingError) {
-      const messages = result.errors?.map((e) => e.message).join(', ');
+      const messages = result.errors?.map((e) => e.message).join(", ");
       throw new Error(`Expected error matching ${pattern}, got: ${messages}`);
     }
   },
@@ -284,7 +278,7 @@ export const resolverAssertions = {
    */
   hasData(result: ResolverTestResult): void {
     if (!result.data) {
-      throw new Error('Expected data, but got null/undefined');
+      throw new Error("Expected data, but got null/undefined");
     }
   },
 
@@ -324,7 +318,7 @@ export const resolverAssertions = {
  * Get nested value from object by path
  */
 function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+  return path.split(".").reduce((current, key) => current?.[key], obj);
 }
 
 /**

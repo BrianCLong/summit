@@ -1,4 +1,4 @@
-const { http } = require('./httpClient');
+const { http } = require("./httpClient");
 
 async function createGraphQLClient(app) {
   // If an app is provided, use it directly; otherwise http() will use TEST_BASE_URL
@@ -6,12 +6,10 @@ async function createGraphQLClient(app) {
 
   return {
     query: async function (options = {}) {
-      const { query = '', variables } = options;
+      const { query = "", variables } = options;
       // If no query is provided, use a default (for backward compatibility with existing test)
-      const actualQuery = query || '{ entity { id } }';
-      const res = await client
-        .post('/graphql')
-        .send({ query: actualQuery, variables });
+      const actualQuery = query || "{ entity { id } }";
+      const res = await client.post("/graphql").send({ query: actualQuery, variables });
       return {
         status: res.status,
         body: res.body,
@@ -19,8 +17,8 @@ async function createGraphQLClient(app) {
       };
     },
     mutate: async function (options = {}) {
-      const { query = '', variables } = options;
-      const res = await client.post('/graphql').send({ query, variables });
+      const { query = "", variables } = options;
+      const res = await client.post("/graphql").send({ query, variables });
       return {
         status: res.status,
         body: res.body,

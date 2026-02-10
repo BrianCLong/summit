@@ -7,10 +7,6 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   actions: read
   contents: write
@@ -20,7 +16,6 @@ permissions:
 
 jobs:
   build-server:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Build Server (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
@@ -34,7 +29,6 @@ jobs:
     secrets: inherit
 
   build-client:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Build Client (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:

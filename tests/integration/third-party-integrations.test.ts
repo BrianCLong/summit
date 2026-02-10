@@ -14,26 +14,35 @@
  * @module tests/integration/third-party-integrations.test
  */
 
-import { jest, describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from "@jest/globals";
 
 // Test configuration
 const TEST_CONFIG = {
   neo4j: {
-    uri: process.env.NEO4J_TEST_URI || 'bolt://localhost:7687',
-    username: process.env.NEO4J_TEST_USERNAME || 'neo4j',
-    password: process.env.NEO4J_TEST_PASSWORD || 'testpassword',
+    uri: process.env.NEO4J_TEST_URI || "bolt://localhost:7687",
+    username: process.env.NEO4J_TEST_USERNAME || "neo4j",
+    password: process.env.NEO4J_TEST_PASSWORD || "testpassword",
   },
   postgres: {
-    host: process.env.POSTGRES_TEST_HOST || 'localhost',
-    port: parseInt(process.env.POSTGRES_TEST_PORT || '5432'),
-    database: process.env.POSTGRES_TEST_DB || 'intelgraph_test',
-    username: process.env.POSTGRES_TEST_USER || 'test',
-    password: process.env.POSTGRES_TEST_PASSWORD || 'testpassword',
+    host: process.env.POSTGRES_TEST_HOST || "localhost",
+    port: parseInt(process.env.POSTGRES_TEST_PORT || "5432"),
+    database: process.env.POSTGRES_TEST_DB || "intelgraph_test",
+    username: process.env.POSTGRES_TEST_USER || "test",
+    password: process.env.POSTGRES_TEST_PASSWORD || "testpassword",
   },
   redis: {
-    host: process.env.REDIS_TEST_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_TEST_PORT || '6379'),
-    password: process.env.REDIS_TEST_PASSWORD || '',
+    host: process.env.REDIS_TEST_HOST || "localhost",
+    port: parseInt(process.env.REDIS_TEST_PORT || "6379"),
+    password: process.env.REDIS_TEST_PASSWORD || "",
   },
 };
 
@@ -73,8 +82,8 @@ class MockNeo4jSession {
 
   async run(query: string, params?: Record<string, any>): Promise<MockNeo4jResult> {
     // Simulate query execution
-    if (query.includes('RETURN')) {
-      return new MockNeo4jResult([{ id: '1', name: 'Test Entity' }]);
+    if (query.includes("RETURN")) {
+      return new MockNeo4jResult([{ id: "1", name: "Test Entity" }]);
     }
     return new MockNeo4jResult([]);
   }
@@ -156,16 +165,16 @@ class MockPostgresPool {
 class MockPostgresClient {
   async query(text: string, params?: any[]): Promise<MockPostgresResult> {
     // Simulate various query types
-    if (text.includes('SELECT')) {
-      return new MockPostgresResult([{ id: 1, name: 'Test' }]);
+    if (text.includes("SELECT")) {
+      return new MockPostgresResult([{ id: 1, name: "Test" }]);
     }
-    if (text.includes('INSERT')) {
+    if (text.includes("INSERT")) {
       return new MockPostgresResult([], 1);
     }
-    if (text.includes('UPDATE')) {
+    if (text.includes("UPDATE")) {
       return new MockPostgresResult([], 1);
     }
-    if (text.includes('DELETE')) {
+    if (text.includes("DELETE")) {
       return new MockPostgresResult([], 1);
     }
     return new MockPostgresResult([]);
@@ -213,7 +222,7 @@ class MockRedisClient {
     if (options?.EX) {
       setTimeout(() => this.store.delete(key), options.EX * 1000);
     }
-    return 'OK';
+    return "OK";
   }
 
   async del(key: string): Promise<number> {
@@ -235,7 +244,7 @@ class MockRedisClient {
   }
 
   async incr(key: string): Promise<number> {
-    const current = parseInt(this.store.get(key) || '0');
+    const current = parseInt(this.store.get(key) || "0");
     const next = current + 1;
     this.store.set(key, next.toString());
     return next;
@@ -262,8 +271,8 @@ class MockRedisClient {
   }
 }
 
-describe('Third-Party Integration Tests', () => {
-  describe('Neo4j Integration', () => {
+describe("Third-Party Integration Tests", () => {
+  describe("Neo4j Integration", () => {
     let driver: MockNeo4jDriver;
 
     beforeAll(async () => {
@@ -275,22 +284,22 @@ describe('Third-Party Integration Tests', () => {
       await driver.close();
     });
 
-    it('should establish connection to Neo4j', async () => {
+    it("should establish connection to Neo4j", async () => {
       expect(driver.isConnected()).toBe(true);
     });
 
-    it('should create and close sessions', async () => {
-      const session = driver.session({ database: 'neo4j' });
+    it("should create and close sessions", async () => {
+      const session = driver.session({ database: "neo4j" });
       expect(session).toBeDefined();
       await session.close();
       expect(driver.getSessionCount()).toBeGreaterThan(0);
     });
 
-    it('should execute read queries', async () => {
+    it("should execute read queries", async () => {
       const session = driver.session();
       try {
         const result = await session.run(
-          'MATCH (n:Entity) RETURN n.id as id, n.name as name LIMIT 10'
+          "MATCH (n:Entity) RETURN n.id as id, n.name as name LIMIT 10"
         );
         expect(result.records).toBeDefined();
         expect(Array.isArray(result.records)).toBe(true);
@@ -299,38 +308,38 @@ describe('Third-Party Integration Tests', () => {
       }
     });
 
-    it('should execute write queries', async () => {
+    it("should execute write queries", async () => {
       const session = driver.session();
       try {
-        const result = await session.run(
-          'CREATE (n:Entity {id: $id, name: $name}) RETURN n',
-          { id: 'test-123', name: 'Test Entity' }
-        );
+        const result = await session.run("CREATE (n:Entity {id: $id, name: $name}) RETURN n", {
+          id: "test-123",
+          name: "Test Entity",
+        });
         expect(result).toBeDefined();
       } finally {
         await session.close();
       }
     });
 
-    it('should handle transactions', async () => {
+    it("should handle transactions", async () => {
       const session = driver.session();
       try {
         const result = await session.writeTransaction(async (tx) => {
-          await tx.run('CREATE (n:TestNode {id: $id})', { id: 'tx-test' });
-          return 'committed';
+          await tx.run("CREATE (n:TestNode {id: $id})", { id: "tx-test" });
+          return "committed";
         });
-        expect(result).toBe('committed');
+        expect(result).toBe("committed");
       } finally {
         await session.close();
       }
     });
 
-    it('should handle transaction rollback', async () => {
+    it("should handle transaction rollback", async () => {
       const session = driver.session();
       const tx = session.beginTransaction();
 
       try {
-        await tx.run('CREATE (n:TestNode)');
+        await tx.run("CREATE (n:TestNode)");
         await tx.rollback();
         // Transaction rolled back successfully
         expect(true).toBe(true);
@@ -339,15 +348,14 @@ describe('Third-Party Integration Tests', () => {
       }
     });
 
-    it('should handle parameterized queries safely', async () => {
+    it("should handle parameterized queries safely", async () => {
       const session = driver.session();
       try {
         // Attempt SQL injection (should be parameterized safely)
         const maliciousInput = "'; DROP DATABASE neo4j; --";
-        const result = await session.run(
-          'MATCH (n:Entity) WHERE n.name = $name RETURN n',
-          { name: maliciousInput }
-        );
+        const result = await session.run("MATCH (n:Entity) WHERE n.name = $name RETURN n", {
+          name: maliciousInput,
+        });
         // Query should execute without harm due to parameterization
         expect(result).toBeDefined();
       } finally {
@@ -356,7 +364,7 @@ describe('Third-Party Integration Tests', () => {
     });
   });
 
-  describe('PostgreSQL Integration', () => {
+  describe("PostgreSQL Integration", () => {
     let pool: MockPostgresPool;
 
     beforeAll(async () => {
@@ -367,67 +375,64 @@ describe('Third-Party Integration Tests', () => {
       await pool.end();
     });
 
-    it('should establish connection to PostgreSQL', async () => {
+    it("should establish connection to PostgreSQL", async () => {
       const client = await pool.connect();
       expect(client).toBeDefined();
       client.release();
       expect(pool.isConnected()).toBe(true);
     });
 
-    it('should execute SELECT queries', async () => {
-      const result = await pool.query('SELECT * FROM users LIMIT 10');
+    it("should execute SELECT queries", async () => {
+      const result = await pool.query("SELECT * FROM users LIMIT 10");
       expect(result.rows).toBeDefined();
       expect(Array.isArray(result.rows)).toBe(true);
     });
 
-    it('should execute INSERT queries', async () => {
-      const result = await pool.query(
-        'INSERT INTO entities (id, name, type) VALUES ($1, $2, $3)',
-        ['entity-1', 'Test Entity', 'Person']
-      );
+    it("should execute INSERT queries", async () => {
+      const result = await pool.query("INSERT INTO entities (id, name, type) VALUES ($1, $2, $3)", [
+        "entity-1",
+        "Test Entity",
+        "Person",
+      ]);
       expect(result.rowCount).toBeGreaterThanOrEqual(0);
     });
 
-    it('should execute UPDATE queries', async () => {
-      const result = await pool.query(
-        'UPDATE entities SET name = $1 WHERE id = $2',
-        ['Updated Name', 'entity-1']
-      );
-      expect(result).toBeDefined();
-    });
-
-    it('should execute DELETE queries', async () => {
-      const result = await pool.query('DELETE FROM entities WHERE id = $1', [
-        'entity-1',
+    it("should execute UPDATE queries", async () => {
+      const result = await pool.query("UPDATE entities SET name = $1 WHERE id = $2", [
+        "Updated Name",
+        "entity-1",
       ]);
       expect(result).toBeDefined();
     });
 
-    it('should handle transactions', async () => {
+    it("should execute DELETE queries", async () => {
+      const result = await pool.query("DELETE FROM entities WHERE id = $1", ["entity-1"]);
+      expect(result).toBeDefined();
+    });
+
+    it("should handle transactions", async () => {
       const client = await pool.connect();
       try {
-        await client.query('BEGIN');
-        await client.query('INSERT INTO test_table (id) VALUES ($1)', ['1']);
-        await client.query('COMMIT');
+        await client.query("BEGIN");
+        await client.query("INSERT INTO test_table (id) VALUES ($1)", ["1"]);
+        await client.query("COMMIT");
       } catch (error) {
-        await client.query('ROLLBACK');
+        await client.query("ROLLBACK");
         throw error;
       } finally {
         client.release();
       }
     });
 
-    it('should handle parameterized queries for security', async () => {
+    it("should handle parameterized queries for security", async () => {
       const maliciousInput = "'; DROP TABLE users; --";
-      const result = await pool.query('SELECT * FROM users WHERE name = $1', [
-        maliciousInput,
-      ]);
+      const result = await pool.query("SELECT * FROM users WHERE name = $1", [maliciousInput]);
       // Query should execute safely with parameterization
       expect(result).toBeDefined();
     });
   });
 
-  describe('Redis Integration', () => {
+  describe("Redis Integration", () => {
     let redis: MockRedisClient;
 
     beforeAll(async () => {
@@ -443,64 +448,64 @@ describe('Third-Party Integration Tests', () => {
       redis.clear();
     });
 
-    it('should establish connection to Redis', async () => {
+    it("should establish connection to Redis", async () => {
       expect(redis.isOpen()).toBe(true);
     });
 
-    it('should set and get values', async () => {
-      await redis.set('test-key', 'test-value');
-      const value = await redis.get('test-key');
-      expect(value).toBe('test-value');
+    it("should set and get values", async () => {
+      await redis.set("test-key", "test-value");
+      const value = await redis.get("test-key");
+      expect(value).toBe("test-value");
     });
 
-    it('should handle missing keys', async () => {
-      const value = await redis.get('non-existent-key');
+    it("should handle missing keys", async () => {
+      const value = await redis.get("non-existent-key");
       expect(value).toBeNull();
     });
 
-    it('should delete keys', async () => {
-      await redis.set('to-delete', 'value');
-      const deleted = await redis.del('to-delete');
+    it("should delete keys", async () => {
+      await redis.set("to-delete", "value");
+      const deleted = await redis.del("to-delete");
       expect(deleted).toBe(1);
-      const value = await redis.get('to-delete');
+      const value = await redis.get("to-delete");
       expect(value).toBeNull();
     });
 
-    it('should check key existence', async () => {
-      await redis.set('exists-key', 'value');
-      const exists = await redis.exists('exists-key');
+    it("should check key existence", async () => {
+      await redis.set("exists-key", "value");
+      const exists = await redis.exists("exists-key");
       expect(exists).toBe(1);
-      const notExists = await redis.exists('not-exists-key');
+      const notExists = await redis.exists("not-exists-key");
       expect(notExists).toBe(0);
     });
 
-    it('should increment values', async () => {
-      await redis.set('counter', '0');
-      const result = await redis.incr('counter');
+    it("should increment values", async () => {
+      await redis.set("counter", "0");
+      const result = await redis.incr("counter");
       expect(result).toBe(1);
-      const secondResult = await redis.incr('counter');
+      const secondResult = await redis.incr("counter");
       expect(secondResult).toBe(2);
     });
 
-    it('should handle pub/sub', async () => {
+    it("should handle pub/sub", async () => {
       const messages: string[] = [];
-      await redis.subscribe('test-channel', (message: string) => {
+      await redis.subscribe("test-channel", (message: string) => {
         messages.push(message);
       });
 
-      await redis.publish('test-channel', 'Hello World');
-      expect(messages).toContain('Hello World');
+      await redis.publish("test-channel", "Hello World");
+      expect(messages).toContain("Hello World");
     });
 
-    it('should implement caching patterns', async () => {
+    it("should implement caching patterns", async () => {
       // Cache-aside pattern test
-      const cacheKey = 'user:123';
+      const cacheKey = "user:123";
       let cacheHits = 0;
       let dbCalls = 0;
 
       const getUserFromDb = async () => {
         dbCalls++;
-        return { id: '123', name: 'Test User' };
+        return { id: "123", name: "Test User" };
       };
 
       const getUser = async (id: string) => {
@@ -515,18 +520,18 @@ describe('Third-Party Integration Tests', () => {
       };
 
       // First call - cache miss
-      const user1 = await getUser('123');
+      const user1 = await getUser("123");
       expect(dbCalls).toBe(1);
       expect(cacheHits).toBe(0);
 
       // Second call - cache hit
-      const user2 = await getUser('123');
+      const user2 = await getUser("123");
       expect(dbCalls).toBe(1);
       expect(cacheHits).toBe(1);
     });
   });
 
-  describe('Cross-Service Integration', () => {
+  describe("Cross-Service Integration", () => {
     let neo4j: MockNeo4jDriver;
     let postgres: MockPostgresPool;
     let redis: MockRedisClient;
@@ -546,23 +551,21 @@ describe('Third-Party Integration Tests', () => {
       await redis.disconnect();
     });
 
-    it('should handle multi-database operations', async () => {
+    it("should handle multi-database operations", async () => {
       // Simulate creating an entity across all databases
-      const entityId = 'cross-db-entity-1';
-      const entityData = { id: entityId, name: 'Cross-DB Entity', type: 'Person' };
+      const entityId = "cross-db-entity-1";
+      const entityData = { id: entityId, name: "Cross-DB Entity", type: "Person" };
 
       // 1. Create in PostgreSQL (primary storage)
-      await postgres.query(
-        'INSERT INTO entities (id, name, type) VALUES ($1, $2, $3)',
-        [entityData.id, entityData.name, entityData.type]
-      );
+      await postgres.query("INSERT INTO entities (id, name, type) VALUES ($1, $2, $3)", [
+        entityData.id,
+        entityData.name,
+        entityData.type,
+      ]);
 
       // 2. Create in Neo4j (graph storage)
       const session = neo4j.session();
-      await session.run(
-        'CREATE (n:Entity {id: $id, name: $name, type: $type})',
-        entityData
-      );
+      await session.run("CREATE (n:Entity {id: $id, name: $name, type: $type})", entityData);
       await session.close();
 
       // 3. Invalidate any cached data
@@ -572,25 +575,25 @@ describe('Third-Party Integration Tests', () => {
       expect(true).toBe(true);
     });
 
-    it('should handle distributed transaction simulation', async () => {
+    it("should handle distributed transaction simulation", async () => {
       // Simulate a distributed transaction with compensation
       const operations: string[] = [];
       const rollbackOperations: string[] = [];
 
       try {
         // Step 1: PostgreSQL operation
-        await postgres.query('INSERT INTO audit_log (action) VALUES ($1)', ['create']);
-        operations.push('postgres');
+        await postgres.query("INSERT INTO audit_log (action) VALUES ($1)", ["create"]);
+        operations.push("postgres");
 
         // Step 2: Neo4j operation
         const session = neo4j.session();
-        await session.run('CREATE (n:AuditNode {action: $action})', { action: 'create' });
-        operations.push('neo4j');
+        await session.run("CREATE (n:AuditNode {action: $action})", { action: "create" });
+        operations.push("neo4j");
         await session.close();
 
         // Step 3: Redis operation
-        await redis.set('last-audit', Date.now().toString());
-        operations.push('redis');
+        await redis.set("last-audit", Date.now().toString());
+        operations.push("redis");
 
         expect(operations).toHaveLength(3);
       } catch (error) {
@@ -602,7 +605,7 @@ describe('Third-Party Integration Tests', () => {
       }
     });
 
-    it('should handle connection failures gracefully', async () => {
+    it("should handle connection failures gracefully", async () => {
       // Test resilience to connection failures
       const healthCheck = async () => {
         const status = {
@@ -635,31 +638,29 @@ describe('Third-Party Integration Tests', () => {
       };
 
       const status = await healthCheck();
-      expect(typeof status.neo4j).toBe('boolean');
-      expect(typeof status.postgres).toBe('boolean');
-      expect(typeof status.redis).toBe('boolean');
+      expect(typeof status.neo4j).toBe("boolean");
+      expect(typeof status.postgres).toBe("boolean");
+      expect(typeof status.redis).toBe("boolean");
     });
   });
 
-  describe('Error Handling and Resilience', () => {
-    it('should handle connection timeouts', async () => {
+  describe("Error Handling and Resilience", () => {
+    it("should handle connection timeouts", async () => {
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Connection timeout')), 100)
+        setTimeout(() => reject(new Error("Connection timeout")), 100)
       );
 
-      const connectPromise = new Promise((resolve) =>
-        setTimeout(() => resolve('connected'), 200)
-      );
+      const connectPromise = new Promise((resolve) => setTimeout(() => resolve("connected"), 200));
 
       try {
         await Promise.race([timeoutPromise, connectPromise]);
-        fail('Should have timed out');
+        fail("Should have timed out");
       } catch (error) {
-        expect((error as Error).message).toBe('Connection timeout');
+        expect((error as Error).message).toBe("Connection timeout");
       }
     });
 
-    it('should implement retry logic', async () => {
+    it("should implement retry logic", async () => {
       let attempts = 0;
       const maxRetries = 3;
 
@@ -668,23 +669,23 @@ describe('Third-Party Integration Tests', () => {
           attempts++;
           try {
             if (attempts < 3) {
-              throw new Error('Transient error');
+              throw new Error("Transient error");
             }
-            return 'success';
+            return "success";
           } catch (error) {
             if (i === maxRetries - 1) throw error;
             await new Promise((r) => setTimeout(r, 10));
           }
         }
-        throw new Error('Max retries exceeded');
+        throw new Error("Max retries exceeded");
       };
 
       const result = await operationWithRetry();
-      expect(result).toBe('success');
+      expect(result).toBe("success");
       expect(attempts).toBe(3);
     });
 
-    it('should implement circuit breaker pattern', async () => {
+    it("should implement circuit breaker pattern", async () => {
       const circuitBreaker = {
         failures: 0,
         threshold: 3,
@@ -698,7 +699,7 @@ describe('Third-Party Integration Tests', () => {
               this.isOpen = false;
               this.failures = 0;
             } else {
-              throw new Error('Circuit breaker is open');
+              throw new Error("Circuit breaker is open");
             }
           }
 
@@ -719,7 +720,7 @@ describe('Third-Party Integration Tests', () => {
 
       // Simulate failures
       const failingOperation = async () => {
-        throw new Error('Service unavailable');
+        throw new Error("Service unavailable");
       };
 
       for (let i = 0; i < 3; i++) {
@@ -734,9 +735,9 @@ describe('Third-Party Integration Tests', () => {
 
       try {
         await circuitBreaker.execute(failingOperation);
-        fail('Should have thrown circuit breaker error');
+        fail("Should have thrown circuit breaker error");
       } catch (error) {
-        expect((error as Error).message).toBe('Circuit breaker is open');
+        expect((error as Error).message).toBe("Circuit breaker is open");
       }
     });
   });

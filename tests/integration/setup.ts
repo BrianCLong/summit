@@ -1,4 +1,4 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect } from "@playwright/test";
 
 // Define custom fixtures if needed
 type MyFixtures = {
@@ -9,8 +9,8 @@ export const test = base.extend<MyFixtures>({
   authenticatedPage: async ({ page }, use) => {
     // Mock authentication by setting a token
     await page.addInitScript(() => {
-        window.localStorage.setItem('auth_token', 'mock-token');
-        window.localStorage.setItem('user', JSON.stringify({ id: 'test-user', tier: 'PRO' }));
+      window.localStorage.setItem("auth_token", "mock-token");
+      window.localStorage.setItem("user", JSON.stringify({ id: "test-user", tier: "PRO" }));
     });
     await use(page);
   },

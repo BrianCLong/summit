@@ -528,4 +528,3 @@ volumes:
 networks:
   summit:
     driver: bridge
->>>>>>> origin/main

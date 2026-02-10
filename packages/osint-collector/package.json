@@ -24,7 +24,7 @@
     "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0",
     "whois": "^2.13.10",
-    "ip-address": "^10.1.0",
+    "ip-address": "^9.0.5",
     "socks-proxy-agent": "^8.0.4",
     "queue": "^7.0.0",
     "rate-limiter-flexible": "^5.0.3",

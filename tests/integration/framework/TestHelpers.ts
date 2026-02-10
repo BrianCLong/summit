@@ -6,7 +6,7 @@
  * @module tests/integration/framework
  */
 
-import { randomUUID } from 'crypto';
+import { randomUUID } from "crypto";
 
 /**
  * Retry configuration
@@ -79,7 +79,7 @@ export async function waitFor(
   condition: () => boolean | Promise<boolean>,
   options: { timeout?: number; interval?: number; message?: string } = {}
 ): Promise<void> {
-  const { timeout = 5000, interval = 100, message = 'Condition not met' } = options;
+  const { timeout = 5000, interval = 100, message = "Condition not met" } = options;
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeout) {
@@ -95,7 +95,7 @@ export async function waitFor(
 /**
  * Generate a unique test ID
  */
-export function generateTestId(prefix: string = 'test'): string {
+export function generateTestId(prefix: string = "test"): string {
   return `${prefix}-${Date.now()}-${randomUUID().slice(0, 8)}`;
 }
 
@@ -141,9 +141,9 @@ export async function graphqlRequest<T = any>(
   options: GraphQLRequestOptions
 ): Promise<GraphQLResponse<T>> {
   const response = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options.headers,
     },
     body: JSON.stringify({
@@ -185,12 +185,11 @@ export class GraphQLQueryBuilder {
   }
 
   build(): { query: string; variables: Record<string, any> } {
-    const varDefs = this.variableDefinitions.length > 0
-      ? `(${this.variableDefinitions.join(', ')})`
-      : '';
+    const varDefs =
+      this.variableDefinitions.length > 0 ? `(${this.variableDefinitions.join(", ")})` : "";
 
     return {
-      query: `query ${varDefs} { ${this.queryParts.join(' ')} }`,
+      query: `query ${varDefs} { ${this.queryParts.join(" ")} }`,
       variables: this.variables,
     };
   }
@@ -206,7 +205,7 @@ export async function httpRequest<T = any>(
   const response = await fetch(url, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options.headers,
     },
   });
@@ -238,7 +237,7 @@ export const assert = {
    */
   noGraphQLErrors(response: GraphQLResponse): void {
     if (response.errors && response.errors.length > 0) {
-      const messages = response.errors.map((e) => e.message).join(', ');
+      const messages = response.errors.map((e) => e.message).join(", ");
       throw new Error(`GraphQL errors: ${messages}`);
     }
   },
@@ -248,7 +247,7 @@ export const assert = {
    */
   hasData(response: GraphQLResponse): void {
     if (!response.data) {
-      throw new Error('GraphQL response has no data');
+      throw new Error("GraphQL response has no data");
     }
   },
 
@@ -316,7 +315,7 @@ export class TestDataCleaner {
    */
   registerEntity(deleteUrl: string, id: string): void {
     this.register(async () => {
-      await fetch(`${deleteUrl}/${id}`, { method: 'DELETE' }).catch(() => {});
+      await fetch(`${deleteUrl}/${id}`, { method: "DELETE" }).catch(() => {});
     });
   }
 

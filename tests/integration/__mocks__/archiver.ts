@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 type Operation = { type: string; args: any[] };
 
@@ -10,22 +10,22 @@ class MockArchive extends EventEmitter {
   }
 
   append(...args: any[]) {
-    this.operations.push({ type: 'append', args });
+    this.operations.push({ type: "append", args });
     return this;
   }
 
   file(...args: any[]) {
-    this.operations.push({ type: 'file', args });
+    this.operations.push({ type: "file", args });
     return this;
   }
 
   directory(...args: any[]) {
-    this.operations.push({ type: 'directory', args });
+    this.operations.push({ type: "directory", args });
     return this;
   }
 
   async finalize() {
-    setImmediate(() => this.emit('finish'));
+    setImmediate(() => this.emit("finish"));
   }
 }
 
