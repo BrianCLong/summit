@@ -320,6 +320,15 @@ const socket = io('http://localhost:4001')
 - Memory usage monitoring
 - Network request optimization
 
+## 🧠 Skills & Best Practices
+
+If you touch React code in this repository, you **must** consult the [React Best Practices Pack](../../skills/react-best-practices-pack/SKILL.md).
+
+**Key Rules:**
+1.  **Async-Parallel**: Don't serial-fetch data.
+2.  **No Barrel Imports**: Avoid importing from `index.ts` if it pulls in the world.
+3.  **Memoize Expensive Renders**: Use `React.memo` and `useMemo` for high-frequency updates (e.g., GraphCanvas).
+
 ## 🤝 Contributing
 
 1. Follow TypeScript strict mode
