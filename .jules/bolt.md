@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-02-10 - [Copy-On-Write Sanitization]
+**Learning:** High-frequency recursion on request objects (e.g., sanitization) should use a copy-on-write pattern to avoid unnecessary allocations for clean data. Original implementations often redundantly create new objects and may corrupt non-plain objects like Date, Buffer, or RegExp by iterating over their internal properties.
+**Action:** Use a detection-then-copy approach in recursive utilities. Ensure consistent object iteration using Object.keys() and preserve common non-plain objects to maintain data integrity and improve performance.
