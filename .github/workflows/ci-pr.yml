@@ -71,7 +71,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Validate Jest & pnpm Configuration
@@ -83,9 +82,7 @@ jobs:
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -128,7 +125,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Verify runtime configuration
@@ -142,10 +138,7 @@ jobs:
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -244,7 +237,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
@@ -260,9 +252,7 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
