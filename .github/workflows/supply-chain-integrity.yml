@@ -24,10 +24,11 @@ on:
       - "scripts/scan-vulnerabilities.sh"
       - "scripts/check-reproducibility.sh"
       - ".github/workflows/supply-chain-integrity.yml"
+  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -36,6 +37,7 @@ permissions:
 
 jobs:
   supply-chain-integrity:
+    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.vars.outputs.release_version }}
