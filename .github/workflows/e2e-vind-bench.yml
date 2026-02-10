@@ -14,7 +14,7 @@ concurrency:
 jobs:
   bench-test:
     name: LB probe + cache benchmark
-    if: (false  # Temporarily disabled for GA merge surge) && (vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_BENCH == '1')
+    if: (false ) && (vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_BENCH == '1')
     runs-on: ubuntu-latest
 
 
