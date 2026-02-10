@@ -32,6 +32,9 @@ export class WebhookAdapter extends BaseAdapter {
   private recordCount = 0;
   private lastReceivedAt: string | null = null;
   private secretKey: string | null = null;
+  private queue: IngestEnvelope[] = [];
+  private maxQueueSize = 1000;
+  private isProcessingQueue = false;
 
   constructor(options: BaseAdapterOptions) {
     super(options);
@@ -65,6 +68,9 @@ export class WebhookAdapter extends BaseAdapter {
       { path: this.webhookConfig.path, method: this.webhookConfig.method ?? 'POST' },
       'Webhook adapter ready'
     );
+
+    // Start background processor
+    this.startQueueProcessor();
   }
 
   protected async doStop(): Promise<void> {
@@ -81,6 +87,7 @@ export class WebhookAdapter extends BaseAdapter {
         recordCount: this.recordCount,
         lastReceivedAt: this.lastReceivedAt,
         signatureValidation: this.webhookConfig.validate_signature ?? false,
+        queueSize: this.queue.length,
       },
     };
   }
@@ -122,11 +129,20 @@ export class WebhookAdapter extends BaseAdapter {
       };
     }
 
-    // Check backpressure
-    if (!this.backpressure.isAccepting()) {
+    // Check backpressure & Queue Size
+    // Note: We prioritize queue size check for fast-ack, but respect drain mode if set
+    if (this.queue.length >= this.maxQueueSize) {
+       return {
+        status: 503,
+        body: { error: 'Service temporarily unavailable (queue full)' },
+        headers: { 'Retry-After': '10' },
+      };
+    }
+
+    if (this.config.backpressure?.drain_mode) {
       return {
         status: 503,
-        body: { error: 'Service temporarily unavailable due to backpressure' },
+        body: { error: 'Service is draining' },
         headers: { 'Retry-After': '10' },
       };
     }
@@ -156,39 +172,27 @@ export class WebhookAdapter extends BaseAdapter {
     try {
       // Process the request body
       const records = this.extractRecords(request.body);
-      const results: Array<{ id: string; success: boolean; error?: string }> = [];
+      let queuedCount = 0;
 
       for (const record of records) {
         try {
           const envelope = this.createEnvelopeFromRecord(record);
-          await this.processRecord(envelope);
-          results.push({ id: envelope.event_id, success: true });
-          this.recordCount++;
+          this.queue.push(envelope);
+          queuedCount++;
         } catch (error) {
-          results.push({
-            id: String(record.id ?? 'unknown'),
-            success: false,
-            error: String(error),
-          });
+          this.logger.warn({ error, recordId: record.id }, 'Failed to create envelope from record');
+          // We can't return partial error easily in 202, so we just log and skip invalid records
         }
       }
 
       this.lastReceivedAt = new Date().toISOString();
 
-      // Checkpoint periodically
-      if (this.recordCount % 100 === 0) {
-        await this.setCheckpoint(this.createCheckpoint(this.recordCount.toString()));
-      }
-
-      const successCount = results.filter((r) => r.success).length;
-      const failureCount = results.filter((r) => !r.success).length;
-
       return {
-        status: failureCount === 0 ? 200 : 207, // Multi-status if partial failure
+        status: 202,
         body: {
-          processed: successCount,
-          failed: failureCount,
-          results,
+          status: 'accepted',
+          queued: queuedCount,
+          message: 'Records queued for processing'
         },
       };
     } catch (error) {
@@ -217,6 +221,50 @@ export class WebhookAdapter extends BaseAdapter {
   // -------------------------------------------------------------------------
   // Private Methods
   // -------------------------------------------------------------------------
+
+  private startQueueProcessor() {
+    if (this.isProcessingQueue) return;
+
+    this.isProcessingQueue = true;
+
+    // Fire and forget, but handle errors
+    (async () => {
+      while (this.running) {
+        if (this.queue.length === 0) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          continue;
+        }
+
+        // Check if we can accept more concurrent tasks
+        // This relies on BaseAdapter's backpressure controller
+        if (!this.backpressure.isAccepting()) {
+          // Wait a bit if overloaded
+          await new Promise(resolve => setTimeout(resolve, 50));
+          continue;
+        }
+
+        const envelope = this.queue.shift();
+        if (envelope) {
+          // Process concurrently - do NOT await
+          this.processRecord(envelope).then(() => {
+            this.recordCount++;
+
+            // Checkpoint periodically
+            if (this.recordCount % 100 === 0) {
+               this.setCheckpoint(this.createCheckpoint(this.recordCount.toString())).catch(() => {});
+            }
+          }).catch(error => {
+            this.logger.error({ error, entityId: envelope.entity.id }, 'Error processing queued record');
+            // processRecord already handles DLQ, so we just log here
+          });
+        }
+      }
+      this.isProcessingQueue = false;
+    })().catch(err => {
+      this.logger.error({ err }, 'Queue processor crashed');
+      this.isProcessingQueue = false;
+    });
+  }
 
   private validateSignature(request: WebhookRequest): boolean {
     if (!this.secretKey) return false;
