@@ -3,7 +3,7 @@ import {
   AsyncIngestDispatcher,
   AsyncIngestWorker,
   InMemoryAsyncIngestRepository,
-} from '../async-pipeline.js';
+} from '../async-pipeline';
 
 describe('Async ingestion pipeline - integration', () => {
   const basePayload = {

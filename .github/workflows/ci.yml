@@ -6,15 +6,10 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
-  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
-
-# Global environment for all jobs - prevents V8 heap exhaustion
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
 
 jobs:
   config-guard:
@@ -25,10 +20,13 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Enable Corepack
+        run: corepack enable
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -37,30 +35,29 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          node-version: '18'
           cache: 'pnpm'
-          node-version-file: .nvmrc
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
-  typecheck:
-    name: Typecheck
+  unit-test:
     needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -73,11 +70,8 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -99,19 +93,17 @@ jobs:
         shell: bash
       - name: Generate Metrics
         if: always()
-        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: server/coverage/
 
   integration-test:
+    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -123,7 +115,6 @@ jobs:
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
   security-compliance:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
     needs: [config-guard]
@@ -131,14 +122,23 @@ jobs:
       strict: true
 
   soc-controls:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
-    services:
-      postgres:
-        image: postgres:15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: SOC Control Unit Tests
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -162,20 +162,8 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
-      - name: Upload SOC compliance reports
-        if: always()
-        uses: actions/upload-artifact@v4
+      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           name: soc-compliance-report
           path: soc-compliance-reports

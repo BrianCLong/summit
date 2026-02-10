@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
-import { cacheService } from '../CacheService.js';
+import { cacheService } from '../CacheService';
 
 const mockRunCypher = jest.fn();
 
@@ -13,7 +13,7 @@ jest.mock('../../graph/neo4j', () => ({
   })),
 }));
 
-import { Neo4jGraphAnalyticsService } from '../GraphAnalyticsService.js';
+import { Neo4jGraphAnalyticsService } from '../GraphAnalyticsService';
 
 describe('Neo4jGraphAnalyticsService', () => {
   let service: Neo4jGraphAnalyticsService;

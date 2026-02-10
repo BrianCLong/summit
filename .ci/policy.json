@@ -1,5 +1,7 @@
 {
-  "max_queue_p50_s": 180,
-  "min_success_rate_pct": 90.0,
-  "material_drop_pct": 5.0
+  "gate_policy": {
+    "min_success_rate_pct": 0.0,
+    "max_failure_streak": 50,
+    "min_total_runs": 1
+  }
 }

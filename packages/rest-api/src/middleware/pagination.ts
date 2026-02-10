@@ -4,7 +4,7 @@
  * Handles pagination parameters and metadata
  */
 
-import type { Request, Response, NextFunction, PaginationOptions, PaginationMetadata } from '../types.js';
+import type { Request, Response, NextFunction, PaginationOptions, PaginationMetadata } from '../types';
 
 export function paginationMiddleware(options: PaginationOptions) {
   return (req: Request, res: Response, next: NextFunction) => {

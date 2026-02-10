@@ -1,4 +1,4 @@
-import { Graph, NodeId } from '../graphTypes.js';
+import { Graph, NodeId } from '../graphTypes.ts';
 
 export interface DegreeCentralityResult {
   scores: Record<NodeId, number>;

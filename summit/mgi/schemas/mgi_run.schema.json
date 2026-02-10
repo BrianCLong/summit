@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "run_id": { "type": "string" },
+    "config": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "keyword_graph": { "type": "string" },
+        "skeleton": { "type": "string" },
+        "key_chunks_k": { "type": "integer" }
+      },
+      "required": ["enabled", "keyword_graph", "skeleton"]
+    },
+    "stats": {
+      "type": "object",
+      "properties": {
+        "total_chunks": { "type": "integer" },
+        "llm_calls": { "type": "integer" },
+        "indexing_time_ms": { "type": "integer" }
+      },
+      "required": ["total_chunks", "llm_calls"]
+    }
+  },
+  "required": ["run_id", "config", "stats"]
+}

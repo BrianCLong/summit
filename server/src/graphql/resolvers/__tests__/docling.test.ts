@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { doclingResolvers } from '../docling.js';
-import { doclingService } from '../../../services/DoclingService.js';
-import { doclingRepository } from '../../../db/repositories/doclingRepository.js';
+import { doclingResolvers } from '../docling';
+import { doclingService } from '../../../services/DoclingService';
+import { doclingRepository } from '../../../db/repositories/doclingRepository';
 
 describe('docling resolvers', () => {
   const ctx = { user: { tenantId: 'tenant-1' } };

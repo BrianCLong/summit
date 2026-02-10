@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { TextIngestionPipeline } from '../pipeline.js';
-import { TransformerInferenceService } from '../transformers.js';
+import { TextIngestionPipeline } from '../pipeline';
+import { TransformerInferenceService } from '../transformers';
 
 // Mock dependencies
 jest.mock('fs');

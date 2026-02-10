@@ -1,6 +1,0 @@
-[
-  {"marker": "late_data_policy", "status": "success", "timestamp": "2026-01-23T10:00:00Z"},
-  {"marker": "schema_contract", "status": "success", "timestamp": "2026-01-23T10:00:01Z"},
-  {"marker": "file_format_checks", "status": "success", "timestamp": "2026-01-23T10:00:02Z"},
-  {"marker": "cost_budget", "status": "success", "cost": 1.25}
-]

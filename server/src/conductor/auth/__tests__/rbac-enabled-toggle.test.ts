@@ -16,7 +16,7 @@ const originalEnv = process.env.RBAC_ENABLED;
 
 const loadRbacModule = async () => {
   jest.resetModules();
-  return import('../rbac-middleware.js');
+  return import('../rbac-middleware');
 };
 
 const loadWithEnv = async (value: string | undefined) => {

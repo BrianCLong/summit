@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "index_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "granularity": {
+      "type": "object",
+      "properties": {
+        "l2_skeleton": {
+          "type": "object",
+          "properties": {
+            "entities": { "type": "integer" },
+            "relations": { "type": "integer" },
+            "key_chunks": { "type": "integer" }
+          },
+          "required": ["entities", "relations", "key_chunks"]
+        },
+        "l1_keyword": {
+          "type": "object",
+          "properties": {
+            "keywords": { "type": "integer" },
+            "edges": { "type": "integer" }
+          },
+          "required": ["keywords", "edges"]
+        }
+      },
+      "required": ["l2_skeleton", "l1_keyword"]
+    }
+  },
+  "required": ["index_id", "created_at", "granularity"]
+}

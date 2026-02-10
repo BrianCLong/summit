@@ -4,9 +4,9 @@
  */
 
 import express from 'express';
-import { gaCoreMetrics } from '../services/GACoremetricsService.js';
-import { getPostgresPool } from '../config/database.js';
-import logger from '../config/logger.js';
+import { gaCoreMetrics } from '../services/GACoremetricsService';
+import { getPostgresPool } from '../config/database';
+import logger from '../config/logger';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
 
 const router = express.Router();

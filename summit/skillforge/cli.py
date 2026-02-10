@@ -1,8 +1,5 @@
 import argparse
-import sys
 
-from . import eval as eval_cmd
-from . import generate, validate
 from .config import SkillForgeConfig
 
 
@@ -14,28 +11,12 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("generate")  # flagged
     return p
 
-
 def main(argv=None) -> int:
-    config = SkillForgeConfig.from_env()
+    _ = SkillForgeConfig()  # TODO: load from env / summit config
     p = build_parser()
     args = p.parse_args(argv)
-
-    if not config.SKILLFORGE_ENABLE:
-        print(
-            "SkillForge is disabled. Set SKILLFORGE_ENABLE=1 to enable.",
-            file=sys.stderr,
-        )
-        return 1
-
-    if args.cmd == "validate":
-        return validate.run(args, config)
-    elif args.cmd == "eval":
-        return eval_cmd.run(args, config)
-    elif args.cmd == "generate":
-        return generate.run(args, config)
-
-    return 1
-
+    # TODO: route commands in PR2/PR4/PR5
+    raise SystemExit(f"skillforge command not yet implemented: {args.cmd}")
 
 if __name__ == "__main__":
     raise SystemExit(main())

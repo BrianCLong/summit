@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ToolRegistry } from './types.js';
+import { ToolRegistry } from './types.ts';
 
 type ToolFunction = (args: any) => Promise<any>;
 

@@ -13,8 +13,6 @@ import {
   getGovernanceService,
   getEvaluationService,
   getProvenanceService,
-  CognitiveStateService,
-  CascadeDetectionService,
 } from '../../cognitive-security/index.js';
 
 import type {
@@ -35,9 +33,6 @@ import type {
   CogSecAuditLog,
   GovernancePolicy,
   CogSecMetrics,
-  AudienceSegment,
-  CognitiveState,
-  NarrativeCascade,
 } from '../../cognitive-security/types.js';
 
 // Helper to get services with error handling
@@ -50,8 +45,6 @@ const getServices = () => {
       governance: getGovernanceService(),
       evaluation: getEvaluationService(),
       provenance: getProvenanceService(),
-      cognitiveState: CognitiveStateService.getInstance(),
-      cascadeDetection: CascadeDetectionService.getInstance(),
     };
   } catch (error: any) {
     throw new GraphQLError('Cognitive Security module not initialized', {
@@ -120,7 +113,7 @@ const Query = {
     const claim = await claims.getClaim(claimId);
     if (!claim) return [];
     const similar = await claims.findSimilarClaims(claim, threshold);
-    return similar.map((s: { claim: Claim; similarity: number }) => s.claim);
+    return similar.map((s) => s.claim);
   },
 
   // Evidence
@@ -236,37 +229,6 @@ const Query = {
   contentCredential: async (_: unknown, { id }: { id: string }) => {
     // Would need to implement retrieval
     return null;
-  },
-
-  // Cognitive Operations
-  audienceCognitiveProfile: async (_: unknown, { id }: { id: string }) => {
-    const { cognitiveState } = getServices();
-    return cognitiveState.getSegmentState(id);
-  },
-
-  cognitiveRiskDashboard: async (_: unknown, { filters }: { filters?: any }) => {
-    // Placeholder implementation
-    return {
-      averageResilience: 0.65,
-      highRiskSegments: 3,
-      topThreats: ['OVERLOAD', 'POLARIZATION_WEDGE']
-    };
-  },
-
-  // Influence Pathways
-  influencePathways: async (_: unknown, { narrativeId }: { narrativeId: string }) => {
-    const { cascadeDetection } = getServices();
-    return cascadeDetection.detectCascades(narrativeId);
-  },
-
-  narrativeConflicts: async (_: unknown, { narrativeId }: { narrativeId: string }) => {
-    const { claims } = getServices();
-    return claims.detectNarrativeConflicts(narrativeId);
-  },
-
-  narrativeEarlyWarnings: async (_: unknown, { watchlistId }: { watchlistId?: string }) => {
-    // Placeholder implementation
-    return [];
   },
 };
 
@@ -706,34 +668,6 @@ const Mutation = {
     // Would need to retrieve credential first
     return null;
   },
-
-  // Cognitive Operations
-  recordCognitiveEffect: async (
-    _: unknown,
-    { exposure }: { exposure: { segmentId: string; narrativeId: string; reactionType?: string; sentimentShift?: number } },
-  ) => {
-    const { cognitiveState } = getServices();
-    await cognitiveState.updateSegmentState(
-      exposure.segmentId,
-      exposure.narrativeId,
-      exposure.sentimentShift || 0.1, // Heuristic strength
-      0.8 // Certainty placeholder
-    );
-    // Fetch the updated state
-    const segment = await cognitiveState.getSegmentState(exposure.segmentId);
-    if (!segment) throw new GraphQLError('Segment not found after update');
-
-    // Construct a snapshot state object
-    return {
-      id: `state-${exposure.segmentId}-${Date.now()}`,
-      segmentId: exposure.segmentId,
-      timestamp: new Date().toISOString(),
-      beliefVector: {}, // In a real app, this would be computed
-      resilienceScore: segment.resilienceScore,
-      emotionalValence: exposure.sentimentShift || 0,
-      arousalLevel: 0.5
-    };
-  },
 };
 
 // ============================================================================
@@ -853,55 +787,6 @@ const VerificationAppealResolvers = {
 // Export
 // ============================================================================
 
-const AudienceSegmentResolvers = {
-  cognitiveStates: async (segment: AudienceSegment) => {
-    // This would typically query a history table. Returning current state as snapshot for now.
-    return [{
-      id: `current-${segment.id}`,
-      segmentId: segment.id,
-      timestamp: new Date().toISOString(),
-      beliefVector: {},
-      resilienceScore: segment.resilienceScore,
-      emotionalValence: 0,
-      arousalLevel: 0.5
-    }];
-  },
-  targetedByCampaigns: async (segment: AudienceSegment) => {
-    const { campaignDetection } = getServices();
-    const campaigns = await campaignDetection.listActiveCampaigns(10);
-    return campaigns.filter((c: Campaign) => c.targetAudienceIds.includes(segment.id));
-  }
-};
-
-const NarrativeCascadeResolvers = {
-  narrative: async (cascade: NarrativeCascade) => {
-    const { claims } = getServices();
-    return claims.getNarrativeGraph(cascade.narrativeId).then((g: any) => g.narrative);
-  },
-  originActor: async (cascade: NarrativeCascade) => {
-    if (!cascade.originActorId) return null;
-    const { claims } = getServices();
-    return claims.getActor(cascade.originActorId);
-  }
-};
-
-const NarrativeConflict = {
-  competingNarrative: async (conflict: any) => {
-    const { claims } = getServices();
-    return claims.getNarrative(conflict.competingNarrativeId);
-  },
-  contradictingClaims: async (conflict: any) => {
-    const { claims } = getServices();
-    return conflict.contradictingClaimPairs.map(async (pair: [string, string]) => {
-      const [c1, c2] = await Promise.all([
-        claims.getClaim(pair[0]),
-        claims.getClaim(pair[1])
-      ]);
-      return { claim1: c1, claim2: c2 };
-    });
-  }
-};
-
 export const cognitiveSecurityResolvers = {
   Query,
   Mutation,
@@ -910,9 +795,6 @@ export const cognitiveSecurityResolvers = {
   CogSecCampaign,
   CogSecIncident: CogSecIncidentResolvers,
   VerificationAppeal: VerificationAppealResolvers,
-  AudienceSegment: AudienceSegmentResolvers,
-  NarrativeCascade: NarrativeCascadeResolvers,
-  NarrativeConflict
 };
 
 export default cognitiveSecurityResolvers;

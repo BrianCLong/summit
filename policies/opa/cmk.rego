@@ -1,5 +1,8 @@
 package composer.cmk
 
+import future.keywords.if
+import future.keywords.in
+
 # Require CMK for artifacts in protected namespaces
 
 needs_cmk {
@@ -11,17 +14,20 @@ missing_cmk {
   not input.artifact.kms_key_id
 }
 
-allow {
+allow if {
   not needs_cmk
-} else = allow {
+} else := allow if {
   needs_cmk
   not missing_cmk
 }
 
 # Wrapper decision
-package composer.decision_cmk
+package composer.decision_cmk_policy
 
-decision := {
+import future.keywords.if
+import future.keywords.in
+
+decision = {
   "policy": "cmk",
   "mode": input.mode,
   "allow": data.composer.cmk.allow,
@@ -30,4 +36,3 @@ decision := {
 {
   missing := [ {"code": "CMK_REQUIRED", "artifact": input.artifact.digest} | data.composer.cmk.missing_cmk ]
 }
-

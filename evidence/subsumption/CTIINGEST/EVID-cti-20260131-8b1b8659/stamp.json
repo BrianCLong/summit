@@ -1,9 +1,0 @@
-{
-  "evidence_id": "EVID-cti-20260131-8b1b8659",
-  "generated_at": "2026-01-31T20:29:10.307846+00:00",
-  "tool_versions": {
-    "pipeline": "1.0.0",
-    "git_commit": "a0680cf11fd217493bfd7b11fea1b3477973fee0",
-    "batch_hash": "8b1b865934173a4b034c0cf10a3e05ef874c5a5fe2be9b6f902ddae11223eeed"
-  }
-}

@@ -4,7 +4,7 @@ import {
   ForensicsCustodySystem,
   InMemoryCustodyLedger,
   InMemoryForensicsRepository,
-} from '../src/cases/forensics-custody-system.js';
+} from '../src/cases/forensics-custody-system';
 
 const fixedNow = () => new Date('2025-01-01T00:00:00.000Z');
 

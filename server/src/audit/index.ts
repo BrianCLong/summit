@@ -2,9 +2,9 @@
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import pino from 'pino';
-import { AdvancedAuditSystem } from './advanced-audit-system.js';
-import { emitAuditEvent } from './emit.js';
-import { cfg, dbUrls } from '../config.js';
+import { AdvancedAuditSystem } from './advanced-audit-system.ts';
+import { emitAuditEvent } from './emit.ts';
+import { cfg, dbUrls } from '../config.ts';
 
 // Create singleton instance
 let instance: AdvancedAuditSystem | null = null;

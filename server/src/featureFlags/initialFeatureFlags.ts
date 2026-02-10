@@ -1,6 +1,6 @@
 // server/src/featureFlags/initialFeatureFlags.ts
 
-import { FeatureFlag } from './types.js';
+import { FeatureFlag } from './types';
 
 export const initialFeatureFlags: FeatureFlag[] = [
   {

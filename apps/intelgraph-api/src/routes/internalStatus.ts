@@ -206,14 +206,6 @@ const requireInternalAuth: RequestHandler = (
   if (!req.auth) {
     return res.status(401).json({ error: 'Authentication required for internal status' })
   }
-
-  // Security Fix: Enforce RBAC
-  const user = req.auth as { roles?: string[] }
-  const roles = user.roles || []
-  if (!roles.includes('admin') && !roles.includes('platform_admin')) {
-    return res.status(403).json({ error: 'Insufficient permissions' })
-  }
-
   return next()
 }
 

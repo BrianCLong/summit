@@ -96,7 +96,7 @@ valid_approvers := {approver |
 
 # Approver role validation
 approver_has_sufficient_role(approver) if {
-  approver.role in {"admin", "finance_admin", "senior_analyst", "security_admin"}
+  approver.role in ["admin", "finance_admin", "senior_analyst", "security_admin"]
 }
 
 approver_has_sufficient_role(approver) if {
@@ -108,7 +108,7 @@ approver_has_sufficient_role(approver) if {
 approver_has_sufficient_role(approver) if {
   # Special case: cross-tenant operations require higher privilege
   input.affects_multiple_tenants == true
-  approver.role in {"admin", "security_admin"}
+  approver.role in ["admin", "security_admin"]
 }
 
 # Approver authentication validation
@@ -199,11 +199,11 @@ decision := {
 # Risk level assessment
 risk_level := "critical" if {
   input.risk_tag in {"destructive", "purge", "cross_tenant_move"}
-} else := "high" if {
+} else = "high" if {
   input.est_usd > 10.0
-} else := "medium" if {
+} else = "medium" if {
   input.est_usd > 1.0
-} else := "low"
+} else = "low" { true }
 
 # Violation reasons for debugging
 violation_reasons contains reason if {
