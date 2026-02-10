@@ -3,21 +3,9 @@ name: Unit Tests & Coverage
 on:
   push:
     branches: [main, develop]
-    # SAFETY: Conservative paths-ignore to prevent skipping required checks
-    # This workflow MUST run on any code/config/dependency changes
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - server/**, client/** (code changes must trigger this)
   pull_request:
     branches: [main, develop]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
+  merge_group:
       - ".github/PULL_REQUEST_TEMPLATE/**"
       - "LICENSE"
       # NOTE: We do NOT ignore:
