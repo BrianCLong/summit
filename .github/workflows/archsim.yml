@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   archsim-foundation:
-    if: false  # Temporarily disabled for GA merge surge
+    if: false 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
