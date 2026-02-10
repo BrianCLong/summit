@@ -203,7 +203,6 @@ jobs:
         timeout-minutes: 15
 
   e2e-tests:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: [integration-tests]
@@ -256,7 +255,6 @@ jobs:
         run: pnpm ci:docs-governance
 
   soc-controls:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SOC Controls
     runs-on: ubuntu-latest
     needs: [config-guard]
