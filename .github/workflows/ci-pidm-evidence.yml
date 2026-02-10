@@ -30,4 +30,4 @@ jobs:
       - name: Run unit tests
         run: pnpm test
       - name: Verify PIDM evidence index
-        run: pnpm dlx ts-node --esm .github/scripts/verify_evidence_index.ts
+        run: npx tsx .github/scripts/verify_evidence_index.ts
