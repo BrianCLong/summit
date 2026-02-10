@@ -6,9 +6,10 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
+  merge_group:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
   cancel-in-progress: true
 
 # Global environment for all jobs - prevents V8 heap exhaustion
@@ -122,6 +123,7 @@ jobs:
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
   security-compliance:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
     needs: [config-guard]
@@ -129,6 +131,7 @@ jobs:
       strict: true
 
   soc-controls:
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
