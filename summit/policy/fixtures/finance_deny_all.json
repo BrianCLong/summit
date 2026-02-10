@@ -1,9 +1,0 @@
-{
-  "sender": "agent_finance",
-  "recipient": "executor",
-  "tool_calls": [{"name": "transfer_funds", "arguments": {"amount": 100}}],
-  "security": {"classification": "FINANCIAL_SENSITIVE"},
-  "allowed_tools": ["transfer_funds"],
-  "expected_allowed": false,
-  "expected_reason": "sensitive_data_requires_hitl:FINANCIAL_SENSITIVE"
-}

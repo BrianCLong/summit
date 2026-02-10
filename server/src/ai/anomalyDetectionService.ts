@@ -1,6 +1,6 @@
 // server/src/ai/anomalyDetectionService.ts
 import { Redis } from 'ioredis';
-import { logger } from '../utils/logger.js';
+import { logger } from '../utils/logger';
 
 export interface AnomalyDetectionConfig {
   redis: Redis;

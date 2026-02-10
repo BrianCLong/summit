@@ -4,6 +4,7 @@
 package intelgraph.approval
 
 import future.keywords.if
+import future.keywords.if
 import future.keywords.in
 
 # Default deny - all operations must be explicitly allowed

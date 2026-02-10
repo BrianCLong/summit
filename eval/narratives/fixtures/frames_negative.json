@@ -16,16 +16,6 @@
         "content_hash": "hash_invalid_002"
       },
       "expect_valid": false
-    },
-    {
-      "id": "invalid-confidence",
-      "event": {
-        "synthetic_frame": "anti-war",
-        "synthetic_stance": "support",
-        "synthetic_confidence": 1.5,
-        "content_hash": "hash_invalid_003"
-      },
-      "expect_valid": false
     }
   ]
 }

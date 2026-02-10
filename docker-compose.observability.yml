@@ -205,24 +205,6 @@ services:
         reservations:
           memory: 16M
 
-  # Postgres Exporter - Postgres Metrics
-  postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:v0.15.0
-    container_name: postgres-exporter
-    environment:
-      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/postgres?sslmode=disable
-    ports:
-      - '9187:9187'
-    networks:
-      - observability
-      - intelgraph
-    deploy:
-      resources:
-        limits:
-          memory: 64M
-        reservations:
-          memory: 16M
-
   # MongoDB Exporter - MongoDB Metrics
   mongodb-exporter:
     image: percona/mongodb_exporter:0.39.0
@@ -356,7 +338,6 @@ services:
       - ./observability/promtail:/etc/promtail
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - observability
     depends_on:

@@ -10,10 +10,6 @@ on:
     - cron: '0 3 * * *'
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   eval-skills-changed:
     if: github.event_name == 'pull_request'
@@ -23,7 +19,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-
+        with:
+          version: 9
       - name: Install dependencies
         run: pnpm install
       - name: Run changed skill evals
@@ -42,7 +39,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
-
+        with:
+          version: 9
       - name: Install dependencies
         run: pnpm install
       - name: Run full skill eval suite

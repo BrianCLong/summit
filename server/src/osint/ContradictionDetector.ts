@@ -1,6 +1,6 @@
 
 import crypto from 'crypto';
-import { Claim, Contradiction } from './types.js';
+import { Claim, Contradiction } from './types';
 
 /**
  * Contradiction detection rule interface.

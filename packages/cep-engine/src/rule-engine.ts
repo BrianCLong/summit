@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
 import pino from 'pino';
-import { BusinessRule, RuleContext } from './types.js';
+import { BusinessRule, RuleContext } from './types';
 
 const logger = pino({ name: 'rule-engine' });
 

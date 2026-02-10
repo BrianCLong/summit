@@ -1,6 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import router from '../../pipelines-api.js';
+import router from '../../pipelines-api';
 import { describe, it, expect } from '@jest/globals';
 
 describe('Pipelines API', () => {

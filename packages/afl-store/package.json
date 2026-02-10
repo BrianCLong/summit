@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "echo 'Tests skipped due to ESM/Babel compatibility with Jest' && exit 0"
+    "test": "jest"
   },
   "dependencies": {
     "ioredis": "^5.8.2",

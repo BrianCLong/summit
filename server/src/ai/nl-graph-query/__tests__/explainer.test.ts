@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { buildQueryExplanation } from '../explainer.js';
+import { buildQueryExplanation } from '../explainer.ts';
 
 describe('buildQueryExplanation', () => {
   const baseCypher =

@@ -127,14 +127,9 @@ export async function initializeFeatureFlags(): Promise<FeatureFlagService> {
     });
 
     // Initialize
-    if (process.env.NODE_ENV !== 'test') {
-      await featureFlagService.initialize();
-      logger.info('Feature flag service initialized successfully');
-    } else {
-      logger.info('Skipping feature flag service initialization in test environment');
-      // Set as ready immediately for tests
-      setTimeout(() => featureFlagService.emit('ready'), 0);
-    }
+    await featureFlagService.initialize();
+
+    logger.info('Feature flag service initialized successfully');
 
     return featureFlagService;
   } catch (error: any) {

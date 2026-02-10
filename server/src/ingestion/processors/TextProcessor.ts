@@ -2,7 +2,7 @@ import { BaseProcessor } from './BaseProcessor.js';
 import { Document } from '../../data-model/types.js';
 
 export class TextProcessor extends BaseProcessor {
-  supportedExtensions = ['.txt', '.md', '.markdown', '.js', '.js', '.py', '.json', '.csv', '.yaml', '.yml'];
+  supportedExtensions = ['.txt', '.md', '.markdown', '.js', '.ts', '.py', '.json', '.csv', '.yaml', '.yml'];
 
   async process(content: Buffer, metadata: Record<string, any>): Promise<Document[]> {
     const text = content.toString('utf-8');

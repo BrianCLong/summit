@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { ClaimExtractor } from '../ClaimExtractor.js';
-import { OSINTEnrichmentResult, SocialMediaProfile, CorporateRecord, PublicRecord } from '../types.js';
+import { ClaimExtractor } from '../ClaimExtractor';
+import { OSINTEnrichmentResult, SocialMediaProfile, CorporateRecord, PublicRecord } from '../types';
 
 describe('ClaimExtractor', () => {
   let extractor: ClaimExtractor;

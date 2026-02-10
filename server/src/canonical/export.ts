@@ -6,14 +6,14 @@
  */
 
 import { Pool } from 'pg';
-import { BaseCanonicalEntity } from './types.js';
+import { BaseCanonicalEntity } from './types.ts';
 import {
   ProvenanceManifest,
   ProvenanceChain,
   createProvenanceManifest,
   verifyManifest,
-} from './provenance.js';
-import { snapshotAtTime, getEntitiesWithProvenance } from './helpers.js';
+} from './provenance.ts';
+import { snapshotAtTime, getEntitiesWithProvenance } from './helpers.ts';
 
 export interface SubgraphExportOptions {
   /** Tenant ID */

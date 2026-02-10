@@ -8,15 +8,6 @@ need gh
 need git
 need jq
 
-PROMOTE_AUTO=false
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --tag-and-promote) PROMOTE_AUTO=true ;;
-        --help) echo "Usage: $0 [--tag-and-promote]"; exit 0 ;;
-    esac
-    shift
-done
-
 echo "🔐 Checking GitHub auth..."
 gh auth status -h github.com >/dev/null
 
@@ -131,19 +122,6 @@ gh run list --limit 10 --branch "$DEFAULT_BRANCH" \
 
 echo "🧰 Required status checks:"
 gh api "/repos/$OWNER/$REPO/branches/$DEFAULT_BRANCH/protection" --jq '.required_status_checks.contexts' || true
-
-# 7) Automated Promotion (Zero-Touch)
-if [ "$PROMOTE_AUTO" = true ]; then
-  echo "🚀 Automated Promotion Triggered..."
-  NEXT_VERSION="v$(npm version patch --no-git-tag-version | sed 's/^v//')"
-  git add package.json server/package.json
-  git commit -m "chore(release): bump version to $NEXT_VERSION [skip ci]" || true
-  git tag "$NEXT_VERSION"
-  git push origin "$DEFAULT_BRANCH" --tags
-
-  echo "🚢 Starting Canary Deployment for $NEXT_VERSION..."
-  VERSION="$NEXT_VERSION" bash scripts/production-canary.sh
-fi
 
 echo "✅ Done. Auto-label + Danger shipped, CI kicked, protections enforced."
 echo "Tip: run 'make discover.checks' anytime to see exact check names."
