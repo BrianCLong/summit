@@ -1,0 +1,48 @@
+{
+  "$id": "https://summit.dev/schemas/agent/run_result.v0.1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Run Result",
+  "type": "object",
+  "required": ["run_id", "status"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "status": { "type": "string", "enum": ["queued", "running", "completed", "failed"] },
+    "outputs": {
+      "type": "object",
+      "properties": {
+        "summary_md": { "type": "string" },
+        "enrichment": { "type": "object" },
+        "recommended_actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["action"],
+            "properties": {
+              "action": { "type": "string" },
+              "requires_approval": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "policy_version": { "type": "string" },
+        "policy_decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["rule_id", "outcome"],
+            "properties": {
+              "rule_id": { "type": "string" },
+              "outcome": { "type": "string" }
+            }
+          }
+        },
+        "audit_record_ids": { "type": "array", "items": { "type": "string" } },
+        "evidence_bundle_ref": { "type": "string" }
+      }
+    }
+  }
+}
