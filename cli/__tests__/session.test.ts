@@ -312,7 +312,7 @@ describe('Session Management', () => {
       expect(sessions.length).toBe(2);
     });
 
-    it('sorts sessions by start time (newest first)', () => {
+    it('sorts sessions by start time (newest first)', async () => {
       const session1 = createSession({
         repoRoot: tempDir,
         command: 'first',
@@ -320,6 +320,9 @@ describe('Session Management', () => {
         sessionDir,
       });
       session1.complete();
+
+      // Small delay to ensure different startTime/mtime
+      await new Promise(resolve => setTimeout(resolve, 10));
 
       // Session 2 created after session 1 - file mtime will be used as tiebreaker
       // when timestamps are equal (which can happen in fast execution)

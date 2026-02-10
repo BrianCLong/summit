@@ -4,12 +4,12 @@ import { PgVectorSync } from '../src/lib/pgvector-sync';
 // Mock pg
 jest.mock('pg', () => {
   const mClient = {
-    query: jest.fn((...args: any[]) => Promise.resolve({ rows: [], rowCount: 0 })),
+    query: jest.fn((..._args: any[]) => Promise.resolve({ rows: [], rowCount: 0 })),
     release: jest.fn(),
   };
   const mPool = {
     connect: jest.fn(() => Promise.resolve(mClient)),
-    query: jest.fn((...args: any[]) => Promise.resolve({ rows: [], rowCount: 0 })),
+    query: jest.fn((..._args: any[]) => Promise.resolve({ rows: [], rowCount: 0 })),
     end: jest.fn(),
     on: jest.fn(),
   };

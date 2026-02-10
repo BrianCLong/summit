@@ -5,6 +5,7 @@
 import { Command } from 'commander';
 import { detectRepoRoot } from '../lib/sandbox.js';
 import { runCapsule } from '../lib/switchboard-runner.js';
+import { startDashboard } from '../lib/switchboard-ui.js';
 import { generateEvidenceBundle } from '../lib/switchboard-evidence.js';
 import { replayCapsule } from '../lib/switchboard-replay.js';
 
@@ -65,5 +66,16 @@ export function registerSwitchboardCommands(program: Command): void {
         console.error(error instanceof Error ? error.message : String(error));
         process.exit(1);
       }
+    });
+
+  switchboard
+    .command('ui')
+    .description('Launch the local Switchboard dashboard')
+    .option('-p, --port <number>', 'Port to run the dashboard on', '3000')
+    .action(async (options) => {
+      const port = parseInt(options.port, 10);
+      console.log(`Starting Switchboard UI at http://127.0.0.1:${port}`);
+      console.log('Press Ctrl+C to stop.');
+      await startDashboard(port);
     });
 }

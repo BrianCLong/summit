@@ -485,21 +485,19 @@ export function createSandbox(options: Partial<SandboxOptions> & { repoRoot: str
  */
 export function detectRepoRoot(startDir: string = process.cwd()): string {
   let currentDir = path.resolve(startDir);
+  let bestRoot = currentDir;
 
+  // In a monorepo, we want the highest directory that has a .git folder
+  // or the highest directory that contains a package.json before we hit the root.
   while (currentDir !== path.dirname(currentDir)) {
-    // Check for .git directory
     if (fs.existsSync(path.join(currentDir, '.git'))) {
       return currentDir;
     }
-
-    // Check for package.json
     if (fs.existsSync(path.join(currentDir, 'package.json'))) {
-      return currentDir;
+      bestRoot = currentDir;
     }
-
     currentDir = path.dirname(currentDir);
   }
 
-  // Fallback to start directory
-  return path.resolve(startDir);
+  return bestRoot;
 }
