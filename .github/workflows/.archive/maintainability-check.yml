@@ -58,7 +58,7 @@ jobs:
             || true
 
       - name: Generate complexity report
-        if: always()
+        if: ((always()) && (always())) && (always())
         run: |
           node -e "
           const fs = require('fs');
@@ -83,7 +83,6 @@ jobs:
           " | tee complexity-report.md
 
       - name: Upload ESLint report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: eslint-complexity-report
@@ -177,7 +176,6 @@ jobs:
           echo "- **Total debt markers:** $((TODO_COUNT + FIXME_COUNT))" >> metrics-report.md
 
       - name: Upload metrics reports
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: code-metrics-report
@@ -192,7 +190,7 @@ jobs:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
     # Only run on main branch or when SONAR_TOKEN is available
-    if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && vars.SONAR_HOST_URL != '')
+    if: ((github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && vars.SONAR_HOST_URL != '')) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')) && (github.event_name == 'schedule')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -242,7 +240,6 @@ jobs:
   weekly-report:
     name: Generate Maintainability Trend Report
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [eslint-complexity, code-metrics]
     steps:
       - name: Checkout code
@@ -300,7 +297,6 @@ jobs:
           retention-days: 90
 
       - name: Create issue with report (optional)
-        if: github.event_name == 'schedule'
         uses: actions/github-script@v7
         with:
           script: |
