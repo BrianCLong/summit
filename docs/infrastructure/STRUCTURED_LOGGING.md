@@ -5,9 +5,6 @@
 ## Overview
 
 The IntelGraph Platform implements enterprise-grade structured logging with:
-
-
-
 - **Winston** - Structured logging library with flexible transports
 - **Pino** - High-performance HTTP request logging
 - **OpenTelemetry** - Distributed tracing integration
@@ -16,7 +13,7 @@ The IntelGraph Platform implements enterprise-grade structured logging with:
 
 ## Logging Architecture
 
-```text
+```
 ┌──────────────┐
 │ Application  │
 │   Logs       │
@@ -49,7 +46,7 @@ The IntelGraph Platform implements enterprise-grade structured logging with:
   ┌────▼──────┐
   │  Kibana   │
   └───────────┘
-```text
+```
 
 ## Using the Logger
 
@@ -70,7 +67,7 @@ logger.info('User authenticated', {
   email: 'user@example.com',
   ipAddress: req.ip,
 });
-```text
+```
 
 ### Logging with Correlation Context
 
@@ -86,7 +83,7 @@ logWithContext('info', 'Processing payment', {
   amount: 100.00,
   currency: 'USD',
 });
-```text
+```
 
 ### Performance Logging
 
@@ -101,7 +98,7 @@ await db.query('SELECT * FROM users');
 // Log completion with duration
 endLog({ query: 'users', rowCount: 150 });
 // Output: "database-query completed in 45ms"
-```text
+```
 
 ### Error Logging
 
@@ -116,7 +113,7 @@ try {
     operation: 'data-import',
   });
 }
-```text
+```
 
 ### Audit Logging
 
@@ -130,7 +127,7 @@ auditLog('USER_LOGIN', {
   success: true,
   timestamp: new Date().toISOString(),
 });
-```text
+```
 
 ### Child Loggers
 
@@ -145,7 +142,7 @@ const routerLogger = createChildLogger({
 
 routerLogger.info('User logged in', { userId: 'user123' });
 // Includes module and service in all logs
-```text
+```
 
 ## Log Levels
 
@@ -165,22 +162,16 @@ LOG_LEVEL=debug
 
 # Or environment variable
 export LOG_LEVEL=info
-```text
+```
 
 ## Correlation IDs
 
 Every request automatically receives:
-
-
-
 - **Correlation ID** - Unique identifier for the request
 - **Trace ID** - OpenTelemetry trace identifier
 - **Span ID** - OpenTelemetry span identifier
 
 These are automatically included in:
-
-
-
 - Log messages
 - HTTP response headers (`x-correlation-id`, `x-trace-id`)
 - Error reports
@@ -198,7 +189,7 @@ const context = getCorrelationContext(req);
 //   userId: 'user123',
 //   tenantId: 'tenant1'
 // }
-```text
+```
 
 ## ELK Stack
 
@@ -210,11 +201,11 @@ docker-compose -f docker-compose.dev.yml -f docker-compose.logging.yml up
 
 # Or standalone
 docker-compose -f docker-compose.logging.yml up
-```text
+```
 
 ### Accessing Kibana
 
-1. Navigate to  <http://localhost:5601>
+1. Navigate to http://localhost:5601
 2. Wait for Elasticsearch to initialize
 3. Create index pattern: `intelgraph-logs-*`
 4. Start exploring logs
@@ -222,9 +213,6 @@ docker-compose -f docker-compose.logging.yml up
 ### Kibana Dashboards
 
 Create dashboards for:
-
-
-
 - Error rates over time
 - Request latency (performance logs)
 - User activity (audit logs)
@@ -239,7 +227,7 @@ Create dashboards for:
 
 Kibana query examples:
 
-```text
+```
 # Find errors for a specific user
 level:ERROR AND userId:"user123"
 
@@ -251,7 +239,7 @@ audit:true AND action:"USER_LOGIN"
 
 # Find requests by correlation ID
 correlationId:"abc123-def456"
-```text
+```
 
 ## Log Retention
 
@@ -276,7 +264,7 @@ DELETE /intelgraph-logs-*
     }
   }
 }
-```text
+```
 
 ## OpenTelemetry Integration
 
@@ -292,12 +280,12 @@ Logs automatically include OpenTelemetry trace context:
   "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
   "spanId": "00f067aa0ba902b7"
 }
-```text
+```
 
 ### Jaeger Integration
 
 View traces in Jaeger:
-- URL:  <http://localhost:16686>
+- URL: http://localhost:16686
 - Search by trace ID or operation
 
 ## Security
@@ -305,9 +293,6 @@ View traces in Jaeger:
 ### Redacted Fields
 
 Sensitive fields are automatically redacted from logs:
-
-
-
 - `password`
 - `authorization` headers
 - `cookie` headers
@@ -323,7 +308,7 @@ logger.info('User login attempt', {
 
 // Output:
 // { email: 'user@example.com', password: '[REDACTED]' }
-```text
+```
 
 ## Best Practices
 
@@ -332,12 +317,12 @@ logger.info('User login attempt', {
 ✅ Use structured logging with metadata:
 ```typescript
 logger.info('User action', { userId: 'user123', action: 'login' });
-```text
+```
 
 ✅ Include correlation IDs for request tracking:
 ```typescript
 logger.info('Request processed', { correlationId: req.correlationId });
-```text
+```
 
 ✅ Use appropriate log levels:
 ```typescript
@@ -345,31 +330,31 @@ logger.error('Critical error');  // Errors that need attention
 logger.warn('Approaching limit'); // Warnings
 logger.info('User logged in');    // Important events
 logger.debug('Request data: ...'); // Debugging info
-```text
+```
 
 ✅ Log performance metrics:
 ```typescript
 const end = perfLog('operation');
 await operation();
 end({ resultCount: 100 });
-```text
+```
 
 ### DON'T
 
 ❌ Log sensitive data without redaction:
 ```typescript
 logger.info('Password:', password); // NEVER!
-```text
+```
 
 ❌ Use string concatenation:
 ```typescript
 logger.info('User ' + userId + ' logged in'); // BAD
-```text
+```
 
 ❌ Log at incorrect levels:
 ```typescript
 logger.error('User logged in'); // Wrong level
-```text
+```
 
 ## Configuration
 
@@ -390,7 +375,7 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: 'logs/combined.log' }),
   ],
 });
-```text
+```
 
 ### Pino Configuration (HTTP Logging)
 
@@ -405,7 +390,7 @@ app.use(pinoHttp({
     traceId: req.traceId,
   }),
 }));
-```text
+```
 
 ## Troubleshooting
 
@@ -413,12 +398,12 @@ app.use(pinoHttp({
 
 1. Check Elasticsearch is running:
    ```bash
-   curl  <http://localhost:9200>/_cluster/health
+   curl http://localhost:9200/_cluster/health
    ```
 
 2. Verify Logstash is processing logs:
    ```bash
-   curl  <http://localhost:9600>/_node/stats/pipelines
+   curl http://localhost:9600/_node/stats/pipelines
    ```
 
 3. Check Filebeat is shipping logs:
@@ -431,13 +416,13 @@ app.use(pinoHttp({
 Adjust log level in production:
 ```bash
 LOG_LEVEL=warn
-```text
+```
 
 Reduce file retention:
 ```typescript
 maxsize: 5242880,  // 5MB
 maxFiles: 3,
-```text
+```
 
 ## References
 

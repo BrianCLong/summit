@@ -33,7 +33,7 @@ Summit uses Infrastructure as Code (IaC) principles to manage all infrastructure
 
 ### Directory Structure
 
-```text
+```
 summit/
 ├── terraform/           # Terraform configurations
 │   ├── modules/        # Reusable Terraform modules
@@ -51,7 +51,7 @@ summit/
     ├── aws/            # AWS-specific configs
     ├── terraform/      # Terraform wrappers
     └── scripts/        # Automation scripts
-```text
+```
 
 ---
 
@@ -88,7 +88,7 @@ resource "aws_eks_cluster" "summit" {
     ManagedBy   = "Terraform"
   })
 }
-```text
+```
 
 #### RDS PostgreSQL
 
@@ -124,7 +124,7 @@ resource "aws_db_instance" "postgres" {
 
   tags = var.tags
 }
-```text
+```
 
 #### S3 Buckets
 
@@ -166,7 +166,7 @@ resource "aws_s3_bucket_public_access_block" "artifacts" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-```text
+```
 
 ### Kubernetes Cluster Configuration
 
@@ -232,7 +232,7 @@ managedNodeGroups:
         effect: NoSchedule
     tags:
       nodegroup-role: memory-optimized
-```text
+```
 
 #### Cluster Autoscaler
 
@@ -274,7 +274,7 @@ spec:
             requests:
               cpu: 100m
               memory: 600Mi
-```text
+```
 
 ---
 
@@ -282,7 +282,7 @@ spec:
 
 ### Project Structure
 
-```text
+```
 terraform/
 ├── environments/
 │   ├── dev/
@@ -302,7 +302,7 @@ terraform/
     ├── apply.sh
     ├── plan.sh
     └── destroy.sh
-```text
+```
 
 ### Environment Configuration
 
@@ -333,7 +333,7 @@ rds_multi_az       = false
 enable_nat_gateway     = false
 enable_flow_logs       = false
 enable_backup_vault    = false
-```text
+```
 
 #### Production
 
@@ -369,7 +369,7 @@ enable_nat_gateway     = true
 enable_flow_logs       = true
 enable_backup_vault    = true
 deletion_protection    = true
-```text
+```
 
 ### Terraform Workflow
 
@@ -392,7 +392,7 @@ terraform destroy
 
 # Import existing resources
 terraform import aws_eks_cluster.summit summit-production
-```text
+```
 
 ### State Management
 
@@ -408,7 +408,7 @@ terraform {
     kms_key_id     = "arn:aws:kms:us-east-1:xxx:key/xxx"
   }
 }
-```text
+```
 
 ---
 
@@ -426,7 +426,7 @@ docker push ghcr.io/brianclong/summit:v1.2.3
 
 # Pull
 docker pull ghcr.io/brianclong/summit:v1.2.3
-```text
+```
 
 ### Image Signing and Verification
 
@@ -442,7 +442,7 @@ syft ghcr.io/brianclong/summit:v1.2.3 -o spdx-json > sbom.json
 
 # Attach SBOM
 cosign attach sbom --sbom sbom.json ghcr.io/brianclong/summit:v1.2.3
-```text
+```
 
 ### Registry Configuration in Kubernetes
 
@@ -456,7 +456,7 @@ metadata:
 type: kubernetes.io/dockerconfigjson
 data:
   .dockerconfigjson: <base64-encoded-docker-config>
-```text
+```
 
 ---
 
@@ -499,7 +499,7 @@ module "vpc" {
     "kubernetes.io/role/internal-elb" = "1"
   }
 }
-```text
+```
 
 ### Service Mesh (Istio)
 
@@ -555,7 +555,7 @@ spec:
       tracing:
         zipkin:
           address: jaeger-collector.observability:9411
-```text
+```
 
 ### Network Policies
 
@@ -627,7 +627,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 80
-```text
+```
 
 ---
 
@@ -666,7 +666,7 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.eks_node_group.name
 }
-```text
+```
 
 ### Pod Security Standards
 
@@ -680,7 +680,7 @@ metadata:
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted
-```text
+```
 
 ### Secrets Management
 
@@ -701,7 +701,7 @@ spec:
       name: summit-secrets
       namespace: intelgraph-prod
     type: Opaque
-```text
+```
 
 ---
 
@@ -726,7 +726,7 @@ spec:
     volumeSnapshotLocations:
       - aws-ebs
     ttl: 720h  # 30 days
-```text
+```
 
 ### Restore Procedure
 
@@ -743,7 +743,7 @@ velero restore describe summit-restore-20251120
 # Restore specific namespace
 velero restore create --from-backup summit-daily-backup-20251120020000 \
   --include-namespaces intelgraph-prod
-```text
+```
 
 ---
 
@@ -758,7 +758,7 @@ kubectl top pods -n intelgraph-prod
 
 # Get resource recommendations
 kubectl resource-capacity --util --sort cpu.util
-```text
+```
 
 ### Spot Instances
 
@@ -780,7 +780,7 @@ resource "aws_eks_node_group" "spot" {
 
   instance_types = ["t3.xlarge", "t3a.xlarge", "t2.xlarge"]
 }
-```text
+```
 
 ---
 
@@ -802,7 +802,7 @@ eksctl upgrade nodegroup --cluster summit-prod --name general-purpose
 # Update Helm charts
 helm repo update
 helm upgrade summit ./helm/summit --version 1.1.0
-```text
+```
 
 ---
 

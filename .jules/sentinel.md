@@ -65,8 +65,3 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** Several sensitive endpoints defined directly in `server/src/app.ts` (e.g., `/search/evidence`, `/monitoring`, and various `/api/admin` routers) were missing authentication or relied on manual, inconsistent role checks.
 **Learning:** Inline routes in main application files are easily overlooked during security audits. Additionally, inconsistent casing in role names (e.g., 'admin' vs 'ADMIN') can lead to manual check bypasses or availability issues.
 **Prevention:** Enforce a "deny-by-default" posture by applying `authenticateToken` and `ensureRole(['ADMIN', 'admin'])` middleware to all administrative and sensitive data endpoints. Always use standardized middleware rather than manual property checks for role validation.
-
-## 2026-02-18 - [CRITICAL] Insecure Webhook Signature Verification
-**Vulnerability:** The `InboundAlertService` in `server/src/integrations/inbound/service.ts` verified webhook signatures by directly comparing the signature with the secret (`signature !== config.secret`). This requires the sender to transmit the secret in plaintext, effectively exposing it.
-**Learning:** Placeholder code ("In production, we'd use HMAC") often persists into production if not flagged. Authentication mechanisms that rely on "shared secrets" must never require the transmission of the secret itself.
-**Prevention:** Implement standard HMAC-SHA256 signature verification. Compare signatures using `crypto.timingSafeEqual` to prevent timing attacks. Ensure the service expects a computed signature (HMAC) rather than the secret itself.

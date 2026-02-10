@@ -5,9 +5,6 @@
 ## Overview
 
 The IntelGraph Platform provides comprehensive API documentation through:
-
-
-
 - **OpenAPI 3.0 Specification** - Machine-readable API contract
 - **Swagger UI** - Interactive API explorer with "Try it out" functionality
 - **ReDoc** - Clean, professional documentation viewer
@@ -20,19 +17,19 @@ The IntelGraph Platform provides comprehensive API documentation through:
 
 Start the server and access documentation at:
 
-- **Swagger UI**:  <http://localhost:4000>/api/docs
-- **ReDoc**:  <http://localhost:4000>/api/docs/redoc
-- **GraphQL Playground**:  <http://localhost:4000>/api/docs/graphql-playground
-- **OpenAPI JSON**:  <http://localhost:4000>/api/docs/openapi.json
-- **OpenAPI YAML**:  <http://localhost:4000>/api/docs/openapi.yaml
-- **GraphQL Schema**:  <http://localhost:4000>/api/docs/graphql-schema
+- **Swagger UI**: http://localhost:4000/api/docs
+- **ReDoc**: http://localhost:4000/api/docs/redoc
+- **GraphQL Playground**: http://localhost:4000/api/docs/graphql-playground
+- **OpenAPI JSON**: http://localhost:4000/api/docs/openapi.json
+- **OpenAPI YAML**: http://localhost:4000/api/docs/openapi.yaml
+- **GraphQL Schema**: http://localhost:4000/api/docs/graphql-schema
 
 ### Production
 
 Documentation endpoints are available in production at:
-```text
+```
 https://api.intelgraph.example.com/api/docs
-```text
+```
 
 ## OpenAPI Specification
 
@@ -63,7 +60,7 @@ info:
   title: IntelGraph Platform API
   version: 1.0.0
 servers:
-  - url:  <http://localhost:4000>
+  - url: http://localhost:4000
 paths:
   /api/cases:
     get:
@@ -76,7 +73,7 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-```text
+```
 
 ## SDK Generation
 
@@ -91,7 +88,7 @@ Generate client SDKs automatically:
 # Generate specific SDK
 ./scripts/generate-sdk.sh typescript
 ./scripts/generate-sdk.sh python
-```text
+```
 
 ### TypeScript SDK
 
@@ -102,7 +99,7 @@ Generated TypeScript types and fetch client:
 import type { paths } from './generated-clients/typescript/api-types';
 
 // Type-safe API calls
-const response = await fetch(' <http://localhost:4000>/api/cases', {
+const response = await fetch('http://localhost:4000/api/cases', {
   headers: {
     'Authorization': 'Bearer YOUR_JWT_TOKEN',
   },
@@ -110,7 +107,7 @@ const response = await fetch(' <http://localhost:4000>/api/cases', {
 
 const cases: paths['/api/cases']['get']['responses']['200']['content']['application/json']
   = await response.json();
-```text
+```
 
 ### Python SDK
 
@@ -119,7 +116,7 @@ Install the generated Python client:
 ```bash
 cd generated-clients/python
 pip install -e .
-```text
+```
 
 Usage:
 
@@ -128,7 +125,7 @@ from intelgraph_client import ApiClient, Configuration
 from intelgraph_client.api import cases_api
 
 configuration = Configuration(
-    host=" <http://localhost:4000>",
+    host="http://localhost:4000",
     access_token="your-jwt-token"
 )
 
@@ -136,15 +133,15 @@ with ApiClient(configuration) as api_client:
     api_instance = cases_api.CasesApi(api_client)
     cases = api_instance.get_cases()
     print(cases)
-```text
+```
 
 ## GraphQL Documentation
 
 ### Schema Access
 
 The GraphQL schema is automatically documented and available at:
-- Playground:  <http://localhost:4000>/api/docs/graphql-playground
-- Raw Schema:  <http://localhost:4000>/api/docs/graphql-schema
+- Playground: http://localhost:4000/api/docs/graphql-playground
+- Raw Schema: http://localhost:4000/api/docs/graphql-schema
 
 ### Example Queries
 
@@ -162,7 +159,7 @@ query GetInvestigation($id: ID!) {
     }
   }
 }
-```text
+```
 
 ## Authentication
 
@@ -170,8 +167,8 @@ All API endpoints (except documentation and health checks) require JWT authentic
 
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-   <http://localhost:4000>/api/cases
-```text
+  http://localhost:4000/api/cases
+```
 
 ### Obtaining a Token
 
@@ -182,25 +179,22 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 ## Rate Limiting
 
 API requests are rate-limited based on:
-
-
-
 - User role
 - Endpoint sensitivity
 - Request window (default: 60 seconds)
 
 Rate limit headers in responses:
-```text
+```
 X-RateLimit-Limit: 600
 X-RateLimit-Remaining: 599
 X-RateLimit-Reset: 1234567890
-```text
+```
 
 ## Testing API Endpoints
 
 ### Using Swagger UI
 
-1. Navigate to  <http://localhost:4000>/api/docs
+1. Navigate to http://localhost:4000/api/docs
 2. Click "Authorize" and enter your JWT token
 3. Expand an endpoint
 4. Click "Try it out"
@@ -212,15 +206,15 @@ X-RateLimit-Reset: 1234567890
 ```bash
 # List cases
 curl -H "Authorization: Bearer $TOKEN" \
-   <http://localhost:4000>/api/cases
+  http://localhost:4000/api/cases
 
 # Create case
 curl -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"title": "New Investigation", "status": "draft"}' \
-   <http://localhost:4000>/api/cases
-```text
+  http://localhost:4000/api/cases
+```
 
 ## Troubleshooting
 
@@ -229,7 +223,7 @@ curl -X POST \
 Check that `/openapi/spec.yaml` exists and is valid YAML:
 ```bash
 python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
-```text
+```
 
 ### Swagger UI not showing endpoints
 
@@ -242,11 +236,11 @@ python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
 Ensure Docker is running for Python client generation:
 ```bash
 docker ps
-```text
+```
 
 ## Architecture
 
-```text
+```
 ┌─────────────────┐
 │   OpenAPI Spec  │
 │  spec.yaml      │
@@ -268,7 +262,7 @@ docker ps
     │  TypeScript │  Python  │
     │   Client    │  Client  │
     └─────────────┴──────────┘
-```text
+```
 
 ## Files
 

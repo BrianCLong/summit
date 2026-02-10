@@ -32,7 +32,7 @@ const config = {
     '^@emotion/styled$': '<rootDir>/../node_modules/@emotion/styled',
   },
   transform: {
-    '^.+\\.(ts|tsx)$': ["ts-jest", {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
       useESM: true,
       tsconfig: {
         jsx: 'react-jsx',

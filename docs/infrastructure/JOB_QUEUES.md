@@ -5,9 +5,6 @@
 ## Overview
 
 The IntelGraph Platform implements a robust job queue system using:
-
-
-
 - **BullMQ** - High-performance job queue based on Redis
 - **Redis** - In-memory data store for queue persistence
 - **Bull Board** - Web-based dashboard for queue monitoring
@@ -16,7 +13,7 @@ The IntelGraph Platform implements a robust job queue system using:
 
 ## Architecture
 
-```text
+```
 ┌──────────────┐
 │ Application  │
 │   Code       │
@@ -46,7 +43,7 @@ The IntelGraph Platform implements a robust job queue system using:
   │ Bull Board  │
   │ Dashboard   │
   └─────────────┘
-```text
+```
 
 ## Quick Start
 
@@ -58,16 +55,13 @@ docker-compose -f docker-compose.dev.yml up redis
 
 # Or standalone
 docker run -p 6379:6379 redis:7-alpine
-```text
+```
 
 ### 2. Access Bull Board Dashboard
 
-Navigate to:  <http://localhost:4000>/queues
+Navigate to: http://localhost:4000/queues
 
 The dashboard shows:
-
-
-
 - Active jobs
 - Completed jobs
 - Failed jobs
@@ -86,7 +80,7 @@ export enum QueueName {
   DATA_PROCESSING = 'data-processing',
   ANALYTICS = 'analytics',
 }
-```text
+```
 
 ### Get or Create Queue
 
@@ -94,7 +88,7 @@ export enum QueueName {
 import { queueRegistry, QueueName } from './queues/config';
 
 const queue = queueRegistry.getQueue(QueueName.EMAIL);
-```text
+```
 
 ## Adding Jobs
 
@@ -115,7 +109,7 @@ await addJob(
     priority: JobPriority.HIGH,
   }
 );
-```text
+```
 
 ### Delayed Job
 
@@ -128,7 +122,7 @@ await addJob(
     delay: 24 * 60 * 60 * 1000, // 24 hours
   }
 );
-```text
+```
 
 ### Job with Custom Retry
 
@@ -142,7 +136,7 @@ await addJob(
     priority: JobPriority.CRITICAL,
   }
 );
-```text
+```
 
 ## Creating a Job Processor
 
@@ -186,7 +180,7 @@ export async function processMyJob(job: Job<MyJobData>): Promise<void> {
 queueRegistry.registerWorker(QueueName.DATA_PROCESSING, processMyJob, {
   concurrency: 5,
 });
-```text
+```
 
 ### Processor with Progress Updates
 
@@ -209,7 +203,7 @@ export async function processLargeFile(job: Job<FileData>): Promise<void> {
 
   await job.updateProgress(100);
 }
-```text
+```
 
 ### Processor with Error Handling
 
@@ -237,7 +231,7 @@ export async function processWithRetry(job: Job<Data>): Promise<void> {
     }
   }
 }
-```text
+```
 
 ## Scheduled Jobs (Cron)
 
@@ -269,7 +263,7 @@ await addRepeatableJob(
   {},
   '0 9 * * 1'
 );
-```text
+```
 
 ### Cron Pattern Examples
 
@@ -298,7 +292,7 @@ export enum JobPriority {
 await addJob(queueName, jobName, data, {
   priority: JobPriority.CRITICAL,
 });
-```text
+```
 
 ## Retry Configuration
 
@@ -312,7 +306,7 @@ await queue.add('job-name', data, {
     delay: 2000, // 2s, 4s, 8s
   },
 });
-```text
+```
 
 ### Fixed Delay
 
@@ -324,7 +318,7 @@ await queue.add('job-name', data, {
     delay: 5000, // 5s between each attempt
   },
 });
-```text
+```
 
 ### Custom Backoff
 
@@ -344,11 +338,11 @@ queueRegistry.registerWorker(queueName, processor, {
     },
   },
 });
-```text
+```
 
 ## Job Lifecycle
 
-```text
+```
 ┌──────────┐
 │  Added   │
 └────┬─────┘
@@ -375,18 +369,15 @@ queueRegistry.registerWorker(queueName, processor, {
              │Permanently  │
              │  Failed     │
              └─────────────┘
-```text
+```
 
 ## Monitoring
 
 ### Bull Board Dashboard
 
-Access at  <http://localhost:4000>/queues
+Access at http://localhost:4000/queues
 
 Features:
-
-
-
 - View all queues
 - Monitor job states (waiting, active, completed, failed)
 - Inspect job data and results
@@ -412,7 +403,7 @@ const failed = await queue.getFailed();
 
 // Get job by ID
 const job = await queue.getJob('job-id-123');
-```text
+```
 
 ### Programmatic Monitoring
 
@@ -437,7 +428,7 @@ queue.on('completed', (job, result) => {
 queue.on('failed', (job, error) => {
   logger.error(`Job failed: ${job?.id}`, { error: error.message });
 });
-```text
+```
 
 ## Best Practices
 
@@ -446,7 +437,7 @@ queue.on('failed', (job, error) => {
 ✅ Use descriptive job names:
 ```typescript
 await addJob(queue, 'send-password-reset-email', data);
-```text
+```
 
 ✅ Include metadata for debugging:
 ```typescript
@@ -455,7 +446,7 @@ await addJob(queue, 'process-upload', {
   filename: 'data.csv',
   uploadedAt: new Date().toISOString(),
 });
-```text
+```
 
 ✅ Set appropriate priorities:
 ```typescript
@@ -468,7 +459,7 @@ await addJob(queue, 'send-otp', data, {
 await addJob(queue, 'cleanup-temp-files', {}, {
   priority: JobPriority.BACKGROUND,
 });
-```text
+```
 
 ✅ Handle errors gracefully:
 ```typescript
@@ -479,7 +470,7 @@ try {
   // Send to error tracking service
   throw error; // Trigger retry
 }
-```text
+```
 
 ✅ Use progress updates for long jobs:
 ```typescript
@@ -487,7 +478,7 @@ await job.updateProgress(25);
 await job.updateProgress(50);
 await job.updateProgress(75);
 await job.updateProgress(100);
-```text
+```
 
 ### DON'T
 
@@ -498,7 +489,7 @@ await addJob(queue, 'process', { fileContent: largeString });
 
 // GOOD: Store reference
 await addJob(queue, 'process', { fileId: 'file123' });
-```text
+```
 
 ❌ Ignore failures silently:
 ```typescript
@@ -512,7 +503,7 @@ catch (error) {
   logger.error('Job failed', { error });
   throw error;
 }
-```text
+```
 
 ❌ Use jobs for real-time operations:
 ```typescript
@@ -521,7 +512,7 @@ await addJob(queue, 'authenticate-user', credentials);
 
 // GOOD: Use jobs for async work
 await addJob(queue, 'send-welcome-email', { userId });
-```text
+```
 
 ## Configuration
 
@@ -533,14 +524,14 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=your-password
 REDIS_QUEUE_DB=1
-```text
+```
 
 ### Queue Worker Configuration
 
 ```bash
 # .env
 QUEUE_WORKER_CONCURRENCY=5  # Jobs per worker
-```text
+```
 
 ### Queue Options
 
@@ -561,7 +552,7 @@ const queue = new Queue('my-queue', {
     },
   },
 });
-```text
+```
 
 ## Troubleshooting
 
@@ -574,7 +565,7 @@ const queue = new Queue('my-queue', {
 
 2. Verify worker is registered:
    ```bash
-   curl  <http://localhost:4000>/queues/health
+   curl http://localhost:4000/queues/health
    ```
 
 3. Check for errors in logs:
@@ -606,9 +597,6 @@ const queue = new Queue('my-queue', {
 ## Examples
 
 See `/server/src/queues/processors/` for examples:
-
-
-
 - `emailProcessor.ts` - Email sending with retry
 - `scheduledTasks.ts` - Cron-like scheduled jobs
 

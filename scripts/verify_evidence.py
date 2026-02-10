@@ -139,8 +139,8 @@ def main() -> int:
         except Exception:
             continue
     if forbidden:
-        print("WARNING possible timestamps outside stamp.json (non-blocking for now):", forbidden)
-        # return 4
+        print("FAIL possible timestamps outside stamp.json:", forbidden)
+        return 4
     print("OK evidence verified")
     return 0
 

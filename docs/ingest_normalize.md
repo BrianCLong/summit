@@ -4,9 +4,9 @@ This guide outlines the ingestion pipeline for location data in IntelGraph GA-Ge
 
 ## Pipeline Overview
 
-```text
+```
 CSV/JSON/GPX -> Parser -> Normalizer -> H3 Indexer -> PostgreSQL + Manifest
-```text
+```
 
 ## Supported Formats
 
@@ -49,4 +49,4 @@ A signed manifest records counts and cryptographic hashes for all ingested files
   "sha256": "abc123...",
   "h3Res": [7, 9]
 }
-```text
+```
