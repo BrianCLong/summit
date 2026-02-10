@@ -5,14 +5,9 @@ name: Workflow Validity Gate
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/**"
-      - ".github/actions/**"
+    branches: [main]
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/**"
-      - ".github/actions/**"
   merge_group:
 
 concurrency:
