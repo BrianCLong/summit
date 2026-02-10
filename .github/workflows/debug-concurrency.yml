@@ -1,0 +1,19 @@
+name: Debug Concurrency logic
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+
+concurrency:
+  group: debug-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Concurrency key worked!"
+      - run: echo "Event name: ${{ github.event_name }}"
+      - run: echo "Ref: ${{ github.ref }}"
