@@ -177,7 +177,7 @@ services:
       typesense:
         condition: service_started
     ports:
-      - '4100:4100'
+      - '8080:4100'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
       interval: 15s
@@ -192,14 +192,37 @@ services:
   ui:
     build: ./apps/ui
     ports: [ "3000:80" ]
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:80/']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit
 
   prov-ledger:
     build: ./services/prov-ledger
-    ports: [ "8101:8080" ]
+    ports:
+      - '4010:4010'
+      - '4011:4011'
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:4011", (r) => process.exit(r.statusCode === 200 ? 0 : 1))']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit
 
   policy-compiler:
     build: ./services/policy-compiler
     ports: [ "8102:8080" ]
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/healthz']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit
 
   ai-nlq:
     build: ./services/ai-nlq
@@ -528,4 +551,3 @@ volumes:
 networks:
   summit:
     driver: bridge
->>>>>>> origin/main

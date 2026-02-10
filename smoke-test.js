@@ -91,11 +91,11 @@ async function runSmokeTests() {
     () => testEndpoint('http://localhost:3000', 'Frontend (UI)'),
     () => testEndpoint('http://localhost:4000/health', 'API health'),
     () => testGraphQL(),
-    () => testEndpoint('http://localhost:4010/health', 'Mock services'),
-    () => testEndpoint('http://localhost:4100/health', 'Worker health'),
+    () => testEndpoint('http://localhost:4010/health', 'Provenance Ledger'),
+    () => testEndpoint('http://localhost:8080/health', 'Gateway health'),
     () => testEndpoint('http://localhost:8181/health', 'OPA health'),
     () =>
-      testEndpoint('http://localhost:9464/metrics', 'OTEL collector metrics'),
+      testEndpoint('http://localhost:8889/metrics', 'OTEL collector metrics'),
     () => testEndpoint('http://localhost:16686', 'Jaeger UI'),
   ];
 
