@@ -29,7 +29,7 @@ env:
 jobs:
   drift:
     name: Drift – plan & risk
-    if: false  # Temporarily disabled for GA merge surge
+    if: false 
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -68,7 +68,7 @@ jobs:
 
   plan:
     name: Plan (${{ matrix.ws }})
-    if: false  # Temporarily disabled for GA merge surge
+    if: false 
     runs-on: ubuntu-latest
     needs: [drift]
     strategy:
