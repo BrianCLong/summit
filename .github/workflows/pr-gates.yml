@@ -10,9 +10,10 @@ on:
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
       - "LICENSE"
+  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -22,6 +23,7 @@ permissions:
 
 jobs:
   compliance-security:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' }}
     name: Compliance & Security
     runs-on: ubuntu-latest
     steps:
@@ -83,6 +85,7 @@ jobs:
         run: npm run lint
 
   build-test:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' }}
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
@@ -111,6 +114,7 @@ jobs:
         run: make ops-verify
 
   infrastructure:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' }}
     name: Infrastructure Checks
     runs-on: ubuntu-latest
     steps:
@@ -136,6 +140,7 @@ jobs:
           AWS_REGION: us-east-1
 
   preview-env:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' }}
     name: Preview Environment
     needs: [build-test, infrastructure]
     runs-on: ubuntu-latest
