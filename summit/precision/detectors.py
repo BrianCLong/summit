@@ -30,10 +30,6 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
         return MismatchReport()
 
     if not HAS_TORCH:
-        # If torch is not available but we have data, we can't compute metrics yet
-        # unless we implement a fallback. For now, return empty report or raise error?
-        # The smoke test passes {} which returns early above, so this path
-        # is only reached if we actually have data but no torch.
         return MismatchReport()
 
     delta = (train_logprobs - rollout_logprobs).abs()

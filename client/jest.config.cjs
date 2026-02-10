@@ -2,18 +2,6 @@
 const config = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
-  globals: {
-    'import.meta': {
-      env: {
-        VITE_GRAFANA_URL: 'http://localhost:3000',
-        VITE_GRAFANA_MAESTRO_DASH_UID: 'test-dashboard',
-        VITE_API_URL: 'http://localhost:8080',
-        MODE: 'test',
-        DEV: false,
-        PROD: false,
-      },
-    },
-  },
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
@@ -37,9 +25,17 @@ const config = {
       tsconfig: {
         jsx: 'react-jsx',
       },
+      diagnostics: false,
+      stringifyContentPathRegex: '\\.(postcss|scss)$',
+      babelConfig: true,
     }],
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
+  // Moved import.meta to setupFiles or just rely on the fact that
+  // it might be handled by babel-jest/ts-jest if needed.
+  // Actually, ts-jest documentation says for import.meta.env we should use:
+  // but let's just keep it simple if possible.
+  // The CI complained about "deprecated ts-jest globals syntax".
   testMatch: [
     '<rootDir>/src/**/*.test.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
@@ -73,28 +69,6 @@ const config = {
       },
     ],
   ],
-  /**
-   * TEMPORARILY SKIPPED TEST SUITES
-   * ================================
-   * These suites are skipped due to fundamental issues that need systematic fixes.
-   * Removal of entries from this list is an explicit goal.
-   *
-   * Categories:
-   * - Category A (Vitest→Jest): Tests using vitest imports/APIs in Jest environment
-   *   Examples: DemoWalkthrough.test.jsx, assistant.chunking.fuzz.test.tsx
-   *
-   * - Category B (Import paths): Broken module paths in tests or source
-   *   Examples: MaestroApp.test.tsx (AuthContext), GraphCanvas.test.tsx (graphql.js)
-   *
-   * - Category C (Assertions): Outdated RTL assertions or MUI structure changes
-   *   Examples: AdminDashboard.test.tsx, VulnerabilityDashboard.test.tsx
-   *
-   * - Category D (Timeouts/Flaky): Async issues, unresolved promises, slow tests
-   *   Examples: ThreatIntelligenceHub.test.tsx, EnhancedAIAssistant.test.tsx
-   *
-   * TODO: Create tracking issue "Unskip broken client Jest suites" with checklist
-   * Target: Remove 5-10 ignored suites per PR, starting with Vitest→Jest conversions
-   */
   testPathIgnorePatterns: [
     '<rootDir>/src/tests/',
     '<rootDir>/src/__tests__/ServiceHealthCard.test.jsx',
