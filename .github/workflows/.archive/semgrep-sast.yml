@@ -47,13 +47,14 @@ jobs:
           SEMGREP_RULES: auto
       
       - name: Upload Semgrep SARIF results
-        if: (((always()) && (always())) && (github.event_name == 'push' || github.event_name == 'schedule')) && (always())
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: semgrep-results.sarif
           category: semgrep
       
       - name: Upload Semgrep artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-results-${{ github.sha }}
@@ -64,6 +65,7 @@ jobs:
     name: Semgrep Supply Chain Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: github.event_name == 'push' || github.event_name == 'schedule'
     
     steps:
       - name: Checkout repository
@@ -102,6 +104,7 @@ jobs:
     name: Semgrep Results Summary
     runs-on: ubuntu-latest
     needs: [semgrep, semgrep-supply-chain]
+    if: always()
     
     steps:
       - name: Generate security summary

@@ -14,9 +14,9 @@ concurrency:
 jobs:
   lifecycle-test:
     name: pause->resume
-    if: (false  # Temporarily disabled for GA merge surge) && (vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_LIFECYCLE == '1')
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
-
+    if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_LIFECYCLE == '1'
 
     steps:
       - name: Checkout code
