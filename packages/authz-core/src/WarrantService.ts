@@ -18,8 +18,8 @@ import type {
   WarrantStatus,
   WarrantValidationResult,
   Action,
-} from './types.js';
-import { WarrantError } from './types.js';
+} from './types';
+import { WarrantError } from './types';
 
 const logger = pino({ name: 'warrant-service' });
 

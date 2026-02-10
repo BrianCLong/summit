@@ -26,7 +26,7 @@ jest.mock('../mlAnalysisService', () => ({
 // Mock util - MUST be before import of the service
 // Relative path from src/services/__tests__/IntelligenceAnalysisService.test.ts to src/utils/require.ts is ../../utils/require.ts
 // BUT since we import it via module name in the source, we mock it via module path if mapped, or relative path.
-// The source uses: import { requireFunc } from '../utils/require.js';
+// The source uses: import { requireFunc } from '../utils/require';
 // Jest resolver will look for it.
 jest.mock('../../utils/require', () => ({
   requireFunc: (path: string) => {
@@ -57,7 +57,7 @@ jest.mock('../../utils/logger.js', () => ({
   debug: jest.fn(),
 }), { virtual: true });
 
-import { IntelligenceAnalysisService } from '../IntelligenceAnalysisService.js';
+import { IntelligenceAnalysisService } from '../IntelligenceAnalysisService';
 
 describe('IntelligenceAnalysisService', () => {
   let service: IntelligenceAnalysisService;

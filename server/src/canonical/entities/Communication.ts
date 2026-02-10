@@ -5,7 +5,7 @@
  * Represents a communication event with bitemporal tracking
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface CommunicationParticipant {
   /** Entity ID of participant */

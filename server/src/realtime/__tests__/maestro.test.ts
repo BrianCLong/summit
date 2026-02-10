@@ -1,6 +1,6 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { Server, Socket } from 'socket.io';
-import { registerMaestroHandlers } from '../maestro.js';
+import { registerMaestroHandlers } from '../maestro';
 
 // Mock Socket.io structures
 const mockJoin = jest.fn();

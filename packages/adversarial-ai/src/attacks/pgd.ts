@@ -1,4 +1,4 @@
-import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types.js';
+import { AdversarialExample, AttackConfig, AdversarialAttackType } from '../types';
 
 /**
  * Projected Gradient Descent (PGD) Attack

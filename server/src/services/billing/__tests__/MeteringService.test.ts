@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, jest, beforeAll } from '@jest/globals';
-import { BillableEventType } from '../../../lib/billing/types.js';
+import { BillableEventType } from '../../../lib/billing/types';
 
 const mockPool = {
   connect: jest.fn(),
@@ -20,9 +20,9 @@ jest.unstable_mockModule('../../../lib/resources/quota-manager', () => ({
   },
 }));
 
-const { MeteringService } = await import('../MeteringService.js');
-const { pool } = await import('../../../db/pg.js');
-const { provenanceLedger } = await import('../../../provenance/ledger.js');
+const { MeteringService } = await import('../MeteringService');
+const { pool } = await import('../../../db/pg');
+const { provenanceLedger } = await import('../../../provenance/ledger');
 
 describe('MeteringService', () => {
   let meteringService: MeteringService;

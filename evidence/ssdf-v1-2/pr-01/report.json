@@ -1,5 +1,16 @@
 {
   "evidence_id": "EVD-SSDF12-BNDL-001",
-  "summary": "Legacy report summary",
-  "artifacts": []
+  "item_slug": "ssdf-v1-2",
+  "findings": [
+    {
+      "status": "present",
+      "artifacts": [
+        "subsumption/ssdf-v1-2/manifest.yaml",
+        "subsumption/ssdf-v1-2/claim_registry.json",
+        "subsumption/ssdf-v1-2/controls.map.json"
+      ]
+    }
+  ],
+  "claim_ids": ["ITEM:CLAIM-01", "ITEM:CLAIM-02", "ITEM:CLAIM-03"],
+  "decisions": [{"description": "Bundle skeleton added without enforcement gates."}]
 }

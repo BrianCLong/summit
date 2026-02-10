@@ -1,8 +1,9 @@
-# Required Checks Discovery
+# Required checks discovery (TODO)
+1. In GitHub: Settings → Branches → Branch protection rules → note required checks.
+2. Or via API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
+3. Record check names here and map them in CI config.
 
-* [ ] GitHub UI: Verify branch protection settings.
-* [ ] Identify exact check names for:
-    * `summit-policy-gates`
-    * `summit-schema-validate`
-    * `summit-eval-fixtures`
-* [ ] Update CI configurations with correct names.
+## Temporary gate names (until discovered)
+- summit-evidence-verify
+- summit-dependency-delta
+- summit-tests

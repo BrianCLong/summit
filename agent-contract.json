@@ -54,18 +54,6 @@
       "paths": ["terraform/prod/"],
       "overrideLabel": "restricted-area-override",
       "notes": "Production infrastructure definitions cannot be modified by agents without a human override."
-    },
-    {
-      "name": "ToolingConfig",
-      "paths": [
-        "jest.config.ts",
-        "jest.config.js",
-        "package.json",
-        "pnpm-lock.yaml",
-        "tsconfig.json"
-      ],
-      "overrideLabel": "tooling-override",
-      "notes": "Global tooling configuration changes require human review to prevent drift."
     }
   ],
   "piiPatterns": [

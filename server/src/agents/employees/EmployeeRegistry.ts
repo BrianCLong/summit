@@ -1,6 +1,6 @@
 
-import { AgentEmployee } from './AgentEmployee.js';
-import { EmployeeRole } from './types.js';
+import { AgentEmployee } from './AgentEmployee.ts';
+import { EmployeeRole } from './types.ts';
 
 export class EmployeeRegistry {
   private employees: Map<string, AgentEmployee> = new Map();

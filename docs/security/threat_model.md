@@ -1,99 +1,60 @@
-# Repo-Wide Threat Model
+# Repo Defense Plane (RDP) Threat Model
 
-**Version:** 0.1
-**Target:** Summit + Maestro + CompanyOS
-**Date:** October 2025
-**Scope:** Server, Client, Orchestration, AI Services
-**Owner:** Security Engineering (U-Series)
+**ITEMSLUG**: `GITHUB_ESPIONAGE`
+**Status**: ACTIVE
+**Last Updated**: 2026-01-24
 
-## 1. Assets
-What are we protecting?
+## 1. Overview
 
-*   **Customer Data**: PII (Names, Emails), Proprietary Knowledge Graphs, Ingested Documents, Behavioral Telemetry.
-*   **Intellectual Property**: System Prompts (PsyOps, Oracle), Proprietary Algorithms, internal "Black Project" code.
-*   **Compute Resources**: LLM Token Budgets, Cloud Infrastructure (AWS/K8s), Database IOPS.
-*   **Audit Trails**: Provenance Ledger, Security Logs, Compliance Artifacts (SOC2 evidence).
-*   **System Integrity**: The correctness of the Knowledge Lattice and decision-making logic.
+This threat model addresses rising cyber-espionage and supply-chain threats targeting GitHub-hosted software development. It specifically focuses on social engineering, malicious dependencies, and GitHub Actions/workflow abuse, amplified by AI-assisted/agentic developer workflows.
 
-## 2. Actors
-Who interacts with the system?
+## 2. Threat Landscape
 
-*   **External Analysts (Users)**: Authenticated users accessing the web UI to run queries and simulations.
-*   **Internal Operators (Admins)**: DevOps/SREs with privileged access to infrastructure and prod DBs.
-*   **Automated Agents**: "Codex" agents, background workers, and schedulers (Maestro) operating with service accounts.
-*   **Third-Party Services**: External APIs (OpenAI, Anthropic), Managed Databases (Neo4j Aura, RDS).
-*   **Malicious Actors**: External attackers, compromised insiders, or compromised dependencies.
+### T1 — Social Engineering → Dev Workstation Compromise → Repo Compromise
+- **Vectors**: Fake job/assignment repos, "open this project" style lures, VS Code task abuse, malicious extensions.
+- **Impact**: Attacker gains local environment access, steals credentials (PATs, SSH keys), and can push malicious code or exfiltrate sensitive data.
 
-## 3. Trust Boundaries
-Where does trust end?
+### T2 — Malicious Dependency / Lockfile Drift
+- **Vectors**: npm/PyPI compromise, maintainer takeover, transitive payloads, typosquatting. AI agents may "helpfully" add or update packages without sufficient vetting.
+- **Impact**: Remote code execution (RCE) in CI/CD or production environments; data exfiltration via malicious post-install scripts.
 
-*   **Browser / Server (The API Boundary)**: All input from the client (web, mobile, CLI) is untrusted. Must be validated by Zod schemas and sanitizers.
-*   **Server / LLM Provider (The Egress Boundary)**: We trust the provider (e.g., OpenAI) not to leak data deliberately, but we **do not trust** the model output to be safe (Prompt Injection response). All LLM output is treated as potentially tainted.
-*   **Server / Database**: Trusted internal network (VPC), but access requires authentication (mTLS/Credentials).
-*   **Service / Service**: Currently effectively flat internal trust (within K8s namespace). Planned move to Zero Trust (mTLS + OPA per hop).
-*   **Connectors / External Web**: Untrusted. OSINT connectors fetching URLs must be sandboxed to prevent SSRF and malware ingress.
+### T3 — GitHub Actions Secrets Exfiltration
+- **Vectors**: Malicious workflow commits, PRs from forks triggering workflows with secrets, credential theft via `actions/checkout` or environment dumping.
+- **Impact**: Mass theft of cloud credentials, PATs, and other repository secrets. (Ref: GhostAction campaign).
 
-## 4. Attack Surfaces
+### T4 — Token Sprawl from Agentic Tooling
+- **Vectors**: Long-lived PATs in local environments, automation credentials, copied `.env` files, credentials in chat/build logs.
+- **Impact**: Increased attack surface; compromise of one tool leads to wider platform access.
 
-### 4.1 LLM Attack Surfaces
-*   **Prompt Injection**: User inputs (search queries, tickets) injected into prompts.
-    *   *Mitigation*: Input sanitization, delimiters, system/user role separation.
-*   **Model Inversion**: Repeated queries to Oracle/PsyOps services to extract training data.
-    *   *Mitigation*: Rate limiting (Token/Request based), anomaly detection.
-*   **Token Exhaustion (DoS)**: Massive inputs sent to token-counting services.
-    *   *Mitigation*: `BudgetAdmissionController`, strict quotas.
+### T5 — Repo Integrity Erosion
+- **Vectors**: Backdoored commits, base64 blobs, "generated" PRs with obfuscated logic, compromised maintainer accounts.
+- **Impact**: Loss of trust in the codebase; persistent backdoors in the software supply chain.
 
-### 4.2 API Injection Vectors
-*   **Cypher/Graph Injection**: Malicious inputs in GraphRAG endpoints.
-    *   *Mitigation*: Neo4j parameters (`$param`), `MutationValidators`.
-*   **SSRF**: Webhook endpoints or "Fetch URL" features.
-    *   *Mitigation*: `URLSchema` validation (no localhost/private IPs), egress filtering.
+## 3. Defensive Strategy: Repo Defense Plane (RDP)
 
-### 4.3 Orchestration Abuse
-*   **Queue Flooding**: Submitting thousands of "light" runs to Maestro.
-    *   *Mitigation*: Tenant-based quotas, queue depth monitoring.
-*   **Race Conditions**: Simultaneous requests checking budget limits.
-    *   *Mitigation*: Atomic check-and-increment (Lua/Redis).
+Summit implements a multi-lane defense strategy to mitigate these threats.
 
-### 4.4 Impersonation & Auth
-*   **Token Theft**: XSS stealing `localStorage` tokens.
-    *   *Mitigation*: Short-lived access tokens, `HttpOnly` refresh cookies (planned).
-*   **Tenant Confusion**: Manipulating `X-Tenant-ID`.
-    *   *Mitigation*: Deriving `tenantId` strictly from signed JWT `req.user.tenantId`.
+### Lane 1: Foundation (Always ON)
+- **Workflow Change Gate**: Mandatory security acknowledgement and CODEOWNER approval for all `.github/workflows/**` changes.
+- **Secret Leak Scanning**: CI-integrated scanning for high-entropy secrets and known key patterns.
+- **Dependency Controls**: Allowlist-based dependency management and lockfile integrity verification.
 
-### 4.5 Data Exfiltration
-*   **Logging Leakage**: Logging full request bodies/headers (Secrets/PII).
-    *   *Mitigation*: `pino-http` redaction, PII scrubbing.
-*   **Verbose Errors**: Stack traces in GraphQL errors.
-    *   *Mitigation*: `formatError` masking in production.
+### Lane 2: Innovation (Flagged OFF by Default)
+- **Agent Least-Authority Profiles (ALAP)**: Explicitly defined scopes for AI agents (deps, workflows, releases).
+- **Suspicious Diff Heuristics**: Detection of base64 blobs, new executables, and obfuscated scripts.
+- **Actions Hardening**: Enforced OIDC, minimal permissions, and commit-SHA pinning for all actions.
 
-### 4.6 Supply Chain
-*   **Malicious Dependencies**: Compromised npm/pypi packages.
-    *   *Mitigation*: `pnpm-lock.yaml`, dependency auditing (Wave U).
+## 4. Requirement Matrix
 
-## 5. Top Threats & Mitigations
-| Threat ID | Description | Likelihood | Impact | Mitigation Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **T-01** | **Prompt Injection** leading to data leak | High | High | Partial (Sanitization) |
-| **T-02** | **Tenant Cross-Talk** via Graph Query | Low | Critical | Strong (Tenant Isolation Clauses) |
-| **T-03** | **Budget Exhaustion** via DoS | Medium | Medium | Strong (Quota Manager) |
-| **T-04** | **Secret Leakage** in Logs | Medium | High | Partial (Redaction Policy needed) |
-| **T-05** | **Malicious Dependency** | Low | Critical | Weak (Manual audit only) |
+| Threat | Control | Gate | Evidence ID |
+| --- | --- | --- | --- |
+| T1 (Social Eng) | Devcontainer/VM Sandbox | Policy/Doc | EVD-GITHUB_ESPIONAGE-SCHEMA-001 |
+| T2 (Malicious Deps) | Allowlist + Delta Doc | `GATE-DEPS-DELTA` | EVD-GITHUB_ESPIONAGE-DEPS-001 |
+| T3 (WF Secret Theft)| Fork Safety + OIDC | `GATE-PR-FORK-EXEC` | EVD-GITHUB_ESPIONAGE-ACTIONS-001 |
+| T4 (Token Sprawl) | ALAP / Short-lived tokens | `GATE-ALAP` | EVD-GITHUB_ESPIONAGE-ALAP-001 |
+| T5 (Integrity) | Suspicious Diff Alerts | `GATE-SUSPICIOUS-DIFF`| EVD-GITHUB_ESPIONAGE-HEUR-001 |
 
-## 6. Known Gaps
-Current security gaps identified for remediation in Wave U.
-
-1.  **Dependency Auditing**: Currently manual. No automated alerts for new vulnerabilities.
-2.  **Secret Scanning**: No pre-commit or CI check for secrets. Reliance on developer discipline.
-3.  **SAST Baseline**: Minimal linting for security patterns (e.g., `no-eval`, unsafe regex).
-4.  **Incident Runbook**: No formalized process for security incidents or vulnerability disclosure.
-5.  **Log Redaction**: Inconsistent application of redaction rules across services.
-
-## 7. Next Hardening Steps (Wave U)
-Roadmap for immediate security improvements.
-
-1.  **Automate Dependency Audit**: Implement warn-only check in CI (U3).
-2.  **Implement Secret Scanning**: Add `secret-scan` script and CI job (U4).
-3.  **Establish Security Gates**: Create a "sec-verify" aggregator (U5).
-4.  **Harden SAST**: Add security-focused ESLint rules (U6).
-5.  **Formalize Documentation**: Publish Incident Runbook, Vuln Disclosure, and Log Redaction Policy (U7, U8).
+## 5. Harvestable Lessons
+- **Workflow security is first-class supply-chain security.**
+- **Secret exfiltration is the primary win condition for attackers.**
+- **AI-assisted changes need automated guardrails.**
