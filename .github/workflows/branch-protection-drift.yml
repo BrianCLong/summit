@@ -37,6 +37,8 @@ concurrency:
 permissions:
   contents: read
   issues: write
+  pull-requests: write
+  checks: read
   actions: read
 
 env:
@@ -307,9 +309,9 @@ jobs:
 
           ### Links
 
-          - [REQUIRED_CHECKS_POLICY.yml](../../docs/ci/REQUIRED_CHECKS_POLICY.yml)
-          - [Branch Protection Settings](../../settings/branches)
-          - [Drift Detection Documentation](../../docs/ci/BRANCH_PROTECTION_DRIFT.md)
+          - [REQUIRED_CHECKS_POLICY.yml](${{ github.server_url }}/${{ github.repository }}/blob/main/docs/ci/REQUIRED_CHECKS_POLICY.yml)
+          - [Branch Protection Settings](${{ github.server_url }}/${{ github.repository }}/settings/branches)
+          - [Drift Detection Documentation](${{ github.server_url }}/${{ github.repository }}/blob/main/docs/ci/BRANCH_PROTECTION_DRIFT.md)
           - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
           ---
