@@ -55,7 +55,7 @@ permissions:
 jobs:
   audit:
     name: Type Safety Audit
-    if: false  # Temporarily disabled for GA merge surge
+    if: false 
     runs-on: ubuntu-latest
     outputs:
       total_any: ${{ steps.audit.outputs.total_any }}
