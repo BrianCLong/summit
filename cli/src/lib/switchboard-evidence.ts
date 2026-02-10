@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { readLedgerEntries, verifyLedger } from './switchboard-ledger.js';
+import { canExport, PricingTier } from './switchboard-quota.js';
 
 export interface EvidenceBundleResult {
   evidenceDir: string;
@@ -25,7 +26,15 @@ function copyIfExists(src: string, dest: string): void {
   fs.cpSync(src, dest, { recursive: true });
 }
 
-export function generateEvidenceBundle(repoRoot: string, sessionId: string): EvidenceBundleResult {
+export function generateEvidenceBundle(
+  repoRoot: string,
+  sessionId: string,
+  tier: PricingTier = 'community'
+): EvidenceBundleResult {
+  if (!canExport(tier)) {
+    throw new Error(`Evidence bundle export is not available on the ${tier} tier. Please upgrade to Pro or higher.`);
+  }
+
   const sessionDir = path.join(repoRoot, '.switchboard', 'capsules', sessionId);
   if (!fs.existsSync(sessionDir)) {
     throw new Error(`Capsule session not found: ${sessionId}`);

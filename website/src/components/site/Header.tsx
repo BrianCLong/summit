@@ -6,6 +6,7 @@ import { track } from "@/lib/analytics/client";
 
 const links = [
   { href: "/summit", label: "Summit" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/initiatives", label: "Initiatives" },
   { href: "/research", label: "Research" },
   { href: "/writing", label: "Writing" },

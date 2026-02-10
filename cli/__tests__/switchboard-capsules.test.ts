@@ -68,7 +68,7 @@ steps:
     });
     expect(runResult.status).toBe('completed');
 
-    const evidence = generateEvidenceBundle(repoRoot, runResult.sessionId);
+    const evidence = generateEvidenceBundle(repoRoot, runResult.sessionId, 'pro');
     expect(fs.existsSync(evidence.ledgerPath)).toBe(true);
     expect(fs.existsSync(evidence.diffPath)).toBe(true);
     expect(

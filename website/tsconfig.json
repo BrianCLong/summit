@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "es2022"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2022"
+    ],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -9,18 +13,47 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-    "types": ["vitest/globals"],
+    "types": [
+      "vitest/globals"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/app/*": ["src/app/*"],
-      "@/components/*": ["src/components/*"],
-      "@/content/*": ["src/content/*"],
-      "@/lib/*": ["src/lib/*"],
-      "@/styles/*": ["src/styles/*"]
-    }
+      "@/app/*": [
+        "src/app/*"
+      ],
+      "@/components/*": [
+        "src/components/*"
+      ],
+      "@/content/*": [
+        "src/content/*"
+      ],
+      "@/lib/*": [
+        "src/lib/*"
+      ],
+      "@/styles/*": [
+        "src/styles/*"
+      ]
+    },
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", "playwright.config.ts", "vitest.config.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "playwright.config.ts",
+    "vitest.config.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
