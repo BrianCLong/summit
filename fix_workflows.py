@@ -1,136 +1,85 @@
-import yaml
-import os
+import re
 
-def fix_workflow(filepath):
-    with open(filepath, 'r') as f:
-        content = f.read()
+def fix_ci_security():
+    path = '.github/workflows/ci-security.yml'
+    with open(path, 'r') as f:
+        lines = f.readlines()
 
-    # Load with round-trip loader if possible to preserve comments?
-    # Python yaml usually destroys comments.
-    # Since we want to preserve comments, maybe string manipulation is better for simple reordering?
-    # But reordering steps reliably with regex is hard.
-    # Let's try to detect the pattern and swap.
+    # Mapping based on previously identified line numbers
+    # 86, 144, 184, 219, 268, 295, 325, 351, 383, 422, 440, 486, 591 -> rename
+    # 516 -> pattern
 
-    lines = content.split('\n')
+    # Actually, lines might shift if I edit, but replacing in place is fine if line count doesn't change.
+    # I'll use a dictionary of line_index -> replacement
+
+    replacements = {
+        85: '          name: security-report-gitleaks\n', # 0-indexed: 86-1
+        143: '          name: security-report-semgrep\n',
+        183: '          name: security-report-snyk\n',
+        218: '          name: security-report-trivy-fs\n',
+        267: '          name: security-report-trivy-image\n',
+        294: '          name: security-report-license\n',
+        324: '          name: security-report-checkov\n',
+        350: '          name: security-report-zizmor\n',
+        382: '          name: security-report-opa\n',
+        421: '          name: security-report-cis\n',
+        439: '          name: security-report-baseline\n',
+        485: '          name: security-report-dast\n',
+        515: '          pattern: security-report-*\n', # Download step
+        590: '          name: security-report-aggregated\n',
+    }
+
     new_lines = []
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-
-        # Detect setup-node block
-        if 'uses: actions/setup-node@v4' in line:
-            # Check if pnpm/action-setup follows immediately or closely
-            # We need to capture the whole block of setup-node
-            setup_node_block = [line]
-            i += 1
-            node_indent = len(line) - len(line.lstrip())
-
-            while i < len(lines):
-                next_line = lines[i]
-                if not next_line.strip():
-                    setup_node_block.append(next_line)
-                    i += 1
-                    continue
-                next_indent = len(next_line) - len(next_line.lstrip())
-                if next_indent > node_indent:
-                    setup_node_block.append(next_line)
-                    i += 1
-                else:
-                    # End of setup-node block?
-                    # Check if it is 'with:' or valid property
-                    # If it's a new step (starts with -), break
-                    if next_line.strip().startswith('-'):
-                        break
-                    # If it's 'with:', it belongs to setup-node
-                    if next_line.strip().startswith('with:') or next_line.strip().startswith('name:'): # name should be before uses usually, but if it is separate key
-                         setup_node_block.append(next_line)
-                         i += 1
-                    else:
-                         # Assume end of block
-                         break
-
-            # Now check if the NEXT step is pnpm/action-setup
-            if i < len(lines) and 'uses: pnpm/action-setup@v4' in lines[i]:
-                pnpm_block = [lines[i]]
-                i += 1
-                pnpm_indent = len(pnpm_block[0]) - len(pnpm_block[0].lstrip())
-
-                while i < len(lines):
-                    next_line = lines[i]
-                    if not next_line.strip():
-                        pnpm_block.append(next_line)
-                        i += 1
-                        continue
-                    next_indent = len(next_line) - len(next_line.lstrip())
-                    if next_indent > pnpm_indent:
-                        # Remove 'with: { version: ... }' or 'version: ...'
-                        if 'version:' in next_line:
-                            # Skip this line (remove version)
-                            # But if 'with' is on separate line and empty?
-                            # Example: with: { version: 9 } -> remove whole line
-                            # Example:
-                            # with:
-                            #   version: 9
-                            # -> remove version line. If with becomes empty?
-                            i += 1
-                            continue
-                        pnpm_block.append(next_line)
-                        i += 1
-                    else:
-                        break
-
-                # Check for inline 'with: { version: ... }'
-                # uses: pnpm/action-setup@v4
-                # with: { version: 9 } -> this is handled above if indented?
-                # But sometimes 'uses: ...' has no children if one-liner?
-
-                # Clean up pnpm block (remove version if inline)
-                # Not handling inline regex complexity yet, assuming indented 'with' or block
-
-                # SWAP: Output pnpm block first, then setup-node block
-                new_lines.extend(pnpm_block)
-                new_lines.extend(setup_node_block)
-                continue
+    for i, line in enumerate(lines):
+        if i in replacements:
+            # Verify context to be sure
+            if 'name: security-reports' in line:
+                new_lines.append(replacements[i])
             else:
-                # No swap needed (or pnpm setup not found immediately after)
-                new_lines.extend(setup_node_block)
-                continue
+                print(f"Warning: Line {i+1} expected 'name: security-reports', found: {line.strip()}")
+                new_lines.append(line)
+        else:
+            new_lines.append(line)
 
-        # Also remove 'version: ...' from pnpm/action-setup if found independently
-        if 'uses: pnpm/action-setup@v4' in line:
-             new_lines.append(line)
-             i += 1
-             # Check next lines for version
-             indent = len(line) - len(line.lstrip())
-             while i < len(lines):
-                 next_line = lines[i]
-                 if not next_line.strip():
-                     new_lines.append(next_line)
-                     i += 1
-                     continue
-                 next_indent = len(next_line) - len(next_line.lstrip())
-                 if next_indent > indent:
-                     if 'version:' in next_line:
-                         i += 1
-                         continue
-                     if 'with:' in next_line and '{ version:' in next_line:
-                         # Inline with: { version: 9 }
-                         # We might want to remove the whole line if it only has version?
-                         # Or verify what's inside.
-                         if 'version:' in next_line:
-                             i += 1
-                             continue
-                     new_lines.append(next_line)
-                     i += 1
-                 else:
-                     break
-             continue
+    with open(path, 'w') as f:
+        f.writelines(new_lines)
+    print("Fixed ci-security.yml")
+
+def fix_pr_quality_gate():
+    path = '.github/workflows/pr-quality-gate.yml'
+    with open(path, 'r') as f:
+        lines = f.readlines()
+
+    new_lines = []
+    in_longrun_job = False
+
+    for i, line in enumerate(lines):
+        if 'name: LongRunJob Spec Advisory Validation' in line:
+            in_longrun_job = True
+
+        if in_longrun_job and 'uses: actions/setup-node@' in line:
+            # Check if we already inserted pnpm setup (idempotency check skipped for simplicity but good practice)
+            # We want to insert before this line
+            indent = line[:line.find('uses:')]
+            new_lines.append(f'{indent}name: Install pnpm\n')
+            new_lines.append(f'{indent}uses: pnpm/action-setup@v4\n')
+            new_lines.append('\n')
+            in_longrun_job = False # Reset to avoid inserting multiple times if multiple setup-node steps (unlikely here)
+
+        # Fix SBOM script call
+        if 'run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json' in line:
+            indent = line[:line.find('run:')]
+            new_lines.append(f'{indent}run: |\n')
+            new_lines.append(f'{indent}  mkdir -p artifacts/sbom\n')
+            new_lines.append(f'{indent}  syft packages dir:. -o cyclonedx-json --file artifacts/sbom/sbom.json\n')
+            continue # Skip adding the original line
 
         new_lines.append(line)
-        i += 1
 
-    return '\n'.join(new_lines)
+    with open(path, 'w') as f:
+        f.writelines(new_lines)
+    print("Fixed pr-quality-gate.yml")
 
-# This naive parser is risky.
-# Let's do string replacement with regex for 'version: ...' removal
-# And specialized replacement for swapping.
+if __name__ == '__main__':
+    fix_ci_security()
+    fix_pr_quality_gate()
