@@ -84,7 +84,7 @@ jobs:
         with:
           retention-days: 14
           name: security-reports
-          path: results.sarif
+          path: security-reports/gitleaks.sarif
           if-no-files-found: ignore
 
   sast:
@@ -128,6 +128,7 @@ jobs:
         uses: returntocorp/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1
         with:
           config: p/ci
+          args: --sarif --output security-reports/semgrep.sarif
           generateSarif: true
           sarifFile: ${{ env.REPORT_DIR }}/semgrep.sarif
           auditOn: push
@@ -345,7 +346,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p rendered
+          helm dependency build infra/helm/intelgraph
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > rendered/dev.yaml
+          helm dependency build infra/helm/intelgraph
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > rendered/prod.yaml
       - name: Conftest policy checks
         run: conftest test rendered --policy policies/opa
@@ -354,7 +357,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-opa
           path: rendered
 
   cis-benchmark:
@@ -374,7 +377,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p rendered
+          helm dependency build infra/helm/intelgraph
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > rendered/dev.yaml
+          helm dependency build infra/helm/intelgraph
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > rendered/prod.yaml
       - name: Run Kubernetes CIS benchmark
         run: |
@@ -426,7 +431,7 @@ jobs:
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
         run: |
-          docker compose -f docker-compose.yml up -d server client
+          docker compose -f docker-compose.yml up -d server
       - name: Wait for application
         run: |
           for i in {1..30}; do
@@ -486,10 +491,10 @@ jobs:
       - name: Download all security reports
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: security-reports
+          pattern: security-reports-*
           path: aggregated-security
           merge-multiple: true
-          if-no-artifact-found: warn
+
       - name: Generate coverage metrics
         id: metrics
         env:
@@ -559,7 +564,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          pattern: security-reports-*
           path: aggregated-security/security-summary.json
       - name: Record dashboard location
         id: dashboard
