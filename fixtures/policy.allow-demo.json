@@ -1,0 +1,7 @@
+{
+  "version": "v1",
+  "name": "allow-demo",
+  "allow_tools": [
+    "demo.echo"
+  ]
+}
