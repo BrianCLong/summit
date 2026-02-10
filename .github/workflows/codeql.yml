@@ -29,7 +29,7 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    if: false  # Temporarily disabled for GA merge surge
+    if: false 
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
