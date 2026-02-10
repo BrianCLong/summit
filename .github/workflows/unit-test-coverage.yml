@@ -6,12 +6,6 @@ on:
   pull_request:
     branches: [main, develop]
   merge_group:
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      - "LICENSE"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - server/**, client/** (code changes must trigger this)
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -23,6 +17,7 @@ env:
 
 jobs:
   test:
+    name: test (${{ matrix.node-version }})
     runs-on: ubuntu-latest
 
     strategy:
