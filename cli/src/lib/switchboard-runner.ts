@@ -14,6 +14,11 @@ import {
 } from './switchboard-capsule.js';
 import { CapsuleLedger } from './switchboard-ledger.js';
 import { CapsulePolicyGate, CapsulePolicyAction } from './switchboard-policy.js';
+import {
+  ActionReceiptGenerator,
+  PolicyPreflight,
+  ReceiptStore,
+} from '@summit/switchboard';
 
 export interface CapsuleRunOptions {
   manifestPath: string;
@@ -201,6 +206,18 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
 
   const gate = new CapsulePolicyGate(manifest, options.waiverToken);
 
+  // V1 Action Receipts & Policy Preflight Integration
+  const preflight = new PolicyPreflight(
+    manifest.allowed_commands.map((cmd) => `exec:${cmd}`)
+  );
+  const receiptStore = new ReceiptStore(
+    path.join(repoRoot, '.switchboard', 'receipts.jsonl')
+  );
+  const policyContext = {
+    identity: process.env.USER || 'unknown',
+    tenant: 'default-tenant',
+  };
+
   const readPaths = normalizeCapsulePaths(manifest.allowed_paths.read);
   const writePaths = normalizeCapsulePaths(manifest.allowed_paths.write);
 
@@ -241,7 +258,32 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       const stepId = step.id ?? `step-${index + 1}`;
       const stepLabel = step.name ?? stepId;
 
-      evaluatePolicy(ledger, gate, { type: 'exec', command: step.command }, step.command);
+      // Policy Preflight V1
+      const preflightDecision = preflight.evaluate(policyContext, {
+        capability: 'exec',
+        action: step.command,
+      });
+
+      if (!preflightDecision.allow) {
+        const denyReceipt = ActionReceiptGenerator.generate({
+          actor: policyContext,
+          tool: {
+            capability: 'exec',
+            action: step.command,
+            inputs: { args: step.args },
+          },
+          policy: { decision: 'deny', reason: preflightDecision.reason },
+        });
+        receiptStore.append(denyReceipt);
+        throw new Error(`Policy Preflight denied ${step.command}: ${preflightDecision.reason}`);
+      }
+
+      evaluatePolicy(
+        ledger,
+        gate,
+        { type: 'exec', command: step.command },
+        step.command
+      );
       evaluatePolicy(ledger, gate, { type: 'network', allow_network: step.allow_network }, 'network');
       evaluatePathActions(step, gate, ledger);
 
@@ -255,6 +297,19 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
         encoding: 'utf8',
       });
       const durationMs = Date.now() - start;
+
+      // Generate Success Receipt V1
+      const allowReceipt = ActionReceiptGenerator.generate({
+        actor: policyContext,
+        tool: {
+          capability: 'exec',
+          action: step.command,
+          inputs: { args: step.args },
+        },
+        policy: { decision: 'allow' },
+        outputs: { exit_code: result.status, stdout_len: result.stdout?.length },
+      });
+      receiptStore.append(allowReceipt);
 
       const stdoutPath = path.join(outputsDir, `${stepId}.stdout.log`);
       const stderrPath = path.join(outputsDir, `${stepId}.stderr.log`);
