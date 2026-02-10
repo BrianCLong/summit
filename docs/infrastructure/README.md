@@ -70,49 +70,36 @@ This directory contains documentation for the enterprise infrastructure improvem
 ### 1. API Documentation
 
 ```bash
-
 # Start server
-
 make up
 
 # Access documentation
-
 open http://localhost:4000/api/docs
-
 ```
 
 ### 2. Logging Infrastructure
 
 ```bash
-
 # Start ELK stack
-
 docker-compose -f docker-compose.dev.yml -f docker-compose.logging.yml up
 
 # Access Kibana
-
 open http://localhost:5601
-
 ```
 
 ### 3. Job Queues
 
 ```bash
-
 # Start server (includes Redis)
-
 make up
 
 # Access Bull Board dashboard
-
 open http://localhost:4000/queues
-
 ```
 
 ## Architecture Overview
 
 ```
-
 ┌─────────────────────────────────────────────────────┐
 │                 IntelGraph Platform                 │
 ├─────────────────┬───────────────────┬───────────────┤
@@ -136,7 +123,6 @@ open http://localhost:4000/queues
 │  └──────────┘   │  └──────────┘     │  └─────────┘  │
 │                 │                   │               │
 └─────────────────┴───────────────────┴───────────────┘
-
 ```
 
 ## Testing
@@ -146,38 +132,29 @@ open http://localhost:4000/queues
 ```bash
 cd server
 npm test -- api-docs.test.ts
-
 ```
 
 ### Logging Tests
 
 ```bash
-
 # Check Winston logger
-
 node -e "import logger from './server/src/utils/logger.js'; logger.info('Test log')"
 
 # Check ELK stack
-
 curl http://localhost:9200/_cluster/health
-
 ```
 
 ### Queue Tests
 
 ```bash
-
 # Check Bull Board
-
 curl http://localhost:4000/queues/health
 
 # Add test job
-
 node -e "
 import { addJob, QueueName } from './server/src/queues/config.js';
 await addJob(QueueName.EMAIL, 'test', { message: 'Test' });
 "
-
 ```
 
 ## Quality Checklist

@@ -22,7 +22,6 @@ Summit's multi-cloud infrastructure platform provides unified orchestration, dep
 ### High-Level Architecture
 
 ```
-
 ┌─────────────────────────────────────────────────────────────┐
 │                    Summit Multi-Cloud Platform               │
 ├─────────────────────────────────────────────────────────────┤
@@ -47,7 +46,6 @@ Summit's multi-cloud infrastructure platform provides unified orchestration, dep
 │  └─────────────┘  └─────────────┘  └─────────────┘       │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
-
 ```
 
 ### Key Components
@@ -81,22 +79,15 @@ Summit's multi-cloud infrastructure platform provides unified orchestration, dep
 ### Directory Structure
 
 ```
-
 infrastructure/
 ├── terraform/
 │   └── multi-cloud/
 │       ├── main.tf                 # Root configuration
-
 │       ├── variables.tf            # Input variables
-
 │       ├── aws/                    # AWS-specific resources
-
 │       ├── azure/                  # Azure-specific resources
-
 │       ├── gcp/                    # GCP-specific resources
-
 │       └── modules/                # Shared modules
-
 │           ├── hybrid-connectivity/
 │           ├── service-mesh/
 │           ├── cost-optimization/
@@ -105,78 +96,62 @@ infrastructure/
 └── kubernetes/
     └── multi-cluster/
         ├── istio/                  # Service mesh configs
-
         ├── configs/                # K8s manifests
-
         └── policies/               # Network & RBAC policies
-
 ```
 
 ### Terraform Deployment
 
 ```bash
-
 # Initialize Terraform
-
 cd infrastructure/terraform/multi-cloud
 terraform init
 
 # Create a terraform.tfvars file
-
 cat > terraform.tfvars <<EOF
 environment = "production"
 project_name = "summit"
 cost_center = "engineering"
 
 # AWS Configuration
-
 aws_primary_region = "us-east-1"
 aws_secondary_region = "us-west-2"
 aws_vpc_cidr = "10.0.0.0/16"
 
 # Azure Configuration
-
 azure_subscription_id = "your-subscription-id"
 azure_tenant_id = "your-tenant-id"
 azure_location = "eastus"
 azure_vnet_cidr = "10.1.0.0/16"
 
 # GCP Configuration
-
 gcp_project_id = "your-project-id"
 gcp_primary_region = "us-central1"
 gcp_vpc_cidr = "10.2.0.0/16"
 
 # Kubernetes
-
 kubernetes_version = "1.28"
 min_nodes = 3
 max_nodes = 10
 
 # Connectivity
-
 enable_vpn = true
 enable_cross_cloud_peering = true
 
 # Cost Optimization
-
 monthly_budget = 10000
 cost_alert_email = "devops@company.com"
 
 # Disaster Recovery
-
 rto_minutes = 60
 rpo_minutes = 15
 EOF
 
 # Plan deployment
-
 terraform plan -out=tfplan
 
 # Apply infrastructure
-
 terraform apply tfplan
-
 ```
 
 ### State Management
@@ -191,7 +166,6 @@ backend "s3" {
   encrypt        = true
   dynamodb_table = "summit-terraform-lock"
 }
-
 ```
 
 ## Cloud Abstraction Layer
@@ -220,7 +194,6 @@ const data = await storage.download('my-bucket', 'file.txt');
 
 // List objects
 const result = await storage.list('my-bucket', { prefix: 'documents/' });
-
 ```
 
 ### Multi-Cloud with Failover
@@ -235,7 +208,6 @@ const storage = CloudFactory.createMultiCloudStorage([
 
 // Operations failover automatically on provider failure
 await storage.upload('my-bucket', 'file.txt', data);
-
 ```
 
 ### Supported Services
@@ -250,18 +222,14 @@ await storage.upload('my-bucket', 'file.txt', data);
 ### Setup
 
 ```bash
-
 # Configure kubectl contexts
-
 aws eks update-kubeconfig --name summit-production-eks --region us-east-1 --alias eks-primary
 az aks get-credentials --name summit-production-aks --resource-group summit-production-rg --context aks-primary
 gcloud container clusters get-credentials summit-production-gke --region us-central1 --context gke-primary
 
 # Deploy Istio multi-cluster service mesh
-
 cd infrastructure/kubernetes/multi-cluster/istio
 ./setup-multi-cluster.sh
-
 ```
 
 ### Service Mesh Features
@@ -287,7 +255,6 @@ spec:
   ports:
   - port: 8080
     targetPort: 8080
-
 ```
 
 Istio automatically:
@@ -303,13 +270,11 @@ Istio automatically:
 Each cloud provider has VPN gateway for secure connectivity:
 
 ```
-
 On-Premise Network
         │
         ├─── VPN ───► AWS VPC (10.0.0.0/16)
         ├─── VPN ───► Azure VNet (10.1.0.0/16)
         └─── VPN ───► GCP VPC (10.2.0.0/16)
-
 ```
 
 ### Cross-Cloud Peering
@@ -317,12 +282,10 @@ On-Premise Network
 VPCs are peered for low-latency connectivity:
 
 ```
-
 AWS VPC (10.0.0.0/16)
     │
     ├─── Peering ───► Azure VNet (10.1.0.0/16)
     └─── Peering ───► GCP VPC (10.2.0.0/16)
-
 ```
 
 ### Private Connectivity Options
@@ -360,17 +323,13 @@ AWS VPC (10.0.0.0/16)
 - **Rollback**: Automatic
 
 ```bash
-
 # Initiate DR test
-
 curl -X POST http://disaster-recovery:3002/api/failover/test \
   -H "Content-Type: application/json" \
   -d '{"cluster": "eks-primary"}'
 
 # Monitor test progress
-
 curl http://disaster-recovery:3002/api/failover/status/:test-id
-
 ```
 
 ## Security
@@ -411,12 +370,9 @@ curl http://disaster-recovery:3002/api/failover/status/:test-id
 4. **Disaster Recovery**: Backup status, RTO/RPO
 
 Access dashboards:
-
 ```bash
 kubectl port-forward -n monitoring svc/grafana 3000:80
-
 # Open http://localhost:3000
-
 ```
 
 ### Alerts
@@ -439,95 +395,67 @@ kubectl port-forward -n monitoring svc/grafana 3000:80
 ### Step-by-Step Deployment
 
 1. **Configure Cloud Credentials**
-
 ```bash
-
 # AWS
-
 aws configure
 
 # Azure
-
 az login
 
 # GCP
-
 gcloud auth login
 gcloud config set project your-project-id
-
 ```
 
 2. **Deploy Infrastructure**
-
 ```bash
 cd infrastructure/terraform/multi-cloud
 terraform init
 terraform plan
 terraform apply
-
 ```
 
 3. **Configure kubectl**
-
 ```bash
-
 # Run the output commands from Terraform
-
 terraform output kubeconfig_commands
-
 ```
 
 4. **Deploy Service Mesh**
-
 ```bash
 cd infrastructure/kubernetes/multi-cluster/istio
 ./setup-multi-cluster.sh
-
 ```
 
 5. **Deploy Applications**
-
 ```bash
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=eks-primary
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=aks-primary
 kubectl apply -f infrastructure/kubernetes/multi-cluster/configs/ --context=gke-primary
-
 ```
 
 6. **Deploy Services**
-
 ```bash
-
 # Cost Optimization Service
-
 kubectl apply -f services/cost-optimization/k8s/
 
 # Cloud Orchestrator
-
 kubectl apply -f services/cloud-orchestrator/k8s/
 
 # Disaster Recovery
-
 kubectl apply -f services/disaster-recovery/k8s/
-
 ```
 
 7. **Verify Deployment**
-
 ```bash
-
 # Check cluster health
-
 istioctl proxy-status
 
 # Verify cross-cluster connectivity
-
 kubectl exec -it pod/test-pod -- curl http://api-service.summit.svc.cluster.local:8080
 
 # Check service mesh
-
 kubectl get all -n istio-system
-
 ```
 
 ## Operations
@@ -542,57 +470,40 @@ kubectl get all -n istio-system
 ### Scaling
 
 ```bash
-
 # Scale node pool (AWS)
-
 eksctl scale nodegroup --cluster=summit-production-eks --name=general --nodes=5
 
 # Scale node pool (Azure)
-
 az aks nodepool scale --resource-group summit-production-rg --cluster-name summit-production-aks --name default --node-count 5
 
 # Scale node pool (GCP)
-
 gcloud container clusters resize summit-production-gke --num-nodes=5
-
 ```
 
 ### Troubleshooting
 
 **Issue: Cross-cluster communication failing**
-
 ```bash
-
 # Check Istio connectivity
-
 istioctl proxy-config cluster pod/api-pod.summit -n summit
 
 # Verify service discovery
-
 kubectl get serviceentries -A
 
 # Check mTLS
-
 istioctl authn tls-check pod/api-pod.summit api-service.summit.svc.cluster.local
-
 ```
 
 **Issue: High costs**
-
 ```bash
-
 # Get rightsizing recommendations
-
 curl http://cost-optimization:3000/api/rightsizing/recommendations
 
 # Check idle resources
-
 curl http://cost-optimization:3000/api/idle-resources
 
 # Review cost breakdown
-
 curl http://cost-optimization:3000/api/costs/breakdown?groupBy=service
-
 ```
 
 ### Maintenance Windows

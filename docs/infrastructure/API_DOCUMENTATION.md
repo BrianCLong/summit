@@ -27,11 +27,8 @@ Start the server and access documentation at:
 ### Production
 
 Documentation endpoints are available in production at:
-
 ```
-
 https://api.intelgraph.example.com/api/docs
-
 ```
 
 ## OpenAPI Specification
@@ -52,7 +49,6 @@ The OpenAPI specification is located at `/openapi/spec.yaml` and includes:
    ```bash
    python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
    ```
-
 3. Restart the server to see changes
 4. Test endpoints using Swagger UI
 
@@ -77,7 +73,6 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-
 ```
 
 ## SDK Generation
@@ -87,16 +82,12 @@ components:
 Generate client SDKs automatically:
 
 ```bash
-
 # Generate all SDKs
-
 ./scripts/generate-sdk.sh all
 
 # Generate specific SDK
-
 ./scripts/generate-sdk.sh typescript
 ./scripts/generate-sdk.sh python
-
 ```
 
 ### TypeScript SDK
@@ -116,7 +107,6 @@ const response = await fetch('http://localhost:4000/api/cases', {
 
 const cases: paths['/api/cases']['get']['responses']['200']['content']['application/json']
   = await response.json();
-
 ```
 
 ### Python SDK
@@ -126,7 +116,6 @@ Install the generated Python client:
 ```bash
 cd generated-clients/python
 pip install -e .
-
 ```
 
 Usage:
@@ -144,7 +133,6 @@ with ApiClient(configuration) as api_client:
     api_instance = cases_api.CasesApi(api_client)
     cases = api_instance.get_cases()
     print(cases)
-
 ```
 
 ## GraphQL Documentation
@@ -158,9 +146,7 @@ The GraphQL schema is automatically documented and available at:
 ### Example Queries
 
 ```graphql
-
 # Get investigation with entities
-
 query GetInvestigation($id: ID!) {
   investigation(id: $id) {
     id
@@ -173,7 +159,6 @@ query GetInvestigation($id: ID!) {
     }
   }
 }
-
 ```
 
 ## Authentication
@@ -183,7 +168,6 @@ All API endpoints (except documentation and health checks) require JWT authentic
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   http://localhost:4000/api/cases
-
 ```
 
 ### Obtaining a Token
@@ -200,13 +184,10 @@ API requests are rate-limited based on:
 - Request window (default: 60 seconds)
 
 Rate limit headers in responses:
-
 ```
-
 X-RateLimit-Limit: 600
 X-RateLimit-Remaining: 599
 X-RateLimit-Reset: 1234567890
-
 ```
 
 ## Testing API Endpoints
@@ -223,20 +204,16 @@ X-RateLimit-Reset: 1234567890
 ### Using cURL
 
 ```bash
-
 # List cases
-
 curl -H "Authorization: Bearer $TOKEN" \
   http://localhost:4000/api/cases
 
 # Create case
-
 curl -X POST \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"title": "New Investigation", "status": "draft"}' \
   http://localhost:4000/api/cases
-
 ```
 
 ## Troubleshooting
@@ -244,10 +221,8 @@ curl -X POST \
 ### OpenAPI spec not loading
 
 Check that `/openapi/spec.yaml` exists and is valid YAML:
-
 ```bash
 python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
-
 ```
 
 ### Swagger UI not showing endpoints
@@ -259,16 +234,13 @@ python3 -c "import yaml; yaml.safe_load(open('openapi/spec.yaml', 'r'))"
 ### SDK generation fails
 
 Ensure Docker is running for Python client generation:
-
 ```bash
 docker ps
-
 ```
 
 ## Architecture
 
 ```
-
 ┌─────────────────┐
 │   OpenAPI Spec  │
 │  spec.yaml      │
@@ -290,7 +262,6 @@ docker ps
     │  TypeScript │  Python  │
     │   Client    │  Client  │
     └─────────────┴──────────┘
-
 ```
 
 ## Files
