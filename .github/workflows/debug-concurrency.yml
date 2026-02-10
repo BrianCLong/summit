@@ -1,9 +1,9 @@
 name: Debug Concurrency logic
 on:
   push:
-    branches: [main]
+    branches: ["debug/concurrency-test"]
   pull_request:
-    branches: [main]
+    branches: ["main"]
   merge_group:
 
 concurrency:
@@ -12,8 +12,7 @@ concurrency:
 
 jobs:
   debug:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - run: echo "Concurrency key worked!"
-      - run: echo "Event name: ${{ github.event_name }}"
-      - run: echo "Ref: ${{ github.ref }}"
