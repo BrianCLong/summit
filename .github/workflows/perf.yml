@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   perf:
-    if: false  # Temporarily disabled for GA merge surge
+    if: false 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
