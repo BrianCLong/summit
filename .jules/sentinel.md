@@ -60,13 +60,3 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `apps/intelgraph-api/src/routes/internalStatus.ts` endpoints relied solely on authentication presence (`req.auth`) without verifying user roles. This allowed any authenticated user (regardless of privilege) to access sensitive system health, governance status, and infrastructure details.
 **Learning:** Checking for "is authenticated" is insufficient for internal or administrative endpoints. All internal endpoints must strictly enforce Role-Based Access Control (RBAC).
 **Prevention:** Enhance authentication middleware to also validate specific roles (e.g., `admin`, `platform_admin`) for sensitive routes. Adopt a "verify-role" pattern immediately after authentication checks.
-
-## 2026-02-18 - [HIGH] Broken Access Control on Administrative and Evidence Endpoints
-**Vulnerability:** Several sensitive endpoints defined directly in `server/src/app.ts` (e.g., `/search/evidence`, `/monitoring`, and various `/api/admin` routers) were missing authentication or relied on manual, inconsistent role checks.
-**Learning:** Inline routes in main application files are easily overlooked during security audits. Additionally, inconsistent casing in role names (e.g., 'admin' vs 'ADMIN') can lead to manual check bypasses or availability issues.
-**Prevention:** Enforce a "deny-by-default" posture by applying `authenticateToken` and `ensureRole(['ADMIN', 'admin'])` middleware to all administrative and sensitive data endpoints. Always use standardized middleware rather than manual property checks for role validation.
-
-## 2026-02-19 - [CRITICAL] Tenant Scoping Bypass via SQL Comments
-**Vulnerability:** The `validateAndScopeQuery` function in `server/src/db/query-scope.ts` naively appended `WHERE tenant_id = ...` to the end of SQL queries. This allowed attackers to use SQL comments (`--`) to neutralize the tenant scoping clause, effectively bypassing tenant isolation.
-**Learning:** Naive string concatenation for security controls is fragile. Security logic must be robust against input variations (like comments) or structural manipulation.
-**Prevention:** When auto-injecting security clauses into SQL, validate that the query structure is safe (e.g., no comments) and sanitize inputs (e.g., strip trailing semicolons). Use parser-based modification or strict validation instead of simple concatenation where possible.

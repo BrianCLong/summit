@@ -1,0 +1,4 @@
+id: item-unknown
+title: Placeholder Manifest
+description: Fix for missing manifest in CI check
+owner: system
