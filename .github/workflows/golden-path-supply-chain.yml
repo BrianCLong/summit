@@ -35,7 +35,7 @@ jobs:
     secrets: inherit
 
   build-client:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
+    if: github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true')
     name: Build Client (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
