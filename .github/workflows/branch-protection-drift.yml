@@ -45,7 +45,6 @@ env:
 jobs:
   check-drift:
     name: Check Branch Protection Drift
-    if: false 
     runs-on: ubuntu-latest
 
     outputs:
@@ -108,25 +107,40 @@ jobs:
 
           chmod +x scripts/release/check_branch_protection_drift.sh
           chmod +x scripts/release/extract_required_checks_from_policy.sh
+          chmod +x scripts/release/verify_branch_protection_snapshot.sh
 
-          scripts/release/check_branch_protection_drift.sh \
+          EXIT_CODE=0
+
+          echo "Step 1: Check drift against REQUIRED_CHECKS_POLICY.yml"
+          if ! ./scripts/release/check_branch_protection_drift.sh \
             --repo "${{ github.repository }}" \
             --branch "${{ steps.branch.outputs.branch }}" \
             --out-dir "${{ env.OUT_DIR }}" \
-            --verbose
+            --fail-on-drift \
+            --verbose; then
+            echo "❌ Step 1 FAILED"
+            EXIT_CODE=1
+          fi
+
+          echo "Step 2: Check drift against docs/ci/snapshots/ branch protection JSON"
+          if ! ./scripts/release/verify_branch_protection_snapshot.sh \
+            --branch "${{ steps.branch.outputs.branch }}"; then
+            echo "❌ Step 2 FAILED"
+            EXIT_CODE=1
+          fi
 
           # Extract results for outputs
-          DRIFT=$(jq -r '.drift_detected' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
-          MISSING=$(jq -r '.summary.missing_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
-          EXTRA=$(jq -r '.summary.extra_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+          if [[ -f "${{ env.OUT_DIR }}/branch_protection_drift_report.json" ]]; then
+            DRIFT=$(jq -r '.drift_detected' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+            MISSING=$(jq -r '.summary.missing_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+            EXTRA=$(jq -r '.summary.extra_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
 
-          echo "drift_detected=${DRIFT}" >> $GITHUB_OUTPUT
-          echo "missing_count=${MISSING}" >> $GITHUB_OUTPUT
-          echo "extra_count=${EXTRA}" >> $GITHUB_OUTPUT
+            echo "drift_detected=${DRIFT}" >> $GITHUB_OUTPUT
+            echo "missing_count=${MISSING}" >> $GITHUB_OUTPUT
+            echo "extra_count=${EXTRA}" >> $GITHUB_OUTPUT
+          fi
 
-          echo "Drift detected: ${DRIFT}"
-          echo "Missing in GitHub: ${MISSING}"
-          echo "Extra in GitHub: ${EXTRA}"
+          exit $EXIT_CODE
 
       - name: Upload Drift Report
         uses: actions/upload-artifact@v4 # v4
