@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "evidence_id": "EVID-MARS-AUTO1",
+  "lessons": [
+    {
+      "lesson_id": "L-EVID-MARS-AUTO1",
+      "source": "same_branch",
+      "diff_summary": "--- solution_a\n+++ solution_b\n@@ -1 +1 @@\n-Initial approach using standard MCTS.\n+Improved approach using budget-aware MCTS with cost-constrained expansion.",
+      "effect": "positive",
+      "redactions_applied": []
+    }
+  ]
+}

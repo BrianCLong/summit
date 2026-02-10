@@ -1,0 +1,121 @@
+{
+  "task": "Automated AI Research",
+  "total_iterations": 100,
+  "seed": 42,
+  "steps": [
+    {
+      "id": "step_1",
+      "type": "design",
+      "cost": 10,
+      "cumulative_cost": 10
+    },
+    {
+      "id": "step_2",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 15
+    },
+    {
+      "id": "step_3",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 20
+    },
+    {
+      "id": "step_4",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 25
+    },
+    {
+      "id": "step_5",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 30
+    },
+    {
+      "id": "step_6",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 35
+    },
+    {
+      "id": "step_7",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 40
+    },
+    {
+      "id": "step_8",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 45
+    },
+    {
+      "id": "step_9",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 50
+    },
+    {
+      "id": "step_10",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 55
+    },
+    {
+      "id": "step_11",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 60
+    },
+    {
+      "id": "step_12",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 65
+    },
+    {
+      "id": "step_13",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 70
+    },
+    {
+      "id": "step_14",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 75
+    },
+    {
+      "id": "step_15",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 80
+    },
+    {
+      "id": "step_16",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 85
+    },
+    {
+      "id": "step_17",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 90
+    },
+    {
+      "id": "step_18",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 95
+    },
+    {
+      "id": "step_19",
+      "type": "decompose",
+      "cost": 5,
+      "cumulative_cost": 100
+    }
+  ]
+}

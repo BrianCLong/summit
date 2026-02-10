@@ -15,7 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **MARS Framework**: Implemented budget-aware reflective search loop including MCTS planning, modular task decomposition, and comparative reflective memory.
+- **MARS Framework Implementation**: Added Modular Agent with Reflective Search (`summit.mars`) for autonomous AI research.
+  - Implemented budget-aware Monte Carlo Tree Search (MCTS) planner.
+  - Added Design-Decompose-Implement (DDI) task decomposition pipeline.
+  - Implemented comparative reflective memory for lesson distillation from solution diffs.
+  - Added machine-verifiable artifact generation (`plan.json`, `ledger.json`, `lessons.json`, `metrics.json`, `stamp.json`).
+  - Integrated PII and secret redaction for reflective insights.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
