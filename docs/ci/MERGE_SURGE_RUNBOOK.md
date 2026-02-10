@@ -96,3 +96,4 @@ To validate the Surge architecture, a reference drill was performed:
 ### Maintenance
 
 Platform Engineering should audit the `MERGE_SURGE` status weekly. It is intended as a tactical tool, not a permanent baseline.
+\n# Triggering CODEOWNERS review
