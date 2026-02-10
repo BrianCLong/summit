@@ -1,0 +1,35 @@
+name: "Pilot intake"
+description: "Collect deployment + compliance requirements for a Summit pilot."
+labels: ["lane:pilot", "triage-needed"]
+body:
+  - type: input
+    id: account
+    attributes:
+      label: Target account / org
+      placeholder: "Acme Corp"
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment model
+      options:
+        - On-prem
+        - VPC-adjacent
+        - SaaS (if applicable)
+    validations:
+      required: true
+  - type: checkboxes
+    id: compliance
+    attributes:
+      label: Compliance artifacts required
+      options:
+        - label: Audit logging ("who saw what when")
+        - label: Access review / RBAC evidence
+        - label: Data retention / never-log list
+        - label: Model/provider allowlist evidence
+  - type: textarea
+    id: success
+    attributes:
+      label: Success metrics (Gain Index candidates)
+      placeholder: "Time saved, error rate reduction, intervention rate, etc."
