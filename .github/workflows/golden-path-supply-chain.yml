@@ -5,11 +5,10 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
-  merge_group:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -21,7 +20,7 @@ permissions:
 
 jobs:
   build-server:
-    if: github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true')
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Build Server (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
@@ -35,7 +34,7 @@ jobs:
     secrets: inherit
 
   build-client:
-    if: github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true')
+    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Build Client (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
     with:
