@@ -201,6 +201,10 @@ server:
       value: production
     - name: PORT
       value: "4000"
+    - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+      value: http://otel-collector.monitoring.svc.cluster.local:4318
+    - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+      value: http://otel-collector.monitoring.svc.cluster.local:4318
     - name: NEO4J_URI
       value: bolt://neo4j:7687
     - name: POSTGRES_HOST
