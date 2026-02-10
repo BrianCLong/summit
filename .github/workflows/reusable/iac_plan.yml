@@ -42,19 +42,17 @@ jobs:
             core.setOutput('paths', touched.map(f => f.filename).join(','));
 
       - name: Set up Terraform
-        if: steps.changes.outputs.changed == 'true'
+        if: ((steps.changes.outputs.changed == 'true') && (steps.changes.outputs.changed == 'true')) && (steps.changes.outputs.changed != 'true')
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with:
           terraform_version: 1.9.8
 
       - name: Validate infrastructure plans
-        if: steps.changes.outputs.changed == 'true'
         run: |
           terraform -chdir=terraform init -backend=false
           terraform -chdir=terraform validate
 
       - name: Report skipped status
-        if: steps.changes.outputs.changed != 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
