@@ -588,12 +588,16 @@ export const createApp = async () => {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
 
-  app.get('/search/evidence', authenticateToken, async (req, res) => {
+  app.get('/search/evidence', authenticateToken, ensureRole(['ADMIN', 'ANALYST']), async (req: Request, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
 
     if (!q) {
       return res.status(400).send({ error: "Query parameter 'q' is required" });
     }
+
+    const tenantId = req.user?.tenantId || req.user?.tenant_id || 'global';
+    const parsedSkip = Math.max(0, parseInt(skip as string, 10) || 0);
+    const parsedLimit = Math.min(100, Math.max(1, parseInt(limit as string, 10) || 10));
 
     const driver = getNeo4jDriver();
     const session = driver.session();
@@ -601,6 +605,7 @@ export const createApp = async () => {
     try {
       const searchQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN node, score
         SKIP $skip
         LIMIT $limit
@@ -608,16 +613,18 @@ export const createApp = async () => {
 
       const countQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN count(node) as total
       `;
 
       const [searchResult, countResult] = await Promise.all([
         session.run(searchQuery, {
           query: q,
-          skip: Number(skip),
-          limit: Number(limit),
+          tenantId,
+          skip: parsedSkip,
+          limit: parsedLimit,
         }),
-        session.run(countQuery, { query: q }),
+        session.run(countQuery, { query: q, tenantId }),
       ]);
 
       const evidence = searchResult.records.map((record: any) => ({
