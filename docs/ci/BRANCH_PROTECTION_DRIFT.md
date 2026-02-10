@@ -2,7 +2,7 @@
 
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
-**Last Updated:** 2026-02-01
+**Last Updated:** 2026-01-23
 
 ---
 
@@ -179,16 +179,7 @@ When drift is resolved, existing drift issues are automatically closed with a re
 
 ## Required Permissions
 
-### GitHub App Authentication (Required)
-
-Branch protection APIs require elevated read permissions that the default `GITHUB_TOKEN` does not provide. Configure a GitHub App and store its credentials as repository secrets:
-
-- **BRANCH_PROTECTION_APP_ID** (GitHub App ID)
-- **BRANCH_PROTECTION_APP_PRIVATE_KEY** (PEM private key)
-
-The workflow generates an installation token via `actions/create-github-app-token@v1`. If token generation fails, the workflow falls back to `GITHUB_TOKEN` and records a warning in the workflow summary.
-
-### GitHub Token (Workflow Runtime)
+### GitHub Token
 
 The workflow needs:
 
@@ -200,15 +191,10 @@ The workflow needs:
 
 Reading branch protection requires one of:
 
-- GitHub App with **Administration: Read-only** (recommended)
 - Admin access to the repository
 - `read:org` scope (for organization repos)
 
 If permissions are insufficient, the script reports the limitation and creates an issue explaining the access requirement.
-
-### Governance Reference
-
-- [Summit Readiness Assertion](../SUMMIT_READINESS_ASSERTION.md)
 
 ---
 
@@ -348,10 +334,10 @@ The GitHub token lacks access to read branch protection.
 
 ## Change History
 
-| Version | Date       | Changes                                                                                                                                                                                                             |
-| ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version | Date       | Changes                                   |
+| ------- | ---------- | ----------------------------------------- |
 | 1.1.0   | 2026-01-23 | Fix extraction to use `branch_protection.required_status_checks.contexts` instead of `always_required`; migrate from file-based state to issue-based state discovery; resolve "Could not push state update" warning |
-| 1.0.0   | 2026-01-08 | Initial branch protection drift detection                                                                                                                                                                           |
+| 1.0.0   | 2026-01-08 | Initial branch protection drift detection |
 
 ---
 

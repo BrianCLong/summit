@@ -5,7 +5,7 @@
  * Represents an online account or handle on a platform
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface CanonicalAccount extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Account';

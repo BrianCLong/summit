@@ -8,12 +8,12 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { DAGExecutor } from './dags/dag-executor.js';
-import { LegalBasis, DataLicense } from './dags/types.js';
-import { CitationValidator } from './dags/citation-validator.js';
-import { createR1RapidAttributionRunbook } from './r1-rapid-attribution.js';
-import { createR2PhishingClusterRunbook } from './r2-phishing-cluster.js';
-import { createR3DisinformationNetworkRunbook } from './r3-disinformation-network.js';
+import { DAGExecutor } from './dags/dag-executor';
+import { LegalBasis, DataLicense } from './dags/types';
+import { CitationValidator } from './dags/citation-validator';
+import { createR1RapidAttributionRunbook } from './r1-rapid-attribution';
+import { createR2PhishingClusterRunbook } from './r2-phishing-cluster';
+import { createR3DisinformationNetworkRunbook } from './r3-disinformation-network';
 
 describe('DAG-Based Runbooks', () => {
   describe('R1: Rapid Attribution (CTI)', () => {

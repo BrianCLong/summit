@@ -6,13 +6,13 @@ import {
     ChatCompletionResult,
     LlmProvider,
     RoutingPolicy
-} from './types.js';
-import { DefaultRoutingPolicy } from './router/default-policy.js';
-import { MockProvider } from './providers/mock-provider.js';
-import { OpenAiProvider } from './providers/openai-provider.js';
-import { AnthropicProvider } from './providers/anthropic-provider.js';
-import { safetyPipeline } from './safety/pipeline.js';
-import { llmMeteringService } from './metering/service.js';
+} from './types';
+import { DefaultRoutingPolicy } from './router/default-policy';
+import { MockProvider } from './providers/mock-provider';
+import { OpenAiProvider } from './providers/openai-provider';
+import { AnthropicProvider } from './providers/anthropic-provider';
+import { safetyPipeline } from './safety/pipeline';
+import { llmMeteringService } from './metering/service';
 
 export class SummitLlmOrchestrator implements LlmOrchestrator {
     private providers: Map<string, LlmProvider> = new Map();
@@ -64,12 +64,6 @@ export class SummitLlmOrchestrator implements LlmOrchestrator {
         }
 
         console.log(`[LLM] Routing ${request.purpose} (Risk: ${request.riskLevel}) to ${decision.provider}/${decision.model} because: ${decision.reason}`);
-
-        // Innovation: Mode-aware routing for NVIDIA NIM
-        if (decision.provider === 'nvidia-nim') {
-            const isHardPrompt = request.purpose === 'agent' || request.purpose === 'tool_call' || inputTokens > 4000;
-            request.mode = isHardPrompt ? 'thinking' : 'instant';
-        }
 
         // 4. Execute
         const result = await provider.chat({

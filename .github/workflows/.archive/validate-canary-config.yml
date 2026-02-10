@@ -42,7 +42,7 @@ jobs:
             --report
 
       - name: Upload validation report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: canary-config-validation-report
@@ -106,7 +106,7 @@ jobs:
           EOF
 
       - name: Upload drift detection report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: drift-detection-report

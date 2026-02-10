@@ -1,7 +1,7 @@
-import { getRedisClient } from '../config/database.js';
-import { flushLocalCache } from './responseCache.js';
-import { scheduleWarmersAfterInvalidation } from './warmers.js';
-import { recInvalidation } from '../metrics/cacheMetrics.js';
+import { getRedisClient } from '../config/database.ts';
+import { flushLocalCache } from './responseCache.ts';
+import { scheduleWarmersAfterInvalidation } from './warmers.ts';
+import { recInvalidation } from '../metrics/cacheMetrics.ts';
 
 const INVALIDATION_CHANNEL = 'cache:invalidation';
 let subscriberStarted = false;

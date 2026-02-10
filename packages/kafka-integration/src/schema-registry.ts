@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-non-null-assertion */
 // @ts-nocheck
 import { SchemaRegistry, SchemaType } from '@kafkajs/confluent-schema-registry';
-import { StreamMessage, SchemaRegistryConfig } from './types.js';
+import { StreamMessage, SchemaRegistryConfig } from './types';
 import pino from 'pino';
 
 const logger = pino({ name: 'schema-registry' });

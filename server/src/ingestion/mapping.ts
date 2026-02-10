@@ -1,4 +1,4 @@
-import { CanonicalEntityKind } from '../canonical/types.js';
+import { CanonicalEntityKind } from '../canonical/types';
 
 export interface FieldMapping {
   sourceField: string;

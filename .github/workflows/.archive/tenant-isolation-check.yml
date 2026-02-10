@@ -29,7 +29,7 @@ jobs:
         run: npx tsx scripts/security/scan-tenant-isolation.ts
 
       - name: Upload Scan Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tenant-scan-report

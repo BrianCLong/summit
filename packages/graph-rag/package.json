@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "test": "jest --passWithNoTests"
+    "test": "jest"
   },
   "dependencies": {
     "neo4j-driver": "^5.28.1"
