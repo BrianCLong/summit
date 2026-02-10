@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { quotaManager, QuotaConfig } from './quotas.js';
-import { meteringEmitter } from './emitter.js';
-import logger from '../utils/logger.js';
+import { quotaManager, QuotaConfig } from './quotas';
+import { meteringEmitter } from './emitter';
+import logger from '../utils/logger';
 
 // Feature flag for hard enforcement. Default OFF (warn-only).
 const ENFORCE_QUOTAS = process.env.ENFORCE_QUOTAS === 'true';

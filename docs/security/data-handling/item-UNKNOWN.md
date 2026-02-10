@@ -1,13 +1,19 @@
-# Data Handling — item-unknown
+# Data Handling: item-UNKNOWN (Framework)
 
 ## Data classes
-- public / internal / confidential / regulated (definitions TBD)
+
+- Public: docs templates, schema files.
+- Internal: CI evidence outputs (non-secret).
+- Confidential/Regulated: Not permitted in evidence outputs.
 
 ## Retention
-- Evidence reports/metrics retained per GA policy (TODO link)
+
+- CI evidence runs: retain per CI policy; avoid secrets.
 
 ## Audit export
-- evidence/index.json + manifest.yaml are the minimum export set
+
+- `evidence/index.json` + referenced files.
 
 ## Never-log fields
-- secrets, tokens, credentials, personal data (deny-by-default)
+
+- Tokens, credentials, API keys, customer data, user identifiers.

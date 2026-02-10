@@ -19,7 +19,7 @@ describe('n8n webhook', () => {
     try {
       process.env.N8N_SIGNING_SECRET = 'test-secret';
       jest.resetModules();
-      const { default: n8nRouter } = await import('../src/routes/n8n.js');
+      const { default: n8nRouter } = await import('../src/routes/n8n');
       const { ProvenanceLedgerService } = await import(
         '../src/services/provenance-ledger.js'
       );

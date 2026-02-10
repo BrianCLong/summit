@@ -1,5 +1,5 @@
 import express from 'express';
-import { dpGate } from '../middleware/dpGate.js';
+import { dpGate } from '../middleware/dpGate';
 
 const router = express.Router();
 

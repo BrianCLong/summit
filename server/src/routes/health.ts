@@ -165,24 +165,20 @@ router.get('/health/detailed', async (req: Request, res: Response) => {
   };
 
   // Check Neo4j connection
-  if (process.env.DISABLE_NEO4J === 'true' || process.env.SKIP_DB_CHECKS === 'true') {
-    health.services.neo4j = 'skipped';
-  } else {
-    try {
-      const { getNeo4jDriver } = await import('../db/neo4j.js');
-      await getNeo4jDriver().verifyConnectivity();
-      health.services.neo4j = 'healthy';
-    } catch (error: any) {
-      const errorMsg = error instanceof Error ? error.message : 'Connection failed';
-      health.services.neo4j = 'unhealthy';
-      health.status = 'degraded';
-      errors.push({
-        service: 'neo4j',
-        error: errorMsg,
-        timestamp: new Date().toISOString(),
-      });
-      logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
-    }
+  try {
+    const neo4j = (await import('../db/neo4jConnection.js')).default;
+    await neo4j.getDriver().verifyConnectivity();
+    health.services.neo4j = 'healthy';
+  } catch (error: any) {
+    const errorMsg = error instanceof Error ? error.message : 'Connection failed';
+    health.services.neo4j = 'unhealthy';
+    health.status = 'degraded';
+    errors.push({
+      service: 'neo4j',
+      error: errorMsg,
+      timestamp: new Date().toISOString(),
+    });
+    logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
   }
 
   // Check PostgreSQL connection
@@ -298,15 +294,13 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
   const failures: string[] = [];
 
   // Check if critical services are available
-  if (process.env.DISABLE_NEO4J !== 'true' && process.env.SKIP_DB_CHECKS !== 'true') {
-    try {
-      const { getNeo4jDriver } = await import('../db/neo4j.js');
-      await getNeo4jDriver().verifyConnectivity();
-    } catch (error: any) {
-      const msg = error instanceof Error ? error.message : 'Unknown error';
-      failures.push(`Neo4j: ${msg}`);
-      logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
-    }
+  try {
+    const neo4j = (await import('../db/neo4jConnection.js')).default;
+    await neo4j.getDriver().verifyConnectivity();
+  } catch (error: any) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    failures.push(`Neo4j: ${msg}`);
+    logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
   }
 
   try {

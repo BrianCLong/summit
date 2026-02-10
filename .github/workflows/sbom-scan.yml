@@ -1,72 +1,25 @@
 name: SBOM & Vulnerability Scanning
-
-# CI Quality Gate: SBOM generation and vulnerability scanning
-# Addresses: Issue #1222 - CI: SBOM + Vulnerability Gate
-# Authority: Platform Engineering
-#
-# Requirements:
-# - CI fails on Sev >= High
-# - SBOM artifacts uploaded
-# - Allowlist support via security/grype-allowlist.yaml
-
-on:
-  push:
-    branches: [main]
-    paths:
-      - "Dockerfile*"
-      - "docker-compose*"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "server/package.json"
-      - ".github/workflows/sbom-scan.yml"
-      - "security/grype-allowlist.yaml"
-
-  pull_request:
-    branches: [main]
-    paths:
-      - "Dockerfile*"
-      - "docker-compose*"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "server/package.json"
-
-  workflow_dispatch:
-
-  schedule:
-    - cron: "0 4 * * *" # Daily at 4 AM UTC
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+on: [push, pull_request]
 permissions:
   contents: read
   security-events: write
   id-token: write
   attestations: write
-
 jobs:
   sbom:
-    name: SBOM & Vulnerability Gate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
-      - name: Generate SBOM with Syft
-        uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
+      - uses: anchore/sbom-action@62ad5284b8ced813296287a0b63906cb364b73ee # v0
         with:
           format: cyclonedx-json
           output-file: sbom.json
-
-      - name: Scan with Grype
-        uses: anchore/scan-action@0d444ed77d83ee2ba7f5ced0d90d640a1281d762 # v7
+      - uses: anchore/scan-action@0d444ed77d83ee2ba7f5ced0d90d640a1281d762 # v7
         with:
           sbom: sbom.json
           fail-build: true
           severity-cutoff: high
           only-fixed: false
-          grype-config: security/grype-allowlist.yaml
       - name: Attest SBOM
         uses: actions/attest-sbom@v3
         with:

@@ -53,10 +53,7 @@ For ready-to-use templates that keep issues and PRs crisp, copy the relevant pla
 ### 3. Submission
 
 - Open a Pull Request against `main`.
-- **Fill out the PR template completely**, including:
-  - **Risk & Surface Labels**: Select the correct classification to route your PR.
-  - **Evidence Bundle**: Attach proofs (tests, screenshots) as required by [Evidence Specs](docs/evidence-bundle-spec.md).
-  - **CI Rules**: Acknowledge the current CI state.
+- Fill out the PR template completely.
 - Ensure all CI checks pass (Lint, Unit, Golden Path).
 
 ## 🤖 Guidelines for External Contributors (Bots & Co-authors)

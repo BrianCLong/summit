@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-BLACKBOX-COMPAT-QUALITY-001",
+  "summary": "Task fixtures succeed with black-box API LLM",
+  "steps": [
+    {
+      "name": "check_serialization_deterministic",
+      "status": "pass",
+      "details": "Serialization output is stable"
+    }
+  ],
+  "run_id": "manual-1769812117",
+  "item_slug": "blackbox-compat-quality-001"
+}

@@ -24,7 +24,7 @@ export const JOB_QUEUE_GENERATE_REPORT = 'generate-report';
  *
  * @example
  * ```typescript
- * import BatchJobService from './BatchJobService.js';
+ * import BatchJobService from './BatchJobService';
  *
  * async function initializeApp() {
  *   const jobService = BatchJobService.getInstance();

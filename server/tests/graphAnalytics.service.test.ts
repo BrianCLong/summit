@@ -1,5 +1,5 @@
 // @ts-nocheck - Test needs update for singleton pattern
-import GraphAnalyticsService from '../src/services/GraphAnalyticsService.js';
+import GraphAnalyticsService from '../src/services/GraphAnalyticsService';
 import { jest, describe, it, expect } from '@jest/globals';
 
 describe('GraphAnalyticsService caching', () => {

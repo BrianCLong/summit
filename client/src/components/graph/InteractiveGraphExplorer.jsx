@@ -122,33 +122,6 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
     drawGraph();
   }, [nodes, edges, selectedNode, zoom, pan]);
 
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Don't trigger if user is typing in an input
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-
-      switch (e.key.toLowerCase()) {
-        case '+':
-        case '=':
-          setZoom((prev) => Math.min(3, prev * 1.2));
-          break;
-        case '-':
-        case '_':
-          setZoom((prev) => Math.max(0.1, prev * 0.8));
-          break;
-        case 'c':
-          setZoom(1);
-          setPan({ x: 0, y: 0 });
-          break;
-        default:
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   const drawGraph = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -295,8 +268,6 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
     >
       <canvas
         ref={canvasRef}
-        role="img"
-        aria-label="Interactive relationship graph showing entities and their connections"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -319,30 +290,27 @@ function GraphCanvas({ nodes, edges, selectedNode, onNodeSelect, onNodeAdd }) {
           gap: 1,
         }}
       >
-        <Tooltip title="Zoom In (+)">
+        <Tooltip title="Zoom In">
           <IconButton
             size="small"
-            aria-label="Zoom in"
             sx={{ bgcolor: 'rgba(255,255,255,0.9)' }}
             onClick={() => setZoom((prev) => Math.min(3, prev * 1.2))}
           >
             <ZoomInIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Zoom Out (-)">
+        <Tooltip title="Zoom Out">
           <IconButton
             size="small"
-            aria-label="Zoom out"
             sx={{ bgcolor: 'rgba(255,255,255,0.9)' }}
             onClick={() => setZoom((prev) => Math.max(0.1, prev * 0.8))}
           >
             <ZoomOutIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Center View (C)">
+        <Tooltip title="Center View">
           <IconButton
             size="small"
-            aria-label="Center view"
             sx={{ bgcolor: 'rgba(255,255,255,0.9)' }}
             onClick={() => {
               setZoom(1);
@@ -381,7 +349,7 @@ function NodeDetailsPanel({ node, onClose }) {
   const config = nodeTypeConfig[node.type];
 
   return (
-    <Drawer anchor="right" open={!!node} onClose={onClose} aria-labelledby="node-details-title">
+    <Drawer anchor="right" open={!!node} onClose={onClose}>
       <Box sx={{ width: 350, p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Box
@@ -397,14 +365,10 @@ function NodeDetailsPanel({ node, onClose }) {
               fontSize: '20px',
             }}
           >
-            <span role="img" aria-label={node.type}>
-              {config.icon}
-            </span>
+            {config.icon}
           </Box>
           <Box>
-            <Typography variant="h6" id="node-details-title">
-              {node.label}
-            </Typography>
+            <Typography variant="h6">{node.label}</Typography>
             <Chip label={node.type} size="small" color="primary" />
           </Box>
         </Box>

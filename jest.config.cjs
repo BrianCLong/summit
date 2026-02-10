@@ -11,7 +11,7 @@ module.exports = {
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'libs'],
+  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'pp_alerts'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
@@ -25,6 +25,7 @@ module.exports = {
     '/archive/',
     '/salvage/',
     '/pull/',
+    '/.cache/',
   ],
   watchPathIgnorePatterns: [
     '/node_modules/',
@@ -74,6 +75,7 @@ module.exports = {
     '^pg$': '<rootDir>/__mocks__/pg.js',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
+    '^uWebSockets\\.js$': '<rootDir>/__mocks__/uWebSockets.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',
@@ -86,6 +88,8 @@ module.exports = {
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
   testTimeout: 30000,
+  maxWorkers: '50%',
+  reporters: ['default', ['jest-junit', { outputDirectory: 'reports/junit' }]],
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },

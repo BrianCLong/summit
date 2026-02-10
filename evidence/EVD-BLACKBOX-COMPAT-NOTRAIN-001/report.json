@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-BLACKBOX-COMPAT-NOTRAIN-001",
+  "summary": "Build contains no training-required components",
+  "steps": [
+    {
+      "name": "check_torch_absence",
+      "status": "pass",
+      "details": "No 'torch' or 'tensorflow' in Lane 1 modules"
+    }
+  ],
+  "run_id": "manual-1769812117",
+  "item_slug": "blackbox-compat-notrain-001"
+}

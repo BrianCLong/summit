@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 import pino from 'pino';
-import { StateBackend, StateDescriptor } from './types.js';
+import { StateBackend, StateDescriptor } from './types';
 
 const logger = pino({ name: 'state-manager' });
 

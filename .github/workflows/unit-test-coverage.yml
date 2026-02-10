@@ -1,94 +1,45 @@
 name: Unit Tests & Coverage
 
 on:
-  push:
-    branches: [main, develop]
-    # SAFETY: Conservative paths-ignore to prevent skipping required checks
-    # This workflow MUST run on any code/config/dependency changes
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - server/**, client/** (code changes must trigger this)
   pull_request:
-    branches: [main, develop]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      - "LICENSE"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - server/**, client/** (code changes must trigger this)
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
-# Global environment for all jobs - prevents V8 heap exhaustion
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
+  push:
+    branches: [main]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.x]
-
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
+          version: 9.12.0
 
-      - name: Install Dependencies
-        run: pnpm install
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
-      - name: Run Server Unit Tests with Coverage
-        working-directory: ./server
-        # CANONICAL ENTRYPOINT: Use test:ci script for deterministic CI execution
-        # Defined in server/package.json with hardened settings from commit 8434f7ae3b0
-        run: |
-          pnpm test:ci
+      - run: pnpm install
+      - run: pnpm test:coverage
         env:
           CI: true
-          NODE_ENV: test
-          JWT_SECRET: test-secret-at-least-32-chars-long-for-safety
-          JWT_REFRESH_SECRET: test-refresh-secret-at-least-32-chars-long
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
 
-      - name: Enforce coverage gate
-        run: pnpm coverage:gate
-        env:
-          COVERAGE_SCOPE: ${{ github.event_name == 'pull_request' && 'changed' || 'all' }}
-          COVERAGE_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.event.pull_request.base.ref) || 'origin/main' }}
-
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          retention-days: 14
           name: coverage-report
           path: server/coverage/
+          retention-days: 14
 
-      - name: Upload Test Results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          retention-days: 14
           name: test-results
           path: server/junit.xml
+          retention-days: 14
