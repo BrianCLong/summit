@@ -507,32 +507,32 @@ jobs:
           DAST_STATUS: ${{ needs.dast.result }}
         run: |
           python - <<'PY'
-            import json
-            import os
-            from pathlib import Path
+import json
+import os
+from pathlib import Path
 
-            report_root = Path('aggregated-security')
-            files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
-            status = {
-                "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
-                "SAST": os.environ.get('SAST_STATUS', 'unknown'),
-                "Semgrep": os.environ.get('SEMGREP_STATUS', 'unknown'),
-                "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),
-                "Filesystem": os.environ.get('FS_STATUS', 'unknown'),
-                "Container": os.environ.get('IMG_STATUS', 'unknown'),
-                "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
-                "IaC": os.environ.get('IAC_STATUS', 'unknown'),
-                "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
-                "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
-                "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
-                "DAST": os.environ.get('DAST_STATUS', 'skipped'),
-            }
-            summary = {
-                "reportCount": len(files),
-                "reports": files,
-                "statuses": status,
-            }
-            report_root.mkdir(parents=True, exist_ok=True)
+report_root = Path('aggregated-security')
+files = sorted(str(p.relative_to(report_root)) for p in report_root.rglob('*') if p.is_file())
+status = {
+    "Secret scanning": os.environ.get('SECRET_STATUS', 'unknown'),
+    "SAST": os.environ.get('SAST_STATUS', 'unknown'),
+    "Semgrep": os.environ.get('SEMGREP_STATUS', 'unknown'),
+    "Dependencies": os.environ.get('DEP_STATUS', 'unknown'),
+    "Filesystem": os.environ.get('FS_STATUS', 'unknown'),
+    "Container": os.environ.get('IMG_STATUS', 'unknown'),
+    "Licenses": os.environ.get('LIC_STATUS', 'unknown'),
+    "IaC": os.environ.get('IAC_STATUS', 'unknown'),
+    "OPA policies": os.environ.get('OPA_STATUS', 'unknown'),
+    "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
+    "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
+    "DAST": os.environ.get('DAST_STATUS', 'skipped'),
+}
+summary = {
+    "reportCount": len(files),
+    "reports": files,
+    "statuses": status,
+}
+report_root.mkdir(parents=True, exist_ok=True)
             with (report_root / 'security-summary.json').open('w', encoding='utf-8') as fh:
                 json.dump(summary, fh, indent=2)
           PY
