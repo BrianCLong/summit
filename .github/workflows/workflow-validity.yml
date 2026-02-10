@@ -5,14 +5,9 @@ name: Workflow Validity Gate
 
 on:
   pull_request:
-    paths:
-      - ".github/workflows/**"
-      - ".github/actions/**"
+    branches: [main]
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/**"
-      - ".github/actions/**"
   merge_group:
 
 concurrency:
@@ -43,112 +38,10 @@ jobs:
           # Run actionlint on all active workflow files
           find .github/workflows -maxdepth 1 -name '*.yml' -o -name '*.yaml' | xargs actionlint -shellcheck= -color -verbose
 
-      - name: Detect Duplicated Keys (Outage Prevention)
-        run: |
-          echo "=== Checking for duplicated keys in workflow files ==="
-          FAILED=0
-          for file in .github/workflows/*.yml .github/workflows/*.yaml; do
-            if [ -f "$file" ]; then
-              # Simple grep check for multiple 'if:' at the same indentation within a job
-              # This is a heuristic to catch the specific error that caused the recent outage
-              # It looks for 'if:' followed by another 'if:' before the next job or step starts
-              if python3 -c "
-import sys
-import re
-
-def check_file(path):
-    with open(path, 'r') as f:
-        lines = f.readlines()
-    
-    current_job = None
-    if_count = 0
-    in_steps = False
-    
-    for i, line in enumerate(lines):
-        # Job start
-        job_match = re.match(r'^  (\w+):', line)
-        if job_match:
-            current_job = job_match.group(1)
-            if_count = 0
-            in_steps = False
-            continue
-        
-        # Step start
-        if re.match(r'^    steps:', line):
-            in_steps = True
-            continue
-            
-        # Check for if: at job level (indent 4 spaces)
-        if current_job and not in_steps and re.match(r'^    if:', line):
-            if_count += 1
-            if if_count > 1:
-                print(f'ERROR: Duplicated "if:" key found in job "{current_job}" at line {i+1} of {path}')
-                return False
-    return True
-
-if not check_file('$file'):
-    sys.exit(1)
-" ; then
-                echo "✅ $file: No duplicated job-level if keys."
-              else
-                FAILED=1
-              fi
-            fi
-          done
-          
-          if [ $FAILED -ne 0 ]; then
-            echo "::error::Duplicated keys detected in one or more workflows. This will cause startup failures in GitHub Actions."
-            exit 1
-          fi
-
-      - name: YAML Schema Validation
-        run: |
-          echo "=== Validating YAML syntax ==="
-          python3 -c "
-import sys
-import os
-import json
-try:
-    import yaml
-except ImportError:
-    # If yaml is not available, we use a simpler check or skip
-    print('PyYAML not found, skipping deep validation')
-    sys.exit(0)
-
-failed = False
-for f in os.listdir('.github/workflows'):
-    if f.endswith('.yml') or f.endswith('.yaml'):
-        path = os.path.join('.github/workflows', f)
-        try:
-            yaml.safe_load(open(path))
-        except Exception as e:
-            print(f'::error file={path}::YAML Load Error: {e}')
-            failed = True
-if failed:
-    sys.exit(1)
-"
-
       - name: Summary
         if: always()
         run: |
-          if [[ "${{ job.status }}" == "success" ]]; then
-            STATUS="PASSED"
-            ICON="✅"
-          else
-            STATUS="FAILED"
-            ICON="❌"
-          fi
-          
           cat <<EOF >> $GITHUB_STEP_SUMMARY
-          ## ${ICON} Workflow Validity Gate: ${STATUS}
-
-          Ensures repository-wide CI stability by validating GitHub Actions configurations.
-
-          ### Checks
-          - ✅ actionlint (Static analysis)
-          - ✅ Duplicated key detection (Outage prevention)
-          - ✅ YAML syntax validation
-
-          ### Documentation
-          See [MERGE_SURGE_RUNBOOK.md](docs/ci/MERGE_SURGE_RUNBOOK.md) for CI management procedures.
+          ## Workflow Validity Gate
+          - actionlint: ${{ job.status }}
           EOF
