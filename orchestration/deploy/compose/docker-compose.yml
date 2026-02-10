@@ -9,21 +9,13 @@ services:
       POSTGRES_DB: chronos
     ports:
       - "5432:5432"
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
   chronosd:
     build:
       context: ../..
       dockerfile: deploy/docker/runtime.Dockerfile
     environment:
       PG_DSN: postgres://chronos:chronos@postgres:5432/chronos?sslmode=disable
-      REDIS_ADDR: redis:6379
     depends_on:
       - postgres
-      - redis
     ports:
       - "8080:8080"

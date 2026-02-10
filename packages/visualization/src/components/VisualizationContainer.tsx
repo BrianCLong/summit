@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useRef, ReactNode } from 'react';
-import { useVisualizationDimensions } from '../hooks.js';
+import { useVisualizationDimensions } from '../hooks';
 
 export interface VisualizationContainerProps {
   children: (dimensions: { width: number; height: number }) => ReactNode;

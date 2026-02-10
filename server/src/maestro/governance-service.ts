@@ -54,9 +54,9 @@ export interface GovernanceDecision {
 
 export class AgentGovernanceService {
   private static instance: AgentGovernanceService;
-  private safetyViolations: Map<string, SafetyViolation[]> = new Map(); // tenantId -> violations
+  private safetyViolations: SafetyViolation[] = [];
   private ledger: ProvenanceLedgerV2;
-  private policies: Map<string, Map<string, AgentGovernanceConfig>> = new Map(); // tenantId -> { policyId -> config }
+  private policies: Map<string, AgentGovernanceConfig> = new Map();
   private riskThresholds: { low: number; medium: number; high: number; critical: number } = {
     low: 0.3,
     medium: 0.6,
@@ -104,11 +104,10 @@ export class AgentGovernanceService {
    * Initialize default policies and governance rules
    */
   private initializePolicies(): void {
-    const systemPolicies = new Map<string, AgentGovernanceConfig>();
-    systemPolicies.set('*', this.defaultConfig); // Default for all agents
+    this.policies.set('*', this.defaultConfig); // Default for all agents
 
     // Define governance tiers based on sensitivity and risk
-    systemPolicies.set('tier-0', {
+    this.policies.set('tier-0', {
       ...this.defaultConfig,
       maxBudget: 5000,
       maxExecutionTimeMs: 30000,
@@ -122,7 +121,7 @@ export class AgentGovernanceService {
       auditLevel: 'minimal'
     });
 
-    systemPolicies.set('tier-1', {
+    this.policies.set('tier-1', {
       ...this.defaultConfig,
       maxBudget: 15000,
       maxExecutionTimeMs: 120000,
@@ -138,8 +137,7 @@ export class AgentGovernanceService {
       auditLevel: 'standard'
     });
 
-    systemPolicies.set('tier-2', this.defaultConfig);
-    this.policies.set('system', systemPolicies);
+    this.policies.set('tier-2', this.defaultConfig);
 
     logger.info('Agent governance policies initialized');
   }
@@ -153,35 +151,6 @@ export class AgentGovernanceService {
     context: any,
     metadata?: Record<string, any>
   ): Promise<GovernanceDecision> {
-    // === HITL OVERRIDE (Task #104) ===
-    // Check if there is an existing human approval for this task/action
-    if (context.taskId) {
-      try {
-        const { getPostgresPool } = await import('../db/postgres.js');
-        const pool = getPostgresPool();
-        // Check for approved record in the approvals table
-        const result = await pool.query(
-          `SELECT status FROM approvals 
-           WHERE (payload->>'taskId' = $1 OR run_id = $2)
-           AND status = 'approved' 
-           ORDER BY created_at DESC LIMIT 1`,
-          [context.taskId, context.runId]
-        );
-
-        if (result.rows && result.rows.length > 0) {
-          logger.info({ taskId: context.taskId }, 'Governance: Human approval detected, allowing action');
-          return {
-            allowed: true,
-            reason: 'Action manually authorized by human operator',
-            riskScore: 0,
-            violations: []
-          };
-        }
-      } catch (err) {
-        logger.warn({ taskId: context.taskId, error: (err as Error).message }, 'Governance: Approval check failed, falling back to policy');
-      }
-    }
-
     const config = this.getAgentConfig(agent);
     const violations: SafetyViolation[] = [];
 
@@ -256,18 +225,10 @@ export class AgentGovernanceService {
       }, 'Critical risk threshold exceeded');
     }
 
-    // Record violations in provenance ledger and local cache
-    const tenantId = agent.tenantId || 'system';
-    if (violations.length > 0) {
-      if (!this.safetyViolations.has(tenantId)) {
-        this.safetyViolations.set(tenantId, []);
-      }
-      this.safetyViolations.get(tenantId)!.push(...violations);
-    }
-
+    // Record violations in provenance ledger
     for (const violation of violations) {
       await this.ledger.appendEntry({
-        tenantId: tenantId,
+        tenantId: agent.tenantId || 'system',
         actionType: 'GOVERNANCE_VIOLATION',
         resourceType: 'SafetyViolation',
         resourceId: violation.id,
@@ -403,13 +364,10 @@ export class AgentGovernanceService {
    * Get governance configuration for an agent
    */
   getAgentConfig(agent: MaestroAgent): AgentGovernanceConfig {
-    const tenantId = agent.tenantId || 'system';
-    const tenantPolicies = this.policies.get(tenantId) || this.policies.get('system');
-    
-    if (!tenantPolicies) return this.defaultConfig;
-
-    const policyId = agent.metadata?.governanceTier || '*';
-    return tenantPolicies.get(policyId) || tenantPolicies.get('*') || this.defaultConfig;
+    // Could have tenant-specific or role-specific policies
+    // For now, return default config if no specific policy exists
+    const policyId = agent.metadata?.governanceTier || agent.tenantId || '*';
+    return this.policies.get(policyId) || this.defaultConfig;
   }
 
   /**
@@ -428,15 +386,11 @@ export class AgentGovernanceService {
   /**
    * Register a governance policy for a specific agent or tenant
    */
-  registerPolicy(id: string, config: AgentGovernanceConfig, tenantId: string = 'system'): void {
-    if (!this.policies.has(tenantId)) {
-      this.policies.set(tenantId, new Map());
-    }
-    this.policies.get(tenantId)!.set(id, config);
+  registerPolicy(id: string, config: AgentGovernanceConfig): void {
+    this.policies.set(id, config);
 
     logger.info({
       policyId: id,
-      tenantId,
       config
     }, 'Agent governance policy registered');
   }
@@ -444,11 +398,9 @@ export class AgentGovernanceService {
   /**
    * Get recent safety violations for an agent
    */
-  getRecentViolations(agentId: string, tenantId: string = 'system', sinceDays: number = 7): SafetyViolation[] {
+  getRecentViolations(agentId: string, sinceDays: number = 7): SafetyViolation[] {
     const cutoffTime = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
-    const tenantViolations = this.safetyViolations.get(tenantId) || [];
-    
-    return tenantViolations
+    return this.safetyViolations
       .filter(violation => violation.agentId === agentId && violation.timestamp > cutoffTime)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
@@ -459,7 +411,7 @@ export class AgentGovernanceService {
   isAgentOperational(agent: MaestroAgent): boolean {
     // Check if agent is within resource limits and hasn't exceeded safety thresholds
     const isHealthy = agent.health.memoryUsage < 90 && agent.health.cpuUsage < 90;
-    const recentViolations = this.getRecentViolations(agent.id, agent.tenantId || 'system', 1);  // Check last day
+    const recentViolations = this.getRecentViolations(agent.id, 1);  // Check last day
     const hasCriticalViolations = recentViolations.some(v => v.severity === 'critical');
 
     return isHealthy && !hasCriticalViolations;
@@ -468,18 +420,18 @@ export class AgentGovernanceService {
   /**
    * Generate governance compliance report
    */
-  async generateComplianceReport(tenantId: string = 'system'): Promise<any> {
-    const allViolations = this.safetyViolations.get(tenantId) || [];
-    const tenantPolicies = this.policies.get(tenantId) || new Map();
+  async generateComplianceReport(): Promise<any> {
+    const allViolations = this.safetyViolations;
+    const totalAgents = Array.from(this.policies.keys()).length;
 
     const report = {
       timestamp: new Date().toISOString(),
-      tenantId,
       summary: {
         totalViolations: allViolations.length,
         criticalViolations: allViolations.filter(v => v.severity === 'critical').length,
         highViolations: allViolations.filter(v => v.severity === 'high').length,
-        policyCoverage: tenantPolicies.size
+        totalAgents,
+        policyCoverage: this.policies.size
       },
       violationsByType: this.groupViolationsByType(allViolations),
       violationsBySeverity: this.groupViolationsBySeverity(allViolations),

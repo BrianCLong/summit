@@ -6,7 +6,6 @@ import BatchJobService from '../services/BatchJobService.js';
 import fs from 'fs/promises';
 import { existsSync, mkdirSync, writeFileSync } from 'fs'; // synchronous for init only
 import path from 'path';
-import { securityAudit } from '../audit/security-audit-logger.js';
 
 // Template Persistence: Simple file-based store for MVP
 const TEMPLATE_STORE_PATH = path.join(process.cwd(), 'server', 'data', 'report-templates.json');
@@ -86,16 +85,6 @@ router.use((req, res, next) => {
 });
 
 router.get('/templates', async (req, res) => {
-  const access = (req as any).accessContext;
-  securityAudit.logSensitiveRead({
-    actor: access?.userId ?? 'unknown',
-    tenantId: (req as any).user?.tenantId,
-    resourceType: 'report_template',
-    resourceId: 'list',
-    action: 'view',
-    ipAddress: req.ip,
-    userAgent: req.get('user-agent'),
-  });
   res.json(await getTemplates());
 });
 
@@ -141,18 +130,6 @@ router.post('/generate', async (req, res) => {
     }
 
     const access = (req as any).accessContext;
-    securityAudit.logSensitiveRead({
-      actor: access?.userId ?? 'unknown',
-      tenantId: (req as any).user?.tenantId,
-      resourceType: 'report',
-      resourceId: typeof request.template === 'string' ? request.template : (request.template as any)?.id ?? 'unknown',
-      action: 'generate',
-      details: { format: (request.template as any)?.format },
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
-      complianceFrameworks: ['SOC2'],
-      dataClassification: 'confidential',
-    });
     const artifact = await reportingService.generate(request, access);
 
     res.setHeader('Content-Type', artifact.mimeType);
@@ -187,17 +164,6 @@ router.post('/schedule', async (req, res) => {
              reportRequest.template = tpl;
         }
 
-        securityAudit.logResourceModify({
-          actor: (req as any).accessContext.userId,
-          tenantId: (req as any).user?.tenantId,
-          resourceType: 'report_schedule',
-          resourceId: name,
-          action: 'schedule',
-          details: { cron },
-          ipAddress: req.ip,
-          userAgent: req.get('user-agent'),
-        });
-
         // Use BatchJobService to schedule the report using the correct method signature
         await BatchJobService.scheduleReport(name, cron, { request: reportRequest, userId: (req as any).accessContext.userId });
 
@@ -208,16 +174,6 @@ router.post('/schedule', async (req, res) => {
 });
 
 router.get('/history/:templateId', (req, res) => {
-    const access = (req as any).accessContext;
-    securityAudit.logSensitiveRead({
-      actor: access?.userId ?? 'unknown',
-      tenantId: (req as any).user?.tenantId,
-      resourceType: 'report_history',
-      resourceId: req.params.templateId,
-      action: 'view',
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
-    });
     const history = reportingService.history(req.params.templateId);
     res.json(history);
 });

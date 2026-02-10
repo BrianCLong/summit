@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { threatHuntingService } from '../threatHuntingService.js';
+import { threatHuntingService } from '../threatHuntingService';
 
 describe('CTI Platform Functionality', () => {
 

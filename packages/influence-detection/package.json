@@ -7,7 +7,7 @@
   "description": "Bot detection, coordinated inauthentic behavior, and astroturfing detection",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

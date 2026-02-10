@@ -14,7 +14,7 @@ import {
   DataClassification,
   GovernanceVerdict,
   GovernanceResult,
-} from '../types/data-envelope.js';
+} from '../types/data-envelope';
 import { randomUUID } from 'crypto';
 
 /**

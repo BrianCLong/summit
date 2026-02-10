@@ -1,8 +1,20 @@
-# Required Checks Discovery
+# Required checks discovery (TODO)
 
-* [ ] GitHub UI: Verify branch protection settings.
-* [ ] Identify exact check names for:
-    * `summit-policy-gates`
-    * `summit-schema-validate`
-    * `summit-eval-fixtures`
-* [ ] Update CI configurations with correct names.
+1) GitHub UI:
+- Repo → Settings → Branches → Branch protection rules → note “Required status checks”.
+
+2) GitHub API (if allowed):
+- List branch protections and required checks.
+
+3) Update:
+- Rename temporary checks in .github/workflows/agentkit.yml (or CI config) to match repo-required names.
+
+# Verified Checks
+- CI PR (Lint, Typecheck, Unit Tests, Integration Tests)
+- Release Readiness
+- Compliance
+- Docs Lint
+- Golden Path E2E
+- Validate Claims
+- Check Lockfile Drift
+- CI Lineage

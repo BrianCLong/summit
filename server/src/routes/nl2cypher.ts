@@ -1,7 +1,7 @@
 // @ts-nocheck
 import express, { Response, NextFunction } from 'express';
-import { nl2cypher } from '../nl2cypher/index.js';
-import { executeSandbox } from '../nl2cypher/sandbox.js';
+import { nl2cypher } from '../nl2cypher/index';
+import { executeSandbox } from '../nl2cypher/sandbox';
 import { diffLines } from 'diff';
 import { trace } from '@opentelemetry/api';
 import type { AuthenticatedRequest } from './types.js';

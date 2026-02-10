@@ -3,7 +3,7 @@
  * Explainable, provenance-aware entity resolution pipeline
  */
 
-import { CanonicalEntityBase, CanonicalEntityType } from '../core/base.js';
+import { CanonicalEntityBase, CanonicalEntityType } from '../core/base';
 
 export interface ERCandidate {
   entityA: CanonicalEntityBase;

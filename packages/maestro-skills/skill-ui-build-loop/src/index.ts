@@ -1,4 +1,4 @@
-import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@intelgraph/maestro-core';
+import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@maestro/core';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

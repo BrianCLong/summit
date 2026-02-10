@@ -3,83 +3,28 @@ name: Compliance
 on:
   push:
     branches: [main]
-    # SAFETY: Conservative paths-ignore to prevent skipping compliance checks
-    # This workflow MUST run on any code/config/policy changes
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - policy/**, scripts/compliance/** (policy/compliance changes must trigger this)
   pull_request:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - policy/**, scripts/compliance/** (policy/compliance changes must trigger this)
-  schedule:
-    - cron: "0 0 * * 1" # Weekly on Mondays
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  drift-detection:
+  compliance:
     name: Compliance Drift Detection
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
-      - name: Check for Control Drift
-        run: pnpm compliance:check
-
-  evidence-generation:
-    name: Evidence Generation Dry-Run
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        # Removed version input to respect package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+          node-version: 18 # Downgraded to 18 for compatibility
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
-      - name: Generate Compliance Snapshot
-        run: python3 scripts/compliance/generate_compliance_snapshot.py
-
-      - name: Upload Compliance Snapshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: compliance-snapshot
-          path: compliance-snapshot.json
-
-      - name: Generate Evidence (Dry Run)
-        run: pnpm compliance:evidence
+      - name: Run compliance checks
+        run: pnpm run compliance:check

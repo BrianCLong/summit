@@ -1,7 +1,7 @@
 // server/src/routes/necromancer.ts
 import { Router } from 'express';
-import { necromancerService } from '../necromancer/NecromancerService.js';
-import { BehavioralCloneParameters } from '../necromancer/necromancer.types.js';
+import { necromancerService } from '../necromancer/NecromancerService';
+import { BehavioralCloneParameters } from '../necromancer/necromancer.types';
 
 const router = Router();
 

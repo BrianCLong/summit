@@ -11,10 +11,6 @@ on:
     - cron: "0 03 * * *"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   security-events: write
@@ -25,7 +21,6 @@ env:
 jobs:
   dependency-review:
     name: Block vulnerable dependency changes
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     # dependency-review-action only works for pull_request/merge_group events
     if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group'
@@ -41,7 +36,6 @@ jobs:
   snyk-scan:
     name: Snyk dependency vulnerability scan
     needs: dependency-review
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     # Run if dependency-review passed or was skipped, and not from fork PRs
     if: |
@@ -87,7 +81,6 @@ jobs:
   snyk-skip-notice:
     name: Snyk scan (skipped - no token)
     needs: dependency-review
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     # Run if dependency-review passed or was skipped
     if: always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped')
@@ -99,17 +92,16 @@ jobs:
 
   check-drift:
     name: Check Lockfile Drift
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0
       - name: Setup Node
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
       # Note: pnpm version is read from package.json "packageManager" field
+      - name: Install pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - name: Check Drift
         run: ./scripts/check-lockfile-drift.sh

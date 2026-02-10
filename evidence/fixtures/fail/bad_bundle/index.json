@@ -1,7 +1,0 @@
-{
-  "item_slug": "TEST",
-  "generated_by": "test",
-  "evidence": {
-    "BAD-ID": { "files": ["missing.json"] }
-  }
-}

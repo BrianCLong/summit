@@ -44,8 +44,8 @@ export class DriftDetectionService {
     private async runChecks(): Promise<void> {
         // Critical paths to monitor
         const criticalPaths = [
-            'server/src/maestro/governance-service.js',
-            'server/src/services/AuthService.js' // Assuming existence or common path
+            'server/src/maestro/governance-service.ts',
+            'server/src/services/AuthService.ts' // Assuming existence or common path
         ];
 
         // Filter paths that actually exist to avoid noise in this MVP

@@ -69,32 +69,12 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
   private llmExecutor: LLMChainExecutor;
   private remediationHooks: AutoRemediationHooks;
   private isInitialized: boolean = false;
-  private llmHandlers: {
-    hypothesesGenerated: (data: Record<string, unknown>) => void;
-    queriesGenerated: (data: Record<string, unknown>) => void;
-    resultsAnalyzed: (data: Record<string, unknown>) => void;
-  };
-  private remediationHandlers: {
-    findingsEnriched: (data: Record<string, unknown>) => void;
-    remediationCompleted: (data: Record<string, unknown>) => void;
-    iocConfirmed: (data: Record<string, unknown>) => void;
-  };
 
   constructor() {
     super();
     this.templateEngine = cypherTemplateEngine;
     this.llmExecutor = llmChainExecutor;
     this.remediationHooks = autoRemediationHooks;
-    this.llmHandlers = {
-      hypothesesGenerated: (data) => this.emit('hypotheses_generated', data),
-      queriesGenerated: (data) => this.emit('queries_generated', data),
-      resultsAnalyzed: (data) => this.emit('results_analyzed', data),
-    };
-    this.remediationHandlers = {
-      findingsEnriched: (data) => this.emit('findings_enriched', data),
-      remediationCompleted: (data) => this.emit('remediation_completed', data),
-      iocConfirmed: (data) => this.emit('ioc_confirmed', data),
-    };
 
     // Forward events from sub-components
     this.setupEventForwarding();
@@ -934,26 +914,25 @@ export class ThreatHuntingOrchestrator extends EventEmitter {
    * Setup event forwarding from sub-components
    */
   private setupEventForwarding(): void {
-    this.llmExecutor.on('hypotheses_generated', this.llmHandlers.hypothesesGenerated);
-    this.llmExecutor.on('queries_generated', this.llmHandlers.queriesGenerated);
-    this.llmExecutor.on('results_analyzed', this.llmHandlers.resultsAnalyzed);
+    this.llmExecutor.on('hypotheses_generated', (data) =>
+      this.emit('hypotheses_generated', data)
+    );
+    this.llmExecutor.on('queries_generated', (data) =>
+      this.emit('queries_generated', data)
+    );
+    this.llmExecutor.on('results_analyzed', (data) =>
+      this.emit('results_analyzed', data)
+    );
 
-    this.remediationHooks.on('findings_enriched', this.remediationHandlers.findingsEnriched);
-    this.remediationHooks.on('remediation_completed', this.remediationHandlers.remediationCompleted);
-    this.remediationHooks.on('ioc_confirmed', this.remediationHandlers.iocConfirmed);
-  }
-
-  /**
-   * Dispose and detach forwarded listeners from shared singletons.
-   */
-  dispose(): void {
-    this.llmExecutor.off('hypotheses_generated', this.llmHandlers.hypothesesGenerated);
-    this.llmExecutor.off('queries_generated', this.llmHandlers.queriesGenerated);
-    this.llmExecutor.off('results_analyzed', this.llmHandlers.resultsAnalyzed);
-    this.remediationHooks.off('findings_enriched', this.remediationHandlers.findingsEnriched);
-    this.remediationHooks.off('remediation_completed', this.remediationHandlers.remediationCompleted);
-    this.remediationHooks.off('ioc_confirmed', this.remediationHandlers.iocConfirmed);
-    this.removeAllListeners();
+    this.remediationHooks.on('findings_enriched', (data) =>
+      this.emit('findings_enriched', data)
+    );
+    this.remediationHooks.on('remediation_completed', (data) =>
+      this.emit('remediation_completed', data)
+    );
+    this.remediationHooks.on('ioc_confirmed', (data) =>
+      this.emit('ioc_confirmed', data)
+    );
   }
 
   /**

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { Entity, Document } from '../data-model/types.js';
+import { Entity, Document } from '../data-model/types';
 
 export enum IngestionEvent {
   PIPELINE_STARTED = 'ingestion.pipeline.started',

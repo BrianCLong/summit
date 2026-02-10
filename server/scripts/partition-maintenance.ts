@@ -78,14 +78,8 @@ async function run() {
         'SELECT ensure_hipaa_log_partitions_for_all() AS tenants_touched'
       );
 
-      // Outbox Partitions
-      await client.query(
-        'SELECT ensure_outbox_partition($1, $2)',
-        [options.monthsAhead, options.retentionMonths],
-      );
-
       console.log(
-        `✅ ensured partitions for ${eventRows[0]?.tenants_touched ?? 0} tenants (event_store), ${hipaaRows[0]?.tenants_touched ?? 0} tenants (hipaa_log), and outbox_events`,
+        `✅ ensured partitions for ${eventRows[0]?.tenants_touched ?? 0} tenants (event_store) and ${hipaaRows[0]?.tenants_touched ?? 0} tenants (hipaa_log)`,
       );
     }
 

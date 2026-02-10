@@ -15,7 +15,7 @@
 import { jest } from '@jest/globals';
 import type { Request, Response, NextFunction } from 'express';
 import axios from 'axios';
-import { OPAEnforcer, createOPAMiddleware } from '../opa-enforcer.js';
+import { OPAEnforcer, createOPAMiddleware } from '../opa-enforcer';
 
 // Mock axios
 jest.mock('axios');
