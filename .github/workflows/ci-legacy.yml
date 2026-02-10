@@ -1,4 +1,4 @@
-name: CI Legacy (Non-Blocking)
+name: "[info] CI Legacy (Non-Blocking)"
 
 # This workflow contains NON-BLOCKING checks:
 # - Quarantined flaky tests

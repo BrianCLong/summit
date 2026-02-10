@@ -13,6 +13,17 @@ The entire Merge Surge architecture is controlled by a single repository variabl
     *   `true`: **Surge Mode Active.** Expensive jobs are skipped on PR pushes.
     *   `false`: **Standard Mode.** All mandatory and recommended checks run on every PR commit.
 
+### Change Control & Audit Trail
+Changing the `MERGE_SURGE` status is a **tier-1 operational change**.
+1.  **Open an Issue:** Create a "CI Scaling" issue describing why the toggle is needed (e.g., "Release v4.2 Crunch").
+2.  **Toggle the Variable:** Update the value in GitHub Settings.
+3.  **Document the Change:** Add a line to the table below via a PR to this file.
+
+| Date | New State | Reason | Operator | Issue Ref |
+| :--- | :--- | :--- | :--- | :--- |
+| 2026-02-09 | `true` | Initial Surge Mode activation for merge recovery | Gemini Agent | N/A |
+| 2026-02-10 | `true` | System hardening and lock-in | Gemini Agent | N/A |
+
 ### What Changes in Surge Mode?
 When `MERGE_SURGE=true`, the following behaviors are active:
 

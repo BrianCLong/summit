@@ -8,16 +8,42 @@
       "gate",
       "Release Readiness Gate",
       "SOC Controls",
-      "test (20.x)"
+      "test (20.x)",
+      "Workflow Validity Gate / Workflow Validity Check"
     ],
     "checks": [
-      { "context": "meta-gate", "app_id": 15368 },
-      { "context": "CI Core Gate ✅", "app_id": 15368 },
-      { "context": "Unit Tests", "app_id": 15368 },
-      { "context": "gate", "app_id": 15368 },
-      { "context": "Release Readiness Gate", "app_id": 15368 },
-      { "context": "SOC Controls", "app_id": 15368 },
-      { "context": "test (20.x)", "app_id": 15368 }
+      {
+        "context": "meta-gate",
+        "app_id": 15368
+      },
+      {
+        "context": "CI Core Gate ✅",
+        "app_id": 15368
+      },
+      {
+        "context": "Unit Tests",
+        "app_id": 15368
+      },
+      {
+        "context": "gate",
+        "app_id": 15368
+      },
+      {
+        "context": "Release Readiness Gate",
+        "app_id": 15368
+      },
+      {
+        "context": "SOC Controls",
+        "app_id": 15368
+      },
+      {
+        "context": "test (20.x)",
+        "app_id": 15368
+      },
+      {
+        "context": "Workflow Validity Gate / Workflow Validity Check",
+        "app_id": 15368
+      }
     ]
   },
   "required_pull_request_reviews": {
