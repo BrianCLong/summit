@@ -11,7 +11,6 @@ This is the canonical runbook for operators to perform releases.
   - `release-bundle/compliance-bundle-v*.tgz`
   - `evidence-bundle.tar.gz`
   - `sbom.json`
-  - `artifact-inventory.json` (release artifact inventory)
 - **RC vs GA behavior:**
   - RC releases (e.g., `v1.0.0-rc.1`) are marked as "prerelease" in GitHub Releases.
   - GA releases (e.g., `v1.0.0`) are marked as "latest" (unless configured otherwise).
@@ -31,22 +30,6 @@ This is the canonical runbook for operators to perform releases.
 
 3.  **Ensure versions match:**
     Check `package.json` in root, server, and client directories to ensure they match the intended tag.
-
-4.  **Generate an artifact inventory (recommended):**
-
-    ```bash
-    node scripts/release/generate_artifact_inventory.mjs --dir <output-dir>
-    ```
-
-    The inventory enumerates `dist/release/*`, compliance bundles, evidence bundles, SBOMs,
-    provenance outputs (for example `provenance.json`), `ga_metadata.json`, `SHA256SUMS`, and
-    release scripts/checklists. It writes `artifact-inventory.json` inside `<output-dir>`.
-
-5.  **Verify the artifact inventory (optional local guard):**
-
-    ```bash
-    node scripts/release/verify_artifact_inventory.mjs --dir <output-dir>
-    ```
 
 ## 3. Dry-run (Recommended)
 
@@ -112,13 +95,6 @@ This governance gate ensures that every release is explicitly verified against k
   - **Canonical Repo Guard:** Ensures release is not running from a fork.
   - **SHA Pinned Actions:** Verifies that GitHub Actions uses immutable SHAs.
 - **Idempotency:** Ensures the release process handles "create" (new release) vs "update" (existing release) correctly.
-- **Artifact inventory:** CI validates the inventory before publish.
-
-  ```bash
-  node scripts/release/verify_artifact_inventory.mjs --dir <output-dir>
-  ```
-
-  Evidence bundles place the inventory under `release-artifacts/artifact-inventory.json`.
 
 ## 7. Troubleshooting
 
@@ -147,7 +123,6 @@ Maestro Conductor and other tools can parse these files from the release artifac
 - `provenance.json`: SLSA provenance data.
 - `freeze.json`: Status of the freeze window check.
 - `preflight.json`: Results of version and ancestry checks.
-- `release-artifacts/artifact-inventory.json`: Inventory of release artifacts.
 
 Parse these JSON files for automated "go/no-go" decisions.
 

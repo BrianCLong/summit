@@ -2,9 +2,9 @@ import {
   GraphPatternQuery,
   GraphPatternNode,
   GraphPatternEdge,
-} from '../graph/patternQuery.js';
-import { runCypher } from '../graph/neo4j.js';
-import { Entity, Edge } from '../graph/types.js';
+} from '../graph/patternQuery';
+import { runCypher } from '../graph/neo4j';
+import { Entity, Edge } from '../graph/types';
 import { enforceTenantScopeForCypher } from './graphTenantScope.js';
 
 // Helper to sanitize attribute keys to prevent injection

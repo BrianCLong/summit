@@ -4,17 +4,12 @@
   "description": "Graph↔PG sync validator",
   "main": "src/compare/compare.mjs",
   "bin": {
-    "graph-sync-validate": "dist/cli.js"
+    "graph-sync-validate": "bin/graph-sync-validate.mjs"
   },
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "prepare": "pnpm run build",
-    "validate": "node dist/cli.js"
+    "validate": "node bin/graph-sync-validate.mjs"
   },
   "dependencies": {},
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
-  }
+  "devDependencies": {}
 }

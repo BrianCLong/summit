@@ -1,5 +1,5 @@
-import { getFeatureFlagService } from '../services/FeatureFlagService.js';
-import { FlagUser } from '../services/FeatureFlagService.js';
+import { getFeatureFlagService } from '../services/FeatureFlagService';
+import { FlagUser } from '../services/FeatureFlagService';
 
 export interface Citation {
   locator: string; // e.g., "doc-123", "https://..."

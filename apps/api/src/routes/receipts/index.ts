@@ -1,17 +1,11 @@
 import express, { Request, Response } from 'express';
 import pino from 'pino';
 import { ReceiptStore } from './store';
-import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
-import { requirePermission } from '../../middleware/security.js';
 
-export function createReceiptRouter(
-  store: ReceiptStore, 
-  rbacManager: RBACManager,
-  logger = pino()
-): express.Router {
+export function createReceiptRouter(store: ReceiptStore, logger = pino()): express.Router {
   const router = express.Router();
 
-  router.get('/:id', requirePermission(rbacManager, 'receipts', 'read'), (req: Request, res: Response) => {
+  router.get('/:id', (req: Request, res: Response) => {
     const receipt = store.get(req.params.id);
     if (!receipt) {
       logger.warn({ id: req.params.id }, 'Receipt not found');
@@ -20,7 +14,7 @@ export function createReceiptRouter(
     return res.json(receipt);
   });
 
-  router.post('/export', requirePermission(rbacManager, 'receipts', 'read'), (req: Request, res: Response) => {
+  router.post('/export', (req: Request, res: Response) => {
     const { id, redactions, reason } = req.body as {
       id?: string;
       redactions?: string[];

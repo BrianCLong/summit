@@ -56,7 +56,7 @@ func TestFailPersistsMessage(t *testing.T) {
 }
 
 func TestOpenPostgresFallsBack(t *testing.T) {
-	store, err := OpenPostgres(context.Background(), "", "")
+	store, err := OpenPostgres(context.Background(), "")
 	if err != nil {
 		t.Fatalf("open postgres fallback: %v", err)
 	}

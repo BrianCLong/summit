@@ -464,9 +464,9 @@ export class RunbookStateManager {
     stepId: string,
     actorId: string,
     output: Record<string, unknown>,
-    evidence?: import('./types.js').Evidence[],
-    citations?: import('./types.js').Citation[],
-    proofs?: import('./types.js').CryptographicProof[],
+    evidence?: import('./types').Evidence[],
+    citations?: import('./types').Citation[],
+    proofs?: import('./types').CryptographicProof[],
     kpis?: Record<string, number>
   ): Promise<RunbookExecution> {
     const execution = await this.getExecutionOrThrow(executionId);

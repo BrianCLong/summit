@@ -1,4 +1,4 @@
-import { RiskEngine } from '../risk/RiskEngine.js';
+import { RiskEngine } from '../risk/RiskEngine';
 import { describe, it, expect } from '@jest/globals';
 
 describe('RiskEngine', () => {

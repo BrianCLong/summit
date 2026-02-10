@@ -1,3 +1,0 @@
-# Dependency Delta
-
-- none

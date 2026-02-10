@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-ATP-LATENT-EVIDENCE-002",
-  "metrics": {
-    "correctness_proxy": 0.95,
-    "token_proxy": 150,
-    "anomaly_count": 0
-  }
-}

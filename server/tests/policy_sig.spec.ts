@@ -1,4 +1,4 @@
-import { loadSignedPolicy } from '../src/policy/loader.js';
+import { loadSignedPolicy } from '../src/policy/loader';
 
 describe('policy signature verification', () => {
   it('rejects unsigned policy', async () => {

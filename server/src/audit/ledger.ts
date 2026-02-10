@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import pino, { type Logger } from 'pino';
-import { logEventBus, type LogEvent, type LogEventBus } from '../logging/logEventBus.js';
+import { logEventBus, type LogEvent, type LogEventBus } from '../logging/logEventBus.ts';
 
 export interface AuditLedgerEntry {
   eventId: string;
@@ -40,7 +40,7 @@ export interface AuditLedgerPayload {
 const defaultLedgerFilePath = (): string => {
   const auditDir =
     process.env.AUDIT_LOG_DIR ?? path.join(process.cwd(), 'logs', 'audit');
-  return path.join(auditDir, 'audit-ledger.jsonl');
+  return path.join(auditDir, 'audit-ledger.tsonl');
 };
 
 export const getLedgerFilePath = (): string =>

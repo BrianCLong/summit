@@ -26,7 +26,7 @@ jest.mock(
   { virtual: true },
 );
 
-import { sanitizeFilePath, sanitizeString } from '../utils/input-sanitization.js';
+import { sanitizeFilePath, sanitizeString } from '../utils/input-sanitization.ts';
 
 function createDeterministicRng(seed: number) {
   let value = seed;

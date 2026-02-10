@@ -18,7 +18,7 @@ jest.mock('../../config/logger.js', () => ({
   },
 }));
 
-import { CaseWorkflowService } from '../cases/workflow/CaseWorkflowService.js';
+import { CaseWorkflowService } from '../cases/workflow/CaseWorkflowService';
 
 describe('Case dashboard read model integration (flagged)', () => {
   const baseCaseRow = {

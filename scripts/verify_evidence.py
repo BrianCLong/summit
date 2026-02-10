@@ -107,8 +107,8 @@ def main() -> int:
         return 3
 
     if "items" in index:
-        if not isinstance(index["items"], (list, dict)):
-            print("FAIL index.json 'items' must be an array or object")
+        if not isinstance(index["items"], list):
+            print("FAIL index.json 'items' must be an array")
             return 3
     elif "evidence" in index:
         # Legacy support
@@ -122,13 +122,12 @@ def main() -> int:
     IGNORE = {
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
-        "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
+        "evidence-index.json"
     }
-    IGNORE_DIRS = {"EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti"}
+    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "ai-influence-ops", "TELETOK-2025", "EVD-POSTIZ-GROWTH-001", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-POSTIZ-GATE-004"}
 
     for p in EVID.rglob("*"):
-        if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
+        if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json") or p.name.startswith("EVD-") or p.name == "acp_stamp.json" or p.name.startswith("skill_"):
             continue
         if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
             continue

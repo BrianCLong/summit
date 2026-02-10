@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { quotaGuards, quotaMiddleware } from '../middleware.js';
-import { QuotaService, quotaService } from '../service.js';
-import { resetTenantQuotaCache } from '../config.js';
+import { quotaGuards, quotaMiddleware } from '../middleware';
+import { QuotaService, quotaService } from '../service';
+import { resetTenantQuotaCache } from '../config';
 import type { Request, Response } from 'express';
 
 const createMockReq = (init?: Partial<Request>): Request => {

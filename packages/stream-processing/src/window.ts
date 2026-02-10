@@ -9,7 +9,7 @@ import {
   Window,
   WindowedMessage,
   AggregateFunction,
-} from './types.js';
+} from './types';
 
 const logger = pino({ name: 'window-manager' });
 

@@ -166,7 +166,7 @@ export async function createAdapterRegistry(
  *   EventType,
  *   EventSeverity,
  *   EventHelpers,
- * } from './notifications-hub.js';
+ * } from './notifications-hub';
  *
  * // Create and initialize hub
  * const hub = await createNotificationHub({

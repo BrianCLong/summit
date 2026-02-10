@@ -1,13 +1,13 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { applyDelta, buildMicroIndex, queryMicroIndex } from '../microindex.js';
-import { computePolicyScopeId } from '../psid.js';
+import { applyDelta, buildMicroIndex, queryMicroIndex } from '../microindex';
+import { computePolicyScopeId } from '../psid';
 import {
   AuthorizedObjects,
   BudgetConfig,
   MicroIndex,
   PolicyScope,
   SubjectBucket,
-} from '../types.js';
+} from '../types';
 
 describe('Policy-Compiled Micro-Index', () => {
   const baseSubjectBucket: SubjectBucket = {

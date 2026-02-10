@@ -1,5 +1,8 @@
 package companyos.incident
 
+import future.keywords
+
+
 # Default to deny all actions unless explicitly allowed.
 default allow = false
 

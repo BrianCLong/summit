@@ -1,7 +1,7 @@
 import { EventEmitter } from 'eventemitter3';
 import pino from 'pino';
-import { CheckpointConfig, StateBackend } from './types.js';
-import { StateManager } from './state.js';
+import { CheckpointConfig, StateBackend } from './types';
+import { StateManager } from './state';
 
 const logger = pino({ name: 'checkpoint-manager' });
 

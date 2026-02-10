@@ -1,0 +1,48 @@
+name: Check SemVer Label
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled]
+
+jobs:
+  check-semver-label:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 9.12.0
+
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 9.12.0
+
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 9.12.0
+
+    - uses: pnpm/action-setup@v4
+      with:
+        version: 9.12.0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Check for SemVer label
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const labels = context.payload.pull_request.labels.map(l => l.name);
+          const semverLabels = ['major', 'minor', 'patch'];
+          const hasSemverLabel = labels.some(l => semverLabels.includes(l));
+
+          if (!hasSemverLabel) {
+            core.setFailed('Pull request must have a SemVer label (major, minor, or patch)');
+          }
