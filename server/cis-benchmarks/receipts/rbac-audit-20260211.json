@@ -1,0 +1,10 @@
+{
+  "audit_id": "RBAC-2026-02-11",
+  "timestamp": "2026-02-11T05:00:00Z",
+  "target": "server/src/routes",
+  "files_scanned": 215,
+  "files_compliant": 30,
+  "compliance_percentage": 13.9,
+  "verdict": "FAIL",
+  "reason": "Insufficient RBAC enforcement across API surface"
+}

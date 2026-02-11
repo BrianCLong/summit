@@ -43,6 +43,18 @@ overrides:
   hono: '>=4.11.7'
   multer: '>=2.0.2'
   busboy: '>=1.6.0'
+  lodash-es@>=4.0.0 <=4.17.22: '>=4.17.23'
+  lodash@>=4.0.0 <=4.17.22: '>=4.17.23'
+  undici@<6.23.0: '>=6.23.0'
+  diff@<3.5.1: '>=3.5.1'
+  diff@>=4.0.0 <4.0.4: '>=4.0.4'
+  diff@>=6.0.0 <8.0.3: '>=8.0.3'
+  '@apollo/server@>=5.0.0 <5.4.0': '>=5.4.0'
+  '@apollo/server@>=4.2.0 <4.13.0': '>=4.13.0'
+  axios@<=1.13.4: '>=1.13.5'
+  html-minifier: npm:html-minifier-terser@^7.2.0
+  apollo-server: npm:@apollo/server@^4.13.0
+  apollo-server-express: npm:@apollo/server@^4.13.0
 
 pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
@@ -50,6 +62,12 @@ importers:
 
   .:
     dependencies:
+      '@apollo/server':
+        specifier: ^4.13.0
+        version: 4.13.0(graphql@16.12.0)
+      '@as-integrations/express4':
+        specifier: ^1.1.2
+        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
       '@jest/globals':
         specifier: ^30.2.0
         version: 30.2.0
@@ -62,12 +80,9 @@ importers:
       '@radix-ui/react-slider':
         specifier: ^1.3.6
         version: 1.3.6(@types/react-dom@18.3.0)(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      apollo-server-express:
-        specifier: ^3.13.0
-        version: 3.13.0(express@5.2.1)(graphql@16.12.0)
       axios:
-        specifier: ^1.13.2
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       cbor:
         specifier: ^9.0.2
         version: 9.0.2
@@ -567,8 +582,8 @@ importers:
   apps/compliance-console:
     dependencies:
       axios:
-        specifier: ^1.7.7
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       react:
         specifier: ^19.2.0
         version: 19.2.1
@@ -765,8 +780,8 @@ importers:
   apps/gateway:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@opentelemetry/api':
         specifier: latest
         version: 1.9.0
@@ -941,11 +956,11 @@ importers:
   apps/intelgraph-api:
     dependencies:
       '@apollo/server':
-        specifier: ^4.10.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.0.0
-        version: 1.1.2(@apollo/server@4.12.2(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -1038,8 +1053,8 @@ importers:
         specifier: ^5.24.1
         version: 5.90.12(react@18.3.1)
       axios:
-        specifier: ^1.6.7
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.1
@@ -1298,8 +1313,8 @@ importers:
         specifier: ^7.2.0
         version: 7.3.1
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1542,8 +1557,8 @@ importers:
         specifier: ^10.4.16
         version: 10.4.22(postcss@8.5.6)
       axios:
-        specifier: ^1.6.3
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       clsx:
         specifier: ^2.0.0
         version: 2.1.1
@@ -1771,8 +1786,8 @@ importers:
         specifier: ^5.8.4
         version: 5.90.14(@tanstack/react-query@5.90.12(react@19.2.1))(react@19.2.1)
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
@@ -2073,11 +2088,11 @@ importers:
   apps/server:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.1
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       axios:
-        specifier: ^1.7.2
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       body-parser:
         specifier: ^2.2.0
         version: 2.2.1
@@ -2167,8 +2182,8 @@ importers:
   apps/slo-exporter:
     dependencies:
       axios:
-        specifier: ^1.13.3
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -2839,8 +2854,8 @@ importers:
   apps/workflow-engine:
     dependencies:
       axios:
-        specifier: ^1.6.2
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       compression:
         specifier: ^1.7.4
         version: 1.8.1
@@ -3322,8 +3337,8 @@ importers:
   companyos/services/api-svc-template:
     dependencies:
       axios:
-        specifier: ^1.7.7
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       config:
         specifier: ^3.3.11
         version: 3.3.12
@@ -3383,8 +3398,8 @@ importers:
   companyos/services/companyos-api:
     dependencies:
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -3417,8 +3432,8 @@ importers:
   companyos/services/incident-api:
     dependencies:
       axios:
-        specifier: ^1.7.7
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       config:
         specifier: ^3.3.11
         version: 3.3.12
@@ -3478,8 +3493,8 @@ importers:
   companyos/services/tenant-api:
     dependencies:
       '@apollo/server':
-        specifier: ^4.10.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -4178,8 +4193,8 @@ importers:
   packages/api-framework:
     dependencies:
       '@apollo/server':
-        specifier: ^5.1.0
-        version: 5.2.0(graphql@16.12.0)
+        specifier: '>=5.4.0'
+        version: 5.4.0(graphql@16.12.0)
       '@intelgraph/query-language':
         specifier: workspace:*
         version: link:../query-language
@@ -4360,8 +4375,8 @@ importers:
         specifier: workspace:*
         version: link:../osint-collector
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       email-validator:
         specifier: ^2.0.4
         version: 2.0.4
@@ -4572,8 +4587,8 @@ importers:
   packages/authz-core:
     dependencies:
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       pg:
         specifier: ^8.11.0
         version: 8.18.0
@@ -5491,8 +5506,8 @@ importers:
         specifier: ^7.11.0
         version: 7.13.0
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       nodemailer:
         specifier: ^7.0.12
         version: 7.0.12
@@ -5883,8 +5898,8 @@ importers:
         specifier: 1.7.0
         version: 1.7.0
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       bull:
         specifier: ^4.16.5
         version: 4.16.5
@@ -6685,8 +6700,8 @@ importers:
         specifier: workspace:*
         version: link:../knowledge-graph
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       neo4j-driver:
         specifier: 6.0.1
         version: 6.0.1
@@ -7534,8 +7549,8 @@ importers:
   packages/fztr-client:
     dependencies:
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
     devDependencies:
       '@types/jest':
         specifier: ^29.5.12
@@ -8272,8 +8287,8 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
     devDependencies:
       '@types/node':
         specifier: 20.19.27
@@ -8888,8 +8903,8 @@ importers:
         specifier: ^1.38.0
         version: 1.39.0
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       cheerio:
         specifier: ^1.0.0-rc.12
         version: 1.2.0
@@ -9553,8 +9568,8 @@ importers:
         specifier: workspace:*
         version: link:../threat-detection-core
       axios:
-        specifier: ^1.6.2
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
     devDependencies:
       '@types/jest':
         specifier: ^29.5.11
@@ -9847,8 +9862,8 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
     devDependencies:
       '@types/node':
         specifier: 20.19.27
@@ -10365,8 +10380,8 @@ importers:
   packages/osint-collector:
     dependencies:
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       cheerio:
         specifier: ^1.0.0
         version: 1.2.0
@@ -11016,8 +11031,8 @@ importers:
   packages/prov-ledger-client:
     dependencies:
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       axios-retry:
         specifier: ^3.8.0
         version: 3.9.1
@@ -11176,8 +11191,8 @@ importers:
         specifier: ^5.15.0
         version: 5.18.0(@emotion/react@11.14.0(@types/react@18.3.11)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.11)(react@18.3.1))(@types/react@18.3.11)(react@18.3.1))(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
@@ -11771,8 +11786,8 @@ importers:
   packages/rpa:
     dependencies:
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       cheerio:
         specifier: ^1.0.0
         version: 1.2.0
@@ -11841,6 +11856,19 @@ importers:
   packages/sb: {}
 
   packages/schema: {}
+
+  packages/sdes-jee:
+    dependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
 
   packages/sdk:
     devDependencies:
@@ -11963,8 +11991,8 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
     devDependencies:
       '@types/node':
         specifier: 20.19.27
@@ -12083,8 +12111,8 @@ importers:
   packages/sim-harness:
     dependencies:
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       commander:
         specifier: ^11.0.0
         version: 11.1.0
@@ -12275,8 +12303,8 @@ importers:
         specifier: workspace:*
         version: link:../osint-collector
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       compromise:
         specifier: ^14.13.0
         version: 14.14.5
@@ -12396,8 +12424,8 @@ importers:
         specifier: workspace:*
         version: link:../audio-processing
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       microsoft-cognitiveservices-speech-sdk:
         specifier: ^1.0.0
         version: 1.47.0
@@ -13134,8 +13162,8 @@ importers:
         specifier: workspace:*
         version: link:../common-types
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       zod:
         specifier: ^4.1.12
         version: 4.2.1
@@ -13525,8 +13553,8 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       cheerio:
         specifier: ^1.0.0
         version: 1.2.0
@@ -14101,11 +14129,11 @@ importers:
   server:
     dependencies:
       '@apollo/server':
-        specifier: 5.2.0
-        version: 5.2.0(graphql@16.12.0)
+        specifier: '>=5.4.0'
+        version: 5.4.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: 1.1.2
-        version: 1.1.2(@apollo/server@5.2.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)
       '@aws-sdk/client-s3':
         specifier: ^3.962.0
         version: 3.980.0
@@ -14245,8 +14273,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1(ajv@8.17.1)
       apollo-server-express:
-        specifier: 3.13.0
-        version: 3.13.0(express@5.2.1)(graphql@16.12.0)
+        specifier: npm:@apollo/server@^4.13.0
+        version: '@apollo/server@4.13.0(graphql@16.12.0)'
       archiver:
         specifier: 6.0.1
         version: 6.0.1
@@ -14254,8 +14282,8 @@ importers:
         specifier: ^0.44.0
         version: 0.44.0
       axios:
-        specifier: ^1.7.9
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       bullmq:
         specifier: 5.66.1
         version: 5.66.1
@@ -14371,8 +14399,8 @@ importers:
         specifier: ^2.2.4
         version: 2.2.4
       lodash:
-        specifier: 4.17.21
-        version: 4.17.21
+        specifier: '>=4.17.23'
+        version: 4.17.23
       lru-cache:
         specifier: ^11.2.4
         version: 11.2.5
@@ -14696,8 +14724,8 @@ importers:
   services/admin-api:
     dependencies:
       '@apollo/server':
-        specifier: ^4.10.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@intelgraph/metrics-exporter':
         specifier: workspace:*
         version: link:../../packages/metrics-exporter
@@ -14745,8 +14773,8 @@ importers:
   services/admin-automation:
     dependencies:
       '@apollo/server':
-        specifier: ^4.12.2
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -15418,11 +15446,11 @@ importers:
   services/api-gateway:
     dependencies:
       '@apollo/server':
-        specifier: ^5.1.0
-        version: 5.2.0(graphql@16.12.0)
+        specifier: '>=5.4.0'
+        version: 5.4.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
-        version: 1.1.2(@apollo/server@5.2.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)
       compression:
         specifier: ^1.7.4
         version: 1.8.1
@@ -15805,8 +15833,8 @@ importers:
         specifier: latest
         version: 1.39.0
       axios:
-        specifier: ^1.6.7
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -15884,8 +15912,8 @@ importers:
   services/battle-api:
     dependencies:
       '@apollo/server':
-        specifier: ^4.9.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.30
         version: 10.0.30(graphql@16.12.0)
@@ -16655,11 +16683,11 @@ importers:
   services/config-service:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
-        version: 1.1.2(@apollo/server@4.12.2(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -16734,8 +16762,8 @@ importers:
   services/control-tower-service:
     dependencies:
       '@apollo/server':
-        specifier: ^4.9.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.0
         version: 10.0.30(graphql@16.12.0)
@@ -17077,8 +17105,8 @@ importers:
   services/dashboard-service:
     dependencies:
       apollo-server-express:
-        specifier: ^3.13.0
-        version: 3.13.0(express@5.2.1)(graphql@16.12.0)
+        specifier: npm:@apollo/server@^4.13.0
+        version: '@apollo/server@4.13.0(graphql@16.12.0)'
       compression:
         specifier: ^1.7.5
         version: 1.8.1
@@ -17300,8 +17328,8 @@ importers:
   services/data-monetization-engine:
     dependencies:
       '@apollo/server':
-        specifier: ^4.10.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@intelgraph/data-monetization-types':
         specifier: workspace:*
         version: link:../../packages/data-monetization-types
@@ -17569,8 +17597,8 @@ importers:
   services/digital-twin:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@opentelemetry/api':
         specifier: 1.7.0
         version: 1.7.0
@@ -17725,8 +17753,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/neural-networks
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -17756,8 +17784,8 @@ importers:
         specifier: ^1.9.0
         version: 1.9.0
       axios:
-        specifier: ^1.7.7
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -18126,8 +18154,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/esg-reporting
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -18431,8 +18459,8 @@ importers:
   services/factcert:
     dependencies:
       axios:
-        specifier: ^1.13.2
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
 
   services/feature-flags:
     dependencies:
@@ -18788,8 +18816,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/geospatial
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -19199,8 +19227,8 @@ importers:
   services/graph-core:
     dependencies:
       '@apollo/server':
-        specifier: ^4.11.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.6
         version: 10.0.30(graphql@16.12.0)
@@ -19766,8 +19794,8 @@ importers:
         specifier: ^5.7.7
         version: 5.7.9
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       bullmq:
         specifier: ^5.0.0
         version: 5.66.1
@@ -20369,8 +20397,8 @@ importers:
         specifier: ^9.0.4
         version: 9.3.0
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       bullmq:
         specifier: ^5.34.8
         version: 5.66.1
@@ -20503,8 +20531,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/sentiment-analysis
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -21009,8 +21037,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/etl-framework
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       bull:
         specifier: ^4.16.5
         version: 4.16.5
@@ -21482,8 +21510,8 @@ importers:
   services/privacy:
     dependencies:
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
     devDependencies:
       '@types/jest':
         specifier: ^30.0.0
@@ -21616,9 +21644,9 @@ importers:
 
   services/prov-ledger:
     dependencies:
-      apollo-server:
-        specifier: 3.13.0
-        version: 3.13.0(graphql@16.12.0)
+      '@apollo/server':
+        specifier: ^4.13.0
+        version: 4.13.0(graphql@16.12.0)
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -21883,8 +21911,8 @@ importers:
   services/regulatory-compliance-agents:
     dependencies:
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       bullmq:
         specifier: ^5.0.0
         version: 5.66.1
@@ -22223,8 +22251,8 @@ importers:
   services/sandbox-gateway:
     dependencies:
       '@apollo/server':
-        specifier: ^4.10.0
-        version: 4.12.2(graphql@16.12.0)
+        specifier: '>=4.13.0'
+        version: 4.13.0(graphql@16.12.0)
       '@intelgraph/datalab-service':
         specifier: workspace:*
         version: link:../datalab-service
@@ -22565,8 +22593,8 @@ importers:
   services/self-upgrading-infrastructure:
     dependencies:
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       date-fns:
         specifier: ^2.30.0
         version: 2.30.0
@@ -22936,8 +22964,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(ajv@8.17.1)
       axios:
-        specifier: ^1.6.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       https-proxy-agent:
         specifier: ^7.0.2
         version: 7.0.6
@@ -23030,8 +23058,8 @@ importers:
         specifier: 1.19.0
         version: 1.19.0(@opentelemetry/api@1.7.0)
       axios:
-        specifier: ^1.13.2
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       commander:
         specifier: ^12.0.0
         version: 12.1.0
@@ -23593,8 +23621,8 @@ importers:
         specifier: workspace:*
         version: link:../license-registry
       axios:
-        specifier: ^1.11.0
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       fastify:
         specifier: '>=5.7.2'
         version: 5.7.4
@@ -23842,8 +23870,8 @@ importers:
   services/xai-explain-anomaly:
     dependencies:
       apollo-server-express:
-        specifier: ^3.13.0
-        version: 3.13.0(express@5.2.1)(graphql@16.12.0)
+        specifier: npm:@apollo/server@^4.13.0
+        version: '@apollo/server@4.13.0(graphql@16.12.0)'
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -24420,8 +24448,8 @@ importers:
   tools/summitctl:
     dependencies:
       axios:
-        specifier: ^1.7.9
-        version: 1.13.4
+        specifier: '>=1.13.5'
+        version: 1.13.5
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -24621,10 +24649,6 @@ packages:
     resolution: {integrity: sha512-vF+zxhPiLtkwxONs6YanSt1EpwpGilThpneExUN5K3tCymuxNnVq2yojTvnpRjv2QfsEIt/n7ozPIIzBLwGIDQ==}
     hasBin: true
 
-  '@apollo/protobufjs@1.2.6':
-    resolution: {integrity: sha512-Wqo1oSHNUj/jxmsVp4iR3I480p6qdqHikn38lKrFhfzcDJ7lwd7Ck7cHRl4JE81tWNArl77xhnG/OkZhxKBYOw==}
-    hasBin: true
-
   '@apollo/protobufjs@1.2.7':
     resolution: {integrity: sha512-Lahx5zntHPZia35myYDBRuF58tlwPskwHc5CWBZC/4bMKB6siTBWwtMrkqXcsNwQiFSzSx5hKdRPUmemrEp3Gg==}
     hasBin: true
@@ -24640,13 +24664,6 @@ packages:
     peerDependencies:
       graphql: 16.12.0
 
-  '@apollo/server@4.12.2':
-    resolution: {integrity: sha512-jKRlf+sBMMdKYrjMoiWKne42Eb6paBfDOr08KJnUaeaiyWFj+/040FjVPQI7YGLfdwnYIsl1NUUqS2UdgezJDg==}
-    engines: {node: '>=14.16.0'}
-    deprecated: Apollo Server v4 is end-of-life since January 26, 2026. As long as you are already using a non-EOL version of Node.js, upgrading to v5 should take only a few minutes. See https://www.apollographql.com/docs/apollo-server/previous-versions for details.
-    peerDependencies:
-      graphql: 16.12.0
-
   '@apollo/server@4.13.0':
     resolution: {integrity: sha512-t4GzaRiYIcPwYy40db6QjZzgvTr9ztDKBddykUXmBb2SVjswMKXbkaJ5nPeHqmT3awr9PAaZdCZdZhRj55I/8A==}
     engines: {node: '>=14.16.0'}
@@ -24654,10 +24671,9 @@ packages:
     peerDependencies:
       graphql: 16.12.0
 
-  '@apollo/server@5.2.0':
-    resolution: {integrity: sha512-OEAl5bwVitkvVkmZlgWksSnQ10FUr6q2qJMdkexs83lsvOGmd/y81X5LoETmKZux8UiQsy/A/xzP00b8hTHH/w==}
+  '@apollo/server@5.4.0':
+    resolution: {integrity: sha512-E0/2C5Rqp7bWCjaDh4NzYuEPDZ+dltTf2c0FI6GCKJA6GBetVferX3h1//1rS4+NxD36wrJsGGJK+xyT/M3ysg==}
     engines: {node: '>=20'}
-    deprecated: This version of Apollo Server is vulnerable to a denial of service (DoS) attack. Please update to @apollo/server 5.4.0 or later. For more details, see https://github.com/apollographql/apollo-server/security/advisories/GHSA-mp6q-xf9x-fwf7
     peerDependencies:
       graphql: 16.12.0
 
@@ -24671,12 +24687,6 @@ packages:
   '@apollo/utils.createhash@3.0.1':
     resolution: {integrity: sha512-CKrlySj4eQYftBE5MJ8IzKwIibQnftDT7yGfsJy5KSEEnLlPASX0UTpbKqkjlVEwPPd4mEwI7WOM7XNxEuO05A==}
     engines: {node: '>=16'}
-
-  '@apollo/utils.dropunuseddefinitions@1.1.0':
-    resolution: {integrity: sha512-jU1XjMr6ec9pPoL+BFWzEPW7VHHulVdGKMkPAMiCigpVIT11VmCbnij0bWob8uS3ODJ65tZLYKAh/55vLw2rbg==}
-    engines: {node: '>=12.13.0'}
-    peerDependencies:
-      graphql: 16.12.0
 
   '@apollo/utils.dropunuseddefinitions@2.0.1':
     resolution: {integrity: sha512-EsPIBqsSt2BwDsv8Wu76LK5R1KtsVkNoO4b0M5aK0hx+dGg9xJXuqlr7Fo34Dl+y83jmzn+UvEW+t1/GP2melA==}
@@ -24700,9 +24710,6 @@ packages:
     resolution: {integrity: sha512-xrjyjfkzunZ0DeF6xkHaK5IKR8F1FBq6qV+uZ+h9worIF/2YSzA0uoBxGv6tbTeo9QoIQnRW4PVFzGix5E7n/g==}
     engines: {node: '>=16'}
 
-  '@apollo/utils.keyvaluecache@1.0.2':
-    resolution: {integrity: sha512-p7PVdLPMnPzmXSQVEsy27cYEjVON+SH/Wb7COyW3rQN8+wJgT1nv9jZouYtztWW8ZgTkii5T6tC9qfoDREd4mg==}
-
   '@apollo/utils.keyvaluecache@2.1.1':
     resolution: {integrity: sha512-qVo5PvUUMD8oB9oYvq4ViCjYAMWnZ5zZwEjNF37L2m1u528x5mueMlU+Cr1UinupCgdB78g+egA1G98rbJ03Vw==}
     engines: {node: '>=14'}
@@ -24710,9 +24717,6 @@ packages:
   '@apollo/utils.keyvaluecache@4.0.0':
     resolution: {integrity: sha512-mKw1myRUkQsGPNB+9bglAuhviodJ2L2MRYLTafCMw5BIo7nbvCPNCkLnIHjZ1NOzH7SnMAr5c9LmXiqsgYqLZw==}
     engines: {node: '>=20'}
-
-  '@apollo/utils.logger@1.0.1':
-    resolution: {integrity: sha512-XdlzoY7fYNK4OIcvMD2G94RoFZbzTQaNP0jozmqqMudmaGo2I/2Jx71xlDJ801mWA/mbYRihyaw6KJii7k5RVA==}
 
   '@apollo/utils.logger@2.0.1':
     resolution: {integrity: sha512-YuplwLHaHf1oviidB7MxnCXAdHp3IqYV8n0momZ3JfLniae92eYqMIx+j5qJFX6WKJPs6q7bczmV4lXIsTu5Pg==}
@@ -24722,21 +24726,9 @@ packages:
     resolution: {integrity: sha512-M8V8JOTH0F2qEi+ktPfw4RL7MvUycDfKp7aEap2eWXfL5SqWHN6jTLbj5f5fj1cceHpyaUSOZlvlaaryaxZAmg==}
     engines: {node: '>=16'}
 
-  '@apollo/utils.printwithreducedwhitespace@1.1.0':
-    resolution: {integrity: sha512-GfFSkAv3n1toDZ4V6u2d7L4xMwLA+lv+6hqXicMN9KELSJ9yy9RzuEXaX73c/Ry+GzRsBy/fdSUGayGqdHfT2Q==}
-    engines: {node: '>=12.13.0'}
-    peerDependencies:
-      graphql: 16.12.0
-
   '@apollo/utils.printwithreducedwhitespace@2.0.1':
     resolution: {integrity: sha512-9M4LUXV/fQBh8vZWlLvb/HyyhjJ77/I5ZKu+NBWV/BmYGyRmoEP9EVAy7LCVoY3t8BDcyCAGfxJaLFCSuQkPUg==}
     engines: {node: '>=14'}
-    peerDependencies:
-      graphql: 16.12.0
-
-  '@apollo/utils.removealiases@1.0.0':
-    resolution: {integrity: sha512-6cM8sEOJW2LaGjL/0vHV0GtRaSekrPQR4DiywaApQlL9EdROASZU5PsQibe2MWeZCOhNrPRuHh4wDMwPsWTn8A==}
-    engines: {node: '>=12.13.0'}
     peerDependencies:
       graphql: 16.12.0
 
@@ -24746,33 +24738,15 @@ packages:
     peerDependencies:
       graphql: 16.12.0
 
-  '@apollo/utils.sortast@1.1.0':
-    resolution: {integrity: sha512-VPlTsmUnOwzPK5yGZENN069y6uUHgeiSlpEhRnLFYwYNoJHsuJq2vXVwIaSmts015WTPa2fpz1inkLYByeuRQA==}
-    engines: {node: '>=12.13.0'}
-    peerDependencies:
-      graphql: 16.12.0
-
   '@apollo/utils.sortast@2.0.1':
     resolution: {integrity: sha512-eciIavsWpJ09za1pn37wpsCGrQNXUhM0TktnZmHwO+Zy9O4fu/WdB4+5BvVhFiZYOXvfjzJUcc+hsIV8RUOtMw==}
     engines: {node: '>=14'}
     peerDependencies:
       graphql: 16.12.0
 
-  '@apollo/utils.stripsensitiveliterals@1.2.0':
-    resolution: {integrity: sha512-E41rDUzkz/cdikM5147d8nfCFVKovXxKBcjvLEQ7bjZm/cg9zEcXvS6vFY8ugTubI3fn6zoqo0CyU8zT+BGP9w==}
-    engines: {node: '>=12.13.0'}
-    peerDependencies:
-      graphql: 16.12.0
-
   '@apollo/utils.stripsensitiveliterals@2.0.1':
     resolution: {integrity: sha512-QJs7HtzXS/JIPMKWimFnUMK7VjkGQTzqD9bKD1h3iuPAqLsxd0mUNVbkYOPTsDhUKgcvUOfOqOJWYohAKMvcSA==}
     engines: {node: '>=14'}
-    peerDependencies:
-      graphql: 16.12.0
-
-  '@apollo/utils.usagereporting@1.0.1':
-    resolution: {integrity: sha512-6dk+0hZlnDbahDBB2mP/PZ5ybrtCJdLMbeNJD+TJpKyZmSY6bA3SjI8Cr2EM9QA+AdziywuWg+SgbWUF3/zQqQ==}
-    engines: {node: '>=12.13.0'}
     peerDependencies:
       graphql: 16.12.0
 
@@ -24798,9 +24772,6 @@ packages:
 
   '@apollographql/graphql-playground-html@1.6.27':
     resolution: {integrity: sha512-tea2LweZvn6y6xFV11K0KC8ETjmm52mQrW+ezgB2O/aTQf8JGyFmMcRPFgUaQZeHbWdm8iisDC6EjOKsXu0nfw==}
-
-  '@apollographql/graphql-playground-html@1.6.29':
-    resolution: {integrity: sha512-xCcXpoz52rI4ksJSdOCxeOCn2DLocxwHf9dVT/Q90Pte1LX+LY+91SFtJF3KXVHH8kEin+g1KKCQPKBjZJfWNA==}
 
   '@apollographql/graphql-upload-8-fork@8.1.4':
     resolution: {integrity: sha512-lHAj/PUegYu02zza9Pg0bQQYH5I0ah1nyIzu2YIqOv41P0vu3GCBISAmQCfFHThK7N3dy7dLFPhoKcXlXRLPoQ==}
@@ -24843,7 +24814,7 @@ packages:
     resolution: {integrity: sha512-PGeMcwoOKdYnZ4LtsmM7aLNoel3tbK8wKnfyahdRau1qb7wLbuaXB35zg3w34Ov4bm3WJtO3yzd8Bw5jVE+aIQ==}
     engines: {node: '>=20'}
     peerDependencies:
-      '@apollo/server': ^4.0.0 || ^5.0.0
+      '@apollo/server': '>=5.4.0'
       express: '>=4.21.0'
 
   '@asamuzakjp/css-color@3.2.0':
@@ -26898,10 +26869,6 @@ packages:
   '@fastify/ajv-compiler@4.0.5':
     resolution: {integrity: sha512-KoWKW+MhvfTRWL4qrhUwAAZoaChluo0m0vbiJlGMt2GXvL4LVPQEjt8kSpHI3IBq5Rez8fg+XeH3cneztq+C7A==}
 
-  '@fastify/busboy@2.1.1':
-    resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
-    engines: {node: '>=14'}
-
   '@fastify/busboy@3.2.0':
     resolution: {integrity: sha512-m9FVDXU3GT2ITSe0UaMA5rU3QkfC/UXtCU8y0gSN/GugTqtVldOBWIB5V6V3sbmenVZUIpU6f+mPEO2+m5iTaA==}
 
@@ -27888,11 +27855,6 @@ packages:
     peerDependencies:
       graphql: 16.12.0
 
-  '@graphql-tools/merge@8.3.1':
-    resolution: {integrity: sha512-BMm99mqdNZbEYeTPK3it9r9S6rsZsQKtlqJsSBknAclXq2pGEfOxjcIZi+kBSkHZKPKCRrYDd5vY0+rUmIHVLg==}
-    peerDependencies:
-      graphql: 16.12.0
-
   '@graphql-tools/merge@8.4.2':
     resolution: {integrity: sha512-XbrHAaj8yDuINph+sAfuq3QCZ/tKblrTLOpirK0+CAgNlZUCHs0Fa+xtMUURgwCVThLle1AF7svJCxFizygLsw==}
     peerDependencies:
@@ -27901,11 +27863,6 @@ packages:
   '@graphql-tools/merge@9.1.6':
     resolution: {integrity: sha512-bTnP+4oom4nDjmkS3Ykbe+ljAp/RIiWP3R35COMmuucS24iQxGLa9Hn8VMkLIoaoPxgz6xk+dbC43jtkNsFoBw==}
     engines: {node: '>=16.0.0'}
-    peerDependencies:
-      graphql: 16.12.0
-
-  '@graphql-tools/mock@8.7.20':
-    resolution: {integrity: sha512-ljcHSJWjC/ZyzpXd5cfNhPI7YljRVvabKHPzKjEs5ElxWu2cdlLGvyNYepApXDsM/OJG/2xuhGM+9GWu5gEAPQ==}
     peerDependencies:
       graphql: 16.12.0
 
@@ -27941,11 +27898,6 @@ packages:
   '@graphql-tools/schema@10.0.30':
     resolution: {integrity: sha512-yPXU17uM/LR90t92yYQqn9mAJNOVZJc0nQtYeZyZeQZeQjwIGlTubvvoDL0fFVk+wZzs4YQOgds2NwSA4npodA==}
     engines: {node: '>=16.0.0'}
-    peerDependencies:
-      graphql: 16.12.0
-
-  '@graphql-tools/schema@8.5.1':
-    resolution: {integrity: sha512-0Esilsh0P/qYcB5DKQpiKeQs/jevzIadNTaT0jeWklPMwNbT7yMX4EqZany7mbeRRlSRwMzNzL5olyFdffHBZg==}
     peerDependencies:
       graphql: 16.12.0
 
@@ -27987,11 +27939,6 @@ packages:
   '@graphql-tools/utils@11.0.0':
     resolution: {integrity: sha512-bM1HeZdXA2C3LSIeLOnH/bcqSgbQgKEDrjxODjqi3y58xai2TkNrtYcQSoWzGbt9VMN1dORGjR7Vem8SPnUFQA==}
     engines: {node: '>=16.0.0'}
-    peerDependencies:
-      graphql: 16.12.0
-
-  '@graphql-tools/utils@8.9.0':
-    resolution: {integrity: sha512-pjJIWH0XOVnYGXCqej8g/u/tsfV4LvLlj0eATKQu5zwnxd/TiTHq7Cg313qUPTFFHZ3PP5wJ15chYVtLDwaymg==}
     peerDependencies:
       graphql: 16.12.0
 
@@ -36655,9 +36602,6 @@ packages:
   '@types/bn.js@5.2.0':
     resolution: {integrity: sha512-DLbJ1BPqxvQhIGbeu8VbUC1DiAiahHtAYvA0ZEAa4P31F7IaArc8z3C3BRQdWX4mtLQuABG4yzp76ZrS02Ui1Q==}
 
-  '@types/body-parser@1.19.2':
-    resolution: {integrity: sha512-ALYone6pm6QmwZoAgeyNksccT9Q4AWZQ6PvfwR37GT6r6FWUPguq6sUmNGSMV2Wr761oQoBxwGGa6DR5o1DC9g==}
-
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
 
@@ -36726,9 +36670,6 @@ packages:
 
   '@types/cookies@0.9.2':
     resolution: {integrity: sha512-1AvkDdZM2dbyFybL4fxpuNCaWyv//0AwsuUk2DWeXyM1/5ZKm6W3z6mQi24RZ4l2ucY+bkSHzbDVpySqPGuV8A==}
-
-  '@types/cors@2.8.12':
-    resolution: {integrity: sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==}
 
   '@types/cors@2.8.19':
     resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
@@ -36966,9 +36907,6 @@ packages:
   '@types/express-rate-limit@5.1.3':
     resolution: {integrity: sha512-H+TYy3K53uPU2TqPGFYaiWc2xJV6+bIFkDd/Ma2/h67Pa6ARk9kWE0p/K9OH1Okm0et9Sfm66fmXoAxsH2PHXg==}
 
-  '@types/express-serve-static-core@4.17.31':
-    resolution: {integrity: sha512-DxMhY+NAsTwMMFHBTtJFNp5qiHKJ7TeqOo23zVEM9alT1Ml27Q3xcTH0xwxn7Q0BbMcVEJOs/7aQtUWupUQN3Q==}
-
   '@types/express-serve-static-core@4.19.6':
     resolution: {integrity: sha512-N4LZ2xG7DatVqhCZzOGb1Yi5lMbXSZcmdLDe9EzSndPV2HpWYWzRbaerl2n27irrm94EPpprqa8KpskPT085+A==}
 
@@ -36977,9 +36915,6 @@ packages:
 
   '@types/express-session@1.18.2':
     resolution: {integrity: sha512-k+I0BxwVXsnEU2hV77cCobC08kIsn4y44C3gC0b46uxZVMaXA04lSPgRLR/bSL2w0t0ShJiG8o4jPzRG/nscFg==}
-
-  '@types/express@4.17.14':
-    resolution: {integrity: sha512-TEbt+vaPFQ+xpxFLFssxUDXj5cWCxZJjIcB7Yg0k0GMHGtgtQgpvx/MUQUeAkNbA9AAGrwkAsoeItdTgS7FMyg==}
 
   '@types/express@4.17.18':
     resolution: {integrity: sha512-Sxv8BSLLgsBYmcnGdGjjEjqET2U+AKAdCRODmMiq02FgjwuV75Ut85DRpvFjyw/Mk0vgUOliGRU0UUmuuZHByQ==}
@@ -38904,11 +38839,6 @@ packages:
     engines: {node: '>=6'}
     deprecated: The `apollo-datasource` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
 
-  apollo-datasource@3.3.2:
-    resolution: {integrity: sha512-L5TiS8E2Hn/Yz7SSnWIVbZw0ZfEIXZCa5VUiVxD9P53JvSrf4aStvsFDlGWPvpIdCR+aly2CfoB79B9/JjKFqg==}
-    engines: {node: '>=12.0'}
-    deprecated: The `apollo-datasource` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-
   apollo-graphql@0.9.7:
     resolution: {integrity: sha512-bezL9ItUWUGHTm1bI/XzIgiiZbhXpsC7uxk4UxFPmcVJwJsDc3ayZ99oXxAaK+3Rbg/IoqrHckA6CwmkCsbaSA==}
     engines: {node: '>=6'}
@@ -38924,10 +38854,6 @@ packages:
     resolution: {integrity: sha512-B3XmnkH6Y458iV6OsA7AhfwvTgeZnFq9nPVjbxmLKnvfkEl8hYADtz724uPa0WeBiD7DSFcnLtqg9yGmCkBohg==}
     deprecated: The `apollo-reporting-protobuf` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/usage-reporting-protobuf` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
 
-  apollo-reporting-protobuf@3.4.0:
-    resolution: {integrity: sha512-h0u3EbC/9RpihWOmcSsvTW2O6RXVaD/mPEjfrPkxRPTEPWqncsgOoRJw+wih4OqfH3PvTJvoEIf4LwKrUaqWog==}
-    deprecated: The `apollo-reporting-protobuf` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/usage-reporting-protobuf` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-
   apollo-server-caching@0.7.0:
     resolution: {integrity: sha512-MsVCuf/2FxuTFVhGLK13B+TZH9tBd2qkyoXKKILIiGcZ5CDUEBO14vIV63aNkMkS1xxvK2U4wBcuuNj/VH2Mkw==}
     engines: {node: '>=6'}
@@ -38940,21 +38866,9 @@ packages:
     peerDependencies:
       graphql: 16.12.0
 
-  apollo-server-core@3.13.0:
-    resolution: {integrity: sha512-v/g6DR6KuHn9DYSdtQijz8dLOkP78I5JSVJzPkARhDbhpH74QNwrQ2PP2URAPPEDJ2EeZNQDX8PvbYkAKqg+kg==}
-    engines: {node: '>=12.0'}
-    deprecated: The `apollo-server-core` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-    peerDependencies:
-      graphql: 16.12.0
-
   apollo-server-env@3.2.0:
     resolution: {integrity: sha512-V+kO5e6vUo2JwqV1/Ng71ZE3J6x1hCOC+nID2/++bCYl0/fPY9iLChbBNSgN/uoFcjhgmBchOv+m4o0Nie/TFQ==}
     engines: {node: '>=6'}
-    deprecated: The `apollo-server-env` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/utils.fetcher` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-
-  apollo-server-env@4.2.1:
-    resolution: {integrity: sha512-vm/7c7ld+zFMxibzqZ7SSa5tBENc4B0uye9LTfjJwGoQFY5xsUPH5FpO5j0bMUDZ8YYNbrF9SNtzc5Cngcr90g==}
-    engines: {node: '>=12.0'}
     deprecated: The `apollo-server-env` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/utils.fetcher` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
 
   apollo-server-errors@2.5.0:
@@ -38964,31 +38878,9 @@ packages:
     peerDependencies:
       graphql: 16.12.0
 
-  apollo-server-errors@3.3.1:
-    resolution: {integrity: sha512-xnZJ5QWs6FixHICXHxUfm+ZWqqxrNuPlQ+kj5m6RtEgIpekOPssH/SD9gf2B4HuWV0QozorrygwZnux8POvyPA==}
-    engines: {node: '>=12.0'}
-    deprecated: The `apollo-server-errors` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-    peerDependencies:
-      graphql: 16.12.0
-
-  apollo-server-express@3.13.0:
-    resolution: {integrity: sha512-iSxICNbDUyebOuM8EKb3xOrpIwOQgKxGbR2diSr4HP3IW8T3njKFOoMce50vr+moOCe1ev8BnLcw9SNbuUtf7g==}
-    engines: {node: '>=12.0'}
-    deprecated: The `apollo-server-express` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-    peerDependencies:
-      express: '>=4.21.0'
-      graphql: 16.12.0
-
   apollo-server-plugin-base@0.14.0:
     resolution: {integrity: sha512-nTNSFuBhZURGjtWptdVqwemYUOdsvABj/GSKzeNvepiEubiv4N0rt4Gvy1inHDiMbo98wQTdF/7XohNcB9A77g==}
     engines: {node: '>=6'}
-    deprecated: The `apollo-server-plugin-base` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-    peerDependencies:
-      graphql: 16.12.0
-
-  apollo-server-plugin-base@3.7.2:
-    resolution: {integrity: sha512-wE8dwGDvBOGehSsPTRZ8P/33Jan6/PmL0y0aN/1Z5a5GcbFhDaaJCjK5cav6npbbGL2DPKK0r6MPXi3k3N45aw==}
-    engines: {node: '>=12.0'}
     deprecated: The `apollo-server-plugin-base` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
     peerDependencies:
       graphql: 16.12.0
@@ -39003,19 +38895,6 @@ packages:
     resolution: {integrity: sha512-LsB3epw1X3Co/HGiKHCGtzWG35J59gG8Ypx0p22+wgdM9AVDm1ylsNGZy+osNIVJc1lUJf3nF5kZ90vA866K/w==}
     engines: {node: '>=6'}
     deprecated: The `apollo-server-types` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-    peerDependencies:
-      graphql: 16.12.0
-
-  apollo-server-types@3.8.0:
-    resolution: {integrity: sha512-ZI/8rTE4ww8BHktsVpb91Sdq7Cb71rdSkXELSwdSR0eXu600/sY+1UXhTWdiJvk+Eq5ljqoHLwLbY2+Clq2b9A==}
-    engines: {node: '>=12.0'}
-    deprecated: The `apollo-server-types` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
-    peerDependencies:
-      graphql: 16.12.0
-
-  apollo-server@3.13.0:
-    resolution: {integrity: sha512-hgT/MswNB5G1r+oBhggVX4Fjw53CFLqG15yB5sN+OrYkCVWF5YwPbJWHfSWa7699JMEXJGaoVfFzcvLZK0UlDg==}
-    deprecated: The `apollo-server` package is part of Apollo Server v2 and v3, which are now end-of-life (as of October 22nd 2023 and October 22nd 2024, respectively). This package's functionality is now found in the `@apollo/server` package. See https://www.apollographql.com/docs/apollo-server/previous-versions/ for more details.
     peerDependencies:
       graphql: 16.12.0
 
@@ -39358,8 +39237,8 @@ packages:
   axios-retry@3.9.1:
     resolution: {integrity: sha512-8PJDLJv7qTTMMwdnbMvrLYuvB47M81wRtxQmEdV5w4rgbTXTt+vtPkXwajOfOdSyv/wZICJOC+/UhXH4aQ/R+w==}
 
-  axios@1.13.4:
-    resolution: {integrity: sha512-1wVkUaAO6WyaYtCkcYCOx12ZgpGf9Zif+qXa4n+oYzK558YryKqiL6UWwd5DqiH3VRW0GYhTZQ/vlgJrCoNQlg==}
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -39661,6 +39540,10 @@ packages:
 
   body-parser@2.2.1:
     resolution: {integrity: sha512-nfDwkulwiZYQIGwxdy0RUmowMhKcFVcYXUU7m4QlKYim1rUtg83xm2yjZ40QjDuc291AJjjeSc9b++AWHSgSHw==}
+    engines: {node: '>=18'}
+
+  body-parser@2.2.2:
+    resolution: {integrity: sha512-oP5VkATKlNwcgvxi0vM0p/D3n2C3EReYVX+DNYs5TjZFn/oQt2j+4sVJtSMr18pdRr8wjTcBl6LoV+FUwzPmNA==}
     engines: {node: '>=18'}
 
   boolbase@1.0.0:
@@ -39982,9 +39865,6 @@ packages:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
 
-  camel-case@3.0.0:
-    resolution: {integrity: sha512-+MbKztAYHXPr1jNTSKQF52VpcFjwY5RkR7fxksV8Doo4KAYc5Fl4UJRgthBbTmEx8C54DqahhbLJkDwjI3PI/w==}
-
   camel-case@4.1.2:
     resolution: {integrity: sha512-gxGWBrTT1JuMx6R+o5PTXMmUnhnVzLQ9SNutD4YqKtI6ap897t3tKECYla6gCWEkplXnlNybEkZg9GEGxKFCgw==}
 
@@ -40239,10 +40119,6 @@ packages:
 
   classnames@2.5.1:
     resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
-
-  clean-css@4.2.4:
-    resolution: {integrity: sha512-EJUDT7nDVFDvaQgAo2G/PJvxmp1o/c6iXLbswsBbUFXi1Nr+AjA2cKmfbKDMjMvzEe75g3P6JkaDDAKk96A85A==}
-    engines: {node: '>= 4.0'}
 
   clean-css@5.3.3:
     resolution: {integrity: sha512-D5J+kHaVb/wKSFcyyV75uCn8fiY4sV38XJoe4CUyGQ+mOU/fMVYUdH1hJC+CJQ5uY3EnW27SbJYS4X8BiLrAFg==}
@@ -41754,16 +41630,12 @@ packages:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  diff@3.5.0:
-    resolution: {integrity: sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==}
-    engines: {node: '>=0.3.1'}
-
-  diff@4.0.2:
-    resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
-    engines: {node: '>=0.3.1'}
-
   diff@8.0.2:
     resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
+    engines: {node: '>=0.3.1'}
+
+  diff@8.0.3:
+    resolution: {integrity: sha512-qejHi7bcSD4hQAZE0tNAawRK1ZtafHDmMTMkrrIGgSLl7hTnQHmKCeB45xAcbfTqK2zowkM3j3bHt/4b/ARbYQ==}
     engines: {node: '>=0.3.1'}
 
   diffie-hellman@5.0.3:
@@ -43954,9 +43826,9 @@ packages:
     engines: {node: '>=12'}
     hasBin: true
 
-  html-minifier@4.0.0:
-    resolution: {integrity: sha512-aoGxanpFPLg7MkIl/DDFYtb0iWz7jMFGqFhvEDZga6/4QTjneiD8I/NXL1x5aaoCp7FSIT6h/OhykDdPsbtMig==}
-    engines: {node: '>=6'}
+  html-minifier-terser@7.2.0:
+    resolution: {integrity: sha512-tXgn3QfqPIpGl9o+K5tpcj3/MN4SfLtsx2GWwBC3SSd0tXQGyF3gsSqad8loJgKZGM3ZxbYDd5yhiBIdWpmvLA==}
+    engines: {node: ^14.13.1 || >=16.0.0}
     hasBin: true
 
   html-parse-stringify@3.0.1:
@@ -46143,8 +46015,8 @@ packages:
     resolution: {integrity: sha512-gvVijfZvn7R+2qyPX8mAuKcFGDf6Nc61GdvGafQsHL0sBIxfKzA+usWn4GFC/bk+QdwPUD4kWFJLhElipq+0VA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  lodash-es@4.17.21:
-    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+  lodash-es@4.17.23:
+    resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
 
   lodash.camelcase@4.3.0:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
@@ -46265,9 +46137,6 @@ packages:
   lodash.upperfirst@4.3.1:
     resolution: {integrity: sha512-sReKOYJIJf74dhJONhU4e0/shzi1trVbSWDOhKYE5XV2O+H7Sb2Dihwuc7xWxVl+DgFPyTqIN3zMfT9cq5iWDg==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
-
   lodash@4.17.23:
     resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
@@ -46337,9 +46206,6 @@ packages:
   lower-case-first@2.0.2:
     resolution: {integrity: sha512-EVm/rR94FJTZi3zefZ82fLWab+GX14LJN4HrWBcuo6Evmsl9hEfnqxgcHCKb9q+mNf6EVdsjx/qucYFIIB84pg==}
 
-  lower-case@1.1.4:
-    resolution: {integrity: sha512-2Fgx1Ycm599x+WGpIYwJOvsjmXFzTSc34IwDWALRA/8AopUKAVPwfJ+h5+f85BCp0PWmmJcWzEpxOpoXycMpdA==}
-
   lower-case@2.0.2:
     resolution: {integrity: sha512-7fm3l3NAF9WfN6W3JOmf5drwpVqX78JtoGJ3A6W0a6ZnldM41w2fV5D490psKFTpMds8TJse/eHLFFsNHHjHgg==}
 
@@ -46363,10 +46229,6 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
-
-  lru-cache@7.13.1:
-    resolution: {integrity: sha512-CHqbAq7NFlW3RSnoWXLJBxCWaZVBrfa9UEHId2M3AW8iEBurbqduNexEUCGc3SHc6iCYXNJCDi903LajSVAEPQ==}
-    engines: {node: '>=12'}
 
   lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
@@ -47433,7 +47295,7 @@ packages:
   native-fetch@4.0.2:
     resolution: {integrity: sha512-4QcVlKFtv2EYVS5MBgsGX5+NWKtbDbIECdUXDBGDMAZXq3Jkv9zf+y8iS7Ub8fEdga3GpYeazp9gauNqXHJOCg==}
     peerDependencies:
-      undici: '*'
+      undici: '>=6.23.0'
 
   nativewind@4.2.1:
     resolution: {integrity: sha512-10uUB2Dlli3MH3NDL5nMHqJHz1A3e/E6mzjTj6cl7hHECClJ7HpE6v+xZL+GXdbwQSnWE+UWMIMsNz7yOQkAJQ==}
@@ -47568,9 +47430,6 @@ packages:
   nkeys.js@1.1.0:
     resolution: {integrity: sha512-tB/a0shZL5UZWSwsoeyqfTszONTt4k2YS0tuQioMOD180+MbombYVgzDUYHlx+gejYK6rgf08n/2Df99WY0Sxg==}
     engines: {node: '>=10.0.0'}
-
-  no-case@2.3.2:
-    resolution: {integrity: sha512-rmTZ9kz+f3rCvK2TD1Ue/oZlns7OGoIWP4fc3llxxRXlOkHKoWPPWJOfFYpITabSow43QJbRIoHQXtt10VldyQ==}
 
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
@@ -48309,9 +48168,6 @@ packages:
 
   papaparse@5.5.3:
     resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
-
-  param-case@2.1.1:
-    resolution: {integrity: sha512-eQE845L6ot89sk2N8liD8HAuH4ca6Vvr7VWAWwt7+kvvG5aBcPmmphQ68JsEG2qa9n1TykS2DLeMt363AAH8/w==}
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -52976,10 +52832,6 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
-  undici@5.29.0:
-    resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
-    engines: {node: '>=14.0'}
-
   undici@6.23.0:
     resolution: {integrity: sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==}
     engines: {node: '>=18.17'}
@@ -53130,9 +52982,6 @@ packages:
 
   upper-case-first@2.0.2:
     resolution: {integrity: sha512-514ppYHBaKwfJRK/pNC6c/OxfGa0obSnAl106u97Ed0I625Nin96KAjttZF6ZL3e1XLtphxnqrOi9iWgm+u+bg==}
-
-  upper-case@1.1.3:
-    resolution: {integrity: sha512-WRbjgmYzgXkCV7zNVpy5YgrHgbBv126rMALQQMrmzOVC4GM2waQ9x7xtm8VU+1yF2kWyPzI9zbZ48n4vSxwfSA==}
 
   upper-case@2.0.2:
     resolution: {integrity: sha512-KgdgDGJt2TpuwBUIjgG6lzw2GWFRCW9Qkfkiv0DxqHHLYJHmtmdUIKcZd8rHgFSjopVTlw6ggzCm1b8MFQwikg==}
@@ -53291,10 +53140,6 @@ packages:
   validator@13.15.26:
     resolution: {integrity: sha512-spH26xU080ydGggxRyR1Yhcbgx+j3y5jbNXk/8L+iRvdIEQ4uTRH2Sgf2dokud6Q4oAtsbNvJ1Ft+9xmm6IZcA==}
     engines: {node: '>= 0.10'}
-
-  value-or-promise@1.0.11:
-    resolution: {integrity: sha512-41BrgH+dIbCFXClcSapVs5M6GkENd3gQOJpEfPDNa71LsUGMXDL0jMWpI/Rh7WhX+Aalfz2TTS3Zt5pUsbnhLg==}
-    engines: {node: '>=12'}
 
   value-or-promise@1.0.12:
     resolution: {integrity: sha512-Z6Uz+TYwEqE7ZN50gwn+1LCVo9ZVrpxRPOhOLnncYkY1ZzOYtrX8Fwf/rFktZ8R5mJms6EZf5TqNOMeZmnPq9Q==}
@@ -54611,7 +54456,7 @@ snapshots:
   '@actions/http-client@2.2.3':
     dependencies:
       tunnel: 0.0.6
-      undici: 5.29.0
+      undici: 6.23.0
 
   '@actions/io@1.1.3': {}
 
@@ -54789,22 +54634,6 @@ snapshots:
       '@types/node': 10.17.60
       long: 4.0.0
 
-  '@apollo/protobufjs@1.2.6':
-    dependencies:
-      '@protobufjs/aspromise': 1.1.2
-      '@protobufjs/base64': 1.1.2
-      '@protobufjs/codegen': 2.0.4
-      '@protobufjs/eventemitter': 1.1.0
-      '@protobufjs/fetch': 1.1.0
-      '@protobufjs/float': 1.0.2
-      '@protobufjs/inquire': 1.1.0
-      '@protobufjs/path': 1.1.2
-      '@protobufjs/pool': 1.1.0
-      '@protobufjs/utf8': 1.1.0
-      '@types/long': 4.0.2
-      '@types/node': 10.17.60
-      long: 4.0.0
-
   '@apollo/protobufjs@1.2.7':
     dependencies:
       '@protobufjs/aspromise': 1.1.2
@@ -54835,36 +54664,6 @@ snapshots:
       '@apollo/utils.keyvaluecache': 4.0.0
       '@apollo/utils.logger': 3.0.0
       graphql: 16.12.0
-
-  '@apollo/server@4.12.2(graphql@16.12.0)':
-    dependencies:
-      '@apollo/cache-control-types': 1.0.3(graphql@16.12.0)
-      '@apollo/server-gateway-interface': 1.1.1(graphql@16.12.0)
-      '@apollo/usage-reporting-protobuf': 4.1.1
-      '@apollo/utils.createhash': 2.0.2
-      '@apollo/utils.fetcher': 2.0.1
-      '@apollo/utils.isnodelike': 2.0.1
-      '@apollo/utils.keyvaluecache': 2.1.1
-      '@apollo/utils.logger': 2.0.1
-      '@apollo/utils.usagereporting': 2.1.0(graphql@16.12.0)
-      '@apollo/utils.withrequired': 2.0.1
-      '@graphql-tools/schema': 9.0.19(graphql@16.12.0)
-      '@types/express': 4.17.25
-      '@types/express-serve-static-core': 4.19.6
-      '@types/node-fetch': 2.6.13
-      async-retry: 1.3.3
-      cors: 2.8.6
-      express: 5.2.1
-      graphql: 16.12.0
-      loglevel: 1.9.2
-      lru-cache: 7.18.3
-      negotiator: 0.6.4
-      node-abort-controller: 3.1.1
-      node-fetch: 3.3.2
-      uuid: 9.0.1
-      whatwg-mimetype: 3.0.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@apollo/server@4.13.0(graphql@16.12.0)':
     dependencies:
@@ -54897,7 +54696,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@apollo/server@5.2.0(graphql@16.12.0)':
+  '@apollo/server@5.4.0(graphql@16.12.0)':
     dependencies:
       '@apollo/cache-control-types': 1.0.3(graphql@16.12.0)
       '@apollo/server-gateway-interface': 2.0.0(graphql@16.12.0)
@@ -54911,7 +54710,8 @@ snapshots:
       '@apollo/utils.withrequired': 3.0.0
       '@graphql-tools/schema': 10.0.30(graphql@16.12.0)
       async-retry: 1.3.3
-      body-parser: 2.2.1
+      body-parser: 2.2.2
+      content-type: 1.0.5
       cors: 2.8.6
       finalhandler: 2.1.1
       graphql: 16.12.0
@@ -54937,10 +54737,6 @@ snapshots:
       '@apollo/utils.isnodelike': 3.0.0
       sha.js: 2.4.12
 
-  '@apollo/utils.dropunuseddefinitions@1.1.0(graphql@16.12.0)':
-    dependencies:
-      graphql: 16.12.0
-
   '@apollo/utils.dropunuseddefinitions@2.0.1(graphql@16.12.0)':
     dependencies:
       graphql: 16.12.0
@@ -54953,11 +54749,6 @@ snapshots:
 
   '@apollo/utils.isnodelike@3.0.0': {}
 
-  '@apollo/utils.keyvaluecache@1.0.2':
-    dependencies:
-      '@apollo/utils.logger': 1.0.1
-      lru-cache: 7.13.1
-
   '@apollo/utils.keyvaluecache@2.1.1':
     dependencies:
       '@apollo/utils.logger': 2.0.1
@@ -54968,21 +54759,11 @@ snapshots:
       '@apollo/utils.logger': 3.0.0
       lru-cache: 11.2.5
 
-  '@apollo/utils.logger@1.0.1': {}
-
   '@apollo/utils.logger@2.0.1': {}
 
   '@apollo/utils.logger@3.0.0': {}
 
-  '@apollo/utils.printwithreducedwhitespace@1.1.0(graphql@16.12.0)':
-    dependencies:
-      graphql: 16.12.0
-
   '@apollo/utils.printwithreducedwhitespace@2.0.1(graphql@16.12.0)':
-    dependencies:
-      graphql: 16.12.0
-
-  '@apollo/utils.removealiases@1.0.0(graphql@16.12.0)':
     dependencies:
       graphql: 16.12.0
 
@@ -54990,32 +54771,13 @@ snapshots:
     dependencies:
       graphql: 16.12.0
 
-  '@apollo/utils.sortast@1.1.0(graphql@16.12.0)':
-    dependencies:
-      graphql: 16.12.0
-      lodash.sortby: 4.7.0
-
   '@apollo/utils.sortast@2.0.1(graphql@16.12.0)':
     dependencies:
       graphql: 16.12.0
       lodash.sortby: 4.7.0
 
-  '@apollo/utils.stripsensitiveliterals@1.2.0(graphql@16.12.0)':
-    dependencies:
-      graphql: 16.12.0
-
   '@apollo/utils.stripsensitiveliterals@2.0.1(graphql@16.12.0)':
     dependencies:
-      graphql: 16.12.0
-
-  '@apollo/utils.usagereporting@1.0.1(graphql@16.12.0)':
-    dependencies:
-      '@apollo/usage-reporting-protobuf': 4.1.1
-      '@apollo/utils.dropunuseddefinitions': 1.1.0(graphql@16.12.0)
-      '@apollo/utils.printwithreducedwhitespace': 1.1.0(graphql@16.12.0)
-      '@apollo/utils.removealiases': 1.0.0(graphql@16.12.0)
-      '@apollo/utils.sortast': 1.1.0(graphql@16.12.0)
-      '@apollo/utils.stripsensitiveliterals': 1.2.0(graphql@16.12.0)
       graphql: 16.12.0
 
   '@apollo/utils.usagereporting@2.1.0(graphql@16.12.0)':
@@ -55037,10 +54799,6 @@ snapshots:
       graphql: 16.12.0
 
   '@apollographql/graphql-playground-html@1.6.27':
-    dependencies:
-      xss: 1.0.15
-
-  '@apollographql/graphql-playground-html@1.6.29':
     dependencies:
       xss: 1.0.15
 
@@ -55121,14 +54879,14 @@ snapshots:
     dependencies:
       node-fetch: 3.3.2
 
-  '@as-integrations/express4@1.1.2(@apollo/server@4.12.2(graphql@16.12.0))(express@5.2.1)':
+  '@as-integrations/express4@1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)':
     dependencies:
-      '@apollo/server': 4.12.2(graphql@16.12.0)
+      '@apollo/server': 4.13.0(graphql@16.12.0)
       express: 5.2.1
 
-  '@as-integrations/express4@1.1.2(@apollo/server@5.2.0(graphql@16.12.0))(express@5.2.1)':
+  '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':
     dependencies:
-      '@apollo/server': 5.2.0(graphql@16.12.0)
+      '@apollo/server': 5.4.0(graphql@16.12.0)
       express: 5.2.1
 
   '@asamuzakjp/css-color@3.2.0':
@@ -58984,12 +58742,12 @@ snapshots:
     dependencies:
       '@chevrotain/gast': 11.0.3
       '@chevrotain/types': 11.0.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   '@chevrotain/gast@11.0.3':
     dependencies:
       '@chevrotain/types': 11.0.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   '@chevrotain/regexp-to-ast@11.0.3': {}
 
@@ -59960,8 +59718,6 @@ snapshots:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       fast-uri: 3.1.0
-
-  '@fastify/busboy@2.1.1': {}
 
   '@fastify/busboy@3.2.0': {}
 
@@ -61751,12 +61507,6 @@ snapshots:
       p-limit: 3.1.0
       tslib: 2.8.1
 
-  '@graphql-tools/merge@8.3.1(graphql@16.12.0)':
-    dependencies:
-      '@graphql-tools/utils': 8.9.0(graphql@16.12.0)
-      graphql: 16.12.0
-      tslib: 2.8.1
-
   '@graphql-tools/merge@8.4.2(graphql@16.12.0)':
     dependencies:
       '@graphql-tools/utils': 9.2.1(graphql@16.12.0)
@@ -61766,14 +61516,6 @@ snapshots:
   '@graphql-tools/merge@9.1.6(graphql@16.12.0)':
     dependencies:
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
-      graphql: 16.12.0
-      tslib: 2.8.1
-
-  '@graphql-tools/mock@8.7.20(graphql@16.12.0)':
-    dependencies:
-      '@graphql-tools/schema': 9.0.19(graphql@16.12.0)
-      '@graphql-tools/utils': 9.2.1(graphql@16.12.0)
-      fast-json-stable-stringify: 2.1.0
       graphql: 16.12.0
       tslib: 2.8.1
 
@@ -61865,14 +61607,6 @@ snapshots:
       '@graphql-tools/utils': 10.11.0(graphql@16.12.0)
       graphql: 16.12.0
       tslib: 2.8.1
-
-  '@graphql-tools/schema@8.5.1(graphql@16.12.0)':
-    dependencies:
-      '@graphql-tools/merge': 8.3.1(graphql@16.12.0)
-      '@graphql-tools/utils': 8.9.0(graphql@16.12.0)
-      graphql: 16.12.0
-      tslib: 2.8.1
-      value-or-promise: 1.0.11
 
   '@graphql-tools/schema@9.0.19(graphql@16.12.0)':
     dependencies:
@@ -61994,11 +61728,6 @@ snapshots:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.12.0)
       '@whatwg-node/promise-helpers': 1.3.2
       cross-inspect: 1.0.1
-      graphql: 16.12.0
-      tslib: 2.8.1
-
-  '@graphql-tools/utils@8.9.0(graphql@16.12.0)':
-    dependencies:
       graphql: 16.12.0
       tslib: 2.8.1
 
@@ -71795,7 +71524,7 @@ snapshots:
       conventional-commits-parser: 6.2.1
       debug: 4.4.3(supports-color@5.5.0)
       import-from-esm: 2.0.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       micromatch: 4.0.8
       semantic-release: 24.2.9(typescript@5.9.3)
     transitivePeerDependencies:
@@ -71832,7 +71561,7 @@ snapshots:
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
       issue-parser: 7.0.1
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       mime: 4.1.0
       p-filter: 4.1.0
       semantic-release: 24.2.9(typescript@5.9.3)
@@ -71847,7 +71576,7 @@ snapshots:
       aggregate-error: 5.0.0
       execa: 9.6.1
       fs-extra: 11.3.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       nerf-dart: 1.0.0
       normalize-url: 8.1.0
       npm: 10.9.4
@@ -71868,7 +71597,7 @@ snapshots:
       get-stream: 7.0.1
       import-from-esm: 2.0.0
       into-stream: 7.0.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       read-package-up: 11.0.0
       semantic-release: 24.2.9(typescript@5.9.3)
     transitivePeerDependencies:
@@ -72139,7 +71868,7 @@ snapshots:
       '@types/express': 4.17.25
       '@types/promise.allsettled': 1.0.6
       '@types/tsscmp': 1.0.2
-      axios: 1.13.4
+      axios: 1.13.5
       express: 5.2.1
       path-to-regexp: 8.3.0
       promise.allsettled: 1.0.7
@@ -72192,7 +71921,7 @@ snapshots:
       '@slack/types': 2.19.0
       '@types/is-stream': 1.1.0
       '@types/node': 20.19.27
-      axios: 1.13.4
+      axios: 1.13.5
       eventemitter3: 3.1.2
       form-data: 4.0.5
       is-electron: 2.2.2
@@ -72208,7 +71937,7 @@ snapshots:
       '@slack/types': 2.19.0
       '@types/node': 20.19.27
       '@types/retry': 0.12.0
-      axios: 1.13.4
+      axios: 1.13.5
       eventemitter3: 5.0.4
       form-data: 4.0.5
       is-electron: 2.2.2
@@ -72223,7 +71952,7 @@ snapshots:
     dependencies:
       '@slack/types': 2.19.0
       '@types/node': 20.19.27
-      axios: 1.13.4
+      axios: 1.13.5
     transitivePeerDependencies:
       - debug
 
@@ -76051,11 +75780,6 @@ snapshots:
     dependencies:
       '@types/node': 20.19.27
 
-  '@types/body-parser@1.19.2':
-    dependencies:
-      '@types/connect': 3.4.38
-      '@types/node': 20.19.27
-
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
@@ -76153,8 +75877,6 @@ snapshots:
       '@types/express': 4.17.25
       '@types/keygrip': 1.0.6
       '@types/node': 20.19.27
-
-  '@types/cors@2.8.12': {}
 
   '@types/cors@2.8.19':
     dependencies:
@@ -76421,12 +76143,6 @@ snapshots:
     dependencies:
       '@types/express': 4.17.25
 
-  '@types/express-serve-static-core@4.17.31':
-    dependencies:
-      '@types/node': 20.19.27
-      '@types/qs': 6.14.0
-      '@types/range-parser': 1.2.7
-
   '@types/express-serve-static-core@4.19.6':
     dependencies:
       '@types/node': 20.19.27
@@ -76444,13 +76160,6 @@ snapshots:
   '@types/express-session@1.18.2':
     dependencies:
       '@types/express': 4.17.25
-
-  '@types/express@4.17.14':
-    dependencies:
-      '@types/body-parser': 1.19.6
-      '@types/express-serve-static-core': 4.19.6
-      '@types/qs': 6.14.0
-      '@types/serve-static': 2.2.0
 
   '@types/express@4.17.18':
     dependencies:
@@ -79407,11 +79116,6 @@ snapshots:
       apollo-server-caching: 0.7.0
       apollo-server-env: 3.2.0
 
-  apollo-datasource@3.3.2:
-    dependencies:
-      '@apollo/utils.keyvaluecache': 1.0.2
-      apollo-server-env: 4.2.1
-
   apollo-graphql@0.9.7(graphql@16.12.0):
     dependencies:
       core-js-pure: 3.47.0
@@ -79430,10 +79134,6 @@ snapshots:
   apollo-reporting-protobuf@0.8.0:
     dependencies:
       '@apollo/protobufjs': 1.2.2
-
-  apollo-reporting-protobuf@3.4.0:
-    dependencies:
-      '@apollo/protobufjs': 1.2.6
 
   apollo-server-caching@0.7.0:
     dependencies:
@@ -79471,76 +79171,18 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  apollo-server-core@3.13.0(graphql@16.12.0):
-    dependencies:
-      '@apollo/utils.keyvaluecache': 1.0.2
-      '@apollo/utils.logger': 1.0.1
-      '@apollo/utils.usagereporting': 1.0.1(graphql@16.12.0)
-      '@apollographql/apollo-tools': 0.5.4(graphql@16.12.0)
-      '@apollographql/graphql-playground-html': 1.6.29
-      '@graphql-tools/mock': 8.7.20(graphql@16.12.0)
-      '@graphql-tools/schema': 8.5.1(graphql@16.12.0)
-      '@josephg/resolvable': 1.0.1
-      apollo-datasource: 3.3.2
-      apollo-reporting-protobuf: 3.4.0
-      apollo-server-env: 4.2.1
-      apollo-server-errors: 3.3.1(graphql@16.12.0)
-      apollo-server-plugin-base: 3.7.2(graphql@16.12.0)
-      apollo-server-types: 3.8.0(graphql@16.12.0)
-      async-retry: 1.3.3
-      fast-json-stable-stringify: 2.1.0
-      graphql: 16.12.0
-      graphql-tag: 2.12.6(graphql@16.12.0)
-      loglevel: 1.9.2
-      lru-cache: 6.0.0
-      node-abort-controller: 3.1.1
-      sha.js: 2.4.12
-      uuid: 9.0.1
-      whatwg-mimetype: 3.0.0
-
   apollo-server-env@3.2.0:
     dependencies:
       node-fetch: 3.3.2
       util.promisify: 1.1.3
 
-  apollo-server-env@4.2.1:
-    dependencies:
-      node-fetch: 3.3.2
-
   apollo-server-errors@2.5.0(graphql@16.12.0):
     dependencies:
       graphql: 16.12.0
 
-  apollo-server-errors@3.3.1(graphql@16.12.0):
-    dependencies:
-      graphql: 16.12.0
-
-  apollo-server-express@3.13.0(express@5.2.1)(graphql@16.12.0):
-    dependencies:
-      '@types/accepts': 1.3.7
-      '@types/body-parser': 1.19.2
-      '@types/cors': 2.8.12
-      '@types/express': 4.17.14
-      '@types/express-serve-static-core': 4.17.31
-      accepts: 1.3.8
-      apollo-server-core: 3.13.0(graphql@16.12.0)
-      apollo-server-types: 3.8.0(graphql@16.12.0)
-      body-parser: 1.20.4
-      cors: 2.8.6
-      express: 5.2.1
-      graphql: 16.12.0
-      parseurl: 1.3.3
-    transitivePeerDependencies:
-      - supports-color
-
   apollo-server-plugin-base@0.14.0(graphql@16.12.0):
     dependencies:
       apollo-server-types: 0.10.0(graphql@16.12.0)
-      graphql: 16.12.0
-
-  apollo-server-plugin-base@3.7.2(graphql@16.12.0):
-    dependencies:
-      apollo-server-types: 3.8.0(graphql@16.12.0)
       graphql: 16.12.0
 
   apollo-server-testing@2.25.3(graphql@16.12.0):
@@ -79557,24 +79199,6 @@ snapshots:
       apollo-server-caching: 0.7.0
       apollo-server-env: 3.2.0
       graphql: 16.12.0
-
-  apollo-server-types@3.8.0(graphql@16.12.0):
-    dependencies:
-      '@apollo/utils.keyvaluecache': 1.0.2
-      '@apollo/utils.logger': 1.0.1
-      apollo-reporting-protobuf: 3.4.0
-      apollo-server-env: 4.2.1
-      graphql: 16.12.0
-
-  apollo-server@3.13.0(graphql@16.12.0):
-    dependencies:
-      '@types/express': 4.17.14
-      apollo-server-core: 3.13.0(graphql@16.12.0)
-      apollo-server-express: 3.13.0(express@5.2.1)(graphql@16.12.0)
-      express: 5.2.1
-      graphql: 16.12.0
-    transitivePeerDependencies:
-      - supports-color
 
   apollo-tracing@0.16.0(graphql@16.12.0):
     dependencies:
@@ -80033,7 +79657,7 @@ snapshots:
       '@babel/runtime': 7.28.4
       is-retry-allowed: 2.2.0
 
-  axios@1.13.4:
+  axios@1.13.5:
     dependencies:
       follow-redirects: 1.15.11(debug@4.4.3)
       form-data: 4.0.5
@@ -80520,6 +80144,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  body-parser@2.2.2:
+    dependencies:
+      bytes: 3.1.2
+      content-type: 1.0.5
+      debug: 4.4.3(supports-color@5.5.0)
+      http-errors: 2.0.1
+      iconv-lite: 0.7.2
+      on-finished: 2.4.1
+      qs: 6.14.1
+      raw-body: 3.0.2
+      type-is: 2.0.1
+    transitivePeerDependencies:
+      - supports-color
+
   boolbase@1.0.0: {}
 
   boolean@3.2.0: {}
@@ -80943,11 +80581,6 @@ snapshots:
 
   callsites@3.1.0: {}
 
-  camel-case@3.0.0:
-    dependencies:
-      no-case: 2.3.2
-      upper-case: 1.1.3
-
   camel-case@4.1.2:
     dependencies:
       pascal-case: 3.1.2
@@ -81153,7 +80786,7 @@ snapshots:
   chevrotain-allstar@0.3.1(chevrotain@11.0.3):
     dependencies:
       chevrotain: 11.0.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   chevrotain@11.0.3:
     dependencies:
@@ -81162,7 +80795,7 @@ snapshots:
       '@chevrotain/regexp-to-ast': 11.0.3
       '@chevrotain/types': 11.0.3
       '@chevrotain/utils': 11.0.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   chokidar@3.6.0:
     dependencies:
@@ -81263,10 +80896,6 @@ snapshots:
       node-gyp-build: 4.8.4
 
   classnames@2.5.1: {}
-
-  clean-css@4.2.4:
-    dependencies:
-      source-map: 0.6.1
 
   clean-css@5.3.3:
     dependencies:
@@ -82601,7 +82230,7 @@ snapshots:
   dagre-d3-es@7.0.13:
     dependencies:
       d3: 7.9.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   dagre@0.8.5:
     dependencies:
@@ -83091,11 +82720,9 @@ snapshots:
 
   diff-sequences@29.6.3: {}
 
-  diff@3.5.0: {}
-
-  diff@4.0.2: {}
-
   diff@8.0.2: {}
+
+  diff@8.0.3: {}
 
   diffie-hellman@5.0.3:
     dependencies:
@@ -83152,9 +82779,9 @@ snapshots:
   dns-over-http-resolver@2.1.3:
     dependencies:
       debug: 4.4.3(supports-color@5.5.0)
-      native-fetch: 4.0.2(undici@5.29.0)
+      native-fetch: 4.0.2(undici@6.23.0)
       receptacle: 1.3.2
-      undici: 5.29.0
+      undici: 6.23.0
     transitivePeerDependencies:
       - supports-color
 
@@ -85185,7 +84812,7 @@ snapshots:
       float-tooltip: 1.7.5
       index-array-by: 1.4.2
       kapsule: 1.16.3
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   foreground-child@3.3.1:
     dependencies:
@@ -86147,15 +85774,15 @@ snapshots:
       relateurl: 0.2.7
       terser: 5.44.1
 
-  html-minifier@4.0.0:
+  html-minifier-terser@7.2.0:
     dependencies:
-      camel-case: 3.0.0
-      clean-css: 4.2.4
-      commander: 2.20.3
-      he: 1.2.0
-      param-case: 2.1.1
+      camel-case: 4.1.2
+      clean-css: 5.3.3
+      commander: 10.0.1
+      entities: 4.5.0
+      param-case: 3.0.4
       relateurl: 0.2.7
-      uglify-js: 3.19.3
+      terser: 5.44.1
 
   html-parse-stringify@3.0.1:
     dependencies:
@@ -89641,7 +89268,7 @@ snapshots:
 
   kapsule@1.16.3:
     dependencies:
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   kareem@2.6.3: {}
 
@@ -90076,7 +89703,7 @@ snapshots:
     dependencies:
       p-locate: 6.0.0
 
-  lodash-es@4.17.21: {}
+  lodash-es@4.17.23: {}
 
   lodash.camelcase@4.3.0: {}
 
@@ -90156,8 +89783,6 @@ snapshots:
 
   lodash.upperfirst@4.3.1: {}
 
-  lodash@4.17.21: {}
-
   lodash@4.17.23: {}
 
   log-symbols@4.1.0:
@@ -90232,8 +89857,6 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  lower-case@1.1.4: {}
-
   lower-case@2.0.2:
     dependencies:
       tslib: 2.8.1
@@ -90256,8 +89879,6 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
-
-  lru-cache@7.13.1: {}
 
   lru-cache@7.18.3: {}
 
@@ -90666,7 +90287,7 @@ snapshots:
       dompurify: 3.3.1
       katex: 0.16.27
       khroma: 2.1.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       marked: 16.4.2
       roughjs: 4.6.6
       stylis: 4.3.6
@@ -91282,7 +90903,7 @@ snapshots:
       '@babel/runtime': 7.28.4
       chokidar: 3.6.0
       glob: 13.0.0
-      html-minifier: 4.0.0
+      html-minifier: html-minifier-terser@7.2.0
       js-beautify: 1.15.4
       lodash: 4.17.23
       minimatch: 9.0.5
@@ -91303,7 +90924,7 @@ snapshots:
       '@babel/runtime': 7.28.4
       cheerio: 1.0.0-rc.12
       detect-node: 2.1.0
-      html-minifier: 4.0.0
+      html-minifier: html-minifier-terser@7.2.0
       js-beautify: 1.15.4
       juice: 10.0.1
       lodash: 4.17.23
@@ -91917,9 +91538,9 @@ snapshots:
     dependencies:
       node-fetch: 3.3.2
 
-  native-fetch@4.0.2(undici@5.29.0):
+  native-fetch@4.0.2(undici@6.23.0):
     dependencies:
-      undici: 5.29.0
+      undici: 6.23.0
 
   nativewind@4.2.1(react-native-reanimated@4.2.1(react-native-worklets@0.7.1(@babel/core@7.28.5)(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native-safe-area-context@5.6.2(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native-svg@15.15.1(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1)(tailwindcss@3.4.18(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
@@ -92159,10 +91780,6 @@ snapshots:
   nkeys.js@1.1.0:
     dependencies:
       tweetnacl: 1.0.3
-
-  no-case@2.3.2:
-    dependencies:
-      lower-case: 1.1.4
 
   no-case@3.0.4:
     dependencies:
@@ -92965,10 +92582,6 @@ snapshots:
   pako@1.0.11: {}
 
   papaparse@5.5.3: {}
-
-  param-case@2.1.1:
-    dependencies:
-      no-case: 2.3.2
 
   param-case@3.0.4:
     dependencies:
@@ -96116,7 +95729,7 @@ snapshots:
       hook-std: 4.0.0
       hosted-git-info: 8.1.0
       import-from-esm: 2.0.0
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       marked: 15.0.12
       marked-terminal: 7.3.0(marked@15.0.12)
       micromatch: 4.0.8
@@ -96501,7 +96114,7 @@ snapshots:
       '@sinonjs/commons': 3.0.1
       '@sinonjs/fake-timers': 15.1.0
       '@sinonjs/samsam': 8.0.3
-      diff: 8.0.2
+      diff: 8.0.3
       supports-color: 7.2.0
 
   sisteransi@1.0.5: {}
@@ -98315,7 +97928,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98335,7 +97948,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.6.3
       v8-compile-cache-lib: 3.0.1
@@ -98355,7 +97968,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.8.3
       v8-compile-cache-lib: 3.0.1
@@ -98376,7 +97989,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98396,7 +98009,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98416,7 +98029,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98436,7 +98049,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98456,7 +98069,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98513,7 +98126,7 @@ snapshots:
       builtin-modules: 1.1.1
       chalk: 2.4.2
       commander: 2.20.3
-      diff: 3.5.0
+      diff: 8.0.2
       glob: 13.0.0
       js-yaml: 3.14.2
       minimatch: 3.1.2
@@ -99046,7 +98659,7 @@ snapshots:
   typesense@1.8.2(@babel/runtime@7.28.4):
     dependencies:
       '@babel/runtime': 7.28.4
-      axios: 1.13.4
+      axios: 1.13.5
       loglevel: 1.9.2
     transitivePeerDependencies:
       - debug
@@ -99065,7 +98678,8 @@ snapshots:
 
   ufo@1.6.3: {}
 
-  uglify-js@3.19.3: {}
+  uglify-js@3.19.3:
+    optional: true
 
   uid-safe@2.1.5:
     dependencies:
@@ -99123,10 +98737,6 @@ snapshots:
   undici-types@6.21.0: {}
 
   undici-types@7.16.0: {}
-
-  undici@5.29.0:
-    dependencies:
-      '@fastify/busboy': 2.1.1
 
   undici@6.23.0: {}
 
@@ -99299,8 +98909,6 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  upper-case@1.1.3: {}
-
   upper-case@2.0.2:
     dependencies:
       tslib: 2.8.1
@@ -99457,8 +99065,6 @@ snapshots:
   validate-npm-package-name@7.0.2: {}
 
   validator@13.15.26: {}
-
-  value-or-promise@1.0.11: {}
 
   value-or-promise@1.0.12: {}
 
@@ -100164,7 +99770,7 @@ snapshots:
       axe-core: 4.11.0
       chalk: 5.6.2
       dom-accessibility-api: 0.5.16
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
       redent: 3.0.0
       vitest: 4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
@@ -100927,7 +100533,7 @@ snapshots:
 
   wait-on@8.0.5:
     dependencies:
-      axios: 1.13.4
+      axios: 1.13.5
       joi: 18.0.2
       lodash: 4.17.23
       minimist: 1.2.8
