@@ -11,7 +11,7 @@ import { SourceMetadataV1, ProvenanceV1 } from './provenance.js'
 /**
  * Generic Ingestion Request
  */
-export const IngestRequestV1 = z.object({
+const IngestRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID for tracing and idempotency'),
   source: SourceMetadataV1.describe('Data source metadata'),
@@ -22,12 +22,13 @@ export const IngestRequestV1 = z.object({
   }),
 })
 
-export type IngestRequestV1 = z.infer<typeof IngestRequestV1>
+export const IngestRequestV1 = IngestRequestV1Schema
+export type IngestRequestV1 = z.infer<typeof IngestRequestV1Schema>
 
 /**
  * Person-specific Ingestion Request
  */
-export const IngestPersonRequestV1 = z.object({
+const IngestPersonRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID for tracing and idempotency'),
   source: SourceMetadataV1.describe('Data source metadata'),
@@ -39,12 +40,13 @@ export const IngestPersonRequestV1 = z.object({
   }),
 })
 
-export type IngestPersonRequestV1 = z.infer<typeof IngestPersonRequestV1>
+export const IngestPersonRequestV1 = IngestPersonRequestV1Schema
+export type IngestPersonRequestV1 = z.infer<typeof IngestPersonRequestV1Schema>
 
 /**
  * Organization-specific Ingestion Request
  */
-export const IngestOrganizationRequestV1 = z.object({
+const IngestOrganizationRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID for tracing and idempotency'),
   source: SourceMetadataV1.describe('Data source metadata'),
@@ -55,12 +57,13 @@ export const IngestOrganizationRequestV1 = z.object({
   }),
 })
 
-export type IngestOrganizationRequestV1 = z.infer<typeof IngestOrganizationRequestV1>
+export const IngestOrganizationRequestV1 = IngestOrganizationRequestV1Schema
+export type IngestOrganizationRequestV1 = z.infer<typeof IngestOrganizationRequestV1Schema>
 
 /**
  * Ingestion Error
  */
-export const IngestErrorV1 = z.object({
+const IngestErrorV1Schema = z.object({
   entityId: z.string().optional().describe('Entity ID that failed (if applicable)'),
   field: z.string().optional().describe('Field that caused the error'),
   error: z.string().describe('Error message'),
@@ -75,12 +78,13 @@ export const IngestErrorV1 = z.object({
     .describe('Error code'),
 })
 
-export type IngestErrorV1 = z.infer<typeof IngestErrorV1>
+export const IngestErrorV1 = IngestErrorV1Schema
+export type IngestErrorV1 = z.infer<typeof IngestErrorV1Schema>
 
 /**
  * Generic Ingestion Response
  */
-export const IngestResponseV1 = z.object({
+const IngestResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID from request'),
   result: z.object({
@@ -89,7 +93,7 @@ export const IngestResponseV1 = z.object({
     entitiesUpdated: z.number().int().nonnegative().describe('Number of existing entities updated'),
     edgesCreated: z.number().int().nonnegative().describe('Number of new edges created'),
     edgesUpdated: z.number().int().nonnegative().optional().describe('Number of edges updated'),
-    errors: z.array(IngestErrorV1).optional().describe('Errors encountered during ingestion'),
+    errors: z.array(IngestErrorV1Schema).optional().describe('Errors encountered during ingestion'),
     skipped: z.number().int().nonnegative().optional().describe('Number of entities skipped'),
   }),
   metadata: z
@@ -100,12 +104,13 @@ export const IngestResponseV1 = z.object({
     .optional(),
 })
 
-export type IngestResponseV1 = z.infer<typeof IngestResponseV1>
+export const IngestResponseV1 = IngestResponseV1Schema
+export type IngestResponseV1 = z.infer<typeof IngestResponseV1Schema>
 
 /**
  * Person-specific Ingestion Response
  */
-export const IngestPersonResponseV1 = z.object({
+const IngestPersonResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   correlationId: z.string().uuid().describe('Correlation ID from request'),
   result: z.object({
@@ -114,7 +119,7 @@ export const IngestPersonResponseV1 = z.object({
     personsUpdated: z.number().int().nonnegative().describe('Number of existing persons updated'),
     associationsCreated: z.number().int().nonnegative().describe('Number of associations created'),
     employmentsCreated: z.number().int().nonnegative().optional().describe('Number of employments created'),
-    errors: z.array(IngestErrorV1).optional().describe('Errors encountered during ingestion'),
+    errors: z.array(IngestErrorV1Schema).optional().describe('Errors encountered during ingestion'),
   }),
   metadata: z
     .object({
@@ -124,22 +129,24 @@ export const IngestPersonResponseV1 = z.object({
     .optional(),
 })
 
-export type IngestPersonResponseV1 = z.infer<typeof IngestPersonResponseV1>
+export const IngestPersonResponseV1 = IngestPersonResponseV1Schema
+export type IngestPersonResponseV1 = z.infer<typeof IngestPersonResponseV1Schema>
 
 /**
  * Batch Ingestion Status Request
  */
-export const BatchIngestionStatusRequestV1 = z.object({
+const BatchIngestionStatusRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   batchId: z.string().uuid().describe('Batch ID to query'),
 })
 
-export type BatchIngestionStatusRequestV1 = z.infer<typeof BatchIngestionStatusRequestV1>
+export const BatchIngestionStatusRequestV1 = BatchIngestionStatusRequestV1Schema
+export type BatchIngestionStatusRequestV1 = z.infer<typeof BatchIngestionStatusRequestV1Schema>
 
 /**
  * Batch Ingestion Status Response
  */
-export const BatchIngestionStatusResponseV1 = z.object({
+const BatchIngestionStatusResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   batchId: z.string().uuid().describe('Batch ID'),
   status: z.enum(['pending', 'processing', 'completed', 'failed', 'partial']).describe('Batch status'),
@@ -155,4 +162,5 @@ export const BatchIngestionStatusResponseV1 = z.object({
   completedAt: z.string().datetime().optional().describe('When processing completed'),
 })
 
-export type BatchIngestionStatusResponseV1 = z.infer<typeof BatchIngestionStatusResponseV1>
+export const BatchIngestionStatusResponseV1 = BatchIngestionStatusResponseV1Schema
+export type BatchIngestionStatusResponseV1 = z.infer<typeof BatchIngestionStatusResponseV1Schema>

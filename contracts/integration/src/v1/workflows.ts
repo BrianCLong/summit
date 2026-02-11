@@ -10,14 +10,15 @@ import { PersonAssociationV1 } from './queries.js'
 /**
  * Workflow execution status
  */
-export const WorkflowStatusV1 = z.enum(['pending', 'running', 'completed', 'failed', 'cancelled', 'timeout'])
+const WorkflowStatusV1Schema = z.enum(['pending', 'running', 'completed', 'failed', 'cancelled', 'timeout'])
 
-export type WorkflowStatusV1 = z.infer<typeof WorkflowStatusV1>
+export const WorkflowStatusV1 = WorkflowStatusV1Schema
+export type WorkflowStatusV1 = z.infer<typeof WorkflowStatusV1Schema>
 
 /**
  * Person Network Analysis Workflow Input
  */
-export const PersonNetworkWorkflowInputV1 = z.object({
+const PersonNetworkWorkflowInputV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   personId: z.string().uuid().describe('Person entity ID to analyze'),
   analysisDepth: z
@@ -39,12 +40,13 @@ export const PersonNetworkWorkflowInputV1 = z.object({
     .optional(),
 })
 
-export type PersonNetworkWorkflowInputV1 = z.infer<typeof PersonNetworkWorkflowInputV1>
+export const PersonNetworkWorkflowInputV1 = PersonNetworkWorkflowInputV1Schema
+export type PersonNetworkWorkflowInputV1 = z.infer<typeof PersonNetworkWorkflowInputV1Schema>
 
 /**
  * Person Network Analysis Workflow Output
  */
-export const PersonNetworkWorkflowOutputV1 = z.object({
+const PersonNetworkWorkflowOutputV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   person: PersonEntityV1.describe('Root person entity'),
   networkSize: z.number().int().nonnegative().describe('Total size of network'),
@@ -64,12 +66,13 @@ export const PersonNetworkWorkflowOutputV1 = z.object({
   }),
 })
 
-export type PersonNetworkWorkflowOutputV1 = z.infer<typeof PersonNetworkWorkflowOutputV1>
+export const PersonNetworkWorkflowOutputV1 = PersonNetworkWorkflowOutputV1Schema
+export type PersonNetworkWorkflowOutputV1 = z.infer<typeof PersonNetworkWorkflowOutputV1Schema>
 
 /**
  * Start Workflow Request (generic)
  */
-export const StartWorkflowRequestV1 = z.object({
+const StartWorkflowRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   workflow: z.string().min(1).describe('Workflow name/identifier'),
   namespace: z.string().default('default').describe('Workflow namespace'),
@@ -83,16 +86,17 @@ export const StartWorkflowRequestV1 = z.object({
     .optional(),
 })
 
-export type StartWorkflowRequestV1 = z.infer<typeof StartWorkflowRequestV1>
+export const StartWorkflowRequestV1 = StartWorkflowRequestV1Schema
+export type StartWorkflowRequestV1 = z.infer<typeof StartWorkflowRequestV1Schema>
 
 /**
  * Start Person Network Workflow Request
  */
-export const StartPersonNetworkWorkflowRequestV1 = z.object({
+const StartPersonNetworkWorkflowRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   workflow: z.literal('person-network-analysis').describe('Workflow identifier'),
   namespace: z.string().default('integration').describe('Workflow namespace'),
-  inputs: PersonNetworkWorkflowInputV1.describe('Workflow inputs'),
+  inputs: PersonNetworkWorkflowInputV1Schema.describe('Workflow inputs'),
   metadata: z
     .object({
       correlationId: z.string().uuid().optional().describe('Correlation ID for tracing'),
@@ -102,34 +106,37 @@ export const StartPersonNetworkWorkflowRequestV1 = z.object({
     .optional(),
 })
 
-export type StartPersonNetworkWorkflowRequestV1 = z.infer<typeof StartPersonNetworkWorkflowRequestV1>
+export const StartPersonNetworkWorkflowRequestV1 = StartPersonNetworkWorkflowRequestV1Schema
+export type StartPersonNetworkWorkflowRequestV1 = z.infer<typeof StartPersonNetworkWorkflowRequestV1Schema>
 
 /**
  * Start Workflow Response
  */
-export const StartWorkflowResponseV1 = z.object({
+const StartWorkflowResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   runId: z.string().uuid().describe('Workflow run ID for tracking'),
-  status: WorkflowStatusV1.describe('Initial workflow status'),
+  status: WorkflowStatusV1Schema.describe('Initial workflow status'),
   startedAt: z.string().datetime().describe('When the workflow started'),
 })
 
-export type StartWorkflowResponseV1 = z.infer<typeof StartWorkflowResponseV1>
+export const StartWorkflowResponseV1 = StartWorkflowResponseV1Schema
+export type StartWorkflowResponseV1 = z.infer<typeof StartWorkflowResponseV1Schema>
 
 /**
  * Get Workflow Status Request
  */
-export const GetWorkflowStatusRequestV1 = z.object({
+const GetWorkflowStatusRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   runId: z.string().uuid().describe('Workflow run ID'),
 })
 
-export type GetWorkflowStatusRequestV1 = z.infer<typeof GetWorkflowStatusRequestV1>
+export const GetWorkflowStatusRequestV1 = GetWorkflowStatusRequestV1Schema
+export type GetWorkflowStatusRequestV1 = z.infer<typeof GetWorkflowStatusRequestV1Schema>
 
 /**
  * Workflow step execution detail
  */
-export const WorkflowStepV1 = z.object({
+const WorkflowStepV1Schema = z.object({
   id: z.string().describe('Step ID'),
   name: z.string().describe('Step name'),
   status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']).describe('Step status'),
@@ -138,22 +145,23 @@ export const WorkflowStepV1 = z.object({
   error: z.string().optional().describe('Error message if step failed'),
 })
 
-export type WorkflowStepV1 = z.infer<typeof WorkflowStepV1>
+export const WorkflowStepV1 = WorkflowStepV1Schema
+export type WorkflowStepV1 = z.infer<typeof WorkflowStepV1Schema>
 
 /**
  * Get Workflow Status Response (generic)
  */
-export const GetWorkflowStatusResponseV1 = z.object({
+const GetWorkflowStatusResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   runId: z.string().uuid().describe('Workflow run ID'),
   workflow: z.string().describe('Workflow name'),
   namespace: z.string().describe('Workflow namespace'),
-  status: WorkflowStatusV1.describe('Current workflow status'),
+  status: WorkflowStatusV1Schema.describe('Current workflow status'),
   startedAt: z.string().datetime().describe('When the workflow started'),
   completedAt: z.string().datetime().optional().describe('When the workflow completed'),
   outputs: z.record(z.unknown()).optional().describe('Workflow outputs (if completed)'),
   error: z.string().optional().describe('Error message if workflow failed'),
-  steps: z.array(WorkflowStepV1).optional().describe('Step execution details'),
+  steps: z.array(WorkflowStepV1Schema).optional().describe('Step execution details'),
   metadata: z
     .object({
       totalSteps: z.number().int().nonnegative().optional().describe('Total number of steps'),
@@ -163,45 +171,49 @@ export const GetWorkflowStatusResponseV1 = z.object({
     .optional(),
 })
 
-export type GetWorkflowStatusResponseV1 = z.infer<typeof GetWorkflowStatusResponseV1>
+export const GetWorkflowStatusResponseV1 = GetWorkflowStatusResponseV1Schema
+export type GetWorkflowStatusResponseV1 = z.infer<typeof GetWorkflowStatusResponseV1Schema>
 
 /**
  * Get Person Network Workflow Status Response
  */
-export const GetPersonNetworkWorkflowStatusResponseV1 = z.object({
+const GetPersonNetworkWorkflowStatusResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   runId: z.string().uuid().describe('Workflow run ID'),
   workflow: z.literal('person-network-analysis').describe('Workflow name'),
   namespace: z.string().describe('Workflow namespace'),
-  status: WorkflowStatusV1.describe('Current workflow status'),
+  status: WorkflowStatusV1Schema.describe('Current workflow status'),
   startedAt: z.string().datetime().describe('When the workflow started'),
   completedAt: z.string().datetime().optional().describe('When the workflow completed'),
-  result: PersonNetworkWorkflowOutputV1.optional().describe('Workflow result (if completed)'),
+  result: PersonNetworkWorkflowOutputV1Schema.optional().describe('Workflow result (if completed)'),
   error: z.string().optional().describe('Error message if workflow failed'),
-  steps: z.array(WorkflowStepV1).optional().describe('Step execution details'),
+  steps: z.array(WorkflowStepV1Schema).optional().describe('Step execution details'),
 })
 
-export type GetPersonNetworkWorkflowStatusResponseV1 = z.infer<typeof GetPersonNetworkWorkflowStatusResponseV1>
+export const GetPersonNetworkWorkflowStatusResponseV1 = GetPersonNetworkWorkflowStatusResponseV1Schema
+export type GetPersonNetworkWorkflowStatusResponseV1 = z.infer<typeof GetPersonNetworkWorkflowStatusResponseV1Schema>
 
 /**
  * Cancel Workflow Request
  */
-export const CancelWorkflowRequestV1 = z.object({
+const CancelWorkflowRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   runId: z.string().uuid().describe('Workflow run ID to cancel'),
   reason: z.string().optional().describe('Reason for cancellation'),
 })
 
-export type CancelWorkflowRequestV1 = z.infer<typeof CancelWorkflowRequestV1>
+export const CancelWorkflowRequestV1 = CancelWorkflowRequestV1Schema
+export type CancelWorkflowRequestV1 = z.infer<typeof CancelWorkflowRequestV1Schema>
 
 /**
  * Cancel Workflow Response
  */
-export const CancelWorkflowResponseV1 = z.object({
+const CancelWorkflowResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   runId: z.string().uuid().describe('Workflow run ID'),
-  status: WorkflowStatusV1.describe('Updated workflow status'),
+  status: WorkflowStatusV1Schema.describe('Updated workflow status'),
   cancelledAt: z.string().datetime().describe('When the workflow was cancelled'),
 })
 
-export type CancelWorkflowResponseV1 = z.infer<typeof CancelWorkflowResponseV1>
+export const CancelWorkflowResponseV1 = CancelWorkflowResponseV1Schema
+export type CancelWorkflowResponseV1 = z.infer<typeof CancelWorkflowResponseV1Schema>
