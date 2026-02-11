@@ -2,21 +2,25 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "summit evidence index",
   "type": "object",
-  "required": ["mappings"],
+  "required": ["version", "items"],
   "properties": {
-<<<<<<< HEAD
     "version": {
-      "type": "string"
+      "type": ["string", "integer"]
     },
     "items": {
-      "type": "object",
-      "additionalProperties": {
+      "type": "array",
+      "items": {
         "type": "object",
         "properties": {
           "evidence_id": { "type": "string" },
           "files": {
-            "type": "array",
-            "items": { "type": "string" }
+            "type": "object",
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            },
+            "required": ["report", "metrics", "stamp"]
           },
           "title": { "type": "string" },
           "category": { "type": "string" },
@@ -27,21 +31,6 @@
         },
         "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }],
         "additionalProperties": true
-      }
-    },
-    "map": {
-=======
-    "mappings": {
->>>>>>> origin/main
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["report", "metrics", "stamp"],
-        "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
-        }
       }
     }
   },

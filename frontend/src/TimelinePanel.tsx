@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface EventItem {
   id: string;
@@ -11,7 +11,7 @@ interface TimelinePanelProps {
   events: EventItem[];
 }
 
-const TimelinePanel: React.FC<TimelinePanelProps> = ({ events }) => (
+const TimelinePanel: React.FC<TimelinePanelProps> = memo(({ events }) => (
   <aside className="timeline-panel">
     <h2>Agent Timeline</h2>
     <ul>
@@ -22,6 +22,6 @@ const TimelinePanel: React.FC<TimelinePanelProps> = ({ events }) => (
       ))}
     </ul>
   </aside>
-);
+));
 
 export default TimelinePanel;
