@@ -1,0 +1,20 @@
+18487	chore(ops): continue daily sprint schema and evidence repair	chore/daily-sprint-2026-02-11-iterate	OPEN	2026-02-11T19:47:08Z
+18486	chore(ops): daily sprint live triage and evidence refresh	chore/daily-sprint-2026-02-11-live-triage-2	OPEN	2026-02-11T19:45:20Z
+18485	chore(ops): daily sprint live triage + evidence refresh	chore/daily-sprint-2026-02-11-live-triage-v2	OPEN	2026-02-11T19:43:55Z
+18484	chore(ops): daily sprint live triage + prompt registration	chore/daily-sprint-2026-02-11-live-triage	OPEN	2026-02-11T19:43:20Z
+18483	⚡ Bolt: Optimized RiskRepository with batched signals insertion	bolt/optimize-risk-repository-batching-11522764981266082204	OPEN	2026-02-11T18:38:41Z
+18482	Build comprehensive testing suite for Summit	test/summit-comprehensive-suite-16075886080297994674	OPEN	2026-02-11T14:14:16Z
+18481	feat: Comprehensive Monitoring and Observability	observability-enhancements-17957429444425996525	OPEN	2026-02-11T12:15:46Z
+18480	Enhance Redis backup, client safety, and partitioning strategy	enhance-redis-backup-partitioning-15458088661726185483	OPEN	2026-02-11T12:14:18Z
+18479	Enable and fix server unit tests for Maestro and Graph modules	jules-fix-server-tests-coverage-7683499697124120097	OPEN	2026-02-11T11:54:12Z
+18478	Sprint 07: Policy-Gated Approvals + Provenance Receipts MVP	feat/governance/sprint-07-mvp-6154244869643593179	OPEN	2026-02-11T11:34:25Z
+18477	fix(ingestion): make optional exports star-import safe	codex/ingestion-optional-exports-fix-20260211	OPEN	2026-02-11T11:23:44Z
+18476	chore(ops): daily sprint evidence refresh + schema conflict repair	chore/daily-sprint-2026-02-11-refresh	OPEN	2026-02-11T11:10:39Z
+18475	IntelGraph Phase 2 Foundations & Hardened Services	feat/intelgraph/phase2-foundations-hardened-852790884084947131	OPEN	2026-02-11T11:03:02Z
+18474	Security Sprint 2: Batch 1 Remediation	sec-sprint-2-batch1-10679402050883836401	OPEN	2026-02-11T11:02:37Z
+18473	Execute Wave 0 & 1 PR Management (EP04-T01)	jules-11027107234280109574-1f43ad13	OPEN	2026-02-11T10:54:02Z
+18472	CompanyOS Core Platform Primitives (Tasks 9-16)	feat/companyos-platform-primitives-2865563395573772890	OPEN	2026-02-11T10:53:59Z
+18471	GraphRAG Determinism Gate: Retrieval, Index Config, Regression Harness	jules/graphrag-determinism-gate-2129655590686802330	OPEN	2026-02-11T10:53:30Z
+18470	docs: harden GA control-room docs and PR explainer for golden-path merge	codex/implement-daily-automation-for-ga-control-room-sejmt7	OPEN	2026-02-11T10:52:53Z
+18469	Sprint 08: Multi-Tenant Hardening + FinOps + Policy Ramps	sprint-08-multi-tenant-hardening-finops-12649272389148867140	OPEN	2026-02-11T10:50:47Z
+18468	🎨 Palette: Spinner accessibility improvement	palette-spinner-a11y-1523367429162190557	OPEN	2026-02-11T10:48:29Z
