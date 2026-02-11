@@ -1,0 +1,30 @@
+{
+  "automation_id": "daily-sprint",
+  "collection_mode": "sensing+reasoning",
+  "date": "2026-02-11",
+  "evidence": [
+    {
+      "artifact": "gh_pr_list.txt",
+      "description": "Top 20 open PRs captured from gh CLI.",
+      "source": "gh pr list -L 20 --repo BrianCLong/summit",
+      "status": "captured"
+    },
+    {
+      "artifact": "gh_issue_list_error.txt",
+      "description": "GitHub issue list error output.",
+      "source": "gh issue list -L 20 --repo BrianCLong/summit --label security --label ga --label governance --label osint",
+      "status": "blocked"
+    },
+    {
+      "artifact": "pr_18448_checks_summary.txt",
+      "description": "PR #18448 checks snapshot with failing job reference.",
+      "source": "gh pr checks 18448 --repo BrianCLong/summit",
+      "status": "partial"
+    }
+  ],
+  "notes": [
+    "GitHub API connectivity degraded during evidence collection.",
+    "PR list captured from terminal output and persisted to file after transient API failure.",
+    "Execution progressed on PR #18448 with local patching despite intermittent GH API failures."
+  ]
+}

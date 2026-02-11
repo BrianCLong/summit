@@ -520,6 +520,7 @@ export class AuthService {
       // Audit Log
       try {
         getAuditSystem().recordEvent({
+          id: randomUUID(),
           eventType: 'user_login',
           level: 'info',
           timestamp: new Date(),
@@ -571,32 +572,8 @@ export class AuthService {
           userAgent,
           details: { error: error.message }
         });
-      } catch (e) {
-         // ignore
-      }
-
-      // Audit Log Failure
-      try {
-        getAuditSystem().recordEvent({
-          eventType: 'user_login',
-          level: 'warn',
-          timestamp: new Date(),
-          correlationId: randomUUID(),
-          tenantId: tenantId,
-          serviceId: 'auth-service',
-          resourceType: 'user',
-          resourceId: email,
-          action: 'login',
-          outcome: 'failure',
-          message: `Login failed for ${email}: ${error.message}`,
-          complianceRelevant: true,
-          complianceFrameworks: ['SOC2'],
-          ipAddress,
-          userAgent,
-          details: { error: error.message }
-        });
-      } catch (e) {
-         // ignore
+      } catch {
+         // Intentionally ignore audit logging failures to preserve auth flow.
       }
       throw error;
     } finally {

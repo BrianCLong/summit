@@ -106,8 +106,6 @@ export class DeterministicExportService {
     request: ExportRequest,
     session: Session,
   ): Promise<{
-
-
     exportId: string;
     bundlePath: string;
     manifest: ExportManifest;
@@ -132,7 +130,7 @@ export class DeterministicExportService {
         complianceFrameworks: ['GDPR'],
         details: { request }
       });
-    } catch (e) {}
+    } catch {}
 
     const startTime = Date.now();
 

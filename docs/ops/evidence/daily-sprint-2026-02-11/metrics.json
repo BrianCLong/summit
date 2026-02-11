@@ -1,0 +1,10 @@
+{
+  "pr_count": 20,
+  "issue_count": 0,
+  "issue_query_status": "blocked",
+  "evidence_artifacts": 3,
+  "prs_touched": 1,
+  "files_patched": 2,
+  "validations_passed": 1,
+  "validations_blocked": 1
+}
