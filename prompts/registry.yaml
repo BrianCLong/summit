@@ -922,3 +922,31 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-automation-loop
+    version: v1
+    path: prompts/operations/daily-sprint-loop@v1.md
+    sha256: 16eb4a4102e90e2a427afdb7c34283d4dba465652ec1b09cce73d1761fdd0081
+    description: Govern deterministic daily sprint automation outputs and evidence artifacts.
+    scope:
+      paths:
+        - scripts/ops/daily-sprint-loop.sh
+        - docs/ops/DAILY_SPRINT_AUTOMATION.md
+        - docs/ops/DAILY_SPRINT_
+        - docs/ops/evidence/daily-sprint-
+        - docs/roadmap/STATUS.json
+        - prompts/operations/daily-sprint-loop@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - governance
+        - evidence
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
