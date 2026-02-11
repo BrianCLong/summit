@@ -1,0 +1,130 @@
+Build & Package	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63294949756	
+Build & Test	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148986/job/63290849747	
+Check Changelog Update	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918149056/job/63290849842	
+Check SemVer Label	fail	33m49s	https://github.com/BrianCLong/summit/actions/runs/21918148941/job/63290849163	
+Compliance & Security	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148986/job/63290849955	
+Compliance Drift Detection	fail	33m49s	https://github.com/BrianCLong/summit/actions/runs/21918149020/job/63290849575	
+Config Preflight	fail	33m49s	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63290849183	
+Deterministic Build	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63294950100	
+E2E Tests (Playwright)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63294950151	
+End-to-End Tests	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148858/job/63290848639	
+Full-Stack Smoke Test	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148893/job/63290849187	
+Gates	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148907/job/63290849235	
+Gitleaks baseline scan (blocking)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148969/job/63290849919	
+Golden Path Smoke	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148968/job/63294945479	
+Golden Path Smoke Test	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63294950787	
+Governance / Branch Protection Drift	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63290849148	
+Governance / Docs Integrity	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63290849154	
+Governance Policy Check	fail	33m47s	https://github.com/BrianCLong/summit/actions/runs/21918148968/job/63290849458	
+Infrastructure Checks	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148986/job/63290849925	
+Integration Tests	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63290849104	
+Lint & Typecheck	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63294949601	
+Markdown Linter	fail	33m50s	https://github.com/BrianCLong/summit/actions/runs/21918148948/job/63290849173	
+Parity (aws)	fail	33m48s	https://github.com/BrianCLong/summit/actions/runs/21918148942/job/63290849319	
+Parity (azure)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148942/job/63290849405	
+Parity (gcp)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148942/job/63290849433	
+Preview Environment	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148986/job/63294950727	
+Quarantine Tests (Flaky)	fail	33m47s	https://github.com/BrianCLong/summit/actions/runs/21918148968/job/63290849472	
+Release Readiness Gate	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148899/job/63290849778	
+Reproducibility Sanity Check	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148953/job/63290849489	
+Run Comprehensive Tests	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148913/job/63290850993	
+Run RDP Security Gates	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148856/job/63290848715	
+S-AOS Enforcement	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918259861/job/63291241402	
+SLO Smoke Gate	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148869/job/63290849089	
+SOC Control Verification	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63290849171	
+Security Gate (Gitleaks + Snyk)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148968/job/63290849642	
+Server TypeScript Check	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148988/job/63290849446	
+Snyk dependency vulnerability scan	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148918/job/63294948989	
+Snyk scan (skipped - no token)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148918/job/63294948932	
+Solid Gate	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918149028/job/63290849850	
+Test & Coverage	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148858/job/63290848645	
+Unit Tests	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63294949949	
+Verification Suite	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63290849222	
+Verify Release Integrity	fail	33m47s	https://github.com/BrianCLong/summit/actions/runs/21918149056/job/63290849938	
+Workflow Validity Check	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148938/job/63290849336	
+ai-assist-eval	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148943/job/63290849663	
+ai-assist-evidence	fail	33m48s	https://github.com/BrianCLong/summit/actions/runs/21918148943/job/63290849789	
+ai-assist-mcp-gate	fail	33m48s	https://github.com/BrianCLong/summit/actions/runs/21918148943/job/63290849792	
+ai-assist-policy	fail	33m48s	https://github.com/BrianCLong/summit/actions/runs/21918148943/job/63290849607	
+build-and-scan (linux/amd64)	fail	33m51s	https://github.com/BrianCLong/summit/actions/runs/21918148872/job/63290848820	
+build-and-scan (linux/arm64)	fail	33m51s	https://github.com/BrianCLong/summit/actions/runs/21918148872/job/63290848772	
+build-and-verify	fail	33m48s	https://github.com/BrianCLong/summit/actions/runs/21918148963/job/63290849281	
+check	fail	33m50s	https://github.com/BrianCLong/summit/actions/runs/21918148864/job/63290848653	
+check-evidence	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148950/job/63290849241	
+ci / ci (lint)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918149024/job/63290849492	
+ci / ci (test)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918149024/job/63290849464	
+ci / ci (typecheck)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918149024/job/63290849526	
+entropy-guard	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148962/job/63290849424	
+evaluate-learning-value	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148887/job/63290849497	
+Type Safety Audit	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148974/job/63290850249	
+pii-scan	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918259861/job/63291241327	
+pr-metadata-check	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918259861/job/63291241407	
+evidence	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148960/job/63290849369	
+MVP-4-GA Promotion Gate	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148968/job/63294945296	
+Build & Lint (Strict)	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148968/job/63290849856	
+compliance-drift-check	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148971/job/63290849350	
+evidence	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148771/job/63290848508	
+lint	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148894/job/63290849586	
+Block vulnerable dependency changes	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148918/job/63290849440	
+enqueue	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918309200/job/63291413945	
+CodeRabbit	pass	0		Review completed
+policy-deny-default	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148959/job/63290849382	
+Jest/ts-jest Suite (ESM Issues)	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148990/job/63290862136	
+Analyze (${{ matrix.language }})	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148923/job/63290849750	
+integration-tests	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918149027/job/63290849536	
+Typecheck	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148998/job/63290849348	
+Quarantine Tests (Flaky)	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148990/job/63290850157	
+restricted-path-check	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918259861/job/63291241312	
+Unit Tests	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148998/job/63290849322	
+Build	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148998/job/63290849393	
+hono-version-gate	fail	33m49s	https://github.com/BrianCLong/summit/actions/runs/21918148865/job/63290848679	
+nds_gates	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148792/job/63290848590	
+policy-fixtures	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148876/job/63290848592	
+auto-approve	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148993/job/63290849422	
+LB probe + cache benchmark	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148916/job/63290849803	
+gate	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148937/job/63290849334	
+verify	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918149061/job/63290849896	
+validate	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148997/job/63290849358	
+governance / required-checks	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148982/job/63290849782	
+Lint	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148998/job/63290849402	
+verify-provenance	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148956/job/63290849500	
+SOC Controls	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148885/job/63290849305	
+check	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148925/job/63290849297	
+Config Guard	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148998/job/63290849429	
+Evidence Generation Dry-Run	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918149020/job/63290850061	
+Check Lockfile Drift	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148918/job/63290849617	
+tests	fail	33m50s	https://github.com/BrianCLong/summit/actions/runs/21918148771/job/63290848450	
+check-freeze	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918149001/job/63290849389	
+build-and-verify	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918149053/job/63290849805	
+enforce-policy	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148926/job/63290849554	
+enforce-classification	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148949/job/63290849573	
+📦 Collect GA Evidence	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148891/job/63290849515	
+evidence-id-consistency	fail	33m48s	https://github.com/BrianCLong/summit/actions/runs/21918149039/job/63290849363	
+nds_gates	fail	33m50s	https://github.com/BrianCLong/summit/actions/runs/21918148883/job/63290849174	
+CI Legacy Summary (Informational)	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148990/job/63290850614	
+Experimental Checks	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148990/job/63290850113	
+verify	fail	33m50s	https://github.com/BrianCLong/summit/actions/runs/21918148921/job/63290849098	
+validate	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148973/job/63290849374	
+ux-governance	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148964/job/63290849430	
+integrity	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148882/job/63290849012	
+governance-check	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148971/job/63290849528	
+meta-gate	fail	33m48s	https://github.com/BrianCLong/summit/actions/runs/21918148889/job/63290849176	
+Deprecated Checks (Migration in Progress)	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148990/job/63290850020	
+gate	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148955/job/63290849780	
+evidence-verify	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148959/job/63290849203	
+validate-claims	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918149005/job/63290849533	
+Performance Regression Tests	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148990/job/63290850152	
+CI Core Gate ✅	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148881/job/63294950433	
+test (20.x)	fail	0	https://github.com/BrianCLong/summit/actions/runs/21918148929/job/63290849397	
+evidence-schemas	pending	0	https://github.com/BrianCLong/summit/actions/runs/21918148876/job/63290848602	
+tests	fail	33m49s	https://github.com/BrianCLong/summit/actions/runs/21918148960/job/63290849360	
+Web Accessibility Audit	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148990/job/63290850297	
+create->kubectl->delete	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148927/job/63290849748	
+deploy-preview	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148946/job/63290863235	
+gate/agent_inventory_required	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148947/job/63290850191	
+gate/agent_surface_lint	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148947/job/63290850036	
+gate/evidence_contract	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148947/job/63290850079	
+gate/relay_policy	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148947/job/63290850134	
+gate/supplychain_verify	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148947/job/63290863237	
+pause->resume	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148999/job/63290849869	
+verify	skipping	0	https://github.com/BrianCLong/summit/actions/runs/21918148784/job/63290849143	
