@@ -1,0 +1,20 @@
+{
+  "sprint_date": "2026-02-11",
+  "evidence": {
+    "pr_list": {
+      "status": "captured",
+      "source": "gh pr list cached output",
+      "artifact": "docs/ops/evidence/daily-sprint-2026-02-11/gh_pr_list.json"
+    },
+    "issue_list": {
+      "status": "error",
+      "source": "gh issue list",
+      "artifact": "docs/ops/evidence/daily-sprint-2026-02-11/gh_issue_list_error.log",
+      "note": "Deferred pending GitHub API connectivity restoration."
+    }
+  },
+  "outputs": {
+    "daily_report": "docs/ops/DAILY_SPRINT_2026-02-11.md",
+    "prompt_registry": "prompts/registry.yaml"
+  }
+}
