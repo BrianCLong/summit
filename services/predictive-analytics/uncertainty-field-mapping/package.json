@@ -25,7 +25,7 @@
   "author": "IntelGraph Team",
   "license": "PROPRIETARY",
   "dependencies": {
-    "@apollo/server": "^4.9.5",
+    "@apollo/server": "^4.16.0",
     "graphql": "^16.8.1",
     "winston": "^3.11.0",
     "date-fns": "^2.30.0",

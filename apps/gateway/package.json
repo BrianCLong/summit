@@ -7,7 +7,7 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@apollo/server": "^4.11.0",
+    "@apollo/server": "^4.16.0",
     "@opentelemetry/api": "latest",
     "@opentelemetry/auto-instrumentations-node": "^0.67.3",
     "@opentelemetry/exporter-metrics-otlp-http": "latest",

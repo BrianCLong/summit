@@ -16,7 +16,7 @@
     "zod": "^4.1.12",
     "neo4j-driver": "6.0.1",
     "uuid": "^11.0.3",
-    "axios": "^1.11.0"
+    "axios": "^1.7.9"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

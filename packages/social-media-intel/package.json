@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "@intelgraph/osint-collector": "workspace:*",
-    "axios": "^1.11.0",
+    "axios": "^1.7.9",
     "natural": "^7.0.7",
     "sentiment": "^5.0.2",
     "compromise": "^14.13.0",

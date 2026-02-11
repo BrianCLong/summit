@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@apollo/server": "^4.10.0",
+    "@apollo/server": "^4.16.0",
     "@intelgraph/metrics-exporter": "workspace:*",
     "@intelgraph/slow-query-killer": "workspace:*",
     "cors": "^2.8.5",
