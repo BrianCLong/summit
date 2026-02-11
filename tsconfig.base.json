@@ -7,10 +7,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "Bundler",
+    "types": ["node"],
     "declaration": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./types"],
     "paths": {
       "@intelgraph/maestro-sdk/*": ["packages/maestro-sdk/src/*"],
       "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],

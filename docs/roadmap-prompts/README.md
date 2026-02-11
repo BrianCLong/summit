@@ -114,10 +114,9 @@ make smoke
 ### 6. Run Prompt #00 in CI Evidence Mode
 
 - Use runbook: [`../runbooks/ga-prompt-00-ci-evidence-mode.md`](../runbooks/ga-prompt-00-ci-evidence-mode.md)
-- Scaffold bundle: `scripts/ga/create-prompt-00-evidence-bundle.sh`
-- Verify bundle: `scripts/ga/verify-prompt-00-evidence-bundle.sh --run-id <run-id>`
-- Produce one bundle per run under `artifacts/ga-discovery/<run-id>/`
-- Record run outcome in `docs/roadmap/STATUS.json`
+- Scaffold bundle: `make ga-prompt00-scaffold [RUN_ID=YYYYMMDD-HHMM]`
+- Verify bundle: `make ga-prompt00-verify RUN_ID=<run-id>`
+- One-command smoke: `make ga-prompt00-smoke RUN_ID=<run-id>`
 
 ---
 

@@ -5,14 +5,12 @@ usage() {
   cat <<'USAGE'
 Usage:
   scripts/ga/verify-prompt-00-evidence-bundle.sh --run-id YYYYMMDD-HHMM
-  scripts/ga/verify-prompt-00-evidence-bundle.sh --dir artifacts/ga-discovery/YYYYMMDD-HHMM
-
-Validates required Prompt #00 evidence bundle files and minimal content checks.
+  scripts/ga/verify-prompt-00-evidence-bundle.sh --dir docs/evidence/ga-hardening/prompt-00/<RUN_ID>
 USAGE
 }
 
 RUN_ID=""
-TARGET_DIR=""
+DIR=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -21,7 +19,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --dir)
-      TARGET_DIR="${2:-}"
+      DIR="${2:-}"
       shift 2
       ;;
     -h|--help)
@@ -30,70 +28,82 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "Unknown argument: $1" >&2
-      usage >&2
+      usage
       exit 1
       ;;
   esac
 done
 
-if [[ -n "${RUN_ID}" && -n "${TARGET_DIR}" ]]; then
-  echo "Specify only one of --run-id or --dir" >&2
+if [[ -n "$RUN_ID" && -n "$DIR" ]]; then
+  echo "Use only one of --run-id or --dir" >&2
   exit 1
 fi
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-
-if [[ -n "${RUN_ID}" ]]; then
-  TARGET_DIR="${ROOT_DIR}/artifacts/ga-discovery/${RUN_ID}"
-fi
-
-if [[ -z "${TARGET_DIR}" ]]; then
-  echo "Missing target bundle. Provide --run-id or --dir." >&2
-  usage >&2
+if [[ -z "$RUN_ID" && -z "$DIR" ]]; then
+  echo "Missing --run-id or --dir" >&2
   exit 1
 fi
 
-if [[ ! -d "${TARGET_DIR}" ]]; then
-  echo "Bundle directory not found: ${TARGET_DIR}" >&2
-  exit 1
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+if [[ -z "$DIR" ]]; then
+  DIR="docs/evidence/ga-hardening/prompt-00/${RUN_ID}"
 fi
 
 required_files=(
-  "manifest.json"
-  "uef.json"
-  "summary.md"
-  "architecture.md"
-  "implementation-plan.md"
-  "test-plan.md"
-  "docs-plan.md"
-  "cicd-gates.md"
-  "pr-package.md"
-  "future-roadmap.md"
-  "ga-checklist.md"
+  "${DIR}/manifest.json"
+  "${DIR}/commands.txt"
+  "${DIR}/prompt-integrity.txt"
+  "${DIR}/boundaries.txt"
+  "${DIR}/status-json.txt"
 )
 
-missing=0
 for file in "${required_files[@]}"; do
-  if [[ ! -s "${TARGET_DIR}/${file}" ]]; then
-    echo "missing_or_empty: ${file}" >&2
-    missing=1
+  if [[ ! -f "$file" ]]; then
+    echo "Missing required file: $file" >&2
+    exit 1
   fi
 done
 
-if [[ "${missing}" -ne 0 ]]; then
+manifest_prompt_hash="$(node -e 'const fs=require("fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(m.prompt_hash_sha256||"");' "${DIR}/manifest.json")"
+manifest_prompt_path="$(node -e 'const fs=require("fs");const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(m.canonical_prompt||"");' "${DIR}/manifest.json")"
+
+if [[ -z "$manifest_prompt_hash" || -z "$manifest_prompt_path" ]]; then
+  echo "Manifest missing canonical_prompt or prompt_hash_sha256" >&2
   exit 1
 fi
 
-# Validate JSON payloads for structural sanity.
-node -e "const fs=require('fs'); JSON.parse(fs.readFileSync(process.argv[1],'utf8')); JSON.parse(fs.readFileSync(process.argv[2],'utf8'));" \
-  "${TARGET_DIR}/manifest.json" \
-  "${TARGET_DIR}/uef.json"
-
-# Verify expected prompt id in manifest.
-if ! rg -q '"prompt"\s*:\s*"00-feature-discovery-ga-orchestration"' "${TARGET_DIR}/manifest.json"; then
-  echo "manifest_prompt_mismatch: expected 00-feature-discovery-ga-orchestration" >&2
+if [[ ! -f "$manifest_prompt_path" ]]; then
+  echo "Canonical prompt from manifest does not exist: $manifest_prompt_path" >&2
   exit 1
 fi
 
-echo "Prompt #00 evidence bundle verified:"
-echo "  ${TARGET_DIR}"
+actual_hash="$(shasum -a 256 "$manifest_prompt_path" | awk '{print $1}')"
+if [[ "$manifest_prompt_hash" != "$actual_hash" ]]; then
+  echo "Prompt hash mismatch: manifest=$manifest_prompt_hash actual=$actual_hash" >&2
+  exit 1
+fi
+
+if ! rg -q "sha256: ${manifest_prompt_hash}" prompts/registry.yaml; then
+  echo "Prompt hash not found in prompts/registry.yaml: ${manifest_prompt_hash}" >&2
+  exit 1
+fi
+
+if ! rg -q "Prompt integrity verified" "${DIR}/prompt-integrity.txt"; then
+  echo "Prompt integrity output missing expected success marker" >&2
+  exit 1
+fi
+
+if ! rg -q "No boundary violations found" "${DIR}/boundaries.txt"; then
+  echo "Boundary output missing expected success marker" >&2
+  exit 1
+fi
+
+if ! rg -q "STATUS.json valid" "${DIR}/status-json.txt"; then
+  echo "STATUS.json validation output missing expected success marker" >&2
+  exit 1
+fi
+
+echo "Prompt #00 evidence bundle verified: ${DIR}"
+

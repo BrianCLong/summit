@@ -1,120 +1,80 @@
-# Prompt #00: Feature Discovery -> GA Orchestration (Governance Meta Prompt)
+# Prompt #00: Feature Discovery -> GA Orchestration
 
-**Target**: GA Readiness (Pre-implementation gate)
-**Owner**: Product/Architecture/Governance
-**Depends on**: docs/SUMMIT_READINESS_ASSERTION.md, docs/governance/CONSTITUTION.md, docs/roadmap/STATUS.json
+**Target**: Governance + Delivery Orchestration  
+**Owner**: Codex / Release Captain  
+**Depends on**: `prompts/ga/feature-discovery-ga-development@v1.md`, prompt registry integrity, GA evidence bundle tooling
+
+---
+
+## Objective
+
+Run a deterministic, evidence-first orchestration loop that:
+
+1. discovers candidate underdeveloped features,
+2. selects one by explicit scoring,
+3. drives that feature through GA implementation standards, and
+4. emits verifiable evidence artifacts for merge readiness.
 
 ---
 
 ## Pre-Flight Checklist
 
-Before running this prompt, verify:
+```bash
+# Prompt registry includes immutable hash
+rg -n "ga-feature-discovery-prompt" prompts/registry.yaml
+
+# Canonical prompt artifact exists
+test -f prompts/ga/feature-discovery-ga-development@v1.md
+
+# Roadmap JSON is parseable
+node -e "JSON.parse(require('fs').readFileSync('docs/roadmap/STATUS.json','utf8')); console.log('ok')"
+```
+
+---
+
+## Execution Command Pack
 
 ```bash
-# ✅ Readiness baseline exists
-ls -la docs/SUMMIT_READINESS_ASSERTION.md
+# 1) Create evidence bundle for this orchestration run
+make ga-prompt00-scaffold RUN_ID=$(date -u +%Y%m%d-%H%M)
 
-# ✅ Governance authority files exist
-ls -la docs/governance/CONSTITUTION.md docs/governance/META_GOVERNANCE.md
+# 2) Verify bundle integrity
+make ga-prompt00-verify RUN_ID=<same-run-id>
 
-# ✅ Roadmap status file exists and is valid JSON
-node -e "const fs=require('fs');JSON.parse(fs.readFileSync('docs/roadmap/STATUS.json','utf8'));console.log('ok')"
-
-# ✅ Candidate feature signals are discoverable
-rg -n "feature flag|beta|preview|labs|TODO|FIXME" server apps packages docs
-```
-
-**Expected**: all checks succeed and candidate signals are present.
-
----
-
-## Claude Prompt
-
-```
-You are a Summit/IntelGraph GA readiness engineer. Execute an evidence-first feature discovery and GA planning pass.
-
-AUTHORITY ORDER:
-1) docs/SUMMIT_READINESS_ASSERTION.md
-2) docs/governance/CONSTITUTION.md and docs/governance/META_GOVERNANCE.md
-3) docs/governance/AGENT_MANDATES.md and docs/ga/*
-4) docs/feature-discovery-ga-prompt.md
-
-OPERATING RULE:
-Never defend the past. Only assert the present and dictate the future.
-
-PRIMARY TASK:
-1. Discover experimental/orphaned/underdeveloped features.
-2. Score and select one candidate for GA.
-3. Produce a full GA delivery package with tests/docs/CI evidence requirements.
-
-MANDATORY CONSTRAINTS:
-- Output evidence before narrative.
-- Include rollback triggers and rollback steps for all high-impact changes.
-- Do not bypass policy/security/evidence gates.
-- Respect module boundaries unless coupling is explicitly required.
-
-EVIDENCE REQUIREMENTS:
-- File paths and line ranges
-- Commit references
-- Existing tests and coverage signals
-- Feature flags/config toggles
-- Dependency and blocker map
-
-MAESTRO FORMAT REQUIREMENT:
-Include explicit sections:
-- MAESTRO Layers
-- Threats Considered
-- Mitigations
-
-STRICT OUTPUT ORDER:
-1) UEF Evidence Bundle
-2) High-Level Summary + 7th-Order Implications
-3) Full Architecture
-4) Implementation Plan (all files, no placeholders)
-5) Tests Plan (unit/integration/e2e/perf/security)
-6) Documentation Plan
-7) CI/CD and Gate Plan
-8) PR Package (commit intent, reviewer checklist, rollback)
-9) Future Roadmap
-10) Final GA Checklist
-
-QUALITY BAR:
-- Reference concrete files and commands, not generic statements.
-- Clearly separate present-state evidence from future-state recommendations.
-- Flag unknowns as "Deferred pending <missing evidence>".
-
-RESPONSE STYLE:
-- Deterministic and concise.
-- Cite files over opinions.
-- End with a final, actionable go/no-go recommendation.
+# 3) Optional one-shot smoke
+make ga-prompt00-smoke RUN_ID=$(date -u +%Y%m%d-%H%M)
 ```
 
 ---
 
-## Acceptance Criteria
+## Required Inputs
 
-- [ ] Evidence bundle appears before any narrative sections
-- [ ] One GA candidate selected with explicit scoring rationale
-- [ ] Rollback strategy included for selected candidate
-- [ ] MAESTRO sections present (layers, threats, mitigations)
-- [ ] CI/GA gate requirements are explicit and testable
-- [ ] Final go/no-go recommendation is explicit
+- Repository root path
+- Timeline target (weeks or sprints)
+- Priority constraints (security-critical, user-facing, compliance, etc.)
 
 ---
 
-## Follow-Up Prompts
+## Required Outputs (Strict Order)
 
-After this prompt is complete:
-
-1. Run one Core GA implementation prompt (#01/#03/#08/#09/#11/#12) aligned to the selected candidate.
-2. Run `make smoke` and collect evidence artifacts.
-3. Update `docs/roadmap/STATUS.json` with completion state and blockers.
+1. UEF evidence bundle
+2. high-level summary + seventh-order implications
+3. full architecture and integration map
+4. implementation diff (no placeholders)
+5. tests (unit/integration/e2e/perf/security)
+6. documentation (dev + ops + API)
+7. CI/CD gates and quality evidence
+8. PR package and reviewer checklist
+9. post-GA roadmap
+10. final GA checklist
 
 ---
 
-## References
+## Canonical Prompt
 
-- Canonical prompt: `docs/feature-discovery-ga-prompt.md`
-- Roadmap state: `docs/roadmap/STATUS.json`
-- Readiness assertion: `docs/SUMMIT_READINESS_ASSERTION.md`
-- Governance authority: `docs/governance/CONSTITUTION.md`
+Use the registered canonical prompt verbatim:
+
+- `prompts/ga/feature-discovery-ga-development@v1.md`
+
+If this file hash diverges from `prompts/registry.yaml`, execution is invalid until reconciled.
+

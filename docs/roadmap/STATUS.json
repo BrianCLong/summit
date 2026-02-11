@@ -1,12 +1,24 @@
 {
-  "last_updated": "2026-02-11T09:25:00Z",
-  "revision_note": "Hardened daily sprint loop with runtime prompt-registry integrity verification and deterministic evidence stamping.",
+  "last_updated": "2026-02-11T10:40:00Z",
+  "revision_note": "Rebased daily sprint + GA prompt expansion; restored ingestion deterministic ID fallback and dependency-light optional exports with regression coverage.",
   "initiatives": [
     {
       "id": "daily-sprint-automation-loop-2026-02-11",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Restored daily sprint runtime assets and added prompt hash verification against prompts/registry.yaml with evidence capture in prompt_integrity.err."
+    },
+    {
+      "id": "ingestion-optional-export-contract",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "HTTP ingestor now uses deterministic compute_hash fallback only when id is null; ingestion package exports are dependency-light with lazy optional access and star-import-safe regression tests."
+    },
+    {
+      "id": "ga-hardening-audit-runner-v1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added deterministic GA hardening audit runner with timeout-safe execution, environment-limitation classification, and dependency-outdated fallback; aligned server test scripts to run via scripts/run-jest.mjs."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -228,7 +240,13 @@
       "id": "ga-feature-discovery-prompt",
       "status": "completed",
       "owner": "codex",
-      "notes": "Expanded feature discovery GA prompt with evidence-first strict output ordering; added roadmap prompt #00, CI evidence-mode runbook, and scripts/ga/create-prompt-00-evidence-bundle.sh + scripts/ga/verify-prompt-00-evidence-bundle.sh tooling."
+      "notes": "Expanded feature discovery GA prompt with full delivery package, PR requirements, and evidence-first strict output ordering; added roadmap prompt #00, CI evidence-mode runbook, and make-driven bundle scaffold/verify/smoke tooling."
+    },
+    {
+      "id": "roadmap-todo-standup-snapshot-2026-02-11",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published docs/roadmaps/summit-development-roadmap-todo-standup.md with Todo classification method, not-started inventory, transition criteria, and Today/Next/Blockers standup snapshot."
     }
   ],
   "summary": {

@@ -3,6 +3,7 @@
 > **Operating Rule:** Never defend the past. Only assert the present and dictate the future.
 > **Escalate before anyone asks:** reference the [Summit Readiness Assertion](SUMMIT_READINESS_ASSERTION.md).
 > **Move the fight to paper:** cite files, not opinions.
+> **Canonical prompt artifact:** `prompts/ga/feature-discovery-ga-development@v1.md`
 
 ## Objective
 Identify an experimental, orphaned, or underdeveloped feature within **[PROJECT_NAME]** and advance
