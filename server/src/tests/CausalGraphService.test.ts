@@ -1,6 +1,5 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { CausalGraphService } from '../services/CausalGraphService.js';
-import { getNeo4jDriver } from '../config/database.js';
+
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 // Mock Neo4j driver and session
 const mockRun = jest.fn();
@@ -10,24 +9,28 @@ const mockSession = jest.fn(() => ({
   close: mockClose,
 }));
 
-jest.mock('../config/database.js', () => ({
-  __esModule: true,
-  getNeo4jDriver: jest.fn(() => ({
+const mockGetNeo4jDriver = jest.fn(() => ({
     session: mockSession,
-  })),
 }));
 
+// Use unstable_mockModule for ESM mocking
+jest.unstable_mockModule('../config/database.js', () => ({
+  getNeo4jDriver: mockGetNeo4jDriver,
+}));
+
+// Dynamic imports must happen after mockModule
+const { CausalGraphService } = await import('../services/CausalGraphService.js');
+
 describe('CausalGraphService', () => {
-  let service: CausalGraphService;
+  let service: any;
 
   beforeEach(() => {
     // Reset the mock return value before creating the service
-    // The service constructor calls getNeo4jDriver()
     mockSession.mockReturnValue({
         run: mockRun,
         close: mockClose,
     });
-    (getNeo4jDriver as jest.Mock).mockReturnValue({
+    mockGetNeo4jDriver.mockReturnValue({
         session: mockSession,
     });
     service = new CausalGraphService();
