@@ -1,0 +1,52 @@
+"""
+IntelGraph Core Schema
+"""
+
+type Entity {
+  "Globally unique identifier (e.g., 'Person:123')"
+  id: ID!
+  type: String!
+  name: String
+  properties: JSON
+  provenance: Provenance
+}
+
+type Relationship {
+  id: ID!
+  type: String!
+  fromId: ID!
+  toId: ID!
+  properties: JSON
+  provenance: Provenance
+}
+
+type Evidence {
+  id: ID!
+  source: String!
+  contentHash: String!
+  timestamp: String!
+  metadata: JSON
+}
+
+type Provenance {
+  id: ID!
+  source: String!
+  ingestTime: String!
+  contentHash: String!
+  operator: String!
+  chainHash: String
+}
+
+scalar JSON
+
+type Query {
+  entity(id: ID!): Entity
+  entities(type: String, limit: Int): [Entity]
+  relationship(id: ID!): Relationship
+  provenance(id: ID!): Provenance
+}
+
+type Mutation {
+  createEntity(type: String!, name: String, properties: JSON): Entity
+  createRelationship(type: String!, fromId: ID!, toId: ID!, properties: JSON): Relationship
+}

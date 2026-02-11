@@ -16,6 +16,7 @@ describe('provenance helpers', () => {
     const manifest: ProvenanceManifest = { artifactId: 'a1', steps: [] };
     const step = recordStep(manifest, {
       id: 's1',
+      type: 'ingest',
       tool: 'test',
       params: {},
       input: 'in',
@@ -29,13 +30,14 @@ describe('provenance helpers', () => {
     const manifest: ProvenanceManifest = { artifactId: 'a1', steps: [] };
     recordStep(manifest, {
       id: 'step1',
+      type: 'transform',
       tool: 'test',
       params: {},
       input: 'in',
       output: 'result',
       timestamp: '2024-01-01T00:00:00Z',
     });
-    const ok = verifyManifest(manifest, { step1: 'result' });
+    const ok = verifyManifest(manifest, { step1: Buffer.from('result') });
     expect(ok).toBe(true);
   });
 
@@ -43,6 +45,7 @@ describe('provenance helpers', () => {
     const manifest: ProvenanceManifest = { artifactId: 'a1', steps: [] };
     recordStep(manifest, {
       id: 'step1',
+      type: 'transform',
       tool: 'test',
       params: {},
       input: 'in',

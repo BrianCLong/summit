@@ -11842,6 +11842,19 @@ importers:
 
   packages/schema: {}
 
+  packages/sdes-jee:
+    dependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
+
   packages/sdk:
     devDependencies:
       '@types/node':
@@ -18747,12 +18760,18 @@ importers:
       '@intelgraph/rate-limiting':
         specifier: workspace:*
         version: link:../../packages/rate-limiting
+      apollo-server-express:
+        specifier: ^3.13.0
+        version: 3.13.0(express@5.2.1)(graphql@16.12.0)
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
+      graphql:
+        specifier: 16.12.0
+        version: 16.12.0
       ioredis:
         specifier: ^5.4.1
         version: 5.8.2

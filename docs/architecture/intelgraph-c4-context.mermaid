@@ -1,0 +1,21 @@
+graph TD
+    User([User / External System])
+    Gateway[API GraphQL Gateway]
+    Auth[OIDC / OPA Auth Service]
+    GraphDB[(Neo4j Graph Store)]
+    RelDB[(Postgres Audit Store)]
+    Ingest[Ingestion Service]
+    Prov[Provenance Service]
+    AI[AI/Analytics Service]
+    S3[S3 / External Data]
+
+    User -- GraphQL / JWT --> Gateway
+    Gateway -- Authorize --> Auth
+    Gateway -- Query --> GraphDB
+    Gateway -- Audit --> Prov
+    Ingest -- Stream --> GraphDB
+    Ingest -- Record --> Prov
+    Prov -- Sign --> RelDB
+    AI -- RAG --> GraphDB
+    AI -- Retrieval --> S3
+    Ingest -- Pull --> S3
