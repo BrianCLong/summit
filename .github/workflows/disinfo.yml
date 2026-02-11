@@ -1,0 +1,42 @@
+name: Disinfo News Ecosystem
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/disinfo-news-ecosystem/**'
+      - 'fixtures/disinfo/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/disinfo-news-ecosystem/**'
+      - 'fixtures/disinfo/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+
+jobs:
+  disinfo-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "9.12.0"
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Tests
+        run: pnpm --filter @intelgraph/disinfo-news-ecosystem test
+
+      - name: Run Drift Check (Functional)
+        run: npx tsx scripts/monitoring/disinfo-news-ecosystem-2026-drift.ts

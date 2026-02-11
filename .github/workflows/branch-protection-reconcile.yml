@@ -70,26 +70,55 @@ jobs:
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Validate branch protection token
-        env:
-          BRANCH_PROTECTION_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+      - name: Generate GitHub App token
+        id: app-token
+        if: github.event.inputs.mode == 'plan'
+        uses: actions/create-github-app-token@v2
+        continue-on-error: true
+        with:
+          app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
+          private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
+
+      - name: Select branch protection token
+        id: auth
         run: |
           if [[ "${{ github.event.inputs.mode }}" == "apply" ]]; then
-            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
+            if [[ -z "${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}" ]]; then
               echo "::error::BRANCH_PROTECTION_ADMIN_TOKEN is required for apply mode."
               exit 1
             fi
-          else
-            if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
-              echo "::error::BRANCH_PROTECTION_READ_TOKEN is required for plan mode."
-              exit 1
-            fi
+
+            echo "token=${{ secrets.BRANCH_PROTECTION_ADMIN_TOKEN }}" >> $GITHUB_OUTPUT
+            echo "auth_source=admin-token" >> $GITHUB_OUTPUT
+            echo "::notice::Using admin token for apply mode."
+            echo "✅ Using admin token for apply mode." >> $GITHUB_STEP_SUMMARY
+            exit 0
           fi
+
+          if [[ -n "${{ steps.app-token.outputs.token }}" ]]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> $GITHUB_OUTPUT
+            echo "auth_source=github-app" >> $GITHUB_OUTPUT
+            echo "::notice::GitHub App token acquired."
+            echo "✅ GitHub App token acquired." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "token=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_OUTPUT
+            echo "auth_source=github-token" >> $GITHUB_OUTPUT
+            echo "::warning::GitHub App token unavailable; falling back to GITHUB_TOKEN."
+            echo "⚠️ Fell back to GITHUB_TOKEN." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Verify GitHub App installation
+        if: steps.auth.outputs.auth_source == 'github-app'
+        env:
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          gh api "/repos/${{ github.repository }}/installation" >/dev/null
+          echo "✅ GitHub App installation verified." >> $GITHUB_STEP_SUMMARY
 
       - name: Run Reconciler
         id: reconcile
         env:
-          GH_TOKEN: ${{ github.event.inputs.mode == 'apply' && secrets.BRANCH_PROTECTION_ADMIN_TOKEN || secrets.BRANCH_PROTECTION_READ_TOKEN }}
+          GH_TOKEN: ${{ steps.auth.outputs.token }}
         run: |
           mkdir -p "${{ env.OUT_DIR }}"
 
@@ -127,7 +156,8 @@ jobs:
           fi
 
       - name: Upload Reconciliation Plan
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
+        with:
           name: branch-protection-reconcile-plan
           path: |
             ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md
@@ -140,6 +170,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
           echo "**Mode:** ${{ github.event.inputs.mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Auth Source:** ${{ steps.auth.outputs.auth_source }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [[ -f "${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md" ]]; then
@@ -149,6 +180,7 @@ jobs:
       - name: Create Issue for Plan
         if: steps.reconcile.outputs.needs_reconciliation == 'true' && github.event.inputs.mode == 'plan'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
+        with:
           script: |
             const fs = require('fs');
             const planPath = '${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md';

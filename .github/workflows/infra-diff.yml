@@ -5,6 +5,10 @@ on:
     paths:
       - 'terraform/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   DIFF_BUDGET: 20 # Maximum number of resource changes allowed without special approval
 
@@ -22,6 +26,7 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
           terraform_wrapper: false
 
       - name: Terraform Init
@@ -67,6 +72,7 @@ jobs:
 
       - name: Post Diff Summary
         uses: actions/github-script@v7
+        with:
           script: |
             const fs = require('fs');
             const path = 'terraform/environments/prod/plan.txt';

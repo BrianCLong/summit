@@ -1,58 +1,90 @@
 ## Summary
+
 <!-- What does this PR do? Link to Jira ticket or issue. -->
 
+## Risk & Surface (Required)
+
+<!-- Select the appropriate risk level and surface area. -->
+
+**Risk Level** (Select one):
+
+- [ ] `risk:low` (Docs, comments, safe refactors)
+- [ ] `risk:medium` (Feature flags, backward-compatible changes)
+- [ ] `risk:high` (Database migrations, auth changes, critical path)
+- [ ] `risk:release-blocking` (Critical fixes only)
+
+**Surface Area** (Select all that apply):
+
+- [ ] `area:client`
+- [ ] `area:server`
+- [ ] `area:docs`
+- [ ] `area:infra`
+- [ ] `area:ci`
+- [ ] `area:policy`
+
 ## Assumption Ledger
+
 <!-- State your assumptions, ambiguities, tradeoffs, and stop conditions. -->
+
 - **Assumptions**:
 - **Ambiguities**:
 - **Tradeoffs**:
 - **Stop Condition**:
 
-## Diff Budget
-<!-- Declare your expected diff and reconcile actual changes. -->
-- **Expected Files**:
-- **Expected LOC Delta**:
-- **Surgical Rule**: [ ] No unrelated refactors/formatting.
+## Execution Governor & Customer Impact
 
-## Success Criteria
-<!-- List verifiable success criteria. -->
-- [ ]
-- [ ]
+- [ ] **Single Product Mode**: Respects active product (FactFlow) or includes `.exec-override`.
+- [ ] **Frozen Code**: Does not touch frozen products without override.
+- **Customer Impact**: <!-- Positive/Negative impact on end user? -->
+- **Rollback Plan**: <!-- How to revert if production breaks? -->
 
-## Type of Change
-- [ ] Bug Fix
-- [ ] New Feature
-- [ ] Refactor
-- [ ] Documentation
-- [ ] Infrastructure
+## Evidence Bundle
+
+<!-- Attach evidence that your change works and is safe. See docs/evidence-bundle-spec.md -->
+
+- [ ] **Tests**: New or updated tests passing?
+- [ ] **Screenshots**: Attached for UI changes?
+- [ ] **Evidence Generated**: Bundle attached or linked?
+- [ ] **Prompt Hash**: `prompts/registry.yaml` updated (if prompts changed)?
+
+## Security Impact
+
+- [ ] **Security Impact**: Does this change touch auth, PII, or crypto?
+  - If YES, link to [Security Triage/Backlog](docs/SECURITY_PHASE1_STARTER_PACK_BACKLOG.md).
 
 ## Green CI Contract Checklist
+
 <!-- Must be checked before merge. See docs/governance/GREEN_CI_CONTRACT.md -->
+
 - [ ] **Lint**: Ran `pnpm lint` locally.
 - [ ] **Tests**: Ran `pnpm test:unit` locally.
 - [ ] **Determinism**: No leaked singletons or open handles.
 - [ ] **Evidence**: Added at least one test case or verification step.
 
-## Evidence Summary
-<!-- Generate Summit-style evidence for merge readiness. -->
-- **Tests/Logs**:
-- **Screenshots**:
-- **Policy/Security Notes**:
+## CI & Merge Train Rules
 
-## Verification Plan
+<!-- See docs/runbooks/CI_RELEASE_GATE_RUNBOOK.md and docs/release/DAILY_DASHBOARD.md -->
+
+**If CI is Blocked:**
+
+- [ ] Docs/Metadata PRs may proceed.
+- [ ] Behavior changes must wait for green CI.
+- [ ] Do not bypass gates without written approval from Release Captain.
+
+## Verification
+
 <!-- How did you verify this change? -->
-- [ ] Automated Test (Unit/Integration)
-- [ ] Manual Verification (describe steps below)
+
+- [ ] Automated Test
+- [ ] Manual Verification
 - [ ] Snapshot / Screenshot
 
-```bash
-# Paste verification output here
-```
-
 <!-- AGENT-METADATA:START -->
+
 {
-  "promptId": "",
-  "taskId": "",
-  "tags": []
+"promptId": "",
+"taskId": "",
+"tags": []
 }
+
 <!-- AGENT-METADATA:END -->

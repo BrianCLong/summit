@@ -11,6 +11,10 @@ on:
     tags:
       - "v*"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -20,6 +24,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
+        with:
           fetch-depth: 0
 
       - name: Determine Tag

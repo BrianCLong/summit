@@ -1,0 +1,236 @@
+# CI Smoke Gate - Golden Path Full-Stack Smoke Test
+#
+# Boots the full stack and runs smoke tests against real services.
+# This ensures health endpoints (/health, /health/live, /health/ready) are
+# working with the complete infrastructure, not just mocked stubs.
+#
+# Exit codes:
+#   0 = all passed (green)
+#   1 = critical failure (blocks merge)
+#   2 = degraded (non-critical endpoints failing)
+
+name: Smoke Gate
+
+on:
+  pull_request:
+    branches: [main, release/*]
+  push:
+    branches: [main, release/*]
+  workflow_dispatch:
+    inputs:
+      smoke_timeout:
+        description: 'Smoke test timeout in seconds'
+        required: false
+        default: '120'
+
+concurrency:
+  group: smoke-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SMOKE_TIMEOUT: ${{ github.event.inputs.smoke_timeout || '120' }}
+  POSTGRES_DB: intelgraph
+  POSTGRES_USER: intelgraph
+  POSTGRES_PASSWORD: password
+  NEO4J_AUTH: neo4j/password
+  REDIS_URL: redis://localhost:6379
+
+jobs:
+  smoke-gate:
+    name: Full-Stack Smoke Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: intelgraph
+          POSTGRES_USER: intelgraph
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U intelgraph -d intelgraph"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: redis:6.2-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      neo4j:
+        image: neo4j:2025.01
+        env:
+          NEO4J_AUTH: neo4j/password
+        ports:
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p password 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build server
+        run: pnpm -C server run build
+        env:
+          NODE_ENV: production
+
+      - name: Run database migrations
+        working-directory: server
+        run: |
+          echo "Running PostgreSQL migrations..."
+          pnpm run migrate || echo "Migration skipped or failed (non-blocking for smoke)"
+        env:
+          DATABASE_URL: postgres://intelgraph:password@localhost:5432/intelgraph
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: intelgraph
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: intelgraph
+
+      - name: Start server
+        working-directory: server
+        run: |
+          echo "Starting server in background..."
+          nohup node dist/server/src/index.js > server.log 2>&1 &
+          echo $! > server.pid
+          echo "Server PID: $(cat server.pid)"
+        env:
+          NODE_ENV: production
+          PORT: 4000
+          DATABASE_URL: postgres://intelgraph:password@localhost:5432/intelgraph
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: intelgraph
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: intelgraph
+          REDIS_URL: redis://localhost:6379
+          # Neo4j enabled for Lane B (Functional Soak)
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: password
+          JWT_SECRET: super-secret-smoke-test
+          REQUIRE_REAL_DBS: "true"
+
+      - name: Wait for server health
+        run: |
+          echo "Waiting for server to be ready..."
+          TIMEOUT=${{ env.SMOKE_TIMEOUT }}
+          ELAPSED=0
+          INTERVAL=5
+
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            if curl -sf http://localhost:4000/health > /dev/null 2>&1; then
+              echo "Server is healthy after ${ELAPSED}s"
+              break
+            fi
+            echo "Waiting for server... (${ELAPSED}s / ${TIMEOUT}s)"
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+          done
+
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "Server did not become healthy within ${TIMEOUT}s"
+            echo "=== Server logs ==="
+            cat server/server.log || echo "No server log found"
+            exit 1
+          fi
+
+      - name: Run smoke tests (full mode)
+        working-directory: server
+        run: |
+          echo "Running smoke tests in FULL mode..."
+          echo "=================================================="
+          SMOKE_MODE=full SMOKE_TEST_VERBOSE=true node scripts/smoke-test.cjs
+          SMOKE_EXIT=$?
+          echo "=================================================="
+          echo "Smoke test exit code: $SMOKE_EXIT"
+          exit $SMOKE_EXIT
+        env:
+          PORT: 4000
+          API_URL: http://localhost:4000
+          SMOKE_MODE: full
+          SMOKE_TEST_VERBOSE: "true"
+          SMOKE_TEST_TIMEOUT_MS: "30000"
+          JWT_SECRET: super-secret-smoke-test
+
+      - name: Capture server logs
+        if: always()
+        run: |
+          echo "=== Capturing server logs ==="
+          if [ -f server/server.log ]; then
+            cp server/server.log smoke-server.log
+          else
+            echo "No server log found" > smoke-server.log
+          fi
+
+      - name: Upload smoke logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-gate-logs
+          path: |
+            smoke-server.log
+            server/server.log
+          retention-days: 7
+
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -f server/server.pid ]; then
+            echo "Stopping server (PID: $(cat server/server.pid))..."
+            kill $(cat server/server.pid) 2>/dev/null || true
+            rm server/server.pid
+          fi
+
+      - name: Smoke gate summary
+        if: always()
+        run: |
+          echo "## Smoke Gate Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "| Status | Result |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Smoke Test | PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Health Endpoints | GREEN |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Status | Result |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Smoke Test | FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Check Artifacts | smoke-gate-logs |" >> $GITHUB_STEP_SUMMARY
+          fi

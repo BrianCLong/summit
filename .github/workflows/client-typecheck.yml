@@ -25,6 +25,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -43,6 +47,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
+        with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
 
@@ -62,6 +67,7 @@ jobs:
       - name: Upload typecheck report
         if: failure()
         uses: actions/upload-artifact@v4
+        with:
           name: client-typecheck-report
           path: docs/ops/typescript/client-typecheck-report.json
           retention-days: 7

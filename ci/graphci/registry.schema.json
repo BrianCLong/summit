@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GraphCIRegistry",
+  "type": "object",
+  "properties": {
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "url", "provider", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "provider": { "type": "string", "enum": ["aws", "tigergraph", "neo4j", "memgraph", "puppygraph", "other"] },
+          "type": { "type": "string", "enum": ["pricing", "docs", "blog", "benchmark", "legal", "general"] },
+          "fetch_mode": { "type": "string", "enum": ["live", "manual"], "default": "live" },
+          "enabled": { "type": "boolean", "default": true }
+        }
+      }
+    }
+  },
+  "required": ["sources"]
+}

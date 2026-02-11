@@ -5,6 +5,10 @@ on:
     paths:
       - "**.md"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   markdown-lint:
     name: Markdown Linter
@@ -13,12 +17,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4 # v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
+        with:
           node-version: "20"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run Markdown Lint
         run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules'

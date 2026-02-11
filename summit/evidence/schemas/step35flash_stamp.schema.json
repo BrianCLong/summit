@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SummitEvidenceStampStep35Flash",
+  "type": "object",
+  "required": ["timestamp", "run_id"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "run_id": { "type": "string" },
+    "git_sha": { "type": "string" }
+  },
+  "additionalProperties": false
+}

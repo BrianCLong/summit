@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Determinism Scan Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "scanned_root",
+    "scanned_files_count",
+    "scanned_files_sha256",
+    "findings",
+    "verdict"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "enum": [1] },
+    "kind": { "type": "string", "const": "determinism_scan" },
+    "scanned_root": { "type": "string", "minLength": 1 },
+    "scanned_files_count": { "type": "integer", "minimum": 0 },
+    "scanned_files_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file", "pointer"],
+        "properties": {
+          "file": { "type": "string" },
+          "pointer": { "type": "string" }
+        }
+      }
+    },
+    "verdict": { "type": "string", "enum": ["PASS", "FAIL"] }
+  }
+}

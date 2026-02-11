@@ -27,17 +27,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
           ref: ${{ needs.gate.outputs.sha }}
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
+        with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - uses: pnpm/action-setup@v4
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate SBOM
         run: pnpm generate:sbom
       - name: Upload SBOM
         uses: actions/upload-artifact@v4
+        with:
           name: sbom
           path: .evidence/sbom.json
 
@@ -46,16 +50,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
           ref: ${{ needs.gate.outputs.sha }}
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
+        with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - uses: pnpm/action-setup@v4
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Provenance
         run: pnpm generate:provenance
       - name: Upload Provenance
         uses: actions/upload-artifact@v4
+        with:
           name: provenance
           path: .evidence/provenance.json

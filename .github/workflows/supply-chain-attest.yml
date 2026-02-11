@@ -23,13 +23,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
-          version: "10.0.0"
 
       - name: Setup Node (if needed)
         uses: actions/setup-node@v4
+        with:
           node-version: "20"
           cache: "pnpm"
 
@@ -75,10 +76,12 @@ jobs:
       # Attest build provenance for the build artifact (GitHub native)
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v1
+        with:
           subject-path: artifacts/build.tar.gz
 
       - name: Upload artifacts (for audit)
         uses: actions/upload-artifact@v4
+        with:
           name: supply-chain
           path: |
             artifacts/build.tar.gz

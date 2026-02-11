@@ -17,9 +17,9 @@ import {
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
-} from '../../types/data-envelope.ts';
-import logger from '../../utils/logger.ts';
-import type { ComplianceFramework, RiskLevel, ControlState } from './CompliancePredictionEngine.ts';
+} from '../../types/data-envelope.js';
+import logger from '../../utils/logger.js';
+import type { ComplianceFramework, RiskLevel, ControlState } from './CompliancePredictionEngine.js';
 
 // ============================================================================
 // Types

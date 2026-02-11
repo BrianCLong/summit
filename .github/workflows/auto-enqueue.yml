@@ -8,9 +8,14 @@ on:
   check_suite:
     types: [completed]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   pull-requests: write
   contents: read
+  checks: read
 
 jobs:
   enqueue:
@@ -20,6 +25,7 @@ jobs:
       github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Enqueue if ready
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

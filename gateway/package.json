@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@apollo/gateway": "^2.12.1",
-    "@apollo/server": "^4.11.0",
+    "@apollo/server": "^4.13.0",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/sdk-trace-base": "^2.0.1",
     "dataloader": "^2.2.2",

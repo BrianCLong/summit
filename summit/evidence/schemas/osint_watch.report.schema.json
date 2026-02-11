@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OSINT Watch Report",
+  "type": "object",
+  "required": ["evidence_id", "sections"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "sections": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -41,7 +41,8 @@ jobs:
 
       - name: Download Previous Metrics
         if: steps.previous_run.outputs.run_id != ''
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
+        with:
           name: security-metrics
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ steps.previous_run.outputs.run_id }}
@@ -59,6 +60,7 @@ jobs:
       - name: Upload Metrics Artifact
         if: always()
         uses: actions/upload-artifact@v4
+        with:
           name: security-metrics
           path: artifacts/security-metrics.json
           retention-days: 90

@@ -6,6 +6,10 @@ on:
       - "scripts/ci/workflows_diff/**"
   workflow_dispatch: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
@@ -17,6 +21,7 @@ jobs:
     steps:
       - name: Checkout fork
         uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
       - name: Determine upstream remote
@@ -33,9 +38,9 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
+        with:
           node-version: '20'
           cache: 'pnpm'
 
@@ -52,12 +57,14 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
+        with:
           name: workflow-drift-artifacts
           path: artifact
 
       - name: Comment on PR
         if: ${{ github.event_name == 'pull_request' }}
         uses: marocchino/sticky-pull-request-comment@v2
+        with:
           recreate: true
           header: "Workflow Drift Guard"
           message: |

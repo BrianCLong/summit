@@ -1,9 +1,9 @@
 import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
 import Redis from 'ioredis';
-import { getDriver } from '../graph/neo4j';
-import { cfg, dbUrls } from '../config';
-import { breaker } from './breakers';
+import { getDriver } from '../graph/neo4j.js';
+import { cfg, dbUrls } from '../config.js';
+import { breaker } from './breakers.js';
 
 let pgPool: Pool | null = null;
 let neo4jDriver: Driver | null = null;

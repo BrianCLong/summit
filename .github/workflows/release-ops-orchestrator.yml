@@ -21,50 +21,6 @@ on:
 
   # Manual trigger with configuration options
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Dry run mode (no state changes, no issue writes)"
-        type: boolean
-        default: false
-      threshold_minutes:
-        description: "Age threshold (minutes) before raising blocker issues"
-        type: number
-        default: 90
-      enable_issue_writes:
-        description: "Enable issue creation/updates"
-        type: boolean
-        default: true
-      enable_routing:
-        description: "Enable routing label application"
-        type: boolean
-        default: true
-      enable_escalation:
-        description: "Enable escalation threshold checks"
-        type: boolean
-        default: true
-      enable_notify:
-        description: "Enable notifications (Slack/email)"
-        type: boolean
-        default: false
-      force_digest:
-        description: "Force digest generation (ignore cadence window)"
-        type: boolean
-        default: false
-      force_handoff:
-        description: "Force handoff generation (ignore cadence window)"
-        type: boolean
-        default: false
-      verbose:
-        description: "Enable verbose logging"
-        type: boolean
-        default: false
-
-  # Trigger on workflow changes (for testing)
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/release-ops-orchestrator.yml"
 
 # Prevent concurrent runs - only one orchestrator cycle at a time
 concurrency:
@@ -86,6 +42,7 @@ jobs:
     steps:
       - name: Checkout (shallow)
         uses: actions/checkout@v4 # v4
+        with:
           fetch-depth: 2
 
       - name: Check for loop avoidance
@@ -146,6 +103,7 @@ jobs:
       # =========================================================================
       - name: Checkout
         uses: actions/checkout@v4 # v4
+        with:
           fetch-depth: 0 # Full history for tag detection
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -622,7 +580,8 @@ jobs:
           echo "::endgroup::"
 
       - name: "Upload Artifact Bundle"
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
+        with:
           name: release-ops-cycle-${{ github.run_id }}
           path: artifacts/release-train/
           retention-days: 30

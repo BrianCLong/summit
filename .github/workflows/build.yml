@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-attest:
     name: Build, SBOM & Provenance
@@ -20,14 +24,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v4.1.7
 
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v4
-          cache: 'pnpm'
-          node-version-file: .nvmrc
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4.1.0
 
       # Note: pnpm version is read from package.json "packageManager" field
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v4
+        with:
+          cache: 'pnpm'
+          node-version-file: .nvmrc
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -94,6 +99,7 @@ jobs:
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.6.0
+        with:
           name: sboms
           path: |
             sbom.*.json

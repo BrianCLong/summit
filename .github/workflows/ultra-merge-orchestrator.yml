@@ -3,8 +3,6 @@ name: 🚀 Ultra Merge Orchestrator
 on:
   schedule:
     - cron: '*/30 * * * *'  # Run every 30 minutes
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       batch_size:
@@ -36,6 +34,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
       - name: Configure git

@@ -1,7 +1,7 @@
 // server/src/api/anomalyDetectionController.ts
 import { Request, Response } from 'express';
-import { AnomalyDetectionService } from '../ai/anomalyDetectionService';
-import { logger } from '../utils/logger';
+import { AnomalyDetectionService } from '../ai/anomalyDetectionService.js';
+import { logger } from '../utils/logger.js';
 
 export class AnomalyDetectionController {
   constructor(private anomalyService: AnomalyDetectionService) {}
@@ -14,7 +14,7 @@ export class AnomalyDetectionController {
       const { metric, value, dimensions, timestamp } = req.body;
 
       if (!metric || value === undefined) {
-        res.status(400).tson({
+        res.status(400).json({
           error: 'Metric name and value are required' 
         });
         return;
@@ -29,10 +29,10 @@ export class AnomalyDetectionController {
 
       const result = await this.anomalyService.processMetricDataPoint(dataPoint);
 
-      res.status(200).tson(result);
+      res.status(200).json(result);
     } catch (error) {
       logger.error(`Failed to process metric data point`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to process metric data point for anomaly detection' 
       });
     }
@@ -46,7 +46,7 @@ export class AnomalyDetectionController {
       const { dataPoints } = req.body;
 
       if (!Array.isArray(dataPoints)) {
-        res.status(400).tson({
+        res.status(400).json({
           error: 'dataPoints must be an array' 
         });
         return;
@@ -54,10 +54,10 @@ export class AnomalyDetectionController {
 
       const results = await this.anomalyService.processBatchMetricDataPoints(dataPoints);
 
-      res.status(200).tson(results);
+      res.status(200).json(results);
     } catch (error) {
       logger.error(`Failed to process batch metric data points`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to process batch metric data points' 
       });
     }
@@ -72,10 +72,10 @@ export class AnomalyDetectionController {
 
       const alerts = await this.anomalyService.getActiveAnomalyAlerts(parseInt(limit as string) || 50);
 
-      res.status(200).tson(alerts);
+      res.status(200).json(alerts);
     } catch (error) {
       logger.error(`Failed to get active anomaly alerts`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to retrieve active anomaly alerts' 
       });
     }
@@ -95,10 +95,10 @@ export class AnomalyDetectionController {
         parseInt(limit as string) || 50
       );
 
-      res.status(200).tson(alerts);
+      res.status(200).json(alerts);
     } catch (error) {
       logger.error(`Failed to get anomaly alert history`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to retrieve anomaly alert history' 
       });
     }
@@ -112,14 +112,14 @@ export class AnomalyDetectionController {
       const { alertId, acknowledgedBy } = req.body;
 
       if (!alertId) {
-        res.status(400).tson({
+        res.status(400).json({
           error: 'Alert ID is required' 
         });
         return;
       }
 
       if (!acknowledgedBy) {
-        res.status(400).tson({
+        res.status(400).json({
           error: 'Acknowledged by user is required' 
         });
         return;
@@ -128,16 +128,16 @@ export class AnomalyDetectionController {
       const success = await this.anomalyService.acknowledgeAnomalyAlert(alertId, acknowledgedBy);
 
       if (success) {
-        res.status(200).tson({ success: true });
+        res.status(200).json({ success: true });
       } else {
-        res.status(404).tson({
+        res.status(404).json({
           error: 'Alert not found',
           success: false 
         });
       }
     } catch (error) {
       logger.error(`Failed to acknowledge anomaly alert`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to acknowledge alert',
         success: false 
       });
@@ -152,14 +152,14 @@ export class AnomalyDetectionController {
       const { alertId, resolvedBy } = req.body;
 
       if (!alertId) {
-        res.status(400).tson({
+        res.status(400).json({
           error: 'Alert ID is required' 
         });
         return;
       }
 
       if (!resolvedBy) {
-        res.status(400).tson({
+        res.status(400).json({
           error: 'Resolved by user is required' 
         });
         return;
@@ -168,16 +168,16 @@ export class AnomalyDetectionController {
       const success = await this.anomalyService.resolveAnomalyAlert(alertId, resolvedBy);
 
       if (success) {
-        res.status(200).tson({ success: true });
+        res.status(200).json({ success: true });
       } else {
-        res.status(404).tson({
+        res.status(404).json({
           error: 'Alert not found',
           success: false 
         });
       }
     } catch (error) {
       logger.error(`Failed to resolve anomaly alert`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to resolve alert',
         success: false 
       });
@@ -192,7 +192,7 @@ export class AnomalyDetectionController {
       const { labeledData } = req.body;
 
       if (!Array.isArray(labeledData)) {
-        res.status(400).tson({
+        res.status(400).json({
           error: 'labeledData must be an array' 
         });
         return;
@@ -200,13 +200,13 @@ export class AnomalyDetectionController {
 
       await this.anomalyService.trainAnomalyModel(labeledData);
 
-      res.status(200).tson({
+      res.status(200).json({
         success: true,
         message: 'Model training initiated successfully' 
       });
     } catch (error) {
       logger.error(`Failed to train anomaly detection model`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to train anomaly detection model',
         success: false 
       });
@@ -220,10 +220,10 @@ export class AnomalyDetectionController {
     try {
       const stats = await this.anomalyService.getAnomalyStatistics();
 
-      res.status(200).tson(stats);
+      res.status(200).json(stats);
     } catch (error) {
       logger.error(`Failed to get anomaly detection statistics`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to retrieve anomaly detection statistics' 
       });
     }
@@ -238,7 +238,7 @@ export class AnomalyDetectionController {
       const { metric, baseValue = 100, variation = 10, anomalyMultiplier = 3, count = 50 } = req.body;
 
       if (!metric) {
-        res.status(400).tson({ error: 'Metric name is required' });
+        res.status(400).json({ error: 'Metric name is required' });
         return;
       }
 
@@ -267,7 +267,7 @@ export class AnomalyDetectionController {
 
       const results = await this.anomalyService.processBatchMetricDataPoints(sampleDataPoints);
 
-      res.status(200).tson({
+      res.status(200).json({
         testDataPoints: sampleDataPoints,
         detectionResults: results,
         anomalyCount: results.filter(r => r.isAnomaly).length,
@@ -276,7 +276,7 @@ export class AnomalyDetectionController {
       });
     } catch (error) {
       logger.error(`Failed to test anomaly detection`, error);
-      res.status(500).tson({
+      res.status(500).json({
         error: 'Failed to test anomaly detection' 
       });
     }

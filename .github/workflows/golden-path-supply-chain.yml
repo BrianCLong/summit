@@ -7,6 +7,10 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   actions: read
   contents: write
@@ -18,6 +22,7 @@ jobs:
   build-server:
     name: Build Server (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
       image_name: server
       dockerfile: server/Dockerfile
       context: .
@@ -30,6 +35,7 @@ jobs:
   build-client:
     name: Build Client (SLSA L3)
     uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
       image_name: client
       dockerfile: client/Dockerfile
       context: .

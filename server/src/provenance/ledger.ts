@@ -5,7 +5,7 @@
 
 // No-op tracer shim to avoid OTEL dependency
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { pool } from '../db/pg';
+import { pool } from '../db/pg.js';
 import { EventEmitter } from 'events';
 import * as crypto from 'crypto';
 import { execSync } from 'child_process';
@@ -273,7 +273,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
             // Insert into database
             // Note: We need to handle the new columns 'witness' if we decide to store it separately
             // For now, we'll store it in the JSON payload or metadata if we don't want to change schema
-            // But 'types.ts' defines it on ProvenanceEntryV2.
+            // But 'types.js' defines it on ProvenanceEntryV2.
             // Let's assume we store it in a new JSONB column or merged into payload for storage if schema is rigid.
             // However, the INSERT query below uses explicit columns.
             // I will update the INSERT to include witness in metadata or payload if I can't change schema easily.

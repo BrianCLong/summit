@@ -28,6 +28,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
           fetch-depth: 0 # Full history for branch analysis
 
       - name: Delete merged branches older than 7 days
@@ -70,6 +71,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
       - name: Find stale unmerged branches (21-30 days)
@@ -108,6 +110,7 @@ jobs:
       - name: Create issue for stale branches
         if: steps.find-stale.outputs.stale_branches != ''
         uses: actions/github-script@v8
+        with:
           script: |
             const staleBranches = `${{ steps.find-stale.outputs.stale_branches }}`;
 
@@ -185,6 +188,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
       - name: Delete unmerged branches older than 30 days
@@ -233,6 +237,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
           fetch-depth: 0
 
       - name: Generate branch statistics

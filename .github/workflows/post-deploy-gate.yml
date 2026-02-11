@@ -31,15 +31,18 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
           ref: ${{ inputs.ref }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
+        with:
           node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-          run_install: false
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -68,6 +71,7 @@ jobs:
 
       - name: Upload Evidence Artifact
         uses: actions/upload-artifact@v4
+        with:
           name: post-deploy-evidence-${{ github.sha }}
           path: artifacts/evidence/post-deploy/${{ github.sha }}/
           retention-days: 90

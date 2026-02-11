@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 import path from 'path';
 import pino from 'pino';
-import { ExtractionEngineConfig } from '../types.ts';
+import { ExtractionEngineConfig } from '../types.js';
 
 const logger = (pino as any)({ name: 'TextAnalysisEngine' });
 

@@ -9,6 +9,10 @@ on:
   # Allow manual trigger for authorized users
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy to Staging
@@ -21,6 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Authenticate to Cloud
         uses: google-github-actions/auth@v3
+        with:
           workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
           service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
       - name: Deploy

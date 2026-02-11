@@ -26,6 +26,10 @@ on:
 # - Top-level: read-only by default
 # - generate-pack job: contents read only (no signing)
 # - attest job: id-token write for OIDC signing
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -48,14 +52,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
+        with:
           fetch-depth: 0  # Full history for git metadata
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-          version: "10.0.0"
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
+        with:
           node-version: "20"
           cache: "pnpm"
 
@@ -101,6 +106,7 @@ jobs:
 
       - name: Upload Evidence Pack
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
           name: ga-evidence-pack-${{ github.run_id }}
           path: dist/ga-evidence/
           retention-days: 90
@@ -138,11 +144,13 @@ jobs:
 
       - name: Download Evidence Pack
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
           name: ga-evidence-pack-${{ github.run_id }}
           path: dist/ga-evidence/
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
+        with:
           cosign-release: v2.2.4
 
       - name: Verify Cosign Installation
@@ -177,6 +185,7 @@ jobs:
 
       - name: Upload Attestations
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
           name: ga-evidence-attestations-${{ github.run_id }}
           path: dist/ga-evidence/attestations/
           retention-days: 90
@@ -184,6 +193,7 @@ jobs:
 
       - name: Upload Complete Evidence Bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
           name: ga-evidence-complete-${{ github.run_id }}
           path: dist/ga-evidence/
           retention-days: 90

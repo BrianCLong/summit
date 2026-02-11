@@ -39,6 +39,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
+        with:
           # Need write access to commit state changes
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -89,7 +90,8 @@ jobs:
           git push
 
       - name: Upload Escalation Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
+        with:
           name: escalation-report-${{ github.run_id }}
           path: artifacts/release-train/escalation_report.md
           retention-days: 30

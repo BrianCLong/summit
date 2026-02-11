@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maestro Workboard</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: 'Inter', system-ui, sans-serif;
+        background: #f8f8fb;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      header h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .column {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        min-height: 360px;
+      }
+      .column h2 {
+        font-size: 14px;
+        margin-top: 0;
+        color: #344054;
+      }
+      .card {
+        border: 1px solid #e4e7ec;
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+        background: #fcfcff;
+      }
+      .card h3 {
+        margin: 0 0 6px 0;
+        font-size: 14px;
+      }
+      .card p {
+        margin: 0;
+        font-size: 12px;
+        color: #475467;
+      }
+      .card button {
+        margin-top: 8px;
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: none;
+        background: #2e6cf6;
+        color: white;
+        cursor: pointer;
+      }
+      .card button:disabled {
+        background: #98a2b3;
+        cursor: not-allowed;
+      }
+      .panel {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 12px;
+      }
+      .detail,
+      .events {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        min-height: 240px;
+      }
+      .detail h3,
+      .events h3 {
+        margin-top: 0;
+        font-size: 14px;
+      }
+      .detail a {
+        display: block;
+        font-size: 12px;
+        color: #2e6cf6;
+        text-decoration: none;
+        margin-bottom: 6px;
+      }
+      .events pre {
+        max-height: 200px;
+        overflow: auto;
+        background: #f2f4f7;
+        padding: 10px;
+        font-size: 11px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: #f2f4f7;
+        font-size: 10px;
+        margin-right: 4px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      select {
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #d0d5dd;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Maestro Workboard</h1>
+        <div class="toolbar">
+          <span class="badge">Policy-gated</span>
+          <span class="badge">Evidence-first</span>
+          <span class="badge">Worktree-isolated</span>
+        </div>
+      </div>
+      <div class="toolbar">
+        <label for="profile">Capability profile</label>
+        <select id="profile"></select>
+      </div>
+    </header>
+
+    <section class="grid" id="board"></section>
+
+    <section class="panel">
+      <div class="detail">
+        <h3>Evidence bundle</h3>
+        <div id="evidence">Select a run to see artifacts.</div>
+      </div>
+      <div class="events">
+        <h3>Run events</h3>
+        <pre id="events">No run selected.</pre>
+      </div>
+    </section>
+
+    <script type="module">
+      const board = document.getElementById('board');
+      const evidence = document.getElementById('evidence');
+      const eventsPane = document.getElementById('events');
+      const profileSelect = document.getElementById('profile');
+      const STATUS_ORDER = [
+        'Backlog',
+        'Ready',
+        'Running',
+        'Needs Review',
+        'Done',
+        'Blocked',
+      ];
+
+      let currentEventSource = null;
+
+      const fetchJson = async (url, options) => {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`Request failed: ${response.status}`);
+        }
+        return response.json();
+      };
+
+      const renderEvidence = (run) => {
+        if (!run?.evidence) {
+          evidence.textContent = 'No evidence bundle available.';
+          return;
+        }
+        const items = Object.entries(run.evidence)
+          .map(([label, path]) =>
+            `<a href="${path.replace(/^.*\.maestro-workboard/, '/artifacts')}" target="_blank">${label}</a>`
+          )
+          .join('');
+        evidence.innerHTML = items || 'No artifacts.';
+      };
+
+      const renderEvents = (events) => {
+        eventsPane.textContent = JSON.stringify(events, null, 2);
+      };
+
+      const subscribeEvents = (runId) => {
+        if (currentEventSource) {
+          currentEventSource.close();
+        }
+        currentEventSource = new EventSource(
+          `/api/runs/${runId}/events/stream`
+        );
+        const events = [];
+        currentEventSource.onmessage = (event) => {
+          events.push(JSON.parse(event.data));
+          renderEvents(events);
+        };
+      };
+
+      const renderBoard = async () => {
+        const { workItems } = await fetchJson('/api/work-items');
+        const columns = STATUS_ORDER.reduce((acc, status) => {
+          acc[status] = [];
+          return acc;
+        }, {});
+        workItems.forEach((item) => {
+          columns[item.status]?.push(item);
+        });
+        board.innerHTML = STATUS_ORDER.map(
+          (status) => `
+          <div class="column">
+            <h2>${status}</h2>
+            ${columns[status]
+              .map(
+                (item) => `
+                <div class="card">
+                  <h3>${item.title}</h3>
+                  <p>${item.description}</p>
+                  <button data-run="${item.id}" ${
+                  status === 'Running' ? 'disabled' : ''
+                }>Run</button>
+                </div>
+              `
+              )
+              .join('')}
+          </div>
+        `
+        ).join('');
+
+        board.querySelectorAll('button[data-run]').forEach((button) => {
+          button.addEventListener('click', async () => {
+            const workItemId = button.dataset.run;
+            const capabilityProfile = profileSelect.value;
+            const { run } = await fetchJson(`/api/work-items/${workItemId}/runs`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ capabilityProfile }),
+            });
+            renderEvidence(run);
+            subscribeEvents(run.id);
+            await renderBoard();
+          });
+        });
+      };
+
+      const loadProfiles = async () => {
+        const { profiles } = await fetchJson('/api/capability-profiles');
+        profileSelect.innerHTML = profiles
+          .map(
+            (profile) =>
+              `<option value="${profile.id}">${profile.label}</option>`
+          )
+          .join('');
+      };
+
+      await loadProfiles();
+      await renderBoard();
+    </script>
+  </body>
+</html>

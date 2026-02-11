@@ -1,0 +1,47 @@
+name: Supply Chain Foundation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "hack/supplychain/**"
+      - "Dockerfile"
+      - ".github/workflows/ci_supplychain_foundation.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Lint Dockerfiles
+        run: |
+          hack/supplychain/lint_dockerfile_pin.sh Dockerfile Dockerfile.services
+
+      - name: Generate Evidence
+        run: |
+          make supplychain.evidence
+
+      - name: Local Attestation Build
+        run: |
+          make supplychain.attest.local
+
+      - name: Verify Evidence Artifacts
+        run: |
+          EVIDENCE_ID=$(cat evidence_id.txt)
+          ls -l evidence/$EVIDENCE_ID/stamp.json
+          ls -l evidence/$EVIDENCE_ID/metrics.json
+          ls -l evidence/$EVIDENCE_ID/report.json
+
+      - name: Upload Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-evidence
+          path: evidence/

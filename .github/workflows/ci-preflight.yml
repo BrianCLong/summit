@@ -1,0 +1,63 @@
+name: CI Preflight Validation
+
+on:
+  workflow_dispatch:
+
+  pull_request:
+    branches: [main]
+    paths:
+      - "server/**"
+      - "apps/gateway/**"
+      - "docker-compose.dev.yaml"
+      - "services/opa/**"
+      - ".github/workflows/ci-preflight.yml"
+
+<<<<<<< HEAD
+concurrency:
+  group: ci-preflight-${{ github.ref }}
+=======
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - "apps/gateway/**"
+      - "docker-compose.dev.yaml"
+      - "services/opa/**"
+      - ".github/workflows/ci-preflight.yml"
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
+
+jobs:
+  validate-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Config
+        run: docker compose -f docker-compose.dev.yaml config
+
+  verify-server-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Server Build
+        run: pnpm -C server build
+
+  verify-gateway-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Gateway Docker Image
+        run: docker compose -f docker-compose.dev.yaml build gateway

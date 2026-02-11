@@ -61,38 +61,33 @@ jobs:
           fi
 
       - name: Set up Node.js
-        if: steps.chart-check.outputs.exists == 'true'
+        if: (((((((((((((((((((((((steps.chart-check.outputs.exists == 'true') && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')) && (steps.chart-check.outputs.exists == 'true')
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
 
       - name: Install pnpm
-        if: steps.chart-check.outputs.exists == 'true'
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+
           run_install: false
 
       - name: Install dependencies
-        if: steps.chart-check.outputs.exists == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Install Helm
-        if: steps.chart-check.outputs.exists == 'true'
         uses: azure/setup-helm@v4
         with:
           version: '3.13.2'
 
       - name: Install Helm plugins
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           helm plugin install https://github.com/chartmuseum/helm-push || true
           helm plugin install https://github.com/helm/helm-mapkubeapis || true
           helm plugin install https://github.com/databus23/helm-diff || true
 
       - name: Install chart testing
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           curl -Lo ct.tar.gz https://github.com/helm/chart-testing/releases/download/v3.10.1/chart-testing_3.10.1_linux_amd64.tar.gz
           tar -xzf ct.tar.gz
@@ -100,20 +95,17 @@ jobs:
           ct version
 
       - name: Install kubectl
-        if: steps.chart-check.outputs.exists == 'true'
         uses: azure/setup-kubectl@v4
         with:
           version: '1.28.4'
 
       - name: Install kind
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
           chmod +x ./kind
           sudo mv ./kind /usr/local/bin/
 
       - name: Install YAML linters
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           python3 -m pip install --user yamllint
@@ -121,7 +113,6 @@ jobs:
           yamllint --version
 
       - name: Install kube-linter
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           curl -sSL https://github.com/stackrox/kube-linter/releases/download/v0.6.8/kube-linter-linux.tar.gz -o kube-linter.tar.gz
@@ -130,7 +121,6 @@ jobs:
           kube-linter version
 
       - name: Validate Chart.yaml
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "📋 Validating Chart.yaml for ${{ matrix.chart.name }}..."
@@ -154,7 +144,6 @@ jobs:
           echo "✅ Chart.yaml validation passed"
 
       - name: Lint Helm chart
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "🔍 Linting Helm chart: ${{ matrix.chart.name }}..."
@@ -164,7 +153,6 @@ jobs:
           ct lint --charts "${{ matrix.chart.path }}" --validate-maintainers=false
 
       - name: Template chart with default values
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "📋 Templating chart with default values..."
@@ -173,7 +161,6 @@ jobs:
             --debug
 
       - name: Template chart with dev values
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "📋 Templating chart with dev values..."
@@ -189,7 +176,6 @@ jobs:
           fi
 
       - name: Template chart with prod values
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "📋 Templating chart with prod values..."
@@ -205,7 +191,6 @@ jobs:
           fi
 
       - name: Validate rendered templates
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "🔍 Validating rendered Kubernetes manifests..."
@@ -225,7 +210,6 @@ jobs:
           fi
 
       - name: Run kube-linter security scan
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "🛡️  Running kube-linter static analysis..."
@@ -254,7 +238,6 @@ jobs:
           done
 
       - name: Check for security best practices
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           echo "🔒 Checking security best practices..."
 
@@ -276,7 +259,6 @@ jobs:
           fi
 
       - name: Test chart installation (dry-run)
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "🧪 Testing chart installation..."
@@ -292,7 +274,6 @@ jobs:
           fi
 
       - name: Package Helm chart
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "📦 Packaging Helm chart..."
@@ -300,7 +281,6 @@ jobs:
           ls -la ./packages/
 
       - name: Verify packaged chart
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           set -euo pipefail
           echo "🔍 Verifying packaged chart..."
@@ -314,7 +294,6 @@ jobs:
           fi
 
       - name: Generate chart documentation
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           echo "📚 Generating chart documentation..."
 
@@ -348,7 +327,6 @@ jobs:
           EOF
 
       - name: Upload chart artifacts
-        if: steps.chart-check.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: helm-chart-${{ matrix.chart.name }}
@@ -359,7 +337,6 @@ jobs:
           retention-days: 14
 
       - name: Generate step summary
-        if: steps.chart-check.outputs.exists == 'true'
         run: |
           echo "## ⛵ Helm Chart CI Summary - ${{ matrix.chart.name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

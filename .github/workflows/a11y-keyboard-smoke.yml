@@ -34,6 +34,7 @@ concurrency:
 jobs:
   a11y-keyboard-gate:
     name: "Accessibility + keyboard smoke"
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -42,16 +43,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
+        with:
           fetch-depth: 0
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
+        with:
           node-version: 20
           cache: pnpm
 
@@ -88,6 +91,7 @@ jobs:
       - name: Upload accessibility artifacts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
           retention-days: 14
           name: a11y-keyboard-smoke-reports
           path: |
@@ -98,6 +102,7 @@ jobs:
       - name: Upload dev server log
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
           retention-days: 14
           name: a11y-keyboard-web-log
           path: /tmp/web.log
