@@ -36,6 +36,7 @@ interface NavItem {
   href: string
   icon: React.ComponentType<{ className?: string }>
   badge?: string | number
+  tourId?: string
   resource?: string
   action?: string
 }
@@ -43,6 +44,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     name: 'Explore',
+    tourId: 'tour-explore',
     href: '/explore',
     icon: Search as React.ComponentType<{ className?: string }>,
     resource: 'investigations',
@@ -50,6 +52,7 @@ const navItems: NavItem[] = [
   },
   {
     name: 'Alerts',
+    tourId: 'tour-alerts',
     href: '/alerts',
     icon: AlertTriangle as React.ComponentType<{ className?: string }>,
     badge: 3,
@@ -93,6 +96,7 @@ const navItems: NavItem[] = [
   },
   {
     name: 'Data Sources',
+    tourId: 'tour-data-sources',
     href: '/data/sources',
     icon: Database as React.ComponentType<{ className?: string }>,
     resource: 'data',
@@ -147,6 +151,7 @@ const NavItemComponent = ({ item, user }: { item: NavItem; user: User | null }) 
     <Tooltip>
       <TooltipTrigger asChild>
         <NavLink
+          id={item.tourId}
           to={item.href}
           className={({ isActive: linkIsActive }) =>
             cn(
