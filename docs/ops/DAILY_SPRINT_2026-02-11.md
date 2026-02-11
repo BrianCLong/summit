@@ -37,9 +37,10 @@ In progress:
 
 Blocked:
 - Labeled issue triage: Deferred pending GitHub API connectivity restoration.
+- PR creation: Deferred pending GitHub API connectivity restoration.
 
 ## PRs Touched
-- Deferred pending PR creation for this run.
+- PR creation deferred pending GitHub API connectivity; branch ready: `chore/daily-sprint-2026-02-11-run`.
 
 ## Commands Run
 - `gh pr list --repo BrianCLong/summit --state open --limit 20 --json number,title,updatedAt,isDraft,headRefName,url,labels`
@@ -48,4 +49,4 @@ Blocked:
 ## End-of-Day Summary
 Completed: Evidence bundle, prompt registry update, daily sprint report.
 In progress: None.
-Blocked: Issue triage deferred pending GitHub API connectivity.
+Blocked: Issue triage and PR creation deferred pending GitHub API connectivity.
