@@ -499,7 +499,7 @@ router.post(
 
         res.status(200).json({ status: 'processed' });
       } catch (error: any) {
-        logger.error('GitHub webhook error:', { error: error.message });
+        logger.error('GitHub webhook error: %s', error.message);
         metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'failed', provider: 'github' });
 
         span.recordException(error);
@@ -589,7 +589,7 @@ router.post(
 
       res.status(200).json({ status: 'processed' });
     } catch (error: any) {
-      console.error('Jira webhook error:', error);
+      console.error('Jira webhook error: %o', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }
   },
@@ -671,7 +671,7 @@ router.post(
 
       res.status(200).json({ status: 'processed' });
     } catch (error: any) {
-      console.error('Lifecycle webhook error:', error);
+      console.error('Lifecycle webhook error: %o', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }
   },

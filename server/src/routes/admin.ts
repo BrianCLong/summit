@@ -567,9 +567,9 @@ router.post('/secrets/rotate', express.json(), async (req, res) => {
   }
 
   for (const service of services) {
-    console.log(`Updating secret for service: ${service}`);
+    console.log('Updating secret for service: %s', service);
     await secretManager.setSecret(secretName, 'current', (await secretManager.getSecret(secretName, newVersion as string)) as string);
-    console.log(`Health check for service ${service}...`);
+    console.log('Health check for service %s...', service);
     const healthUrl = serviceRegistry.getServiceHealthUrl(service);
     if (!healthUrl) {
       console.error(`Health check URL not found for service: ${service}`);
@@ -582,7 +582,7 @@ router.post('/secrets/rotate', express.json(), async (req, res) => {
       await secretManager.setSecret(secretName, 'current', previousSecret);
       return res.status(500).json({ ok: false, error: `Service ${service} failed to restart with new secret` });
     }
-    console.log(`Service ${service} is healthy.`);
+    console.log('Service %s is healthy.', service);
   }
 
   res.json({ ok: true, message: 'Secret rotation completed successfully' });

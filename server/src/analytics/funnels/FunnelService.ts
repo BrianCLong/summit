@@ -26,8 +26,8 @@ export class FunnelService {
         }
 
         // BOLT OPTIMIZATION: Prevent DoS from excessively large funnel definitions
-        if (funnel.steps.length > 1000) {
-            throw new Error('Funnel too complex');
+        if (!Array.isArray(funnel.steps) || funnel.steps.length > 1000) {
+            throw new Error('Funnel too complex or invalid');
         }
 
         const userEvents = this.loadUserEvents();

@@ -32,10 +32,7 @@ export class SimpleFeedCollector extends CollectorBase {
     console.log(`[SimpleFeedCollector] Fetching feed from ${url}`);
 
     try {
-      await validateSafeUrl(url);
-
-      // Re-parse URL to satisfy CodeQL that it has been validated
-      const safeUrl = new URL(url).toString();
+      const safeUrl = await validateSafeUrl(url);
 
       const response = await fetch(safeUrl);
       if (!response.ok) {

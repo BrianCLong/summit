@@ -28,6 +28,11 @@ export class FcrSchemaValidator {
     const validate = this.ajv.compile(schema);
     const failures: string[] = [];
 
+    // BOLT OPTIMIZATION: Bounding the number of signals to process
+    if (!Array.isArray(signals) || signals.length > 1000) {
+        throw new Error('Too many signals provided for validation');
+    }
+
     for (const signal of signals) {
       const ok = validate(signal);
       if (!ok) {
