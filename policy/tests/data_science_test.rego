@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package intelgraph.authz
 
 test_data_scientist_can_read_dataset if {

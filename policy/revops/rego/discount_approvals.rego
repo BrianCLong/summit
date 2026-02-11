@@ -1,3 +1,4 @@
+import future.keywords.in
 package revops.discount_approvals
 
 import future.keywords.if

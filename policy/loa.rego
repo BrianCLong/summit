@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package orchestra
 default allow = false
 allow if {

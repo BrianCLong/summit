@@ -3,7 +3,7 @@ from summit.self_evolve.redact import redact_dict
 def test_evidence_redaction():
     data = {
         "api_key": "sk-123456",
-        "user_email": "user@example.com",
+        "user_email": "USER_DOT_EMAIL_DOT_REDACTED",
         "normal_field": "hello",
         "nested": {
             "password": "secret_pass",

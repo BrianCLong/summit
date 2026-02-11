@@ -1,3 +1,4 @@
+import future.keywords.if
 # IntelGraph Autonomous Orchestrator - OPA/Rego Policy Definitions
 # Implements comprehensive policy rules for action authorization and safety gates
 # Version: 1.0.0

@@ -1,3 +1,4 @@
+import future.keywords.in
 package maestro.policy
 
 import future.keywords.if

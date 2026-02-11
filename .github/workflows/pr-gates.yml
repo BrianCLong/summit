@@ -120,7 +120,11 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            helm lint helm/
+            for d in helm/*/; do
+              if [ -f "$d/Chart.yaml" ]; then
+                helm lint "$d"
+              fi
+            done
           fi
 
       - name: Terraform Plan

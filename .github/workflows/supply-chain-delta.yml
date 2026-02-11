@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Require deps delta doc when lockfiles change
         run: |
-          git fetch origin ${{ github.base_ref }} --depth=1
+          git fetch origin ${{ github.base_ref }} --unshallow
           CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
           echo "$CHANGED" | grep -E "(package-lock.json|pnpm-lock.yaml|yarn.lock|requirements.txt|poetry.lock)" && LOCK_CHANGED=1 || LOCK_CHANGED=0
           if [ "$LOCK_CHANGED" = "1" ]; then

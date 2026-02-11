@@ -1,3 +1,4 @@
+import future.keywords.in
 package summit.merge_train
 
 import future.keywords.if

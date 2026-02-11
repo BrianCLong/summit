@@ -26,6 +26,3 @@ class SubagentRegistry:
         if name not in self._specs:
             raise ValueError(f"Subagent '{name}' not found in registry.")
         return self._specs[name]
-
-    def list_agents(self) -> List[str]:
-        return list(self._specs.keys())

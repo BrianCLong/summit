@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 # policy/intelgraph_governance.rego
 package intelgraph.governance
 

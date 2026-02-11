@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package taint.rules
 # Example taint rule: PII should not flow to untrusted sinks
 deny contains msg if {

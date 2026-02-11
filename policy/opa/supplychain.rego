@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package supplychain
 
 import rego.v1

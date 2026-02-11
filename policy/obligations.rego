@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package policy.obligations
 
 # OPA Obligations for RFA and Step-Up Auth

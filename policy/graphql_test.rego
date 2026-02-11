@@ -1,3 +1,4 @@
+import future.keywords.in
 package graphql
 
 import future.keywords.if

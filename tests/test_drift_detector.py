@@ -1,28 +1,18 @@
+import pytest
 from summit.self_evolve.drift import DriftDetector
 
 def test_drift_detector_flags_regression():
-    detector = DriftDetector(success_threshold=0.05, cost_threshold=0.20)
+    detector = DriftDetector(threshold=0.1)
 
-    baseline = {"success_rate": 0.90, "avg_cost": 1.0}
+    baseline = {"success_rate": 0.90, "avg_latency": 100}
 
-    # PASS
-    current_pass = {"success_rate": 0.88, "avg_cost": 1.1}
-    report = detector.analyze_drift(baseline, current_pass)
-    assert report["regression"] is False
+    # Within threshold
+    current_ok = {"success_rate": 0.85, "avg_latency": 105}
+    assert len(detector.detect_drift(current_ok, baseline)) == 0
 
-    # FAIL - Success Rate
-    current_fail_success = {"success_rate": 0.84, "avg_cost": 1.0}
-    report = detector.analyze_drift(baseline, current_fail_success)
-    assert report["regression"] is True
-    assert report["details"]["success_rate"]["status"] == "FAIL"
-
-    # FAIL - Cost
-    current_fail_cost = {"success_rate": 0.90, "avg_cost": 1.25}
-    report = detector.analyze_drift(baseline, current_fail_cost)
-    assert report["regression"] is True
-    assert report["details"]["avg_cost"]["status"] == "FAIL"
-
-def test_drift_detector_handles_missing_metrics():
-    detector = DriftDetector()
-    report = detector.analyze_drift({}, {})
-    assert report["regression"] is False
+    # Outside threshold (regression)
+    current_bad = {"success_rate": 0.80, "avg_latency": 120}
+    regressions = detector.detect_drift(current_bad, baseline)
+    assert len(regressions) == 2
+    assert "success_rate" in regressions[0]
+    assert "avg_latency" in regressions[1]

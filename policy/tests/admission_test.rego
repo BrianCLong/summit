@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package maestro.admission
 
 # Stub function for admission decision

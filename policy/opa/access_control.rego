@@ -1,3 +1,4 @@
+import future.keywords.in
 package opa.intelgraph.authz
 
 import future.keywords.if

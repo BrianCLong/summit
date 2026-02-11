@@ -1,21 +1,13 @@
 # Data Handling: Self-Evolving Agents
 
-## Data Classification (ITEM:CLAIM-03)
-- **Evolution Patches**: Classified as System Configuration (Public-Internal).
-- **Meta-Cognition Traces**: Classified as Operational Telemetry (Internal).
-- **Feedback Signals**: Classified as Performance Metrics (Internal).
+## Data Classification
+- **PII/PHI**: Strictly prohibited in evidence logs.
+- **Trace Data**: Redacted by default (see `summit/self_evolve/redact.py`).
 
-## Never-Log List
-- Raw customer prompts.
-- Credentials or API keys.
-- Tokens (unless hashed/redacted).
-- PII/PHI fields.
-- Proprietary code blobs.
+## Redaction Rules
+- Never log fields: `api_key`, `password`, `token`, `auth_token`, `secret`.
+- Deterministic hashing for stable field identifiers within a run.
 
-## Redaction Policy
-All evidence artifacts must pass through the `summit_harness.redaction` hooks before being written to disk.
-Deterministic hashing should be used for stable identifiers within a run.
-
-## Retention
-- Artifacts TTL: 14 days.
-- Opt-out available via `SUMMIT_SELF_EVOLVE_OPT_OUT` environment variable.
+## Retention Policy
+- Artifacts kept for 14 days by default.
+- Evidence stored in `artifacts/self-evolving-agents/`.

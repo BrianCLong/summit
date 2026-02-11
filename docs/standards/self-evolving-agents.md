@@ -1,17 +1,20 @@
 # Standards: Self-Evolving Agents
 
 ## Taxonomy (ITEM:CLAIM-01)
-Organized by **what/when/how** to evolve:
-- **Models**: Fine-tuning or parameter updates.
-- **Memory**: Rule updates or surgical history pruning.
-- **Tools**: Dynamic selection or reordering.
-- **Architecture**: Concierge/DMoE runtime restructuring.
+Agents are classified by:
+- **What** to evolve: Models, Memory, Tools, Architecture.
+- **When** to evolve: Intra-run vs Inter-run.
+- **How** to evolve: Feedback-driven operators.
 
-## Mechanism Menu
-- **Intra-test-time adaptation**: Adapting during a single task run.
-- **Inter-test-time adaptation**: Adapting based on historical performance across tasks.
+## Safety & Governance (ITEM:CLAIM-02, ITEM:CLAIM-08)
+- **Controlled Self-Evolution**: Bounded operators only.
+- **Deny-by-Default**: Every mutation operator must be explicitly allowlisted.
+- **Reproduction**: Evidence must be deterministic and byte-identical under fixed seeds.
 
-## Safety & Scalability (ITEM:CLAIM-02)
-- Bounds on evolution steps.
-- Deterministic evidence requirements.
-- Drift detection and rollback triggers.
+## Adaptive Orchestration (ITEM:CLAIM-03)
+- **Concierge Router**: DMoE implementation for sub-agent selection.
+- **LRU Eviction**: Specialist cache management.
+- **Meta-cognition Engine**: Capability gap detection.
+
+## Data Flywheel (ITEM:CLAIM-04)
+-Production loop for continuous refinement based on evaluation signals.

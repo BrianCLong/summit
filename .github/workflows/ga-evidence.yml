@@ -35,13 +35,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -54,7 +54,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: v0.61.0
+          version: v0.68.0
 
       - name: Generate Evidence Bundle
         run: pnpm ga:evidence

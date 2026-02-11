@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package export.v2
 
 default allow := false

@@ -1,30 +1,35 @@
-from collections import OrderedDict
 from typing import List, Dict, Any, Optional
-from summit_harness.subagents import SubagentRegistry, SubagentSpec
+
+class SpecialistRegistry:
+    def __init__(self):
+        self.specialists = {
+            "coder": {"id": "coder", "capability": "writing_code"},
+            "researcher": {"id": "researcher", "capability": "gathering_info"},
+            "reviewer": {"id": "reviewer", "capability": "policy_validation"}
+        }
 
 class ConciergeRouter:
-    """
-    Selects/hires sub-agents from registry; includes LRU eviction.
-    Inspired by Adaptive Orchestration (arXiv:2601.09742).
-    """
-    def __init__(self, registry: SubagentRegistry, max_active_agents: int = 4):
+    def __init__(self, registry: SpecialistRegistry, max_hires: int = 4):
         self.registry = registry
-        self.max_active_agents = max_active_agents
-        self.active_agents = OrderedDict()
+        self.max_hires = max_hires
+        self.active_hires = []
 
-    def hire_specialist(self, name: str) -> SubagentSpec:
-        spec = self.registry.get(name)
+    def hire_specialist(self, capability: str) -> Optional[Dict[str, Any]]:
+        if len(self.active_hires) >= self.max_hires:
+            # LRU Eviction
+            evicted = self.active_hires.pop(0)
+            print(f"Evicting specialist: {evicted['id']}")
 
-        # LRU eviction
-        if name in self.active_agents:
-            self.active_agents.move_to_end(name)
-        else:
-            if len(self.active_agents) >= self.max_active_agents:
-                evicted_name, _ = self.active_agents.popitem(last=False)
-                # print(f"Evicted agent: {evicted_name}")
-            self.active_agents[name] = spec
+        for s in self.registry.specialists.values():
+            if s["capability"] == capability:
+                self.active_hires.append(s)
+                return s
+        return None
 
-        return spec
-
-    def get_active_agents(self) -> List[str]:
-        return list(self.active_agents.keys())
+class MetaCognitionEngine:
+    def detect_gap(self, trace: List[Dict[str, Any]]) -> Optional[str]:
+        # Simple heuristic for MWS
+        for entry in trace:
+            if "error" in entry and "not supported" in entry["error"]:
+                return "capability_gap"
+        return None

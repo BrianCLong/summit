@@ -1,33 +1,37 @@
 import pytest
-from summit_harness.subagents import SubagentRegistry, SubagentSpec
-from summit.self_evolve.concierge import ConciergeRouter
-from summit.self_evolve.meta import MetaCognitionEngine
+from summit.self_evolve.concierge import ConciergeRouter, SpecialistRegistry, MetaCognitionEngine
 
 def test_concierge_hires_specialist():
-    registry = SubagentRegistry()
-    registry.register(SubagentSpec(name="coder", system_prompt="..."))
-    registry.register(SubagentSpec(name="reviewer", system_prompt="..."))
+    registry = SpecialistRegistry()
+    router = ConciergeRouter(registry, max_hires=2)
 
-    router = ConciergeRouter(registry, max_active_agents=2)
+    specialist = router.hire_specialist("writing_code")
+    assert specialist is not None
+    assert specialist["id"] == "coder"
+    assert len(router.active_hires) == 1
 
-    router.hire_specialist("coder")
-    assert router.get_active_agents() == ["coder"]
+def test_concierge_lru_eviction():
+    registry = SpecialistRegistry()
+    router = ConciergeRouter(registry, max_hires=2)
 
-    router.hire_specialist("reviewer")
-    assert router.get_active_agents() == ["coder", "reviewer"]
+    router.hire_specialist("writing_code") # coder
+    router.hire_specialist("gathering_info") # researcher
 
-    # Test LRU eviction
-    registry.register(SubagentSpec(name="tester", system_prompt="..."))
-    router.hire_specialist("tester")
-    assert router.get_active_agents() == ["reviewer", "tester"]
-    assert "coder" not in router.get_active_agents()
+    assert len(router.active_hires) == 2
 
-def test_meta_cognition_gap_detector():
-    meta = MetaCognitionEngine()
-    gaps = meta.analyze_task("Write some python code and review it", available_agents=[])
-    assert "coder" in gaps
-    assert "reviewer" in gaps
+    # Hiring a third should evict the first (coder)
+    router.hire_specialist("policy_validation") # reviewer
 
-    evidence = meta.get_gap_evidence()
-    assert len(evidence) == 2
-    assert evidence[0]["missing_specialist"] == "coder"
+    assert len(router.active_hires) == 2
+    assert router.active_hires[0]["id"] == "researcher"
+    assert router.active_hires[1]["id"] == "reviewer"
+
+def test_meta_cognition_detects_gap():
+    engine = MetaCognitionEngine()
+    trace = [
+        {"step": 1, "action": "search"},
+        {"step": 2, "error": "capability not supported: advanced_math"}
+    ]
+
+    gap = engine.detect_gap(trace)
+    assert gap == "capability_gap"

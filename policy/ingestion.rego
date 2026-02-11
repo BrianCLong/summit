@@ -1,3 +1,4 @@
+import future.keywords.in
 package intelgraph.ingestion
 
 import future.keywords.if

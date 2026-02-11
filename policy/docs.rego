@@ -1,3 +1,4 @@
+import future.keywords.in
 package docs
 
 import future.keywords.if
