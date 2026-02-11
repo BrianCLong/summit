@@ -228,17 +228,13 @@
       "id": "ga-feature-discovery-prompt",
       "status": "completed",
       "owner": "codex",
-<<<<<<< HEAD
-      "notes": "Expanded feature discovery GA prompt with evidence-first strict output ordering; added roadmap prompt #00, CI evidence-mode runbook, and make-driven bundle scaffold/verify tooling."
+      "notes": "Expanded feature discovery GA prompt with full delivery package, PR requirements, and evidence-first strict output ordering; added roadmap prompt #00, CI evidence-mode runbook, and make-driven bundle scaffold/verify tooling."
     },
     {
       "id": "roadmap-todo-standup-snapshot-2026-02-11",
       "status": "completed",
       "owner": "codex",
       "notes": "Published docs/roadmaps/summit-development-roadmap-todo-standup.md with Todo classification method, not-started inventory, transition criteria, and Today/Next/Blockers standup snapshot."
-=======
-      "notes": "Expanded prompt with full delivery package, PR requirements, and strict output ordering."
->>>>>>> 11b13c1a00 (docs: expand GA feature discovery prompt)
     }
   ],
   "summary": {
