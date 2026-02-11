@@ -94,7 +94,18 @@ check_anchored_regex "scripts/ci" "CI Scripts anchored triggers"
 
 tmp_file=$(mktemp)
 printf '%s\n' "${results[@]}" > "$tmp_file"
-python - "$tmp_file" "$REPORT_DIR/baseline-report.json" <<'PY'
+PYTHON_BIN="${PYTHON_BIN:-}"
+if [[ -z "$PYTHON_BIN" ]]; then
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+  elif command -v python >/dev/null 2>&1; then
+    PYTHON_BIN="python"
+  else
+    echo "Python interpreter not found (expected python3 or python)" >&2
+    exit 127
+  fi
+fi
+"$PYTHON_BIN" - "$tmp_file" "$REPORT_DIR/baseline-report.json" <<'PY'
 import json
 import sys
 
