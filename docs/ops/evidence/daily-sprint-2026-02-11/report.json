@@ -1,6 +1,6 @@
 {
   "run_id": "daily-sprint-2026-02-11",
-  "generated_at": "2026-02-11T11:11:36Z",
+  "generated_at": "2026-02-11T11:24:09Z",
   "mode": "sensing",
   "inputs": {
     "gh_pr_list": {
@@ -20,13 +20,9 @@
   },
   "observations": [
     "GitHub PR triage capture succeeded for 20 open PRs.",
-    "Label-filtered issue triage returned an empty set.",
-    "Conflict marker remediation applied to evidence schema and FactGov standards files.",
-    "Evidence schema CI validator is blocked by missing python module: jsonschema.",
-    "Merge-ready output published as PR #18476."
+    "Label-filtered issue triage returned 0 open issues.",
+    "Conflict marker scan found 0 unresolved markers.",
+    "Evidence schema validator completed successfully via uv no-project runtime."
   ],
-  "outputs": {
-    "pull_request": "https://github.com/BrianCLong/summit/pull/18476"
-  },
   "notes": "Evidence-first output per governance; narrative summary in DAILY_SPRINT_2026-02-11.md"
 }
