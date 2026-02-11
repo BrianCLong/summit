@@ -13,10 +13,6 @@ on:
         required: true
         type: string
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   REGISTRY: ghcr.io
 
@@ -28,15 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "18"
-          cache: "pnpm"
-
       - name: Install dependencies
         run: pnpm install
 

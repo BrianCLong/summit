@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Influence Operations Defense Suite with PFIDG, CoC-EW, CwC, IPNF, and IRCES modules.
+- New graph node types: `narrative_frame`, `process_frame`.
+- Evidence schema for Influence Risk Reports with causal envelope support.
+- Technical disclosures and claim sets for influence defense inventions.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

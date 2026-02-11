@@ -109,19 +109,7 @@ jobs:
           echo "pnpm=9.12.0" >> "$GITHUB_OUTPUT"
           echo "⚠️  Falling back to pinned pnpm 9.12.0"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-        with:
-          version: ${{ steps.resolve-pnpm.outputs.pnpm }}
-          run_install: ${{ inputs.install-deps }}
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          node-version: ${{ steps.detect.outputs.version }}
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
-
       - name: Log toolchain versions
         shell: bash
         run: |

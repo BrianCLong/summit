@@ -12,9 +12,7 @@
 - [ ] **[SEC-OPS-001] Rotate n8n Credentials**
   - **Goal**: Invalidate potential compromised keys in self-hosted n8n instances.
   - **Owner**: DevOps / Security
-  - **Runbook**: See [runbooks/n8n-credential-rotation.md](../runbooks/n8n-credential-rotation.md)
   - **Acceptance Criteria**: All GitHub PATs, AI API keys, and Database credentials used in n8n are rotated.
-  - **Status**: Runbook created 2026-02-06, awaiting execution by DevOps.
 
 ## P1: Structural Hardening (Sprint N+7)
 

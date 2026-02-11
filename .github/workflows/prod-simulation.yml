@@ -9,10 +9,6 @@ on:
       - 'scripts/ci/simulate_prod_deploy.sh'
       - '.github/workflows/prod-simulation.yml'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   simulate-prod:
     name: "🚀 Prod Simulation"
@@ -21,20 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
-
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:

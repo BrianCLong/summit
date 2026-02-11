@@ -1,0 +1,27 @@
+graph TD
+    subgraph Ingestion
+        A[Sources: Social, News, Web] --> B[Evidence Packager]
+        B --> C[(Evidence Ledger)]
+    end
+
+    subgraph "Summit Influence Suite"
+        C --> D[PFIDG: Provenance-First Graph]
+        D --> E[CoC-EW: Narrative Curvature]
+        D --> F[CwC: Non-Semantic Coordinator]
+        D --> G[IPNF: Process Frame Fingerprinter]
+    end
+
+    subgraph "Reasoning & Attribution"
+        E --> H[Multi-Graph Fusion]
+        F --> H
+        G --> H
+        H --> I[IRCES: Causal Envelope Scoring]
+    end
+
+    subgraph Governance
+        I --> J{Policy Gate}
+        J -->|Pass| K[Decision Object + Causal Envelope]
+        J -->|Fail| L[Audit Record: Insufficient Evidence]
+    end
+
+    K --> M[Downstream Defense / Lawful Action]

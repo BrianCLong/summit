@@ -29,7 +29,6 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -51,17 +50,8 @@ jobs:
       # and packages/ directories. Dependencies MUST be installed before CodeQL
       # analysis to ensure proper JavaScript/TypeScript resolution.
       # ============================================================================
-      - name: Setup pnpm
-        if: matrix.language == 'javascript-typescript'
-        uses: pnpm/action-setup@v4 # v4
-
       - name: Setup Node.js
         if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4 # v6
-        with:
-          node-version: 20
-          cache: "pnpm"
-
       - name: Install dependencies (monorepo workspaces)
         if: matrix.language == 'javascript-typescript'
         run: pnpm install --frozen-lockfile --ignore-scripts

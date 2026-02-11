@@ -16,14 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          node-version: 20
-          cache: "pnpm"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -37,14 +30,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Setup Node.js
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
+        with:
+          version: 10
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -74,7 +69,6 @@ jobs:
     # TODO: Re-enable when ga-risk-gate.yml is created
 
   security-scan:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
     with:
@@ -83,7 +77,6 @@ jobs:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
   sbom:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:

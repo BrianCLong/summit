@@ -30,10 +30,6 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   issues: write
@@ -45,7 +41,6 @@ env:
 jobs:
   check-drift:
     name: Check Branch Protection Drift
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
 
     outputs:

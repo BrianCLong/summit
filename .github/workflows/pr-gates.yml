@@ -55,18 +55,7 @@ jobs:
         env:
           MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "18"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Generate SBOM
         run: npm run generate:sbom
 
@@ -89,17 +78,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Setup Node.js
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
+        with:
+          version: 10
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build
@@ -145,17 +132,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Deploy Preview Environment
         id: deploy

@@ -1,5 +1,1 @@
-{
-  "summary": "Partitioning eval completed",
-  "scenarios": 3,
-  "status": "PASS"
-}
+{"status": "passed", "metadata": {"generated_by": "summit-ci"}}

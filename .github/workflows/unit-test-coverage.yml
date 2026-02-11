@@ -46,15 +46,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4
-
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4 # v6
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
-
       - name: Install Dependencies
         run: pnpm install
 

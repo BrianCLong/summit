@@ -36,8 +36,6 @@ on:
 
 permissions:
   contents: write
-  issues: write
-  actions: read
 
 jobs:
   determinism-check:
@@ -61,15 +59,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
