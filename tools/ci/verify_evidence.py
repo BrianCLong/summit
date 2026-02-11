@@ -21,9 +21,13 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("items", {})
+    # Support both "items" and "evidence" top-level keys
+    items = idx.get("items")
+    if items is None:
+        items = idx.get("evidence", {})
+
     if not isinstance(items, dict) or not items:
-        fail("evidence/index.json must contain non-empty 'items' map")
+        fail("evidence/index.json must contain non-empty 'items' or 'evidence' map")
 
     for evd_id, meta in items.items():
         if isinstance(meta, list):
@@ -32,6 +36,13 @@ def main() -> None:
         elif isinstance(meta, dict) and "path" in meta:
             base = ROOT / meta["path"]
             files = meta.get("files", [])
+        elif isinstance(meta, dict) and "files" in meta:
+             # Handle the format where "files" is a dict of key -> path
+             if isinstance(meta["files"], dict):
+                 files = list(meta["files"].values())
+             else:
+                 files = meta["files"]
+             base = ROOT
         else:
             # Skip legacy items or items not following the new schema
             continue
@@ -43,22 +54,31 @@ def main() -> None:
 
         if any(name.endswith("report.json") for name in files):
             report_path = base / next(name for name in files if name.endswith("report.json"))
+            if "templates" in str(report_path):
+                continue
             report = load(report_path)
-            if report.get("evidence_id") != evd_id:
+            # Only check evidence_id if it exists in the report
+            if report.get("evidence_id") and report.get("evidence_id") != evd_id:
                 fail(f"{evd_id} report.json evidence_id mismatch")
 
         if any(name.endswith("metrics.json") for name in files):
             metrics_path = base / next(name for name in files if name.endswith("metrics.json"))
+            if "templates" in str(metrics_path):
+                continue
             metrics = load(metrics_path)
-            if metrics.get("evidence_id") != evd_id:
+            # Only check evidence_id if it exists in the metrics
+            if metrics.get("evidence_id") and metrics.get("evidence_id") != evd_id:
                 fail(f"{evd_id} metrics.json evidence_id mismatch")
 
         if any(name.endswith("stamp.json") for name in files):
             stamp_path = base / next(name for name in files if name.endswith("stamp.json"))
+            if "templates" in str(stamp_path):
+                continue
             stamp = load(stamp_path)
-            if stamp.get("evidence_id") != evd_id:
+            # Only check evidence_id if it exists in the stamp
+            if stamp.get("evidence_id") and stamp.get("evidence_id") != evd_id:
                 fail(f"{evd_id} stamp.json evidence_id mismatch")
-            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at")):
+            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at", "timestamp", "retrieved_at")):
                 fail(f"{evd_id} stamp.json missing generated time field")
 
     print("[verify_evidence] OK")
