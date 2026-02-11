@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-02-11T19:34:01Z",
+  "artifacts": {
+    "report.json": "37ec2c5510be62cb0f905413e0eefb10aba1fa7bbcaf36bdcf603f79c66eb609",
+    "metrics.json": "2d596d2d1c0a1e818989a52b4948a14fcbbdf797c8643ec4a493a972057ba946",
+    "gh_pr_list.json": "580ec2db426dd936d8ec6031128afbf29384948d4165b11ac88010f37861f3b8",
+    "gh_pr_list.txt": "137c03f4705a266647ea6edbeaff17c12f3ac35c878323cbc035d5db96b6a22f",
+    "gh_issue_list.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "gh_issue_list.txt": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  "evidence_root": "docs/ops/evidence/daily-sprint-2026-02-11",
+  "provenance": {
+    "collector": "daily-sprint-orchestrator",
+    "mode": "sensing"
+  }
+}

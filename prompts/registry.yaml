@@ -26,6 +26,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/operations/daily-sprint-orchestrator@v1.md
+    sha256: 5a3004b60143476201cef2a229d26fff700559256aaef6073905c2d09810cd9a
+    description: Daily sprint orchestration for Summit repo with evidence-first outputs.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_*.md
+        - docs/ops/evidence/daily-sprint-*/
+        - docs/roadmap/STATUS.json
+        - prompts/operations/daily-sprint-orchestrator@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
