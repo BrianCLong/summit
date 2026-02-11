@@ -226,11 +226,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }
