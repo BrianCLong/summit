@@ -41,6 +41,8 @@ jobs:
           cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+      with:
+        version: 9.12.0
         with:
           version: latest
       - name: Install dependencies
@@ -70,6 +72,8 @@ jobs:
           cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+      with:
+        version: 9.12.0
         with:
           version: latest
       - name: Install dependencies
@@ -105,6 +109,8 @@ jobs:
           cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+      with:
+        version: 9.12.0
         with:
           version: latest
       - name: Install dependencies

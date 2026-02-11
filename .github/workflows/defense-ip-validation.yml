@@ -1,0 +1,30 @@
+name: Defense IP Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/ip/defense_**'
+      - 'scripts/governance/validate_defense_claims.ts'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/ip/defense_**'
+      - 'scripts/governance/validate_defense_claims.ts'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run Validation
+        run: pnpm exec bun run scripts/governance/validate_defense_claims.ts

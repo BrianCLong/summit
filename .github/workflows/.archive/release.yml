@@ -28,6 +28,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
+      with:
+        version: 9.12.0
         with:
           run_install: false
       - uses: actions/setup-node@v4

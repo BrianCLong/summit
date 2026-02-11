@@ -25,6 +25,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
+      with:
+        version: 9.12.0
         with:
           version: 9.12.0
 
@@ -71,6 +73,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
+      with:
+        version: 9.12.0
         with:
           version: 9.12.0
 
@@ -110,6 +114,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
+      with:
+        version: 9.12.0
         with:
           version: 9.12.0
 
@@ -207,6 +213,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
+      with:
+        version: 9.12.0
         with:
           version: 9.12.0
 

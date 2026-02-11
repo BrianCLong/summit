@@ -79,6 +79,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+      with:
+        version: 9.12.0
         with:
 
       - name: Get pnpm store directory
@@ -246,6 +248,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
+      with:
+        version: 9.12.0
         with:
 
       - name: Install dependencies

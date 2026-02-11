@@ -1,4 +1,6 @@
 package intelgraph.export
+import future.keywords.if
+import future.keywords.in
 
 # Export policy for IntelGraph GA Core — simulate/enforce, DLP redactions, WebAuthn step-up.
 # Decision object intentionally explicit for audit & UX payloads.

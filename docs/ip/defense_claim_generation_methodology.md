@@ -1,55 +1,30 @@
-# Defense Claim Generation Methodology
+# Defense Claim Generation Methodology (v1.1)
 
-This document outlines the systematic approach used to generate and expand Intellectual Property (IP) claims for the Summit/IntelGraph defense families (CRM and Simulation Apparatus).
+## Master Plan
+1.  **ITEM Normalization:** Continue with two consecutive +30 blocks per family (C271-C330, S271-S330).
+2.  **Drafting Goals:** Add six continuation-ready clusters:
+    *   Rule provenance + explainability.
+    *   Credentialed approvals + delegation + revocation.
+    *   Adversarial data poisoning defenses.
+    *   Cross-model consensus + disagreement handling.
+    *   Semantic canarying + harm-minimization.
+    *   Disaster recovery + continuity-of-operations.
 
-## 1. Master Plan Rationale
-The "next and more" ITEM normalization strategy aims to accelerate the growth of our defensive moats by adding two consecutive +30 claim blocks (+60 new dependents total) per family in each expansion turn.
+## Sub-Agent Prompts (A-E)
+*   **A) Rule-provenance:** Independent claim on policy rule provenance, explainability, and rule-level audits.
+*   **B) Credentialed approvals:** Independent claim on approval credentials, delegation, revocation, and step-up authentication.
+*   **C) Poisoning defenses:** Independent claim on poisoning detection, source reliability drift, quarantine, and robustness checks.
+*   **D) Cross-model consensus + semantic canarying:** Independent claim on model disagreement handling + semantic canary constraints + safe fallbacks.
+*   **E) DR/COOP:** Independent claim on immutable audit backups + recovery proofs + continuity safe modes.
 
-### Drafting Goals
-The current expansion turn (C271–C330 and S271–S330) focuses on six continuation-ready moat clusters:
-1. **Policy rule provenance + per-rule explainability**: Ensuring every governance decision is traceable to its source and author.
-2. **Credentialed approvals + delegation + revocation**: Cryptographically binding human approvals to defense actions.
-3. **Adversarial data poisoning defenses**: Protecting narrative state integrity against malicious input shifts.
-4. **Cross-model consensus + disagreement handling**: Using variance among models as a proxy for uncertainty and risk.
-5. **Semantic canarying + harm-minimization constraints**: Rolling out defense actions safely using constrained variants.
-6. **Disaster recovery + continuity-of-operations**: Ensuring audit integrity and accountability even during outages.
+## Convergence Protocol
+1.  **Rule-level provenance:** Decisions cite rule IDs/versions and source/author.
+2.  **Credentialed approvals:** Approvals are cryptographically bound and revocable.
+3.  **Poisoning defense:** Quarantine suspicious inputs; reduce reliance on low-reliability sources.
+4.  **Cross-model consensus:** Treat disagreement as uncertainty; prefer monitoring-only.
+5.  **Semantic canarying:** Block/constrain actions if semantic safety checks fail.
+6.  **DR/COOP:** Preserve audit integrity under outages; fail closed for external publish.
 
-## 2. Expansion Vectors (Sub-Agent Prompts)
-We use a sub-agent architecture to specialize the drafting process across different defensive domains:
-
-### Prompt A: Rule-provenance continuation pack
-*   **Vector:** Independent claims on policy rule provenance, explainability, and rule-level audits.
-*   **Focus:** Mapping decisions to specific rule IDs, versions, and authors.
-
-### Prompt B: Credentialed approvals continuation pack
-*   **Vector:** Claims on approval credentials, delegation, revocation, and step-up authentication.
-*   **Focus:** Multi-factor and dual-control requirements for high-risk actions.
-
-### Prompt C: Poisoning defenses continuation pack
-*   **Vector:** Claims on poisoning detection, source reliability drift, quarantine, and robustness checks.
-*   **Focus:** Identifying anomalous shifts in input data distributions.
-
-### Prompt D: Cross-model consensus + semantic canarying continuation pack
-*   **Vector:** Claims on model disagreement handling + semantic canary constraints + safe fallbacks.
-*   **Focus:** Routing high-variance cases to monitoring-only or red-team review.
-
-### Prompt E: DR/COOP continuation pack
-*   **Vector:** Claims on immutable audit backups + recovery proofs + continuity safe modes.
-*   **Focus:** Preserving the chain of custody and fail-closed logic for governance availability.
-
-## 3. Moat Cluster Mapping
-The moat clusters map directly to the platform's defensive capabilities as follows:
-*   **Provenance Clusters:** Build trust through transparency and accountability.
-*   **Approval Clusters:** Build safety through cryptographically verified human-in-the-loop.
-*   **Integrity Clusters (Poisoning/Consensus):** Build robustness through adversarial-aware data and model fusion.
-*   **Canary Clusters:** Build resilience through safe, incremental deployment.
-*   **Availability Clusters (DR/COOP):** Build continuity through immutable, distributed audit state.
-
-## 4. Convergence Protocol
-The following protocol ensures all generated claims converge on a unified defensive posture:
-1.  **Rule-level provenance:** Citations for every decision.
-2.  **Credentialed approvals:** Cryptographic signatures for every high-risk action.
-3.  **Poisoning defense:** Automatic quarantine of suspicious content.
-4.  **Cross-model consensus:** Disagreement implies uncertainty; prefer monitoring.
-5.  **Semantic canarying:** Constrain actions if safety checks fail.
-6.  **DR/COOP:** Audit integrity as a blocker for external publishing.
+## Bundle Manifest
+*   `docs/ip/defense_crm_claims_v1.md`: C271–C330
+*   `docs/ip/defense_simulation_apparatus_claims_v1.md`: S271–S330

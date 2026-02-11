@@ -27,6 +27,8 @@ jobs:
           persist-credentials: true
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+      with:
+        version: 9.12.0
         with:
       - name: Setup Node
         uses: actions/setup-node@v4

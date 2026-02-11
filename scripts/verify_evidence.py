@@ -134,7 +134,7 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
+            if re.search(r"202[0-9]-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}", txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
