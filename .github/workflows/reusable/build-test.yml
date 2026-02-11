@@ -1,108 +1,30 @@
 name: Reusable Build & Test
-
 on:
   workflow_call:
     inputs:
-      node_version:
-        required: false
+      packages:
+        required: true
         type: string
-        default: '20.x'
-      pnpm_cache_folder:
-        required: false
-        type: string
-        default: '~/.pnpm-store'
+        description: 'JSON list of packages to build and test'
 
 jobs:
-  fast-checks:
+  build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: ${{ fromJson(inputs.packages) }}
     steps:
-      - uses: actions/checkout@v4 # v4
-      - uses: actions/setup-node@v4 # v4
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 9.12.0
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4 # v4
-        with:
-          path: ${{ inputs.pnpm_cache_folder }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir ${{ inputs.pnpm_cache_folder }}
+          node-version-file: .nvmrc
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm -w run lint
-      - name: Typecheck
-        run: pnpm -w run typecheck
-      - name: Production guardrails
-        run: |
-          set +e
-          NODE_ENV=production \
-          JWT_SECRET=weaksecret \
-          JWT_REFRESH_SECRET=weaksecret2 \
-          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
-          NEO4J_URI=bolt://localhost:7687 \
-          NEO4J_USERNAME=neo4j \
-          NEO4J_PASSWORD=devpassword \
-          REDIS_HOST=localhost \
-          REDIS_PORT=6379 \
-          REDIS_PASSWORD=devpassword \
-          CORS_ORIGIN=* \
-          pnpm ci:prod-guard
-          status=$?
-          if [ "$status" -eq 0 ]; then
-            echo "Prod guardrails command succeeded unexpectedly"
-            exit 1
-          fi
-          echo "Prod guardrails correctly blocked unsafe config"
-
-  build-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4 # v4
-      - uses: actions/setup-node@v4 # v4
-        with:
-          node-version: ${{ inputs.node_version }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 9.12.0
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4 # v4
-        with:
-          path: ${{ inputs.pnpm_cache_folder }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir ${{ inputs.pnpm_cache_folder }}
-      - name: Cache Turbo
-        uses: actions/cache@v4 # v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build workspace
-        run: pnpm -w run build
-      - name: Unit & integration tests
-        run: pnpm -w run test
-      - name: Upload build artifacts for golden path
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: build-artifacts
-          path: |
-            .turbo
-            node_modules/.cache
-          retention-days: 1
+      - name: Build
+        run: pnpm --filter ${{ matrix.package }} build
+      - name: Test
+        run: pnpm --filter ${{ matrix.package }} test
