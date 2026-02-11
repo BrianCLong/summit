@@ -12,6 +12,9 @@
   "keywords": ["graph", "types", "typescript"],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "neo4j-driver": "^5.28.1"
+  },
   "devDependencies": {
     "typescript": "^5.3.3"
   }
