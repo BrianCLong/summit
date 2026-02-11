@@ -6,7 +6,7 @@ export class BackupManager {
   private backupService: BackupService;
   private schedule: string; // Cron expression
 
-  constructor(schedule: string = '0 2 * * *') { // Default: 2 AM daily
+  constructor(schedule: string = '0 3 * * *') { // Default: 3 AM daily to avoid partition maintenance
     this.backupService = new BackupService();
     this.schedule = schedule;
   }

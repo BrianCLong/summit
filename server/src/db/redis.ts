@@ -1,16 +1,17 @@
-// @ts-nocheck
-import Redis, { Cluster } from 'ioredis';
+import Redis, { Cluster, type ClusterOptions, type RedisOptions } from 'ioredis';
 import * as dotenv from 'dotenv';
 import pino from 'pino';
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 
 dotenv.config();
 
 const logger = (pino as any)();
 
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
+// Type alias for our Redis client
+export type RedisClient = Redis | Cluster;
 
 // Map to store multiple Redis clients
-const clients = new Map<string, Redis | Cluster | any>();
+const clients = new Map<string, RedisClient | any>();
 
 interface RedisConfig {
   host: string;
@@ -53,11 +54,11 @@ function getConfig(name: string): RedisConfig {
   };
 }
 
-export function getRedisClient(name: string = 'default'): Redis | Cluster {
+export function getRedisClient(name: string = 'default'): RedisClient {
   if (!clients.has(name)) {
     try {
       const config = getConfig(name);
-      let client: Redis | Cluster;
+      let client: RedisClient;
 
       if (config.useCluster) {
         if (!config.clusterNodes) {
@@ -71,7 +72,7 @@ export function getRedisClient(name: string = 'default'): Redis | Cluster {
 
         logger.info({ nodes, name }, 'Initializing Redis Cluster');
 
-        client = new Redis.Cluster(nodes, {
+        const clusterOptions: ClusterOptions = {
           redisOptions: {
             password: config.password,
             tls: config.tlsEnabled ? {} : undefined,
@@ -79,45 +80,53 @@ export function getRedisClient(name: string = 'default'): Redis | Cluster {
             maxRetriesPerRequest: null,
           },
           scaleReads: 'slave',
-          clusterRetryStrategy: (times) => {
+          clusterRetryStrategy: (times: number) => {
             const delay = Math.min(times * 100, 3000);
             return delay;
           },
           enableOfflineQueue: true,
-        });
+        };
+
+        client = new Redis.Cluster(nodes, clusterOptions);
       } else {
         logger.info({ host: config.host, port: config.port, name }, 'Initializing Redis Client');
-        client = new Redis({
+        const redisOptions: RedisOptions = {
           host: config.host,
           port: config.port,
           password: config.password,
           tls: config.tlsEnabled ? {} : undefined,
           connectTimeout: 10000,
           lazyConnect: true,
-          retryStrategy: (times) => {
+          retryStrategy: (times: number) => {
             const delay = Math.min(times * 50, 2000);
             return delay;
           },
           maxRetriesPerRequest: null,
-        });
+        };
+        client = new Redis(redisOptions);
       }
 
       client.on('connect', () => logger.info(`Redis client '${name}' connected.`));
+
       client.on('error', (err: any) => {
-        logger.warn(
-          `Redis connection '${name}' failed - using mock responses. Error: ${err.message}`,
-        );
-        // Replace the failed client in the map with a mock
-        // Note: This replaces the reference for future calls, but existing references might be broken?
-        // Actually, we usually just return the mock here.
-        // But since we are assigning to 'client' which is local, we need to update the map?
-        // The pattern in the original code was: redisClient = createMock...
-        clients.set(name, createMockRedisClient(name));
+        logger.error(`Redis connection '${name}' error: ${err.message}`);
+
+        // In production, we do NOT want to silently failover to a mock,
+        // as this can lead to data inconsistency and confusing bugs.
+        // We let the application crash or handle the error upstream.
+        if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'staging') {
+             logger.warn(`Using mock Redis client for '${name}' due to connection error (non-production).`);
+             clients.set(name, createMockRedisClient(name));
+        }
       });
 
-      // Attach Telemetry
+      // Attach Telemetry using Proxy to avoid mutating the client prototype directly if possible,
+      // or just wrapping methods. Since ioredis methods are bound, we need to be careful.
+      // Simpler approach: wrapping specific methods we care about.
+
       const originalGet = client.get.bind(client);
-      client.get = async (key: string) => {
+      // @ts-ignore
+      client.get = async (key: Redis.KeyType) => {
         const value = await originalGet(key);
         if (value) {
           telemetry.subsystems.cache.hits.add(1);
@@ -128,20 +137,28 @@ export function getRedisClient(name: string = 'default'): Redis | Cluster {
       };
 
       const originalSet = client.set.bind(client);
-      client.set = async (key: string, value: string) => {
+      // @ts-ignore
+      client.set = async (key: Redis.KeyType, value: Redis.ValueType, ...args: any[]) => {
         telemetry.subsystems.cache.sets.add(1);
-        return await originalSet(key, value);
+        // @ts-ignore
+        return await originalSet(key, value, ...args);
       };
 
       const originalDel = client.del.bind(client);
-      client.del = (async (...keys: string[]) => {
+      // @ts-ignore
+      client.del = async (...keys: Redis.KeyType[]) => {
         telemetry.subsystems.cache.dels.add(1);
         return await originalDel(...keys);
-      }) as any;
+      };
 
       clients.set(name, client);
 
     } catch (error: any) {
+      if (process.env.NODE_ENV === 'production') {
+        logger.fatal(`Redis initialization for '${name}' failed: ${(error as Error).message}`);
+        throw error;
+      }
+
       logger.warn(
         `Redis initialization for '${name}' failed - using development mode. Error: ${(error as Error).message}`,
       );
@@ -151,7 +168,7 @@ export function getRedisClient(name: string = 'default'): Redis | Cluster {
   return clients.get(name);
 }
 
-function createMockRedisClient(name: string) {
+function createMockRedisClient(name: string): any {
   return {
     get: async (key: string) => {
       logger.debug(`Mock Redis (${name}) GET: Key: ${key}`);
@@ -178,6 +195,7 @@ function createMockRedisClient(name: string) {
     connect: async () => { },
     options: { keyPrefix: 'summit:' },
     duplicate: () => createMockRedisClient(name),
+    status: 'ready',
   };
 }
 
@@ -186,8 +204,15 @@ export async function redisHealthCheck(): Promise<boolean> {
   const defaultClient = clients.get('default');
   if (!defaultClient) return false;
   try {
-    await defaultClient.ping();
-    return true;
+    if ((defaultClient as any).status === 'ready' || (defaultClient as any).status === 'connect') {
+       if (typeof defaultClient.ping === 'function') {
+           await defaultClient.ping();
+           return true;
+       }
+       // Mock client might not have ping or it might just work
+       return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -195,7 +220,7 @@ export async function redisHealthCheck(): Promise<boolean> {
 
 export async function closeRedisClient(): Promise<void> {
   for (const [name, client] of clients.entries()) {
-    if (client) {
+    if (client && typeof client.quit === 'function') {
       await client.quit();
       logger.info(`Redis client '${name}' closed.`);
     }
