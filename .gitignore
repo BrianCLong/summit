@@ -378,3 +378,5 @@ packages/osint-collector/src/types/*.js
 packages/osint-collector/src/utils/*.js
 evidence/skills/
 *.js.map
+.venv_312/
+.venv/
