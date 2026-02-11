@@ -4,8 +4,8 @@
 # Both RC and GA pipelines derive required checks from this file.
 #
 # Authority: Platform Engineering
-# Last Updated: 2026-02-11
-# Version: 2.2.1
+# Last Updated: 2026-04-01
+# Version: 2.2.0
 #
 # How to add/remove checks safely:
 # 1. Create PR modifying this file
@@ -16,9 +16,9 @@
 # IMPORTANT: Do not add new always_required checks without
 # verifying they run on EVERY commit to main.
 
-version: "2.2.1"
+version: "2.2.0"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-02-11"
+last_updated: "2026-04-01"
 owner: "Platform Engineering"
 
 # Branch Protection Policy
@@ -36,7 +36,8 @@ branch_protection:
       - "Release Readiness Gate"
       - "SOC Controls"
       - "Unit Tests & Coverage"
-      - "verify-provenance"
+      - "Provenance Verification"
+      - "Feature Flag Guardrails"
 
 # Always Required Checks
 # ----------------------
@@ -67,7 +68,7 @@ always_required:
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
-  - name: "verify-provenance"
+  - name: "Provenance Verification"
     workflow: "provenance-verify.yml"
     rationale: "Ensures all artifacts are signed and verifiable (SLSA)"
 
