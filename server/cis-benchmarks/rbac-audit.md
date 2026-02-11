@@ -15,4 +15,4 @@ The audit scanned `server/src/routes/` for RBAC enforcement using `assertCan` or
 
 ## Evidence
 Audit run at 2026-02-11T00:00:00Z.
-Receipt: `server/cis-benchmarks/receipts/rbac-audit-20260211.json`
+Receipt: `evidence/EVD-SEC-SPRINT2-BATCH1/rbac_audit_receipt.json`

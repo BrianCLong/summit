@@ -11,4 +11,4 @@ TruffleHog was used to scan the repository for secrets, using the `.trufflerc` c
 
 ## Evidence
 Audit run at 2026-02-11T00:00:00Z.
-Receipt: `server/cis-benchmarks/receipts/trufflehog-baseline-20260211.json`
+Receipt: `evidence/EVD-SEC-SPRINT2-BATCH1/secrets_baseline_receipt.json`

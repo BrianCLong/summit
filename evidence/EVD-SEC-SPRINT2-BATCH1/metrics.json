@@ -1,0 +1,7 @@
+{
+  "vulnerabilities_resolved": 14,
+  "vulnerabilities_remaining_high": 0,
+  "rbac_coverage_percent": 13.9,
+  "secrets_found": 0,
+  "container_hardened": true
+}

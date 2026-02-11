@@ -408,6 +408,14 @@
         "metrics": "evidence/EVD-NARRATIVE-CI-METRICS-001/metrics.json",
         "stamp": "evidence/EVD-NARRATIVE-CI-METRICS-001/stamp.json"
       }
+    },
+    "EVD-SEC-SPRINT2-BATCH1": {
+      "evidence_id": "EVD-SEC-SPRINT2-BATCH1",
+      "files": {
+        "report": "evidence/EVD-SEC-SPRINT2-BATCH1/report.json",
+        "metrics": "evidence/EVD-SEC-SPRINT2-BATCH1/metrics.json",
+        "stamp": "evidence/EVD-SEC-SPRINT2-BATCH1/stamp.json"
+      }
     }
   }
 }
