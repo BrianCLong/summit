@@ -409,3 +409,9 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+verify-evidence: ## Verify all evidence artifacts (Schema + Strict)
+	@python3 scripts/evidence_validate.py
+
+verify-trust-paradox: ## Verify Trust Paradox evidence specific schemas
+	@python3 ci/verifier/verify_evidence.py

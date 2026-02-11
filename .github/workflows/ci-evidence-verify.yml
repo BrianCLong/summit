@@ -27,6 +27,6 @@ jobs:
       - name: Install verification dependencies
         run: python -m pip install --upgrade pip jsonschema
       - name: Verify trust paradox evidence
-        run: python ci/verifier/verify_evidence.py
+        run: make verify-trust-paradox
       - name: Verify policy fixtures
         run: python ci/verifier/verify_policy_fixtures.py

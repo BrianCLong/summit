@@ -68,7 +68,7 @@ def check_timestamps_location(data: Any, filename: str, allow_timestamps: bool) 
 
 def main():
     parser = argparse.ArgumentParser(description="Validate Summit Evidence System")
-    parser.add_argument("--schemas", default="evidence/schema", help="Path to schemas dir")
+    parser.add_argument("--schemas", default="evidence/schemas", help="Path to schemas dir")
     parser.add_argument("--index", default="evidence/index.json", help="Path to index.json")
     parser.add_argument("--root", default=".", help="Repo root")
     parser.add_argument("--strict", action="store_true", help="Fail on formatting or legacy issues")
@@ -105,23 +105,46 @@ def main():
 
     success = True
 
+    # Normalize items from different possible keys
+    if "items" in index_data:
+        items = index_data["items"]
+    elif "evidence" in index_data:
+        items = index_data["evidence"]
+    else:
+        items = {}
+
     # Iterate Items
-    items = index_data.get("items", {})
     for evd_id, details in items.items():
-        files = details.get("files", []) + details.get("artifacts", [])
+        files_entry = details.get("files", [])
+        artifacts_entry = details.get("artifacts", [])
+
+        file_paths = []
+        if isinstance(files_entry, dict):
+            file_paths.extend(files_entry.values())
+        elif isinstance(files_entry, list):
+            file_paths.extend(files_entry)
+
+        if isinstance(artifacts_entry, dict):
+            file_paths.extend(artifacts_entry.values())
+        elif isinstance(artifacts_entry, list):
+            file_paths.extend(artifacts_entry)
 
         has_report = False
         has_metrics = False
         has_stamp = False
 
-        for fpath in files:
+        for fpath in file_paths:
             full_path = os.path.join(args.root, fpath)
             if not os.path.exists(full_path):
                 if "KIMI-K25" in evd_id:
                     print(f"Missing file for {evd_id}: {fpath}")
                     success = False
                 else:
+                    # Only warn if strict is not enabled, otherwise fail?
+                    # Original logic was print warning and continue.
                     print(f"Warning: Missing file for legacy {evd_id}: {fpath}")
+                    if args.strict:
+                        success = False
                 continue
 
             basename = os.path.basename(fpath)
@@ -168,8 +191,7 @@ def main():
                 # Check formatting only as warning
                 if fpath.endswith(".json"):
                     if not check_deterministic_formatting(full_path):
-                         # Print warning but don't fail unless strict global policy enabled (which we might want to avoid for now)
-                         # print(f"Warning: Formatting mismatch in {fpath}")
+                         # Print warning but don't fail unless strict global policy enabled
                          pass
 
         # For Kimi K2.5 items, enforce presence of all 3 artifacts
