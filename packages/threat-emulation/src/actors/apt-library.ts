@@ -254,6 +254,147 @@ export class APTLibrary {
       lastSeen: new Date(),
       active: true
     });
+
+    // UNC3886 - Singapore Telco Targeting
+    this.addActor({
+      id: 'unc3886',
+      names: ['UNC3886'],
+      category: ThreatActorCategory.APT,
+      motivation: [ThreatActorMotivation.ESPIONAGE],
+      attribution: {
+        country: 'China',
+        confidence: 'medium',
+        sponsorship: 'state-sponsored',
+        evidence: ['Targeting patterns', 'Technical indicators', 'Mandiant reporting']
+      },
+      capabilities: {
+        sophistication: 'advanced',
+        resources: 'extensive',
+        persistence: 'persistent',
+        stealthLevel: 'high',
+        zeroDayUsage: true,
+        customTooling: true
+      },
+      targetedSectors: ['Telecommunications'],
+      targetedRegions: ['Singapore', 'Asia'],
+      ttps: {
+        tactics: [
+          { tacticId: 'TA0001', name: 'Initial Access', frequency: 'always' },
+          { tacticId: 'TA0003', name: 'Persistence', frequency: 'always' },
+          { tacticId: 'TA0005', name: 'Defense Evasion', frequency: 'always' },
+          { tacticId: 'TA0010', name: 'Exfiltration', frequency: 'often' }
+        ],
+        techniques: [
+          { techniqueId: 'T1190', name: 'Exploit Public-Facing Application', frequency: 'always', variants: [], tools: [] },
+          { techniqueId: 'T1014', name: 'Rootkit', frequency: 'often', variants: [], tools: [] },
+          { techniqueId: 'T1562.001', name: 'Disable or Modify Tools', frequency: 'often', variants: ['Firewall Bypass'], tools: [] },
+          { techniqueId: 'T1020', name: 'Automated Exfiltration', frequency: 'sometimes', variants: [], tools: [] },
+          { techniqueId: 'T1071', name: 'Application Layer Protocol', frequency: 'always', variants: [], tools: [] }
+        ],
+        procedures: [
+          {
+            id: 'proc_unc3886_1',
+            techniqueId: 'T1190',
+            description: 'Exploit zero-day vulnerability in perimeter devices',
+            artifacts: ['Exploit payload', 'Web logs']
+          },
+          {
+            id: 'proc_unc3886_2',
+            techniqueId: 'T1014',
+            description: 'Deploy kernel-mode rootkit for persistence',
+            artifacts: ['Kernel modules', 'Hidden files']
+          }
+        ],
+        signatures: []
+      },
+      campaigns: [
+        {
+          id: 'camp_cyber_guardian',
+          name: 'Operation CYBER GUARDIAN',
+          description: 'Campaign targeting Singapore telecommunications sector',
+          startDate: new Date('2025-03-01'), // Approx 11 months prior to Feb 2026
+          endDate: new Date('2026-02-01'),
+          targetedSectors: ['Telecommunications'],
+          targetedRegions: ['Singapore'],
+          objectives: ['Espionage', 'Network Reconnaissance'],
+          techniques: ['T1190', 'T1014'],
+          malware: [],
+          iocs: []
+        }
+      ],
+      infrastructure: {
+        c2Patterns: [],
+        domains: [],
+        hosting: ['Compromised infrastructure'],
+        registrars: [],
+        vpnUsage: true,
+        torUsage: false,
+        bulletproofHosting: false
+      },
+      tools: [],
+      malware: [],
+      aliases: [],
+      references: [],
+      firstSeen: new Date('2023-01-01'), // Approx
+      lastSeen: new Date(),
+      active: true
+    });
+
+    // TGR-STA-1030 - Shadow Campaigns
+    this.addActor({
+      id: 'tgr_sta_1030',
+      names: ['TGR-STA-1030'],
+      category: ThreatActorCategory.APT,
+      motivation: [ThreatActorMotivation.ESPIONAGE],
+      attribution: {
+        country: 'China',
+        confidence: 'medium',
+        sponsorship: 'state-affiliated', // 'Asia-based state-aligned'
+        evidence: ['Targeting scope', 'Technical overlap']
+      },
+      capabilities: {
+        sophistication: 'high',
+        resources: 'extensive',
+        persistence: 'persistent',
+        stealthLevel: 'high',
+        zeroDayUsage: false,
+        customTooling: true
+      },
+      targetedSectors: ['Government', 'Critical Infrastructure', 'Education', 'High Tech'],
+      targetedRegions: ['Global', 'Asia'], // 37 countries
+      ttps: {
+        tactics: [
+          { tacticId: 'TA0001', name: 'Initial Access', frequency: 'always' },
+          { tacticId: 'TA0003', name: 'Persistence', frequency: 'always' },
+          { tacticId: 'TA0011', name: 'Command and Control', frequency: 'always' }
+        ],
+        techniques: [
+          { techniqueId: 'T1566', name: 'Phishing', frequency: 'often', variants: [], tools: [] },
+          { techniqueId: 'T1190', name: 'Exploit Public-Facing Application', frequency: 'often', variants: [], tools: [] },
+          { techniqueId: 'T1071', name: 'Application Layer Protocol', frequency: 'always', variants: [], tools: ['WebShells', 'Tunneling'] },
+          { techniqueId: 'T1014', name: 'Rootkit', frequency: 'sometimes', variants: [], tools: [] }
+        ],
+        procedures: [],
+        signatures: []
+      },
+      campaigns: [],
+      infrastructure: {
+        c2Patterns: [],
+        domains: [],
+        hosting: ['Compromised infrastructure'],
+        registrars: [],
+        vpnUsage: true,
+        torUsage: false,
+        bulletproofHosting: false
+      },
+      tools: [],
+      malware: [],
+      aliases: [],
+      references: [],
+      firstSeen: new Date('2024-01-01'), // Approx
+      lastSeen: new Date(),
+      active: true
+    });
   }
 
   private addActor(actor: ThreatActorProfile): void {
