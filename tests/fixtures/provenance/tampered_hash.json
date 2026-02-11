@@ -1,0 +1,10 @@
+{
+  "record": {
+    "record_id": "rec-1",
+    "artifact_id": "art-1",
+    "hash_alg": "sha256",
+    "hash_value": "deadbeef",
+    "source": "source-1"
+  },
+  "payload": "dGVzdA=="
+}

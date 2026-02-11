@@ -95,8 +95,7 @@ export class TemporalGraphRAG {
       evidenceId,
       query,
       timeScope: scope,
-      results: results.map(r => ({ chunkId: r.chunkId, score: r.score })),
-      timestamp: new Date().toISOString()
+      results: results.map(r => ({ chunkId: r.chunkId, score: r.score }))
     };
 
     const metrics = {
