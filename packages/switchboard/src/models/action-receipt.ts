@@ -11,8 +11,8 @@ export const ActionReceiptSchema = z.object({
   tool: z.object({
     capability: z.string(),
     action: z.string(),
-    inputs_digest: z.string(), // Hash of inputs
-    outputs_digest: z.string().optional(), // Hash of outputs (if allow)
+    inputs_digest: z.string(),
+    outputs_digest: z.string().optional(),
   }),
   policy: z.object({
     decision: z.enum(['allow', 'deny']),
@@ -23,7 +23,7 @@ export const ActionReceiptSchema = z.object({
       currency: z.string().default('USD'),
     }).optional(),
   }),
-  hash: z.string(), // Integrity hash of the entire receipt
+  hash: z.string(),
 });
 
 export type ActionReceipt = z.infer<typeof ActionReceiptSchema>;

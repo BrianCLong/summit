@@ -26,19 +26,16 @@ export class PolicyPreflight {
   }
 
   public evaluate(context: PolicyContext, request: PolicyRequest): PolicyDecision {
-    // 1. Default Deny
     let decision: PolicyDecision = {
       allow: false,
       reason: 'Default deny: action not explicitly allowed by policy',
     };
 
-    // 2. Check explicitly allowed actions
     const actionKey = `${request.capability}:${request.action}`;
     if (this.allowedActions.has(actionKey)) {
       decision = { allow: true };
     }
 
-    // 3. Check budget if present
     if (decision.allow && context.budget) {
       if (context.budget.consumed >= context.budget.limit) {
         decision = {
@@ -48,7 +45,6 @@ export class PolicyPreflight {
       }
     }
 
-    // 4. Identity/Tenant checks (minimal for now)
     if (decision.allow && (!context.identity || !context.tenant)) {
       decision = {
         allow: false,

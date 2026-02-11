@@ -6,7 +6,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawnSync } from 'child_process';
 import * as crypto from 'crypto';
-import { computeDigest } from '@summit/receipts';
 import {
   CapsuleManifest,
   CapsuleStep,
@@ -209,7 +208,7 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
 
   // V1 Action Receipts & Policy Preflight Integration
   const preflight = new PolicyPreflight(
-    manifest.allowed_commands.map((cmd) => `exec:${cmd}`)
+    manifest.allowed_commands.map((cmd) => `exec:\${cmd}`)
   );
   const receiptStore = new ReceiptStore(
     path.join(repoRoot, '.switchboard', 'receipts.jsonl')
@@ -276,7 +275,9 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
           policy: { decision: 'deny', reason: preflightDecision.reason },
         });
         receiptStore.append(denyReceipt);
-        throw new Error(`Policy Preflight denied ${step.command}: ${preflightDecision.reason}`);
+        throw new Error(
+          `Policy Preflight denied \${step.command}: \${preflightDecision.reason}`
+        );
       }
 
       evaluatePolicy(
@@ -317,35 +318,15 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       fs.writeFileSync(stdoutPath, result.stdout ?? '', 'utf8');
       fs.writeFileSync(stderrPath, result.stderr ?? '', 'utf8');
 
-      // Record detailed action receipt
-      const inputDigest = computeDigest({
+      ledger.append('tool_exec', {
+        step_id: stepId,
+        step_name: stepLabel,
         command: step.command,
         args: step.args,
-        env // includes secrets if any
-      });
-
-      const outputDigest = computeDigest({
-        stdout: result.stdout,
-        stderr: result.stderr,
-        exitCode: result.status
-      });
-
-      ledger.recordAction({
-        toolId: step.command,
-        capability: 'exec',
-        inputDigest,
-        outputDigest,
-        status: result.status === 0 ? 'success' : 'failure',
-        errorCategory: result.status !== 0 ? 'exit_code_nonzero' : undefined,
-        metadata: {
-          step_id: stepId,
-          step_name: stepLabel,
-          duration_ms: durationMs,
-          command: step.command,
-          args: step.args,
-          stdout_path: path.relative(sessionDir, stdoutPath),
-          stderr_path: path.relative(sessionDir, stderrPath),
-        }
+        exit_code: result.status ?? 0,
+        duration_ms: durationMs,
+        stdout_path: path.relative(sessionDir, stdoutPath),
+        stderr_path: path.relative(sessionDir, stderrPath),
       });
 
       if (step.category === 'test') {

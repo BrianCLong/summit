@@ -58,7 +58,7 @@ export function registerSwitchboardCommands(program: Command): void {
 
         allReceipts.forEach((r) => {
           console.log(
-            `[${r.timestamp}] ${r.id.slice(0, 8)}: ${r.tool.capability}:${r.tool.action} -> ${r.policy.decision}`
+            `[\${r.timestamp}] \${r.id.slice(0, 8)}: \${r.tool.capability}:\${r.tool.action} -> \${r.policy.decision}`
           );
         });
       } catch (error) {
@@ -79,7 +79,7 @@ export function registerSwitchboardCommands(program: Command): void {
           store.getById(id) || store.list().find((r) => r.id.startsWith(id));
 
         if (!receipt) {
-          console.error(`Receipt not found: ${id}`);
+          console.error(\`Receipt not found: \${id}\`);
           process.exit(1);
         }
 
@@ -102,13 +102,13 @@ export function registerSwitchboardCommands(program: Command): void {
           store.getById(id) || store.list().find((r) => r.id.startsWith(id));
 
         if (!receipt) {
-          console.error(`Receipt not found: ${id}`);
+          console.error(\`Receipt not found: \${id}\`);
           process.exit(1);
         }
 
         const isValid = ActionReceiptGenerator.verify(receipt);
-        console.log(`Receipt ID: ${receipt.id}`);
-        console.log(`Integrity: ${isValid ? 'VALID' : 'INVALID'}`);
+        console.log(\`Receipt ID: \${receipt.id}\`);
+        console.log(\`Integrity: \${isValid ? 'VALID' : 'INVALID'}\`);
 
         if (!isValid) {
           process.exit(1);

@@ -43,7 +43,6 @@ export class ActionReceiptGenerator {
       hash,
     };
 
-    // Validate against schema
     return ActionReceiptSchema.parse(receipt);
   }
 
