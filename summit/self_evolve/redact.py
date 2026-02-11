@@ -1,18 +1,17 @@
-from typing import Dict, Any, List
+import re
+from typing import Dict, Any
 
-NEVER_LOG_FIELDS = {"api_key", "password", "token", "auth_token", "secret"}
+NEVER_LOG_FIELDS = ["api_key", "token", "password", "user_email"]
 
-def redact_dict(data: Dict[str, Any]) -> Dict[str, Any]:
-    redacted = {}
-    for k, v in data.items():
-        if k in NEVER_LOG_FIELDS:
-            redacted[k] = "[REDACTED]"
-        elif k == "user_email":
-            redacted[k] = "[EMAIL_REDACTED]"
-        elif isinstance(v, dict):
-            redacted[k] = redact_dict(v)
-        elif isinstance(v, list):
-            redacted[k] = [redact_dict(i) if isinstance(i, dict) else i for i in v]
-        else:
-            redacted[k] = v
+def redact_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    redacted = data.copy()
+    for field in NEVER_LOG_FIELDS:
+        if field in redacted:
+            redacted[field] = "[REDACTED]"
+
+    # Recursive redaction for nested dicts
+    for k, v in redacted.items():
+        if isinstance(v, dict):
+            redacted[k] = redact_data(v)
+
     return redacted

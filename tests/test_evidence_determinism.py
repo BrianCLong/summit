@@ -1,30 +1,43 @@
 import json
+
 import pytest
+
+from connectors.spiderfoot import OsintEvent, write_normalized
+
+
+def test_determinism(tmp_path):
+    events = [
+        OsintEvent(type="A", value="1"),
+        OsintEvent(type="B", value="2")
+    ]
+
+    p1 = tmp_path / "1.json"
+    p2 = tmp_path / "2.json"
+
+    write_normalized(events, str(p1))
+    write_normalized(events, str(p2))
+
+    assert p1.read_bytes() == p2.read_bytes()
+
+
+from summit_harness.evidence import EvidenceWriter
 from pathlib import Path
-from summit.self_evolve.evidence import EvolutionEvidenceWriter
 
-def test_deterministic_evidence(tmp_path):
-    writer1 = EvolutionEvidenceWriter(tmp_path / "run1")
-    writer2 = EvolutionEvidenceWriter(tmp_path / "run2")
+def test_harness_evidence_writer_determinism(tmp_path):
+    writer = EvidenceWriter(tmp_path)
+    report = {"evidence_id": "EVD-1", "summary": "test", "item_slug": "slug", "artifacts": ["a.txt"]}
+    metrics = {"evidence_id": "EVD-1", "metrics": {"m1": 1.0}}
 
-    data = {"result": "success", "steps": 10}
-    evidence_id = "EVD-TEST-001"
+    # Run twice
+    writer.write(report, metrics)
+    p1 = tmp_path / "report.json"
+    content1 = p1.read_text()
 
-    writer1.write_evidence(evidence_id, data)
-    writer2.write_evidence(evidence_id, data)
+    writer.write(report, metrics)
+    content2 = p1.read_text()
 
-    file1 = tmp_path / "run1" / "evidence.json"
-    file2 = tmp_path / "run2" / "evidence.json"
-
-    assert file1.read_text() == file2.read_text()
-
-def test_no_timestamps_in_evidence(tmp_path):
-    writer = EvolutionEvidenceWriter(tmp_path)
-    writer.write_evidence("EVD-001", {"data": "foo"})
-
-    with open(tmp_path / "evidence.json") as f:
-        content = f.read()
-        # Should not contain strings that look like typical ISO timestamps
-        # This is a bit loose but fits the MWS
-        assert "2026-" not in content
-        assert "T" not in content or ":" not in content # Very rough check
+    assert content1 == content2
+    # Check that keys are sorted in output
+    data = json.loads(content1)
+    keys = list(data.keys())
+    assert keys == sorted(keys)

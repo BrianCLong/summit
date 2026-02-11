@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package composer.policy_shadow
 
 # Combine sub-decisions and emit a consolidated verdict

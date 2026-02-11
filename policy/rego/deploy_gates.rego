@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package deploy.gates
 
 # Require cosign signature, SBOM, and no critical vulns

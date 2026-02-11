@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package billing.invariants
 
 # Guardrails shared across billing policies.

@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package intelgraph.migrations
 
 default allow := false

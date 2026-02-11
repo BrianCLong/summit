@@ -1,4 +1,3 @@
-import future.keywords.in
 package main_test
 
 import data.summit.main as main

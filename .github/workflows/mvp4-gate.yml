@@ -78,7 +78,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.68.0
+          version: v0.61.0
       - name: Verify Policies
         run: |
           opa check policies/

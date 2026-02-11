@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package billing.credits_and_discounts
 
 import data.billing.invariants

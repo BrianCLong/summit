@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package policy.simulation.privileged_actions
 
 import data.summit.abac

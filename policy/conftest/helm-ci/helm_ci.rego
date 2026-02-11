@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package helm_ci
 
 deny contains msg if {

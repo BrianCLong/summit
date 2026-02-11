@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package helmchecks
 
 # Input is a list of rendered Kubernetes resources (via `helm template`).

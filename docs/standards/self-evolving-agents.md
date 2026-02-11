@@ -1,20 +1,20 @@
-# Standards: Self-Evolving Agents
+# Self-Evolving Agents Standards
+
+## Overview
+Summit implements "Controlled Self-Evolution" to allow agents to adapt their behavior and architecture within safe, governed boundaries.
 
 ## Taxonomy (ITEM:CLAIM-01)
-Agents are classified by:
+Agents are organized by:
 - **What** to evolve: Models, Memory, Tools, Architecture.
-- **When** to evolve: Intra-run vs Inter-run.
-- **How** to evolve: Feedback-driven operators.
+- **When** to evolve: Intra-task adaptation vs. Inter-task refinement.
+- **How** to evolve: Optimization loops, Meta-cognition engines.
 
-## Safety & Governance (ITEM:CLAIM-02, ITEM:CLAIM-08)
-- **Controlled Self-Evolution**: Bounded operators only.
-- **Deny-by-Default**: Every mutation operator must be explicitly allowlisted.
-- **Reproduction**: Evidence must be deterministic and byte-identical under fixed seeds.
+## Controlled Evolution (ITEM:CLAIM-08)
+All mutations must be:
+- **Bounded**: Maximum token changes, restricted operators.
+- **Deterministic**: Producible and verifiable from fixed seeds.
+- **Denied by Default**: Mutations only occur if explicitly allowed by policy.
 
-## Adaptive Orchestration (ITEM:CLAIM-03)
-- **Concierge Router**: DMoE implementation for sub-agent selection.
-- **LRU Eviction**: Specialist cache management.
-- **Meta-cognition Engine**: Capability gap detection.
-
-## Data Flywheel (ITEM:CLAIM-04)
--Production loop for continuous refinement based on evaluation signals.
+## Interop Matrix
+- **Imports**: Agent traces, tool logs, eval rubrics.
+- **Exports**: `evidence.json`, `metrics.json`, `drift_report.json`.

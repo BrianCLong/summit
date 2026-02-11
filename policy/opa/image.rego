@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package kubernetes.admission
 
 deny contains msg if {

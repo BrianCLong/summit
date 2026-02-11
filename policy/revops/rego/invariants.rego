@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package revops.invariants
 
 # Global guardrails that tenants cannot bypass.

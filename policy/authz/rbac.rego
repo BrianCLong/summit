@@ -1,4 +1,3 @@
-import future.keywords.in
 package policy.authz.rbac
 
 import data.policy.common.helpers

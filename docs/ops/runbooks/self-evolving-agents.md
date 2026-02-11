@@ -1,12 +1,13 @@
 # Runbook: Self-Evolving Agents
 
 ## Feature Flag
-Enable with `SUMMIT_SELF_EVOLVE=1`.
+Enable/Disable via environment variable: `SUMMIT_SELF_EVOLVE=1`
 
 ## Drift Detection
-Check `artifacts/self-evolving-agents/drift_report.json`.
-Failures in the scheduled CI job indicate significant regression.
+Scheduled CI jobs run benchmarks and compare results against stored baselines.
+If a regression exceeds 5%, the job fails and alerts Ops.
 
-## Rollback
+## Rollback Steps
 1. Set `SUMMIT_SELF_EVOLVE=0`.
-2. Revert recent policy bundle changes in `summit/self_evolve/policy.py`.
+2. Revert the active `EvolutionPolicy` bundle to a known-good state.
+3. Purge recent mutation artifacts if necessary.

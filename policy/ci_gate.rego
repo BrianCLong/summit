@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package ci_gate
 
 import data.supply_chain

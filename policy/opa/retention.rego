@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package summit.retention
 
 import rego.v1

@@ -1,13 +1,16 @@
 # Data Handling: Self-Evolving Agents
 
 ## Data Classification
-- **PII/PHI**: Strictly prohibited in evidence logs.
-- **Trace Data**: Redacted by default (see `summit/self_evolve/redact.py`).
+- **Level 1 (Public)**: Standards, taxonomy frames.
+- **Level 2 (Internal)**: Metrics, drift reports.
+- **Level 3 (Sensitive)**: Agent traces, mutation evidence.
 
-## Redaction Rules
-- Never log fields: `api_key`, `password`, `token`, `auth_token`, `secret`.
-- Deterministic hashing for stable field identifiers within a run.
+## Never-Log List
+- Raw customer prompts.
+- Credentials (API keys, passwords).
+- PII (user emails, etc.).
+- Proprietary code blobs.
 
-## Retention Policy
-- Artifacts kept for 14 days by default.
-- Evidence stored in `artifacts/self-evolving-agents/`.
+## Retention & Redaction
+- **Retention**: Artifacts are kept for 14 days by default.
+- **Redaction**: Automated redaction of sensitive fields via `summit.self_evolve.redact`.

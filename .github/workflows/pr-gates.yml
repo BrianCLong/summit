@@ -55,14 +55,14 @@ jobs:
         env:
           MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -89,14 +89,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -120,11 +120,7 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            for d in helm/*/; do
-              if [ -f "$d/Chart.yaml" ]; then
-                helm lint "$d"
-              fi
-            done
+            helm lint helm/
           fi
 
       - name: Terraform Plan
@@ -149,14 +145,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

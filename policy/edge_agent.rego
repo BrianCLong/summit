@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package edge_ops
 
 default allow_deployment := false

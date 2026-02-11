@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 # Summit Jobs OPA Policy
 # Part of Shai-Hulud supply chain security initiative
 #

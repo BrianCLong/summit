@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 # (same as in sprint doc)
 package abac.authz
 

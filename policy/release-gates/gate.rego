@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package release_gates
 
 default allow = false

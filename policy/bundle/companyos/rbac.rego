@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package companyos.rbac
 
 # OPA v1 imports - keywords are built-in

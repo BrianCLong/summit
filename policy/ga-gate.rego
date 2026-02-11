@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package ga_gate
 
 import data.intelgraph.authz.extended

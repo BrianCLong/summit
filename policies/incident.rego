@@ -1,5 +1,3 @@
-import future.keywords.in
-import future.keywords.if
 package companyos.incident
 
 # Default to deny all actions unless explicitly allowed.

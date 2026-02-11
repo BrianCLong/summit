@@ -41,10 +41,7 @@ jobs:
 
       - name: Setup AWS CLI
         if: matrix.cloud == 'aws'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: us-east-1
-          role-to-assume: arn:aws:iam::123456789012:role/GithubActionsRole
+        uses: aws-actions/setup-cli@v2
       - name: Setup gcloud
         if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v2
