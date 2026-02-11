@@ -1,5 +1,6 @@
 
 package policies
+import future.keywords.in
 
 default allow = false
 

@@ -4,7 +4,13 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-import torch
+try:
+    import torch
+except ImportError:
+    class MockTorch:
+        def __getattr__(self, name):
+            return lambda *args, **kwargs: None
+    torch = MockTorch()
 
 
 @dataclass

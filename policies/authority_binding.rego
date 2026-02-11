@@ -2,6 +2,7 @@
 # Addresses Foster & Starkey dissent requirements
 
 package intelgraph.authority
+import future.keywords.in
 
 import rego.v1
 

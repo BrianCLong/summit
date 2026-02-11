@@ -1,0 +1,7 @@
+{
+  "id": "fixture-001",
+  "input": {
+    "instruction": "Explain the scientific reason why the sky is blue.",
+    "domain": "science"
+  }
+}

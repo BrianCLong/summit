@@ -1,35 +1,31 @@
-# Repo Assumptions & Validation
+# Repo Assumptions - UniReason 1.0 Integration
 
-## Structure Validation
+## Verified (from repo map)
+*   **Language/Tooling:** TypeScript, Node 18+, pnpm.
+*   **CI:** GitHub Actions.
+*   **Key Paths:**
+    *   `src/api/graphql`
+    *   `src/api/rest`
+    *   `src/agents`
+    *   `src/connectors`
+    *   `src/graphrag`
+    *   `tests/`
+    *   `docs/{architecture,api,security}`
+    *   `.github/workflows/*`
 
-| Plan Path | Actual Path | Status | Notes |
-|Str|Str|Str|Str|
-| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
-| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
-| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
-| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
-| `docs/` | `docs/` | ✅ Exists | Root directory. |
-| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
-| `tests/` | `tests/` | ✅ Exists | Root directory. |
-| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+## Assumed (to be validated)
+*   **Pipeline Runner:** Existence of a central pipeline runner or agent orchestrator under `src/agents/*`.
+*   **Evidence Schema:** Existing "evidence" artifact schema and CI enforcement steps.
+*   **Logging:** Preferred logging framework and redaction utilities.
 
-## Component Mapping
+## Must-Not-Touch
+*   `.github/workflows/ci-*.yml` (critical for governance)
+*   `.github/policies/*`
+*   `.github/MILESTONES/*`
+*   Production docker-compose files (`docker-compose.yml`, `docker-compose.prod.yml`)
 
-| Planned Component | Proposed Location | Actual Location / Action |
-|Str|Str|Str|
-| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
-| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
-| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
-| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
-
-## Constraints & Checks
-
-* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
-* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
-* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
-* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
-
-## Next Steps
-
-1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
-2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+## Validation Checklist
+1.  [ ] Confirm `pnpm` scripts: `pnpm test`, `pnpm test:e2e`, `pnpm test:coverage`.
+2.  [ ] Locate agent orchestration entrypoints under `src/agents/`.
+3.  [ ] Confirm preferred logger + redaction utilities.
+4.  [ ] Identify CI check names that gate merges.
