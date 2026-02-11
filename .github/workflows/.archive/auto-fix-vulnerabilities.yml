@@ -93,14 +93,13 @@ jobs:
           echo "   Fixable: $FIXABLE"
 
       - name: Configure Git
-        if: steps.scan.outputs.fixable > 0
+        if: (((steps.scan.outputs.fixable > 0) && (steps.scan.outputs.fixable > 0)) && (steps.fix.outputs.count > 0)) && (steps.fix.outputs.count > 0 && (github.event.inputs.create_pr == 'true' || github.event.inputs.create_pr == ''))
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Apply vulnerability fixes
         id: fix
-        if: steps.scan.outputs.fixable > 0
         env:
           SEVERITY_THRESHOLD: ${{ github.event.inputs.severity_threshold || 'high' }}
           MAX_FIXES: ${{ github.event.inputs.max_fixes || '10' }}
@@ -190,7 +189,6 @@ This fix was automatically applied by the security auto-fix workflow."
           fi
 
       - name: Run tests after fixes
-        if: steps.fix.outputs.count > 0
         continue-on-error: true
         run: |
           pnpm test:quick 2>&1 | tee test-output.txt || true
@@ -203,7 +201,6 @@ This fix was automatically applied by the security auto-fix workflow."
 
       - name: Create Pull Request
         id: pr
-        if: steps.fix.outputs.count > 0 && (github.event.inputs.create_pr == 'true' || github.event.inputs.create_pr == '')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
