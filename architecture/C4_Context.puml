@@ -1,0 +1,23 @@
+@startuml C4_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+Person(analyst, "Intelligence Analyst", "Consumes insights and explores the graph.")
+Person(admin, "System Admin", "Manages users, policies, and configuration.")
+
+System_Boundary(intelgraph_boundary, "IntelGraph Platform") {
+    System(intelgraph, "IntelGraph Core", "Knowledge graph platform for intelligence analysis.")
+}
+
+System_Ext(data_sources, "Data Sources", "External data sources (S3, APIs, CSVs).")
+System_Ext(auth_provider, "Identity Provider", "OIDC Provider (e.g., Auth0, Keycloak).")
+System_Ext(audit_system, "External Audit", "Long-term immutable audit logs.")
+
+Rel(analyst, intelgraph, "Uses", "HTTPS/GraphQL")
+Rel(admin, intelgraph, "Configures", "HTTPS/GraphQL")
+Rel(intelgraph, data_sources, "Ingests data from")
+Rel(intelgraph, auth_provider, "Authenticates via", "OIDC")
+Rel(intelgraph, audit_system, "Exports logs to")
+
+@enduml
