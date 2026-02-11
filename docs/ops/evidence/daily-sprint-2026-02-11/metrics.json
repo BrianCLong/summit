@@ -1,11 +1,13 @@
 {
   "run_id": "daily-sprint-2026-02-11",
-  "generated_at": "2026-02-11T11:08:33Z",
+  "generated_at": "2026-02-11T11:11:36Z",
   "gh_pr_list_success": true,
   "gh_pr_count": 20,
   "gh_issue_list_success": true,
   "gh_issue_count": 0,
   "schema_conflict_markers_remaining": 0,
   "schema_validation_success": false,
-  "schema_validation_blocker": "ModuleNotFoundError: No module named 'jsonschema'"
+  "schema_validation_blocker": "ModuleNotFoundError: No module named 'jsonschema'",
+  "pr_created": true,
+  "pr_number": 18476
 }
