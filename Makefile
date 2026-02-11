@@ -409,3 +409,6 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+aws:validate: ## Validate AWS Path A Terraform configuration
+	@./scripts/aws/validate.sh
