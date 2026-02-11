@@ -3,17 +3,71 @@ import { Request, Response, NextFunction } from 'express';
 /**
  * Recursively removes any keys that start with '$' or '.',
  * which could be used to execute malicious queries (e.g. NoSQL injection).
+ *
+ * BOLT OPTIMIZATION:
+ * - Implements copy-on-write to avoid unnecessary allocations if no sanitization is needed.
+ * - Uses O(1) character checks (key[0]) instead of startsWith.
+ * - Preserves Date, RegExp, and Buffer instances.
+ * - Uses Object.keys() for efficient iteration.
  */
 function sanitize(obj: any): any {
     if (!obj || typeof obj !== 'object') return obj;
-    if (Array.isArray(obj)) return obj.map(sanitize);
 
-    const clean: any = {};
-    for (const key in obj) {
-        if (key.startsWith('$') || key.startsWith('.')) continue;
-        clean[key] = sanitize(obj[key]);
+    // Preserve common non-plain objects that shouldn't be recursed into
+    if (obj instanceof Date || obj instanceof RegExp || (typeof Buffer !== 'undefined' && Buffer.isBuffer(obj))) {
+        return obj;
     }
-    return clean;
+
+    if (Array.isArray(obj)) {
+        let newArr: any[] | null = null;
+        for (let i = 0; i < obj.length; i++) {
+            const v = obj[i];
+            const t = sanitize(v);
+            if (t !== v && !newArr) {
+                newArr = obj.slice(0, i);
+            }
+            if (newArr) {
+                newArr.push(t);
+            }
+        }
+        return newArr || obj;
+    }
+
+    const keys = Object.keys(obj);
+    let newObj: any = null;
+
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const firstChar = key[0];
+
+        // O(1) character check for injection patterns
+        if (firstChar === '$' || firstChar === '.') {
+            if (!newObj) {
+                newObj = {};
+                for (let j = 0; j < i; j++) {
+                    newObj[keys[j]] = obj[keys[j]];
+                }
+            }
+            continue;
+        }
+
+        const v = obj[key];
+        const t = sanitize(v);
+
+        // Copy-on-write: only allocate new object if a value changed
+        if (t !== v && !newObj) {
+            newObj = {};
+            for (let j = 0; j < i; j++) {
+                newObj[keys[j]] = obj[keys[j]];
+            }
+        }
+
+        if (newObj) {
+            newObj[key] = t;
+        }
+    }
+
+    return newObj || obj;
 }
 
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
