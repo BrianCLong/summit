@@ -379,6 +379,11 @@ export class BackupService {
    * @param backupId - The timestamp identifier of the backup (e.g., '2023-10-25T12-00-00-000Z')
    */
   async restore(backupId: string): Promise<void> {
+    // Validate backupId to prevent path traversal or injection
+    if (!/^[a-zA-Z0-9T-]+$/.test(backupId)) {
+      throw new Error('Invalid backup ID format. Only alphanumeric characters, dashes, and T are allowed.');
+    }
+
     logger.info(`Starting restore for backup ID: ${backupId}`);
 
     const pgFile = `postgres_${backupId}.sql`;

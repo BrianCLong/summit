@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   validate-exceptions:
-    if: false 
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

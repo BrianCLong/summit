@@ -25,9 +25,10 @@ env:
 jobs:
   dependency-review:
     name: Block vulnerable dependency changes
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     # dependency-review-action only works for pull_request/merge_group events
-    if: (false ) && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group')
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || github.event_name == 'merge_group'
     steps:
       - name: Dependency review
         uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
@@ -40,9 +41,10 @@ jobs:
   snyk-scan:
     name: Snyk dependency vulnerability scan
     needs: dependency-review
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     # Run if dependency-review passed or was skipped, and not from fork PRs
-    if: (false ) && (|)
+    if: |
       always() &&
       (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped') &&
       (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
@@ -85,9 +87,10 @@ jobs:
   snyk-skip-notice:
     name: Snyk scan (skipped - no token)
     needs: dependency-review
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     # Run if dependency-review passed or was skipped
-    if: (false ) && (always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped'))
+    if: always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped')
     steps:
       - name: Notice
         run: |
@@ -96,7 +99,7 @@ jobs:
 
   check-drift:
     name: Check Lockfile Drift
-    if: false 
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7

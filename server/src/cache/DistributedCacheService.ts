@@ -223,11 +223,14 @@ export class DistributedCacheService {
       // Check if compression needed
       const serialized = JSON.stringify(entry);
       let toStore = serialized;
+      let redisEntry = { ...entry };
 
       if (serialized.length > this.config.compressionThreshold) {
-        entry.value = (await this.compress(value)) as any;
-        entry.compressed = true;
-        toStore = JSON.stringify(entry);
+        // Clone entry for Redis storage so we don't mutate the in-memory L1 copy
+        redisEntry = { ...entry };
+        redisEntry.value = (await this.compress(value)) as any;
+        redisEntry.compressed = true;
+        toStore = JSON.stringify(redisEntry);
         this.stats.compressions++;
       }
 
@@ -235,13 +238,14 @@ export class DistributedCacheService {
       switch (strategy) {
         case 'write-through':
           // Write to both L1 and L2 synchronously
-          this.l1Cache.set(fullKey, { ...entry, value, compressed: false });
+          // Use original 'entry' (uncompressed) for L1
+          this.l1Cache.set(fullKey, entry);
           await this.redis.setex(fullKey, ttl, toStore);
           break;
 
         case 'write-behind':
           // Write to L1 immediately, buffer L2 write
-          this.l1Cache.set(fullKey, { ...entry, value, compressed: false });
+          this.l1Cache.set(fullKey, entry);
           this.bufferWrite(fullKey, toStore, ttl);
           break;
 
@@ -249,7 +253,7 @@ export class DistributedCacheService {
         default:
           // Write to L2 first, then L1
           await this.redis.setex(fullKey, ttl, toStore);
-          this.l1Cache.set(fullKey, { ...entry, value, compressed: false });
+          this.l1Cache.set(fullKey, entry);
           break;
       }
 

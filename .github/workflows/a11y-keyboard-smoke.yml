@@ -34,7 +34,7 @@ concurrency:
 jobs:
   a11y-keyboard-gate:
     name: "Accessibility + keyboard smoke"
-    if: false 
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
