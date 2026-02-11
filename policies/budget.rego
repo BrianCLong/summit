@@ -111,7 +111,7 @@ monthly_room[tenant] := room if {
     spent := monthly_spending[tenant]
     room := budget.monthly_usd_limit - spent
     room >= 0
-} else := 0
+}
 
 # Emergency monthly room (120% of normal limit)
 emergency_monthly_room[tenant] := room if {
@@ -121,7 +121,7 @@ emergency_monthly_room[tenant] := room if {
     emergency_limit := budget.monthly_usd_limit * 1.2
     room := emergency_limit - spent
     room >= 0
-} else := 0
+}
 
 # Budget calculations - daily room remaining
 daily_room[tenant] := room if {
@@ -155,7 +155,7 @@ monthly_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in monthly_entries])
-} else := 0
+}
 
 # Current day spending calculation  
 daily_spending[tenant] := total if {
@@ -168,7 +168,7 @@ daily_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in daily_entries])
-} else := 0
+}
 
 # Risk assessment for operations
 operation_risk_level := "high" if {

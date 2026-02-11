@@ -315,7 +315,7 @@ truth_defense_posture := score if {
     low_integrity_total := count([c | some c in input.claims; c.integrity_score < integrity_threshold_low])
 
     integrity_score := high_integrity_claims / total_claims
-    containment_score := quarantined_low_integrity / low_integrity_total if low_integrity_total > 0 else 1.0
+    containment_score := safe_div(quarantined_low_integrity, low_integrity_total)
 
     score := (integrity_score + containment_score) / 2
 }
@@ -351,3 +351,5 @@ violations := {
     "high_risk_decisions": high_risk_decisions,
     "escalations_to_security": escalate_to_security,
 }
+
+safe_div(num, den) := num / den { den > 0 } else := 1.0
