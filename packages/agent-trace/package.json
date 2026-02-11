@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agent-trace",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Agent Trace spec + reference implementation for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

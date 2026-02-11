@@ -8,6 +8,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "types": ["node", "pg", "crypto-js", "uuid"],
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/decision-policy",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Versioned decision policies for autonomous agents.",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-      "ajv": "^8.12.0"
+    "ajv": "^8.12.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/context-shell",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Summit Context Shell for policy-gated, auditable repo access",
   "type": "module",
   "main": "dist/index.js",

@@ -18,7 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
+## [4.2.3] - Risk-Based Assurance Sync - 2026-01-23
+
 ### Added
+- **Risk-Based Assurance (OMB M-26-05)**:
+  - Transitioned from universal self-attestation to machine-readable evidence packs.
+  - Implemented deterministic SBOM generation (SPDX JSON).
+  - Added build provenance attestation and verification.
+  - Added automated evidence packaging and schema validation.
+  - Integrated SBOM-on-request delivery via CI artifacts.
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).

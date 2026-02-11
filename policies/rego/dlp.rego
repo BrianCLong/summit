@@ -1,4 +1,7 @@
 package intelgraph.dlp
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 default allow := true
 pattern := {"ssn": `\b\d{3}-\d{2}-\d{4}\b`, "cc": `\b4[0-9]{12}(?:[0-9]{3})?\b`, "api": `(?i)api[_-]?key\s*[:=]\s*[A-Za-z0-9_\-]{16,}`}
 

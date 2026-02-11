@@ -1,4 +1,7 @@
 package companyos.provenance
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 
 test_approval_required {
     input := {

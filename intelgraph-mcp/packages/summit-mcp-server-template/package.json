@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/summit-mcp-server-template",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Golden Path scaffold for Summit-grade MCP servers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

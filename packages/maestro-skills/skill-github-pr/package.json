@@ -1,6 +1,6 @@
 {
   "name": "@maestro/skill-github-pr",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "Summit Skill for GitHub PRs",
   "main": "src/index.ts",
   "license": "MIT",

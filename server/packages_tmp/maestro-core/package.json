@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/maestro-core",
-  "version": "5.3.2",
+  "version": "4.2.3",
   "description": "Maestro orchestration engine core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
