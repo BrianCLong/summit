@@ -1,5 +1,7 @@
 import { Client } from 'pg';
 import 'dotenv/config';
+import { PartitionMaintenanceService } from '../src/services/PartitionMaintenanceService.js';
+import { logger } from '../src/config/logger.js';
 
 interface CliOptions {
   tenantId?: string;
@@ -44,59 +46,37 @@ async function run() {
   const client = new Client({ connectionString: connStr });
   await client.connect();
 
+  const service = new PartitionMaintenanceService(client);
+
   try {
     if (options.dryRun) {
-      console.log(
+      logger.info(
         `Dry run: would ensure partitions for ${
           options.tenantId ? `tenant ${options.tenantId}` : 'all tenants'
         } with monthsAhead=${options.monthsAhead}, retentionMonths=${options.retentionMonths}`,
       );
+      await service.archiveOldPartitions(options.retentionMonths, true);
       return;
     }
 
-    if (options.tenantId) {
-      // Event Store Partitions
-      await client.query(
-        'SELECT ensure_event_store_partition($1, $2, $3)',
-        [options.tenantId, options.monthsAhead, options.retentionMonths],
-      );
-      // HIPAA Log Partitions
-      await client.query(
-        'SELECT ensure_hipaa_log_partition($1)',
-        [options.tenantId],
-      );
-      console.log(`✅ ensured partitions for tenant ${options.tenantId}`);
-    } else {
-      // Event Store Partitions
-      const { rows: eventRows } = await client.query(
-        'SELECT ensure_event_store_partitions_for_all($1, $2) AS tenants_touched',
-        [options.monthsAhead, options.retentionMonths],
-      );
+    await service.ensurePartitions(options.tenantId, options.monthsAhead, options.retentionMonths);
 
-      // HIPAA Log Partitions
-      const { rows: hipaaRows } = await client.query(
-        'SELECT ensure_hipaa_log_partitions_for_all() AS tenants_touched'
-      );
+    // Archive old partitions strategy
+    await service.archiveOldPartitions(options.retentionMonths, false);
 
-      // Outbox Partitions
-      await client.query(
-        'SELECT ensure_outbox_partition($1, $2)',
-        [options.monthsAhead, options.retentionMonths],
-      );
-
-      console.log(
-        `✅ ensured partitions for ${eventRows[0]?.tenants_touched ?? 0} tenants (event_store), ${hipaaRows[0]?.tenants_touched ?? 0} tenants (hipaa_log), and outbox_events`,
-      );
+    // Metrics display (kept from original script)
+    try {
+        const metrics = await client.query(
+        `SELECT partition_name, total_pretty, bounds
+        FROM event_store_partition_metrics
+        ORDER BY total_bytes DESC
+        LIMIT 15`,
+        );
+        console.table(metrics.rows);
+    } catch (e) {
+        logger.warn('Could not fetch partition metrics (view might not exist)');
     }
 
-    const metrics = await client.query(
-      `SELECT partition_name, total_pretty, bounds
-       FROM event_store_partition_metrics
-       ORDER BY total_bytes DESC
-       LIMIT 15`,
-    );
-
-    console.table(metrics.rows);
   } finally {
     await client.end();
   }
