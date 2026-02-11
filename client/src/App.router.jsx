@@ -32,26 +32,16 @@ import {
   Divider,
 } from '@mui/material';
 import {
-  Assessment,
-  Assignment as AssignmentIcon,
-  Cable,
   Dashboard as DashboardIcon,
-  Extension,
-  Hub,
-  Key,
-  Map,
-  Menu as MenuIcon,
-  MilitaryTech,
-  Notifications,
-  PendingActions,
-  Psychology,
-  RocketLaunch,
-  Science,
   Search,
-  Security,
-  Settings,
   Timeline,
-  VerifiedUser,
+  Psychology,
+  Menu as MenuIcon,
+  Map,
+  Assessment,
+  Settings,
+  RocketLaunch,
+  PendingActions,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -135,6 +125,9 @@ const SearchResultDetail = React.lazy(() =>
   import('./pages/Search/SearchResultDetail')
 );
 
+import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { Security } from '@mui/icons-material';
+import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
 // Demo mode components
 import DemoIndicator from './components/common/DemoIndicator';
@@ -147,9 +140,9 @@ const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/search', label: 'Search', icon: <Search /> },
   { path: '/hunts', label: 'Hunts', icon: <Security /> },
-  { path: '/ioc', label: 'IOCs', icon: <AssignmentIcon /> },
-  { path: '/investigations', label: 'Timeline', icon: <Timeline /> },
-  { path: '/graph', label: 'Graph Explorer', icon: <Hub /> },
+  { path: '/ioc', label: 'IOCs', icon: <Timeline /> },
+  { path: '/investigations', label: 'Timeline', icon: <Search /> },
+  { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/orchestrator', label: 'Orchestrator', icon: <RocketLaunch /> },
   {
@@ -283,9 +276,7 @@ function AppHeader({ onMenuClick }) {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPage = navigationItems.find(
-    (item) =>
-      location.pathname === item.path ||
-      location.pathname.startsWith(item.path + '/'),
+    (item) => item.path === location.pathname,
   );
 
   // Show demo walkthrough link only in demo mode
@@ -306,7 +297,7 @@ function AppHeader({ onMenuClick }) {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          IntelGraph Platform{currentPage ? ` - ${currentPage.label}` : ''}
+          IntelGraph Platform - {currentPage?.label || 'Unknown'}
         </Typography>
         {showDemoWalkthrough && (
           <Button

@@ -570,15 +570,22 @@ export default function IOCList() {
       headerName: 'Actions',
       width: 120,
       sortable: false,
-      renderCell: () => (
+      renderCell: (params) => (
         <Stack direction="row" spacing={1}>
           <Tooltip title="Block IOC">
-            <IconButton size="small" color="error">
+            <IconButton
+              size="small"
+              color="error"
+              aria-label={`Block indicator ${params.row.value}`}
+            >
               <Block />
             </IconButton>
           </Tooltip>
           <Tooltip title="Share IOC">
-            <IconButton size="small">
+            <IconButton
+              size="small"
+              aria-label={`Share indicator ${params.row.value}`}
+            >
               <Share />
             </IconButton>
           </Tooltip>
