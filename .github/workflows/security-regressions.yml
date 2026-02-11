@@ -12,10 +12,6 @@ on:
     - cron: '0 0 * * *' # Nightly run
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   security-regressions:
     name: "🛡️ Security Regressions"
@@ -25,15 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
-      - name: Install Dependencies
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4      - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
       - name: Run Regression Pack

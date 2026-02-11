@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   configure-aws-oidc:
-    if: (((inputs.cloud_provider == 'aws' || inputs.cloud_provider == 'both') && (inputs.cloud_provider == 'oci' || inputs.cloud_provider == 'both')) && (always() && (needs.configure-aws-oidc.result == 'success' || needs.configure-oci-oidc.result == 'success'))) && (always())
+    if: inputs.cloud_provider == 'aws' || inputs.cloud_provider == 'both'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -57,6 +57,7 @@ jobs:
           kubectl get nodes
 
   configure-oci-oidc:
+    if: inputs.cloud_provider == 'oci' || inputs.cloud_provider == 'both'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -82,6 +83,7 @@ jobs:
 
   sops-key-rotation:
     needs: [configure-aws-oidc, configure-oci-oidc]
+    if: always() && (needs.configure-aws-oidc.result == 'success' || needs.configure-oci-oidc.result == 'success')
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
@@ -175,6 +177,7 @@ jobs:
 
   verify-setup:
     needs: [configure-aws-oidc, configure-oci-oidc, sops-key-rotation]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Setup Summary
