@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   guard:
-    if: github.event_name == 'schedule'
+    if: ((github.event_name == 'schedule') && (steps.guard.outputs.saturated == 'true')) && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true')
     runs-on: ubuntu-latest
     outputs:
       saturated: ${{ steps.guard.outputs.saturated }}
@@ -29,7 +29,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summarize guard decision
-        if: steps.guard.outputs.saturated == 'true'
         run: |
           echo "⚠️ **Backlog Guard Active**" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -40,7 +39,6 @@ jobs:
           echo "**Manual Override:** \`gh workflow run auto-update-prs.yml\` (bypasses guard)" >> "$GITHUB_STEP_SUMMARY"
 
   triage-prs:
-    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
     needs: [guard]
     runs-on: ubuntu-latest
     steps:
@@ -124,14 +122,13 @@ jobs:
           done
 
   update:
-    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
+    if: ((github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') && (github.event_name == 'schedule')) && (steps.list.outputs.prs != '')
     needs: [guard, triage-prs] # Ensure triage runs first
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
     steps:
       - name: Start jitter
-        if: github.event_name == 'schedule'
         run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
       - name: List out-of-date PRs
         id: list
@@ -143,7 +140,6 @@ jobs:
           echo "prs=$(cat prs.txt | tr '\n' ' ')" >> $GITHUB_OUTPUT
 
       - name: Update branches (safe server-side)
-        if: steps.list.outputs.prs != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
