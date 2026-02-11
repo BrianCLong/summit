@@ -61,7 +61,7 @@ permissions:
 jobs:
   audit:
     name: Security Audit
-    if: false  # Temporarily disabled for GA merge surge
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     outputs:
       critical: ${{ steps.audit.outputs.critical }}
@@ -240,10 +240,9 @@ jobs:
 
   auto-fix:
     name: Auto-Fix Vulnerabilities
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     needs: audit
-    if: |
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (|)
       github.event_name == 'workflow_dispatch' &&
       inputs.fix == true &&
       needs.audit.outputs.failed == 'true'
