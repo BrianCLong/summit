@@ -1,0 +1,4 @@
+slug: item-unknown
+evidence_id: EVD-UNKNOWN-001
+description: A placeholder item for testing unknown bundle verification.
+version: 0.0.1

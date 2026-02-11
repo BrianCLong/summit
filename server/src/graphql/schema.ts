@@ -109,96 +109,9 @@ const mainSchema = `
     createdBy: String!
   }
 
-  type Case {
-    id: ID!
-    tenantId: String!
-    title: String!
-    description: String
-    status: String!
-    priority: String!
-    compartment: String
-    policyLabels: [String!]
-    metadata: JSON
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    createdBy: String!
-    closedAt: DateTime
-    closedBy: String
-    slaTimers: [SLATimer!]
-    comments(limit: Int, offset: Int): [Comment!]
-  }
-
-  type Comment {
-    commentId: ID!
-    tenantId: String!
-    targetType: String!
-    targetId: String!
-    parentId: ID
-    rootId: ID
-    content: String!
-    authorId: String!
-    author: User
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    mentions: [String!]
-    isEdited: Boolean!
-    isDeleted: Boolean!
-    metadata: JSON
-  }
-
-  type SLATimer {
-    slaId: ID!
-    caseId: ID!
-    tenantId: String!
-    type: String!
-    name: String!
-    startTime: DateTime!
-    deadline: DateTime!
-    completedAt: DateTime
-    status: String!
-    targetDurationSeconds: Int!
-    metadata: JSON
-  }
-
-  input CaseInput {
-    title: String!
-    description: String
-    status: String
-    priority: String
-    compartment: String
-    policyLabels: [String!]
-    metadata: JSON
-    reason: String
-    legalBasis: String
-  }
-
-  input CaseUpdateInput {
-    id: ID!
-    title: String
-    description: String
-    status: String
-    priority: String
-    compartment: String
-    policyLabels: [String!]
-    metadata: JSON
-    reason: String
-    legalBasis: String
-  }
-
-  input CommentInput {
-    targetType: String!
-    targetId: String!
-    parentId: ID
-    content: String!
-    mentions: [String!]
-    metadata: JSON
-  }
-
   input InvestigationInput {
     name: String!
     description: String
-    status: InvestigationStatus
-    priority: Int
   }
 
   enum InvestigationStatus {
@@ -473,30 +386,6 @@ const mainSchema = `
     tenantId: String!
   }
 
-  type OsintScan {
-    id: ID!
-    target: String!
-    status: String!
-  }
-
-  type SynintAgentFinding {
-    agentName: String!
-    success: Boolean!
-    findings: JSON!
-    errors: [String!]
-    warnings: [String!]
-    startedAt: DateTime
-    completedAt: DateTime
-  }
-
-  type SynintSweep {
-    target: String!
-    startedAt: DateTime!
-    completedAt: DateTime!
-    agents: [SynintAgentFinding!]!
-    meta: JSON
-  }
-
   input CognitiveExposureInput {
     segmentId: ID!
     narrativeId: ID!
@@ -570,11 +459,6 @@ const mainSchema = `
     getStrategicResponsePlaybooks(scenarioId: ID!): JSON
     getCrisisScenario(id: ID!): JSON
     getAllCrisisScenarios: [JSON]
-    case(id: ID!, reason: String!, legalBasis: String!): Case
-    cases(status: String, compartment: String, limit: Int, offset: Int): [Case!]
-    comments(targetType: String!, targetId: String!, limit: Int, offset: Int): [Comment!]
-    osintScans: [OsintScan]
-    osintScan(id: ID!): OsintScan
     health: JSON
   }
 
@@ -652,17 +536,8 @@ const mainSchema = `
     startTrial(plan: String!, days: Int!): Boolean!
     upgradePlan(plan: String!): Boolean!
     runWarGameSimulation(input: JSON!): JSON
-    createCrisisScenario(input: JSON!): JSON
     updateCrisisScenario(id: ID!, input: JSON!): JSON
     deleteCrisisScenario(id: ID!): Boolean!
-    createCase(input: CaseInput!): Case!
-    updateCase(input: CaseUpdateInput!): Case!
-    archiveCase(id: ID!, reason: String!, legalBasis: String!): Case!
-    addComment(input: CommentInput!): Comment!
-    updateComment(id: ID!, content: String!): Comment!
-    deleteComment(id: ID!): Boolean!
-    startOsintScan(target: String!): OsintScan
-    runSynintSweep(target: String!): SynintSweep!
   }
 
   type Subscription {
