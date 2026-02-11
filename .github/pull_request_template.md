@@ -52,6 +52,15 @@
 - [ ] **Security Impact**: Does this change touch auth, PII, or crypto?
   - If YES, link to [Security Triage/Backlog](docs/SECURITY_PHASE1_STARTER_PACK_BACKLOG.md).
 
+
+## Governance & Labels Contract
+
+<!-- See docs/labels.md for guidance. -->
+
+- [ ] **Labels**: Applied `lane:*`, `level:*`, and `compliance:*` labels?
+- [ ] **No Secrets**: Verified no secrets in code or history?
+- [ ] **Audit**: If `compliance:audit-ready`, verified audit logs are generated?
+
 ## Green CI Contract Checklist
 
 <!-- Must be checked before merge. See docs/governance/GREEN_CI_CONTRACT.md -->

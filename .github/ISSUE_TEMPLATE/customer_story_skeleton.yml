@@ -1,0 +1,25 @@
+name: "Customer Story Skeleton"
+description: "Draft a case study or success story."
+labels: ["lane:bizdev", "type:docs"]
+body:
+  - type: input
+    id: customer
+    attributes:
+      label: Customer Name
+    validations:
+      required: true
+  - type: textarea
+    id: challenge
+    attributes:
+      label: The Challenge
+      description: "What was the problem before Summit?"
+  - type: textarea
+    id: solution
+    attributes:
+      label: The Solution
+      description: "How was Summit deployed?"
+  - type: textarea
+    id: results
+    attributes:
+      label: Quantitative Results
+      description: "ROI, time saved, etc."

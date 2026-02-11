@@ -30,6 +30,14 @@ For ready-to-use templates that keep issues and PRs crisp, copy the relevant pla
 - **Bugfix**: reproduction, guardrails, regression coverage, and backport plan.
 - **Documentation**: audience, coverage, link verification, and asset expectations.
 
+## 🏷️ Labels & Governance
+
+We use a strict label taxonomy to route issues and trigger compliance gates.
+
+- **[Label Playbook](docs/labels.md)**: Defines all lanes (`lane:bizdev`, `lane:engineering`), levels, and compliance flags.
+- **Bot Actions**: Our bots automatically tag PRs based on file paths. Please verify these labels.
+- **Skills Pack**: For React best practices, refer to our vendored [Skills Pack](skills/vendor/vercel-labs-agent-skills/skills/react-best-practices/).
+
 ## 🛠 Development Workflow
 
 ### 1. Issue & Branching
