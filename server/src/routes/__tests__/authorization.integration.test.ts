@@ -7,7 +7,9 @@ const app = express();
 
 app.use(express.json());
 app.use((req: any, _res, next) => {
-  const role = req.headers['x-user-role'];
+  // In tests, we mock the authentication by populating req.user based on a test-only header
+  // that doesn't conflict with the ones we just hardened in the application.
+  const role = req.headers['x-test-role'];
   if (role) {
     req.user = { role: String(role).toUpperCase() };
   }
@@ -32,26 +34,26 @@ describe('authorization guard integration', () => {
 
     await request(app)
       .post('/entities')
-      .set('x-user-role', 'viewer')
+      .set('x-test-role', 'viewer')
       .expect(403);
   });
 
   it('allows analysts to create IntelGraph entities', async () => {
     await request(app)
       .post('/entities')
-      .set('x-user-role', 'analyst')
+      .set('x-test-role', 'analyst')
       .expect(201);
   });
 
   it('gates Maestro run operations to operators', async () => {
     await request(app)
       .post('/maestro/runs')
-      .set('x-user-role', 'viewer')
+      .set('x-test-role', 'viewer')
       .expect(403);
 
     await request(app)
       .post('/maestro/runs')
-      .set('x-user-role', 'operator')
+      .set('x-test-role', 'operator')
       .expect(202);
   });
 
@@ -60,12 +62,12 @@ describe('authorization guard integration', () => {
 
     await request(app)
       .get('/admin/users')
-      .set('x-user-role', 'analyst')
+      .set('x-test-role', 'analyst')
       .expect(403);
 
     await request(app)
       .get('/admin/users')
-      .set('x-user-role', 'admin')
+      .set('x-test-role', 'admin')
       .expect(200);
   });
 });

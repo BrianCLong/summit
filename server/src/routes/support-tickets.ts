@@ -165,20 +165,25 @@ router.get('/tickets/:id/comments', async (req, res) => {
 
 const resolveActor = (req: express.Request) => {
   const user = (req as any).user;
-  const idHeader = req.headers['x-user-id'];
-  const roleHeader = req.headers['x-user-role'];
 
-  const id = (user?.sub || user?.id || (Array.isArray(idHeader) ? idHeader[0] : idHeader) || '').toString();
-  const roles = Array.isArray(user?.roles)
-    ? (user?.roles as string[])
-    : roleHeader
-      ? [roleHeader].flat()
-      : [];
+  // Use the authenticated user object, never trust user-supplied headers for identity or roles.
+  const id = (user?.sub || user?.id || '').toString();
+  let roles: string[] = [];
+  if (Array.isArray(user?.roles)) {
+    roles = user.roles;
+  } else if (user?.role) {
+    roles = [user.role];
+  }
 
   return { id, roles };
 };
 
-const canModerateComments = (roles: string[]) => roles.some((role) => role === 'admin' || role === 'support_admin');
+const canModerateComments = (roles: string[]) =>
+  roles.some(
+    (role) =>
+      typeof role === 'string' &&
+      (role.toLowerCase() === 'admin' || role.toLowerCase() === 'support_admin'),
+  );
 
 router.post('/tickets/:ticketId/comments/:commentId/delete', express.json(), async (req, res) => {
   try {

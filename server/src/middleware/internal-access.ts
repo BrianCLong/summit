@@ -6,9 +6,6 @@ const isConsoleEnabled = () =>
 const internalRoles = new Set(['admin', 'system.internal', 'ops', 'platform-admin']);
 
 function hasAdminRole(req: Request): boolean {
-  const roleHeader =
-    (req.headers['x-user-role'] as string | undefined) ||
-    (req.headers['x-role'] as string | undefined);
   const roles: string[] = [];
 
   if ((req as any).user?.role) {
@@ -17,11 +14,11 @@ function hasAdminRole(req: Request): boolean {
   if (Array.isArray((req as any).user?.roles)) {
     roles.push(...(req as any).user.roles);
   }
-  if (roleHeader) {
-    roles.push(roleHeader);
-  }
 
-  return roles.some((role) => internalRoles.has(role));
+  // Only trust roles from the authenticated user object, not from request headers.
+  return roles.some(
+    (role) => typeof role === 'string' && internalRoles.has(role.toLowerCase()),
+  );
 }
 
 export function requireInternalAccess(

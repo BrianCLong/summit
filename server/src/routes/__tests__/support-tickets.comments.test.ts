@@ -71,8 +71,9 @@ describeIf('Support ticket comment safe delete lifecycle', () => {
     app = express();
     app.use(express.json());
     app.use((req, _res, next) => {
-      const idHeader = req.headers['x-user-id'];
-      const roleHeader = req.headers['x-user-role'];
+      // In tests, we mock the authentication by populating req.user based on test-only headers.
+      const idHeader = req.headers['x-test-user-id'];
+      const roleHeader = req.headers['x-test-user-role'];
       if (idHeader) {
         (req as any).user = { id: idHeader, roles: roleHeader ? [roleHeader] : [] };
       }
@@ -97,7 +98,7 @@ describeIf('Support ticket comment safe delete lifecycle', () => {
   it('soft deletes a comment, hides it from listings, and restores it', async () => {
     const createRes = await request(app)
       .post(`/api/support/tickets/${ticketId}/comments`)
-      .set('x-user-id', ACTOR_ONE)
+      .set('x-test-user-id', ACTOR_ONE)
       .send({ content: 'Initial comment', isInternal: false });
 
     expect(createRes.status).toBe(201);
@@ -110,7 +111,7 @@ describeIf('Support ticket comment safe delete lifecycle', () => {
 
     const deleteRes = await request(app)
       .post(`/api/support/tickets/${ticketId}/comments/${commentId}/delete`)
-      .set('x-user-id', ACTOR_ONE)
+      .set('x-test-user-id', ACTOR_ONE)
       .send({ reason: 'cleanup' });
     expect(deleteRes.status).toBe(200);
     expect(deleteRes.body.status).toBe('deleted');
@@ -121,7 +122,7 @@ describeIf('Support ticket comment safe delete lifecycle', () => {
 
     const restoreRes = await request(app)
       .post(`/api/support/tickets/${ticketId}/comments/${commentId}/restore`)
-      .set('x-user-id', ACTOR_ONE);
+      .set('x-test-user-id', ACTOR_ONE);
     expect(restoreRes.status).toBe(200);
     expect(restoreRes.body.status).toBe('restored');
 
@@ -136,13 +137,13 @@ describeIf('Support ticket comment safe delete lifecycle', () => {
   it('enforces author or moderator permissions for deletion', async () => {
     const createRes = await request(app)
       .post(`/api/support/tickets/${ticketId}/comments`)
-      .set('x-user-id', ACTOR_ONE)
+      .set('x-test-user-id', ACTOR_ONE)
       .send({ content: 'Owned comment' });
     const commentId = createRes.body.id as string;
 
     const forbidden = await request(app)
       .post(`/api/support/tickets/${ticketId}/comments/${commentId}/delete`)
-      .set('x-user-id', ACTOR_TWO)
+      .set('x-test-user-id', ACTOR_TWO)
       .send({ reason: 'should not work' });
     expect(forbidden.status).toBe(403);
 
@@ -151,8 +152,8 @@ describeIf('Support ticket comment safe delete lifecycle', () => {
 
     const allowed = await request(app)
       .post(`/api/support/tickets/${ticketId}/comments/${commentId}/delete`)
-      .set('x-user-id', ACTOR_TWO)
-      .set('x-user-role', 'admin')
+      .set('x-test-user-id', ACTOR_TWO)
+      .set('x-test-user-role', 'admin')
       .send({ reason: 'moderator clean up' });
     expect(allowed.status).toBe(200);
   });
