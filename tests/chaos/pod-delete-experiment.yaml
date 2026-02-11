@@ -1,0 +1,22 @@
+# tests/chaos/pod-delete-experiment.yaml
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: nginx-chaos
+  namespace: litmus
+spec:
+  engineState: 'active'
+  appinfo:
+    appns: 'default'
+    applabel: 'app=nginx'
+    appkind: 'deployment'
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: '30' # in seconds
+            - name: PODS_AFFECTED_PERC
+              value: '100'
