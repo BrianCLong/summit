@@ -1,0 +1,44 @@
+name: governance-evidence
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+jobs:
+  registry-validate:
+    name: Registry Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Validate Registry
+        run: node scripts/ci/validate_policy_registry.mjs
+
+  evidence-verify:
+    name: Evidence Artifact Verification
+    needs: [registry-validate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+
+      - name: Download Evidence Artifacts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: '*-evidence'
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Verify Evidence
+        run: node scripts/ci/verify_evidence_artifacts.mjs

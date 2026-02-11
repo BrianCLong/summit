@@ -191,12 +191,26 @@ jobs:
           # Add to job summary
           cat artifacts/release-readiness/summary.md >> $GITHUB_STEP_SUMMARY
 
+      - name: Emit release readiness evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/governance
+          cat > artifacts/governance/ga_release_readiness.json <<EOF
+          {
+            "policy": "GA-GATE",
+            "status": "${{ steps.readiness.outcome }}",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "commit": "${{ github.sha }}"
+          }
+          EOF
+
       - name: Upload Release Readiness Artifact
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4
         with:
-          name: release-readiness-report
-          path: artifacts/release-readiness/
+          name: release-readiness-evidence
+          path: artifacts/
           retention-days: 30
 
       - name: Update PR Comment

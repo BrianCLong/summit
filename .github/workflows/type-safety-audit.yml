@@ -42,20 +42,13 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: write
   pull-requests: write
-  issues: write
-  actions: read
 
 jobs:
   audit:
     name: Type Safety Audit
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     outputs:
       total_any: ${{ steps.audit.outputs.total_any }}

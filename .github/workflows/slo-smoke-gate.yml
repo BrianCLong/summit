@@ -33,10 +33,6 @@ on:
   schedule:
     - cron: "0 3 * * *"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   checks: write
@@ -46,7 +42,6 @@ env:
 
 jobs:
   slo-smoke-gate:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SLO Smoke Gate
     runs-on: ubuntu-latest
     timeout-minutes: 15
