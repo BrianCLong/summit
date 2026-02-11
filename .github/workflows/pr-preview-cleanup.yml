@@ -3,39 +3,12 @@ name: PR Preview Cleanup
 on:
   pull_request:
     types: [closed]
-  schedule:
-    - cron: '0 */6 * * *'
-
-concurrency:
-  group: preview-cleanup-${{ github.event.pull_request.number || 'scheduled' }}
-  cancel-in-progress: false
-
-permissions:
-  id-token: write
-  contents: read
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: Cleanup preview resources
-        run: ./scripts/preview/cleanup.sh
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-
-      - name: Remove PR comment
-    if: false && (github.event_name == 'pull_request' && github.event.action == 'closed')
+      - name: Cleanup Preview
         run: |
-          COMMENTS=$(curl -s -X GET \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments)
-
-          echo "$COMMENTS" | jq -r '.[] | select(.body | contains("Preview URL")) | .id' | while read COMMENT_ID; do
-            curl -X DELETE \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              https://api.github.com/repos/${{ github.repository }}/issues/comments/$COMMENT_ID
-          done
+          echo "Cleaning up preview for PR #${{ github.event.number }}"
+          # Add actual cleanup logic here
