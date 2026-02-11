@@ -76,9 +76,9 @@ always_required:
 #   "^\.github/workflows/" - Matches workflow files (escape dots)
 #   "^Dockerfile$" - Matches exactly "Dockerfile" at root
 conditional_required:
-  - name: "Workflow Lint"
-    workflow: "workflow-lint.yml"
-    rationale: "Validates GitHub Actions workflow syntax and safety"
+  - name: "Workflow Validity Gate"
+    workflow: "workflow-validity.yml"
+    rationale: "Validates GitHub Actions workflow syntax and safety to prevent global outages"
     when_paths_match:
       - '^\.github/workflows/'
       - '^\.github/actions/'
