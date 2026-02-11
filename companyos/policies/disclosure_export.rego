@@ -1,3 +1,4 @@
+import future.keywords
 package companyos.authz.disclosure_export
 
 default decision := {

@@ -1,3 +1,4 @@
+import future.keywords
 package summit.narrative.authz
 
 default allow := false

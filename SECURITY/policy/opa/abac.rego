@@ -1,3 +1,4 @@
+import future.keywords
 # ABAC (Attribute-Based Access Control) Policy for IntelGraph
 # Implements fine-grained access control based on user, resource, and environmental attributes
 

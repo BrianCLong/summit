@@ -64,6 +64,8 @@ jobs:
           echo "api_url=$api" >> $GITHUB_OUTPUT
           echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

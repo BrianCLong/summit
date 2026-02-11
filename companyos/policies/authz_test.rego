@@ -1,3 +1,4 @@
+import future.keywords
 # CompanyOS Authorization Policy Tests
 # Tests for B1: OPA-Backed Authorization v1
 

@@ -1,3 +1,4 @@
+import future.keywords
 package fixes.compartmentation
 
 default allow = false

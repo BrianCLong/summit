@@ -47,21 +47,14 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: write
   pull-requests: write
   security-events: write
-  issues: write
-  actions: read
 
 jobs:
   audit:
     name: Security Audit
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     outputs:
       critical: ${{ steps.audit.outputs.critical }}
@@ -74,9 +67,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
@@ -240,7 +232,6 @@ jobs:
 
   auto-fix:
     name: Auto-Fix Vulnerabilities
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     needs: audit
     if: |
@@ -252,9 +243,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:

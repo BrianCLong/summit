@@ -1,3 +1,4 @@
+import future.keywords
 # CompanyOS Authorization Policy
 # Implements B1: OPA-Backed Authorization v1 (ABAC -> Real PDP)
 #

@@ -1,3 +1,4 @@
+import future.keywords
 package helm_ci
 
 deny contains msg if {

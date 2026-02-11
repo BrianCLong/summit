@@ -2,17 +2,12 @@ name: graph-sync
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   validate:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -22,7 +17,9 @@ jobs:
       - name: Neo4j & PG services
         uses: hoverkraft-tech/compose-action@v2
         with:
-          compose-file: .github/compose/pg_neo.yml
+          compose-file: |
+            docker-compose.db.yml
+            docker-compose.neo4j.yml
       - name: Validate Graph↔PG sync
         run: node scripts/ci/validate_graph_pg_sync.mjs
       - name: Upload evidence

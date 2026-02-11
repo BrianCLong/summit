@@ -135,11 +135,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -180,11 +180,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -222,11 +222,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -301,11 +301,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -380,11 +380,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -467,11 +467,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -527,11 +527,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -597,11 +597,11 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

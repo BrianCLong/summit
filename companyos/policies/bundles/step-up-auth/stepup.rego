@@ -1,3 +1,4 @@
+import future.keywords
 # CompanyOS Identity Fabric - Step-Up Authentication Policy
 # Version: 1.0.0
 #

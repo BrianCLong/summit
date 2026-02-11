@@ -1,3 +1,4 @@
+import future.keywords
 package envoy.authz
 
 allow {

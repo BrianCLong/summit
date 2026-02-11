@@ -11,7 +11,6 @@ import logger from '../config/logger.js';
 const repoLogger = logger.child({ name: 'CaseRepo' });
 
 export type CaseStatus = 'open' | 'active' | 'closed' | 'archived';
-export type CasePriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface Case {
   id: string;
@@ -19,7 +18,6 @@ export interface Case {
   title: string;
   description?: string;
   status: CaseStatus;
-  priority: CasePriority;
   compartment?: string;
   policyLabels: string[];
   metadata: Record<string, any>;
@@ -44,7 +42,6 @@ export interface CaseInput {
   title: string;
   description?: string;
   status?: CaseStatus;
-  priority?: CasePriority;
   compartment?: string;
   policyLabels?: string[];
   metadata?: Record<string, any>;
@@ -55,7 +52,6 @@ export interface CaseUpdateInput {
   title?: string;
   description?: string;
   status?: CaseStatus;
-  priority?: CasePriority;
   compartment?: string;
   policyLabels?: string[];
   metadata?: Record<string, any>;
@@ -67,7 +63,6 @@ interface CaseRow {
   title: string;
   description: string | null;
   status: string;
-  priority: string;
   compartment: string | null;
   policy_labels: string[];
   metadata: any;
@@ -89,10 +84,10 @@ export class CaseRepo {
 
     const { rows } = (await this.pg.query(
       `INSERT INTO maestro.cases (
-        id, tenant_id, title, description, status, priority, compartment,
+        id, tenant_id, title, description, status, compartment,
         policy_labels, metadata, created_by
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         id,
@@ -100,7 +95,6 @@ export class CaseRepo {
         input.title,
         input.description || null,
         input.status || 'open',
-        input.priority || 'medium',
         input.compartment || null,
         input.policyLabels || [],
         JSON.stringify(input.metadata || {}),
@@ -153,12 +147,6 @@ export class CaseRepo {
         params.push(userId);
         paramIndex++;
       }
-    }
-
-    if (input.priority !== undefined) {
-      updateFields.push(`priority = $${paramIndex}`);
-      params.push(input.priority);
-      paramIndex++;
     }
 
     if (input.compartment !== undefined) {
@@ -470,7 +458,6 @@ export class CaseRepo {
       title: row.title,
       description: row.description || undefined,
       status: row.status as CaseStatus,
-      priority: row.priority as CasePriority,
       compartment: row.compartment || undefined,
       policyLabels: row.policy_labels || [],
       metadata: row.metadata || {},

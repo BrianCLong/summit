@@ -1,3 +1,4 @@
+import future.keywords
 package ethics.test
 
 import data.ethics.interaction

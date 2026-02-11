@@ -1,3 +1,4 @@
+import future.keywords
 # CompanyOS Identity Fabric - Attribute-Based Access Control Policy
 # Version: 1.0.0
 #

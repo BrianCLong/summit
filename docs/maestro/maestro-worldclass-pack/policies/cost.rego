@@ -1,3 +1,4 @@
+import future.keywords
 package maestro.cost
 
 violation[reason] {

@@ -96,9 +96,8 @@ jobs:
           echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
           echo "Resolved commit: ${COMMIT}"
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:

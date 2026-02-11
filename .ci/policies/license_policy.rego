@@ -1,3 +1,4 @@
+import future.keywords
 package license.policy
 
 # Example: block GPL-3.0 unless waived

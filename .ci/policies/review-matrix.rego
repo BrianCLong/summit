@@ -1,3 +1,4 @@
+import future.keywords
 package review.matrix
 
 default allow = false

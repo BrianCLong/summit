@@ -1,3 +1,4 @@
+import future.keywords
 package summit.sbom
 
 default allow := false

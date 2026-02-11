@@ -29,10 +29,6 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -46,11 +42,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"

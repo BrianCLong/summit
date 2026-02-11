@@ -13,24 +13,15 @@ on:
       - "scripts/audit/check-exceptions.js"
       - ".github/workflows/audit-exception-expiry.yml"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   validate-exceptions:
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Use Node.js 20
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "20"
       - name: Install dependencies
         run: |

@@ -1,3 +1,4 @@
+import future.keywords
 package summit.capability
 
 default allow = false

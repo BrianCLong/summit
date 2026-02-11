@@ -109,8 +109,8 @@ jobs:
           echo "pnpm=9.12.0" >> "$GITHUB_OUTPUT"
           echo "⚠️  Falling back to pinned pnpm 9.12.0"
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: ${{ steps.resolve-pnpm.outputs.pnpm }}
           run_install: ${{ inputs.install-deps }}

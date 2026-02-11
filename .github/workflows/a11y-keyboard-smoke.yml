@@ -34,7 +34,6 @@ concurrency:
 jobs:
   a11y-keyboard-gate:
     name: "Accessibility + keyboard smoke"
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -49,11 +48,10 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: pnpm

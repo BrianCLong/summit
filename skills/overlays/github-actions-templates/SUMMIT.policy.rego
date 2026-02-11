@@ -1,3 +1,4 @@
+import future.keywords
 package summit.skills.overlays
 
 permissions["github-actions-templates"] = {

@@ -1,3 +1,4 @@
+import future.keywords
 package intelgraph.rest
 
 default allow := false

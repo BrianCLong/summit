@@ -1,3 +1,4 @@
+import future.keywords
 package export
 
 default allow = false

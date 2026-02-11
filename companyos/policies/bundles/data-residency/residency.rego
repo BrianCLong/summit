@@ -1,3 +1,4 @@
+import future.keywords
 # CompanyOS Identity Fabric - Data Residency Enforcement Policy
 # Version: 1.0.0
 #

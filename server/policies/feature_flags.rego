@@ -1,3 +1,4 @@
+import future.keywords
 package feature_flags
 
 default decision = {

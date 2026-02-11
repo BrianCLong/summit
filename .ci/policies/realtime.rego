@@ -1,3 +1,4 @@
+import future.keywords
 package realtime
 
 default allow = false

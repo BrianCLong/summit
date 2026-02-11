@@ -23,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
-      - uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
           run_install: false
@@ -60,11 +60,11 @@ jobs:
     needs: fast-checks
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
-      - uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
           run_install: false
@@ -189,12 +189,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
           run_install: false

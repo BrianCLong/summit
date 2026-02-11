@@ -1,12 +1,13 @@
 name: ai-assist-gates
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches: [ main ]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   ai-assist-policy:
@@ -42,3 +43,55 @@ jobs:
       - run: |
           pip install PyYAML
           python tools/ci/verify_mcp_deny_by_default.py
+
+  ai-redundancy-gate:
+    name: AI Redundancy Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Need full history for git diff
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Redundancy Check
+        run: node scripts/ci/ai-redundancy-check.mjs
+        env:
+          GITHUB_PR_BODY: ${{ github.event.pull_request.body }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  reviewer-awareness:
+    name: Reviewer Awareness Prompt
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.body, 'AGENT-METADATA')
+    steps:
+      - name: Post Research Awareness Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `
+            ### 🤖 AI Governance Awareness Prompt (MSR '26)
+
+            This PR has been identified as AI-authored. Per Summit's AI Governance Policy:
+
+            - **Risk:** AI agents tend to produce higher semantic redundancy (Type-4 clones).
+            - **Warning:** Reviewers may be biased by "surface plausibility" while missing sub-optimal reuse.
+
+            **Reviewer Checklist:**
+            1. [ ] Did the agent duplicate logic that already exists in the codebase?
+            2. [ ] Are there existing utility functions that should have been used?
+            3. [ ] Is the design robust, or just "plausible"?
+
+            *Refer to [AI_CODE_GOVERNANCE.md](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/docs/governance/AI_CODE_GOVERNANCE.md) for details.*
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
