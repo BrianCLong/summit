@@ -33,7 +33,7 @@ jobs:
           cache: 'pip'
 
       - name: Install Node Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Install Python Dependencies
         run: |
@@ -52,7 +52,7 @@ jobs:
           ./scripts/test-comprehensive.sh
 
       - name: Upload Test Results
-        if: always()
+        if: always() || failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
