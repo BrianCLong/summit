@@ -13,13 +13,10 @@ import supportTicketResolvers from './supportTicket.js';
 import sprint28Resolvers from './sprint28.js';
 import ewResolvers from './electronic-warfare.js';
 import { collaborationResolvers } from './collaboration.js';
-import { caseResolvers } from './cases.js';
-import { commentResolvers } from './comments.js';
 import { cognitiveSecurityResolvers } from './cognitive-security.js';
 import { deduplicationResolvers } from './deduplication.js';
 import ticketLinksResolvers from './ticket-links.js';
 import { factGovResolvers } from '../../modules/factgov/resolvers.js';
-import { osintSynintResolvers } from './osint-synint.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040.js';
@@ -44,8 +41,6 @@ const resolvers = {
     ...(sprint28Resolvers.Query || {}),
     ...(ewResolvers.Query || {}),
     ...(collaborationResolvers.Query || {}),
-    ...(caseResolvers.Query || {}),
-    ...(commentResolvers.Query || {}),
     ...(cognitiveSecurityResolvers.Query || {}),
     ...(deduplicationResolvers.Query || {}),
     ...(ticketLinksResolvers.Query || {}),
@@ -68,7 +63,6 @@ const resolvers = {
       wargameResolver.getAllCrisisScenarios.bind(wargameResolver),
   },
   Mutation: {
-    ...(osintSynintResolvers.Mutation || {}),
     ...entityResolvers.Mutation,
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
@@ -81,8 +75,6 @@ const resolvers = {
     ...(sprint28Resolvers.Mutation || {}),
     ...(ewResolvers.Mutation || {}),
     ...(collaborationResolvers.Mutation || {}),
-    ...(caseResolvers.Mutation || {}),
-    ...(commentResolvers.Mutation || {}),
     ...(cognitiveSecurityResolvers.Mutation || {}),
     ...(factGovResolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
@@ -99,8 +91,6 @@ const resolvers = {
   },
   SupportTicket: supportTicketResolvers.SupportTicket,
   WarRoom: collaborationResolvers.WarRoom,
-  Case: caseResolvers.Case,
-  Comment: commentResolvers.Comment,
   Subscription: {
     ...(collaborationResolvers.Subscription || {}),
     ...(cognitiveSecurityResolvers.Subscription || {}),

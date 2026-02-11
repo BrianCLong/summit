@@ -66,7 +66,7 @@ jobs:
           echo "✓ Report format validation passed"
 
       - name: Upload test report
-        if: (always()) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: test-report-node-${{ matrix.node-version }}
@@ -76,6 +76,7 @@ jobs:
   weekly-triage:
     name: Weekly Triage Report
     runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout code

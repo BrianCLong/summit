@@ -1,0 +1,6 @@
+waivers: []
+# Example waiver:
+# - id: SBOM-001
+#   reason: "sbom generator temporarily offline"
+#   approver: "security@"
+#   expires_on: "2026-03-01"

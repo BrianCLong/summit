@@ -38,7 +38,7 @@ jobs:
 
   smoke:
     needs: detect
-    if: ((needs.detect.outputs.run == 'true') && (always())) && (always())
+    if: needs.detect.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -67,12 +67,14 @@ jobs:
           UI_URL: http://localhost:3000
           API_URL: http://localhost:4000
       - name: Upload k6 artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: k6-smoke-${{ github.run_id }}
           path: .github/k6/*.json
           retention-days: 7
       - name: Compose down
+        if: always()
         run: |
           if [ -f .github/ci/docker-compose.ci.yml ]; then
             docker compose -f .github/ci/docker-compose.ci.yml down -v

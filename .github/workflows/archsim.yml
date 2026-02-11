@@ -12,13 +12,8 @@ on:
       - 'modules/archsim/**'
       - 'schemas/archsim/**'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   archsim-foundation:
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
