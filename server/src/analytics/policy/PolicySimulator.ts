@@ -18,6 +18,7 @@ import {
   createDataEnvelope,
 } from '../../types/data-envelope.js';
 import logger from '../../utils/logger.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 // ============================================================================
 // Types
@@ -422,6 +423,21 @@ export class PolicySimulator {
         },
         'Policy simulation completed'
       );
+
+      // Metering: Record policy simulation
+      try {
+        await meteringEmitter.emitPolicySimulation({
+          tenantId: request.tenantId,
+          rulesCount: request.changes.length,
+          source: 'PolicySimulator',
+          correlationId: simulationId,
+          metadata: {
+            overallRisk: riskAssessment.overallRisk,
+          },
+        });
+      } catch (err) {
+        logger.warn({ err }, 'Failed to emit policy simulation meter event');
+      }
 
       return createDataEnvelope(result, {
         source: 'PolicySimulator',
