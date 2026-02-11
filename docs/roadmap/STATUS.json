@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-11T06:30:00Z",
-  "revision_note": "Hardened daily sprint automation loop with reusable generator script and deterministic evidence outputs.",
+  "last_updated": "2026-02-11T09:40:00Z",
+  "revision_note": "Aligned daily sprint automation docs to runtime outputs and added Makefile targets for deterministic generation and validation.",
   "initiatives": [
     {
       "id": "daily-sprint-automation-loop-2026-02-11",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added scripts/ops/daily-sprint-loop.sh to generate report + evidence deterministically, including explicit runtime-tooling error capture."
+      "notes": "Daily sprint loop now runs via `make daily-sprint`, validates via `make daily-sprint-validate`, and writes evidence-local markdown plus JSON bundle outputs."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -223,6 +223,18 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "ga-feature-discovery-prompt",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Expanded feature discovery GA prompt with evidence-first strict output ordering; added roadmap prompt #00, CI evidence-mode runbook, and make-driven bundle scaffold/verify tooling."
+    },
+    {
+      "id": "roadmap-todo-standup-snapshot-2026-02-11",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published docs/roadmaps/summit-development-roadmap-todo-standup.md with Todo classification method, not-started inventory, transition criteria, and Today/Next/Blockers standup snapshot."
     }
   ],
   "summary": {

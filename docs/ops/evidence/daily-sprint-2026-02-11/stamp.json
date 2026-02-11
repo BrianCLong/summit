@@ -1,4 +1,9 @@
 {
-  "hash": "07a6a785fe960d22bd423f8b738fedb6460c4672e6c18c691c087c6a9a7eb47d",
-  "provenance": "daily-sprint"
+  "schema_version": "daily-sprint-stamp.v1",
+  "evidence_id": "daily-sprint-2026-02-11",
+  "generated_at_utc": "2026-02-11T08:12:33Z",
+  "report_sha256": "d28eed93491e631bc92b0e635ddffd3a3630104eb083f8b9a9240fcb96cc83a0",
+  "metrics_sha256": "fad8e9dbce1e47eaf3f834047a3d3254743a6b39d57e448d41f6d474f59d1e2b",
+  "git_sha": "c4ed82d648382ed5d8b066cb72d2d5d18cbda6bf",
+  "script_path": "scripts/ops/daily-sprint-loop.sh"
 }
