@@ -1,7 +1,7 @@
 package docs.content
 
-import future.keywords.if
 import future.keywords.contains
+import future.keywords.if
 
 # Example policy: All docs must have a title
 deny contains msg if {

@@ -9,10 +9,7 @@ simulate := input.simulate
 
 # Sensitivity tiers requiring step-up auth
 requires_step_up {
-  input.bundle.sensitivity == "Sensitive"
-}
-requires_step_up {
-  input.bundle.sensitivity == "Restricted"
+  input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
 }
 
 has_webauthn := input.user.webauthn == true
@@ -65,12 +62,6 @@ decision := {
   "policy_version": input.policy.version,
   "redacted": redact_record(input.record),
 } {
-  some allow_effective_bool
-  allow_effective_bool := any([would_allow, simulate])
-  allow_effective := allow_effective_bool
-}
-
-any(xs) {
-  xs[_]
+  allow_effective := (would_allow or simulate)
 }
 

@@ -1,7 +1,7 @@
 package summit.deploy
 
-import future.keywords.if
 import future.keywords.contains
+import future.keywords.if
 
 import data.summit.shared
 import future.keywords

@@ -1,7 +1,7 @@
 package policy.authz.abac
 
-import future.keywords.in
 import future.keywords.contains
+import future.keywords.in
 
 import data.policy.authz.admin
 import data.policy.authz.rbac

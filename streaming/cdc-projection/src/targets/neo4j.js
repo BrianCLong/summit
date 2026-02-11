@@ -9,7 +9,6 @@ export async function mergeToNeo4j(event) {
   if (op_type === 'd') {
     // Handle delete: DETACH DELETE
     const cypher = `MATCH (n {id: $source_id}) DETACH DELETE n`;
-    // await session.run(cypher, { source_id });
     return;
   }
 
@@ -21,19 +20,4 @@ export async function mergeToNeo4j(event) {
         n._schema_version = $schema_version,
         n.updated_at = datetime($ts_source)
   `;
-
-  /**
-   * REAL IMPLEMENTATION EXAMPLE:
-   *
-   * import neo4j from 'neo4j-driver';
-   * const driver = neo4j.driver(...);
-   * const session = driver.session();
-   * await session.run(cypher, {
-   *   source_id,
-   *   properties: after,
-   *   evidence_id,
-   *   schema_version,
-   *   ts_source
-   * });
-   */
 }

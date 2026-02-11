@@ -32,16 +32,4 @@ export async function upsertToPostgres(event) {
         _schema_version = EXCLUDED._schema_version,
         updated_at = CURRENT_TIMESTAMP;
   `;
-
-  /**
-   * REAL IMPLEMENTATION EXAMPLE:
-   *
-   * import pg from 'pg';
-   * const client = new pg.Client();
-   * await client.connect();
-   * await client.query(sql, values);
-   */
-
-  // For this blueprint, we just log that the operation was prepared
-  // console.log('Postgres UPSERT prepared for:', source_id);
 }

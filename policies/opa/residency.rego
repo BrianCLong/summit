@@ -1,6 +1,5 @@
 package composer.residency
 
-import future.keywords.if
 import future.keywords.in
 
 # Input contract (example):
@@ -27,10 +26,18 @@ allow {
 }
 
 # Top-level decision with shadow support
+package composer.decision
+
+import data.composer.residency as r
+
 decision := {
   "policy": "residency",
-  "mode": input.mode,
-  "allow": allow,
-  "violations": violation,
+  "mode": mode,
+  "allow": allow_val,
+  "violations": r.violation,
+}
+{
+  mode := input.mode
+  allow_val := r.allow
 }
 

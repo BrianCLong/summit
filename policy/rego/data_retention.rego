@@ -1,7 +1,7 @@
 package data.retention
 
-import future.keywords.if
 import future.keywords.contains
+import future.keywords.if
 # Example policy: PII data must have a retention period
 deny contains msg if {
   input.data.pii == true

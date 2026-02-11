@@ -17,14 +17,11 @@ default allow := false
 
 # --- Helpers -----------------------------------------------------------------
 
-import future.keywords.if
-import future.keywords.in
-
 is_simulate := input.mode == "simulate"
 is_enforce  := input.mode == "enforce"
 
 sens := lower(input.resource.sensitivity)
-needs_step_up if sens in {"sensitive", "restricted"}
+needs_step_up := sens == "sensitive" or sens == "restricted"
 has_step_up := input.auth.webauthn_verified == true
 
 # Collect DLP redactions from pii:* tags on fields
@@ -67,15 +64,9 @@ decision := {
 reasons := r {
   base := []
   rs := base
-  rs2 := cond_append(rs, needs_step_up, reason_step_up)
-  rs3 := cond_append(rs2, should_append_no_step_reason, reason_no_step)
-  r := rs3
-}
-
-should_append_no_step_reason {
-  needs_step_up
-  not has_step_up
-  is_enforce
+  rs := cond_append(rs, needs_step_up, reason_step_up)
+  rs := cond_append(rs, needs_step_up and not has_step_up and is_enforce, reason_no_step)
+  r := rs
 }
 
 # allow rules

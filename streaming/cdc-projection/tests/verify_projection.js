@@ -7,7 +7,7 @@ const sampleInput = JSON.stringify({
     {
       schema: "public",
       table: "orders",
-      kind: "insert", // testing 'kind' instead of 'op'
+      kind: "insert",
       columnnames: ["id", "amount", "status"],
       columnvalues: [123, 99.99, "pending"]
     }
@@ -15,14 +15,14 @@ const sampleInput = JSON.stringify({
 });
 
 async function runTest() {
-  console.log("Starting CDC projection final verification test...");
+  console.log("Starting CDC projection verification test...");
 
   const consumer = spawn('node', ['src/canonical_consumer.js'], {
     cwd: './streaming/cdc-projection',
     env: {
       ...process.env,
-      SOURCE_COMMIT: 'final-commit-sha',
-      PROJECTION_NAME: 'final-projection',
+      SOURCE_COMMIT: 'test-commit-sha',
+      PROJECTION_NAME: 'test-projection',
       SCHEMA_VERSION: '1'
     }
   });
@@ -45,9 +45,9 @@ async function runTest() {
   console.log(output);
 
   if (output.includes('Applying c for pg://localhost/db/public.orders/PK:123')) {
-    console.log("✅ Verification Successful: Event processed correctly with 'kind: insert' -> 'c'.");
+    console.log("✅ Verification Successful: Event processed correctly.");
   } else {
-    console.log("❌ Verification Failed: Expected output (Applying c ...) not found.");
+    console.log("❌ Verification Failed: Expected output not found.");
     process.exit(1);
   }
 }
