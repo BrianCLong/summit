@@ -65,3 +65,33 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
+# Added via CI fix
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Schema major version not supported
+  - code: SCHEMA_VERSION_INVALID
+    description: Schema version format invalid
+  - code: JSON_PARSE_ERROR
+    description: Failed to parse JSON
+  - code: MISSING_FIELD
+    description: Required field missing
+  - code: INVALID_ENUM
+    description: Value not in allowed enum list
+  - code: DRIFT_DETECTED
+    description: Configuration drift detected
+  - code: DRIFT_ERROR
+    description: Error checking for drift
+  - code: SIG_ORPHAN
+    description: Signature file exists without artifact
+  - code: SIG_INVALID
+    description: Signature verification failed
+  - code: COSIGN_MISSING
+    description: Cosign tool missing
+  - code: SIG_MISSING
+    description: Signature missing
+  - code: ATTESTATION_MISSING
+    description: Attestation missing
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: SHA256SUMS file format invalid
+  - code: INVALID_JSON
+    description: Invalid JSON format

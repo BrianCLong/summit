@@ -24,6 +24,8 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -45,6 +47,8 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -63,6 +67,8 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
