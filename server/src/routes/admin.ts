@@ -558,7 +558,7 @@ router.post('/secrets/rotate', express.json(), async (req, res) => {
     return res.status(400).json({ ok: false, error: 'Missing required parameters' });
   }
 
-  console.log(`Rotating secret "${secretName}" to version "${newVersion}" for services:`, services);
+  console.log('Rotating secret %s to version %s for services:', secretName, newVersion, services);
 
   const previousSecret = await secretManager.getSecret(secretName, 'current');
 

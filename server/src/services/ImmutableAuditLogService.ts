@@ -208,10 +208,10 @@ export class ImmutableAuditLogService {
         await fs.mkdir(path.dirname(logFilePath), { recursive: true });
 
         // Write events to log file in append-only fashion
-        // Optimization: Batch write events to reduce syscall overhead and improve throughput
-        const content = batch.map(event => JSON.stringify(event)).join('\n') + '\n';
-        await fs.appendFile(logFilePath, content);
-        processedEvents += batch.length;
+        for (const event of batch) {
+          await fs.appendFile(logFilePath, JSON.stringify(event) + '\n');
+          processedEvents++;
+        }
 
         logger.info({
           eventsProcessed: batch.length,

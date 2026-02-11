@@ -8,7 +8,8 @@ const Ajv = (AjvModule as any).default || AjvModule;
 const addFormats = (addFormatsModule as any).default || addFormatsModule;
 
 export class FcrSchemaValidator {
-  private ajv = new Ajv({ allErrors: true, strict: true });
+  // BOLT OPTIMIZATION: Disable allErrors to prevent DoS from malicious inputs
+  private ajv = new Ajv({ allErrors: false, strict: true });
 
   constructor() {
     addFormats(this.ajv);
