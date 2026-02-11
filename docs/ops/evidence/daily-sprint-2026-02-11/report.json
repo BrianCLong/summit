@@ -1,0 +1,18 @@
+{
+  "summary": "Daily sprint continuation repaired schema merge corruption, restored FactGov standards doc integrity, and refreshed PR/issue sensing artifacts.",
+  "completed_tasks": 4,
+  "planned_tasks": 4,
+  "blockers": [
+    "Legacy evidence index shape mismatch in evidence/tools/verify_evidence.py",
+    "node scripts/check-boundaries.cjs hangs in this environment"
+  ],
+  "artifacts": [
+    "docs/ops/evidence/daily-sprint-2026-02-11/gh_pr_list.json",
+    "docs/ops/evidence/daily-sprint-2026-02-11/gh_issue_list.json",
+    "evidence/schemas/index.schema.json",
+    "evidence/schemas/report.schema.json",
+    "evidence/schemas/metrics.schema.json",
+    "evidence/schemas/stamp.schema.json",
+    "docs/standards/factgov.md"
+  ]
+}
