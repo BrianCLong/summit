@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const args = process.argv.slice(2);
+const command = args[0];
+const serviceName = args[1];
+
+if (command !== 'new' || !serviceName) {
+  console.error('Usage: companyos new <service-name>');
+  process.exit(1);
+}
+
+const targetDir = path.resolve(process.cwd(), serviceName);
+const scriptDir = __dirname;
+// tooling/bin -> tooling -> root -> templates/companyos-service-template
+const templateDir = path.resolve(scriptDir, '../../templates/companyos-service-template');
+
+if (fs.existsSync(targetDir)) {
+  console.error(`Error: Directory "${targetDir}" already exists.`);
+  process.exit(1);
+}
+
+if (!fs.existsSync(templateDir)) {
+  console.error(`Error: Template directory "${templateDir}" not found.`);
+  process.exit(1);
+}
+
+console.log(`Creating new service "${serviceName}"...`);
+
+try {
+  // Copy template
+  fs.cpSync(templateDir, targetDir, { recursive: true });
+  console.log('Template copied.');
+
+  // Update package.json
+  const packageJsonPath = path.join(targetDir, 'package.json');
+  if (fs.existsSync(packageJsonPath)) {
+    const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    pkg.name = serviceName;
+    pkg.version = '0.1.0';
+    pkg.private = true;
+    fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2));
+    console.log('package.json updated.');
+  }
+
+  // Update Chart.yaml
+  const chartPath = path.join(targetDir, 'deploy/chart/Chart.yaml');
+  if (fs.existsSync(chartPath)) {
+    let chart = fs.readFileSync(chartPath, 'utf8');
+    chart = chart.replace(/^name:.*$/m, `name: ${serviceName}`);
+    fs.writeFileSync(chartPath, chart);
+    console.log('Chart.yaml updated.');
+  }
+
+  // Update Terraform variables
+  const tfVarsPath = path.join(targetDir, 'terraform/variables.tf');
+  if (fs.existsSync(tfVarsPath)) {
+    let tfVars = fs.readFileSync(tfVarsPath, 'utf8');
+    if (tfVars.includes('variable "service_name"')) {
+        // Use a simple regex to replace the variable block or just inject default
+        // The original block:
+        // variable "service_name" {
+        //   description = "Name of the service"
+        //   type        = string
+        // }
+        // We want to add default = ""
+
+        // This regex matches the block and captures content inside braces
+        const regex = /(variable "service_name" \{)([^}]*)(\})/;
+        if (regex.test(tfVars)) {
+             tfVars = tfVars.replace(regex, (match, start, content, end) => {
+                 if (!content.includes('default')) {
+                     return `${start}${content}  default     = "${serviceName}"\n${end}`;
+                 }
+                 return match;
+             });
+             fs.writeFileSync(tfVarsPath, tfVars);
+             console.log('Terraform variables updated.');
+        }
+    }
+  }
+
+  // Initialize git
+  console.log('Initializing git repository...');
+  try {
+    execSync('git init', { cwd: targetDir, stdio: 'ignore' });
+    execSync('git add .', { cwd: targetDir, stdio: 'ignore' });
+    execSync('git commit -m "feat: Initial commit from companyos generator"', { cwd: targetDir, stdio: 'ignore' });
+    console.log('Git repository initialized.');
+  } catch (gitError) {
+    console.warn('Warning: Failed to initialize git repository. Is git installed?');
+  }
+
+  console.log('\nService created successfully!');
+  console.log('\nNext steps:');
+  console.log(`  cd ${serviceName}`);
+  console.log('  npm install');
+  console.log('  make dev');
+} catch (error) {
+  console.error('Error creating service:', error);
+  process.exit(1);
+}
