@@ -1,0 +1,113 @@
+{
+  "title": "Org Mesh GA SLO Dashboard",
+  "uid": "org-mesh-ga-slo",
+  "tags": ["org-mesh", "ga", "slo", "capacity"],
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "editable": true,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "p95 Response Time (seconds)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"org-mesh-conductor\"}[5m])) by (le))",
+          "refId": "A",
+          "legendFormat": "p95 Latency"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 2.0 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Current Throughput (req/s)",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=\"org-mesh-conductor\"}[1m]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 450 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Error Budget (28d)",
+      "targets": [
+        {
+          "expr": "1 - (sum(rate(http_requests_total{service=\"org-mesh-conductor\", status=~\"5..\"}[28d])) / sum(rate(http_requests_total{service=\"org-mesh-conductor\"}[28d])))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 0.995 }
+            ]
+          }
+        }
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "HPA Replicas",
+      "targets": [
+        {
+          "expr": "kube_horizontalpodautoscaler_status_current_replicas{horizontalpodautoscaler=\"org-mesh-hpa\"}",
+          "refId": "A",
+          "legendFormat": "Current Replicas"
+        },
+        {
+          "expr": "kube_horizontalpodautoscaler_spec_max_replicas{horizontalpodautoscaler=\"org-mesh-hpa\"}",
+          "refId": "B",
+          "legendFormat": "Max Replicas"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "max": 6
+        }
+      },
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 8 }
+    }
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  }
+}
