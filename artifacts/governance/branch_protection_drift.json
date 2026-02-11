@@ -1,0 +1,6 @@
+{
+  "last_checked": "2024-05-22T10:00:00Z",
+  "drift_detected": false,
+  "repos_checked": ["intelgraph-server", "intelgraph-client"],
+  "policy_version": "v1.2.0"
+}
