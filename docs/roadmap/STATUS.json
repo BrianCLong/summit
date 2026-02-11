@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-11T06:30:00Z",
-  "revision_note": "Hardened daily sprint automation loop with reusable generator script and deterministic evidence outputs.",
+  "last_updated": "2026-02-11T09:25:00Z",
+  "revision_note": "Hardened daily sprint loop with runtime prompt-registry integrity verification and deterministic evidence stamping.",
   "initiatives": [
     {
       "id": "daily-sprint-automation-loop-2026-02-11",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added scripts/ops/daily-sprint-loop.sh to generate report + evidence deterministically, including explicit runtime-tooling error capture."
+      "notes": "Restored daily sprint runtime assets and added prompt hash verification against prompts/registry.yaml with evidence capture in prompt_integrity.err."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -223,6 +223,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "ga-feature-discovery-prompt",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Expanded feature discovery GA prompt with evidence-first strict output ordering; added roadmap prompt #00, CI evidence-mode runbook, and scripts/ga/create-prompt-00-evidence-bundle.sh + scripts/ga/verify-prompt-00-evidence-bundle.sh tooling."
     }
   ],
   "summary": {

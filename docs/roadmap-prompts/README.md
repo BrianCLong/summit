@@ -1,6 +1,6 @@
 # IntelGraph Roadmap Prompts - Copy-Paste Ready for Claude
 
-**Version**: 1.0
+**Version**: 1.1
 **Created**: 2025-11-29
 **Target**: Q3-Q4 2025 (Core GA + Prov-Ledger Beta + Predictive Alpha + Ops)
 
@@ -8,7 +8,7 @@
 
 ## 🎯 Overview
 
-This directory contains **12 production-ready Claude prompts** aligned with IntelGraph's near-term roadmap. Each prompt has been validated against the actual codebase structure and includes:
+This directory contains **13 production-ready Claude prompts** aligned with IntelGraph's near-term roadmap. Each prompt has been validated against the actual codebase structure and includes:
 
 - ✅ Pre-flight checklist (verify existing code)
 - ✅ Corrected paths (apps/web/src/components/, server/src/, services/)
@@ -20,6 +20,12 @@ This directory contains **12 production-ready Claude prompts** aligned with Inte
 ---
 
 ## 📋 Prompt Index
+
+### **Governance Meta Prompt**
+
+| # | Prompt | Target | Key Deliverables | Depends On |
+|---|---|---|---|---|
+| **00** | [Feature Discovery -> GA Orchestration](./00-feature-discovery-ga-orchestration.md) | GA Readiness | Evidence-first discovery, full GA package, PR readiness checklist | Summit readiness assertion + governance files |
 
 ### **Core GA (Q3 2025)**
 
@@ -60,6 +66,7 @@ This directory contains **12 production-ready Claude prompts** aligned with Inte
 ### 1. Pick a Prompt
 
 Choose based on priority:
+- **Start with #00** (Feature Discovery -> GA Orchestration) to produce evidence-first selection and GA packaging
 - **Start with #01** (NL → Cypher) if you need Core GA graph querying
 - **Start with #03** (ABAC/OPA) if security is blocking GA
 - **Start with #08** (Ingest Wizard) if data ingestion is top priority
@@ -103,6 +110,14 @@ pnpm test -- nlq.sandbox.test.ts
 # Run acceptance criteria
 make smoke
 ```
+
+### 6. Run Prompt #00 in CI Evidence Mode
+
+- Use runbook: [`../runbooks/ga-prompt-00-ci-evidence-mode.md`](../runbooks/ga-prompt-00-ci-evidence-mode.md)
+- Scaffold bundle: `scripts/ga/create-prompt-00-evidence-bundle.sh`
+- Verify bundle: `scripts/ga/verify-prompt-00-evidence-bundle.sh --run-id <run-id>`
+- Produce one bundle per run under `artifacts/ga-discovery/<run-id>/`
+- Record run outcome in `docs/roadmap/STATUS.json`
 
 ---
 
@@ -151,6 +166,10 @@ All prompts have been validated against the **actual** codebase structure as of 
 - ✅ **Actual paths**: `apps/web/src/components/`, `server/src/`, `services/`
 - ✅ **Existing code**: NLQ at `server/src/ai/nl-graph-query/`, Prov-Ledger scaffolded, SSO/SCIM implemented
 
+### 0. GA Discovery Orchestration
+- ✅ Use [Feature Discovery -> GA Orchestration](./00-feature-discovery-ga-orchestration.md) first to identify and prioritize candidates.
+- ✅ Start implementation prompts only after the evidence bundle and GA selection output are complete.
+
 ### 2. Neo4j Version + APOC
 - ✅ **Neo4j**: 5.24.0-community
 - ✅ **APOC**: Unrestricted (apoc.*)
@@ -189,6 +208,7 @@ All prompts have been validated against the **actual** codebase structure as of 
 ### When to Use Each Prompt
 
 **Before Core GA:**
+- Prompt #00 (Feature Discovery -> GA Orchestration)
 - Prompts #01, #03, #08, #09, #11, #12 (all Core GA features)
 
 **After Core GA:**
