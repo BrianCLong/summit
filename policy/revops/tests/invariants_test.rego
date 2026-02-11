@@ -1,5 +1,7 @@
 package revops.invariants_test
 
+import future.keywords.if
+
 import data.revops.invariants
 
 # Discounts cannot exceed the global maximum.

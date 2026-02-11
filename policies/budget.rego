@@ -3,6 +3,8 @@
 
 package intelgraph.budget
 
+import future.keywords.contains
+
 import future.keywords.if
 import future.keywords.in
 
@@ -111,7 +113,12 @@ monthly_room[tenant] := room if {
     spent := monthly_spending[tenant]
     room := budget.monthly_usd_limit - spent
     room >= 0
-} else := 0
+}
+
+# Default for monthly_room if calculation fails or not found
+# In Rego, we can just check if it's missing when we use it,
+# or provide another rule that fills in the gaps.
+# But for simplicity in this blueprint, we'll use 0 as a fallback where needed.
 
 # Emergency monthly room (120% of normal limit)
 emergency_monthly_room[tenant] := room if {
@@ -121,7 +128,7 @@ emergency_monthly_room[tenant] := room if {
     emergency_limit := budget.monthly_usd_limit * 1.2
     room := emergency_limit - spent
     room >= 0
-} else := 0
+}
 
 # Budget calculations - daily room remaining
 daily_room[tenant] := room if {
@@ -131,7 +138,7 @@ daily_room[tenant] := room if {
     spent := daily_spending[tenant]
     room := budget.daily_usd_limit - spent
     room >= 0
-} else := monthly_room[tenant] / 30 # Fallback to 1/30th of monthly
+}
 
 # Emergency daily room (150% of normal daily limit)
 emergency_daily_room[tenant] := room if {
@@ -142,7 +149,7 @@ emergency_daily_room[tenant] := room if {
     emergency_limit := budget.daily_usd_limit * 1.5
     room := emergency_limit - spent
     room >= 0
-} else := emergency_monthly_room[tenant] / 30
+}
 
 # Current month spending calculation
 monthly_spending[tenant] := total if {
@@ -155,7 +162,7 @@ monthly_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in monthly_entries])
-} else := 0
+}
 
 # Current day spending calculation  
 daily_spending[tenant] := total if {
@@ -168,7 +175,7 @@ daily_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in daily_entries])
-} else := 0
+}
 
 # Risk assessment for operations
 operation_risk_level := "high" if {
@@ -214,8 +221,8 @@ decision := {
     "allow": allow,
     "tenant_id": input.tenant_id,
     "estimated_usd": input.est_usd,
-    "monthly_room": monthly_room[input.tenant_id],
-    "daily_room": daily_room[input.tenant_id],
+    "monthly_room": object.get(monthly_room, input.tenant_id, 0),
+    "daily_room": object.get(daily_room, input.tenant_id, 0),
     "requires_four_eyes": requires_four_eyes,
     "valid_approvers": count(valid_approvers),
     "risk_level": operation_risk_level,

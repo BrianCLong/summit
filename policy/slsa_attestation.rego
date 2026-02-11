@@ -1,5 +1,7 @@
 package summit.slsa
 
+import future.keywords.if
+
 default allow := false
 
 #

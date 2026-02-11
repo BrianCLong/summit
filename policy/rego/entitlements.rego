@@ -1,5 +1,7 @@
 package entitlements
 
+import future.keywords.if
+
 # input: { plan, feature }
 allow if {
   input.feature == "batch_import"; input.plan == "enterprise"

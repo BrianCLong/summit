@@ -1,5 +1,9 @@
 package summit.sbom
 
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+
 default acceptable := false
 
 acceptable if {

@@ -1,5 +1,7 @@
 package policy.obligations
 
+import future.keywords.if
+
 # OPA Obligations for RFA and Step-Up Auth
 # Corresponds to audit/policy/rfa_matrix.yaml
 

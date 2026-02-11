@@ -1,6 +1,10 @@
 # policy/intelgraph_governance.rego
 package intelgraph.governance
 
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+
 # Deny by default
 default allow = false
 

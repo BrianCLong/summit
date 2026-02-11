@@ -1,5 +1,7 @@
 package policy.common.helpers
 
+import future.keywords.in
+
 import future.keywords.if
 
 classification_rank := {"public": 0, "internal": 1, "restricted": 2}

@@ -1,5 +1,7 @@
 package rego.governance
 
+import future.keywords.if
+
 default allow := false
 default log_event := true
 

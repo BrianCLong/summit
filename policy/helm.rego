@@ -1,5 +1,9 @@
 package helmsecurity
 
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+
 # Deny deployments without security context
 deny contains msg if {
     input.Kind == "Deployment"

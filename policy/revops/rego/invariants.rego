@@ -1,5 +1,8 @@
 package revops.invariants
 
+import future.keywords.if
+import future.keywords.contains
+
 # Global guardrails that tenants cannot bypass.
 
 default violations := {}

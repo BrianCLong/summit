@@ -1,6 +1,8 @@
 
 package governance_test
 
+import future.keywords.if
+
 import data.governance
 
 test_allow_safe if {

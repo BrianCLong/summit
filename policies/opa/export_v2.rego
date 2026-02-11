@@ -1,5 +1,7 @@
 package export.v2
 
+import future.keywords.if
+
 default allow := false
 
 # Simulation mode: when true, decision.allow_effective may be true even if would_allow is false
@@ -7,7 +9,10 @@ simulate := input.simulate
 
 # Sensitivity tiers requiring step-up auth
 requires_step_up {
-  input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
+  input.bundle.sensitivity == "Sensitive"
+}
+requires_step_up {
+  input.bundle.sensitivity == "Restricted"
 }
 
 has_webauthn := input.user.webauthn == true
@@ -60,6 +65,12 @@ decision := {
   "policy_version": input.policy.version,
   "redacted": redact_record(input.record),
 } {
-  allow_effective := (would_allow or simulate)
+  some allow_effective_bool
+  allow_effective_bool := any([would_allow, simulate])
+  allow_effective := allow_effective_bool
+}
+
+any(xs) {
+  xs[_]
 }
 

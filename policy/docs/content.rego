@@ -1,5 +1,8 @@
 package docs.content
 
+import future.keywords.if
+import future.keywords.contains
+
 # Example policy: All docs must have a title
 deny contains msg if {
   not input.frontmatter.title

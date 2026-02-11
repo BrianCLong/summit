@@ -1,6 +1,9 @@
 # (same as in sprint doc)
 package abac.authz
 
+import future.keywords.if
+import future.keywords.in
+
 default allow = false
 
 # Rule to check if tenant is isolated

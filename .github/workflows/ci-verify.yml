@@ -75,7 +75,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
+          version: v0.68.0 # Upgraded to support modern Rego syntax (if/in)
 
       - name: OPA policy check
         run: |
@@ -107,6 +107,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0 # Required for git diff in verify_media_provenance.ts
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -154,10 +156,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4 # Uses version from package.json (10.0.0)
+      - uses: actions/setup-node@v4
         with:
-          version: 9
-      - uses: pnpm/action-setup@v4 # v4
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Run MCP UX Linter
         run: |
@@ -173,9 +176,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -321,9 +322,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - uses: pnpm/action-setup@v4 # Uses version from package.json (10.0.0)
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"

@@ -1,5 +1,8 @@
 package mc.admin
 
+import future.keywords.if
+import future.keywords.contains
+
 default allow := false
 
 # Input contract (GraphQL) expected:

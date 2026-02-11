@@ -1,5 +1,8 @@
 package policy.authz.rbac
 
+import future.keywords.in
+import future.keywords.contains
+
 import data.policy.common.helpers
 import data.policy.data.permissions
 import data.policy.data.roles

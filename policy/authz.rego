@@ -1,5 +1,7 @@
 package intelgraph.authz.extended
 
+import future.keywords.if
+
 default allow := false
 
 tenant_match if { input.subject.tenant == input.resource.tenant }

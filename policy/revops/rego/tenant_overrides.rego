@@ -1,5 +1,7 @@
 package revops.tenant_overrides
 
+import future.keywords.if
+
 # Applies per-tenant overrides while keeping invariants intact.
 
 import data.revops.config
