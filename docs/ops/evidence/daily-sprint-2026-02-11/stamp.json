@@ -1,0 +1,12 @@
+{
+  "run_id": "daily-sprint-2026-02-11",
+  "generated_at": "2026-02-11T11:08:33Z",
+  "hashes": {
+    "report.json": "ff7ae9d1c9c5f4623f5e509a97df028d40ba14472e6d029e4103062e32cd085f",
+    "metrics.json": "7820763076a4d19421ddc903446a24a125e5a95fda58d60837177aca8d0b579e",
+    "gh_pr_list.json": "138649e015980dda13afb321ddbf687cbdf5cc2b2c04f705cb311c8072e1ff2d",
+    "gh_issue_list.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "conflict_scan.txt": "71e872fb40e98e6ae8a786a3a2117ff95d64afdbbcee6153e929713191f8ea59",
+    "validate_evidence_schema.log": "992b24dcb8e7f0963440e7bf53c04e916bf7305c966f0dae39fedeeaf2f0e4af"
+  }
+}

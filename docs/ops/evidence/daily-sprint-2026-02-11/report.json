@@ -1,0 +1,28 @@
+{
+  "run_id": "daily-sprint-2026-02-11",
+  "generated_at": "2026-02-11T11:08:33Z",
+  "mode": "sensing",
+  "inputs": {
+    "gh_pr_list": {
+      "path": "docs/ops/evidence/daily-sprint-2026-02-11/gh_pr_list.json",
+      "error_path": "docs/ops/evidence/daily-sprint-2026-02-11/gh_pr_list.err"
+    },
+    "gh_issue_list": {
+      "path": "docs/ops/evidence/daily-sprint-2026-02-11/gh_issue_list.json",
+      "error_path": "docs/ops/evidence/daily-sprint-2026-02-11/gh_issue_list.err"
+    },
+    "conflict_scan": {
+      "path": "docs/ops/evidence/daily-sprint-2026-02-11/conflict_scan.txt"
+    },
+    "schema_validation_log": {
+      "path": "docs/ops/evidence/daily-sprint-2026-02-11/validate_evidence_schema.log"
+    }
+  },
+  "observations": [
+    "GitHub PR triage capture succeeded for 20 open PRs.",
+    "Label-filtered issue triage returned an empty set.",
+    "Conflict marker remediation applied to evidence schema and FactGov standards files.",
+    "Evidence schema CI validator is blocked by missing python module: jsonschema."
+  ],
+  "notes": "Evidence-first output per governance; narrative summary in DAILY_SPRINT_2026-02-11.md"
+}
