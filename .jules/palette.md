@@ -35,3 +35,7 @@
 ## 2025-12-05 - Tailwind Content Resolution for Mixed-Extension Codebases
 **Learning:** In projects with a mix of JS/JSX and TS/TSX, Tailwind configurations may only target TS/TSX files. This causes utility classes in JS/JSX files to be purged, breaking accessibility features (like `sr-only`) or layout styles.
 **Action:** Always verify `tailwind.config.cjs` includes all relevant file extensions (js, jsx, ts, tsx) when implementing utility-based styles.
+
+## 2025-10-30 - Global Component Constraints
+**Learning:** Automated global UI changes (like adding icons to all Badges) can have unforeseen layout side effects and violate "micro-UX" scope boundaries.
+**Action:** Prioritize non-visual accessibility improvements (like ARIA attributes) for micro-UX tasks unless a specific visual change is requested or vetted for a single instance.
