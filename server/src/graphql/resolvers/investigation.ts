@@ -1,3 +1,5 @@
+import { getAuditSystem } from '../../audit/advanced-audit-system.js';
+import { randomUUID } from 'crypto';
 import pino from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
@@ -185,14 +187,40 @@ const investigationResolvers = {
     createInvestigation: authGuard(async (
       _: any,
       { input }: { input: { name: string; description?: string } },
+      context: GraphQLContext
     ) => {
       logger.info(`Creating investigation: ${input.name} (placeholder)`);
-      return {
+      const result = {
         id: 'new-inv-id',
         name: input.name,
         description: input.description,
         createdAt: new Date().toISOString(),
       };
+
+      try {
+        getAuditSystem().recordEvent({
+          id: randomUUID(),
+          eventType: 'investigation_lifecycle',
+          level: 'info',
+          timestamp: new Date(),
+          correlationId: randomUUID(),
+          userId: context.user?.id,
+          tenantId: context.user?.tenantId,
+          serviceId: 'maestro-graph',
+          resourceType: 'investigation',
+          resourceId: result.id,
+          action: 'create',
+          outcome: 'success',
+          message: `Investigation created: ${input.name}`,
+          complianceRelevant: true,
+          complianceFrameworks: ['SOC2'],
+          details: { name: input.name }
+        });
+      } catch (e) {
+        logger.error('Failed to log audit', e);
+      }
+
+      return result;
     }, 'write:case'),
 
     updateInvestigation: authGuard(async (
@@ -201,16 +229,42 @@ const investigationResolvers = {
         id,
         input,
       }: { id: string; input: { name?: string; description?: string } },
+      context: GraphQLContext
     ) => {
       logger.info(
         `Updating investigation ${id}: ${JSON.stringify(input)} (placeholder)`,
       );
-      return {
+      const result = {
         id: id,
         name: input.name || `Investigation ${id}`,
         description: input.description || `Description for investigation ${id}`,
         updatedAt: new Date().toISOString(),
       };
+
+      try {
+        getAuditSystem().recordEvent({
+          id: randomUUID(),
+          eventType: 'investigation_lifecycle',
+          level: 'info',
+          timestamp: new Date(),
+          correlationId: randomUUID(),
+          userId: context.user?.id,
+          tenantId: context.user?.tenantId,
+          serviceId: 'maestro-graph',
+          resourceType: 'investigation',
+          resourceId: id,
+          action: 'update',
+          outcome: 'success',
+          message: `Investigation updated: ${id}`,
+          complianceRelevant: true,
+          complianceFrameworks: ['SOC2'],
+          details: { input }
+        });
+      } catch (e) {
+        logger.error('Failed to log audit', e);
+      }
+
+      return result;
     }, 'write:case'),
 
     deleteInvestigation: flagGuard(

@@ -4,8 +4,8 @@
 # Both RC and GA pipelines derive required checks from this file.
 #
 # Authority: Platform Engineering
-# Last Updated: 2026-02-01
-# Version: 2.1.0
+# Last Updated: 2026-04-01
+# Version: 2.2.0
 #
 # How to add/remove checks safely:
 # 1. Create PR modifying this file
@@ -16,9 +16,9 @@
 # IMPORTANT: Do not add new always_required checks without
 # verifying they run on EVERY commit to main.
 
-version: "2.1.0"
+version: "2.2.0"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-02-01"
+last_updated: "2026-04-01"
 owner: "Platform Engineering"
 
 # Branch Protection Policy
@@ -36,6 +36,8 @@ branch_protection:
       - "Release Readiness Gate"
       - "SOC Controls"
       - "Unit Tests & Coverage"
+      - "Provenance Verification"
+      - "Feature Flag Guardrails"
 
 # Always Required Checks
 # ----------------------
@@ -65,6 +67,10 @@ always_required:
   - name: "CI Core (Primary Gate) / CI Core Gate ✅"
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
+
+  - name: "Provenance Verification"
+    workflow: "provenance-verify.yml"
+    rationale: "Ensures all artifacts are signed and verifiable (SLSA)"
 
 # Conditional Required Checks
 # ---------------------------
@@ -140,6 +146,13 @@ conditional_required:
     when_paths_match:
       - "^packages/extortion/"
       - "^scripts/ci/.*extortion"
+
+  - name: "Feature Flag Guardrails"
+    workflow: "feature-flag-guard.yml"
+    rationale: "Enforces feature flag metadata (owner, expiry) compliance"
+    when_paths_match:
+      - "^config/feature-flags.json$"
+      - "^scripts/validate_flags.py$"
 
 # Informational Checks
 # --------------------

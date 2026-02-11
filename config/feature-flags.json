@@ -35,7 +35,11 @@
       "description": "Gate ATSH harness execution, preview-only rollout, and rollback hooks",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["qa", "preview", "atsh"],
+      "tags": [
+        "qa",
+        "preview",
+        "atsh"
+      ],
       "rollout": {
         "type": "gradual",
         "percentage": 0
@@ -43,7 +47,9 @@
       "metadata": {
         "branch": "feat/atsh",
         "label": "feature:ATSH_ENABLED"
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "saga-enabled": {
       "key": "saga-enabled",
@@ -51,7 +57,11 @@
       "description": "Gate saga orchestration workflows, compensations, and preview smoke paths",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["platform", "preview", "saga"],
+      "tags": [
+        "platform",
+        "preview",
+        "saga"
+      ],
       "rollout": {
         "type": "gradual",
         "percentage": 0
@@ -59,7 +69,9 @@
       "metadata": {
         "branch": "feat/saga",
         "label": "feature:SAGA_ENABLED"
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "prompt-registry-enabled": {
       "key": "prompt-registry-enabled",
@@ -67,7 +79,11 @@
       "description": "Gate governed prompt registry features, evaluations, and rollout events",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["ai", "preview", "prompts"],
+      "tags": [
+        "ai",
+        "preview",
+        "prompts"
+      ],
       "rollout": {
         "type": "gradual",
         "percentage": 0
@@ -75,7 +91,9 @@
       "metadata": {
         "branch": "feat/prompt-registry",
         "label": "feature:PROMPT_REGISTRY_ENABLED"
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "new-ui-dashboard": {
       "key": "new-ui-dashboard",
@@ -83,11 +101,17 @@
       "description": "Enable the redesigned dashboard UI",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["frontend", "ui", "dashboard"],
+      "tags": [
+        "frontend",
+        "ui",
+        "dashboard"
+      ],
       "rollout": {
         "type": "gradual",
         "percentage": 0
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "advanced-analytics": {
       "key": "advanced-analytics",
@@ -95,11 +119,17 @@
       "description": "Enable advanced analytics and ML-powered insights",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["analytics", "ml", "backend"],
+      "tags": [
+        "analytics",
+        "ml",
+        "backend"
+      ],
       "rollout": {
         "type": "gradual",
         "percentage": 10
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "graph-query-optimizer": {
       "key": "graph-query-optimizer",
@@ -107,17 +137,26 @@
       "description": "Enable experimental query optimization for graph operations",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["performance", "graph", "backend"],
+      "tags": [
+        "performance",
+        "graph",
+        "backend"
+      ],
       "rollout": {
         "type": "targeted",
         "rules": [
           {
             "attribute": "organization",
             "operator": "in",
-            "values": ["internal", "beta-testers"]
+            "values": [
+              "internal",
+              "beta-testers"
+            ]
           }
         ]
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "real-time-collaboration": {
       "key": "real-time-collaboration",
@@ -125,11 +164,17 @@
       "description": "Enable real-time collaborative editing features",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["collaboration", "realtime", "frontend"],
+      "tags": [
+        "collaboration",
+        "realtime",
+        "frontend"
+      ],
       "rollout": {
         "type": "gradual",
         "percentage": 0
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "api-rate-limit": {
       "key": "api-rate-limit",
@@ -140,7 +185,13 @@
         "requestsPerMinute": 100,
         "burstSize": 200
       },
-      "tags": ["api", "performance", "backend"]
+      "tags": [
+        "api",
+        "performance",
+        "backend"
+      ],
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "maintenance-mode": {
       "key": "maintenance-mode",
@@ -148,8 +199,13 @@
       "description": "Enable maintenance mode (emergency kill switch)",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["emergency", "operations"],
-      "killSwitch": true
+      "tags": [
+        "emergency",
+        "operations"
+      ],
+      "killSwitch": true,
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "use-new-auth-flow": {
       "key": "use-new-auth-flow",
@@ -157,11 +213,17 @@
       "description": "Enable new OAuth2/OIDC authentication flow",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["security", "auth", "backend"],
+      "tags": [
+        "security",
+        "auth",
+        "backend"
+      ],
       "rollout": {
         "type": "gradual",
         "percentage": 0
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "experimental-features": {
       "key": "experimental-features",
@@ -169,17 +231,24 @@
       "description": "Enable experimental and preview features",
       "type": "boolean",
       "defaultValue": false,
-      "tags": ["experimental"],
+      "tags": [
+        "experimental"
+      ],
       "rollout": {
         "type": "targeted",
         "rules": [
           {
             "attribute": "userRole",
             "operator": "in",
-            "values": ["admin", "developer"]
+            "values": [
+              "admin",
+              "developer"
+            ]
           }
         ]
-      }
+      },
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "cache-strategy": {
       "key": "cache-strategy",
@@ -187,8 +256,17 @@
       "description": "Select caching strategy for data layer",
       "type": "string",
       "defaultValue": "redis",
-      "allowedValues": ["redis", "memory", "hybrid"],
-      "tags": ["performance", "backend"]
+      "allowedValues": [
+        "redis",
+        "memory",
+        "hybrid"
+      ],
+      "tags": [
+        "performance",
+        "backend"
+      ],
+      "owner": "platform",
+      "expiry": "2026-12-31"
     },
     "enable-telemetry": {
       "key": "enable-telemetry",
@@ -196,7 +274,12 @@
       "description": "Enable detailed telemetry and tracing",
       "type": "boolean",
       "defaultValue": true,
-      "tags": ["observability", "monitoring"]
+      "tags": [
+        "observability",
+        "monitoring"
+      ],
+      "owner": "platform",
+      "expiry": "2026-12-31"
     }
   },
   "killSwitches": {
@@ -205,21 +288,30 @@
       "name": "Emergency Read-Only Mode",
       "description": "Force all users into read-only mode for emergency situations",
       "defaultValue": false,
-      "tags": ["emergency", "operations"]
+      "tags": [
+        "emergency",
+        "operations"
+      ]
     },
     "disable-new-signups": {
       "key": "disable-new-signups",
       "name": "Disable New Signups",
       "description": "Temporarily disable new user registrations",
       "defaultValue": false,
-      "tags": ["emergency", "operations"]
+      "tags": [
+        "emergency",
+        "operations"
+      ]
     },
     "circuit-breaker-external-api": {
       "key": "circuit-breaker-external-api",
       "name": "External API Circuit Breaker",
       "description": "Disable all external API calls if third-party services are down",
       "defaultValue": false,
-      "tags": ["emergency", "resilience"]
+      "tags": [
+        "emergency",
+        "resilience"
+      ]
     }
   }
 }

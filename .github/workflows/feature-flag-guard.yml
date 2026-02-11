@@ -1,0 +1,22 @@
+name: Feature Flag Guardrails
+
+on:
+  pull_request:
+    paths:
+      - 'config/feature-flags.json'
+      - 'scripts/validate_flags.py'
+  schedule:
+    - cron: '0 9 * * 1' # Weekly on Monday
+  workflow_dispatch:
+
+jobs:
+  validate-flags:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Validate Feature Flags
+        run: python3 scripts/validate_flags.py
