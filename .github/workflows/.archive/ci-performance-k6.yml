@@ -19,7 +19,7 @@ env:
 
 jobs:
   guard:
-    if: github.event_name == 'schedule'
+    if: (github.event_name == 'schedule') && (steps.guard.outputs.saturated == 'true')
     runs-on: ubuntu-latest
     outputs:
       saturated: ${{ steps.guard.outputs.saturated }}
@@ -31,7 +31,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summarize guard decision
-        if: steps.guard.outputs.saturated == 'true'
         run: |
           echo "⚠️ **Backlog Guard Active**" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -42,7 +41,7 @@ jobs:
           echo "**Manual Override:** \`gh workflow run ci-performance-k6.yml\` (bypasses guard)" >> "$GITHUB_STEP_SUMMARY"
 
   k6:
-    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
+    if: (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') && (github.event_name == 'schedule')
     needs: [guard]
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -62,7 +61,6 @@ jobs:
         ports: ['6379:6379']
     steps:
       - name: Start jitter
-        if: github.event_name == 'schedule'
         run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
 
       - uses: actions/checkout@v4
