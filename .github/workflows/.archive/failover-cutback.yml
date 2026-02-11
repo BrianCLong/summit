@@ -32,10 +32,11 @@ jobs:
           echo "approver=${{ inputs.approver }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Failover
-        if: (${{ inputs.action == 'failover' }}) && (${{ inputs.action == 'cutback' }})
+        if: ${{ inputs.action == 'failover' }}
         run: |
           bash .ci/scripts/dr/failover.sh "${{ inputs.trace_id }}" "${{ inputs.approver }}"
 
       - name: Cutback
+        if: ${{ inputs.action == 'cutback' }}
         run: |
           bash .ci/scripts/dr/cutback.sh "${{ inputs.trace_id }}" "${{ inputs.approver }}"

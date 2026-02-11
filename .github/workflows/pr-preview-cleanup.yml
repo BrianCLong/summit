@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Cleanup preview resources
         run: ./scripts/preview/cleanup.sh
@@ -28,7 +28,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Remove PR comment
-    if: false && (github.event_name == 'pull_request' && github.event.action == 'closed')
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
         run: |
           COMMENTS=$(curl -s -X GET \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \

@@ -1,31 +1,5 @@
 version: 1
 prompts:
-  - id: saas-crash-2026-positioning-pack
-    version: v1
-    path: prompts/positioning/saas-crash-2026@v1.md
-    sha256: 1acce34de92a05653ef32c23fed94b971bf06b529c6d76fcb9c8ad43c7d48ed8
-    description: Create the saas-crash-2026 positioning pack, claim registry, and repo validation alignment.
-    scope:
-      paths:
-        - docs/positioning/saas-crash-2026.md
-        - docs/positioning/claim-registry.md
-        - repo_assumptions.md
-        - docs/roadmap/STATUS.json
-        - prompts/positioning/saas-crash-2026@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - positioning
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md
@@ -451,6 +425,7 @@ prompts:
     scope:
       paths:
         - docs/runbooks/
+        - docs/roadmap/
         - docs/roadmap/STATUS.json
         - agents/examples/
         - prompts/docs/runbooks-update@v1.md
@@ -702,18 +677,10 @@ prompts:
         - prompts/registry.yaml
         - agents/examples/
       domains:
-        - architecture
+ HEAD
+        - competitive-intel
+        - product-strategy
         - governance
-        - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: competitive-subsumption-protocol-v4-1
     version: v1
     path: prompts/competitive/competitive-subsumption-protocol-v4.1.md
@@ -730,29 +697,14 @@ prompts:
         - agents/examples/
       domains:
         - documentation
-        - competitive-intel
-        - product-strategy
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
   - id: sar-agentic-app-runtime
-    version: v1
     path: prompts/architecture/sar-agentic-app-runtime@v1.md
     sha256: 0c2ea2abded4bee786ab44a93066948cac8bff1dc60d94cb3cd56faa15c367d8
     description: Summit App Runtime architecture, governance, and compatibility plan with SAR deliverables.
-    scope:
-      paths:
         - docs/architecture/sar-agentic-app-runtime.md
         - prompts/architecture/sar-agentic-app-runtime@v1.md
-        - prompts/registry.yaml
-      domains:
+
+ origin/main
         - architecture
         - governance
         - documentation
@@ -841,84 +793,4 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - create
-      - edit
-  - id: summit-labs-scaffold
-    version: v1
-    path: prompts/labs/summit-labs-scaffold-v1.md
-    sha256: 4497084e918cf58c6e8e4394085706d5cf94484a7fcb53cc63853592839c952b
-    description: Scaffold Summit Labs documentation, preview spec, and promotion gates.
-    scope:
-      paths:
-        - labs/
-        - docs/roadmap/STATUS.json
-        - agents/examples/
-        - prompts/labs/
-        - prompts/registry.yaml
-      domains:
-        - governance
-        - documentation
-        - roadmap
-        - labs
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: kimik25-evidence-scaffold
-    version: v1
-    path: prompts/evidence/kimik25-evidence-scaffold@v1.md
-    sha256: bf7fa8fb88d42633c7d7fe399403da277b52606ac82d2279ecad840437972059
-    description: Scaffold KIMIK25 evidence bundles, fixtures, and verification checks.
-    scope:
-      paths:
-        - evidence/
-        - ci/check_evidence.py
-        - tools/emit_evidence.py
-        - tests/test_evidence_schemas.py
-        - .gitignore
-        - docs/roadmap/STATUS.json
-        - prompts/evidence/kimik25-evidence-scaffold@v1.md
-        - prompts/registry.yaml
-      domains:
-        - evidence
-        - governance
-        - ci
-        - testing
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: jest-entities-override
-    version: v1
-    path: prompts/maintenance/jest-entities-override@v1.md
-    sha256: f1ef077d68bb34b6bf128b0f4aa15cc8c27a3ded28c0106f695ee042095b9370
-    description: Pin entities for parse5/Jest compatibility and update governance artifacts.
-    scope:
-      paths:
-        - package.json
-        - pnpm-lock.yaml
-        - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/maintenance/jest-entities-override@v1.md
-        - prompts/registry.yaml
-      domains:
-        - dependencies
-        - testing
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
       - edit

@@ -5,17 +5,25 @@ on:
   push:
     branches: [main]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   required-checks:
     name: governance / required-checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install yaml
-      - run: node scripts/ci/verify_required_checks.mjs
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: |
+          mkdir -p .tmp_deps
+          cd .tmp_deps
+          pnpm init
+          pnpm add yaml
+      - name: Run verification
+        run: node scripts/ci/verify_required_checks.mjs
         env:
+          NODE_PATH: ./.tmp_deps/node_modules
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

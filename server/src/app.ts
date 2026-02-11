@@ -23,7 +23,6 @@ import { sanitizeInput } from './middleware/sanitization.js';
 import { piiGuardMiddleware } from './middleware/pii-guard.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { publicRateLimit, authenticatedRateLimit } from './middleware/rateLimiter.js';
-import { ensureRole } from './middleware/auth.js';
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
@@ -215,12 +214,30 @@ export const createApp = async () => {
   app.use(publicRateLimit);
   app.use(abuseGuard.middleware());
 
-  // Enhanced Pino HTTP logger disabled due to symbol issues
-  // app.use(pinoHttpInstance({ ... }));
-  app.use((req: any, res: any, next: any) => {
-    req.log = appLogger;
-    next();
-  });
+  // Enhanced Pino HTTP logger with correlation and trace context
+  const pinoHttpInstance = typeof pinoHttp === 'function' ? pinoHttp : (pinoHttp as any).pinoHttp;
+  if (process.env.NODE_ENV === 'test') {
+    console.log('DEBUG: appLogger type:', typeof appLogger);
+    console.log('DEBUG: appLogger has levels:', !!(appLogger as any).levels);
+    if ((appLogger as any).levels) {
+      console.log('DEBUG: appLogger.levels.values:', (appLogger as any).levels.values);
+    }
+  }
+  // Skip pino-http in test environment to avoid mock issues
+  if (cfg.NODE_ENV !== 'test') {
+    app.use(
+      pinoHttpInstance({
+        logger: appLogger,
+        customProps: (req: any) => ({
+          correlationId: req.correlationId,
+          traceId: req.traceId,
+          spanId: req.spanId,
+          userId: req.user?.sub || req.user?.id,
+          tenantId: req.user?.tenant_id || req.user?.tenantId,
+        }),
+      }),
+    );
+  }
   app.use(requestProfilingMiddleware);
 
   app.use(
@@ -293,8 +310,6 @@ export const createApp = async () => {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
-            tenantId: 'global',
-            id: 'dev-user', // SEC-2025-002: Ensure downstream helpers rely on user object, not headers
           };
           return next();
         }
@@ -381,8 +396,13 @@ export const createApp = async () => {
   });
 
   // Admin Rate Limit Dashboard Endpoint
-  // Requires authentication and admin role
-  app.get('/api/admin/rate-limits/:userId', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
+  // Requires authentication and admin role (simplified check for now)
+  app.get('/api/admin/rate-limits/:userId', authenticateToken, async (req, res) => {
+    const user = (req as any).user;
+    if (!user || user.role !== 'admin') {
+      res.status(403).json({ error: 'Forbidden' });
+      return;
+    }
     try {
       const status = await advancedRateLimiter.getStatus(req.params.userId);
       res.json(status);
@@ -397,31 +417,13 @@ export const createApp = async () => {
   app.use('/api/auth', authRouter); // Alternative path
   app.use('/sso', ssoRouter);
 
-  // SEC-2025-002: Enforce authentication globally for /api routes
-  // This mitigates the risk of missing authentication checks in individual routers.
-  app.use('/api', (req, res, next) => {
-    // Exempt known public paths (must be robust against mount point logic)
-    // Note: req.path is relative to the mount point (/api)
-
-    // Public Webhooks (e.g., GitHub, Jira)
-    if (isPublicWebhook(req)) return next();
-
-    // Auth routes (redundant as they are mounted before, but good for safety)
-    if (req.path.startsWith('/auth')) return next();
-
-    // Health checks if exposed under /api
-    if (req.path.startsWith('/health')) return next();
-
-    return authenticateToken(req, res, next);
-  });
-
   // Other routes
   // app.use('/api/policy', policyRouter);
   app.use('/api/policies', policyManagementRouter);
   app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
   app.use('/api/brand-packs', brandPackRouter);
-  app.use(['/monitoring', '/api/monitoring'], authenticateToken, monitoringRouter);
+  app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
   app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   if (process.env.SKIP_AI_ROUTES !== 'true') {
@@ -502,12 +504,12 @@ export const createApp = async () => {
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
   app.use('/api', federatedCampaignRadarRouter);
-  app.use('/api/admin', authenticateToken, ensureRole(['ADMIN', 'admin']), adminGateway);
-  app.use('/api/plugins', authenticateToken, ensureRole(['ADMIN', 'admin']), pluginAdminRouter);
-  app.use('/api/integrations', authenticateToken, ensureRole(['ADMIN', 'admin']), integrationAdminRouter);
-  app.use('/api/security', authenticateToken, ensureRole(['ADMIN', 'admin']), securityAdminRouter);
-  app.use('/api/compliance', authenticateToken, ensureRole(['ADMIN', 'admin']), complianceAdminRouter);
-  app.use('/api/sandbox', authenticateToken, ensureRole(['ADMIN', 'admin']), sandboxAdminRouter);
+  app.use('/api/admin', adminGateway);
+  app.use('/api/plugins', pluginAdminRouter);
+  app.use('/api/integrations', integrationAdminRouter);
+  app.use('/api/security', securityAdminRouter);
+  app.use('/api/compliance', complianceAdminRouter);
+  app.use('/api/sandbox', sandboxAdminRouter);
   app.use('/api/v1/onboarding', onboardingRouter);
   app.use('/api/v1/support', supportCenterRouter);
   app.use('/api/v1/i18n', i18nRouter);
@@ -608,29 +610,19 @@ export const createApp = async () => {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
 
-  app.get('/search/evidence', authenticateToken, ensureRole(['admin', 'analyst']), async (req, res) => {
-    const { q } = req.query;
-    // SEC-DoS: Enforce pagination and offset limits
-    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
-    const skip = Math.max(Number(req.query.skip) || 0, 0);
+  app.get('/search/evidence', async (req, res) => {
+    const { q, skip = 0, limit = 10 } = req.query;
 
     if (!q) {
       return res.status(400).send({ error: "Query parameter 'q' is required" });
-    }
-
-    const tenantId = (req as any).user?.tenantId || (req as any).user?.tenant_id;
-    if (!tenantId) {
-      return res.status(403).send({ error: "Tenant context is required" });
     }
 
     const driver = getNeo4jDriver();
     const session = driver.session();
 
     try {
-      // SEC-TENANCY: Filter results by tenantId/tenant to prevent cross-tenant data leakage
       const searchQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
-        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN node, score
         SKIP $skip
         LIMIT $limit
@@ -638,18 +630,16 @@ export const createApp = async () => {
 
       const countQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
-        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN count(node) as total
       `;
 
       const [searchResult, countResult] = await Promise.all([
         session.run(searchQuery, {
           query: q,
-          tenantId,
           skip: Number(skip),
-          limit,
+          limit: Number(limit),
         }),
-        session.run(countQuery, { query: q, tenantId }),
+        session.run(countQuery, { query: q }),
       ]);
 
       const evidence = searchResult.records.map((record: any) => ({
@@ -714,7 +704,7 @@ export const createApp = async () => {
         persistedQueriesPlugin as any,
         resolverMetricsPlugin as any,
         auditLoggerPlugin as any,
-        // rateLimitAndCachePlugin(schema) as any,
+        rateLimitAndCachePlugin(schema) as any,
         // Enable PBAC in production
         ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
       ],
@@ -776,14 +766,10 @@ export const createApp = async () => {
     startTrustWorker();
     // Start retention worker if enabled
     startRetentionWorker();
-    // Start streaming ingestion if enabled (Epic B)
-    if (cfg.KAFKA_ENABLED) {
-      streamIngest.start(['ingest-events']).catch(err => {
-        appLogger.error({ err }, 'Failed to start streaming ingestion');
-      });
-    } else {
-      appLogger.info('Streaming ingestion disabled (KAFKA_ENABLED=false)');
-    }
+    // Start streaming ingestion (Epic B)
+    streamIngest.start(['ingest-events']).catch(err => {
+      appLogger.error({ err }, 'Failed to start streaming ingestion');
+    });
   } else {
     appLogger.warn(
       { safetyState, env: process.env.NODE_ENV },
