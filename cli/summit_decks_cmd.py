@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
+
 from packages.summit_decks.summit_decks.build import build_template_deck
+
 
 def maybe_register(subparsers) -> None:
     if os.getenv("SUMMIT_DECKS", "0") != "1":

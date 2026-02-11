@@ -1,6 +1,8 @@
 from __future__ import annotations
-from pathlib import Path
+
 import zipfile
+from pathlib import Path
+
 
 def export_skill_to_zip(skill_root: Path, out_path: Path) -> None:
     with zipfile.ZipFile(out_path, "w", compression=zipfile.ZIP_DEFLATED) as z:

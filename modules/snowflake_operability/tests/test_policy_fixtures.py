@@ -1,7 +1,9 @@
 import json
-import unittest
 import os
+import unittest
+
 from modules.snowflake_operability.policy import evaluate_operability
+
 
 class TestOperabilityPolicy(unittest.TestCase):
     def load_fixture(self, name):

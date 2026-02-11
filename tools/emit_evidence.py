@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 
 
@@ -32,7 +32,7 @@ def main() -> None:
     metrics = {"evidence_id": args.evidence_id, "metrics": {}}
     stamp = {
         "evidence_id": args.evidence_id,
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
     }
 
     write_json(base / "report.json", report)

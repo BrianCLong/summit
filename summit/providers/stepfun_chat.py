@@ -1,7 +1,9 @@
-from dataclasses import dataclass
-from typing import Dict, Any, List, Optional
-import httpx
 import os
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import httpx
+
 
 @dataclass(frozen=True)
 class StepFunChatConfig:
@@ -25,7 +27,7 @@ class StepFunChatProvider:
 
         self.cfg = cfg
 
-    async def chat_completions(self, model: str, messages: List[Dict[str, str]], **kwargs) -> Dict[str, Any]:
+    async def chat_completions(self, model: str, messages: list[dict[str, str]], **kwargs) -> dict[str, Any]:
         """
         Sends a chat completion request to the StepFun API (or compatible).
         """

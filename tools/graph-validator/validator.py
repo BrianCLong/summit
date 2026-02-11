@@ -1,12 +1,12 @@
-import os
-import sys
+import argparse
 import json
 import logging
-import argparse
+import os
 import random
+import sys
 import time
-from datetime import datetime, timezone
-from typing import List, Dict, Any, Optional
+from datetime import UTC, datetime, timezone
+from typing import Any, Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -44,7 +44,7 @@ class DegreeSampler:
         if self.driver:
             self.driver.close()
 
-    def fetch_sample(self, sample_size: int = 100000, label: Optional[str] = None) -> List[int]:
+    def fetch_sample(self, sample_size: int = 100000, label: Optional[str] = None) -> list[int]:
         """
         Fetches a random sample of node degrees.
         Uses `rand()` to sample if the graph is large.
@@ -86,7 +86,7 @@ class DriftDetector:
         self.alpha = alpha
         self.threshold_d = threshold_d
 
-    def run_test(self, baseline_degrees: List[int], live_degrees: List[int]) -> Dict[str, Any]:
+    def run_test(self, baseline_degrees: list[int], live_degrees: list[int]) -> dict[str, Any]:
         if not np or not stats:
             raise RuntimeError("Scientific libraries not available.")
 
@@ -135,13 +135,13 @@ class DriftDetector:
             "status": status
         }
 
-def save_baseline(degrees: List[int], filepath: str):
+def save_baseline(degrees: list[int], filepath: str):
     with open(filepath, 'w') as f:
         json.dump(degrees, f)
     logger.info(f"Baseline saved to {filepath}")
 
-def load_baseline(filepath: str) -> List[int]:
-    with open(filepath, 'r') as f:
+def load_baseline(filepath: str) -> list[int]:
+    with open(filepath) as f:
         return json.load(f)
 
 def main():
@@ -175,9 +175,9 @@ def main():
             detector = DriftDetector()
             report = detector.run_test(baseline_degrees, degrees)
 
-            report["window_start"] = datetime.now(timezone.utc).isoformat()
+            report["window_start"] = datetime.now(UTC).isoformat()
             # Just a placeholder for window_end as we are sampling 'now'
-            report["window_end"] = datetime.now(timezone.utc).isoformat()
+            report["window_end"] = datetime.now(UTC).isoformat()
 
             json_output = json.dumps(report, indent=2)
             print(json_output)

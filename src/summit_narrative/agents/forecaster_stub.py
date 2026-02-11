@@ -12,6 +12,6 @@ class ForecasterStub:
         capabilities={"role": "forecast", "outputs": ["risk_scores"]},
     )
 
-    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def run(self, inputs: dict[str, Any]) -> dict[str, Any]:
         inputs.setdefault("risk_scores", {})
         return inputs

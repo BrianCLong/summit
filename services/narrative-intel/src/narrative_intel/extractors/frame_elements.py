@@ -1,11 +1,12 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class FrameElementExtractor:
     def __init__(self, model_path: str = "models/frame_extractor"):
         self.model_path = model_path
         # Load model here (hypothetical)
 
-    def extract(self, text: str) -> Dict[str, str]:
+    def extract(self, text: str) -> dict[str, str]:
         """
         Extracts frame elements from text.
         Returns a dictionary with keys: problem_definition, causal_interpretation,

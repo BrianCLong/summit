@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 
 @dataclass(frozen=True)
 class ShardPlan:
@@ -10,7 +11,7 @@ class ShardPlan:
     cross_shard_allowed: bool = False
     max_shards: int = 1
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "entity_domain": self.entity_domain,
             "region": self.region,

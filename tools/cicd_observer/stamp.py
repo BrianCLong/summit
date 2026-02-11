@@ -3,7 +3,8 @@ import json
 import time
 from typing import Any, Dict
 
-def generate_stamp(inputs: Dict[str, Any], outputs: Dict[str, Any]) -> Dict[str, Any]:
+
+def generate_stamp(inputs: dict[str, Any], outputs: dict[str, Any]) -> dict[str, Any]:
     # Canonicalize inputs and outputs for hashing
     input_str = json.dumps(inputs, sort_keys=True)
     output_str = json.dumps(outputs, sort_keys=True)
@@ -19,7 +20,7 @@ def generate_stamp(inputs: Dict[str, Any], outputs: Dict[str, Any]) -> Dict[str,
         "determinism_assertion": "Output is strictly derived from inputs"
     }
 
-def verify_stamp(stamp: Dict[str, Any], inputs: Dict[str, Any], outputs: Dict[str, Any]) -> bool:
+def verify_stamp(stamp: dict[str, Any], inputs: dict[str, Any], outputs: dict[str, Any]) -> bool:
     input_str = json.dumps(inputs, sort_keys=True)
     output_str = json.dumps(outputs, sort_keys=True)
 

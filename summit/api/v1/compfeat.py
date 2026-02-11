@@ -1,5 +1,6 @@
 from summit.policy.compfeat_policy import evaluate_compfeat
 
+
 def post_compfeat(actor: dict, payload: dict, flags: dict) -> dict:
   decision = evaluate_compfeat(actor=actor, request=payload, flags=flags)
   if not decision.allowed:

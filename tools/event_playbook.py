@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-import json
 import argparse
 import hashlib
-import yaml
-from pathlib import Path
+import json
 from datetime import datetime
+from pathlib import Path
+
+import yaml
+
 
 def is_action_allowed(action: str, policy_path: str = "policy/event_policy.yaml") -> bool:
     p = Path(policy_path)
     if not p.exists():
         return False
 
-    with open(p, "r", encoding="utf-8") as f:
+    with open(p, encoding="utf-8") as f:
         policy = yaml.safe_load(f)
 
     deny_list = [d["action"] for d in policy.get("policy", {}).get("deny", [])]

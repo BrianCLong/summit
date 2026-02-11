@@ -1,12 +1,14 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from summit.evidence.run_bundle import RunBundle
+
 
 class Replayer:
     def __init__(self, bundle: RunBundle):
         self.bundle = bundle
         self.cursor = 0
 
-    def next_event(self) -> Dict[str, Any]:
+    def next_event(self) -> dict[str, Any]:
         if self.cursor >= len(self.bundle.events):
             raise StopIteration
         event = self.bundle.events[self.cursor]

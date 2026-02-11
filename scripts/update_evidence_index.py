@@ -20,7 +20,7 @@ def main():
     if not os.path.exists(INDEX_PATH):
         index = {"version": "1.0", "map": {}}
     else:
-        with open(INDEX_PATH, "r") as f:
+        with open(INDEX_PATH) as f:
             index = json.load(f)
 
     # Use 'map' to align with moltbook-relay-index.schema.json and main index schema
