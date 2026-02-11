@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-11T18:10:00Z",
-  "revision_note": "Resolved roadmap conflict state and added IO PR2 normalization hardening: canonical EVID:: IDs, deterministic schema eval outputs, and CLI io command wiring.",
+  "last_updated": "2026-02-11T18:45:00Z",
+  "revision_note": "Resolved roadmap conflict state, added IO PR2 normalization hardening, and restored ingestion deterministic ID fallback with dependency-light optional exports and regression tests.",
   "initiatives": [
     {
       "id": "influence-ops-pr2-normalization-hardening-2026-02-11",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Standardized IO evidence IDs to EVID::<tenant>::<domain>::<artifact>::<date>::<gitsha7>::<runid8>, wired CLI io command registration, and hardened schema roundtrip eval outputs for deterministic report/metrics/stamp generation."
+    },
+    {
+      "id": "ingestion-optional-export-contract",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "HTTP ingestor now uses deterministic compute_hash fallback only when id is null; ingestion package exports are dependency-light with lazy optional access and star-import-safe regression tests."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
