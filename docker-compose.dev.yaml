@@ -527,16 +527,15 @@ services:
       - 'prometheus.path=/metrics'
 
 volumes:
-  postgres_data:
-  redis_data:
-  neo4j_data:
-  neo4j_logs:
-  elasticsearch_data:
-  grafana_data:
-  prometheus_data:
-  loki_data:
-  alertmanager_data:
-
+  postgres_data: {}
+  redis_data: {}
+  neo4j_data: {}
+  neo4j_logs: {}
+  elasticsearch_data: {}
+  grafana_data: {}
+  prometheus_data: {}
+  loki_data: {}
+  alertmanager_data: {}
 networks:
   summit:
     driver: bridge
