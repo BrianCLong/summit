@@ -437,7 +437,7 @@ jobs:
     name: Deployment Readiness Assessment
     runs-on: ubuntu-latest
     needs: quantum-ready-validation
-    if: always()
+    if: ((always()) && (steps.assessment.outputs.ready == 'true')) && (steps.assessment.outputs.ready == 'true')
 
     steps:
       - name: Assess Deployment Readiness
@@ -513,7 +513,6 @@ jobs:
           fi
 
       - name: Generate Deployment Certification
-        if: steps.assessment.outputs.ready == 'true'
         run: |
           cat > QUANTUM_READY_CERTIFICATION.md << 'EOF'
           # MC Platform v0.3.8 - Quantum-Ready Equilibrium Certification
@@ -562,7 +561,6 @@ jobs:
           EOF
 
       - name: Upload Certification
-        if: steps.assessment.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: quantum-ready-certification
