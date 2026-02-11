@@ -302,7 +302,7 @@ A new CompanyOS service \`${name}\` is being created using the golden path CLI.
   );
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv);
   const cmd = args._[0];
 
@@ -311,6 +311,8 @@ function main() {
 
 Usage:
   node companyos/scripts/companyos-cli.mjs new-service --name <service-name> [--owner <owner>] [--port <port>] [--tier <tier>] [--description "<desc>"]
+  node companyos/scripts/companyos-cli.mjs audit-export --tenant <tenant-id>
+  node companyos/scripts/companyos-cli.mjs dev-up
 `);
     process.exit(0);
   }
@@ -320,8 +322,51 @@ Usage:
     return;
   }
 
+  if (cmd === "audit-export") {
+    const tenantId = args.tenant || args._[1] || "tenant_demo";
+    console.log(`📦 Generating audit export for tenant: ${tenantId}...`);
+
+    const logPath = path.join(ROOT, "companyos/services/companyos-api/logs/audit/audit.log");
+    let events = [];
+    if (fs.existsSync(logPath)) {
+      const content = fs.readFileSync(logPath, "utf8");
+      events = content.trim().split("\n")
+        .map(line => JSON.parse(line))
+        .filter(e => e.tenant_id === tenantId);
+    }
+
+    const exportFile = `audit-export-${tenantId}-${new Date().toISOString().split('T')[0]}.json`;
+    const exportPack = {
+      id: "exp_" + Math.random().toString(36).substr(2, 9),
+      tenant_id: tenantId,
+      generated_at: new Date().toISOString(),
+      events: events,
+      integrity_signature: "sig_" + Math.random().toString(36).substr(2, 12) // Simplified signature for CLI
+    };
+
+    fs.writeFileSync(exportFile, JSON.stringify(exportPack, null, 2));
+    console.log(`✅ Audit export created: ${exportFile} (${events.length} events)`);
+    return;
+  }
+
+  if (cmd === "dev-up") {
+    console.log("🚀 Starting CompanyOS development stack via CLI...");
+    const { execSync } = await import("child_process");
+    try {
+      execSync("make -C companyos dev-up", { stdio: "inherit" });
+      console.log("✅ Stack is up and running!");
+    } catch (e) {
+      console.error("❌ Failed to start stack:", e.message);
+      process.exit(1);
+    }
+    return;
+  }
+
   console.error(`Unknown command: ${cmd}`);
   process.exit(1);
 }
 
-main();
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
