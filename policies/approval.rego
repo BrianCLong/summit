@@ -2,9 +2,10 @@
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.approval"
 
 package intelgraph.approval
-
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
+
 
 # Default deny - all operations must be explicitly allowed
 default allow := false

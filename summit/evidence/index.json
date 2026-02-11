@@ -1,10 +1,11 @@
 {
+  "version": "1.0",
   "items": [
     {
-      "evidence_id": "EVD-ATP-LATENT-EVIDENCE-002",
-      "report": "examples/report.json",
-      "metrics": "examples/metrics.json",
-      "stamp": "examples/stamp.json"
+      "id": "EVD-OPENWORK-EVIDENCE-001",
+      "report": "report.json",
+      "metrics": "metrics.json",
+      "stamp": "stamp.json"
     }
   ]
 }

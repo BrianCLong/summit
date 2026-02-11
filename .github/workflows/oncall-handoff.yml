@@ -58,6 +58,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
         with:
+          fetch-depth: 0
+        with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate On-Call Handoff

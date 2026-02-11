@@ -1,25 +1,16 @@
-name: "GA Gate"
-
-# AUTHORITATIVE GA GATE
-# This workflow provides the required "GA Gate" check and "ga / gate" context
-# per REQUIRED_CHECKS_POLICY.yml. It runs the official GA verification entrypoint.
-#
-# Required check contexts produced:
-# - "GA Gate" (workflow name)
-# - "ga / gate" (job name with workflow prefix)
-
+name: GA Gate
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   push:
-    branches: [main]
-  merge_group:
-  workflow_dispatch:
-
+    branches:
+      - main
+  merge_group: null
+  workflow_dispatch: null
 concurrency:
   group: ga-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   gate:
     name: gate
@@ -27,25 +18,20 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version-file: .nvmrc
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Run GA Verification
         run: |
           echo "Running GA verification entrypoint..."
@@ -53,7 +39,6 @@ jobs:
         env:
           CI: true
           GA_VERIFY_MODE: true
-
       - name: GA Gate Summary
         if: always()
         run: |

@@ -1,35 +1,33 @@
 name: PR Gates
-
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
     paths-ignore:
       - "**.md"
-      - "docs/**"
-      - ".github/workflows/*.md"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      - "LICENSE"
-
+      - docs/**
+      - .github/workflows/*.md
+      - .github/ISSUE_TEMPLATE/**
+      - .github/PULL_REQUEST_TEMPLATE/**
+      - LICENSE
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: write
   checks: write
-
 jobs:
   compliance-security:
     name: Compliance & Security
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - name: Check for Canary and Rollback Plans
         run: |
           if [ ! -f "canary-plan.md" ]; then
@@ -40,7 +38,6 @@ jobs:
             echo "Error: rollback-plan.md is missing."
             exit 1
           fi
-
       - name: Check Migration Gate
         id: migration-check
         run: |
@@ -54,24 +51,17 @@ jobs:
           fi
         env:
           MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "18"
-
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: "10.0.0"
-
+          cache: pnpm
+          node-version: "18"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Generate SBOM
         run: npm run generate:sbom
-
       - name: Run SCA (Trivy)
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
@@ -80,53 +70,44 @@ jobs:
           else
             echo "Trivy scan script not found, skipping."
           fi
-
       - name: Run SAST (Lint)
         run: npm run lint
-
   build-test:
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/checkout@v4
         with:
-          cache: 'pnpm'
-          node-version: "18"
-
+          fetch-depth: 0
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: "10.0.0"
-
+          cache: pnpm
+          node-version: "18"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Build
         run: pnpm build
-
       - name: Test
         run: pnpm test
-
       - name: Ops Verify
         run: make ops-verify
-
   infrastructure:
     name: Infrastructure Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
-
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
             helm lint helm/
           fi
-
       - name: Terraform Plan
         run: |
           if [ -d "terraform" ]; then
@@ -138,31 +119,28 @@ jobs:
           AWS_ACCESS_KEY_ID: mock_key
           AWS_SECRET_ACCESS_KEY: mock_secret
           AWS_REGION: us-east-1
-
   preview-env:
     name: Preview Environment
-    needs: [build-test, infrastructure]
+    needs:
+      - build-test
+      - infrastructure
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/checkout@v4
         with:
-          cache: 'pnpm'
-          node-version: "18"
-
+          fetch-depth: 0
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: "10.0.0"
-
+          cache: pnpm
+          node-version: "18"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Deploy Preview Environment
         id: deploy
         run: |
@@ -219,9 +197,8 @@ jobs:
              # Set localhost as the preview URL for smoke tests
              echo "preview_url=http://localhost:4000" >> $GITHUB_OUTPUT
           fi
-
       - name: Post Preview URL
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const previewUrl = '${{ steps.deploy.outputs.preview_url }}';
@@ -236,7 +213,6 @@ jobs:
               repo: context.repo.repo,
               body: commentBody
             })
-
       - name: Run Smoke Tests
         run: |
           export TARGET_URL="${{ steps.deploy.outputs.preview_url }}"

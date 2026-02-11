@@ -1,21 +1,9 @@
 name: RC Preparation
-
-# Deterministic RC Preparation Pipeline
-# Prepares an MVP-4 stabilization release candidate with full artifact bundle.
-#
-# This workflow:
-# 1. Runs release readiness verification
-# 2. Computes the next RC tag deterministically
-# 3. Generates an RC Preparation Bundle artifact
-# 4. Does NOT create tags (operator runs commands.sh from bundle)
-#
-# See docs/ci/RC_PREPARATION.md for full documentation.
-
 on:
   workflow_dispatch:
     inputs:
       base_version:
-        description: "Base version (e.g., 4.1.2)"
+        description: Base version (e.g., 4.1.2)
         required: false
         default: ""
         type: string
@@ -25,37 +13,32 @@ on:
         default: ""
         type: string
       dry_run:
-        description: "Dry run mode (no tag creation)"
+        description: Dry run mode (no tag creation)
         required: false
         default: true
         type: boolean
       skip_verification:
-        description: "Skip release readiness check"
+        description: Skip release readiness check
         required: false
         default: false
         type: boolean
-
 permissions:
   contents: read
   actions: read
-
 jobs:
   prepare-rc:
     name: Prepare Release Candidate
     runs-on: ubuntu-latest
-
     outputs:
       tag: ${{ steps.prepare.outputs.tag }}
       commit_sha: ${{ steps.params.outputs.commit_sha }}
       artifact_name: ${{ steps.prepare.outputs.artifact_name }}
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ inputs.commit_sha || 'main' }}
-
       - name: Determine Parameters
         id: params
         run: |
@@ -79,19 +62,15 @@ jobs:
 
           echo "Commit SHA: ${COMMIT_SHA}"
           echo "Base Version: ${VERSION}"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
       - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: "20"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Run Release Readiness Check
         if: ${{ !inputs.skip_verification }}
         id: verify
@@ -109,7 +88,6 @@ jobs:
             pnpm --filter intelgraph-server build || true
             echo "status=fallback" >> $GITHUB_OUTPUT
           fi
-
       - name: Prepare RC Bundle
         id: prepare
         env:
@@ -161,7 +139,6 @@ jobs:
 
           echo "Generated RC: ${TAG}"
           echo "Artifacts: ${ARTIFACT_DIR}"
-
       - name: Capture Verification Status
         if: always()
         run: |
@@ -178,14 +155,12 @@ jobs:
           else
             echo "Verification script not available" > "${ARTIFACT_DIR}/required_checks_snapshot.txt"
           fi
-
       - name: Upload RC Bundle Artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: ${{ steps.prepare.outputs.artifact_name }}
           path: ${{ steps.prepare.outputs.artifact_dir }}
           retention-days: 90
-
       - name: Job Summary
         run: |
           TAG="${{ steps.prepare.outputs.tag }}"

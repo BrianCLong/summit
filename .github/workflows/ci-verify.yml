@@ -1,44 +1,36 @@
 name: CI Verify (Security & Compliance)
-
-# This workflow enforces security, provenance, compliance, and governance gates.
-# Most jobs are BLOCKING - PRs cannot merge if critical checks fail.
-
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   push:
-    branches: [main]
-  merge_group:
-  workflow_dispatch:
-
+    branches:
+      - main
+  merge_group: null
+  workflow_dispatch: null
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history required for Gitleaks
-
+          fetch-depth: 0
       - name: Gitleaks secret scanning
-        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: false # BLOCKING: secrets block merge
-
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@v4 # v6
+        continue-on-error: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Dependency audit (critical CVEs only)
         run: |
           echo "=== Scanning for Critical CVEs ==="
@@ -47,17 +39,15 @@ jobs:
             echo "::error::Run 'pnpm audit' locally and document exceptions if needed"
             exit 1
           }
-        continue-on-error: false # BLOCKING: critical CVEs block merge
-
+        continue-on-error: false
       - name: Snyk security scan
         if: env.SNYK_TOKEN != ''
         run: npx snyk test --severity-threshold=high || npx snyk test --severity-threshold=high
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        continue-on-error: true # Non-blocking (token may not be available)
-
+        continue-on-error: true
       - name: Upload security scan results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
           name: security-scan-results
@@ -65,18 +55,15 @@ jobs:
             gitleaks-report.json
             snyk-report.json
           retention-days: 90
-
   policy-compliance:
     name: Policy Compliance
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
-
+      - uses: actions/checkout@v4
       - name: Setup OPA
-        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
+        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576
         with:
-          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
-
+          version: v0.45.0
       - name: OPA policy check
         run: |
           echo "=== Checking OPA Policy Syntax ==="
@@ -84,7 +71,6 @@ jobs:
             echo "::error::OPA policy syntax check FAILED"
             exit 1
           }
-
       - name: OPA policy tests
         run: |
           echo "=== Running OPA Policy Tests ==="
@@ -92,37 +78,31 @@ jobs:
             echo "::error::OPA policy tests FAILED"
             exit 1
           }
-
       - name: Upload OPA test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
           name: opa-test-results
           path: |
             policies/test-results.json
           retention-days: 90
-
   governance-checks:
     name: Governance Checks
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@v4 # v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Media provenance gate
         run: npx tsx scripts/ci/verify_media_provenance.ts
-
       - name: Check governance compliance
         run: npm run check:governance || echo "Governance check skipped (script may not exist)"
-        continue-on-error: true # Non-blocking until governance engine is stable
-
+        continue-on-error: true
       - name: Validate agent contracts
         run: |
           if [ -f "scripts/validate-agent-contracts.ts" ]; then
@@ -130,8 +110,7 @@ jobs:
           else
             echo "Agent contract validation skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
-
+        continue-on-error: true
       - name: Check audit exception expiry
         run: |
           if [ -f "scripts/check-audit-exceptions.ts" ]; then
@@ -139,18 +118,18 @@ jobs:
           else
             echo "Audit exception check skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
-
+        continue-on-error: true
   mcp-ux-lint:
     name: MCP Tool UX Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: actions/setup-node@v4 # v6
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: "20"
-
       - name: Run MCP UX Linter
         run: |
           if [ -f "scripts/ci/lint-mcp-ux.mjs" ]; then
@@ -158,22 +137,19 @@ jobs:
           else
             echo "MCP UX Linter not found, skipping."
           fi
-        continue-on-error: false # BLOCKING: poor tool UX fails CI
-
+        continue-on-error: false
   provenance:
     name: Provenance & SBOM
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@v4 # v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Generate SBOM
         run: |
           if [ -f "scripts/generate-sbom.sh" ]; then
@@ -183,8 +159,7 @@ jobs:
             echo "Placeholder SBOM for CI validation"
             echo '{"bomFormat":"CycloneDX","specVersion":"1.4","version":1}' > sbom.json
           fi
-        continue-on-error: true # Non-blocking for PRs, required for releases
-
+        continue-on-error: true
       - name: Generate SLSA provenance
         run: |
           if [ -f "scripts/attest-slsa.sh" ]; then
@@ -194,30 +169,26 @@ jobs:
             echo "Placeholder provenance for CI validation"
             echo '{"_type":"https://in-toto.io/Statement/v0.1"}' > provenance.json
           fi
-        continue-on-error: true # Non-blocking for PRs, required for releases
-
+        continue-on-error: true
       - name: Upload SBOM
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
           name: sbom
           path: sbom.json
-          retention-days: 90 # 2 years retention
-
+          retention-days: 90
       - name: Upload SLSA provenance
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         if: always()
         with:
           name: slsa-provenance
           path: provenance.json
-          retention-days: 90 # 2 years retention
-
+          retention-days: 90
       - name: Prepare evidence directory
         run: |
           mkdir -p evidence
           [ -f provenance.json ] && cp provenance.json evidence/
           [ -f sbom.json ] && cp sbom.json evidence/sbom.cdx.json || true
-
       - name: Generate Evidence Index (deterministic)
         run: |
           node scripts/release/generate_evidence_index.mjs \
@@ -225,37 +196,31 @@ jobs:
             --provenance evidence/provenance.json \
             --outjson evidence/evidence-index.json \
             --outmd evidence/EVIDENCE_INDEX.md
-
       - name: Create deterministic evidence tarball
         run: |
           tar --sort=name \
               --mtime='UTC 1970-01-01' \
               --owner=0 --group=0 --numeric-owner \
               -czf evidence/evidence-bundle.tgz evidence
-
       - name: Upload evidence bundle
         uses: actions/upload-artifact@v4
         with:
           name: golden-evidence-bundle
           path: evidence
-
   schema-validation:
     name: Schema Validation
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Needed for schema diff
-
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@v4 # v6
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: GraphQL schema compatibility check
         run: |
           if npm run graphql:schema:check 2>/dev/null; then
@@ -263,8 +228,7 @@ jobs:
           else
             echo "GraphQL schema check skipped (may not be configured)"
           fi
-        continue-on-error: true # Non-blocking until graphql-inspector is fixed
-
+        continue-on-error: true
       - name: API schema validation
         run: |
           if [ -f "scripts/validate-api-schema.ts" ]; then
@@ -272,22 +236,19 @@ jobs:
           else
             echo "API schema validation skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
-
+        continue-on-error: true
   compliance-evidence:
     name: Compliance Evidence
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-      - uses: actions/setup-node@v4 # v6
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Verify control coverage
         run: |
           if [ -f "scripts/verify-control-coverage.ts" ]; then
@@ -295,8 +256,7 @@ jobs:
           else
             echo "Control coverage verification skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking until implementation complete
-
+        continue-on-error: true
       - name: Generate evidence bundle (dry run)
         run: |
           if [ -f "scripts/generate-evidence-bundle.sh" ]; then
@@ -304,16 +264,17 @@ jobs:
           else
             echo "Evidence bundle generation skipped (script not yet implemented)"
           fi
-        continue-on-error: true # Non-blocking for PRs
-
+        continue-on-error: true
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: actions/setup-node@v4 # v6
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: "20"
       - name: Ensure evidence bundle exists
         run: |
@@ -333,7 +294,6 @@ jobs:
           fi
           node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir "$EVIDENCE_DIR"
           node scripts/evidence/validate_control_evidence.mjs --evidence-dir "$EVIDENCE_DIR"
-
       - name: Generate GA evidence manifest (deterministic)
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
@@ -352,24 +312,21 @@ jobs:
             --evidence-dir "$EVIDENCE_DIR" \
             --provenance "$EVIDENCE_DIR/provenance.json" \
             --out "$EVIDENCE_DIR/ga-evidence-manifest.json"
-
       - name: Generate GA evidence dashboard (deterministic)
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
           node scripts/release/generate_ga_evidence_dashboard.mjs \
             --evidence-dir "$EVIDENCE_DIR" \
             --out "$EVIDENCE_DIR/GA_EVIDENCE_DASHBOARD.md"
-
       - name: Upload evidence index
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: ga-evidence-index-${{ github.sha }}
           path: |
             dist/evidence/${{ github.sha }}/control_evidence_index.json
             dist/evidence/${{ github.sha }}/validation_report.json
           retention-days: 30
-
       - name: Evidence completeness summary
         if: always()
         run: |
@@ -389,7 +346,6 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Artifacts: ga-evidence-index-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
           fi
-
   ci-verify-gate:
     name: CI Verify Gate ✅
     runs-on: ubuntu-22.04
@@ -444,7 +400,6 @@ jobs:
           echo ""
           echo "✅ CI VERIFY GATE: PASSED"
           echo "All critical security, policy, and GA evidence checks passed."
-
       - name: Post summary
         run: |
           echo "## ✅ CI Verify Gate: PASSED" >> $GITHUB_STEP_SUMMARY

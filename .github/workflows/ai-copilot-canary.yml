@@ -1,34 +1,27 @@
 name: AI Copilot Canary
-
 on:
   schedule:
-    - cron: "15 * * * *"
-  workflow_dispatch:
+    - cron: 15 * * * *
+  workflow_dispatch: null
   push:
     paths:
-      - "slo/ai-copilot.yaml"
-      - "RUNBOOKS/ai-copilot-service.md"
-      - "services/ai-copilot/**"
-      - ".github/workflows/ai-copilot-canary.yml"
-
+      - slo/ai-copilot.yaml
+      - RUNBOOKS/ai-copilot-service.md
+      - services/ai-copilot/**
+      - .github/workflows/ai-copilot-canary.yml
 jobs:
   canary:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
+      - uses: actions/checkout@v4
       - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        # version is read from package.json packageManager field
-
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: "20"
       - name: Install dependencies (script only)
-        run: pnpm add -w js-yaml
-
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run AI Copilot canary checks
         run: node scripts/ai-copilot-canary.cjs

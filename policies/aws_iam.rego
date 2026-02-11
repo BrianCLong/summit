@@ -1,5 +1,8 @@
 
 package maestro.governance
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
 # Deny overly permissive IAM roles
 deny[msg] {

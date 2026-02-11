@@ -1,63 +1,45 @@
 name: Redaction Layer Tests
-
-# Tests the redaction layer to ensure forbidden patterns are removed
-# and sensitive sections are collapsed correctly. Runs on PRs that
-# modify the redaction policy, scripts, or Pages workflow.
-#
-# Authority: docs/ci/RELEASE_OPS_REDACTION.md
-
 on:
   pull_request:
     paths:
-      # Redaction policy and scripts
-      - "docs/ci/REDACTION_POLICY.yml"
-      - "scripts/release/redact_release_ops_content.sh"
-      - "scripts/release/build_release_ops_site.sh"
-      - "scripts/release/render_release_ops_single_page_html.*"
-      - "scripts/release/generate_release_ops_single_page.sh"
-      # Pages publishing
-      - ".github/workflows/publish-release-ops-pages.yml"
-      - "docs/ci/PAGES_PUBLISH_ALLOWLIST.md"
-      # Test fixtures and scripts
-      - "scripts/release/tests/**"
-
-  # Allow manual runs for debugging
-  workflow_dispatch:
-
+      - docs/ci/REDACTION_POLICY.yml
+      - scripts/release/redact_release_ops_content.sh
+      - scripts/release/build_release_ops_site.sh
+      - scripts/release/render_release_ops_single_page_html.*
+      - scripts/release/generate_release_ops_single_page.sh
+      - .github/workflows/publish-release-ops-pages.yml
+      - docs/ci/PAGES_PUBLISH_ALLOWLIST.md
+      - scripts/release/tests/**
+  workflow_dispatch: null
 concurrency:
   group: redaction-tests-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   redaction-tests:
     name: Redaction Layer Tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
-
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
+        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: "20"
-
       - name: Install marked (for HTML rendering)
         run: npm install marked@16
-
       - name: Make Scripts Executable
         run: |
           chmod +x scripts/release/*.sh
           chmod +x scripts/release/tests/*.sh
-
       - name: Run Redaction Tests
         id: tests
         run: |
           echo "=== Running Redaction Layer Tests ==="
           scripts/release/tests/redaction_layer.test.sh --verbose
-
       - name: Test Summary
         if: always()
         run: |
@@ -84,16 +66,13 @@ jobs:
           echo "- Policy: \`docs/ci/REDACTION_POLICY.yml\`" >> $GITHUB_STEP_SUMMARY
           echo "- Script: \`scripts/release/redact_release_ops_content.sh\`" >> $GITHUB_STEP_SUMMARY
           echo "- Fixtures: \`scripts/release/tests/fixtures/\`" >> $GITHUB_STEP_SUMMARY
-
   verify-policy-syntax:
     name: Verify Policy Syntax
     runs-on: ubuntu-latest
     timeout-minutes: 2
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
-
+        uses: actions/checkout@v4
       - name: Validate YAML Syntax
         run: |
           echo "Validating REDACTION_POLICY.yml..."
@@ -128,7 +107,6 @@ jobs:
               print(f'YAML parse error: {e}')
               sys.exit(1)
           "
-
       - name: Summary
         if: always()
         run: |

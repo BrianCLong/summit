@@ -1,50 +1,35 @@
 name: Publish Release Ops Internal
-
-# Produces a FULL (non-redacted) Release Ops package for maintainers.
-# This is NOT published to Pages - only available as a workflow artifact.
-#
-# Use this when you need the complete blocker details, issue bodies,
-# and internal links that are redacted from the public Pages site.
-#
-# Authority: docs/ci/RELEASE_OPS_REDACTION.md
-
 on:
-  # Manual trigger only - this produces sensitive content
   workflow_dispatch:
     inputs:
       run_id:
-        description: "Orchestrator run ID to build from (leave empty for latest)"
+        description: Orchestrator run ID to build from (leave empty for latest)
         type: string
         required: false
       include_state:
-        description: "Include state files in package (for debugging)"
+        description: Include state files in package (for debugging)
         type: boolean
         default: false
-
-# Only one internal build at a time
 concurrency:
   group: release-ops-internal
   cancel-in-progress: false
-
 permissions:
   contents: read
   actions: read
-
 jobs:
   build-internal:
     name: Build Internal Package
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4
-
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
+        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: "20"
-
       - name: Find Orchestrator Run
         id: find-run
         env:
@@ -71,7 +56,6 @@ jobs:
             echo "run_id=${LATEST_RUN}" >> $GITHUB_OUTPUT
             echo "Found latest run: ${LATEST_RUN}"
           fi
-
       - name: Download Orchestrator Artifacts
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,10 +74,8 @@ jobs:
 
           echo "Downloaded artifacts:"
           ls -la artifacts/release-train/
-
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
-
       - name: Build Full Internal Package
         run: |
           mkdir -p internal-package
@@ -184,21 +166,18 @@ jobs:
           echo ""
           echo "=== Internal Package Contents ==="
           ls -la internal-package/
-
       - name: Upload Internal Package
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: release-ops-internal-${{ steps.find-run.outputs.run_id }}
           path: internal-package/
           retention-days: 30
-
       - name: Upload as Latest
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: release-ops-internal-latest
           path: internal-package/
           retention-days: 7
-
       - name: Summary
         run: |
           echo "## Release Ops Internal Package" >> $GITHUB_STEP_SUMMARY

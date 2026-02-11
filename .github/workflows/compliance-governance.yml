@@ -1,56 +1,52 @@
 name: Compliance & Governance
-
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
     paths-ignore:
       - "**.md"
-      - "docs/**"
+      - docs/**
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
     paths-ignore:
       - "**.md"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
+      - docs/**
+      - .github/ISSUE_TEMPLATE/**
+      - .github/PULL_REQUEST_TEMPLATE/**
   schedule:
-    - cron: "0 0 * * 1" # Weekly verification
-
+    - cron: 0 0 * * 1
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
 jobs:
   governance-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
-
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: "20"
-
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install --frozen-lockfile
-
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Verify Governance Rules
         run: pnpm verify:governance
-
   compliance-drift-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
-
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: "20"
-
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install --frozen-lockfile
-
+        run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Verify Compliance Drift
         run: pnpm verify:compliance

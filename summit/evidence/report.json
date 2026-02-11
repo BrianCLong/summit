@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-OPENWORK-EVIDENCE-001",
+  "summary": "Skeleton for OpenWork subsumption",
+  "artifacts": [
+    "summit/core/agentic/types.ts",
+    "summit/policy/permissions.ts"
+  ]
+}

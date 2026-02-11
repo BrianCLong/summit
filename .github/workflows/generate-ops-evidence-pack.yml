@@ -1,39 +1,35 @@
 name: Generate Ops Evidence Pack
-
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: 'Git reference to checkout (default: main)'
+        description: "Git reference to checkout (default: main)"
         required: false
-        default: 'main'
-
+        default: main
 jobs:
   generate-pack:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.ref }}
-
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
-
+          cache: pnpm
+          node-version: "20"
       - name: Install Dependencies
         run: npm install -g pnpm && pnpm install
-
       - name: Generate Ops Evidence Pack
         id: generate
         run: |
           ./scripts/verification/generate_ops_evidence_pack.sh
-
       - name: Upload Evidence Pack
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: ops-evidence-pack
           path: artifacts/ops-evidence/*.tar.gz

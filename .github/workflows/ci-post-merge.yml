@@ -1,18 +1,17 @@
 name: ci-post-merge
-
 on:
   workflow_run:
-    workflows: ["ci-pr"]
-    types: [completed]
-    branches: [main]
-
+    workflows:
+      - ci-pr
+    types:
+      - completed
+    branches:
+      - main
 permissions:
   contents: read
   id-token: write
-
 jobs:
   gate:
-    # Logic: Run only if the upstream workflow (ci-pr) succeeded AND it was a push event (merge to main)
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
     runs-on: ubuntu-latest
     outputs:
@@ -21,7 +20,6 @@ jobs:
       - name: Extract merged SHA
         id: ref
         run: echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
-
   sbom:
     needs: gate
     runs-on: ubuntu-latest
@@ -29,13 +27,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.gate.outputs.sha }}
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+          node-version-file: .nvmrc
+          cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate SBOM
@@ -45,7 +41,6 @@ jobs:
         with:
           name: sbom
           path: .evidence/sbom.json
-
   provenance:
     needs: gate
     runs-on: ubuntu-latest
@@ -53,13 +48,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.gate.outputs.sha }}
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
+          node-version-file: .nvmrc
+          cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Provenance

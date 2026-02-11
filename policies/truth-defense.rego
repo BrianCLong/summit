@@ -2,9 +2,10 @@
 # Enforces adversarial-resistant decision-making rules
 
 package summit.truth_defense
-
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
+
 
 # Configuration
 default integrity_threshold_high := 0.70

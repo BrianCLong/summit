@@ -1,52 +1,29 @@
 name: Release RC Pipeline
-
-# Canonical RC Pipeline - Single authoritative workflow for RC tag events
-# Consolidates verification + promotion bundle into one artifact.
-#
-# This workflow:
-# 1. Runs release readiness gate on the tagged commit
-# 2. Verifies all required checks are green (truth table)
-# 3. Builds a Promotion Bundle with all materials
-# 4. Produces single rc-pipeline-bundle-{tag} artifact
-#
-# See docs/ci/RELEASE_RC_PIPELINE.md for full documentation.
-
 on:
   push:
     tags:
-      - "v*.*.*-rc.*"
-
-  # Manual dispatch for re-running without re-pushing tag
+      - v*.*.*-rc.*
   workflow_dispatch:
     inputs:
       tag:
-        description: "RC tag to process (e.g., v4.1.2-rc.1)"
+        description: RC tag to process (e.g., v4.1.2-rc.1)
         required: true
         type: string
-
 permissions:
   contents: read
   actions: read
-
 concurrency:
   group: release-rc-${{ github.ref_name || inputs.tag }}
-  cancel-in-progress: false # Don't cancel release workflows
-
+  cancel-in-progress: false
 jobs:
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 1: Release Readiness Verification
-  # Runs canonical release:ready gate on the tagged commit
-  # ═══════════════════════════════════════════════════════════════════════════
   verify:
-    name: "1️⃣ Release Readiness"
+    name: 1️⃣ Release Readiness
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     outputs:
       tag: ${{ steps.params.outputs.tag }}
       commit: ${{ steps.params.outputs.commit }}
       version: ${{ steps.params.outputs.version }}
-
     steps:
       - name: Determine Parameters
         id: params
@@ -69,7 +46,6 @@ jobs:
           echo "Tag: ${TAG}"
           echo "Commit: ${COMMIT:-'(will resolve from tag)'}"
           echo "Version: ${VERSION}"
-
       - name: Validate RC Tag Format
         run: |
           TAG="${{ steps.params.outputs.tag }}"
@@ -78,13 +54,11 @@ jobs:
             exit 1
           fi
           echo "✅ Valid RC tag format: ${TAG}"
-
       - name: Checkout at tagged commit
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           ref: ${{ steps.params.outputs.tag }}
           fetch-depth: 0
-
       - name: Resolve Commit SHA
         id: resolve
         run: |
@@ -95,21 +69,15 @@ jobs:
           fi
           echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
           echo "Resolved commit: ${COMMIT}"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: 10
-
+          cache: pnpm
+          node-version: "20"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Run release:ready
         run: |
           TAG="${{ steps.params.outputs.tag }}"
@@ -118,28 +86,20 @@ jobs:
           echo "Running release readiness gate for RC: ${TAG}"
           echo "Commit: ${COMMIT}"
           pnpm release:ready
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 2: Promotion Guard Verification
-  # Verifies all required checks are green using truth table
-  # ═══════════════════════════════════════════════════════════════════════════
   promotion-guard:
-    name: "2️⃣ Promotion Guard"
+    name: 2️⃣ Promotion Guard
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: verify
-
     outputs:
       promotion_allowed: ${{ steps.guard.outputs.promotion_allowed }}
       verification_output: ${{ steps.guard.outputs.output_file }}
-
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
-
       - name: Compute Base Reference
         id: base
         run: |
@@ -155,7 +115,6 @@ jobs:
 
           echo "Computed base: ${BASE}"
           echo "base=${BASE}" >> $GITHUB_OUTPUT
-
       - name: Run Promotion Guard
         id: guard
         env:
@@ -194,14 +153,12 @@ jobs:
             echo "⚠️ Promotion Guard: Some checks pending/failed"
             echo "Note: Bundle will still be created for audit purposes"
           fi
-
       - name: Upload Verification Output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: verification-output
           path: artifacts/verification/
           retention-days: 90
-
       - name: Promotion Guard Summary
         if: always()
         run: |
@@ -216,31 +173,25 @@ jobs:
           echo "| RC Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`${COMMIT:0:7}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Status | ${ALLOWED} == 'true' && '✅ PASSED' || '⚠️ PENDING/FAILED' |" >> $GITHUB_STEP_SUMMARY
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Stage 3: Build & Assemble RC Pipeline Bundle
-  # Creates single authoritative artifact: rc-pipeline-bundle-{tag}
-  # ═══════════════════════════════════════════════════════════════════════════
   bundle:
-    name: "3️⃣ Assemble Pipeline Bundle"
+    name: 3️⃣ Assemble Pipeline Bundle
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [verify, promotion-guard]
+    needs:
+      - verify
+      - promotion-guard
     if: always() && needs.verify.result == 'success'
-
     steps:
       - name: Checkout at tagged commit
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
-
       - name: Download Verification Output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
         with:
           name: verification-output
           path: staging/verification
-
       - name: Build Promotion Bundle
         id: bundle
         run: |
@@ -263,7 +214,6 @@ jobs:
             --output "${STAGING_DIR}" || true
 
           echo "bundle_staging=${STAGING_DIR}" >> $GITHUB_OUTPUT
-
       - name: Assemble RC Pipeline Bundle
         id: assemble
         run: |
@@ -388,20 +338,17 @@ jobs:
           echo ""
           echo "Bundle contents:"
           ls -la "${BUNDLE_DIR}/"
-
       - name: Upload RC Pipeline Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
           path: ${{ steps.assemble.outputs.bundle_dir }}
           retention-days: 90
-
       - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b
         with:
           name: verification-output
           failOnError: false
-
       - name: Generate Job Summary
         run: |
           TAG="${{ needs.verify.outputs.tag }}"

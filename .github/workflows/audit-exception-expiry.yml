@@ -1,28 +1,29 @@
 name: audit-exception-expiry
-
 on:
   pull_request:
     paths:
-      - "audit/exceptions.yaml"
-      - "scripts/audit/check-exceptions.js"
-      - ".github/workflows/audit-exception-expiry.yml"
+      - audit/exceptions.yaml
+      - scripts/audit/check-exceptions.js
+      - .github/workflows/audit-exception-expiry.yml
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
-      - "audit/exceptions.yaml"
-      - "scripts/audit/check-exceptions.js"
-      - ".github/workflows/audit-exception-expiry.yml"
-
+      - audit/exceptions.yaml
+      - scripts/audit/check-exceptions.js
+      - .github/workflows/audit-exception-expiry.yml
 jobs:
   validate-exceptions:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Use Node.js 20
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: pnpm
           node-version: "20"
       - name: Install dependencies
         run: |

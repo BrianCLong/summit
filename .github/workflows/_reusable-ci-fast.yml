@@ -5,8 +5,7 @@ on:
       test-command:
         required: false
         type: string
-        default: "pnpm run test:fast -- --runInBand --bail=1 --silent"
-
+        default: pnpm run test:fast -- --runInBand --bail=1 --silent
 jobs:
   fast:
     runs-on: ubuntu-22.04
@@ -16,32 +15,26 @@ jobs:
       NODE_OPTIONS: "--max-old-space-size=3072"
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
-      - uses: actions/checkout@v4 # v6
-
+      - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
         with:
           run_install: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20.11.x"
-
       - name: Enable corepack (belt & suspenders)
         run: corepack enable
-
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 20.11.x
       - name: Install deps
         run: pnpm i --frozen-lockfile
-
       - name: Run fast lane
         run: ${{ inputs.test-command }}
         continue-on-error: true
-
       - name: Upload Jest results (debug)
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           retention-days: 14
           name: fast-jest-results

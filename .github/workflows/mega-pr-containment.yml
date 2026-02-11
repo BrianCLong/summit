@@ -1,44 +1,36 @@
 name: Mega PR Containment
-
 on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: "PR Number to analyze"
+        description: PR Number to analyze
         required: true
         type: string
       generate_patches:
-        description: "Generate patch files (experimental)"
+        description: Generate patch files (experimental)
         required: false
         type: boolean
         default: false
-
 permissions:
   contents: read
   pull-requests: read
-
 jobs:
   analyze-pr:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Needed for patch generation if used
-
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        # version is read from package.json packageManager field
-
+          cache: pnpm
       - name: Install dependencies
         run: pnpm install
-
       - name: Run Containment Analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,9 +47,8 @@ jobs:
             --pr ${{ inputs.pr_number }} \
             --out artifacts/pr-containment/${{ inputs.pr_number }} \
             $FLAGS
-
       - name: Upload Analysis Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: mega-pr-${{ inputs.pr_number }}-plan
           path: artifacts/pr-containment/${{ inputs.pr_number }}

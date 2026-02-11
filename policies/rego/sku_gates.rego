@@ -1,4 +1,7 @@
 package intelgraph.sku
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
 default allow_feature := false
 

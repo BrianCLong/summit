@@ -1,29 +1,18 @@
 name: Auto-Remediation
-
-# AUTOMATED REMEDIATION FOR RELEASE BLOCKERS
-# Matches release blocker issues to playbooks and executes
-# appropriate remediation steps.
-#
-# See docs/ci/AUTO_REMEDIATION.md for full documentation.
-
 on:
-  # Trigger on issue label events
   issues:
-    types: [labeled]
-
-  # Scheduled scan for remediation candidates
+    types:
+      - labeled
   schedule:
-    - cron: "0 */4 * * *" # Every 4 hours
-
-  # Manual dispatch
+    - cron: 0 */4 * * *
   workflow_dispatch:
     inputs:
       issue_number:
-        description: "Specific issue number to remediate"
+        description: Specific issue number to remediate
         type: string
         required: false
       playbook:
-        description: "Force specific playbook"
+        description: Force specific playbook
         type: choice
         options:
           - auto-detect
@@ -37,25 +26,21 @@ on:
           - security-scan
         default: auto-detect
       dry_run:
-        description: "Dry run mode (show actions without executing)"
+        description: Dry run mode (show actions without executing)
         type: boolean
         default: true
       auto_only:
-        description: "Only run auto-execute playbooks"
+        description: Only run auto-execute playbooks
         type: boolean
         default: true
-
-# Prevent concurrent runs
 concurrency:
   group: auto-remediation-${{ github.event.issue.number || 'batch' }}
   cancel-in-progress: false
-
 permissions:
-  contents: write # For committing fixes
-  issues: write # For commenting and labeling
-  actions: write # For triggering workflows and clearing caches
-  pull-requests: write # For creating fix PRs
-
+  contents: write
+  issues: write
+  actions: write
+  pull-requests: write
 jobs:
   check-trigger:
     name: Check Trigger Conditions
@@ -92,7 +77,6 @@ jobs:
             echo "should_run=false" >> $GITHUB_OUTPUT
             echo "Issue does not have remediation labels, skipping"
           fi
-
   remediate:
     name: Run Remediation
     needs: check-trigger
@@ -100,24 +84,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: "20"
       - name: Run Auto-Remediation
         id: remediate
         env:
@@ -150,7 +132,6 @@ jobs:
 
           # Run remediation
           ./scripts/release/run_remediation.sh $ARGS
-
       - name: Check for State Changes
         id: check_changes
         run: |
@@ -159,7 +140,6 @@ jobs:
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
-
       - name: Commit State Changes via PR
         if: steps.check_changes.outputs.changed == 'true' && inputs.dry_run != true
         env:
@@ -193,7 +173,6 @@ jobs:
 
           # Enable auto-merge
           gh pr merge --auto --squash || echo "Auto-merge enabled or not available"
-
       - name: Job Summary
         run: |
           echo "### Auto-Remediation Results" >> $GITHUB_STEP_SUMMARY

@@ -1,32 +1,22 @@
 name: "Reusable: GA Readiness"
-
-# Consolidated GA Readiness checks.
-# This workflow is the single source of truth for "What defines GA readiness?"
-# It combines:
-# 1. Antigravity Governance Checks
-# 2. Security Scans (Secrets, Vulns, Dependencies)
-# 3. Supply Chain Security (SBOM, Provenance Check)
-# 4. SLO/Performance Verification
-
 on:
   workflow_call:
     inputs:
       ref:
-        description: "Git reference to checkout"
+        description: Git reference to checkout
         required: false
         type: string
         default: ""
     outputs:
       ready:
-        description: "True if all readiness gates passed"
+        description: True if all readiness gates passed
         value: ${{ jobs.ga-readiness.outputs.ready }}
       sha:
-        description: "The commit SHA that was verified"
+        description: The commit SHA that was verified
         value: ${{ jobs.ga-readiness.outputs.sha }}
       verify_status:
-        description: "Verification status (passed/failed)"
+        description: Verification status (passed/failed)
         value: ${{ jobs.ga-readiness.outputs.verify_status }}
-
 jobs:
   ga-readiness:
     name: GA Readiness Gate
@@ -36,40 +26,31 @@ jobs:
       ready: ${{ steps.summary.outputs.ready }}
       sha: ${{ steps.capture-sha.outputs.sha }}
       verify_status: ${{ steps.summary.outputs.verify_status }}
-
     permissions:
       contents: read
       security-events: write
       id-token: write
       pull-requests: write
-
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v4
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
-
       - name: Capture SHA
         id: capture-sha
         run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: 10
-
+          cache: pnpm
+          node-version: "20"
       - name: Setup Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5
         with:
           go-version: "1.21"
-
       - name: Install Tools (OPA, Cosign, Syft, Grype)
         run: |
           # OPA
@@ -87,35 +68,26 @@ jobs:
 
           # Grype
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
-      # 1. Antigravity Governance Check
       - name: Antigravity Compliance
         id: antigravity
         run: |
           echo "⚖️ Verifying Antigravity Governance..."
           npm run compliance:antigravity
-
-      # 2. Security: Secrets & Vulns
       - name: Run Trivy (Secrets)
-        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
+        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac
         with:
-          scan-type: "fs"
-          scan-ref: "."
-          scanners: "secret"
-          severity: "CRITICAL,HIGH"
-          format: "table"
+          scan-type: fs
+          scan-ref: .
+          scanners: secret
+          severity: CRITICAL,HIGH
+          format: table
           exit-code: "1"
-
       - name: Run NPM Audit
         run: npm audit --audit-level=high
-
-      # 3. Supply Chain: SBOM & OPA
       - name: Generate SBOM
         run: syft . -o cyclonedx-json=sbom.cdx.json
-
       - name: OPA Policy Check
         run: |
           if [[ -f scripts/check-ga-policy.sh ]]; then
@@ -124,23 +96,18 @@ jobs:
           else
             echo "⚠️ scripts/check-ga-policy.sh not found, skipping."
           fi
-
-      # 4. SLO & Performance Readiness
-      # Note: This might require a running stack. In CI, we use docker-compose.
       - name: Boot Minimal Stack for SLO Check
         run: |
           docker compose -f docker-compose.yml -f docker-compose.minimal.yml up -d
           echo "Waiting for stack..."
           sleep 45
-
       - name: Run SLO Readiness
         run: |
           # Use the hardened script that no longer uses mocks
           node scripts/generate-evidence-bundle.js
-
       - name: Upload Readiness Artifacts
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: ga-readiness-evidence
           path: |
@@ -148,7 +115,6 @@ jobs:
             evidence/
             artifacts/
           retention-days: 90
-
       - name: Readiness Summary
         id: summary
         if: always()

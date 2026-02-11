@@ -87,6 +87,8 @@ jobs:
       - name: Checkout (shallow)
         uses: actions/checkout@v4 # v4
         with:
+          fetch-depth: 0
+        with:
           fetch-depth: 2
 
       - name: Check for loop avoidance

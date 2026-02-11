@@ -1,15 +1,14 @@
 name: Governance Engine
-
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   push:
-    branches: [main]
-
+    branches:
+      - main
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 jobs:
   enforce-policy:
     runs-on: ubuntu-latest
@@ -17,22 +16,18 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Need full history for diff
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
+          fetch-depth: 0
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: "20"
       - name: Install dependencies (scripts only)
         run: pnpm install --frozen-lockfile
-
       - name: Evaluate Governance Policies
         env:
           BASE_REF: ${{ github.event.pull_request.base.sha || 'origin/main' }}
@@ -40,10 +35,9 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
           npx tsx scripts/ci/evaluate-policies.ts
-
       - name: Upload Provenance Artifact
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           retention-days: 14
           name: governance-provenance

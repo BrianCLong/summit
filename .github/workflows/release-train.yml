@@ -1,13 +1,11 @@
 name: release-train
-
 on:
   workflow_dispatch:
     inputs:
       target_env:
-        description: "stage|prod"
+        description: stage|prod
         required: true
-        default: "stage"
-
+        default: stage
 jobs:
   parity_audit:
     runs-on: ubuntu-latest
@@ -29,7 +27,6 @@ jobs:
           scripts/ci/deny_on_drift.sh artifacts/iac.diff
       - name: Secret parity check
         run: scripts/ci/secret_matrix_check.sh scripts/ci/configs/secrets.stage.json scripts/ci/configs/secrets.prod.json
-
   third_party_status:
     runs-on: ubuntu-latest
     steps:
@@ -39,66 +36,55 @@ jobs:
         run: scripts/ci/provider_status_gate.sh scripts/ci/configs/providers.yaml
     outputs:
       ok: ${{ steps.gate.outputs.ok }}
-
   build_and_sign:
-    needs: [parity_audit, third_party_status]
+    needs:
+      - parity_audit
+      - third_party_status
     if: ${{ always() && needs.third_party_status.outputs.ok == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       digest: ${{ steps.build.outputs.DIGEST }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: "pnpm"
-          node-version: "20"
-
+        uses: actions/checkout@v4
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          version: "9.12.0"
-
+          cache: pnpm
+          node-version: "20"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Build Packages
         id: build
         run: pnpm run build
-
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: client-dist
           path: client/dist
           retention-days: 5
           if-no-files-found: warn
-
       - name: Upload Server Artifacts
         if: hashFiles('server/dist/**') != ''
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: server-dist
           path: server/dist
           retention-days: 5
           if-no-files-found: warn
-
   sbom:
     name: Generate SBOM
     needs: build_and_sign
     runs-on: ubuntu-latest
     if: success()
-
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v6
-
+        uses: actions/checkout@v4
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
-
+        uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee
       - name: Generate SBOMs
         run: |
           docker build -t registry/app:${{ github.sha }} .
@@ -108,25 +94,19 @@ jobs:
         run: scripts/ci/release-train/provenance_attest.sh ${{ steps.build.outputs.DIGEST }}
       - name: Push + record artifact
         run: scripts/ci/release-train/publish_and_record.sh ${{ steps.build.outputs.DIGEST }} scripts/ci/records/artifacts.json
-
   canary_rollout:
     needs: build_and_sign
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4 # v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: "pnpm"
-          node-version: "20"
-
+        uses: actions/checkout@v4
       - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          version: "9.12.0"
-
+          cache: pnpm
+          node-version: "20"
       - name: Generate Evidence Bundle (Provenance)
         run: |
           if [ -f scripts/compliance/generate_evidence.ts ]; then
@@ -136,28 +116,26 @@ jobs:
           else
             echo "Provenance generation script not found. Skipping."
           fi
-
       - name: Upload Evidence Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: evidence-bundle
           path: evidence
           retention-days: 90
           if-no-files-found: warn
-
   finalize:
     name: Finalize Release (Dry Run)
-    needs: [build_and_sign, sbom]
+    needs:
+      - build_and_sign
+      - sbom
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Step up 25% → 50% → 100%
         run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
-
   post_deploy_verification:
     needs: finalize
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Post-deploy probes (latency/error rates/log SLOs)
