@@ -615,7 +615,7 @@ export class SupernodeQueryOptimizer {
 
       // BOLT OPTIMIZATION: Use batched detectSupernodes to pre-compute and cache stats for all entities at once
       const supernodes = await this.detectSupernodes(entityIds);
-      const processed = supernodes.length;
+      const processed = entityIds.length;
 
       serviceLogger.info('Supernode pre-computation complete', { processed });
       return processed;
