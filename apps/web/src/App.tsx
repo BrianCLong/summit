@@ -44,6 +44,7 @@ const InternalCommandDashboard = React.lazy(() => import('@/pages/internal/Inter
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
 const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
+const TrialSignupPage = React.lazy(() => import('@/onboarding/trial-signup'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
@@ -140,6 +141,7 @@ function App() {
                         {/* Auth routes */}
                       <Route path="/signin" element={<SignInPage />} />
                       <Route path="/signup" element={<SignupPage />} />
+                      <Route path="/trial-signup" element={<TrialSignupPage />} />
                       <Route path="/verify-email" element={<VerifyEmailPage />} />
                       <Route
                         path="/access-denied"
