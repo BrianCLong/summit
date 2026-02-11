@@ -31,7 +31,10 @@ export class OpenAIProvider implements LLMProvider {
         body: JSON.stringify({
           model,
           messages,
-          // TODO: Add more options like temperature, max_tokens based on config or request
+          temperature: request.metadata?.temperature ?? 0,
+          max_tokens: request.metadata?.maxTokens,
+          seed: request.metadata?.seed ?? 42, // Default seed for determinism
+          response_format: request.metadata?.responseFormat === 'json' ? { type: 'json_object' } : undefined,
         }),
       });
 

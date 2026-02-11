@@ -337,7 +337,11 @@ class EmbeddingService {
 
     return similarities
       .filter((item) => item.similarity >= threshold)
-      .sort((a, b) => b.similarity - a.similarity)
+      .sort((a, b) => {
+        const diff = b.similarity - a.similarity;
+        if (diff !== 0) return diff;
+        return a.index - b.index; // Secondary sort key for determinism
+      })
       .slice(0, topK);
   }
 

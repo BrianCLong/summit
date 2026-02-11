@@ -36,7 +36,7 @@ export class RetrievalService {
           `SELECT id, document_id, text, metadata, embedding <=> $1 as distance
            FROM chunks
            WHERE tenant_id = $2
-           ORDER BY distance ASC
+           ORDER BY distance ASC, id ASC
            LIMIT $3`,
           [`[${options.embedding.join(',')}]`, tenantId, limit]
         );

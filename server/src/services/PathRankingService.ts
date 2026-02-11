@@ -69,7 +69,11 @@ export function rankPaths<T extends WhyPathLike>(
     };
   });
 
-  return ranked.sort((a, b) => b.score - a.score);
+  return ranked.sort((a, b) => {
+    const diff = b.score - a.score;
+    if (diff !== 0) return diff;
+    return a.path.relId.localeCompare(b.path.relId); // Secondary sort key for determinism
+  });
 }
 
 export default rankPaths;

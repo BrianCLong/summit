@@ -78,7 +78,11 @@ export async function retrieveGraphContext(
 
   // 4. Sort nodes by relevance and trim to limit
   const sortedNodes = boostedNodes
-    .sort((a, b) => (b.relevance ?? 0) - (a.relevance ?? 0))
+    .sort((a, b) => {
+      const relevanceDiff = (b.relevance ?? 0) - (a.relevance ?? 0);
+      if (relevanceDiff !== 0) return relevanceDiff;
+      return a.id.localeCompare(b.id); // Secondary sort key for determinism
+    })
     .slice(0, resolvedParams.maxNodes);
 
   // 5. Filter edges to only include those in sorted nodes

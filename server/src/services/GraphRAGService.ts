@@ -383,7 +383,7 @@ export class GraphRAGService {
 
         cypher = `
           MATCH (e:Entity ${matchProps})
-          WITH e ORDER BY e.confidence DESC, e.createdAt DESC LIMIT 10
+          WITH e ORDER BY e.confidence DESC, e.createdAt DESC, e.id ASC LIMIT 10
           CALL apoc.path.subgraphAll(e, {
             maxLevel: $maxHops,
             relationshipFilter: 'RELATIONSHIP>',
@@ -440,10 +440,10 @@ export class GraphRAGService {
       temp: number,
     ): Promise<GraphRAGResponse> => {
       const rawResponse = await this.llmService.complete(prompt, {
-        model:
-          request.temperature !== undefined ? this.config.llmModel : undefined,
+        model: this.config.llmModel,
         maxTokens: request.maxTokens || 1000,
         temperature: temp,
+        seed: 42, // Fixed seed for GA determinism
         responseFormat: 'json',
       });
 
