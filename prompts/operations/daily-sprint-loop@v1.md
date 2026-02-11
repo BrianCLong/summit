@@ -9,6 +9,7 @@ Generate a deterministic daily sprint sensing bundle using the automation loop a
 - `docs/ops/DAILY_SPRINT_YYYY-MM-DD.md`
 - `docs/ops/evidence/daily-sprint-YYYY-MM-DD/`
 - `docs/roadmap/STATUS.json`
+- `agents/examples/DAILY_SPRINT_AUTOMATION_LOOP_20260211.json`
 - `prompts/registry.yaml`
 
 ## Constraints

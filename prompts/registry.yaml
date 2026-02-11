@@ -899,7 +899,7 @@ prompts:
   - id: daily-sprint-automation-loop
     version: v1
     path: prompts/operations/daily-sprint-loop@v1.md
-    sha256: 16eb4a4102e90e2a427afdb7c34283d4dba465652ec1b09cce73d1761fdd0081
+    sha256: 86fb5131bc27970a7d9d250a45ab113c937c3f40cd1b3ebf71b510ece3d0ffaa
     description: Govern deterministic daily sprint automation outputs and evidence artifacts.
     scope:
       paths:
@@ -908,6 +908,7 @@ prompts:
         - docs/ops/DAILY_SPRINT_
         - docs/ops/evidence/daily-sprint-
         - docs/roadmap/STATUS.json
+        - agents/examples/DAILY_SPRINT_AUTOMATION_LOOP_20260211.json
         - prompts/operations/daily-sprint-loop@v1.md
         - prompts/registry.yaml
       domains:
