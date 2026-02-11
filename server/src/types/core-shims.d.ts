@@ -8,11 +8,6 @@ declare module './monitoring/metrics.js' {
   export const graphqlResolverCallsTotal: any;
   export const mcpInvocationsTotal: any;
   export const mcpSessionsTotal: any;
-  export const narrativeSimulationActiveSimulations: any;
-  export const applicationErrors: any;
-  export const graphragSchemaFailuresTotal: any;
-  export const graphragCacheHitRatio: any;
-  export const metrics: any;
   const _default: any;
   export default _default;
 }

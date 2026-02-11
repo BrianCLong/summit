@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
-      - run: pip install pytest jsonschema
+      - run: pip install pytest jsonschema torch numpy --extra-index-url https://download.pytorch.org/whl/cpu
       - run: pytest tests/test_precision_flow_policy.py tests/test_detectors_deny_by_default.py
   evidence:
     runs-on: ubuntu-latest

@@ -1,0 +1,94 @@
+name: repro-build-verify
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  repro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TZ: UTC
+      LANG: C
+      LC_ALL: C
+      SOURCE_DATE_EPOCH: ""
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute SOURCE_DATE_EPOCH
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+
+      - name: Install Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.0.1
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: pnpm
+
+      - name: Check Lockfile Compatibility
+        run: bash scripts/ci/check_lockfile_compat.sh "9.12.0"
+
+      - name: Build #1
+        run: bash scripts/ci/repro_build_helper.sh "dist/pkg1.tgz"
+
+      - name: Checkout fresh clone
+        uses: actions/checkout@v4
+        with:
+          path: second
+          fetch-depth: 0
+
+      - name: Build #2
+        working-directory: second
+        run: |
+          export SOURCE_DATE_EPOCH="${{ env.SOURCE_DATE_EPOCH }}"
+          bash scripts/ci/repro_build_helper.sh "dist/pkg2.tgz"
+
+      - name: Move Build #2 Artifact
+        run: |
+          mkdir -p dist
+          mv second/dist/pkg2.tgz dist/pkg2.tgz
+          sha256sum dist/pkg1.tgz dist/pkg2.tgz
+
+      - name: Compare & Report
+        id: verify
+        run: |
+          HASH1=$(sha256sum dist/pkg1.tgz | awk '{print $1}')
+          HASH2=$(sha256sum dist/pkg2.tgz | awk '{print $1}')
+
+          echo "Hash 1: $HASH1"
+          echo "Hash 2: $HASH2"
+
+          if [ "$HASH1" == "$HASH2" ]; then
+            echo "MATCH=true" >> "$GITHUB_ENV"
+          else
+            echo "MATCH=false" >> "$GITHUB_ENV"
+          fi
+
+          echo "HASH1=$HASH1" >> "$GITHUB_ENV"
+          echo "HASH2=$HASH2" >> "$GITHUB_ENV"
+
+      - name: Generate Report
+        run: |
+          bash scripts/ci/write_repro_report.sh             --sha "${{ github.sha }}"             --epoch "${{ env.SOURCE_DATE_EPOCH }}"             --artifact1 "${{ env.HASH1 }}"             --artifact2 "${{ env.HASH2 }}"             --match "${{ env.MATCH }}"             --output "dist/repro.report.json"             --node "$(node --version)"             --pnpm "$(pnpm --version)"
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproducible-build
+          path: |
+            dist/pkg1.tgz
+            dist/pkg2.tgz
+            dist/repro.report.json
+
+      - name: Fail if Mismatch
+        if: env.MATCH != 'true'
+        run: exit 1
