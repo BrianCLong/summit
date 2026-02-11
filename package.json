@@ -23,6 +23,8 @@
     "test:client": "cd client && npm test",
     "test:web": "cd apps/web && npm test",
     "test:e2e": "npx playwright test",
+    "test:e2e:investigations": "npx playwright test e2e/golden-path-investigations.spec.ts",
+    "test:e2e:golden-path": "npx playwright test e2e/golden-path-frontend.spec.ts e2e/golden-path-investigations.spec.ts",
     "test:a11y-gate": "pnpm exec playwright test -c playwright.a11y-keyboard.config.ts",
     "test:release-bundle-sdk": "cd packages/release-bundle && pnpm test",
     "test:release-scripts": "node --test scripts/release/__tests__/*.test.mjs",
@@ -116,6 +118,8 @@
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "regulatory:build": "npx tsx cli/src/cli.ts regulatory build",
+    "regulatory:diff": "npx tsx cli/src/cli.ts regulatory diff",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
@@ -191,7 +195,7 @@
     "typescript-eslint": "^8.50.1",
     "uuid": "^13.0.0",
     "vitest": "^4.0.16",
-    "zod": "^4.2.1"
+    "zod": "3.25.76"
   },
   "lint-staged": {
     "server/**/*.{ts,js}": [
