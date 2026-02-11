@@ -23,6 +23,6 @@
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
 
-## 2025-05-22 - [Batched PostgreSQL Signal Insertion]
+## 2026-05-22 - [Batched PostgreSQL Signal Insertion]
 **Learning:** Inserting many risk signals individually in a loop for a single risk score is a major performance bottleneck due to multiple round-trips. Batched multi-row 'INSERT' statements with chunking (e.g., 100 records) can drastically reduce persistence latency.
 **Action:** Use multi-row 'VALUES' for batched PostgreSQL inserts and always implement chunking to stay within parameter limits safely.

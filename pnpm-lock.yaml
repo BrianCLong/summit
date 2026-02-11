@@ -5347,6 +5347,12 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)
 
+  packages/companyos-sdk:
+    devDependencies:
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/competitive-execution:
     devDependencies:
       '@types/node':
@@ -7758,6 +7764,12 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)
+
+  packages/graph:
+    devDependencies:
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
 
   packages/graph-ai-core:
     devDependencies:
@@ -11791,6 +11803,8 @@ importers:
         version: 5.9.3
 
   packages/sb: {}
+
+  packages/schema: {}
 
   packages/sdk:
     devDependencies:
@@ -19043,6 +19057,22 @@ importers:
       vitest:
         specifier: ^1.0.0
         version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)
+
+  services/gov-policy:
+    dependencies:
+      express:
+        specifier: '>=4.21.0'
+        version: 5.2.1
+      typescript:
+        specifier: 5.7.3
+        version: 5.9.3
+    devDependencies:
+      '@types/express':
+        specifier: ^4.17.17
+        version: 4.17.25
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
 
   services/govtech-export-engine:
     dependencies:
