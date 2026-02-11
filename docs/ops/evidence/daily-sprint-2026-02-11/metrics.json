@@ -1,10 +1,11 @@
 {
   "pr_count": 20,
-  "issue_count": 0,
-  "issue_query_status": "blocked",
-  "evidence_artifacts": 3,
+  "issue_count": 3,
+  "issue_query_status": "captured",
+  "evidence_artifacts": 4,
   "prs_touched": 1,
   "files_patched": 2,
   "validations_passed": 1,
-  "validations_blocked": 1
+  "validations_blocked": 1,
+  "ci_failures_classified": 1
 }
