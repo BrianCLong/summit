@@ -9,7 +9,7 @@
     "issue_list": {
       "status": "error",
       "source": "gh issue list",
-      "artifact": "docs/ops/evidence/daily-sprint-2026-02-11/gh_issue_list_error.log",
+      "error": "error connecting to api.github.com",
       "note": "Deferred pending GitHub API connectivity restoration."
     }
   },
