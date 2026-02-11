@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/etl-assistant",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "ETL Assistant for schema inference, PII detection, and canonical mapping",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

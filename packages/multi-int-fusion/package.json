@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/multi-int-fusion",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Multi-intelligence fusion with cross-INT correlation and entity resolution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

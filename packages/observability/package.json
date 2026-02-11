@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/observability",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "CompanyOS Observability SDK - Unified metrics, logging, tracing, and SLO management",
   "type": "module",
   "main": "./dist/index.js",

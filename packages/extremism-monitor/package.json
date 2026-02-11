@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/extremism-monitor",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Attack planning detection and extremist activity monitoring",
   "license": "MIT",
   "type": "module",

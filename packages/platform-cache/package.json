@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/platform-cache",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Unified caching abstraction for Summit platform (P20)",
   "type": "module",
   "main": "dist/index.js",

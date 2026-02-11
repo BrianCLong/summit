@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/bitemporal",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Bitemporal storage layer with time-travel queries, temporal diff, and signed audits",
   "main": "dist/index.js",
   "type": "module",

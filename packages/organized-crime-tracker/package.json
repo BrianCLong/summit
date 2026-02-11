@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/organized-crime-tracker",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Criminal organization tracking and intelligence for law enforcement",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

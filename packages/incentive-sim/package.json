@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/incentive-sim",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "type": "module",
   "description": "Incentive adjustment simulation models.",
   "main": "dist/index.js",

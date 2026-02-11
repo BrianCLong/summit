@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/disinfo-ops",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.1",
   "description": "Production-grade disinformation detection operations",
   "main": "src/index.ts",
   "scripts": {

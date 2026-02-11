@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/integration-modernization",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Unified connector runtime, event backbone, workflow orchestration, and sync correctness controls",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

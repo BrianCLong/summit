@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cybint-bulwark",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Production-grade cyber defense modernization toolkit implementing the BULWARK roadmap",
   "type": "module",
   "main": "dist/index.js",

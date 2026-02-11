@@ -1,6 +1,6 @@
 {
   "name": "@summit/skillmesh",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "description": "SkillMesh Hub: Distributed Skill Management for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

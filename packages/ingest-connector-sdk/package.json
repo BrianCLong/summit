@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ingest-connector-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "SDK for streaming ingest connectors with backpressure and exactly-once semantics",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

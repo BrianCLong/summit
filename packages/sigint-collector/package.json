@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sigint-collector",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "SIGINT collection simulation and training framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

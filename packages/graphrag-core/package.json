@@ -1,6 +1,6 @@
 {
   "name": "@summit/graphrag-core",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "description": "Summit GraphRAG core phases and query registry",
   "main": "dist/index.js",
   "type": "module",

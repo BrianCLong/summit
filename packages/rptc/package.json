@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/rptc",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Robust Prompt Template Compiler with typed slots, validation, adapters, and test synthesis.",
   "type": "module",
   "main": "dist/index.js",

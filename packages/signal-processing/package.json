@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/signal-processing",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Real-time signal processing toolkit with FFT, wavelets, digital filters, Kalman denoising, and streaming connectors.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

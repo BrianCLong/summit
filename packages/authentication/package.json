@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/authentication",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Enterprise authentication and authorization with OAuth 2.0, JWT, API keys, and mTLS",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/license-registry-pkg",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "main": "index.js",
   "types": "index.d.ts"
 }

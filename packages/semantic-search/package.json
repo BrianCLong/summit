@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/semantic-search",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Semantic search and discovery for data catalog with faceted search and relevance ranking",
   "license": "MIT",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/api-gateway-core",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Enterprise API Gateway with intelligent routing and load balancing",
   "type": "module",
   "main": "dist/index.js",

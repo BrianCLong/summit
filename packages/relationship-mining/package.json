@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/relationship-mining",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Relationship pattern detection and mining for intelligence analysis",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/platform-benchmarks",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Cross-language benchmark harness for Summit platform (P17)",
   "type": "module",
   "main": "dist/index.js",

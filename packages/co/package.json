@@ -1,8 +1,11 @@
 {
   "name": "@summit/flows-co",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "private": true,
-  "files": ["flows", "manifest.json"],
+  "files": [
+    "flows",
+    "manifest.json"
+  ],
   "scripts": {
     "maestro:test": "maestro test flows"
   }

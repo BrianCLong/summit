@@ -1,6 +1,6 @@
 {
   "name": "@summit/retrieval-engine",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.1",
   "type": "module",
   "description": "Governed Retrieval Substrate (GraphRAG/Hybrid) Engine",
   "main": "dist/index.js",

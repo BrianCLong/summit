@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/post-quantum-crypto",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "NIST post-quantum cryptography implementation for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

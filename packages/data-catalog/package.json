@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-catalog",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Enterprise data catalog platform with metadata management, semantic search, and collaborative documentation",
   "license": "MIT",
   "type": "module",

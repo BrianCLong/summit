@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/synthetic-data",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Comprehensive tabular data synthesis with statistical methods and GANs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

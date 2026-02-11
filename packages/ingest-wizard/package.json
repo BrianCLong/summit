@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ingest-wizard",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Shared UI components for data ingestion wizard with DPIA compliance",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

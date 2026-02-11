@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-integration",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Enterprise-grade data integration framework for IntelGraph platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

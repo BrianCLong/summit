@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/adapter-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Adapter execution harness with retries, DLQ, circuit breaking, and OpenTelemetry metrics",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

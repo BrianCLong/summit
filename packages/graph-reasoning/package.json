@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-reasoning",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Knowledge graph reasoning engine with inference and contradiction detection",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

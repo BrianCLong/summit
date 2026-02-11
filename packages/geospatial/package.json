@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/geospatial",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Geospatial intelligence with satellite imagery processing, Neo4j graph storage, and change detection for IntelGraph GEOINT operations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/migration-linter",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Static linter for SQL and ORM migrations enforcing backward-compatible patterns",
   "type": "module",
   "main": "dist/index.js",

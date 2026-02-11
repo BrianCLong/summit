@@ -1,13 +1,17 @@
 {
   "name": "@intelgraph/schema",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "description": "JSON Schemas for IntelGraph domain models",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\""
   },
-  "keywords": ["schema", "json-schema", "graph"],
+  "keywords": [
+    "schema",
+    "json-schema",
+    "graph"
+  ],
   "author": "",
   "license": "ISC"
 }

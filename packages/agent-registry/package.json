@@ -1,6 +1,6 @@
 {
   "name": "@summit/agent-registry",
-  "version": "4.1.4",
+  "version": "1.0.0-rc.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

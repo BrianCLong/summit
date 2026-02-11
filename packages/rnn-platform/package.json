@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/rnn-platform",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Deep learning rnn-platform for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

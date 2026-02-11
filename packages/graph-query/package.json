@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-query",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Graph query language support (Cypher, Gremlin, SPARQL)",
   "type": "module",
   "main": "dist/index.js",

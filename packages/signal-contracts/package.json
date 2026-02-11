@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/signal-contracts",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Signal Bus contract definitions - SignalEnvelope, SignalType registry, Alert schemas",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/edge-computing",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Core edge computing infrastructure and types",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

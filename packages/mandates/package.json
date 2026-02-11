@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mandates",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.1",
   "description": "Mandate management for agentic integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

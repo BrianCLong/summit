@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/document-governance",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Business Document Ontology and Governance Framework for Summit/IntelGraph/CompanyOS",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

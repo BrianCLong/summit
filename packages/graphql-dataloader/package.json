@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graphql-dataloader",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "DataLoader implementation for N+1 query elimination",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

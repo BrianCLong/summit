@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/decision-ledger",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "type": "module",
   "description": "Ledger for recording and replaying autonomous decisions.",
   "main": "dist/index.js",

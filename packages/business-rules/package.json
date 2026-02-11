@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/business-rules",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Business Rules Engine with DMN support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

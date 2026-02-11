@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/quantum-simulation",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Quantum algorithm simulation and circuit design for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

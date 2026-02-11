@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/canonical-entities",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Canonical entity types for Summit Platform with bitemporal support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

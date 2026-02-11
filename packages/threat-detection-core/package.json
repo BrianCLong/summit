@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/threat-detection-core",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Core types and interfaces for advanced threat detection system",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

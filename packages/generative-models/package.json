@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/generative-models",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Deep learning generative-models for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

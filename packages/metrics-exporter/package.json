@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/metrics-exporter",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Prometheus metrics exporter for IntelGraph services",
   "type": "module",
   "main": "./dist/index.js",

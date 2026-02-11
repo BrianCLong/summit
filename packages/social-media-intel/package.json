@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/social-media-intel",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Social Media Intelligence (SOCMINT) - Profile analysis, sentiment analysis, network mapping",
   "type": "module",
   "main": "dist/index.js",

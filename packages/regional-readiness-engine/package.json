@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/regional-readiness-engine",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Executable readiness matrix and residency enforcement for regional expansion",
   "type": "module",
   "private": true,

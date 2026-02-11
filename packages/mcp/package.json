@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mcp",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "private": true,
   "description": "Model Context Protocol (MCP) canonical library for Summit",
   "main": "index.js",

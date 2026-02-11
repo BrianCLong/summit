@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agent-runtime",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "description": "Agent Runtime v1 for IntelGraph Platform",
   "main": "src/index.ts",
   "types": "src/index.ts",
