@@ -126,7 +126,7 @@ jobs:
           TEST_SUITE: ${{ matrix.suite }}
       
       - name: Upload coverage
-        if: ((matrix.suite != 'e2e'  # Conditional step) && (always())) && (always())
+        if: matrix.suite != 'e2e'  # Conditional step
         uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
         with:
           files: ./coverage/coverage-final.json
@@ -134,6 +134,7 @@ jobs:
           name: ${{ matrix.suite }}-coverage
       
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: test-results-${{ matrix.suite }}-${{ matrix.os }}
@@ -145,6 +146,7 @@ jobs:
   # Aggregate results from all test jobs
   test-summary:
     needs: test
+    if: always()
     runs-on: ubuntu-latest
     name: 📊 Test Summary
     
