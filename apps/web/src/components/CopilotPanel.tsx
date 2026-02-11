@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/Badge';
 import { Label } from '@/components/ui/label';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/use-toast';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, Code, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
@@ -38,6 +39,7 @@ export function CopilotPanel() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('prompt');
   const { toast } = useToast();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // jQuery ref for the action panel
   const actionPanelRef = useRef<HTMLDivElement>(null);
@@ -145,7 +147,9 @@ export function CopilotPanel() {
           <CardTitle className="flex justify-between items-center">
             <span>Copilot v0.9</span>
             {result?.isValid === false && (
-              <Badge variant="destructive">Invalid Syntax</Badge>
+              <Badge variant="destructive">
+                <AlertTriangle className="w-3 h-3 mr-1" aria-hidden="true" /> Invalid Syntax
+              </Badge>
             )}
             {result?.isValid === true && (
               <Badge variant="outline" className="text-green-600 border-green-600">
@@ -169,6 +173,7 @@ export function CopilotPanel() {
               <div className="grid w-full gap-1.5 flex-1">
                 <Label htmlFor="copilot-prompt">Prompt</Label>
                 <Textarea
+                  ref={textareaRef}
                   id="copilot-prompt"
                   placeholder="Ask a question about the graph (e.g., 'find User where email is ...')"
                   value={prompt}
@@ -185,7 +190,10 @@ export function CopilotPanel() {
                       <button
                         key={p}
                         type="button"
-                        onClick={() => setPrompt(p)}
+                        onClick={() => {
+                          setPrompt(p);
+                          textareaRef.current?.focus();
+                        }}
                         aria-label={`Use prompt: ${p}`}
                         className="rounded-full border border-input bg-background px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
@@ -195,8 +203,8 @@ export function CopilotPanel() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleTranslate} disabled={loading} className="w-full">
-                {loading ? 'Thinking...' : 'Generate Cypher'}
+              <Button onClick={handleTranslate} loading={loading} className="w-full">
+                Generate Cypher
               </Button>
             </TabsContent>
 
@@ -270,7 +278,8 @@ export function CopilotPanel() {
                     <Button
                       className="action-btn bg-green-600 hover:bg-green-700 text-white"
                       onClick={handleSandboxRun}
-                      disabled={loading || !result?.isValid}
+                      loading={loading}
+                      disabled={!result?.isValid}
                       aria-label="Run Cypher query in sandbox"
                     >
                       <Play className="w-4 h-4 mr-1" aria-hidden="true" /> Run in Sandbox
@@ -283,7 +292,11 @@ export function CopilotPanel() {
             <TabsContent value="results" className="flex-1 pt-4 overflow-auto">
               <div className="result-area">
                  {sandboxResult && sandboxResult.length === 0 && (
-                   <div className="text-center text-muted-foreground py-8">No results found.</div>
+                   <EmptyState
+                     icon="search"
+                     title="No results found"
+                     description="Try adjusting your prompt or Cypher query."
+                   />
                  )}
                  {sandboxResult && sandboxResult.length > 0 && (
                    <table className="w-full text-sm border-collapse">
@@ -324,7 +337,7 @@ export function CopilotPanel() {
                     <CardContent className="py-2 text-sm text-muted-foreground flex gap-2 items-center">
                       <BookOpen className="w-4 h-4" />
                       <span>ID: {cit.id}</span>
-                      {cit.url && <a href={cit.url} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline ml-2">View Source</a>}
+                      {cit.url && <a href={cit.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline ml-2">View Source</a>}
                     </CardContent>
                   </Card>
                 ))}
