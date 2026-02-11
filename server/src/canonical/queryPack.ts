@@ -11,11 +11,11 @@ import {
   getEntityHistory,
   getEntitiesInTimeRange,
   temporalDistance,
-} from './helpers.ts';
-import { CanonicalPerson } from './entities/Person.ts';
-import { CanonicalOrganization } from './entities/Organization.ts';
-import { CanonicalCase } from './entities/Case.ts';
-import { BaseCanonicalEntity } from './types.ts';
+} from './helpers.js';
+import { CanonicalPerson } from './entities/Person.js';
+import { CanonicalOrganization } from './entities/Organization.js';
+import { CanonicalCase } from './entities/Case.js';
+import { BaseCanonicalEntity } from './types.js';
 
 /**
  * Query 1: "Show me all people as they were known on January 1, 2024"

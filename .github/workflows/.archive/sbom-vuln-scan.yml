@@ -57,7 +57,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 9.12.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -106,7 +106,7 @@ jobs:
           echo "📦 SBOM generated with $COMPONENT_COUNT components"
 
       - name: Sign SBOM with Cosign (keyless)
-        if: github.event_name != 'pull_request'
+        if: (((((github.event_name != 'pull_request') && (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (|)) && (steps.autofix.outputs.branch != '')) && (always())
         run: |
           cosign sign-blob \
             --yes \
@@ -127,7 +127,6 @@ jobs:
           retention-days: 90
 
       - name: Upload SBOM to Dependency Graph
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: advanced-security/spdx-dependency-submission-action@v0.1.1
         with:
           filePath: sbom.cdx.json
@@ -230,7 +229,6 @@ jobs:
     name: SLSA Attestation
     runs-on: ubuntu-latest
     needs: [sbom-generate, vulnerability-scan]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout repository
@@ -337,7 +335,6 @@ jobs:
     name: Auto-Fix Vulnerabilities
     runs-on: ubuntu-latest
     needs: vulnerability-scan
-    if: |
       (github.event_name == 'workflow_dispatch' && github.event.inputs.auto_fix == 'true') ||
       (github.event_name == 'schedule' && needs.vulnerability-scan.outputs.fixable > 0)
 
@@ -357,7 +354,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 9.12.0
 
       - name: Download scan results
         uses: actions/download-artifact@v4
@@ -416,7 +413,6 @@ jobs:
           fi
 
       - name: Create Pull Request
-        if: steps.autofix.outputs.branch != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -448,7 +444,6 @@ jobs:
     name: Policy Gate
     runs-on: ubuntu-latest
     needs: [sbom-generate, vulnerability-scan]
-    if: always()
 
     steps:
       - name: Check policy status

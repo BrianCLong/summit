@@ -1,23 +1,40 @@
-# repo_assumptions.md
+# Repo Assumptions & Validation
 
-## Verified
+## Verified vs Assumed Directory List
 
-- Repository contents inspected locally; subsumption bundles and verifier script exist.
-- CI uses GitHub Actions workflows under `.github/workflows/`.
-- Evidence schemas and index live under `evidence/`.
+| Path | Status | Notes |
+| --- | --- | --- |
+| `.github/workflows/` | ✅ Verified | Present at repo root. |
+| `docs/` | ✅ Verified | Present at repo root. |
+| `scripts/` | ✅ Verified | Present at repo root. |
+| `tests/` | ✅ Verified | Present at repo root. |
+| `src/` | ✅ Verified | Present at repo root. |
+| `server/` | ✅ Verified | Present at repo root. |
+| `client/` | ✅ Verified | Present at repo root. |
+| `packages/` | ✅ Verified | Present at repo root. |
+| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
+| `docs/governance/` | ✅ Verified | Present at repo root. |
 
-## Assumed (validate ASAP)
+## CI Check Names (Exact)
 
-- Required status check names remain to be confirmed against branch protection.
-- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
+Deferred pending validation against `.github/workflows/*` and branch protection.
 
-## Must-not-touch (until validated)
+## Evidence Schema Conventions (Exact)
 
-- Public API surfaces in `packages/**` (no breaking changes).
-- Existing GA gates / branch protection requirements.
-- Deployment configs / secrets / infra definitions.
+Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
 
-## Validation plan
+## Must-Not-Touch List (Guardrails)
 
-- Enumerate required checks via GitHub branch protection UI/API.
-- Confirm test runner (jest/vitest) and lint tooling.
+Deferred pending validation. Baseline expectations:
+
+- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
+- Production compose files (`docker-compose*.yml`)
+- Secrets or `.env` files
+
+## Validation Checklist
+
+1. Confirm Node version + package manager in `package.json` and workflows.
+2. Confirm workflows and required checks in branch protection.
+3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
+4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
+5. Confirm graph stores in configs (Neo4j/Qdrant/etc).

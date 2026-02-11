@@ -496,7 +496,7 @@ CREATE UNIQUE INDEX idx_model_analytics_summary_model_id ON model_analytics_summ
 CREATE OR REPLACE FUNCTION refresh_model_analytics_summary()
 RETURNS void AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY model_analytics_summary;
+    REFRESH MATERIALIZED VIEW  model_analytics_summary;
 END;
 $$ LANGUAGE plpgsql;
 

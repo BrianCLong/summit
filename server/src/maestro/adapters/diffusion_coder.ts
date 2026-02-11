@@ -1,5 +1,5 @@
-import { policyClient } from '../policy-client';
-import { logger } from '../../utils/logger';
+import { policyClient } from '../policy-client.js';
+import { logger } from '../../utils/logger.js';
 
 export interface LLMService {
   callCompletion(runId: string, taskId: string, payload: any): Promise<any>;

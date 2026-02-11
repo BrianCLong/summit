@@ -3,21 +3,27 @@ name: Docs Lint
 on:
   pull_request:
     paths:
-      - 'docs/**'
-  push:
-    branches: [main]
-    paths:
-      - 'docs/**'
+      - "**.md"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint-docs:
+  markdown-lint:
+    name: Markdown Linter
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
         with:
-          node-version: 18
-          cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm run lint:docs
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Run Markdown Lint
+        run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules'

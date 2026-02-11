@@ -32,7 +32,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+
           run_install: false
 
       - name: Install dependencies
@@ -48,13 +48,12 @@ jobs:
           path: reports/dead-code-report.json
 
       - name: Generate cleanup PR (dry run)
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.dry-run != false }}
+        if: (${{ github.event_name != 'workflow_dispatch' || inputs.dry-run != false }}) && (${{ github.event_name == 'workflow_dispatch' && inputs.dry-run == false }})
         env:
           DEAD_CODE_BRANCH: feature/dead-code-detector-pr-bot-01
         run: pnpm exec ts-node --project tsconfig.json --esm scripts/cleanup/create-dead-code-pr.ts
 
       - name: Generate cleanup PR (execute)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run == false }}
         env:
           DEAD_CODE_BRANCH: feature/dead-code-detector-pr-bot-01
         run: pnpm exec ts-node --project tsconfig.json --esm scripts/cleanup/create-dead-code-pr.ts --execute

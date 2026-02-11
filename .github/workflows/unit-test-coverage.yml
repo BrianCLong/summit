@@ -3,34 +3,21 @@ name: Unit Tests & Coverage
 on:
   push:
     branches: [main, develop]
-    # SAFETY: Conservative paths-ignore to prevent skipping required checks
-    # This workflow MUST run on any code/config/dependency changes
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - server/**, client/** (code changes must trigger this)
   pull_request:
     branches: [main, develop]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      - "LICENSE"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - server/**, client/** (code changes must trigger this)
+  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Global environment for all jobs - prevents V8 heap exhaustion
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
 
 jobs:
   test:
+    name: test (${{ matrix.node-version }})
     runs-on: ubuntu-latest
 
     strategy:
@@ -43,7 +30,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4 # v4
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4 # v6

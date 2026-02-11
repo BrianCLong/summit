@@ -1,4 +1,4 @@
-name: CI Legacy (Non-Blocking)
+name: "[info] CI Legacy (Non-Blocking)"
 
 # This workflow contains NON-BLOCKING checks:
 # - Quarantined flaky tests
@@ -21,11 +21,12 @@ concurrency:
 jobs:
   quarantine-tests:
     name: Quarantine Tests (Flaky)
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -53,11 +54,12 @@ jobs:
 
   jest-legacy-suite:
     name: Jest/ts-jest Suite (ESM Issues)
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -84,11 +86,12 @@ jobs:
 
   experimental-checks:
     name: Experimental Checks
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -123,6 +126,7 @@ jobs:
 
   deprecated-checks:
     name: Deprecated Checks (Migration in Progress)
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -130,7 +134,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -161,11 +165,12 @@ jobs:
 
   performance-regression:
     name: Performance Regression Tests
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -193,11 +198,12 @@ jobs:
 
   accessibility-audit:
     name: Web Accessibility Audit
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -233,7 +239,7 @@ jobs:
       - deprecated-checks
       - performance-regression
       - accessibility-audit
-    if: always()
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (always())
     steps:
       - name: Report results (non-blocking)
         run: |

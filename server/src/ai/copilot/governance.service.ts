@@ -18,7 +18,7 @@ import type {
   CopilotAnswer,
   CopilotRefusal,
   GuardrailCheck,
-} from './types.ts';
+} from './types.js';
 
 const logger = (pino as any)({ name: 'copilot-governance' });
 

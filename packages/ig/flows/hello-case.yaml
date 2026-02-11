@@ -1,0 +1,258 @@
+# Hello-Case Reference Workflow - Full IntelGraph value loop demonstration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-case-workflow
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: workflow
+    app.kubernetes.io/part-of: intelgraph
+    workflow-type: reference
+data:
+  hello-case.json: |
+    {
+      "name": "hello_case_workflow",
+      "description": "End-to-end IntelGraph value loop: ingest → resolve → analyze → brief",
+      "version": 1,
+      "tasks": [
+        {
+          "name": "data_ingest_task",
+          "taskReferenceName": "data_ingest",
+          "type": "SIMPLE",
+          "description": "Simulate data ingestion from multiple sources",
+          "inputParameters": {
+            "sources": [
+              {
+                "type": "osint",
+                "url": "https://api.example.com/intel-feed",
+                "format": "json"
+              },
+              {
+                "type": "social",
+                "platform": "twitter",
+                "query": "sample intelligence"
+              },
+              {
+                "type": "document",
+                "path": "/demo/sample-document.pdf",
+                "classification": "unclassified"
+              }
+            ],
+            "batch_size": 100,
+            "timeout": 30
+          },
+          "retryCount": 3,
+          "timeoutSeconds": 60
+        },
+        {
+          "name": "entity_resolution_task",
+          "taskReferenceName": "entity_resolution",
+          "type": "SIMPLE",
+          "description": "Extract and resolve entities from ingested data",
+          "inputParameters": {
+            "data": "${data_ingest.output.processed_data}",
+            "entity_types": [
+              "person",
+              "organization",
+              "location",
+              "event",
+              "artifact"
+            ],
+            "resolution_threshold": 0.85,
+            "use_ml_models": true
+          },
+          "retryCount": 2,
+          "timeoutSeconds": 120
+        },
+        {
+          "name": "graph_analysis_task",
+          "taskReferenceName": "graph_analysis",
+          "type": "SIMPLE",
+          "description": "Perform graph analysis on resolved entities",
+          "inputParameters": {
+            "entities": "${entity_resolution.output.entities}",
+            "relationships": "${entity_resolution.output.relationships}",
+            "analysis_types": [
+              "centrality",
+              "clustering",
+              "path_finding",
+              "anomaly_detection"
+            ],
+            "depth": 3,
+            "min_confidence": 0.7
+          },
+          "retryCount": 2,
+          "timeoutSeconds": 180
+        },
+        {
+          "name": "intelligence_brief_task",
+          "taskReferenceName": "intelligence_brief",
+          "type": "SIMPLE",
+          "description": "Generate intelligence brief from analysis results",
+          "inputParameters": {
+            "analysis_results": "${graph_analysis.output}",
+            "template": "standard_brief",
+            "classification": "unclassified",
+            "format": "json",
+            "include_visualizations": true,
+            "target_audience": "analysts"
+          },
+          "retryCount": 1,
+          "timeoutSeconds": 90
+        },
+        {
+          "name": "artifact_signing_task",
+          "taskReferenceName": "artifact_signing",
+          "type": "SIMPLE",
+          "description": "Sign and attest the intelligence brief artifact",
+          "inputParameters": {
+            "artifact": "${intelligence_brief.output.brief}",
+            "signing_key": "intelgraph-dev-key",
+            "attestation_type": "sbom",
+            "metadata": {
+              "workflow_id": "${workflow.workflowId}",
+              "execution_time": "${workflow.startTime}",
+              "version": "1.0.0",
+              "environment": "dev"
+            }
+          },
+          "retryCount": 2,
+          "timeoutSeconds": 30
+        }
+      ],
+      "outputParameters": {
+        "ingested_records": "${data_ingest.output.record_count}",
+        "resolved_entities": "${entity_resolution.output.entity_count}",
+        "analysis_summary": "${graph_analysis.output.summary}",
+        "intelligence_brief": "${intelligence_brief.output.brief}",
+        "signed_artifact": "${artifact_signing.output.signed_artifact}",
+        "execution_metrics": {
+          "total_time": "${workflow.endTime - workflow.startTime}",
+          "stages_completed": 5,
+          "workflow_id": "${workflow.workflowId}",
+          "correlation_id": "${workflow.correlationId}"
+        }
+      },
+      "schemaVersion": 2,
+      "restartable": true,
+      "workflowStatusListenerEnabled": true,
+      "ownerEmail": "intelligence@intelgraph.io",
+      "timeoutPolicy": "TIME_OUT_WF",
+      "timeoutSeconds": 600,
+      "variables": {
+        "demo_mode": true,
+        "environment": "development"
+      },
+      "inputTemplate": {
+        "demo_data": true,
+        "use_sample_sources": true
+      }
+    }
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-case-workflow-registration
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: workflow-registration
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: workflow-registration
+          image: curlimages/curl:8.4.0
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -ex
+              echo "Registering Hello-Case workflow..."
+
+              # Wait for Conductor to be ready
+              until curl -f http://maestro-conductor:8080/health; do
+                echo "Waiting for Conductor..."
+                sleep 10
+              done
+
+              # Register workflow definition
+              curl -X POST \
+                http://maestro-conductor:8080/api/metadata/workflow \
+                -H "Content-Type: application/json" \
+                -d @/workflow/hello-case.json
+
+              echo "Hello-Case workflow registered successfully!"
+
+          volumeMounts:
+            - name: workflow-config
+              mountPath: /workflow
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: workflow-config
+          configMap:
+            name: hello-case-workflow
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello-case-scheduler
+  namespace: dev-orch
+  labels:
+    app.kubernetes.io/name: maestro-conductor
+    app.kubernetes.io/component: scheduler
+    app.kubernetes.io/part-of: intelgraph
+spec:
+  schedule: '0 */6 * * *' # Every 6 hours
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: workflow-trigger
+              image: curlimages/curl:8.4.0
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -ex
+                  echo "Triggering Hello-Case workflow..."
+
+                  WORKFLOW_ID=$(date +%s)
+
+                  curl -X POST \
+                    http://maestro-conductor:8080/api/workflow/hello_case_workflow \
+                    -H "Content-Type: application/json" \
+                    -d "{
+                      \"version\": 1,
+                      \"correlationId\": \"hello-case-${WORKFLOW_ID}\",
+                      \"input\": {
+                        \"demo_data\": true,
+                        \"use_sample_sources\": true,
+                        \"scheduledRun\": true,
+                        \"runId\": \"${WORKFLOW_ID}\",
+                        \"environment\": \"dev\",
+                        \"batch_size\": 50
+                      }
+                    }"
+
+                  echo "Hello-Case workflow triggered with ID: ${WORKFLOW_ID}"
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 100m
+                  memory: 128Mi

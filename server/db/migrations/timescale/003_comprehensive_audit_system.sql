@@ -416,7 +416,7 @@ CREATE INDEX ON audit_user_activity_summary (user_id, day DESC);
 CREATE OR REPLACE FUNCTION refresh_audit_daily_summary()
 RETURNS void AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY audit_daily_summary;
+    REFRESH MATERIALIZED VIEW  audit_daily_summary;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -424,7 +424,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION refresh_audit_user_activity_summary()
 RETURNS void AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY audit_user_activity_summary;
+    REFRESH MATERIALIZED VIEW  audit_user_activity_summary;
 END;
 $$ LANGUAGE plpgsql;
 

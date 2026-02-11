@@ -1,0 +1,44 @@
+id: memory-leak-detected
+name: Memory Leak Detection and Remediation
+description: Detect and remediate memory leaks through service restarts and resource limits
+triggerPatterns:
+  - memory.?leak
+  - out.?of.?memory
+  - oom
+  - heap
+severity:
+  - medium
+  - high
+  - critical
+steps:
+  - name: Capture heap dump
+    actionType: capture_heap_dump
+    parameters:
+      service: affected-service
+      destination: s3://diagnostics/heap-dumps/
+    onFailure: continue
+
+  - name: Restart affected service
+    actionType: restart_service
+    parameters:
+      service: affected-service
+      graceful: true
+      timeout: 30
+    onFailure: abort
+
+  - name: Apply memory limits
+    actionType: update_resource_limits
+    parameters:
+      service: affected-service
+      memory_limit: 2Gi
+      memory_request: 1Gi
+    condition: severity == 'critical'
+    onFailure: continue
+
+rollbackSteps:
+  - name: Restore original resource limits
+    actionType: update_resource_limits
+    parameters:
+      service: affected-service
+      memory_limit: 4Gi
+      memory_request: 2Gi

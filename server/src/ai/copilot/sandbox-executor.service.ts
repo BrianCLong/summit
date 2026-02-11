@@ -18,9 +18,9 @@ import {
   type QueryCostEstimate,
   type QueryRefinement,
   QueryCostEstimateSchema,
-} from './types.ts';
-import { estimateQueryCost } from '../nl-graph-query/cost-estimator.ts';
-import { validateCypher, isReadOnlyQuery } from '../nl-graph-query/validator.ts';
+} from './types.js';
+import { estimateQueryCost } from '../nl-graph-query/cost-estimator.js';
+import { validateCypher, isReadOnlyQuery } from '../nl-graph-query/validator.js';
 
 const logger = (pino as any)({ name: 'sandbox-executor' });
 

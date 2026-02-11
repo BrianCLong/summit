@@ -13,6 +13,12 @@ module.exports = async () => {
   try {
     process.env.NODE_ENV = 'test';
     process.env.LOG_LEVEL = process.env.DEBUG_TESTS ? 'info' : 'error';
+    process.env.TZ = process.env.TZ || 'UTC';
+    process.env.LANG = process.env.LANG || 'en_US.UTF-8';
+    process.env.LC_ALL = process.env.LC_ALL || 'en_US.UTF-8';
+
+    const testSeed = process.env.TEST_SEED || process.env.SEED;
+    console.log(`Running tests with seed: ${testSeed || 'random'}`);
 
     if (!process.env.NEO4J_URI) {
       process.env.NEO4J_URI = 'bolt://localhost:7687';

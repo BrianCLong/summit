@@ -24,10 +24,11 @@ on:
       - "scripts/scan-vulnerabilities.sh"
       - "scripts/check-reproducibility.sh"
       - ".github/workflows/supply-chain-integrity.yml"
+  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -36,22 +37,23 @@ permissions:
 
 jobs:
   supply-chain-integrity:
+    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.vars.outputs.release_version }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7 (pinned to v4 branch tip)
+        uses: actions/checkout@v4 # v4.1.7 (pinned to v4 branch tip)
         with:
           fetch-depth: 0
 
       - name: Set up pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        uses: pnpm/action-setup@v4 # v4
         # version is read from package.json packageManager field
 
       - name: Set up Node.js
-        uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.0.3
+        uses: actions/setup-node@v4 # v4.0.3
         with:
           node-version: "20"
           cache: "pnpm"
@@ -62,7 +64,7 @@ jobs:
           python-version: "3.11"
 
       - name: Set up Go
-        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v5.0.1
+        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5.0.1
         with:
           go-version: "1.21"
 
@@ -123,7 +125,7 @@ jobs:
 
       # Upload source SBOMs immediately to free disk space before Docker build
       - name: Upload Source SBOMs
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@v4 # v4.3.3
         with:
           name: sboms-source-${{ env.VERSION }}
           path: ./sboms/
@@ -131,7 +133,7 @@ jobs:
 
       # Upload source vulnerability reports immediately
       - name: Upload Source Vulnerability Reports
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@v4 # v4.3.3
         with:
           name: vulnerability-reports-source-${{ env.VERSION }}
           path: ./vulnerability-reports/
@@ -214,7 +216,7 @@ jobs:
       # Upload container SBOMs (generated during Docker build)
       - name: Upload Container SBOMs
         if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@v4 # v4.3.3
         with:
           name: sboms-container-${{ env.VERSION }}
           path: ./sboms/
@@ -223,7 +225,7 @@ jobs:
       # Upload container vulnerability reports (generated during Docker build)
       - name: Upload Container Vulnerability Reports
         if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@v4 # v4.3.3
         with:
           name: vulnerability-reports-container-${{ env.VERSION }}
           path: ./vulnerability-reports/
@@ -232,7 +234,7 @@ jobs:
       # Upload release evidence bundle
       - name: Upload Release Evidence Bundle
         if: github.event_name == 'push' && github.ref_type == 'tag'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.3.3
+        uses: actions/upload-artifact@v4 # v4.3.3
         with:
           name: release-evidence-${{ env.VERSION }}
           path: ./release-evidence/summit-release-${{ env.VERSION }}-evidence.tar.gz
@@ -246,7 +248,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.1.7
+        uses: actions/checkout@v4 # v4.1.7
 
       - name: Download Source SBOMs
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7

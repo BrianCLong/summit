@@ -1,4 +1,4 @@
-name: release-train
+name: "[info] Release Train"
 
 on:
   workflow_dispatch:
@@ -50,16 +50,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4.1.0
+        with:
+          version: "9.12.0"
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version: "20"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "9.12.0"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -70,7 +70,7 @@ jobs:
 
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: client-dist
           path: client/dist
@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload Server Artifacts
         if: hashFiles('server/dist/**') != ''
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: server-dist
           path: server/dist
@@ -116,16 +116,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4.1.0
+        with:
+          version: "9.12.0"
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version: "20"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: "9.12.0"
 
       - name: Generate Evidence Bundle (Provenance)
         run: |
@@ -138,7 +138,7 @@ jobs:
           fi
 
       - name: Upload Evidence Artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: evidence-bundle
           path: evidence

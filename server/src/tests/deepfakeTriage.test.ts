@@ -1,4 +1,4 @@
-import { deepfakeTriage } from '../ai/deepfakeTriage';
+import { deepfakeTriage } from '../ai/deepfakeTriage.js';
 import { describe, it, test, expect } from '@jest/globals';
 
 describe('deepfake triage', () => {

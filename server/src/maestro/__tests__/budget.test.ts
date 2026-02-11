@@ -1,7 +1,7 @@
 import {
   buildBudgetEvidence,
   normalizeReasoningBudget,
-} from '../budget';
+} from '../budget.js';
 
 describe('Reasoning budget normalization', () => {
   it('applies defaults and enforces think mode off', () => {

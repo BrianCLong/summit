@@ -5,7 +5,7 @@ include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
 .PHONY: dev test lint build format ci
-.PHONY: db-migrate db-seed sbom k6 supply-chain/sbom supply-chain/sign
+.PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
@@ -49,10 +49,8 @@ dev-down: dev-prereqs ## Stop dev stack and remove volumes
 dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Running dev smoke checks..."
 	@docker compose -f $(COMPOSE_DEV_FILE) ps
-	@echo "Checking UI at http://localhost:3000 ..."
-	@curl -sSf http://localhost:3000 > /dev/null || { echo "UI not responding on port 3000."; exit 1; }
-	@echo "Checking Gateway health at http://localhost:8080/health ..."
-	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
+	@node smoke-test.js
+	@$(MAKE) k6 TARGET=http://localhost:4000
 	@echo "Dev smoke checks passed."
 
 restart: down up
@@ -92,7 +90,7 @@ lint:   ## Lint js/ts + python
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
-	$(VENV_BIN)/ruff format .
+	$(VVENV_BIN)/ruff format .
 
 build:  ## Build all images
 	docker compose -f $(COMPOSE_DEV_FILE) build
@@ -124,15 +122,19 @@ validate-ops: ## Validate observability assets (dashboards, alerts, runbooks)
 rollback-drill: ## Run simulated rollback drill
 	@node scripts/ops/rollback_drill.js
 
-sbom:   ## Generate CycloneDX SBOM (Legacy target, calls scripts/generate-sbom.sh)
-	@bash scripts/generate-sbom.sh
+sbom:   ## Generate CycloneDX SBOM
+	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
-supply-chain/sbom: ## Generate modern SBOMs (CycloneDX 1.7 + SPDX 3.0.1)
-	@bash scripts/generate-sbom.sh "summit-platform" "latest" "./artifacts/sbom"
+supplychain.evidence: ## Generate supply chain evidence artifacts
+	@bash hack/supplychain/evidence_id.sh > evidence_id.txt
+	@EVIDENCE_ID=$$(cat evidence_id.txt); \
+	python3 hack/supplychain/gen_evidence.py --evidence-id "$$EVIDENCE_ID" --output-dir "evidence/$$EVIDENCE_ID"
 
-supply-chain/sign: ## Sign artifacts and SBOMs using Cosign
-	@if [ -z "$(ARTIFACT)" ]; then echo "Usage: make supply-chain/sign ARTIFACT=<image|blob> [SBOM=<path>] [TYPE=image|blob]"; exit 1; fi
-	@bash scripts/supply-chain/sign-and-attest.sh "$(ARTIFACT)" "$(SBOM)" "$(TYPE)"
+supplychain.attest.local: ## Build image and export attestations locally (no push)
+	@mkdir -p out
+	@docker buildx build --attest type=sbom --attest type=provenance,mode=min --output type=local,dest=out/image .
+	@echo "Verifying attestations..."
+	@find out/image -name "*.json" -exec python3 hack/supplychain/verify_attestation_shape.py {} \;
 
 smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@echo "Waiting for services to start..."
@@ -201,8 +203,7 @@ pr-release:
 	  --node "$(NODE_VERSION)"
 
 provenance:
-	@npm run generate:provenance
-	@echo "Provenance generated at .evidence/provenance.json"
+	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
 
 ci-check:
 	@pnpm install --frozen-lockfile
@@ -290,43 +291,23 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
 	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
-	@$(MAKE) ga-evidence
-	@$(MAKE) ga-validate-evidence
-	@$(MAKE) ga-report
 
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
 
-ga-validate-evidence: ## Validate control evidence completeness for GA
-	@EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	if [ ! -d "$$EVIDENCE_DIR" ]; then \
-		echo "Missing evidence bundle at $$EVIDENCE_DIR"; \
-		exit 1; \
-	fi; \
-	node scripts/evidence/generate_control_evidence_index.mjs --evidence-dir "$$EVIDENCE_DIR"; \
-	node scripts/evidence/validate_control_evidence.mjs --evidence-dir "$$EVIDENCE_DIR"
-
-ga-report: ## Generate SOC evidence report for the current bundle
-	@EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	if [ ! -d "$$EVIDENCE_DIR" ]; then \
-		echo "Missing evidence bundle at $$EVIDENCE_DIR"; \
-		exit 1; \
-	fi; \
-	python3 scripts/evidence/generate_soc_report.py --evidence-dir "$$EVIDENCE_DIR"
-
-ga-evidence: ## Create a minimal local evidence bundle for GA validation
-	@set -e; \
-	EVIDENCE_DIR="dist/evidence/$$(git rev-parse HEAD)"; \
-	if [ -d "$$EVIDENCE_DIR" ] && [ "$$(ls -A "$$EVIDENCE_DIR" 2>/dev/null)" ]; then \
-		echo "Evidence bundle already present at $$EVIDENCE_DIR"; \
-		exit 0; \
-	fi; \
-	node scripts/evidence/create_stub_evidence_bundle.mjs --evidence-dir "$$EVIDENCE_DIR"; \
-	echo "Created stub evidence bundle at $$EVIDENCE_DIR"
-
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
+
+# --- Governance & Evidence ---
+
+.PHONY: evidence-bundle
+evidence-bundle: ## Generate a standard evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [RISK=low] [CHECKS="make test"])
+	@python3 scripts/maintainers/gen-evidence-bundle.py \
+		$(if $(BASE),--base $(BASE),) \
+		$(if $(RISK),--risk $(RISK),) \
+		$(if $(CHECKS),--checks "$(CHECKS)",) \
+		$(if $(PROMPTS),--prompts "$(PROMPTS)",)
 
 # --- Demo Environment ---
 
@@ -415,22 +396,16 @@ pipelines-list: ## List registered pipelines
 pipelines-validate: ## Validate pipeline manifests
 	@python3 pipelines/cli.py validate
 
-test-security: ## Run security verifications
-	@echo "Running Security Tests..."
-	@npx tsx --test server/src/utils/__tests__/security.test.ts
-	@bash scripts/ci/scan_secrets.sh --dry-run || true
+# Copilot CLI lanes
+.PHONY: copilot-explore copilot-plan copilot-task copilot-review
+copilot-explore: ## Run Copilot CLI in explore lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot explore $(ARGS) $(PROMPT)
 
-test-compliance: ## Run compliance controls as tests
-	@echo "Running Compliance Tests..."
-	@node --test compliance/soc/*.test.mjs
+copilot-plan: ## Run Copilot CLI in plan lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot plan $(ARGS) $(PROMPT)
 
-# Eval Skills
-.PHONY: eval-skill eval-skills-changed eval-skills-all
-eval-skill: ## Run a single eval skill (SKILL=...)
-	@npx tsx evals/runner/run_skill_eval.ts --skill $(SKILL)
+copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot task $(ARGS) $(PROMPT)
 
-eval-skills-changed: ## Run eval skills changed in the current diff
-	@npx tsx evals/runner/run_skills_changed.ts
-
-eval-skills-all: ## Run the full eval skills suite
-	@npx tsx evals/runner/run_skill_suite.ts
+copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
+	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)

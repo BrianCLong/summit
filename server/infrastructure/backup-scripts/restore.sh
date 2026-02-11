@@ -1,36 +1,71 @@
 #!/bin/bash
 set -e
 
-if [ -z "$1" ]; then
-    echo "Usage: ./restore.sh <timestamp_folder>"
-    exit 1
-fi
-
 TIMESTAMP=$1
-BACKUP_DIR="/backups/$TIMESTAMP"
 
-if [ ! -d "$BACKUP_DIR" ]; then
-    echo "Error: Backup directory $BACKUP_DIR does not exist."
+if [ -z "$TIMESTAMP" ]; then
+    echo "Usage: ./restore.sh <timestamp> or <path>"
     exit 1
 fi
 
-echo "Starting restore from $BACKUP_DIR..."
+# S3 Download if needed
+if [ ! -d "/backups/$TIMESTAMP" ] && [ ! -f "/backups/backup-$TIMESTAMP.tar.gz" ]; then
+     if [ ! -z "$S3_BUCKET" ]; then
+        echo "Downloading from S3..."
+        AWS_ARGS=""
+        if [ ! -z "$S3_ENDPOINT" ]; then
+            AWS_ARGS="--endpoint-url $S3_ENDPOINT"
+        fi
+        aws s3 cp $AWS_ARGS "s3://$S3_BUCKET/backup-$TIMESTAMP.tar.gz" "/backups/backup-$TIMESTAMP.tar.gz"
+        tar -xzf "/backups/backup-$TIMESTAMP.tar.gz" -C "/backups"
+     fi
+fi
 
-# Postgres Restore
+# Support passing just timestamp or full path
+if [ -d "/backups/$TIMESTAMP" ]; then
+    BACKUP_DIR="/backups/$TIMESTAMP"
+elif [ -d "$1" ]; then
+    BACKUP_DIR="$1"
+else
+    echo "Error: Backup not found at $1 or in /backups"
+    exit 1
+fi
+
+echo "Restoring from $BACKUP_DIR..."
+
+# Postgres
 echo "Restoring PostgreSQL..."
 POSTGRES_HOST=${POSTGRES_HOST:-postgres}
 POSTGRES_PORT=${POSTGRES_PORT:-5432}
 POSTGRES_USER=${POSTGRES_USER:-postgres}
 POSTGRES_DB=${POSTGRES_DB:-postgres}
+PGPASSWORD=${POSTGRES_PASSWORD:-postgres}
 
-if [ -z "$POSTGRES_PASSWORD" ]; then
-    POSTGRES_PASSWORD=postgres
+pg_restore -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB --clean --if-exists "$BACKUP_DIR/postgres.dump"
+
+# Redis
+if [ -f "$BACKUP_DIR/redis.rdb" ]; then
+    if [ -d "/redis_data" ]; then
+        echo "Restoring Redis data..."
+        cp "$BACKUP_DIR/redis.rdb" "/redis_data/dump.rdb"
+        echo "Redis dump replaced. Attempting to restart Redis..."
+
+        REDIS_HOST=${REDIS_HOST:-redis}
+
+        REDIS_CLI_CMD="redis-cli -h $REDIS_HOST"
+        if [ ! -z "$REDIS_PASSWORD" ] && [ "$REDIS_PASSWORD" != "devpassword" ]; then
+            REDIS_CLI_CMD="$REDIS_CLI_CMD -a $REDIS_PASSWORD --no-auth-warning"
+        fi
+
+        # Shutdown redis so it restarts and reloads data
+        $REDIS_CLI_CMD shutdown nosave || true
+        echo "Redis shutdown signal sent. Docker should restart it automatically."
+    else
+        echo "Warning: /redis_data not mounted. Cannot automate Redis restore."
+        echo "Manual step: Copy $BACKUP_DIR/redis.rdb to redis volume and restart redis."
+    fi
+else
+    echo "No redis.rdb found in backup."
 fi
 
-# pg_restore with --clean drops objects before recreating them
-PGPASSWORD=$POSTGRES_PASSWORD pg_restore -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USER -d $POSTGRES_DB --clean --if-exists "$BACKUP_DIR/postgres.dump"
-
-echo "Redis restore requires manual steps to replace the dump.rdb file and restart the service."
-echo "Redis RDB file is available at: $BACKUP_DIR/redis.rdb"
-
-echo "Restore completed (Postgres restored, Redis manual step required)."
+echo "Restore completed."

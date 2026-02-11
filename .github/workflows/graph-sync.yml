@@ -1,31 +1,32 @@
-name: Graph Sync
-
+name: graph-sync
 on:
-  schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  sync:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
+      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+          node-version: '20'
+          cache: 'pnpm'
+      - name: Install workspace
+        run: pnpm -w install --frozen-lockfile
+      - name: Neo4j & PG services
+        uses: hoverkraft-tech/compose-action@v2
         with:
-          version: 9
-
-      - run: pnpm -w install --frozen-lockfile
-
-      - run: pnpm nx run-many -t graph-sync --parallel=3
-
-      - uses: actions/upload-artifact@v4
+          compose-file: .github/compose/pg_neo.yml
+      - name: Validate Graph↔PG sync
+        run: node scripts/ci/validate_graph_pg_sync.mjs
+      - name: Upload evidence
         if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: graph-sync-evidence
           path: artifacts/graph-sync/*.json

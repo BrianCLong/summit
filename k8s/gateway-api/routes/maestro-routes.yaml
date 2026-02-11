@@ -1,1 +1,183 @@
-# Replaces: nginx.ingress.kubernetes.io/limit-rpm: 1000
+---
+# Maestro/Conductor orchestrator HTTPRoute
+# Replaces: infra/k8s/ingress/maestro-ingress.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: maestro
+  namespace: orchestrator
+  labels:
+    app.kubernetes.io/name: maestro
+    app.kubernetes.io/part-of: summit-platform
+    app.kubernetes.io/component: orchestrator
+spec:
+  parentRefs:
+    - name: summit-gateway
+      namespace: envoy-gateway-system
+  hostnames:
+    - "maestro.intelgraph.io"
+  rules:
+    # Conductor UI
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /conductor
+      backendRefs:
+        - name: maestro-server
+          port: 8080
+
+    # API endpoints
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - name: maestro-server
+          port: 8080
+
+    # Actuator endpoints (health, info, etc.)
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /actuator
+      backendRefs:
+        - name: maestro-server
+          port: 8080
+
+    # Metrics endpoint
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /metrics
+      backendRefs:
+        - name: maestro-server
+          port: 8080
+---
+# Maestro rate limiting policy
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: maestro-rate-limit
+  namespace: orchestrator
+  labels:
+    app.kubernetes.io/name: maestro
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: maestro
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        # 1000 requests per minute (from original ingress)
+        - limit:
+            requests: 1000
+            unit: Minute
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+  timeout:
+    tcp:
+      connectTimeout: 10s
+    http:
+      requestTimeout: 120s
+      idleTimeout: 300s
+  retry:
+    numRetries: 2
+    retryOn:
+      - connect-failure
+      - refused-stream
+      - unavailable
+    perRetry:
+      timeout: 30s
+---
+# Maestro CORS policy
+# Replaces nginx CORS configuration snippet
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: maestro-cors
+  namespace: orchestrator
+  labels:
+    app.kubernetes.io/name: maestro
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: maestro
+  cors:
+    allowOrigins:
+      - type: Regex
+        value: "https://.*\\.intelgraph\\.io"
+    allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+    allowHeaders:
+      - Content-Type
+      - Authorization
+      - X-Requested-With
+      - Accept
+      - Origin
+    exposeHeaders:
+      - X-Request-ID
+    maxAge: 86400s
+    allowCredentials: true
+---
+# Maestro security headers
+# Note: Security headers in Gateway API are typically handled via EnvoyPatchPolicy
+# or implementation-specific extensions
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: maestro-security
+  namespace: orchestrator
+  labels:
+    app.kubernetes.io/name: maestro
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: maestro
+  # Basic authorization - internal only for admin endpoints
+  authorization:
+    defaultAction: Allow
+    rules:
+      - name: actuator-internal-only
+        action: Allow
+        principal:
+          clientCIDRs:
+            - cidr: "10.0.0.0/8"
+---
+# Network policy update for Gateway API
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: maestro-gateway-access
+  namespace: orchestrator
+  labels:
+    app.kubernetes.io/name: maestro
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: maestro-server
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from Envoy Gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: envoy-gateway-system
+      ports:
+        - port: 8080
+          protocol: TCP

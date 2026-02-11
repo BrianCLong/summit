@@ -2,12 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Stamp",
   "type": "object",
-  "anyOf": [{ "required": ["created_at"] }, { "required": ["generated_at"] }],
+  "required": ["timestamp"],
   "properties": {
-    "created_at": { "type": "string", "format": "date-time" },
-    "generated_at": { "type": "string", "format": "date-time" },
-    "evidence_id": { "type": "string" },
-    "ci_run_id": { "type": "string" }
+    "timestamp": { "type": "string", "format": "date-time" }
   },
   "additionalProperties": true
 }

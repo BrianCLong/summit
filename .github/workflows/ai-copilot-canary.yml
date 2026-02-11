@@ -1,4 +1,4 @@
-name: AI Copilot Canary
+name: "[info] AI Copilot Canary"
 
 on:
   schedule:
@@ -11,21 +11,25 @@ on:
       - "services/ai-copilot/**"
       - ".github/workflows/ai-copilot-canary.yml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   canary:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4
+        # version is read from package.json packageManager field
+
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "20"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        # version is read from package.json packageManager field
 
       - name: Install dependencies (script only)
         run: pnpm add -w js-yaml
