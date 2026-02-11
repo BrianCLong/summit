@@ -19,7 +19,6 @@ allow {
 }
 
 # Wrapper decision
-package composer.decision_cmk
 
 decision := {
   "policy": "cmk",

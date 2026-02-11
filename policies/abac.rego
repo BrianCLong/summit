@@ -1,3 +1,5 @@
+import rego.v1
+
 # (same as in sprint doc)
 package abac.authz
 

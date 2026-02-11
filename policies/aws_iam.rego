@@ -1,3 +1,5 @@
+import rego.v1
+
 
 package maestro.governance
 
