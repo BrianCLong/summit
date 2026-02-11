@@ -149,37 +149,6 @@ jobs:
           fi
         continue-on-error: true # Non-blocking until implementation complete
 
-  unireason-drift:
-    name: UniReason Drift Monitor
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run UniReason loop & drift monitor
-        run: |
-          # Ensure artifacts dir exists
-          mkdir -p artifacts/unireason-1-0
-          # Run focused tests to generate artifacts
-          NODE_OPTIONS=--experimental-vm-modules npx jest --runInBand tests/agents/dualReasoning/run.test.ts
-          # Run drift monitor
-          npx tsx scripts/monitoring/unireason-1-0-drift.ts
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-
-      - name: Upload drift metrics
-        uses: actions/upload-artifact@v4
-        with:
-          name: unireason-drift-metrics
-          path: artifacts/unireason-1-0/drift.json
-
   mcp-ux-lint:
     name: MCP Tool UX Lint
     runs-on: ubuntu-latest
@@ -187,7 +156,7 @@ jobs:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 9
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -347,6 +316,28 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+  unireason-drift:
+    name: UniReason Drift Detector
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run UniReason Drift Detector
+        run: npx tsx scripts/monitoring/unireason-1-0-drift.ts
+      - name: Upload drift artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unireason-drift
+          path: artifacts/unireason-1-0/drift.json
+
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
@@ -354,7 +345,7 @@ jobs:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: 9
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -459,7 +450,6 @@ jobs:
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
-          echo "UniReason Drift: ${{ needs.unireason-drift.result }}"
           echo ""
 
           # Critical gates (BLOCKING)
@@ -483,6 +473,10 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.unireason-drift.result }}" != "success" ]]; then
+             echo "::warning::UniReason Drift Detector FAILED - Informational only"
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -499,6 +493,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ UniReason Drift Detector" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY

@@ -1,5 +1,4 @@
 package composer.cmk
-import future.keywords.in
 
 # Require CMK for artifacts in protected namespaces
 
