@@ -39,8 +39,6 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           run_install: false
 

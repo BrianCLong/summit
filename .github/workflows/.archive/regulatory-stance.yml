@@ -78,10 +78,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
-          version: 9.12.0
+
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -199,7 +197,7 @@ jobs:
     name: Notify on Critical Findings
     runs-on: ubuntu-latest
     needs: analyze
-    if: |
+    if: (|) && (github.event_name == 'pull_request')
       (github.event.inputs.notify_on_findings == 'true' || github.event_name == 'schedule') &&
       (needs.analyze.outputs.has_critical_findings == 'true' || needs.analyze.outputs.has_high_findings == 'true')
 
@@ -282,7 +280,6 @@ jobs:
     name: Comment on PR
     runs-on: ubuntu-latest
     needs: analyze
-    if: github.event_name == 'pull_request'
 
     steps:
       - name: Download reports

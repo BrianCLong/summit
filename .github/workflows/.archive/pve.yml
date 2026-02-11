@@ -29,10 +29,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
-          version: 9
+          version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -50,7 +48,7 @@ jobs:
         run: pnpm --filter @intelgraph/pve test:run
 
       - name: Validate PR
-        if: github.event_name == 'pull_request'
+        if: (github.event_name == 'pull_request') && (github.event_name == 'pull_request')
         run: |
           node --loader ts-node/esm packages/pve/scripts/validate-pr.ts
         env:
@@ -60,7 +58,6 @@ jobs:
   schema-drift:
     name: Schema Drift Detection
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -69,10 +66,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
-          version: 9
+          version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -102,10 +97,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
-          version: 9
+          version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

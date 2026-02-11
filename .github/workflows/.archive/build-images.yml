@@ -56,8 +56,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-      with:
-        version: 9.12.0
         with:
 
       - name: Set up Node.js
@@ -134,7 +132,7 @@ jobs:
           fi
 
       - name: Build and push Docker image
-        if: steps.dockerfile-check.outputs.exists == 'true'
+        if: ((((((((((steps.dockerfile-check.outputs.exists == 'true') && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && (success() || failure()))) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')
         id: build
         uses: docker/build-push-action@v5
         with:
@@ -150,20 +148,17 @@ jobs:
           sbom: true
 
       - name: Generate SBOM with Syft
-        if: steps.dockerfile-check.outputs.exists == 'true'
         run: |
           syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:latest -o spdx-json=sbom-${{ matrix.component.name }}.spdx.json
           syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:latest -o cyclonedx-json=sbom-${{ matrix.component.name }}.cyclonedx.json
 
       - name: Validate SBOM against dependency policy
-        if: steps.dockerfile-check.outputs.exists == 'true'
         run: |
           conftest test sbom-${{ matrix.component.name }}.spdx.json \
             --policy .ci/policies/deps.rego \
             --data .security/deps/policy.yaml
 
       - name: Scan image with Trivy
-        if: steps.dockerfile-check.outputs.exists == 'true'
         run: |
           trivy image \
             --format sarif \
@@ -173,14 +168,12 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:latest
 
       - name: Upload Trivy scan results to GitHub Security tab
-        if: steps.dockerfile-check.outputs.exists == 'true' && (success() || failure())
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-${{ matrix.component.name }}.sarif
           category: trivy-${{ matrix.component.name }}
 
       - name: Cosign sign (keyless)
-        if: steps.dockerfile-check.outputs.exists == 'true'
         id: cosign-sign
         env:
           COSIGN_EXPERIMENTAL: '1'
@@ -190,7 +183,6 @@ jobs:
           echo "ref=$IMAGE_REF" >> "$GITHUB_OUTPUT"
 
       - name: Attach SBOM attestation (cosign)
-        if: steps.dockerfile-check.outputs.exists == 'true'
         env:
           COSIGN_EXPERIMENTAL: '1'
         run: |
@@ -200,7 +192,6 @@ jobs:
             ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Verify image signature
-        if: steps.dockerfile-check.outputs.exists == 'true'
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
@@ -210,7 +201,6 @@ jobs:
             ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Verify SBOM attestation
-        if: steps.dockerfile-check.outputs.exists == 'true'
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
@@ -221,7 +211,6 @@ jobs:
             ${{ steps.cosign-sign.outputs.ref }}
 
       - name: Upload SBOM artifacts
-        if: steps.dockerfile-check.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: sbom-${{ matrix.component.name }}
@@ -231,7 +220,6 @@ jobs:
           retention-days: 30
 
       - name: Generate build summary
-        if: steps.dockerfile-check.outputs.exists == 'true'
         run: |
           echo "## 🐳 Container Build Summary - ${{ matrix.component.name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

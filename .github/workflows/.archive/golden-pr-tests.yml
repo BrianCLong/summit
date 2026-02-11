@@ -52,8 +52,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -228,7 +226,7 @@ jobs:
           echo "✅ Performance benchmarks completed"
 
       - name: Generate validation report
-        if: always()
+        if: ((always()) && (failure())) && (success())
         run: |
           cat > validation-report.md << EOF
           # 🚢 Release Captain Validation Report
@@ -270,7 +268,6 @@ jobs:
           cat validation-report.md
 
       - name: Create validation issue
-        if: failure()
         run: |
           # Create issue for failed validation
           gh issue create \
@@ -287,7 +284,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Post success summary
-        if: success()
         run: |
           echo "🎉 Release Captain validation completed successfully!"
           echo ""

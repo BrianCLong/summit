@@ -2,7 +2,7 @@ name: Agentic Policy Drift Check
 
 on:
   schedule:
-    - cron: "0 8 * * *" # Daily at 8am
+    - cron: '0 8 * * *' # Daily at 8am
   workflow_dispatch:
 
 permissions:
@@ -14,15 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
-        with:
-          run_install: false
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "pnpm"
+          node-version: '18'
+          cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run Drift Check
-        run: pnpm exec tsx scripts/monitoring/on-programming-with-agents-drift.ts
+        run: npx tsx scripts/monitoring/on-programming-with-agents-drift.ts

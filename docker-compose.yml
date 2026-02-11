@@ -61,8 +61,8 @@ services:
 
   server:
     build:
-      context: ./server
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: server/Dockerfile.dev
     ports: [ "4001:4000" ]
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres?sslmode=disable
@@ -70,9 +70,15 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=test1234
       - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=dev-secret-do-not-use-in-prod
+      - REDIS_HOST=redis
+      - JWT_SECRET=dev-secret-do-not-use-in-prod-and-longer
+      - JWT_REFRESH_SECRET=another-dev-secret-refresh-key-32-chars
       - SESSION_SECRET=dev-secret-do-not-use-in-prod
       - NODE_ENV=development
+      - ENABLE_INSECURE_DEV_AUTH=true
+      - AI_ENABLED=false
+      - GA_CLOUD=
+      - OPENAI_API_KEY=dummy
       - JAEGER_ENDPOINT=http://jaeger-collector:14268/api/traces
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector:4318/v1/metrics
@@ -88,6 +94,10 @@ services:
   api-gateway:
     build: ./services/api-gateway
     ports: [ "4000:4000" ]
+    environment:
+      - POLICY_DRY_RUN=true
+      - ENABLE_INSECURE_DEV_AUTH=true
+      - GRAPH_SERVICE_URL=http://server:4000
     depends_on: [ redis ]
     networks:
       - default
@@ -106,10 +116,11 @@ services:
       - observability
 
   backup-service:
-    build: ./server/infrastructure/backup-scripts
+    build: ./server/infrastructure/disaster-recovery
     volumes:
       - ./backups:/backups
       - redis_data:/redis_data
+      - neo4j_data:/neo4j_data
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=postgres
@@ -126,6 +137,19 @@ services:
     networks:
       - default
       - observability
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.dev
+    ports: [ "3000:3000" ]
+    environment:
+      - VITE_API_URL=http://localhost:4000/graphql
+      - VITE_WS_URL=ws://localhost:4000/graphql
+    networks:
+      - default
+      - observability
+      - intelgraph
 
 volumes:
   neo4j_data: {}

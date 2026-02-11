@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "artifact_type", "summary", "classification"],
+  "properties": {
+    "id": {"type": "string"},
+    "artifact_type": {"type": "string"},
+    "summary": {"type": "string", "minLength": 1},
+    "classification": {"type": "string", "enum": ["public", "restricted", "sensitive"]},
+    "provenance_id": {"type": "string"},
+    "hash": {"type": "string"},
+    "references": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

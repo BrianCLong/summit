@@ -68,10 +68,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
-          version: 9
+          version: 9.12.0
 
       - name: Get pnpm store directory
         shell: bash
@@ -104,7 +102,7 @@ jobs:
 
       - name: Compare system maps
         id: compare
-        if: steps.previous-map.outputs.has_previous == 'true'
+        if: (((((((steps.previous-map.outputs.has_previous == 'true') && (steps.changes.outputs.has_changes == 'true')) && (steps.changes.outputs.has_changes == 'true')) && (github.event_name == 'pull_request' && steps.compare.outputs.significant_change == 'true')) && (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.has_changes == 'true')) && (always())) && (failure() || needs.detect-drift.outputs.significant_change == 'true')) && (env.SLACK_WEBHOOK_URL != '')
         run: |
           # Extract service counts
           PREV_SERVICES=$(jq '.stats.totalServices' /tmp/system-map-previous.json)
@@ -161,17 +159,14 @@ jobs:
           fi
 
       - name: Install Graphviz
-        if: steps.changes.outputs.has_changes == 'true'
         run: sudo apt-get install -y graphviz
 
       - name: Render system map image
-        if: steps.changes.outputs.has_changes == 'true'
         run: |
           dot -Tpng docs/architecture/system-map.dot -o docs/architecture/system-map.png
           dot -Tsvg docs/architecture/system-map.dot -o docs/architecture/system-map.svg
 
       - name: Comment on PR (significant changes)
-        if: github.event_name == 'pull_request' && steps.compare.outputs.significant_change == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -226,7 +221,6 @@ jobs:
             });
 
       - name: Commit updated system map
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.has_changes == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -238,7 +232,6 @@ jobs:
           git push
 
       - name: Upload system map artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: system-map
@@ -253,12 +246,10 @@ jobs:
   notify-on-drift:
     name: Notify on Significant Drift
     needs: detect-drift
-    if: failure() || needs.detect-drift.outputs.significant_change == 'true'
     runs-on: ubuntu-latest
 
     steps:
       - name: Send Slack notification (optional)
-        if: env.SLACK_WEBHOOK_URL != ''
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |

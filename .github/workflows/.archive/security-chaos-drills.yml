@@ -99,8 +99,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
 
@@ -114,7 +112,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Start local stack (if local environment)
-        if: needs.safety-check.outputs.environment == 'local'
+        if: (((needs.safety-check.outputs.environment == 'local') && (steps.report.outputs.report_path != '')) && (github.event_name == 'pull_request' && steps.report.outputs.report_path != '')) && (always() && needs.safety-check.outputs.environment == 'local')
         run: |
           # Start docker compose in background
           make up &
@@ -177,7 +175,6 @@ jobs:
           fi
 
       - name: Upload drill report
-        if: steps.report.outputs.report_path != ''
         uses: actions/upload-artifact@v4
         with:
           name: security-drill-report-${{ needs.safety-check.outputs.environment }}-${{ github.run_number }}
@@ -185,7 +182,6 @@ jobs:
           retention-days: 90
 
       - name: Comment report summary on PR
-        if: github.event_name == 'pull_request' && steps.report.outputs.report_path != ''
         uses: actions/github-script@v7
         with:
           script: |
@@ -204,7 +200,6 @@ jobs:
             });
 
       - name: Stop local stack
-        if: always() && needs.safety-check.outputs.environment == 'local'
         run: |
           make down || true
 

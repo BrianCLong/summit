@@ -1,0 +1,6 @@
+{
+  "task_type": "customer_support_automation",
+  "output_determinism_required": false,
+  "regulatory_exposure": "low",
+  "chosen_modality": "genai"
+}

@@ -1,0 +1,17 @@
+{
+  "types": {
+    "aws_iam_role": 5,
+    "aws_iam_policy": 7,
+    "aws_s3_bucket": 2,
+    "aws_iam_openid_connect_provider": 1
+  },
+  "critical_resources": [
+    "module.iam.aws_iam_openid_connect_provider.github",
+    "module.deploy.aws_iam_role.deploy_runner"
+  ],
+  "required_secrets": [
+    "DEPLOY_GITHUB_APP_ID",
+    "DEPLOY_GITHUB_APP_PEM",
+    "CLOUD_DEPLOY_ROLE_ARN"
+  ]
+}

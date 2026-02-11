@@ -28,10 +28,8 @@ jobs:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
-          version: 9
+          version: 9.12.0
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -67,10 +65,8 @@ jobs:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
-          version: 9
+          version: 9.12.0
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -199,10 +195,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
-          version: 9
+          version: 9.12.0
           run_install: false
 
       - name: Install dependencies
@@ -230,12 +224,11 @@ jobs:
           OUTPUT_JSON: true
 
       - name: Upload SLO Results
-        if: always()
+        if: (always()) && (always())
         uses: actions/upload-artifact@v4
         with:
           name: slo-results
           path: slo-results.json
 
       - name: Teardown
-        if: always()
         run: make down

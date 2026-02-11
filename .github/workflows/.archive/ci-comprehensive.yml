@@ -84,8 +84,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 
@@ -166,8 +164,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 
@@ -208,7 +204,7 @@ jobs:
           fi
 
       - name: Upload coverage
-        if: always()
+        if: ((((((((((always()) && (needs.setup.outputs.has-schema == 'true')) && (github.event_name == 'pull_request')) && (always())) && (github.ref == 'refs/heads/main')) && (always())) && (always() && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped'))) && (always())) && (github.ref == 'refs/heads/main' && needs.build-and-attestation.result == 'success')) && (always())) && (always())
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ github.run_number }}
@@ -219,15 +215,12 @@ jobs:
     name: Schema & API Validation
     runs-on: ubuntu-latest
     needs: [setup, lint-and-typecheck]
-    if: needs.setup.outputs.has-schema == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 
@@ -257,7 +250,6 @@ jobs:
           pnpm run api:contract:test || echo "API contract tests not configured"
 
       - name: Generate schema diff
-        if: github.event_name == 'pull_request'
         run: |
           echo "📊 Generating schema diff report..."
           echo "## GraphQL Schema Changes" >> $GITHUB_STEP_SUMMARY
@@ -297,14 +289,12 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
       - name: Upload Security Results
-        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
           category: 'trivy-security-scan'
 
       - name: SBOM attestation (Cosign)
-        if: github.ref == 'refs/heads/main'
         run: |
           echo "🔏 Creating SBOM attestation..."
           # Install cosign
@@ -316,7 +306,6 @@ jobs:
           echo "Cosign attestation would be created here"
 
       - name: Security summary
-        if: always()
         run: |
           echo "# Security Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -330,15 +319,12 @@ jobs:
     name: Build & Attestation
     runs-on: ubuntu-latest
     needs: [lint-and-typecheck, unit-integration-tests, security-gates]
-    if: always() && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped')
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.setup.outputs.pnpm }}
 
@@ -357,7 +343,6 @@ jobs:
           pnpm run build || echo "Build not configured or failed"
 
       - name: Upload build artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ github.run_number }}
@@ -383,7 +368,6 @@ jobs:
     name: OTEL Sanity Check
     runs-on: ubuntu-latest
     needs: [build-and-attestation]
-    if: github.ref == 'refs/heads/main' && needs.build-and-attestation.result == 'success'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -413,7 +397,6 @@ jobs:
           OTEL_SANITY_TIMEOUT: 90000 # 90 seconds
 
       - name: OTEL Status Summary
-        if: always()
         run: |
           echo "# 🔍 OpenTelemetry Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -441,7 +424,6 @@ jobs:
         build-and-attestation,
         otel-sanity,
       ]
-    if: always()
     steps:
       - name: Evaluate merge readiness
         run: |

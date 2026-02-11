@@ -11,7 +11,7 @@ function getSha256(content) {
 }
 
 async function buildBundleIndex(dir) {
-  const files = await fs.readdir(dir);
+  const files = (await fs.readdir(dir)).sort();
   const fileDetails = [];
 
   for (const file of files) {
@@ -20,13 +20,15 @@ async function buildBundleIndex(dir) {
 
     if (stat.isFile()) {
       const content = await fs.readFile(filePath);
+      const relativePath = path.relative(dir, filePath).split(path.sep).join('/');
       fileDetails.push({
-        path: path.join(dir, file),
+        path: relativePath,
         bytes: stat.size,
         sha256: getSha256(content),
       });
     }
   }
+  fileDetails.sort((a, b) => a.path.localeCompare(b.path));
 
   const tag = process.env.GITHUB_REF_NAME || 'local';
   const channel = tag.includes('-rc') ? 'rc' : 'stable';
@@ -44,7 +46,7 @@ async function buildBundleIndex(dir) {
 
   for (const [key, file] of Object.entries(pointerCandidates)) {
     if (files.includes(file)) {
-      pointers[key] = path.join(dir, file);
+      pointers[key] = file;
     }
   }
 

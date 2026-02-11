@@ -1,6 +1,4 @@
 package summit.authz_test
-import future.keywords.if
-import future.keywords.in
 
 import data.summit.authz
 

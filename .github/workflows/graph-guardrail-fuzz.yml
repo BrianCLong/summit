@@ -11,16 +11,18 @@ on:
       - ".github/workflows/graph-guardrail-fuzz.yml"
       - "package.json"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   guardrail-fuzz:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 9.12.3
-      - uses: actions/setup-node@v4 # v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20.14.0
           cache: pnpm

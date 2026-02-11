@@ -1,12 +1,12 @@
-package intelgraph.abac
-import future.keywords.if
-import future.keywords.in
 # ============================================================================
 # IntelGraph ABAC Authorization Policy
 # Main allow policy that orchestrates all authorization checks
 # ============================================================================
 
+package intelgraph.abac
 
+import future.keywords.if
+import future.keywords.in
 
 # ============================================================================
 # MAIN AUTHORIZATION DECISION

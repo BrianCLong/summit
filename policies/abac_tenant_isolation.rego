@@ -1,7 +1,5 @@
-package policies
-import future.keywords.if
-import future.keywords.in
 
+package policies
 
 default allow = false
 

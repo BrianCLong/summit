@@ -41,8 +41,6 @@ jobs:
           cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: latest
       - name: Install dependencies
@@ -61,7 +59,7 @@ jobs:
     name: ESLint SARIF Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request'
+    if: (((github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request') && (>)) && (github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request')) && (>)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -72,8 +70,6 @@ jobs:
           cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: latest
       - name: Install dependencies
@@ -85,7 +81,6 @@ jobs:
             --output-file eslint-results.sarif \
           || true
       - name: Upload ESLint SARIF (fork-safe guard)
-        if: >
           always() &&
           github.event.pull_request.head.repo.fork == false &&
           hashFiles('**/*.sarif') != ''
@@ -98,7 +93,6 @@ jobs:
     name: TypeScript SARIF Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -109,8 +103,6 @@ jobs:
           cache: 'pnpm'
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: latest
       - name: Install dependencies
@@ -121,7 +113,6 @@ jobs:
           npx tsc --noEmit --pretty false 2>&1 | \
           npx @microsoft/sarif-multitool convert --tool typescript --output typescript-results.sarif || true
       - name: Upload TypeScript SARIF (fork-safe guard)
-        if: >
           always() &&
           github.event.pull_request.head.repo.fork == false &&
           hashFiles('**/*.sarif') != ''

@@ -5,58 +5,113 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    paths:
+      - 'client/**'
+      - 'apps/web/**'
+      - 'server/src/graphql/**'
+      - 'server/src/investigations/**'
+      - 'server/src/services/investigationWorkflowService.ts'
+      - 'e2e/golden-path*.spec.ts'
+      - 'flags/**'
   schedule:
     - cron: "0 2 * * *" # Nightly at 2 AM
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
+
 jobs:
-  golden-path-e2e:
+  golden-path-investigations:
+    name: Golden Path - Investigations
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "pnpm"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
-        with:
-          version: 8
+          node-version-file: .nvmrc
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Browsers
-        run: |
-          cd e2e/golden-path
-          pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run Golden Path E2E
+      - name: Run Investigation Golden Path
         env:
           BASE_URL: http://localhost:3000
-          GOLDEN_PATH_E2E_ENABLED: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '1' || '0' }}
-          GOLDEN_PATH_JOURNEY: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'full' || 'basic' }}
-        run: ./scripts/ci/run_golden_path_e2e.sh
+          PLAYWRIGHT_USE_WEBSERVER: 'true'
+        run: pnpm test:e2e:investigations
 
       - name: Upload Playwright Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report
+          name: playwright-report-investigations
+          path: reports/playwright
           retention-days: 7
 
-      - name: Upload Playwright Artifacts
+      - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts
+          name: test-results-investigations
+          path: test-results
+          retention-days: 7
+
+  golden-path-frontend:
+    name: Golden Path - Consolidated Frontend
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Frontend Golden Path
+        env:
+          BASE_URL: http://localhost:3000
+          PLAYWRIGHT_USE_WEBSERVER: 'true'
+        run: pnpm test:e2e:golden-path
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-frontend
+          path: reports/playwright
+          retention-days: 7
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-frontend
           path: test-results
           retention-days: 7
 
@@ -65,13 +120,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: golden-path-evidence
-          path: artifacts/evidence/goldenpath-frontend/
-          retention-days: 7
-
-      - name: Upload Summit Evidence Bundle
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: summit-evidence
           path: artifacts/evidence/
           retention-days: 7

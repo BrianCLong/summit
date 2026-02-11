@@ -34,7 +34,7 @@ permissions:
 jobs:
   detect-deployment-failure:
     name: 🔍 Detect Deployment Issues
-    if: |
+    if: (((((|) && (false # Belt-and-suspenders guard during stabilization)) && (steps.check.outputs.critical_failure == 'true')) && (|)) && (always())) && (always() && needs.execute-rollback.result != 'skipped')
       (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'failure') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') ||
       (github.event_name == 'repository_dispatch' && (github.event.action == 'slo-breach' || github.event.action == 'alert-webhook'))
@@ -150,7 +150,6 @@ jobs:
 
   health-monitor:
     name: 🏥 Health Monitor
-    if: false # Belt-and-suspenders guard during stabilization
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -208,7 +207,6 @@ jobs:
           fi
 
       - name: Check deployment metrics
-        if: steps.check.outputs.critical_failure == 'true'
         run: |
           echo "📊 Checking deployment metrics for anomalies..."
 
@@ -229,7 +227,6 @@ jobs:
   execute-rollback:
     name: ↩️ Execute Rollback
     needs: [detect-deployment-failure, health-monitor]
-    if: |
       always() && (
         (needs.detect-deployment-failure.outputs.should_rollback == 'true') ||
         (needs.health-monitor.outputs.critical_failure == 'true')
@@ -252,8 +249,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -385,7 +380,6 @@ jobs:
           fi
 
       - name: Notify stakeholders
-        if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ROLLBACK_ENV: ${{ needs.detect-deployment-failure.outputs.environment }}
@@ -432,7 +426,6 @@ jobs:
   post-rollback-analysis:
     name: 📊 Post-Rollback Analysis
     needs: [execute-rollback]
-    if: always() && needs.execute-rollback.result != 'skipped'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -156,16 +156,30 @@ services:
     restart: unless-stopped
     environment:
       PORT: 4100
+      PROMETHEUS_PORT: 9464
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-gateway
       OTEL_SERVICE_VERSION: 1.0.0
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      FEATURE_LAC_ENFORCE: "true"
+      COPILOT_NLQ: "true"
+      UI_TRIPANE: "true"
+      POLICY_COMPILER_URL: "http://policy-compiler:8080"
+      OPA_DECISION_URL: "http://opa:8181/v1/data/policy/authz/abac/decision"
+      TYPESENSE_HOST: "typesense"
+      TYPESENSE_PORT: "8108"
+      TYPESENSE_API_KEY: "xyz"
     depends_on:
       api:
         condition: service_healthy
+      policy-compiler:
+        condition: service_healthy
+      typesense:
+        condition: service_healthy
     ports:
       - '4100:4100'
+      - '9464:9464'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
       interval: 15s
@@ -177,6 +191,42 @@ services:
       - 'prometheus.job=summit_gateway'
       - 'prometheus.port=4100'
 
+  prov-ledger:
+    build: ./services/prov-ledger
+    ports: [ "4010:4010" ]
+
+  policy-compiler:
+    build: ./services/policy-compiler
+    ports: [ "8102:8080" ]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit
+
+  ai-nlq:
+    build: ./services/ai-nlq
+    ports: [ "8103:8080" ]
+
+  er-service:
+    build: ./services/er-service
+    ports: [ "8104:8080" ]
+
+  ingest:
+    build: ./services/ingest
+    ports: [ "8105:8080" ]
+
+  zk-tx:
+    build: ./services/zk-tx
+    ports: [ "8106:8080" ]
+
+  predictd:
+    build:
+      context: .
+      dockerfile: services/predictd/Dockerfile
+
   slo-exporter:
     build:
       context: ./apps/slo-exporter
@@ -187,6 +237,7 @@ services:
       PORT: 9092
       PROMETHEUS_URL: http://prometheus:9090
       API_URL: http://api:4000
+      PREDICTD_PORT: 4001
     ports:
       - '9092:9092'
     depends_on:
@@ -199,6 +250,36 @@ services:
     labels:
       - 'prometheus.job=slo_exporter'
       - 'prometheus.port=9092'
+
+  typesense:
+    image: typesense/typesense:0.25.2
+    ports:
+      - "8108:8108"
+    environment:
+      - TYPESENSE_DATA_DIR=/data
+      - TYPESENSE_API_KEY=xyz
+      - TYPESENSE_ENABLE_CORS=true
+    volumes:
+      - ./tmp/typesense-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8108/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit
+
+  opa:
+    image: openpolicyagent/opa:0.61.0
+    ports:
+      - "8181:8181"
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+      - "/policies"
+    volumes:
+      - ./services/opa/policies:/policies
 
   web:
     build:

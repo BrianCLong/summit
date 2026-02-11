@@ -51,8 +51,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: latest
 
@@ -116,7 +114,7 @@ jobs:
           fi
 
       - name: Setup verification environment
-        if: steps.detect-changes.outputs.verification_needed == 'true'
+        if: (((((((((((steps.detect-changes.outputs.verification_needed == 'true') && (steps.detect-changes.outputs.verification_needed == 'true')) && (steps.detect-changes.outputs.verification_needed == 'true' && matrix.signature_type == 'eddsa')) && (steps.detect-changes.outputs.verification_needed == 'true' && matrix.signature_type == 'pqc-dilithium')) && (steps.detect-changes.outputs.verification_needed == 'true')) && (steps.detect-changes.outputs.verification_needed == 'true')) && (steps.detect-changes.outputs.verification_needed == 'true' && steps.verify-dual.outputs.dual_sig_valid == 'true')) && (steps.detect-changes.outputs.verification_needed == 'true')) && (steps.detect-changes.outputs.verification_needed == 'true')) && (steps.detect-changes.outputs.verification_needed == 'false')) && (always())) && (needs.pq-dual-signature-verification.result == 'success')
         run: |
           set -e
 
@@ -145,7 +143,6 @@ jobs:
           echo "📋 Verification manifest created"
 
       - name: Generate test payload
-        if: steps.detect-changes.outputs.verification_needed == 'true'
         run: |
           set -e
 
@@ -171,7 +168,6 @@ jobs:
           echo "✅ Test payload generated"
 
       - name: Verify EdDSA (Ed25519) signature
-        if: steps.detect-changes.outputs.verification_needed == 'true' && matrix.signature_type == 'eddsa'
         run: |
           set -e
 
@@ -222,7 +218,6 @@ jobs:
           echo "✅ Ed25519 signature verification completed"
 
       - name: Verify PQC (Dilithium) signature
-        if: steps.detect-changes.outputs.verification_needed == 'true' && matrix.signature_type == 'pqc-dilithium'
         run: |
           set -e
 
@@ -304,7 +299,6 @@ jobs:
           echo "✅ Dilithium signature verification completed"
 
       - name: Combine verification results
-        if: steps.detect-changes.outputs.verification_needed == 'true'
         run: |
           set -e
 
@@ -375,7 +369,6 @@ jobs:
           echo "DUAL_SIG_VALID=$DUAL_SIG_VALID" >> $GITHUB_ENV
 
       - name: Verify dual signature validity
-        if: steps.detect-changes.outputs.verification_needed == 'true'
         id: verify-dual
         run: |
           set -e
@@ -410,7 +403,6 @@ jobs:
           fi
 
       - name: Generate verification evidence
-        if: steps.detect-changes.outputs.verification_needed == 'true' && steps.verify-dual.outputs.dual_sig_valid == 'true'
         run: |
           set -e
 
@@ -471,7 +463,6 @@ jobs:
           echo "✅ Verification attestation created"
 
       - name: Upload verification artifacts
-        if: steps.detect-changes.outputs.verification_needed == 'true'
         uses: actions/upload-artifact@v3
         with:
           name: pq-dual-signature-verification-${{ github.sha }}-${{ matrix.signature_type }}
@@ -480,7 +471,6 @@ jobs:
           retention-days: 90
 
       - name: Security gate enforcement
-        if: steps.detect-changes.outputs.verification_needed == 'true'
         run: |
           set -e
 
@@ -513,7 +503,6 @@ jobs:
           echo "🛡️ Post-quantum readiness: ✅"
 
       - name: Skip verification summary
-        if: steps.detect-changes.outputs.verification_needed == 'false'
         run: |
           echo "ℹ️ Post-quantum dual signature verification SKIPPED"
           echo "📋 Reason: ${{ steps.detect-changes.outputs.change_reason }}"
@@ -523,11 +512,9 @@ jobs:
     name: Verification Summary
     runs-on: ubuntu-latest
     needs: pq-dual-signature-verification
-    if: always()
 
     steps:
       - name: Download verification artifacts
-        if: needs.pq-dual-signature-verification.result == 'success'
         uses: actions/download-artifact@v3
         with:
           path: verification-artifacts

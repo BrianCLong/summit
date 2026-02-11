@@ -72,8 +72,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
 
@@ -123,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: sovereign-safeguards-validation
     timeout-minutes: 20
-    if: github.event.inputs.sovereign_compliance_check == 'true' || github.event_name != 'workflow_dispatch'
+    if: (((((github.event.inputs.sovereign_compliance_check == 'true' || github.event_name != 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging')) && (github.ref == 'refs/heads/main' && github.event.inputs.environment == 'production')) && (always())) && (needs.deploy-staging.result == 'success' && needs.setup-v041-monitoring.result == 'success')) && (needs.deploy-staging.result == 'failure' || needs.setup-v041-monitoring.result == 'failure')
 
     steps:
       - name: Checkout repository
@@ -283,7 +281,6 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [sovereign-compliance-check, build-sovereign-services]
-    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
     environment:
       name: staging
       url: https://staging.mc-platform.com
@@ -382,7 +379,6 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [deploy-staging, sovereign-compliance-check]
-    if: github.ref == 'refs/heads/main' && github.event.inputs.environment == 'production'
     environment:
       name: production
       url: https://mc-platform.com
@@ -516,11 +512,9 @@ jobs:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
     needs: [deploy-staging, setup-v041-monitoring]
-    if: always()
 
     steps:
       - name: Deployment Success Notification
-        if: needs.deploy-staging.result == 'success' && needs.setup-v041-monitoring.result == 'success'
         run: |
           echo "🎉 MC Platform v0.4.1 Sovereign Safeguards deployment successful!"
           echo "✅ Sovereign compliance validated"
@@ -535,7 +529,6 @@ jobs:
           echo "Compliance Score: 100% (1.0/1.0) ✅"
 
       - name: Deployment Failure Notification
-        if: needs.deploy-staging.result == 'failure' || needs.setup-v041-monitoring.result == 'failure'
         run: |
           echo "❌ MC Platform v0.4.1 Sovereign Safeguards deployment failed!"
           echo "Please check the workflow logs for details."

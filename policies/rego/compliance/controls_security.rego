@@ -1,6 +1,4 @@
 package compliance
-import future.keywords.if
-import future.keywords.in
 
 pass["sec-AUTHZ-001"]["Authorization decision logged with actor and resource"] {
   input.evidence.spec == "summit.evidence.authz.v1"

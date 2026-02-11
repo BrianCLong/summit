@@ -6,10 +6,11 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
+  merge_group:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Global environment for all jobs - prevents V8 heap exhaustion
 env:
@@ -24,13 +25,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -39,17 +37,18 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
+=======
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
-        with:
-          version: 10.0.0
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
           cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
@@ -60,17 +59,18 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
+=======
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
-        with:
-          version: 10.0.0
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: "pnpm"
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -83,12 +83,16 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+=======
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
-        with:
-          version: 10.0.0
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -121,6 +125,8 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -143,9 +149,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
+<<<<<<< HEAD
     services:
       postgres:
         image: postgres:15
+=======
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: SOC Control Unit Tests
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -171,10 +193,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
-        with:
-          version: 10.0.0
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

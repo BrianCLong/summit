@@ -207,8 +207,6 @@ jobs:
           ref: ${{ needs.validate.outputs.branch_name }}
 
       - uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           run_install: false
 
@@ -453,8 +451,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           run_install: false
 

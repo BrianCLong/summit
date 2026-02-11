@@ -54,7 +54,7 @@ jobs:
 
       - name: Quick risk analysis
         id: analyze
-        if: steps.check.outputs.should_run_full_validation == 'true'
+        if: (((((((((((((((steps.check.outputs.should_run_full_validation == 'true') && (steps.check.outputs.should_run_full_validation == 'true')) && (steps.check.outputs.should_run_full_validation == 'true')) && (needs.validate-pr.outputs.should_run_full_validation == 'true')) && (needs.validate-pr.outputs.should_run_full_validation == 'true')) && (needs.validate-pr.outputs.should_run_full_validation == 'true')) && (always())) && (always())) && (always())) && (needs.validate-pr.outputs.should_run_full_validation == 'true')) && (needs.validate-pr.outputs.should_run_full_validation == 'true' && needs.validate-pr.outputs.helm_changed == 'true')) && (needs.validate-pr.outputs.should_run_full_validation == 'true' && needs.validate-pr.outputs.database_changed == 'true')) && (always() && needs.validate-pr.outputs.should_run_full_validation == 'true')) && (needs.validate-pr.outputs.risk_level == 'HIGH')) && (always())) && (always() && needs.validate-pr.outputs.should_run_full_validation == 'true')
         run: |
           # Get changed files
           CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
@@ -123,7 +123,6 @@ jobs:
 
       - name: Classify PR risk tiers
         id: classify
-        if: steps.check.outputs.should_run_full_validation == 'true'
         run: node .github/scripts/pr-risk-classifier.cjs
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -134,7 +133,6 @@ jobs:
 
       - name: Detect change scopes
         id: change-detection
-        if: steps.check.outputs.should_run_full_validation == 'true'
         run: |
           CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
           echo "helm_changed=false" >> $GITHUB_OUTPUT
@@ -154,7 +152,6 @@ jobs:
   build-and-typecheck:
     name: 🔨 Build & TypeCheck
     needs: validate-pr
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -170,8 +167,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -197,7 +192,6 @@ jobs:
   test-validation:
     name: 🧪 Test Suite
     needs: validate-pr
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -213,8 +207,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -258,7 +250,6 @@ jobs:
   security-validation:
     name: 🔒 Security Scan
     needs: validate-pr
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -274,8 +265,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -345,7 +334,6 @@ jobs:
           args: '--redact --exit-code 1 --report-format sarif --report-path gitleaks.sarif'
 
       - name: Upload Gitleaks SARIF
-        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: gitleaks.sarif
@@ -384,7 +372,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload SBOM Artifacts
-        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: sbom-artifacts
@@ -439,7 +426,6 @@ jobs:
           fi
 
       - name: Generate security annotations
-        if: always()
         run: |
           # Create security annotations for PR
           if [[ -f "gitleaks.sarif" ]]; then
@@ -462,7 +448,6 @@ jobs:
   lint-validation:
     name: 🎯 Code Quality
     needs: validate-pr
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -478,8 +463,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-      with:
-        version: 9.12.0
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -527,7 +510,6 @@ jobs:
   helm-lint:
     name: ⛵ Helm Lint
     needs: validate-pr
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true' && needs.validate-pr.outputs.helm_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -558,7 +540,6 @@ jobs:
   migration-validation:
     name: 🗄️ Migration Gate
     needs: validate-pr
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true' && needs.validate-pr.outputs.database_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -584,7 +565,6 @@ jobs:
       - helm-lint
       - migration-validation
       - e2e-validation
-    if: always() && needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -672,7 +652,6 @@ jobs:
   e2e-validation:
     name: 🎬 E2E Validation
     needs: validate-pr
-    if: needs.validate-pr.outputs.risk_level == 'HIGH'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -695,7 +674,6 @@ jobs:
           BASE_URL=http://localhost:4000 npx playwright test --timeout=30000
 
       - name: Cleanup
-        if: always()
         run: docker-compose -f deploy/compose/docker-compose.yml down
 
   # Summary status check
@@ -711,7 +689,6 @@ jobs:
       - migration-validation
       - e2e-validation
       - policy-validation
-    if: always() && needs.validate-pr.outputs.should_run_full_validation == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check validation results

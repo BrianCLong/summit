@@ -137,8 +137,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -184,8 +182,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -228,8 +224,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -286,7 +280,7 @@ jobs:
     name: 🏗️ Build - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: [preflight, lint, typecheck]
-    if: always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') && (needs.typecheck.result == 'success' || needs.typecheck.result == 'skipped')
+    if: (((((((((always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') && (needs.typecheck.result == 'success' || needs.typecheck.result == 'skipped')) && (matrix.upload-artifacts)) && (needs.preflight.outputs.should-run-tests == 'true')) && (matrix.node == '20.x')) && (needs.preflight.outputs.should-run-tests == 'true')) && (always() && needs.build.result == 'success')) && (failure())) && (always())) && (always())) && (github.event_name == 'pull_request')
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -309,8 +303,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -350,7 +342,6 @@ jobs:
           NODE_ENV: production
 
       - name: Upload build artifacts (Ubuntu only)
-        if: matrix.upload-artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ github.run_number }}
@@ -374,7 +365,6 @@ jobs:
     name: 🧪 Unit Tests - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: [preflight, build]
-    if: needs.preflight.outputs.should-run-tests == 'true'
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -390,8 +380,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -417,7 +405,6 @@ jobs:
           CI: true
 
       - name: Upload coverage
-        if: matrix.node == '20.x'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-unit-${{ matrix.os }}-${{ matrix.node }}
@@ -429,7 +416,6 @@ jobs:
     name: 🔗 Integration Tests
     runs-on: ubuntu-latest
     needs: [preflight, build]
-    if: needs.preflight.outputs.should-run-tests == 'true'
     timeout-minutes: 30
     services:
       postgres:
@@ -479,8 +465,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -527,7 +511,6 @@ jobs:
     name: 🎯 Golden Path Smoke Tests
     runs-on: ubuntu-latest
     needs: [preflight, build, test-unit]
-    if: always() && needs.build.result == 'success'
     timeout-minutes: 30
     env:
       DOCKER_BUILDKIT: '1'
@@ -541,8 +524,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -587,12 +568,10 @@ jobs:
           fi
 
       - name: Show logs on failure
-        if: failure()
         run: |
           docker compose -f docker-compose.dev.yml logs --tail=200
 
       - name: 5. Cleanup
-        if: always()
         run: ./scripts/teardown.sh
 
   # ============================================================================
@@ -613,8 +592,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      with:
-        version: 9.12.0
         with:
           version: ${{ needs.preflight.outputs.pnpm-version }}
 
@@ -663,7 +640,6 @@ jobs:
       - test-integration
       - golden-path
       - prod-guardrails
-    if: always()
     timeout-minutes: 5
     outputs:
       ready: ${{ steps.evaluate.outputs.ready }}
@@ -710,7 +686,6 @@ jobs:
           fi
 
       - name: Post summary comment (PR only)
-        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
