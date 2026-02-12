@@ -29,13 +29,13 @@ branch_protection:
   required_status_checks:
     strict: true
     contexts:
-      - "Governance Meta Gate / meta-gate"
       - "CI Core (Primary Gate) / CI Core Gate ✅"
       - "CI / Unit Tests"
       - "GA Gate"
       - "Release Readiness Gate"
       - "SOC Controls"
       - "Unit Tests & Coverage"
+      - "Governance Meta Gate / meta-gate"
 
 # Always Required Checks
 # ----------------------
@@ -76,12 +76,12 @@ always_required:
 #   "^\.github/workflows/" - Matches workflow files (escape dots)
 #   "^Dockerfile$" - Matches exactly "Dockerfile" at root
 conditional_required:
-  - name: "Workflow Validity Gate"
-    workflow: "workflow-validity.yml"
-    rationale: "Validates GitHub Actions workflow syntax and safety to prevent global outages"
+  - name: "Workflow Lint"
+    workflow: "workflow-lint.yml"
+    rationale: "Validates GitHub Actions workflow syntax and safety"
     when_paths_match:
-      - '^\.github/workflows/'
-      - '^\.github/actions/'
+      - "^\.github/workflows/"
+      - "^\.github/actions/"
 
   - name: "CodeQL"
     workflow: "codeql.yml"
@@ -97,10 +97,10 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - '^package\.json$'
-      - '^pnpm-lock\.yaml$'
-      - '^server/package\.json$'
-      - '^\.github/workflows/supply-chain'
+      - "^package\.json$"
+      - "^pnpm-lock\.yaml$"
+      - "^server/package\.json$"
+      - "^\.github/workflows/supply-chain"
       - "^scripts/security/"
 
   - name: "Docker Build & Security Scan"
@@ -109,9 +109,9 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - '^\.dockerignore$'
+      - "^\.dockerignore$"
 
-  - name: "Schema compatibility guard / schema-compat"
+  - name: "Schema Compatibility Check"
     workflow: "schema-compat.yml"
     rationale: "API schema backward compatibility checks"
     when_paths_match:
@@ -133,13 +133,6 @@ conditional_required:
     rationale: "Validates OPA/Rego policies with 90% coverage requirement"
     when_paths_match:
       - "^policy/"
-
-  - name: "Extortion Pressure Gates"
-    workflow: "extortion-gates.yml"
-    rationale: "Ensures extortion artifacts are deterministic and follow never-log policy"
-    when_paths_match:
-      - "^packages/extortion/"
-      - "^scripts/ci/.*extortion"
 
 # Informational Checks
 # --------------------

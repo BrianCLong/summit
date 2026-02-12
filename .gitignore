@@ -228,9 +228,6 @@ junit.xml
 coverage/
 **/coverage/
 coverage-reports/
-.pytest_cache/
-.coverage
-playwright-report/
 
 # Neo4j & graph stores
 neo4j/data/
@@ -294,7 +291,6 @@ data/automl/
 tmp-audit/
 **/digest-sandbox/
 **/tmp-security/
-.maestro-workboard/
 
 # Test reports
 reports/
@@ -329,6 +325,8 @@ validation-report-*.txt
 stale_refs_files.txt
 cosign-verify.txt
 dns.txt
+soc-compliance-reports/
+packages/policy-audit/src/*.js.map
 
 # Data Dumps (Root Only)
 # Note: Specific CSVs in subdirectories are allowed, but root CSVs should be ignored
@@ -363,18 +361,12 @@ bin/
 release-assets/
 evidence-staging/
 *.txt
+!services/er-service/requirements.txt
 tmp-test/
-\n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
-.pnpm-store/
-dist-isolated/
-services/agent-runtime-restored/
-services/api-gateway-restored/
-services/prov-ledger-restored/
-services/graph-xai-restored-2/
-libs/context-shell/node/
-packages/osint-collector/src/collectors/*.js
-packages/osint-collector/src/core/*.js
-packages/osint-collector/src/types/*.js
-packages/osint-collector/src/utils/*.js
-evidence/skills/
-*.js.map
+_worktrees/
+
+# Local runs output (do not commit)
+subsumption/**/runs/
+
+# Governance evidence artifacts (generated locally/CI)
+artifacts/governance/

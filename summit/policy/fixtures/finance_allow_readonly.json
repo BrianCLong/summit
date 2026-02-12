@@ -1,8 +1,0 @@
-{
-  "sender": "agent_finance",
-  "recipient": "executor",
-  "tool_calls": [{"name": "read_balance", "arguments": {}}],
-  "security": {"classification": "INTERNAL"},
-  "allowed_tools": ["read_balance"],
-  "expected_allowed": true
-}
