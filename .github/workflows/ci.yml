@@ -1,123 +1,81 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches: [ main ]
-    paths-ignore:
-      - "**/*.md"
-  merge_group:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
-# Global environment for all jobs - prevents V8 heap exhaustion
-env:
-  NODE_OPTIONS: --max-old-space-size=8192
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  config-guard:
-    name: Build & Test (Untrusted)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Validate Jest & pnpm Configuration
-        run: pnpm -w check:jest-config
-
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-<<<<<<< HEAD
-=======
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
 
   typecheck:
-    name: Typecheck
-    needs: lint
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-<<<<<<< HEAD
-=======
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          node-version-file: .nvmrc
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
 
-  unit-tests:
-    name: Unit Tests
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-<<<<<<< HEAD
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-=======
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version-file: .nvmrc
-          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Unit Tests
-        run: pnpm -w test:unit || pnpm -w test:unit
-      - name: Attach evidence
-        if: always()
-        run: |
-          mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs \
-            --job unit-tests \
-            --runner ${{ runner.os }} \
-            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
-            --out artifacts/stamp.json
-        shell: bash
-      - name: Generate Metrics
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Test
+        run: pnpm test
+
+  config-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          name: coverage-report
-          path: server/coverage/
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+      - name: Check Config
+        run: node scripts/check-config.js
 
   integration-test:
     runs-on: ubuntu-latest
@@ -149,25 +107,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
-<<<<<<< HEAD
     services:
       postgres:
         image: postgres:15
-=======
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -221,11 +163,7 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs \
-            --job verify-versions \
-            --runner ${{ runner.os }} \
-            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
-            --out artifacts/stamp.json
+          node scripts/ci/emit_evidence_stamp.mjs             --job verify-versions             --runner ${{ runner.os }}             --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}"             --out artifacts/stamp.json
         shell: bash
       - name: Upload artifacts
         if: always()
