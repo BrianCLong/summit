@@ -1,5 +1,36 @@
 version: 1
 prompts:
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/operations/daily-sprint-orchestrator@v1.md
+    sha256: 786493092033755fb4af8f4657157c6a455623ae5e7e4eb4243a8f75ff7e07b6
+    description: Orchestrate the daily sprint evidence-first loop for Summit operations.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_2026-02-12.md
+        - docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/report.json
+        - docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/metrics.json
+        - docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/stamp.json
+        - docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/gh_pr_list.json
+        - docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/gh_issue_list.json
+        - docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/gh_issue_list.err
+        - docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/run_timestamp.txt
+        - docs/roadmap/STATUS.json
+        - prompts/operations/daily-sprint-orchestrator@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: saas-crash-2026-positioning-pack
     version: v1
     path: prompts/positioning/saas-crash-2026@v1.md

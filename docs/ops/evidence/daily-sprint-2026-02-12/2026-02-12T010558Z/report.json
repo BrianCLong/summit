@@ -1,0 +1,14 @@
+{
+  "mode": "sensing",
+  "observations": {
+    "issue_query_error": "error connecting to api.github.com\ncheck your internet connection or https://githubstatus.com",
+    "issue_query_status": "error",
+    "open_pr_count": 0
+  },
+  "run_timestamp": "2026-02-12T010558Z",
+  "sources": {
+    "issue_error_log": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/gh_issue_list.err",
+    "issue_list": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/gh_issue_list.json",
+    "pr_list": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/gh_pr_list.json"
+  }
+}
