@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVID::ops::daily_sprint::2026-02-12::2026-02-12T070256Z::v1",
+  "git_sha": "0ecc8d91e8ac9e7a98d6ea3553627e7c379570ca",
+  "timestamp_utc": "2026-02-12T07:03:32Z",
+  "repro_command": "gh pr list / gh pr view / gh issue list (see evidence logs)"
+}
