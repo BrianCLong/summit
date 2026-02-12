@@ -1,3 +1,4 @@
+# Agent Archetypes Policy
 #
 # Defines authorization rules for Summit's AI agent archetypes:
 # - Chief of Staff
@@ -7,8 +8,9 @@
 # All agent actions must pass through these policies before execution.
 
 package agents.archetypes
-import future.keywords
 
+import future.keywords.if
+import future.keywords.in
 
 # Default deny
 default allow = false

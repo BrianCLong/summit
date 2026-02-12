@@ -1,248 +1,405 @@
 {
-  "version": "1.0.0",
-  "items": {
-    "EVD-MITTR-AGENTIC-WORKFORCE-001": {
-      "path": "evidence/MITTR-AGENTIC-WORKFORCE",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+  "version": 1,
+  "items": [
+    {
+      "evidence_id": "EVD-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-FORBES-AGENTIC-AI-2026-001": {
-      "path": "evidence/FORBES-AGENTIC-AI-2026",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-002",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-DISINFO-NEWS-ECOSYSTEM-2026-001": {
-      "path": "evidence/DISINFO-NEWS-ECOSYSTEM-2026",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-003",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-COGWAR-2026-EVENT-001": {
-      "path": "evidence/EVD-COGWAR-2026-EVENT-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-MITTR-AGENTIC-WORKFORCE-001",
+      "files": {
+        "report": "evidence/MITTR-AGENTIC-WORKFORCE/report.json",
+        "metrics": "evidence/MITTR-AGENTIC-WORKFORCE/metrics.json",
+        "stamp": "evidence/MITTR-AGENTIC-WORKFORCE/stamp.json"
+      }
     },
-    "EVD-COGWAR-2026-EVENT-002": {
-      "path": "evidence/EVD-COGWAR-2026-EVENT-002",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-FORBES-AGENTIC-AI-2026-001",
+      "files": {
+        "report": "evidence/FORBES-AGENTIC-AI-2026/report.json",
+        "metrics": "evidence/FORBES-AGENTIC-AI-2026/metrics.json",
+        "stamp": "evidence/FORBES-AGENTIC-AI-2026/stamp.json"
+      }
     },
-    "EVD-COGWAR-2026-EVENT-003": {
-      "path": "evidence/EVD-COGWAR-2026-EVENT-003",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-DISINFO-NEWS-ECOSYSTEM-2026-001",
+      "files": {
+        "report": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/report.json",
+        "metrics": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/metrics.json",
+        "stamp": "evidence/DISINFO-NEWS-ECOSYSTEM-2026/stamp.json"
+      }
     },
-    "EVD-MITTR-AIMEM-PRIV-MODEL-001": {
-      "path": "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-openviking-trace-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-MITTR-AIMEM-PRIV-POLICY-002": {
-      "path": "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-openviking-trace-002",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-MITTR-AIMEM-PRIV-LEAK-003": {
-      "path": "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-openviking-trace-003",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-MITTR-AIMEM-PRIV-DSAR-004": {
-      "path": "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-COGWAR-2026-EVENT-001",
+      "files": {
+        "report": "evidence/EVD-COGWAR-2026-EVENT-001/report.json",
+        "metrics": "evidence/EVD-COGWAR-2026-EVENT-001/metrics.json",
+        "stamp": "evidence/EVD-COGWAR-2026-EVENT-001/stamp.json"
+      }
     },
-    "EVD-MITTR-AIMEM-PRIV-EGRESS-005": {
-      "path": "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-COGWAR-2026-EVENT-002",
+      "files": {
+        "report": "evidence/EVD-COGWAR-2026-EVENT-002/report.json",
+        "metrics": "evidence/EVD-COGWAR-2026-EVENT-002/metrics.json",
+        "stamp": "evidence/EVD-COGWAR-2026-EVENT-002/stamp.json"
+      }
     },
-    "EVD-WSJ-AI-FUNDRAISING-FRENZY-MKT-001": {
-      "path": "evidence/WSJ-AI-FUNDRAISING-FRENZY",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-COGWAR-2026-EVENT-003",
+      "files": {
+        "report": "evidence/EVD-COGWAR-2026-EVENT-003/report.json",
+        "metrics": "evidence/EVD-COGWAR-2026-EVENT-003/metrics.json",
+        "stamp": "evidence/EVD-COGWAR-2026-EVENT-003/stamp.json"
+      }
     },
-    "EVD-SKETCHDYNAMICS-CLARIFY-001": {
-      "path": "evidence/EVD-SKETCHDYNAMICS-CLARIFY-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-MITTR-AIMEM-PRIV-MODEL-001",
+      "files": {
+        "report": "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/report.json",
+        "metrics": "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/metrics.json",
+        "stamp": "evidence/EVD-MITTR-AIMEM-PRIV-MODEL-001/stamp.json"
+      }
     },
-    "EVD-260119895-keel-BENCH-004": {
-      "path": "summit/evidence/templates",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-MITTR-AIMEM-PRIV-POLICY-002",
+      "files": {
+        "report": "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/report.json",
+        "metrics": "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/metrics.json",
+        "stamp": "evidence/EVD-MITTR-AIMEM-PRIV-POLICY-002/stamp.json"
+      }
     },
-    "EVD-SSDF12-BNDL-001": {
-      "path": "evidence/ssdf-v1-2/pr-01",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-MITTR-AIMEM-PRIV-LEAK-003",
+      "files": {
+        "report": "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/report.json",
+        "metrics": "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/metrics.json",
+        "stamp": "evidence/EVD-MITTR-AIMEM-PRIV-LEAK-003/stamp.json"
+      }
     },
-    "EVD-EXPB-CORE-001": {
-      "path": "evidence/runs/expectation-baselines",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-MITTR-AIMEM-PRIV-DSAR-004",
+      "files": {
+        "report": "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/report.json",
+        "metrics": "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/metrics.json",
+        "stamp": "evidence/EVD-MITTR-AIMEM-PRIV-DSAR-004/stamp.json"
+      }
     },
-    "EVD-PRIVTEL-SCHEMA-001": {
-      "path": "evidence/privtel",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-MITTR-AIMEM-PRIV-EGRESS-005",
+      "files": {
+        "report": "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/report.json",
+        "metrics": "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/metrics.json",
+        "stamp": "evidence/EVD-MITTR-AIMEM-PRIV-EGRESS-005/stamp.json"
+      }
     },
-    "EVD-AGENTSKILLS-SKILLSEC-001": {
-      "path": "evidence/agent-skills",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-WSJ-AI-FUNDRAISING-FRENZY-MKT-001",
+      "files": {
+        "report": "evidence/WSJ-AI-FUNDRAISING-FRENZY/report.json",
+        "metrics": "evidence/WSJ-AI-FUNDRAISING-FRENZY/metrics.json",
+        "stamp": "evidence/WSJ-AI-FUNDRAISING-FRENZY/stamp.json"
+      }
     },
-    "EVD-IOB20260202-ECONESP-001": {
-      "path": "evidence/EVD-IOB20260202-ECONESP-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-IOB20260202-SUPPLYCHAIN-001": {
-      "path": "evidence/EVD-IOB20260202-SUPPLYCHAIN-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-IOB20260202-WIRELESS-001": {
-      "path": "evidence/EVD-IOB20260202-WIRELESS-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
+      "files": {
+        "report": "evidence/EVD-SKETCHDYNAMICS-CLARIFY-001/report.json",
+        "metrics": "evidence/EVD-SKETCHDYNAMICS-CLARIFY-001/metrics.json",
+        "stamp": "evidence/EVD-SKETCHDYNAMICS-CLARIFY-001/stamp.json"
+      }
     },
-    "EVD-IOB20260202-AIAGENT-001": {
-      "path": "evidence/EVD-IOB20260202-AIAGENT-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-vfgnn-ATT-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-IOB20260202-FIMI-001": {
-      "path": "evidence/EVD-IOB20260202-FIMI-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-vfgnn-NEG-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-IOB20260202-CAPACITY-001": {
-      "path": "evidence/EVD-IOB20260202-CAPACITY-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-IOB20260202-HUMINT-001": {
-      "path": "evidence/EVD-IOB20260202-HUMINT-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-ATLAS-SCHEMA-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-IOB20260202-ALLYRISK-001": {
-      "path": "evidence/EVD-IOB20260202-ALLYRISK-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-ATLAS-PLNR-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
     },
-    "EVD-shared-memory-orch-001": {
-      "path": "evidence/EVD-shared-memory-orch-001",
-      "files": [
-        "report.json",
-        "metrics.json",
-        "stamp.json"
-      ],
-      "description": "Imported from legacy format"
+    {
+      "evidence_id": "EVD-ATLAS-XFER-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-ATLAS-ATLS-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-ATLAS-ATLS-002",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-ATLAS-GOV-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-ARCH-001",
+      "files": {
+        "report": "summit/evidence/templates/report.json",
+        "metrics": "summit/evidence/templates/metrics.json",
+        "stamp": "summit/evidence/templates/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-STAB-002",
+      "files": {
+        "report": "summit/evidence/templates/report.json",
+        "metrics": "summit/evidence/templates/metrics.json",
+        "stamp": "summit/evidence/templates/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-DSCL-003",
+      "files": {
+        "report": "summit/evidence/templates/report.json",
+        "metrics": "summit/evidence/templates/metrics.json",
+        "stamp": "summit/evidence/templates/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-BENCH-004",
+      "files": {
+        "report": "summit/evidence/templates/report.json",
+        "metrics": "summit/evidence/templates/metrics.json",
+        "stamp": "summit/evidence/templates/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-SSDF12-BNDL-001",
+      "files": {
+        "report": "evidence/ssdf-v1-2/pr-01/report.json",
+        "metrics": "evidence/ssdf-v1-2/pr-01/metrics.json",
+        "stamp": "evidence/ssdf-v1-2/pr-01/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-EXPB-CORE-001",
+      "files": {
+        "report": "evidence/runs/expectation-baselines/report.json",
+        "metrics": "evidence/runs/expectation-baselines/metrics.json",
+        "stamp": "evidence/runs/expectation-baselines/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-PRIVTEL-SCHEMA-001",
+      "files": {
+        "report": "evidence/privtel/report.json",
+        "metrics": "evidence/privtel/metrics.json",
+        "stamp": "evidence/privtel/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-openviking-contextfs-001",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-openviking-retrieval-002",
+      "files": {
+        "report": "evidence/report.json",
+        "metrics": "evidence/metrics.json",
+        "stamp": "evidence/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-AGENTSKILLS-SKILLSEC-001",
+      "files": {
+        "report": "evidence/agent-skills/report.json",
+        "metrics": "evidence/agent-skills/metrics.json",
+        "stamp": "evidence/agent-skills/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-ECONESP-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-ECONESP-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-ECONESP-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-ECONESP-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-SUPPLYCHAIN-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-SUPPLYCHAIN-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-SUPPLYCHAIN-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-SUPPLYCHAIN-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-WIRELESS-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-WIRELESS-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-WIRELESS-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-WIRELESS-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-AIAGENT-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-AIAGENT-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-AIAGENT-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-AIAGENT-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-FIMI-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-FIMI-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-FIMI-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-FIMI-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-CAPACITY-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-CAPACITY-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-CAPACITY-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-CAPACITY-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-HUMINT-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-HUMINT-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-HUMINT-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-HUMINT-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-IOB20260202-ALLYRISK-001",
+      "files": {
+        "report": "evidence/EVD-IOB20260202-ALLYRISK-001/report.json",
+        "metrics": "evidence/EVD-IOB20260202-ALLYRISK-001/metrics.json",
+        "stamp": "evidence/EVD-IOB20260202-ALLYRISK-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-shared-memory-orch-001",
+      "files": {
+        "report": "evidence/EVD-shared-memory-orch-001/report.json",
+        "metrics": "evidence/EVD-shared-memory-orch-001/metrics.json",
+        "stamp": "evidence/EVD-shared-memory-orch-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-INTSUM-2026-THREAT-HORIZON-001",
+      "files": {
+        "report": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/report.json",
+        "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
+        "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
+      }
     }
-  }
+  ]
 }

@@ -1,6 +1,5 @@
 
 package conductor
-import future.keywords
 
 test_allow_known_good {
     allow with input as {

@@ -1,5 +1,4 @@
 package intelgraph.sku
-import future.keywords
 
 default allow_feature := false
 
@@ -8,8 +7,8 @@ default allow_feature := false
 
 # Define gates
 gate["Team"]        = { "export.pdf", "edge.sync" }
-gate["Business"]    = gate["Team"]        | { "qos.override", "audit.evidence" }
-gate["Enterprise"]  = gate["Business"]    | { "byok", "hsm" }
+gate["Business"]    = gate["Team"]        ∪ { "qos.override", "audit.evidence" }
+gate["Enterprise"]  = gate["Business"]    ∪ { "byok", "hsm" }
 
 allow_feature {
   some t

@@ -1,8 +1,10 @@
+# Truth Defense Policy
 # Enforces adversarial-resistant decision-making rules
 
 package summit.truth_defense
-import future.keywords
 
+import future.keywords.if
+import future.keywords.in
 
 # Configuration
 default integrity_threshold_high := 0.70

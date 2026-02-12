@@ -1,4 +1,4 @@
-import future.keywords
+package switchboard
 
 default allow = false
 

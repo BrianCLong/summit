@@ -3,7 +3,9 @@
 
 package intelgraph.license
 
-import future.keywords
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 
 # =============================================================================
 # Main Decision Rules

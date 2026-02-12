@@ -1,5 +1,4 @@
 package summit.authz
-import future.keywords
 
 # Attribute-based and role-aware access controls for Summit tenants.
 # The policy enforces tenant boundaries, least privilege, purpose-based

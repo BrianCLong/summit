@@ -3,7 +3,9 @@
 
 package intelgraph.warrant
 
-import future.keywords
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 
 # =============================================================================
 # Main Decision Rules
