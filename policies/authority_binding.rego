@@ -1,3 +1,5 @@
+import future.keywords
+
 # IntelGraph GA-Core Authority Binding Policy
 # Addresses Foster & Starkey dissent requirements
 

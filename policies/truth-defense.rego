@@ -1,3 +1,5 @@
+import future.keywords
+
 # Truth Defense Policy
 # Enforces adversarial-resistant decision-making rules
 

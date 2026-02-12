@@ -1,3 +1,5 @@
+import future.keywords
+
 package compliance
 
 pass["sec-AUTHZ-001"]["Authorization decision logged with actor and resource"] {

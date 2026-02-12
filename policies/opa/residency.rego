@@ -1,3 +1,5 @@
+import future.keywords
+
 package composer.residency
 
 # Input contract (example):
