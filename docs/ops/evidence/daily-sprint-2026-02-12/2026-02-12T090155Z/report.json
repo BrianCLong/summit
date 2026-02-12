@@ -1,0 +1,12 @@
+{
+  "run_ts": "2026-02-12T090155Z",
+  "run_type": "daily-sprint",
+  "mode": "sensing",
+  "summary": "Captured GH API failure logs, fallback PR snapshot, and sprint plan artifacts.",
+  "gh_api_status": "failed",
+  "pr_snapshot_source": "pr-open.json",
+  "issue_snapshot_source": null,
+  "tasks_planned": 3,
+  "tasks_completed": 1,
+  "tasks_blocked": 2
+}
