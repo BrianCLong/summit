@@ -25,6 +25,11 @@
       "id": "gh_issue_list_error",
       "path": "gh_issue_list_error.log",
       "status": "captured"
+    },
+    {
+      "id": "prompt_registry_entry",
+      "path": "../../../prompts/registry.yaml",
+      "status": "captured"
     }
   ]
 }

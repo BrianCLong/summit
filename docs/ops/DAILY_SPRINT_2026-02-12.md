@@ -31,16 +31,22 @@
    - Goal: Maintain execution invariants and traceability.
    - Target: `docs/roadmap/STATUS.json`
    - Validation: JSON parse sanity.
+4. Register daily sprint prompt for immutable prompt governance.
+   - Goal: Align automation prompt with registry/hash requirements.
+   - Target: `prompts/operations/daily-sprint-orchestrator@v1.md`, `prompts/registry.yaml`
+   - Validation: SHA256 recorded in registry entry.
 
 ## Execution Log
 - 08:02Z: GitHub API calls failed for PR/issue triage. Error logs captured.
 - 08:02Z: Evidence bundle generated with report/metrics/stamp and error logs.
 - 08:02Z: Roadmap status refreshed for sprint run metadata.
+- 08:04Z: Daily sprint prompt registered in `prompts/registry.yaml`.
 
 ## Status
 - Task 1: Blocked — Deferred pending GitHub API connectivity.
 - Task 2: Complete.
 - Task 3: Complete.
+- Task 4: Complete.
 
 ## Blockers
 - GitHub API connectivity blocks PR/issue triage and downstream task selection.

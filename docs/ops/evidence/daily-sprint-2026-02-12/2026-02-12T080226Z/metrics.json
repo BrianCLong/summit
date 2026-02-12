@@ -4,6 +4,7 @@
     "gh_pr_list_errors": 1,
     "gh_issue_list_errors": 1,
     "gh_prs_captured": 0,
-    "gh_issues_captured": 0
+    "gh_issues_captured": 0,
+    "prompt_registry_updates": 1
   }
 }
