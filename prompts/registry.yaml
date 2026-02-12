@@ -922,3 +922,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/operations/daily-sprint-orchestrator@v1.md
+    sha256: c4a482c27eedee0504a52ab8252a169ce327ce45ed11b8ff87df4f5bf714b360
+    description: Run the Summit daily sprint loop with evidence bundle and roadmap update.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_2026-02-12.md
+        - docs/ops/evidence/daily-sprint-2026-02-12/
+        - docs/roadmap/STATUS.json
+        - prompts/operations/daily-sprint-orchestrator@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ops
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
