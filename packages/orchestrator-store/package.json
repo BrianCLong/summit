@@ -8,7 +8,7 @@
     "build": "tsc",
     "test": "vitest run",
     "lint": "eslint src/",
-    "prepare": "npm run build"
+    "prepare": ""
   },
   "keywords": [
     "intelgraph",
@@ -34,6 +34,8 @@
     "typescript": "^5.3.0",
     "vitest": "^1.0.0",
     "@types/node": "^20.11.0",
+    "@types/hapi__catbox": "^12.1.0",
+    "@types/hapi__shot": "^6.0.0",
     "ts-node": "^10.9.2"
   },
   "repository": {
