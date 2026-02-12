@@ -73,10 +73,15 @@ export class TemporalGraphRAG {
   }
 
   private generateEvidenceId(query: string, scope: any): string {
-    // Deterministic ID without current date
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0].replace(/-/g, '');
     const hashInput = `${query}-${JSON.stringify(scope)}`;
-    const hash = crypto.createHash('sha256').update(hashInput).digest('hex').substring(0, 10);
-    return `EVID-TGRAG-${hash.toUpperCase()}`;
+    // Use first 6 chars of base64 (simplified base32-ish for purpose of ID)
+    const hash = crypto.createHash('sha256').update(hashInput).digest('base64')
+      .replace(/[+/=]/g, '')
+      .substring(0, 6)
+      .toUpperCase();
+    return `EVID-TGRAG-${dateStr}-${hash}`;
   }
 
   private async emitArtifacts(

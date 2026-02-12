@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/graphrag-retrieval-engine",
+  "name": "@intelgraph/graphrag",
   "version": "0.1.0",
   "description": "GraphRAG implementation focusing on Path-Native context and Graph-First retrieval.",
   "main": "index.ts",

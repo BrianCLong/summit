@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "evidence": {
+  "version": "1.0.0",
+  "items": {
     "EVD-001": {
       "evidence_id": "EVD-001",
       "files": {

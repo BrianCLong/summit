@@ -18,7 +18,7 @@ jobs:
 permissions:
   contents: write
   issues: write
-            pull-requests: write
+      pull-requests: write
 
     steps:
       - name: Checkout main repository

@@ -19,9 +19,9 @@ jobs:
   validate-schemas:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.12'
       - name: Install dependencies
@@ -37,9 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: validate-schemas
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.12'
       - name: Run Eval (Mock)

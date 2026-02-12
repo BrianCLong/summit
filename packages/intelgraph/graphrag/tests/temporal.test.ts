@@ -61,9 +61,9 @@ describe('Temporal GraphRAG', () => {
     it('should zero out scores for out-of-scope edges', () => {
       const scope = { start: new Date('2025-01-01'), end: new Date('2025-12-31'), raw: '2025' };
       const edge: TemporalEdge = { v1: 'A', v2: 'B', rel: 'T1', timestamp: '2024-01-01T00:00:00Z', chunkIds: [] };
-      const nodeScores = new Map([['A', 0.5], ['B', 0.5]]);
+      const nodeScores = { 'A': 0.5, 'B': 0.5 };
 
-      const edgeScore = TGRAGScorer.scoreEdge(edge, scope, nodeScores);
+      const edgeScore = TGRAGScorer.scoreEdge(edge, nodeScores, scope);
       expect(edgeScore).toBe(0);
     });
   });
