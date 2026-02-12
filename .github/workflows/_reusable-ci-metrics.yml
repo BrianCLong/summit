@@ -49,7 +49,7 @@ jobs:
     timeout-minutes: 5
 
     outputs:
-      artifact_name: ${{ steps.upload.outputs.artifact_name }}
+      artifact_name: ${{ steps.output_name.outputs.artifact_name }}
       duration_minutes: ${{ steps.metrics.outputs.duration_minutes }}
       success_rate: ${{ steps.metrics.outputs.success_rate }}
 
@@ -170,5 +170,6 @@ jobs:
           retention-days: 30
 
       - name: Output Artifact Name
+        id: output_name
         run: |
           echo "artifact_name=ci-metrics-${{ github.run_id }}-${{ github.run_attempt }}" >> $GITHUB_OUTPUT

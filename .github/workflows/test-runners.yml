@@ -58,6 +58,9 @@ jobs:
       - name: Check pnpm
         run: |
           if command -v pnpm &> /dev/null; then
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
             echo "✅ pnpm installed"
             pnpm --version
           else

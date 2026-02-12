@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Require deps delta doc when lockfiles change
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1
