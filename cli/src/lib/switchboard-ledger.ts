@@ -7,9 +7,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { ActionReceipt, createActionReceipt, ActionReceiptInput } from '@summit/receipts';
-
-export { ActionReceipt };
 
 export interface LedgerEntry<T = Record<string, unknown>> {
   seq: number;
@@ -81,11 +78,6 @@ export class CapsuleLedger {
     this.lastHash = entryHash;
     this.seq += 1;
     return entry;
-  }
-
-  recordAction(input: ActionReceiptInput): LedgerEntry<ActionReceipt> {
-    const receipt = createActionReceipt(input);
-    return this.append('action_receipt', receipt);
   }
 }
 

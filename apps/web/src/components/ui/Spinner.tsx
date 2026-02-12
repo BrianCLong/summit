@@ -8,11 +8,6 @@ export type SpinnerProps = React.SVGProps<SVGSVGElement>
 
 export function Spinner({ className, ...props }: SpinnerProps) {
   return (
-    <Loader2
-      className={cn('h-4 w-4 animate-spin', className)}
-      role="status"
-      aria-label="Loading"
-      {...props}
-    />
+    <Loader2 className={cn('h-4 w-4 animate-spin', className)} {...props} />
   )
 }

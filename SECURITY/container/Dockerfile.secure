@@ -1,0 +1,184 @@
+# Multi-stage Dockerfile for IntelGraph with Security Hardening
+# Implements distroless images, minimal attack surface, and comprehensive security controls
+
+# Build stage - Use specific version for reproducibility
+FROM node:18.19.0-alpine3.19 AS builder
+
+# Security: Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S intelgraph -u 1001 -G nodejs
+
+# Security: Set work directory and ownership
+WORKDIR /app
+RUN chown -R intelgraph:nodejs /app
+
+# Install build dependencies with security considerations
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    ca-certificates && \
+    # Clean up
+    rm -rf /var/cache/apk/*
+
+# Copy package files with proper ownership
+COPY --chown=intelgraph:nodejs package*.json ./
+COPY --chown=intelgraph:nodejs pnpm-lock.yaml ./
+
+# Switch to non-root user for dependency installation
+USER intelgraph
+
+# Install production dependencies only
+RUN npm ci --only=production --no-audit --no-fund && \
+    npm cache clean --force
+
+# Copy application source with proper ownership
+COPY --chown=intelgraph:nodejs . .
+
+# Build the application
+RUN npm run build && \
+    # Remove development dependencies and clean up
+    rm -rf node_modules && \
+    npm ci --only=production --no-audit --no-fund
+
+# Security scanning stage
+FROM aquasec/trivy:latest AS security-scan
+COPY --from=builder /app /scan
+RUN trivy fs --exit-code 0 --no-progress --format table /scan
+
+# Runtime stage - Use distroless for minimal attack surface
+FROM gcr.io/distroless/nodejs18-debian12:nonroot AS runtime
+
+# Security labels and metadata
+LABEL maintainer="IntelGraph Security Team <security@intelgraph.com>" \
+      version="1.24.0" \
+      description="IntelGraph - AI-augmented intelligence analysis platform" \
+      vendor="IntelGraph" \
+      security.scan="trivy" \
+      security.distroless="true" \
+      security.nonroot="true"
+
+# Set environment variables for security
+ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=2048 --enable-source-maps" \
+    FORCE_COLOR=0 \
+    NPM_CONFIG_CACHE=/tmp/.npm \
+    NPM_CONFIG_UPDATE_NOTIFIER=false
+
+# Security: Use non-root user (distroless nonroot user)
+USER 65532:65532
+
+# Create necessary directories with proper permissions
+WORKDIR /app
+
+# Copy built application with proper ownership
+COPY --from=builder --chown=65532:65532 /app/dist ./dist
+COPY --from=builder --chown=65532:65532 /app/node_modules ./node_modules
+COPY --from=builder --chown=65532:65532 /app/package.json ./package.json
+
+# Copy configuration files
+COPY --from=builder --chown=65532:65532 /app/config ./config
+
+# Security: Set proper file permissions (distroless handles most of this)
+# Files are read-only by default in distroless
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD ["/nodejs/bin/node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+
+# Expose port (non-privileged)
+EXPOSE 3000
+
+# Security: Run with minimal capabilities
+# Distroless already drops most capabilities
+
+# Start the application
+CMD ["dist/index.js"]
+
+# Alternative secure runtime stage using Alpine with hardening
+FROM node:18.19.0-alpine3.19 AS runtime-alpine
+
+# Security hardening for Alpine variant
+RUN apk add --no-cache \
+    dumb-init \
+    ca-certificates && \
+    # Remove package manager to reduce attack surface
+    apk del apk-tools && \
+    rm -rf /var/cache/apk/* \
+           /usr/share/man \
+           /usr/share/doc \
+           /usr/share/info \
+           /usr/share/lintian \
+           /usr/share/common-licenses \
+           /tmp/* \
+           /var/tmp/*
+
+# Create non-root user with no shell and no home directory
+RUN addgroup -g 1001 -S intelgraph && \
+    adduser -S -D -H -u 1001 -s /sbin/nologin -G intelgraph intelgraph
+
+# Set security-focused environment
+ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=2048" \
+    PATH="/usr/local/bin:$PATH"
+
+WORKDIR /app
+
+# Copy application with proper ownership
+COPY --from=builder --chown=1001:1001 /app/dist ./dist
+COPY --from=builder --chown=1001:1001 /app/node_modules ./node_modules
+COPY --from=builder --chown=1001:1001 /app/package.json ./package.json
+COPY --from=builder --chown=1001:1001 /app/config ./config
+
+# Security: Remove write permissions from application files
+RUN chmod -R 555 /app && \
+    # Create tmp directory for application with proper permissions
+    mkdir -p /tmp/app && \
+    chown 1001:1001 /tmp/app && \
+    chmod 755 /tmp/app
+
+USER 1001:1001
+
+EXPOSE 3000
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "dist/index.js"]
+
+# Development stage with security tools
+FROM node:18.19.0-alpine3.19 AS development
+
+# Install security scanning tools
+RUN apk add --no-cache \
+    curl \
+    wget \
+    git \
+    openssh-client \
+    ca-certificates && \
+    # Install security tools
+    wget -qO- https://github.com/aquasecurity/trivy/releases/latest/download/trivy_Linux-64bit.tar.gz | tar xz -C /usr/local/bin && \
+    chmod +x /usr/local/bin/trivy
+
+# Create development user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S intelgraph -u 1001 -G nodejs
+
+WORKDIR /app
+RUN chown -R intelgraph:nodejs /app
+
+USER intelgraph
+
+# Copy package files
+COPY --chown=intelgraph:nodejs package*.json ./
+COPY --chown=intelgraph:nodejs pnpm-lock.yaml ./
+
+# Install all dependencies including dev dependencies
+RUN npm ci --no-audit --no-fund
+
+# Copy source code
+COPY --chown=intelgraph:nodejs . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]
