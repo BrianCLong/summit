@@ -110,7 +110,6 @@ const config: Config = {
     'src/securiteyes/',
     'src/security/tenant-simulation/__tests__/',
     'src/summitsight/__tests__/',
-    'src/tests/',
     'src/trust-center/__tests__/',
     'src/utils/__tests__/',
     'src/webhooks/__tests__/',
@@ -118,7 +117,6 @@ const config: Config = {
     'src/services/reporting/__tests__/',
     'src/logging/__tests__/',
     'src/jobs/__tests__/',
-    'tests/',
   ],
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   moduleNameMapper: {
