@@ -9,7 +9,9 @@
     "gh_issue_list": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/gh_issue_list.json",
     "gh_pr_list_error": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/gh_pr_list.error.json",
     "gh_issue_list_error": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/gh_issue_list.error.json",
-    "pr_18488_error": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/pr_18488.error.json"
+    "pr_18488_error": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/pr_18488.error.json",
+    "pr_create_error": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/pr_create.error.json",
+    "pr_create_output": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/pr_create.out.json"
   },
   "notes": [
     "GH issue list failed due to api.github.com connectivity; error log captured.",
