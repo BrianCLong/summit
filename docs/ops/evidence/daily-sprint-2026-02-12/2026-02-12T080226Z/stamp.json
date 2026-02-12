@@ -1,0 +1,10 @@
+{
+  "run_id": "daily-sprint-2026-02-12T080226Z",
+  "generated_at_utc": "2026-02-12T08:02:26Z",
+  "artifacts": [
+    {"path": "report.json", "sha256": "2a4c2194ba31fdb7058c9a03315913cead7f0abe013f668413b92271dacac562"},
+    {"path": "metrics.json", "sha256": "c34aac76305054dd4a9bd39f69bb5b40dff98d48328688cd53b2399c598ad3b3"},
+    {"path": "gh_pr_list_error.log", "sha256": "eed65211f0fcee1b82c2661764250c1adaebcb36f0cb78a702d59632f056c439"},
+    {"path": "gh_issue_list_error.log", "sha256": "eed65211f0fcee1b82c2661764250c1adaebcb36f0cb78a702d59632f056c439"}
+  ]
+}

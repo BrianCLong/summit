@@ -1,0 +1,30 @@
+{
+  "run_id": "daily-sprint-2026-02-12T080226Z",
+  "date_utc": "2026-02-12",
+  "mode": "sensing",
+  "summary": "Daily sprint evidence bundle for GH triage attempts and ops reporting.",
+  "evidence": [
+    {
+      "id": "gh_pr_list",
+      "path": "gh_pr_list.json",
+      "status": "deferred",
+      "reason": "Deferred pending GitHub API connectivity"
+    },
+    {
+      "id": "gh_issue_list",
+      "path": "gh_issue_list.json",
+      "status": "deferred",
+      "reason": "Deferred pending GitHub API connectivity"
+    },
+    {
+      "id": "gh_pr_list_error",
+      "path": "gh_pr_list_error.log",
+      "status": "captured"
+    },
+    {
+      "id": "gh_issue_list_error",
+      "path": "gh_issue_list_error.log",
+      "status": "captured"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "run_id": "daily-sprint-2026-02-12T080226Z",
+  "metrics": {
+    "gh_pr_list_errors": 1,
+    "gh_issue_list_errors": 1,
+    "gh_prs_captured": 0,
+    "gh_issues_captured": 0
+  }
+}
