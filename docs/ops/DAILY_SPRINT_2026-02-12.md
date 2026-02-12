@@ -2,7 +2,7 @@
 
 ## Evidence Bundle
 - Path: `docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z`
-- Files: `report.json`; `metrics.json`; `stamp.json`; `gh_pr_list_error.txt`; `gh_issue_list_error.txt`
+- Files: `report.json`; `metrics.json`; `stamp.json`; `gh_pr_list_error.json`; `gh_issue_list_error.json`
 
 ## Sensing (Evidence)
 - GitHub API connectivity: Deferred pending restore (see error logs in evidence bundle).

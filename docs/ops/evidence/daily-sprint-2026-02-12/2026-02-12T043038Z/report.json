@@ -1,16 +1,16 @@
 {
   "date": "2026-02-12",
   "evidence_files": [
-    "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_list_error.txt",
-    "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_issue_list_error.txt",
+    "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_list_error.json",
+    "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_issue_list_error.json",
     "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/report.json",
     "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/metrics.json"
   ],
   "run_id": "daily-sprint-2026-02-12T043038Z",
   "sensing": {
     "error_logs": [
-      "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_list_error.txt",
-      "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_issue_list_error.txt"
+      "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_list_error.json",
+      "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_issue_list_error.json"
     ],
     "gh_issue_list": "deferred_pending_api_connectivity",
     "gh_pr_list": "deferred_pending_api_connectivity"

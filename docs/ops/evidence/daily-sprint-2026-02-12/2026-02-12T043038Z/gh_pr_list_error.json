@@ -1,0 +1,4 @@
+{
+  "error": "error connecting to api.github.com\ncheck your internet connection or https://githubstatus.com",
+  "source": "gh_pr_list_error.txt"
+}
