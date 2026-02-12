@@ -291,7 +291,7 @@ export const createApp = async () => {
           console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
           (req as any).user = {
             sub: 'dev-user',
-            email: 'dev@intelgraph.local',
+            email: 'dev-user@example.com',
             role: 'admin',
             tenantId: 'global',
           };
