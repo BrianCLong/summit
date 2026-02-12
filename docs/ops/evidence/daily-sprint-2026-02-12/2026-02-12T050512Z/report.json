@@ -1,0 +1,17 @@
+{
+  "type": "daily_sprint_report",
+  "run_id": "daily-sprint-2026-02-12T050512Z",
+  "timestamp": "2026-02-12T05:05:12Z",
+  "repo": "BrianCLong/summit",
+  "commit": "0ecc8d91e8ac9e7a98d6ea3553627e7c379570ca",
+  "sensing": {
+    "gh_pr_list": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/gh_pr_list.json",
+    "gh_issue_list": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/gh_issue_list.json",
+    "gh_pr_list_error": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/gh_pr_list.error.log",
+    "gh_issue_list_error": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T050512Z/gh_issue_list.error.log"
+  },
+  "notes": [
+    "GH issue list failed due to api.github.com connectivity; error log captured.",
+    "PR list captured from successful gh output and written to JSON for evidence."
+  ]
+}

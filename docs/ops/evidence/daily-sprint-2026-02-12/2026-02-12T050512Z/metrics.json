@@ -1,0 +1,10 @@
+{
+  "type": "daily_sprint_metrics",
+  "run_id": "daily-sprint-2026-02-12T050512Z",
+  "timestamp": "2026-02-12T05:05:12Z",
+  "counts": {
+    "open_prs_sampled": 20,
+    "open_issues_sampled": 0,
+    "gh_issue_list_errors": 1
+  }
+}
