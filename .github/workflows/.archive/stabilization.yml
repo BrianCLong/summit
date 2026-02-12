@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 1 }
       - uses: actions/setup-node@v4
         with: { node-version: '18' , cache: 'pnpm' }
       - name: Install (top-level only)
@@ -33,7 +33,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 1 }
       - uses: actions/setup-node@v4
         with: { node-version: '18' , cache: 'pnpm' }
       - name: Unit tests (non-flaky subset)

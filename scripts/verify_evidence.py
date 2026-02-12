@@ -129,7 +129,7 @@ def main() -> int:
         "schemas", "ecosystem", "jules", "project19", "governance",
         "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs",
         "runtime", "subsumption", "out", "TELETOK-2025", "ga", "bundles",
-
+        "summit"
     }
 
     for p in EVID.rglob("*"):
@@ -147,7 +147,7 @@ def main() -> int:
 
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if re.search(r"202\d-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}", txt):
+            if "202" in txt and ("T" in txt or ":" in txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue

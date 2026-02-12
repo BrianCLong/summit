@@ -17,6 +17,9 @@ function fixWorkflow(file) {
     // Fix pull_request: null
     if (doc.on) {
         if (doc.on.pull_request === null) doc.on.pull_request = {};
+        if (Array.isArray(doc.on.push?.branches)) {
+            // keep it as array
+        }
     }
 
     for (const jobId in doc.jobs) {
@@ -26,24 +29,16 @@ function fixWorkflow(file) {
       let setupNodeIdx = -1;
       let pnpmSetupIdx = -1;
       let hasPnpmCache = false;
-      let usesGitDiff = false;
 
       for (let i = 0; i < job.steps.length; i++) {
         const step = job.steps[i];
-
-        if (step.run && step.run.includes('git diff')) {
-            usesGitDiff = true;
-        }
-
-        if (step.uses && step.uses.includes('actions/checkout')) {
-          // handled below if usesGitDiff
-        }
 
         if (step.uses && step.uses.includes('actions/setup-node')) {
           setupNodeIdx = i;
           if (step.with && step.with.cache === 'pnpm') {
             hasPnpmCache = true;
           }
+          // Ensure node-version is a string to prevent yaml issues
           if (step.with && typeof step.with['node-version'] === 'number') {
               step.with['node-version'] = String(step.with['node-version']);
           }
@@ -51,6 +46,7 @@ function fixWorkflow(file) {
 
         if (step.uses && step.uses.includes('pnpm/action-setup')) {
           pnpmSetupIdx = i;
+          // Remove version pinning
           if (step.with) {
               delete step.with.version;
               if (Object.keys(step.with).length === 0) delete step.with;
@@ -61,19 +57,10 @@ function fixWorkflow(file) {
           pnpmSetupIdx = i;
         }
 
+        // Fix run commands
         if (step.run && (step.run.includes('npm install -g pnpm') || step.run.includes('pnpm add -w js-yaml'))) {
             step.run = 'pnpm install --frozen-lockfile --ignore-scripts';
         }
-      }
-
-      if (usesGitDiff) {
-          for (let i = 0; i < job.steps.length; i++) {
-              const step = job.steps[i];
-              if (step.uses && step.uses.includes('actions/checkout')) {
-                  if (!step.with) step.with = {};
-                  step.with['fetch-depth'] = 0;
-              }
-          }
       }
 
       if (hasPnpmCache) {
@@ -109,6 +96,7 @@ function fixWorkflow(file) {
       noCompatMode: true
     });
 
+    // Final cleanup of the dumped string
     newContent = newContent.replace(/pull_request: \{\}/g, 'pull_request:');
 
     fs.writeFileSync(filePath, newContent);

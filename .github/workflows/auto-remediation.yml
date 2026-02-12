@@ -86,8 +86,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-        with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install yq
         run: |
