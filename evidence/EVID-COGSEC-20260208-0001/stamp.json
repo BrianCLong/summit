@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-08T06:10:38.385109",
-  "git_sha": "gitsha7",
-  "evidence_id": "EVID-COGSEC-20260208-0001"
+  "id": "EVID-COGSEC-20260208-0001",
+  "timestamp": "2026-02-12T02:10:02.861314+00:00",
+  "version": "1.0.0"
 }

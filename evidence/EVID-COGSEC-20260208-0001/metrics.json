@@ -1,5 +1,5 @@
 {
-  "schema_valid": 1,
-  "spoof_detection_passed": 1,
-  "provenance_score_sample": 0.8
+  "edge_count": 0,
+  "node_count": 1,
+  "precision": 1.0
 }
