@@ -36,6 +36,7 @@
 - 2026-02-12T07:05:23Z Attempted issue triage; GitHub API connectivity error logged.
 - 2026-02-12T07:05:23Z Attempted PR detail and check capture for #18488/#18474/#18475; connectivity unstable, detail refresh deferred pending GH API access.
 - 2026-02-12T07:05:23Z Updated docs/roadmap/STATUS.json with sprint run revision note.
+- 2026-02-12T07:05:23Z Registered daily sprint prompt in prompts/registry.yaml.
 
 ## MAESTRO Alignment
 - MAESTRO Layers: Observability, Tools, Governance
