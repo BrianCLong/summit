@@ -416,7 +416,7 @@ enum ChangeType {
 // Auto-generated resolvers for ${partner.name}
 // Generated: ${new Date().toISOString()}
 
-import { AuthenticationError, ForbiddenError } from 'apollo-server-errors';
+import { GraphQLError } from 'graphql';
 import { GraphQLResolveInfo } from 'graphql';
 
 export const ${this.camelCase(typeName)}Resolvers = {
