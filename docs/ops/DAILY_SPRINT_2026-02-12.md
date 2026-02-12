@@ -42,9 +42,11 @@ Deliver a focused daily sprint plan plus evidence-first triage of the highest-si
 - Captured PR details/checks for #18488 and PR details for #18490.
 - Recorded API connectivity errors for PR/issue list in evidence bundle.
 - Registered daily sprint prompt in `prompts/registry.yaml` for prompt-integrity alignment.
+- PR creation deferred pending GitHub API connectivity restoration.
 
 ## Blockers (Deferred Pending)
 - GitHub API connectivity intermittently blocks `gh pr list` and `gh issue list` queries.
+- GitHub API connectivity blocks `gh pr create` for this branch.
 
 ## End-of-Day Summary
 - Completed: PR #18488 triage + checks capture; PR #18490 triage; evidence bundle + sprint report update.
