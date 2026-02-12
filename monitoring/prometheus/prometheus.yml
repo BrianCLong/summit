@@ -3,7 +3,12 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - "/etc/prometheus/rules/alerts.yaml"
+  - "maestro-alerts.yaml"
+  - "alerts-conductor.yml"
+  - "burn-alerts.rules.yml"
+  - "error-budget-rules.yml"
+  - "summit-alerts.yml"
+  - "/etc/prometheus/alerts.yml"
 
 scrape_configs:
   - job_name: 'summit-server'

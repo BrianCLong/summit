@@ -24,5 +24,3 @@ The goal of the RFC process is to ensure that major decisions are well-documente
 ## Active RFCs
 
 - [Backlog Reduction Strategy v0.1](./backlog-reduction-v0.1.md)
-- [FE-01: Frontend Consolidation](./FE-01-frontend-consolidation.md)
-- [Structured Logging & Telemetry Envelope](./structured-logging-telemetry-envelope.md)

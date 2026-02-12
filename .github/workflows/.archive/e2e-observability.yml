@@ -163,7 +163,7 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: test-results.json
 
       - name: Collect browser performance metrics
-        if: ((((((((always()) && (always())) && (always())) && (always())) && (always())) && (always())) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')) && (failure())) && (github.event_name == 'schedule')
+        if: always()
         run: |
           # Extract performance metrics from Playwright traces
           cd client
@@ -180,6 +180,7 @@ jobs:
 
       - name: Generate metrics artifact
         id: metrics
+        if: always()
         run: |
           mkdir -p metrics-output
 
@@ -208,6 +209,7 @@ jobs:
           echo "artifact_name=e2e-metrics-${{ matrix.test_suite }}" >> $GITHUB_OUTPUT
 
       - name: Upload metrics artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-metrics-${{ matrix.test_suite }}
@@ -215,6 +217,7 @@ jobs:
           retention-days: 30
 
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-results-${{ matrix.test_suite }}
@@ -224,6 +227,7 @@ jobs:
           retention-days: 14
 
       - name: Cleanup
+        if: always()
         run: |
           docker compose -f docker-compose.yml down -v || true
           docker compose -f docker-compose.observability.yml down -v || true
@@ -235,6 +239,7 @@ jobs:
     name: 📈 Aggregate Metrics
     runs-on: ubuntu-latest
     needs: [setup-observability, e2e-with-metrics]
+    if: always()
     steps:
       - uses: actions/checkout@v4
 
@@ -341,6 +346,7 @@ jobs:
     name: 📊 Update Dashboards
     runs-on: ubuntu-latest
     needs: aggregate-metrics
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
 
@@ -395,6 +401,7 @@ jobs:
     name: 🚨 Alert on Failures
     runs-on: ubuntu-latest
     needs: [aggregate-metrics]
+    if: failure()
     steps:
       - name: Download metrics
         uses: actions/download-artifact@v4
@@ -430,6 +437,7 @@ jobs:
           EOF
 
       - name: Create issue for persistent failures
+        if: github.event_name == 'schedule'
         uses: actions/github-script@v7
         with:
           script: |

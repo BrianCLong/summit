@@ -68,11 +68,12 @@ jobs:
         timeout-minutes: 5
       - name: k6 smoke
         id: k6-smoke
-        if: (${{ always() && (github.event.pull_request != null || contains(github.event.head_commit.message, '[smoke]')) }}) && (always())
+        if: ${{ always() && (github.event.pull_request != null || contains(github.event.head_commit.message, '[smoke]')) }}
         run: bash scripts/k6_smoke.sh
         continue-on-error: true
         timeout-minutes: 8
       - name: Upload k6 artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: k6-smoke-${{ github.run_id }}
