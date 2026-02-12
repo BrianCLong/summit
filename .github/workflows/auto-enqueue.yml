@@ -36,7 +36,7 @@ jobs:
           approvals=$(gh pr view $pr -R ${{ github.repository }} --json reviews --jq '[.reviews[] | select(.state=="APPROVED")] | length')
           checks=$(gh pr checks $pr -R ${{ github.repository }} --required)
 
-          if echo "$labels" | grep -q "queue:ready" && [ "$approvals" -ge 1 ]; then
+          if [[ "$labels" == *"queue:ready"* ]] && [ "$approvals" -ge 1 ]; then
             gh api repos/${{ github.repository }}/pulls/$pr/merge-queue/enqueue \
               -f merge_method=squash || true
           fi
