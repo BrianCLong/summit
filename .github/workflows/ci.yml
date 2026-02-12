@@ -26,8 +26,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -72,11 +70,8 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
