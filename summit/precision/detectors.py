@@ -4,7 +4,10 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 
 
 @dataclass
@@ -22,7 +25,7 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
     if rollout_logprobs is None:
         rollout_logprobs = rollout_vals.get("log_probs")
 
-    if train_logprobs is None or rollout_logprobs is None:
+    if train_logprobs is None or rollout_logprobs is None or torch is None:
         return MismatchReport()
 
     delta = (train_logprobs - rollout_logprobs).abs()
