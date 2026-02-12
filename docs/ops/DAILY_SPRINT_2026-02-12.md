@@ -5,9 +5,7 @@
 - `docs/ops/evidence/daily-sprint-2026-02-12/metrics.json`
 - `docs/ops/evidence/daily-sprint-2026-02-12/stamp.json`
 - `docs/ops/evidence/daily-sprint-2026-02-12/gh_pr_list.json`
-- `docs/ops/evidence/daily-sprint-2026-02-12/gh_pr_list_error.txt`
 - `docs/ops/evidence/daily-sprint-2026-02-12/gh_issue_list.json`
-- `docs/ops/evidence/daily-sprint-2026-02-12/gh_issue_list_error.txt`
 
 ## Sensing (Observations)
 - PR snapshot (20 items) captured earlier in run; latest refresh attempt failed due to GitHub API connectivity.

@@ -2,11 +2,9 @@
   "run_id": "daily-sprint-2026-02-12",
   "created_at": "2026-02-12T00:46:51Z",
   "hashes": {
-    "docs/ops/evidence/daily-sprint-2026-02-12/report.json": "816542fa31290a4d62e5729230c78edee3b78d2e397f8f67a5581a715398f825",
+    "docs/ops/evidence/daily-sprint-2026-02-12/report.json": "13ed5bdd6014fb1300aa43abe12d38c4ecdd4bb26a1893dd82892d952b7d7f1a",
     "docs/ops/evidence/daily-sprint-2026-02-12/metrics.json": "3bd9d4536b6fc63718891e2abdcbbe4e290c647277f04657b1fad60c4fc79218",
     "docs/ops/evidence/daily-sprint-2026-02-12/gh_pr_list.json": "90c5f675358403c88b007c2048ffc542f56842f0e043cc53318885e23ae5e392",
-    "docs/ops/evidence/daily-sprint-2026-02-12/gh_pr_list_error.txt": "eed65211f0fcee1b82c2661764250c1adaebcb36f0cb78a702d59632f056c439",
-    "docs/ops/evidence/daily-sprint-2026-02-12/gh_issue_list.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
-    "docs/ops/evidence/daily-sprint-2026-02-12/gh_issue_list_error.txt": "eed65211f0fcee1b82c2661764250c1adaebcb36f0cb78a702d59632f056c439"
+    "docs/ops/evidence/daily-sprint-2026-02-12/gh_issue_list.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
   }
 }
