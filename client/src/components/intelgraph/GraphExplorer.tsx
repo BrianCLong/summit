@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import cytoscape from 'cytoscape';
-import { Box, Paper, Typography, IconButton, CircularProgress, Alert } from '@mui/material';
+import { Box, Tooltip, Paper, Typography, IconButton, CircularProgress, Alert } from '@mui/material';
 import { ZoomIn, ZoomOut, CenterFocusStrong, ErrorOutline } from '@mui/icons-material';
 
 interface NodeData {

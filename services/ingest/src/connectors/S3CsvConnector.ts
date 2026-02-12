@@ -1,3 +1,4 @@
+import { canonicalSerialize } from '@intelgraph/prov-ledger-core';
 import {
   BaseConnector,
   ConnectorConfig,
@@ -75,27 +76,9 @@ export class S3CsvConnector extends BaseConnector {
     yield [];
   }
 
-  /**
-   * Deterministically serialize an object or array by sorting keys alphabetically.
-   * Matches @intelgraph/prov-ledger-core logic.
-   */
-  private canonicalSerialize(obj: any): string {
-    if (obj === null || typeof obj !== 'object') {
-      return JSON.stringify(obj);
-    }
-    if (Array.isArray(obj)) {
-      return '[' + obj.map(item => this.canonicalSerialize(item)).join(',') + ']';
-    }
-    const sortedKeys = Object.keys(obj).sort();
-    const parts = sortedKeys.map(key => {
-      return JSON.stringify(key) + ':' + this.canonicalSerialize(obj[key]);
-    });
-    return '{' + parts.join(',') + '}';
-  }
-
   protected createProvenanceMetadata(row: any, objectContentHash: string = 'unknown') {
     const recordHash = createHash('sha256')
-      .update(this.canonicalSerialize(row))
+      .update(canonicalSerialize(row))
       .digest('hex');
 
     return {

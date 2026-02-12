@@ -166,6 +166,8 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@types/hapi__shot": "^6.0.0",
+    "@types/hapi__catbox": "^12.1.0",
     "@aws-sdk/client-glue": "^3.958.0",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
