@@ -6,6 +6,7 @@
   "gh_api_status": "failed",
   "pr_snapshot_source": "pr-open.json",
   "issue_snapshot_source": null,
+  "pr_create_status": "failed",
   "tasks_planned": 3,
   "tasks_completed": 1,
   "tasks_blocked": 2

@@ -29,6 +29,7 @@
 - Evidence bundle: docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T090155Z
 - GH API status: failed (see gh_pr_list.err, gh_issue_list.err)
 - Fallback PR snapshot: pr-open.json captured in evidence bundle
+- PR creation: failed (gh pr create) due to GH API connectivity
 
 ## Status
 

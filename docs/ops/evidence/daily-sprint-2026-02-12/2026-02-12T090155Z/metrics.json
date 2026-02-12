@@ -4,5 +4,6 @@
   "gh_issue_list_bytes": 0,
   "pr_open_snapshot_bytes": 312683,
   "gh_pr_error_bytes": 94,
-  "gh_issue_error_bytes": 94
+  "gh_issue_error_bytes": 94,
+  "gh_pr_create_error_bytes": 94
 }
