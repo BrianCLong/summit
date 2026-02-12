@@ -3,6 +3,7 @@
   "evidence_files": [
     "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_list_error.json",
     "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_issue_list_error.json",
+    "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_create_error.json",
     "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/report.json",
     "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/metrics.json"
   ],
@@ -10,21 +11,25 @@
   "sensing": {
     "error_logs": [
       "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_list_error.json",
-      "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_issue_list_error.json"
+      "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_issue_list_error.json",
+      "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z/gh_pr_create_error.json"
     ],
     "gh_issue_list": "deferred_pending_api_connectivity",
+    "gh_pr_create": "deferred_pending_api_connectivity",
     "gh_pr_list": "deferred_pending_api_connectivity"
   },
   "status": "partial",
   "summary": {
     "completed": [
       "registered daily sprint prompt in registry",
-      "created sprint report and evidence bundle"
+      "created sprint report and evidence bundle",
+      "pushed branch chore/daily-sprint-2026-02-12-0430"
     ],
     "deferred": [
       "gh pr list (api connectivity)",
       "gh issue list (api connectivity)",
-      "pr triage for #18488 #18489 #18483"
+      "pr triage for #18488 #18489 #18483",
+      "gh pr create (api connectivity)"
     ]
   },
   "timestamp_utc": "2026-02-12T04:30:38Z"

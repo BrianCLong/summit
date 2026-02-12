@@ -2,7 +2,7 @@
 
 ## Evidence Bundle
 - Path: `docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T043038Z`
-- Files: `report.json`; `metrics.json`; `stamp.json`; `gh_pr_list_error.json`; `gh_issue_list_error.json`
+- Files: `report.json`; `metrics.json`; `stamp.json`; `gh_pr_list_error.json`; `gh_issue_list_error.json`; `gh_pr_create_error.json`
 
 ## Sensing (Evidence)
 - GitHub API connectivity: Deferred pending restore (see error logs in evidence bundle).
@@ -45,9 +45,11 @@
 ## Execution Log
 - Completed: Prompt registration (daily-sprint-orchestrator v1).
 - Completed: Evidence bundle + sprint report creation for 2026-02-12.
+- Completed: Pushed branch `chore/daily-sprint-2026-02-12-0430`.
 - Deferred: GH PR/issue live triage pending GitHub API connectivity.
+- Deferred: PR creation pending GitHub API connectivity.
 
 ## End-of-Day Summary
-- Completed: Registered daily sprint prompt in registry; created sprint report + evidence bundle for 2026-02-12.
+- Completed: Registered daily sprint prompt in registry; created sprint report + evidence bundle for 2026-02-12; pushed branch `chore/daily-sprint-2026-02-12-0430`.
 - In progress: PR triage for #18488, #18489, #18483 waiting on GH API.
-- Blocked: `gh pr list` / `gh issue list` access deferred pending connectivity restore.
+- Blocked: `gh pr list`, `gh issue list`, and `gh pr create` deferred pending connectivity restore.
