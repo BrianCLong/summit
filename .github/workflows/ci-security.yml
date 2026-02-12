@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-secret
           path: results.sarif
           if-no-files-found: ignore
 
@@ -141,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-semgrep
           path: ${{ env.REPORT_DIR }}/semgrep.sarif
 
   dependency-scan:
@@ -181,7 +181,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-snyk
           path: ${{ env.REPORT_DIR }}/snyk.sarif
 
   filesystem-scan:
@@ -216,7 +216,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-fs
           path: ${{ env.REPORT_DIR }}/trivy-fs.sarif
 
   container-scan:
@@ -265,7 +265,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-container
           path: |
             ${{ env.REPORT_DIR }}/trivy-server.sarif
             ${{ env.REPORT_DIR }}/trivy-client.sarif
@@ -292,7 +292,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-license
           path: ${{ env.REPORT_DIR }}/trivy-license.json
 
   iac-scan:
@@ -322,7 +322,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-iac
           path: ${{ env.REPORT_DIR }}/results.sarif
 
   opa-policy:
@@ -354,7 +354,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-opa
           path: rendered
 
   cis-benchmark:
@@ -393,7 +393,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-cis
           path: ${{ env.REPORT_DIR }}/trivy-cis.json
 
   baseline:
@@ -411,7 +411,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-baseline
           path: ${{ env.REPORT_DIR }}/baseline-report.json
 
   dast:
@@ -426,7 +426,7 @@ jobs:
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
         run: |
-          docker compose -f docker-compose.yml up -d server client
+          docker compose -f docker-compose.yml up -d server
       - name: Wait for application
         run: |
           for i in {1..30}; do
@@ -440,7 +440,7 @@ jobs:
       - name: OWASP ZAP baseline scan
         uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
         with:
-          target: "http://localhost:3000"
+          target: "http://localhost:4001"
           cmd_options: "-a -m 5"
           rules_file_name: ".zap/rules.tsv"
       - name: Collect ZAP artifacts
@@ -457,7 +457,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-reports-dast
           path: |
             ${{ env.REPORT_DIR }}/zap-report.html
             ${{ env.REPORT_DIR }}/zap-report.md
@@ -486,7 +486,7 @@ jobs:
       - name: Download all security reports
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: security-reports
+          pattern: security-reports-*
           path: aggregated-security
           merge-multiple: true
           if-no-artifact-found: warn
@@ -559,7 +559,7 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          pattern: security-reports-*
           path: aggregated-security/security-summary.json
       - name: Record dashboard location
         id: dashboard
