@@ -19,4 +19,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Check Config
-        run: pnpm check:config
+        run: pnpm check:jest-config
