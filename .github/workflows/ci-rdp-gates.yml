@@ -27,7 +27,7 @@ jobs:
           python-version: '3.11'
 
       - name: Run RDP Gates
-        run: ./security/gates/run_all_gates.sh
+        run: ./scripts/security-check.sh
         env:
           GITHUB_BASE_REF: ${{ github.base_ref }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
