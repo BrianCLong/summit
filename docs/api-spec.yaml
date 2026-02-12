@@ -3,6 +3,9 @@ info:
   title: IntelGraph Summit API
   version: 1.1.0
   description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
+  contact:
+    name: IntelGraph Support
+    url: https://github.com/BrianCLong/summit
 
 servers:
   - url: /api
@@ -10,10 +13,25 @@ servers:
   - url: /
     description: Root path for monitoring and health
 
+tags:
+  - name: Observability
+    description: System monitoring and health endpoints
+  - name: Tenancy
+    description: Multi-tenant management and isolation
+  - name: Governance
+    description: Policy enforcement and simulation
+  - name: Disclosure
+    description: Intellectual artifact export and sharing
+  - name: Provenance
+    description: Verifiable evidence and audit trails
+  - name: Maestro
+    description: Autonomous agent orchestration
+
 paths:
   /monitoring/metrics:
     get:
       operationId: getMonitoringMetrics
+      description: Retrieve Prometheus-formatted system metrics.
       summary: Prometheus metrics
       tags: [Observability]
       responses:
@@ -27,6 +45,7 @@ paths:
   /health:
     get:
       operationId: getHealth
+      description: Perform a health check of the platform services and dependencies.
       summary: System health check
       tags: [Observability]
       responses:
@@ -45,6 +64,8 @@ paths:
 
   /api/tenants:
     post:
+      operationId: createTenant
+      description: Create a new tenant with specified configuration.
       summary: Create a new tenant
       tags: [Tenancy]
       requestBody:
@@ -62,6 +83,8 @@ paths:
                 $ref: '#/components/schemas/Tenant'
 
     get:
+      operationId: getTenants
+      description: Retrieve a list of all tenants. Requires administrator privileges.
       summary: List tenants (Admin only)
       tags: [Tenancy]
       responses:
@@ -76,6 +99,8 @@ paths:
 
   /api/policy/simulate:
     post:
+      operationId: simulatePolicy
+      description: Dry-run a policy evaluation for a given input without persisting changes.
       summary: Simulate a policy decision (Preflight)
       tags: [Governance]
       requestBody:
@@ -94,6 +119,8 @@ paths:
 
   /api/export/bundles:
     post:
+      operationId: createExportBundle
+      description: Initiate a job to export intellectual artifacts into a bundle.
       summary: Create an Intel Bundle export
       tags: [Disclosure]
       requestBody:
@@ -112,6 +139,8 @@ paths:
 
   /api/receipts/{id}:
     get:
+      operationId: getReceipt
+      description: Fetch a verifiable signed receipt for a specific operation.
       summary: Get a signed receipt by ID
       tags: [Provenance]
       parameters:
@@ -131,6 +160,7 @@ paths:
   /api/maestro/route/preview:
     post:
       operationId: previewRoute
+      description: Get a list of potential agent candidates suitable for the given task and context.
       summary: Preview routing candidates for a task
       tags: [Maestro]
       requestBody:
@@ -155,6 +185,7 @@ paths:
   /api/maestro/route/execute:
     post:
       operationId: executeRoute
+      description: Run the specified task using the chosen agent candidates.
       summary: Execute a task with selected candidates
       tags: [Maestro]
       requestBody:
@@ -181,6 +212,7 @@ paths:
   /api/maestro/web/interfaces:
     get:
       operationId: getWebInterfaces
+      description: List all registered and available web interfaces for the Maestro system.
       summary: Get available web interfaces
       tags: [Maestro]
       responses:
@@ -194,6 +226,7 @@ paths:
   /api/maestro/web/run:
     post:
       operationId: runWebOrchestration
+      description: Perform an autonomous web search or content processing task using specified interfaces.
       summary: Orchestrate web search/content tasks
       tags: [Maestro]
       requestBody:
@@ -220,6 +253,7 @@ paths:
   /api/maestro/budgets:
     get:
       operationId: getBudgets
+      description: Fetch information about current budget limits and actual resource usage.
       summary: Get budget and usage information
       tags: [Maestro]
       responses:
@@ -233,6 +267,7 @@ paths:
   /api/maestro/policy/check:
     post:
       operationId: checkPolicy
+      description: Evaluate whether a proposed action complies with established Maestro governance policies.
       summary: Check policy for an action
       tags: [Maestro]
       requestBody:
@@ -257,6 +292,7 @@ paths:
   /api/maestro/runs:
     post:
       operationId: createRun
+      description: Initialize and execute a new Maestro pipeline run.
       summary: Create and run a new pipeline
       tags: [Maestro]
       requestBody:
@@ -281,6 +317,7 @@ paths:
   /api/tenants/{tenantId}/workflows:
     post:
       operationId: createWorkflowDefinition
+      description: Define a new workflow or update an existing one within the scope of a specific tenant.
       summary: Create or update a workflow definition
       tags: [Maestro]
       parameters:
@@ -306,6 +343,7 @@ paths:
   /api/tenants/{tenantId}/runs:
     post:
       operationId: startRun
+      description: Begin the execution of a previously defined workflow for a given tenant.
       summary: Start a new run from a workflow definition
       tags: [Maestro]
       parameters:
@@ -331,6 +369,7 @@ paths:
   /api/tenants/{tenantId}/runs/{runId}:
     get:
       operationId: getRun
+      description: Retrieve the current status, artifacts, and verifiable receipts for a specific run.
       summary: Get run details including receipts
       tags: [Maestro]
       parameters:
@@ -355,6 +394,7 @@ paths:
   /api/tenants/{tenantId}/runs/{runId}/approve:
     post:
       operationId: approveRun
+      description: Submit a human-in-the-loop decision to approve or reject a pending step in a run.
       summary: Approve or reject a run/step
       tags: [Maestro]
       parameters:
@@ -385,6 +425,7 @@ paths:
   /api/tenants/{tenantId}/runs/{runId}/events:
     get:
       operationId: getRunEvents
+      description: Get a chronological list of all events that have occurred during the lifecycle of a run.
       summary: Get timeline events for a run
       tags: [Maestro]
       parameters:
