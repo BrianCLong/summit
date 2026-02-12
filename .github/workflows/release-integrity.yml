@@ -38,8 +38,8 @@ jobs:
       - name: Policy Gate (OPA)
         run: |
           # Install OPA
-          curl -L -o opa https://openpolicyagent.org/downloads/v0.60.0/opa_linux_amd64_static
-          chmod +x opa
+          curl -L -o opa_bin https://openpolicyagent.org/downloads/v0.60.0/opa_linux_amd64_static
+          chmod +x opa_bin
 
           # Evaluate Policy
-          ./opa eval -i .evidence/results/input.json -d policy/release-gates/ "data.release_gates.allow" | grep "true" || exit 1
+          ./opa_bin eval -i .evidence/results/input.json -d policy/release-gates/ "data.release_gates.allow" | grep "true" || exit 1

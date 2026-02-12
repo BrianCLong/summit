@@ -3,7 +3,7 @@ set -eo pipefail
 
 # Configuration
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_ROOT="/backups"
+BACKUP_ROOT="./tmp_backups"
 BACKUP_DIR="$BACKUP_ROOT/$TIMESTAMP"
 LOG_FILE="$BACKUP_ROOT/backup.log"
 RETENTION_DAYS=${RETENTION_DAYS:-7}
