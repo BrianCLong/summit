@@ -12,6 +12,8 @@
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { LRUCache } from 'lru-cache';
+import zlib from 'zlib';
+import { promisify } from 'util';
 import {
   DataEnvelope,
   GovernanceVerdict,
@@ -20,6 +22,9 @@ import {
   createDataEnvelope,
 } from '../types/data-envelope.js';
 import logger from '../utils/logger.js';
+
+const gzip = promisify(zlib.gzip);
+const gunzip = promisify(zlib.gunzip);
 
 // ============================================================================
 // Types
@@ -158,7 +163,7 @@ export class DistributedCacheService {
 
         // Decompress if needed
         const value = entry.compressed
-          ? this.decompress(entry.value as string)
+          ? await this.decompress(entry.value as string)
           : entry.value;
 
         // Promote to L1
@@ -220,7 +225,7 @@ export class DistributedCacheService {
       let toStore = serialized;
 
       if (serialized.length > this.config.compressionThreshold) {
-        entry.value = this.compress(value) as T;
+        entry.value = await this.compress(value) as T;
         entry.compressed = true;
         toStore = JSON.stringify(entry);
         this.stats.compressions++;
@@ -304,33 +309,34 @@ export class DistributedCacheService {
    */
   async deleteByTag(tag: string): Promise<DataEnvelope<number>> {
     const tagKey = `${this.config.keyPrefix}tag:${tag}`;
+    let totalDeleted = 0;
 
     try {
-      const keys = await this.redis.smembers(tagKey);
+        const stream = this.redis.sscanStream(tagKey);
+        for await (const keys of stream) {
+            if (keys && keys.length > 0) {
+                 // Delete from L1
+                 for (const key of keys) {
+                     this.l1Cache.delete(key);
+                 }
+                 // Delete from Redis
+                 await this.redis.del(...keys);
 
-      if (keys.length === 0) {
-        return createDataEnvelope(0, {
-          source: 'DistributedCacheService',
-          governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'No keys found for tag'),
-          classification: DataClassification.INTERNAL,
-        });
-      }
+                 // Broadcast invalidation for all keys
+                 for (const key of keys) {
+                    await this.broadcastInvalidation(key);
+                 }
 
-      // Delete all tagged keys
-      for (const key of keys) {
-        this.l1Cache.delete(key);
-      }
-      await this.redis.del(...keys, tagKey);
+                 totalDeleted += keys.length;
+            }
+        }
 
-      // Broadcast invalidation for all keys
-      for (const key of keys) {
-        await this.broadcastInvalidation(key);
-      }
+        await this.redis.del(tagKey);
 
-      this.stats.invalidations += keys.length;
-      logger.info({ tag, count: keys.length }, 'Cache invalidated by tag');
+        this.stats.invalidations += totalDeleted;
+        logger.info({ tag, count: totalDeleted }, 'Cache invalidated by tag');
 
-      return createDataEnvelope(keys.length, {
+      return createDataEnvelope(totalDeleted, {
         source: 'DistributedCacheService',
         governanceVerdict: createVerdict(GovernanceResult.ALLOW, 'Tag invalidation successful'),
         classification: DataClassification.INTERNAL,
@@ -468,14 +474,16 @@ export class DistributedCacheService {
   // Compression
   // --------------------------------------------------------------------------
 
-  private compress(value: unknown): string {
-    // Simple base64 encoding for now
-    // In production, use zlib or similar
-    return Buffer.from(JSON.stringify(value)).toString('base64');
+  private async compress(value: unknown): Promise<string> {
+    const buffer = Buffer.from(JSON.stringify(value));
+    const compressed = await gzip(buffer);
+    return compressed.toString('base64');
   }
 
-  private decompress(compressed: string): unknown {
-    return JSON.parse(Buffer.from(compressed, 'base64').toString('utf-8'));
+  private async decompress(compressed: string): Promise<unknown> {
+    const buffer = Buffer.from(compressed, 'base64');
+    const decompressed = await gunzip(buffer);
+    return JSON.parse(decompressed.toString('utf-8'));
   }
 
   // --------------------------------------------------------------------------

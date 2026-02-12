@@ -102,14 +102,18 @@ if [ -f "$BACKUP_DIR/redis.rdb" ]; then
         cp "$BACKUP_DIR/redis.rdb" "/redis_data/dump.rdb"
 
         echo "Restarting Redis to load new data..."
-        REDIS_CLI_CMD="redis-cli -h $REDIS_HOST -p $REDIS_PORT"
+        REDIS_CLI_ARGS=(-h "$REDIS_HOST" -p "$REDIS_PORT")
         if [ ! -z "$REDIS_PASSWORD" ] && [ "$REDIS_PASSWORD" != "devpassword" ]; then
-            REDIS_CLI_CMD="$REDIS_CLI_CMD -a $REDIS_PASSWORD --no-auth-warning"
+            REDIS_CLI_ARGS+=(-a "$REDIS_PASSWORD" --no-auth-warning)
         fi
 
-        # Shutdown NOSAVE to avoid overwriting our restored RDB
-        $REDIS_CLI_CMD shutdown nosave || true
-        echo "Redis shutdown signal sent. Docker should restart it."
+        if command -v redis-cli &> /dev/null; then
+            redis-cli "${REDIS_CLI_ARGS[@]}" shutdown nosave || true
+            echo "Redis shutdown signal sent. Docker should restart it."
+        else
+            echo "Warning: redis-cli not found. Cannot automatically restart Redis."
+            echo "Please restart the Redis container manually to load the new RDB file."
+        fi
     else
         echo "Warning: /redis_data is not mounted. Cannot restore Redis RDB automatically."
         echo "Manual intervention required: Place $BACKUP_DIR/redis.rdb into the Redis data volume and restart Redis."

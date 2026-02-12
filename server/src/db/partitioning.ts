@@ -1,20 +1,20 @@
 
 import { getPostgresPool } from './postgres.js';
 import logger from '../utils/logger.js';
-import { RedisService } from '../cache/redis.js';
 import { coldStorageService } from '../services/ColdStorageService.js';
 
 export class PartitionManager {
   private pool = getPostgresPool();
-  private redis = RedisService.getInstance();
 
   /**
-   * Creates a new partition for a specific tenant in the maestro_runs table.
+   * Creates a new partition for a specific tenant in a partitioned table.
    * Useful when onboarding a new tenant to ensure they have their own dedicated partition.
+   * @param tenantId The tenant ID
+   * @param tableName The parent table name (default: maestro_runs for backward compatibility)
    */
-  async createTenantPartition(tenantId: string): Promise<void> {
+  async createTenantPartition(tenantId: string, tableName: string = 'maestro_runs'): Promise<void> {
     const safeTenantId = tenantId.replace(/[^a-zA-Z0-9_]/g, '');
-    const partitionName = `maestro_runs_${safeTenantId}`;
+    const partitionName = `${tableName}_${safeTenantId}`;
 
     const client = await this.pool.connect();
     try {
@@ -26,15 +26,15 @@ export class PartitionManager {
         [partitionName]
       );
 
-      if (checkRes.rows[0].to_regclass) {
+      if (checkRes.rows[0]?.to_regclass) {
         logger.info(`Partition ${partitionName} already exists.`);
         await client.query('COMMIT');
         return;
       }
 
       const query = `
-        CREATE TABLE ${partitionName}
-        PARTITION OF maestro_runs
+        CREATE TABLE IF NOT EXISTS ${partitionName}
+        PARTITION OF ${tableName}
         FOR VALUES IN ('${tenantId}')
       `;
 
@@ -44,8 +44,14 @@ export class PartitionManager {
       await client.query('COMMIT');
     } catch (error: any) {
       await client.query('ROLLBACK');
-      logger.error(`Failed to create partition for tenant ${tenantId}`, error);
-      throw error;
+      if (error.code === '42P01') {
+          logger.warn(`Parent table ${tableName} does not exist. Skipping partition creation.`);
+      } else if (error.code === '42P07') {
+          logger.info(`Partition ${partitionName} already exists (race condition).`);
+      } else {
+          logger.error(`Failed to create partition for tenant ${tenantId} in ${tableName}`, error);
+          throw error;
+      }
     } finally {
       client.release();
     }
@@ -77,14 +83,14 @@ export class PartitionManager {
         [partitionName]
       );
 
-      if (checkRes.rows[0].to_regclass) {
+      if (checkRes.rows[0]?.to_regclass) {
         logger.info(`Partition ${partitionName} already exists.`);
         await client.query('COMMIT');
         return;
       }
 
       const query = `
-        CREATE TABLE ${partitionName}
+        CREATE TABLE IF NOT EXISTS ${partitionName}
         PARTITION OF ${tableName}
         FOR VALUES FROM ('${startStr}') TO ('${endStr}')
       `;
@@ -96,8 +102,10 @@ export class PartitionManager {
     } catch (error: any) {
        await client.query('ROLLBACK');
        // Don't log error if it's just that the parent table doesn't exist yet (might be dev env)
-       if ((error as any).code === '42P01') {
+       if (error.code === '42P01') {
            logger.warn(`Parent table ${tableName} does not exist. Skipping partition creation.`);
+       } else if (error.code === '42P07') {
+           logger.info(`Partition ${partitionName} already exists.`);
        } else {
            logger.error(`Failed to create partition ${partitionName}`, error);
            throw error;
@@ -124,8 +132,6 @@ export class PartitionManager {
         // Ensure month after next exists (buffer)
         await this.createMonthlyPartition(table, monthAfterNext);
     }
-
-    // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
   }
 
   async detachOldPartitions(
@@ -156,11 +162,15 @@ export class PartitionManager {
             await client.query(
               `ALTER TABLE ${table} DETACH PARTITION ${partitionName}`,
             );
-            await coldStorageService.archivePartition(
-              table,
-              partitionName,
-              true,
-            );
+            if (coldStorageService && typeof coldStorageService.archivePartition === 'function') {
+                await coldStorageService.archivePartition(
+                  table,
+                  partitionName,
+                  true,
+                );
+            } else {
+                logger.warn(`ColdStorageService not available, skipping archive for ${partitionName}`);
+            }
           }
         }
       }

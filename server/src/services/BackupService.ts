@@ -131,16 +131,25 @@ export class BackupService {
     const env = { ...process.env };
     const args: string[] = [];
 
+    // Prioritize explicit components if set, otherwise fallback to DATABASE_URL or defaults
+    const pgHost = env.POSTGRES_HOST || 'postgres';
+    const pgPort = env.POSTGRES_PORT || '5432';
+    const pgUser = env.POSTGRES_USER || 'postgres';
+    const pgDb = env.POSTGRES_DB || 'postgres';
+
+    // Set PGPASSWORD for authentication
+    if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
+        env.PGPASSWORD = env.POSTGRES_PASSWORD;
+    }
+
+    // Prefer connection string if available and fully formed, but components are safer for pg_dump argument handling
     if (env.DATABASE_URL) {
       args.push(env.DATABASE_URL);
     } else {
-      if (env.POSTGRES_HOST) args.push('-h', env.POSTGRES_HOST);
-      if (env.POSTGRES_PORT) args.push('-p', env.POSTGRES_PORT);
-      if (env.POSTGRES_USER) args.push('-U', env.POSTGRES_USER);
-      if (env.POSTGRES_DB) args.push(env.POSTGRES_DB);
-      if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
-        env.PGPASSWORD = env.POSTGRES_PASSWORD;
-      }
+      args.push('-h', pgHost);
+      args.push('-p', pgPort);
+      args.push('-U', pgUser);
+      args.push('-d', pgDb);
     }
 
     return new Promise((resolve, reject) => {
@@ -255,12 +264,13 @@ export class BackupService {
     const client = getRedisClient();
     if (!client) throw new Error('Redis client unavailable');
 
+    // Trigger BGSAVE for disk persistence as a precaution
     try {
       await client.bgsave();
     } catch (err: any) {
       const message = err instanceof Error ? err.message : String(err);
       if (!message.includes('already in progress')) {
-        throw err;
+        logger.warn('Redis BGSAVE failed (might be managed service)', err);
       }
     }
 
@@ -273,24 +283,28 @@ export class BackupService {
     for await (const keys of stream) {
       if (keys.length > 0) {
         const pipeline = client.pipeline();
-        keys.forEach((key: string) => pipeline.get(key));
-        const values = await pipeline.exec();
+        keys.forEach((key: string) => pipeline.dump(key));
+        const results = await pipeline.exec();
 
-        keys.forEach((key: string, index: number) => {
-          const val = values?.[index]?.[1];
-          if (typeof val === 'string') {
-            if (!isFirstKey) writeStream.write(',');
-            writeStream.write(`"${key}":${JSON.stringify(val)}`);
-            isFirstKey = false;
-          }
-        });
+        if (results) {
+             keys.forEach((key: string, index: number) => {
+              const [err, dump] = results[index];
+              if (!err && dump) {
+                  if (!isFirstKey) writeStream.write(',');
+                  // Store dump as base64 string
+                  const b64 = (dump as Buffer).toString('base64');
+                  writeStream.write(`"${key}":${JSON.stringify({ type: 'dump', data: b64 })}`);
+                  isFirstKey = false;
+              }
+            });
+        }
       }
     }
 
     writeStream.write('}');
     writeStream.end();
 
-    logger.info(`Redis backup created at ${file}`);
+    logger.info(`Redis logical backup created at ${file}`);
     return file;
   }
 
@@ -377,7 +391,7 @@ export class BackupService {
    * Stub for restoring a backup
    */
   async restore(backupId: string): Promise<void> {
-    logger.warn(`Restore functionality requested for ${backupId} but not fully implemented. Manual intervention required.`);
+    logger.warn(`Restore functionality requested for ${backupId} but not fully implemented. Please see server/infrastructure/disaster-recovery/restore.sh for full disaster recovery.`);
     // TODO: Implement download from S3 and restoration logic for each service
   }
 }
