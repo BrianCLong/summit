@@ -32,7 +32,7 @@ Summit adopts a "Privacy by Design" and "Safety First" approach aligned with Reg
 | **Art 11** | Technical Documentation | Automated Documentation Generation | `docs/models/technical_docs/` |
 | **Art 12** | Record Keeping | Automatic Event Logging (7+ years) | `artifacts/logs/governance/` |
 | **Art 13** | Transparency | Model Cards & System Instructions | `docs/models/` |
-| **Art 14** | Human Oversight | "Human-in-the-loop" Review UI | `apps/web/src/components/ReviewQueue.tsx` |
+| **Art 14** | Human Oversight | "Human-in-the-loop" Review UI | `apps/web/src/components/HITLReviewPanel.tsx` |
 | **Art 15** | Accuracy & Cybersecurity | Red Teaming & Adversarial Testing | `tests/adversarial/` |
 | **Art 55** | Systemic Risk (GPAI) | Systemic Risk Assessment & Mitigation | `docs/governance/SYSTEMIC_RISK_EVAL.md` |
 
