@@ -1,6 +1,6 @@
 package intelgraph.export
+import future.keywords
 
-import future.keywords.every
 
 test_simulate_allows_without_step_up {
   input := {
