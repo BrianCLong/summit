@@ -69,6 +69,7 @@ export class RiskRepository {
             savedSignals.push(...batchRows.map((r: any) => this.mapSignal(r)));
           } catch (e) {
             // Fallback to individual inserts for this chunk to maintain reliability
+            console.warn('Batched risk signals insert failed, falling back to sequential', e);
             for (const sig of chunk) {
               const sigRows = await tx.query(
                 `INSERT INTO risk_signals (

@@ -156,7 +156,6 @@ services:
     restart: unless-stopped
     environment:
       PORT: 4100
-      PROMETHEUS_PORT: 9464
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-gateway
       OTEL_SERVICE_VERSION: 1.0.0
@@ -174,12 +173,11 @@ services:
       api:
         condition: service_healthy
       policy-compiler:
-        condition: service_healthy
+        condition: service_started
       typesense:
-        condition: service_healthy
+        condition: service_started
     ports:
       - '4100:4100'
-      - '9464:9464'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
       interval: 15s
@@ -191,20 +189,17 @@ services:
       - 'prometheus.job=summit_gateway'
       - 'prometheus.port=4100'
 
+  ui:
+    build: ./apps/ui
+    ports: [ "3000:80" ]
+
   prov-ledger:
     build: ./services/prov-ledger
-    ports: [ "4010:4010" ]
+    ports: [ "8101:8080" ]
 
   policy-compiler:
     build: ./services/policy-compiler
     ports: [ "8102:8080" ]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - summit
 
   ai-nlq:
     build: ./services/ai-nlq
@@ -261,13 +256,6 @@ services:
       - TYPESENSE_ENABLE_CORS=true
     volumes:
       - ./tmp/typesense-data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8108/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - summit
 
   opa:
     image: openpolicyagent/opa:0.61.0
@@ -527,15 +515,16 @@ services:
       - 'prometheus.path=/metrics'
 
 volumes:
-  postgres_data: {}
-  redis_data: {}
-  neo4j_data: {}
-  neo4j_logs: {}
-  elasticsearch_data: {}
-  grafana_data: {}
-  prometheus_data: {}
-  loki_data: {}
-  alertmanager_data: {}
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  neo4j_logs:
+  elasticsearch_data:
+  grafana_data:
+  prometheus_data:
+  loki_data:
+  alertmanager_data:
+
 networks:
   summit:
     driver: bridge

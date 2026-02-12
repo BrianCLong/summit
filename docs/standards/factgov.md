@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # FactGov Standards
 
 ## Import/Export Matrix
@@ -27,7 +26,6 @@
 ## Determinism
 *   All artifacts (award recommendations, audit trails) must be generated deterministically.
 *   Timestamps in artifacts must be separated into a `runtime_meta` field or file, not embedded in the hashable content.
-=======
 # FactGov Standards & Data Handling
 
 ## Core Principles
@@ -67,4 +65,3 @@ The following fields must **NEVER** appear in application logs (use redaction):
 - All state changes (status transitions) must emit an immutable audit event.
 - Audit packs must be deterministic (same input = same output bytes).
 - Timestamps in audit packs must be isolated to `stamp.json`.
->>>>>>> main

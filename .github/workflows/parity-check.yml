@@ -40,13 +40,9 @@ jobs:
         with:
           terraform_version: 1.8.5
 
-      - name: Configure AWS Credentials
+      - name: Setup AWS CLI
         if: matrix.cloud == 'aws'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
-          audience: ${{ secrets.AWS_OIDC_AUDIENCE }}
-          aws-region: us-east-1
+        uses: aws-actions/setup-cli@v2
       - name: Setup gcloud
         if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v2
