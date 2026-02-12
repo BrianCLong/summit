@@ -148,7 +148,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run database migrations
-        run: cd server && npx tsx scripts/run-migrations.ts
+        run: cd server && npx tsx scripts/db_migrate.cjs
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 

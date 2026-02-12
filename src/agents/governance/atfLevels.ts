@@ -11,7 +11,7 @@ export function getLevelRank(level: AtfLevel): number {
 export function canExecuteActions(level: AtfLevel): boolean {
   // Interns cannot execute actions autonomously.
   // Juniors and above can, but subject to policy.
-  return level !== "intern";
+  return level === "senior" || level === "principal";
 }
 
 export function requiresHumanApproval(level: AtfLevel): boolean {
