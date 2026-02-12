@@ -152,7 +152,7 @@ Generated: **${now} (UTC)**
             core.setOutput('body', md);
 
       - name: Commit report
-        if: ((${{ steps.gen.outputs.ok == 'true' }}) && (${{ steps.gen.outputs.ok != 'true' }})) && (${{ env.SLACK_WEBHOOK_URL != '' }})
+        if: ${{ steps.gen.outputs.ok == 'true' }}
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: weekly Copilot adoption report"
@@ -166,11 +166,13 @@ Generated: **${now} (UTC)**
           retention-days: 30
 
       - name: Fallback note (no metrics)
+        if: ${{ steps.gen.outputs.ok != 'true' }}
         run: |
           echo "${{ steps.gen.outputs.body }}" > copilot-metrics-unavailable.md
           echo "::notice:: Copilot metrics not available. See artifact."
 
       - name: Optional Slack post
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |

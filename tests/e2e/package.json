@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/e2e-tests",
+  "version": "4.2.3",
+  "description": "Cross-browser E2E tests for IntelGraph Maestro platform",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium-desktop",
+    "test:firefox": "playwright test --project=firefox-desktop",
+    "test:webkit": "playwright test --project=webkit-desktop",
+    "test:mobile": "playwright test --project=chromium-mobile --project=webkit-mobile",
+    "test:accessibility": "playwright test --project=chromium-a11y",
+    "test:performance": "playwright test --project=chromium-performance",
+    "test:security": "playwright test --project=chromium-security",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "install": "playwright install --with-deps",
+    "codegen": "playwright codegen localhost:3000"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.44.0",
+    "@axe-core/playwright": "^4.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "allure-playwright": "^2.15.1"
+  }
+}
