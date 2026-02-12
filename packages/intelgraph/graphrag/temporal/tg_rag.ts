@@ -1,14 +1,14 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { TGRAGConfig, TemporalEdge, Chunk, TimeNode } from './types.js';
-import { TimeScopeResolver } from './time_scope_resolver.js';
-import { RelationIndex } from './relation_index.js';
-import { ChunkIndex } from './chunk_index.js';
-import { DynamicSubgraph } from './dynamic_subgraph.js';
-import { PPR } from './ppr.js';
-import { TGRAGScorer, ScoredChunk } from './scoring.js';
-import { ContextPacker } from './context_packer.js';
+import { TGRAGConfig, TemporalEdge, Chunk, TimeNode } from './types';
+import { TimeScopeResolver } from './time_scope_resolver';
+import { RelationIndex } from './relation_index';
+import { ChunkIndex } from './chunk_index';
+import { DynamicSubgraph } from './dynamic_subgraph';
+import { PPR } from './ppr';
+import { TGRAGScorer, ScoredChunk } from './scoring';
+import { ContextPacker } from './context_packer';
 
 // Mock embedding function type
 type Embedder = (text: string) => Promise<number[]>;

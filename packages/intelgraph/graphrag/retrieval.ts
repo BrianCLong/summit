@@ -1,8 +1,8 @@
 import { Driver, Session } from 'neo4j-driver';
-import { PathAssembler, GraphContext } from './path_assembler.js';
-import { TemporalGraphRAG } from './temporal/tg_rag.js';
-import { RelationIndex } from './temporal/relation_index.js';
-import { ChunkIndex } from './temporal/chunk_index.js';
+import { PathAssembler, GraphContext } from './path_assembler';
+import { TemporalGraphRAG } from './temporal/tg_rag';
+import { RelationIndex } from './temporal/relation_index';
+import { ChunkIndex } from './temporal/chunk_index';
 
 // Mock embedding function type
 type Embedder = (text: string) => Promise<number[]>;

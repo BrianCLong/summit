@@ -1,4 +1,4 @@
-import { AdjacencyList } from './dynamic_subgraph.js';
+import { AdjacencyList } from './dynamic_subgraph';
 
 export interface PPRScores {
   [nodeId: string]: number;

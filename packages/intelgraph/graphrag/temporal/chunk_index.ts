@@ -1,4 +1,4 @@
-import { Chunk } from './types.js';
+import { Chunk } from './types';
 
 export class ChunkIndex {
   private chunks: Map<string, Chunk> = new Map();

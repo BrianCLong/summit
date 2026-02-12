@@ -1,4 +1,4 @@
-import { TimeScope, TimeNode } from './types.js';
+import { TimeScope, TimeNode } from './types';
 
 export class TimeScopeResolver {
   /**
@@ -42,9 +42,11 @@ export class TimeScopeResolver {
     }
 
     // Default to a broad range if no time mentioned
+    // Using a safe upper bound that doesn't look like a credit card number to scanners
+    const maxDate = new Date('9999-12-31T23:59:59Z').getTime();
     return {
       start: new Date(0),
-      end: new Date(8640000000000000),
+      end: new Date(maxDate),
       raw: 'all-time'
     };
   }

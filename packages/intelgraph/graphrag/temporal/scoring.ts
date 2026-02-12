@@ -1,5 +1,5 @@
-import { TemporalEdge, Chunk, TimeScope } from './types.js';
-import { PPRScores } from './ppr.js';
+import { TemporalEdge, Chunk, TimeScope } from './types';
+import { PPRScores } from './ppr';
 
 export interface ScoredChunk extends Chunk {
   score: number;

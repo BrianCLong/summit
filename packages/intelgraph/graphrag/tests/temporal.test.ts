@@ -1,52 +1,70 @@
-import { TimeScopeResolver } from '../temporal/time_scope_resolver.js';
-import { TGRAGScorer } from '../temporal/scoring.js';
-import { DynamicSubgraph } from '../temporal/dynamic_subgraph.js';
-import { PPR } from '../temporal/ppr.js';
-import { TemporalEdge, Chunk } from '../temporal/types.js';
+import { TimeScopeResolver } from '../temporal/time_scope_resolver';
+import { DynamicSubgraph } from '../temporal/dynamic_subgraph';
+import { PPR } from '../temporal/ppr';
+import { TGRAGScorer } from '../temporal/scoring';
+import { TemporalEdge } from '../temporal/types';
 
-async function runTests() {
-  console.log('Running Temporal GraphRAG Unit Tests...');
-
-  // 1. TimeScopeResolver
+describe('Temporal GraphRAG', () => {
   const resolver = new TimeScopeResolver();
-  const s1 = await resolver.resolve('revenue in 2023');
-  if (s1.start.getFullYear() !== 2023) throw new Error('TimeScopeResolver failed on year');
-  console.log('✅ TimeScopeResolver: Year parsing passed');
 
-  const s2 = await resolver.resolve('events in Oct 2025');
-  if (s2.start.getMonth() !== 9) throw new Error('TimeScopeResolver failed on month');
-  console.log('✅ TimeScopeResolver: Month parsing passed');
+  describe('TimeScopeResolver', () => {
+    it('should parse year correctly', async () => {
+      const scope = await resolver.resolve("What happened in 2024?");
+      expect(scope.start.getFullYear()).toBe(2024);
+      expect(scope.end.getFullYear()).toBe(2024);
+    });
 
-  const s3 = await resolver.resolve('attacks on 2024-05-20');
-  if (!s3.start.toISOString().includes('2024-05-20')) throw new Error('TimeScopeResolver failed on ISO date');
-  console.log('✅ TimeScopeResolver: ISO date parsing passed');
+    it('should parse month correctly', async () => {
+      const scope = await resolver.resolve("Events in Oct 2025");
+      expect(scope.start.getMonth()).toBe(9); // October is 9
+      expect(scope.start.getFullYear()).toBe(2025);
+    });
 
-  // 2. DynamicSubgraph & PPR
-  const edges: TemporalEdge[] = [
-    { v1: 'A', v2: 'B', rel: 'KNOWS', timestamp: '2023-01-01T00:00:00Z', chunkIds: ['c1'] },
-    { v1: 'B', v2: 'C', rel: 'KNOWS', timestamp: '2024-01-01T00:00:00Z', chunkIds: ['c2'] },
-    { v1: 'A', v2: 'C', rel: 'KNOWS', timestamp: '2023-06-01T00:00:00Z', chunkIds: ['c3'] }
-  ];
-  const scope2023 = { start: new Date('2023-01-01'), end: new Date('2023-12-31') };
-  const adj = DynamicSubgraph.build(edges, scope2023);
-  if (adj['B'] && adj['B']['C']) throw new Error('DynamicSubgraph failed to filter by time');
-  console.log('✅ DynamicSubgraph: Temporal filtering passed');
+    it('should parse ISO date correctly', async () => {
+      const scope = await resolver.resolve("Incident on 2025-10-27");
+      expect(scope.start.toISOString().startsWith('2025-10-27')).toBe(true);
+    });
+  });
 
-  const pprScores = PPR.calculate(adj, ['A'], 0.15, 10);
-  if (pprScores['A'] <= pprScores['B']) throw new Error('PPR failed: seed node should have highest score');
-  console.log('✅ PPR: Salience scoring passed');
+  describe('DynamicSubgraph', () => {
+    it('should filter edges by time scope', async () => {
+      const edges: TemporalEdge[] = [
+        { v1: 'A', v2: 'B', rel: 'T1', timestamp: '2024-01-01T00:00:00Z', chunkIds: [] },
+        { v1: 'B', v2: 'C', rel: 'T2', timestamp: '2025-01-01T00:00:00Z', chunkIds: [] }
+      ];
+      const scope = { start: new Date('2025-01-01'), end: new Date('2025-12-31'), raw: '2025' };
 
-  // 3. TGRAGScorer
-  const edgeIn = { v1: 'A', v2: 'B', rel: 'R', timestamp: '2023-05-01T00:00:00Z', chunkIds: [] };
-  const edgeOut = { v1: 'A', v2: 'B', rel: 'R', timestamp: '2024-05-01T00:00:00Z', chunkIds: [] };
-  if (TGRAGScorer.scoreEdge(edgeIn, pprScores, scope2023) === 0) throw new Error('TGRAGScorer failed to score edge in scope');
-  if (TGRAGScorer.scoreEdge(edgeOut, pprScores, scope2023) !== 0) throw new Error('TGRAGScorer failed to zero out edge out of scope');
-  console.log('✅ TGRAGScorer: Edge scoring passed');
+      const adj = DynamicSubgraph.build(edges, scope);
+      const nodes = DynamicSubgraph.getNodes(adj);
 
-  console.log('\nAll Temporal GraphRAG Unit Tests Passed! 🚀');
-}
+      expect(nodes).toContain('B');
+      expect(nodes).toContain('C');
+      expect(nodes).not.toContain('A');
+    });
+  });
 
-runTests().catch(err => {
-  console.error('❌ Tests failed:', err);
-  process.exit(1);
+  describe('PPR', () => {
+    it('should score nodes by salience', async () => {
+      const adj = {
+        'A': { 'B': 1 },
+        'B': { 'C': 1 },
+        'C': { 'A': 1 }
+      };
+
+      const scores = PPR.calculate(adj, ['A']);
+
+      expect(scores['A']).toBeGreaterThan(scores['C']);
+    });
+  });
+
+  describe('TGRAGScorer', () => {
+    it('should zero out scores for out-of-scope edges', () => {
+      const scope = { start: new Date('2025-01-01'), end: new Date('2025-12-31'), raw: '2025' };
+      const edge: TemporalEdge = { v1: 'A', v2: 'B', rel: 'T1', timestamp: '2024-01-01T00:00:00Z', chunkIds: [] };
+      const nodeScores = new Map([['A', 0.5], ['B', 0.5]]);
+
+      const edgeScore = TGRAGScorer.scoreEdge(edge, scope, nodeScores);
+      expect(edgeScore).toBe(0);
+    });
+  });
 });

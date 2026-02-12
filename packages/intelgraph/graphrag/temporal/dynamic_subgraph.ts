@@ -1,4 +1,4 @@
-import { TemporalEdge, TimeScope } from './types.js';
+import { TemporalEdge, TimeScope } from './types';
 
 export interface AdjacencyList {
   [nodeId: string]: {

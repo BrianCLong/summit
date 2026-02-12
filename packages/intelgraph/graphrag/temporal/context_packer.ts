@@ -1,4 +1,4 @@
-import { ScoredChunk } from './scoring.js';
+import { ScoredChunk } from './scoring';
 
 export class ContextPacker {
   static pack(chunks: ScoredChunk[], tokenBudget: number): ScoredChunk[] {

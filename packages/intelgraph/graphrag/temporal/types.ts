@@ -4,6 +4,7 @@ export interface TemporalEdge {
   rel: string; // Relation type
   timestamp: string; // ISO 8601 or similar representation
   embeddingId?: string; // Reference to relation embedding
+  embedding?: number[]; // Actual embedding vector
   chunkIds: string[]; // Chunks supporting this fact
 }
 

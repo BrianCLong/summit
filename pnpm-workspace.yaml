@@ -1,6 +1,7 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'packages/intelgraph/*'
   - 'platform/*'
   - 'packages/maestro-skills/*'
   - 'sdk/*'
