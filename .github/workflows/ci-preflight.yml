@@ -46,7 +46,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-# version handled by package.json
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

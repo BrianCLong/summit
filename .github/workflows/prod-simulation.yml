@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: '20'
+          node-# version handled by package.json
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'latest'
+          # auto-detect
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

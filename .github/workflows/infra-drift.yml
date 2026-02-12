@@ -52,8 +52,9 @@ jobs:
           key: tf-${{ runner.os }}-${{ hashFiles('infra/.terraform.lock.hcl') }}
 
       - name: Install OPA
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+      - name: Ensure opa path is clean
+        run: rm -rf opa
+        run: |          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
           chmod +x opa
           sudo mv opa /usr/local/bin/opa
 
@@ -93,8 +94,7 @@ jobs:
           terraform_version: 1.8.5
 
       - name: OPA
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+        run: |          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
           chmod +x opa
           sudo mv opa /usr/local/bin/opa
 

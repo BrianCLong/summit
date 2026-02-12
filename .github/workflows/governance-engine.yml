@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-# version handled by package.json
 
       - name: Install dependencies (scripts only)
         run: pnpm install --frozen-lockfile

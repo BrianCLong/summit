@@ -28,10 +28,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          # version handled by package.json
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-# auto-detect
           cache: 'pnpm'
       - name: Install dependencies (scoped)
         run: pnpm install --filter @intelgraph/a11y-lab...

@@ -61,17 +61,18 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-# version handled by package.json
 
       - name: Setup Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5
         with:
-          go-version: "1.21"
+          go-# auto-detect
 
       - name: Install Tools (OPA, Cosign, Syft, Grype)
         run: |
-          # OPA
-          curl -L -o opa https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
+        - name: Ensure opa path is clean
+          run: rm -rf opa
+          # OPA          curl -L -o opa https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
           chmod +x opa
           sudo mv opa /usr/local/bin/
 

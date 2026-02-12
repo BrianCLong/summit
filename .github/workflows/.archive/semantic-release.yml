@@ -66,7 +66,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-# version handled by package.json
           cache: 'pnpm'
 
       - name: Cache pnpm store
@@ -219,6 +219,6 @@ jobs:
     needs: release
     uses: ./.github/workflows/deploy-staging.yml
     with:
-      version: ${{ needs.release.outputs.new-release-version }}
+      # auto-detect
       environment: staging
     secrets: inherit

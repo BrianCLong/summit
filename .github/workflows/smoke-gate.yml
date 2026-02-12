@@ -88,7 +88,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-# version handled by package.json
 
       - name: Get pnpm store directory
         shell: bash
@@ -127,7 +127,7 @@ jobs:
         working-directory: server
         run: |
           echo "Starting server in background..."
-          nohup node dist/server/src/index.js > server.log 2>&1 &
+          nohup node dist/src/index.js > server.log 2>&1 &
           echo $! > server.pid
           echo "Server PID: $(cat server.pid)"
         env:

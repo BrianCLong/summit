@@ -63,8 +63,9 @@ jobs:
 
       - name: Install Release Captain dependencies
         run: |
-          # Install OPA for policy testing
-          curl -L -o opa https://openpolicyagent.org/downloads/v0.57.0/opa_linux_amd64_static
+        - name: Ensure opa path is clean
+          run: rm -rf opa
+          # Install OPA for policy testing          curl -L -o opa https://openpolicyagent.org/downloads/v0.57.0/opa_linux_amd64_static
           chmod +x opa && sudo mv opa /usr/local/bin/
 
           # Install additional testing tools

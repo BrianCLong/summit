@@ -24,7 +24,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20.14.0
+          node-# version handled by package.json
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Run guardrail fuzz (PR subset)

@@ -48,8 +48,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup OPA
-        run: |
-          curl -L -o opa-bin https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
+      - name: Ensure opa path is clean
+        run: rm -rf opa
+        run: |          curl -L -o opa-bin https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
           chmod 755 opa-bin
           sudo mv opa-bin /usr/local/bin/opa
           opa version

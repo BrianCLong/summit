@@ -112,13 +112,13 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
-          version: ${{ steps.resolve-pnpm.outputs.pnpm }}
+          # version handled by package.json
           run_install: ${{ inputs.install-deps }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: ${{ steps.detect.outputs.version }}
+          node-# auto-detect
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 

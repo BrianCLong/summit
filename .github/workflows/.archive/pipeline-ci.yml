@@ -29,7 +29,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          # version handled by package.json
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -63,10 +63,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: ${{ env.NODE_VERSION }}
+          node-# auto-detect
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          # version handled by package.json
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -192,11 +192,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: ${{ env.NODE_VERSION }}
+          node-# auto-detect
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          # version handled by package.json
           run_install: false
 
       - name: Install dependencies

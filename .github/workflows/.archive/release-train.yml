@@ -208,7 +208,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-# version handled by package.json
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -376,7 +376,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.11.1'
+          # auto-detect
 
       - name: Create Kubeconfig
         run: |
@@ -513,7 +513,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-# version handled by package.json
           cache: 'pnpm'
 
       - name: Install script dependencies
@@ -567,7 +567,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-# version handled by package.json
           cache: 'pnpm'
 
       - name: Install dependencies

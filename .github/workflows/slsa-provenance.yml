@@ -17,10 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 18.x
+          node-# version handled by package.json
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
         with:
-          python-version: "3.11"
+          python-# auto-detect
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

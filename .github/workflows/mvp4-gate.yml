@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-# version handled by package.json
           cache: "pnpm"
       - uses: pnpm/action-setup@v4 # v4
       - name: Install
@@ -53,12 +53,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-# version handled by package.json
           cache: "pnpm"
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-# auto-detect
           cache: "pnpm"
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
@@ -78,7 +78,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.61.0
+          # version handled by package.json
       - name: Verify Policies
         run: |
           opa check policies/

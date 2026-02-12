@@ -212,7 +212,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-# version handled by package.json
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -297,7 +297,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.11.1'
+          # auto-detect
 
       - name: Create Kubeconfig
         run: |
@@ -378,7 +378,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'v3.11.1'
+          # version handled by package.json
 
       - name: Create Kubeconfig
         run: |
@@ -456,7 +456,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-# version handled by package.json
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -473,7 +473,7 @@ jobs:
 
           git tag -a "v$VERSION" -m "Hotfix release v$VERSION
 
-          Base version: v${{ inputs.base_version }}
+          Base # auto-detect
           Justification: ${{ inputs.justification }}
           Run ID: ${{ github.run_id }}"
 

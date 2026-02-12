@@ -30,8 +30,9 @@ jobs:
         uses: sigstore/cosign-installer@v3
 
       - name: Install OPA
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+      - name: Ensure opa path is clean
+        run: rm -rf opa
+        run: |          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
           chmod +x opa && sudo mv opa /usr/local/bin/opa
 
       - name: Resolve digest and fetch attestation
