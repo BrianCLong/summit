@@ -1,0 +1,16 @@
+{
+  "run_id": "daily-sprint-2026-02-12",
+  "created_at": "2026-02-12T00:46:51Z",
+  "mode": "sensing",
+  "summary": "Daily sprint sensing run captured PR snapshot and logged issue triage failure.",
+  "evidence": {
+    "gh_pr_list": "docs/ops/evidence/daily-sprint-2026-02-12/gh_pr_list.json",
+    "gh_pr_list_error": "docs/ops/evidence/daily-sprint-2026-02-12/gh_pr_list_error.txt",
+    "gh_issue_list": "docs/ops/evidence/daily-sprint-2026-02-12/gh_issue_list.json",
+    "gh_issue_list_error": "docs/ops/evidence/daily-sprint-2026-02-12/gh_issue_list_error.txt"
+  },
+  "notes": [
+    "PR snapshot recorded from prior successful GH query; latest refresh attempt failed due to API connectivity.",
+    "Issue triage failed due to GitHub API connectivity; error captured in evidence."
+  ]
+}
