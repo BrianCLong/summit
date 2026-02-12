@@ -46,6 +46,7 @@ Primary Zone: Documentation (docs/) with governed prompt registry coupling
 - 01:10Z: Updated docs/roadmap/STATUS.json revision metadata.
 - 01:13Z: Git push failed (network reset) and PR creation deferred pending GitHub connectivity.
 - 01:14Z: Git push succeeded after retry; branch published.
+- 01:15Z: PR creation failed due to GitHub API connectivity (see CLI error).
 
 ## End-of-Day Report
 Completed:
@@ -56,3 +57,4 @@ Completed:
 
 Blocked (Governed Exceptions):
 - Issue triage: GitHub API connectivity error (see docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T010558Z/gh_issue_list.err).
+- PR creation: GitHub API connectivity error during `gh pr create`.
