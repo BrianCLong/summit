@@ -21,9 +21,13 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("items", {})
+    # Support both 'items' (legacy?) and 'evidence' (v1) keys
+    items = idx.get("items")
+    if not items:
+        items = idx.get("evidence")
+
     if not isinstance(items, dict) or not items:
-        fail("evidence/index.json must contain non-empty 'items' map")
+        fail("evidence/index.json must contain non-empty 'items' or 'evidence' map")
 
     for evd_id, meta in items.items():
         if isinstance(meta, list):
@@ -32,6 +36,13 @@ def main() -> None:
         elif isinstance(meta, dict) and "path" in meta:
             base = ROOT / meta["path"]
             files = meta.get("files", [])
+        elif isinstance(meta, dict) and "files" in meta:
+             # Handle direct files dict
+             base = ROOT
+             files = meta["files"]
+             # If files is a dict (v1 schema), convert values to list
+             if isinstance(files, dict):
+                 files = list(files.values())
         else:
             # Skip legacy items or items not following the new schema
             continue
