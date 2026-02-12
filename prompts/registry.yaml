@@ -922,3 +922,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/operations/daily-sprint-orchestrator@v1.md
+    sha256: 7912eb40047cb46fbf8ae7d7c45453ecbdaa271770e1348e5223f379fd8276e3
+    description: Run the daily sprint orchestration loop with evidence-first outputs.
+    scope:
+      paths:
+        - docs/ops/
+        - docs/ops/evidence/
+        - docs/roadmap/STATUS.json
+        - prompts/operations/daily-sprint-orchestrator@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
