@@ -14,7 +14,7 @@
     "@aws-sdk/client-s3": "^3.713.0",
     "@azure/storage-blob": "^12.26.0",
     "@slack/web-api": "^7.11.0",
-    "axios": "^1.11.0",
+    "axios": "^1.13.5",
     "nodemailer": "^7.0.12",
     "pg": "^8.16.3",
     "redis": "^5.8.1",

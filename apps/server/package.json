@@ -11,8 +11,8 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --config ./jest.config.cjs --runInBand"
   },
   "dependencies": {
-    "@apollo/server": "^4.11.1",
-    "axios": "^1.7.2",
+    "@apollo/server": "^5.4.0",
+    "axios": "^1.13.5",
     "body-parser": "^2.2.0",
     "connect-redis": "^8.0.1",
     "cors": "^2.8.5",
