@@ -1,0 +1,6 @@
+{
+  "command": "gh pr checks 18488 --repo BrianCLong/summit --required",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "error connecting to api.github.com\ncheck your internet connection or https://githubstatus.com\n"
+}

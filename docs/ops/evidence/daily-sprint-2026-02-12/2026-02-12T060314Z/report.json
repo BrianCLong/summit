@@ -8,11 +8,11 @@
     "stamp.json",
     "pr-open.json",
     "gh_pr_list.json",
-    "gh_pr_list_error.txt",
     "gh_issue_list.json",
-    "gh_issue_list_error.txt",
     "pr_18488.json",
-    "pr_18488_checks.txt",
-    "pr_18490.json"
+    "pr_18490.json",
+    "gh_pr_list_result.json",
+    "gh_issue_list_result.json",
+    "pr_18488_checks_result.json"
   ]
 }

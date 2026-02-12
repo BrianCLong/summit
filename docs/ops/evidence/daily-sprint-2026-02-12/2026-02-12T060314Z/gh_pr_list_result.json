@@ -1,0 +1,6 @@
+{
+  "command": "gh pr list --repo BrianCLong/summit --state open --limit 20 --json number,title,author,updatedAt,labels,headRefName,baseRefName,url",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "error connecting to api.github.com\ncheck your internet connection or https://githubstatus.com\n"
+}

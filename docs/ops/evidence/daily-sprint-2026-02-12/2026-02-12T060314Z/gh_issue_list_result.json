@@ -1,0 +1,6 @@
+{
+  "command": "gh issue list --repo BrianCLong/summit --state open --search \"label:security OR label:ga OR label:bolt OR label:osint OR label:governance\" --limit 50 --json number,title,labels,updatedAt,url",
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "error connecting to api.github.com\ncheck your internet connection or https://githubstatus.com\n"
+}
