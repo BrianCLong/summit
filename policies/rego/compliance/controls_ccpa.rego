@@ -1,5 +1,9 @@
 package compliance
 
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+
 import data.compliance.lib_time as t
 
 pass["ccpa-DSR-001"]["DSR within 45 days and status OK"] {

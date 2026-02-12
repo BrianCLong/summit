@@ -100,6 +100,7 @@ router.post('/ingest-feed', ensureAuthenticated, async (req: Request, res: Respo
            ON CONFLICT DO NOTHING`, // simplified handling
           values,
         );
+        insertedCount += chunk.length;
       } catch (err) {
         console.error('Batch insert failed, falling back to individual inserts', err);
         // BOLT: Fallback to individual inserts to ensure valid records are still processed
@@ -112,13 +113,12 @@ router.post('/ingest-feed', ensureAuthenticated, async (req: Request, res: Respo
                ON CONFLICT DO NOTHING`,
               [ioc.type, ioc.value, ioc.source],
             );
+            insertedCount++;
           } catch (innerErr) {
             console.error('Individual insert failed', innerErr);
           }
         }
       }
-      // We increment insertedCount by chunk length to maintain original reporting behavior
-      insertedCount += chunk.length;
     }
 
     res.json({

@@ -1,5 +1,9 @@
 package summit.authz_test
 
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+
 import data.summit.authz
 
 base_subject := {

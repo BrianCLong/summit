@@ -1,5 +1,9 @@
 package composer.residency
 
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
+
 # Input contract (example):
 # input = {
 #   "mode": "enforce" | "shadow",
