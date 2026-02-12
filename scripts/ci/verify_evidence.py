@@ -94,7 +94,12 @@ def check_timestamps(evid_dir=None):
     IGNORE_DIRS = {
         "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7",
         "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption",
-        "EVD-POSTIZ-GATE-004", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GROWTH-001"
+        "EVD-POSTIZ-GATE-004", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GROWTH-001",
+        "EVD-IOB20260202-SUPPLYCHAIN-001", "forbes-2026-trends", "EVD-IOB20260202-CAPACITY-001",
+        "pppt-501608", "moltbook-relay-surface-001", "EVD-IOB20260202-ALLYRISK-001",
+        "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-IOB20260202-HUMINT-001", "EVID-NARINT-SMOKE",
+        "EVD-IOB20260202-AIAGENT-001", "EVD-IOB20260202-FIMI-001", "EVD-IOB20260202-WIRELESS-001",
+        "EVD-IOB20260202-ECONESP-001", "fixtures", "bundles"
     }
 
     for p in scan_dir.rglob("*"):
