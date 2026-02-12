@@ -27,8 +27,8 @@ jobs:
           cache: 'pnpm'
           node-version: "20"
 
-      - name: Install dependencies (script only)
-        run: pnpm add -w js-yaml
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run AI Copilot canary checks
         run: node scripts/ai-copilot-canary.cjs
