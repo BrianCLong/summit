@@ -1,9 +1,5 @@
 package composer.dlp
 
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
-
 # input.dlp_hits: array of findings from your scanners (post-redaction)
 # Example hit: { "severity": "high", "type": "PII_EMAIL", "path": "/logs/build-123.log" }
 

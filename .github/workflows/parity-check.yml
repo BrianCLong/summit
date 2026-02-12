@@ -39,6 +39,9 @@ jobs:
         with:
           terraform_version: 1.8.5
 
+      - name: Setup AWS CLI
+        if: matrix.cloud == 'aws'
+        uses: aws-actions/setup-cli@v2
       - name: Setup gcloud
         if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v2

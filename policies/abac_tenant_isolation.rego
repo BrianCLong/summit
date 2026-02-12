@@ -1,10 +1,6 @@
 
 package policies
 
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
-
 default allow = false
 
 # Allow if the principal's tenant_id matches the resource's tenant_id

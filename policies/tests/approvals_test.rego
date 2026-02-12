@@ -1,9 +1,5 @@
 package companyos.provenance
 
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
-
 test_approval_required {
     input := {
         "action": "delete",

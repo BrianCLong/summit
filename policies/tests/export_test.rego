@@ -1,9 +1,5 @@
 package intelgraph.export
 
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
-
 import future.keywords.every
 
 test_simulate_allows_without_step_up {

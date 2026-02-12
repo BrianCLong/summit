@@ -1,9 +1,5 @@
 package composer.cmk
 
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
-
 # Require CMK for artifacts in protected namespaces
 
 needs_cmk {

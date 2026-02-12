@@ -1,10 +1,6 @@
 
 package conductor
 
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
-
 test_allow_known_good {
     allow with input as {
         "verb": "get",
