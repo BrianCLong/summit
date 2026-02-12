@@ -13,10 +13,10 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-maestro}
       POSTGRES_USER: ${POSTGRES_USER:-maestro}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_pw}
       # WAL-G Configuration
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID for WAL archiving}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY for WAL archiving}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-mock_key}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-mock_secret}
       AWS_REGION: ${AWS_REGION:-us-west-2}
       WALG_S3_PREFIX: ${WALG_S3_PREFIX:-s3://summit-wal-archives/postgres}
       WALG_COMPRESSION_METHOD: lz4
