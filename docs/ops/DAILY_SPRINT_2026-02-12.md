@@ -41,6 +41,7 @@
 - 08:02Z: Evidence bundle generated with report/metrics/stamp and error logs.
 - 08:02Z: Roadmap status refreshed for sprint run metadata.
 - 08:04Z: Daily sprint prompt registered in `prompts/registry.yaml`.
+- 08:06Z: PR creation failed; logged `gh_pr_create_error.log`.
 
 ## Status
 - Task 1: Blocked — Deferred pending GitHub API connectivity.
@@ -50,6 +51,7 @@
 
 ## Blockers
 - GitHub API connectivity blocks PR/issue triage and downstream task selection.
+- GitHub API connectivity blocks PR creation for this sprint branch.
 
 ## End-of-Run Summary
 - Completed: Evidence bundle generation, sprint report, roadmap status update.
