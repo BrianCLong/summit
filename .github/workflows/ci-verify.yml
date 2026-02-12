@@ -75,7 +75,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.60.0 # Updated to support modern Rego syntax (e.g. 'in')
+          version: v0.45.0 # Updated to support modern Rego syntax (e.g. 'in')
 
       - name: OPA policy check
         run: |
