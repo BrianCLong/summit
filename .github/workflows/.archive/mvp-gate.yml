@@ -19,7 +19,7 @@ jobs:
 
     env:
       NODE_VERSION: "20.19.0"
-      PNPM_VERSION: "9.12.0"
+      PNPM_VERSION: "10.0.0"
       DEFAULT_MVP_TIER: "mvp-0"
       SMOKE_URL: "http://127.0.0.1:3000/healthz"
 
