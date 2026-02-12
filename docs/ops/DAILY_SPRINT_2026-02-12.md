@@ -135,3 +135,20 @@ check your internet connection or https://githubstatus.com
 - Checkout PR #18493 branch and run targeted security regression test.
 - Checkout PR #18422 branch and run gateway tests with env vars.
 - Evaluate PR #18491 for security patch scope and run scoped lint/test.
+
+## Update (Post-Connectivity Recovery)
+### Evidence: Issues list (labels security,ga,bolt,osint,governance)
+Command:
+`gh issue list --repo BrianCLong/summit --limit 30 --search "label:security,ga,bolt,osint,governance sort:updated-desc" --json number,title,updatedAt,labels,url`
+
+Output:
+```json
+[
+  {"number":17754,"title":"[Governance Drift] Branch protection does not match REQUIRED_CHECKS_POLICY (main)","updatedAt":"2026-02-09T10:20:40Z","url":"https://github.com/BrianCLong/summit/issues/17754"},
+  {"number":193,"title":"OSINT data integration","updatedAt":"2026-01-16T18:18:04Z","url":"https://github.com/BrianCLong/summit/issues/193"},
+  {"number":257,"title":"Data importers: STIX/TAXII & CSV bulk","updatedAt":"2025-08-14T04:54:48Z","url":"https://github.com/BrianCLong/summit/issues/257"}
+]
+```
+
+### PR Created
+- Daily sprint docs PR: https://github.com/BrianCLong/summit/pull/18496
