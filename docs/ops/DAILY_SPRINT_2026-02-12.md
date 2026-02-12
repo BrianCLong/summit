@@ -43,6 +43,7 @@ Reasoning
 
 ### Blocked
 - **GitHub issue triage:** `gh issue list` failed with `error connecting to api.github.com`.
+- **PR comment:** `gh pr comment` failed with `error connecting to api.github.com`.
 - **Tests:** `pnpm --filter intelgraph-server test -- server/tests/security/security_regression.test.js` failed; `cross-env` missing (dependencies not installed).
 
 ## PRs Touched
@@ -56,6 +57,7 @@ Reasoning
 - `gh issue list -R BrianCLong/summit --state open --label <security|ga|governance|osint|bolt> --limit 10 --json number,title,author,updatedAt,labels,url` (failed)
 - `rg -n "airgap|analytics|/dr" server/src/app.ts`
 - `pnpm --filter intelgraph-server test -- server/tests/security/security_regression.test.js` (failed)
+- `gh pr comment -R BrianCLong/summit 18493 -b "<summary>"` (failed)
 
 ## Follow-ups
 - Install dependencies (`pnpm install`) and rerun targeted test.
