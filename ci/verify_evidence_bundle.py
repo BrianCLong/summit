@@ -24,24 +24,37 @@ def main():
         sys.exit(1)
 
     data = json.loads(idx.read_text())
-    if "evidence" not in data or not isinstance(data["evidence"], dict):
-        print("Error: evidence/index.json must contain an 'evidence' dictionary")
+    items = data.get("items") or data.get("evidence")
+    if not isinstance(items, dict):
+        print("Error: evidence/index.json must contain an 'items' or 'evidence' dictionary")
         sys.exit(1)
 
     # Requirement: only stamp.json can have timestamps
-    evidence_dir = pathlib.Path("evidence")
-    for evd_id, rel_path in data["evidence"].items():
-        fpath = evidence_dir.parent / rel_path
-        if fpath.name != "stamp.json" and fpath.suffix == ".json":
-            try:
-                content = json.loads(fpath.read_text())
-                scan_for_timestamps(content, path=str(rel_path))
-            except ValueError as e:
-                print(f"Validation Error for {evd_id}: {e}")
-                sys.exit(1)
-            except Exception as e:
-                print(f"Error reading {rel_path}: {e}")
-                sys.exit(1)
+    root_dir = idx.parent.parent
+    for evd_id, meta in items.items():
+        # Handle different item formats
+        file_paths = []
+        if isinstance(meta, str):
+            file_paths = [meta]
+        elif isinstance(meta, dict) and "files" in meta:
+            files = meta["files"]
+            if isinstance(files, dict):
+                file_paths = list(files.values())
+            elif isinstance(files, list):
+                file_paths = files
+
+        for fp in file_paths:
+            fpath = root_dir / fp
+            if fpath.name != "stamp.json" and fpath.suffix == ".json" and fpath.exists():
+                try:
+                    content = json.loads(fpath.read_text())
+                    scan_for_timestamps(content, path=str(fp))
+                except ValueError as e:
+                    print(f"Validation Error for {evd_id}: {e}")
+                    sys.exit(1)
+                except Exception as e:
+                    print(f"Error reading {fp}: {e}")
+                    sys.exit(1)
 
     print("OK: evidence/index.json and artifacts validated")
 
