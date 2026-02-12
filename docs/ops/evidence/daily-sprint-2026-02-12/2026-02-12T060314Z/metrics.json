@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-OPS-DAILYSPRINT-20260212-001",
+  "metrics": {
+    "steps": 4,
+    "tool_calls": 6,
+    "pr_targets": 2,
+    "issue_query": 1
+  }
+}

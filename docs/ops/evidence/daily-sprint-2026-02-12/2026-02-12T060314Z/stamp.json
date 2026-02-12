@@ -1,0 +1,5 @@
+{
+  "evidence_id": "EVD-OPS-DAILYSPRINT-20260212-001",
+  "generated_at": "2026-02-12T06:03:14Z",
+  "git_head": "$(git rev-parse HEAD)"
+}

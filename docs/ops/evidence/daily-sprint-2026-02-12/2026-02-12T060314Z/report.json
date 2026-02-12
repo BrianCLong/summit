@@ -1,0 +1,18 @@
+{
+  "evidence_id": "EVD-OPS-DAILYSPRINT-20260212-001",
+  "summary": "Daily sprint triage evidence bundle for 2026-02-12.",
+  "item_slug": "daily-sprint-2026-02-12",
+  "artifacts": [
+    "report.json",
+    "metrics.json",
+    "stamp.json",
+    "pr-open.json",
+    "gh_pr_list.json",
+    "gh_pr_list_error.txt",
+    "gh_issue_list.json",
+    "gh_issue_list_error.txt",
+    "pr_18488.json",
+    "pr_18488_checks.txt",
+    "pr_18490.json"
+  ]
+}
