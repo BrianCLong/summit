@@ -1,26 +1,17 @@
 # RFCs (Requests for Comments)
 
-This directory contains Requests for Comments (RFCs), which are formal proposals for significant changes, new features, or systemic policies within the IntelGraph ecosystem.
-
-## Purpose
-
-The goal of the RFC process is to ensure that major decisions are well-documented, debated, and aligned with the project's strategic goals before implementation begins.
+This directory contains architectural and policy proposals for this repository.
 
 ## RFC Lifecycle
-
-1.  **Draft**: The proposal is being written and is not yet ready for formal review.
-2.  **Review**: The proposal is open for feedback from the community and stakeholders.
-3.  **Approved**: The proposal has been accepted and is ready for implementation.
-4.  **Rejected**: The proposal has been declined with a clear rationale.
-5.  **Implemented**: The proposed changes have been fully merged and deployed.
-6.  **Deprecated**: The RFC has been superseded by a newer proposal or is no longer relevant.
-
-## How to Submit an RFC
-
-1.  Copy a previous RFC or use a template (if available).
-2.  Create a new file in this directory following the naming convention `[ID]-[short-description].md` or `[description]-v[version].md`.
-3.  Open a Pull Request and label it as `type/rfc`.
+1. **Draft**: Initial proposal. Open for discussion.
+2. **Review**: Maintainers and stakeholders provide feedback.
+3. **Approved**: Consensus reached; implementation may begin.
+4. **Superseded**: Replaced by a newer RFC.
+5. **Withdrawn**: No longer being pursued.
 
 ## Active RFCs
-
-- [Backlog Reduction Strategy v0.1](./backlog-reduction-v0.1.md)
+| ID | Title | Status |
+|----|-------|--------|
+| FE-01 | [Frontend Consolidation](FE-01-frontend-consolidation.md) | Draft |
+| 001 | [Structured Logging](structured-logging-telemetry-envelope.md) | Draft |
+| 002 | [Backlog Reduction v0.1](backlog-reduction-v0.1.md) | **Approved** |

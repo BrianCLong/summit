@@ -1,112 +1,68 @@
 # RFC: Systemic Backlog Reduction v0.1
 
-**Status:** Draft
-**Author:** Jules (Release Captain)
-**Date:** February 8, 2026
-**Priority:** High Leverage
-
 ## Problem Statement
-
-The current backlog scale creates significant friction for both maintainers and contributors. High triage costs, review drag, and duplicate work are direct consequences of an unmanaged backlog. Large backlogs obscure critical issues, delay urgent fixes, and demotivate the community by making progress feel impossible. Systemic reduction is required to restore project velocity.
+The current issue backlog has reached a state of "entropy" where the sheer volume of open tickets harms productivity:
+* **Triage Cost**: New issues are buried; maintainers spend more time sorting than solving.
+* **Review Drag**: Stale PRs and issues create mental overhead for reviewers.
+* **Duplicate Work**: High noise makes it difficult to find existing discussions, leading to redundant tickets.
+* **Obfuscation**: Critical bugs are hidden among low-priority feature requests or vague feedback.
 
 ## Principles
+1. **Close by Default**: Issues without an active owner, clear acceptance criteria, or recent activity (within 30 days) should be closed.
+2. **Evidence-First**: Issues must have a reproduction case or data-backed evidence to remain open.
+3. **Consolidate**: Multiple issues describing the same root cause or goal must be merged into a single Epic or tracking issue.
+4. **Label Taxonomy as Control Plane**: Labels are not just metadata; they drive automation and prioritization.
 
-- **Close by Default**: Unless an issue has an active owner, clear acceptance criteria (AC), and is assigned to a near-term milestone, it should be closed.
-- **Consolidate Aggressively**: Duplicates are the enemy of clarity. Merge similar issues into a single source of truth immediately.
-- **Label Taxonomy as Control Plane**: Labels are not just metadata; they are the interface for automation and the control plane for project health.
-- **Evidence-First Issues**: Issues without reproduction steps, logs, or data-backed evidence are candidates for immediate closure or "Needs-Repro" status.
+## Policy: The "Keep or Close" Criteria
 
-## Policy
+### Criteria for KEEP
+* **Active**: Assigned to a contributor with progress in the last 14 days.
+* **Critical**: Security vulnerabilities or P0 regressions with a verified repro.
+* **Approved RFC**: Issues linked to an approved RFC in the `docs/rfcs` directory.
 
-### Criteria for Disposition
+### Criteria for CLOSE
+* **Stale**: No activity for >30 days and not marked as `pinned`.
+* **Vague**: Lacks "Expected vs Actual" behavior or environment details.
+* **Duplicate**: Superseded by a more comprehensive issue.
+* **No Repro**: Maintainers cannot reproduce the issue and the reporter hasn't responded to queries.
 
-- **Close**:
-  - No activity for > 60 days without a dedicated owner.
-  - Missing reproduction steps or sufficient evidence after 7 days of request.
-  - Low-value feature requests that do not align with the current roadmap.
-- **Keep**:
-  - Active owner assigned and meaningful progress in the last 30 days.
-  - Clear acceptance criteria and part of an active milestone.
-- **Convert-to-Epic**:
-  - Issues that represent broad workstreams rather than discrete tasks.
-  - Large features that require multiple PRs and coordinated effort.
-- **Merge**:
-  - Direct duplicates or overlapping scopes.
-- **Needs-Repro**:
-  - Valid reports missing sufficient detail to act upon.
+### Criteria for CONVERT TO EPIC
+* Large features that require >3 distinct PRs should be moved to an Epic template.
 
-## Process
-
-### Weekly Sweep Cadence
-
-A systemic sweep of the backlog will occur weekly to ensure adherence to the policy.
-
-- **Roles**:
-  - **Day Captain**: A rotational maintainer role responsible for the weekly triage sweep and initial labeling.
-  - **Maintainer**: Final authority on "Close" vs. "Convert-to-Epic" decisions for high-impact issues.
-  - **Triage Bot**: Automated assistant that handles stale labeling, initial categorization, and closure of abandoned issues.
-- **Definition of "Active"**: An issue is considered active if it has a meaningful comment from a contributor or is assigned to a milestone within the current or next sprint cycle.
+## Process: Weekly Sweep Cadence
+1. **Monday (Day Captain)**: Run the "Backlog Burn-down" script/query to identify stale issues.
+2. **Tuesday (Maintainer Review)**: Apply `stale-closure-warning` labels.
+3. **Friday (Cleanup)**: Bulk-close issues that reached the warning threshold.
 
 ## Automation Hooks
-
-### Interface Specifications
-
-- **Labels**:
-  - `status/stale`: Automatically applied after 60 days of inactivity.
-  - `status/needs-repro`: Applied when evidence is missing.
-  - `resolution/duplicate`: Used for merging.
-  - `epic-candidate`: Flag for potential epic conversion.
-- **GitHub Actions**:
-  - **Stale Manager**: Monitors `status/stale` issues and closes them after 7 days of further inactivity.
-  - **Template Enforcer**: Validates that new issues contain required sections (e.g., "Reproduction Steps").
-- **Bot Comments**:
-  - Automated "call for owner" on issues approaching stale status.
-  - Standardized closure messages with instructions on how to reopen.
+* **Stale Bot**: Automatically label issues with no activity after 30 days; close after 7 more.
+* **Repro Checker**: Require the `has-repro` label for any `bug` to reach "Priority" status.
+* **Label Invariants**: CI checks to ensure every open issue has at least one `status/` and one `type/` label.
 
 ## Metrics
-
-- **Backlog Burn-down**: Track the total count of open issues vs. closed issues weekly.
-- **Mean Issue Age**: Average time from creation to resolution/closure.
-- **% Issues with Evidence**: Percentage of open issues that meet the "Evidence-First" criteria.
-- **Reopen Rate**: Percentage of issues closed by systemic reduction that are subsequently reopened with new evidence.
+* **Backlog Burn-down**: Total open issues vs. closed per week.
+* **Mean Issue Age**: Targeted reduction in the average age of open tickets.
+* **Repro Rate**: % of bug reports containing a valid reproduction.
+* **Reopen Rate**: Monitoring for accidental closures (target <5%).
 
 ## Risk + Rollback
-
-### Avoiding Accidental Closures
-
-- **Grace Period**: Issues must be labeled `status/stale` for at least 7 days before automated closure.
-- **Human Override**: Any contributor can remove the `status/stale` label by providing a meaningful update.
-
-### Restoration
-
-- **Standard Reopen Policy**: Any closed issue can be reopened if the requester provides the missing reproduction steps or takes ownership of the implementation.
-- **Audit Trail**: Every systemic action must be accompanied by a comment explaining the rationale and citing this RFC.
+* **Accidental Closure**: Use a templated comment: *"Closing due to inactivity. If this is still relevant, please provide [missing info] and reopen."*
+* **Audit Trail**: Every bulk action must be tagged with a unique `cleanup-session-ID` label.
 
 ## Appendix
 
 ### Example Label Set
+* `status/triage`: New, unvetted.
+* `status/blocked`: Waiting on external factors.
+* `status/active`: Work in progress.
+* `type/cleanup`: For backlog reduction tasks.
 
-| Label                  | Purpose                     |
-| ---------------------- | --------------------------- |
-| `type/bug`             | Functional defect           |
-| `type/feature`         | Enhancement request         |
-| `priority/critical`    | Immediate action required   |
-| `status/stale`         | No recent activity          |
-| `status/needs-repro`   | Awaiting reproduction steps |
-| `resolution/duplicate` | Merged into another issue   |
+### Closure Comment Template
+> "This issue is being closed as part of the [Systemic Backlog Reduction v0.1](docs/rfcs/backlog-reduction-v0.1.md) policy. It has been inactive for 30+ days. If you believe this is an error, please add a reproduction case and reopen the ticket."
 
-### Closure Comment Templates
-
-> **Stale Closure:**
-> "This issue has been closed due to 60 days of inactivity. If this is still relevant, please reopen it with updated information or reproduction steps. See [RFC: Systemic Backlog Reduction v0.1](docs/rfcs/backlog-reduction-v0.1.md) for more context."
-
-> **Missing Evidence Closure:**
-> "Closing this issue as it lacks the required reproduction steps/evidence to be actionable. Please feel free to reopen once the necessary details are provided."
-
+---
 ## How to Adopt Checklist
-
-- [ ] **Approve RFC**: Stakeholder sign-off on this strategy.
-- [ ] **Label Initialization**: Ensure all labels in the "Example Label Set" exist in the repository.
-- [ ] **Action Configuration**: Deploy or update GitHub Actions for stale management and template enforcement.
-- [ ] **Initial Sweep**: Assign the first Day Captain to perform a manual sweep of all issues > 90 days old.
-- [ ] **Documentation Update**: Link this policy in `CONTRIBUTING.md` and issue templates.
+- [ ] Merge this RFC.
+- [ ] Audit existing labels against the taxonomy.
+- [ ] Configure GitHub Stale Bot according to the 30/7 day rule.
+- [ ] Appoint a "Day Captain" for the first weekly sweep.
