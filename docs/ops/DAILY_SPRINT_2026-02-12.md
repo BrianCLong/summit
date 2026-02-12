@@ -37,6 +37,7 @@
 - 2026-02-12T07:05:23Z Attempted PR detail and check capture for #18488/#18474/#18475; connectivity unstable, detail refresh deferred pending GH API access.
 - 2026-02-12T07:05:23Z Updated docs/roadmap/STATUS.json with sprint run revision note.
 - 2026-02-12T07:05:23Z Registered daily sprint prompt in prompts/registry.yaml.
+- 2026-02-12T07:05:23Z PR creation via gh failed; error logged in evidence bundle.
 
 ## MAESTRO Alignment
 - MAESTRO Layers: Observability, Tools, Governance
@@ -45,9 +46,10 @@
 
 ## Blockers
 - GitHub API connectivity intermittent; issue triage and PR detail refresh are deferred pending GH access.
+- GitHub API connectivity blocked PR creation.
 
 ## End-of-Day Summary
 - Planned: 3 triage tasks (PR #18488, #18474, #18475).
 - Completed: PR snapshot capture; STATUS.json updated; evidence bundle created.
 - In progress: PR detail/label verification (deferred pending GH API access).
-- Blocked: Issue triage + PR detail refresh due to GH API connectivity.
+- Blocked: Issue triage + PR detail refresh + PR creation due to GH API connectivity.

@@ -3,5 +3,7 @@
   "issue_snapshot_count": 0,
   "pr_detail_refresh_success": 0,
   "pr_detail_refresh_attempted": 3,
-  "gh_api_errors": 1
+  "gh_api_errors": 2,
+  "pr_create_attempted": 1,
+  "pr_create_success": 0
 }

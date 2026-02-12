@@ -1,7 +1,7 @@
 {
   "evidence_id": "EVID::ops::daily_sprint::2026-02-12::2026-02-12T070256Z::v1",
   "status": "PARTIAL",
-  "summary": "Captured live PR snapshot; GitHub API unavailable for issue triage and PR detail refresh.",
+  "summary": "Captured live PR snapshot; GitHub API unavailable for issue triage, PR detail refresh, and PR creation.",
   "artifacts": {
     "pr_snapshot": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T070256Z/pr-open.json",
     "issue_snapshot": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T070256Z/issue-open.json",
@@ -15,9 +15,11 @@
       "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T070256Z/pr-18488-checks.txt",
       "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T070256Z/pr-18474-checks.txt",
       "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T070256Z/pr-18475-checks.txt"
-    ]
+    ],
+    "pr_create_error_log": "docs/ops/evidence/daily-sprint-2026-02-12/2026-02-12T070256Z/pr-create.error.log"
   },
   "blockers": [
-    "GitHub API connectivity failed for live issue triage and PR detail refresh."
+    "GitHub API connectivity failed for live issue triage and PR detail refresh.",
+    "GitHub API connectivity failed for PR creation."
   ]
 }
