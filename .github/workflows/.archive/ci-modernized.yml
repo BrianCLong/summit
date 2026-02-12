@@ -143,7 +143,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -188,7 +188,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -230,7 +230,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -309,7 +309,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Get pnpm store path
@@ -386,7 +386,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -471,7 +471,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -530,13 +530,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-# version handled by package.json
+          python-version: '3.11'
 
       - name: 1. Bootstrap
         run: ./scripts/bootstrap.sh
@@ -598,7 +598,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies

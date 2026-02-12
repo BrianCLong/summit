@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-# version handled by package.json
+          node-version: 20
 
       - name: Install deps
         run: pnpm i --no-frozen-lockfile

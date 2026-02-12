@@ -63,7 +63,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-# auto-detect
+          node-version: 20
       - uses: pnpm/action-setup@v4
         with:
           # version handled by package.json
@@ -192,7 +192,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-# auto-detect
+          node-version: 20
 
       - uses: pnpm/action-setup@v4
         with:

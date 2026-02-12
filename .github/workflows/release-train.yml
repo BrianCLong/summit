@@ -59,7 +59,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
-          node-# auto-detect
+          node-version: 20
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -125,7 +125,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
-          node-# auto-detect
+          node-version: 20
 
       - name: Generate Evidence Bundle (Provenance)
         run: |

@@ -50,7 +50,7 @@ jobs:
       - name: Setup OPA
       - name: Ensure opa path is clean
         run: rm -rf opa
-        run: |          curl -L -o opa-bin https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
+           |          curl -L -o opa-bin https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
           chmod 755 opa-bin
           sudo mv opa-bin /usr/local/bin/opa
           opa version

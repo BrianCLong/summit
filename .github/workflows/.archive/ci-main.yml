@@ -42,7 +42,7 @@ jobs:
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -94,7 +94,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

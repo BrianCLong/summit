@@ -2,10 +2,15 @@ import crypto from "crypto";
 import { AuditEvent } from "./types";
 
 const SIGNING_ALGORITHM = "sha256";
-const DEFAULT_KEY = "dev-secret-do-not-use-in-prod";
-
 export function getSigningKey(): string {
-  return process.env.AUDIT_SIGNING_KEY || DEFAULT_KEY;
+  const key = process.env.AUDIT_SIGNING_KEY;
+  if (!key) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("AUDIT_SIGNING_KEY must be set in production");
+    }
+    return "dev-secret-do-not-use-in-prod";
+  }
+  return key;
 }
 
 export function calculateSignature(event: Omit<AuditEvent, "signature">): string {

@@ -68,7 +68,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -93,7 +93,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -116,7 +116,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -140,7 +140,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

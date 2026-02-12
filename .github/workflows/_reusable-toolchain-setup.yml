@@ -118,7 +118,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-# auto-detect
+          node-version: 20
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 

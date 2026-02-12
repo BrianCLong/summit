@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
-          node-# version handled by package.json
+          node-version: 20
 
       - name: Find Orchestrator Run
         id: find-run

@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: "pnpm"
       - uses: pnpm/action-setup@v4 # v4
       - name: Install
@@ -53,12 +53,12 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: "pnpm"
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          node-# auto-detect
+          node-version: 20
           cache: "pnpm"
       - name: Gitleaks
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2

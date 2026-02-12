@@ -208,7 +208,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -513,7 +513,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install script dependencies
@@ -567,7 +567,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies

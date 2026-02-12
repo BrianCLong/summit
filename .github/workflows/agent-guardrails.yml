@@ -96,11 +96,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-# version handled by package.json
+          node-version: 20
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-# auto-detect
+          node-version: 20
 
       - name: Verify S-AOS Compliance
         run: node scripts/ga/verify-saos.mjs

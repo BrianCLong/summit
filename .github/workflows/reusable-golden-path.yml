@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-# version handled by package.json
+          node-version: 20
           cache: "pnpm"
 
       - name: Install dependencies
@@ -128,7 +128,7 @@ jobs:
       - name: Install OPA
       - name: Ensure opa path is clean
         run: rm -rf opa
-        run: |          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+           |          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
           chmod +x ./opa
 
       - name: Pull image and get config for policy check

@@ -21,7 +21,7 @@ jobs:
       - name: Policy sim
       - name: Ensure opa path is clean
         run: rm -rf opa
-        run: |          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
+           |          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
           ./opa test policies/ -v
       - name: SBOM + provenance
         run: pnpm cyclonedx-npm --output-format JSON --output-file sbom.json && node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
