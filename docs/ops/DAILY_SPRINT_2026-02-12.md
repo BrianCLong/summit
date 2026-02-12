@@ -47,6 +47,9 @@
 - Issue triage failed due to GH API connectivity (error logged).
 - Generated report/metrics/stamp evidence bundle with hashes.
 - Drafted this sprint report and updated roadmap status metadata.
+- Attempted `pre-commit run --files ...`; blocked by permissions on `/Users/brianlong/.cache/pre-commit/.lock`.
+- Registered daily sprint prompt in `prompts/registry.yaml` and created `prompts/operations/daily-sprint-orchestrator@v1.md`.
+- PR creation blocked by GitHub API connectivity.
 
 ## Validation
 - `gh pr list --repo BrianCLong/summit --state open --limit 20 --json number,title,author,updatedAt,labels,headRefName,baseRefName,url`
@@ -54,6 +57,8 @@
 
 ## Blockers
 - GitHub API connectivity blocked live PR refresh and issue triage for this run.
+- GitHub API connectivity blocked PR creation.
+- `pre-commit` could not acquire cache lock due to permissions.
 
 ## End-of-Day Report
 - Planned: 5 tasks.
