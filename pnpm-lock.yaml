@@ -43,15 +43,12 @@ overrides:
   hono: '>=4.11.7'
   multer: '>=2.0.2'
   busboy: '>=1.6.0'
-  lodash-es@>=4.0.0 <=4.17.22: '>=4.17.23'
-  lodash@>=4.0.0 <=4.17.22: '>=4.17.23'
-  undici@<6.23.0: '>=6.23.0'
-  diff@<3.5.1: '>=3.5.1'
-  diff@>=4.0.0 <4.0.4: '>=4.0.4'
-  diff@>=6.0.0 <8.0.3: '>=8.0.3'
-  '@apollo/server@>=5.0.0 <5.4.0': '>=5.4.0'
-  '@apollo/server@>=4.2.0 <4.13.0': '>=4.13.0'
-  axios@<=1.13.4: '>=1.13.5'
+  lodash-es: '>=4.17.21'
+  lodash: '>=4.17.21'
+  undici: '>=6.21.1'
+  diff: '>=5.2.0'
+  '@apollo/server': '>=4.11.3'
+  axios: '>=1.7.9'
   html-minifier: npm:html-minifier-terser@^7.2.0
   apollo-server: npm:@apollo/server@^4.13.0
   apollo-server-express: npm:@apollo/server@^4.13.0
@@ -63,11 +60,11 @@ importers:
   .:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
-        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)
       '@jest/globals':
         specifier: ^30.2.0
         version: 30.2.0
@@ -81,7 +78,7 @@ importers:
         specifier: ^1.3.6
         version: 1.3.6(@types/react-dom@18.3.0)(@types/react@19.2.7)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       cbor:
         specifier: ^9.0.2
@@ -420,7 +417,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       moment:
         specifier: ^2.29.4
@@ -582,7 +579,7 @@ importers:
   apps/compliance-console:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       react:
         specifier: ^19.2.0
@@ -780,8 +777,8 @@ importers:
   apps/gateway:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@opentelemetry/api':
         specifier: latest
         version: 1.9.0
@@ -874,7 +871,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       mathjs:
         specifier: ^15.0.0
@@ -956,11 +953,11 @@ importers:
   apps/intelgraph-api:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.0.0
-        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -1053,7 +1050,7 @@ importers:
         specifier: ^5.24.1
         version: 5.90.12(react@18.3.1)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       class-variance-authority:
         specifier: ^0.7.0
@@ -1174,7 +1171,7 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       moment:
         specifier: ^2.29.4
@@ -1313,7 +1310,7 @@ importers:
         specifier: ^7.2.0
         version: 7.3.1
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       class-variance-authority:
         specifier: ^0.7.1
@@ -1557,7 +1554,7 @@ importers:
         specifier: ^10.4.16
         version: 10.4.22(postcss@8.5.6)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       clsx:
         specifier: ^2.0.0
@@ -1786,7 +1783,7 @@ importers:
         specifier: ^5.8.4
         version: 5.90.14(@tanstack/react-query@5.90.12(react@19.2.1))(react@19.2.1)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       date-fns:
         specifier: ^4.1.0
@@ -2006,7 +2003,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       natural:
         specifier: ^8.1.0
@@ -2088,10 +2085,10 @@ importers:
   apps/server:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       body-parser:
         specifier: ^2.2.0
@@ -2182,7 +2179,7 @@ importers:
   apps/slo-exporter:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       express:
         specifier: '>=4.21.0'
@@ -2501,7 +2498,7 @@ importers:
         specifier: 1.9.4
         version: 1.9.4
       lodash:
-        specifier: 4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       lucide-react:
         specifier: 0.554.0
@@ -2854,7 +2851,7 @@ importers:
   apps/workflow-engine:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       compression:
         specifier: ^1.7.4
@@ -2875,7 +2872,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       neo4j-driver:
         specifier: ^6.0.1
@@ -3147,7 +3144,7 @@ importers:
         specifier: 1.9.4
         version: 1.9.4
       lodash:
-        specifier: 4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       react:
         specifier: 18.3.1
@@ -3337,7 +3334,7 @@ importers:
   companyos/services/api-svc-template:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       config:
         specifier: ^3.3.11
@@ -3398,7 +3395,7 @@ importers:
   companyos/services/companyos-api:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       express:
         specifier: '>=4.21.0'
@@ -3432,7 +3429,7 @@ importers:
   companyos/services/incident-api:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       config:
         specifier: ^3.3.11
@@ -3493,8 +3490,8 @@ importers:
   companyos/services/tenant-api:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -4193,7 +4190,7 @@ importers:
   packages/api-framework:
     dependencies:
       '@apollo/server':
-        specifier: '>=5.4.0'
+        specifier: '>=4.11.3'
         version: 5.4.0(graphql@16.12.0)
       '@intelgraph/query-language':
         specifier: workspace:*
@@ -4375,7 +4372,7 @@ importers:
         specifier: workspace:*
         version: link:../osint-collector
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       email-validator:
         specifier: ^2.0.4
@@ -4587,7 +4584,7 @@ importers:
   packages/authz-core:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       pg:
         specifier: ^8.11.0
@@ -4840,7 +4837,7 @@ importers:
   packages/business-rules:
     dependencies:
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       uuid:
         specifier: ^13.0.0
@@ -5043,7 +5040,7 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       react:
         specifier: ^19.2.1
@@ -5506,7 +5503,7 @@ importers:
         specifier: ^7.11.0
         version: 7.13.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       nodemailer:
         specifier: ^7.0.12
@@ -5898,7 +5895,7 @@ importers:
         specifier: 1.7.0
         version: 1.7.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       bull:
         specifier: ^4.16.5
@@ -6700,7 +6697,7 @@ importers:
         specifier: workspace:*
         version: link:../knowledge-graph
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       neo4j-driver:
         specifier: 6.0.1
@@ -7549,7 +7546,7 @@ importers:
   packages/fztr-client:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
     devDependencies:
       '@types/jest':
@@ -8269,7 +8266,7 @@ importers:
         specifier: workspace:*
         version: link:../common-types
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
 
   packages/incentive-sim:
@@ -8287,7 +8284,7 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
     devDependencies:
       '@types/node':
@@ -8903,7 +8900,7 @@ importers:
         specifier: ^1.38.0
         version: 1.39.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       cheerio:
         specifier: ^1.0.0-rc.12
@@ -9568,7 +9565,7 @@ importers:
         specifier: workspace:*
         version: link:../threat-detection-core
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
     devDependencies:
       '@types/jest':
@@ -9862,7 +9859,7 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
     devDependencies:
       '@types/node':
@@ -10035,7 +10032,7 @@ importers:
         specifier: ^8.17.1
         version: 8.17.1
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       uuid:
         specifier: ^13.0.0
@@ -10380,7 +10377,7 @@ importers:
   packages/osint-collector:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       cheerio:
         specifier: ^1.0.0
@@ -10916,7 +10913,7 @@ importers:
         specifier: workspace:*
         version: link:../synthetic-data
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
     devDependencies:
       '@types/lodash':
@@ -11031,7 +11028,7 @@ importers:
   packages/prov-ledger-client:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       axios-retry:
         specifier: ^3.8.0
@@ -11191,7 +11188,7 @@ importers:
         specifier: ^5.15.0
         version: 5.18.0(@emotion/react@11.14.0(@types/react@18.3.11)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.11)(react@18.3.1))(@types/react@18.3.11)(react@18.3.1))(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       crypto-js:
         specifier: ^4.2.0
@@ -11438,8 +11435,8 @@ importers:
   packages/rate-limiter:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       express:
         specifier: '>=4.21.0'
         version: 5.2.1
@@ -11786,7 +11783,7 @@ importers:
   packages/rpa:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       cheerio:
         specifier: ^1.0.0
@@ -11991,7 +11988,7 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
     devDependencies:
       '@types/node':
@@ -12111,7 +12108,7 @@ importers:
   packages/sim-harness:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       commander:
         specifier: ^11.0.0
@@ -12303,7 +12300,7 @@ importers:
         specifier: workspace:*
         version: link:../osint-collector
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       compromise:
         specifier: ^14.13.0
@@ -12424,7 +12421,7 @@ importers:
         specifier: workspace:*
         version: link:../audio-processing
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       microsoft-cognitiveservices-speech-sdk:
         specifier: ^1.0.0
@@ -12739,7 +12736,7 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       mathjs:
         specifier: ^12.0.0
@@ -12817,7 +12814,7 @@ importers:
   packages/task-routing:
     dependencies:
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       uuid:
         specifier: ^13.0.0
@@ -13048,7 +13045,7 @@ importers:
         specifier: workspace:*
         version: link:../common-types
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
     devDependencies:
       '@types/lodash':
@@ -13162,7 +13159,7 @@ importers:
         specifier: workspace:*
         version: link:../common-types
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       zod:
         specifier: ^4.1.12
@@ -13465,7 +13462,7 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       react:
         specifier: ^19.2.1
@@ -13553,7 +13550,7 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       cheerio:
         specifier: ^1.0.0
@@ -13978,8 +13975,8 @@ importers:
   sdk/acc:
     dependencies:
       undici:
-        specifier: ^6.23.0
-        version: 6.23.0
+        specifier: '>=6.21.1'
+        version: 7.19.2
     devDependencies:
       '@types/node':
         specifier: ^20.11.30
@@ -14129,7 +14126,7 @@ importers:
   server:
     dependencies:
       '@apollo/server':
-        specifier: '>=5.4.0'
+        specifier: '>=4.11.3'
         version: 5.4.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: 1.1.2
@@ -14282,7 +14279,7 @@ importers:
         specifier: ^0.44.0
         version: 0.44.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       bullmq:
         specifier: 5.66.1
@@ -14399,7 +14396,7 @@ importers:
         specifier: ^2.2.4
         version: 2.2.4
       lodash:
-        specifier: '>=4.17.23'
+        specifier: '>=4.17.21'
         version: 4.17.23
       lru-cache:
         specifier: ^11.2.4
@@ -14724,8 +14721,8 @@ importers:
   services/admin-api:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@intelgraph/metrics-exporter':
         specifier: workspace:*
         version: link:../../packages/metrics-exporter
@@ -14773,8 +14770,8 @@ importers:
   services/admin-automation:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -15089,7 +15086,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       mercurius:
         specifier: ^16.3.0
@@ -15446,7 +15443,7 @@ importers:
   services/api-gateway:
     dependencies:
       '@apollo/server':
-        specifier: '>=5.4.0'
+        specifier: '>=4.11.3'
         version: 5.4.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
@@ -15833,7 +15830,7 @@ importers:
         specifier: latest
         version: 1.39.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       express:
         specifier: '>=4.21.0'
@@ -15912,8 +15909,8 @@ importers:
   services/battle-api:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.30
         version: 10.0.30(graphql@16.12.0)
@@ -16655,8 +16652,8 @@ importers:
         specifier: ^11.0.0
         version: 11.0.0
       undici:
-        specifier: ^6.23.0
-        version: 6.23.0
+        specifier: '>=6.21.1'
+        version: 7.19.2
     devDependencies:
       '@types/express':
         specifier: ^4.17.21
@@ -16683,11 +16680,11 @@ importers:
   services/config-service:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@as-integrations/express4':
         specifier: ^1.1.2
-        version: 1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)
+        version: 1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -16762,8 +16759,8 @@ importers:
   services/control-tower-service:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.0
         version: 10.0.30(graphql@16.12.0)
@@ -17328,8 +17325,8 @@ importers:
   services/data-monetization-engine:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@intelgraph/data-monetization-types':
         specifier: workspace:*
         version: link:../../packages/data-monetization-types
@@ -17597,8 +17594,8 @@ importers:
   services/digital-twin:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@opentelemetry/api':
         specifier: 1.7.0
         version: 1.7.0
@@ -17753,7 +17750,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/neural-networks
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       express:
         specifier: '>=4.21.0'
@@ -17784,7 +17781,7 @@ importers:
         specifier: ^1.9.0
         version: 1.9.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       express:
         specifier: '>=4.21.0'
@@ -18154,7 +18151,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/esg-reporting
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       cors:
         specifier: ^2.8.5
@@ -18459,7 +18456,7 @@ importers:
   services/factcert:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
 
   services/feature-flags:
@@ -18816,7 +18813,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/geospatial
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       cors:
         specifier: ^2.8.5
@@ -19227,8 +19224,8 @@ importers:
   services/graph-core:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@graphql-tools/schema':
         specifier: ^10.0.6
         version: 10.0.30(graphql@16.12.0)
@@ -19794,7 +19791,7 @@ importers:
         specifier: ^5.7.7
         version: 5.7.9
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       bullmq:
         specifier: ^5.0.0
@@ -20397,7 +20394,7 @@ importers:
         specifier: ^9.0.4
         version: 9.3.0
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       bullmq:
         specifier: ^5.34.8
@@ -20531,7 +20528,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/sentiment-analysis
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       express:
         specifier: '>=4.21.0'
@@ -21037,7 +21034,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/etl-framework
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       bull:
         specifier: ^4.16.5
@@ -21510,7 +21507,7 @@ importers:
   services/privacy:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
     devDependencies:
       '@types/jest':
@@ -21645,8 +21642,8 @@ importers:
   services/prov-ledger:
     dependencies:
       '@apollo/server':
-        specifier: ^4.13.0
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -21911,7 +21908,7 @@ importers:
   services/regulatory-compliance-agents:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       bullmq:
         specifier: ^5.0.0
@@ -22251,8 +22248,8 @@ importers:
   services/sandbox-gateway:
     dependencies:
       '@apollo/server':
-        specifier: '>=4.13.0'
-        version: 4.13.0(graphql@16.12.0)
+        specifier: '>=4.11.3'
+        version: 5.4.0(graphql@16.12.0)
       '@intelgraph/datalab-service':
         specifier: workspace:*
         version: link:../datalab-service
@@ -22593,7 +22590,7 @@ importers:
   services/self-upgrading-infrastructure:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       date-fns:
         specifier: ^2.30.0
@@ -22964,7 +22961,7 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(ajv@8.17.1)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       https-proxy-agent:
         specifier: ^7.0.2
@@ -23058,7 +23055,7 @@ importers:
         specifier: 1.19.0
         version: 1.19.0(@opentelemetry/api@1.7.0)
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       commander:
         specifier: ^12.0.0
@@ -23621,7 +23618,7 @@ importers:
         specifier: workspace:*
         version: link:../license-registry
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       fastify:
         specifier: '>=5.7.2'
@@ -24101,8 +24098,8 @@ importers:
   tools/issue-sweeper:
     dependencies:
       undici:
-        specifier: ^6.23.0
-        version: 6.23.0
+        specifier: '>=6.21.1'
+        version: 7.19.2
       yargs:
         specifier: ^17.7.2
         version: 17.7.2
@@ -24448,7 +24445,7 @@ importers:
   tools/summitctl:
     dependencies:
       axios:
-        specifier: '>=1.13.5'
+        specifier: '>=1.7.9'
         version: 1.13.5
       chalk:
         specifier: ^4.1.2
@@ -24814,7 +24811,7 @@ packages:
     resolution: {integrity: sha512-PGeMcwoOKdYnZ4LtsmM7aLNoel3tbK8wKnfyahdRau1qb7wLbuaXB35zg3w34Ov4bm3WJtO3yzd8Bw5jVE+aIQ==}
     engines: {node: '>=20'}
     peerDependencies:
-      '@apollo/server': '>=5.4.0'
+      '@apollo/server': '>=4.11.3'
       express: '>=4.21.0'
 
   '@asamuzakjp/css-color@3.2.0':
@@ -47295,7 +47292,7 @@ packages:
   native-fetch@4.0.2:
     resolution: {integrity: sha512-4QcVlKFtv2EYVS5MBgsGX5+NWKtbDbIECdUXDBGDMAZXq3Jkv9zf+y8iS7Ub8fEdga3GpYeazp9gauNqXHJOCg==}
     peerDependencies:
-      undici: '>=6.23.0'
+      undici: '>=6.21.1'
 
   nativewind@4.2.1:
     resolution: {integrity: sha512-10uUB2Dlli3MH3NDL5nMHqJHz1A3e/E6mzjTj6cl7hHECClJ7HpE6v+xZL+GXdbwQSnWE+UWMIMsNz7yOQkAJQ==}
@@ -52832,10 +52829,6 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
-  undici@6.23.0:
-    resolution: {integrity: sha512-VfQPToRA5FZs/qJxLIinmU59u0r7LXqoJkCzinq3ckNJp3vKEh7jTWN589YQ5+aoAC/TGRLyJLCPKcLQbM8r9g==}
-    engines: {node: '>=18.17'}
-
   undici@7.19.2:
     resolution: {integrity: sha512-4VQSpGEGsWzk0VYxyB/wVX/Q7qf9t5znLRgs0dzszr9w9Fej/8RVNQ+S20vdXSAyra/bJ7ZQfGv6ZMj7UEbzSg==}
     engines: {node: '>=20.18.1'}
@@ -54456,7 +54449,7 @@ snapshots:
   '@actions/http-client@2.2.3':
     dependencies:
       tunnel: 0.0.6
-      undici: 6.23.0
+      undici: 7.19.2
 
   '@actions/io@1.1.3': {}
 
@@ -54878,11 +54871,6 @@ snapshots:
   '@ardatan/sync-fetch@0.0.1':
     dependencies:
       node-fetch: 3.3.2
-
-  '@as-integrations/express4@1.1.2(@apollo/server@4.13.0(graphql@16.12.0))(express@5.2.1)':
-    dependencies:
-      '@apollo/server': 4.13.0(graphql@16.12.0)
-      express: 5.2.1
 
   '@as-integrations/express4@1.1.2(@apollo/server@5.4.0(graphql@16.12.0))(express@5.2.1)':
     dependencies:
@@ -82779,9 +82767,9 @@ snapshots:
   dns-over-http-resolver@2.1.3:
     dependencies:
       debug: 4.4.3(supports-color@5.5.0)
-      native-fetch: 4.0.2(undici@6.23.0)
+      native-fetch: 4.0.2(undici@7.19.2)
       receptacle: 1.3.2
-      undici: 6.23.0
+      undici: 7.19.2
     transitivePeerDependencies:
       - supports-color
 
@@ -91538,9 +91526,9 @@ snapshots:
     dependencies:
       node-fetch: 3.3.2
 
-  native-fetch@4.0.2(undici@6.23.0):
+  native-fetch@4.0.2(undici@7.19.2):
     dependencies:
-      undici: 6.23.0
+      undici: 7.19.2
 
   nativewind@4.2.1(react-native-reanimated@4.2.1(react-native-worklets@0.7.1(@babel/core@7.28.5)(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native-safe-area-context@5.6.2(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native-svg@15.15.1(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1))(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@18.3.11)(react@19.2.1))(react@19.2.1)(tailwindcss@3.4.18(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
@@ -98737,8 +98725,6 @@ snapshots:
   undici-types@6.21.0: {}
 
   undici-types@7.16.0: {}
-
-  undici@6.23.0: {}
 
   undici@7.19.2: {}
 
