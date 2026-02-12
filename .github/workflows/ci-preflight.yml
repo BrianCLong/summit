@@ -24,6 +24,10 @@ on:
 jobs:
   validate-compose:
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: dummy-secret
+      POSTGRES_PASSWORD: dummy-password
+      DATABASE_URL: postgresql://postgres:dummy-password@localhost:5432/summit_dev
     steps:
       - uses: actions/checkout@v4
 
@@ -51,6 +55,10 @@ jobs:
 
   verify-gateway-build:
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: dummy-secret
+      POSTGRES_PASSWORD: dummy-password
+      DATABASE_URL: postgresql://postgres:dummy-password@localhost:5432/summit_dev
     steps:
       - uses: actions/checkout@v4
 
