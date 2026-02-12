@@ -10,7 +10,7 @@
     "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js"
   },
   "dependencies": {
-    "uuid": "^11.1.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

@@ -84,6 +84,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
       CI: true
+      PLAYWRIGHT_USE_WEBSERVER: 'true'
     steps:
       - uses: actions/checkout@v4
 
