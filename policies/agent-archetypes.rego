@@ -248,20 +248,20 @@ allow if {
     not deny_impersonation
     not deny_policy_modification
     not deny_credential_access
-    (
-        allow_chief_of_staff_read
-        or allow_chief_of_staff_create
-        or allow_coo_read_ops
-        or allow_coo_triage_incident
-        or allow_coo_create_incident
-        or allow_coo_send_reminder
-        or allow_coo_process_analysis
-        or allow_revops_read_revenue
-        or allow_revops_create_tasks
-        or allow_revops_analytics
-        or allow_revops_reports
-    )
+    any_allow_rule
 }
+
+any_allow_rule if { allow_chief_of_staff_read }
+any_allow_rule if { allow_chief_of_staff_create }
+any_allow_rule if { allow_coo_read_ops }
+any_allow_rule if { allow_coo_triage_incident }
+any_allow_rule if { allow_coo_create_incident }
+any_allow_rule if { allow_coo_send_reminder }
+any_allow_rule if { allow_coo_process_analysis }
+any_allow_rule if { allow_revops_read_revenue }
+any_allow_rule if { allow_revops_create_tasks }
+any_allow_rule if { allow_revops_analytics }
+any_allow_rule if { allow_revops_reports }
 
 # Determine required approvers based on action and resource
 required_approvers := approvers if {

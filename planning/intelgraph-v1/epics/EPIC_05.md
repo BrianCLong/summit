@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph LR
-    A[User Prompt] --> B[Vector Retrieval]
-    B --> C[LLM Context]
-    C --> D[Guardrail Check]
-    D --> E[Response + Citation]
-    E --> F[Audit Trail]
+graph LR\n    A[User Prompt] --> B[Vector Retrieval]\n    B --> C[LLM Context]\n    C --> D[Guardrail Check]\n    D --> E[Response + Citation]\n    E --> F[Audit Trail]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

@@ -4,11 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph LR
-    A[Data Class] --> B[OPA Policy]
-    B --> C[Field Redaction]
-    C --> D[K-Anonymity]
-    D --> E[Immutable Audit]
+graph LR\n    A[Data Class] --> B[OPA Policy]\n    B --> C[Field Redaction]\n    C --> D[K-Anonymity]\n    D --> E[Immutable Audit]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

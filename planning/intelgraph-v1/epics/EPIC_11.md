@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph TD
-    A[Cloud Usage] --> B[Tagging Engine]
-    B --> C[Metering API]
-    C --> D[Unit Economics Calc]
-    D --> E[Budget Alerts]
-    E --> F[Quota Enforcement]
+graph TD\n    A[Cloud Usage] --> B[Tagging Engine]\n    B --> C[Metering API]\n    C --> D[Unit Economics Calc]\n    D --> E[Budget Alerts]\n    E --> F[Quota Enforcement]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

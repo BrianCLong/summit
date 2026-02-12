@@ -4,13 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph TD
-    A[Tenant Request] --> B[OIDC/JWT Gate]
-    B --> C{OPA AuthZ}
-    C -->|Allow| D[Service Mesh mTLS]
-    C -->|Deny| E[403 Forbidden]
-    D --> F[Tenant Container]
-    F --> G[Observability Hooks]
+graph TD\n    A[Tenant Request] --> B[OIDC/JWT Gate]\n    B --> C{{OPA AuthZ}}\n    C -->|Allow| D[Service Mesh mTLS]\n    C -->|Deny| E[403 Forbidden]\n    D --> F[Tenant Container]\n    F --> G[Observability Hooks]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

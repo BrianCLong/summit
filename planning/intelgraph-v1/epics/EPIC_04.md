@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph TD
-    A[Client] --> B[GQL Gateway]
-    B --> C[PQ Checker]
-    C --> D[Cost Middleware]
-    D --> E[AuthZ OPA]
-    E --> F[Resolvers]
+graph TD\n    A[Client] --> B[GQL Gateway]\n    B --> C[PQ Checker]\n    C --> D[Cost Middleware]\n    D --> E[AuthZ OPA]\n    E --> F[Resolvers]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

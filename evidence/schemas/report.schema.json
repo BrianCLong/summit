@@ -1,23 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "evidence_id": { "type": "string" },
-    "summary": { "type": "string" },
-    "scenarios": { "type": "integer" },
-    "status": { "type": "string" },
-    "item": { "type": "string" }
-  },
-  "required": [],
-  "additionalProperties": true
   "$id": "https://summit.local/schemas/report.schema.json",
   "type": "object",
-  "required": ["version", "classification", "summary"],
+  "required": [],
   "properties": {
     "version": { "type": "integer" },
-    "classification": { "type": "string", "enum": ["public", "internal", "restricted"] },
+    "classification": { "type": "string" },
     "summary": { "type": "string" },
-    "notes": { "type": "array", "items": { "type": "string" } }
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "evidence_id": { "type": "string" },
+    "status": { "type": "string" },
+    "item": { "type": "string" },
+    "artifacts": { "type": "array" }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

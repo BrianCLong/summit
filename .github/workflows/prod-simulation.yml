@@ -38,7 +38,6 @@ jobs:
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
-          version: 'latest'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

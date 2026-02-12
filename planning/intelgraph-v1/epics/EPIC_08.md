@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph TD
-    A[Service] --> B[OTel Tracing]
-    B --> C[Prom Metrics]
-    C --> D[Alert Manager]
-    D --> E[PagerDuty]
-    E --> F[Auto Remediation]
+graph TD\n    A[Service] --> B[OTel Tracing]\n    B --> C[Prom Metrics]\n    C --> D[Alert Manager]\n    D --> E[PagerDuty]\n    E --> F[Auto Remediation]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

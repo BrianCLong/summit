@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph LR
-    A[Evidence Item] --> B[SHA-256 Hash]
-    B --> C[Merkle Tree]
-    C --> D[KMS Signing]
-    D --> E[WORM Storage]
-    E --> F[Integrity CLI]
+graph LR\n    A[Evidence Item] --> B[SHA-256 Hash]\n    B --> C[Merkle Tree]\n    C --> D[KMS Signing]\n    D --> E[WORM Storage]\n    E --> F[Integrity CLI]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph LR
-    A[Commit] --> B[Lint/Test]
-    B --> C[Security Scan]
-    C --> D[SBOM Gen]
-    D --> E[Policy Check]
-    E --> F[ArgoCD Deploy]
+graph LR\n    A[Commit] --> B[Lint/Test]\n    B --> C[Security Scan]\n    C --> D[SBOM Gen]\n    D --> E[Policy Check]\n    E --> F[ArgoCD Deploy]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

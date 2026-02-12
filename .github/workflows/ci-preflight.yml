@@ -12,10 +12,6 @@ on:
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
 
-<<<<<<< HEAD
-concurrency:
-  group: ci-preflight-${{ github.ref }}
-=======
   push:
     branches: [main]
     paths:
@@ -24,7 +20,10 @@ concurrency:
       - "docker-compose.dev.yaml"
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
+
+concurrency:
+  group: ci-preflight-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate-compose:

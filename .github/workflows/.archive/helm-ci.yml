@@ -79,7 +79,6 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
         with:
-          version: '3.13.2'
 
       - name: Install Helm plugins
         run: |

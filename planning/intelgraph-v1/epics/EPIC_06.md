@@ -4,11 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph TD
-    A[React App] --> B[Cytoscape Renderer]
-    B --> C[GraphQL Client]
-    C --> D[Socket.IO Sync]
-    D --> E[Audit Viewer]
+graph TD\n    A[React App] --> B[Cytoscape Renderer]\n    B --> C[GraphQL Client]\n    C --> D[Socket.IO Sync]\n    D --> E[Audit Viewer]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

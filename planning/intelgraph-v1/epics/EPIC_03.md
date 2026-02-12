@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph LR
-    A[Source] --> B[Connector]
-    B --> C[Validation Engine]
-    C --> D[PII Masking]
-    D --> E[Kafka Stream]
-    E --> F[Graph Writer]
+graph LR\n    A[Source] --> B[Connector]\n    B --> C[Validation Engine]\n    C --> D[PII Masking]\n    D --> E[Kafka Stream]\n    E --> F[Graph Writer]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).

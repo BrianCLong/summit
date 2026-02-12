@@ -307,7 +307,6 @@ jobs:
             --arg verify_result "${{ needs.verify.result }}" \
             --arg guard_result "${{ needs.promotion-guard.result }}" \
             '{
-              version: $version,
               pipeline: $pipeline,
               generated_at: $generated_at,
               rc_tag: $rc_tag,

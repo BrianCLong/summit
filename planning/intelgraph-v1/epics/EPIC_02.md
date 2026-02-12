@@ -4,12 +4,7 @@
 
 **Architecture Reference**:
 ```mermaid
-graph LR
-    A[Raw Data] --> B[Ontology Mapping]
-    B --> C[Neo4j Node/Edge]
-    C --> D[Postgres Anchor]
-    D --> E[Field Encryption]
-    E --> F[Provenance Ledger]
+graph LR\n    A[Raw Data] --> B[Ontology Mapping]\n    B --> C[Neo4j Node/Edge]\n    C --> D[Postgres Anchor]\n    D --> E[Field Encryption]\n    E --> F[Provenance Ledger]
 ```
 
 **Constraints**: Align with Org Defaults (SLOs, Cost, Privacy).
@@ -75,7 +70,7 @@ graph LR
   - Tables created with FKs
   - Unit test coverage > 85%.
 - **Verification Steps**:
-  - Run `psql \d`
+  - Run `psql \\d`
   - Audit logs verify correct agent execution.
 - **Observability Hooks**: Prometheus metrics, structured logs.
 - **Policy Impact**: Governed by Org Default Data Policy.
