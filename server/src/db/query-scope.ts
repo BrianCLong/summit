@@ -40,7 +40,12 @@ export function validateAndScopeQuery(
       lowerQuery.includes(table),
     );
 
-    const isAlreadyScoped = !!(lowerQuery.includes('tenant_id') && lowerQuery.includes('$'));
+    // Remove string literals to avoid false positives in strings
+    const queryWithoutStrings = lowerQuery.replace(/'([^']|'')*'/g, "''");
+
+    // Check for tenant_id = $placeholder using regex
+    // Matches tenant_id (optional quotes) followed by = (optional whitespace) and $ (parameter placeholder)
+    const isAlreadyScoped = /["']?tenant_id["']?\s*=\s*\$\d+/.test(queryWithoutStrings);
     const hasWhereClause = lowerQuery.includes('where');
 
     let operationType: 'select' | 'insert' | 'update' | 'delete' | undefined;
