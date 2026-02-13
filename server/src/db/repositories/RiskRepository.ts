@@ -34,6 +34,7 @@ export class RiskRepository {
       const savedSignals: RiskSignal[] = [];
 
       // 2. Insert Risk Signals in batches of 100 to optimize performance
+      // This reduces database round-trips from O(N) to O(N/100)
       if (input.signals && input.signals.length > 0) {
         const chunkSize = 100;
         for (let i = 0; i < input.signals.length; i += chunkSize) {
@@ -67,8 +68,6 @@ export class RiskRepository {
 
       return {
         ...this.mapScore(savedScore),
-        // Note: signals are not part of RiskScore interface but usually returned in a full object
-        // For strict typing we return the RiskScore entity
       };
     });
   }
